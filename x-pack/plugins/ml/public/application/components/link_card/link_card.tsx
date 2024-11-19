@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { FC, ReactElement } from 'react';
+import type { FC, ReactElement } from 'react';
+import React from 'react';
 
+import type { IconType } from '@elastic/eui';
 import {
   EuiIcon,
-  IconType,
   EuiText,
   EuiTitle,
   EuiFlexItem,
@@ -67,7 +68,7 @@ export const LinkCard: FC<Props> = ({
             {typeof icon === 'string' ? (
               <EuiIcon size="xl" type={icon} aria-label={iconAreaLabel} />
             ) : (
-              icon
+              (icon as React.ReactNode)
             )}
           </EuiFlexItem>
           <EuiFlexItem>

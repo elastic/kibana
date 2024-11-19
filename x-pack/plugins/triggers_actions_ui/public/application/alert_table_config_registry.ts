@@ -7,17 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
-import { ALERT_TABLE_GENERIC_CONFIG_ID } from '../../common/alert_config';
-import {
-  AlertsTableConfigurationRegistry,
-  AlertsTableConfigurationRegistryWithActions,
-} from '../types';
+import { ALERT_TABLE_GENERIC_CONFIG_ID } from './constants';
+import { AlertsTableConfigurationRegistry } from '../types';
 
 export class AlertTableConfigRegistry {
-  private readonly objectTypes: Map<
-    string,
-    AlertsTableConfigurationRegistry | AlertsTableConfigurationRegistryWithActions
-  > = new Map();
+  private readonly objectTypes: Map<string, AlertsTableConfigurationRegistry> = new Map();
 
   /**
    * Returns if the object type registry has the given type registered
@@ -63,9 +57,9 @@ export class AlertTableConfigRegistry {
     return this.objectTypes.get(id)!;
   }
 
-  public getActions(id: string): AlertsTableConfigurationRegistryWithActions['actions'] {
+  public getActions(id: string): AlertsTableConfigurationRegistry['actions'] {
     return (
-      (this.objectTypes.get(id) as AlertsTableConfigurationRegistryWithActions)?.actions ?? {
+      (this.objectTypes.get(id) as AlertsTableConfigurationRegistry)?.actions ?? {
         toggleColumn: noop,
       }
     );
@@ -78,7 +72,7 @@ export class AlertTableConfigRegistry {
   /**
    * Returns an object type, throw error if not registered
    */
-  public update(id: string, objectType: AlertsTableConfigurationRegistryWithActions) {
+  public update(id: string, objectType: AlertsTableConfigurationRegistry) {
     if (!this.has(id)) {
       throw new Error(
         i18n.translate('xpack.triggersActionsUI.typeRegistry.get.missingActionTypeErrorMessage', {

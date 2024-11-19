@@ -10,9 +10,10 @@ import { useQuery } from '@tanstack/react-query';
 import type { ServerError } from '@kbn/cases-plugin/public/types';
 import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { IToasts } from '@kbn/core-notifications-browser';
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { AIConnector } from '../connector_selector';
 import * as i18n from '../translations';
 
 /**
@@ -26,17 +27,41 @@ export interface Props {
   toasts?: IToasts;
 }
 
+const actionTypeKey = {
+  bedrock: '.bedrock',
+  openai: '.gen-ai',
+  gemini: '.gemini',
+};
+
 export const useLoadConnectors = ({
   http,
   toasts,
-}: Props): UseQueryResult<ActionConnector[], IHttpFetchError> => {
+}: Props): UseQueryResult<AIConnector[], IHttpFetchError> => {
   return useQuery(
     QUERY_KEY,
     async () => {
       const queryResult = await loadConnectors({ http });
-      return queryResult.filter(
-        (connector) =>
-          !connector.isMissingSecrets && ['.bedrock', '.gen-ai'].includes(connector.actionTypeId)
+      return queryResult.reduce(
+        (acc: AIConnector[], connector) => [
+          ...acc,
+          ...(!connector.isMissingSecrets &&
+          [actionTypeKey.bedrock, actionTypeKey.openai, actionTypeKey.gemini].includes(
+            connector.actionTypeId
+          )
+            ? [
+                {
+                  ...connector,
+                  apiProvider:
+                    !connector.isPreconfigured &&
+                    !connector.isSystemAction &&
+                    connector?.config?.apiProvider
+                      ? (connector?.config?.apiProvider as OpenAiProviderType)
+                      : undefined,
+                },
+              ]
+            : []),
+        ],
+        []
       );
     },
     {

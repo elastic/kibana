@@ -9,10 +9,12 @@ import { FindConnectorsSoResult, FindConnectorsSoParams } from './types';
 import { MAX_ACTIONS_RETURNED } from './constants';
 
 export const findConnectorsSo = async ({
-  unsecuredSavedObjectsClient,
+  savedObjectsClient,
+  namespace,
 }: FindConnectorsSoParams): Promise<FindConnectorsSoResult> => {
-  return unsecuredSavedObjectsClient.find({
+  return savedObjectsClient.find({
     perPage: MAX_ACTIONS_RETURNED,
     type: 'action',
+    ...(namespace ? { namespaces: [namespace] } : {}),
   });
 };

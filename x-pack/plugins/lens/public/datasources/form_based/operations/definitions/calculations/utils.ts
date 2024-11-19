@@ -16,9 +16,12 @@ import type { FormBasedLayer } from '../../../types';
 import { adjustTimeScaleLabelSuffix } from '../../time_scale_utils';
 import type { ReferenceBasedIndexPatternColumn } from '../column_types';
 import { getManagedColumnsFrom, isColumnValidAsReference } from '../../layer_helpers';
-import { operationDefinitionMap } from '..';
-import { FieldBasedIndexPatternColumn } from '../../../types';
-import { IndexPatternField } from '../../../../../types';
+import { FieldBasedOperationErrorMessage, operationDefinitionMap } from '..';
+import {
+  CALCULATIONS_DATE_HISTOGRAM_REQUIRED,
+  CALCULATIONS_MISSING_COLUMN_REFERENCE,
+  CALCULATIONS_WRONG_DIMENSION_CONFIG,
+} from '../../../../../user_messages_ids';
 
 export const buildLabelFunction =
   (ofName: (name?: string) => string) =>
@@ -51,22 +54,28 @@ export function checkForDataLayerType(layerType: LayerType, name: string) {
 /**
  * Checks whether the current layer includes a date histogram and returns an error otherwise
  */
-export function checkForDateHistogram(layer: FormBasedLayer, name: string) {
+export function checkForDateHistogram(
+  layer: FormBasedLayer,
+  name: string
+): FieldBasedOperationErrorMessage[] {
   const buckets = layer.columnOrder.filter((colId) => layer.columns[colId].isBucketed);
   const hasDateHistogram = buckets.some(
     (colId) => layer.columns[colId].operationType === 'date_histogram'
   );
   if (hasDateHistogram) {
-    return undefined;
+    return [];
   }
   return [
-    i18n.translate('xpack.lens.indexPattern.calculations.dateHistogramErrorMessage', {
-      defaultMessage:
-        '{name} requires a date histogram to work. Add a date histogram or select a different function.',
-      values: {
-        name,
-      },
-    }),
+    {
+      uniqueId: CALCULATIONS_DATE_HISTOGRAM_REQUIRED,
+      message: i18n.translate('xpack.lens.indexPattern.calculations.dateHistogramErrorMessage', {
+        defaultMessage:
+          '{name} requires a date histogram to work. Add a date histogram or select a different function.',
+        values: {
+          name,
+        },
+      }),
+    },
   ];
 }
 
@@ -87,21 +96,25 @@ const getFullyManagedColumnIds = memoizeOne((layer: FormBasedLayer) => {
   return managedColumnIds;
 });
 
-export function checkReferences(layer: FormBasedLayer, columnId: string) {
+export function checkReferences(
+  layer: FormBasedLayer,
+  columnId: string
+): FieldBasedOperationErrorMessage[] {
   const column = layer.columns[columnId] as ReferenceBasedIndexPatternColumn;
 
-  const errors: string[] = [];
+  const errors: FieldBasedOperationErrorMessage[] = [];
 
   column.references.forEach((referenceId, index) => {
     if (!layer.columns[referenceId]) {
-      errors.push(
-        i18n.translate('xpack.lens.indexPattern.missingReferenceError', {
+      errors.push({
+        uniqueId: CALCULATIONS_MISSING_COLUMN_REFERENCE,
+        message: i18n.translate('xpack.lens.indexPattern.missingReferenceError', {
           defaultMessage: '"{dimensionLabel}" is not fully configured',
           values: {
             dimensionLabel: column.label,
           },
-        })
-      );
+        }),
+      });
     } else {
       const referenceColumn = layer.columns[referenceId]!;
       const definition = operationDefinitionMap[column.operationType];
@@ -116,27 +129,29 @@ export function checkReferences(layer: FormBasedLayer, columnId: string) {
 
       // do not enforce column validity if current column is part of managed subtree
       if (!isValid && !getFullyManagedColumnIds(layer).has(columnId)) {
-        errors.push(
-          i18n.translate('xpack.lens.indexPattern.invalidReferenceConfiguration', {
+        errors.push({
+          uniqueId: CALCULATIONS_WRONG_DIMENSION_CONFIG,
+          message: i18n.translate('xpack.lens.indexPattern.invalidReferenceConfiguration', {
             defaultMessage: 'Dimension "{dimensionLabel}" is configured incorrectly',
             values: {
               dimensionLabel: column.label,
             },
-          })
-        );
+          }),
+        });
       }
     }
   });
-  return errors.length ? errors : undefined;
+  return errors;
 }
 
-export function getErrorsForDateReference(layer: FormBasedLayer, columnId: string, name: string) {
-  const dateErrors = checkForDateHistogram(layer, name) ?? [];
-  const referenceErrors = checkReferences(layer, columnId) ?? [];
-  if (dateErrors.length || referenceErrors.length) {
-    return [...dateErrors, ...referenceErrors];
-  }
-  return;
+export function getErrorsForDateReference(
+  layer: FormBasedLayer,
+  columnId: string,
+  name: string
+): FieldBasedOperationErrorMessage[] {
+  const dateErrors = checkForDateHistogram(layer, name);
+  const referenceErrors = checkReferences(layer, columnId);
+  return dateErrors.concat(referenceErrors);
 }
 
 export function hasDateField(indexPattern: IndexPattern) {
@@ -177,7 +192,7 @@ export function dateBasedOperationToExpression(
 /**
  * Creates an expression ast for a date based operation (cumulative sum, derivative, moving average, counter rate)
  */
-export function optionallHistogramBasedOperationToExpression(
+export function optionalHistogramBasedOperationToExpression(
   layer: FormBasedLayer,
   columnId: string,
   functionName: string,
@@ -204,46 +219,4 @@ export function optionallHistogramBasedOperationToExpression(
       },
     },
   ];
-}
-
-function isMetricCounterField(field?: IndexPatternField) {
-  return field?.timeSeriesMetric === 'counter';
-}
-
-function checkReferencedColumnMetric(
-  layer: FormBasedLayer,
-  columnId: string,
-  indexPattern: IndexPattern
-) {
-  const column = layer.columns[columnId] as ReferenceBasedIndexPatternColumn;
-  return column.references
-    .filter((referencedId) => 'sourceField' in layer.columns[referencedId])
-    .map((referencedId) => {
-      const fieldName = (layer.columns[referencedId] as FieldBasedIndexPatternColumn).sourceField;
-      if (!isMetricCounterField(indexPattern.getFieldByName(fieldName))) {
-        return i18n.translate('xpack.lens.indexPattern.invalidReferenceConfiguration', {
-          defaultMessage: 'Dimension "{dimensionLabel}" is configured incorrectly',
-          values: {
-            dimensionLabel: layer.columns[referencedId].label,
-          },
-        });
-      }
-    });
-}
-
-export function getErrorForRateReference(
-  layer: FormBasedLayer,
-  columnId: string,
-  name: string,
-  indexPattern: IndexPattern
-) {
-  const dateErrors = checkForDateHistogram(layer, name) ?? [];
-  const referenceErrors = checkReferences(layer, columnId) ?? [];
-  const metricCounterErrors = checkReferencedColumnMetric(layer, columnId, indexPattern) ?? [];
-  if (metricCounterErrors.length) {
-    return metricCounterErrors.concat(referenceErrors);
-  }
-  if (dateErrors.length) {
-    return dateErrors.concat(referenceErrors);
-  }
 }

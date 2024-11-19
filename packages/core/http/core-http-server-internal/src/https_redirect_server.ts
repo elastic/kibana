@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Request, ResponseToolkit, Server } from '@hapi/hapi';
 import { format as formatUrl } from 'url';
-import { createServer, getListenerOptions, getServerOptions } from '@kbn/server-http-tools';
+import { createServer, getServerOptions } from '@kbn/server-http-tools';
 import type { Logger } from '@kbn/logging';
 
 import { HttpConfig } from './http_config';
@@ -31,19 +32,16 @@ export class HttpsRedirectServer {
     // Redirect server is configured in the same way as any other HTTP server
     // within the platform with the only exception that it should always be a
     // plain HTTP server, so we just ignore `tls` part of options.
-    this.server = createServer(
-      {
-        ...getServerOptions(config, { configureTLS: false }),
-        port: config.ssl.redirectHttpFromPort,
-      },
-      getListenerOptions(config)
-    );
+    this.server = createServer({
+      ...getServerOptions(config, { configureTLS: false }),
+      port: config.ssl.redirectHttpFromPort,
+    });
 
     this.server.ext('onRequest', (request: Request, responseToolkit: ResponseToolkit) => {
       return responseToolkit
         .redirect(
           formatUrl({
-            hostname: config.host,
+            hostname: request.url.hostname,
             pathname: request.url.pathname,
             port: config.port,
             protocol: 'https',

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type {
@@ -11,6 +12,7 @@ import type {
   IContextProvider,
   IRouter,
   RequestHandlerContextBase,
+  RouterDeprecatedApiDetails,
 } from './router';
 import type {
   AuthenticationHandler,
@@ -218,7 +220,7 @@ export interface HttpServiceSetup<
    * Creates cookie based session storage factory {@link SessionStorageFactory}
    * @param cookieOptions {@link SessionStorageCookieOptions} - options to configure created cookie session storage.
    */
-  createCookieSessionStorageFactory: <T>(
+  createCookieSessionStorageFactory: <T extends object>(
     cookieOptions: SessionStorageCookieOptions<T>
   ) => Promise<SessionStorageFactory<T>>;
 
@@ -358,6 +360,14 @@ export interface HttpServiceSetup<
    * Provides common {@link HttpServerInfo | information} about the running http server.
    */
   getServerInfo: () => HttpServerInfo;
+
+  /**
+   * Provides a list of all registered deprecated routes {{@link RouterDeprecatedApiDetails | information}}.
+   * The routers will be evaluated everytime this function gets called to
+   * accommodate for any late route registrations
+   * @returns {RouterDeprecatedApiDetails[]}
+   */
+  getDeprecatedRoutes: () => RouterDeprecatedApiDetails[];
 }
 
 /** @public */
@@ -402,3 +412,12 @@ export interface HttpServerInfo {
   /** The protocol used by the server */
   protocol: 'http' | 'https' | 'socket';
 }
+
+/**
+ * Defines an http protocol.
+ * (Only supporting http1 for now)
+ *
+ * - http1: regroups all http/1.x protocols
+ * - http2: h2
+ */
+export type HttpProtocol = 'http1' | 'http2';

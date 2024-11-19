@@ -41,6 +41,9 @@ export interface AlertingUsage {
   count_connector_types_by_consumers: Record<string, Record<string, number>>;
   count_rules_snoozed: number;
   count_rules_muted: number;
+  count_mw_total: number;
+  count_mw_with_repeat_toggle_on: number;
+  count_mw_with_filter_alert_toggle_on: number;
   count_rules_with_muted_alerts: number;
   count_rules_by_execution_status_per_day: Record<string, number>;
   percentile_num_generated_actions_per_day: {
@@ -94,4 +97,6 @@ export interface AlertingUsage {
     avg: number;
     max: number;
   };
+  count_alerts_total: number;
+  count_alerts_by_rule_type: Record<string, number>;
 }

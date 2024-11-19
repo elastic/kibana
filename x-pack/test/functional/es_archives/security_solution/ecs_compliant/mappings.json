@@ -67,6 +67,9 @@
             "name": {
               "type": "keyword"
             },
+            "ip": {
+              "type": "ip"
+            },
             "uptime": {
               "type": "long"
             }

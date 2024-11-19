@@ -8,18 +8,29 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { dataViewConfig } from '../../constants';
+import { RoleCredentials, InternalRequestHeader } from '../../../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
   const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  let roleAuthc: RoleCredentials;
+  let internalReqHeader: InternalRequestHeader;
 
   describe('main', () => {
+    before(async () => {
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
+    });
+    after(async () => {
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+    });
     describe('get data views api', () => {
       it('returns list of data views', async () => {
-        const response = await supertest
+        const response = await supertestWithoutAuth
           .get(dataViewConfig.basePath)
-          // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader());
+          .set(internalReqHeader)
+          .set(roleAuthc.apiKeyHeader);
         expect(response.status).to.be(200);
         expect(response.body).to.have.property(dataViewConfig.serviceKey);
         expect(response.body[dataViewConfig.serviceKey]).to.be.an('array');

@@ -14,7 +14,7 @@ export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderCo
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['common']);
+  const { common } = getPageObjects(['common']);
 
   return {
     async goToListingPage() {
@@ -22,7 +22,7 @@ export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderCo
       // disabling the current url check because canvas moved away from
       // hash router and redirects from /app/canvas#/ to /app/canvas/
       // but navigateToUrl includes hash in the url which causes test flakiness
-      await PageObjects.common.navigateToUrl('canvas', '', {
+      await common.navigateToUrl('canvas', '', {
         ensureCurrentUrl: false,
         shouldUseHashForSubUrl: false,
       });
@@ -119,7 +119,7 @@ export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderCo
       await testSubjects.click('add-element-button');
       await testSubjects.click('saved-elements-menu-option');
 
-      await PageObjects.common.sleep(1000); // give time for modal animation to complete
+      await common.sleep(1000); // give time for modal animation to complete
     },
 
     async closeSavedElementsModal() {
@@ -143,8 +143,8 @@ export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderCo
       await testSubjects.missingOrFail('add-element-button');
     },
 
-    async getTimeFiltersFromDebug() {
-      log.debug('CanvasPage.getTimeFiltersFromDebug');
+    async getFiltersFromDebug(type: 'range' | 'term') {
+      log.debug(`CanvasPage.getFiltersFromDebug: ${type}`);
       await testSubjects.existOrFail('canvasDebug__content');
 
       const contentElem = await testSubjects.find('canvasDebug__content');
@@ -152,19 +152,7 @@ export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderCo
 
       const filters = JSON.parse(content);
 
-      return filters.filters.filter((f: any) => f.query?.range);
-    },
-
-    async getMatchFiltersFromDebug() {
-      log.debug('CanvasPage.getMatchFiltersFromDebug');
-      await testSubjects.existOrFail('canvasDebug__content');
-
-      const contentElem = await testSubjects.find('canvasDebug__content');
-      const content = await contentElem.getVisibleText();
-
-      const filters = JSON.parse(content);
-
-      return filters.filters.filter((f: any) => f.query?.term);
+      return filters.filters.filter((f: any) => f.query[type]);
     },
 
     async clickAddFromLibrary() {

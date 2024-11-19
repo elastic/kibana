@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -53,13 +54,14 @@ export const CodeEditorInput = ({
   const onUpdate = useUpdate({ onInputChange, field });
 
   const updateValue = useCallback(
-    async (newValue: string, onUpdateFn) => {
-      const isJsonArray = Array.isArray(JSON.parse(defaultValue || '{}'));
-      const parsedValue = newValue || (isJsonArray ? '[]' : '{}');
+    async (newValue: string, onUpdateFn: typeof onUpdate) => {
+      let parsedValue;
 
       // Validate JSON syntax
       if (field.type === 'json') {
         try {
+          const isJsonArray = Array.isArray(JSON.parse(defaultValue || 'null'));
+          parsedValue = newValue || (isJsonArray ? '[]' : '{}');
           JSON.parse(parsedValue);
         } catch (e) {
           onUpdateFn({
@@ -90,14 +92,17 @@ export const CodeEditorInput = ({
   );
 
   const debouncedUpdateValue = useMemo(() => {
-    // Trigger update 1000 ms after the user stopped typing to reduce validation requests to the server
-    return debounce(updateValue, 1000);
+    // Trigger update 500 ms after the user stopped typing to reduce validation requests to the server
+    return debounce(updateValue, 500);
   }, [updateValue]);
 
   const onChange: CodeEditorProps['onChange'] = async (newValue) => {
-    // @ts-expect-error
-    setValue(newValue);
-    await debouncedUpdateValue(newValue, onUpdate);
+    // Only update the value when the onChange handler is called with a different value from the current one
+    if (newValue !== value) {
+      // @ts-expect-error
+      setValue(newValue);
+      await debouncedUpdateValue(newValue, onUpdate);
+    }
   };
 
   useEffect(() => {

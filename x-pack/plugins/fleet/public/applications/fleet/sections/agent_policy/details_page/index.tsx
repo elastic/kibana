@@ -28,7 +28,6 @@ import {
 import { Loading, Error, AgentEnrollmentFlyout } from '../../../components';
 import { WithHeaderLayout } from '../../../layouts';
 
-import { useGetAgentStatus, AgentStatusRefreshContext } from './hooks';
 import {
   PackagePoliciesView,
   SettingsView,
@@ -55,13 +54,10 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
     openAddAgentHelpPopoverOpenByDefault
   );
 
-  const agentStatusRequest = useGetAgentStatus(policyId);
-  const { refreshAgentStatus } = agentStatusRequest;
   const {
     application: { navigateToApp },
   } = useStartServices();
   const routeState = useIntraAppState<AgentPolicyDetailsDeployAgentAction>();
-  const agentStatus = agentStatusRequest.data?.results;
 
   const { isReady: isFleetReady } = useFleetStatus();
 
@@ -94,6 +90,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
         name: i18n.translate('xpack.fleet.policyDetails.subTabs.settingsTabText', {
           defaultMessage: 'Settings',
         }),
+        'data-test-subj': 'agentPolicySettingsTab',
         href: getHref('policy_details', { policyId, tabId: 'settings' }),
         isSelected: tabId === 'settings',
       },
@@ -133,7 +130,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
             />
           }
           error={i18n.translate('xpack.fleet.policyDetails.policyNotFoundErrorTitle', {
-            defaultMessage: "Policy '{id}' not found",
+            defaultMessage: "Policy ''{id}'' not found",
             values: {
               id: policyId,
             },
@@ -170,8 +167,6 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
   const headerRightContent = (
     <HeaderRightContent
       agentPolicy={agentPolicy}
-      agentStatus={agentStatus}
-      policyId={policyId}
       onCancelEnrollment={onCancelEnrollment}
       isLoading={isLoading}
       isAddAgentHelpPopoverOpen={isAddAgentHelpPopoverOpen}
@@ -182,15 +177,13 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
 
   return (
     <AgentPolicyRefreshContext.Provider value={{ refresh: refreshAgentPolicy }}>
-      <AgentStatusRefreshContext.Provider value={{ refresh: refreshAgentStatus }}>
-        <WithHeaderLayout
-          leftColumn={headerLeftContent}
-          rightColumn={headerRightContent}
-          tabs={headerTabs as unknown as EuiTabProps[]}
-        >
-          {content}
-        </WithHeaderLayout>
-      </AgentStatusRefreshContext.Provider>
+      <WithHeaderLayout
+        leftColumn={headerLeftContent}
+        rightColumn={headerRightContent}
+        tabs={headerTabs as unknown as EuiTabProps[]}
+      >
+        {content}
+      </WithHeaderLayout>
     </AgentPolicyRefreshContext.Provider>
   );
 };

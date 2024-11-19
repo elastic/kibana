@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getServerListenerMock } from './get_server_options.test.mocks';
 import moment from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
+import type { IHttpConfig } from './types';
 import { getServerOptions } from './get_server_options';
-import { IHttpConfig } from './types';
 
 jest.mock('fs', () => {
   const original = jest.requireActual('fs');
@@ -22,9 +24,11 @@ jest.mock('fs', () => {
 
 const createConfig = (parts: Partial<IHttpConfig>): IHttpConfig => ({
   host: 'localhost',
+  protocol: 'http1',
   port: 5601,
   socketTimeout: 120000,
   keepaliveTimeout: 120000,
+  payloadTimeout: 20000,
   shutdownTimeout: moment.duration(30, 'seconds'),
   maxPayload: ByteSizeValue.parse('1048576b'),
   ...parts,
@@ -38,73 +42,46 @@ const createConfig = (parts: Partial<IHttpConfig>): IHttpConfig => ({
     enabled: false,
     ...parts.ssl,
   },
-  restrictInternalApis: false,
+  restrictInternalApis: true,
 });
 
 describe('getServerOptions', () => {
-  beforeEach(() =>
-    jest.requireMock('fs').readFileSync.mockImplementation((path: string) => `content-${path}`)
-  );
+  beforeEach(() => {
+    jest.requireMock('fs').readFileSync.mockImplementation((path: string) => `content-${path}`);
+    getServerListenerMock.mockReset();
+  });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it('properly configures TLS with default options', () => {
-    const httpConfig = createConfig({
-      ssl: {
-        enabled: true,
-        key: 'some-key-path',
-        certificate: 'some-certificate-path',
-      },
-    });
+  it('calls `getServerListener` to retrieve the listener that will be provided in the config', () => {
+    const listener = Symbol('listener');
+    getServerListenerMock.mockReturnValue(listener);
 
-    expect(getServerOptions(httpConfig).tls).toMatchInlineSnapshot(`
-      Object {
-        "ca": undefined,
-        "cert": "some-certificate-path",
-        "ciphers": undefined,
-        "honorCipherOrder": true,
-        "key": "some-key-path",
-        "passphrase": undefined,
-        "rejectUnauthorized": undefined,
-        "requestCert": undefined,
-        "secureOptions": undefined,
-      }
-    `);
+    const httpConfig = createConfig({});
+    const serverOptions = getServerOptions(httpConfig, { configureTLS: true });
+
+    expect(getServerListenerMock).toHaveBeenCalledTimes(1);
+    expect(getServerListenerMock).toHaveBeenCalledWith(httpConfig, { configureTLS: true });
+
+    expect(serverOptions.listener).toBe(listener);
   });
 
-  it('properly configures TLS with client authentication', () => {
-    const httpConfig = createConfig({
-      ssl: {
-        enabled: true,
-        key: 'some-key-path',
-        certificate: 'some-certificate-path',
-        certificateAuthorities: ['ca-1', 'ca-2'],
-        cipherSuites: ['suite-a', 'suite-b'],
-        keyPassphrase: 'passPhrase',
-        rejectUnauthorized: true,
-        requestCert: true,
-        getSecureOptions: () => 42,
-      },
-    });
-
-    expect(getServerOptions(httpConfig).tls).toMatchInlineSnapshot(`
-      Object {
-        "ca": Array [
-          "ca-1",
-          "ca-2",
-        ],
-        "cert": "some-certificate-path",
-        "ciphers": "suite-a:suite-b",
-        "honorCipherOrder": true,
-        "key": "some-key-path",
-        "passphrase": "passPhrase",
-        "rejectUnauthorized": true,
-        "requestCert": true,
-        "secureOptions": 42,
-      }
-    `);
+  it('properly configures the tls option depending on the config and the configureTLS flag', () => {
+    expect(
+      getServerOptions(createConfig({ ssl: { enabled: true } }), { configureTLS: true }).tls
+    ).toBe(true);
+    expect(getServerOptions(createConfig({ ssl: { enabled: true } }), {}).tls).toBe(true);
+    expect(
+      getServerOptions(createConfig({ ssl: { enabled: true } }), { configureTLS: false }).tls
+    ).toBe(false);
+    expect(
+      getServerOptions(createConfig({ ssl: { enabled: false } }), { configureTLS: true }).tls
+    ).toBe(false);
+    expect(
+      getServerOptions(createConfig({ ssl: { enabled: false } }), { configureTLS: false }).tls
+    ).toBe(false);
   });
 
   it('properly configures CORS when cors enabled', () => {
@@ -121,5 +98,13 @@ describe('getServerOptions', () => {
       origin: ['*'],
       headers: ['Accept', 'Authorization', 'Content-Type', 'If-None-Match', 'kbn-xsrf'],
     });
+  });
+
+  it('properly configures `routes.payload.timeout`', () => {
+    const httpConfig = createConfig({
+      payloadTimeout: 9007,
+    });
+
+    expect(getServerOptions(httpConfig).routes!.payload!.timeout).toEqual(9007);
   });
 });

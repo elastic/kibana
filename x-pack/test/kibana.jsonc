@@ -1,0 +1,6 @@
+{
+  "type": "test-helper",
+  "id": "@kbn/test-suites-xpack",
+  "owner": [],
+  "devOnly": true
+}

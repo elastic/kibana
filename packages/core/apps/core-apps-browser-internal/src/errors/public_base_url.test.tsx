@@ -1,20 +1,34 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-
+import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
+
 import { setupPublicBaseUrlConfigWarning } from './public_base_url';
 
 describe('publicBaseUrl warning', () => {
   const docLinks = docLinksServiceMock.createStartContract();
   const notifications = notificationServiceMock.createStartContract();
+  const i18nStart = i18nServiceMock.createStartContract();
+  const analytics = analyticsServiceMock.createAnalyticsServiceStart();
+  const theme = themeServiceMock.createStartContract();
+  const startServices = {
+    notifications,
+    analytics,
+    i18n: i18nStart,
+    theme,
+  };
+  const addWarningToastSpy = jest.spyOn(notifications.toasts, 'addWarning');
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -24,38 +38,38 @@ describe('publicBaseUrl warning', () => {
     const http = httpServiceMock.createStartContract();
 
     setupPublicBaseUrlConfigWarning({
+      ...startServices,
       docLinks,
-      notifications,
       http,
       location: {
         hostname: 'localhost',
       } as Location,
     });
 
-    expect(notifications.toasts.addWarning).not.toHaveBeenCalled();
+    expect(addWarningToastSpy).not.toHaveBeenCalled();
   });
 
   it('does not show any toast on 127.0.0.1', () => {
     const http = httpServiceMock.createStartContract();
 
     setupPublicBaseUrlConfigWarning({
+      ...startServices,
       docLinks,
-      notifications,
       http,
       location: {
         hostname: '127.0.0.1',
       } as Location,
     });
 
-    expect(notifications.toasts.addWarning).not.toHaveBeenCalled();
+    expect(addWarningToastSpy).not.toHaveBeenCalled();
   });
 
   it('does not show toast if configured correctly', () => {
     const http = httpServiceMock.createStartContract({ publicBaseUrl: 'http://myhost.com' });
 
     setupPublicBaseUrlConfigWarning({
+      ...startServices,
       docLinks,
-      notifications,
       http,
       location: {
         hostname: 'myhost.com',
@@ -65,7 +79,7 @@ describe('publicBaseUrl warning', () => {
       } as Location,
     });
 
-    expect(notifications.toasts.addWarning).not.toHaveBeenCalled();
+    expect(addWarningToastSpy).not.toHaveBeenCalled();
   });
 
   describe('config missing toast', () => {
@@ -73,8 +87,8 @@ describe('publicBaseUrl warning', () => {
       const http = httpServiceMock.createStartContract({ publicBaseUrl: undefined });
 
       setupPublicBaseUrlConfigWarning({
+        ...startServices,
         docLinks,
-        notifications,
         http,
         location: {
           hostname: 'myhost.com',
@@ -84,7 +98,7 @@ describe('publicBaseUrl warning', () => {
         } as Location,
       });
 
-      expect(notifications.toasts.addWarning).toHaveBeenCalledWith({
+      expect(addWarningToastSpy).toHaveBeenCalledWith({
         title: 'Configuration recommended',
         text: expect.any(Function),
       });
@@ -94,8 +108,8 @@ describe('publicBaseUrl warning', () => {
       const http = httpServiceMock.createStartContract({ publicBaseUrl: undefined });
 
       setupPublicBaseUrlConfigWarning({
+        ...startServices,
         docLinks,
-        notifications,
         http,
         location: {
           hostname: 'myhost.com',
@@ -104,11 +118,11 @@ describe('publicBaseUrl warning', () => {
           },
         } as Location,
         storage: {
-          getItem: (id: string) => 'true',
+          getItem: (_id: string) => 'true',
         } as Storage,
       });
 
-      expect(notifications.toasts.addWarning).not.toHaveBeenCalled();
+      expect(addWarningToastSpy).not.toHaveBeenCalled();
     });
   });
 });

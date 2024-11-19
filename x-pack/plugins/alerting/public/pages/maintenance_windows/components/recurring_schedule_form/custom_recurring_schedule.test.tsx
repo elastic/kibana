@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { fireEvent, waitFor, within } from '@testing-library/react';
 import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Frequency } from '@kbn/rrule';
@@ -29,7 +29,7 @@ const initialValue: FormProps = {
 describe('CustomRecurringSchedule', () => {
   let appMockRenderer: AppMockRenderer;
 
-  const MockHookWrapperComponent: React.FC<{ iv?: FormProps }> = ({
+  const MockHookWrapperComponent: FC<PropsWithChildren<{ iv?: FormProps }>> = ({
     children,
     iv = initialValue,
   }) => {
@@ -67,9 +67,14 @@ describe('CustomRecurringSchedule', () => {
       </MockHookWrapperComponent>
     );
 
-    fireEvent.change(within(result.getByTestId('custom-frequency-field')).getByTestId('select'), {
-      target: { value: Frequency.WEEKLY },
-    });
+    fireEvent.change(
+      within(result.getByTestId('custom-frequency-field')).getByTestId(
+        'customRecurringScheduleFrequencySelect'
+      ),
+      {
+        target: { value: Frequency.WEEKLY },
+      }
+    );
     await waitFor(() => expect(result.getByTestId('byweekday-field')).toBeInTheDocument());
   });
 
@@ -97,9 +102,14 @@ describe('CustomRecurringSchedule', () => {
       </MockHookWrapperComponent>
     );
 
-    fireEvent.change(within(result.getByTestId('custom-frequency-field')).getByTestId('select'), {
-      target: { value: Frequency.MONTHLY },
-    });
+    fireEvent.change(
+      within(result.getByTestId('custom-frequency-field')).getByTestId(
+        'customRecurringScheduleFrequencySelect'
+      ),
+      {
+        target: { value: Frequency.MONTHLY },
+      }
+    );
     await waitFor(() => expect(result.getByTestId('bymonth-field')).toBeInTheDocument());
   });
 
@@ -111,9 +121,11 @@ describe('CustomRecurringSchedule', () => {
     );
 
     const frequencyInput = within(result.getByTestId('custom-frequency-field')).getByTestId(
-      'select'
+      'customRecurringScheduleFrequencySelect'
     );
-    const intervalInput = within(result.getByTestId('interval-field')).getByTestId('input');
+    const intervalInput = within(result.getByTestId('interval-field')).getByTestId(
+      'customRecurringScheduleIntervalInput'
+    );
 
     expect(frequencyInput).toHaveValue('2');
     expect(intervalInput).toHaveValue(1);
@@ -137,14 +149,16 @@ describe('CustomRecurringSchedule', () => {
     );
 
     const frequencyInput = within(result.getByTestId('custom-frequency-field')).getByTestId(
-      'select'
+      'customRecurringScheduleFrequencySelect'
     );
-    const intervalInput = within(result.getByTestId('interval-field')).getByTestId('input');
+    const intervalInput = within(result.getByTestId('interval-field')).getByTestId(
+      'customRecurringScheduleIntervalInput'
+    );
     const input3 = within(result.getByTestId('byweekday-field'))
-      .getByTestId('3')
+      .getByTestId('isoWeekdays3')
       .getAttribute('aria-pressed');
     const input4 = within(result.getByTestId('byweekday-field'))
-      .getByTestId('4')
+      .getByTestId('isoWeekdays4')
       .getAttribute('aria-pressed');
     expect(frequencyInput).toHaveValue('2');
     expect(intervalInput).toHaveValue(3);

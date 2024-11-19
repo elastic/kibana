@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PivotAggsConfigWithExtra } from '../../../../../../common/pivot_aggs';
+import type { PivotAggsConfigWithExtra } from '../../../../../../common/pivot_aggs';
 
 export interface TermsAggConfig {
   size: number;

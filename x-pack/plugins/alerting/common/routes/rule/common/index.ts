@@ -11,8 +11,9 @@ export {
   ruleExecutionStatusValues,
   ruleExecutionStatusErrorReason,
   ruleExecutionStatusWarningReason,
-  filterStateStore,
 } from './constants/latest';
+
+export { flappingSchema } from './flapping/schemas/latest';
 
 export type {
   RuleNotifyWhen,
@@ -20,8 +21,9 @@ export type {
   RuleExecutionStatusValues,
   RuleExecutionStatusErrorReason,
   RuleExecutionStatusWarningReason,
-  FilterStateStore,
 } from './constants/latest';
+
+export type { Flapping } from './flapping/types/latest';
 
 export {
   ruleNotifyWhen as ruleNotifyWhenV1,
@@ -29,8 +31,9 @@ export {
   ruleExecutionStatusValues as ruleExecutionStatusValuesV1,
   ruleExecutionStatusErrorReason as ruleExecutionStatusErrorReasonV1,
   ruleExecutionStatusWarningReason as ruleExecutionStatusWarningReasonV1,
-  filterStateStore as filterStateStoreV1,
 } from './constants/v1';
+
+export { flappingSchema as flappingSchemaV1 } from './flapping/schemas/v1';
 
 export type {
   RuleNotifyWhen as RuleNotifyWhenV1,
@@ -38,5 +41,6 @@ export type {
   RuleExecutionStatusValues as RuleExecutionStatusValuesV1,
   RuleExecutionStatusErrorReason as RuleExecutionStatusErrorReasonV1,
   RuleExecutionStatusWarningReason as RuleExecutionStatusWarningReasonV1,
-  FilterStateStore as FilterStateStoreV1,
 } from './constants/v1';
+
+export type { Flapping as FlappingV1 } from './flapping/types/v1';

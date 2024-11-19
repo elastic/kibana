@@ -60,7 +60,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 }) => {
   const [shardsToggleState, setShardsToggleState] =
     useState<EuiAccordionProps['forceState']>('closed');
-  const handleToggle = useCallback((isOpen) => {
+  const handleToggle = useCallback((isOpen: any) => {
     const newState = isOpen ? 'open' : 'closed';
     setShardsToggleState(newState);
   }, []);

@@ -7,6 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import {
+  EuiTitle,
   EuiText,
   EuiHorizontalRule,
   EuiFlexGroup,
@@ -27,7 +28,7 @@ import { RemovableItem } from '../../removable_item/removable_item';
 
 export interface EditCategoryProps {
   isLoading: boolean;
-  onSubmit: (category?: string | null) => void;
+  onSubmit: (category: string | null) => void;
   category?: string | null;
 }
 
@@ -106,87 +107,88 @@ export const EditCategory = React.memo(({ isLoading, onSubmit, category }: EditC
 
   return (
     <EuiFlexItem grow={false}>
-      <EuiText data-test-subj="cases-categories">
-        <EuiFlexGroup
-          alignItems="center"
-          gutterSize="none"
-          justifyContent="spaceBetween"
-          responsive={false}
-        >
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="none"
+        justifyContent="spaceBetween"
+        responsive={false}
+        data-test-subj="cases-categories"
+      >
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h3>{i18n.CATEGORY}</h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        {isLoadingAll && <EuiLoadingSpinner data-test-subj="category-loading" />}
+        {!isLoadingAll && permissions.update && (
           <EuiFlexItem grow={false}>
-            <h4>{i18n.CATEGORY}</h4>
+            <EuiButtonIcon
+              data-test-subj="category-edit-button"
+              aria-label={i18n.EDIT_CATEGORIES_ARIA}
+              iconType={'pencil'}
+              onClick={onEdit}
+            />
           </EuiFlexItem>
-          {isLoadingAll && <EuiLoadingSpinner data-test-subj="category-loading" />}
-          {!isLoadingAll && permissions.update && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                data-test-subj="category-edit-button"
-                aria-label={i18n.EDIT_CATEGORIES_ARIA}
-                iconType={'pencil'}
-                onClick={onEdit}
-              />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-        <EuiHorizontalRule margin="xs" />
-        <EuiFlexGroup gutterSize="none" data-test-subj="case-category">
-          {!isEditCategory && (
+        )}
+      </EuiFlexGroup>
+      <EuiHorizontalRule margin="xs" />
+      <EuiFlexGroup gutterSize="none" data-test-subj="case-category">
+        {!isEditCategory && (
+          <EuiFlexItem>
+            {category ? (
+              <RemovableItem
+                onRemoveItem={removeCategory}
+                tooltipContent={i18n.REMOVE_CATEGORY}
+                buttonAriaLabel={i18n.REMOVE_CATEGORY_ARIA_LABEL}
+                dataTestSubjPrefix="category"
+              >
+                <CategoryViewer category={category} />
+              </RemovableItem>
+            ) : (
+              <EuiText size="xs" data-test-subj="no-categories">
+                {i18n.NO_CATEGORIES}
+              </EuiText>
+            )}
+          </EuiFlexItem>
+        )}
+        {isEditCategory && (
+          <EuiFlexGroup data-test-subj="edit-category" direction="column">
+            <CategoryFormWrapper
+              onChange={setFormState}
+              category={category}
+              availableCategories={categories}
+              isLoading={isLoadingAll}
+            />
             <EuiFlexItem>
-              {category ? (
-                <RemovableItem
-                  onRemoveItem={removeCategory}
-                  tooltipContent={i18n.REMOVE_CATEGORY}
-                  buttonAriaLabel={i18n.REMOVE_CATEGORY_ARIA_LABEL}
-                  dataTestSubjPrefix="category"
-                >
-                  <CategoryViewer category={category} />
-                </RemovableItem>
-              ) : (
-                <EuiText size="xs" data-test-subj="no-categories">
-                  {i18n.NO_CATEGORIES}
-                </EuiText>
-              )}
+              <EuiFlexGroup alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    color="success"
+                    data-test-subj="edit-category-submit"
+                    fill
+                    iconType="save"
+                    onClick={onSubmitCategory}
+                    size="s"
+                    disabled={!isCategoryValid || isLoadingAll}
+                  >
+                    {i18n.SAVE}
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    data-test-subj="edit-category-cancel"
+                    iconType="cross"
+                    onClick={onCancel}
+                    size="s"
+                  >
+                    {i18n.CANCEL}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
-          )}
-          {isEditCategory && (
-            <EuiFlexGroup data-test-subj="edit-category" direction="column">
-              <CategoryFormWrapper
-                onChange={setFormState}
-                category={category}
-                availableCategories={categories}
-                isLoading={isLoadingAll}
-              />
-              <EuiFlexItem>
-                <EuiFlexGroup alignItems="center" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      color="success"
-                      data-test-subj="edit-category-submit"
-                      fill
-                      iconType="save"
-                      onClick={onSubmitCategory}
-                      size="s"
-                      disabled={!isCategoryValid || isLoadingAll}
-                    >
-                      {i18n.SAVE}
-                    </EuiButton>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      data-test-subj="edit-category-cancel"
-                      iconType="cross"
-                      onClick={onCancel}
-                      size="s"
-                    >
-                      {i18n.CANCEL}
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
-        </EuiFlexGroup>
-      </EuiText>
+          </EuiFlexGroup>
+        )}
+      </EuiFlexGroup>
     </EuiFlexItem>
   );
 });

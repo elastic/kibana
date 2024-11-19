@@ -17,12 +17,12 @@ import { TimelineTabs } from '../../../common/types';
 import type { State } from '../../common/store/types';
 import type { TimelineModel } from './model';
 import type { InsertTimeline, TimelineById } from './types';
-import { TimelineStatus, TimelineType } from '../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineTypeEnum } from '../../../common/api/timeline';
 
 export const getTimelineShowStatusByIdSelector = () =>
   createSelector(timelineSelectors.selectTimeline, (timeline) => ({
     activeTab: timeline?.activeTab ?? TimelineTabs.query,
-    status: timeline?.status ?? TimelineStatus.draft,
+    status: timeline?.status ?? TimelineStatusEnum.draft,
     show: timeline?.show ?? false,
     updated: timeline?.updated ?? undefined,
     changed: timeline?.changed ?? false,
@@ -117,6 +117,14 @@ const selectTimelineType = createSelector(selectTimelineById, (timeline) => time
 const selectTimelineKqlQuery = createSelector(selectTimelineById, (timeline) => timeline?.kqlQuery);
 
 /**
+ * Selector that returns the timeline esql saved search id.
+ */
+export const selectTimelineESQLSavedSearchId = createSelector(
+  selectTimelineById,
+  (timeline) => timeline?.savedSearchId
+);
+
+/**
  * Selector that returns the kqlQuery.filterQuery.kuery.expression of a timeline.
  */
 export const selectKqlFilterQueryExpression = createSelector(
@@ -137,7 +145,7 @@ export const selectTitleByTimelineById = createSelector(
     if (!isEmpty(savedTitle)) {
       return savedTitle;
     }
-    if (timelineType === TimelineType.template) {
+    if (timelineType === TimelineTypeEnum.template) {
       return UNTITLED_TEMPLATE;
     }
     return UNTITLED_TIMELINE;
@@ -169,4 +177,9 @@ export const selectDataInTimeline = createSelector(
   (dataProviders, kqlQuery): boolean => {
     return !isEmpty(dataProviders) || !isEmpty(get('filterQuery.kuery.expression', kqlQuery));
   }
+);
+
+export const selectExcludedRowRendererIds = createSelector(
+  selectTimelineById,
+  (timeline) => timeline?.excludedRowRendererIds
 );

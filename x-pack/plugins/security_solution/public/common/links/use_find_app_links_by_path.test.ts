@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ExternalPageName } from '@kbn/security-solution-navigation';
 import { renderHook } from '@testing-library/react-hooks';
 import { APP_PATH, SecurityPageName } from '../../../common';
 import { useFindAppLinksByPath } from './use_find_app_links_by_path';
@@ -30,6 +31,10 @@ jest.mock('react-router-dom', () => {
 });
 
 describe('useFindAppLinksByPath', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('returns null when navLinks is undefined', () => {
     const { result } = renderHook(() => useFindAppLinksByPath(undefined));
     expect(result.current).toBe(null);
@@ -79,5 +84,24 @@ describe('useFindAppLinksByPath', () => {
     mockedUseLocation.mockReturnValue({ pathname: '/users-risk' });
     const { result } = renderHook(() => useFindAppLinksByPath([usersNavItem, usersRiskNavItem]));
     expect(result.current).toBe(usersRiskNavItem);
+  });
+
+  it('should call getAppUrl using security internal security appId', () => {
+    const navItem = { id: SecurityPageName.users, title: 'Test User page' };
+    mockedUseLocation.mockReturnValue({ pathname: '/users' });
+    const { result } = renderHook(() => useFindAppLinksByPath([navItem]));
+    expect(result.current).toBe(navItem);
+    expect(mockedGetAppUrl).toHaveBeenCalledWith({
+      appId: 'securitySolutionUI',
+      deepLinkId: 'users',
+    });
+  });
+
+  it('should call getAppUrl using security external appId', () => {
+    const navItem = { id: ExternalPageName.osquery, title: 'Test Osquery external page' };
+    mockedUseLocation.mockReturnValue({ pathname: '/osquery' });
+    const { result } = renderHook(() => useFindAppLinksByPath([navItem]));
+    expect(result.current).toBe(navItem);
+    expect(mockedGetAppUrl).toHaveBeenCalledWith({ appId: 'osquery', deepLinkId: '' });
   });
 });

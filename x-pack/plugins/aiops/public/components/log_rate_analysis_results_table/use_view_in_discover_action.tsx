@@ -9,13 +9,13 @@ import React, { useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
-
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
+import type { GroupTableItem, TableItemAction } from '@kbn/aiops-log-rate-analysis/state';
+
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 import { TableActionButton } from './table_action_button';
 import { getTableItemAsKQL } from './get_table_item_as_kql';
-import type { GroupTableItem, TableItemAction } from './types';
 
 const viewInDiscoverMessage = i18n.translate(
   'xpack.aiops.logRateAnalysis.resultsTable.linksMenu.viewInDiscover',
@@ -28,8 +28,8 @@ export const useViewInDiscoverAction = (dataViewId?: string): TableItemAction =>
   const { application, share, data } = useAiopsAppContext();
 
   const discoverLocator = useMemo(
-    () => share.url.locators.get('DISCOVER_APP_LOCATOR'),
-    [share.url.locators]
+    () => share?.url.locators.get('DISCOVER_APP_LOCATOR'),
+    [share?.url.locators]
   );
 
   const discoverUrlError = useMemo(() => {

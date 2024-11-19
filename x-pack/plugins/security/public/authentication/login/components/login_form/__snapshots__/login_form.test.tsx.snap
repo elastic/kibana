@@ -57,19 +57,13 @@ exports[`LoginForm renders as expected 1`] = `
       onSubmit={[Function]}
     >
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         isInvalid={false}
         label={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Username"
             id="xpack.security.login.basicLoginForm.usernameFormRowLabel"
-            values={Object {}}
           />
         }
-        labelType="label"
       >
         <EuiFieldText
           aria-required={true}
@@ -85,19 +79,13 @@ exports[`LoginForm renders as expected 1`] = `
         />
       </EuiFormRow>
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         isInvalid={false}
         label={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Password"
             id="xpack.security.login.basicLoginForm.passwordFormRowLabel"
-            values={Object {}}
           />
         }
-        labelType="label"
       >
         <EuiFieldPassword
           aria-required={true}
@@ -130,10 +118,9 @@ exports[`LoginForm renders as expected 1`] = `
             onClick={[Function]}
             type="submit"
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Log in"
               id="xpack.security.login.basicLoginForm.logInButtonLabel"
-              values={Object {}}
             />
           </EuiButton>
         </EuiFlexItem>

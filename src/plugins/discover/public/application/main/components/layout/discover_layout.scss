@@ -9,21 +9,21 @@ discover-app {
 }
 
 .dscPage {
-  @include euiBreakpoint('m', 'l', 'xl') {
-    @include kibanaFullBodyHeight();
-
-    &.dscPage--serverless {
-      @include kibanaFullBodyHeight($euiSize * 3);
-    }
-  }
-
   flex-direction: column;
   overflow: hidden;
   padding: 0;
 
-  .dscPageBody {
-    overflow: hidden;
+  @include euiBreakpoint('m', 'l', 'xl') {
+    @include kibanaFullBodyHeight();
+
+    &.dscPage--topNavInline {
+      @include kibanaFullBodyHeight($euiSize * 3);
+    }
   }
+}
+
+.dscPage .dscPageBody {
+  overflow: hidden;
 }
 
 .dscPageBody__inner {

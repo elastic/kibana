@@ -11,11 +11,12 @@ import {
   DEFAULT_ROWS_PER_PAGE,
   LOG_LEVEL_FIELD,
 } from '../../../../common/constants';
-import { AllDatasetSelection } from '../../../../common/dataset_selection';
 import { DefaultLogsExplorerControllerState } from './types';
+import { DEFAULT_ALL_SELECTION } from './default_all_selection';
 
 export const DEFAULT_CONTEXT: DefaultLogsExplorerControllerState = {
-  datasetSelection: AllDatasetSelection.create(),
+  dataSourceSelection: DEFAULT_ALL_SELECTION,
+  allSelection: DEFAULT_ALL_SELECTION,
   grid: {
     columns: DEFAULT_COLUMNS,
     rows: {

@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect, useCallback } from 'react';
+import type { FC } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import type { TimeBuckets } from '@kbn/ml-time-buckets';
 import { useModelMemoryEstimator } from '../../common/job_creator/util/model_memory_estimator';
 import { WIZARD_STEPS } from '../components/step_types';
 
-import { TimeBuckets } from '../../../../util/time_buckets';
+import type { JobCreatorContextValue } from '../components/job_creator_context';
+import { JobCreatorContext } from '../components/job_creator_context';
+import type { ExistingJobsAndGroups } from '../../../../services/job_service';
 
-import { JobCreatorContext, JobCreatorContextValue } from '../components/job_creator_context';
-import { ExistingJobsAndGroups } from '../../../../services/job_service';
-
-import { JobCreatorType } from '../../common/job_creator';
-import { ChartLoader } from '../../common/chart_loader';
-import { MapLoader } from '../../common/map_loader';
-import { ResultsLoader } from '../../common/results_loader';
-import { JobValidator } from '../../common/job_validator';
-import { newJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
+import type { JobCreatorType } from '../../common/job_creator';
+import type { ChartLoader } from '../../common/chart_loader';
+import type { MapLoader } from '../../common/map_loader';
+import type { ResultsLoader } from '../../common/results_loader';
+import type { JobValidator } from '../../common/job_validator';
+import { useNewJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { WizardSteps } from './wizard_steps';
 import { WizardHorizontalSteps } from './wizard_horizontal_steps';
 import { JOB_TYPE } from '../../../../../../common/constants/new_job';
@@ -45,6 +46,7 @@ export const Wizard: FC<Props> = ({
   existingJobsAndGroups,
   firstWizardStep = WIZARD_STEPS.TIME_RANGE,
 }) => {
+  const newJobCapsService = useNewJobCapsService();
   const [jobCreatorUpdated, setJobCreatorUpdate] = useState(0);
   const jobCreatorUpdate = useCallback(() => {
     setJobCreatorUpdate((prev) => prev + 1);

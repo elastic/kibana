@@ -16,6 +16,7 @@ const defaultProcessSchema = {
   id: 'process.entity_id',
   name: 'process.name',
   parent: 'process.parent.entity_id',
+  agentId: 'agent.id',
 };
 
 /* Factory function returning the source and schema for the endpoint data source  */

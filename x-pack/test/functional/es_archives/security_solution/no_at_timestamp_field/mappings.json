@@ -1,0 +1,32 @@
+{
+  "type": "index",
+  "value": {
+    "index": "auditbeat-no_at_timestamp_field",
+    "mappings": {
+      "dynamic": "strict",
+      "properties": {
+        "locale": {
+          "type": "keyword"
+        },
+        "event": {
+          "properties": {
+            "category": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "ingested": {
+              "type": "date",
+              "format": "epoch_second"
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

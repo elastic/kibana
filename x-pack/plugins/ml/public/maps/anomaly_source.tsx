@@ -6,23 +6,21 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { ReactElement } from 'react';
-import {
+import type { ReactElement } from 'react';
+import React from 'react';
+import type {
   FieldFormatter,
-  MAX_ZOOM,
-  MIN_ZOOM,
-  SOURCE_TYPES,
   TooltipFeatureAction,
-  VECTOR_SHAPE_TYPE,
   VectorSourceRequestMeta,
 } from '@kbn/maps-plugin/common';
-import { AbstractSourceDescriptor, MapExtent } from '@kbn/maps-plugin/common/descriptor_types';
-import { ITooltipProperty, GEOJSON_FEATURE_ID_PROPERTY_NAME } from '@kbn/maps-plugin/public';
-import { DataFilters } from '@kbn/maps-plugin/common';
+import { MAX_ZOOM, MIN_ZOOM, SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '@kbn/maps-plugin/common';
+import type { AbstractSourceDescriptor, MapExtent } from '@kbn/maps-plugin/common/descriptor_types';
+import { GEOJSON_FEATURE_ID_PROPERTY_NAME } from '@kbn/maps-plugin/public';
+import type { DataFilters } from '@kbn/maps-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import type { GeoJsonWithMeta } from '@kbn/maps-plugin/public';
+import type { GeoJsonWithMeta, ITooltipProperty } from '@kbn/maps-plugin/public';
 import type { IField } from '@kbn/maps-plugin/public';
 import type { Attribution, ImmutableSourceProperty } from '@kbn/maps-plugin/public';
 import type { SourceEditorArgs } from '@kbn/maps-plugin/public';
@@ -34,9 +32,10 @@ import {
   ANOMALY_SOURCE_FIELDS,
 } from './anomaly_source_field';
 import { ML_PAGES } from '../../common/constants/locator';
-import { getResultsForJobId, ML_ANOMALY_LAYERS, MlAnomalyLayersType } from './util';
+import type { MlAnomalyLayersType } from './util';
+import { getResultsForJobId, ML_ANOMALY_LAYERS } from './util';
 import { UpdateAnomalySourceEditor } from './update_anomaly_source_editor';
-import type { MlApiServices } from '../application/services/ml_api_service';
+import type { MlApi } from '../application/services/ml_api_service';
 
 const RESULT_LIMIT = 1000;
 
@@ -46,7 +45,7 @@ export interface AnomalySourceDescriptor extends AbstractSourceDescriptor {
 }
 
 export class AnomalySource implements IVectorSource {
-  static mlResultsService: MlApiServices['results'];
+  static mlResultsService: MlApi['results'];
   static mlLocator?: LocatorPublic<SerializableRecord>;
 
   static createDescriptor(descriptor: Partial<AnomalySourceDescriptor>) {
@@ -285,7 +284,7 @@ export class AnomalySource implements IVectorSource {
       if (key === GEOJSON_FEATURE_ID_PROPERTY_NAME) {
         continue;
       }
-      if (properties.hasOwnProperty(key)) {
+      if (Object.hasOwn(properties, key)) {
         tooltipProperties.push(new AnomalySourceTooltipProperty(key, properties[key]));
       }
     }

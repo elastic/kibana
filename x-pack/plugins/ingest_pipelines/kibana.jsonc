@@ -1,7 +1,9 @@
 {
   "type": "plugin",
   "id": "@kbn/ingest-pipelines-plugin",
-  "owner": "@elastic/platform-deployment-management",
+  "owner": "@elastic/kibana-management",
+  "group": "platform",
+  "visibility": "shared",
   "plugin": {
     "id": "ingestPipelines",
     "server": true,
@@ -19,7 +21,8 @@
     ],
     "optionalPlugins": [
       "security",
-      "usageCollection"
+      "usageCollection",
+      "console"
     ],
     "requiredBundles": [
       "esUiShared",

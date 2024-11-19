@@ -32,12 +32,14 @@ export const NewAgentActionSchema = schema.oneOf([
   schema.object({
     type: schema.oneOf([schema.literal('SETTINGS')]),
     data: schema.object({
-      log_level: schema.oneOf([
-        schema.literal('debug'),
-        schema.literal('info'),
-        schema.literal('warning'),
-        schema.literal('error'),
-      ]),
+      log_level: schema.nullable(
+        schema.oneOf([
+          schema.literal('debug'),
+          schema.literal('info'),
+          schema.literal('warning'),
+          schema.literal('error'),
+        ])
+      ),
     }),
   }),
 ]);

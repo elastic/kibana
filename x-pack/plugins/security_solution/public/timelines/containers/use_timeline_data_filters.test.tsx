@@ -9,7 +9,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { mockGlobalState, TestProviders, createMockStore } from '../../common/mock';
 import { useTimelineDataFilters } from './use_timeline_data_filters';
 import React from 'react';
-import { SourcererScopeName } from '../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../sourcerer/store/model';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -18,7 +18,6 @@ jest.mock('react-router-dom', () => {
 
 const defaultDataViewPattern = 'test-dataview-patterns';
 const timelinePattern = 'test-timeline-patterns';
-const alertsPagePatterns = '.siem-signals-spacename';
 const pathname = '/alerts';
 const store = createMockStore({
   ...mockGlobalState,
@@ -30,9 +29,22 @@ const store = createMockStore({
     },
     sourcererScopes: {
       ...mockGlobalState.sourcerer.sourcererScopes,
-      [SourcererScopeName.timeline]: {
+      [SourcererScopeName.analyzer]: {
         ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
         selectedPatterns: [timelinePattern],
+      },
+    },
+  },
+  inputs: {
+    ...mockGlobalState.inputs,
+    timeline: {
+      ...mockGlobalState.inputs.timeline,
+      timerange: {
+        kind: 'relative',
+        fromStr: 'now/d',
+        toStr: 'now/d',
+        from: '2024-01-07T08:20:18.966Z',
+        to: '2024-01-08T08:20:18.966Z',
       },
     },
   },
@@ -44,18 +56,23 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 
 describe('useTimelineDataFilters', () => {
   describe('on alerts page', () => {
-    it('returns default data view patterns and alerts page patterns when isActiveTimelines is falsy', () => {
-      const isActiveTimelines = false;
-      const { result } = renderHook(() => useTimelineDataFilters(isActiveTimelines), { wrapper });
+    it('uses the same selected patterns throughout the app', () => {
+      const { result } = renderHook(() => useTimelineDataFilters(false), { wrapper });
+      const { result: timelineResult } = renderHook(() => useTimelineDataFilters(true), {
+        wrapper,
+      });
 
-      expect(result.current.selectedPatterns).toEqual([alertsPagePatterns, defaultDataViewPattern]);
+      expect(result.current.selectedPatterns).toEqual(timelineResult.current.selectedPatterns);
     });
 
-    it('returns default data view patterns and timelinePatterns when isActiveTimelines is truthy', () => {
-      const isActiveTimelines = true;
-      const { result } = renderHook(() => useTimelineDataFilters(isActiveTimelines), { wrapper });
+    it('allows the other parts of the query to remain unique', () => {
+      const { result } = renderHook(() => useTimelineDataFilters(false), { wrapper });
+      const { result: timelineResult } = renderHook(() => useTimelineDataFilters(true), {
+        wrapper,
+      });
 
-      expect(result.current.selectedPatterns).toEqual([timelinePattern, defaultDataViewPattern]);
+      expect(result.current.from !== timelineResult.current.from).toBeTruthy();
+      expect(result.current.to !== timelineResult.current.to).toBeTruthy();
     });
   });
 });

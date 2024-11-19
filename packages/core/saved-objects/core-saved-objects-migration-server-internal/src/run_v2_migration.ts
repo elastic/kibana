@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Logger } from '@kbn/logging';
@@ -17,13 +18,16 @@ import type {
   ISavedObjectsSerializer,
   SavedObjectsRawDoc,
 } from '@kbn/core-saved-objects-server';
-import type {
-  IndexTypesMap,
-  MigrationResult,
-  SavedObjectsMigrationConfigType,
-  SavedObjectsTypeMappingDefinitions,
+import {
+  getVirtualVersionMap,
+  type IndexMappingMeta,
+  type IndexTypesMap,
+  type MigrationResult,
+  type SavedObjectsMigrationConfigType,
+  type SavedObjectsTypeMappingDefinitions,
 } from '@kbn/core-saved-objects-base-server-internal';
 import Semver from 'semver';
+import { pick } from 'lodash';
 import type { DocumentMigrator } from './document_migrator';
 import { buildActiveMappings, createIndexMap } from './core';
 import {
@@ -43,6 +47,8 @@ export interface RunV2MigrationOpts {
   typeRegistry: ISavedObjectTypeRegistry;
   /** The map of indices => types to use as a default / baseline state */
   defaultIndexTypesMap: IndexTypesMap;
+  /** A map that holds [last md5 used => modelVersion] for each of the SO types */
+  hashToVersionMap: Record<string, string>;
   /** Logger to use for migration output */
   logger: Logger;
   /** The document migrator to use to convert the document */
@@ -113,6 +119,9 @@ export const runV2Migration = async (options: RunV2MigrationOpts): Promise<Migra
   // but if their SOs must be relocated to another index, we still need a migrator to do the job
   indicesWithRelocatingTypes.forEach((index) => migratorIndices.add(index));
 
+  // we will store model versions instead of hashes (to be FIPS compliant)
+  const appVersions = getVirtualVersionMap(options.typeRegistry.getAllTypes());
+
   const migrators = Array.from(migratorIndices).map((indexName, i) => {
     return {
       migrate: (): Promise<MigrationResult> => {
@@ -122,14 +131,27 @@ export const runV2Migration = async (options: RunV2MigrationOpts): Promise<Migra
         // check if this migrator's index is involved in some document redistribution
         const mustRelocateDocuments = indicesWithRelocatingTypes.includes(indexName);
 
+        // a migrator's index might no longer have any associated types to it
+        const typeDefinitions = indexMap[indexName]?.typeMappings ?? {};
+
+        const indexTypes = Object.keys(typeDefinitions);
+        // store only the model versions of SO types that belong to the index
+        const mappingVersions = pick(appVersions, indexTypes);
+
+        const _meta: IndexMappingMeta = {
+          indexTypesMap,
+          mappingVersions,
+        };
+
         return runResilientMigrator({
           client: options.elasticsearchClient,
           kibanaVersion: options.kibanaVersion,
           mustRelocateDocuments,
+          indexTypes,
           indexTypesMap,
+          hashToVersionMap: options.hashToVersionMap,
           waitForMigrationCompletion: options.waitForMigrationCompletion,
-          // a migrator's index might no longer have any associated types to it
-          targetMappings: buildActiveMappings(indexMap[indexName]?.typeMappings ?? {}),
+          targetIndexMappings: buildActiveMappings(typeDefinitions, _meta),
           logger: options.logger,
           preMigrationScript: indexMap[indexName]?.script,
           readyToReindex,

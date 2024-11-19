@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { pick } from 'lodash';
@@ -31,10 +32,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     let controlIds: string[];
 
     const addDocument = async (index: string, document: string) => {
-      await console.enterRequest('\nPOST ' + index + '/_doc/ \n{\n ' + document);
+      await console.enterText('\nPOST ' + index + '/_doc/\n{\n ' + document + '\n}');
       await console.clickPlay();
       await header.waitUntilLoadingHasFinished();
-      const response = JSON.parse(await console.getResponse());
+      const response = JSON.parse(await console.getOutputText());
       newDocuments.push({ index, id: response._id });
     };
 
@@ -43,8 +44,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       /* start by adding some incomplete data so that we can test `exists` query */
       await common.navigateToApp('console');
-      await console.closeHelpIfExists();
-      await console.clearTextArea();
+      await console.skipTourIfExists();
+      await console.clearEditorText();
       await addDocument(
         'animals-cats-2018-01-01',
         '"@timestamp": "2018-01-01T16:00:00.000Z", \n"animal": "cat"'
@@ -87,10 +88,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await common.navigateToApp('console');
-      await console.closeHelpIfExists();
-      await console.clearTextArea();
+      await console.clearEditorText();
       for (const { index, id } of newDocuments) {
-        await console.enterRequest(`\nDELETE /${index}/_doc/${id}`);
+        await console.enterText(`\nDELETE /${index}/_doc/${id}`);
         await console.clickPlay();
         await header.waitUntilLoadingHasFinished();
       }
@@ -154,15 +154,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         suggestions: { Fluffy: 6, 'Fee Fee': 3, Rover: 3 },
         invalidSelections: ['sylvester'],
       });
-      const suggestions = pick(OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS, [
-        'ruff',
-        'bark',
-        'grrr',
-        'bow ow ow',
-        'grr',
-      ]);
       await dashboardControls.ensureAvailableOptionsEqual(controlIds[2], {
-        suggestions: { ...suggestions, grr: suggestions.grr - 1 },
+        suggestions: {},
         invalidSelections: ['meow'],
       });
     });
@@ -188,6 +181,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardControls.optionsListPopoverSelectOption('cat');
       await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
 
+      await dashboardControls.clearControlSelections(controlIds[1]);
       await dashboardControls.optionsListOpenPopover(controlIds[1]);
       expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(1);
       await dashboardControls.optionsListOpenPopover(controlIds[2]);
@@ -201,7 +195,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
       await dashboard.waitForRenderComplete();
 
-      await dashboardControls.clearControlSelections(controlIds[1]);
       await dashboardControls.optionsListOpenPopover(controlIds[1]);
       expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(1);
       await dashboardControls.ensureAvailableOptionsEqual(
@@ -246,7 +239,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[2]);
     });
 
-    describe('Hierarchical chaining off', async () => {
+    describe('Hierarchical chaining off', () => {
       before(async () => {
         await dashboardControls.updateChainingSystem('NONE');
       });

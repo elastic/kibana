@@ -13,6 +13,7 @@ import {
 import {
   GenerativeAIForSecurityConnectorFeatureId,
   GenerativeAIForObservabilityConnectorFeatureId,
+  GenerativeAIForSearchPlaygroundConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 import { ValidatorServices } from '@kbn/actions-plugin/server/types';
@@ -39,6 +40,7 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
   supportedFeatureIds: [
     GenerativeAIForSecurityConnectorFeatureId,
     GenerativeAIForObservabilityConnectorFeatureId,
+    GenerativeAIForSearchPlaygroundConnectorFeatureId,
   ],
   minimumLicenseRequired: 'enterprise' as const,
   renderParameterTemplates,
@@ -51,7 +53,11 @@ export const configValidator = (configObject: Config, validatorServices: Validat
 
     const { apiProvider } = configObject;
 
-    if (apiProvider !== OpenAiProviderType.OpenAi && apiProvider !== OpenAiProviderType.AzureAi) {
+    if (
+      apiProvider !== OpenAiProviderType.OpenAi &&
+      apiProvider !== OpenAiProviderType.AzureAi &&
+      apiProvider !== OpenAiProviderType.Other
+    ) {
       throw new Error(
         `API Provider is not supported${
           apiProvider && (apiProvider as OpenAiProviderType).length ? `: ${apiProvider}` : ``
@@ -65,7 +71,7 @@ export const configValidator = (configObject: Config, validatorServices: Validat
       i18n.translate('xpack.stackConnectors.genAi.configurationErrorApiProvider', {
         defaultMessage: 'Error configuring OpenAI action: {err}',
         values: {
-          err,
+          err: err.toString(),
         },
       })
     );

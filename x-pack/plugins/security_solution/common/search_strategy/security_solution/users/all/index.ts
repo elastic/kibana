@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/search-types';
 import type { Inspect, Maybe, PageInfoPaginated } from '../../../common';
 import type { RiskSeverity } from '../../risk_score';
 
@@ -14,6 +14,7 @@ export interface User {
   lastSeen: string;
   domain: string;
   risk?: RiskSeverity;
+  criticality?: string;
 }
 
 export interface UsersStrategyResponse extends IEsSearchResponse {

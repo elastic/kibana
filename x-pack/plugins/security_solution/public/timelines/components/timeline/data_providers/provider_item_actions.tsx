@@ -7,17 +7,22 @@
 
 import type { EuiContextMenuPanelDescriptor, EuiPopoverProps } from '@elastic/eui';
 import { EuiContextMenu, EuiPopover } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import styled from 'styled-components';
 
-import { TimelineType } from '../../../../../common/api/timeline';
+import {
+  type DataProviderType,
+  DataProviderTypeEnum,
+  type TimelineType,
+  TimelineTypeEnum,
+} from '../../../../../common/api/timeline';
 import type { PrimitiveOrArrayOfPrimitives } from '../../../../common/lib/kuery';
 import type { BrowserFields } from '../../../../common/containers/source';
 
 import type { OnDataProviderEdited } from '../events';
 import type { QueryOperator } from './data_provider';
-import { DataProviderType, EXISTS_OPERATOR, IS_ONE_OF_OPERATOR } from './data_provider';
+import { EXISTS_OPERATOR, IS_ONE_OF_OPERATOR } from './data_provider';
 import { StatefulEditDataProvider } from '../../edit_data_provider';
 
 import * as i18n from './translations';
@@ -39,7 +44,6 @@ interface OwnProps {
   kqlQuery: string; // eslint-disable-line react/no-unused-prop-types
   isEnabled: boolean;
   isExcluded: boolean;
-  isLoading: boolean;
   isOpen: boolean;
   onDataProviderEdited?: OnDataProviderEdited;
   operator: QueryOperator;
@@ -53,10 +57,11 @@ interface OwnProps {
   type: DataProviderType;
 }
 
-const MyEuiPopover = styled(EuiPopover as unknown as FunctionComponent)<
-  EuiPopoverProps & {
-    id?: string;
-  }
+const MyEuiPopover = styled(EuiPopover as unknown as FC)<
+  EuiPopoverProps &
+    PropsWithChildren<{
+      id?: string;
+    }>
 >`
   height: 100%;
   user-select: none;
@@ -71,7 +76,6 @@ interface GetProviderActionsProps {
   field: string;
   isEnabled: boolean;
   isExcluded: boolean;
-  isLoading: boolean;
   onDataProviderEdited?: OnDataProviderEdited;
   onFilterForFieldPresent: () => void;
   operator: QueryOperator;
@@ -92,7 +96,6 @@ export const getProviderActions = ({
   field,
   isEnabled,
   isExcluded,
-  isLoading,
   operator,
   onDataProviderEdited,
   onFilterForFieldPresent,
@@ -110,39 +113,35 @@ export const getProviderActions = ({
     items: [
       {
         className: EDIT_CLASS_NAME,
-        disabled: isLoading,
         icon: 'pencil',
         name: i18n.EDIT_MENU_ITEM,
         panel: 1,
       },
       {
         className: EXCLUDE_CLASS_NAME,
-        disabled: isLoading,
         icon: `${isExcluded ? 'plusInCircle' : 'minusInCircle'}`,
         name: isExcluded ? i18n.INCLUDE_DATA_PROVIDER : i18n.EXCLUDE_DATA_PROVIDER,
         onClick: toggleExcluded,
       },
       {
         className: ENABLE_CLASS_NAME,
-        disabled: isLoading,
         icon: `${isEnabled ? 'eyeClosed' : 'eye'}`,
         name: isEnabled ? i18n.TEMPORARILY_DISABLE_DATA_PROVIDER : i18n.RE_ENABLE_DATA_PROVIDER,
         onClick: toggleEnabled,
       },
       {
         className: FILTER_FOR_FIELD_PRESENT_CLASS_NAME,
-        disabled: isLoading,
         icon: 'logstashFilter',
         name: i18n.FILTER_FOR_FIELD_PRESENT,
         onClick: onFilterForFieldPresent,
       },
-      timelineType === TimelineType.template
+      timelineType === TimelineTypeEnum.template
         ? {
             className: CONVERT_TO_FIELD_CLASS_NAME,
-            disabled: isLoading || operator === IS_ONE_OF_OPERATOR,
+            disabled: operator === IS_ONE_OF_OPERATOR,
             icon: 'visText',
             name:
-              type === DataProviderType.template
+              type === DataProviderTypeEnum.template
                 ? i18n.CONVERT_TO_FIELD
                 : i18n.CONVERT_TO_TEMPLATE_FIELD,
             onClick: toggleType,
@@ -150,7 +149,6 @@ export const getProviderActions = ({
         : { name: null },
       {
         className: DELETE_CLASS_NAME,
-        disabled: isLoading,
         icon: 'trash',
         name: i18n.DELETE_DATA_PROVIDER,
         onClick: deleteItem,
@@ -190,7 +188,6 @@ export class ProviderItemActions extends React.PureComponent<OwnProps> {
       field,
       isEnabled,
       isExcluded,
-      isLoading,
       isOpen,
       operator,
       providerId,
@@ -210,7 +207,6 @@ export class ProviderItemActions extends React.PureComponent<OwnProps> {
       field,
       isEnabled,
       isExcluded,
-      isLoading,
       onDataProviderEdited: this.onDataProviderEdited,
       onFilterForFieldPresent: this.onFilterForFieldPresent,
       operator,

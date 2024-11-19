@@ -8,7 +8,7 @@
 import util from 'util';
 import { isEqual, isEqualWith } from 'lodash';
 import expect from '@kbn/expect';
-import { RawKibanaPrivileges } from '@kbn/security-plugin/common/model';
+import { RawKibanaPrivileges } from '@kbn/security-plugin-types-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -40,6 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
       ],
       observabilityAIAssistant: ['all', 'read', 'minimal_all', 'minimal_read'],
       slo: ['all', 'read', 'minimal_all', 'minimal_read'],
+      searchInferenceEndpoints: ['all', 'read', 'minimal_all', 'minimal_read'],
       fleetv2: ['all', 'read', 'minimal_all', 'minimal_read'],
       fleet: ['all', 'read', 'minimal_all', 'minimal_read'],
       actions: ['all', 'read', 'minimal_all', 'minimal_read'],
@@ -68,9 +69,18 @@ export default function ({ getService }: FtrProviderContext) {
         'process_operations_all',
         'file_operations_all',
         'execute_operations_all',
+        'scan_operations_all',
       ],
       uptime: ['all', 'read', 'minimal_all', 'minimal_read', 'elastic_managed_locations_enabled'],
-      securitySolutionAssistant: ['all', 'read', 'minimal_all', 'minimal_read'],
+      securitySolutionAssistant: [
+        'all',
+        'read',
+        'minimal_all',
+        'minimal_read',
+        'update_anonymization',
+        'manage_global_knowledge_base',
+      ],
+      securitySolutionAttackDiscovery: ['all', 'read', 'minimal_all', 'minimal_read'],
       securitySolutionCases: [
         'all',
         'read',
@@ -81,7 +91,8 @@ export default function ({ getService }: FtrProviderContext) {
       ],
       infrastructure: ['all', 'read', 'minimal_all', 'minimal_read'],
       logs: ['all', 'read', 'minimal_all', 'minimal_read'],
-      apm: ['all', 'read', 'minimal_all', 'minimal_read'],
+      dataQuality: ['all', 'read', 'minimal_all', 'minimal_read'],
+      apm: ['all', 'read', 'minimal_all', 'minimal_read', 'settings_save'],
       discover: [
         'all',
         'read',
@@ -103,7 +114,7 @@ export default function ({ getService }: FtrProviderContext) {
       advancedSettings: ['all', 'read', 'minimal_all', 'minimal_read'],
       indexPatterns: ['all', 'read', 'minimal_all', 'minimal_read'],
       savedObjectsManagement: ['all', 'read', 'minimal_all', 'minimal_read'],
-      savedQueryManagement: ['all', 'minimal_all'],
+      savedQueryManagement: ['all', 'read', 'minimal_all', 'minimal_read'],
       osquery: [
         'all',
         'read',
@@ -117,6 +128,7 @@ export default function ({ getService }: FtrProviderContext) {
         'packs_all',
         'packs_read',
       ],
+      enterpriseSearch: ['all', 'read', 'minimal_all', 'minimal_read'],
       filesManagement: ['all', 'read', 'minimal_all', 'minimal_read'],
       filesSharedImage: ['all', 'read', 'minimal_all', 'minimal_read'],
       rulesSettings: [
@@ -129,6 +141,8 @@ export default function ({ getService }: FtrProviderContext) {
       ],
       maintenanceWindow: ['all', 'read', 'minimal_all', 'minimal_read'],
       guidedOnboardingFeature: ['all', 'read', 'minimal_all', 'minimal_read'],
+      aiAssistantManagementSelection: ['all', 'read', 'minimal_all', 'minimal_read'],
+      inventory: ['all', 'read', 'minimal_all', 'minimal_read'],
     },
     reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring'],
   };

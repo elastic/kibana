@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectReference } from '@kbn/core/types';
-import { Tag, TagAttributes } from '../types';
-import { TagsCapabilities } from '../capabilities';
-import { AssignableObject } from '../assignments';
+import type { SavedObject, SavedObjectReference } from '@kbn/core/types';
+import type { Tag, TagAttributes } from '../types';
+import type { TagsCapabilities } from '../capabilities';
+import type { AssignableObject } from '../assignments';
 
 export const createReference = (type: string, id: string): SavedObjectReference => ({
   type,
@@ -31,6 +31,7 @@ export const createTag = (parts: Partial<Tag> = {}): Tag => ({
   name: 'some-tag',
   description: 'Some tag',
   color: '#FF00CC',
+  managed: false,
   ...parts,
 });
 

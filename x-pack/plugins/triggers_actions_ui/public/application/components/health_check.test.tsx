@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 
 import { HealthCheck } from './health_check';
-
+import { I18nProvider } from '@kbn/i18n-react';
 import { act } from 'react-dom/test-utils';
 import { HealthContextProvider } from '../context/health_context';
 import { useKibana } from '../../common/lib/kibana';
@@ -23,11 +23,13 @@ describe('health check', () => {
       .fn()
       .mockImplementationOnce(() => new Promise(() => {}));
     const { queryByText, container } = render(
-      <HealthContextProvider>
-        <HealthCheck waitForCheck={true}>
-          <p>{'shouldnt render'}</p>
-        </HealthCheck>
-      </HealthContextProvider>
+      <I18nProvider>
+        <HealthContextProvider>
+          <HealthCheck waitForCheck={true}>
+            <p>{'shouldnt render'}</p>
+          </HealthCheck>
+        </HealthContextProvider>
+      </I18nProvider>
     );
     await act(async () => {
       // wait for useEffect to run
@@ -43,11 +45,13 @@ describe('health check', () => {
       .mockImplementationOnce(() => new Promise(() => {}));
 
     const { queryByText, container } = render(
-      <HealthContextProvider>
-        <HealthCheck waitForCheck={false}>
-          <p>{'should render'}</p>
-        </HealthCheck>
-      </HealthContextProvider>
+      <I18nProvider>
+        <HealthContextProvider>
+          <HealthCheck waitForCheck={false}>
+            <p>{'should render'}</p>
+          </HealthCheck>
+        </HealthContextProvider>
+      </I18nProvider>
     );
     await act(async () => {
       // wait for useEffect to run
@@ -69,11 +73,13 @@ describe('health check', () => {
       isAlertsAvailable: true,
     });
     const { queryByText } = render(
-      <HealthContextProvider>
-        <HealthCheck waitForCheck={true}>
-          <p>{'should render'}</p>
-        </HealthCheck>
-      </HealthContextProvider>
+      <I18nProvider>
+        <HealthContextProvider>
+          <HealthCheck waitForCheck={true}>
+            <p>{'should render'}</p>
+          </HealthCheck>
+        </HealthContextProvider>
+      </I18nProvider>
     );
     await act(async () => {
       // wait for useEffect to run
@@ -93,11 +99,13 @@ describe('health check', () => {
       isAlertsAvailable: true,
     }));
     const { queryAllByText } = render(
-      <HealthContextProvider>
-        <HealthCheck waitForCheck={true}>
-          <p>{'should render'}</p>
-        </HealthCheck>
-      </HealthContextProvider>
+      <I18nProvider>
+        <HealthContextProvider>
+          <HealthCheck waitForCheck={true}>
+            <p>{'should render'}</p>
+          </HealthCheck>
+        </HealthContextProvider>
+      </I18nProvider>
     );
     await act(async () => {
       // wait for useEffect to run
@@ -107,11 +115,11 @@ describe('health check', () => {
     const [action] = queryAllByText(/Learn more/i);
 
     expect(description.textContent).toMatchInlineSnapshot(
-      `"You must enable API keys to use Alerting. Learn more.External link(opens in a new tab or window)"`
+      `"You must enable API keys to use Alerting. Learn more.(external, opens in a new tab or window)"`
     );
 
     expect(action.textContent).toMatchInlineSnapshot(
-      `"Learn more.External link(opens in a new tab or window)"`
+      `"Learn more.(external, opens in a new tab or window)"`
     );
 
     expect(action.getAttribute('href')).toMatchInlineSnapshot(
@@ -131,24 +139,26 @@ describe('health check', () => {
       isAlertsAvailable: true,
     }));
     const { queryByText, queryByRole } = render(
-      <HealthContextProvider>
-        <HealthCheck waitForCheck={true}>
-          <p>{'should render'}</p>
-        </HealthCheck>
-      </HealthContextProvider>
+      <I18nProvider>
+        <HealthContextProvider>
+          <HealthCheck waitForCheck={true}>
+            <p>{'should render'}</p>
+          </HealthCheck>
+        </HealthContextProvider>
+      </I18nProvider>
     );
     await act(async () => {
       // wait for useEffect to run
     });
 
-    const description = queryByRole(/banner/i);
+    const description = queryByRole('banner');
     expect(description!.textContent).toMatchInlineSnapshot(
-      `"You must configure an encryption key to use Alerting. Learn more.External link(opens in a new tab or window)"`
+      `"You must configure an encryption key to use Alerting. Learn more.(external, opens in a new tab or window)"`
     );
 
     const action = queryByText(/Learn/i);
     expect(action!.textContent).toMatchInlineSnapshot(
-      `"Learn more.External link(opens in a new tab or window)"`
+      `"Learn more.(external, opens in a new tab or window)"`
     );
     expect(action!.getAttribute('href')).toMatchInlineSnapshot(
       `"https://www.elastic.co/guide/en/kibana/mocked-test-branch/alert-action-settings-kb.html#general-alert-action-settings"`
@@ -168,11 +178,13 @@ describe('health check', () => {
     }));
 
     const { queryByText } = render(
-      <HealthContextProvider>
-        <HealthCheck waitForCheck={true}>
-          <p>{'should render'}</p>
-        </HealthCheck>
-      </HealthContextProvider>
+      <I18nProvider>
+        <HealthContextProvider>
+          <HealthCheck waitForCheck={true}>
+            <p>{'should render'}</p>
+          </HealthCheck>
+        </HealthContextProvider>
+      </I18nProvider>
     );
     await act(async () => {
       // wait for useEffect to run
@@ -181,12 +193,12 @@ describe('health check', () => {
     const description = queryByText(/You must enable/i);
 
     expect(description!.textContent).toMatchInlineSnapshot(
-      `"You must enable API keys and configure an encryption key to use Alerting. Learn more.External link(opens in a new tab or window)"`
+      `"You must enable API keys and configure an encryption key to use Alerting. Learn more.(external, opens in a new tab or window)"`
     );
 
     const action = queryByText(/Learn/i);
     expect(action!.textContent).toMatchInlineSnapshot(
-      `"Learn more.External link(opens in a new tab or window)"`
+      `"Learn more.(external, opens in a new tab or window)"`
     );
     expect(action!.getAttribute('href')).toMatchInlineSnapshot(
       `"https://www.elastic.co/guide/en/kibana/mocked-test-branch/alerting-setup.html#alerting-prerequisites"`
@@ -201,11 +213,13 @@ describe('health check', () => {
       // result from alerting health
       .mockRejectedValueOnce(new Error('for example, not authorized for rules / 403 response'));
     const { queryByText } = render(
-      <HealthContextProvider>
-        <HealthCheck waitForCheck={true}>
-          <p>{'should render'}</p>
-        </HealthCheck>
-      </HealthContextProvider>
+      <I18nProvider>
+        <HealthContextProvider>
+          <HealthCheck waitForCheck={true}>
+            <p>{'should render'}</p>
+          </HealthCheck>
+        </HealthContextProvider>
+      </I18nProvider>
     );
     await act(async () => {
       // wait for useEffect to run

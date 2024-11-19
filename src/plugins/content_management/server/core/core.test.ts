@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -309,7 +310,7 @@ describe('Content Core', () => {
             { title: 'Hello' },
             { id: '1234' } // We send this "id" option to specify the id of the content created
           );
-          expect(fooContentCrud!.get(ctx, '1234')).resolves.toEqual({
+          await expect(fooContentCrud!.get(ctx, '1234')).resolves.toEqual({
             contentTypeId: FOO_CONTENT_ID,
             result: {
               item: {
@@ -327,7 +328,7 @@ describe('Content Core', () => {
 
           await fooContentCrud!.create(ctx, { title: 'Hello' }, { id: '1234' });
           await fooContentCrud!.update(ctx, '1234', { title: 'changed' });
-          expect(fooContentCrud!.get(ctx, '1234')).resolves.toEqual({
+          await expect(fooContentCrud!.get(ctx, '1234')).resolves.toEqual({
             contentTypeId: FOO_CONTENT_ID,
             result: {
               item: {
@@ -363,7 +364,7 @@ describe('Content Core', () => {
             },
           });
 
-          expect(fooContentCrud!.get(ctx, '1234')).resolves.toEqual({
+          await expect(fooContentCrud!.get(ctx, '1234')).resolves.toEqual({
             contentTypeId: FOO_CONTENT_ID,
             result: {
               item: {
@@ -380,14 +381,14 @@ describe('Content Core', () => {
           const { fooContentCrud, ctx, cleanUp } = setup({ registerFooType: true });
 
           await fooContentCrud!.create(ctx, { title: 'Hello' }, { id: '1234' });
-          expect(fooContentCrud!.get(ctx, '1234')).resolves.toEqual({
+          await expect(fooContentCrud!.get(ctx, '1234')).resolves.toEqual({
             contentTypeId: FOO_CONTENT_ID,
             result: {
               item: expect.any(Object),
             },
           });
           await fooContentCrud!.delete(ctx, '1234');
-          expect(fooContentCrud!.get(ctx, '1234')).resolves.toEqual({
+          await expect(fooContentCrud!.get(ctx, '1234')).resolves.toEqual({
             contentTypeId: FOO_CONTENT_ID,
             result: {
               item: undefined,

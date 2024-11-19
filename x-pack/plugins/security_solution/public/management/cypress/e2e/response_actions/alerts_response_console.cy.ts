@@ -9,6 +9,7 @@ import { closeAllToasts } from '../../tasks/toasts';
 import {
   getAlertsTableRows,
   openAlertDetailsView,
+  openAlertDetailsViewFromTimeline,
   openInvestigateInTimelineView,
   openResponderFromEndpointAlertDetails,
 } from '../../screens/alerts';
@@ -49,7 +50,7 @@ describe(
 
             return enableAllPolicyProtections(policy.id).then(() => {
               // Create and enroll a new Endpoint host
-              return createEndpointHost(policy.policy_id).then((host) => {
+              return createEndpointHost(policy.policy_ids[0]).then((host) => {
                 createdHost = host as CreateAndEnrollEndpointHostResponse;
               });
             });
@@ -104,9 +105,7 @@ describe(
 
       getAlertsTableRows().should('have.length.greaterThan', 0);
       openInvestigateInTimelineView();
-      cy.getByTestSubj('timeline-container').within(() => {
-        openAlertDetailsView();
-      });
+      openAlertDetailsViewFromTimeline();
       openResponderFromEndpointAlertDetails();
       ensureOnResponder();
     });

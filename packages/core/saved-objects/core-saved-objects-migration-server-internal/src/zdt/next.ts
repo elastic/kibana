@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type {
@@ -57,7 +58,7 @@ export const nextActionMap = (context: MigratorContext) => {
   const client = context.elasticsearchClient;
   return {
     INIT: (state: InitState) =>
-      Actions.init({
+      Actions.fetchIndices({
         client,
         indices: [`${context.indexPrefix}_*`],
       }),
@@ -65,6 +66,7 @@ export const nextActionMap = (context: MigratorContext) => {
       Actions.createIndex({
         client,
         indexName: state.currentIndex,
+        aliases: state.creationAliases,
         mappings: state.indexMappings,
         esCapabilities: context.esCapabilities,
       }),
@@ -204,7 +206,7 @@ export const next = (context: MigratorContext) => {
       // instead of the union.
       const nextAction = map[state.controlState] as (
         state: State
-      ) => ReturnType<typeof map[AllActionStates]>;
+      ) => ReturnType<(typeof map)[AllActionStates]>;
       return delay(nextAction(state));
     }
   };

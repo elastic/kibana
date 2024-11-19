@@ -5,31 +5,43 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { ExpandableFlyout, type ExpandableFlyoutProps } from '@kbn/expandable-flyout';
-import type { IsolateHostPanelProps } from './document_details/isolate_host';
+import { useEuiTheme } from '@elastic/eui';
+import type { NetworkExpandableFlyoutProps } from './network_details';
+import { Flyouts } from './document_details/shared/constants/flyouts';
 import {
-  IsolateHostPanel,
   DocumentDetailsIsolateHostPanelKey,
-} from './document_details/isolate_host';
+  DocumentDetailsLeftPanelKey,
+  DocumentDetailsRightPanelKey,
+  DocumentDetailsPreviewPanelKey,
+  DocumentDetailsAlertReasonPanelKey,
+  DocumentDetailsAnalyzerPanelKey,
+} from './document_details/shared/constants/panel_keys';
+import type { IsolateHostPanelProps } from './document_details/isolate_host';
+import { IsolateHostPanel } from './document_details/isolate_host';
 import { IsolateHostPanelProvider } from './document_details/isolate_host/context';
-import type { RightPanelProps } from './document_details/right';
-import { RightPanel, DocumentDetailsRightPanelKey } from './document_details/right';
-import { RightPanelProvider } from './document_details/right/context';
-import type { LeftPanelProps } from './document_details/left';
-import { LeftPanel, DocumentDetailsLeftPanelKey } from './document_details/left';
-import { LeftPanelProvider } from './document_details/left/context';
-import type { PreviewPanelProps } from './document_details/preview';
-import { PreviewPanel, DocumentDetailsPreviewPanelKey } from './document_details/preview';
-import { PreviewPanelProvider } from './document_details/preview/context';
+import type { DocumentDetailsProps } from './document_details/shared/types';
+import { DocumentDetailsProvider } from './document_details/shared/context';
+import { RightPanel } from './document_details/right';
+import { LeftPanel } from './document_details/left';
+import { PreviewPanel } from './document_details/preview';
+import type { AlertReasonPanelProps } from './document_details/alert_reason';
+import { AlertReasonPanel } from './document_details/alert_reason';
+import { AlertReasonPanelProvider } from './document_details/alert_reason/context';
+import type { RulePanelExpandableFlyoutProps } from './rule_details/right';
+import { RulePanel, RulePanelKey, RulePreviewPanelKey } from './rule_details/right';
 import type { UserPanelExpandableFlyoutProps } from './entity_details/user_right';
-import { UserPanel, UserPanelKey } from './entity_details/user_right';
-import type { UserDetailsPanelProps } from './entity_details/user_details_left';
+import { UserPanel, UserPanelKey, UserPreviewPanelKey } from './entity_details/user_right';
+import type { UserDetailsExpandableFlyoutProps } from './entity_details/user_details_left';
 import { UserDetailsPanel, UserDetailsPanelKey } from './entity_details/user_details_left';
 import type { HostPanelExpandableFlyoutProps } from './entity_details/host_right';
-import { HostPanel, HostPanelKey } from './entity_details/host_right';
+import { HostPanel, HostPanelKey, HostPreviewPanelKey } from './entity_details/host_right';
 import type { HostDetailsExpandableFlyoutProps } from './entity_details/host_details_left';
 import { HostDetailsPanel, HostDetailsPanelKey } from './entity_details/host_details_left';
+import { NetworkPanel, NetworkPanelKey } from './network_details';
+import type { AnalyzerPanelExpandableFlyoutProps } from './document_details/analyzer_panels';
+import { AnalyzerPanel } from './document_details/analyzer_panels';
 
 /**
  * List of all panels that will be used within the document details expandable flyout.
@@ -39,25 +51,43 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
   {
     key: DocumentDetailsRightPanelKey,
     component: (props) => (
-      <RightPanelProvider {...(props as RightPanelProps).params}>
-        <RightPanel path={props.path as RightPanelProps['path']} />
-      </RightPanelProvider>
+      <DocumentDetailsProvider {...(props as DocumentDetailsProps).params}>
+        <RightPanel path={props.path as DocumentDetailsProps['path']} />
+      </DocumentDetailsProvider>
     ),
   },
   {
     key: DocumentDetailsLeftPanelKey,
     component: (props) => (
-      <LeftPanelProvider {...(props as LeftPanelProps).params}>
-        <LeftPanel path={props.path as LeftPanelProps['path']} />
-      </LeftPanelProvider>
+      <DocumentDetailsProvider {...(props as DocumentDetailsProps).params}>
+        <LeftPanel path={props.path as DocumentDetailsProps['path']} />
+      </DocumentDetailsProvider>
     ),
   },
   {
     key: DocumentDetailsPreviewPanelKey,
     component: (props) => (
-      <PreviewPanelProvider {...(props as PreviewPanelProps).params}>
-        <PreviewPanel path={props.path as PreviewPanelProps['path']} />
-      </PreviewPanelProvider>
+      <DocumentDetailsProvider {...(props as DocumentDetailsProps).params}>
+        <PreviewPanel path={props.path as DocumentDetailsProps['path']} />
+      </DocumentDetailsProvider>
+    ),
+  },
+  {
+    key: DocumentDetailsAlertReasonPanelKey,
+    component: (props) => (
+      <AlertReasonPanelProvider {...(props as AlertReasonPanelProps).params}>
+        <AlertReasonPanel />
+      </AlertReasonPanelProvider>
+    ),
+  },
+  {
+    key: RulePanelKey,
+    component: (props) => <RulePanel {...(props as RulePanelExpandableFlyoutProps).params} />,
+  },
+  {
+    key: RulePreviewPanelKey,
+    component: (props) => (
+      <RulePanel {...(props as RulePanelExpandableFlyoutProps).params} isPreviewMode />
     ),
   },
   {
@@ -69,13 +99,25 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     ),
   },
   {
+    key: DocumentDetailsAnalyzerPanelKey,
+    component: (props) => (
+      <AnalyzerPanel {...(props as AnalyzerPanelExpandableFlyoutProps).params} />
+    ),
+  },
+  {
     key: UserPanelKey,
     component: (props) => <UserPanel {...(props as UserPanelExpandableFlyoutProps).params} />,
   },
   {
     key: UserDetailsPanelKey,
     component: (props) => (
-      <UserDetailsPanel {...({ ...props.params, path: props.path } as UserDetailsPanelProps)} />
+      <UserDetailsPanel {...(props as UserDetailsExpandableFlyoutProps).params} />
+    ),
+  },
+  {
+    key: UserPreviewPanelKey,
+    component: (props) => (
+      <UserPanel {...(props as UserPanelExpandableFlyoutProps).params} isPreviewMode />
     ),
   },
   {
@@ -88,10 +130,82 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
       <HostDetailsPanel {...(props as HostDetailsExpandableFlyoutProps).params} />
     ),
   },
+  {
+    key: HostPreviewPanelKey,
+    component: (props) => (
+      <HostPanel {...(props as HostPanelExpandableFlyoutProps).params} isPreviewMode />
+    ),
+  },
+  {
+    key: NetworkPanelKey,
+    component: (props) => <NetworkPanel {...(props as NetworkExpandableFlyoutProps).params} />,
+  },
 ];
 
-export const SecuritySolutionFlyout = memo(() => (
-  <ExpandableFlyout registeredPanels={expandableFlyoutDocumentsPanels} paddingSize="none" />
-));
+export const SECURITY_SOLUTION_ON_CLOSE_EVENT = `expandable-flyout-on-close-${Flyouts.securitySolution}`;
+export const TIMELINE_ON_CLOSE_EVENT = `expandable-flyout-on-close-${Flyouts.timeline}`;
+
+/**
+ * Flyout used for the Security Solution application
+ * We keep the default EUI 1000 z-index to ensure it is always rendered behind Timeline (which has a z-index of 1001)
+ * We propagate the onClose callback to the rest of Security Solution using a window event 'expandable-flyout-on-close-SecuritySolution'
+ * This flyout support push/overlay mode. The value is saved in local storage.
+ */
+export const SecuritySolutionFlyout = memo(() => {
+  const onClose = useCallback(
+    () =>
+      window.dispatchEvent(
+        new CustomEvent(SECURITY_SOLUTION_ON_CLOSE_EVENT, {
+          detail: Flyouts.securitySolution,
+        })
+      ),
+    []
+  );
+
+  return (
+    <ExpandableFlyout
+      registeredPanels={expandableFlyoutDocumentsPanels}
+      paddingSize="none"
+      onClose={onClose}
+    />
+  );
+});
 
 SecuritySolutionFlyout.displayName = 'SecuritySolutionFlyout';
+
+/**
+ * Flyout used in Timeline
+ * We set the z-index to 1002 to ensure it is always rendered above Timeline (which has a z-index of 1001)
+ * We propagate the onClose callback to the rest of Security Solution using a window event 'expandable-flyout-on-close-Timeline'
+ * This flyout does not support push mode, because timeline being rendered in a modal (EUiPortal), it's very difficult to dynamically change its width.
+ */
+export const TimelineFlyout = memo(() => {
+  const { euiTheme } = useEuiTheme();
+
+  const onClose = useCallback(
+    () =>
+      window.dispatchEvent(
+        new CustomEvent(TIMELINE_ON_CLOSE_EVENT, {
+          detail: Flyouts.timeline,
+        })
+      ),
+    []
+  );
+
+  return (
+    <ExpandableFlyout
+      registeredPanels={expandableFlyoutDocumentsPanels}
+      paddingSize="none"
+      customStyles={{ 'z-index': (euiTheme.levels.flyout as number) + 2 }}
+      onClose={onClose}
+      flyoutCustomProps={{
+        pushVsOverlay: {
+          disabled: true,
+          tooltip: 'Push mode is not supported in Timeline',
+        },
+      }}
+    />
+  );
+});
+
+TimelineFlyout.displayName = 'TimelineFlyout';

@@ -11,13 +11,14 @@ import type {
   FormBasedPersistedState,
   TypedLensByValueInput,
 } from '@kbn/lens-plugin/public';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 
 import type { LensProps } from '@kbn/cases-plugin/public/types';
 import type { InputsModelId } from '../../store/inputs/constants';
-import type { SourcererScopeName } from '../../store/sourcerer/model';
+import type { SourcererScopeName } from '../../../sourcerer/store/model';
 import type { Status } from '../../../../common/api/detection_engine';
 
 export type LensAttributes = TypedLensByValueInput['attributes'];
@@ -28,6 +29,7 @@ export type GetLensAttributes = (
 
 export interface UseLensAttributesProps {
   applyGlobalQueriesAndFilters?: boolean;
+  applyPageAndTabsFilters?: boolean;
   extraOptions?: ExtraOptions;
   getLensAttributes?: GetLensAttributes;
   lensAttributes?: LensAttributes | null;
@@ -83,6 +85,7 @@ export enum VisualizationContextMenuDefaultActionName {
 
 export interface LensEmbeddableComponentProps {
   applyGlobalQueriesAndFilters?: boolean;
+  applyPageAndTabsFilters?: boolean;
   extraActions?: Action[];
   extraOptions?: ExtraOptions;
   getLensAttributes?: GetLensAttributes;
@@ -143,7 +146,7 @@ export interface RequestStatistic {
 }
 
 export interface Response {
-  json?: { rawResponse?: object };
+  json?: IKibanaSearchResponse;
   time?: number;
 }
 

@@ -24,6 +24,12 @@ export const listTypesRoute = (
   router.get(
     {
       path: `${BASE_ACTION_API_PATH}/connector_types`,
+      options: {
+        access: 'public',
+        summary: `Get connector types`,
+        description: 'You do not need any Kibana feature privileges to run this API.',
+        tags: ['oas-tag:connectors'],
+      },
       validate: {
         query: connectorTypesQuerySchemaV1,
       },
@@ -35,7 +41,9 @@ export const listTypesRoute = (
         // Assert versioned inputs
         const query: ConnectorTypesRequestQueryV1 = req.query;
 
-        const connectorTypes = await actionsClient.listTypes({ featureId: query?.feature_id });
+        const connectorTypes = await actionsClient.listTypes({
+          featureId: query?.feature_id,
+        });
 
         const responseBody: ConnectorTypesResponseV1[] =
           transformListTypesResponseV1(connectorTypes);

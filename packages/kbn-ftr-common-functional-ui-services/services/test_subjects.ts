@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
@@ -19,6 +20,10 @@ interface ExistsOptions {
 interface SetValueOptions {
   clearWithKeyboard?: boolean;
   typeCharByChar?: boolean;
+}
+
+export function nonNullable<T>(v: T): v is NonNullable<T> {
+  return v != null;
 }
 
 export class TestSubjects extends FtrService {
@@ -226,9 +231,11 @@ export class TestSubjects extends FtrService {
 
   public async getAttributeAll(selector: string, attribute: string): Promise<string[]> {
     this.log.debug(`TestSubjects.getAttributeAll(${selector}, ${attribute})`);
-    return await this._mapAll(selector, async (element: WebElementWrapper) => {
-      return await element.getAttribute(attribute);
-    });
+    return (
+      await this._mapAll(selector, async (element: WebElementWrapper) => {
+        return await element.getAttribute(attribute);
+      })
+    ).filter(nonNullable);
   }
 
   public async getAttribute(
@@ -240,7 +247,7 @@ export class TestSubjects extends FtrService {
           findTimeout?: number;
           tryTimeout?: number;
         }
-  ): Promise<string> {
+  ): Promise<string | null> {
     const findTimeout =
       (typeof options === 'number' ? options : options?.findTimeout) ??
       this.config.get('timeouts.find');

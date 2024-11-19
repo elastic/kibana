@@ -3,14 +3,14 @@
 exports[`CronEditor is rendered with a DAY frequency 1`] = `
 Array [
   <div
-    class="euiFormRow euiFormRow--fullWidth euiFormRow--hasLabel"
+    class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
     id="generated-id-row"
   >
     <div
       class="euiFormRow__labelWrapper"
     >
       <label
-        class="euiFormLabel euiFormRow__label"
+        class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
         for="generated-id"
         id="generated-id-label"
       >
@@ -21,19 +21,24 @@ Array [
       class="euiFormRow__fieldWrapper"
     >
       <div
-        class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+        class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-fullWidth-group"
       >
-        <label
-          class="euiFormLabel euiFormControlLayout__prepend"
-          for="generated-id"
-        >
-          Every
-        </label>
         <div
-          class="euiFormControlLayout__childrenWrapper"
+          class="euiFormControlLayout__prepend emotion-euiFormControlLayout__side-prepend"
+        >
+          <label
+            class="euiFormLabel emotion-euiFormLabel"
+            for="generated-id"
+          >
+            Every
+          </label>
+        </div>
+        <div
+          class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup-prependOnly"
+          style="--euiFormControlRightIconsCount: 1;"
         >
           <select
-            class="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
+            class="euiSelect emotion-euiSelect-fullWidth-inGroup"
             data-test-subj="cronFrequencySelect"
             id="generated-id"
           >
@@ -69,10 +74,10 @@ Array [
             </option>
           </select>
           <div
-            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
+            class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
           >
             <span
-              class="euiFormControlLayoutCustomIcon"
+              class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
             >
               <span
                 aria-hidden="true"
@@ -86,7 +91,7 @@ Array [
     </div>
   </div>,
   <div
-    class="euiFormRow euiFormRow--fullWidth euiFormRow--hasLabel"
+    class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
     data-test-subj="cronFrequencyConfiguration"
     id="generated-id-row"
   >
@@ -94,7 +99,7 @@ Array [
       class="euiFormRow__labelWrapper"
     >
       <label
-        class="euiFormLabel euiFormRow__label"
+        class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
         for="generated-id"
         id="generated-id-label"
       >
@@ -112,19 +117,24 @@ Array [
           class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <div
-            class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+            class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-fullWidth-group"
           >
-            <label
-              class="euiFormLabel euiFormControlLayout__prepend"
-            >
-              At
-            </label>
             <div
-              class="euiFormControlLayout__childrenWrapper"
+              class="euiFormControlLayout__prepend emotion-euiFormControlLayout__side-prepend"
+            >
+              <label
+                class="euiFormLabel emotion-euiFormLabel"
+              >
+                At
+              </label>
+            </div>
+            <div
+              class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup-prependOnly"
+              style="--euiFormControlRightIconsCount: 1;"
             >
               <select
                 aria-label="Hour"
-                class="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
+                class="euiSelect emotion-euiSelect-fullWidth-inGroup"
                 data-test-subj="cronFrequencyDailyHourSelect"
               >
                 <option
@@ -249,10 +259,10 @@ Array [
                 </option>
               </select>
               <div
-                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
+                class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
               >
                 <span
-                  class="euiFormControlLayoutCustomIcon"
+                  class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
                 >
                   <span
                     aria-hidden="true"
@@ -268,19 +278,24 @@ Array [
           class="euiFlexItem emotion-euiFlexItem-grow-1"
         >
           <div
-            class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+            class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-fullWidth-group"
           >
-            <label
-              class="euiFormLabel euiFormControlLayout__prepend"
-            >
-              :
-            </label>
             <div
-              class="euiFormControlLayout__childrenWrapper"
+              class="euiFormControlLayout__prepend emotion-euiFormControlLayout__side-prepend"
+            >
+              <label
+                class="euiFormLabel emotion-euiFormLabel"
+              >
+                :
+              </label>
+            </div>
+            <div
+              class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup-prependOnly"
+              style="--euiFormControlRightIconsCount: 1;"
             >
               <select
                 aria-label="Minute"
-                class="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
+                class="euiSelect emotion-euiSelect-fullWidth-inGroup"
                 data-test-subj="cronFrequencyDailyMinuteSelect"
               >
                 <option
@@ -585,10 +600,10 @@ Array [
                 </option>
               </select>
               <div
-                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
+                class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
               >
                 <span
-                  class="euiFormControlLayoutCustomIcon"
+                  class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
                 >
                   <span
                     aria-hidden="true"
@@ -609,14 +624,14 @@ Array [
 exports[`CronEditor is rendered with a HOUR frequency 1`] = `
 Array [
   <div
-    class="euiFormRow euiFormRow--fullWidth euiFormRow--hasLabel"
+    class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
     id="generated-id-row"
   >
     <div
       class="euiFormRow__labelWrapper"
     >
       <label
-        class="euiFormLabel euiFormRow__label"
+        class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
         for="generated-id"
         id="generated-id-label"
       >
@@ -627,19 +642,24 @@ Array [
       class="euiFormRow__fieldWrapper"
     >
       <div
-        class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+        class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-fullWidth-group"
       >
-        <label
-          class="euiFormLabel euiFormControlLayout__prepend"
-          for="generated-id"
-        >
-          Every
-        </label>
         <div
-          class="euiFormControlLayout__childrenWrapper"
+          class="euiFormControlLayout__prepend emotion-euiFormControlLayout__side-prepend"
+        >
+          <label
+            class="euiFormLabel emotion-euiFormLabel"
+            for="generated-id"
+          >
+            Every
+          </label>
+        </div>
+        <div
+          class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup-prependOnly"
+          style="--euiFormControlRightIconsCount: 1;"
         >
           <select
-            class="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
+            class="euiSelect emotion-euiSelect-fullWidth-inGroup"
             data-test-subj="cronFrequencySelect"
             id="generated-id"
           >
@@ -675,10 +695,10 @@ Array [
             </option>
           </select>
           <div
-            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
+            class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
           >
             <span
-              class="euiFormControlLayoutCustomIcon"
+              class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
             >
               <span
                 aria-hidden="true"
@@ -692,7 +712,7 @@ Array [
     </div>
   </div>,
   <div
-    class="euiFormRow euiFormRow--fullWidth euiFormRow--hasLabel"
+    class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
     data-test-subj="cronFrequencyConfiguration"
     id="generated-id-row"
   >
@@ -700,7 +720,7 @@ Array [
       class="euiFormRow__labelWrapper"
     >
       <label
-        class="euiFormLabel euiFormRow__label"
+        class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
         for="generated-id"
         id="generated-id-label"
       >
@@ -711,19 +731,24 @@ Array [
       class="euiFormRow__fieldWrapper"
     >
       <div
-        class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+        class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-fullWidth-group"
       >
-        <label
-          class="euiFormLabel euiFormControlLayout__prepend"
-          for="generated-id"
-        >
-          At
-        </label>
         <div
-          class="euiFormControlLayout__childrenWrapper"
+          class="euiFormControlLayout__prepend emotion-euiFormControlLayout__side-prepend"
+        >
+          <label
+            class="euiFormLabel emotion-euiFormLabel"
+            for="generated-id"
+          >
+            At
+          </label>
+        </div>
+        <div
+          class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup-prependOnly"
+          style="--euiFormControlRightIconsCount: 1;"
         >
           <select
-            class="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
+            class="euiSelect emotion-euiSelect-fullWidth-inGroup"
             data-test-subj="cronFrequencyHourlyMinuteSelect"
             id="generated-id"
           >
@@ -1029,10 +1054,10 @@ Array [
             </option>
           </select>
           <div
-            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
+            class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
           >
             <span
-              class="euiFormControlLayoutCustomIcon"
+              class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
             >
               <span
                 aria-hidden="true"
@@ -1050,14 +1075,14 @@ Array [
 
 exports[`CronEditor is rendered with a MINUTE frequency 1`] = `
 <div
-  class="euiFormRow euiFormRow--fullWidth euiFormRow--hasLabel"
+  class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
   id="generated-id-row"
 >
   <div
     class="euiFormRow__labelWrapper"
   >
     <label
-      class="euiFormLabel euiFormRow__label"
+      class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
       for="generated-id"
       id="generated-id-label"
     >
@@ -1068,19 +1093,24 @@ exports[`CronEditor is rendered with a MINUTE frequency 1`] = `
     class="euiFormRow__fieldWrapper"
   >
     <div
-      class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+      class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-fullWidth-group"
     >
-      <label
-        class="euiFormLabel euiFormControlLayout__prepend"
-        for="generated-id"
-      >
-        Every
-      </label>
       <div
-        class="euiFormControlLayout__childrenWrapper"
+        class="euiFormControlLayout__prepend emotion-euiFormControlLayout__side-prepend"
+      >
+        <label
+          class="euiFormLabel emotion-euiFormLabel"
+          for="generated-id"
+        >
+          Every
+        </label>
+      </div>
+      <div
+        class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup-prependOnly"
+        style="--euiFormControlRightIconsCount: 1;"
       >
         <select
-          class="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
+          class="euiSelect emotion-euiSelect-fullWidth-inGroup"
           data-test-subj="cronFrequencySelect"
           id="generated-id"
         >
@@ -1116,10 +1146,10 @@ exports[`CronEditor is rendered with a MINUTE frequency 1`] = `
           </option>
         </select>
         <div
-          class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
+          class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
         >
           <span
-            class="euiFormControlLayoutCustomIcon"
+            class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
           >
             <span
               aria-hidden="true"
@@ -1137,14 +1167,14 @@ exports[`CronEditor is rendered with a MINUTE frequency 1`] = `
 exports[`CronEditor is rendered with a MONTH frequency 1`] = `
 Array [
   <div
-    class="euiFormRow euiFormRow--fullWidth euiFormRow--hasLabel"
+    class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
     id="generated-id-row"
   >
     <div
       class="euiFormRow__labelWrapper"
     >
       <label
-        class="euiFormLabel euiFormRow__label"
+        class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
         for="generated-id"
         id="generated-id-label"
       >
@@ -1155,19 +1185,24 @@ Array [
       class="euiFormRow__fieldWrapper"
     >
       <div
-        class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+        class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-fullWidth-group"
       >
-        <label
-          class="euiFormLabel euiFormControlLayout__prepend"
-          for="generated-id"
-        >
-          Every
-        </label>
         <div
-          class="euiFormControlLayout__childrenWrapper"
+          class="euiFormControlLayout__prepend emotion-euiFormControlLayout__side-prepend"
+        >
+          <label
+            class="euiFormLabel emotion-euiFormLabel"
+            for="generated-id"
+          >
+            Every
+          </label>
+        </div>
+        <div
+          class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup-prependOnly"
+          style="--euiFormControlRightIconsCount: 1;"
         >
           <select
-            class="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
+            class="euiSelect emotion-euiSelect-fullWidth-inGroup"
             data-test-subj="cronFrequencySelect"
             id="generated-id"
           >
@@ -1203,10 +1238,10 @@ Array [
             </option>
           </select>
           <div
-            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
+            class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
           >
             <span
-              class="euiFormControlLayoutCustomIcon"
+              class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
             >
               <span
                 aria-hidden="true"
@@ -1220,7 +1255,7 @@ Array [
     </div>
   </div>,
   <div
-    class="euiFormRow euiFormRow--fullWidth euiFormRow--hasLabel"
+    class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
     data-test-subj="cronFrequencyConfiguration"
     id="generated-id-row"
   >
@@ -1228,7 +1263,7 @@ Array [
       class="euiFormRow__labelWrapper"
     >
       <label
-        class="euiFormLabel euiFormRow__label"
+        class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
         for="generated-id"
         id="generated-id-label"
       >
@@ -1239,19 +1274,24 @@ Array [
       class="euiFormRow__fieldWrapper"
     >
       <div
-        class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+        class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-fullWidth-group"
       >
-        <label
-          class="euiFormLabel euiFormControlLayout__prepend"
-          for="generated-id"
-        >
-          On the
-        </label>
         <div
-          class="euiFormControlLayout__childrenWrapper"
+          class="euiFormControlLayout__prepend emotion-euiFormControlLayout__side-prepend"
+        >
+          <label
+            class="euiFormLabel emotion-euiFormLabel"
+            for="generated-id"
+          >
+            On the
+          </label>
+        </div>
+        <div
+          class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup-prependOnly"
+          style="--euiFormControlRightIconsCount: 1;"
         >
           <select
-            class="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
+            class="euiSelect emotion-euiSelect-fullWidth-inGroup"
             data-test-subj="cronFrequencyMonthlyDateSelect"
             id="generated-id"
           >
@@ -1412,10 +1452,10 @@ Array [
             </option>
           </select>
           <div
-            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
+            class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
           >
             <span
-              class="euiFormControlLayoutCustomIcon"
+              class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
             >
               <span
                 aria-hidden="true"
@@ -1429,7 +1469,7 @@ Array [
     </div>
   </div>,
   <div
-    class="euiFormRow euiFormRow--fullWidth euiFormRow--hasLabel"
+    class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
     data-test-subj="cronFrequencyConfiguration"
     id="generated-id-row"
   >
@@ -1437,7 +1477,7 @@ Array [
       class="euiFormRow__labelWrapper"
     >
       <label
-        class="euiFormLabel euiFormRow__label"
+        class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
         for="generated-id"
         id="generated-id-label"
       >
@@ -1455,19 +1495,24 @@ Array [
           class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <div
-            class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+            class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-fullWidth-group"
           >
-            <label
-              class="euiFormLabel euiFormControlLayout__prepend"
-            >
-              At
-            </label>
             <div
-              class="euiFormControlLayout__childrenWrapper"
+              class="euiFormControlLayout__prepend emotion-euiFormControlLayout__side-prepend"
+            >
+              <label
+                class="euiFormLabel emotion-euiFormLabel"
+              >
+                At
+              </label>
+            </div>
+            <div
+              class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup-prependOnly"
+              style="--euiFormControlRightIconsCount: 1;"
             >
               <select
                 aria-label="Hour"
-                class="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
+                class="euiSelect emotion-euiSelect-fullWidth-inGroup"
                 data-test-subj="cronFrequencyMonthlyHourSelect"
               >
                 <option
@@ -1592,10 +1637,10 @@ Array [
                 </option>
               </select>
               <div
-                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
+                class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
               >
                 <span
-                  class="euiFormControlLayoutCustomIcon"
+                  class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
                 >
                   <span
                     aria-hidden="true"
@@ -1611,19 +1656,24 @@ Array [
           class="euiFlexItem emotion-euiFlexItem-grow-1"
         >
           <div
-            class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+            class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-fullWidth-group"
           >
-            <label
-              class="euiFormLabel euiFormControlLayout__prepend"
-            >
-              :
-            </label>
             <div
-              class="euiFormControlLayout__childrenWrapper"
+              class="euiFormControlLayout__prepend emotion-euiFormControlLayout__side-prepend"
+            >
+              <label
+                class="euiFormLabel emotion-euiFormLabel"
+              >
+                :
+              </label>
+            </div>
+            <div
+              class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup-prependOnly"
+              style="--euiFormControlRightIconsCount: 1;"
             >
               <select
                 aria-label="Minute"
-                class="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
+                class="euiSelect emotion-euiSelect-fullWidth-inGroup"
                 data-test-subj="cronFrequencyMonthlyMinuteSelect"
               >
                 <option
@@ -1928,10 +1978,10 @@ Array [
                 </option>
               </select>
               <div
-                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
+                class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
               >
                 <span
-                  class="euiFormControlLayoutCustomIcon"
+                  class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
                 >
                   <span
                     aria-hidden="true"
@@ -1952,14 +2002,14 @@ Array [
 exports[`CronEditor is rendered with a WEEK frequency 1`] = `
 Array [
   <div
-    class="euiFormRow euiFormRow--fullWidth euiFormRow--hasLabel"
+    class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
     id="generated-id-row"
   >
     <div
       class="euiFormRow__labelWrapper"
     >
       <label
-        class="euiFormLabel euiFormRow__label"
+        class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
         for="generated-id"
         id="generated-id-label"
       >
@@ -1970,19 +2020,24 @@ Array [
       class="euiFormRow__fieldWrapper"
     >
       <div
-        class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+        class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-fullWidth-group"
       >
-        <label
-          class="euiFormLabel euiFormControlLayout__prepend"
-          for="generated-id"
-        >
-          Every
-        </label>
         <div
-          class="euiFormControlLayout__childrenWrapper"
+          class="euiFormControlLayout__prepend emotion-euiFormControlLayout__side-prepend"
+        >
+          <label
+            class="euiFormLabel emotion-euiFormLabel"
+            for="generated-id"
+          >
+            Every
+          </label>
+        </div>
+        <div
+          class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup-prependOnly"
+          style="--euiFormControlRightIconsCount: 1;"
         >
           <select
-            class="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
+            class="euiSelect emotion-euiSelect-fullWidth-inGroup"
             data-test-subj="cronFrequencySelect"
             id="generated-id"
           >
@@ -2018,10 +2073,10 @@ Array [
             </option>
           </select>
           <div
-            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
+            class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
           >
             <span
-              class="euiFormControlLayoutCustomIcon"
+              class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
             >
               <span
                 aria-hidden="true"
@@ -2035,7 +2090,7 @@ Array [
     </div>
   </div>,
   <div
-    class="euiFormRow euiFormRow--fullWidth euiFormRow--hasLabel"
+    class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
     data-test-subj="cronFrequencyConfiguration"
     id="generated-id-row"
   >
@@ -2043,7 +2098,7 @@ Array [
       class="euiFormRow__labelWrapper"
     >
       <label
-        class="euiFormLabel euiFormRow__label"
+        class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
         for="generated-id"
         id="generated-id-label"
       >
@@ -2054,19 +2109,24 @@ Array [
       class="euiFormRow__fieldWrapper"
     >
       <div
-        class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+        class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-fullWidth-group"
       >
-        <label
-          class="euiFormLabel euiFormControlLayout__prepend"
-          for="generated-id"
-        >
-          On
-        </label>
         <div
-          class="euiFormControlLayout__childrenWrapper"
+          class="euiFormControlLayout__prepend emotion-euiFormControlLayout__side-prepend"
+        >
+          <label
+            class="euiFormLabel emotion-euiFormLabel"
+            for="generated-id"
+          >
+            On
+          </label>
+        </div>
+        <div
+          class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup-prependOnly"
+          style="--euiFormControlRightIconsCount: 1;"
         >
           <select
-            class="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
+            class="euiSelect emotion-euiSelect-fullWidth-inGroup"
             data-test-subj="cronFrequencyWeeklyDaySelect"
             id="generated-id"
           >
@@ -2107,10 +2167,10 @@ Array [
             </option>
           </select>
           <div
-            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
+            class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
           >
             <span
-              class="euiFormControlLayoutCustomIcon"
+              class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
             >
               <span
                 aria-hidden="true"
@@ -2124,7 +2184,7 @@ Array [
     </div>
   </div>,
   <div
-    class="euiFormRow euiFormRow--fullWidth euiFormRow--hasLabel"
+    class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
     data-test-subj="cronFrequencyConfiguration"
     id="generated-id-row"
   >
@@ -2132,7 +2192,7 @@ Array [
       class="euiFormRow__labelWrapper"
     >
       <label
-        class="euiFormLabel euiFormRow__label"
+        class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
         for="generated-id"
         id="generated-id-label"
       >
@@ -2150,19 +2210,24 @@ Array [
           class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <div
-            class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+            class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-fullWidth-group"
           >
-            <label
-              class="euiFormLabel euiFormControlLayout__prepend"
-            >
-              At
-            </label>
             <div
-              class="euiFormControlLayout__childrenWrapper"
+              class="euiFormControlLayout__prepend emotion-euiFormControlLayout__side-prepend"
+            >
+              <label
+                class="euiFormLabel emotion-euiFormLabel"
+              >
+                At
+              </label>
+            </div>
+            <div
+              class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup-prependOnly"
+              style="--euiFormControlRightIconsCount: 1;"
             >
               <select
                 aria-label="Hour"
-                class="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
+                class="euiSelect emotion-euiSelect-fullWidth-inGroup"
                 data-test-subj="cronFrequencyWeeklyHourSelect"
               >
                 <option
@@ -2287,10 +2352,10 @@ Array [
                 </option>
               </select>
               <div
-                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
+                class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
               >
                 <span
-                  class="euiFormControlLayoutCustomIcon"
+                  class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
                 >
                   <span
                     aria-hidden="true"
@@ -2306,19 +2371,24 @@ Array [
           class="euiFlexItem emotion-euiFlexItem-grow-1"
         >
           <div
-            class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+            class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-fullWidth-group"
           >
-            <label
-              class="euiFormLabel euiFormControlLayout__prepend"
-            >
-              :
-            </label>
             <div
-              class="euiFormControlLayout__childrenWrapper"
+              class="euiFormControlLayout__prepend emotion-euiFormControlLayout__side-prepend"
+            >
+              <label
+                class="euiFormLabel emotion-euiFormLabel"
+              >
+                :
+              </label>
+            </div>
+            <div
+              class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup-prependOnly"
+              style="--euiFormControlRightIconsCount: 1;"
             >
               <select
                 aria-label="Minute"
-                class="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
+                class="euiSelect emotion-euiSelect-fullWidth-inGroup"
                 data-test-subj="cronFrequencyWeeklyMinuteSelect"
               >
                 <option
@@ -2623,10 +2693,10 @@ Array [
                 </option>
               </select>
               <div
-                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
+                class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
               >
                 <span
-                  class="euiFormControlLayoutCustomIcon"
+                  class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
                 >
                   <span
                     aria-hidden="true"
@@ -2647,14 +2717,14 @@ Array [
 exports[`CronEditor is rendered with a YEAR frequency 1`] = `
 Array [
   <div
-    class="euiFormRow euiFormRow--fullWidth euiFormRow--hasLabel"
+    class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
     id="generated-id-row"
   >
     <div
       class="euiFormRow__labelWrapper"
     >
       <label
-        class="euiFormLabel euiFormRow__label"
+        class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
         for="generated-id"
         id="generated-id-label"
       >
@@ -2665,19 +2735,24 @@ Array [
       class="euiFormRow__fieldWrapper"
     >
       <div
-        class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+        class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-fullWidth-group"
       >
-        <label
-          class="euiFormLabel euiFormControlLayout__prepend"
-          for="generated-id"
-        >
-          Every
-        </label>
         <div
-          class="euiFormControlLayout__childrenWrapper"
+          class="euiFormControlLayout__prepend emotion-euiFormControlLayout__side-prepend"
+        >
+          <label
+            class="euiFormLabel emotion-euiFormLabel"
+            for="generated-id"
+          >
+            Every
+          </label>
+        </div>
+        <div
+          class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup-prependOnly"
+          style="--euiFormControlRightIconsCount: 1;"
         >
           <select
-            class="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
+            class="euiSelect emotion-euiSelect-fullWidth-inGroup"
             data-test-subj="cronFrequencySelect"
             id="generated-id"
           >
@@ -2713,10 +2788,10 @@ Array [
             </option>
           </select>
           <div
-            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
+            class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
           >
             <span
-              class="euiFormControlLayoutCustomIcon"
+              class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
             >
               <span
                 aria-hidden="true"
@@ -2730,7 +2805,7 @@ Array [
     </div>
   </div>,
   <div
-    class="euiFormRow euiFormRow--fullWidth euiFormRow--hasLabel"
+    class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
     data-test-subj="cronFrequencyConfiguration"
     id="generated-id-row"
   >
@@ -2738,7 +2813,7 @@ Array [
       class="euiFormRow__labelWrapper"
     >
       <label
-        class="euiFormLabel euiFormRow__label"
+        class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
         for="generated-id"
         id="generated-id-label"
       >
@@ -2749,19 +2824,24 @@ Array [
       class="euiFormRow__fieldWrapper"
     >
       <div
-        class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+        class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-fullWidth-group"
       >
-        <label
-          class="euiFormLabel euiFormControlLayout__prepend"
-          for="generated-id"
-        >
-          In
-        </label>
         <div
-          class="euiFormControlLayout__childrenWrapper"
+          class="euiFormControlLayout__prepend emotion-euiFormControlLayout__side-prepend"
+        >
+          <label
+            class="euiFormLabel emotion-euiFormLabel"
+            for="generated-id"
+          >
+            In
+          </label>
+        </div>
+        <div
+          class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup-prependOnly"
+          style="--euiFormControlRightIconsCount: 1;"
         >
           <select
-            class="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
+            class="euiSelect emotion-euiSelect-fullWidth-inGroup"
             data-test-subj="cronFrequencyYearlyMonthSelect"
             id="generated-id"
           >
@@ -2827,10 +2907,10 @@ Array [
             </option>
           </select>
           <div
-            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
+            class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
           >
             <span
-              class="euiFormControlLayoutCustomIcon"
+              class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
             >
               <span
                 aria-hidden="true"
@@ -2844,7 +2924,7 @@ Array [
     </div>
   </div>,
   <div
-    class="euiFormRow euiFormRow--fullWidth euiFormRow--hasLabel"
+    class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
     data-test-subj="cronFrequencyConfiguration"
     id="generated-id-row"
   >
@@ -2852,7 +2932,7 @@ Array [
       class="euiFormRow__labelWrapper"
     >
       <label
-        class="euiFormLabel euiFormRow__label"
+        class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
         for="generated-id"
         id="generated-id-label"
       >
@@ -2863,19 +2943,24 @@ Array [
       class="euiFormRow__fieldWrapper"
     >
       <div
-        class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+        class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-fullWidth-group"
       >
-        <label
-          class="euiFormLabel euiFormControlLayout__prepend"
-          for="generated-id"
-        >
-          On the
-        </label>
         <div
-          class="euiFormControlLayout__childrenWrapper"
+          class="euiFormControlLayout__prepend emotion-euiFormControlLayout__side-prepend"
+        >
+          <label
+            class="euiFormLabel emotion-euiFormLabel"
+            for="generated-id"
+          >
+            On the
+          </label>
+        </div>
+        <div
+          class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup-prependOnly"
+          style="--euiFormControlRightIconsCount: 1;"
         >
           <select
-            class="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
+            class="euiSelect emotion-euiSelect-fullWidth-inGroup"
             data-test-subj="cronFrequencyYearlyDateSelect"
             id="generated-id"
           >
@@ -3036,10 +3121,10 @@ Array [
             </option>
           </select>
           <div
-            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
+            class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
           >
             <span
-              class="euiFormControlLayoutCustomIcon"
+              class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
             >
               <span
                 aria-hidden="true"
@@ -3053,7 +3138,7 @@ Array [
     </div>
   </div>,
   <div
-    class="euiFormRow euiFormRow--fullWidth euiFormRow--hasLabel"
+    class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
     data-test-subj="cronFrequencyConfiguration"
     id="generated-id-row"
   >
@@ -3061,7 +3146,7 @@ Array [
       class="euiFormRow__labelWrapper"
     >
       <label
-        class="euiFormLabel euiFormRow__label"
+        class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
         for="generated-id"
         id="generated-id-label"
       >
@@ -3079,19 +3164,24 @@ Array [
           class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <div
-            class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+            class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-fullWidth-group"
           >
-            <label
-              class="euiFormLabel euiFormControlLayout__prepend"
-            >
-              At
-            </label>
             <div
-              class="euiFormControlLayout__childrenWrapper"
+              class="euiFormControlLayout__prepend emotion-euiFormControlLayout__side-prepend"
+            >
+              <label
+                class="euiFormLabel emotion-euiFormLabel"
+              >
+                At
+              </label>
+            </div>
+            <div
+              class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup-prependOnly"
+              style="--euiFormControlRightIconsCount: 1;"
             >
               <select
                 aria-label="Hour"
-                class="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
+                class="euiSelect emotion-euiSelect-fullWidth-inGroup"
                 data-test-subj="cronFrequencyYearlyHourSelect"
               >
                 <option
@@ -3216,10 +3306,10 @@ Array [
                 </option>
               </select>
               <div
-                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
+                class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
               >
                 <span
-                  class="euiFormControlLayoutCustomIcon"
+                  class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
                 >
                   <span
                     aria-hidden="true"
@@ -3235,19 +3325,24 @@ Array [
           class="euiFlexItem emotion-euiFlexItem-grow-1"
         >
           <div
-            class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+            class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-fullWidth-group"
           >
-            <label
-              class="euiFormLabel euiFormControlLayout__prepend"
-            >
-              :
-            </label>
             <div
-              class="euiFormControlLayout__childrenWrapper"
+              class="euiFormControlLayout__prepend emotion-euiFormControlLayout__side-prepend"
+            >
+              <label
+                class="euiFormLabel emotion-euiFormLabel"
+              >
+                :
+              </label>
+            </div>
+            <div
+              class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup-prependOnly"
+              style="--euiFormControlRightIconsCount: 1;"
             >
               <select
                 aria-label="Minute"
-                class="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
+                class="euiSelect emotion-euiSelect-fullWidth-inGroup"
                 data-test-subj="cronFrequencyYearlyMinuteSelect"
               >
                 <option
@@ -3552,10 +3647,10 @@ Array [
                 </option>
               </select>
               <div
-                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
+                class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
               >
                 <span
-                  class="euiFormControlLayoutCustomIcon"
+                  class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
                 >
                   <span
                     aria-hidden="true"

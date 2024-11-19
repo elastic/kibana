@@ -5,18 +5,24 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiInMemoryTable, Pagination, Direction, useEuiTheme } from '@elastic/eui';
+import {
+  EuiInMemoryTable,
+  Pagination,
+  Direction,
+  useEuiTheme,
+  CriteriaWithPagination,
+} from '@elastic/eui';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
-import { getFieldColumns, getFieldItemsData, isActionsColumn } from '../field_items';
+import { getFieldColumns, getFieldItemsData } from '../field_items';
 import { CATEGORY_TABLE_CLASS_NAME, TABLE_HEIGHT } from '../../helpers';
-import type { FieldBrowserProps, GetFieldTableColumns } from '../../types';
+import type { BrowserFieldItem, FieldBrowserProps, GetFieldTableColumns } from '../../types';
 import { FieldTableHeader } from './field_table_header';
 import { styles } from './field_table.styles';
 
-const DEFAULT_SORTING: { field: string; direction: Direction } = {
-  field: '',
+const DEFAULT_SORTING: { field: keyof BrowserFieldItem; direction: Direction } = {
+  field: 'name',
   direction: 'asc',
-} as const;
+};
 
 export interface FieldTableProps extends Pick<FieldBrowserProps, 'columnIds' | 'onToggleColumn'> {
   /**
@@ -104,16 +110,19 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
     [sortDirection, sortField]
   );
 
-  const onTableChange = useCallback(({ page, sort = DEFAULT_SORTING }) => {
-    const { index, size } = page;
-    const { field, direction } = sort;
+  const onTableChange = useCallback(
+    ({ page, sort = DEFAULT_SORTING }: CriteriaWithPagination<BrowserFieldItem>) => {
+      const { index, size } = page;
+      const { field, direction } = sort;
 
-    setPageIndex(index);
-    setPageSize(size);
+      setPageIndex(index);
+      setPageSize(size);
 
-    setSortField(field);
-    setSortDirection(direction);
-  }, []);
+      setSortField(field);
+      setSortDirection(direction);
+    },
+    []
+  );
 
   /**
    * Process columns
@@ -128,7 +137,6 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
       }),
     [getFieldTableColumns, searchInput, onHide, onToggleColumn]
   );
-  const hasActions = useMemo(() => columns.some((column) => isActionsColumn(column)), [columns]);
 
   return (
     <>
@@ -147,7 +155,6 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
           columns={columns}
           pagination={pagination}
           sorting={sorting}
-          hasActions={hasActions}
           onChange={onTableChange}
           compressed
         />

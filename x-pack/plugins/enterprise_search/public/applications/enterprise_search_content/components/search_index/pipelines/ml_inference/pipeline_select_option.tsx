@@ -32,6 +32,7 @@ export const PipelineSelectOptionDisabled: React.FC<{ disabledReason?: string }>
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiTextColor color="warning">
+          {/* @ts-expect-error Type 'string | ((commaSeparatedMissingSourceFields: string) => string)' is not assignable to type 'ReactNode' */}
           {disabledReason ?? EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELDS}
         </EuiTextColor>
       </EuiFlexItem>
@@ -52,7 +53,9 @@ export const PipelineSelectOption: React.FC<PipelineSelectOptionProps> = ({ pipe
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center">
           <EuiFlexItem grow={pipeline.modelType.length === 0}>
-            <EuiText size="s">{modelIdDisplay}</EuiText>
+            <EuiText size="s" color="subdued">
+              {modelIdDisplay}
+            </EuiText>
           </EuiFlexItem>
           {pipeline.modelType.length > 0 && (
             <EuiFlexItem>

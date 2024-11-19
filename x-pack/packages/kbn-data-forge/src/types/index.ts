@@ -8,19 +8,25 @@
 import type { Moment } from 'moment';
 import { Client } from '@elastic/elasticsearch';
 import * as rt from 'io-ts';
-import { FAKE_HOSTS, FAKE_LOGS, FAKE_STACK } from '../constants';
+import { FAKE_HOSTS, FAKE_LOGS, FAKE_STACK, SERVICE_LOGS } from '../constants';
 
 export interface Doc {
   namespace: string;
   '@timestamp': Moment | string;
   labels?: object;
   tags?: string[];
+  data_stream?: {
+    dataset?: string;
+    namespace?: string;
+    type?: 'logs' | 'metrics';
+  };
 }
 
 export const DatasetRT = rt.keyof({
   [FAKE_HOSTS]: null,
   [FAKE_LOGS]: null,
   [FAKE_STACK]: null,
+  [SERVICE_LOGS]: null,
 });
 
 export type Dataset = rt.TypeOf<typeof DatasetRT>;
@@ -120,6 +126,7 @@ export const ConfigRT = rt.type({
     reduceWeekendTrafficBy: rt.number,
     ephemeralProjectIds: rt.number,
     alignEventsToInterval: rt.boolean,
+    artificialIndexDelay: rt.number,
   }),
   schedule: rt.array(ScheduleRT),
 });
@@ -146,7 +153,7 @@ export type EventTemplate = Array<[EventFunction, number]>;
 export type ElasticSearchService = (client: Client) => Promise<any>;
 
 export const IndexTemplateDefRT = rt.type({
-  namespace: rt.string,
+  name: rt.string,
   template: rt.UnknownRecord,
   components: rt.array(rt.type({ name: rt.string, template: rt.UnknownRecord })),
 });
@@ -159,7 +166,7 @@ export interface Point {
 }
 
 export interface CliOptions {
-  config: string;
+  config?: string;
   lookback: string;
   eventsPerCycle: number;
   payloadSize: number;
@@ -170,7 +177,7 @@ export interface CliOptions {
   elasticsearchHost: string;
   elasticsearchUsername: string;
   elasticsearchPassword: string;
-  elasticsearchApiKey: undefined | string;
+  elasticsearchApiKey?: undefined | string;
   kibanaUrl: string;
   kibanaUsername: string;
   kibanaPassword: string;
@@ -179,4 +186,5 @@ export interface CliOptions {
   reduceWeekendTrafficBy: number;
   ephemeralProjectIds: number;
   alignEventsToInterval: boolean;
+  scheduleEnd?: string;
 }

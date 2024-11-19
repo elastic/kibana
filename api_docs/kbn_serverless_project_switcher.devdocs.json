@@ -35,7 +35,7 @@
             "section": "def-common.ProjectSwitcherProps",
             "text": "ProjectSwitcherProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/serverless/project_switcher/src/switcher.tsx",
         "deprecated": false,
@@ -84,7 +84,7 @@
             "section": "def-common.KibanaDependencies",
             "text": "KibanaDependencies"
           },
-          ">) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/serverless/project_switcher/src/services.tsx",
         "deprecated": false,
@@ -129,7 +129,7 @@
         "signature": [
           "({ children, ...services }: React.PropsWithChildren<",
           "Services",
-          ">) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/serverless/project_switcher/src/services.tsx",
         "deprecated": false,
@@ -140,7 +140,7 @@
             "id": "def-common.ProjectSwitcherProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{ children, ...services }",
+            "label": "{\n  children,\n  ...services\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",

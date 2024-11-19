@@ -168,7 +168,7 @@ describe('useAddToCaseActions', () => {
     expect(addToNewCase.mock.calls[0][0]).not.toHaveProperty('initialValue');
   });
 
-  it('should refetch when adding an alert to a new case', () => {
+  it('should refetch when adding an alert to a new case', async () => {
     const { result } = renderHook(() => useAddToCaseActions(defaultProps), {
       wrapper: TestProviders,
     });
@@ -178,7 +178,7 @@ describe('useAddToCaseActions', () => {
     renderContextMenu(result.current.addToCaseActionItems);
 
     expect(screen.getByTestId('add-to-new-case-action')).toBeInTheDocument();
-    userEvent.click(screen.getByTestId('add-to-new-case-action'));
+    await userEvent.click(screen.getByTestId('add-to-new-case-action'));
 
     expect(refetch).toHaveBeenCalled();
   });
@@ -195,7 +195,7 @@ describe('useAddToCaseActions', () => {
     expect(refetch).toHaveBeenCalled();
   });
 
-  it('should refetch when adding an alert to an existing case', () => {
+  it('should refetch when adding an alert to an existing case', async () => {
     const { result } = renderHook(() => useAddToCaseActions(defaultProps), {
       wrapper: TestProviders,
     });
@@ -205,7 +205,7 @@ describe('useAddToCaseActions', () => {
     renderContextMenu(result.current.addToCaseActionItems);
 
     expect(screen.getByTestId('add-to-existing-case-action')).toBeInTheDocument();
-    userEvent.click(screen.getByTestId('add-to-existing-case-action'));
+    await userEvent.click(screen.getByTestId('add-to-existing-case-action'));
 
     expect(refetch).toHaveBeenCalled();
   });

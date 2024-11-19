@@ -12,13 +12,13 @@ import supertest from 'supertest';
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { PUBLIC_ROUTES } from '@kbn/reporting-common';
 import { PdfExportType } from '@kbn/reporting-export-types-pdf';
-import { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
+import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
+import { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import { ReportingCore } from '../../..';
-import { PUBLIC_ROUTES } from '../../../../common/constants';
 import { ReportingStore } from '../../../lib';
-import { ExportTypesRegistry } from '../../../lib/export_types_registry';
 import { Report } from '../../../lib/store';
 import { reportingMock } from '../../../mocks';
 import {
@@ -27,6 +27,7 @@ import {
   createMockReportingCore,
 } from '../../../test_helpers';
 import { ReportingRequestHandlerContext } from '../../../types';
+import { EventTracker } from '../../../usage';
 import { registerGenerationRoutesPublic } from '../generate_from_jobparams';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
@@ -34,12 +35,14 @@ type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
   const reportingSymbol = Symbol('reporting');
   let server: SetupServerReturn['server'];
+  let eventTracker: EventTracker;
   let usageCounter: IUsageCounter;
   let httpSetup: SetupServerReturn['httpSetup'];
   let mockExportTypesRegistry: ExportTypesRegistry;
-  let mockReportingCore: ReportingCore;
+  let reportingCore: ReportingCore;
   let store: ReportingStore;
 
+  const coreSetupMock = coreMock.createSetup();
   const mockConfigSchema = createMockConfigSchema({
     queue: { indexInterval: 'year', timeout: 10000, pollEnabled: true },
   });
@@ -73,7 +76,7 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
           ...licensingMock.createStart(),
           license$: new BehaviorSubject({ isActive: true, isAvailable: true, type: 'gold' }),
         },
-        security: {
+        securityService: {
           authc: {
             getCurrentUser: () => ({ id: '123', roles: ['superuser'], username: 'Tom Riddle' }),
           },
@@ -82,21 +85,21 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
       mockConfigSchema
     );
 
-    mockReportingCore = await createMockReportingCore(
-      mockConfigSchema,
-      mockSetupDeps,
-      mockStartDeps
-    );
+    reportingCore = await createMockReportingCore(mockConfigSchema, mockSetupDeps, mockStartDeps);
 
     usageCounter = {
+      domainId: 'abc123',
       incrementCounter: jest.fn(),
     };
-    mockReportingCore.getUsageCounter = jest.fn().mockReturnValue(usageCounter);
+    jest.spyOn(reportingCore, 'getUsageCounter').mockReturnValue(usageCounter);
+
+    eventTracker = new EventTracker(coreSetupMock.analytics, 'jobId', 'exportTypeId', 'appId');
+    jest.spyOn(reportingCore, 'getEventTracker').mockReturnValue(eventTracker);
 
     mockExportTypesRegistry = new ExportTypesRegistry();
     mockExportTypesRegistry.register(mockPdfExportType);
 
-    store = await mockReportingCore.getStore();
+    store = await reportingCore.getStore();
     store.addReport = jest.fn().mockImplementation(async (opts) => {
       return new Report({
         ...opts,
@@ -111,12 +114,12 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
   });
 
   it('returns 400 if there are no job params', async () => {
-    registerGenerationRoutesPublic(mockReportingCore, mockLogger);
+    registerGenerationRoutesPublic(reportingCore, mockLogger);
 
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .post(`${PUBLIC_ROUTES.GENERATE_PREFIX}/printablePdf`)
+      .post(`${PUBLIC_ROUTES.GENERATE_PREFIX}/printablePdfV2`)
       .expect(400)
       .then(({ body }) =>
         expect(body.message).toMatchInlineSnapshot(
@@ -126,30 +129,30 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
   });
 
   it('returns 400 if job params query is invalid', async () => {
-    registerGenerationRoutesPublic(mockReportingCore, mockLogger);
+    registerGenerationRoutesPublic(reportingCore, mockLogger);
 
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .post(`${PUBLIC_ROUTES.GENERATE_PREFIX}/printablePdf?jobParams=foo:`)
+      .post(`${PUBLIC_ROUTES.GENERATE_PREFIX}/printablePdfV2?jobParams=foo:`)
       .expect(400)
       .then(({ body }) => expect(body.message).toMatchInlineSnapshot('"invalid rison: foo:"'));
   });
 
   it('returns 400 if job params body is invalid', async () => {
-    registerGenerationRoutesPublic(mockReportingCore, mockLogger);
+    registerGenerationRoutesPublic(reportingCore, mockLogger);
 
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .post(`${PUBLIC_ROUTES.GENERATE_PREFIX}/printablePdf`)
+      .post(`${PUBLIC_ROUTES.GENERATE_PREFIX}/printablePdfV2`)
       .send({ jobParams: `foo:` })
       .expect(400)
       .then(({ body }) => expect(body.message).toMatchInlineSnapshot('"invalid rison: foo:"'));
   });
 
   it('returns 400 export type is invalid', async () => {
-    registerGenerationRoutesPublic(mockReportingCore, mockLogger);
+    registerGenerationRoutesPublic(reportingCore, mockLogger);
 
     await server.start();
 
@@ -163,12 +166,12 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
   });
 
   it('returns 400 on invalid browser timezone', async () => {
-    registerGenerationRoutesPublic(mockReportingCore, mockLogger);
+    registerGenerationRoutesPublic(reportingCore, mockLogger);
 
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .post(`${PUBLIC_ROUTES.GENERATE_PREFIX}/printablePdf`)
+      .post(`${PUBLIC_ROUTES.GENERATE_PREFIX}/printablePdfV2`)
       .send({ jobParams: rison.encode({ browserTimezone: 'America/Amsterdam', title: `abc` }) })
       .expect(400)
       .then(({ body }) =>
@@ -179,18 +182,58 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
   it('returns 500 if job handler throws an error', async () => {
     store.addReport = jest.fn().mockRejectedValue('silly');
 
-    registerGenerationRoutesPublic(mockReportingCore, mockLogger);
+    registerGenerationRoutesPublic(reportingCore, mockLogger);
 
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .post(`${PUBLIC_ROUTES.GENERATE_PREFIX}/printablePdf`)
+      .post(`${PUBLIC_ROUTES.GENERATE_PREFIX}/printablePdfV2`)
       .send({ jobParams: rison.encode({ title: `abc` }) })
       .expect(500);
   });
 
   it(`returns 200 if job handler doesn't error`, async () => {
-    registerGenerationRoutesPublic(mockReportingCore, mockLogger);
+    registerGenerationRoutesPublic(reportingCore, mockLogger);
+
+    await server.start();
+
+    await supertest(httpSetup.server.listener)
+      .post(`${PUBLIC_ROUTES.GENERATE_PREFIX}/printablePdfV2`)
+      .send({
+        jobParams: rison.encode({
+          title: `abc`,
+          layout: { id: 'test' },
+          objectType: 'canvas workpad',
+        }),
+      })
+      .expect(200)
+      .then(({ body }) => {
+        expect(body).toMatchObject({
+          job: {
+            attempts: 0,
+            created_by: 'Tom Riddle',
+            id: 'foo',
+            index: 'foo-index',
+            jobtype: 'printable_pdf_v2',
+            payload: {
+              forceNow: expect.any(String),
+              isDeprecated: false,
+              layout: {
+                id: 'test',
+              },
+              objectType: 'canvas workpad',
+              title: 'abc',
+              version: '7.14.0',
+            },
+            status: 'pending',
+          },
+          path: '/mock-server-basepath/api/reporting/jobs/download/foo',
+        });
+      });
+  });
+
+  it('allows deprecated printablePdf request', async () => {
+    registerGenerationRoutesPublic(reportingCore, mockLogger);
 
     await server.start();
 
@@ -199,8 +242,8 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
       .send({
         jobParams: rison.encode({
           title: `abc`,
-          relativeUrls: ['test'],
           layout: { id: 'test' },
+          relativeUrls: ['test'],
           objectType: 'canvas workpad',
         }),
       })
@@ -220,11 +263,6 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
                 id: 'test',
               },
               objectType: 'canvas workpad',
-              objects: [
-                {
-                  relativeUrl: 'test',
-                },
-              ],
               title: 'abc',
               version: '7.14.0',
             },
@@ -235,18 +273,17 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
       });
   });
 
-  describe('usage counters', () => {
+  describe('telemetry', () => {
     it('increments generation api counter', async () => {
-      registerGenerationRoutesPublic(mockReportingCore, mockLogger);
+      registerGenerationRoutesPublic(reportingCore, mockLogger);
 
       await server.start();
 
       await supertest(httpSetup.server.listener)
-        .post(`${PUBLIC_ROUTES.GENERATE_PREFIX}/printablePdf`)
+        .post(`${PUBLIC_ROUTES.GENERATE_PREFIX}/printablePdfV2`)
         .send({
           jobParams: rison.encode({
             title: `abc`,
-            relativeUrls: ['test'],
             layout: { id: 'test' },
             objectType: 'canvas workpad',
           }),
@@ -255,9 +292,27 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
 
       expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
       expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: `post /api/reporting/generate/printablePdf`,
+        counterName: `post /api/reporting/generate/printablePdfV2`,
         counterType: 'reportingApi',
       });
+    });
+
+    it(`supports event tracking`, async () => {
+      registerGenerationRoutesPublic(reportingCore, mockLogger);
+
+      await server.start();
+
+      await supertest(httpSetup.server.listener)
+        .post(`${PUBLIC_ROUTES.GENERATE_PREFIX}/printablePdfV2`)
+        .send({
+          jobParams: rison.encode({
+            title: `abc`,
+            layout: { id: 'test' },
+            objectType: 'canvas workpad',
+          }),
+        });
+
+      expect(eventTracker.createReport).toHaveBeenCalledTimes(1);
     });
   });
 });

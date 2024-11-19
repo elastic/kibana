@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { get, has, isPlainObject } from 'lodash';
 import type { Filter, FilterMeta } from './types';
-import type { DataViewFieldBase, DataViewBase } from '../../es_query';
+import type { DataViewFieldBase, DataViewBaseNoFields } from '../../es_query';
 import { getConvertedValueForField } from './get_converted_value_for_field';
 import { hasRangeKeys } from './range_filter';
 
@@ -37,7 +39,7 @@ export type ScriptedPhraseFilter = Filter & {
   meta: PhraseFilterMeta;
   query: {
     script: {
-      script: estypes.InlineScript;
+      script: estypes.Script;
     };
   };
 };
@@ -101,7 +103,7 @@ export const getPhraseFilterValue = (
 export const buildPhraseFilter = (
   field: DataViewFieldBase,
   value: PhraseFilterValue,
-  indexPattern: DataViewBase
+  indexPattern: DataViewBaseNoFields
 ): PhraseFilter | ScriptedPhraseFilter => {
   const convertedValue = getConvertedValueForField(field, value);
 
@@ -134,7 +136,7 @@ export const getPhraseScript = (field: DataViewFieldBase, value: PhraseFilterVal
       params: {
         value: convertedValue,
       },
-    } as estypes.InlineScript,
+    } as estypes.Script,
   };
 };
 

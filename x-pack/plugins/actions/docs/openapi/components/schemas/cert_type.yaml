@@ -1,0 +1,7 @@
+title: Certificate type
+type: string
+description: >
+  If the `authType` is `webhook-authentication-ssl`, specifies whether the certificate authentication data is in a CRT and key file format or a PFX file format.
+enum:
+  - ssl-crt-key
+  - ssl-pfx

@@ -33,7 +33,7 @@ import type {
 } from '../../../../../types';
 import { entries } from '../../../../../types';
 import { useGetCategoriesQuery } from '../../../../../hooks';
-import { AssetTitleMap, DisplayedAssets, ServiceTitleMap } from '../../../constants';
+import { AssetTitleMap, DisplayedAssetsFromPackageInfo, ServiceTitleMap } from '../../../constants';
 
 import { ChangelogModal } from '../settings/changelog_modal';
 
@@ -133,7 +133,7 @@ export const Details: React.FC<Props> = memo(({ packageInfo, integrationInfo }) 
       // (currently we only display Kibana and Elasticsearch assets)
       const filteredTypes: AssetTypeToParts = entries(typeToParts).reduce(
         (acc: any, [asset, value]) => {
-          if (DisplayedAssets[service].includes(asset)) acc[asset] = value;
+          if (DisplayedAssetsFromPackageInfo[service].includes(asset)) acc[asset] = value;
           return acc;
         },
         {}

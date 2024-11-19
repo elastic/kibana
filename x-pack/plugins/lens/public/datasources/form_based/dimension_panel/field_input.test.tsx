@@ -7,8 +7,10 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
 import { EuiComboBox } from '@elastic/eui';
+import userEvent from '@testing-library/user-event';
 import { GenericOperationDefinition } from '../operations';
 import {
   averageOperation,
@@ -18,6 +20,7 @@ import {
   termsOperation,
   staticValueOperation,
   minOperation,
+  FieldInputProps,
 } from '../operations/definitions';
 import { FieldInput, getErrorMessage } from './field_input';
 import { createMockedIndexPattern, createMockedIndexPatternWithAdditionalFields } from '../mocks';
@@ -27,36 +30,7 @@ import { ReferenceBasedIndexPatternColumn } from '../operations/definitions/colu
 import { FieldSelect } from './field_select';
 import { IndexPattern, VisualizationDimensionGroupConfig } from '../../../types';
 
-jest.mock('../operations/layer_helpers', () => {
-  const original = jest.requireActual('../operations/layer_helpers');
-
-  return {
-    ...original,
-    insertOrReplaceColumn: () => {
-      return {} as FormBasedLayer;
-    },
-  };
-});
-
-const defaultProps = {
-  indexPattern: createMockedIndexPattern(),
-  currentFieldIsInvalid: false,
-  incompleteField: null,
-  incompleteOperation: undefined,
-  incompleteParams: {},
-  dimensionGroups: [] as VisualizationDimensionGroupConfig[],
-  groupId: 'any',
-  operationDefinitionMap: {
-    terms: termsOperation,
-    average: averageOperation,
-    count: countOperation,
-    differences: derivativeOperation,
-    staticValue: staticValueOperation,
-    min: minOperation,
-  } as unknown as Record<string, GenericOperationDefinition>,
-};
-
-function getStringBasedOperationColumn(field = 'source'): FieldBasedIndexPatternColumn {
+function getStringBasedOperationColumn(field = 'source') {
   return {
     label: `Top value of ${field}`,
     dataType: 'string',
@@ -106,12 +80,32 @@ function getCountOperationColumn(): GenericIndexPatternColumn {
     operationType: 'count',
   };
 }
-function getLayer(
-  col1: GenericIndexPatternColumn = getStringBasedOperationColumn(),
-  indexPattern?: IndexPattern
-) {
+const defaultDataView = createMockedIndexPattern();
+const defaultProps = {
+  columnId: 'col1',
+  layer: getLayer(),
+  operationSupportMatrix: getDefaultOperationSupportMatrix(getLayer(), 'col1'),
+  indexPattern: defaultDataView,
+  currentFieldIsInvalid: false,
+  incompleteField: null,
+  incompleteOperation: undefined,
+  incompleteParams: {},
+  dimensionGroups: [] as VisualizationDimensionGroupConfig[],
+  groupId: 'any',
+  updateLayer: jest.fn(),
+  operationDefinitionMap: {
+    terms: termsOperation,
+    average: averageOperation,
+    count: countOperation,
+    differences: derivativeOperation,
+    staticValue: staticValueOperation,
+    min: minOperation,
+  } as unknown as Record<string, GenericOperationDefinition>,
+};
+
+function getLayer(col1: GenericIndexPatternColumn = getStringBasedOperationColumn()) {
   return {
-    indexPatternId: defaultProps.indexPattern.id,
+    indexPatternId: defaultDataView.id,
     columnOrder: ['col1', 'col2'],
     columns: {
       col1,
@@ -132,71 +126,43 @@ function getDefaultOperationSupportMatrix(
     filterOperations: () => true,
     columnId,
     indexPatterns: {
-      [defaultProps.indexPattern.id]: indexPattern ?? defaultProps.indexPattern,
+      [defaultDataView.id]: indexPattern ?? defaultDataView,
     },
   });
 }
 
-const mockedReader = {
-  hasFieldData: (dataViewId: string, fieldName: string) => {
-    if (defaultProps.indexPattern.id !== dataViewId) {
-      return false;
-    }
-
-    const map: Record<string, boolean> = {};
-    for (const field of defaultProps.indexPattern.fields) {
-      map[field.name] = true;
-    }
-
-    return map[fieldName];
-  },
+const renderFieldInput = (
+  overrideProps?: Partial<FieldInputProps<FieldBasedIndexPatternColumn>>
+) => {
+  return render(<FieldInput {...defaultProps} {...overrideProps} />);
 };
 
-jest.mock('@kbn/unified-field-list/src/hooks/use_existing_fields', () => ({
-  useExistingFieldsReader: jest.fn(() => mockedReader),
-}));
+const waitForComboboxToClose = async () =>
+  await waitFor(() => expect(screen.queryByRole('listbox')).toBeNull());
+
+const getErrorElement = (container: HTMLElement) => container.querySelector('.euiFormErrorText');
+const getLabelElement = () =>
+  screen.getByTestId('indexPattern-field-selection-row').querySelector('label');
 
 describe('FieldInput', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   it('should render a field select box', () => {
-    const updateLayerSpy = jest.fn();
-    const layer = getLayer();
-    const operationSupportMatrix = getDefaultOperationSupportMatrix(layer, 'col1');
-    const instance = mount(
-      <FieldInput
-        {...defaultProps}
-        layer={layer}
-        columnId={'col1'}
-        updateLayer={updateLayerSpy}
-        operationSupportMatrix={operationSupportMatrix}
-      />
-    );
-
-    expect(instance.find('[data-test-subj="indexPattern-dimension-field"]').exists()).toBeTruthy();
+    renderFieldInput();
+    expect(screen.getByTestId('indexPattern-dimension-field')).toBeInTheDocument();
   });
 
   it('should render an error message when incomplete operation is on', () => {
-    const updateLayerSpy = jest.fn();
-    const layer = getLayer();
-    const operationSupportMatrix = getDefaultOperationSupportMatrix(layer, 'col1');
-    const instance = mount(
-      <FieldInput
-        {...defaultProps}
-        layer={layer}
-        columnId={'col1'}
-        updateLayer={updateLayerSpy}
-        operationSupportMatrix={operationSupportMatrix}
-        incompleteOperation={'terms'}
-        selectedColumn={getStringBasedOperationColumn()}
-      />
+    const { container } = renderFieldInput({
+      incompleteOperation: 'terms',
+      selectedColumn: getStringBasedOperationColumn(),
+    });
+
+    expect(getErrorElement(container)).toHaveTextContent(
+      'This field does not work with the selected function.'
     );
-
-    expect(
-      instance.find('[data-test-subj="indexPattern-field-selection-row"]').first().prop('isInvalid')
-    ).toBeTruthy();
-
-    expect(
-      instance.find('[data-test-subj="indexPattern-field-selection-row"]').first().prop('error')
-    ).toBe('This field does not work with the selected function.');
+    expect(getLabelElement()).toBeInvalid();
   });
 
   it.each([
@@ -205,30 +171,12 @@ describe('FieldInput', () => {
   ])(
     'should mark the field as invalid but not show any error message for a %s when only an incomplete column is set',
     (_, col: ReferenceBasedIndexPatternColumn) => {
-      const updateLayerSpy = jest.fn();
-      const layer = getLayer(col);
-      const operationSupportMatrix = getDefaultOperationSupportMatrix(layer, 'col1');
-      const instance = mount(
-        <FieldInput
-          {...defaultProps}
-          layer={layer}
-          columnId={'col1'}
-          updateLayer={updateLayerSpy}
-          operationSupportMatrix={operationSupportMatrix}
-          incompleteOperation={'terms'}
-        />
-      );
+      const { container } = renderFieldInput({
+        incompleteOperation: 'terms',
+      });
 
-      expect(
-        instance
-          .find('[data-test-subj="indexPattern-field-selection-row"]')
-          .first()
-          .prop('isInvalid')
-      ).toBeTruthy();
-
-      expect(
-        instance.find('[data-test-subj="indexPattern-field-selection-row"]').first().prop('error')
-      ).toBe(undefined);
+      expect(getLabelElement()).toBeInvalid();
+      expect(getErrorElement(container)).not.toBeInTheDocument();
     }
   );
 
@@ -238,155 +186,60 @@ describe('FieldInput', () => {
   ])(
     'should mark the field as invalid but and show an error message for a %s when an incomplete column is set and an existing column is selected',
     (_, col: ReferenceBasedIndexPatternColumn) => {
-      const updateLayerSpy = jest.fn();
-      const layer = getLayer(col);
-      const operationSupportMatrix = getDefaultOperationSupportMatrix(layer, 'col1');
-      const instance = mount(
-        <FieldInput
-          {...defaultProps}
-          layer={layer}
-          columnId={'col1'}
-          updateLayer={updateLayerSpy}
-          operationSupportMatrix={operationSupportMatrix}
-          selectedColumn={getStringBasedOperationColumn()}
-          incompleteOperation={'terms'}
-        />
+      const { container } = renderFieldInput({
+        incompleteOperation: 'terms',
+        selectedColumn: getStringBasedOperationColumn(),
+      });
+      expect(getErrorElement(container)).toHaveTextContent(
+        'This field does not work with the selected function.'
       );
-
-      expect(
-        instance
-          .find('[data-test-subj="indexPattern-field-selection-row"]')
-          .first()
-          .prop('isInvalid')
-      ).toBeTruthy();
-
-      expect(
-        instance.find('[data-test-subj="indexPattern-field-selection-row"]').first().prop('error')
-      ).toBe('This field does not work with the selected function.');
     }
   );
 
   it('should render an error message for invalid fields', () => {
-    const updateLayerSpy = jest.fn();
-    const layer = getLayer();
-    const operationSupportMatrix = getDefaultOperationSupportMatrix(layer, 'col1');
-    const instance = mount(
-      <FieldInput
-        {...defaultProps}
-        layer={layer}
-        columnId={'col1'}
-        updateLayer={updateLayerSpy}
-        operationSupportMatrix={operationSupportMatrix}
-        currentFieldIsInvalid
-      />
+    const { container } = renderFieldInput({
+      currentFieldIsInvalid: true,
+    });
+    expect(getLabelElement()).toBeInvalid();
+    expect(getErrorElement(container)).toHaveTextContent(
+      'Invalid field. Check your data view or pick another field.'
     );
-
-    expect(
-      instance.find('[data-test-subj="indexPattern-field-selection-row"]').first().prop('isInvalid')
-    ).toBeTruthy();
-
-    expect(
-      instance.find('[data-test-subj="indexPattern-field-selection-row"]').first().prop('error')
-    ).toBe('Invalid field. Check your data view or pick another field.');
   });
 
   it('should render a help message when passed and no errors are found', () => {
-    const updateLayerSpy = jest.fn();
-    const layer = getLayer();
-    const operationSupportMatrix = getDefaultOperationSupportMatrix(layer, 'col1');
-    const instance = mount(
-      <FieldInput
-        {...defaultProps}
-        layer={layer}
-        columnId={'col1'}
-        updateLayer={updateLayerSpy}
-        operationSupportMatrix={operationSupportMatrix}
-        helpMessage={'My help message'}
-      />
+    const helpMessage = 'My help message';
+    renderFieldInput({ helpMessage });
+    expect(screen.getByTestId('indexPattern-field-selection-row')).toHaveTextContent(
+      `Field ${helpMessage}`
     );
+  });
 
-    expect(
-      instance
-        .find('[data-test-subj="indexPattern-field-selection-row"]')
-        .first()
-        .prop('labelAppend')
-    ).toBe('My help message');
+  it('should update the layer on field selection', async () => {
+    renderFieldInput({ selectedColumn: getStringBasedOperationColumn() });
+    await userEvent.click(screen.getByRole('combobox'));
+    fireEvent.click(screen.getByTestId('lns-fieldOption-bytes'));
+    expect(defaultProps.updateLayer).toHaveBeenCalled();
+    await waitForComboboxToClose();
   });
 
   it('should prioritize errors over help messages', () => {
-    const updateLayerSpy = jest.fn();
-    const layer = getLayer();
-    const operationSupportMatrix = getDefaultOperationSupportMatrix(layer, 'col1');
-    const instance = mount(
-      <FieldInput
-        {...defaultProps}
-        layer={layer}
-        columnId={'col1'}
-        updateLayer={updateLayerSpy}
-        operationSupportMatrix={operationSupportMatrix}
-        currentFieldIsInvalid
-        helpMessage={'My help message'}
-      />
+    const helpMessage = 'My help message';
+    renderFieldInput({ helpMessage, currentFieldIsInvalid: true });
+    expect(screen.getByTestId('indexPattern-field-selection-row')).not.toHaveTextContent(
+      `Field ${helpMessage}`
     );
-
-    expect(
-      instance
-        .find('[data-test-subj="indexPattern-field-selection-row"]')
-        .first()
-        .prop('labelAppend')
-    ).not.toBe('My help message');
   });
 
-  it('should update the layer on field selection', () => {
-    const updateLayerSpy = jest.fn();
-    const layer = getLayer();
-    const operationSupportMatrix = getDefaultOperationSupportMatrix(layer, 'col1');
-    const instance = mount(
-      <FieldInput
-        {...defaultProps}
-        layer={layer}
-        columnId={'col1'}
-        updateLayer={updateLayerSpy}
-        operationSupportMatrix={operationSupportMatrix}
-        selectedColumn={getStringBasedOperationColumn()}
-      />
-    );
+  it('should not trigger when the same selected field is selected again', async () => {
+    renderFieldInput({ selectedColumn: getStringBasedOperationColumn() });
+    await userEvent.click(screen.getByRole('combobox'));
+    fireEvent.click(screen.getByTestId('lns-fieldOption-source'));
 
-    act(() => {
-      instance.find(EuiComboBox).first().prop('onChange')!([
-        { value: { type: 'field', field: 'dest' }, label: 'dest' },
-      ]);
-    });
-
-    expect(updateLayerSpy).toHaveBeenCalled();
-  });
-
-  it('should not trigger when the same selected field is selected again', () => {
-    const updateLayerSpy = jest.fn();
-    const layer = getLayer();
-    const operationSupportMatrix = getDefaultOperationSupportMatrix(layer, 'col1');
-    const instance = mount(
-      <FieldInput
-        {...defaultProps}
-        layer={layer}
-        columnId={'col1'}
-        updateLayer={updateLayerSpy}
-        operationSupportMatrix={operationSupportMatrix}
-        selectedColumn={getStringBasedOperationColumn()}
-      />
-    );
-
-    act(() => {
-      instance.find(EuiComboBox).first().prop('onChange')!([
-        { value: { type: 'field', field: 'source' }, label: 'source' },
-      ]);
-    });
-
-    expect(updateLayerSpy).not.toHaveBeenCalled();
+    await waitForComboboxToClose();
+    expect(defaultProps.updateLayer).not.toHaveBeenCalled();
   });
 
   it('should prioritize incomplete fields over selected column field to display', () => {
-    const updateLayerSpy = jest.fn();
     const layer = getLayer();
     const operationSupportMatrix = getDefaultOperationSupportMatrix(layer, 'col1');
     const instance = mount(
@@ -394,7 +247,7 @@ describe('FieldInput', () => {
         {...defaultProps}
         layer={layer}
         columnId={'col1'}
-        updateLayer={updateLayerSpy}
+        updateLayer={defaultProps.updateLayer}
         operationSupportMatrix={operationSupportMatrix}
         incompleteField={'dest'}
         selectedColumn={getStringBasedOperationColumn()}
@@ -410,7 +263,6 @@ describe('FieldInput', () => {
   });
 
   it('should forward the onDeleteColumn function', () => {
-    const updateLayerSpy = jest.fn();
     const onDeleteColumn = jest.fn();
     const layer = getLayer();
     const operationSupportMatrix = getDefaultOperationSupportMatrix(layer, 'col1');
@@ -419,7 +271,7 @@ describe('FieldInput', () => {
         {...defaultProps}
         layer={layer}
         columnId={'col1'}
-        updateLayer={updateLayerSpy}
+        updateLayer={defaultProps.updateLayer}
         operationSupportMatrix={operationSupportMatrix}
         onDeleteColumn={onDeleteColumn}
       />
@@ -430,7 +282,7 @@ describe('FieldInput', () => {
     });
 
     expect(onDeleteColumn).toHaveBeenCalled();
-    expect(updateLayerSpy).not.toHaveBeenCalled();
+    expect(defaultProps.updateLayer).not.toHaveBeenCalled();
   });
 
   describe('time series group', () => {
@@ -446,7 +298,6 @@ describe('FieldInput', () => {
       return layer;
     }
     it('should not render the time dimension category if it has tsdb metric column but the group is not a breakdown', () => {
-      const updateLayerSpy = jest.fn();
       const layer = getLayerWithTSDBMetric();
       const operationSupportMatrix = getDefaultOperationSupportMatrix(layer, 'col1');
       const instance = mount(
@@ -464,7 +315,7 @@ describe('FieldInput', () => {
           ])}
           layer={layer}
           columnId={'col1'}
-          updateLayer={updateLayerSpy}
+          updateLayer={defaultProps.updateLayer}
           operationSupportMatrix={operationSupportMatrix}
         />
       );
@@ -473,7 +324,6 @@ describe('FieldInput', () => {
     });
 
     it('should render the time dimension category if it has tsdb metric column and the group is a breakdown one', () => {
-      const updateLayerSpy = jest.fn();
       const layer = getLayerWithTSDBMetric();
       const operationSupportMatrix = getDefaultOperationSupportMatrix(layer, 'col1');
       const instance = mount(
@@ -498,7 +348,7 @@ describe('FieldInput', () => {
           groupId="breakdown"
           layer={layer}
           columnId={'col1'}
-          updateLayer={updateLayerSpy}
+          updateLayer={defaultProps.updateLayer}
           operationSupportMatrix={operationSupportMatrix}
         />
       );

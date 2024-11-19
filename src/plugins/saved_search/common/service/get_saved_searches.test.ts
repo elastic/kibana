@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -88,8 +90,10 @@ describe('getSavedSearch', () => {
         "columns": Array [
           "_source",
         ],
+        "density": undefined,
         "description": "description",
         "grid": Object {},
+        "headerRowHeight": undefined,
         "hideAggregatedPreview": undefined,
         "hideChart": false,
         "id": "ccf1af80-2297-11ec-86e0-1155ffb9c7a7",
@@ -122,12 +126,12 @@ describe('getSavedSearch', () => {
           "getSearchRequestBody": [MockFunction],
           "getSerializedFields": [MockFunction],
           "history": Array [],
+          "loadDataViewFields": [MockFunction],
           "onRequestStart": [MockFunction],
           "parseActiveIndexPatternFromQueryString": [MockFunction],
           "removeField": [MockFunction],
           "serialize": [MockFunction],
           "setField": [MockFunction],
-          "setFields": [MockFunction],
           "setOverwriteDataViewType": [MockFunction],
           "setParent": [MockFunction],
           "toExpressionAst": [MockFunction],
@@ -147,6 +151,7 @@ describe('getSavedSearch', () => {
         "title": "test1",
         "usesAdHocDataView": undefined,
         "viewMode": undefined,
+        "visContext": undefined,
       }
     `);
   });
@@ -195,8 +200,10 @@ describe('getSavedSearch', () => {
         "columns": Array [
           "_source",
         ],
+        "density": undefined,
         "description": "description",
         "grid": Object {},
+        "headerRowHeight": undefined,
         "hideAggregatedPreview": undefined,
         "hideChart": true,
         "id": "ccf1af80-2297-11ec-86e0-1155ffb9c7a7",
@@ -229,12 +236,12 @@ describe('getSavedSearch', () => {
           "getSearchRequestBody": [MockFunction],
           "getSerializedFields": [MockFunction],
           "history": Array [],
+          "loadDataViewFields": [MockFunction],
           "onRequestStart": [MockFunction],
           "parseActiveIndexPatternFromQueryString": [MockFunction],
           "removeField": [MockFunction],
           "serialize": [MockFunction],
           "setField": [MockFunction],
-          "setFields": [MockFunction],
           "setOverwriteDataViewType": [MockFunction],
           "setParent": [MockFunction],
           "toExpressionAst": [MockFunction],
@@ -254,6 +261,7 @@ describe('getSavedSearch', () => {
         "title": "test2",
         "usesAdHocDataView": undefined,
         "viewMode": undefined,
+        "visContext": undefined,
       }
     `);
   });

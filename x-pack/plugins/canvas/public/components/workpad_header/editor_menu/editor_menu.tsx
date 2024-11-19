@@ -7,18 +7,32 @@
 
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { BaseVisType, VisGroups, VisTypeAlias } from '@kbn/visualizations-plugin/public';
+import {
+  VisGroups,
+  type BaseVisType,
+  type VisTypeAlias,
+  type VisParams,
+} from '@kbn/visualizations-plugin/public';
 import {
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
   EmbeddableInput,
 } from '@kbn/embeddable-plugin/public';
+import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public/actions';
+
 import { trackCanvasUiMetric, METRIC_TYPE } from '../../../lib/ui_metric';
-import { useEmbeddablesService, useVisualizationsService } from '../../../services';
 import { CANVAS_APP } from '../../../../common/lib';
-import { encode } from '../../../../common/lib/embeddable_dataurl';
 import { ElementSpec } from '../../../../types';
 import { EditorMenu as Component } from './editor_menu.component';
+import { embeddableInputToExpression } from '../../../../canvas_plugin_src/renderers/embeddable/embeddable_input_to_expression';
+import { EmbeddableInput as CanvasEmbeddableInput } from '../../../../canvas_plugin_src/expression_types';
+import { useCanvasApi } from '../../hooks/use_canvas_api';
+import { ADD_CANVAS_ELEMENT_TRIGGER } from '../../../state/triggers/add_canvas_element_trigger';
+import {
+  embeddableService,
+  uiActionsService,
+  visualizationsService,
+} from '../../../services/kibana_services';
 
 interface Props {
   /**
@@ -33,14 +47,15 @@ interface UnwrappedEmbeddableFactory {
 }
 
 export const EditorMenu: FC<Props> = ({ addElement }) => {
-  const embeddablesService = useEmbeddablesService();
   const { pathname, search, hash } = useLocation();
-  const stateTransferService = embeddablesService.getStateTransfer();
-  const visualizationsService = useVisualizationsService();
+  const stateTransferService = embeddableService.getStateTransfer();
+  const canvasApi = useCanvasApi();
+
+  const [addPanelActions, setAddPanelActions] = useState<Array<Action<object>>>([]);
 
   const embeddableFactories = useMemo(
-    () => (embeddablesService ? Array.from(embeddablesService.getEmbeddableFactories()) : []),
-    [embeddablesService]
+    () => (embeddableService ? Array.from(embeddableService.getEmbeddableFactories()) : []),
+    []
   );
 
   const [unwrappedEmbeddableFactories, setUnwrappedEmbeddableFactories] = useState<
@@ -57,6 +72,21 @@ export const EditorMenu: FC<Props> = ({ addElement }) => {
       setUnwrappedEmbeddableFactories(factories);
     });
   }, [embeddableFactories]);
+
+  useEffect(() => {
+    let mounted = true;
+    async function loadPanelActions() {
+      const registeredActions = await uiActionsService.getTriggerCompatibleActions(
+        ADD_CANVAS_ELEMENT_TRIGGER,
+        { embeddable: canvasApi }
+      );
+      if (mounted) setAddPanelActions(registeredActions);
+    }
+    loadPanelActions();
+    return () => {
+      mounted = false;
+    };
+  }, [canvasApi]);
 
   const createNewVisType = useCallback(
     (visType?: BaseVisType | VisTypeAlias) => () => {
@@ -93,11 +123,12 @@ export const EditorMenu: FC<Props> = ({ addElement }) => {
     [stateTransferService, pathname, search, hash]
   );
 
-  const createNewEmbeddable = useCallback(
+  const createNewEmbeddableFromFactory = useCallback(
     (factory: EmbeddableFactoryDefinition) => async () => {
       if (trackCanvasUiMetric) {
         trackCanvasUiMetric(METRIC_TYPE.CLICK, factory.type);
       }
+
       let embeddableInput;
       if (factory.getExplicitInput) {
         embeddableInput = await factory.getExplicitInput();
@@ -107,15 +138,35 @@ export const EditorMenu: FC<Props> = ({ addElement }) => {
       }
 
       if (embeddableInput) {
-        const config = encode(embeddableInput);
-        const expression = `embeddable config="${config}"
-  type="${factory.type}"
-| render`;
-
+        const expression = embeddableInputToExpression(
+          embeddableInput as CanvasEmbeddableInput,
+          factory.type,
+          undefined,
+          true
+        );
         addElement({ expression });
       }
     },
     [addElement]
+  );
+
+  const createNewEmbeddableFromAction = useCallback(
+    (action: Action, context: ActionExecutionContext<object>, closePopover: () => void) =>
+      (event: React.MouseEvent) => {
+        closePopover();
+        if (event.currentTarget instanceof HTMLAnchorElement) {
+          if (
+            !event.defaultPrevented && // onClick prevented default
+            event.button === 0 &&
+            (!event.currentTarget.target || event.currentTarget.target === '_self') &&
+            !(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey)
+          ) {
+            event.preventDefault();
+            action.execute(context);
+          }
+        } else action.execute(context);
+      },
+    []
   );
 
   const getVisTypesByGroup = (group: VisGroups): BaseVisType[] =>
@@ -152,13 +203,19 @@ export const EditorMenu: FC<Props> = ({ addElement }) => {
     .map(({ factory }) => factory);
 
   const promotedVisTypes = getVisTypesByGroup(VisGroups.PROMOTED);
+  const legacyVisTypes = getVisTypesByGroup(VisGroups.LEGACY);
 
   return (
     <Component
       createNewVisType={createNewVisType}
-      createNewEmbeddable={createNewEmbeddable}
-      promotedVisTypes={promotedVisTypes}
+      createNewEmbeddableFromFactory={createNewEmbeddableFromFactory}
+      createNewEmbeddableFromAction={createNewEmbeddableFromAction}
+      promotedVisTypes={([] as Array<BaseVisType<VisParams>>).concat(
+        promotedVisTypes,
+        legacyVisTypes
+      )}
       factories={factories}
+      addPanelActions={addPanelActions}
       visTypeAliases={visTypeAliases}
     />
   );

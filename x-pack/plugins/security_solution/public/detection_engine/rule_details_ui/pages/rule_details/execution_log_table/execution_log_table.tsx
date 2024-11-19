@@ -9,7 +9,13 @@ import React, { useCallback, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import moment from 'moment';
-import type { OnTimeChangeProps, OnRefreshProps, OnRefreshChangeProps } from '@elastic/eui';
+import type {
+  OnTimeChangeProps,
+  OnRefreshProps,
+  OnRefreshChangeProps,
+  EuiSwitchEvent,
+  CriteriaWithPagination,
+} from '@elastic/eui';
 import {
   EuiTextColor,
   EuiFlexGroup,
@@ -26,11 +32,18 @@ import {
 import type { Filter, Query } from '@kbn/es-query';
 import { buildFilter, FILTERS } from '@kbn/es-query';
 import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
-import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { I18nStart } from '@kbn/core-i18n-browser';
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 
+import { dataViewSpecToViewBase } from '../../../../../common/lib/kuery';
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
 
-import { RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY } from '../../../../../../common/constants';
+import {
+  RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY,
+  RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_SOURCE_EVENT_TIME_RANGE_STORAGE_KEY,
+} from '../../../../../../common/constants';
 import type {
   RuleExecutionResult,
   RuleExecutionStatus,
@@ -43,7 +56,7 @@ import {
   UtilityBarSection,
   UtilityBarText,
 } from '../../../../../common/components/utility_bar';
-import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -58,7 +71,7 @@ import type {
   RelativeTimeRange,
 } from '../../../../../common/store/inputs/model';
 import { isAbsoluteTimeRange, isRelativeTimeRange } from '../../../../../common/store/inputs/model';
-import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { useExecutionResults } from '../../../../rule_monitoring';
 import { useRuleDetailsContext } from '../rule_details_context';
 import { useExpandableRows } from '../../../../rule_monitoring/components/basic/tables/use_expandable_rows';
@@ -69,8 +82,10 @@ import {
   getMessageColumn,
   getExecutionLogMetricsColumns,
   expanderColumn,
+  getSourceEventTimeRangeColumns,
 } from './execution_log_columns';
 import { ExecutionLogSearchBar } from './execution_log_search_bar';
+import { EventLogEventTypes } from '../../../../../common/lib/telemetry';
 
 const EXECUTION_UUID_FIELD_NAME = 'kibana.alert.rule.execution.uuid';
 
@@ -82,7 +97,13 @@ const DatePickerEuiFlexItem = styled(EuiFlexItem)`
   max-width: 582px;
 `;
 
-interface ExecutionLogTableProps {
+interface StartServices {
+  analytics: AnalyticsServiceStart;
+  i18n: I18nStart;
+  theme: ThemeServiceStart;
+}
+
+interface ExecutionLogTableProps extends StartServices {
   ruleId: string;
   selectAlertsTab: () => void;
 }
@@ -96,6 +117,7 @@ interface CachedGlobalQueryState {
 const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
   ruleId,
   selectAlertsTab,
+  ...startServices
 }) => {
   const {
     docLinks,
@@ -104,6 +126,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
     },
     storage,
     timelines,
+    telemetry,
   } = useKibana().services;
 
   const {
@@ -112,7 +135,9 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
         superDatePicker: { recentlyUsedRanges, refreshInterval, isPaused, start, end },
         queryText,
         statusFilters,
+        runTypeFilters,
         showMetricColumns,
+        showSourceEventTimeRange,
         pagination: { pageIndex, pageSize },
         sort: { sortField, sortDirection },
       },
@@ -129,12 +154,14 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
         setSortField,
         setStart,
         setStatusFilters,
+        setRunTypeFilters,
+        setShowSourceEventTimeRange,
       },
     },
   } = useRuleDetailsContext();
 
   // Index for `add filter` action and toasts for errors
-  const { indexPattern } = useSourcererDataView(SourcererScopeName.detections);
+  const { sourcererDataView } = useSourcererDataView(SourcererScopeName.detections);
   const { addError, addSuccess, remove } = useAppToasts();
 
   // QueryString, Filters, and TimeRange state
@@ -197,6 +224,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
     end,
     queryText,
     statusFilters,
+    runTypeFilters,
     page: pageIndex,
     perPage: pageSize,
     sortField,
@@ -206,20 +234,22 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
   const maxEvents = events?.total ?? 0;
 
   // Cache UUID field from data view as it can be expensive to iterate all data view fields
-  const uuidDataViewField = useMemo(() => {
-    return indexPattern.fields.find((f) => f.name === EXECUTION_UUID_FIELD_NAME);
-  }, [indexPattern]);
+  const uuidDataViewField = useMemo(
+    () => sourcererDataView.fields?.[EXECUTION_UUID_FIELD_NAME],
+    [sourcererDataView]
+  );
 
   // Callbacks
   const onTableChangeCallback = useCallback(
-    ({ page = {}, sort = {} }) => {
+    ({ page, sort }: CriteriaWithPagination<RuleExecutionResult>) => {
       const { index, size } = page;
-      const { field, direction } = sort;
-
       setPageIndex(index + 1);
       setPageSize(size);
-      setSortField(field);
-      setSortDirection(direction);
+      if (sort) {
+        const { field, direction } = sort;
+        setSortField(field);
+        setSortDirection(direction);
+      }
     },
     [setPageIndex, setPageSize, setSortDirection, setSortField]
   );
@@ -272,12 +302,18 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
 
   const onFilterByExecutionIdCallback = useCallback(
     (executionId: string, executionStart: string) => {
-      if (uuidDataViewField != null) {
+      const dataViewAsViewBase = dataViewSpecToViewBase(sourcererDataView);
+
+      if (
+        uuidDataViewField != null &&
+        typeof uuidDataViewField !== 'undefined' &&
+        dataViewAsViewBase
+      ) {
         // Update cached global query state with current state as a rollback point
         cachedGlobalQueryState.current = { filters, query, timerange };
         // Create filter & daterange constraints
         const filter = buildFilter(
-          indexPattern,
+          dataViewAsViewBase,
           uuidDataViewField,
           FILTERS.PHRASE,
           false,
@@ -299,7 +335,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
         successToastId.current = addSuccess(
           {
             title: i18n.ACTIONS_SEARCH_FILTERS_HAVE_BEEN_UPDATED_TITLE,
-            text: mountReactNode(
+            text: toMountPoint(
               <>
                 <p>{i18n.ACTIONS_SEARCH_FILTERS_HAVE_BEEN_UPDATED_DESCRIPTION}</p>
                 <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
@@ -309,7 +345,8 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
                     </EuiButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>
-              </>
+              </>,
+              startServices
             ),
           },
           // Essentially keep toast around till user dismisses via 'x'
@@ -322,18 +359,30 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
       }
     },
     [
-      addError,
-      addSuccess,
+      uuidDataViewField,
+      filters,
+      query,
+      timerange,
+      sourcererDataView,
       dispatch,
       filterManager,
-      filters,
-      indexPattern,
-      query,
-      resetGlobalQueryState,
       selectAlertsTab,
-      timerange,
-      uuidDataViewField,
+      addSuccess,
+      resetGlobalQueryState,
+      startServices,
+      addError,
     ]
+  );
+
+  const onShowSourceEventTimeRange = useCallback(
+    (showEventTimeRange: boolean) => {
+      storage.set(
+        RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_SOURCE_EVENT_TIME_RANGE_STORAGE_KEY,
+        showEventTimeRange
+      );
+      setShowSourceEventTimeRange(showEventTimeRange);
+    },
+    [setShowSourceEventTimeRange, storage]
   );
 
   const onShowMetricColumnsCallback = useCallback(
@@ -418,13 +467,34 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
     renderItem: renderExpandedItem,
   });
 
+  const handleShowSourceEventTimeRange = useCallback(
+    (e: EuiSwitchEvent) => {
+      const isVisible = e.target.checked;
+      onShowSourceEventTimeRange(isVisible);
+      telemetry.reportEvent(EventLogEventTypes.EventLogShowSourceEventDateRange, {
+        isVisible,
+      });
+    },
+    [onShowSourceEventTimeRange, telemetry]
+  );
+
   const executionLogColumns = useMemo(() => {
     const columns = [...EXECUTION_LOG_COLUMNS];
+    let messageColumnWidth = 50;
+
+    if (showSourceEventTimeRange) {
+      columns.push(...getSourceEventTimeRangeColumns());
+      messageColumnWidth = 30;
+    }
 
     if (showMetricColumns) {
-      columns.push(getMessageColumn('20%'), ...getExecutionLogMetricsColumns(docLinks));
+      messageColumnWidth = 20;
+      columns.push(
+        getMessageColumn(`${messageColumnWidth}%`),
+        ...getExecutionLogMetricsColumns(docLinks)
+      );
     } else {
-      columns.push(getMessageColumn('50%'));
+      columns.push(getMessageColumn(`${messageColumnWidth}%`));
     }
 
     columns.push(
@@ -436,10 +506,17 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
     );
 
     return columns;
-  }, [actions, docLinks, showMetricColumns, rows.toggleRowExpanded, rows.isRowExpanded]);
+  }, [
+    actions,
+    docLinks,
+    showMetricColumns,
+    showSourceEventTimeRange,
+    rows.toggleRowExpanded,
+    rows.isRowExpanded,
+  ]);
 
   return (
-    <EuiPanel hasBorder>
+    <EuiPanel data-test-subj="executionLogContainer" hasBorder>
       {/* Filter bar */}
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={true}>
@@ -451,6 +528,8 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
             selectedStatuses={statusFilters}
             onStatusFilterChange={onStatusFilterChangeCallback}
             onSearch={onSearchCallback}
+            selectedRunTypes={runTypeFilters}
+            onRunTypeFilterChange={setRunTypeFilters}
           />
         </EuiFlexItem>
         <DatePickerEuiFlexItem>
@@ -505,6 +584,12 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
               })}
             </UtilityBarText>
             <UtilitySwitch
+              label={i18n.RULE_EXECUTION_LOG_SHOW_SOURCE_EVENT_TIME_RANGE}
+              checked={showSourceEventTimeRange}
+              compressed={true}
+              onChange={handleShowSourceEventTimeRange}
+            />
+            <UtilitySwitch
               label={i18n.RULE_EXECUTION_LOG_SHOW_METRIC_COLUMNS_SWITCH}
               checked={showMetricColumns}
               compressed={true}
@@ -524,7 +609,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
         onChange={onTableChangeCallback}
         itemId={getItemId}
         itemIdToExpandedRowMap={rows.itemIdToExpandedRowMap}
-        isExpandable={true}
+        data-test-subj="executionsTable"
       />
     </EuiPanel>
   );

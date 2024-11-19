@@ -6,10 +6,9 @@
  */
 
 import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
-import { getDataViewById, getDataViewIdFromName } from '../util/index_utils';
-import { mlJobService } from './job_service';
+import type { MlJobService } from './job_service';
 import type { MlIndexUtils } from '../util/index_service';
-import type { MlApiServices } from './ml_api_service';
+import type { MlApi } from './ml_api_service';
 
 type FormatsByJobId = Record<string, any>;
 type IndexPatternIdsByJob = Record<string, any>;
@@ -20,7 +19,11 @@ export class FieldFormatService {
   indexPatternIdsByJob: IndexPatternIdsByJob = {};
   formatsByJob: FormatsByJobId = {};
 
-  constructor(private mlApiServices?: MlApiServices, private mlIndexUtils?: MlIndexUtils) {}
+  constructor(
+    private mlApi: MlApi,
+    private mlIndexUtils: MlIndexUtils,
+    private mlJobService: MlJobService
+  ) {}
 
   // Populate the service with the FieldFormats for the list of jobs with the
   // specified IDs. List of Kibana data views is passed, with a title
@@ -36,17 +39,18 @@ export class FieldFormatService {
     (
       await Promise.all(
         jobIds.map(async (jobId) => {
-          const getDataViewId = this.mlIndexUtils?.getDataViewIdFromName ?? getDataViewIdFromName;
           let jobObj;
-          if (this.mlApiServices) {
-            const { jobs } = await this.mlApiServices.getJobs({ jobId });
+          if (this.mlApi) {
+            const { jobs } = await this.mlApi.getJobs({ jobId });
             jobObj = jobs[0];
           } else {
-            jobObj = mlJobService.getJob(jobId);
+            jobObj = this.mlJobService.getJob(jobId);
           }
           return {
             jobId,
-            dataViewId: await getDataViewId(jobObj.datafeed_config!.indices.join(',')),
+            dataViewId: await this.mlIndexUtils.getDataViewIdFromName(
+              jobObj.datafeed_config!.indices.join(',')
+            ),
           };
         })
       )
@@ -74,19 +78,18 @@ export class FieldFormatService {
   // Return the FieldFormat to use for formatting values from
   // the detector from the job with the specified ID.
   getFieldFormat(jobId: string, detectorIndex: number) {
-    if (this.formatsByJob.hasOwnProperty(jobId)) {
+    if (Object.hasOwn(this.formatsByJob, jobId)) {
       return this.formatsByJob[jobId][detectorIndex];
     }
   }
 
   async getFormatsForJob(jobId: string): Promise<any[]> {
     let jobObj;
-    const getDataView = this.mlIndexUtils?.getDataViewById ?? getDataViewById;
-    if (this.mlApiServices) {
-      const { jobs } = await this.mlApiServices.getJobs({ jobId });
+    if (this.mlApi) {
+      const { jobs } = await this.mlApi.getJobs({ jobId });
       jobObj = jobs[0];
     } else {
-      jobObj = mlJobService.getJob(jobId);
+      jobObj = this.mlJobService.getJob(jobId);
     }
     const detectors = jobObj.analysis_config.detectors || [];
     const formatsByDetector: any[] = [];
@@ -94,7 +97,7 @@ export class FieldFormatService {
     const dataViewId = this.indexPatternIdsByJob[jobId];
     if (dataViewId !== undefined) {
       // Load the full data view configuration to obtain the formats of each field.
-      const dataView = await getDataView(dataViewId);
+      const dataView = await this.mlIndexUtils.getDataViewById(dataViewId);
       // Store the FieldFormat for each job by detector_index.
       const fieldList = dataView.fields;
       detectors.forEach((dtr) => {
@@ -114,5 +117,4 @@ export class FieldFormatService {
   }
 }
 
-export const mlFieldFormatService = new FieldFormatService();
-export type MlFieldFormatService = typeof mlFieldFormatService;
+export type MlFieldFormatService = FieldFormatService;

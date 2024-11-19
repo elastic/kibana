@@ -1,52 +1,50 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
+import { merge } from 'rxjs';
 
 import { isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import {
+  apiPublishesPartialUnifiedSearch,
+  apiHasUniqueId,
+  EmbeddableApiContext,
+  HasParentApi,
+  HasUniqueId,
+  PublishesDataViews,
+  PublishesUnifiedSearch,
+  CanLockHoverActions,
+  CanAccessViewMode,
+} from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
-import {
-  apiCanAccessViewMode,
-  apiPublishesPartialLocalUnifiedSearch,
-  apiHasUniqueId,
-  CanAccessViewMode,
-  EmbeddableApiContext,
-  getInheritedViewMode,
-  getViewModeSubject,
-  HasParentApi,
-  PublishesLocalUnifiedSearch,
-  HasUniqueId,
-} from '@kbn/presentation-publishing';
-import { merge } from 'rxjs';
-import { DashboardPluginInternalFunctions } from '../dashboard_container/external_api/dashboard_api';
-import { pluginServices } from '../services/plugin_services';
-import { FiltersNotificationPopover } from './filters_notification_popover';
+import { coreServices } from '../services/kibana_services';
 import { dashboardFilterNotificationActionStrings } from './_dashboard_actions_strings';
+import { FiltersNotificationPopover } from './filters_notification_popover';
 
 export const BADGE_FILTERS_NOTIFICATION = 'ACTION_FILTERS_NOTIFICATION';
 
 export type FiltersNotificationActionApi = HasUniqueId &
-  CanAccessViewMode &
-  Partial<PublishesLocalUnifiedSearch> &
-  HasParentApi<DashboardPluginInternalFunctions>;
+  Partial<PublishesUnifiedSearch> &
+  Partial<HasParentApi<Partial<PublishesDataViews>>> &
+  Partial<CanLockHoverActions> &
+  Partial<CanAccessViewMode>;
 
 const isApiCompatible = (api: unknown | null): api is FiltersNotificationActionApi =>
-  Boolean(
-    apiHasUniqueId(api) && apiCanAccessViewMode(api) && apiPublishesPartialLocalUnifiedSearch(api)
-  );
+  Boolean(apiHasUniqueId(api) && apiPublishesPartialUnifiedSearch(api));
 
 const compatibilityCheck = (api: EmbeddableApiContext['embeddable']) => {
-  if (!isApiCompatible(api) || getInheritedViewMode(api) !== 'edit') return false;
-  const query = api.localQuery?.value;
+  if (!isApiCompatible(api)) return false;
+  const query = api.query$?.value;
   return (
-    (api.localFilters?.value ?? []).length > 0 ||
+    (api.filters$?.value ?? []).length > 0 ||
     (isOfQueryType(query) && query.query !== '') ||
     isOfAggregateQueryType(query)
   );
@@ -57,18 +55,12 @@ export class FiltersNotificationAction implements Action<EmbeddableApiContext> {
   public readonly type = BADGE_FILTERS_NOTIFICATION;
   public readonly order = 2;
 
-  private settingsService;
-
-  constructor() {
-    ({ settings: this.settingsService } = pluginServices.getServices());
-  }
-
   public readonly MenuItem = ({ context }: { context: EmbeddableApiContext }) => {
     const { embeddable } = context;
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
 
     const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
-      uiSettings: this.settingsService.uiSettings,
+      uiSettings: coreServices.uiSettings,
     });
 
     return (
@@ -93,7 +85,7 @@ export class FiltersNotificationAction implements Action<EmbeddableApiContext> {
   };
 
   public couldBecomeCompatible({ embeddable }: EmbeddableApiContext) {
-    return apiPublishesPartialLocalUnifiedSearch(embeddable);
+    return apiPublishesPartialUnifiedSearch(embeddable);
   }
 
   public subscribeToCompatibilityChanges(
@@ -102,9 +94,7 @@ export class FiltersNotificationAction implements Action<EmbeddableApiContext> {
   ) {
     if (!isApiCompatible(embeddable)) return;
     return merge(
-      ...[embeddable.localQuery, embeddable.localFilters, getViewModeSubject(embeddable)].filter(
-        (value) => Boolean(value)
-      )
+      ...[embeddable.query$, embeddable.filters$].filter((value) => Boolean(value))
     ).subscribe(() => onChange(compatibilityCheck(embeddable), this));
   }
 

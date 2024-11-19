@@ -10,17 +10,19 @@ import { render, unmountComponentAtNode } from 'react-dom';
 
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import type { ClientConfigType } from '@kbn/reporting-public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import {
+  InternalApiClientProvider,
+  ReportingAPIClient,
+  KibanaContext,
+} from '@kbn/reporting-public';
 import { ReportListing } from '.';
 import { PolicyStatusContextProvider } from '../lib/default_status_context';
-import { InternalApiClientProvider, type ReportingAPIClient } from '../lib/reporting_api_client';
-import type { KibanaContext } from '../types';
 
 export async function mountManagementSection(
   coreStart: CoreStart,
@@ -41,25 +43,23 @@ export async function mountManagementSection(
   };
 
   render(
-    <KibanaThemeProvider theme={{ theme$: params.theme$ }}>
-      <I18nProvider>
-        <KibanaContextProvider services={services}>
-          <InternalApiClientProvider apiClient={apiClient}>
-            <PolicyStatusContextProvider config={config}>
-              <ReportListing
-                apiClient={apiClient}
-                toasts={coreStart.notifications.toasts}
-                license$={license$}
-                config={config}
-                redirect={coreStart.application.navigateToApp}
-                navigateToUrl={coreStart.application.navigateToUrl}
-                urlService={shareService.url}
-              />
-            </PolicyStatusContextProvider>
-          </InternalApiClientProvider>
-        </KibanaContextProvider>
-      </I18nProvider>
-    </KibanaThemeProvider>,
+    <KibanaRenderContextProvider {...coreStart}>
+      <KibanaContextProvider services={services}>
+        <InternalApiClientProvider apiClient={apiClient} http={coreStart.http}>
+          <PolicyStatusContextProvider config={config}>
+            <ReportListing
+              apiClient={apiClient}
+              toasts={coreStart.notifications.toasts}
+              license$={license$}
+              config={config}
+              redirect={coreStart.application.navigateToApp}
+              navigateToUrl={coreStart.application.navigateToUrl}
+              urlService={shareService.url}
+            />
+          </PolicyStatusContextProvider>
+        </InternalApiClientProvider>
+      </KibanaContextProvider>
+    </KibanaRenderContextProvider>,
     params.element
   );
 

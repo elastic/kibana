@@ -52,6 +52,7 @@ export const IndexPipelinesConfigurationsLogic = kea<
   },
   events: ({ actions, values }) => ({
     afterMount: () => {
+      // @ts-expect-error upgrade typescript v4.9.5
       if (!values.indexPipelinesData || values.indexPipelinesData.length === 0) {
         return;
       }
@@ -76,6 +77,7 @@ export const IndexPipelinesConfigurationsLogic = kea<
     selectedPipelineId: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         selectPipeline: (_, { pipeline }) => pipeline,
       },
     ],
@@ -96,7 +98,7 @@ export const IndexPipelinesConfigurationsLogic = kea<
     selectedPipeline: [
       () => [selectors.selectedPipelineId, selectors.pipelines],
       (selectedPipelineId: string, pipelines: Record<string, IngestPipeline>) => {
-        if (pipelines.hasOwnProperty(selectedPipelineId)) {
+        if (Object.hasOwn(pipelines, selectedPipelineId)) {
           return pipelines[selectedPipelineId];
         }
         return undefined;

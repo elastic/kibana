@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { RulesContainer } from './rules_container';
 import { render, screen } from '@testing-library/react';
 import { QueryClient } from '@tanstack/react-query';
@@ -13,7 +13,7 @@ import { useFindCspBenchmarkRule } from './use_csp_benchmark_rules';
 import * as TEST_SUBJECTS from './test_subjects';
 import { Chance } from 'chance';
 import { TestProvider } from '../../test/test_provider';
-import type { CspBenchmarkRule } from '../../../common/types/latest';
+import type { CspBenchmarkRule } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { useParams } from 'react-router-dom';
 import { coreMock } from '@kbn/core/public/mocks';
 
@@ -36,7 +36,9 @@ const queryClient = new QueryClient({
 });
 
 const getWrapper =
-  ({ canUpdate = true }: { canUpdate: boolean } = { canUpdate: true }): React.FC =>
+  (
+    { canUpdate = true }: { canUpdate: boolean } = { canUpdate: true }
+  ): FC<PropsWithChildren<unknown>> =>
   ({ children }) => {
     const coreStart = coreMock.createStart();
     const core = {

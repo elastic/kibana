@@ -6,3 +6,4 @@
  */
 
 export * from './row_to_document';
+export * from './generate_alert_id';

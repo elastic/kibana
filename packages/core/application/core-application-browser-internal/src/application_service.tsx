@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { BehaviorSubject, firstValueFrom, type Observable, Subject, type Subscription } from 'rxjs';
-import { map, shareReplay, takeUntil, distinctUntilChanged, filter, take } from 'rxjs/operators';
+import { map, shareReplay, takeUntil, distinctUntilChanged, filter, take } from 'rxjs';
 import { createBrowserHistory, History } from 'history';
 
 import type { PluginOpaqueId } from '@kbn/core-base-common';
@@ -29,7 +30,7 @@ import type {
   NavigateToUrlOptions,
 } from '@kbn/core-application-browser';
 import { CapabilitiesService } from '@kbn/core-capabilities-browser-internal';
-import { AppStatus, AppNavLinkStatus } from '@kbn/core-application-browser';
+import { AppStatus } from '@kbn/core-application-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { AppRouter } from './ui';
 import type { InternalApplicationSetup, InternalApplicationStart, Mounter } from './types';
@@ -182,7 +183,9 @@ export class ApplicationService {
 
     const validateApp = (app: App<unknown>) => {
       if (this.registrationClosed) {
-        throw new Error(`Applications cannot be registered after "setup"`);
+        throw new Error(
+          `Applications cannot be registered after "setup" (attempted to register "${app.id}")`
+        );
       } else if (!applicationIdRegexp.test(app.id)) {
         throw new Error(
           `Invalid application id: it can only be composed of alphanum chars, '-' and '_'`
@@ -206,7 +209,6 @@ export class ApplicationService {
         this.apps.set(app.id, {
           ...appProps,
           status: app.status ?? AppStatus.accessible,
-          navLinkStatus: app.navLinkStatus ?? AppNavLinkStatus.default,
           deepLinks: populateDeepLinkDefaults(appProps.deepLinks),
         });
         if (updater$) {
@@ -325,6 +327,9 @@ export class ApplicationService {
         takeUntil(this.stop$)
       ),
       history: this.history!,
+      isAppRegistered: (appId: string): boolean => {
+        return applications$.value.get(appId) !== undefined;
+      },
       getUrlForApp: (
         appId,
         {
@@ -468,10 +473,6 @@ const updateStatus = (app: App, statusUpdaters: AppUpdaterWrapper[]): App => {
           changes.status ?? AppStatus.accessible,
           fields.status ?? AppStatus.accessible
         ),
-        navLinkStatus: Math.max(
-          changes.navLinkStatus ?? AppNavLinkStatus.default,
-          fields.navLinkStatus ?? AppNavLinkStatus.default
-        ),
         ...(fields.deepLinks ? { deepLinks: populateDeepLinkDefaults(fields.deepLinks) } : {}),
       };
     }
@@ -489,7 +490,7 @@ const populateDeepLinkDefaults = (deepLinks?: AppDeepLink[]): AppDeepLink[] => {
   }
   return deepLinks.map((deepLink) => ({
     ...deepLink,
-    navLinkStatus: deepLink.navLinkStatus ?? AppNavLinkStatus.default,
+    visibleIn: deepLink.visibleIn ?? ['globalSearch'], // by default, deepLinks are only visible in global search.
     deepLinks: populateDeepLinkDefaults(deepLink.deepLinks),
   }));
 };

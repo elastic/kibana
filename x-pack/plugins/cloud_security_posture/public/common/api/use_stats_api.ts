@@ -6,17 +6,14 @@
  */
 
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
+import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import { useKibana } from '../hooks/use_kibana';
 import { ComplianceDashboardDataV2, PosturePolicyTemplate } from '../../../common/types_old';
-import {
-  CSPM_POLICY_TEMPLATE,
-  KSPM_POLICY_TEMPLATE,
-  STATS_ROUTE_PATH,
-} from '../../../common/constants';
+import { STATS_ROUTE_PATH } from '../../../common/constants';
 
 // TODO: consolidate both hooks into one hook with a dynamic key
-export const getCspmStatsKey = ['csp_cspm_dashboard_stats'];
-export const getKspmStatsKey = ['csp_kspm_dashboard_stats'];
+export const CSPM_STATS_QUERY_KEY = ['csp_cspm_dashboard_stats'];
+export const KSPM_STATS_QUERY_KEY = ['csp_kspm_dashboard_stats'];
 
 export const getStatsRoute = (policyTemplate: PosturePolicyTemplate) => {
   return STATS_ROUTE_PATH.replace('{policy_template}', policyTemplate);
@@ -27,7 +24,7 @@ export const useCspmStatsApi = (
 ) => {
   const { http } = useKibana().services;
   return useQuery(
-    getCspmStatsKey,
+    CSPM_STATS_QUERY_KEY,
     () =>
       http.get<ComplianceDashboardDataV2>(getStatsRoute(CSPM_POLICY_TEMPLATE), { version: '2' }),
     options
@@ -39,7 +36,7 @@ export const useKspmStatsApi = (
 ) => {
   const { http } = useKibana().services;
   return useQuery(
-    getKspmStatsKey,
+    KSPM_STATS_QUERY_KEY,
     () =>
       http.get<ComplianceDashboardDataV2>(getStatsRoute(KSPM_POLICY_TEMPLATE), { version: '2' }),
     options

@@ -30,7 +30,6 @@ export function registerLoadRoute({ router, lib: { handleEsError } }: RouteDepen
       const params = {
         expand_wildcards: 'none' as const,
         flat_settings: false,
-        local: false,
         include_defaults: true,
         index: indexName,
       };

@@ -104,6 +104,7 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               },
             },
+            kibana: {},
           });
         });
         it('returns has_all_required false for user without asset criticality index read', async () => {
@@ -118,6 +119,7 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               },
             },
+            kibana: {},
           });
         });
         it('returns has_all_required false for user without asset criticality index write', async () => {
@@ -132,12 +134,14 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               },
             },
+            kibana: {},
           });
         });
       });
     });
 
-    describe('@serverless Asset Criticality Privileges API', () => {
+    // https://github.com/elastic/kibana/issues/183247
+    describe('@skipInServerless @skipInServerlessMKI Asset Criticality Privileges API', () => {
       const supertestWithoutAuth = getService('supertestWithoutAuth');
       const assetCriticalityRoutesNoAuth =
         assetCriticalityRouteHelpersFactoryNoAuth(supertestWithoutAuth);
@@ -156,6 +160,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
           },
+          kibana: {},
         });
       });
 
@@ -174,6 +179,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
           },
+          kibana: {},
         });
       });
     });

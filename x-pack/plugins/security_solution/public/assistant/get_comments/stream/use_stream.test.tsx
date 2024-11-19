@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { useStream } from './use_stream';
 
-const amendMessage = jest.fn();
+const refetchCurrentConversation = jest.fn();
 const reader = jest.fn();
 const cancel = jest.fn();
 const chunk1 = `data: {"object":"chat.completion.chunk","choices":[{"delta":{"content":"My"}}]}\ndata: {"object":"chat.completion.chunk","choices":[{"delta":{"content":" new"}}]}`;
@@ -37,12 +37,13 @@ const readerComplete = {
 } as unknown as ReadableStreamDefaultReader<Uint8Array>;
 
 const defaultProps = {
-  amendMessage,
+  refetchCurrentConversation,
   reader: readerComplete,
   isError: false,
-  connectorTypeTitle: 'OpenAI',
 };
-describe('useStream', () => {
+
+// FLAKY: https://github.com/elastic/kibana/issues/180091
+describe.skip('useStream', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });

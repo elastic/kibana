@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { addProfile } from '../../../../common/customizations';
 import { getStatesFromKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { DiscoverContextAppLocatorDefinition } from './locator';
 
@@ -71,18 +71,6 @@ describe('Discover context url generator', () => {
     expect(state).toEqual({ referrer: 'mock-referrer' });
     expect(_a).toEqual(appStateParams);
     expect(_g).toEqual({ filters: [] });
-  });
-
-  test('can specify profile', async () => {
-    const { locator } = await setup();
-    const { path } = await locator.getLocation({
-      profile: 'test',
-      index: dataViewId,
-      rowId: 'mock-row-id',
-      referrer: 'mock-referrer',
-    });
-
-    expect(path).toBe(`${addProfile('#/', 'test')}context/${dataViewId}/mock-row-id`);
   });
 
   test('when useHash set to false, sets data view ID in the generated URL', async () => {

@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { reportingIlmPolicy } from './constants';
 export { IlmPolicyManager } from './ilm_policy_manager';

@@ -1,18 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import $ from 'jquery';
 import React, { RefObject } from 'react';
 
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
+import { CoreStart } from '@kbn/core/public';
 import { VisTypeVislibCoreSetup } from './plugin';
 import { VisLegend, CUSTOM_LEGEND_VIS_TYPES } from './vislib/components/legend';
 import { BasicVislibParams } from './types';
@@ -85,6 +87,7 @@ export const createVislibVisController = (
       this.vislibVis.on('brush', fireEvent);
       this.vislibVis.on('click', fireEvent);
 
+      const [startServices] = await core.getStartServices();
       this.vislibVis.on('renderComplete', () => {
         // refreshing the legend after the chart is rendered.
         // this is necessary because some visualizations
@@ -94,7 +97,13 @@ export const createVislibVisController = (
           CUSTOM_LEGEND_VIS_TYPES.includes(this.vislibVis.visConfigArgs.type)
         ) {
           this.unmountLegend?.();
-          this.mountLegend(esResponse, visParams, fireEvent, uiState as PersistedState);
+          this.mountLegend(
+            startServices,
+            esResponse,
+            visParams,
+            fireEvent,
+            uiState as PersistedState
+          );
         }
 
         renderComplete?.();
@@ -109,18 +118,25 @@ export const createVislibVisController = (
 
       if (this.showLegend(visParams)) {
         $(this.container)
-          .attr('class', (i, cls) => {
+          .attr('class', (_i, cls) => {
             return cls.replace(/vislib--legend-\S+/g, '');
           })
           .addClass((legendClassName as any)[visParams.legendPosition]);
 
-        this.mountLegend(esResponse, visParams, fireEvent, uiState as PersistedState);
+        this.mountLegend(
+          startServices,
+          esResponse,
+          visParams,
+          fireEvent,
+          uiState as PersistedState
+        );
       }
 
       this.vislibVis.render(esResponse, uiState);
     }
 
     mountLegend(
+      startServices: Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>,
       visData: unknown,
       visParams: BasicVislibParams,
       fireEvent: IInterpreterRenderHandlers['event'],
@@ -136,7 +152,8 @@ export const createVislibVisController = (
           fireEvent={fireEvent}
           addLegend={this.showLegend(visParams)}
           position={legendPosition}
-        />
+        />,
+        startServices
       )(this.legendEl);
     }
 

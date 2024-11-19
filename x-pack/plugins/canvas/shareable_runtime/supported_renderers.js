@@ -17,6 +17,11 @@ import { plot } from '../canvas_plugin_src/renderers/plot';
 import { pie } from '../canvas_plugin_src/renderers/pie';
 import { getMarkdownRenderer } from '../canvas_plugin_src/renderers/markdown';
 
+/**
+ * FIXME: Render function factories require stateful dependencies to be
+ * injected. Without them, we can not provide proper theming, i18n, or
+ * telemetry when fatal errors occur during rendering.
+ */
 const unboxFactory = (factory) => factory();
 
 const renderFunctionsFactories = [

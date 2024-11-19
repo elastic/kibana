@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
@@ -11,8 +12,6 @@ import type { State } from './table_list_view_table';
 import type { Action } from './actions';
 
 export function getReducer<T extends UserContentCommonSchema>() {
-  let sortColumnChanged = false;
-
   return (state: State<T>, action: Action<T>): State<T> => {
     switch (action.type) {
       case 'onFetchItems': {
@@ -25,19 +24,28 @@ export function getReducer<T extends UserContentCommonSchema>() {
         const items = action.data.response.hits;
         let tableSort;
         let hasUpdatedAtMetadata = state.hasUpdatedAtMetadata;
+        let hasCreatedByMetadata = state.hasCreatedByMetadata;
 
         if (!state.hasInitialFetchReturned) {
           // We only get the state on the initial fetch of items
           // After that we don't want to reset the columns or change the sort after fetching
           hasUpdatedAtMetadata = Boolean(items.find((item) => Boolean(item.updatedAt)));
+          hasCreatedByMetadata = Boolean(items.find((item) => Boolean(item.createdBy)));
 
           // Only change the table sort if it hasn't been changed already.
           // For example if its state comes from the URL, we don't want to override it here.
-          if (hasUpdatedAtMetadata && !sortColumnChanged) {
-            tableSort = {
-              field: 'updatedAt' as const,
-              direction: 'desc' as const,
-            };
+          if (!state.sortColumnChanged) {
+            if (state.hasRecentlyAccessedMetadata) {
+              tableSort = {
+                field: 'accessedAt' as const,
+                direction: 'desc' as const,
+              };
+            } else if (hasUpdatedAtMetadata) {
+              tableSort = {
+                field: 'updatedAt' as const,
+                direction: 'desc' as const,
+              };
+            }
           }
         }
 
@@ -58,6 +66,7 @@ export function getReducer<T extends UserContentCommonSchema>() {
           hasNoItems,
           totalItems: action.data.response.total,
           hasUpdatedAtMetadata,
+          hasCreatedByMetadata,
           tableSort: tableSort ?? state.tableSort,
           pagination: {
             ...state.pagination,
@@ -75,24 +84,30 @@ export function getReducer<T extends UserContentCommonSchema>() {
         };
       }
       case 'onSearchQueryChange': {
-        if (action.data.text === state.searchQuery.text) {
+        if (
+          action.data.text === state.searchQuery.text &&
+          action.data.error === state.searchQuery.error
+        ) {
           return state;
         }
 
         return {
           ...state,
-          searchQuery: action.data,
-          isFetchingItems: true,
+          searchQuery: {
+            ...state.searchQuery,
+            ...action.data,
+          },
+          isFetchingItems:
+            action.data.error === null && action.data.text !== state.searchQuery.text,
         };
       }
       case 'onTableChange': {
-        if (action.data.sort) {
-          sortColumnChanged = true;
-        }
-
         const tableSort = action.data.sort ?? state.tableSort;
         const pageIndex = action.data.page?.pageIndex ?? state.pagination.pageIndex;
         const pageSize = action.data.page?.pageSize ?? state.pagination.pageSize;
+        const tableFilter = action.data.filter
+          ? { ...state.tableFilter, ...action.data.filter }
+          : state.tableFilter;
 
         return {
           ...state,
@@ -102,6 +117,8 @@ export function getReducer<T extends UserContentCommonSchema>() {
             pageSize,
           },
           tableSort,
+          tableFilter,
+          sortColumnChanged: state.sortColumnChanged || Boolean(action.data.sort),
         };
       }
       case 'showConfirmDeleteItemsModal': {

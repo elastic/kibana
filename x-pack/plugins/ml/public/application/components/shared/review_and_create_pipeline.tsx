@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { FC, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
   EuiAccordion,
@@ -24,7 +25,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
+import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import { useMlKibana } from '../../contexts/kibana';
 import { ReindexWithPipeline } from '../ml_inference/components/reindex_with_pipeline';
 
@@ -108,7 +109,7 @@ export const ReviewAndCreatePipeline: FC<Props> = ({
                 {i18n.translate(
                   'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.title',
                   {
-                    defaultMessage: "Review the pipeline configuration for '{pipelineName}'",
+                    defaultMessage: "Review the pipeline configuration for ''{pipelineName}''",
                     values: { pipelineName },
                   }
                 )}
@@ -123,7 +124,7 @@ export const ReviewAndCreatePipeline: FC<Props> = ({
                 title={i18n.translate(
                   'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.create.successMessage',
                   {
-                    defaultMessage: "'{pipelineName}' has been created successfully.",
+                    defaultMessage: "''{pipelineName}'' has been created successfully.",
                     values: { pipelineName },
                   }
                 )}
@@ -172,7 +173,7 @@ export const ReviewAndCreatePipeline: FC<Props> = ({
                 title={i18n.translate(
                   'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.create.failureMessage',
                   {
-                    defaultMessage: "Unable to create '{pipelineName}'.",
+                    defaultMessage: "Unable to create ''{pipelineName}''.",
                     values: { pipelineName },
                   }
                 )}

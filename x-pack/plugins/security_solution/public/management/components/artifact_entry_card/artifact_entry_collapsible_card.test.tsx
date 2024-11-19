@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { act, fireEvent } from '@testing-library/react';
@@ -13,6 +13,7 @@ import type { AnyArtifact } from './types';
 import { getTrustedAppProviderMock, getExceptionProviderMock } from './test_utils';
 import type { ArtifactEntryCollapsibleCardProps } from './artifact_entry_collapsible_card';
 import { ArtifactEntryCollapsibleCard } from './artifact_entry_collapsible_card';
+import type { ArtifactEntryCardDecoratorProps } from './artifact_entry_card';
 
 describe.each([
   ['trusted apps', getTrustedAppProviderMock],
@@ -118,5 +119,33 @@ describe.each([
     render({ expanded: true });
 
     expect(renderResult.getByTestId(testSubjId).classList.contains('eui-textTruncate')).toBe(false);
+  });
+
+  it('should pass item to decorator function and display its result when expanded', () => {
+    let passedItem: ArtifactEntryCardDecoratorProps['item'] | null = null;
+    const MockDecorator = memo<ArtifactEntryCardDecoratorProps>(({ item: actualItem }) => {
+      passedItem = actualItem;
+      return <p>{'mock decorator'}</p>;
+    });
+    MockDecorator.displayName = 'MockDecorator';
+
+    render({ Decorator: MockDecorator, expanded: true });
+
+    expect(renderResult.getByText('mock decorator')).toBeInTheDocument();
+    expect(passedItem).toBe(item);
+  });
+
+  it('should not display decorator when collapsed', () => {
+    let passedItem: ArtifactEntryCardDecoratorProps['item'] | null = null;
+    const MockDecorator = memo<ArtifactEntryCardDecoratorProps>(({ item: actualItem }) => {
+      passedItem = actualItem;
+      return <p>{'mock decorator'}</p>;
+    });
+    MockDecorator.displayName = 'MockDecorator';
+
+    render({ Decorator: MockDecorator, expanded: false });
+
+    expect(renderResult.queryByText('mock decorator')).not.toBeInTheDocument();
+    expect(passedItem).toBe(null);
   });
 });

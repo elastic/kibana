@@ -6,7 +6,7 @@
  */
 
 import { Plugin, CoreSetup, CoreStart, AppMountParameters } from '@kbn/core/public';
-import { CasesUiSetup, CasesUiStart } from '@kbn/cases-plugin/public/types';
+import { CasesPublicSetup, CasesPublicStart } from '@kbn/cases-plugin/public/types';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { getExternalReferenceAttachmentRegular } from './attachments/external_reference';
 import { getPersistableStateAttachmentRegular } from './attachments/persistable_state';
@@ -15,12 +15,12 @@ export type Setup = void;
 export type Start = void;
 
 export interface CasesExamplePublicSetupDeps {
-  cases: CasesUiSetup;
+  cases: CasesPublicSetup;
 }
 
 export interface CasesExamplePublicStartDeps {
   lens: LensPublicStart;
-  cases: CasesUiStart;
+  cases: CasesPublicStart;
 }
 
 export class CasesFixturePlugin

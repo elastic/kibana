@@ -186,7 +186,6 @@ function PipelinesTableUi({
     <EuiInMemoryTable
       columns={columns}
       data-test-subj="pipelineTable"
-      isSelectable={isSelectable}
       itemId="id"
       items={pipelines}
       message={message}

@@ -19,6 +19,8 @@ describe('connectorMissingCallout', () => {
         hasAssistantPrivilege: true,
         hasConnectorsAllPrivilege: false,
         hasConnectorsReadPrivilege: true,
+        hasUpdateAIAssistantAnonymization: true,
+        hasManageGlobalKnowledgeBase: true,
         isAssistantEnabled: true,
       };
 
@@ -56,6 +58,8 @@ describe('connectorMissingCallout', () => {
         hasAssistantPrivilege: true,
         hasConnectorsAllPrivilege: false,
         hasConnectorsReadPrivilege: false,
+        hasUpdateAIAssistantAnonymization: true,
+        hasManageGlobalKnowledgeBase: false,
         isAssistantEnabled: true,
       };
 

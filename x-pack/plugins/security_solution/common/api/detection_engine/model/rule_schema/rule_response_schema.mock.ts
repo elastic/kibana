@@ -6,16 +6,18 @@
  */
 
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../constants';
+import { getListArrayMock } from '../../../../detection_engine/schemas/types/lists.mock';
 import type {
   EqlRule,
   EsqlRule,
   MachineLearningRule,
+  NewTermsRule,
   QueryRule,
   SavedQueryRule,
   SharedResponseProps,
   ThreatMatchRule,
+  ThresholdRule,
 } from './rule_schemas.gen';
-import { getListArrayMock } from '../../../../detection_engine/schemas/types/lists.mock';
 
 export const ANCHOR_DATE = '2020-02-20T03:57:54.037Z';
 
@@ -45,6 +47,7 @@ const getResponseBaseParams = (anchorDate: string = ANCHOR_DATE): SharedResponse
   risk_score: 55,
   risk_score_mapping: [],
   rule_id: 'query-rule-id',
+  rule_source: { type: 'internal' },
   interval: '5m',
   exceptions_list: getListArrayMock(),
   related_integrations: [],
@@ -236,5 +239,29 @@ export const getRulesEqlSchemaMock = (anchorDate: string = ANCHOR_DATE): EqlRule
     timestamp_field: undefined,
     event_category_override: undefined,
     tiebreaker_field: undefined,
+  };
+};
+
+export const getRulesNewTermsSchemaMock = (anchorDate: string = ANCHOR_DATE): NewTermsRule => {
+  return {
+    ...getResponseBaseParams(anchorDate),
+    type: 'new_terms',
+    query: '*',
+    language: 'kuery',
+    new_terms_fields: ['user.name'],
+    history_window_start: 'now-7d',
+  };
+};
+
+export const getRulesThresholdSchemaMock = (anchorDate: string = ANCHOR_DATE): ThresholdRule => {
+  return {
+    ...getResponseBaseParams(anchorDate),
+    type: 'threshold',
+    language: 'kuery',
+    query: 'user.name: root or user.name: admin',
+    threshold: {
+      field: 'some.field',
+      value: 4,
+    },
   };
 };

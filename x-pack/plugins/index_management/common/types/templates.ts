@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataRetention, DataStream } from './data_streams';
+import { DataRetention, DataStream, IndexMode } from './data_streams';
 import { IndexSettings } from './indices';
 import { Aliases } from './aliases';
 import { Mappings } from './mappings';
@@ -49,8 +49,9 @@ export interface TemplateDeserialized {
   ignoreMissingComponentTemplates?: string[];
   version?: number;
   priority?: number; // Composable template only
-  allowAutoCreate?: boolean;
+  allowAutoCreate: string;
   order?: number; // Legacy template only
+  indexMode: IndexMode;
   ilmPolicy?: {
     name: string;
   };

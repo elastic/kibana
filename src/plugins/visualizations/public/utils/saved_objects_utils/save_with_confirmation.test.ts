@@ -1,18 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectsCreateOptions, OverlayStart } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import type { SavedObjectsCreateOptions } from '@kbn/core/public';
 import { saveWithConfirmation } from './save_with_confirmation';
 import { VisSavedObject } from '../../types';
 import * as deps from './confirm_modal_promise';
 import { OVERWRITE_REJECTED } from './constants';
 import { VisualizationSavedObjectAttributes } from '../../../common';
 
+const coreStart = coreMock.createStart();
 const mockFindContent = jest.fn(() => ({
   pagination: { total: 0 },
   hits: [],
@@ -39,7 +42,7 @@ const mockGetContent = jest.fn(() => ({
     alias_target_id: null,
   },
 }));
-const mockCreateContent = jest.fn(async (input: any) => ({
+const mockCreateContent = jest.fn(async (_input: any) => ({
   item: {
     id: 'test',
   },
@@ -63,7 +66,6 @@ jest.mock('../../services', () => ({
 }));
 
 describe('saveWithConfirmation', () => {
-  const overlays: OverlayStart = {} as OverlayStart;
   const source: VisualizationSavedObjectAttributes = {} as VisualizationSavedObjectAttributes;
   const options: SavedObjectsCreateOptions = {} as SavedObjectsCreateOptions;
   const savedObject = {
@@ -78,7 +80,7 @@ describe('saveWithConfirmation', () => {
   });
 
   test('should call create of savedObjectsClient', async () => {
-    await saveWithConfirmation(source, savedObject, options, { overlays });
+    await saveWithConfirmation(source, savedObject, options, coreStart);
     expect(mockCreateContent).toHaveBeenCalledWith({
       contentTypeId: savedObject.getEsType(),
       data: source,
@@ -93,12 +95,12 @@ describe('saveWithConfirmation', () => {
         : Promise.reject({ res: { status: 409 } })
     );
 
-    await saveWithConfirmation(source, savedObject, options, { overlays });
+    await saveWithConfirmation(source, savedObject, options, coreStart);
     expect(deps.confirmModalPromise).toHaveBeenCalledWith(
       expect.any(String),
       expect.any(String),
       expect.any(String),
-      overlays
+      expect.objectContaining(coreStart)
     );
   });
 
@@ -109,7 +111,7 @@ describe('saveWithConfirmation', () => {
         : Promise.reject({ res: { status: 409 } })
     );
 
-    await saveWithConfirmation(source, savedObject, options, { overlays });
+    await saveWithConfirmation(source, savedObject, options, coreStart);
     expect(mockCreateContent).toHaveBeenLastCalledWith({
       contentTypeId: savedObject.getEsType(),
       data: source,
@@ -125,10 +127,8 @@ describe('saveWithConfirmation', () => {
     jest.spyOn(deps, 'confirmModalPromise').mockReturnValue(Promise.reject());
 
     expect.assertions(1);
-    await expect(
-      saveWithConfirmation(source, savedObject, options, {
-        overlays,
-      })
-    ).rejects.toThrow(OVERWRITE_REJECTED);
+    await expect(saveWithConfirmation(source, savedObject, options, coreStart)).rejects.toThrow(
+      OVERWRITE_REJECTED
+    );
   });
 });

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -20,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { ExpandableFlyout } from '.';
 import { TestProvider } from './test/provider';
-import { State } from './state';
+import { initialUiState, State } from './store/state';
 
 export default {
   component: ExpandableFlyout,
@@ -101,53 +102,144 @@ const registeredPanels = [
 ];
 
 export const Right: Story<void> = () => {
-  const state = {
-    right: {
-      id: 'right',
+  const state: State = {
+    panels: {
+      byId: {
+        memory: {
+          right: {
+            id: 'right',
+          },
+          left: undefined,
+          preview: undefined,
+        },
+      },
     },
-    left: {},
-    preview: [],
-  } as unknown as State;
+    ui: initialUiState,
+  };
 
   return (
     <TestProvider state={state}>
-      <ExpandableFlyout registeredPanels={registeredPanels} />
+      <ExpandableFlyout
+        registeredPanels={registeredPanels}
+        flyoutCustomProps={{ hideSettings: true }}
+      />
     </TestProvider>
   );
 };
 
 export const Left: Story<void> = () => {
-  const state = {
-    right: {
-      id: 'right',
+  const state: State = {
+    panels: {
+      byId: {
+        memory: {
+          right: {
+            id: 'right',
+          },
+          left: {
+            id: 'left',
+          },
+          preview: undefined,
+        },
+      },
     },
-    left: {
-      id: 'left',
-    },
-    preview: [],
-  } as unknown as State;
+    ui: initialUiState,
+  };
 
   return (
     <TestProvider state={state}>
-      <ExpandableFlyout registeredPanels={registeredPanels} />
+      <ExpandableFlyout
+        registeredPanels={registeredPanels}
+        flyoutCustomProps={{ hideSettings: true }}
+      />
     </TestProvider>
   );
 };
 
 export const Preview: Story<void> = () => {
-  const state = {
-    right: {
-      id: 'right',
-    },
-    left: {
-      id: 'left',
-    },
-    preview: [
-      {
-        id: 'preview1',
+  const state: State = {
+    panels: {
+      byId: {
+        memory: {
+          right: {
+            id: 'right',
+          },
+          left: {
+            id: 'left',
+          },
+          preview: [
+            {
+              id: 'preview1',
+            },
+          ],
+        },
       },
-    ],
-  } as unknown as State;
+    },
+    ui: initialUiState,
+  };
+
+  return (
+    <TestProvider state={state}>
+      <ExpandableFlyout
+        registeredPanels={registeredPanels}
+        flyoutCustomProps={{ hideSettings: true }}
+      />
+    </TestProvider>
+  );
+};
+
+export const MultiplePreviews: Story<void> = () => {
+  const state: State = {
+    panels: {
+      byId: {
+        memory: {
+          right: {
+            id: 'right',
+          },
+          left: {
+            id: 'left',
+          },
+          preview: [
+            {
+              id: 'preview1',
+            },
+            {
+              id: 'preview2',
+            },
+          ],
+        },
+      },
+    },
+    ui: initialUiState,
+  };
+
+  return (
+    <TestProvider state={state}>
+      <ExpandableFlyout
+        registeredPanels={registeredPanels}
+        flyoutCustomProps={{ hideSettings: true }}
+      />
+    </TestProvider>
+  );
+};
+
+export const CollapsedPushMode: Story<void> = () => {
+  const state: State = {
+    panels: {
+      byId: {
+        memory: {
+          right: {
+            id: 'right',
+          },
+          left: undefined,
+          preview: undefined,
+        },
+      },
+    },
+    ui: {
+      ...initialUiState,
+      pushVsOverlay: 'push',
+    },
+  };
 
   return (
     <TestProvider state={state}>
@@ -156,27 +248,115 @@ export const Preview: Story<void> = () => {
   );
 };
 
-export const MultiplePreviews: Story<void> = () => {
-  const state = {
-    right: {
-      id: 'right',
-    },
-    left: {
-      id: 'left',
-    },
-    preview: [
-      {
-        id: 'preview1',
+export const ExpandedPushMode: Story<void> = () => {
+  const state: State = {
+    panels: {
+      byId: {
+        memory: {
+          right: {
+            id: 'right',
+          },
+          left: {
+            id: 'left',
+          },
+          preview: undefined,
+        },
       },
-      {
-        id: 'preview2',
-      },
-    ],
-  } as unknown as State;
+    },
+    ui: {
+      ...initialUiState,
+      pushVsOverlay: 'push',
+    },
+  };
 
   return (
     <TestProvider state={state}>
       <ExpandableFlyout registeredPanels={registeredPanels} />
+    </TestProvider>
+  );
+};
+
+export const DisableTypeSelection: Story<void> = () => {
+  const state: State = {
+    panels: {
+      byId: {
+        memory: {
+          right: {
+            id: 'right',
+          },
+          left: {
+            id: 'left',
+          },
+          preview: undefined,
+        },
+      },
+    },
+    ui: initialUiState,
+  };
+
+  return (
+    <TestProvider state={state}>
+      <ExpandableFlyout
+        registeredPanels={registeredPanels}
+        flyoutCustomProps={{
+          pushVsOverlay: { disabled: true, tooltip: 'This option is disabled' },
+        }}
+      />
+    </TestProvider>
+  );
+};
+
+export const ResetWidths: Story<void> = () => {
+  const state: State = {
+    panels: {
+      byId: {
+        memory: {
+          right: {
+            id: 'right',
+          },
+          left: {
+            id: 'left',
+          },
+          preview: undefined,
+        },
+      },
+    },
+    ui: initialUiState,
+  };
+
+  return (
+    <TestProvider state={state}>
+      <ExpandableFlyout registeredPanels={registeredPanels} />
+    </TestProvider>
+  );
+};
+
+export const DisableResizeWidthSelection: Story<void> = () => {
+  const state: State = {
+    panels: {
+      byId: {
+        memory: {
+          right: {
+            id: 'right',
+          },
+          left: {
+            id: 'left',
+          },
+          preview: undefined,
+        },
+      },
+    },
+    ui: initialUiState,
+  };
+
+  return (
+    <TestProvider state={state}>
+      <ExpandableFlyout
+        registeredPanels={registeredPanels}
+        flyoutCustomProps={{
+          resize: { disabled: true, tooltip: 'This option is disabled' },
+        }}
+      />
     </TestProvider>
   );
 };

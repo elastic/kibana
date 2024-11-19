@@ -37,12 +37,6 @@ describe(
           { product_line: 'security', product_tier: 'essentials' },
           { product_line: 'endpoint', product_tier: 'essentials' },
         ],
-        // alertSuppressionForIndicatorMatchRuleEnabled feature flag is also enabled in a global config
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'alertSuppressionForIndicatorMatchRuleEnabled',
-          ])}`,
-        ],
       },
     },
   },

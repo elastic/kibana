@@ -6,7 +6,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { takeUntil, map } from 'rxjs/operators';
+import { takeUntil, map } from 'rxjs';
 import { type ServiceStatus, ServiceStatusLevels } from '@kbn/core/server';
 import type { ILicense } from '../common/types';
 

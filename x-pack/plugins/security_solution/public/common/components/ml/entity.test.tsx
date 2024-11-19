@@ -8,7 +8,6 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import '../../mock/match_media';
 import { EntityComponent } from './entity';
 import { TestProviders } from '../../mock/test_providers';
 import { useMountAppended } from '../../utils/use_mount_appended';

@@ -10,9 +10,7 @@
   "include": [
     "**/*.js",
     "**/*.ts",
-    "**/*.tsx",
-    "types/intl_format_cache.d.ts",
-    "types/intl_relativeformat.d.ts"
+    "**/*.tsx"
   ],
   "exclude": [
     "**/__fixtures__/**/*",

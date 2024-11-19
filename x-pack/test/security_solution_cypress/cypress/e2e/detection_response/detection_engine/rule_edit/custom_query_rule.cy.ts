@@ -36,6 +36,7 @@ import {
   CUSTOM_QUERY_DETAILS,
   DEFINITION_DETAILS,
   INDEX_PATTERNS_DETAILS,
+  INTERVAL_ABBR_VALUE,
   INVESTIGATION_NOTES_TOGGLE,
   RISK_SCORE_DETAILS,
   RULE_NAME_HEADER,
@@ -60,7 +61,7 @@ import { saveEditedRule, visitEditRulePage } from '../../../../tasks/edit_rule';
 import { login } from '../../../../tasks/login';
 import { getDetails } from '../../../../tasks/rule_details';
 
-describe('Custom query rules', { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] }, () => {
+describe('Custom query rules', { tags: ['@ess', '@serverless'] }, () => {
   const rule = getEditedRule();
   const expectedEditedtags = rule.tags?.join('');
   const expectedEditedIndexPatterns = rule.index;
@@ -92,7 +93,7 @@ describe('Custom query rules', { tags: ['@ess', '@serverless', '@brokenInServerl
       cy.get(RULE_NAME_INPUT).invoke('val').should('eql', existingRule.name);
       cy.get(RULE_DESCRIPTION_INPUT).should('have.text', existingRule.description);
       cy.get(TAGS_FIELD).should('have.text', existingRule.tags?.join(''));
-      cy.get(SEVERITY_DROPDOWN).should('have.text', 'High');
+      cy.get(SEVERITY_DROPDOWN).should('contain.text', 'High');
       cy.get(DEFAULT_RISK_SCORE_INPUT).invoke('val').should('eql', `${existingRule.risk_score}`);
 
       goToScheduleStepTab();
@@ -149,7 +150,9 @@ describe('Custom query rules', { tags: ['@ess', '@serverless', '@brokenInServerl
       });
       if (getEditedRule().interval) {
         cy.get(SCHEDULE_DETAILS).within(() => {
-          getDetails(RUNS_EVERY_DETAILS).should('have.text', getEditedRule().interval);
+          getDetails(RUNS_EVERY_DETAILS)
+            .find(INTERVAL_ABBR_VALUE)
+            .should('have.text', getEditedRule().interval);
         });
       }
     });

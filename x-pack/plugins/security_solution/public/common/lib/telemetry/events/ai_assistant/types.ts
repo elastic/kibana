@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import type { RootSchema } from '@kbn/analytics-client';
-import type { TelemetryEventTypes } from '../../constants';
+import type { RootSchema } from '@kbn/core/public';
+
+export enum AssistantEventTypes {
+  AssistantInvoked = 'Assistant Invoked',
+  AssistantMessageSent = 'Assistant Message Sent',
+  AssistantQuickPrompt = 'Assistant Quick Prompt',
+  AssistantSettingToggled = 'Assistant Setting Toggled',
+}
 
 export interface ReportAssistantInvokedParams {
   conversationId: string;
@@ -16,8 +22,10 @@ export interface ReportAssistantInvokedParams {
 export interface ReportAssistantMessageSentParams {
   conversationId: string;
   role: string;
+  actionTypeId: string;
+  provider?: string;
+  model?: string;
   isEnabledKnowledgeBase: boolean;
-  isEnabledRAGAlerts: boolean;
 }
 
 export interface ReportAssistantQuickPromptParams {
@@ -26,30 +34,18 @@ export interface ReportAssistantQuickPromptParams {
 }
 
 export interface ReportAssistantSettingToggledParams {
-  isEnabledKnowledgeBase?: boolean;
-  isEnabledRAGAlerts?: boolean;
+  alertsCountUpdated?: boolean;
+  assistantStreamingEnabled?: boolean;
 }
 
-export type ReportAssistantTelemetryEventParams =
-  | ReportAssistantInvokedParams
-  | ReportAssistantMessageSentParams
-  | ReportAssistantSettingToggledParams
-  | ReportAssistantQuickPromptParams;
+export interface AssistantTelemetryEventsMap {
+  [AssistantEventTypes.AssistantInvoked]: ReportAssistantInvokedParams;
+  [AssistantEventTypes.AssistantMessageSent]: ReportAssistantMessageSentParams;
+  [AssistantEventTypes.AssistantQuickPrompt]: ReportAssistantQuickPromptParams;
+  [AssistantEventTypes.AssistantSettingToggled]: ReportAssistantSettingToggledParams;
+}
 
-export type AssistantTelemetryEvent =
-  | {
-      eventType: TelemetryEventTypes.AssistantInvoked;
-      schema: RootSchema<ReportAssistantInvokedParams>;
-    }
-  | {
-      eventType: TelemetryEventTypes.AssistantSettingToggled;
-      schema: RootSchema<ReportAssistantSettingToggledParams>;
-    }
-  | {
-      eventType: TelemetryEventTypes.AssistantMessageSent;
-      schema: RootSchema<ReportAssistantMessageSentParams>;
-    }
-  | {
-      eventType: TelemetryEventTypes.AssistantQuickPrompt;
-      schema: RootSchema<ReportAssistantQuickPromptParams>;
-    };
+export interface AssistantTelemetryEvent {
+  eventType: AssistantEventTypes;
+  schema: RootSchema<AssistantTelemetryEventsMap[AssistantEventTypes]>;
+}

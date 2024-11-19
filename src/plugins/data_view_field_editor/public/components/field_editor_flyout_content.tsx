@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -56,7 +57,6 @@ export interface Props {
   fieldToEdit?: Field;
   /** Optional preselected configuration for new field */
   fieldToCreate?: Field;
-  isSavingField: boolean;
   /** Handler to call when the component mounts.
    *  We will pass "up" data that the parent component might need
    */
@@ -64,13 +64,13 @@ export interface Props {
 }
 
 const isPanelVisibleSelector = (state: PreviewState) => state.isPanelVisible;
+const isSavingSelector = (state: PreviewState) => state.isSaving;
 
 const FieldEditorFlyoutContentComponent = ({
   fieldToEdit,
   fieldToCreate,
   onSave,
   onCancel,
-  isSavingField,
   onMounted,
 }: Props) => {
   const isMounted = useRef(false);
@@ -81,6 +81,7 @@ const FieldEditorFlyoutContentComponent = ({
 
   const { controller } = useFieldPreviewContext();
   const isPanelVisible = useStateSelector(controller.state$, isPanelVisibleSelector);
+  const isSavingField = useStateSelector(controller.state$, isSavingSelector);
 
   const [formState, setFormState] = useState<FieldEditorFormState>({
     isSubmitted: false,
@@ -217,7 +218,7 @@ const FieldEditorFlyoutContentComponent = ({
                   {fieldToEdit ? (
                     <FormattedMessage
                       id="indexPatternFieldEditor.editor.flyoutEditFieldTitle"
-                      defaultMessage="Edit field '{fieldName}'"
+                      defaultMessage="Edit field ''{fieldName}''"
                       values={{
                         fieldName: fieldToEdit.name,
                       }}

@@ -6,15 +6,17 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 
 import { EuiSpacer, EuiDescriptionList, EuiCallOut } from '@elastic/eui';
-import { DocFailure, Failures } from './failures';
+import type { DocFailure } from './failures';
+import { Failures } from './failures';
 
 interface Props {
   index: string;
   dataView: string;
-  ingestPipelineId: string;
+  pipelineId: string;
   docCount: number;
   importFailures: DocFailure[];
   createDataView: boolean;
@@ -24,7 +26,7 @@ interface Props {
 export const ImportSummary: FC<Props> = ({
   index,
   dataView,
-  ingestPipelineId,
+  pipelineId,
   docCount,
   importFailures,
   createDataView,
@@ -33,7 +35,7 @@ export const ImportSummary: FC<Props> = ({
   const items = createDisplayItems(
     index,
     dataView,
-    ingestPipelineId,
+    pipelineId,
     docCount,
     importFailures,
     createDataView,
@@ -97,7 +99,7 @@ export const ImportSummary: FC<Props> = ({
 function createDisplayItems(
   index: string,
   dataView: string,
-  ingestPipelineId: string,
+  pipelineId: string,
   docCount: number,
   importFailures: DocFailure[],
   createDataView: boolean,
@@ -132,7 +134,7 @@ function createDisplayItems(
           defaultMessage="Ingest pipeline"
         />
       ),
-      description: ingestPipelineId,
+      description: pipelineId,
     });
   }
 

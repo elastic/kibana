@@ -326,7 +326,7 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.wizard.assertAdvancedQueryEditorSwitchCheckState(false);
 
           await transform.testExecution.logTestStep('enables the index preview histogram charts');
-          await transform.wizard.enableIndexPreviewHistogramCharts(false);
+          await transform.wizard.enableIndexPreviewHistogramCharts(true);
           await transform.testExecution.logTestStep('displays the index preview histogram charts');
           await transform.wizard.assertIndexPreviewHistogramCharts(
             testData.expected.histogramCharts

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
+import { mount, type ComponentType as EnzymeComponentType } from 'enzyme';
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 
@@ -45,7 +45,7 @@ describe('RuleSwitch', () => {
 
   test('it renders loader if "isLoading" is true', () => {
     const wrapper = mount(<RuleSwitchComponent enabled={true} id={'7'} isLoading />, {
-      wrappingComponent: TestProviders,
+      wrappingComponent: TestProviders as EnzymeComponentType<{}>,
     });
 
     expect(wrapper.find('[data-test-subj="ruleSwitchLoader"]').exists()).toBeTruthy();
@@ -54,7 +54,7 @@ describe('RuleSwitch', () => {
 
   test('it renders switch disabled if "isDisabled" is true', () => {
     const wrapper = mount(<RuleSwitchComponent enabled={true} id={'7'} isDisabled />, {
-      wrappingComponent: TestProviders,
+      wrappingComponent: TestProviders as EnzymeComponentType<{}>,
     });
 
     expect(wrapper.find('[data-test-subj="ruleSwitch"]').at(0).props().disabled).toBeTruthy();
@@ -62,16 +62,43 @@ describe('RuleSwitch', () => {
 
   test('it renders switch enabled if "enabled" is true', () => {
     const wrapper = mount(<RuleSwitchComponent enabled id={'7'} />, {
-      wrappingComponent: TestProviders,
+      wrappingComponent: TestProviders as EnzymeComponentType<{}>,
     });
     expect(wrapper.find('[data-test-subj="ruleSwitch"]').at(0).props().checked).toBeTruthy();
   });
 
   test('it renders switch disabled if "enabled" is false', () => {
     const wrapper = mount(<RuleSwitchComponent enabled={false} id={'7'} />, {
-      wrappingComponent: TestProviders,
+      wrappingComponent: TestProviders as EnzymeComponentType<{}>,
     });
     expect(wrapper.find('[data-test-subj="ruleSwitch"]').at(0).props().checked).toBeFalsy();
+  });
+
+  test('it sets the undefined aria-label for switch if ruleName not passed', () => {
+    const wrapper = mount(<RuleSwitchComponent enabled={true} id={'7'} />, {
+      wrappingComponent: TestProviders as EnzymeComponentType<{}>,
+    });
+    expect(
+      wrapper.find('[data-test-subj="ruleSwitch"]').at(0).props()['aria-label']
+    ).toBeUndefined();
+  });
+
+  test('it sets the correct aria-label for switch if "enabled" is true', () => {
+    const wrapper = mount(<RuleSwitchComponent enabled={true} id={'7'} ruleName={'test'} />, {
+      wrappingComponent: TestProviders as EnzymeComponentType<{}>,
+    });
+    expect(wrapper.find('[data-test-subj="ruleSwitch"]').at(0).props()['aria-label']).toBe(
+      'Switch off "test"'
+    );
+  });
+
+  test('it sets the correct aria-label for switch if "enabled" is false', () => {
+    const wrapper = mount(<RuleSwitchComponent enabled={false} id={'7'} ruleName={'test'} />, {
+      wrappingComponent: TestProviders as EnzymeComponentType<{}>,
+    });
+    expect(wrapper.find('[data-test-subj="ruleSwitch"]').at(0).props()['aria-label']).toBe(
+      'Switch on "test"'
+    );
   });
 
   test('it dispatches error toaster if "enableRules" call rejects', async () => {
@@ -79,7 +106,7 @@ describe('RuleSwitch', () => {
     (performBulkAction as jest.Mock).mockRejectedValue(mockError);
 
     const wrapper = mount(<RuleSwitchComponent enabled={false} isDisabled={false} id={'7'} />, {
-      wrappingComponent: TestProviders,
+      wrappingComponent: TestProviders as EnzymeComponentType<{}>,
     });
     wrapper.find('[data-test-subj="ruleSwitch"]').at(2).simulate('click');
 
@@ -94,7 +121,7 @@ describe('RuleSwitch', () => {
     (useRulesTableContextOptional as jest.Mock).mockReturnValue(rulesTableContext);
 
     const wrapper = mount(<RuleSwitchComponent enabled isDisabled={false} id={'7'} />, {
-      wrappingComponent: TestProviders,
+      wrappingComponent: TestProviders as EnzymeComponentType<{}>,
     });
     wrapper.find('[data-test-subj="ruleSwitch"]').at(2).simulate('click');
 

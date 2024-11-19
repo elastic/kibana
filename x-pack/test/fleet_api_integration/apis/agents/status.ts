@@ -217,7 +217,6 @@ export default function ({ getService }: FtrProviderContext) {
         results: {
           events: 0,
           other: 0,
-          total: 8,
           online: 2,
           active: 8,
           all: 11,
@@ -228,10 +227,6 @@ export default function ({ getService }: FtrProviderContext) {
           unenrolled: 1,
         },
       });
-    });
-
-    it('should work with deprecated api', async () => {
-      await supertest.get(`/api/fleet/agent-status`).set('kbn-xsrf', 'xxxx').expect(200);
     });
 
     it('should work with adequate package privileges', async () => {
@@ -296,7 +291,6 @@ export default function ({ getService }: FtrProviderContext) {
         results: {
           events: 0,
           other: 0,
-          total: 10,
           online: 3,
           active: 10,
           all: 11,
@@ -327,14 +321,14 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
     });
 
-    it('should return 400 if passed kuery has non existing parameters', async () => {
+    it('with enableStrictKQLValidation should return 400 if passed kuery has non existing parameters', async () => {
       await supertest
         .get(`/api/fleet/agent_status?kuery=fleet-agents.non_existent_parameter:healthy`)
         .set('kbn-xsrf', 'xxxx')
         .expect(400);
     });
 
-    it('should return 400 if passed kuery is not correct', async () => {
+    it('with enableStrictKQLValidation should return 400 if passed kuery is not correct', async () => {
       await supertest
         .get(`/api/fleet/agent_status?kuery='test%3A'`)
         .set('kbn-xsrf', 'xxxx')

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTitle } from '@elastic/eui';
@@ -49,4 +50,6 @@ export const DatafeedSectionTitle: FC = () => (
   </EuiTitle>
 );
 
-export const Italic: FC = ({ children }) => <span style={{ fontStyle: 'italic' }}>{children}</span>;
+export const Italic: FC<PropsWithChildren<unknown>> = ({ children }) => (
+  <span style={{ fontStyle: 'italic' }}>{children}</span>
+);

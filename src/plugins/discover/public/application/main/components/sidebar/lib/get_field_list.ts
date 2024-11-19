@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { difference } from 'lodash';
 import { type DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/public';
 import { isNestedFieldParent } from '@kbn/discover-utils';
@@ -61,20 +63,11 @@ export function getDataViewFieldList(
   return [...dataViewFields, ...unknownFields];
 }
 
-export function getTextBasedQueryFieldList(
-  textBasedQueryColumns?: DatatableColumn[]
-): DataViewField[] {
-  if (!textBasedQueryColumns) {
+export function getEsqlQueryFieldList(esqlQueryColumns?: DatatableColumn[]): DataViewField[] {
+  if (!esqlQueryColumns) {
     return [];
   }
-  return textBasedQueryColumns.map(
-    (column) =>
-      new DataViewField({
-        name: column.name,
-        type: column.meta?.type ?? 'unknown',
-        searchable: false,
-        aggregatable: false,
-        isNull: Boolean(column?.isNull),
-      })
+  return esqlQueryColumns.map(
+    (column) => new DataViewField(convertDatatableColumnToDataViewFieldSpec(column))
   );
 }

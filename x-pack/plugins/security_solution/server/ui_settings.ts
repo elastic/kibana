@@ -19,6 +19,7 @@ import {
   DEFAULT_INDEX_PATTERN,
   DEFAULT_INTERVAL_PAUSE,
   DEFAULT_INTERVAL_VALUE,
+  DEFAULT_MAX_UNASSOCIATED_NOTES,
   DEFAULT_RULE_REFRESH_INTERVAL_ON,
   DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
   DEFAULT_RULES_TABLE_REFRESH_SETTING,
@@ -28,6 +29,7 @@ import {
   ENABLE_NEWS_FEED_SETTING,
   IP_REPUTATION_LINKS_SETTING,
   IP_REPUTATION_LINKS_SETTING_DEFAULT,
+  MAX_UNASSOCIATED_NOTES,
   NEWS_FEED_URL_SETTING,
   NEWS_FEED_URL_SETTING_DEFAULT,
   ENABLE_CCS_READ_WARNING_SETTING,
@@ -36,8 +38,9 @@ import {
   EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING,
   DEFAULT_ALERT_TAGS_KEY,
   DEFAULT_ALERT_TAGS_VALUE,
-  ENABLE_EXPANDABLE_FLYOUT_SETTING,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
+  EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION,
+  ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';
@@ -76,6 +79,7 @@ export const initUiSettings = (
         {
           defaultMessage:
             '<p>Default refresh interval for the Security time filter, in milliseconds.</p>',
+          values: { p: (chunks) => `<p>${chunks}</p>` },
         }
       ),
       category: [APP_ID],
@@ -96,6 +100,7 @@ export const initUiSettings = (
 }`,
       description: i18n.translate('xpack.securitySolution.uiSettings.defaultTimeRangeDescription', {
         defaultMessage: '<p>Default period of time in the Security time filter.</p>',
+        values: { p: (chunks) => `<p>${chunks}</p>` },
       }),
       category: [APP_ID],
       requiresPageReload: true,
@@ -114,6 +119,7 @@ export const initUiSettings = (
       description: i18n.translate('xpack.securitySolution.uiSettings.defaultIndexDescription', {
         defaultMessage:
           '<p>Comma-delimited list of Elasticsearch indices from which the Security app collects events.</p>',
+        values: { p: (chunks) => `<p>${chunks}</p>` },
       }),
       category: [APP_ID],
       requiresPageReload: true,
@@ -132,6 +138,7 @@ export const initUiSettings = (
         {
           defaultMessage:
             '<p>Comma-delimited list of Threat Intelligence indices from which the Security app collects indicators.</p>',
+          values: { p: (chunks) => `<p>${chunks}</p>` },
         }
       ),
       category: [APP_ID],
@@ -151,6 +158,7 @@ export const initUiSettings = (
         {
           defaultMessage:
             '<p>Value above which Machine Learning job anomalies are displayed in the Security app.</p><p>Valid values: 0 to 100.</p>',
+          values: { p: (chunks) => `<p>${chunks}</p>` },
         }
       ),
       category: [APP_ID],
@@ -164,23 +172,8 @@ export const initUiSettings = (
       value: true,
       description: i18n.translate('xpack.securitySolution.uiSettings.enableNewsFeedDescription', {
         defaultMessage: '<p>Enables the News feed</p>',
+        values: { p: (chunks) => `<p>${chunks}</p>` },
       }),
-      type: 'boolean',
-      category: [APP_ID],
-      requiresPageReload: true,
-      schema: schema.boolean(),
-    },
-    [ENABLE_EXPANDABLE_FLYOUT_SETTING]: {
-      name: i18n.translate('xpack.securitySolution.uiSettings.enableExpandableFlyoutLabel', {
-        defaultMessage: 'Expandable flyout',
-      }),
-      value: true,
-      description: i18n.translate(
-        'xpack.securitySolution.uiSettings.enableExpandableFlyoutDescription',
-        {
-          defaultMessage: '<p>Enables the expandable flyout</p>',
-        }
-      ),
       type: 'boolean',
       category: [APP_ID],
       requiresPageReload: true,
@@ -199,6 +192,25 @@ export const initUiSettings = (
         {
           defaultMessage:
             '<p>When enabled, cold and frozen tiers will be skipped in analyzer queries</p>',
+          values: { p: (chunks) => `<p>${chunks}</p>` },
+        }
+      ),
+      type: 'boolean',
+      category: [APP_ID],
+      requiresPageReload: true,
+      schema: schema.boolean(),
+    },
+    [ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING]: {
+      name: i18n.translate('xpack.securitySolution.uiSettings.enableVisualizationsInFlyoutLabel', {
+        defaultMessage: 'Enable visualizations in flyout',
+      }),
+      value: false,
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.enableVisualizationsInFlyoutDescription',
+        {
+          defaultMessage:
+            '<em>[technical preview]</em> Enable visualizations (analyzer and session viewer) in flyout.',
+          values: { em: (chunks) => `<em>${chunks}</em>` },
         }
       ),
       type: 'boolean',
@@ -215,6 +227,7 @@ export const initUiSettings = (
         {
           defaultMessage:
             '<p>Enables auto refresh on the rules and monitoring tables, in milliseconds</p>',
+          values: { p: (chunks) => `<p>${chunks}</p>` },
         }
       ),
       type: 'json',
@@ -237,6 +250,7 @@ export const initUiSettings = (
       sensitive: true,
       description: i18n.translate('xpack.securitySolution.uiSettings.newsFeedUrlDescription', {
         defaultMessage: '<p>News feed content will be retrieved from this URL</p>',
+        values: { p: (chunks) => `<p>${chunks}</p>` },
       }),
       category: [APP_ID],
       requiresPageReload: true,
@@ -272,6 +286,7 @@ export const initUiSettings = (
       value: true,
       description: i18n.translate('xpack.securitySolution.uiSettings.enableCcsWarningDescription', {
         defaultMessage: '<p>Enables privilege check warnings in rules for CCS indices</p>',
+        values: { p: (chunks) => `<p>${chunks}</p>` },
       }),
       type: 'boolean',
       category: [APP_ID],
@@ -287,6 +302,7 @@ export const initUiSettings = (
         'xpack.securitySolution.uiSettings.showRelatedIntegrationsDescription',
         {
           defaultMessage: '<p>Shows related integrations on the rules and monitoring tables</p>',
+          values: { p: (chunks) => `<p>${chunks}</p>` },
         }
       ),
       type: 'boolean',
@@ -303,10 +319,56 @@ export const initUiSettings = (
       description: i18n.translate('xpack.securitySolution.uiSettings.defaultAlertTagsDescription', {
         defaultMessage:
           '<p>List of tag options for use with alerts generated by Security Solution rules.</p>',
+        values: { p: (chunks) => `<p>${chunks}</p>` },
       }),
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.arrayOf(schema.string()),
+    },
+    [MAX_UNASSOCIATED_NOTES]: {
+      name: i18n.translate('xpack.securitySolution.uiSettings.maxUnassociatedNotesLabel', {
+        defaultMessage: 'Maximum amount of unassociated notes',
+      }),
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.maxUnassociatedNotesDescription',
+        {
+          defaultMessage:
+            'Defines the maximum amount of unassociated notes (notes that are not assigned to a timeline) that can be created.',
+        }
+      ),
+      type: 'number',
+      value: DEFAULT_MAX_UNASSOCIATED_NOTES,
+      schema: schema.number({
+        min: 1,
+        max: 1000,
+        defaultValue: DEFAULT_MAX_UNASSOCIATED_NOTES,
+      }),
+      category: [APP_ID],
+      requiresPageReload: false,
+    },
+    [EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION]: {
+      name: i18n.translate(
+        'xpack.securitySolution.uiSettings.excludedDataTiersForRuleExecutionLabel',
+        {
+          defaultMessage: 'Exclude cold or frozen data tier from rule execution',
+        }
+      ),
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.excludedDataTiersForRuleExecutionDescription',
+        {
+          defaultMessage: `
+          When configured, events from the specified data tiers are not searched during rules executions.
+          <br/>This might help to improve rule performance or reduce execution time.
+          <br/>If you specify multiple data tiers, separate values with commas. For example: data_frozen,data_cold`,
+        }
+      ),
+      type: 'array',
+      schema: schema.arrayOf(
+        schema.oneOf([schema.literal('data_cold'), schema.literal('data_frozen')])
+      ),
+      value: [],
+      category: [APP_ID],
+      requiresPageReload: false,
     },
     ...(experimentalFeatures.extendedRuleExecutionLoggingEnabled
       ? {
@@ -322,6 +384,7 @@ export const initUiSettings = (
               {
                 defaultMessage:
                   '<p>Enables extended rule execution logging to .kibana-event-log-* indices. Shows plain execution events on the Rule Details page.</p>',
+                values: { p: (chunks) => `<p>${chunks}</p>` },
               }
             ),
             type: 'boolean',
@@ -342,6 +405,7 @@ export const initUiSettings = (
               {
                 defaultMessage:
                   '<p>Sets minimum log level starting from which rules will write extended logs to .kibana-event-log-* indices. This affects only events of type Message, other events are being written to .kibana-event-log-* regardless of this setting and their log level.</p>',
+                values: { p: (chunks) => `<p>${chunks}</p>` },
               }
             ),
             type: 'select',

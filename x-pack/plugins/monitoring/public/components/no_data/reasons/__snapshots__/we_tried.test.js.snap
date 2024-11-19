@@ -10,7 +10,7 @@ exports[`WeTried should render "we tried" message 1`] = `
     We couldn't activate monitoring
   </h2>
   <hr
-    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge emotion-euiHorizontalRule-half-l"
+    class="euiHorizontalRule emotion-euiHorizontalRule-half-l"
   />
   <div
     class="euiText eui-textLeft emotion-euiText-m"

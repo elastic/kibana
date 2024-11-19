@@ -3095,6 +3095,7 @@ describe('IndexPattern Data Source', () => {
               "longMessage": "error 1",
               "severity": "error",
               "shortMessage": "",
+              "uniqueId": "error 1",
             },
             Object {
               "displayLocations": Array [
@@ -3106,6 +3107,7 @@ describe('IndexPattern Data Source', () => {
               "longMessage": "error 2",
               "severity": "error",
               "shortMessage": "",
+              "uniqueId": "error 2",
             },
           ]
         `);
@@ -3146,20 +3148,19 @@ describe('IndexPattern Data Source', () => {
                 },
               ],
               "fixableInEditor": true,
-              "longMessage": <FormattedMessage
+              "longMessage": <Memo(MemoizedFormattedMessage)
                 defaultMessage="Layer {position} error: {wrappedMessage}"
                 id="xpack.lens.indexPattern.layerErrorWrapper"
                 values={
                   Object {
                     "position": 1,
-                    "wrappedMessage": <React.Fragment>
-                      error 1
-                    </React.Fragment>,
+                    "wrappedMessage": "error 1",
                   }
                 }
               />,
               "severity": "error",
               "shortMessage": "Layer 1 error: ",
+              "uniqueId": "error 1",
             },
             Object {
               "displayLocations": Array [
@@ -3168,20 +3169,19 @@ describe('IndexPattern Data Source', () => {
                 },
               ],
               "fixableInEditor": true,
-              "longMessage": <FormattedMessage
+              "longMessage": <Memo(MemoizedFormattedMessage)
                 defaultMessage="Layer {position} error: {wrappedMessage}"
                 id="xpack.lens.indexPattern.layerErrorWrapper"
                 values={
                   Object {
                     "position": 1,
-                    "wrappedMessage": <React.Fragment>
-                      error 2
-                    </React.Fragment>,
+                    "wrappedMessage": "error 2",
                   }
                 }
               />,
               "severity": "error",
               "shortMessage": "Layer 1 error: ",
+              "uniqueId": "error 2",
             },
           ]
         `);
@@ -3248,6 +3248,7 @@ describe('IndexPattern Data Source', () => {
                 </p>,
                 "severity": "error",
                 "shortMessage": "",
+                "uniqueId": "editor_invalid_dimension",
               },
             ]
           `);
@@ -3286,6 +3287,7 @@ describe('IndexPattern Data Source', () => {
                 </React.Fragment>,
                 "severity": "error",
                 "shortMessage": "",
+                "uniqueId": undefined,
               },
             ]
           `);
@@ -3424,7 +3426,7 @@ describe('IndexPattern Data Source', () => {
         return onlyWarnings.map(({ longMessage }) =>
           isFragment(longMessage)
             ? (longMessage as ReactElement).props.children[0].props.id
-            : (longMessage as ReactElement).props.id
+            : (longMessage as unknown as ReactElement).props.id
         );
       };
 

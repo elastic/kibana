@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -28,35 +29,13 @@ const HUMAN_FRIENDLY = 'humanize';
 const HUMAN_FRIENDLY_PRECISE = 'humanizePrecise';
 const DEFAULT_OUTPUT_PRECISION = 2;
 
-function parseInputAsDuration(val: number, inputFormat: string) {
+function parseInputAsDuration(val: number, inputFormat: string, humanPrecise: boolean) {
   const ratio = ratioToSeconds[inputFormat] || 1;
   const kind = (
     inputFormat in ratioToSeconds ? 'seconds' : inputFormat
   ) as unitOfTime.DurationConstructor;
-  return moment.duration(val * ratio, kind);
-}
-
-function formatInputHumanPrecise(
-  val: number,
-  inputFormat: string,
-  outputPrecision: number,
-  useShortSuffix: boolean,
-  includeSpace: string
-) {
-  const ratio = ratioToSeconds[inputFormat] || 1;
-  const kind = (
-    inputFormat in ratioToSeconds ? 'seconds' : inputFormat
-  ) as unitOfTime.DurationConstructor;
-  const valueInDuration = moment.duration(val * ratio, kind);
-
-  return formatDuration(
-    val,
-    valueInDuration,
-    inputFormat,
-    outputPrecision,
-    useShortSuffix,
-    includeSpace
-  );
+  const value = humanPrecise && val < 0 ? Math.abs(val * ratio) : val * ratio;
+  return moment.duration(value, kind);
 }
 
 export class DurationFormat extends FieldFormat {
@@ -112,12 +91,12 @@ export class DurationFormat extends FieldFormat {
           }) + ' '
         : '';
 
-    const duration = parseInputAsDuration(val, inputFormat) as Record<keyof Duration, Function>;
+    const duration = parseInputAsDuration(val, inputFormat, humanPrecise);
     const formatted = humanPrecise
-      ? formatInputHumanPrecise(val, inputFormat, outputPrecision, useShortSuffix, includeSpace)
-      : duration[outputFormat]();
+      ? formatDurationHumanPrecise(duration, outputPrecision, useShortSuffix, includeSpace, val < 0)
+      : (duration[outputFormat] as Function)();
 
-    const precise = human || humanPrecise ? formatted : formatted.toFixed(outputPrecision);
+    const precise = human || humanPrecise ? formatted : Number(formatted).toFixed(outputPrecision);
     const type = DURATION_OUTPUT_FORMATS.find(({ method }) => method === outputFormat);
 
     const unitText = useShortSuffix ? type?.shortText : type?.text.toLowerCase();
@@ -128,53 +107,41 @@ export class DurationFormat extends FieldFormat {
   };
 }
 
-function formatDuration(
-  val: number,
+// Array of units is to find the first unit duration value that is not 0
+const units = [
+  { seconds: 31536000, method: 'asYears' },
+  // Note: 30 days is used as a month in the duration format
+  { seconds: 2592000, method: 'asMonths' },
+  { seconds: 604800, method: 'asWeeks' },
+  { seconds: 86400, method: 'asDays' },
+  { seconds: 3600, method: 'asHours' },
+  { seconds: 60, method: 'asMinutes' },
+  { seconds: 1, method: 'asSeconds' },
+  { seconds: 0.001, method: 'asMilliseconds' },
+];
+
+function formatDurationHumanPrecise(
   duration: moment.Duration,
-  inputFormat: string,
   outputPrecision: number,
   useShortSuffix: boolean,
-  includeSpace: string
+  includeSpace: string,
+  negativeValue: boolean
 ) {
   // return nothing when the duration is falsy or not correctly parsed (P0D)
   if (!duration || !duration.isValid()) return;
-  const units = [
-    { unit: duration.years(), nextUnitRate: 12, method: 'asYears' },
-    { unit: duration.months(), nextUnitRate: 4, method: 'asMonths' },
-    { unit: duration.weeks(), nextUnitRate: 7, method: 'asWeeks' },
-    { unit: duration.days(), nextUnitRate: 24, method: 'asDays' },
-    { unit: duration.hours(), nextUnitRate: 60, method: 'asHours' },
-    { unit: duration.minutes(), nextUnitRate: 60, method: 'asMinutes' },
-    { unit: duration.seconds(), nextUnitRate: 1000, method: 'asSeconds' },
-    { unit: duration.milliseconds(), nextUnitRate: 1000, method: 'asMilliseconds' },
-  ];
+  const valueInSeconds = duration.as('seconds');
 
   const getUnitText = (method: string) => {
     const type = DURATION_OUTPUT_FORMATS.find(({ method: methodT }) => method === methodT);
     return useShortSuffix ? type?.shortText : type?.text.toLowerCase();
   };
 
-  for (let i = 0; i < units.length; i++) {
-    const unitValue = units[i].unit;
-    if (unitValue >= 1) {
-      const unitText = getUnitText(units[i].method);
-
-      const value = Math.floor(unitValue);
-      if (units?.[i + 1]) {
-        const decimalPointValue = Math.floor(units[i + 1].unit);
-        return (
-          (value + decimalPointValue / units[i].nextUnitRate).toFixed(outputPrecision) +
-          includeSpace +
-          unitText
-        );
-      } else {
-        return unitValue.toFixed(outputPrecision) + includeSpace + unitText;
-      }
+  for (const unit of units) {
+    const unitValue = valueInSeconds / unit.seconds;
+    if (unitValue >= 1 || unit === units[units.length - 1]) {
+      // return a value if it's the first iteration where the value > 1, or the last iteration
+      const prefix = negativeValue ? '-' : '';
+      return prefix + unitValue.toFixed(outputPrecision) + includeSpace + getUnitText(unit.method);
     }
   }
-
-  const unitValue = units[units.length - 1].unit;
-  const unitText = getUnitText(units[units.length - 1].method);
-
-  return unitValue.toFixed(outputPrecision) + includeSpace + unitText;
 }

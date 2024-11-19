@@ -34,6 +34,9 @@ export function createConfig(
     encryptionKey = crypto.randomBytes(16).toString('hex');
   }
 
+  const hashedEncryptionKey = crypto.createHash('sha3-256').update(encryptionKey).digest('base64');
+  logger.info(`Hashed 'xpack.reporting.encryptionKey' for this instance: ${hashedEncryptionKey}`);
+
   const { kibanaServer: reportingServer } = config;
   const serverInfo = core.http.getServerInfo();
   // set kibanaServer.hostname, default to server.host, don't allow "0.0.0.0" as it breaks in Windows
@@ -45,10 +48,7 @@ export function createConfig(
     ipaddr.isValid(kibanaServerHostname) &&
     !sum(ipaddr.parse(kibanaServerHostname).toByteArray())
   ) {
-    logger.info(
-      `Overriding server host address "0.0.0.0" in Reporting runtime config,` +
-        ` using "xpack.reporting.kibanaServer.hostname: localhost".`
-    );
+    // A silent override to use "localhost" instead of "0.0.0.0" for connection of the headless browser
     kibanaServerHostname = 'localhost';
   }
   // kibanaServer.port, default to server.port

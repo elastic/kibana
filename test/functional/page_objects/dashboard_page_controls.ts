@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -11,7 +12,7 @@ import {
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
 } from '@kbn/controls-plugin/common';
-import { ControlGroupChainingSystem } from '@kbn/controls-plugin/common/control_group/types';
+import { ControlGroupChainingSystem } from '@kbn/controls-plugin/common';
 import { OptionsListSearchTechnique } from '@kbn/controls-plugin/common/options_list/suggestions_searching';
 import { OptionsListSortingType } from '@kbn/controls-plugin/common/options_list/suggestions_sorting';
 import expect from '@kbn/expect';
@@ -65,7 +66,9 @@ export class DashboardPageControls extends FtrService {
   public async getAllControlIds() {
     const controlFrames = await this.testSubjects.findAll('control-frame');
     const ids = await Promise.all(
-      controlFrames.map(async (controlFrame) => await controlFrame.getAttribute('data-control-id'))
+      controlFrames.map(
+        async (controlFrame) => (await controlFrame.getAttribute('data-control-id')) ?? ''
+      )
     );
     this.log.debug('Got all control ids:', ids);
     return ids;
@@ -93,7 +96,7 @@ export class DashboardPageControls extends FtrService {
   public async clearAllControls() {
     const controlIds = await this.getAllControlIds();
     for (const controlId of controlIds) {
-      await this.removeExistingControl(controlId);
+      if (controlId) await this.removeExistingControl(controlId);
     }
   }
 
@@ -162,7 +165,8 @@ export class DashboardPageControls extends FtrService {
       false: 'NONE',
     };
 
-    const switchState = await this.testSubjects.getAttribute('control-group-chaining', 'checked');
+    const switchState =
+      (await this.testSubjects.getAttribute('control-group-chaining', 'checked')) ?? '';
     if (chainingSystem !== switchStateToChainingSystem[switchState]) {
       await this.testSubjects.click('control-group-chaining');
     }
@@ -201,6 +205,34 @@ export class DashboardPageControls extends FtrService {
     await this.openControlGroupSettingsFlyout();
     await this.setSwitchState(syncTimeRange, 'control-group-query-sync-time-range');
     await this.testSubjects.click('control-group-editor-save');
+  }
+
+  public async updateShowApplyButtonSetting(showApplyButton: boolean) {
+    this.log.debug(`Update show apply button setting to ${showApplyButton}`);
+    await this.openControlGroupSettingsFlyout();
+    // the "showApplyButton" toggle has in inverse relationship with the `showApplyButton` seting - so, negate `showApplyButton`
+    await this.setSwitchState(!showApplyButton, 'control-group-auto-apply-selections');
+    await this.testSubjects.click('control-group-editor-save');
+  }
+
+  public async clickApplyButton() {
+    this.log.debug('Clicking the apply button');
+    await this.verifyApplyButtonEnabled();
+
+    const applyButton = await this.testSubjects.find('controlGroup--applyFiltersButton');
+    await applyButton.click();
+
+    await this.verifyApplyButtonEnabled(false);
+  }
+
+  public async verifyApplyButtonEnabled(enabled: boolean = true) {
+    this.log.debug(
+      `Checking that control group apply button is ${enabled ? 'enabled' : 'not enabled'}`
+    );
+    const applyButton = await this.testSubjects.find('controlGroup--applyFiltersButton');
+    await this.retry.try(async () => {
+      expect(await applyButton.isEnabled()).to.be(enabled);
+    });
   }
 
   /* -----------------------------------------------------------
@@ -404,7 +436,7 @@ export class DashboardPageControls extends FtrService {
     this.log.debug(`getting available options count from options list`);
     await this.optionsListPopoverWaitForLoading();
     const availableOptions = await this.testSubjects.find(`optionsList-control-available-options`);
-    return +(await availableOptions.getAttribute('data-option-count'));
+    return +((await availableOptions.getAttribute('data-option-count')) ?? '0');
   }
 
   public async optionsListPopoverGetAvailableOptions() {
@@ -444,7 +476,11 @@ export class DashboardPageControls extends FtrService {
     await this.optionsListWaitForLoading(controlId);
     if (!skipOpen) await this.optionsListOpenPopover(controlId);
     await this.retry.try(async () => {
-      expect(await this.optionsListPopoverGetAvailableOptions()).to.eql(expectation);
+      const availableOptions = await this.optionsListPopoverGetAvailableOptions();
+      expect(availableOptions.suggestions).to.eql(expectation.suggestions);
+      expect(availableOptions.invalidSelections.sort()).to.eql(
+        expectation.invalidSelections.sort()
+      );
     });
     if (await this.testSubjects.exists('optionsList-cardinality-label')) {
       expect(await this.optionsListGetCardinalityValue()).to.be(
@@ -465,7 +501,9 @@ export class DashboardPageControls extends FtrService {
   public async optionsListPopoverSearchForOption(search: string) {
     this.log.debug(`searching for ${search} in options list`);
     await this.optionsListPopoverAssertOpen();
-    await this.testSubjects.setValue(`optionsList-control-search-input`, search);
+    await this.testSubjects.setValue(`optionsList-control-search-input`, search, {
+      typeCharByChar: true,
+    });
     await this.optionsListPopoverWaitForLoading();
   }
 
@@ -607,7 +645,7 @@ export class DashboardPageControls extends FtrService {
     selectedType?: string;
   }) {
     this.log.debug(`Verifying that control types match what is expected for the selected field`);
-    asyncForEach(supportedTypes, async (type) => {
+    await asyncForEach(supportedTypes, async (type) => {
       const controlTypeItem = await this.testSubjects.find(`create__${type}`);
       expect(await controlTypeItem.isEnabled()).to.be(true);
       if (type === selectedType) {
@@ -670,6 +708,10 @@ export class DashboardPageControls extends FtrService {
         `range-slider-control-${controlId} > rangeSlider__lowerBoundFieldNumber`,
         value
       );
+      await this.testSubjects.pressEnter(
+        // force the change without waiting for the debounce
+        `range-slider-control-${controlId} > rangeSlider__lowerBoundFieldNumber`
+      );
       expect(await this.rangeSliderGetLowerBoundAttribute(controlId, 'value')).to.be(value);
     });
   }
@@ -680,6 +722,10 @@ export class DashboardPageControls extends FtrService {
       await this.testSubjects.setValue(
         `range-slider-control-${controlId} > rangeSlider__upperBoundFieldNumber`,
         value
+      );
+      await this.testSubjects.pressEnter(
+        // force the change without waiting for the debounce
+        `range-slider-control-${controlId} > rangeSlider__upperBoundFieldNumber`
       );
       expect(await this.rangeSliderGetUpperBoundAttribute(controlId, 'value')).to.be(value);
     });

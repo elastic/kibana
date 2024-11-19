@@ -14,9 +14,8 @@ import { render, waitFor, screen } from '@testing-library/react';
 import { isDiscoverActionDisabled, DiscoverActionName } from './discover_action_name';
 
 import transformListRow from '../../../../common/__mocks__/transform_list_row.json';
-import { TransformListRowWithStats } from '../../../../common/transform_list';
+import type { TransformListRowWithStats } from '../../../../common/transform_list';
 
-jest.mock('../../../../../shared_imports');
 jest.mock('../../../../app_dependencies');
 
 // @ts-expect-error mock data is too loosely typed

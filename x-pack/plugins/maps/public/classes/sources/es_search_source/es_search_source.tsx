@@ -19,12 +19,7 @@ import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { SortDirection, SortDirectionNumeric } from '@kbn/data-plugin/common';
 import { getTileUrlParams } from '@kbn/maps-vector-tile-utils';
 import { AbstractESSource } from '../es_source';
-import {
-  getHttp,
-  getSearchService,
-  getSecurityService,
-  getTimeFilter,
-} from '../../../kibana_services';
+import { getCore, getHttp, getSearchService, getTimeFilter } from '../../../kibana_services';
 import {
   addFieldToDSL,
   getField,
@@ -532,7 +527,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     if (!(await this._isDrawingIndex())) {
       return {};
     }
-    const user = await getSecurityService()?.authc.getCurrentUser();
+    const user = await getCore().security.authc.getCurrentUser();
     const timestamp = new Date().toISOString();
     return {
       created: {
@@ -700,6 +695,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       );
     }
 
+    // @ts-expect-error hit's type is `SearchHit<{}>` while `flattenHit` expects `Record<string, unknown[]>`
     const properties = indexPattern.flattenHit(hit) as Record<string, string>;
     indexPattern.metaFields.forEach((metaField: string) => {
       if (!this._getTooltipPropertyNames().includes(metaField)) {

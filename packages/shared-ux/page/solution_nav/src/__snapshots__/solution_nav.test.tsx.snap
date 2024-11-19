@@ -16,7 +16,7 @@ exports[`SolutionNav accepts EuiSideNavProps 1`] = `
       >
         <h2>
           <strong>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="{solutionName} {menuText}"
               id="sharedUXPackages.solutionNav.mobileTitleText"
               values={
@@ -36,7 +36,7 @@ exports[`SolutionNav accepts EuiSideNavProps 1`] = `
       color="transparent"
       paddingSize="s"
     >
-      <EuiSideNav
+      <EuiSideNavClass
         aria-hidden={true}
         aria-labelledby="SolutionNav_generated-id_heading"
         data-test-subj="DTS"
@@ -108,7 +108,7 @@ exports[`SolutionNav accepts EuiSideNavProps 1`] = `
     >
       <h2>
         <strong>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="{solutionName} {menuText}"
             id="sharedUXPackages.solutionNav.mobileTitleText"
             values={
@@ -124,7 +124,7 @@ exports[`SolutionNav accepts EuiSideNavProps 1`] = `
     <EuiSpacer
       size="l"
     />
-    <EuiSideNav
+    <EuiSideNavClass
       aria-hidden={true}
       aria-labelledby="SolutionNav_generated-id_heading"
       data-test-subj="DTS"
@@ -207,7 +207,7 @@ exports[`SolutionNav accepts canBeCollapsed prop 1`] = `
       >
         <h2>
           <strong>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="{solutionName} {menuText}"
               id="sharedUXPackages.solutionNav.mobileTitleText"
               values={
@@ -227,7 +227,7 @@ exports[`SolutionNav accepts canBeCollapsed prop 1`] = `
       color="transparent"
       paddingSize="s"
     >
-      <EuiSideNav
+      <EuiSideNavClass
         aria-hidden={true}
         aria-labelledby="SolutionNav_generated-id_heading"
         items={
@@ -298,7 +298,7 @@ exports[`SolutionNav accepts canBeCollapsed prop 1`] = `
     >
       <h2>
         <strong>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="{solutionName} {menuText}"
             id="sharedUXPackages.solutionNav.mobileTitleText"
             values={
@@ -314,7 +314,7 @@ exports[`SolutionNav accepts canBeCollapsed prop 1`] = `
     <EuiSpacer
       size="l"
     />
-    <EuiSideNav
+    <EuiSideNavClass
       aria-hidden={true}
       aria-labelledby="SolutionNav_generated-id_heading"
       items={
@@ -396,7 +396,7 @@ exports[`SolutionNav accepts canBeCollapsed prop 2`] = `
       >
         <h2>
           <strong>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="{solutionName} {menuText}"
               id="sharedUXPackages.solutionNav.mobileTitleText"
               values={
@@ -416,7 +416,7 @@ exports[`SolutionNav accepts canBeCollapsed prop 2`] = `
       color="transparent"
       paddingSize="s"
     >
-      <EuiSideNav
+      <EuiSideNavClass
         aria-hidden={false}
         aria-labelledby="SolutionNav_generated-id_heading"
         items={
@@ -487,7 +487,7 @@ exports[`SolutionNav accepts canBeCollapsed prop 2`] = `
     >
       <h2>
         <strong>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="{solutionName} {menuText}"
             id="sharedUXPackages.solutionNav.mobileTitleText"
             values={
@@ -503,7 +503,7 @@ exports[`SolutionNav accepts canBeCollapsed prop 2`] = `
     <EuiSpacer
       size="l"
     />
-    <EuiSideNav
+    <EuiSideNavClass
       aria-hidden={false}
       aria-labelledby="SolutionNav_generated-id_heading"
       items={
@@ -582,7 +582,7 @@ exports[`SolutionNav heading accepts more headingProps 1`] = `
       >
         <h3>
           <strong>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="{solutionName} {menuText}"
               id="sharedUXPackages.solutionNav.mobileTitleText"
               values={
@@ -613,7 +613,7 @@ exports[`SolutionNav heading accepts more headingProps 1`] = `
     >
       <h3>
         <strong>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="{solutionName} {menuText}"
             id="sharedUXPackages.solutionNav.mobileTitleText"
             values={
@@ -652,7 +652,7 @@ exports[`SolutionNav renders 1`] = `
       >
         <h2>
           <strong>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="{solutionName} {menuText}"
               id="sharedUXPackages.solutionNav.mobileTitleText"
               values={
@@ -672,7 +672,7 @@ exports[`SolutionNav renders 1`] = `
       color="transparent"
       paddingSize="s"
     >
-      <EuiSideNav
+      <EuiSideNavClass
         aria-hidden={true}
         aria-labelledby="SolutionNav_generated-id_heading"
         items={
@@ -743,7 +743,7 @@ exports[`SolutionNav renders 1`] = `
     >
       <h2>
         <strong>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="{solutionName} {menuText}"
             id="sharedUXPackages.solutionNav.mobileTitleText"
             values={
@@ -759,7 +759,7 @@ exports[`SolutionNav renders 1`] = `
     <EuiSpacer
       size="l"
     />
-    <EuiSideNav
+    <EuiSideNavClass
       aria-hidden={true}
       aria-labelledby="SolutionNav_generated-id_heading"
       items={
@@ -846,7 +846,7 @@ exports[`SolutionNav renders with icon 1`] = `
             name="Solution"
           />
           <strong>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="{solutionName} {menuText}"
               id="sharedUXPackages.solutionNav.mobileTitleText"
               values={
@@ -866,7 +866,7 @@ exports[`SolutionNav renders with icon 1`] = `
       color="transparent"
       paddingSize="s"
     >
-      <EuiSideNav
+      <EuiSideNavClass
         aria-hidden={true}
         aria-labelledby="SolutionNav_generated-id_heading"
         items={
@@ -942,7 +942,7 @@ exports[`SolutionNav renders with icon 1`] = `
           name="Solution"
         />
         <strong>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="{solutionName} {menuText}"
             id="sharedUXPackages.solutionNav.mobileTitleText"
             values={
@@ -958,7 +958,7 @@ exports[`SolutionNav renders with icon 1`] = `
     <EuiSpacer
       size="l"
     />
-    <EuiSideNav
+    <EuiSideNavClass
       aria-hidden={true}
       aria-labelledby="SolutionNav_generated-id_heading"
       items={

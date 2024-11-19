@@ -12,7 +12,12 @@ import {
   BulkActionTypeEnum,
   BulkActionEditTypeEnum,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
-import { createRule, createAlertsIndex, deleteAllRules, deleteAllAlerts } from '../../../utils';
+import {
+  createRule,
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+} from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {

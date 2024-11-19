@@ -11,13 +11,11 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
-  const PageObjects = getPageObjects([
+  const { common, header, dashboard, home, maps, searchSessionsManagement } = getPageObjects([
     'common',
     'header',
     'dashboard',
-    'visChart',
     'home',
-    'timePicker',
     'maps',
     'searchSessionsManagement',
   ]);
@@ -30,33 +28,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('save a search sessions with relative time', () => {
     before(async () => {
-      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+      await common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
       });
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       // use sample data set because it has recent relative time range and bunch of different visualizations
-      await PageObjects.home.addSampleDataSet('flights');
+      await home.addSampleDataSet('flights');
       await retry.tryForTime(10000, async () => {
-        const isInstalled = await PageObjects.home.isSampleDataSetInstalled('flights');
+        const isInstalled = await home.isSampleDataSetInstalled('flights');
         expect(isInstalled).to.be(true);
       });
-      await PageObjects.common.navigateToApp('dashboard');
+      await common.navigateToApp('dashboard');
     });
 
     after(async () => {
-      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+      await common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
       });
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.home.removeSampleDataSet('flights');
-      const isInstalled = await PageObjects.home.isSampleDataSetInstalled('flights');
+      await header.waitUntilLoadingHasFinished();
+      await home.removeSampleDataSet('flights');
+      const isInstalled = await home.isSampleDataSetInstalled('flights');
       expect(isInstalled).to.be(false);
     });
 
     it('Saves and restores a session with relative time ranges', async () => {
-      await PageObjects.dashboard.loadSavedDashboard('[Flights] Global Flight Dashboard');
-      await PageObjects.dashboard.waitForRenderComplete();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await dashboard.loadSavedDashboard('[Flights] Global Flight Dashboard');
+      await dashboard.waitForRenderComplete();
+      await header.waitUntilLoadingHasFinished();
 
       await searchSessions.expectState('completed');
       await searchSessions.save();
@@ -65,14 +63,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await checkSampleDashboardLoaded('xyVisChart');
 
       // load URL to restore a saved session
-      await PageObjects.searchSessionsManagement.goTo();
-      const searchSessionList = await PageObjects.searchSessionsManagement.getList();
+      await searchSessionsManagement.goTo();
+      const searchSessionList = await searchSessionsManagement.getList();
 
       // navigate to dashboard
       await searchSessionList[0].view();
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.waitForRenderComplete();
+      await header.waitUntilLoadingHasFinished();
+      await dashboard.waitForRenderComplete();
       await checkSampleDashboardLoaded('xyVisChart');
 
       // Check that session is restored
@@ -99,7 +97,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await dashboardPanelActions.openInspectorByTitle('[Flights] Origin Time Delayed');
     await inspector.openInspectorView('Requests');
     const requestStats = await inspector.getTableData();
-    const totalHits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
+    const totalHits = maps.getInspectorStatRowHit(requestStats, 'Hits');
     expect(totalHits).to.equal('0');
     await inspector.close();
   }

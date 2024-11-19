@@ -19,8 +19,8 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { ClientConfigType } from '@kbn/reporting-public';
-import { ReportingAPIClient, DiagnoseResponse } from '../../lib/reporting_api_client';
+import { ClientConfigType, ReportingAPIClient } from '@kbn/reporting-public';
+import { DiagnoseResponse } from '@kbn/reporting-public/reporting_api_client';
 
 interface Props {
   apiClient: ReportingAPIClient;
@@ -100,17 +100,17 @@ export const ReportDiagnostic = ({ apiClient, clientConfig }: Props) => {
     if (state.success && chromeStatus === 'complete') {
       outcomeCallout = (
         <EuiCallOut
-          id="xpack.reporting.listing.diagnosticSuccessMessage"
+          data-test-subj="reportingDiagnosticSuccessCallout"
           color="success"
           title={i18n.translate('xpack.reporting.listing.diagnosticSuccessMessage', {
-            defaultMessage: 'Everything looks good for reporting to function.',
+            defaultMessage: 'Everything looks good for screenshot reports to function.',
           })}
         />
       );
-    } else if (!state.success && chromeStatus === 'complete') {
+    } else if (!state.success && chromeStatus === 'danger') {
       outcomeCallout = (
         <EuiCallOut
-          id="xpack.reporting.listing.diagnosticFailureTitle"
+          data-test-subj="reportingDiagnosticFailureCallout"
           iconType="warning"
           color="danger"
           title={i18n.translate('xpack.reporting.listing.diagnosticFailureTitle', {
@@ -121,7 +121,12 @@ export const ReportDiagnostic = ({ apiClient, clientConfig }: Props) => {
     }
 
     flyout = (
-      <EuiFlyout onClose={closeFlyout} aria-labelledby="reportingHelperTitle" size="m">
+      <EuiFlyout
+        onClose={closeFlyout}
+        data-test-subj="reportDiagnosisFlyout"
+        aria-labelledby="reportingHelperTitle"
+        size="m"
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>
@@ -161,6 +166,7 @@ export const ReportDiagnostic = ({ apiClient, clientConfig }: Props) => {
             onClick={apiWrapper(() => apiClient.verifyBrowser(), statuses.chromeStatus)}
             isLoading={isBusy && chromeStatus === 'incomplete'}
             iconType={chromeStatus === 'complete' ? 'check' : undefined}
+            data-test-subj="reportingDiagnosticInitiationButton"
           >
             <FormattedMessage
               id="xpack.reporting.listing.diagnosticBrowserButton"

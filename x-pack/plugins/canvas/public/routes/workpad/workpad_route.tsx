@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useCallback } from 'react';
+import React, { FC, PropsWithChildren, useEffect, useCallback } from 'react';
 import { Redirect, useParams } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { useDispatch } from 'react-redux';
@@ -33,6 +33,7 @@ export const WorkpadRoute = () => {
     <Route
       path={['/workpad/:id/page/:pageNumber', '/workpad/:id']}
       exact={false}
+      // @ts-expect-error @types/react@18 - match can be null
       children={(route: WorkpadRouteProps) => {
         return <WorkpadRouteComponent route={route} />;
       }}
@@ -82,6 +83,7 @@ export const ExportWorkpadRoute = () => {
   return (
     <Route
       path={'/export/workpad/pdf/:id/page/:pageNumber'}
+      // @ts-expect-error @types/react@18 - match can be null
       children={(route: WorkpadRouteProps) => {
         return <ExportWorkpadRouteComponent route={route} />;
       }}
@@ -110,7 +112,7 @@ const ExportWorkpadRouteComponent: FC<{ route: WorkpadRouteProps }> = ({ route: 
   );
 };
 
-export const ExportRouteManager: FC = ({ children }) => {
+export const ExportRouteManager: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const params = useParams<WorkpadPageRouteParams>();
   usePageSync();
 
@@ -123,7 +125,7 @@ export const ExportRouteManager: FC = ({ children }) => {
   return <>{children}</>;
 };
 
-export const WorkpadHistoryManager: FC = ({ children }) => {
+export const WorkpadHistoryManager: FC<PropsWithChildren<unknown>> = ({ children }) => {
   useRestoreHistory();
   useWorkpadHistory();
   usePageSync();

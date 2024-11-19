@@ -1,0 +1,77 @@
+{
+  "id": "@kbn/response-ops-feature-flag-service",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/response-ops-feature-flag-service",
+        "id": "def-common.createFeatureFlagService",
+        "type": "Function",
+        "tags": [],
+        "label": "createFeatureFlagService",
+        "description": [],
+        "signature": [
+          "<T extends string>(featureFlags: T[]) => FeatureFlag<T>"
+        ],
+        "path": "packages/response-ops/feature_flag_service/feature_flag_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-feature-flag-service",
+            "id": "def-common.createFeatureFlagService.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "featureFlags",
+            "description": [],
+            "signature": [
+              "T[]"
+            ],
+            "path": "packages/response-ops/feature_flag_service/feature_flag_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/response-ops-feature-flag-service",
+        "id": "def-common.FeatureFlagService",
+        "type": "Type",
+        "tags": [],
+        "label": "FeatureFlagService",
+        "description": [],
+        "signature": [
+          "FeatureFlag<T>"
+        ],
+        "path": "packages/response-ops/feature_flag_service/feature_flag_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

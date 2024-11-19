@@ -35,7 +35,7 @@
             "section": "def-common.SolutionSideNavProps",
             "text": "SolutionSideNavProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "x-pack/packages/security-solution/side_nav/src/index.tsx",
         "deprecated": false,

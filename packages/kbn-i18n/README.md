@@ -61,16 +61,11 @@ data to UI frameworks and provides methods for the direct translation.
 
 Here is the public API exposed by this engine:
 
-- `addTranslation(newTranslation: Translation, [locale: string])` - provides a way to register
-translations with the engine
 - `getTranslation()` - returns messages for the current language
 - `setLocale(locale: string)` - tells the engine which language to use by given
 language key
 - `getLocale()` - returns the current locale
-- `setDefaultLocale(locale: string)` - tells the library which language to fallback
 when missing translations
-- `getDefaultLocale()` - returns the default locale
-- `setFormats(formats: object)` - supplies a set of options to the underlying formatter.
 For the detailed explanation, see the section below
 - `getFormats()` - returns current formats
 - `getRegisteredLocales()` - returns array of locales having translations

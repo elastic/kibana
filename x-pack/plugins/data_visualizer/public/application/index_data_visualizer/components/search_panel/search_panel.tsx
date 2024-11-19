@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 import {
   useEuiBreakpoint,
@@ -14,13 +15,13 @@ import {
   EuiFlexGroup,
   EuiSpacer,
 } from '@elastic/eui';
-import { Query, Filter } from '@kbn/es-query';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { SearchQueryLanguage } from '@kbn/ml-query-utils';
+import type { Query, Filter } from '@kbn/es-query';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { SearchPanelContent } from './search_bar';
 import { DataVisualizerFieldNamesFilter } from './field_name_filter';
 import { DataVisualizerFieldTypeFilter } from './field_type_filter';
-import { OverallStats } from '../../types/overall_stats';
+import type { OverallStats } from '../../types/overall_stats';
 
 interface Props {
   dataView: DataView;
@@ -46,6 +47,7 @@ interface Props {
   }): void;
   showEmptyFields: boolean;
   onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
+  onQueryChange?: (query: Query['query'] | undefined) => void;
 }
 
 export const SearchPanel: FC<Props> = ({
@@ -61,6 +63,7 @@ export const SearchPanel: FC<Props> = ({
   visibleFieldNames,
   setSearchParams,
   showEmptyFields,
+  onQueryChange,
 }) => {
   const dvSearchPanelControls = css({
     marginLeft: '0px !important',
@@ -100,6 +103,7 @@ export const SearchPanel: FC<Props> = ({
           searchString={searchString}
           searchQuery={searchQuery}
           searchQueryLanguage={searchQueryLanguage}
+          onQueryChange={onQueryChange}
         />
       </EuiFlexItem>
 

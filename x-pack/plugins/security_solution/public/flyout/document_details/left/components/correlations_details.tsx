@@ -15,43 +15,37 @@ import { RelatedCases } from './related_cases';
 import { useShowRelatedCases } from '../../shared/hooks/use_show_related_cases';
 import { useShowRelatedAlertsByAncestry } from '../../shared/hooks/use_show_related_alerts_by_ancestry';
 import { useShowSuppressedAlerts } from '../../shared/hooks/use_show_suppressed_alerts';
-import { useLeftPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 import { useShowRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_show_related_alerts_by_same_source_event';
 import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
 import { RelatedAlertsByAncestry } from './related_alerts_by_ancestry';
 import { SuppressedAlerts } from './suppressed_alerts';
+import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
+import { isActiveTimeline } from '../../../../helpers';
 
-export const CORRELATIONS_TAB_ID = 'correlations-details';
+export const CORRELATIONS_TAB_ID = 'correlations';
 
 /**
  * Correlations displayed in the document details expandable flyout left section under the Insights tab
  */
 export const CorrelationsDetails: React.FC = () => {
-  const {
-    dataAsNestedObject,
-    dataFormattedForFieldBrowser,
-    eventId,
-    getFieldsData,
-    scopeId,
-    isPreview,
-  } = useLeftPanelContext();
+  const { dataAsNestedObject, eventId, getFieldsData, scopeId, isPreview } =
+    useDocumentDetailsContext();
 
-  const {
-    show: showAlertsByAncestry,
-    indices,
-    documentId,
-  } = useShowRelatedAlertsByAncestry({
+  const { selectedPatterns } = useTimelineDataFilters(isActiveTimeline(scopeId));
+
+  const { show: showAlertsByAncestry, documentId } = useShowRelatedAlertsByAncestry({
     getFieldsData,
     dataAsNestedObject,
-    dataFormattedForFieldBrowser,
     eventId,
     isPreview,
   });
   const { show: showSameSourceAlerts, originalEventId } = useShowRelatedAlertsBySameSourceEvent({
+    eventId,
     getFieldsData,
   });
   const { show: showAlertsBySession, entityId } = useShowRelatedAlertsBySession({ getFieldsData });
-  const showCases = useShowRelatedCases();
+  const showCases = useShowRelatedCases({ getFieldsData });
   const { show: showSuppressedAlerts, alertSuppressionCount } = useShowSuppressedAlerts({
     getFieldsData,
   });
@@ -72,6 +66,7 @@ export const CorrelationsDetails: React.FC = () => {
               <SuppressedAlerts
                 alertSuppressionCount={alertSuppressionCount}
                 dataAsNestedObject={dataAsNestedObject}
+                isPreview={isPreview}
               />
             </EuiFlexItem>
           )}
@@ -80,7 +75,7 @@ export const CorrelationsDetails: React.FC = () => {
               <RelatedCases eventId={eventId} />
             </EuiFlexItem>
           )}
-          {showSameSourceAlerts && originalEventId && (
+          {showSameSourceAlerts && (
             <EuiFlexItem>
               <RelatedAlertsBySameSourceEvent
                 originalEventId={originalEventId}
@@ -94,10 +89,10 @@ export const CorrelationsDetails: React.FC = () => {
               <RelatedAlertsBySession entityId={entityId} scopeId={scopeId} eventId={eventId} />
             </EuiFlexItem>
           )}
-          {showAlertsByAncestry && documentId && indices && (
+          {showAlertsByAncestry && (
             <EuiFlexItem>
               <RelatedAlertsByAncestry
-                indices={indices}
+                indices={selectedPatterns}
                 scopeId={scopeId}
                 documentId={documentId}
               />

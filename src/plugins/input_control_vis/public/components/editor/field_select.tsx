@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import _ from 'lodash';
 import React, { Component } from 'react';
 
-import { injectI18n, FormattedMessage, InjectedIntlProps } from '@kbn/i18n-react';
+import { injectI18n, FormattedMessage, WrappedComponentProps } from '@kbn/i18n-react';
 import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
@@ -20,7 +21,7 @@ interface FieldSelectUiState {
   indexPatternId: string;
 }
 
-export type FieldSelectUiProps = InjectedIntlProps & {
+export type FieldSelectUiProps = WrappedComponentProps & {
   getIndexPattern: (indexPatternId: string) => Promise<DataView>;
   indexPatternId: string;
   onChange: (value: any) => void;

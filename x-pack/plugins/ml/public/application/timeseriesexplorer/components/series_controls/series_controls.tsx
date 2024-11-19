@@ -5,24 +5,27 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSelectProps } from '@elastic/eui';
+import type { EuiSelectProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { debounce } from 'lodash';
 import { lastValueFrom } from 'rxjs';
 import { useStorage } from '@kbn/ml-local-storage';
 import type { MlEntityFieldType } from '@kbn/ml-anomaly-utils';
-import { MlJob } from '@elastic/elasticsearch/lib/api/types';
+import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import { EntityControl } from '../entity_control';
-import { mlJobService } from '../../../services/job_service';
-import { CombinedJob, Detector, JobId } from '../../../../../common/types/anomaly_detection_jobs';
+import { useMlJobService } from '../../../services/job_service';
+import type {
+  CombinedJob,
+  Detector,
+  JobId,
+} from '../../../../../common/types/anomaly_detection_jobs';
 import { useMlKibana } from '../../../contexts/kibana';
 import { APP_STATE_ACTION } from '../../timeseriesexplorer_constants';
-import {
-  ComboBoxOption,
-  EMPTY_FIELD_VALUE_LABEL,
-  EntityControlProps,
-} from '../entity_control/entity_control';
+import type { ComboBoxOption, Entity, EntityControlProps } from '../entity_control/entity_control';
+import { EMPTY_FIELD_VALUE_LABEL } from '../entity_control/entity_control';
 import { getControlsForDetector } from '../../get_controls_for_detector';
 import {
   ML_ENTITY_FIELDS_CONFIG,
@@ -31,9 +34,10 @@ import {
   type MlStorageKey,
   type TMlStorageMapped,
 } from '../../../../../common/types/storage';
-import { FieldDefinition } from '../../../services/results_service/result_service_rx';
+import type { FieldDefinition } from '../../../services/results_service/result_service_rx';
 import { getViewableDetectors } from '../../timeseriesexplorer_utils/get_viewable_detectors';
 import { PlotByFunctionControls } from '../plot_function_controls';
+import type { MlEntity } from '../../../../embeddables';
 
 function getEntityControlOptions(fieldValues: FieldDefinition['values']): ComboBoxOption[] {
   if (!Array.isArray(fieldValues)) {
@@ -53,15 +57,16 @@ export type UiPartitionFieldConfig = Exclude<PartitionFieldConfig, undefined>;
  * Provides default fields configuration.
  */
 const getDefaultFieldConfig = (
-  fieldTypes: MlEntityFieldType[],
+  entities: Entity[],
   isAnomalousOnly: boolean,
   applyTimeRange: boolean
 ): UiPartitionFieldsConfig => {
-  return fieldTypes.reduce((acc, f) => {
-    acc[f] = {
+  return entities.reduce((acc, f) => {
+    acc[f.fieldType] = {
       applyTimeRange,
       anomalousOnly: isAnomalousOnly,
       sort: { by: 'anomaly_score', order: 'desc' },
+      ...(f.fieldValue && { value: f.fieldValue }),
     };
     return acc;
   }, {} as UiPartitionFieldsConfig);
@@ -70,10 +75,11 @@ const getDefaultFieldConfig = (
 interface SeriesControlsProps {
   appStateHandler: Function;
   bounds: any;
+  direction?: 'column' | 'row';
   functionDescription?: string;
   job?: CombinedJob | MlJob;
   selectedDetectorIndex: number;
-  selectedEntities: Record<string, any>;
+  selectedEntities?: MlEntity;
   selectedJobId: JobId;
   setFunctionDescription: (func: string) => void;
 }
@@ -81,10 +87,11 @@ interface SeriesControlsProps {
 /**
  * Component for handling the detector and entities controls.
  */
-export const SeriesControls: FC<SeriesControlsProps> = ({
+export const SeriesControls: FC<PropsWithChildren<SeriesControlsProps>> = ({
   appStateHandler,
   bounds,
   children,
+  direction = 'row',
   functionDescription,
   job,
   selectedDetectorIndex,
@@ -95,10 +102,11 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
   const {
     services: {
       mlServices: {
-        mlApiServices: { results: mlResultsService },
+        mlApi: { results: mlResultsService },
       },
     },
   } = useMlKibana();
+  const mlJobService = useMlJobService();
 
   const selectedJob: CombinedJob | MlJob = useMemo(
     () => job ?? mlJobService.getJob(selectedJobId),
@@ -122,7 +130,6 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
     return getControlsForDetector(
       selectedDetectorIndex,
       selectedEntities,
-      selectedJobId,
       selectedJob as CombinedJob
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -135,18 +142,28 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
 
   // Merge the default config with the one from the local storage
   const resultFieldsConfig = useMemo(() => {
-    return {
-      ...getDefaultFieldConfig(
-        entityControls.map((v) => v.fieldType),
-        !storageFieldsConfig
-          ? true
-          : Object.values(storageFieldsConfig).some((v) => !!v?.anomalousOnly),
-        !storageFieldsConfig
-          ? true
-          : Object.values(storageFieldsConfig).some((v) => !!v?.applyTimeRange)
-      ),
-      ...(!storageFieldsConfig ? {} : storageFieldsConfig),
-    };
+    const resultFieldConfig = getDefaultFieldConfig(
+      entityControls,
+      !storageFieldsConfig
+        ? true
+        : Object.values(storageFieldsConfig).some((v) => !!v?.anomalousOnly),
+      !storageFieldsConfig
+        ? true
+        : Object.values(storageFieldsConfig).some((v) => !!v?.applyTimeRange)
+    );
+
+    // Early return to prevent unnecessary looping through the default config
+    if (!storageFieldsConfig) return resultFieldConfig;
+
+    // Override only the fields properties stored in the local storage
+    for (const key of Object.keys(resultFieldConfig) as MlEntityFieldType[]) {
+      resultFieldConfig[key] = {
+        ...resultFieldConfig[key],
+        ...storageFieldsConfig[key],
+      } as UiPartitionFieldConfig;
+    }
+
+    return resultFieldConfig;
   }, [entityControls, storageFieldsConfig]);
 
   /**
@@ -234,7 +251,7 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
     appStateHandler(APP_STATE_ACTION.SET_ENTITIES, resultEntities);
   };
 
-  const detectorIndexChangeHandler: EuiSelectProps['onChange'] = useCallback(
+  const detectorIndexChangeHandler = useCallback<NonNullable<EuiSelectProps['onChange']>>(
     (e) => {
       const id = e.target.value;
       if (id !== undefined) {
@@ -262,7 +279,7 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
         // In case anomalous selector has been changed
         // we need to change it for all the other fields
         for (const c in updatedResultConfig) {
-          if (updatedResultConfig.hasOwnProperty(c)) {
+          if (Object.hasOwn(updatedResultConfig, c)) {
             updatedResultConfig[c as MlEntityFieldType]!.anomalousOnly =
               updatedFieldConfig.anomalousOnly;
           }
@@ -273,16 +290,27 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
         // In case time range selector has been changed
         // we need to change it for all the other fields
         for (const c in updatedResultConfig) {
-          if (updatedResultConfig.hasOwnProperty(c)) {
+          if (Object.hasOwn(updatedResultConfig, c)) {
             updatedResultConfig[c as MlEntityFieldType]!.applyTimeRange =
               updatedFieldConfig.applyTimeRange;
           }
         }
       }
 
+      // Remove the value from the field config to avoid storing it in the local storage
+      const { value, ...updatedFieldConfigWithoutValue } = updatedFieldConfig;
+
+      // Remove the value from the result config to avoid storing it in the local storage
+      const updatedResultConfigWithoutValues = Object.fromEntries(
+        Object.entries(updatedResultConfig).map(([key, fieldValue]) => {
+          const { value: _, ...rest } = fieldValue;
+          return [key, rest];
+        })
+      );
+
       setStorageFieldsConfig({
-        ...updatedResultConfig,
-        [fieldType]: updatedFieldConfig,
+        ...updatedResultConfigWithoutValues,
+        [fieldType]: updatedFieldConfigWithoutValue,
       });
     },
     [resultFieldsConfig, setStorageFieldsConfig]
@@ -293,7 +321,7 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
 
   return (
     <div data-test-subj="mlSingleMetricViewerSeriesControls">
-      <EuiFlexGroup>
+      <EuiFlexGroup direction={direction}>
         <EuiFlexItem grow={false}>
           <EuiFormRow
             label={

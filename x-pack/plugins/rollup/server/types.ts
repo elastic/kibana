@@ -11,7 +11,7 @@ import { VisTypeTimeseriesSetup } from '@kbn/vis-type-timeseries-plugin/server';
 
 import { getCapabilitiesForRollupIndices } from '@kbn/data-plugin/server';
 import { IndexManagementPluginSetup } from '@kbn/index-management-plugin/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { DataViewsServerPluginSetup } from '@kbn/data-views-plugin/server';
 import { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';

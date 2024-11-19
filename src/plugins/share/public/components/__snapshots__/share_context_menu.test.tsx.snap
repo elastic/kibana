@@ -27,18 +27,10 @@ exports[`shareContextMenuExtensions should render a custom panel title when prov
           "title": "Embed Code",
         },
         Object {
-          "content": <div>
-            panel content
-          </div>,
           "id": 3,
-          "title": "AAA panel",
         },
         Object {
-          "content": <div>
-            panel content
-          </div>,
           "id": 4,
-          "title": "ZZZ panel",
         },
         Object {
           "id": 5,
@@ -92,18 +84,10 @@ exports[`shareContextMenuExtensions should sort ascending on sort order first an
           "title": "Get link",
         },
         Object {
-          "content": <div>
-            panel content
-          </div>,
           "id": 2,
-          "title": "AAA panel",
         },
         Object {
-          "content": <div>
-            panel content
-          </div>,
           "id": 3,
-          "title": "ZZZ panel",
         },
         Object {
           "id": 4,

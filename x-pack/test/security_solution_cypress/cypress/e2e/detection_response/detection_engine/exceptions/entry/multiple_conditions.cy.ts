@@ -45,7 +45,7 @@ describe(
     });
 
     after(() => {
-      cy.task('esArchiverUnload', 'exceptions');
+      cy.task('esArchiverUnload', { archiveName: 'exceptions' });
     });
 
     const exceptionName = 'My item name';

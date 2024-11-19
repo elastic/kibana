@@ -14,7 +14,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
   const ml = getService('ml');
   const PageObjects = getPageObjects(['common', 'timePicker', 'discover']);
-  const selectedField = '@message';
   const totalDocCount = 14005;
 
   async function retrySwitchTab(tabIndex: number, seconds: number) {
@@ -23,8 +22,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/172770
-  describe.skip('log pattern analysis', async function () {
+  describe('log pattern analysis', function () {
     let tabsCount = 1;
 
     afterEach(async () => {
@@ -56,15 +54,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.discover.selectIndexPattern('logstash-*');
       await aiops.logPatternAnalysisPage.assertDiscoverDocCount(totalDocCount);
 
-      await aiops.logPatternAnalysisPage.clickDiscoverField(selectedField);
-      await aiops.logPatternAnalysisPage.clickDiscoverMenuAnalyzeButton(selectedField);
+      await aiops.logPatternAnalysisPage.clickPatternsTab();
+      await aiops.logPatternAnalysisPage.assertLogPatternAnalysisTabContentsExists();
 
-      await aiops.logPatternAnalysisPage.assertLogPatternAnalysisFlyoutExists();
-      await aiops.logPatternAnalysisPage.assertLogPatternAnalysisFlyoutTitle(selectedField);
+      await aiops.logPatternAnalysisPage.setRandomSamplingOptionDiscover(
+        'aiopsRandomSamplerOptionOff'
+      );
 
-      await aiops.logPatternAnalysisPage.setRandomSamplingOption('aiopsRandomSamplerOptionOff');
-
-      await aiops.logPatternAnalysisPage.assertTotalCategoriesFound(3);
+      await aiops.logPatternAnalysisPage.assertTotalCategoriesFoundDiscover(3);
       await aiops.logPatternAnalysisPage.assertCategoryTableRows(3);
 
       // get category count from the first row
@@ -88,15 +85,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
       await aiops.logPatternAnalysisPage.assertDiscoverDocCount(totalDocCount);
 
-      await aiops.logPatternAnalysisPage.clickDiscoverField(selectedField);
-      await aiops.logPatternAnalysisPage.clickDiscoverMenuAnalyzeButton(selectedField);
+      await aiops.logPatternAnalysisPage.clickPatternsTab();
+      await aiops.logPatternAnalysisPage.assertLogPatternAnalysisTabContentsExists();
 
-      await aiops.logPatternAnalysisPage.assertLogPatternAnalysisFlyoutExists();
-      await aiops.logPatternAnalysisPage.assertLogPatternAnalysisFlyoutTitle(selectedField);
+      await aiops.logPatternAnalysisPage.setRandomSamplingOptionDiscover(
+        'aiopsRandomSamplerOptionOff'
+      );
 
-      await aiops.logPatternAnalysisPage.setRandomSamplingOption('aiopsRandomSamplerOptionOff');
-
-      await aiops.logPatternAnalysisPage.assertTotalCategoriesFound(3);
+      await aiops.logPatternAnalysisPage.assertTotalCategoriesFoundDiscover(3);
       await aiops.logPatternAnalysisPage.assertCategoryTableRows(3);
 
       // get category count from the first row

@@ -16,6 +16,7 @@ import { TaskStore } from '../task_store';
 import {
   IdleTaskWithExpiredRunAt,
   RunningOrClaimingTaskWithExpiredRetryAt,
+  OneOfTaskTypes,
 } from '../queries/mark_available_tasks_as_claimed';
 import { ITaskEventEmitter, TaskLifecycleEvent } from '../polling_lifecycle';
 import { asTaskManagerMetricEvent } from '../task_events';
@@ -26,6 +27,8 @@ interface ConstructorOpts {
   logger: Logger;
   store: TaskStore;
   pollInterval?: number;
+  taskTypes: Set<string>;
+  excludedTypes: Set<string>;
 }
 
 export interface TaskManagerMetrics {
@@ -44,15 +47,20 @@ export class TaskManagerMetricsCollector implements ITaskEventEmitter<TaskLifecy
   private logger: Logger;
   private readonly pollInterval: number;
 
+  private readonly taskTypes: Set<string>;
+  private readonly excludedTypes: Set<string>;
+
   private running: boolean = false;
 
   // emit collected metrics
   private metrics$ = new Subject<TaskLifecycleEvent>();
 
-  constructor({ logger, store, pollInterval }: ConstructorOpts) {
+  constructor({ logger, store, pollInterval, taskTypes, excludedTypes }: ConstructorOpts) {
     this.store = store;
     this.logger = logger;
     this.pollInterval = pollInterval ?? DEFAULT_POLL_INTERVAL;
+    this.taskTypes = taskTypes;
+    this.excludedTypes = excludedTypes;
 
     this.start();
   }
@@ -64,12 +72,15 @@ export class TaskManagerMetricsCollector implements ITaskEventEmitter<TaskLifecy
   private start() {
     if (!this.running) {
       this.running = true;
-      this.runCollectionCycle();
+      this.runCollectionCycle().catch(() => {});
     }
   }
 
   private async runCollectionCycle() {
     const start = Date.now();
+    const searchedTypes = Array.from(this.taskTypes).filter(
+      (type) => !this.excludedTypes.has(type)
+    );
     try {
       const results = await this.store.aggregate({
         size: 0,
@@ -78,7 +89,9 @@ export class TaskManagerMetricsCollector implements ITaskEventEmitter<TaskLifecy
             filter: [
               {
                 bool: {
+                  must: [OneOfTaskTypes('task.taskType', searchedTypes)],
                   should: [IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt],
+                  minimum_should_match: 1,
                 },
               },
             ],
@@ -89,8 +102,15 @@ export class TaskManagerMetricsCollector implements ITaskEventEmitter<TaskLifecy
             type: 'long',
             script: {
               source: `
+                def taskStatus = doc['task.status'];
                 def runAt = doc['task.runAt'];
-                if(!runAt.empty) {
+
+                if (taskStatus.empty) {
+                  emit(0);
+                  return;
+                }
+
+                if(taskStatus.value == 'idle') {
                   emit((new Date().getTime() - runAt.value.getMillis()) / 1000);
                 } else {
                   def retryAt = doc['task.retryAt'];

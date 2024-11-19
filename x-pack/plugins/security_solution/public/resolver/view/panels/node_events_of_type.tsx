@@ -18,7 +18,6 @@ import {
 } from '@elastic/eui';
 import { useSelector, useDispatch } from 'react-redux';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { StyledPanel } from '../styles';
 import { BoldCode, StyledTime } from './styles';
 import { Breadcrumbs } from './breadcrumbs';
 import * as eventModel from '../../../../common/endpoint/models/event';
@@ -31,6 +30,19 @@ import { useFormattedDate } from './use_formatted_date';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import type { State } from '../../../common/store/types';
 import { userRequestedAdditionalRelatedEvents } from '../../store/data/action';
+import { EventKind } from '../../../flyout/document_details/shared/constants/event_kinds';
+
+export type NodeEventOnClick = ({
+  documentId,
+  indexName,
+  scopeId,
+  isAlert,
+}: {
+  documentId: string | undefined;
+  indexName: string | undefined;
+  scopeId: string;
+  isAlert: boolean;
+}) => () => void;
 
 /**
  * Render a list of events that are related to `nodeID` and that have a category of `eventType`.
@@ -40,10 +52,12 @@ export const NodeEventsInCategory = memo(function ({
   id,
   nodeID,
   eventCategory,
+  nodeEventOnClick,
 }: {
   id: string;
   nodeID: string;
   eventCategory: string;
+  nodeEventOnClick?: NodeEventOnClick;
 }) {
   const node = useSelector((state: State) => selectors.graphNodeForID(state.analyzer[id])(nodeID));
   const isLoading = useSelector((state: State) =>
@@ -56,43 +70,42 @@ export const NodeEventsInCategory = memo(function ({
   return (
     <>
       {isLoading ? (
-        <StyledPanel hasBorder>
-          <PanelLoading id={id} />
-        </StyledPanel>
-      ) : (
-        <StyledPanel hasBorder data-test-subj="resolver:panel:events-in-category">
-          {hasError || !node ? (
-            <EuiCallOut
-              title={i18n.translate(
-                'xpack.securitySolution.endpoint.resolver.panel.nodeEventsByType.errorPrimary',
-                {
-                  defaultMessage: 'Unable to load events.',
-                }
-              )}
-              color="danger"
-              iconType="warning"
-              data-test-subj="resolver:nodeEventsInCategory:error"
-            >
-              <p>
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.resolver.panel.nodeEventsByType.errorSecondary"
-                  defaultMessage="An error occurred when fetching the events."
-                />
-              </p>
-            </EuiCallOut>
-          ) : (
-            <>
-              <NodeEventsInCategoryBreadcrumbs
-                id={id}
-                nodeName={node.name}
-                eventCategory={eventCategory}
-                nodeID={nodeID}
-              />
-              <EuiSpacer size="l" />
-              <NodeEventList id={id} eventCategory={eventCategory} nodeID={nodeID} />
-            </>
+        <PanelLoading id={id} />
+      ) : hasError || !node ? (
+        <EuiCallOut
+          title={i18n.translate(
+            'xpack.securitySolution.endpoint.resolver.panel.nodeEventsByType.errorPrimary',
+            {
+              defaultMessage: 'Unable to load events.',
+            }
           )}
-        </StyledPanel>
+          color="danger"
+          iconType="warning"
+          data-test-subj="resolver:nodeEventsInCategory:error"
+        >
+          <p>
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.resolver.panel.nodeEventsByType.errorSecondary"
+              defaultMessage="An error occurred when fetching the events."
+            />
+          </p>
+        </EuiCallOut>
+      ) : (
+        <div data-test-subj="resolver:panel:events-in-category">
+          <NodeEventsInCategoryBreadcrumbs
+            id={id}
+            nodeName={node.name}
+            eventCategory={eventCategory}
+            nodeID={nodeID}
+          />
+          <EuiSpacer size="l" />
+          <NodeEventList
+            id={id}
+            eventCategory={eventCategory}
+            nodeID={nodeID}
+            nodeEventOnClick={nodeEventOnClick}
+          />
+        </div>
       )}
     </>
   );
@@ -102,20 +115,25 @@ export const NodeEventsInCategory = memo(function ({
  * Rendered for each event in the list.
  */
 // eslint-disable-next-line react/display-name
-const NodeEventsListItem = memo(function ({
+export const NodeEventsListItem = memo(function ({
   id,
   event,
   nodeID,
   eventCategory,
+  nodeEventOnClick,
 }: {
   id: string;
   event: SafeResolverEvent;
   nodeID: string;
   eventCategory: string;
+  nodeEventOnClick?: NodeEventOnClick;
 }) {
   const expandedEvent = expandDottedObject(event);
   const timestamp = eventModel.eventTimestamp(expandedEvent);
   const eventID = eventModel.eventID(expandedEvent);
+  const isAlert = eventModel.eventKind(expandedEvent)[0] === EventKind.signal;
+  const documentId = eventModel.documentID(expandedEvent);
+  const indexName = eventModel.indexName(expandedEvent);
   const winlogRecordID = eventModel.winlogRecordID(expandedEvent);
   const date =
     useFormattedDate(timestamp) ||
@@ -132,6 +150,7 @@ const NodeEventsListItem = memo(function ({
       winlogRecordID: String(winlogRecordID),
     },
   });
+
   return (
     <>
       <EuiText>
@@ -154,12 +173,21 @@ const NodeEventsListItem = memo(function ({
         </StyledTime>
       </EuiText>
       <EuiSpacer size="xs" />
-      <EuiButtonEmpty
-        data-test-subj="resolver:panel:node-events-in-category:event-link"
-        {...linkProps}
-      >
-        <DescriptiveName event={expandedEvent} />
-      </EuiButtonEmpty>
+      {nodeEventOnClick ? (
+        <EuiButtonEmpty
+          data-test-subj="resolver:panel:node-events-in-category:event-link"
+          onClick={nodeEventOnClick({ documentId, indexName, scopeId: id, isAlert })}
+        >
+          <DescriptiveName event={expandedEvent} />
+        </EuiButtonEmpty>
+      ) : (
+        <EuiButtonEmpty
+          data-test-subj="resolver:panel:node-events-in-category:event-link"
+          {...linkProps}
+        >
+          <DescriptiveName event={expandedEvent} />
+        </EuiButtonEmpty>
+      )}
     </>
   );
 });
@@ -171,10 +199,12 @@ const NodeEventList = memo(function NodeEventList({
   id,
   eventCategory,
   nodeID,
+  nodeEventOnClick,
 }: {
   id: string;
   eventCategory: string;
   nodeID: string;
+  nodeEventOnClick?: NodeEventOnClick;
 }) {
   const events = useSelector((state: State) => selectors.nodeEventsInCategory(state.analyzer[id]));
   const dispatch = useDispatch();
@@ -191,7 +221,13 @@ const NodeEventList = memo(function NodeEventList({
     <>
       {events.map((event, index) => (
         <Fragment key={index}>
-          <NodeEventsListItem id={id} nodeID={nodeID} eventCategory={eventCategory} event={event} />
+          <NodeEventsListItem
+            id={id}
+            nodeID={nodeID}
+            eventCategory={eventCategory}
+            event={event}
+            nodeEventOnClick={nodeEventOnClick}
+          />
           {index === events.length - 1 ? null : <EuiHorizontalRule margin="m" />}
         </Fragment>
       ))}

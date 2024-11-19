@@ -12,8 +12,10 @@ import {
 
 export const AssistantOverlay: React.FC = () => {
   const { assistantAvailability } = useAssistantContext();
+
   if (!assistantAvailability.hasAssistantPrivilege) {
     return null;
   }
+
   return <ElasticAssistantOverlay />;
 };

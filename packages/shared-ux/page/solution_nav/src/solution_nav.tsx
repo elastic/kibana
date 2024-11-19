@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import './solution_nav.scss';
 
 import React, { FC, useState, useMemo, useEffect } from 'react';
@@ -25,6 +27,7 @@ import {
   useIsWithinMinBreakpoint,
   useEuiTheme,
   useEuiThemeCSSVariables,
+  EuiPageSidebar,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -234,11 +237,11 @@ export const SolutionNav: FC<SolutionNavProps> = ({
               className="kbnSolutionNav__flyout"
               hideCloseButton={!canBeCollapsed}
             >
-              <div className={sideNavClasses}>
+              <EuiPageSidebar className={sideNavClasses} hasEmbellish={true}>
                 {titleText}
                 <EuiSpacer size="l" />
                 {sideNavContent}
-              </div>
+              </EuiPageSidebar>
             </EuiFlyout>
           )}
           {canBeCollapsed && (

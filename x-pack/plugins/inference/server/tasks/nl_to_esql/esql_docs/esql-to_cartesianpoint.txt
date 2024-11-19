@@ -1,0 +1,27 @@
+# TO_CARTESIANPOINT
+
+The TO_CARTESIANPOINT function converts an input value into a `cartesian_point` value.
+
+## Syntax
+
+`TO_CARTESIANPOINT(field)`
+
+### Parameters
+
+#### field
+
+This is the input value. It can be a single or multi-valued column or an expression.
+
+## Examples
+
+```esql
+ROW wkt = ["POINT(4297.11 -1475.53)", "POINT(7580.93 2272.77)"]
+| MV_EXPAND wkt
+| EVAL pt = TO_CARTESIANPOINT(wkt)
+```
+
+```esql
+ROW wkt = ["POINT(1000.0 2000.0)", "POINT(3000.0 4000.0)"]
+| MV_EXPAND wkt
+| EVAL pt = TO_CARTESIANPOINT(wkt)
+```

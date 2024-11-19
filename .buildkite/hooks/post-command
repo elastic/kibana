@@ -1,7 +1,3 @@
 #!/usr/bin/env bash
 
-if [[ "$BUILDKITE_AGENT_NAME" =~ ^bk-agent ]]; then
-  echo "Pipeline file triggered from outside the kibana executors, skipping post_command"
-else
-  .buildkite/scripts/lifecycle/post_command.sh
-fi
+source .buildkite/scripts/lifecycle/post_command.sh

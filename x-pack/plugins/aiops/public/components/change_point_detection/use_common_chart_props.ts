@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import moment from 'moment';
-import { FilterStateStore, type TimeRange } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 import { type TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import { useMemo } from 'react';
-import { useFilerQueryUpdates } from '../../hooks/use_filters_query';
+import { useFilterQueryUpdates } from '../../hooks/use_filters_query';
 import { fnOperationTypeMapping } from './constants';
 import { useDataSource } from '../../hooks/use_data_source';
-import { ChangePointAnnotation, FieldConfig } from './change_point_detection_context';
+import type { ChangePointAnnotation, FieldConfig } from './change_point_detection_context';
 
 /**
  * Provides common props for the Lens Embeddable component
@@ -32,20 +30,7 @@ export const useCommonChartProps = ({
 }): Partial<TypedLensByValueInput> => {
   const { dataView } = useDataSource();
 
-  const { filters: resultFilters, query: resultQuery, timeRange } = useFilerQueryUpdates();
-
-  /**
-   * In order to correctly render annotations for change points at the edges,
-   * we need to adjust time bound based on the change point timestamp.
-   */
-  const chartTimeRange = useMemo<TimeRange>(() => {
-    const absoluteTimeRange = getAbsoluteTimeRange(timeRange);
-
-    return {
-      from: moment.min(moment(absoluteTimeRange.from), moment(annotation.timestamp)).toISOString(),
-      to: moment.max(moment(absoluteTimeRange.to), moment(annotation.timestamp)).toISOString(),
-    };
-  }, [timeRange, annotation.timestamp]);
+  const { filters: resultFilters, query: resultQuery, searchBounds } = useFilterQueryUpdates();
 
   const filters = useMemo(() => {
     return [
@@ -230,8 +215,13 @@ export const useCommonChartProps = ({
     gridAndLabelsVisibility,
   ]);
 
+  const boundsTimeRange = {
+    from: searchBounds.min?.toISOString()!,
+    to: searchBounds.max?.toISOString()!,
+  };
+
   return {
-    timeRange: chartTimeRange,
+    timeRange: boundsTimeRange,
     filters,
     query: resultQuery,
     attributes,

@@ -160,6 +160,70 @@
           },
           {
             "parentPluginId": "@kbn/unified-doc-viewer",
+            "id": "def-common.DocViewsRegistry.enableById",
+            "type": "Function",
+            "tags": [],
+            "label": "enableById",
+            "description": [],
+            "signature": [
+              "(id: string) => void"
+            ],
+            "path": "packages/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/unified-doc-viewer",
+                "id": "def-common.DocViewsRegistry.enableById.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-doc-viewer",
+            "id": "def-common.DocViewsRegistry.disableById",
+            "type": "Function",
+            "tags": [],
+            "label": "disableById",
+            "description": [],
+            "signature": [
+              "(id: string) => void"
+            ],
+            "path": "packages/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/unified-doc-viewer",
+                "id": "def-common.DocViewsRegistry.disableById.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-doc-viewer",
             "id": "def-common.DocViewsRegistry.clone",
             "type": "Function",
             "tags": [],
@@ -198,7 +262,7 @@
         "signature": [
           "({ docViews, ...renderProps }: ",
           "DocViewerProps",
-          ") => JSX.Element | null"
+          ") => React.JSX.Element | null"
         ],
         "path": "packages/kbn-unified-doc-viewer/src/components/doc_viewer/doc_viewer.tsx",
         "deprecated": false,
@@ -231,7 +295,7 @@
         "label": "FieldName",
         "description": [],
         "signature": [
-          "({\n  fieldName,\n  fieldMapping,\n  fieldType,\n  fieldIconProps,\n  scripted = false,\n  highlight = '',\n}: Props) => JSX.Element"
+          "({\n  fieldName,\n  fieldMapping,\n  fieldType,\n  fieldIconProps,\n  scripted = false,\n  highlight = '',\n}: Props) => React.JSX.Element"
         ],
         "path": "packages/kbn-unified-doc-viewer/src/components/field_name/field_name.tsx",
         "deprecated": false,

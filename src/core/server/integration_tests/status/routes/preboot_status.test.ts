@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import supertest from 'supertest';
-import { createCoreContext, createHttpServer } from '@kbn/core-http-server-mocks';
+import { createCoreContext, createHttpService } from '@kbn/core-http-server-mocks';
 import type { HttpService, InternalHttpServicePreboot } from '@kbn/core-http-server-internal';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 
@@ -22,7 +23,7 @@ describe('GET /api/status', () => {
   const setupServer = async () => {
     const coreContext = createCoreContext({ coreId });
 
-    server = createHttpServer(coreContext);
+    server = createHttpService(coreContext);
     httpPreboot = await server.preboot({
       context: contextServiceMock.createPrebootContract(),
     });

@@ -14,6 +14,7 @@ import { InvokeCreator } from 'xstate';
 import { OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY } from '../../../../common';
 import type { ObservabilityLogsExplorerContext, ObservabilityLogsExplorerEvent } from './types';
 import * as urlSchemaV1 from './url_schema_v1';
+import * as urlSchemaV2 from './url_schema_v2';
 
 interface ObservabilityLogsExplorerUrlStateDependencies {
   toastsService: IToasts;
@@ -28,7 +29,7 @@ export const updateUrlFromLogsExplorerState =
     }
 
     // we want to write in the newest schema
-    const encodedUrlStateValues = urlSchemaV1.stateFromUntrustedUrlRT.encode(
+    const encodedUrlStateValues = urlSchemaV2.stateFromUntrustedUrlRT.encode(
       context.logsExplorerState
     );
 
@@ -52,7 +53,11 @@ export const initializeFromUrl =
 
     // in the future we'll have to more schema versions to the union
     const stateValuesE = rt
-      .union([rt.undefined, urlSchemaV1.stateFromUntrustedUrlRT])
+      .union([
+        rt.undefined,
+        urlSchemaV1.stateFromUntrustedUrlRT,
+        urlSchemaV2.stateFromUntrustedUrlRT,
+      ])
       .decode(urlStateValues);
 
     if (Either.isLeft(stateValuesE)) {

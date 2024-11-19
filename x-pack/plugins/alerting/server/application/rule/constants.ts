@@ -41,9 +41,5 @@ export const ruleExecutionStatusWarningReason = {
   MAX_EXECUTABLE_ACTIONS: 'maxExecutableActions',
   MAX_ALERTS: 'maxAlerts',
   MAX_QUEUED_ACTIONS: 'maxQueuedActions',
-} as const;
-
-export const filterStateStore = {
-  APP_STATE: 'appState',
-  GLOBAL_STATE: 'globalState',
+  EXECUTION: 'ruleExecution',
 } as const;

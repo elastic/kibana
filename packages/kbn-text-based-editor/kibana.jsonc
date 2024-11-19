@@ -1,5 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/text-based-editor",
-  "owner": "@elastic/kibana-visualizations",
-}

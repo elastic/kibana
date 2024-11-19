@@ -73,7 +73,7 @@ const assetCriticalityHostResponse = [
   {
     fields: {
       id_value: ['host name 2'],
-      criticality_level: ['very_important'],
+      criticality_level: ['extremely_critical'],
     },
   },
   {
@@ -200,10 +200,7 @@ describe('enrichEvents', () => {
         createAlert('2', createEntity('host', 'user name 1')),
       ],
       spaceId: 'default',
-      experimentalFeatures: {
-        ...allowedExperimentalValues,
-        entityAnalyticsAssetCriticalityEnabled: true,
-      },
+      experimentalFeatures: allowedExperimentalValues,
     });
 
     expect(enrichedEvents).toEqual([

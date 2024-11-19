@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { isInternalURL } from '@kbn/std';
 
 import type { AuthenticationProviderOptions } from './base';
 import { BaseAuthenticationProvider } from './base';
@@ -16,7 +17,6 @@ import {
   AUTH_URL_HASH_QUERY_STRING_PARAMETER,
   NEXT_URL_QUERY_STRING_PARAMETER,
 } from '../../../common/constants';
-import { isInternalURL } from '../../../common/is_internal_url';
 import type { AuthenticationInfo } from '../../elasticsearch';
 import { getDetailedErrorMessage } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
@@ -144,14 +144,14 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     // we should clear such session an log user out.
     if (state && this.realm && state.realm !== this.realm) {
       const message = `State based on realm "${state.realm}", but provider with the name "${this.options.name}" is configured to use realm "${this.realm}".`;
-      this.logger.debug(message);
+      this.logger.warn(message);
       return AuthenticationResult.failed(Boom.unauthorized(message));
     }
 
     if (attempt.type === SAMLLogin.LoginInitiatedByUser) {
       if (!attempt.redirectURL) {
         const message = 'Login attempt should include non-empty `redirectURL` string.';
-        this.logger.debug(message);
+        this.logger.warn(message);
         return AuthenticationResult.failed(Boom.badRequest(message));
       }
       return this.authenticateViaHandshake(request, attempt.redirectURL);
@@ -187,9 +187,10 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       this.logger.debug('Login has been successfully performed.');
     } else {
       this.logger.debug(
-        `Failed to perform a login: ${
-          authenticationResult.error && getDetailedErrorMessage(authenticationResult.error)
-        }`
+        () =>
+          `Failed to perform a login: ${
+            authenticationResult.error && getDetailedErrorMessage(authenticationResult.error)
+          }`
       );
     }
 
@@ -215,7 +216,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     // we should clear such session an log user out.
     if (state && this.realm && state.realm !== this.realm) {
       const message = `State based on realm "${state.realm}", but provider with the name "${this.options.name}" is configured to use realm "${this.realm}".`;
-      this.logger.debug(message);
+      this.logger.warn(message);
       return AuthenticationResult.failed(Boom.unauthorized(message));
     }
 
@@ -286,7 +287,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
           return DeauthenticationResult.redirectTo(redirect);
         }
       } catch (err) {
-        this.logger.debug(`Failed to deauthenticate user: ${getDetailedErrorMessage(err)}`);
+        this.logger.debug(() => `Failed to deauthenticate user: ${getDetailedErrorMessage(err)}`);
         return DeauthenticationResult.failed(err);
       }
     }
@@ -340,7 +341,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     };
     if (state && !stateRequestId) {
       const message = 'SAML response state does not have corresponding request id.';
-      this.logger.debug(message);
+      this.logger.warn(message);
       return AuthenticationResult.failed(Boom.badRequest(message));
     }
 
@@ -375,7 +376,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         },
       })) as any;
     } catch (err) {
-      this.logger.debug(`Failed to log in with SAML response: ${getDetailedErrorMessage(err)}`);
+      this.logger.error(`Failed to log in with SAML response: ${getDetailedErrorMessage(err)}`);
 
       // Since we don't know upfront what realm is targeted by the Identity Provider initiated login
       // there is a chance that it failed because of realm mismatch and hence we should return
@@ -390,11 +391,11 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     let redirectURLFromRelayState;
     if (isIdPInitiatedLogin && relayState) {
       if (!this.useRelayStateDeepLink) {
-        this.options.logger.debug(
+        this.options.logger.warn(
           `"RelayState" is provided, but deep links support is not enabled for "${this.type}/${this.options.name}" provider.`
         );
       } else if (!isInternalURL(relayState, this.options.basePath.serverBasePath)) {
-        this.options.logger.debug(
+        this.options.logger.warn(
           `"RelayState" is provided, but it is not a valid Kibana internal URL.`
         );
       } else {
@@ -439,7 +440,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     relayState: string | undefined,
     existingState: ProviderState
   ) {
-    this.logger.debug('Trying to log in with SAML response payload and existing valid session.');
+    this.logger.info('Trying to log in with SAML response payload and existing valid session.');
 
     // First let's try to authenticate via SAML Response payload.
     const payloadAuthenticationResult = await this.loginWithSAMLResponse(
@@ -467,7 +468,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       });
     } catch (err) {
       this.logger.debug(
-        `Failed to perform IdP initiated local logout: ${getDetailedErrorMessage(err)}`
+        () => `Failed to perform IdP initiated local logout: ${getDetailedErrorMessage(err)}`
       );
       return AuthenticationResult.failed(err);
     }
@@ -500,7 +501,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.succeeded(user, { authHeaders });
     } catch (err) {
       this.logger.debug(
-        `Failed to authenticate request via state: ${getDetailedErrorMessage(err)}`
+        () => `Failed to authenticate request via state: ${getDetailedErrorMessage(err)}`
       );
       return AuthenticationResult.failed(err);
     }
@@ -525,6 +526,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     try {
       refreshTokenResult = await this.options.tokens.refresh(state.refreshToken);
     } catch (err) {
+      this.logger.error(`Failed to refresh access token: ${getDetailedErrorMessage(err)}`);
       return AuthenticationResult.failed(err);
     }
 
@@ -535,7 +537,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     // to do the same on Kibana side and `401` would force user to logout and do full SLO if it's supported.
     if (refreshTokenResult === null) {
       if (canStartNewSession(request)) {
-        this.logger.debug(
+        this.logger.warn(
           'Both access and refresh tokens are expired. Capturing redirect URL and re-initiating SAML handshake.'
         );
         return this.initiateAuthenticationHandshake(request);
@@ -592,7 +594,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         state: { requestId, redirectURL, realm },
       });
     } catch (err) {
-      this.logger.debug(`Failed to initiate SAML handshake: ${getDetailedErrorMessage(err)}`);
+      this.logger.debug(() => `Failed to initiate SAML handshake: ${getDetailedErrorMessage(err)}`);
       return AuthenticationResult.failed(err);
     }
   }

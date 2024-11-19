@@ -63,9 +63,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-ui-settings-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                    "section": "def-common.IUiSettingsClient",
+                    "section": "def-public.IUiSettingsClient",
                     "text": "IUiSettingsClient"
                   }
                 ],
@@ -1455,12 +1455,12 @@
           "(http: ",
           {
             "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
+            "section": "def-public.HttpSetup",
             "text": "HttpSetup"
           },
-          ") => { createQuery: (attributes: ",
+          ") => { isDuplicateTitle: (title: string, id?: string | undefined) => Promise<boolean>; createQuery: (attributes: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -1492,15 +1492,7 @@
             "section": "def-common.SavedQuery",
             "text": "SavedQuery"
           },
-          ">; getAllSavedQueries: () => Promise<",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.SavedQuery",
-            "text": "SavedQuery"
-          },
-          "[]>; findSavedQueries: (search?: string, perPage?: number, page?: number) => Promise<{ total: number; queries: ",
+          ">; findSavedQueries: (search?: string, perPage?: number, page?: number) => Promise<{ total: number; queries: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -1532,9 +1524,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpSetup",
+                "section": "def-public.HttpSetup",
                 "text": "HttpSetup"
               }
             ],
@@ -2840,7 +2832,7 @@
             "label": "savedQueries",
             "description": [],
             "signature": [
-              "{ createQuery: (attributes: ",
+              "{ isDuplicateTitle: (title: string, id?: string | undefined) => Promise<boolean>; createQuery: (attributes: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -2872,15 +2864,7 @@
                 "section": "def-common.SavedQuery",
                 "text": "SavedQuery"
               },
-              ">; getAllSavedQueries: () => Promise<",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.SavedQuery",
-                "text": "SavedQuery"
-              },
-              "[]>; findSavedQueries: (search?: string, perPage?: number, page?: number) => Promise<{ total: number; queries: ",
+              ">; findSavedQueries: (search?: string, perPage?: number, page?: number) => Promise<{ total: number; queries: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -3054,6 +3038,53 @@
         "children": [
           {
             "parentPluginId": "data",
+            "id": "def-public.SavedQueryService.isDuplicateTitle",
+            "type": "Function",
+            "tags": [],
+            "label": "isDuplicateTitle",
+            "description": [],
+            "signature": [
+              "(title: string, id?: string | undefined) => Promise<boolean>"
+            ],
+            "path": "src/plugins/data/public/query/saved_query/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.SavedQueryService.isDuplicateTitle.$1",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data/public/query/saved_query/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-public.SavedQueryService.isDuplicateTitle.$2",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/data/public/query/saved_query/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-public.SavedQueryService.createQuery",
             "type": "Function",
             "tags": [],
@@ -3173,30 +3204,6 @@
                 "isRequired": true
               }
             ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.SavedQueryService.getAllSavedQueries",
-            "type": "Function",
-            "tags": [],
-            "label": "getAllSavedQueries",
-            "description": [],
-            "signature": [
-              "() => Promise<",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.SavedQuery",
-                "text": "SavedQuery"
-              },
-              "[]>"
-            ],
-            "path": "src/plugins/data/public/query/saved_query/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
             "returnComment": []
           },
           {
@@ -3423,7 +3430,7 @@
                 "section": "def-common.RefreshInterval",
                 "text": "RefreshInterval"
               },
-              "; setRefreshInterval: (refreshInterval: Partial<",
+              "; getMinRefreshInterval: () => number; setRefreshInterval: (refreshInterval: Partial<",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -3827,7 +3834,7 @@
             "section": "def-common.RefreshInterval",
             "text": "RefreshInterval"
           },
-          "; setRefreshInterval: (refreshInterval: Partial<",
+          "; getMinRefreshInterval: () => number; setRefreshInterval: (refreshInterval: Partial<",
           {
             "pluginId": "data",
             "scope": "common",
@@ -4527,7 +4534,7 @@
           "\nConverts QueryState to expression AST"
         ],
         "signature": [
-          "({\n  filters,\n  query,\n  inputQuery,\n  time,\n  dataView,\n}: Args) => Promise<",
+          "({\n  filters,\n  query,\n  inputQuery,\n  time,\n  dataView,\n  titleForInspector,\n  descriptionForInspector,\n}: Args) => Promise<",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -4546,7 +4553,7 @@
             "id": "def-common.textBasedQueryStateToAstWithValidation.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  filters,\n  query,\n  inputQuery,\n  time,\n  dataView,\n}",
+            "label": "{\n  filters,\n  query,\n  inputQuery,\n  time,\n  dataView,\n  titleForInspector,\n  descriptionForInspector,\n}",
             "description": [],
             "signature": [
               "Args"
@@ -4570,7 +4577,7 @@
           "\nConverts QueryState to expression AST"
         ],
         "signature": [
-          "({\n  filters,\n  query,\n  inputQuery,\n  time,\n  timeFieldName,\n}: Args) => ",
+          "({\n  filters,\n  query,\n  inputQuery,\n  time,\n  timeFieldName,\n  titleForInspector,\n  descriptionForInspector,\n}: Args) => ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -4588,7 +4595,7 @@
             "id": "def-common.textBasedQueryStateToExpressionAst.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  filters,\n  query,\n  inputQuery,\n  time,\n  timeFieldName,\n}",
+            "label": "{\n  filters,\n  query,\n  inputQuery,\n  time,\n  timeFieldName,\n  titleForInspector,\n  descriptionForInspector,\n}",
             "description": [],
             "signature": [
               "Args"

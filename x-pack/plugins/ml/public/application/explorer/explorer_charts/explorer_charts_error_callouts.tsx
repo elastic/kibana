@@ -7,8 +7,9 @@
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FC } from 'react';
-import { ExplorerChartSeriesErrorMessages } from './explorer_charts_container_service';
+import type { FC } from 'react';
+import React from 'react';
+import type { ExplorerChartSeriesErrorMessages } from './explorer_charts_container_service';
 
 interface ExplorerChartsErrorCalloutsProps {
   errorMessagesByType: ExplorerChartSeriesErrorMessages;

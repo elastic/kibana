@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { AttachmentPatchRequestRt } from '../../../../common/types/api';
-import { decodeWithExcessOrThrow } from '../../../../common/api';
+import { decodeWithExcessOrThrow } from '../../../common/runtime_types';
 import { CASE_COMMENTS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
@@ -20,6 +20,13 @@ export const patchCommentRoute = createCasesRoute({
     params: schema.object({
       case_id: schema.string(),
     }),
+  },
+  routerOptions: {
+    access: 'public',
+    summary: `Update a case comment or alert`,
+    tags: ['oas-tag:cases'],
+    description: 'You cannot change the comment type or the owner of a comment.',
+    // You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're updating.
   },
   handler: async ({ context, request, response }) => {
     try {

@@ -11,40 +11,25 @@ import numeral from '@elastic/numeral';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
 import { useUiSetting$ } from '../../../common/lib/kibana';
 import { SHOWING_ALERTS } from '../../components/alerts_kpis/alerts_histogram_panel/translations';
-import type { AlertsTotal } from '../../components/alerts_kpis/alerts_histogram_panel/types';
 import { useVisualizationResponse } from '../../../common/components/visualization_actions/use_visualization_response';
 
 export const useAlertHistogramCount = ({
-  totalAlertsObj,
   visualizationId,
-  isChartEmbeddablesEnabled,
 }: {
-  totalAlertsObj: AlertsTotal;
   visualizationId: string;
-  isChartEmbeddablesEnabled: boolean;
 }): string => {
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
-  const { responses: visualizationResponse } = useVisualizationResponse({ visualizationId });
-
-  const totalAlerts = useMemo(
-    () =>
-      SHOWING_ALERTS(
-        numeral(totalAlertsObj.value).format(defaultNumberFormat),
-        totalAlertsObj.value,
-        totalAlertsObj.relation === 'gte' ? '>' : totalAlertsObj.relation === 'lte' ? '<' : ''
-      ),
-    [totalAlertsObj.value, totalAlertsObj.relation, defaultNumberFormat]
-  );
+  const { responses: visualizationResponses } = useVisualizationResponse({ visualizationId });
 
   const visualizationAlerts = useMemo(() => {
     const visualizationAlertsCount =
-      visualizationResponse != null ? visualizationResponse[0].hits.total : 0;
+      visualizationResponses != null ? visualizationResponses[0].hits.total : 0;
     return SHOWING_ALERTS(
       numeral(visualizationAlertsCount).format(defaultNumberFormat),
       visualizationAlertsCount,
       ''
     );
-  }, [defaultNumberFormat, visualizationResponse]);
+  }, [defaultNumberFormat, visualizationResponses]);
 
-  return isChartEmbeddablesEnabled ? visualizationAlerts : totalAlerts;
+  return visualizationAlerts;
 };

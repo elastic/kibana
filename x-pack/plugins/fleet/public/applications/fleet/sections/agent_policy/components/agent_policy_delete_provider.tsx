@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React, { Fragment, useRef, useState } from 'react';
-import { EuiConfirmModal, EuiCallOut } from '@elastic/eui';
+import React, { Fragment, useCallback, useMemo, useRef, useState } from 'react';
+import { EuiConfirmModal, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useHistory } from 'react-router-dom';
 
 import { SO_SEARCH_LIMIT } from '../../../../../constants';
+import { useMultipleAgentPolicies } from '../../../hooks';
 
 import {
   useStartServices,
@@ -22,9 +23,13 @@ import {
   sendGetAgents,
 } from '../../../hooks';
 
+import type { AgentPolicy, PackagePolicy } from '../../../types';
+
 interface Props {
   children: (deleteAgentPolicy: DeleteAgentPolicy) => React.ReactElement;
   hasFleetServer: boolean;
+  packagePolicies?: PackagePolicy[];
+  agentPolicy: AgentPolicy;
 }
 
 export type DeleteAgentPolicy = (agentPolicy: string, onSuccess?: OnSuccessCallback) => void;
@@ -34,12 +39,14 @@ type OnSuccessCallback = (agentPolicyDeleted: string) => void;
 export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
   children,
   hasFleetServer,
+  packagePolicies,
+  agentPolicy,
 }) => {
   const { notifications } = useStartServices();
   const {
     agents: { enabled: isFleetEnabled },
   } = useConfig();
-  const [agentPolicy, setAgentPolicy] = useState<string>();
+  const [agentPolicyId, setAgentPolicyId] = useState<string>();
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isLoadingAgentsCount, setIsLoadingAgentsCount] = useState<boolean>(false);
   const [agentsCount, setAgentsCount] = useState<number>(0);
@@ -48,22 +55,23 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
   const { getPath } = useLink();
   const history = useHistory();
   const deleteAgentPolicyMutation = useDeleteAgentPolicyMutation();
+  const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
 
   const deleteAgentPolicyPrompt: DeleteAgentPolicy = (
-    agentPolicyToDelete,
+    agentPolicyIdToDelete,
     onSuccess = () => undefined
   ) => {
-    if (!agentPolicyToDelete) {
+    if (!agentPolicyIdToDelete) {
       throw new Error('No agent policy specified for deletion');
     }
     setIsModalOpen(true);
-    setAgentPolicy(agentPolicyToDelete);
-    fetchAgentsCount(agentPolicyToDelete);
+    setAgentPolicyId(agentPolicyIdToDelete);
+    fetchAgentsCount(agentPolicyIdToDelete);
     onSuccessCallback.current = onSuccess;
   };
 
   const closeModal = () => {
-    setAgentPolicy(undefined);
+    setAgentPolicyId(undefined);
     setIsLoading(false);
     setIsLoadingAgentsCount(false);
     setIsModalOpen(false);
@@ -74,24 +82,24 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
 
     try {
       const { data } = await deleteAgentPolicyMutation.mutateAsync({
-        agentPolicyId: agentPolicy!,
+        agentPolicyId: agentPolicyId!,
       });
 
       if (data) {
         notifications.toasts.addSuccess(
           i18n.translate('xpack.fleet.deleteAgentPolicy.successSingleNotificationTitle', {
-            defaultMessage: "Deleted agent policy '{id}'",
+            defaultMessage: "Deleted agent policy ''{id}''",
             values: { id: data.name || data.id },
           })
         );
         if (onSuccessCallback.current) {
-          onSuccessCallback.current(agentPolicy!);
+          onSuccessCallback.current(agentPolicyId!);
         }
       } else {
         notifications.toasts.addDanger(
           i18n.translate('xpack.fleet.deleteAgentPolicy.failureSingleNotificationTitle', {
-            defaultMessage: "Error deleting agent policy '{id}'",
-            values: { id: agentPolicy },
+            defaultMessage: "Error deleting agent policy ''{id}''",
+            values: { id: agentPolicyId },
           })
         );
       }
@@ -106,20 +114,31 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
     history.push(getPath('policies_list'));
   };
 
-  const fetchAgentsCount = async (agentPolicyToCheck: string) => {
-    if (!isFleetEnabled || isLoadingAgentsCount) {
-      return;
+  const fetchAgentsCount = useCallback(
+    async (agentPolicyToCheck: string) => {
+      if (!isFleetEnabled || isLoadingAgentsCount) {
+        return;
+      }
+      setIsLoadingAgentsCount(true);
+      // filtering out the unenrolled agents assigned to this policy
+      const agents = await sendGetAgents({
+        showInactive: true,
+        kuery: `policy_id:"${agentPolicyToCheck}" and not status: unenrolled`,
+        perPage: SO_SEARCH_LIMIT,
+      });
+      setAgentsCount(agents.data?.total ?? 0);
+      setIsLoadingAgentsCount(false);
+    },
+    [isFleetEnabled, isLoadingAgentsCount]
+  );
+
+  const packagePoliciesWithMultiplePolicies = useMemo(() => {
+    // Find if there are package policies that have multiple agent policies
+    if (packagePolicies && canUseMultipleAgentPolicies) {
+      return packagePolicies.some((policy) => policy?.policy_ids.length > 1);
     }
-    setIsLoadingAgentsCount(true);
-    // filtering out the unenrolled agents assigned to this policy
-    const agents = await sendGetAgents({
-      showInactive: true,
-      kuery: `policy_id:"${agentPolicyToCheck}" and not status: unenrolled`,
-      perPage: SO_SEARCH_LIMIT,
-    });
-    setAgentsCount(agents.data?.total ?? 0);
-    setIsLoadingAgentsCount(false);
-  };
+    return false;
+  }, [canUseMultipleAgentPolicies, packagePolicies]);
 
   const renderModal = () => {
     if (!isModalOpen) {
@@ -156,8 +175,25 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
           )
         }
         buttonColor="danger"
-        confirmButtonDisabled={isLoading || isLoadingAgentsCount || !!agentsCount}
+        confirmButtonDisabled={
+          isLoading || isLoadingAgentsCount || (!agentPolicy?.supports_agentless && !!agentsCount)
+        }
       >
+        {packagePoliciesWithMultiplePolicies && (
+          <>
+            <EuiCallOut
+              color="primary"
+              iconType="iInCircle"
+              title={
+                <FormattedMessage
+                  id="xpack.fleet.deleteAgentPolicy.confirmModal.warningSharedIntegrationPolicies"
+                  defaultMessage="Fleet has detected that this policy contains integration policies shared by multiple agent policies. These integration policies won't be deleted."
+                />
+              }
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
         {isLoadingAgentsCount ? (
           <FormattedMessage
             id="xpack.fleet.deleteAgentPolicy.confirmModal.loadingAgentsCountMessage"
@@ -174,13 +210,23 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
               }
             )}
           >
-            <FormattedMessage
-              id="xpack.fleet.deleteAgentPolicy.confirmModal.affectedAgentsMessage"
-              defaultMessage="{agentsCount, plural, one {# agent is} other {# agents are}} assigned to this agent policy. Unassign these agents before deleting this policy."
-              values={{
-                agentsCount,
-              }}
-            />
+            {agentPolicy?.supports_agentless ? (
+              <FormattedMessage
+                id="xpack.fleet.deleteAgentPolicy.confirmModal.affectedAgentlessMessage"
+                defaultMessage="Deleting this agent policy will automatically delete integrations assign to {name} and unenroll elastic agent."
+                values={{
+                  name: <strong>{agentPolicy.name}</strong>,
+                }}
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.fleet.deleteAgentPolicy.confirmModal.affectedAgentsMessage"
+                defaultMessage="{agentsCount, plural, one {# agent is} other {# agents are}} assigned to this agent policy. Unassign these agents before deleting this policy. This might include inactive agents."
+                values={{
+                  agentsCount,
+                }}
+              />
+            )}
           </EuiCallOut>
         ) : hasFleetServer ? (
           <FormattedMessage

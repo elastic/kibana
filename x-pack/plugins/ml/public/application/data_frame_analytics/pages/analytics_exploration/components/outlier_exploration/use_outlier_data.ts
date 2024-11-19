@@ -7,7 +7,7 @@
 
 import { useEffect, useMemo } from 'react';
 
-import { EuiDataGridColumn } from '@elastic/eui';
+import type { EuiDataGridColumn } from '@elastic/eui';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
@@ -26,14 +26,14 @@ import {
   type UseIndexDataReturnType,
 } from '@kbn/ml-data-grid';
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
 import {
   useColorRange,
   COLOR_RANGE,
   COLOR_RANGE_SCALE,
 } from '../../../../../components/color_range_legend';
-import { getToastNotifications } from '../../../../../util/dependency_cache';
+import { useMlApi, useMlKibana } from '../../../../../contexts/kibana';
 
 import { getIndexData, getIndexFields } from '../../../../common';
 
@@ -45,6 +45,12 @@ export const useOutlierData = (
   jobConfig: DataFrameAnalyticsConfig | undefined,
   searchQuery: estypes.QueryDslQueryContainer
 ): UseIndexDataReturnType => {
+  const {
+    services: {
+      notifications: { toasts },
+    },
+  } = useMlKibana();
+  const mlApi = useMlApi();
   const needsDestIndexFields =
     dataView !== undefined && dataView.title === jobConfig?.source.index[0];
 
@@ -53,7 +59,7 @@ export const useOutlierData = (
 
     if (jobConfig !== undefined && dataView !== undefined) {
       const resultsField = jobConfig.dest.results_field;
-      const { fieldTypes } = getIndexFields(jobConfig, needsDestIndexFields);
+      const { fieldTypes } = getIndexFields(mlApi, jobConfig, needsDestIndexFields);
       newColumns.push(
         ...getDataGridSchemasFromFieldTypes(fieldTypes, resultsField!).sort((a: any, b: any) =>
           sortExplorationResultsFields(a.id, b.id, jobConfig)
@@ -86,7 +92,7 @@ export const useOutlierData = (
   // passed on to `getIndexData`.
   useEffect(() => {
     const options = { didCancel: false };
-    getIndexData(jobConfig, dataGrid, searchQuery, options);
+    getIndexData(mlApi, jobConfig, dataGrid, searchQuery, options);
     return () => {
       options.didCancel = true;
     };
@@ -95,7 +101,9 @@ export const useOutlierData = (
   }, [jobConfig && jobConfig.id, dataGrid.pagination, searchQuery, dataGrid.sortingColumns]);
 
   const dataLoader = useMemo(
-    () => (dataView !== undefined ? new DataLoader(dataView, getToastNotifications()) : undefined),
+    () => (dataView !== undefined ? new DataLoader(dataView, mlApi) : undefined),
+    // skip ml API services from deps check
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [dataView]
   );
 
@@ -114,7 +122,7 @@ export const useOutlierData = (
         dataGrid.setColumnCharts(columnChartsData);
       }
     } catch (e) {
-      showDataGridColumnChartErrorMessageToast(e, getToastNotifications());
+      showDataGridColumnChartErrorMessageToast(e, toasts);
     }
   };
 

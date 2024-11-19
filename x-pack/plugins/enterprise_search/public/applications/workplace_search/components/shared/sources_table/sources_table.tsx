@@ -26,7 +26,7 @@ export const SourcesTable: React.FC<SourcesTableProps> = ({
   onSearchableToggle,
 }) => {
   return (
-    <EuiTable responsive={false}>
+    <EuiTable responsiveBreakpoint={false}>
       <EuiTableHeader>
         <EuiTableHeaderCell>{SOURCE}</EuiTableHeaderCell>
         <EuiTableHeaderCell>{STATUS_HEADER}</EuiTableHeaderCell>

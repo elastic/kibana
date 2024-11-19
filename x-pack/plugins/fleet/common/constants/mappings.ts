@@ -6,7 +6,7 @@
  */
 
 /**
- * ATTENTION: Mappings for Fleet are defined in the ElasticSearch repo.
+ * ATTENTION: Mappings for Fleet are defined in the Elasticsearch repo.
  *
  * The following mappings declared here closely mirror them
  * But they are only used to perform validation on the endpoints using ListWithKuery
@@ -53,6 +53,8 @@ export const PACKAGE_POLICIES_MAPPINGS = {
     enabled: { type: 'boolean' },
     is_managed: { type: 'boolean' },
     policy_id: { type: 'keyword' },
+    policy_ids: { type: 'keyword' },
+    output_id: { type: 'keyword' },
     package: {
       properties: {
         name: { type: 'keyword' },
@@ -166,6 +168,9 @@ export const AGENT_MAPPINGS = {
                     },
                   },
                 },
+                unprivileged: {
+                  type: 'boolean',
+                },
               },
             },
           },
@@ -256,6 +261,9 @@ export const AGENT_MAPPINGS = {
         },
       },
     },
+    namespaces: {
+      type: 'keyword',
+    },
     packages: {
       type: 'keyword',
     },
@@ -284,6 +292,9 @@ export const AGENT_MAPPINGS = {
       type: 'date',
     },
     unenrolled_reason: {
+      type: 'keyword',
+    },
+    unhealthy_reason: {
       type: 'keyword',
     },
     updated_at: {
@@ -322,6 +333,9 @@ export const AGENT_MAPPINGS = {
             download_percent: {
               type: 'double',
             },
+            download_rate: {
+              type: 'double',
+            },
             failed_state: {
               type: 'keyword',
             },
@@ -332,6 +346,17 @@ export const AGENT_MAPPINGS = {
                   type: 'keyword',
                 },
               },
+            },
+            retry_error_msg: {
+              type: 'text',
+              fields: {
+                keyword: {
+                  type: 'keyword',
+                },
+              },
+            },
+            retry_until: {
+              type: 'date',
             },
           },
         },

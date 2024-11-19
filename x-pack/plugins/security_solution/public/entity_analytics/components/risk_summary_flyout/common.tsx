@@ -10,15 +10,12 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { sumBy } from 'lodash/fp';
 
-import type {
-  HostRiskScore,
-  RiskStats,
-  UserRiskScore,
-} from '../../../../common/search_strategy/security_solution/risk_score';
+import type { HostRiskScore, RiskStats, UserRiskScore } from '../../../../common/search_strategy';
+import { formatRiskScore } from '../../common';
 
 interface TableItem {
   category: string;
-  count: number;
+  count: number | undefined;
   score: number;
 }
 
@@ -27,7 +24,7 @@ interface EntityData {
   risk: RiskStats;
 }
 
-export const buildColumns: () => Array<EuiBasicTableColumn<TableItem>> = () => [
+export const columnsArray: Array<EuiBasicTableColumn<TableItem>> = [
   {
     field: 'category',
     name: (
@@ -59,10 +56,10 @@ export const buildColumns: () => Array<EuiBasicTableColumn<TableItem>> = () => [
     sortable: true,
     dataType: 'number',
     align: 'right',
-    render: (score: number) => displayNumber(score),
+    render: formatRiskScore,
     footer: (props) => (
       <span data-test-subj="risk-summary-result-score">
-        {displayNumber(sumBy((i) => i.score, props.items))}
+        {formatRiskScore(sumBy((i) => i.score, props.items))}
       </span>
     ),
   },
@@ -80,7 +77,9 @@ export const buildColumns: () => Array<EuiBasicTableColumn<TableItem>> = () => [
     dataType: 'number',
     align: 'right',
     footer: (props) => (
-      <span data-test-subj="risk-summary-result-count">{sumBy((i) => i.count, props.items)}</span>
+      <span data-test-subj="risk-summary-result-count">
+        {sumBy((i) => i.count ?? 0, props.items)}
+      </span>
     ),
   },
 ];
@@ -94,12 +93,16 @@ export const getItems: (entityData: EntityData | undefined) => TableItem[] = (en
       score: entityData?.risk.category_1_score ?? 0,
       count: entityData?.risk.category_1_count ?? 0,
     },
+
     {
-      category: i18n.translate('xpack.securitySolution.flyout.entityDetails.contextGroupLabel', {
-        defaultMessage: 'Contexts',
-      }),
+      category: i18n.translate(
+        'xpack.securitySolution.flyout.entityDetails.assetCriticalityGroupLabel',
+        {
+          defaultMessage: 'Asset Criticality',
+        }
+      ),
       score: entityData?.risk.category_2_score ?? 0,
-      count: entityData?.risk.category_2_count ?? 0,
+      count: undefined,
     },
   ];
 };
@@ -123,8 +126,6 @@ export const getEntityData = (
 
   return riskData.host;
 };
-
-const displayNumber = (num: number) => num.toFixed(2);
 
 export const LENS_VISUALIZATION_HEIGHT = 126; //  Static height in pixels specified by design
 export const LENS_VISUALIZATION_MIN_WIDTH = 160; // Lens visualization min-width in pixels

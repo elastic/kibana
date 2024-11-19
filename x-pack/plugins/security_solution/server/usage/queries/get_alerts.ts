@@ -82,7 +82,7 @@ export const getAlerts = async ({
       size: 0,
     };
     logger.debug(
-      `Getting alerts with point in time (PIT) query: ${JSON.stringify(ruleSearchOptions)}`
+      () => `Getting alerts with point in time (PIT) query: ${JSON.stringify(ruleSearchOptions)}`
     );
     const body = await esClient.search<unknown, AlertAggs>(ruleSearchOptions);
     if (body.aggregations?.buckets?.buckets != null) {

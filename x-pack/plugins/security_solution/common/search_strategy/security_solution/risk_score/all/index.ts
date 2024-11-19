@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/search-types';
 
+import { EntityRiskLevels, EntityRiskLevelsEnum } from '../../../../api/entity_analytics/common';
+import type { EntityRiskScoreRecord } from '../../../../api/entity_analytics/common';
 import type { Inspect, Maybe, SortField } from '../../../common';
-import type { RiskScore } from '../../../../entity_analytics/risk_engine';
-import { RiskLevels as RiskSeverity } from '../../../../entity_analytics/risk_engine';
 
 export interface HostsRiskScoreStrategyResponse extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;
@@ -23,12 +23,13 @@ export interface UsersRiskScoreStrategyResponse extends IEsSearchResponse {
   data: UserRiskScore[] | undefined;
 }
 
-export interface RiskStats extends RiskScore {
+export interface RiskStats extends EntityRiskScoreRecord {
   rule_risks: RuleRisk[];
   multipliers: string[];
 }
 
-export { RiskSeverity };
+export const RiskSeverity = EntityRiskLevels.enum;
+export type RiskSeverity = EntityRiskLevels;
 
 export interface HostRiskScore {
   '@timestamp': string;
@@ -76,8 +77,8 @@ export interface RiskScoreItem {
 
   [RiskScoreFields.timestamp]: Maybe<string>;
 
-  [RiskScoreFields.hostRisk]: Maybe<RiskSeverity>;
-  [RiskScoreFields.userRisk]: Maybe<RiskSeverity>;
+  [RiskScoreFields.hostRisk]: Maybe<EntityRiskLevels>;
+  [RiskScoreFields.userRisk]: Maybe<EntityRiskLevels>;
 
   [RiskScoreFields.hostRiskScore]: Maybe<number>;
   [RiskScoreFields.userRiskScore]: Maybe<number>;
@@ -89,9 +90,9 @@ export const isUserRiskScore = (risk: HostRiskScore | UserRiskScore): risk is Us
   'user' in risk;
 
 export const EMPTY_SEVERITY_COUNT = {
-  [RiskSeverity.critical]: 0,
-  [RiskSeverity.high]: 0,
-  [RiskSeverity.low]: 0,
-  [RiskSeverity.moderate]: 0,
-  [RiskSeverity.unknown]: 0,
+  [EntityRiskLevelsEnum.Critical]: 0,
+  [EntityRiskLevelsEnum.High]: 0,
+  [EntityRiskLevelsEnum.Low]: 0,
+  [EntityRiskLevelsEnum.Moderate]: 0,
+  [EntityRiskLevelsEnum.Unknown]: 0,
 };

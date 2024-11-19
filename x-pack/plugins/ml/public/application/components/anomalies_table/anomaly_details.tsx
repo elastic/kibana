@@ -10,7 +10,8 @@
  * of the anomalies table.
  */
 
-import React, { FC, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -29,8 +30,8 @@ import { type MlAnomaliesTableRecordExtended } from '@kbn/ml-anomaly-utils';
 import { getAnomalyDescription } from '../../../../common/util/anomaly_description';
 import { MAX_CHARS } from './anomalies_table_constants';
 import type { CategoryDefinition } from '../../services/ml_api_service/results';
-import { EntityCellFilter } from '../entity_cell';
-import { ExplorerJob } from '../../explorer/explorer_utils';
+import type { EntityCellFilter } from '../entity_cell';
+import type { ExplorerJob } from '../../explorer/explorer_utils';
 import {
   AnomalyExplanationDetails,
   DetailsItems,

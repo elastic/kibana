@@ -20,7 +20,9 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
         await tearDown(getService);
       });
 
+      loadTestFile(require.resolve('./backfill'));
       loadTestFile(require.resolve('./find'));
+      loadTestFile(require.resolve('./find_internal'));
       loadTestFile(require.resolve('./find_with_post'));
       loadTestFile(require.resolve('./create'));
       loadTestFile(require.resolve('./delete'));
@@ -33,6 +35,7 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
       loadTestFile(require.resolve('./rule_types'));
       loadTestFile(require.resolve('./retain_api_key'));
       loadTestFile(require.resolve('./bulk_untrack'));
+      loadTestFile(require.resolve('./bulk_untrack_by_query'));
     });
   });
 }

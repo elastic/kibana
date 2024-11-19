@@ -5,24 +5,36 @@
  * 2.0.
  */
 
-//import mockOverallSwimlaneData from './__mocks__/mock_overall_swimlane.json';
-
 import moment from 'moment-timezone';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 
 import { TimeseriesChart } from './timeseries_chart';
 
-jest.mock('../../../util/time_buckets', () => ({
-  TimeBuckets: function () {
-    this.setBounds = jest.fn();
-    this.setInterval = jest.fn();
-    this.getScaledDateFormat = jest.fn();
+jest.mock('../../../util/time_buckets_service', () => ({
+  timeBucketsServiceFactory: function () {
+    return { getTimeBuckets: jest.fn() };
   },
 }));
 
-jest.mock('../../../services/field_format_service', () => ({
-  mlFieldFormatService: {},
+jest.mock('../../../util/time_series_explorer_service', () => ({
+  timeSeriesExplorerServiceFactory: function () {
+    return {
+      getAutoZoomDuration: jest.fn(),
+      calculateAggregationInterval: jest.fn(),
+      calculateInitialFocusRange: jest.fn(),
+      calculateDefaultFocusRange: jest.fn(),
+      processRecordScoreResults: jest.fn(),
+      processMetricPlotResults: jest.fn(),
+      processForecastResults: jest.fn(),
+      findChartPointForAnomalyTime: jest.fn(),
+      processDataForFocusAnomalies: jest.fn(),
+      findChartPointForScheduledEvent: jest.fn(),
+      processScheduledEventsForChart: jest.fn(),
+      getFocusData: jest.fn(),
+    };
+  },
 }));
 
 function getTimeseriesChartPropsMock() {
@@ -39,6 +51,14 @@ function getTimeseriesChartPropsMock() {
   };
 }
 
+const kibanaReactContextMock = createKibanaReactContext({
+  mlServices: {
+    mlApi: {},
+    mlResultsService: {},
+  },
+  notifications: { toasts: { addDanger: jest.fn(), addSuccess: jest.fn() } },
+});
+
 describe('TimeseriesChart', () => {
   const mockedGetBBox = { x: 0, y: -10, width: 40, height: 20 };
   const originalGetBBox = SVGElement.prototype.getBBox;
@@ -54,7 +74,11 @@ describe('TimeseriesChart', () => {
   test('Minimal initialization', () => {
     const props = getTimeseriesChartPropsMock();
 
-    const wrapper = mountWithIntl(<TimeseriesChart {...props} />);
+    const wrapper = mountWithIntl(
+      <kibanaReactContextMock.Provider>
+        <TimeseriesChart {...props} />
+      </kibanaReactContextMock.Provider>
+    );
 
     expect(wrapper.html()).toBe('<div class="ml-timeseries-chart-react"></div>');
   });

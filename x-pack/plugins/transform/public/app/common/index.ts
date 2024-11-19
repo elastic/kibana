@@ -59,15 +59,10 @@ export {
   pivotGroupByFieldSupport,
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
 } from './pivot_group_by';
-export type { TransformConfigQuery, SimpleQuery } from './request';
+export type { TransformConfigQuery } from './request';
 export {
-  defaultQuery,
   getPreviewTransformRequestBody,
   getCreateTransformRequestBody,
   getTransformConfigQuery,
   getRequestPayload,
-  isDefaultQuery,
-  isMatchAllQuery,
-  isSimpleQuery,
-  matchAllQuery,
 } from './request';

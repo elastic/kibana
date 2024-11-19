@@ -7,9 +7,9 @@
 
 import { defineCreateApiKeyRoutes } from './create';
 import { defineEnabledApiKeysRoutes } from './enabled';
-import { defineGetApiKeysRoutes } from './get';
 import { defineHasApiKeysRoutes } from './has_active';
 import { defineInvalidateApiKeysRoutes } from './invalidate';
+import { defineQueryApiKeysAndAggregationsRoute } from './query';
 import { defineUpdateApiKeyRoutes } from './update';
 import type { RouteDefinitionParams } from '..';
 
@@ -19,14 +19,13 @@ export type {
   UpdateRestAPIKeyParams,
   UpdateCrossClusterAPIKeyParams,
   UpdateRestAPIKeyWithKibanaPrivilegesParams,
-} from './update';
-export type { GetAPIKeysResult } from './get';
+} from '@kbn/security-plugin-types-server';
 
 export function defineApiKeysRoutes(params: RouteDefinitionParams) {
   defineEnabledApiKeysRoutes(params);
-  defineGetApiKeysRoutes(params);
   defineHasApiKeysRoutes(params);
   defineCreateApiKeyRoutes(params);
   defineUpdateApiKeyRoutes(params);
   defineInvalidateApiKeysRoutes(params);
+  defineQueryApiKeysAndAggregationsRoute(params);
 }

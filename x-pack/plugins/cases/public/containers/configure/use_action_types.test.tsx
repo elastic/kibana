@@ -24,25 +24,29 @@ describe('useActionTypes', () => {
 
   it('should fetch action types', async () => {
     const spy = jest.spyOn(api, 'fetchActionTypes');
-    const { waitForNextUpdate } = renderHook(() => useGetActionTypes(), {
+
+    renderHook(() => useGetActionTypes(), {
       wrapper: appMockRenderer.AppWrapper,
     });
 
-    await waitForNextUpdate();
     expect(spy).toHaveBeenCalledWith({ signal: expect.any(AbortSignal) });
   });
 
-  it('should show a toast eror message if failed to fetch', async () => {
-    const spy = jest.spyOn(api, 'fetchActionTypes');
-    spy.mockImplementation(() => {
+  it('should show a toast error message if failed to fetch', async () => {
+    const spyOnFetchActionTypes = jest.spyOn(api, 'fetchActionTypes');
+
+    spyOnFetchActionTypes.mockRejectedValue(() => {
       throw new Error('Something went wrong');
     });
+
     const addErrorMock = jest.fn();
+
     (useToasts as jest.Mock).mockReturnValue({ addError: addErrorMock });
+
     const { waitForNextUpdate } = renderHook(() => useGetActionTypes(), {
       wrapper: appMockRenderer.AppWrapper,
     });
-    await waitForNextUpdate();
+    await waitForNextUpdate({ timeout: 2000 });
     expect(addErrorMock).toHaveBeenCalled();
   });
 });

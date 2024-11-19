@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import { ExploreDataContextMenuAction } from './explore_data_context_menu_action';
-import { Params, PluginDeps } from './abstract_explore_data_action';
 import { coreMock } from '@kbn/core/public/mocks';
+import { DataView } from '@kbn/data-views-plugin/common';
+import { DiscoverAppLocator } from '@kbn/discover-plugin/common';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { ViewMode as ViewModeType } from '@kbn/presentation-publishing';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import {
   VisualizeEmbeddableContract,
   VISUALIZE_EMBEDDABLE_TYPE,
 } from '@kbn/visualizations-plugin/public';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { DiscoverAppLocator } from '@kbn/discover-plugin/common';
-import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import { BehaviorSubject } from 'rxjs';
+import { Params, PluginDeps } from './abstract_explore_data_action';
+import { ExploreDataContextMenuAction } from './explore_data_context_menu_action';
 
 const i18nTranslateSpy = i18n.translate as unknown as jest.SpyInstance;
 
@@ -57,47 +60,42 @@ const setup = () => {
   };
   const action = new ExploreDataContextMenuAction(params);
 
-  const input = {
-    viewMode: ViewMode.VIEW,
-  };
-
-  const output = {
-    indexPatterns: [
+  const embeddable: VisualizeEmbeddableContract = {
+    type: VISUALIZE_EMBEDDABLE_TYPE,
+    dataViews: new BehaviorSubject([
       {
         id: 'index-ptr-foo',
       },
-    ],
-  };
-
-  const embeddable: VisualizeEmbeddableContract = {
-    type: VISUALIZE_EMBEDDABLE_TYPE,
-    getInput: () => input,
-    getOutput: () => output,
+    ]),
+    parentApi: {
+      viewMode: new BehaviorSubject(ViewMode.VIEW),
+      localFilters: new BehaviorSubject([]),
+    },
   } as unknown as VisualizeEmbeddableContract;
 
   const context = {
     embeddable,
   };
 
-  return { core, plugins, locator, params, action, input, output, embeddable, context };
+  return { core, plugins, locator, params, action, embeddable, context };
 };
 
 describe('"Explore underlying data" panel action', () => {
   test('action has Discover icon', () => {
-    const { action, context } = setup();
-    expect(action.getIconType(context)).toBe('discoverApp');
+    const { action } = setup();
+    expect(action.getIconType()).toBe('discoverApp');
   });
 
   test('title is "Explore underlying data"', () => {
-    const { action, context } = setup();
-    expect(action.getDisplayName(context)).toBe('Explore underlying data');
+    const { action } = setup();
+    expect(action.getDisplayName()).toBe('Explore underlying data');
   });
 
   test('translates title', () => {
     expect(i18nTranslateSpy).toHaveBeenCalledTimes(0);
 
-    const { action, context } = setup();
-    action.getDisplayName(context);
+    const { action } = setup();
+    action.getDisplayName();
 
     expect(i18nTranslateSpy).toHaveBeenCalledTimes(1);
     expect(i18nTranslateSpy.mock.calls[0][0]).toBe(
@@ -124,15 +122,15 @@ describe('"Explore underlying data" panel action', () => {
     });
 
     test('returns false if embeddable has more than one index pattern', async () => {
-      const { action, output, context } = setup();
-      output.indexPatterns = [
+      const { action, embeddable, context } = setup();
+      embeddable.dataViews = new BehaviorSubject<undefined | DataView[]>([
         {
           id: 'index-ptr-foo',
         },
         {
           id: 'index-ptr-bar',
         },
-      ];
+      ] as any as DataView[]);
 
       const isCompatible = await action.isCompatible(context);
 
@@ -140,9 +138,9 @@ describe('"Explore underlying data" panel action', () => {
     });
 
     test('returns false if embeddable does not have index patterns', async () => {
-      const { action, output, context } = setup();
+      const { action, embeddable, context } = setup();
       // @ts-expect-error
-      delete output.indexPatterns;
+      embeddable.dataViews = undefined;
 
       const isCompatible = await action.isCompatible(context);
 
@@ -150,8 +148,8 @@ describe('"Explore underlying data" panel action', () => {
     });
 
     test('returns false if embeddable index patterns are empty', async () => {
-      const { action, output, context } = setup();
-      output.indexPatterns = [];
+      const { action, embeddable, context } = setup();
+      embeddable.dataViews = new BehaviorSubject<undefined | DataView[]>([]);
 
       const isCompatible = await action.isCompatible(context);
 
@@ -159,8 +157,10 @@ describe('"Explore underlying data" panel action', () => {
     });
 
     test('returns false if dashboard is in edit mode', async () => {
-      const { action, input, context } = setup();
-      input.viewMode = ViewMode.EDIT;
+      const { action, embeddable, context } = setup();
+      if (embeddable.parentApi) {
+        embeddable.parentApi.viewMode = new BehaviorSubject<ViewModeType>(ViewMode.EDIT);
+      }
 
       const isCompatible = await action.isCompatible(context);
 
@@ -191,7 +191,8 @@ describe('"Explore underlying data" panel action', () => {
 
       expect(locator.getLocation).toHaveBeenCalledTimes(1);
       expect(locator.getLocation).toHaveBeenCalledWith({
-        indexPatternId: 'index-ptr-foo',
+        dataViewId: 'index-ptr-foo',
+        filters: [],
       });
     });
   });

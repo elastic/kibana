@@ -29,15 +29,25 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { Form, FormikProvider, useFormik, useFormikContext } from 'formik';
 import type { FunctionComponent } from 'react';
 import React, { useRef, useState } from 'react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
-import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
+import type { CoreStart, IUiSettingsClient, ThemeServiceStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import {
+  FormChangesProvider,
+  FormField,
+  FormLabel,
+  FormRow,
+  OptionalText,
+  useFormChanges,
+  useFormChangesContext,
+} from '@kbn/security-form-components';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { DarkModeValue, UserProfileData } from '@kbn/user-profile-components';
 import { UserAvatar, useUpdateUserProfile } from '@kbn/user-profile-components';
@@ -53,16 +63,14 @@ import {
 } from '../../../common/model';
 import { useSecurityApiClients } from '../../components';
 import { Breadcrumb } from '../../components/breadcrumb';
-import {
-  FormChangesProvider,
-  useFormChanges,
-  useFormChangesContext,
-} from '../../components/form_changes';
-import { FormField } from '../../components/form_field';
-import { FormLabel } from '../../components/form_label';
-import { FormRow, OptionalText } from '../../components/form_row';
 import { ChangePasswordModal } from '../../management/users/edit_user/change_password_modal';
 import { isUserReserved } from '../../management/users/user_utils';
+
+const formRowCSS = css`
+  .euiFormRow__label {
+    flex: 1;
+  }
+`;
 
 export interface UserProfileProps {
   user: AuthenticatedUser;
@@ -128,30 +136,36 @@ const UserDetailsEditor: FunctionComponent<UserDetailsEditorProps> = ({ user }) 
       }
     >
       <FormRow
+        css={formRowCSS}
         label={
           <FormLabel for="user.full_name">
-            <FormattedMessage
-              id="xpack.security.accountManagement.userProfile.fullNameLabel"
-              defaultMessage="Full name"
-            />
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <FormattedMessage
+                id="xpack.security.accountManagement.userProfile.fullNameLabel"
+                defaultMessage="Full name"
+              />
+              <OptionalText />
+            </EuiFlexGroup>
           </FormLabel>
         }
-        labelAppend={<OptionalText />}
         fullWidth
       >
         <FormField name="user.full_name" data-test-subj={'userProfileFullName'} fullWidth />
       </FormRow>
 
       <FormRow
+        css={formRowCSS}
         label={
           <FormLabel for="user.email">
-            <FormattedMessage
-              id="xpack.security.accountManagement.userProfile.emailLabel"
-              defaultMessage="Email address"
-            />
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <FormattedMessage
+                id="xpack.security.accountManagement.userProfile.emailLabel"
+                defaultMessage="Email address"
+              />
+              <OptionalText />
+            </EuiFlexGroup>
           </FormLabel>
         }
-        labelAppend={<OptionalText />}
         fullWidth
       >
         <FormField type="email" name="user.email" data-test-subj={'userProfileEmail'} fullWidth />
@@ -423,7 +437,18 @@ function UserAvatarEditor({
               )
             }
             onChange={createImageHandler((imageUrl) => {
-              formik.setFieldValue('data.avatar.imageUrl', imageUrl ?? '');
+              if (!imageUrl) {
+                formik.setFieldError(
+                  'data.avatar.imageUrl',
+                  i18n.translate(
+                    'xpack.security.accountManagement.userProfile.imageUrlRequiredError',
+                    { defaultMessage: 'Upload an image.' }
+                  )
+                );
+                formik.setFieldTouched('data.avatar.imageUrl', true);
+              } else {
+                formik.setFieldValue('data.avatar.imageUrl', imageUrl ?? '');
+              }
             })}
             validate={{
               required: i18n.translate(
@@ -656,7 +681,8 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
   const isCloudUser = user.elastic_cloud_user;
 
   const { isThemeOverridden, isOverriddenThemeDarkMode } = determineIfThemeOverridden(
-    services.settings.client
+    services.settings.client,
+    services.theme
   );
 
   const rightSideItems = [
@@ -998,12 +1024,15 @@ export const SaveChangesBottomBar: FunctionComponent = () => {
   );
 };
 
-function determineIfThemeOverridden(settingsClient: IUiSettingsClient): {
+function determineIfThemeOverridden(
+  settingsClient: IUiSettingsClient,
+  theme: ThemeServiceStart
+): {
   isThemeOverridden: boolean;
   isOverriddenThemeDarkMode: boolean;
 } {
   return {
     isThemeOverridden: settingsClient.isOverridden('theme:darkMode'),
-    isOverriddenThemeDarkMode: settingsClient.get<boolean>('theme:darkMode'),
+    isOverriddenThemeDarkMode: theme.getTheme().darkMode,
   };
 }

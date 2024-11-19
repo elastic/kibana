@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useContext, useState, useEffect } from 'react';
-import { Subscription } from 'rxjs';
+import type { FC } from 'react';
+import React, { Fragment, useContext, useState, useEffect } from 'react';
+import type { Subscription } from 'rxjs';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -17,12 +18,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { createResultsUrl } from '../../../../../util/results_url';
 import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
 import { PreviousButton } from '../wizard_nav';
-import { WIZARD_STEPS, StepProps } from '../step_types';
+import type { StepProps } from '../step_types';
+import { WIZARD_STEPS } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
-import { JobRunner } from '../../../common/job_runner';
-import { mlJobService } from '../../../../../services/job_service';
+import type { JobRunner } from '../../../common/job_runner';
 import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
 import { isSingleMetricJobCreator, isAdvancedJobCreator } from '../../../common/job_creator';
 import { JobDetails } from './components/job_details';
@@ -123,7 +125,7 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
   }
 
   function viewResults() {
-    const url = mlJobService.createResultsUrl(
+    const url = createResultsUrl(
       [jobCreator.jobId],
       jobCreator.start,
       jobCreator.end,

@@ -20,7 +20,7 @@ jest.mock('./versions', () => {
     getAvailableVersions: jest
       .fn()
       .mockResolvedValue(['8.4.0', '8.5.0', '8.6.0', '8.7.0', '8.8.0']),
-    getLatestAvailableVersion: jest.fn().mockResolvedValue('8.8.0'),
+    getLatestAvailableAgentVersion: jest.fn().mockResolvedValue('8.8.0'),
   };
 });
 
@@ -35,15 +35,24 @@ jest.mock('./action_status', () => {
 });
 
 describe('sendUpgradeAgentsActions (plural)', () => {
+  let mocks: ReturnType<typeof createClientMock>;
+
   beforeEach(async () => {
-    appContextService.start(createAppContextStartContractMock());
+    mocks = createClientMock();
+
+    appContextService.start(
+      createAppContextStartContractMock({}, false, {
+        internal: mocks.soClient,
+        withoutSpaceExtensions: mocks.soClient,
+      })
+    );
   });
 
   afterEach(() => {
     appContextService.stop();
   });
   it('can upgrade from an regular agent policy', async () => {
-    const { soClient, esClient, agentInRegularDoc, agentInRegularDoc2 } = createClientMock();
+    const { soClient, esClient, agentInRegularDoc, agentInRegularDoc2 } = mocks;
     const idsToAction = [agentInRegularDoc._id, agentInRegularDoc2._id];
     await sendUpgradeAgentsActions(soClient, esClient, { agentIds: idsToAction, version: '8.5.0' });
 
@@ -63,8 +72,7 @@ describe('sendUpgradeAgentsActions (plural)', () => {
     }
   });
   it('cannot upgrade from a hosted agent policy by default', async () => {
-    const { soClient, esClient, agentInHostedDoc, agentInRegularDoc, agentInRegularDoc2 } =
-      createClientMock();
+    const { soClient, esClient, agentInHostedDoc, agentInRegularDoc, agentInRegularDoc2 } = mocks;
 
     const idsToAction = [agentInRegularDoc._id, agentInHostedDoc._id, agentInRegularDoc2._id];
     await sendUpgradeAgentsActions(soClient, esClient, { agentIds: idsToAction, version: '8.5.0' });
@@ -99,8 +107,8 @@ describe('sendUpgradeAgentsActions (plural)', () => {
   });
 
   it('can upgrade from hosted agent policy with force=true', async () => {
-    const { soClient, esClient, agentInHostedDoc, agentInRegularDoc, agentInRegularDoc2 } =
-      createClientMock();
+    const { soClient, esClient, agentInHostedDoc, agentInRegularDoc, agentInRegularDoc2 } = mocks;
+
     const idsToAction = [agentInRegularDoc._id, agentInHostedDoc._id, agentInRegularDoc2._id];
     await sendUpgradeAgentsActions(soClient, esClient, {
       agentIds: idsToAction,
@@ -124,9 +132,9 @@ describe('sendUpgradeAgentsActions (plural)', () => {
   });
 
   it('skip upgrade if action id is cancelled', async () => {
-    const { soClient, esClient, agentInRegularDoc } = createClientMock();
+    const { esClient, agentInRegularDoc } = mocks;
     const agents = [{ id: agentInRegularDoc._id } as Agent];
-    await upgradeBatch(soClient, esClient, agents, {}, {
+    await upgradeBatch(esClient, agents, {}, {
       actionId: 'cancelled-action',
     } as any);
   });

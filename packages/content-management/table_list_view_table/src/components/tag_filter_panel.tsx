@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -43,7 +44,7 @@ const saveBtnWrapperCSS = css`
   width: 100%;
 `;
 
-interface Props {
+interface Context {
   clearTagSelection: () => void;
   closePopover: () => void;
   isPopoverOpen: boolean;
@@ -54,18 +55,31 @@ interface Props {
   onSelectChange: (updatedOptions: TagOptionItem[]) => void;
 }
 
-export const TagFilterPanel: FC<Props> = ({
-  isPopoverOpen,
-  isInUse,
-  options,
-  totalActiveFilters,
-  onFilterButtonClick,
-  onSelectChange,
-  closePopover,
-  clearTagSelection,
+const TagFilterContext = React.createContext<Context | null>(null);
+
+export const TagFilterContextProvider: FC<React.PropsWithChildren<Context>> = ({
+  children,
+  ...props
 }) => {
+  return <TagFilterContext.Provider value={props}>{children}</TagFilterContext.Provider>;
+};
+
+export const TagFilterPanel: FC<{}> = ({}) => {
   const { euiTheme } = useEuiTheme();
   const { navigateToUrl, currentAppId$, getTagManagementUrl } = useServices();
+  const componentContext = React.useContext(TagFilterContext);
+  if (!componentContext)
+    throw new Error('TagFilterPanel must be used within a TagFilterContextProvider');
+  const {
+    isPopoverOpen,
+    isInUse,
+    options,
+    totalActiveFilters,
+    onFilterButtonClick,
+    onSelectChange,
+    closePopover,
+    clearTagSelection,
+  } = componentContext;
   const isSearchVisible = options.length > 10;
 
   const searchBoxCSS = css`

@@ -52,16 +52,23 @@ export const removeKqlFilter = () => {
 };
 
 export const fillAddFilterForm = ({ key, operator, value }: SearchBarFilter) => {
-  cy.get(ADD_FILTER_FORM_FIELD_INPUT).type(`${key}{downarrow}{enter}`);
+  // workaround for field input sometimes rerenders losing focus
+  cy.waitUntil(() => {
+    cy.get(ADD_FILTER_FORM_FIELD_INPUT).should('be.enabled');
+    cy.get(ADD_FILTER_FORM_FIELD_INPUT).focus();
+    cy.get(ADD_FILTER_FORM_FIELD_INPUT).invoke('val', ''); // .clear() not working well
+    cy.get(ADD_FILTER_FORM_FIELD_INPUT).type(`${key}{downarrow}{enter}`);
+    return cy.get(ADD_FILTER_FORM_OPERATOR_FIELD).then(($el) => !$el.attr('disabled'));
+  }).then(() => {
+    cy.get(ADD_FILTER_FORM_OPERATOR_FIELD).type(`${operator}{downarrow}{enter}`);
 
-  cy.get(ADD_FILTER_FORM_OPERATOR_FIELD).type(`${operator}{downarrow}{enter}`);
+    if (value) {
+      cy.get(ADD_FILTER_FORM_FILTER_VALUE_INPUT).type(value);
+    }
 
-  if (value) {
-    cy.get(ADD_FILTER_FORM_FILTER_VALUE_INPUT).type(value);
-  }
-
-  cy.get(ADD_FILTER_FORM_SAVE_BUTTON).click();
-  cy.get(ADD_FILTER_FORM_SAVE_BUTTON).should('not.exist');
+    cy.get(ADD_FILTER_FORM_SAVE_BUTTON).click();
+    cy.get(ADD_FILTER_FORM_SAVE_BUTTON).should('not.exist');
+  });
 };
 
 export const fillLocalSearchBar = (query: string) => {

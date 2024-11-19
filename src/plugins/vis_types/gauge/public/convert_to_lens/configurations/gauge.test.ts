@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ColorSchemas } from '@kbn/charts-plugin/common';
 import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { getConfiguration } from './gauge';
-import { GaugeVisParams } from '../../types';
+import { GaugeType, GaugeVisParams } from '../../types';
 
 const params: GaugeVisParams = {
   addTooltip: false,
@@ -49,35 +50,70 @@ const params: GaugeVisParams = {
 };
 
 describe('getConfiguration', () => {
-  const palette = {
-    name: 'custom',
-    params: { name: 'custom' },
-    type: 'palette',
-  } as PaletteOutput<CustomPaletteParams>;
+  const getPalette = (gaugeType: GaugeType) =>
+    ({
+      name: 'custom',
+      params: { name: 'custom', gaugeType },
+      type: 'palette',
+    } as PaletteOutput<CustomPaletteParams>);
 
-  test('shourd return correct configuration', () => {
+  test('shourd return correct configuration - Arc', () => {
     const layerId = 'layer-id';
     const metricAccessor = 'metric-id';
     const minAccessor = 'min-accessor';
     const maxAccessor = 'max-accessor';
     expect(
-      getConfiguration(layerId, params, palette, {
+      getConfiguration(layerId, params, getPalette('Arc'), {
         metricAccessor,
         minAccessor,
         maxAccessor,
       })
     ).toEqual({
       colorMode: 'palette',
-      labelMajorMode: 'auto',
-      labelMinor: undefined,
+      labelMajorMode: 'none',
       layerId: 'layer-id',
       layerType: 'data',
       maxAccessor: 'max-accessor',
       metricAccessor: 'metric-id',
       minAccessor: 'min-accessor',
-      palette: { name: 'custom', params: { name: 'custom' }, type: 'palette' },
-      shape: 'horizontalBullet',
-      ticksPosition: 'bands',
+      palette: {
+        name: 'custom',
+        params: { name: 'custom', gaugeType: 'Arc' },
+        type: 'palette',
+      },
+      percentageMode: false,
+      shape: 'arc',
+      ticksPosition: 'hidden',
+    });
+  });
+
+  test('shourd return correct configuration - Circle', () => {
+    const layerId = 'layer-id';
+    const metricAccessor = 'metric-id';
+    const minAccessor = 'min-accessor';
+    const maxAccessor = 'max-accessor';
+    expect(
+      getConfiguration(layerId, params, getPalette('Circle'), {
+        metricAccessor,
+        minAccessor,
+        maxAccessor,
+      })
+    ).toEqual({
+      colorMode: 'palette',
+      labelMajorMode: 'none',
+      layerId: 'layer-id',
+      layerType: 'data',
+      maxAccessor: 'max-accessor',
+      metricAccessor: 'metric-id',
+      minAccessor: 'min-accessor',
+      palette: {
+        name: 'custom',
+        params: { name: 'custom', gaugeType: 'Circle' },
+        type: 'palette',
+      },
+      percentageMode: false,
+      shape: 'arc',
+      ticksPosition: 'hidden',
     });
   });
 });

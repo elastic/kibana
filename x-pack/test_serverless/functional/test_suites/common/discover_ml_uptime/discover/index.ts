@@ -6,8 +6,16 @@
  */
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-export default ({ loadTestFile }: FtrProviderContext) => {
+export default ({ getService, loadTestFile }: FtrProviderContext) => {
+  const browser = getService('browser');
+
   describe('Discover alerting', function () {
+    this.tags(['esGate']);
+
+    before(async function () {
+      await browser.setWindowSize(1600, 1200);
+    });
+
     loadTestFile(require.resolve('./search_source_alert'));
   });
 };

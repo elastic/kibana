@@ -6,14 +6,12 @@
  */
 
 import type {
-  SentinelOneKillProcessParams,
   SentinelOneExecuteScriptParams,
   SentinelOneIsolateHostParams,
 } from '../../../common/sentinelone/types';
 import type { SUB_ACTION } from '../../../common/sentinelone/constants';
 
 export type SentinelOneExecuteSubActionParams =
-  | SentinelOneKillProcessParams
   | SentinelOneExecuteScriptParams
   | SentinelOneIsolateHostParams;
 

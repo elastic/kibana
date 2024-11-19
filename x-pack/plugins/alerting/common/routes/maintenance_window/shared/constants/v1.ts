@@ -13,4 +13,4 @@ export const maintenanceWindowCategoryIdTypes = {
 } as const;
 
 export type MaintenanceWindowCategoryIdTypes =
-  typeof maintenanceWindowCategoryIdTypes[keyof typeof maintenanceWindowCategoryIdTypes];
+  (typeof maintenanceWindowCategoryIdTypes)[keyof typeof maintenanceWindowCategoryIdTypes];

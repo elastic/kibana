@@ -8,7 +8,7 @@ import { Client } from '@elastic/elasticsearch';
 import {
   SLO_DESTINATION_INDEX_PATTERN,
   SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
-} from '@kbn/observability-plugin/common/slo/constants';
+} from '@kbn/slo-plugin/common/constants';
 
 export class SloEsClient {
   constructor(private esClient: Client) {}

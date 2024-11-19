@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { SourceCode } from 'eslint';
@@ -89,7 +90,11 @@ export function getI18nImportFixer({
 
   // If the file doesn't have an import line for the translation package yet, we need to add it.
   // Pretty safe bet to add it underneath the import line for React.
-  let lineIndex = sourceCode.lines.findIndex((l) => l.includes("from 'react'") || l.includes('*/'));
+  let lineIndex = sourceCode.lines.findIndex((l) => l.includes("from 'react'"));
+
+  if (lineIndex === -1) {
+    lineIndex = sourceCode.lines.findIndex((l) => l.includes('*/'));
+  }
 
   if (lineIndex === -1) {
     lineIndex = 0;

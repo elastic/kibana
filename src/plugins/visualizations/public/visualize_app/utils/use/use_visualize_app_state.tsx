@@ -1,19 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useState } from 'react';
 import { cloneDeep, isEqual } from 'lodash';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 import { EventEmitter } from 'events';
 import { i18n } from '@kbn/i18n';
 import { FilterStateStore } from '@kbn/es-query';
 
-import { KibanaThemeProvider, MarkdownSimple, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { Markdown } from '@kbn/shared-ux-markdown';
 import { connectToQueryState } from '@kbn/data-plugin/public';
 import { migrateLegacyQuery } from '../migrate_legacy_query';
 import {
@@ -127,11 +129,7 @@ export const useVisualizeAppState = (
               title: i18n.translate('visualizations.visualizationLoadingFailedErrorMessage', {
                 defaultMessage: 'Failed to load the visualization',
               }),
-              text: toMountPoint(
-                <KibanaThemeProvider theme$={services.theme.theme$}>
-                  <MarkdownSimple>{error.message}</MarkdownSimple>
-                </KibanaThemeProvider>
-              ),
+              text: toMountPoint(<Markdown readOnly>{error.message}</Markdown>, services.core),
             });
 
             services.history.replace(

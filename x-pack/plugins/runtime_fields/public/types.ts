@@ -25,7 +25,7 @@ export interface SetupPlugins {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StartPlugins {}
 
-export type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
+export type RuntimeType = (typeof RUNTIME_FIELD_TYPES)[number];
 
 export interface RuntimeField {
   name: string;

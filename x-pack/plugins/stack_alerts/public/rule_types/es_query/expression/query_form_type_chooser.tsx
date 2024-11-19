@@ -7,7 +7,6 @@
 
 import React, { useMemo } from 'react';
 import {
-  EuiBetaBadge,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,24 +21,6 @@ import { i18n } from '@kbn/i18n';
 import { SearchType } from '../types';
 import { useTriggerUiActionServices } from '../util';
 
-export const ExperimentalBadge = React.memo(() => (
-  <EuiBetaBadge
-    size="s"
-    label={i18n.translate('xpack.stackAlerts.esQuery.ui.selectQueryFormType.experimentalLabel', {
-      defaultMessage: 'Technical preview',
-    })}
-    tooltipContent={i18n.translate(
-      'xpack.stackAlerts.esQuery.ui.selectQueryFormType.experimentalDescription',
-      {
-        defaultMessage:
-          'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
-      }
-    )}
-    tooltipPosition="bottom"
-  />
-));
-ExperimentalBadge.displayName = 'ExperimentalBadge';
-
 export interface QueryFormTypeProps {
   searchType: SearchType | null;
   onFormTypeSelect: (formType: SearchType | null) => void;
@@ -50,7 +31,7 @@ export const QueryFormTypeChooser: React.FC<QueryFormTypeProps> = ({
   onFormTypeSelect,
 }) => {
   const { uiSettings } = useTriggerUiActionServices();
-  const isEsqlEnabled = uiSettings?.get('discover:enableESQL');
+  const isEsqlEnabled = uiSettings?.get('enableESQL');
 
   const formTypeItems = useMemo(() => {
     const items: Array<{ formType: SearchType; label: string; description: string }> = [
@@ -119,11 +100,6 @@ export const QueryFormTypeChooser: React.FC<QueryFormTypeProps> = ({
                   <h5>{activeFormTypeItem?.label}</h5>
                 </EuiTitle>
               </EuiFlexItem>
-              {activeFormTypeItem?.formType === SearchType.esqlQuery && (
-                <EuiFlexItem>
-                  <ExperimentalBadge />
-                </EuiFlexItem>
-              )}
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -172,11 +148,6 @@ export const QueryFormTypeChooser: React.FC<QueryFormTypeProps> = ({
                   <EuiFlexItem grow={false}>
                     <strong>{item.label}</strong>
                   </EuiFlexItem>
-                  {item.formType === SearchType.esqlQuery && (
-                    <EuiFlexItem>
-                      <ExperimentalBadge />
-                    </EuiFlexItem>
-                  )}
                 </EuiFlexGroup>
                 <EuiText color="subdued" size="s">
                   <p>{item.description}</p>

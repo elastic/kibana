@@ -13,7 +13,6 @@
   ],
   "kbn_references": [
     "@kbn/std",
-    "@kbn/ui-shared-deps-npm",
     "@kbn/core-base-common",
     "@kbn/core-injected-metadata-common-internal",
     "@kbn/core-custom-branding-common",

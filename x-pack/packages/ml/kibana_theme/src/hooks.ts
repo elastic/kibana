@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import { of } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { euiDarkVars as euiThemeDark, euiLightVars as euiThemeLight } from '@kbn/ui-theme';
-import { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 
 export type EuiThemeType = typeof euiThemeLight | typeof euiThemeDark;
 

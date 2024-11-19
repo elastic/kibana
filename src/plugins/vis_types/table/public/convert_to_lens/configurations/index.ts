@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -13,6 +14,12 @@ import {
   TableVisConfiguration,
 } from '@kbn/visualizations-plugin/common';
 import { TableVisParams } from '../../../common';
+
+enum RowHeightMode {
+  auto = 'auto',
+  single = 'single',
+  custom = 'custom',
+}
 
 const getColumns = (
   params: TableVisParams,
@@ -48,8 +55,8 @@ const getRowHeight = (
 ): Pick<TableVisConfiguration, 'rowHeight' | 'headerRowHeight'> => {
   const { autoFitRowToContent } = params;
   return {
-    rowHeight: autoFitRowToContent ? 'auto' : 'single',
-    headerRowHeight: autoFitRowToContent ? 'auto' : 'single',
+    rowHeight: autoFitRowToContent ? RowHeightMode.auto : RowHeightMode.single,
+    headerRowHeight: autoFitRowToContent ? RowHeightMode.auto : RowHeightMode.single,
   };
 };
 

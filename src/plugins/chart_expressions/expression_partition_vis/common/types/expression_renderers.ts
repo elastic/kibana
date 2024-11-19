@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Position } from '@elastic/charts';
@@ -11,7 +12,10 @@ import type { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/chart
 import type { PaletteOutput } from '@kbn/coloring';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import type {
+  ExpressionValueVisDimension,
+  PartitionLegendValue,
+} from '@kbn/visualizations-plugin/common';
 import type { LegendSize } from '@kbn/visualizations-plugin/public';
 import {
   type AllowedPartitionOverrides,
@@ -80,7 +84,7 @@ export interface PartitionVisParams extends VisCommonParams {
   labels: LabelsParams;
   palette: PaletteOutput;
   isDonut?: boolean;
-  showValuesInLegend?: boolean;
+  legendStats?: PartitionLegendValue[];
   respectSourceOrder?: boolean;
   emptySizeRatio?: EmptySizeRatios;
   startFromSecondLargestSlice?: boolean;
@@ -110,7 +114,7 @@ export interface MosaicVisConfig
 
 export interface WaffleVisConfig extends Omit<VisCommonConfig, 'buckets'> {
   bucket?: ExpressionValueVisDimension | string;
-  showValuesInLegend: boolean;
+  legendStats?: PartitionLegendValue[];
 }
 
 export interface PartitionChartProps {

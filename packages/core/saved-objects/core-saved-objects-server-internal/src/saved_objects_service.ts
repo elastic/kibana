@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Subject, Observable, firstValueFrom, of } from 'rxjs';
-import { filter, switchMap } from 'rxjs/operators';
+import { filter, switchMap } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import { stripVersionQualifier } from '@kbn/std';
 import type { ServiceStatus } from '@kbn/core-status-common';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
-import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
+import type { DocLinksServiceSetup, DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type {
@@ -43,6 +44,7 @@ import {
   type SavedObjectsMigrationConfigType,
   type IKibanaMigrator,
   DEFAULT_INDEX_TYPES_MAP,
+  HASH_TO_VERSION_MAP,
 } from '@kbn/core-saved-objects-base-server-internal';
 import {
   SavedObjectsClient,
@@ -64,6 +66,7 @@ import { registerCoreObjectTypes } from './object_types';
 import { getSavedObjectsDeprecationsProvider } from './deprecations';
 import { applyTypeDefaults } from './apply_type_defaults';
 import { getAllIndices } from './utils';
+import { MIGRATION_CLIENT_OPTIONS } from './constants';
 
 /**
  * @internal
@@ -74,7 +77,21 @@ export interface InternalSavedObjectsServiceSetup extends SavedObjectsServiceSet
   getTypeRegistry: () => ISavedObjectTypeRegistry;
 }
 
-export type InternalSavedObjectsServiceStart = SavedObjectsServiceStart;
+/**
+ * @internal
+ */
+export interface InternalSavedObjectsServiceStart extends SavedObjectsServiceStart {
+  metrics: {
+    /**
+     * The number of milliseconds it took to run the SO migrator.
+     *
+     * Note: it's the time spent in the `migrator.runMigrations` call.
+     * The value will be recorded even if a migration wasn't strictly performed,
+     * and in that case it will just be the time spent checking if a migration was required.
+     */
+    migrationDuration: number;
+  };
+}
 
 /** @internal */
 export interface SavedObjectsSetupDeps {
@@ -82,6 +99,7 @@ export interface SavedObjectsSetupDeps {
   elasticsearch: InternalElasticsearchServiceSetup;
   coreUsageData: InternalCoreUsageDataSetup;
   deprecations: DeprecationRegistryProvider;
+  docLinks: DocLinksServiceSetup;
 }
 
 /** @internal */
@@ -118,7 +136,7 @@ export class SavedObjectsService
     this.logger.debug('Setting up SavedObjects service');
 
     this.setupDeps = setupDeps;
-    const { http, elasticsearch, coreUsageData, deprecations } = setupDeps;
+    const { http, elasticsearch, coreUsageData, deprecations, docLinks } = setupDeps;
 
     const savedObjectsConfig = await firstValueFrom(
       this.coreContext.configService.atPath<SavedObjectsConfigType>('savedObjects')
@@ -146,6 +164,8 @@ export class SavedObjectsService
       migratorPromise: firstValueFrom(this.migrator$),
       kibanaIndex: MAIN_SAVED_OBJECT_INDEX,
       kibanaVersion: this.kibanaVersion,
+      isServerless: this.coreContext.env.packageInfo.buildFlavor === 'serverless',
+      docLinks,
     });
 
     registerCoreObjectTypes(this.typeRegistry);
@@ -223,7 +243,8 @@ export class SavedObjectsService
     const waitForMigrationCompletion = node.roles.backgroundTasks && !node.roles.ui;
     const migrator = this.createMigrator(
       this.config.migration,
-      elasticsearch.client.asInternalUser,
+      // override the default Client settings
+      client.asInternalUser.child(MIGRATION_CLIENT_OPTIONS),
       docLinks,
       waitForMigrationCompletion,
       node,
@@ -253,10 +274,13 @@ export class SavedObjectsService
      */
     migrator.prepareMigrations();
 
+    let migrationDuration: number;
+
     if (skipMigrations) {
       this.logger.warn(
         'Skipping Saved Object migrations on startup. Note: Individual documents will still be migrated when read or written.'
       );
+      migrationDuration = 0;
     } else {
       this.logger.info(
         'Waiting until all Elasticsearch nodes are compatible with Kibana before starting saved objects migrations...'
@@ -280,7 +304,9 @@ export class SavedObjectsService
       }
 
       this.logger.info('Starting saved objects migrations');
+      const migrationStartTime = performance.now();
       await migrator.runMigrations();
+      migrationDuration = Math.round(performance.now() - migrationStartTime);
     }
 
     const createRepository = (
@@ -352,6 +378,7 @@ export class SavedObjectsService
           savedObjectsClient,
           typeRegistry: this.typeRegistry,
           importSizeLimit: options?.importSizeLimit ?? this.config!.maxImportExportSize,
+          logger: this.logger.get('importer'),
         }),
       getTypeRegistry: () => this.typeRegistry,
       getDefaultIndex: () => MAIN_SAVED_OBJECT_INDEX,
@@ -369,6 +396,9 @@ export class SavedObjectsService
         return [...indices];
       },
       getAllIndices: () => [...allIndices],
+      metrics: {
+        migrationDuration,
+      },
     };
   }
 
@@ -389,6 +419,7 @@ export class SavedObjectsService
       soMigrationsConfig,
       kibanaIndex: MAIN_SAVED_OBJECT_INDEX,
       defaultIndexTypesMap: DEFAULT_INDEX_TYPES_MAP,
+      hashToVersionMap: HASH_TO_VERSION_MAP,
       client,
       docLinks,
       waitForMigrationCompletion,

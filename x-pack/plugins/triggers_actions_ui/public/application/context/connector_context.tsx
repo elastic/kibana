@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { ConnectorServices } from '../../types';
 
 export interface ConnectorContextValue {
@@ -14,10 +14,11 @@ export interface ConnectorContextValue {
 
 export const ConnectorContext = React.createContext<ConnectorContextValue | undefined>(undefined);
 
-export const ConnectorProvider: React.FC<{ value: ConnectorContextValue }> = ({
-  children,
-  value,
-}) => {
+export const ConnectorProvider: FC<
+  PropsWithChildren<{
+    value: ConnectorContextValue;
+  }>
+> = ({ children, value }) => {
   return <ConnectorContext.Provider value={value}>{children}</ConnectorContext.Provider>;
 };
 

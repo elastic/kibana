@@ -6,6 +6,7 @@
  */
 
 import { Logger } from '@kbn/core/server';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { ExecutorType } from '../types';
 import { ExecutorParams, SubActionConnectorType } from './types';
@@ -29,7 +30,15 @@ export const buildExecutor = <
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
 }): ExecutorType<Config, Secrets, ExecutorParams, unknown> => {
-  return async ({ actionId, params, config, secrets, services }) => {
+  return async ({
+    actionId,
+    params,
+    config,
+    secrets,
+    services,
+    request,
+    connectorUsageCollector,
+  }) => {
     const subAction = params.subAction;
     const subActionParams = params.subActionParams;
 
@@ -40,6 +49,7 @@ export const buildExecutor = <
       configurationUtilities,
       logger,
       services,
+      request,
     });
 
     const subActions = service.getSubActions();
@@ -79,11 +89,14 @@ export const buildExecutor = <
       try {
         action.schema.validate(subActionParams);
       } catch (reqValidationError) {
-        throw new Error(`Request validation failed (${reqValidationError})`);
+        throw createTaskRunError(
+          new Error(`Request validation failed (${reqValidationError})`),
+          TaskErrorSource.USER
+        );
       }
     }
 
-    const data = await func.call(service, subActionParams);
+    const data = await func.call(service, subActionParams, connectorUsageCollector);
     return { status: 'ok', data: data ?? {}, actionId };
   };
 };

@@ -21,22 +21,22 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CspBenchmarkRuleMetadata } from '../../../common/types/latest';
+import { HttpSetup } from '@kbn/core/public';
+import type { CspBenchmarkRuleMetadata } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { getRuleList } from '../configurations/findings_flyout/rule_tab';
 import { getRemediationList } from '../configurations/findings_flyout/overview_tab';
 import * as TEST_SUBJECTS from './test_subjects';
-import { useChangeCspRuleState } from './change_csp_rule_state';
+import { useChangeCspRuleState } from './use_change_csp_rule_state';
 import { CspBenchmarkRulesWithStates } from './rules_container';
 import { TakeAction } from '../../components/take_action';
+import { createDetectionRuleFromBenchmarkRule } from '../configurations/utils/create_detection_rule_from_benchmark';
 
 export const RULES_FLYOUT_SWITCH_BUTTON = 'rule-flyout-switch-button';
 
 interface RuleFlyoutProps {
   onClose(): void;
   rule: CspBenchmarkRulesWithStates;
-  refetchRulesStates: () => void;
 }
 
 const tabs = [
@@ -56,12 +56,13 @@ const tabs = [
   },
 ] as const;
 
-type RuleTab = typeof tabs[number]['id'];
+type RuleTab = (typeof tabs)[number]['id'];
 
-export const RuleFlyout = ({ onClose, rule, refetchRulesStates }: RuleFlyoutProps) => {
+export const RuleFlyout = ({ onClose, rule }: RuleFlyoutProps) => {
   const [tab, setTab] = useState<RuleTab>('overview');
-  const postRequestChangeRulesStates = useChangeCspRuleState();
+
   const isRuleMuted = rule?.state === 'muted';
+  const { mutate: mutateRuleState } = useChangeCspRuleState();
 
   const switchRuleStates = async () => {
     if (rule.metadata.benchmark.rule_number) {
@@ -72,14 +73,18 @@ export const RuleFlyout = ({ onClose, rule, refetchRulesStates }: RuleFlyoutProp
         rule_id: rule.metadata.id,
       };
       const nextRuleStates = isRuleMuted ? 'unmute' : 'mute';
-      await postRequestChangeRulesStates(nextRuleStates, [rulesObjectRequest]);
-      await refetchRulesStates();
+      mutateRuleState({
+        newState: nextRuleStates,
+        ruleIds: [rulesObjectRequest],
+      });
     }
   };
 
+  const createMisconfigurationRuleFn = async (http: HttpSetup) =>
+    await createDetectionRuleFromBenchmarkRule(http, rule.metadata);
+
   return (
     <EuiFlyout
-      ownFocus={false}
       onClose={onClose}
       data-test-subj={TEST_SUBJECTS.CSP_RULES_FLYOUT_CONTAINER}
       outsideClickCloses
@@ -117,9 +122,17 @@ export const RuleFlyout = ({ onClose, rule, refetchRulesStates }: RuleFlyoutProp
         <EuiFlexGroup gutterSize="none" direction="rowReverse">
           <EuiFlexItem grow={false}>
             {isRuleMuted ? (
-              <TakeAction enableBenchmarkRuleFn={switchRuleStates} />
+              <TakeAction
+                enableBenchmarkRuleFn={switchRuleStates}
+                createRuleFn={createMisconfigurationRuleFn}
+                isCreateDetectionRuleDisabled={true}
+              />
             ) : (
-              <TakeAction disableBenchmarkRuleFn={switchRuleStates} />
+              <TakeAction
+                disableBenchmarkRuleFn={switchRuleStates}
+                createRuleFn={createMisconfigurationRuleFn}
+                isCreateDetectionRuleDisabled={false}
+              />
             )}
           </EuiFlexItem>
         </EuiFlexGroup>

@@ -11,9 +11,9 @@ import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { Y_AXIS_LABEL_WIDTH } from '../swimlane_annotation_container';
 import { useAnomalyExplorerContext } from '../anomaly_explorer_context';
 import { useMlKibana } from '../../contexts/kibana';
+import { Y_AXIS_LABEL_WIDTH } from '../constants';
 
 export interface AnomalyDetectionAlertsOverviewChart {
   seriesType?: 'bar_stacked' | 'line';

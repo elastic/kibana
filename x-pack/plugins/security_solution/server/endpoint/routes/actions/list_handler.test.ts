@@ -15,13 +15,11 @@ import {
 } from '@kbn/core/server/mocks';
 import type { EndpointActionListRequestQuery } from '../../../../common/api/endpoint';
 import { BASE_ENDPOINT_ACTION_ROUTE } from '../../../../common/endpoint/constants';
-import { EndpointAppContextService } from '../../endpoint_app_context_services';
+import type { HttpApiTestSetupMock } from '../../mocks';
 import {
-  createMockEndpointAppContext,
-  createMockEndpointAppContextServiceSetupContract,
-  createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
   getRegisteredVersionedRouteMock,
+  createHttpApiTestSetupMock,
 } from '../../mocks';
 import { registerActionListRoutes } from './list';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
@@ -37,8 +35,8 @@ const mockGetActionList = getActionList as jest.Mock;
 const mockGetActionListByStatus = getActionListByStatus as jest.Mock;
 
 describe('Action List Handler', () => {
-  let endpointAppContextService: EndpointAppContextService;
   let mockResponse: jest.Mocked<KibanaResponseFactory>;
+  let apiTestSetup: HttpApiTestSetupMock;
 
   let actionListHandler: (
     query?: EndpointActionListRequestQuery
@@ -47,12 +45,11 @@ describe('Action List Handler', () => {
   beforeEach(() => {
     const esClientMock = elasticsearchServiceMock.createScopedClusterClient();
     const routerMock = httpServiceMock.createRouter();
-    endpointAppContextService = new EndpointAppContextService();
-    endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
-    endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
+    apiTestSetup = createHttpApiTestSetupMock();
+
     mockDoesLogsEndpointActionsIndexExist.mockResolvedValue(true);
 
-    registerActionListRoutes(routerMock, createMockEndpointAppContext());
+    registerActionListRoutes(routerMock, apiTestSetup.endpointAppContextMock);
 
     actionListHandler = async (
       query?: EndpointActionListRequestQuery
@@ -81,10 +78,6 @@ describe('Action List Handler', () => {
     };
   });
 
-  afterEach(() => {
-    endpointAppContextService.stop();
-  });
-
   describe('Internals', () => {
     const defaultParams = { pageSize: 10, page: 1 };
     it('should return `notFound` when actions index does not exist', async () => {
@@ -96,8 +89,10 @@ describe('Action List Handler', () => {
     });
 
     it('should return `badRequest` when sentinel_one feature flag is not enabled and agentType is `sentinel_one`', async () => {
-      // @ts-expect-error We're writing to a readonly property just for the purpose of the test
-      endpointAppContextService.experimentalFeatures.responseActionsSentinelOneV1Enabled = false;
+      apiTestSetup.endpointAppContextMock.experimentalFeatures = {
+        ...apiTestSetup.endpointAppContextMock.experimentalFeatures,
+        responseActionsSentinelOneV1Enabled: false,
+      };
       await actionListHandler({ ...defaultParams, agentTypes: 'sentinel_one' });
       expect(mockResponse.customError).toHaveBeenCalledWith({
         statusCode: 400,

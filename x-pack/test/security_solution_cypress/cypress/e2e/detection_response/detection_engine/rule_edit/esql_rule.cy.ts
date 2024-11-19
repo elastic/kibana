@@ -7,9 +7,22 @@
 
 import { getEsqlRule } from '../../../../objects/rule';
 
-import { ESQL_QUERY_DETAILS, RULE_NAME_OVERRIDE_DETAILS } from '../../../../screens/rule_details';
+import {
+  ESQL_QUERY_DETAILS,
+  RULE_NAME_OVERRIDE_DETAILS,
+  SUPPRESS_FOR_DETAILS,
+  DEFINITION_DETAILS,
+  SUPPRESS_MISSING_FIELD,
+  SUPPRESS_BY_DETAILS,
+} from '../../../../screens/rule_details';
 
-import { ESQL_QUERY_BAR } from '../../../../screens/create_new_rule';
+import {
+  ESQL_QUERY_BAR,
+  ALERT_SUPPRESSION_FIELDS,
+  ALERT_SUPPRESSION_MISSING_FIELDS_SUPPRESS,
+  ALERT_SUPPRESSION_DURATION_VALUE_INPUT,
+  ALERT_SUPPRESSION_DURATION_UNIT_INPUT,
+} from '../../../../screens/create_new_rule';
 
 import { createRule } from '../../../../tasks/api_calls/rules';
 
@@ -17,79 +30,194 @@ import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 import { getDetails } from '../../../../tasks/rule_details';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import {
-  clearEsqlQueryBar,
-  expandEsqlQueryBar,
   fillEsqlQueryBar,
   fillOverrideEsqlRuleName,
   goToAboutStepTab,
   expandAdvancedSettings,
+  selectAlertSuppressionPerRuleExecution,
+  selectDoNotSuppressForMissingFields,
+  fillAlertSuppressionFields,
+  interceptEsqlQueryFieldsRequest,
 } from '../../../../tasks/create_new_rule';
 import { login } from '../../../../tasks/login';
 
 import { editFirstRule } from '../../../../tasks/alerts_detection_rules';
 
-import { saveEditedRule } from '../../../../tasks/edit_rule';
+import {
+  saveEditedRule,
+  saveEditedRuleWithNonBlockingErrors,
+  visitEditRulePage,
+} from '../../../../tasks/edit_rule';
 import { visit } from '../../../../tasks/navigation';
 
 const rule = getEsqlRule();
 
-const expectedValidEsqlQuery = 'from auditbeat* | stats count(event.category) by event.category';
+const expectedValidEsqlQuery =
+  'from auditbeat* | stats _count=count(event.category) by event.category';
 
-describe('Detection ES|QL rules, edit', { tags: ['@ess'] }, () => {
-  beforeEach(() => {
-    login();
-    deleteAlertsAndRules();
-    createRule(rule);
-  });
+// Skipping in MKI due to flake
+// Failing: See https://github.com/elastic/kibana/issues/184557
+// Failing: See https://github.com/elastic/kibana/issues/184556
+describe.skip(
+  'Detection ES|QL rules, edit',
+  {
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
+  },
+  () => {
+    beforeEach(() => {
+      login();
+      deleteAlertsAndRules();
+      createRule(rule);
 
-  it('edits ES|QL rule and checks details page', () => {
-    visit(RULES_MANAGEMENT_URL);
-    editFirstRule();
-    expandEsqlQueryBar();
-    // ensure once edit form opened, correct query is displayed in ES|QL input
-    cy.get(ESQL_QUERY_BAR).contains(rule.query);
+      visit(RULES_MANAGEMENT_URL);
+      editFirstRule();
+    });
 
-    clearEsqlQueryBar();
-    fillEsqlQueryBar(expectedValidEsqlQuery);
+    it('edits ES|QL rule and checks details page', () => {
+      // ensure once edit form opened, correct query is displayed in ES|QL input
+      cy.get(ESQL_QUERY_BAR).contains(rule.query);
 
-    saveEditedRule();
+      fillEsqlQueryBar(expectedValidEsqlQuery);
 
-    // ensure updated query is displayed on details page
-    getDetails(ESQL_QUERY_DETAILS).should('have.text', expectedValidEsqlQuery);
-  });
+      saveEditedRule();
 
-  it('edits ES|QL rule query and override rule name with new property', () => {
-    visit(RULES_MANAGEMENT_URL);
-    editFirstRule();
-    clearEsqlQueryBar();
-    fillEsqlQueryBar(expectedValidEsqlQuery);
+      // ensure updated query is displayed on details page
+      getDetails(ESQL_QUERY_DETAILS).should('have.text', expectedValidEsqlQuery);
+    });
 
-    goToAboutStepTab();
-    expandAdvancedSettings();
-    fillOverrideEsqlRuleName('event.category');
+    it('edits ES|QL rule query and override rule name with new property', () => {
+      fillEsqlQueryBar(expectedValidEsqlQuery);
 
-    saveEditedRule();
+      goToAboutStepTab();
+      expandAdvancedSettings();
+      fillOverrideEsqlRuleName('event.category');
 
-    // ensure rule name override is displayed on details page
-    getDetails(RULE_NAME_OVERRIDE_DETAILS).should('have.text', 'event.category');
-  });
+      saveEditedRule();
 
-  it('adds ES|QL override rule name on edit', () => {
-    visit(RULES_MANAGEMENT_URL);
-    editFirstRule();
+      // ensure rule name override is displayed on details page
+      getDetails(RULE_NAME_OVERRIDE_DETAILS).should('have.text', 'event.category');
+    });
 
-    expandEsqlQueryBar();
-    // ensure once edit form opened, correct query is displayed in ES|QL input
-    cy.get(ESQL_QUERY_BAR).contains(rule.query);
+    it('adds ES|QL override rule name on edit', () => {
+      // ensure once edit form opened, correct query is displayed in ES|QL input
+      cy.get(ESQL_QUERY_BAR).contains(rule.query);
 
-    goToAboutStepTab();
-    expandAdvancedSettings();
-    // this field defined to be returned in rule query
-    fillOverrideEsqlRuleName('test_id');
+      goToAboutStepTab();
+      expandAdvancedSettings();
+      // this field defined to be returned in rule query
+      fillOverrideEsqlRuleName('test_id');
 
-    saveEditedRule();
+      saveEditedRule();
 
-    // ensure rule name override is displayed on details page
-    getDetails(RULE_NAME_OVERRIDE_DETAILS).should('have.text', 'test_id');
-  });
-});
+      // ensure rule name override is displayed on details page
+      getDetails(RULE_NAME_OVERRIDE_DETAILS).should('have.text', 'test_id');
+    });
+
+    describe('with configured suppression', () => {
+      const SUPPRESS_BY_FIELDS = ['event.category'];
+      const NEW_SUPPRESS_BY_FIELDS = ['event.category', '_count'];
+
+      beforeEach(() => {
+        deleteAlertsAndRules();
+        createRule({
+          ...rule,
+          query: expectedValidEsqlQuery,
+          alert_suppression: {
+            group_by: SUPPRESS_BY_FIELDS,
+            duration: { value: 3, unit: 'h' },
+            missing_fields_strategy: 'suppress',
+          },
+        });
+      });
+
+      it('displays suppress options correctly on edit form and allows its editing', () => {
+        visit(RULES_MANAGEMENT_URL);
+
+        interceptEsqlQueryFieldsRequest(expectedValidEsqlQuery, 'esqlSuppressionFieldsRequest');
+        editFirstRule();
+
+        // check saved suppression settings
+        cy.get(ALERT_SUPPRESSION_DURATION_VALUE_INPUT).should('be.enabled').should('have.value', 3);
+        cy.get(ALERT_SUPPRESSION_DURATION_UNIT_INPUT)
+          .should('be.enabled')
+          .should('have.value', 'h');
+        cy.get(ALERT_SUPPRESSION_FIELDS).should('contain', SUPPRESS_BY_FIELDS.join(''));
+        cy.get(ALERT_SUPPRESSION_MISSING_FIELDS_SUPPRESS).should('be.checked');
+
+        selectAlertSuppressionPerRuleExecution();
+        selectDoNotSuppressForMissingFields();
+
+        cy.wait('@esqlSuppressionFieldsRequest');
+        fillAlertSuppressionFields(['_count']);
+
+        saveEditedRule();
+
+        cy.get(DEFINITION_DETAILS).within(() => {
+          getDetails(SUPPRESS_BY_DETAILS).should('have.text', NEW_SUPPRESS_BY_FIELDS.join(''));
+          getDetails(SUPPRESS_FOR_DETAILS).should('have.text', 'One rule execution');
+          getDetails(SUPPRESS_MISSING_FIELD).should(
+            'have.text',
+            'Do not suppress alerts for events with missing fields'
+          );
+        });
+      });
+    });
+
+    describe('without suppression', () => {
+      const SUPPRESS_BY_FIELDS = ['event.category'];
+
+      beforeEach(() => {
+        deleteAlertsAndRules();
+        createRule({
+          ...rule,
+          query: expectedValidEsqlQuery,
+        });
+      });
+
+      it('enables suppression on time interval', () => {
+        visit(RULES_MANAGEMENT_URL);
+
+        interceptEsqlQueryFieldsRequest(expectedValidEsqlQuery, 'esqlSuppressionFieldsRequest');
+        editFirstRule();
+
+        cy.wait('@esqlSuppressionFieldsRequest');
+        fillAlertSuppressionFields(SUPPRESS_BY_FIELDS);
+
+        saveEditedRule();
+
+        cy.get(DEFINITION_DETAILS).within(() => {
+          getDetails(SUPPRESS_BY_DETAILS).should('have.text', SUPPRESS_BY_FIELDS.join(''));
+          getDetails(SUPPRESS_FOR_DETAILS).should('have.text', 'One rule execution');
+          getDetails(SUPPRESS_MISSING_FIELD).should(
+            'have.text',
+            'Suppress and group alerts for events with missing fields'
+          );
+        });
+      });
+    });
+
+    describe('Editing rule with non-blocking query validation errors', () => {
+      it('should allow user to save a rule and show confirmation modal when data source does not exist', () => {
+        const esqlRule = {
+          ...rule,
+          query: 'from fake-* metadata _id, _version, _index | keep agent.*,_id | eval test_id=_id',
+        };
+        createRule(esqlRule).then((createdRule) => {
+          visitEditRulePage(createdRule.body.id);
+          saveEditedRuleWithNonBlockingErrors();
+        });
+      });
+
+      it('should allow user to save a rule and show confirmation modal when data field does not exist', () => {
+        const esqlRule = {
+          ...rule,
+          query: 'from auditbeat-* metadata _id, _version, _index | keep hello.world',
+        };
+        createRule(esqlRule).then((createdRule) => {
+          visitEditRulePage(createdRule.body.id);
+          saveEditedRuleWithNonBlockingErrors();
+        });
+      });
+    });
+  }
+);

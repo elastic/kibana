@@ -17,8 +17,8 @@ import {
   EuiModalHeaderTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { CoreStart } from '@kbn/core/public';
 import { cloneDeep } from 'lodash';
 import { OverlayRef } from '@kbn/core-mount-utils-browser';
 import { IToasts } from '@kbn/core-notifications-browser';
@@ -36,7 +36,7 @@ export const getRevertChangesAction = ({
   state: XYState;
   layer: XYByReferenceAnnotationLayerConfig;
   setState: StateSetter<XYState, unknown>;
-  core: Pick<CoreStart, 'overlays' | 'theme' | 'notifications'>;
+  core: Pick<CoreStart, 'overlays' | 'analytics' | 'i18n' | 'theme' | 'notifications'>;
 }): LayerAction => {
   return {
     displayName: i18n.translate('xpack.lens.xyChart.annotations.revertChanges', {
@@ -58,9 +58,7 @@ export const getRevertChangesAction = ({
               revert({ setState, layer, state, modal, toasts: core.notifications.toasts });
             }}
           />,
-          {
-            theme$: core.theme.theme$,
-          }
+          core
         ),
         {
           'data-test-subj': 'lnsAnnotationLayerRevertModal',

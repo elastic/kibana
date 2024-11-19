@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen, screen } from '@elastic/eui/lib/test/rtl';
 import userEvent from '@testing-library/user-event';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
@@ -35,30 +35,30 @@ describe('UserActionPropertyActions', () => {
   });
 
   it('renders the loading spinner correctly when loading', async () => {
-    const result = appMock.render(<UserActionPropertyActions {...props} isLoading={true} />);
+    appMock.render(<UserActionPropertyActions {...props} isLoading={true} />);
 
-    expect(result.getByTestId('user-action-title-loading')).toBeInTheDocument();
-    expect(result.queryByTestId('property-actions-user-action')).not.toBeInTheDocument();
+    expect(await screen.findByTestId('user-action-title-loading')).toBeInTheDocument();
+    expect(screen.queryByTestId('property-actions-user-action')).not.toBeInTheDocument();
   });
 
   it('renders the property actions', async () => {
-    const result = appMock.render(<UserActionPropertyActions {...props} isLoading={false} />);
+    appMock.render(<UserActionPropertyActions {...props} />);
 
-    expect(result.getByTestId('property-actions-user-action')).toBeInTheDocument();
+    expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId('property-actions-user-action-ellipses'));
+    await userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
-    expect(result.getByTestId('property-actions-user-action-group').children.length).toBe(1);
-    expect(result.queryByTestId('property-actions-user-action-pencil')).toBeInTheDocument();
+    expect((await screen.findByTestId('property-actions-user-action-group')).children.length).toBe(
+      1
+    );
+    expect(await screen.findByTestId('property-actions-user-action-pencil')).toBeInTheDocument();
   });
 
   it('does not render if properties are empty', async () => {
-    const result = appMock.render(
-      <UserActionPropertyActions {...props} isLoading={false} propertyActions={[]} />
-    );
+    appMock.render(<UserActionPropertyActions isLoading={false} propertyActions={[]} />);
 
-    expect(result.queryByTestId('property-actions-user-action')).not.toBeInTheDocument();
-    expect(result.queryByTestId('user-action-title-loading')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('property-actions-user-action')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('user-action-title-loading')).not.toBeInTheDocument();
   });
 });

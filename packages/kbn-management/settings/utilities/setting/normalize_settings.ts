@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { SettingType, UiSetting, UiSettingMetadata, Value } from '@kbn/management-settings-types';
@@ -49,6 +50,10 @@ const deriveType = (setting: UiSetting<SettingType>): SettingType => {
   return typeofVal;
 };
 
+const isNumericValue = (value: unknown): boolean => {
+  return value != null && value !== '' && !isNaN(Number(value.toString()));
+};
+
 /**
  * UiSettings have an extremely permissive set of types, which makes it difficult to code
  * against them.  The `value` property is typed as `unknown`, but the setting has a `type`
@@ -71,7 +76,7 @@ const deriveValue = (type: SettingType, value: unknown): Value => {
     case 'string':
       return value as string;
     case 'number':
-      return value ? Number(value) : undefined;
+      return isNumericValue(value) ? Number(value) : undefined;
     case 'boolean':
       return Boolean(value);
     case 'array':

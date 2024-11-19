@@ -13,9 +13,9 @@ import type {
   UseFetchRelatedAlertsBySessionResult,
 } from './use_fetch_related_alerts_by_session';
 import { useFetchRelatedAlertsBySession } from './use_fetch_related_alerts_by_session';
-import { useAlertPrevalence } from '../../../../common/containers/alerts/use_alert_prevalence';
+import { useAlertPrevalence } from './use_alert_prevalence';
 
-jest.mock('../../../../common/containers/alerts/use_alert_prevalence');
+jest.mock('./use_alert_prevalence');
 
 const entityId = 'entityId';
 const scopeId = 'scopeId';

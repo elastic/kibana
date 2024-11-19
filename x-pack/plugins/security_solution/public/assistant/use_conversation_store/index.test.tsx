@@ -5,13 +5,13 @@
  * 2.0.
  */
 import { renderHook } from '@testing-library/react-hooks';
-import { useConversationStore } from '.';
+import { useBaseConversations } from '.';
 import { useLinkAuthorized } from '../../common/links';
 import { useKibana as mockUseKibana } from '../../common/lib/kibana/__mocks__';
-import { DATA_QUALITY_DASHBOARD_CONVERSATION_ID } from '@kbn/ecs-data-quality-dashboard/impl/data_quality/data_quality_panel/tabs/summary_tab/callout_summary/translations';
 import { useKibana } from '../../common/lib/kibana';
 import { BASE_SECURITY_CONVERSATIONS } from '../content/conversations';
 import { unset } from 'lodash/fp';
+import { DATA_QUALITY_DASHBOARD_CONVERSATION_ID } from '@kbn/ecs-data-quality-dashboard';
 
 const BASE_CONVERSATIONS_WITHOUT_DATA_QUALITY = unset(
   DATA_QUALITY_DASHBOARD_CONVERSATION_ID,
@@ -20,6 +20,14 @@ const BASE_CONVERSATIONS_WITHOUT_DATA_QUALITY = unset(
 
 jest.mock('../../common/links', () => ({
   useLinkAuthorized: jest.fn(),
+}));
+
+jest.mock('@kbn/elastic-assistant', () => ({
+  useFetchCurrentUserConversations: jest.fn().mockReturnValue({
+    data: {},
+    isLoading: false,
+    isError: false,
+  }),
 }));
 
 const mockedUseKibana = {
@@ -40,7 +48,7 @@ jest.mock('../../common/lib/kibana', () => {
   };
 });
 
-describe('useConversationStore', () => {
+describe('useBaseConversations', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -49,18 +57,16 @@ describe('useConversationStore', () => {
 
   it('should return conversations with "Data Quality dashboard" conversation', () => {
     (useLinkAuthorized as jest.Mock).mockReturnValue(true);
-    const { result } = renderHook(() => useConversationStore());
+    const { result } = renderHook(() => useBaseConversations());
 
-    expect(result.current.conversations).toEqual(
-      expect.objectContaining(BASE_SECURITY_CONVERSATIONS)
-    );
+    expect(result.current).toEqual(expect.objectContaining(BASE_SECURITY_CONVERSATIONS));
   });
 
   it('should return conversations Without "Data Quality dashboard" conversation', () => {
     (useLinkAuthorized as jest.Mock).mockReturnValue(false);
-    const { result } = renderHook(() => useConversationStore());
+    const { result } = renderHook(() => useBaseConversations());
 
-    expect(result.current.conversations).toEqual(
+    expect(result.current).toEqual(
       expect.objectContaining(BASE_CONVERSATIONS_WITHOUT_DATA_QUALITY)
     );
   });

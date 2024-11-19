@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -29,7 +30,14 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import { apiPublishesLocalUnifiedSearch, getInheritedViewMode } from '@kbn/presentation-publishing';
+import {
+  apiPublishesTimeRange,
+  apiPublishesUnifiedSearch,
+  getInheritedViewMode,
+  getPanelDescription,
+  getPanelTitle,
+  PublishesUnifiedSearch,
+} from '@kbn/presentation-publishing';
 
 import { core } from '../../kibana_services';
 import { CustomizePanelActionApi } from './customize_panel_action';
@@ -56,15 +64,12 @@ export const CustomizePanelEditor = ({
    */
   const editMode = getInheritedViewMode(api) === 'edit';
   const [hideTitle, setHideTitle] = useState(api.hidePanelTitle?.value);
-  const [panelDescription, setPanelDescription] = useState(
-    api.panelDescription?.value ?? api.defaultPanelDescription?.value
+  const [panelTitle, setPanelTitle] = useState(getPanelTitle(api));
+  const [panelDescription, setPanelDescription] = useState(getPanelDescription(api));
+  const [timeRange, setTimeRange] = useState(
+    api.timeRange$?.value ?? api.parentApi?.timeRange$?.value
   );
-  const [panelTitle, setPanelTitle] = useState(
-    api.panelTitle?.value ?? api.defaultPanelTitle?.value
-  );
-  const [localTimeRange, setLocalTimeRange] = useState(
-    api.localTimeRange?.value ?? api?.getFallbackTimeRange?.()
-  );
+
   const initialFocusRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -73,9 +78,7 @@ export const CustomizePanelEditor = ({
     }
   }, [initialFocusRef, focusOnTitle]);
 
-  const [hasOwnTimeRange, setHasOwnTimeRange] = useState<boolean>(
-    Boolean(api.localTimeRange?.value)
-  );
+  const [hasOwnTimeRange, setHasOwnTimeRange] = useState<boolean>(Boolean(api.timeRange$?.value));
 
   const commonlyUsedRangesForDatePicker = useMemo(() => {
     const commonlyUsedRanges = core.uiSettings.get<TimePickerQuickRange[]>(
@@ -101,9 +104,9 @@ export const CustomizePanelEditor = ({
     if (panelDescription !== api.panelDescription?.value)
       api.setPanelDescription?.(panelDescription);
 
-    const newTimeRange = hasOwnTimeRange ? localTimeRange : undefined;
-    if (newTimeRange !== api.localTimeRange?.value) {
-      api.setLocalTimeRange?.(newTimeRange);
+    const newTimeRange = hasOwnTimeRange ? timeRange : undefined;
+    if (newTimeRange !== api.timeRange$?.value) {
+      api.setTimeRange?.(newTimeRange);
     }
 
     onClose();
@@ -118,7 +121,6 @@ export const CustomizePanelEditor = ({
           <EuiSwitch
             checked={!hideTitle}
             data-test-subj="customEmbeddablePanelHideTitleSwitch"
-            disabled={!editMode}
             id="hideTitle"
             label={
               <FormattedMessage
@@ -137,23 +139,25 @@ export const CustomizePanelEditor = ({
             />
           }
           labelAppend={
-            <EuiButtonEmpty
-              size="xs"
-              data-test-subj="resetCustomEmbeddablePanelTitleButton"
-              onClick={() => setPanelTitle(api.defaultPanelTitle?.value)}
-              disabled={hideTitle || !editMode || api?.defaultPanelTitle?.value === panelTitle}
-              aria-label={i18n.translate(
-                'presentationPanel.action.customizePanel.flyout.optionsMenuForm.resetCustomTitleButtonAriaLabel',
-                {
-                  defaultMessage: 'Reset title',
-                }
-              )}
-            >
-              <FormattedMessage
-                id="presentationPanel.action.customizePanel.flyout.optionsMenuForm.resetCustomTitleButtonLabel"
-                defaultMessage="Reset"
-              />
-            </EuiButtonEmpty>
+            api?.defaultPanelTitle?.value && (
+              <EuiButtonEmpty
+                size="xs"
+                data-test-subj="resetCustomEmbeddablePanelTitleButton"
+                onClick={() => setPanelTitle(api.defaultPanelTitle?.value)}
+                disabled={hideTitle || panelTitle === api?.defaultPanelTitle?.value}
+                aria-label={i18n.translate(
+                  'presentationPanel.action.customizePanel.flyout.optionsMenuForm.resetCustomTitleButtonAriaLabel',
+                  {
+                    defaultMessage: 'Reset title to default',
+                  }
+                )}
+              >
+                <FormattedMessage
+                  id="presentationPanel.action.customizePanel.flyout.optionsMenuForm.resetCustomTitleButtonLabel"
+                  defaultMessage="Reset to default"
+                />
+              </EuiButtonEmpty>
+            )
           }
         >
           <EuiFieldText
@@ -163,7 +167,7 @@ export const CustomizePanelEditor = ({
             data-test-subj="customEmbeddablePanelTitleInput"
             name="title"
             type="text"
-            disabled={hideTitle || !editMode}
+            disabled={hideTitle}
             value={panelTitle ?? ''}
             onChange={(e) => setPanelTitle(e.target.value)}
             aria-label={i18n.translate(
@@ -182,32 +186,32 @@ export const CustomizePanelEditor = ({
             />
           }
           labelAppend={
-            <EuiButtonEmpty
-              size="xs"
-              data-test-subj="resetCustomEmbeddablePanelDescriptionButton"
-              onClick={() => setPanelDescription(api.defaultPanelDescription?.value)}
-              disabled={
-                hideTitle || !editMode || api.defaultPanelDescription?.value === panelDescription
-              }
-              aria-label={i18n.translate(
-                'presentationPanel.action.customizePanel.flyout.optionsMenuForm.resetCustomDescriptionButtonAriaLabel',
-                {
-                  defaultMessage: 'Reset description',
-                }
-              )}
-            >
-              <FormattedMessage
-                id="presentationPanel.action.customizePanel.modal.optionsMenuForm.resetCustomDescriptionButtonLabel"
-                defaultMessage="Reset"
-              />
-            </EuiButtonEmpty>
+            api.defaultPanelDescription?.value && (
+              <EuiButtonEmpty
+                size="xs"
+                data-test-subj="resetCustomEmbeddablePanelDescriptionButton"
+                onClick={() => setPanelDescription(api.defaultPanelDescription?.value)}
+                disabled={api.defaultPanelDescription?.value === panelDescription}
+                aria-label={i18n.translate(
+                  'presentationPanel.action.customizePanel.flyout.optionsMenuForm.resetCustomDescriptionButtonAriaLabel',
+                  {
+                    defaultMessage: 'Reset description to default',
+                  }
+                )}
+              >
+                <FormattedMessage
+                  id="presentationPanel.action.customizePanel.modal.optionsMenuForm.resetCustomDescriptionButtonLabel"
+                  defaultMessage="Reset to default"
+                />
+              </EuiButtonEmpty>
+            )
           }
         >
           <EuiTextArea
             id="panelDescriptionInput"
             className="panelDescriptionInputText"
             data-test-subj="customEmbeddablePanelDescriptionInput"
-            disabled={hideTitle || !editMode}
+            disabled={!editMode}
             name="description"
             value={panelDescription ?? ''}
             onChange={(e) => setPanelDescription(e.target.value)}
@@ -219,14 +223,15 @@ export const CustomizePanelEditor = ({
             )}
           />
         </EuiFormRow>
+        <EuiSpacer size="m" />
       </div>
     );
   };
 
   const renderCustomTimeRangeComponent = () => {
     if (
-      !apiPublishesLocalUnifiedSearch(api) ||
-      !(api.isCompatibleWithLocalUnifiedSearch?.() ?? true)
+      !apiPublishesTimeRange(api) ||
+      !((api as PublishesUnifiedSearch).isCompatibleWithUnifiedSearch?.() ?? true)
     )
       return null;
 
@@ -256,9 +261,9 @@ export const CustomizePanelEditor = ({
             }
           >
             <EuiSuperDatePicker
-              start={localTimeRange?.from ?? undefined}
-              end={localTimeRange?.to ?? undefined}
-              onTimeChange={({ start, end }) => setLocalTimeRange({ from: start, to: end })}
+              start={timeRange?.from ?? undefined}
+              end={timeRange?.to ?? undefined}
+              onTimeChange={({ start, end }) => setTimeRange({ from: start, to: end })}
               showUpdateButton={false}
               dateFormat={dateFormat}
               commonlyUsedRanges={commonlyUsedRangesForDatePicker}
@@ -271,7 +276,7 @@ export const CustomizePanelEditor = ({
   };
 
   const renderFilterDetails = () => {
-    if (!apiPublishesLocalUnifiedSearch(api)) return null;
+    if (!apiPublishesUnifiedSearch(api)) return null;
 
     return (
       <>
@@ -288,7 +293,7 @@ export const CustomizePanelEditor = ({
           <h2>
             <FormattedMessage
               id="presentationPanel.action.customizePanel.flyout.title"
-              defaultMessage="Panel settings"
+              defaultMessage="Settings"
             />
           </h2>
         </EuiTitle>

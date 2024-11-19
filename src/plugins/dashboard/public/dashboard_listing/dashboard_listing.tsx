@@ -1,31 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FormattedRelative, I18nProvider } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 
+import { FavoritesClient } from '@kbn/content-management-favorites-public';
 import { TableListView } from '@kbn/content-management-table-list-view';
+import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
+import { FormattedRelative, I18nProvider } from '@kbn/i18n-react';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
+
+import { DASHBOARD_APP_ID, DASHBOARD_CONTENT_ID } from '../dashboard_constants';
 import {
-  type TableListViewKibanaDependencies,
-  TableListViewKibanaProvider,
-} from '@kbn/content-management-table-list-view-table';
-
-import { toMountPoint, useExecutionContext } from '@kbn/kibana-react-plugin/public';
-
-import { pluginServices } from '../services/plugin_services';
-
+  coreServices,
+  savedObjectsTaggingService,
+  usageCollectionService,
+} from '../services/kibana_services';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { useDashboardListingTable } from './hooks/use_dashboard_listing_table';
-import {
-  DashboardListingProps,
-  DashboardSavedObjectUserContent,
-  TableListViewApplicationService,
-} from './types';
+import { DashboardListingProps, DashboardSavedObjectUserContent } from './types';
 
 export const DashboardListing = ({
   children,
@@ -34,51 +32,39 @@ export const DashboardListing = ({
   getDashboardUrl,
   useSessionStorageIntegration,
 }: DashboardListingProps) => {
-  const {
-    application,
-    notifications,
-    overlays,
-    http,
-    chrome: { theme },
-    savedObjectsTagging,
-    coreContext: { executionContext },
-  } = pluginServices.getServices();
-
-  useExecutionContext(executionContext, {
+  useExecutionContext(coreServices.executionContext, {
     type: 'application',
     page: 'list',
   });
 
-  const { unsavedDashboardIds, refreshUnsavedDashboards, tableListViewTableProps } =
-    useDashboardListingTable({
-      goToDashboard,
-      getDashboardUrl,
-      useSessionStorageIntegration,
-      initialFilter,
-    });
+  const {
+    unsavedDashboardIds,
+    refreshUnsavedDashboards,
+    tableListViewTableProps,
+    contentInsightsClient,
+  } = useDashboardListingTable({
+    goToDashboard,
+    getDashboardUrl,
+    useSessionStorageIntegration,
+    initialFilter,
+  });
 
-  const savedObjectsTaggingFakePlugin = useMemo(() => {
-    return savedObjectsTagging.hasApi // TODO: clean up this logic once https://github.com/elastic/kibana/issues/140433 is resolved
-      ? ({
-          ui: savedObjectsTagging,
-        } as TableListViewKibanaDependencies['savedObjectsTagging'])
-      : undefined;
-  }, [savedObjectsTagging]);
+  const dashboardFavoritesClient = useMemo(() => {
+    return new FavoritesClient(DASHBOARD_APP_ID, DASHBOARD_CONTENT_ID, {
+      http: coreServices.http,
+      usageCollection: usageCollectionService,
+    });
+  }, []);
 
   return (
     <I18nProvider>
       <TableListViewKibanaProvider
         {...{
-          core: {
-            application: application as TableListViewApplicationService,
-            notifications,
-            overlays,
-            http,
-            theme,
-          },
-          toMountPoint,
-          savedObjectsTagging: savedObjectsTaggingFakePlugin,
+          core: coreServices,
+          savedObjectsTagging: savedObjectsTaggingService?.getTaggingApi(),
           FormattedRelative,
+          favorites: dashboardFavoritesClient,
+          contentInsightsClient,
         }}
       >
         <TableListView<DashboardSavedObjectUserContent> {...tableListViewTableProps}>

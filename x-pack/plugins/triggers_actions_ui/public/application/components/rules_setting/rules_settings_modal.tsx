@@ -26,8 +26,8 @@ import {
   EuiSpacer,
   EuiEmptyPrompt,
 } from '@elastic/eui';
+import { useFetchFlappingSettings } from '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_flapping_settings';
 import { useKibana } from '../../../common/lib/kibana';
-import { useGetFlappingSettings } from '../../hooks/use_get_flapping_settings';
 import { RulesSettingsFlappingSection } from './flapping/rules_settings_flapping_section';
 import { RulesSettingsQueryDelaySection } from './query_delay/rules_settings_query_delay_section';
 import { useGetQueryDelaySettings } from '../../hooks/use_get_query_delay_settings';
@@ -93,11 +93,10 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
   const {
     application: { capabilities },
     isServerless,
+    http,
   } = useKibana().services;
   const {
     rulesSettings: {
-      show,
-      save,
       writeFlappingSettingsUI,
       readFlappingSettingsUI,
       writeQueryDelaySettingsUI,
@@ -111,7 +110,8 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
   const [queryDelaySettings, hasQueryDelayChanged, setQueryDelaySettings, resetQueryDelaySettings] =
     useResettableState<RulesSettingsQueryDelayProperties>();
 
-  const { isLoading: isFlappingLoading, isError: hasFlappingError } = useGetFlappingSettings({
+  const { isLoading: isFlappingLoading, isError: hasFlappingError } = useFetchFlappingSettings({
+    http,
     enabled: isVisible,
     onSuccess: (fetchedSettings) => {
       if (!flappingSettings) {
@@ -156,10 +156,10 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
   // In the future when we have more settings sub-features, we should
   // disassociate the rule settings capabilities (save, show) from the
   // sub-feature capabilities (writeXSettingsUI).
-  const canWriteFlappingSettings = save && writeFlappingSettingsUI && !hasFlappingError;
-  const canShowFlappingSettings = show && readFlappingSettingsUI;
-  const canWriteQueryDelaySettings = save && writeQueryDelaySettingsUI && !hasQueryDelayError;
-  const canShowQueryDelaySettings = show && readQueryDelaySettingsUI;
+  const canWriteFlappingSettings = writeFlappingSettingsUI && !hasFlappingError;
+  const canShowFlappingSettings = readFlappingSettingsUI;
+  const canWriteQueryDelaySettings = writeQueryDelaySettingsUI && !hasQueryDelayError;
+  const canShowQueryDelaySettings = readQueryDelaySettingsUI;
 
   const handleSettingsChange = (
     setting: keyof RulesSettingsProperties,

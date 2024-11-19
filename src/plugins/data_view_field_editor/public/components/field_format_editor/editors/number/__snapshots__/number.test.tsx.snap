@@ -3,20 +3,15 @@
 exports[`NumberFormatEditor should render normally 1`] = `
 <Fragment>
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     helpText={
       <span>
         <EuiLink
           href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/numeral.html"
           target="_blank"
         >
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Documentation"
             id="indexPatternFieldEditor.number.documentationLabel"
-            values={Object {}}
           />
            
           <EuiIcon
@@ -27,7 +22,7 @@ exports[`NumberFormatEditor should render normally 1`] = `
     }
     isInvalid={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Numeral.js format pattern (Default: {defaultPattern})"
         id="indexPatternFieldEditor.number.numeralLabel"
         values={
@@ -39,7 +34,6 @@ exports[`NumberFormatEditor should render normally 1`] = `
         }
       />
     }
-    labelType="label"
   >
     <EuiFieldText
       data-test-subj="numberEditorFormatPattern"

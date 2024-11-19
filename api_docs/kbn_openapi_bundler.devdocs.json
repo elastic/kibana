@@ -27,7 +27,7 @@
         "label": "bundle",
         "description": [],
         "signature": [
-          "(config: ",
+          "({ sourceGlob, outputFilePath, options, }: ",
           {
             "pluginId": "@kbn/openapi-bundler",
             "scope": "common",
@@ -46,7 +46,7 @@
             "id": "def-common.bundle.$1",
             "type": "Object",
             "tags": [],
-            "label": "config",
+            "label": "{\n  sourceGlob,\n  outputFilePath = 'bundled_{version}.schema.yaml',\n  options,\n}",
             "description": [],
             "signature": [
               {
@@ -58,6 +58,53 @@
               }
             ],
             "path": "packages/kbn-openapi-bundler/src/openapi_bundler.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/openapi-bundler",
+        "id": "def-common.merge",
+        "type": "Function",
+        "tags": [],
+        "label": "merge",
+        "description": [],
+        "signature": [
+          "({ sourceGlobs, outputFilePath, options, }: ",
+          {
+            "pluginId": "@kbn/openapi-bundler",
+            "scope": "common",
+            "docId": "kibKbnOpenapiBundlerPluginApi",
+            "section": "def-common.MergerConfig",
+            "text": "MergerConfig"
+          },
+          ") => Promise<void>"
+        ],
+        "path": "packages/kbn-openapi-bundler/src/openapi_merger.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/openapi-bundler",
+            "id": "def-common.merge.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  sourceGlobs,\n  outputFilePath = 'merged.schema.yaml',\n  options,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/openapi-bundler",
+                "scope": "common",
+                "docId": "kibKbnOpenapiBundlerPluginApi",
+                "section": "def-common.MergerConfig",
+                "text": "MergerConfig"
+              }
+            ],
+            "path": "packages/kbn-openapi-bundler/src/openapi_merger.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -81,17 +128,6 @@
         "children": [
           {
             "parentPluginId": "@kbn/openapi-bundler",
-            "id": "def-common.BundlerConfig.rootDir",
-            "type": "string",
-            "tags": [],
-            "label": "rootDir",
-            "description": [],
-            "path": "packages/kbn-openapi-bundler/src/openapi_bundler.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/openapi-bundler",
             "id": "def-common.BundlerConfig.sourceGlob",
             "type": "string",
             "tags": [],
@@ -109,6 +145,73 @@
             "label": "outputFilePath",
             "description": [],
             "path": "packages/kbn-openapi-bundler/src/openapi_bundler.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/openapi-bundler",
+            "id": "def-common.BundlerConfig.options",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "BundleOptions | undefined"
+            ],
+            "path": "packages/kbn-openapi-bundler/src/openapi_bundler.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/openapi-bundler",
+        "id": "def-common.MergerConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "MergerConfig",
+        "description": [],
+        "path": "packages/kbn-openapi-bundler/src/openapi_merger.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/openapi-bundler",
+            "id": "def-common.MergerConfig.sourceGlobs",
+            "type": "Array",
+            "tags": [],
+            "label": "sourceGlobs",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-openapi-bundler/src/openapi_merger.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/openapi-bundler",
+            "id": "def-common.MergerConfig.outputFilePath",
+            "type": "string",
+            "tags": [],
+            "label": "outputFilePath",
+            "description": [],
+            "path": "packages/kbn-openapi-bundler/src/openapi_merger.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/openapi-bundler",
+            "id": "def-common.MergerConfig.options",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "MergerOptions | undefined"
+            ],
+            "path": "packages/kbn-openapi-bundler/src/openapi_merger.ts",
             "deprecated": false,
             "trackAdoption": false
           }

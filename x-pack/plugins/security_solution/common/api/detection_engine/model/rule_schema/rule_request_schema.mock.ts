@@ -17,6 +17,7 @@ import type {
   ThresholdRuleCreateProps,
   NewTermsRuleCreateProps,
   NewTermsRuleUpdateProps,
+  EqlRuleCreateProps,
 } from './rule_schemas.gen';
 
 export const getCreateRulesSchemaMock = (ruleId = 'rule-1'): QueryRuleCreateProps => ({
@@ -212,4 +213,16 @@ export const getUpdateNewTermsSchemaMock = (
   from: 'now-6m',
   new_terms_fields: ['user.name'],
   history_window_start: 'now-7d',
+});
+
+export const getCreateEqlRuleSchemaMock = (ruleId = 'rule-1'): EqlRuleCreateProps => ({
+  description: 'Event correlation index pattern rule',
+  name: 'Event correlation index pattern rule',
+  index: ['auditbeat-*'],
+  severity: 'high',
+  risk_score: 55,
+  rule_id: ruleId,
+  type: 'eql',
+  language: 'eql',
+  query: 'process where process.name == "regsvr32.exe"',
 });

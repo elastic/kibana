@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import expect from '@kbn/expect';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -71,6 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return 200 with individual responses', async () =>
       await supertest
         .post(`/api/saved_objects/_bulk_get`)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(BULK_REQUESTS)
         .expect(200)
         .then((resp) => {
@@ -146,6 +149,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return 200 with individual responses that include the managed property of each object', async () =>
       await supertest
         .post(`/api/saved_objects/_bulk_get`)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(BULK_REQUESTS_MANAGED)
         .expect(200)
         .then((resp) => {
@@ -230,10 +234,10 @@ export default function ({ getService }: FtrProviderContext) {
                 type: 'dashboard',
                 namespaces: ['default'],
                 migrationVersion: {
-                  dashboard: '8.9.0',
+                  dashboard: '10.2.0',
                 },
                 coreMigrationVersion: '8.8.0',
-                typeMigrationVersion: '8.9.0',
+                typeMigrationVersion: '10.2.0',
                 updated_at: '2015-01-01T00:00:00.000Z',
                 created_at: '2015-01-01T00:00:00.000Z',
                 version: resp.body.saved_objects[3].version,
@@ -280,6 +284,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { body } = await supertest
         .post(`/api/saved_objects/_bulk_get`)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send([
           {
             type: 'config',

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React, { type FC, type PropsWithChildren } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { render, waitFor } from '@testing-library/react';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
@@ -57,7 +57,7 @@ const getMockedDatePickeDependencies = () => {
   } as unknown as DatePickerDependencies;
 };
 
-const Wrapper: FC = ({ children }) => (
+const Wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <I18nProvider>
     <DatePickerContextProvider {...getMockedDatePickeDependencies()}>
       {children}
@@ -82,10 +82,10 @@ describe('NotificationsList', () => {
 
     await waitFor(() => {
       expect(
-        useMlKibana().services.mlServices.mlApiServices.notifications.findMessages
+        useMlKibana().services.mlServices.mlApi.notifications.findMessages
       ).toHaveBeenCalledTimes(1);
       expect(
-        useMlKibana().services.mlServices.mlApiServices.notifications.findMessages
+        useMlKibana().services.mlServices.mlApi.notifications.findMessages
       ).toHaveBeenCalledWith({
         earliest: '',
         latest: '',

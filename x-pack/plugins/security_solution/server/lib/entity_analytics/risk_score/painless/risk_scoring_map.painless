@@ -1,0 +1,8 @@
+Map fields = new HashMap();
+fields.put('id', doc['kibana.alert.uuid'].value);
+fields.put('index', doc['_index'].value);
+fields.put('time', doc['@timestamp'].value);
+fields.put('rule_name', doc['kibana.alert.rule.name'].value);
+fields.put('category', doc['event.kind'].value);
+fields.put('score', doc['kibana.alert.risk_score'].value);
+state.inputs.add(fields);      

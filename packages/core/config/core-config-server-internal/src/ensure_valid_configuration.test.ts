@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { configServiceMock } from '@kbn/config-mocks';
@@ -22,19 +23,19 @@ describe('ensureValidConfiguration', () => {
   });
 
   it('returns normally when there is no unused keys and when the config validates', async () => {
-    await expect(ensureValidConfiguration(configService as any)).resolves.toBeUndefined();
+    await expect(ensureValidConfiguration(configService)).resolves.toBeUndefined();
 
-    expect(configService.validate).toHaveBeenCalledWith(undefined);
+    expect(configService.validate).toHaveBeenCalledWith({ logDeprecations: true });
   });
 
   it('forwards parameters to the `validate` method', async () => {
     await expect(
-      ensureValidConfiguration(configService as any, { logDeprecations: false })
+      ensureValidConfiguration(configService, { logDeprecations: false })
     ).resolves.toBeUndefined();
     expect(configService.validate).toHaveBeenCalledWith({ logDeprecations: false });
 
     await expect(
-      ensureValidConfiguration(configService as any, { logDeprecations: true })
+      ensureValidConfiguration(configService, { logDeprecations: true })
     ).resolves.toBeUndefined();
     expect(configService.validate).toHaveBeenCalledWith({ logDeprecations: true });
   });
@@ -44,7 +45,7 @@ describe('ensureValidConfiguration', () => {
       throw new Error('some message');
     });
 
-    await expect(ensureValidConfiguration(configService as any)).rejects.toMatchInlineSnapshot(
+    await expect(ensureValidConfiguration(configService)).rejects.toMatchInlineSnapshot(
       `[Error: some message]`
     );
   });
@@ -57,7 +58,7 @@ describe('ensureValidConfiguration', () => {
     });
 
     try {
-      await ensureValidConfiguration(configService as any);
+      await ensureValidConfiguration(configService);
     } catch (e) {
       expect(e).toBeInstanceOf(CriticalError);
       expect(e.processExitCode).toEqual(78);
@@ -67,9 +68,17 @@ describe('ensureValidConfiguration', () => {
   it('throws when there are some unused keys', async () => {
     configService.getUnusedPaths.mockResolvedValue(['some.key', 'some.other.key']);
 
-    await expect(ensureValidConfiguration(configService as any)).rejects.toMatchInlineSnapshot(
+    await expect(ensureValidConfiguration(configService)).rejects.toMatchInlineSnapshot(
       `[Error: Unknown configuration key(s): "some.key", "some.other.key". Check for spelling errors and ensure that expected plugins are installed.]`
     );
+  });
+
+  it('does not throw when there are some unused keys and skipUnusedConfigKeysCheck: true', async () => {
+    configService.getUnusedPaths.mockResolvedValue(['some.key', 'some.other.key']);
+
+    await expect(
+      ensureValidConfiguration(configService, { logDeprecations: true, stripUnknownKeys: true })
+    ).resolves.toBeUndefined();
   });
 
   it('throws a `CriticalError` with the correct processExitCode value', async () => {
@@ -78,7 +87,7 @@ describe('ensureValidConfiguration', () => {
     configService.getUnusedPaths.mockResolvedValue(['some.key', 'some.other.key']);
 
     try {
-      await ensureValidConfiguration(configService as any);
+      await ensureValidConfiguration(configService);
     } catch (e) {
       expect(e).toBeInstanceOf(CriticalError);
       expect(e.processExitCode).toEqual(64);
@@ -88,13 +97,13 @@ describe('ensureValidConfiguration', () => {
   it('does not throw when all unused keys are included in the ignored paths', async () => {
     configService.getUnusedPaths.mockResolvedValue(['dev.someDevKey', 'elastic.apm.enabled']);
 
-    await expect(ensureValidConfiguration(configService as any)).resolves.toBeUndefined();
+    await expect(ensureValidConfiguration(configService)).resolves.toBeUndefined();
   });
 
   it('throws when only some keys are included in the ignored paths', async () => {
     configService.getUnusedPaths.mockResolvedValue(['dev.someDevKey', 'some.key']);
 
-    await expect(ensureValidConfiguration(configService as any)).rejects.toMatchInlineSnapshot(
+    await expect(ensureValidConfiguration(configService)).rejects.toMatchInlineSnapshot(
       `[Error: Unknown configuration key(s): "some.key". Check for spelling errors and ensure that expected plugins are installed.]`
     );
   });

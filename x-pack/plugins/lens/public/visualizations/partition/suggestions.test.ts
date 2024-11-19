@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PaletteOutput } from '@kbn/coloring';
+import { PaletteOutput, DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import { suggestions } from './suggestions';
 import type { DataType, SuggestionRequest } from '../../types';
 import type { PieLayerState, PieVisualizationState } from '../../../common/types';
@@ -668,7 +668,7 @@ describe('suggestions', () => {
       ).toContainEqual(
         expect.objectContaining({
           state: {
-            shape: PieChartTypes.DONUT,
+            shape: PieChartTypes.PIE,
             palette,
             layers: [
               {
@@ -683,7 +683,7 @@ describe('suggestions', () => {
                 legendMaxLines: 1,
                 truncateLegend: true,
                 nestedLegend: true,
-                colorMapping: undefined,
+                colorMapping: DEFAULT_COLOR_MAPPING_CONFIG,
               },
             ],
           },

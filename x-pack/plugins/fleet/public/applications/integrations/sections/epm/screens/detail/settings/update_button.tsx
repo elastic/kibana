@@ -18,11 +18,10 @@ import {
   EuiConfirmModal,
   EuiSpacer,
 } from '@elastic/eui';
-import type { Observable } from 'rxjs';
-import type { CoreTheme } from '@kbn/core/public';
 
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 
+import type { FleetStartServices } from '../../../../../../../plugin';
 import type {
   PackageInfo,
   UpgradePackagePolicyDryRunResponse,
@@ -45,7 +44,7 @@ interface UpdateButtonProps extends Pick<PackageInfo, 'name' | 'title' | 'versio
   agentPolicyIds: string[];
   isUpgradingPackagePolicies?: boolean;
   setIsUpgradingPackagePolicies?: React.Dispatch<React.SetStateAction<boolean>>;
-  theme$: Observable<CoreTheme>;
+  startServices: Pick<FleetStartServices, 'analytics' | 'i18n' | 'theme'>;
 }
 
 /*
@@ -77,7 +76,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
   setIsUpgradingPackagePolicies = () => {},
   title,
   version,
-  theme$,
+  startServices,
 }) => {
   const history = useHistory();
   const { getPath } = useLink();
@@ -185,7 +184,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
             defaultMessage="Updated {title} and upgraded policies"
             values={{ title }}
           />,
-          { theme$ }
+          startServices
         ),
         text: toMountPoint(
           <FormattedMessage
@@ -193,7 +192,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
             defaultMessage="Successfully updated {title} and upgraded policies"
             values={{ title }}
           />,
-          { theme$ }
+          startServices
         ),
       });
 
@@ -230,7 +229,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
     packagePolicyIds,
     dryRunData,
     notifications.toasts,
-    theme$,
+    startServices,
     navigateToNewSettingsPage,
   ]);
 
@@ -336,7 +335,6 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
         {packagePolicyCount > 0 && (
           <EuiFlexItem grow={false}>
             <EuiCheckbox
-              compressed
               labelProps={{
                 style: {
                   display: 'flex',

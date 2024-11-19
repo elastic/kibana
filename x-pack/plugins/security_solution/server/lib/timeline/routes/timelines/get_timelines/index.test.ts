@@ -5,18 +5,9 @@
  * 2.0.
  */
 
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
-
-import {
-  serverMock,
-  requestContextMock,
-  createMockConfig,
-} from '../../../../detection_engine/routes/__mocks__';
+import { serverMock, requestContextMock } from '../../../../detection_engine/routes/__mocks__';
 import { getAllTimeline } from '../../../saved_object/timelines';
-
-import { mockGetCurrentUser } from '../../../__mocks__/import_timelines';
 import { getTimelineRequest } from '../../../__mocks__/request_responses';
-
 import { getTimelinesRoute } from '.';
 
 jest.mock('../../../saved_object/timelines', () => ({
@@ -25,7 +16,6 @@ jest.mock('../../../saved_object/timelines', () => ({
 
 describe('get all timelines', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let securitySetup: SecurityPluginSetup;
   let { context } = requestContextMock.createTools();
 
   beforeEach(() => {
@@ -35,14 +25,7 @@ describe('get all timelines', () => {
     server = serverMock.create();
     context = requestContextMock.createTools().context;
 
-    securitySetup = {
-      authc: {
-        getCurrentUser: jest.fn().mockReturnValue(mockGetCurrentUser),
-      },
-      authz: {},
-    } as unknown as SecurityPluginSetup;
-
-    getTimelinesRoute(server.router, createMockConfig(), securitySetup);
+    getTimelinesRoute(server.router);
   });
 
   test('should get the total count', async () => {

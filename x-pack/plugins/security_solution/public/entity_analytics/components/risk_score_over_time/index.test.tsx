@@ -7,13 +7,11 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { RiskScoreOverTime, scoreFormatter } from '.';
+import { RiskScoreOverTime } from '.';
 import { TestProviders } from '../../../common/mock';
-import { LineSeries } from '@elastic/charts';
 import { RiskScoreEntity } from '../../../../common/search_strategy';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
-const mockLineSeries = LineSeries as jest.Mock;
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
 jest.mock('@elastic/charts', () => {
   const original = jest.requireActual('@elastic/charts');
@@ -58,17 +56,7 @@ describe('Risk Score Over Time', () => {
     expect(queryByTestId('RiskScoreOverTime')).toBeInTheDocument();
   });
 
-  it('renders loader when loading', () => {
-    const { queryByTestId } = render(
-      <TestProviders>
-        <RiskScoreOverTime {...props} loading={true} />
-      </TestProviders>
-    );
-
-    expect(queryByTestId('RiskScoreOverTime-loading')).toBeInTheDocument();
-  });
-
-  it('renders VisualizationEmbeddable when isChartEmbeddablesEnabled = true and spaceId exists', () => {
+  it('renders VisualizationEmbeddable', () => {
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
 
     const { queryByTestId } = render(
@@ -78,26 +66,5 @@ describe('Risk Score Over Time', () => {
     );
 
     expect(queryByTestId('visualization-embeddable')).toBeInTheDocument();
-  });
-
-  describe('scoreFormatter', () => {
-    it('renders score formatted', () => {
-      render(
-        <TestProviders>
-          <RiskScoreOverTime {...props} />
-        </TestProviders>
-      );
-
-      const tickFormat = mockLineSeries.mock.calls[0][0].tickFormat;
-
-      expect(tickFormat).toBe(scoreFormatter);
-    });
-
-    it('renders a formatted score', () => {
-      expect(scoreFormatter(3.000001)).toEqual('3');
-      expect(scoreFormatter(3.4999)).toEqual('3');
-      expect(scoreFormatter(3.51111)).toEqual('4');
-      expect(scoreFormatter(3.9999)).toEqual('4');
-    });
   });
 });

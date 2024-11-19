@@ -13,19 +13,18 @@ import React, { useCallback, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { NotificationsStart } from '@kbn/core/public';
-import type { Observable } from 'rxjs';
-import type { CoreTheme } from '@kbn/core/public';
-
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import type { PackageInfo } from '../../../types';
+import type { FleetStartServices } from '../../../plugin';
 import { sendInstallPackage, sendRemovePackage, useLink } from '../../../hooks';
 
 import { InstallStatus } from '../../../types';
 import { isVerificationError } from '../services';
 
 import { useConfirmForceInstall } from '.';
+
+type StartServices = Pick<FleetStartServices, 'notifications' | 'analytics' | 'i18n' | 'theme'>;
 
 interface PackagesInstall {
   [key: string]: PackageInstallItem;
@@ -43,13 +42,7 @@ type InstallPackageProps = Pick<PackageInfo, 'name' | 'version' | 'title'> & {
 };
 type SetPackageInstallStatusProps = Pick<PackageInfo, 'name'> & PackageInstallItem;
 
-function usePackageInstall({
-  notifications,
-  theme$,
-}: {
-  notifications: NotificationsStart;
-  theme$: Observable<CoreTheme>;
-}) {
+function usePackageInstall({ startServices }: { startServices: StartServices }) {
   const history = useHistory();
   const { getPath } = useLink();
   const [packages, setPackage] = useState<PackagesInstall>({});
@@ -67,6 +60,8 @@ function usePackageInstall({
     },
     []
   );
+
+  const { notifications } = startServices;
 
   const getPackageInstallStatus = useCallback(
     (pkg: string): PackageInstallItem => {
@@ -115,7 +110,7 @@ function usePackageInstall({
                 defaultMessage="Reinstalled {title}"
                 values={{ title }}
               />,
-              { theme$ }
+              startServices
             ),
             text: toMountPoint(
               <FormattedMessage
@@ -123,7 +118,7 @@ function usePackageInstall({
                 defaultMessage="Successfully reinstalled {title}"
                 values={{ title }}
               />,
-              { theme$ }
+              startServices
             ),
           });
         } else if (isUpgrade) {
@@ -134,7 +129,7 @@ function usePackageInstall({
                 defaultMessage="Upgraded {title}"
                 values={{ title }}
               />,
-              { theme$ }
+              startServices
             ),
             text: toMountPoint(
               <FormattedMessage
@@ -142,7 +137,7 @@ function usePackageInstall({
                 defaultMessage="Successfully upgraded {title}"
                 values={{ title }}
               />,
-              { theme$ }
+              startServices
             ),
           });
         } else {
@@ -153,7 +148,7 @@ function usePackageInstall({
                 defaultMessage="Installed {title}"
                 values={{ title }}
               />,
-              { theme$ }
+              startServices
             ),
             text: toMountPoint(
               <FormattedMessage
@@ -161,7 +156,7 @@ function usePackageInstall({
                 defaultMessage="Successfully installed {title}"
                 values={{ title }}
               />,
-              { theme$ }
+              startServices
             ),
           });
         }
@@ -192,14 +187,7 @@ function usePackageInstall({
       return true;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      getPackageInstallStatus,
-      setPackageInstallStatus,
-      notifications.toasts,
-      theme$,
-      getPath,
-      history,
-    ]
+    [getPackageInstallStatus, setPackageInstallStatus, startServices, getPath, history]
   );
 
   const uninstallPackage = useCallback(
@@ -211,7 +199,7 @@ function usePackageInstall({
     }: Pick<PackageInfo, 'name' | 'version' | 'title'> & { redirectToVersion: string }) => {
       setPackageInstallStatus({ name, status: InstallStatus.uninstalling, version });
 
-      const res = await sendRemovePackage(name, version);
+      const res = await sendRemovePackage({ pkgName: name, pkgVersion: version });
       if (res.error) {
         setPackageInstallStatus({ name, status: InstallStatus.installed, version });
         notifications.toasts.addWarning({
@@ -221,14 +209,14 @@ function usePackageInstall({
               defaultMessage="Failed to uninstall {title} package"
               values={{ title }}
             />,
-            { theme$ }
+            startServices
           ),
           text: toMountPoint(
             <FormattedMessage
               id="xpack.fleet.integrations.packageUninstallErrorDescription"
               defaultMessage="Something went wrong while trying to uninstall this package. Please try again later."
             />,
-            { theme$ }
+            startServices
           ),
           iconType: 'error',
         });
@@ -242,7 +230,7 @@ function usePackageInstall({
               defaultMessage="Uninstalled {title}"
               values={{ title }}
             />,
-            { theme$ }
+            startServices
           ),
           text: toMountPoint(
             <FormattedMessage
@@ -250,7 +238,7 @@ function usePackageInstall({
               defaultMessage="Successfully uninstalled {title}"
               values={{ title }}
             />,
-            { theme$ }
+            startServices
           ),
         });
         if (redirectToVersion !== version) {
@@ -261,7 +249,7 @@ function usePackageInstall({
         }
       }
     },
-    [notifications.toasts, setPackageInstallStatus, getPath, history, theme$]
+    [notifications.toasts, setPackageInstallStatus, getPath, history, startServices]
   );
 
   return {

@@ -24,27 +24,29 @@ import { visit } from '../../../../tasks/navigation';
 
 import { ruleDetailsUrl } from '../../../../urls/rule_details';
 
-describe('Detection ES|QL rules, details view', { tags: ['@ess'] }, () => {
-  const rule = getEsqlRule();
+describe(
+  'Detection ES|QL rules, details view',
+  { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
+  () => {
+    const rule = getEsqlRule();
 
-  beforeEach(() => {
-    deleteAlertsAndRules();
-    login();
-  });
+    beforeEach(() => {
+      deleteAlertsAndRules();
+      login();
+    });
 
-  it('displays ES|QL rule specific fields', function () {
-    createRule(getEsqlRule()).then((createdRule) => {
-      visit(ruleDetailsUrl(createdRule.body.id));
+    it('displays ES|QL rule specific fields', function () {
+      createRule(getEsqlRule()).then((createdRule) => {
+        visit(ruleDetailsUrl(createdRule.body.id));
 
-      cy.get(RULE_NAME_HEADER).should('contain', `${rule.name}`);
+        cy.get(RULE_NAME_HEADER).should('contain', `${rule.name}`);
 
-      cy.get(DEFINITION_DETAILS).within(() => {
-        getDetails(ESQL_QUERY_DETAILS).should('have.text', rule.query);
+        cy.get(DEFINITION_DETAILS).within(() => {
+          getDetails(ESQL_QUERY_DETAILS).should('have.text', rule.query);
 
-        getDetails(RULE_TYPE_DETAILS).contains('ES|QL');
-        // ensures ES|QL rule in technical preview
-        getDetails(RULE_TYPE_DETAILS).contains('Technical Preview');
+          getDetails(RULE_TYPE_DETAILS).contains('ES|QL');
+        });
       });
     });
-  });
-});
+  }
+);

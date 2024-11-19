@@ -121,31 +121,30 @@ describe('#toExpression', () => {
     ).toMatchSnapshot();
   });
 
-  it('should default the fitting function to None', () => {
-    expect(
-      (
-        xyVisualization.toExpression(
+  it('should default the fitting function to Linear', () => {
+    const ast = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'hide',
+        preferredSeriesType: 'bar',
+        layers: [
           {
-            legend: { position: Position.Bottom, isVisible: true },
-            valueLabels: 'hide',
-            preferredSeriesType: 'bar',
-            layers: [
-              {
-                layerId: 'first',
-                layerType: LayerTypes.DATA,
-                seriesType: 'area',
-                splitAccessor: 'd',
-                xAccessor: 'a',
-                accessors: ['b', 'c'],
-              },
-            ],
+            layerId: 'first',
+            layerType: LayerTypes.DATA,
+            seriesType: 'area',
+            splitAccessor: 'd',
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
           },
-          frame.datasourceLayers,
-          undefined,
-          datasourceExpressionsByLayers
-        ) as Ast
-      ).chain[0].arguments.fittingFunction[0]
-    ).toEqual('None');
+        ],
+      },
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
+    ) as Ast;
+
+    expect(ast.chain[0].arguments.fittingFunction[0]).toEqual('Linear');
+    expect(ast.chain[0].arguments.emphasizeFitting[0]).toEqual(true);
   });
 
   it('should default the axisTitles visibility settings to true', () => {
@@ -584,6 +583,12 @@ describe('#toExpression', () => {
   });
 
   it('should correctly set the current time marker visibility settings', () => {
+    // mock the xAccessor column to be of type date
+    mockDatasource.publicAPIMock.getOperationForColumnId.mockImplementation((col) => {
+      if (col === 'a')
+        return { label: `col_${col}`, dataType: 'date', scale: 'interval' } as OperationDescriptor;
+      return { label: `col_${col}`, dataType: 'number' } as OperationDescriptor;
+    });
     const state: XYState = {
       legend: { position: Position.Bottom, isVisible: true },
       valueLabels: 'show',
@@ -614,6 +619,34 @@ describe('#toExpression', () => {
       {
         ...state,
         showCurrentTimeMarker: false,
+      },
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
+    ) as Ast;
+    expect(expression.chain[0].arguments.addTimeMarker[0] as Ast).toEqual(false);
+  });
+
+  it('ignores set current time marker visibility settings if the chart is not time-based', () => {
+    const state: XYState = {
+      legend: { position: Position.Bottom, isVisible: true },
+      valueLabels: 'show',
+      preferredSeriesType: 'bar',
+      layers: [
+        {
+          layerId: 'first',
+          layerType: LayerTypes.DATA,
+          seriesType: 'area',
+          splitAccessor: 'd',
+          xAccessor: 'a',
+          accessors: ['b', 'c'],
+        },
+      ],
+    };
+    const expression = xyVisualization.toExpression(
+      {
+        ...state,
+        showCurrentTimeMarker: true,
       },
       frame.datasourceLayers,
       undefined,

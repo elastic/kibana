@@ -57,8 +57,12 @@ export interface StoryProvidersComponentProps {
 const securityLayout = {
   getPluginWrapper:
     (): FC =>
-    ({ children }) =>
-      <div>{children}</div>,
+    ({ children, isEmptyState, emptyPageBody }: any) => {
+      if (isEmptyState && emptyPageBody) {
+        return <>{emptyPageBody}</>;
+      }
+      return <>{children}</>;
+    },
 };
 
 const defaultServices = {

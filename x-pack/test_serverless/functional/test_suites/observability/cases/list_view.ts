@@ -17,10 +17,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
   const svlObltNavigation = getService('svlObltNavigation');
+  const toasts = getService('toasts');
 
   describe('Cases list', function () {
     before(async () => {
-      await svlCommonPage.login();
+      await svlCommonPage.loginWithPrivilegedRole();
       await svlObltNavigation.navigateToLandingPage();
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
     });
@@ -28,7 +29,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     after(async () => {
       await svlCases.api.deleteAllCaseItems();
       await cases.casesTable.waitForCasesToBeDeleted();
-      await svlCommonPage.forceLogout();
     });
 
     describe('empty state', () => {
@@ -211,6 +211,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('row actions', () => {
+      afterEach(async () => {
+        await toasts.dismissAll();
+      });
+
       describe('Status', () => {
         createNCasesBeforeDeleteAllAfter(1, getPageObject, getService);
 

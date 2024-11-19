@@ -7,7 +7,7 @@
 
 import { EuiAccordion, EuiErrorBoundary, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
-import type { FunctionComponent } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -21,7 +21,7 @@ export interface ApiKeysEmptyPromptProps {
   readOnly?: boolean;
 }
 
-export const ApiKeysEmptyPrompt: FunctionComponent<ApiKeysEmptyPromptProps> = ({
+export const ApiKeysEmptyPrompt: FC<PropsWithChildren<ApiKeysEmptyPromptProps>> = ({
   error,
   readOnly,
   children,
@@ -76,17 +76,22 @@ export const ApiKeysEmptyPrompt: FunctionComponent<ApiKeysEmptyPromptProps> = ({
       throw error;
     };
 
+    const promptHeading = doesErrorIndicateBadQuery(error) ? (
+      <FormattedMessage
+        id="xpack.security.management.apiKeysEmptyPrompt.badQueryErrorMessage"
+        defaultMessage="Could not load API keys as the query is incorrect."
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.security.management.apiKeysEmptyPrompt.errorMessage"
+        defaultMessage="Could not load API keys."
+      />
+    );
+
     return (
       <KibanaPageTemplate.EmptyPrompt
         iconType="warning"
-        body={
-          <p>
-            <FormattedMessage
-              id="xpack.security.management.apiKeysEmptyPrompt.errorMessage"
-              defaultMessage="Could not load API keys."
-            />
-          </p>
-        }
+        body={<p>{promptHeading}</p>}
         actions={
           <>
             {children}
@@ -176,4 +181,13 @@ function doesErrorIndicateAPIKeysAreDisabled(error: Record<string, any>) {
 
 function doesErrorIndicateUserHasNoPermissionsToManageAPIKeys(error: Record<string, any>) {
   return error.body?.statusCode === 403;
+}
+
+export function doesErrorIndicateBadQuery(error: Record<string, any>) {
+  const message = error?.message || '';
+  const errorString = error?.name || '';
+
+  return (
+    errorString.indexOf('ResponseError') > -1 || message.indexOf('illegal_argument_exception') > -1
+  );
 }

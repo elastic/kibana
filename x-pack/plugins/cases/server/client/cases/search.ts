@@ -11,7 +11,7 @@ import Boom from '@hapi/boom';
 import type { CustomFieldsConfiguration } from '../../../common/types/domain';
 import type { CasesSearchRequest, CasesFindResponse } from '../../../common/types/api';
 import { CasesSearchRequestRt, CasesFindResponseRt } from '../../../common/types/api';
-import { decodeWithExcessOrThrow } from '../../../common/api';
+import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 
 import { createCaseError } from '../../common/error';
 import { asArray, transformCases } from '../../common/utils';
@@ -20,7 +20,6 @@ import { Operations } from '../../authorization';
 import type { CasesClient, CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { CasesSearchParams } from '../types';
-import { decodeOrThrow } from '../../../common/api/runtime_types';
 import { validateSearchCasesCustomFields } from './validators';
 
 /**

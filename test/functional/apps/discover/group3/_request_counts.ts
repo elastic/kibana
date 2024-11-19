@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -12,13 +13,11 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects([
+  const { common, discover, timePicker, header } = getPageObjects([
     'common',
     'discover',
     'timePicker',
     'header',
-    'unifiedSearch',
-    'settings',
   ]);
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
@@ -37,9 +36,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
         'bfetch:disable': true,
-        'discover:enableESQL': true,
+        enableESQL: true,
       });
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
 
     after(async () => {
@@ -49,8 +48,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     beforeEach(async () => {
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await common.navigateToApp('discover');
+      await header.waitUntilLoadingHasFinished();
     });
 
     const getSearchCount = async (type: 'ese' | 'esql') => {
@@ -63,8 +62,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     };
 
     const waitForLoadingToFinish = async () => {
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.discover.waitForDocTableLoadingComplete();
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitForDocTableLoadingComplete();
       await elasticChart.canvasExists();
     };
 
@@ -123,7 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it(`should send ${expectedRequests} requests (documents + chart) when changing the time range`, async () => {
         await expectSearches(type, expectedRequests, async () => {
-          await PageObjects.timePicker.setAbsoluteRange(
+          await timePicker.setAbsoluteRange(
             'Sep 21, 2015 @ 06:31:44.000',
             'Sep 23, 2015 @ 00:00:00.000'
           );
@@ -133,7 +132,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it(`should send ${savedSearchesRequests} requests for saved search changes`, async () => {
         await setQuery(query1);
         await queryBar.clickQuerySubmitButton();
-        await PageObjects.timePicker.setAbsoluteRange(
+        await timePicker.setAbsoluteRange(
           'Sep 21, 2015 @ 06:31:44.000',
           'Sep 23, 2015 @ 00:00:00.000'
         );
@@ -142,14 +141,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // https://github.com/elastic/kibana/issues/165192
         // creating the saved search
         await expectSearches(type, savedSearchesRequests ?? expectedRequests, async () => {
-          await PageObjects.discover.saveSearch(savedSearch);
+          await discover.saveSearch(savedSearch);
         });
         // resetting the saved search
         await setQuery(query2);
         await queryBar.clickQuerySubmitButton();
         await waitForLoadingToFinish();
         await expectSearches(type, expectedRequests, async () => {
-          await PageObjects.discover.revertUnsavedChanges();
+          await discover.revertUnsavedChanges();
         });
         // clearing the saved search
         await expectSearches('ese', savedSearchesRequests ?? expectedRequests, async () => {
@@ -159,7 +158,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // loading the saved search
         // TODO: https://github.com/elastic/kibana/issues/165192
         await expectSearches(type, savedSearchesRequests ?? expectedRequests, async () => {
-          await PageObjects.discover.loadSavedSearch(savedSearch);
+          await discover.loadSavedSearch(savedSearch);
         });
       });
     };
@@ -177,10 +176,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it(`should send 2 requests (documents + chart) when toggling the chart visibility`, async () => {
         await expectSearches(type, 2, async () => {
-          await PageObjects.discover.toggleChartVisibility();
+          await discover.toggleChartVisibility();
         });
         await expectSearches(type, 2, async () => {
-          await PageObjects.discover.toggleChartVisibility();
+          await discover.toggleChartVisibility();
         });
       });
 
@@ -196,31 +195,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should send 2 requests (documents + chart) when sorting', async () => {
         await expectSearches(type, 2, async () => {
-          await PageObjects.discover.clickFieldSort('@timestamp', 'Sort Old-New');
+          await discover.clickFieldSort('@timestamp', 'Sort Old-New');
         });
       });
 
       it('should send 2 requests (documents + chart) when changing to a breakdown field without an other bucket', async () => {
         await expectSearches(type, 2, async () => {
-          await PageObjects.discover.chooseBreakdownField('type');
+          await discover.chooseBreakdownField('type');
         });
       });
 
       it('should send 3 requests (documents + chart + other bucket) when changing to a breakdown field with an other bucket', async () => {
         await expectSearches(type, 3, async () => {
-          await PageObjects.discover.chooseBreakdownField('extension.raw');
+          await discover.chooseBreakdownField('extension.raw');
         });
       });
 
       it('should send 2 requests (documents + chart) when changing the chart interval', async () => {
         await expectSearches(type, 2, async () => {
-          await PageObjects.discover.setChartInterval('Day');
+          await discover.setChartInterval('Day');
         });
       });
 
       it('should send 2 requests (documents + chart) when changing the data view', async () => {
         await expectSearches(type, 2, async () => {
-          await PageObjects.discover.selectIndexPattern('long-window-logstash-*');
+          await discover.selectIndexPattern('long-window-logstash-*');
         });
       });
     });

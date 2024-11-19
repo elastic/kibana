@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect, useCallback, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiSpacer,
@@ -22,10 +23,11 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { useMlApi, useMlKibana } from '../../../../contexts/kibana';
 import { deleteJobs } from '../utils';
-import { DELETING_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
+import { BLOCKED_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
 import { DeleteSpaceAwareItemCheckModal } from '../../../../components/delete_space_aware_item_check_modal';
-import { MlSummaryJob } from '../../../../../../common/types/anomaly_detection_jobs';
+import type { MlSummaryJob } from '../../../../../../common/types/anomaly_detection_jobs';
 import { isManagedJob } from '../../../jobs_utils';
 import { ManagedJobsWarningCallout } from '../confirm_modals/managed_jobs_warning_callout';
 
@@ -38,6 +40,12 @@ interface Props {
 }
 
 export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, refreshJobs }) => {
+  const {
+    services: {
+      notifications: { toasts },
+    },
+  } = useMlKibana();
+  const mlApi = useMlApi();
   const [deleting, setDeleting] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [adJobs, setAdJobs] = useState<MlSummaryJob[]>([]);
@@ -82,6 +90,8 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
   const deleteJob = useCallback(() => {
     setDeleting(true);
     deleteJobs(
+      toasts,
+      mlApi,
       jobIds.map((id) => ({ id })),
       deleteUserAnnotations,
       deleteAlertingRules
@@ -90,8 +100,8 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
     setTimeout(() => {
       closeModal();
       refreshJobs();
-    }, DELETING_JOBS_REFRESH_INTERVAL_MS);
-  }, [jobIds, deleteUserAnnotations, deleteAlertingRules, closeModal, refreshJobs]);
+    }, BLOCKED_JOBS_REFRESH_INTERVAL_MS);
+  }, [toasts, mlApi, jobIds, deleteUserAnnotations, deleteAlertingRules, closeModal, refreshJobs]);
 
   if (modalVisible === false || jobIds.length === 0) {
     return null;

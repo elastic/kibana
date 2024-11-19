@@ -8,19 +8,8 @@
 import deepmerge from 'deepmerge';
 import { createTestServers, createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
 
-export async function setupTestServers(settings = {}) {
-  const { startES } = createTestServers({
-    adjustTimeout: (t) => jest.setTimeout(t),
-    settings: {
-      es: {
-        license: 'trial',
-      },
-    },
-  });
-
-  const esServer = await startES();
-
-  const root = createRootWithCorePlugins(
+function createRoot(settings = {}) {
+  return createRootWithCorePlugins(
     deepmerge(
       {
         logging: {
@@ -39,6 +28,20 @@ export async function setupTestServers(settings = {}) {
     ),
     { oss: false }
   );
+}
+export async function setupTestServers(settings = {}) {
+  const { startES } = createTestServers({
+    adjustTimeout: (t) => jest.setTimeout(t),
+    settings: {
+      es: {
+        license: 'trial',
+      },
+    },
+  });
+
+  const esServer = await startES();
+
+  const root = createRoot(settings);
 
   await root.preboot();
   const coreSetup = await root.setup();
@@ -46,6 +49,23 @@ export async function setupTestServers(settings = {}) {
 
   return {
     esServer,
+    kibanaServer: {
+      root,
+      coreSetup,
+      coreStart,
+      stop: async () => await root.shutdown(),
+    },
+  };
+}
+
+export async function setupKibanaServer(settings = {}) {
+  const root = createRoot(settings);
+
+  await root.preboot();
+  const coreSetup = await root.setup();
+  const coreStart = await root.start();
+
+  return {
     kibanaServer: {
       root,
       coreSetup,

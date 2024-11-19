@@ -2,26 +2,10 @@
   "id": "@kbn/management-settings-components-field-row",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/management-settings-components-field-row",
-        "id": "def-common.FieldRow",
+        "id": "def-public.FieldRow",
         "type": "Function",
         "tags": [],
         "label": "FieldRow",
@@ -32,12 +16,12 @@
           "(props: ",
           {
             "pluginId": "@kbn/management-settings-components-field-row",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
-            "section": "def-common.FieldRowProps",
+            "section": "def-public.FieldRowProps",
             "text": "FieldRowProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-management/settings/components/field_row/field_row.tsx",
         "deprecated": false,
@@ -45,7 +29,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-components-field-row",
-            "id": "def-common.FieldRow.$1",
+            "id": "def-public.FieldRow.$1",
             "type": "Object",
             "tags": [],
             "label": "props",
@@ -55,9 +39,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/management-settings-components-field-row",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
-                "section": "def-common.FieldRowProps",
+                "section": "def-public.FieldRowProps",
                 "text": "FieldRowProps"
               }
             ],
@@ -72,7 +56,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-components-field-row",
-        "id": "def-common.FieldRowKibanaProvider",
+        "id": "def-public.FieldRowKibanaProvider",
         "type": "Function",
         "tags": [],
         "label": "FieldRowKibanaProvider",
@@ -83,12 +67,12 @@
           "({ children, docLinks, notifications, settings, }: React.PropsWithChildren<",
           {
             "pluginId": "@kbn/management-settings-components-field-row",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
-            "section": "def-common.FieldRowKibanaDependencies",
+            "section": "def-public.FieldRowKibanaDependencies",
             "text": "FieldRowKibanaDependencies"
           },
-          ">) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/kbn-management/settings/components/field_row/services.tsx",
         "deprecated": false,
@@ -96,7 +80,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-components-field-row",
-            "id": "def-common.FieldRowKibanaProvider.$1",
+            "id": "def-public.FieldRowKibanaProvider.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "{\n  children,\n  docLinks,\n  notifications,\n  settings,\n}",
@@ -105,9 +89,9 @@
               "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/management-settings-components-field-row",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
-                "section": "def-common.FieldRowKibanaDependencies",
+                "section": "def-public.FieldRowKibanaDependencies",
                 "text": "FieldRowKibanaDependencies"
               },
               ">"
@@ -123,7 +107,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-components-field-row",
-        "id": "def-common.FieldRowProvider",
+        "id": "def-public.FieldRowProvider",
         "type": "Function",
         "tags": [],
         "label": "FieldRowProvider",
@@ -134,12 +118,12 @@
           "({ children, ...services }: ",
           {
             "pluginId": "@kbn/management-settings-components-field-row",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
-            "section": "def-common.FieldRowProviderProps",
+            "section": "def-public.FieldRowProviderProps",
             "text": "FieldRowProviderProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-management/settings/components/field_row/services.tsx",
         "deprecated": false,
@@ -147,7 +131,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-components-field-row",
-            "id": "def-common.FieldRowProvider.$1",
+            "id": "def-public.FieldRowProvider.$1",
             "type": "Object",
             "tags": [],
             "label": "{ children, ...services }",
@@ -155,9 +139,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/management-settings-components-field-row",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
-                "section": "def-common.FieldRowProviderProps",
+                "section": "def-public.FieldRowProviderProps",
                 "text": "FieldRowProviderProps"
               }
             ],
@@ -174,7 +158,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/management-settings-components-field-row",
-        "id": "def-common.FieldRowProps",
+        "id": "def-public.FieldRowProps",
         "type": "Interface",
         "tags": [],
         "label": "FieldRowProps",
@@ -187,7 +171,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-components-field-row",
-            "id": "def-common.FieldRowProps.field",
+            "id": "def-public.FieldRowProps.field",
             "type": "Object",
             "tags": [],
             "label": "field",
@@ -195,7 +179,7 @@
               "The {@link FieldDefinition} corresponding the setting."
             ],
             "signature": [
-              "{ type: ",
+              "{ id: string; type: ",
               {
                 "pluginId": "@kbn/core-ui-settings-common",
                 "scope": "common",
@@ -203,7 +187,7 @@
                 "section": "def-common.UiSettingsType",
                 "text": "UiSettingsType"
               },
-              "; id: string; defaultValue?: string | number | boolean | (string | number)[] | null | undefined; name: string; groupId: string; displayName: string; isCustom: boolean; isOverridden: boolean; ariaAttributes: { ariaLabel: string; ariaDescribedBy?: string | undefined; }; savedValue?: string | number | boolean | (string | number)[] | null | undefined; defaultValueDisplay: string; isDefaultValue: boolean; unsavedFieldId: string; }"
+              "; defaultValue?: string | number | boolean | (string | number)[] | null | undefined; name: string; groupId: string; displayName: string; isCustom: boolean; isOverridden: boolean; ariaAttributes: { ariaLabel: string; ariaDescribedBy?: string | undefined; }; savedValue?: string | number | boolean | (string | number)[] | null | undefined; defaultValueDisplay: string; isDefaultValue: boolean; unsavedFieldId: string; }"
             ],
             "path": "packages/kbn-management/settings/components/field_row/field_row.tsx",
             "deprecated": false,
@@ -211,7 +195,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-components-field-row",
-            "id": "def-common.FieldRowProps.isSavingEnabled",
+            "id": "def-public.FieldRowProps.isSavingEnabled",
             "type": "boolean",
             "tags": [],
             "label": "isSavingEnabled",
@@ -224,7 +208,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-components-field-row",
-            "id": "def-common.FieldRowProps.onFieldChange",
+            "id": "def-public.FieldRowProps.onFieldChange",
             "type": "Function",
             "tags": [],
             "label": "onFieldChange",
@@ -235,9 +219,9 @@
               "(id: string, change?: ",
               {
                 "pluginId": "@kbn/management-settings-types",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnManagementSettingsTypesPluginApi",
-                "section": "def-common.UnsavedFieldChange",
+                "section": "def-public.UnsavedFieldChange",
                 "text": "UnsavedFieldChange"
               },
               "<",
@@ -257,7 +241,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/management-settings-components-field-row",
-                "id": "def-common.FieldRowProps.onFieldChange.$1",
+                "id": "def-public.FieldRowProps.onFieldChange.$1",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -268,7 +252,7 @@
               },
               {
                 "parentPluginId": "@kbn/management-settings-components-field-row",
-                "id": "def-common.FieldRowProps.onFieldChange.$2",
+                "id": "def-public.FieldRowProps.onFieldChange.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "change",
@@ -276,9 +260,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/management-settings-types",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnManagementSettingsTypesPluginApi",
-                    "section": "def-common.UnsavedFieldChange",
+                    "section": "def-public.UnsavedFieldChange",
                     "text": "UnsavedFieldChange"
                   },
                   "<T> | undefined"
@@ -291,7 +275,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-components-field-row",
-            "id": "def-common.FieldRowProps.onClear",
+            "id": "def-public.FieldRowProps.onClear",
             "type": "Function",
             "tags": [],
             "label": "onClear",
@@ -307,7 +291,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/management-settings-components-field-row",
-                "id": "def-common.FieldRowProps.onClear.$1",
+                "id": "def-public.FieldRowProps.onClear.$1",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -327,7 +311,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-components-field-row",
-            "id": "def-common.FieldRowProps.unsavedChange",
+            "id": "def-public.FieldRowProps.unsavedChange",
             "type": "Object",
             "tags": [],
             "label": "unsavedChange",
@@ -337,9 +321,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/management-settings-types",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnManagementSettingsTypesPluginApi",
-                "section": "def-common.UnsavedFieldChange",
+                "section": "def-public.UnsavedFieldChange",
                 "text": "UnsavedFieldChange"
               },
               "<",
@@ -361,7 +345,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-components-field-row",
-        "id": "def-common.FieldRowProviderProps",
+        "id": "def-public.FieldRowProviderProps",
         "type": "Interface",
         "tags": [],
         "label": "FieldRowProviderProps",
@@ -371,17 +355,17 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-components-field-row",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
-            "section": "def-common.FieldRowProviderProps",
+            "section": "def-public.FieldRowProviderProps",
             "text": "FieldRowProviderProps"
           },
           " extends ",
           {
             "pluginId": "@kbn/management-settings-components-field-row",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
-            "section": "def-common.FieldRowServices",
+            "section": "def-public.FieldRowServices",
             "text": "FieldRowServices"
           }
         ],
@@ -391,13 +375,13 @@
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-components-field-row",
-            "id": "def-common.FieldRowProviderProps.children",
+            "id": "def-public.FieldRowProviderProps.children",
             "type": "CompoundType",
             "tags": [],
             "label": "children",
             "description": [],
             "signature": [
-              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "packages/kbn-management/settings/components/field_row/services.tsx",
             "deprecated": false,
@@ -408,7 +392,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-components-field-row",
-        "id": "def-common.KibanaDependencies",
+        "id": "def-public.KibanaDependencies",
         "type": "Interface",
         "tags": [],
         "label": "KibanaDependencies",
@@ -421,7 +405,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-components-field-row",
-            "id": "def-common.KibanaDependencies.docLinks",
+            "id": "def-public.KibanaDependencies.docLinks",
             "type": "Object",
             "tags": [],
             "label": "docLinks",
@@ -438,7 +422,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-components-field-row",
-        "id": "def-common.Services",
+        "id": "def-public.Services",
         "type": "Interface",
         "tags": [],
         "label": "Services",
@@ -451,7 +435,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-components-field-row",
-            "id": "def-common.Services.links",
+            "id": "def-public.Services.links",
             "type": "Object",
             "tags": [],
             "label": "links",
@@ -471,7 +455,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/management-settings-components-field-row",
-        "id": "def-common.FieldRowKibanaDependencies",
+        "id": "def-public.FieldRowKibanaDependencies",
         "type": "Type",
         "tags": [],
         "label": "FieldRowKibanaDependencies",
@@ -481,17 +465,17 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-components-field-row",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
-            "section": "def-common.KibanaDependencies",
+            "section": "def-public.KibanaDependencies",
             "text": "KibanaDependencies"
           },
           " & ",
           {
             "pluginId": "@kbn/management-settings-components-field-input",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsComponentsFieldInputPluginApi",
-            "section": "def-common.FieldInputKibanaDependencies",
+            "section": "def-public.FieldInputKibanaDependencies",
             "text": "FieldInputKibanaDependencies"
           }
         ],
@@ -502,7 +486,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-components-field-row",
-        "id": "def-common.FieldRowServices",
+        "id": "def-public.FieldRowServices",
         "type": "Type",
         "tags": [],
         "label": "FieldRowServices",
@@ -512,17 +496,17 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-components-field-input",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsComponentsFieldInputPluginApi",
-            "section": "def-common.FieldInputServices",
+            "section": "def-public.FieldInputServices",
             "text": "FieldInputServices"
           },
           " & ",
           {
             "pluginId": "@kbn/management-settings-components-field-row",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
-            "section": "def-common.Services",
+            "section": "def-public.Services",
             "text": "Services"
           }
         ],
@@ -532,6 +516,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

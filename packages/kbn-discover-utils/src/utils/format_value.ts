@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
@@ -15,6 +15,7 @@ import type {
   HtmlContextTypeOptions,
   TextContextTypeOptions,
 } from '@kbn/field-formats-plugin/common/types';
+import { EsHitRecord } from '../types';
 
 /**
  * Formats the value of a specific field using the appropriate field formatter if available
@@ -31,7 +32,7 @@ import type {
  */
 export function formatFieldValue(
   value: unknown,
-  hit: SearchHit,
+  hit: EsHitRecord,
   fieldFormats: FieldFormatsStart,
   dataView?: DataView,
   field?: DataViewField,

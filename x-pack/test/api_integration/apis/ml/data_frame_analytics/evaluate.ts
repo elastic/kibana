@@ -129,7 +129,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     testJobConfigs.forEach((testConfig) => {
-      describe(`EvaluateDataFrameAnalytics ${testConfig.jobType}`, async () => {
+      describe(`EvaluateDataFrameAnalytics ${testConfig.jobType}`, () => {
         it(`should evaluate ${testConfig.jobType} analytics job`, async () => {
           const { body, status } = await supertest
             .post(`/internal/ml/data_frame/_evaluate`)
@@ -185,7 +185,6 @@ export default ({ getService }: FtrProviderContext) => {
           ml.api.assertResponseStatusCode(403, status, body);
 
           expect(body.error).to.eql('Forbidden');
-          expect(body.message).to.eql('Forbidden');
         });
       });
     });

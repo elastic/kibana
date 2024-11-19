@@ -1,19 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { inspect } from 'util';
 
 import { ToolingLog } from '@kbn/tooling-log';
-import { tap } from 'rxjs/operators';
+import { hasNonDefaultThemeTags } from '@kbn/core-ui-settings-common';
+import { tap } from 'rxjs';
 
 import { OptimizerConfig } from './optimizer';
 import { OptimizerUpdate$ } from './run_optimizer';
-import { CompilerMsg, pipeClosure, ALL_THEMES } from './common';
+import { CompilerMsg, pipeClosure } from './common';
 
 export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
   return pipeClosure((update$: OptimizerUpdate$) => {
@@ -79,9 +81,9 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
               );
             }
 
-            if (config.themeTags.length !== ALL_THEMES.length) {
+            if (hasNonDefaultThemeTags(config.themeTags)) {
               log.warning(
-                `only building [${config.themeTags}] themes, customize with the KBN_OPTIMIZER_THEMES environment variable`
+                `running with non-default [${config.themeTags}] set of themes, customize with the KBN_OPTIMIZER_THEMES environment variable`
               );
             }
           }

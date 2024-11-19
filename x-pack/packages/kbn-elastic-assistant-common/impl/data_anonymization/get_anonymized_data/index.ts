@@ -4,26 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { Replacements } from '../../schemas';
+import { AnonymizationFieldResponse } from '../../schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { isAllowed } from '../helpers';
 import type { AnonymizedData, GetAnonymizedValues } from '../types';
 
 export const getAnonymizedData = ({
-  allow,
-  allowReplacement,
+  anonymizationFields,
   currentReplacements,
   getAnonymizedValue,
   getAnonymizedValues,
   rawData,
 }: {
-  allow: string[];
-  allowReplacement: string[];
-  currentReplacements: Record<string, string> | undefined;
+  anonymizationFields?: AnonymizationFieldResponse[];
+  currentReplacements: Replacements | undefined;
   getAnonymizedValue: ({
     currentReplacements,
     rawValue,
   }: {
-    currentReplacements: Record<string, string> | undefined;
+    currentReplacements: Replacements | undefined;
     rawValue: string;
   }) => string;
   getAnonymizedValues: GetAnonymizedValues;
@@ -31,13 +30,9 @@ export const getAnonymizedData = ({
 }): AnonymizedData =>
   Object.keys(rawData).reduce<AnonymizedData>(
     (acc, field) => {
-      const allowReplacementSet = new Set(allowReplacement);
-      const allowSet = new Set(allow);
-
-      if (isAllowed({ allowSet, field })) {
+      if (isAllowed({ anonymizationFields: anonymizationFields ?? [], field })) {
         const { anonymizedValues, replacements } = getAnonymizedValues({
-          allowReplacementSet,
-          allowSet,
+          anonymizationFields,
           currentReplacements,
           field,
           getAnonymizedValue,

@@ -9,7 +9,8 @@
  * React component for rendering EuiEmptyPrompt when no results were found.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Entity } from '../entity_control/entity_control';

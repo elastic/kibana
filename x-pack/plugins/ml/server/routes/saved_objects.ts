@@ -7,7 +7,7 @@
 
 import { ML_EXTERNAL_BASE_PATH, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
-import { RouteInitialization, SavedObjectsRouteDeps } from '../types';
+import type { RouteInitialization, SavedObjectsRouteDeps } from '../types';
 import { checksFactory, syncSavedObjectsFactory } from '../saved_objects';
 import {
   updateJobsSpaces,
@@ -28,21 +28,18 @@ export function savedObjectsRoutes(
   { router, routeGuard }: RouteInitialization,
   { getSpaces, resolveMlCapabilities }: SavedObjectsRouteDeps
 ) {
-  /**
-   * @apiGroup MLSavedObjects
-   *
-   * @api {get} /internal/ml/saved_objects/status Get job and trained model saved object status
-   * @apiName SavedObjectsStatus
-   * @apiDescription Lists all jobs, trained models and saved objects to view the relationship status between them
-   *
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/saved_objects/status`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs', 'access:ml:canGetTrainedModels'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs', 'ml:canGetTrainedModels'],
+        },
       },
+      summary: 'Get job and trained model saved object status',
+      description:
+        'Lists all jobs, trained models and saved objects to view the relationship status between them',
     })
     .addVersion(
       {
@@ -63,28 +60,25 @@ export function savedObjectsRoutes(
       })
     );
 
-  /**
-   * @apiGroup MLSavedObjects
-   *
-   * @api {get} /api/ml/saved_objects/sync Sync job and trained models saved objects
-   * @apiName SyncMLSavedObjects
-   * @apiDescription Synchronizes saved objects for jobs and trained models. Saved objects will be created for items which are missing them,
-   *                 and saved objects will be deleted for items which no longer exist.
-   *                 Updates missing datafeed IDs in saved objects for datafeeds which exist, and
-   *                 removes datafeed IDs for datafeeds which no longer exist.
-   *
-   */
   router.versioned
     .get({
       path: `${ML_EXTERNAL_BASE_PATH}/saved_objects/sync`,
       access: 'public',
-      options: {
-        tags: [
-          'access:ml:canCreateJob',
-          'access:ml:canCreateDataFrameAnalytics',
-          'access:ml:canCreateTrainedModels',
-        ],
+      summary: 'Synchronize machine learning saved objects',
+      security: {
+        authz: {
+          requiredPrivileges: [
+            'ml:canCreateJob',
+            'ml:canCreateDataFrameAnalytics',
+            'ml:canCreateTrainedModels',
+          ],
+        },
       },
+      options: {
+        tags: ['oas-tag:machine learning'],
+      },
+      description:
+        'Synchronizes Kibana saved objects for machine learning jobs and trained models. This API runs automatically when you start Kibana and periodically thereafter.',
     })
     .addVersion(
       {
@@ -112,25 +106,22 @@ export function savedObjectsRoutes(
       )
     );
 
-  /**
-   * @apiGroup MLSavedObjects
-   *
-   * @api {get} /internal/ml/saved_objects/initialize Create saved objects for all job and trained models
-   * @apiName InitializeMLSavedObjects
-   * @apiDescription Create saved objects for jobs and trained models which are missing them.
-   *
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/saved_objects/initialize`,
       access: 'internal',
-      options: {
-        tags: [
-          'access:ml:canCreateJob',
-          'access:ml:canCreateDataFrameAnalytics',
-          'access:ml:canCreateTrainedModels',
-        ],
+      security: {
+        authz: {
+          requiredPrivileges: [
+            'ml:canCreateJob',
+            'ml:canCreateDataFrameAnalytics',
+            'ml:canCreateTrainedModels',
+          ],
+        },
       },
+      summary: 'Create saved objects for all job and trained models',
+      description:
+        'Creates saved objects for machine learning jobs and trained models which are missing them.',
     })
     .addVersion(
       {
@@ -158,25 +149,21 @@ export function savedObjectsRoutes(
       )
     );
 
-  /**
-   * @apiGroup MLSavedObjects
-   *
-   * @api {get} /internal/ml/saved_objects/sync_needed Check whether job and trained model saved objects need synchronizing
-   * @apiName SyncCheck
-   * @apiDescription Check whether job and trained model saved objects need synchronizing.
-   *
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/saved_objects/sync_check`,
       access: 'internal',
-      options: {
-        tags: [
-          'access:ml:canGetJobs',
-          'access:ml:canGetDataFrameAnalytics',
-          'access:ml:canGetTrainedModels',
-        ],
+      security: {
+        authz: {
+          requiredPrivileges: [
+            'ml:canGetJobs',
+            'ml:canGetDataFrameAnalytics',
+            'ml:canGetTrainedModels',
+          ],
+        },
       },
+      summary: 'Check whether job and trained model saved objects need synchronizing',
+      description: 'Check whether job and trained model saved objects need synchronizing.',
     })
     .addVersion(
       {
@@ -204,22 +191,17 @@ export function savedObjectsRoutes(
       )
     );
 
-  /**
-   * @apiGroup MLSavedObjects
-   *
-   * @api {post} /internal/ml/saved_objects/update_jobs_spaces Update what spaces jobs are assigned to
-   * @apiName UpdateJobsSpaces
-   * @apiDescription Update a list of jobs to add and/or remove them from given spaces.
-   *
-   * @apiSchema (body) updateJobsSpaces
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/saved_objects/update_jobs_spaces`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateJob', 'access:ml:canCreateDataFrameAnalytics'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateJob', 'ml:canCreateDataFrameAnalytics'],
+        },
       },
+      summary: 'Update what spaces jobs are assigned to',
+      description: 'Update a list of jobs to add and/or remove them from given spaces.',
     })
     .addVersion(
       {
@@ -250,22 +232,17 @@ export function savedObjectsRoutes(
       })
     );
 
-  /**
-   * @apiGroup MLSavedObjects
-   *
-   * @api {post} /internal/ml/saved_objects/update_trained_models_spaces Update what spaces trained models are assigned to
-   * @apiName UpdateTrainedModelsSpaces
-   * @apiDescription Update a list of trained models to add and/or remove them from given spaces.
-   *
-   * @apiSchema (body) updateTrainedModelsSpaces
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/saved_objects/update_trained_models_spaces`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateTrainedModels'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateTrainedModels'],
+        },
       },
+      summary: 'Update what spaces trained models are assigned to',
+      description: 'Update a list of trained models to add and/or remove them from given spaces.',
     })
     .addVersion(
       {
@@ -295,22 +272,17 @@ export function savedObjectsRoutes(
       })
     );
 
-  /**
-   * @apiGroup MLSavedObjects
-   *
-   * @api {post} /internal/ml/saved_objects/remove_item_from_current_space Remove jobs or trained models from the current space
-   * @apiName RemoveMLSpaceAwareItemsFromCurrentSpace
-   * @apiDescription Remove a list of jobs or trained models from the current space.
-   *
-   * @apiSchema (body) itemsAndCurrentSpace
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/saved_objects/remove_item_from_current_space`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateJob', 'access:ml:canCreateDataFrameAnalytics'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateJob', 'ml:canCreateDataFrameAnalytics'],
+        },
       },
+      summary: 'Remove jobs or trained models from the current space',
+      description: 'Remove a list of jobs or trained models from the current space.',
     })
     .addVersion(
       {
@@ -366,21 +338,17 @@ export function savedObjectsRoutes(
       })
     );
 
-  /**
-   * @apiGroup MLSavedObjects
-   *
-   * @api {get} /internal/ml/saved_objects/jobs_spaces Get all jobs and their spaces
-   * @apiName JobsSpaces
-   * @apiDescription List all jobs and their spaces.
-   *
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/saved_objects/jobs_spaces`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs', 'access:ml:canGetDataFrameAnalytics'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs', 'ml:canGetDataFrameAnalytics'],
+        },
       },
+      summary: 'Get all jobs and their spaces',
+      description: 'List all jobs and their spaces.',
     })
     .addVersion(
       {
@@ -401,21 +369,17 @@ export function savedObjectsRoutes(
       })
     );
 
-  /**
-   * @apiGroup MLSavedObjects
-   *
-   * @api {get} /internal/ml/saved_objects/trained_models_spaces Get all trained models and their spaces
-   * @apiName TrainedModelsSpaces
-   * @apiDescription List all trained models and their spaces.
-   *
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/saved_objects/trained_models_spaces`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetTrainedModels'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetTrainedModels'],
+        },
       },
+      summary: 'Get all trained models and their spaces',
+      description: 'List all trained models and their spaces.',
     })
     .addVersion(
       {
@@ -436,39 +400,21 @@ export function savedObjectsRoutes(
       })
     );
 
-  /**
-   * @apiGroup MLSavedObjects
-   *
-   * @api {post} /internal/ml/saved_objects/can_delete_ml_space_aware_item Check whether user can delete a job or trained model
-   * @apiName CanDeleteMLSpaceAwareItems
-   * @apiDescription Check the user's ability to delete jobs or trained models. Returns whether they are able
-   *                 to fully delete the job or trained model and whether they are able to remove it from
-   *                 the current space.
-   *                 Note, this is only for enabling UI controls. A user calling endpoints
-   *                 directly will still be able to delete or remove the job or trained model from a space.
-   *
-   * @apiSchema (params) itemTypeSchema
-   * @apiSchema (body) canDeleteMLSpaceAwareItemsSchema
-   * @apiSuccessExample {json} Error-Response:
-   * {
-   *   "my_job": {
-   *     "canDelete": false,
-   *     "canRemoveFromSpace": true
-   *   }
-   * }
-   *
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/saved_objects/can_delete_ml_space_aware_item/{jobType}`,
       access: 'internal',
-      options: {
-        tags: [
-          'access:ml:canGetJobs',
-          'access:ml:canGetDataFrameAnalytics',
-          'access:ml:canGetTrainedModels',
-        ],
+      security: {
+        authz: {
+          requiredPrivileges: [
+            'ml:canGetJobs',
+            'ml:canGetDataFrameAnalytics',
+            'ml:canGetTrainedModels',
+          ],
+        },
       },
+      summary: 'Check whether user can delete a job or trained model',
+      description: `Check the user's ability to delete jobs or trained models. Returns whether they are able to fully delete the job or trained model and whether they are able to remove it from the current space. Note, this is only for enabling UI controls. A user calling endpoints directly will still be able to delete or remove the job or trained model from a space.`,
     })
     .addVersion(
       {

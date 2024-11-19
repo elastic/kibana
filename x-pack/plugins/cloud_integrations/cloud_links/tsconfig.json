@@ -22,7 +22,6 @@
     "@kbn/core-ui-settings-browser",
     "@kbn/user-profile-components",
     "@kbn/core-lifecycle-browser",
-    "@kbn/kibana-react-plugin",
     "@kbn/share-plugin",
     "@kbn/cloud",
     "@kbn/react-kibana-mount",

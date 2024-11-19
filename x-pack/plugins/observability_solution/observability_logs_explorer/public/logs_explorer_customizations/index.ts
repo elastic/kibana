@@ -6,17 +6,21 @@
  */
 
 import { CreateLogsExplorerController } from '@kbn/logs-explorer-plugin/public';
-import { renderFlyoutContent } from './flyout_content';
+import { PluginKibanaContextValue } from '../utils/use_kibana';
+import { createOnUknownDataViewSelectionHandler } from './discover_navigation_handler';
 
 export const createLogsExplorerControllerWithCustomizations =
-  (createLogsExplorerController: CreateLogsExplorerController): CreateLogsExplorerController =>
+  (
+    createLogsExplorerController: CreateLogsExplorerController,
+    services: PluginKibanaContextValue
+  ): CreateLogsExplorerController =>
   (args) =>
     createLogsExplorerController({
       ...args,
       customizations: {
         ...args.customizations,
-        flyout: {
-          renderContent: renderFlyoutContent,
+        events: {
+          onUknownDataViewSelection: createOnUknownDataViewSelectionHandler(services.discover),
         },
       },
     });

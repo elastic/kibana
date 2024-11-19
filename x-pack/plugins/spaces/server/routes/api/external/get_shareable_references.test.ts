@@ -15,6 +15,7 @@ import {
   httpServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
 import { initGetShareableReferencesApi } from './get_shareable_references';
 import { spacesConfig } from '../../../lib/__fixtures__';
@@ -42,7 +43,7 @@ describe('get shareable references', () => {
     const { savedObjects, savedObjectsClient } = createMockSavedObjectsService(spaces);
     coreStart.savedObjects = savedObjects;
 
-    const clientService = new SpacesClientService(jest.fn());
+    const clientService = new SpacesClientService(jest.fn(), 'traditional');
     clientService
       .setup({ config$: Rx.of(spacesConfig) })
       .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
@@ -54,7 +55,7 @@ describe('get shareable references', () => {
 
     const usageStatsServicePromise = Promise.resolve(usageStatsServiceMock.createSetupContract());
 
-    const clientServiceStart = clientService.start(coreStart);
+    const clientServiceStart = clientService.start(coreStart, featuresPluginMock.createStart());
 
     const spacesServiceStart = service.start({
       basePath: coreStart.http.basePath,
@@ -66,6 +67,7 @@ describe('get shareable references', () => {
       log,
       getSpacesService: () => spacesServiceStart,
       usageStatsServicePromise,
+      isServerless: false,
     });
 
     const [[getShareableReferences, getShareableReferencesRouteHandler]] = router.post.mock.calls;

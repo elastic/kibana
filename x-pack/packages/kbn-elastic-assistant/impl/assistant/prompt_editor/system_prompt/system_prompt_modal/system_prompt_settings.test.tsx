@@ -17,22 +17,27 @@ const onSelectedSystemPromptChange = jest.fn();
 const setUpdatedSystemPromptSettings = jest.fn().mockImplementation((fn) => {
   return fn(mockSystemPrompts);
 });
-const setUpdatedConversationSettings = jest.fn().mockImplementation((fn) => {
+const setConversationSettings = jest.fn().mockImplementation((fn) => {
   return fn({
-    [welcomeConvo.id]: welcomeConvo,
-    [alertConvo.id]: alertConvo,
+    [welcomeConvo.title]: welcomeConvo,
+    [alertConvo.title]: alertConvo,
   });
 });
 
 const testProps = {
+  connectors: [],
   conversationSettings: {
-    [welcomeConvo.id]: welcomeConvo,
+    [welcomeConvo.title]: welcomeConvo,
   },
   onSelectedSystemPromptChange,
   selectedSystemPrompt: mockSystemPrompts[0],
   setUpdatedSystemPromptSettings,
-  setUpdatedConversationSettings,
+  setConversationSettings,
   systemPromptSettings: mockSystemPrompts,
+  conversationsSettingsBulkActions: {},
+  setConversationsSettingsBulkActions: jest.fn(),
+  promptsBulkActions: {},
+  setPromptsBulkActions: jest.fn(),
 };
 
 jest.mock('./system_prompt_selector/system_prompt_selector', () => ({
@@ -93,6 +98,7 @@ describe('SystemPromptSettings', () => {
     );
     fireEvent.click(getByTestId('change-sp-custom'));
     const customOption = {
+      consumer: 'test',
       content: '',
       id: 'sooper custom prompt',
       name: 'sooper custom prompt',
@@ -126,7 +132,7 @@ describe('SystemPromptSettings', () => {
     );
     fireEvent.click(getByTestId('change-multi'));
 
-    expect(setUpdatedConversationSettings).toHaveReturnedWith({
+    expect(setConversationSettings).toHaveReturnedWith({
       [welcomeConvo.id]: {
         ...welcomeConvo,
         apiConfig: {

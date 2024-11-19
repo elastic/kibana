@@ -5,14 +5,20 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef, useEffect } from 'react';
+import React, { useCallback, useRef, useEffect, forwardRef } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexGrid, EuiFlexItem, EuiSpacer, EuiText, EuiAutoSizer } from '@elastic/eui';
+import {
+  EuiFlexGrid,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+  EuiAutoSizer,
+  EuiSkeletonRectangle,
+} from '@elastic/eui';
 import { VariableSizeList as List } from 'react-window';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { WindowScroller } from 'react-virtualized';
 
-import { Loading } from '../../../../components';
 import type { IntegrationCardItem } from '../../screens/home';
 
 import { PackageCard } from '../package_card';
@@ -22,12 +28,15 @@ interface GridColumnProps {
   isLoading: boolean;
   showMissingIntegrationMessage?: boolean;
   showCardLabels?: boolean;
+  scrollElementId?: string;
+  emptyStateStyles?: Record<string, string>;
 }
 
 const VirtualizedRow: React.FC<{
   index: number;
   onHeightChange: (index: number, size: number) => void;
   style: any;
+  children: React.ReactNode;
 }> = ({ index, children, style, onHeightChange }) => {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -47,15 +56,18 @@ const VirtualizedRow: React.FC<{
   );
 };
 
+const CARD_OFFSET = 16;
+
 export const GridColumn = ({
   list,
   showMissingIntegrationMessage = false,
   showCardLabels = false,
   isLoading,
+  scrollElementId,
+  emptyStateStyles,
 }: GridColumnProps) => {
   const itemsSizeRefs = useRef(new Map<number, number>());
   const listRef = useRef<List>(null);
-
   const onHeightChange = useCallback((index: number, size: number) => {
     itemsSizeRefs.current.set(index, size);
     if (listRef.current) {
@@ -63,11 +75,21 @@ export const GridColumn = ({
     }
   }, []);
 
-  if (isLoading) return <Loading />;
+  if (isLoading) {
+    return (
+      <EuiFlexGrid gutterSize="l" columns={3}>
+        {Array.from({ length: 12 }).map((_, index) => (
+          <EuiFlexItem key={index} grow={3}>
+            <EuiSkeletonRectangle height="160px" width="100%" />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGrid>
+    );
+  }
 
   if (!list.length) {
     return (
-      <EuiFlexGrid gutterSize="l" columns={3}>
+      <EuiFlexGrid gutterSize="l" columns={3} data-test-subj="emptyState" style={emptyStateStyles}>
         <EuiFlexItem grow={3}>
           <EuiText>
             <p>
@@ -88,6 +110,7 @@ export const GridColumn = ({
       </EuiFlexGrid>
     );
   }
+
   return (
     <>
       <WindowScroller
@@ -96,15 +119,29 @@ export const GridColumn = ({
             listRef.current.scrollTo(scrollTop);
           }
         }}
+        scrollElement={
+          scrollElementId ? document.getElementById(scrollElementId) ?? undefined : undefined
+        }
       >
         {() => (
           <EuiAutoSizer disableHeight>
             {({ width }: { width: number }) => (
               <List
-                style={{ height: '100%' }}
+                style={{ height: '100%', overflow: 'visible' }}
                 ref={listRef}
                 layout="vertical"
                 itemCount={Math.ceil(list.length / 3)}
+                innerElementType={forwardRef(({ style, children, ...rest }, ref) => (
+                  <div
+                    ref={ref}
+                    // provides extra padding to the top and bottom of the list to prevent clipping and other strange behavior.
+                    // for more info see: https://github.com/bvaughn/react-window?tab=readme-ov-file#can-i-add-padding-to-the-top-and-bottom-of-a-list
+                    style={{ ...style, height: `${parseFloat(style.height) + CARD_OFFSET * 2}px` }}
+                    {...rest}
+                  >
+                    {children}
+                  </div>
+                ))}
                 itemSize={(index) => {
                   const test = itemsSizeRefs.current.get(index) ?? 200;
 
@@ -116,7 +153,13 @@ export const GridColumn = ({
               >
                 {({ index, style }) => {
                   return (
-                    <VirtualizedRow index={index} style={style} onHeightChange={onHeightChange}>
+                    <VirtualizedRow
+                      index={index}
+                      // this is necessary to prevent clipping of the first row during animaiton, or if the cards have a badge.
+                      // for more info see: https://github.com/bvaughn/react-window?tab=readme-ov-file#can-i-add-padding-to-the-top-and-bottom-of-a-list
+                      style={{ ...style, top: `${(Number(style.top) ?? 0) + CARD_OFFSET}px` }}
+                      onHeightChange={onHeightChange}
+                    >
                       <EuiFlexGrid gutterSize="l" columns={3}>
                         {list.slice(index * 3, index * 3 + 3).map((item) => {
                           return (

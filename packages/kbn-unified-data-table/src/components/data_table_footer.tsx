@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, FC, PropsWithChildren } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -28,7 +29,9 @@ export interface UnifiedDataTableFooterProps {
   fieldFormats: FieldFormatsStart;
 }
 
-export const UnifiedDataTableFooter: React.FC<UnifiedDataTableFooterProps> = (props) => {
+export const UnifiedDataTableFooter: FC<PropsWithChildren<UnifiedDataTableFooterProps>> = (
+  props
+) => {
   const {
     isLoadingMore,
     rowCount,
@@ -110,12 +113,9 @@ interface UnifiedDataTableFooterContainerProps extends UnifiedDataTableFooterPro
   hasButton: boolean;
 }
 
-const UnifiedDataTableFooterContainer: React.FC<UnifiedDataTableFooterContainerProps> = ({
-  hasButton,
-  rowCount,
-  children,
-  fieldFormats,
-}) => {
+const UnifiedDataTableFooterContainer: React.FC<
+  React.PropsWithChildren<UnifiedDataTableFooterContainerProps>
+> = ({ hasButton, rowCount, children, fieldFormats }) => {
   const { euiTheme } = useEuiTheme();
 
   const formattedRowCount = fieldFormats

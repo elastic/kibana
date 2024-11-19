@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React, { type FC, type PropsWithChildren } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook } from '@testing-library/react-hooks';
 
-jest.mock('../../../../../shared_imports');
 jest.mock('../../../../app_dependencies');
 
 import { useActions } from './use_actions';
@@ -17,7 +16,7 @@ import { useActions } from './use_actions';
 describe('Transform: Transform List Actions', () => {
   test('useActions()', async () => {
     const queryClient = new QueryClient();
-    const wrapper: FC = ({ children }) => (
+    const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     );
     const { result, waitForNextUpdate } = renderHook(

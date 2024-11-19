@@ -388,8 +388,8 @@ export function MachineLearningDataVisualizerTableProvider(
     public async assertNumberFieldContents(
       fieldName: string,
       docCountFormatted: string,
-      topValuesCount: number,
-      viewableInLens: boolean,
+      topValuesCount?: number,
+      viewableInLens?: boolean,
       hasActionMenu = false,
       checkDistributionPreviewExist = true
     ) {
@@ -398,27 +398,31 @@ export function MachineLearningDataVisualizerTableProvider(
       await this.assertFieldDocCount(fieldName, docCountFormatted);
       await this.ensureDetailsOpen(fieldName);
 
-      await testSubjects.existOrFail(
-        this.detailsSelector(fieldName, 'dataVisualizerNumberSummaryTable')
-      );
+      await retry.tryForTime(3000, async () => {
+        await testSubjects.existOrFail(
+          this.detailsSelector(fieldName, 'dataVisualizerNumberSummaryTable')
+        );
 
-      await testSubjects.existOrFail(
-        this.detailsSelector(fieldName, 'dataVisualizerFieldDataTopValues')
-      );
-      await this.assertTopValuesCount(fieldName, topValuesCount);
-
-      if (checkDistributionPreviewExist) {
-        await this.assertDistributionPreviewExist(fieldName);
-      }
-      if (viewableInLens) {
-        if (hasActionMenu) {
-          await this.assertActionMenuViewInLensEnabled(fieldName, true);
-        } else {
-          await this.assertViewInLensActionEnabled(fieldName, true);
+        if (topValuesCount !== undefined) {
+          await testSubjects.existOrFail(
+            this.detailsSelector(fieldName, 'dataVisualizerFieldDataTopValues')
+          );
+          await this.assertTopValuesCount(fieldName, topValuesCount);
         }
-      } else {
-        await this.assertViewInLensActionNotExists(fieldName);
-      }
+
+        if (checkDistributionPreviewExist) {
+          await this.assertDistributionPreviewExist(fieldName);
+        }
+        if (viewableInLens) {
+          if (hasActionMenu) {
+            await this.assertActionMenuViewInLensEnabled(fieldName, true);
+          } else {
+            await this.assertViewInLensActionEnabled(fieldName, true);
+          }
+        } else {
+          await this.assertViewInLensActionNotExists(fieldName);
+        }
+      });
 
       await this.ensureDetailsClosed(fieldName);
     }
@@ -495,9 +499,7 @@ export function MachineLearningDataVisualizerTableProvider(
 
       await this.assertExamplesList(fieldName, expectedExamplesCount);
 
-      await testSubjects.existOrFail(
-        this.detailsSelector(fieldName, 'dataVisualizerEmbeddedMapContent')
-      );
+      await testSubjects.existOrFail(this.detailsSelector(fieldName, 'mapContainer'));
 
       await this.ensureDetailsClosed(fieldName);
     }
@@ -525,33 +527,35 @@ export function MachineLearningDataVisualizerTableProvider(
       hasActionMenu?: boolean,
       exampleContent?: string[]
     ) {
-      // Currently the data used in the data visualizer tests only contains these field types.
-      if (fieldType === ML_JOB_FIELD_TYPES.DATE) {
-        await this.assertDateFieldContents(fieldName, docCountFormatted);
-      } else if (fieldType === ML_JOB_FIELD_TYPES.KEYWORD) {
-        await this.assertKeywordFieldContents(
-          fieldName,
-          docCountFormatted,
-          exampleCount,
-          exampleContent
-        );
-      } else if (fieldType === ML_JOB_FIELD_TYPES.TEXT) {
-        await this.assertTextFieldContents(fieldName, docCountFormatted, exampleCount);
-      } else if (fieldType === ML_JOB_FIELD_TYPES.GEO_POINT) {
-        await this.assertGeoPointFieldContents(fieldName, docCountFormatted, exampleCount);
-      } else if (fieldType === ML_JOB_FIELD_TYPES.UNKNOWN) {
-        await this.assertUnknownFieldContents(fieldName, docCountFormatted);
-      }
-
-      if (viewableInLens) {
-        if (hasActionMenu) {
-          await this.assertActionMenuViewInLensEnabled(fieldName, true);
-        } else {
-          await this.assertViewInLensActionEnabled(fieldName, true);
+      await retry.tryForTime(3000, async () => {
+        // Currently the data used in the data visualizer tests only contains these field types.
+        if (fieldType === ML_JOB_FIELD_TYPES.DATE) {
+          await this.assertDateFieldContents(fieldName, docCountFormatted);
+        } else if (fieldType === ML_JOB_FIELD_TYPES.KEYWORD) {
+          await this.assertKeywordFieldContents(
+            fieldName,
+            docCountFormatted,
+            exampleCount,
+            exampleContent
+          );
+        } else if (fieldType === ML_JOB_FIELD_TYPES.TEXT) {
+          await this.assertTextFieldContents(fieldName, docCountFormatted, exampleCount);
+        } else if (fieldType === ML_JOB_FIELD_TYPES.GEO_POINT) {
+          await this.assertGeoPointFieldContents(fieldName, docCountFormatted, exampleCount);
+        } else if (fieldType === ML_JOB_FIELD_TYPES.UNKNOWN) {
+          await this.assertUnknownFieldContents(fieldName, docCountFormatted);
         }
-      } else {
-        await this.assertViewInLensActionNotExists(fieldName);
-      }
+
+        if (viewableInLens) {
+          if (hasActionMenu) {
+            await this.assertActionMenuViewInLensEnabled(fieldName, true);
+          } else {
+            await this.assertViewInLensActionEnabled(fieldName, true);
+          }
+        } else {
+          await this.assertViewInLensActionNotExists(fieldName);
+        }
+      });
     }
 
     public async assertLensActionShowChart(fieldName: string, visualizationContainer?: string) {

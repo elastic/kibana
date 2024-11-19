@@ -58,6 +58,7 @@ export const adminMlCapabilities = {
   canResetJob: false,
   canUpdateJob: false,
   canForecastJob: false,
+  canDeleteForecast: false,
   canCreateDatafeed: false,
   canDeleteDatafeed: false,
   canStartStopDatafeed: false,
@@ -84,6 +85,8 @@ export const adminMlCapabilities = {
   canCreateTrainedModels: false,
   canDeleteTrainedModels: false,
   canStartStopTrainedModels: false,
+  // Inference models
+  canCreateInferenceEndpoint: false,
 };
 
 export type FeatureMlCapabilities = typeof featureMlCapabilities;
@@ -220,6 +223,7 @@ export const featureCapabilities: FeatureCapabilities = {
     'canResetJob',
     'canUpdateJob',
     'canForecastJob',
+    'canDeleteForecast',
     'canCreateDatafeed',
     'canDeleteDatafeed',
     'canStartStopDatafeed',
@@ -243,5 +247,6 @@ export const featureCapabilities: FeatureCapabilities = {
     'canCreateTrainedModels',
     'canDeleteTrainedModels',
     'canStartStopTrainedModels',
+    'canCreateInferenceEndpoint',
   ],
 };

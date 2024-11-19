@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
+import Boom from '@hapi/boom';
 import {
   MAX_DESCRIPTION_LENGTH,
   MAX_TAGS_PER_CASE,
@@ -21,7 +23,6 @@ import { bulkCreate } from './bulk_create';
 import { CaseSeverity, ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
 
 import type { CaseCustomFields } from '../../../common/types/domain';
-import { omit } from 'lodash';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -354,6 +355,38 @@ describe('bulkCreate', () => {
         expect(error.wrappedError.output).toEqual({
           headers: {},
           payload: { error: 'Not Found', message: 'My error', statusCode: 404 },
+          statusCode: 404,
+        });
+      }
+    });
+
+    it('constructs the case error correctly in case of an SO decorated error', async () => {
+      expect.assertions(1);
+
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [
+          caseSO,
+          {
+            id: '1',
+            type: 'cases',
+            // @ts-expect-error: the error property of the SO client is not typed correctly
+            error: {
+              ...Boom.boomify(new Error('My error'), {
+                statusCode: 404,
+                message: 'SO not found',
+              }),
+            },
+            references: [],
+          },
+        ],
+      });
+
+      try {
+        await bulkCreate({ cases: getCases() }, clientArgs, casesClientMock);
+      } catch (error) {
+        expect(error.wrappedError.output).toEqual({
+          headers: {},
+          payload: { error: 'Not Found', message: 'Not Found', statusCode: 404 },
           statusCode: 404,
         });
       }
@@ -944,7 +977,7 @@ describe('bulkCreate', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to bulk create cases: Error: Invalid duplicated custom field keys in request: duplicated_key"`
+        `"Failed to bulk create cases: Error: Invalid duplicated customFields keys in request: duplicated_key"`
       );
     });
 

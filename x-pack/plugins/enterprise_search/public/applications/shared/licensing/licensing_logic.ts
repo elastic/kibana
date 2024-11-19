@@ -10,9 +10,17 @@ import { Observable, Subscription } from 'rxjs';
 
 import { ILicense } from '@kbn/licensing-plugin/public';
 
+import {
+  hasEnterpriseLicense,
+  hasGoldLicense,
+  hasPlatinumLicense,
+  isTrialLicense,
+} from '../../../../common/utils/licensing';
+
 interface LicensingValues {
   license: ILicense | null;
   licenseSubscription: Subscription | null;
+  hasEnterpriseLicense: boolean;
   hasPlatinumLicense: boolean;
   hasGoldLicense: boolean;
   isTrial: boolean;
@@ -33,12 +41,14 @@ export const LicensingLogic = kea<MakeLogicType<LicensingValues, LicensingAction
     license: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setLicense: (_, license) => license,
       },
     ],
     licenseSubscription: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setLicenseSubscription: (_, licenseSubscription) => licenseSubscription,
       },
     ],
@@ -47,22 +57,14 @@ export const LicensingLogic = kea<MakeLogicType<LicensingValues, LicensingAction
   selectors: {
     hasPlatinumLicense: [
       (selectors) => [selectors.license],
-      (license) => {
-        const qualifyingLicenses = ['platinum', 'enterprise', 'trial'];
-        return license?.isActive && qualifyingLicenses.includes(license?.type);
-      },
+      (license) => hasPlatinumLicense(license),
     ],
-    hasGoldLicense: [
+    hasEnterpriseLicense: [
       (selectors) => [selectors.license],
-      (license) => {
-        const qualifyingLicenses = ['gold', 'platinum', 'enterprise', 'trial'];
-        return license?.isActive && qualifyingLicenses.includes(license?.type);
-      },
+      (license) => hasEnterpriseLicense(license),
     ],
-    isTrial: [
-      (selectors) => [selectors.license],
-      (license) => license?.isActive && license?.type === 'trial',
-    ],
+    hasGoldLicense: [(selectors) => [selectors.license], (license) => hasGoldLicense(license)],
+    isTrial: [(selectors) => [selectors.license], (license) => isTrialLicense(license)],
   },
   events: ({ props, actions, values }) => ({
     afterMount: () => {
@@ -81,7 +83,7 @@ export const LicensingLogic = kea<MakeLogicType<LicensingValues, LicensingAction
  * Mount/props helper
  */
 interface LicensingLogicProps {
-  license$: Observable<ILicense>;
+  license$: Observable<ILicense | undefined>;
   canManageLicense: boolean;
 }
 export const mountLicensingLogic = (props: LicensingLogicProps) => {

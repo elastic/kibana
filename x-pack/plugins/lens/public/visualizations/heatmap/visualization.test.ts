@@ -437,7 +437,9 @@ describe('heatmap', () => {
                       function: LEGEND_FUNCTION,
                       arguments: {
                         isVisible: [true],
-                        position: [Position.Right],
+                        maxLines: [1],
+                        position: ['right'],
+                        shouldTruncate: [true],
                       },
                     },
                   ],
@@ -626,6 +628,7 @@ describe('heatmap', () => {
             "longMessage": "Configuration for the horizontal axis is missing.",
             "severity": "error",
             "shortMessage": "Missing Horizontal axis.",
+            "uniqueId": "heatmap_x_missing_axis",
           },
         ]
       `);

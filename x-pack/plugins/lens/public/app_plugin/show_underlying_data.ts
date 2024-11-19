@@ -15,6 +15,7 @@ import {
   TimeRange,
   EsQueryConfig,
   isOfQueryType,
+  AggregateQuery,
 } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { RecursiveReadonly } from '@kbn/utility-types';
@@ -203,7 +204,7 @@ type QueryLanguage = 'lucene' | 'kuery';
  * extra filter pill.
  */
 export function combineQueryAndFilters(
-  query: Query | Query[] | undefined,
+  query: Query | Query[] | AggregateQuery | undefined,
   filters: Filter[],
   meta: LayerMetaInfo,
   dataViews: DataViewBase[] | undefined,

@@ -14,19 +14,24 @@ import {
   ANALYTICS_PLUGIN,
   APP_SEARCH_PLUGIN,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
-  ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
+  SEARCH_RELEVANCE_PLUGIN,
   ENTERPRISE_SEARCH_PRODUCT_NAME,
   AI_SEARCH_PLUGIN,
   SEARCH_EXPERIENCES_PLUGIN,
   SEARCH_PRODUCT_NAME,
   VECTOR_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
+  SEMANTIC_SEARCH_PLUGIN,
+  APPLICATIONS_PLUGIN,
+  GETTING_STARTED_TITLE,
 } from '../../../../common/constants';
 
 import { stripLeadingSlash } from '../../../../common/strip_slashes';
 import { HttpLogic } from '../http';
 import { KibanaLogic } from '../kibana';
 import { letBrowserHandleEvent, createHref } from '../react_router_helpers';
+
+import { getHomeURL } from './breadcrumbs_home';
 
 /**
  * Types
@@ -106,7 +111,7 @@ export const useSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   useEuiBreadcrumbs([
     {
       text: SEARCH_PRODUCT_NAME,
-      path: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
+      path: getHomeURL(),
       shouldNotCreateHref: true,
     },
     ...breadcrumbs,
@@ -116,14 +121,18 @@ export const useEnterpriseSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   useEuiBreadcrumbs([
     {
       text: ENTERPRISE_SEARCH_PRODUCT_NAME,
-      path: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
+      path: getHomeURL(),
       shouldNotCreateHref: true,
     },
     ...breadcrumbs,
   ]);
 
 export const useAnalyticsBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
-  useSearchBreadcrumbs([{ text: ANALYTICS_PLUGIN.NAME, path: '/' }, ...breadcrumbs]);
+  useSearchBreadcrumbs([
+    { text: APPLICATIONS_PLUGIN.NAV_TITLE },
+    { text: ANALYTICS_PLUGIN.NAME, path: '/' },
+    ...breadcrumbs,
+  ]);
 
 export const useElasticsearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   useSearchBreadcrumbs([
@@ -151,14 +160,32 @@ export const useEnterpriseSearchContentBreadcrumbs = (breadcrumbs: Breadcrumbs =
     ...breadcrumbs,
   ]);
 
+export const useEnterpriseSearchRelevanceBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
+  useSearchBreadcrumbs([{ text: SEARCH_RELEVANCE_PLUGIN.NAV_TITLE, path: '/' }, ...breadcrumbs]);
+
 export const useSearchExperiencesBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   useSearchBreadcrumbs([{ text: SEARCH_EXPERIENCES_PLUGIN.NAV_TITLE, path: '/' }, ...breadcrumbs]);
 
 export const useEnterpriseSearchApplicationsBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
-  useSearchBreadcrumbs(breadcrumbs);
+  useSearchBreadcrumbs([{ text: APPLICATIONS_PLUGIN.NAV_TITLE }, ...breadcrumbs]);
 
 export const useAiSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
-  useSearchBreadcrumbs([{ text: AI_SEARCH_PLUGIN.NAME, path: '/' }, ...breadcrumbs]);
+  useSearchBreadcrumbs([
+    { text: GETTING_STARTED_TITLE },
+    { text: AI_SEARCH_PLUGIN.NAME, path: '/' },
+    ...breadcrumbs,
+  ]);
 
 export const useVectorSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
-  useSearchBreadcrumbs([{ text: VECTOR_SEARCH_PLUGIN.NAV_TITLE, path: '/' }, ...breadcrumbs]);
+  useSearchBreadcrumbs([
+    { text: GETTING_STARTED_TITLE },
+    { text: VECTOR_SEARCH_PLUGIN.NAV_TITLE, path: '/' },
+    ...breadcrumbs,
+  ]);
+
+export const useSemanticSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
+  useSearchBreadcrumbs([
+    { text: GETTING_STARTED_TITLE },
+    { text: SEMANTIC_SEARCH_PLUGIN.NAME, path: '/' },
+    ...breadcrumbs,
+  ]);

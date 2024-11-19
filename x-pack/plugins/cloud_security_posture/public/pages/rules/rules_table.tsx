@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Criteria,
   EuiButtonEmpty,
@@ -19,11 +19,16 @@ import {
   EuiTableSortingType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE } from '@kbn/analytics';
+import {
+  CHANGE_RULE_STATE,
+  uiMetricService,
+} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { uniqBy } from 'lodash';
 import { ColumnNameWithTooltip } from '../../components/column_name_with_tooltip';
 import type { CspBenchmarkRulesWithStates, RulesState } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
-import { RuleStateAttributesWithoutStates, useChangeCspRuleState } from './change_csp_rule_state';
+import { useChangeCspRuleState } from './use_change_csp_rule_state';
 
 export const RULES_ROWS_ENABLE_SWITCH_BUTTON = 'rules-row-enable-switch-button';
 export const RULES_ROW_SELECT_ALL_CURRENT_PAGE = 'cloud-security-fields-selector-item-all';
@@ -35,7 +40,6 @@ type RulesTableProps = Pick<
   setPagination(pagination: Pick<RulesState, 'perPage' | 'page'>): void;
   onRuleClick: (ruleID: string) => void;
   selectedRuleId?: string;
-  refetchRulesStates: () => void;
   selectedRules: CspBenchmarkRulesWithStates[];
   setSelectedRules: (rules: CspBenchmarkRulesWithStates[]) => void;
   onSortChange: (value: 'asc' | 'desc') => void;
@@ -43,12 +47,8 @@ type RulesTableProps = Pick<
 
 type GetColumnProps = Pick<
   RulesTableProps,
-  'onRuleClick' | 'refetchRulesStates' | 'selectedRules' | 'setSelectedRules'
+  'onRuleClick' | 'selectedRules' | 'setSelectedRules'
 > & {
-  postRequestChangeRulesStates: (
-    actionOnRule: 'mute' | 'unmute',
-    ruleIds: RuleStateAttributesWithoutStates[]
-  ) => void;
   items: CspBenchmarkRulesWithStates[];
   setIsAllRulesSelectedThisPage: (isAllRulesSelected: boolean) => void;
   isAllRulesSelectedThisPage: boolean;
@@ -67,7 +67,6 @@ export const RulesTable = ({
   loading,
   error,
   selectedRuleId,
-  refetchRulesStates,
   selectedRules,
   setSelectedRules,
   onRuleClick,
@@ -87,7 +86,6 @@ export const RulesTable = ({
       direction: sortDirection,
     },
   };
-
   const onTableChange = ({
     page: pagination,
     sort: sortOrder,
@@ -108,7 +106,6 @@ export const RulesTable = ({
   });
 
   const [isAllRulesSelectedThisPage, setIsAllRulesSelectedThisPage] = useState<boolean>(false);
-  const postRequestChangeRulesStates = useChangeCspRuleState();
 
   const isCurrentPageRulesASubset = (
     currentPageRulesArray: CspBenchmarkRulesWithStates[],
@@ -131,29 +128,15 @@ export const RulesTable = ({
     else setIsAllRulesSelectedThisPage(false);
   }, [items.length, selectedRules.length]);
 
-  const columns = useMemo(
-    () =>
-      getColumns({
-        refetchRulesStates,
-        postRequestChangeRulesStates,
-        selectedRules,
-        setSelectedRules,
-        items,
-        setIsAllRulesSelectedThisPage,
-        isAllRulesSelectedThisPage,
-        isCurrentPageRulesASubset,
-        onRuleClick,
-      }),
-    [
-      refetchRulesStates,
-      postRequestChangeRulesStates,
-      selectedRules,
-      setSelectedRules,
-      items,
-      isAllRulesSelectedThisPage,
-      onRuleClick,
-    ]
-  );
+  const columns = getColumns({
+    selectedRules,
+    setSelectedRules,
+    items,
+    setIsAllRulesSelectedThisPage,
+    isAllRulesSelectedThisPage,
+    isCurrentPageRulesASubset,
+    onRuleClick,
+  });
 
   return (
     <>
@@ -174,8 +157,6 @@ export const RulesTable = ({
 };
 
 const getColumns = ({
-  refetchRulesStates,
-  postRequestChangeRulesStates,
   selectedRules,
   setSelectedRules,
   items,
@@ -189,7 +170,7 @@ const getColumns = ({
       <EuiCheckbox
         id={RULES_ROW_SELECT_ALL_CURRENT_PAGE}
         checked={isCurrentPageRulesASubset(items, selectedRules) && isAllRulesSelectedThisPage}
-        onChange={(e) => {
+        onChange={() => {
           const uniqueSelectedRules = uniqBy([...selectedRules, ...items], 'metadata.id');
           const onChangeSelectAllThisPageFn = () => {
             setSelectedRules(uniqueSelectedRules);
@@ -213,7 +194,7 @@ const getColumns = ({
     ),
     width: '40px',
     sortable: false,
-    render: (rules, item: CspBenchmarkRulesWithStates) => {
+    render: (_rules, item: CspBenchmarkRulesWithStates) => {
       return (
         <EuiCheckbox
           checked={selectedRules.some(
@@ -286,37 +267,44 @@ const getColumns = ({
     align: 'right',
     width: '100px',
     truncateText: true,
-    render: (name, rule: CspBenchmarkRulesWithStates) => {
-      const rulesObjectRequest = {
-        benchmark_id: rule?.metadata.benchmark.id,
-        benchmark_version: rule?.metadata.benchmark.version,
-        /* Rule number always exists from 8.7 */
-        rule_number: rule?.metadata.benchmark.rule_number!,
-        rule_id: rule?.metadata.id,
-      };
-      const isRuleMuted = rule?.state === 'muted';
-      const nextRuleState = isRuleMuted ? 'unmute' : 'mute';
-
-      const useChangeCspRuleStateFn = async () => {
-        if (rule?.metadata.benchmark.rule_number) {
-          await postRequestChangeRulesStates(nextRuleState, [rulesObjectRequest]);
-          await refetchRulesStates();
-        }
-      };
-      return (
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiSwitch
-              className="eui-textTruncate"
-              checked={!isRuleMuted}
-              onChange={useChangeCspRuleStateFn}
-              data-test-subj={RULES_ROWS_ENABLE_SWITCH_BUTTON}
-              label=""
-              compressed={true}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    },
+    render: (_name, rule: CspBenchmarkRulesWithStates) => <RuleStateSwitch rule={rule} />,
   },
 ];
+
+const RuleStateSwitch = ({ rule }: { rule: CspBenchmarkRulesWithStates }) => {
+  const isRuleMuted = rule?.state === 'muted';
+  const nextRuleState = isRuleMuted ? 'unmute' : 'mute';
+
+  const { mutate: mutateRulesStates } = useChangeCspRuleState();
+
+  const rulesObjectRequest = {
+    benchmark_id: rule?.metadata.benchmark.id,
+    benchmark_version: rule?.metadata.benchmark.version,
+    /* Rule number always exists from 8.7 */
+    rule_number: rule?.metadata.benchmark.rule_number!,
+    rule_id: rule?.metadata.id,
+  };
+  const changeCspRuleStateFn = async () => {
+    if (rule?.metadata.benchmark.rule_number) {
+      uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, CHANGE_RULE_STATE);
+      mutateRulesStates({
+        newState: nextRuleState,
+        ruleIds: [rulesObjectRequest],
+      });
+    }
+  };
+  return (
+    <EuiFlexGroup justifyContent="flexEnd">
+      <EuiFlexItem grow={false}>
+        <EuiSwitch
+          className="eui-textTruncate"
+          checked={!isRuleMuted}
+          onChange={changeCspRuleStateFn}
+          data-test-subj={RULES_ROWS_ENABLE_SWITCH_BUTTON}
+          label=""
+          compressed={true}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};

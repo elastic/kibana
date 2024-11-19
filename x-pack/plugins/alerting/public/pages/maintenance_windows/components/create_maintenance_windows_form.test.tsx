@@ -14,11 +14,11 @@ import {
 } from './create_maintenance_windows_form';
 
 jest.mock('../../../utils/kibana_react');
-jest.mock('../../../services/alert_api', () => ({
+jest.mock('../../../services/rule_api', () => ({
   loadRuleTypes: jest.fn(),
 }));
 
-const { loadRuleTypes } = jest.requireMock('../../../services/alert_api');
+const { loadRuleTypes } = jest.requireMock('../../../services/rule_api');
 const { useKibana, useUiSetting } = jest.requireMock('../../../utils/kibana_react');
 
 const formProps: CreateMaintenanceWindowFormProps = {
@@ -96,12 +96,16 @@ describe('CreateMaintenanceWindowForm', () => {
   it('should initialize the form when no initialValue provided', () => {
     const result = appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
 
-    const titleInput = within(result.getByTestId('title-field')).getByTestId('input');
+    const titleInput = within(result.getByTestId('title-field')).getByTestId(
+      'createMaintenanceWindowFormNameInput'
+    );
     const dateInputs = within(result.getByTestId('date-field')).getAllByLabelText(
       // using the aria-label to query for the date-picker input
       'Press the down key to open a popover containing a calendar.'
     );
-    const recurringInput = within(result.getByTestId('recurring-field')).getByTestId('input');
+    const recurringInput = within(result.getByTestId('recurring-field')).getByTestId(
+      'createMaintenanceWindowRepeatSwitch'
+    );
 
     expect(titleInput).toHaveValue('');
     // except for the date field
@@ -125,12 +129,16 @@ describe('CreateMaintenanceWindowForm', () => {
       />
     );
 
-    const titleInput = within(result.getByTestId('title-field')).getByTestId('input');
+    const titleInput = within(result.getByTestId('title-field')).getByTestId(
+      'createMaintenanceWindowFormNameInput'
+    );
     const dateInputs = within(result.getByTestId('date-field')).getAllByLabelText(
       // using the aria-label to query for the date-picker input
       'Press the down key to open a popover containing a calendar.'
     );
-    const recurringInput = within(result.getByTestId('recurring-field')).getByTestId('input');
+    const recurringInput = within(result.getByTestId('recurring-field')).getByTestId(
+      'createMaintenanceWindowRepeatSwitch'
+    );
     const timezoneInput = within(result.getByTestId('timezone-field')).getByTestId(
       'comboBoxSearchInput'
     );

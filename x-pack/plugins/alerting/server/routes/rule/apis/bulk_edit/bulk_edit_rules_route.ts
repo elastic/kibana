@@ -8,18 +8,20 @@
 import { IRouter } from '@kbn/core/server';
 
 import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
-import { verifyAccessAndContext, handleDisabledApiKeysError } from '../../../lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
+import { handleDisabledApiKeysError, verifyAccessAndContext } from '../../../lib';
 
 import {
   bulkEditRulesRequestBodySchemaV1,
   BulkEditRulesRequestBodyV1,
   BulkEditRulesResponseV1,
 } from '../../../../../common/routes/rule/apis/bulk_edit';
-import { Rule } from '../../../../application/rule/types';
 import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
+import { Rule } from '../../../../application/rule/types';
 
 import { transformRuleToRuleResponseV1 } from '../../transforms';
+import { validateRequiredGroupInDefaultActionsV1 } from '../../validation';
+import { transformOperationsV1 } from './transforms';
 
 interface BuildBulkEditRulesRouteParams {
   licenseState: ILicenseState;
@@ -31,6 +33,7 @@ const buildBulkEditRulesRoute = ({ licenseState, path, router }: BuildBulkEditRu
   router.post(
     {
       path,
+      options: { access: 'internal' },
       validate: {
         body: bulkEditRulesRequestBodySchemaV1,
       },
@@ -39,15 +42,24 @@ const buildBulkEditRulesRoute = ({ licenseState, path, router }: BuildBulkEditRu
       router.handleLegacyErrors(
         verifyAccessAndContext(licenseState, async function (context, req, res) {
           const rulesClient = (await context.alerting).getRulesClient();
-          const bulkEditData: BulkEditRulesRequestBodyV1 = req.body;
+          const actionsClient = (await context.actions).getActionsClient();
 
+          const bulkEditData: BulkEditRulesRequestBodyV1 = req.body;
           const { filter, operations, ids } = bulkEditData;
 
           try {
+            validateRequiredGroupInDefaultActionsInOperations(
+              operations ?? [],
+              (connectorId: string) => actionsClient.isSystemAction(connectorId)
+            );
+
             const bulkEditResults = await rulesClient.bulkEdit<RuleParamsV1>({
               filter,
               ids,
-              operations,
+              operations: transformOperationsV1({
+                operations,
+                isSystemAction: (connectorId: string) => actionsClient.isSystemAction(connectorId),
+              }),
             });
 
             const resultBody: BulkEditRulesResponseV1<RuleParamsV1> = {
@@ -82,3 +94,17 @@ export const bulkEditInternalRulesRoute = (
     path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_bulk_edit`,
     router,
   });
+
+const validateRequiredGroupInDefaultActionsInOperations = (
+  operations: BulkEditRulesRequestBodyV1['operations'],
+  isSystemAction: (connectorId: string) => boolean
+) => {
+  for (const operation of operations) {
+    if (operation.field === 'actions') {
+      validateRequiredGroupInDefaultActionsV1({
+        actions: operation.value,
+        isSystemAction,
+      });
+    }
+  }
+};

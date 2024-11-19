@@ -27,7 +27,7 @@ import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../common/constants';
 
 import welcomeGraphicDark from '../../../assets/images/welcome_dark.svg';
 import welcomeGraphicLight from '../../../assets/images/welcome_light.svg';
-import { NEW_INDEX_PATH } from '../../enterprise_search_content/routes';
+import { NEW_API_PATH } from '../../enterprise_search_content/routes';
 import { docLinks } from '../doc_links';
 
 import './add_content_empty_prompt.scss';
@@ -60,7 +60,7 @@ export const AddContentEmptyPrompt: React.FC = () => {
           <EuiFlexItem grow={false}>
             <div>
               <EuiLinkTo
-                to={generatePath(ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + NEW_INDEX_PATH)}
+                to={generatePath(ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + NEW_API_PATH)}
                 shouldNotCreateHref
               >
                 <EuiButton color="primary" fill iconType="plusInCircle">

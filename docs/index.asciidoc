@@ -1,8 +1,6 @@
 [[kibana-guide]]
 = Kibana Guide
 
-:kib-repo-dir:   {kibana-root}/docs
-
 include::{docs-root}/shared/versions/stack/{source_branch}.asciidoc[]
 
 include::{docs-root}/shared/attributes.asciidoc[]

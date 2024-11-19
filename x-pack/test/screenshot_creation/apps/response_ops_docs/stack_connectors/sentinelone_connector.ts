@@ -18,13 +18,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const actions = getService('actions');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
+  const toasts = getService('toasts');
   let simulatorUrl: string;
   let editSimulatorUrl: string;
 
   describe('sentinelone connector', function () {
     before(async () => {
       simulatorUrl = kibanaServer.resolveUrl(
-        getExternalServiceSimulatorPath(ExternalServiceSimulator.TINES)
+        getExternalServiceSimulatorPath(ExternalServiceSimulator.SENTINELONE)
       );
       editSimulatorUrl = simulatorUrl.replace('/elastic:changeme@', '/');
     });
@@ -43,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.setValue('secrets.token-input', 'tester');
       await commonScreenshots.takeScreenshot('sentinelone-connector', screenshotDirectories);
       await testSubjects.click('create-connector-flyout-save-test-btn');
-      await pageObjects.common.clearAllToasts();
+      await toasts.dismissAll();
       await commonScreenshots.takeScreenshot('sentinelone-params-test', screenshotDirectories);
       await testSubjects.click('euiFlyoutCloseButton');
     });

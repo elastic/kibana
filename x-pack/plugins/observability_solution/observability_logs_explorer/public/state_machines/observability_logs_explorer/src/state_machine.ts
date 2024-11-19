@@ -10,6 +10,8 @@ import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { CreateLogsExplorerController } from '@kbn/logs-explorer-plugin/public';
 import { actions, createMachine, InterpreterFrom } from 'xstate';
 import { TimefilterContract } from '@kbn/data-plugin/public';
+import { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
 import { DEFAULT_CONTEXT } from './defaults';
 import {
   ObservabilityLogsExplorerContext,
@@ -17,13 +19,19 @@ import {
   ObservabilityLogsExplorerTypeState,
 } from './types';
 import { initializeFromUrl, updateUrlFromLogsExplorerState } from './url_state_storage_service';
-import { createController, subscribeToLogsExplorerState } from './controller_service';
+import {
+  createController,
+  subscribeToLogsExplorerPublicEvents,
+  subscribeToLogsExplorerState,
+} from './controller_service';
 import { initializeFromTimeFilterService } from './time_filter_service';
+import { createDataReceivedTelemetryEventEmitter } from './telemetry_events';
+import { initializeAllSelection } from './all_selection_service';
 
 export const createPureObservabilityLogsExplorerStateMachine = (
   initialContext: ObservabilityLogsExplorerContext
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QHkBGswCcBuBDVAlgDYEAuAngDID2UAogB4AOR1mWAdAK4B2BfpArhIAvSAGIA2gAYAuolBNqsMgWo8FIBogDMOjgFYAbAEZpAdgCcRgwBYAHAcsGANCHK7bHWztsGTRjomevbmRpYAvhFuaBg4+MRkVLSMLGyc-KrCBCL8UABimNQAtgAqBMVg+cSkWADKWNgEAMZg4gCSAHLtpe0AgpTtAFp0ACIA+vkASsgAsuO9s3ST7ZSldFPjdRsAau0AwnQy8kggSiqC6praCAC0ZvrhRua24Tp2jiZuHggATEb2Dj-aQ2PQmcEGSFRGLoRoJEgUGj0ZisdiYDiZQTZXI8ApFYoAVUwRA63V6A2GY0mM3mBKmlGOmnOqiupxutx0Rg49ksv2kBl+9hMQp0oV+30QBnsXgsAX8lhevx0lki0RAsThhARyWRaTRHGa7Fwglx+3UpCKRCIWHE+2QnVKM0olA2432UzofXWo0Zp2Zlw0bMQt0FHCMAN85jC9k5tl+cYlCFCJg4QRMxnM0lsZkcRmh6th8S1SSRqVRGQEQlEkG4PAA1jxqAB3HillHpTB1UjGtqUZAAcXGdAAGgAFPsezZ1Upe5b7AASfU6-bGvsUyhZgdANyVBg4JmzRl+UtFFks9nsiYh0n3tn59lM-2FNnzGqLiURKXb+sxVZyNbwEgIDbPV6m7WpxD7QcR3HZBJy2Gd1jdRdl1XOQmQ3ANrklUxDFCSxDwVX4TAIq9BXMIFnnTc9gXseMojVRsIDgTQ3zwYtP11ctMAwi41C3LRg3TFMnheN4Pn8RN7h0CjpDk6QDyFcxiOkX5VRhOJ2I-HUyw7Wtf2xSBeM3bCEAot4LyFHl42cEEpNsSxDHkkwlTMKwH2cV9Cy07UQO4jFK2xPJChKcpKmqIhak7RoWjAYysKDO57Bvayswc0EDxeMiuVscwdEFAUBRci9fi8zT4RLL9QPRAzRGC-EiSIeL+NMjkuXeNT3PDF5fFcdxEDjFNlNBSxwQvXKdDKzVtL8vTDTAY08jNHgLWoK0sGa1lt2DTkOGsJUHNGuSSJ8RMXhTEw8t8S61LkpwpvfXyqv82r-wgTaBPZOjvGSz49F5RxzEvfqEDMdMwzvBwAnMAwoxIh6fMqri9NesQIFrBtm1bZ6Oy7HsPta3wfukP7lQKoGr2fDhpEsTllNCAwdAUya1TYirON0n9AurdHAIIYCcbRPHagJxKjBp-cDCzA9LDuqxLEph9qdp55yMZhSDAYiIgA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QHkBGswCcBuBDVAlgDYEAuAngDID2UsAogB4AOR1mWAdAK4B2B-UgVwkAXpADEAbQAMAXUShm1WGQLVeikI0QBGABwBmTvt0AmAKwyZAThsXdAFkcWLAGhDk9Mi5zv+LQ0NTcwA2QwBfCI80DBx8YjIqWgYWNg5MTgE1EQJRASgAMUxqAFsAFQJSsELiUiwAZSxsAgBjMAkASQA5TvLOgEFKToAtegARAH1CgCVkAFlJ-vn6ac7KcvoZyYatgDVOgGF6WQUkEGVVIQ0tHQQLMw8vBGD9ThkzQxd9RxtPmwA7BYojF0M0EiQKDQ6ExWOwuNkhLl8rwiiVSgBVTBELq9fpDUYTaZzRYYmaUU5aS5qG7nO4PJ6IUL2ThWawfFzhXQ2RwgkCxcGESHJGFpeGZVocXBCVGHDSkEpEIhYCSHZDdcpzSiULaTQ4zegDTbjSnnanXTR0xAOGycXQWUJmfSmfQA14AxkIZm+X52AEAsyhfSWB58gXxIVJaGpOEZLKCYRiSA8XgAa141AA7rxo7D0o1SNKOpRkABxBqTegADQACiWDdsGuUjatDgAJAbdUsTU1KFQ0y2gO5fXScN2OQwA2wB-QyfQ2T3mGTGUIOwzL3TrxyBsNgiOJKEpPPi+M5JMQTh4EgQXNijINQv1CQl8uV2v13VNlt6jtdnvyKl+wtW4mVCGQTAcX0J3nQJQkXXRuU4Fx11MAMZDA4MomiEAMwgOAtHDPBI0PUVYywQCrnUQdtEQABaBdPDo3x-BY1j7ABXc4iIg8RRjfNMj4RFEzySAKIHECEG3RcfHedkPmXUJtxscxOMFHjbzIzIhORApijKSpqlqIh6kwJocDaMAxOAq0EDMAE3nnH5HBkcd9AeIJPVMJCWPsp1nCdMxVP3YUNP408kTEXT0SxIgrKoiTt1HR02TcwJHH9RxPVeWS5KcT5TB8ILuJCo87y4SUwGlAo5V4BVqCVcizSA+KbKdN5rHs5lDB5MDdDgxivRZdLV2ZMweUMUIAyKiEo1KzTwuE8QIDi2kh0QbrPRsH4-ECTcnPCQJImwwiZpIviT2088U3TLMczm-iHyLFbqLuV1FzMZzODAnlAwymRdBkXljr3YrZtIsLLpEi8rwIG97vFR76meiSp1tPr7McfQg0MCwMve9KIJsYILFdCwbGXQKsKAA */
   createMachine<
     ObservabilityLogsExplorerContext,
     ObservabilityLogsExplorerEvent,
@@ -36,7 +44,17 @@ export const createPureObservabilityLogsExplorerStateMachine = (
       initial: 'uninitialized',
       states: {
         uninitialized: {
-          always: 'initializingFromTimeFilterService',
+          always: 'initializeAllSelection',
+        },
+        initializeAllSelection: {
+          invoke: {
+            src: 'initializeAllSelection',
+            onDone: {
+              target: 'initializingFromTimeFilterService',
+              actions: ['storeAllSelection'],
+            },
+            onError: 'initializingFromTimeFilterService',
+          },
         },
         initializingFromTimeFilterService: {
           invoke: {
@@ -73,9 +91,10 @@ export const createPureObservabilityLogsExplorerStateMachine = (
           },
         },
         initialized: {
-          invoke: {
-            src: 'subscribeToLogsExplorerState',
-          },
+          invoke: [
+            { src: 'subscribeToLogsExplorerState' },
+            { src: 'subscribeToLogsExplorerPublicEvents' },
+          ],
 
           states: {
             unknownLogsExplorerState: {
@@ -94,6 +113,9 @@ export const createPureObservabilityLogsExplorerStateMachine = (
                   target: 'validLogsExplorerState',
                   internal: true,
                 },
+                LOGS_EXPLORER_DATA_RECEIVED: {
+                  actions: ['trackDataReceived'],
+                },
               },
             },
           },
@@ -107,6 +129,13 @@ export const createPureObservabilityLogsExplorerStateMachine = (
         storeController: actions.assign((context, event) => {
           return 'controller' in event && event.type === 'CONTROLLER_CREATED'
             ? { controller: event.controller }
+            : {};
+        }),
+        storeAllSelection: actions.assign((context, event) => {
+          return 'data' in event
+            ? {
+                allSelection: event.data,
+              }
             : {};
         }),
         storeInitialTimeFilter: actions.assign((context, event) => {
@@ -151,6 +180,8 @@ export interface ObservabilityLogsExplorerStateMachineDependencies {
   timeFilterService: TimefilterContract;
   toasts: IToasts;
   urlStateStorageContainer: IKbnUrlStateStorage;
+  analytics: AnalyticsServiceStart;
+  logSourcesService: LogSourcesService;
 }
 
 export const createObservabilityLogsExplorerStateMachine = ({
@@ -159,16 +190,21 @@ export const createObservabilityLogsExplorerStateMachine = ({
   urlStateStorageContainer,
   createLogsExplorerController,
   timeFilterService,
+  analytics,
+  logSourcesService,
 }: ObservabilityLogsExplorerStateMachineDependencies) =>
   createPureObservabilityLogsExplorerStateMachine(initialContext).withConfig({
     actions: {
       updateUrlFromLogsExplorerState: updateUrlFromLogsExplorerState({ urlStateStorageContainer }),
+      trackDataReceived: createDataReceivedTelemetryEventEmitter(analytics),
     },
     services: {
       createController: createController({ createLogsExplorerController }),
       initializeFromTimeFilterService: initializeFromTimeFilterService({ timeFilterService }),
       initializeFromUrl: initializeFromUrl({ urlStateStorageContainer, toastsService: toasts }),
+      initializeAllSelection: initializeAllSelection({ logSourcesService }),
       subscribeToLogsExplorerState,
+      subscribeToLogsExplorerPublicEvents,
     },
   });
 

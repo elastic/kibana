@@ -20,6 +20,7 @@ import {
   EuiTitle,
   EuiHorizontalRule,
 } from '@elastic/eui';
+import { SnoozeSchedule } from '../../../../types';
 import { RuleStatusDropdown } from '../..';
 import {
   ComponentOpts as RuleApis,
@@ -60,11 +61,11 @@ export const RuleStatusPanel: React.FC<RuleStatusPanelWithApiProps> = ({
   const isInitialized = useRef(false);
 
   const onSnoozeRule = useCallback(
-    (snoozeSchedule) => snoozeRule(rule, snoozeSchedule),
+    (snoozeSchedule: SnoozeSchedule) => snoozeRule(rule, snoozeSchedule),
     [rule, snoozeRule]
   );
   const onUnsnoozeRule = useCallback(
-    (scheduleIds) => unsnoozeRule(rule, scheduleIds),
+    (scheduleIds?: string[]) => unsnoozeRule(rule, scheduleIds),
     [rule, unsnoozeRule]
   );
 
@@ -102,6 +103,13 @@ export const RuleStatusPanel: React.FC<RuleStatusPanelWithApiProps> = ({
     requestRefresh();
   }, [requestRefresh, loadEventLogs]);
 
+  const onDisableRule = useCallback(
+    (untrack: boolean) => {
+      return bulkDisableRules({ ids: [rule.id], untrack });
+    },
+    [bulkDisableRules, rule.id]
+  );
+
   useEffect(() => {
     if (isInitialized.current) {
       loadEventLogs();
@@ -126,7 +134,7 @@ export const RuleStatusPanel: React.FC<RuleStatusPanelWithApiProps> = ({
           </EuiFlexItem>
           <EuiFlexItem>
             <RuleStatusDropdown
-              disableRule={() => bulkDisableRules({ ids: [rule.id] })}
+              disableRule={onDisableRule}
               enableRule={() => bulkEnableRules({ ids: [rule.id] })}
               snoozeRule={async () => {}}
               unsnoozeRule={async () => {}}

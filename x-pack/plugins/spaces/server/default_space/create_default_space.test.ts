@@ -87,6 +87,31 @@ test(`it creates the default space when one does not exist`, async () => {
   );
 });
 
+test(`it creates the default space when one does not exist with defined solution`, async () => {
+  const deps = createMockDeps({
+    defaultExists: false,
+  });
+
+  await createDefaultSpace({ ...deps, solution: 'security' });
+
+  const repository = (await deps.getSavedObjects()).createInternalRepository();
+
+  expect(repository.get).toHaveBeenCalledTimes(1);
+  expect(repository.create).toHaveBeenCalledTimes(1);
+  expect(repository.create).toHaveBeenCalledWith(
+    'space',
+    {
+      _reserved: true,
+      description: 'This is your default space!',
+      disabledFeatures: [],
+      name: 'Default',
+      color: '#00bfb3',
+      solution: 'security',
+    },
+    { id: 'default' }
+  );
+});
+
 test(`it does not attempt to recreate the default space if it already exists`, async () => {
   const deps = createMockDeps({
     defaultExists: true,
@@ -106,7 +131,7 @@ test(`it throws all other errors from the saved objects client when checking for
     simulateGetErrorCondition: true,
   });
 
-  expect(createDefaultSpace(deps)).rejects.toThrowErrorMatchingInlineSnapshot(
+  await expect(createDefaultSpace(deps)).rejects.toThrowErrorMatchingInlineSnapshot(
     `"unit test: unexpected exception condition"`
   );
 });
@@ -131,7 +156,7 @@ test(`it throws other errors if there is an error creating the default space`, a
     simulateCreateErrorCondition: true,
   });
 
-  expect(createDefaultSpace(deps)).rejects.toThrowErrorMatchingInlineSnapshot(
+  await expect(createDefaultSpace(deps)).rejects.toThrowErrorMatchingInlineSnapshot(
     `"unit test: some other unexpected error"`
   );
 });

@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-// eslint-disable-next-line @kbn/eslint/module_migration
-import styled from 'styled-components';
-
-import { useAssistantContext } from '../assistant_context';
+import styled from '@emotion/styled';
+import { AnonymizedData } from '@kbn/elastic-assistant-common/impl/data_anonymization/types';
 import type { SelectedPromptContext } from '../assistant/prompt_context/types';
-import { ContextEditor } from './context_editor';
 import { BatchUpdateListItem } from './context_editor/types';
-import { getIsDataAnonymizable, updateDefaults, updateSelectedPromptContext } from './helpers';
+import { getIsDataAnonymizable, updateSelectedPromptContext } from './helpers';
 import { ReadOnlyContextViewer } from './read_only_context_viewer';
-import { Stats } from './stats';
+import { ContextEditorFlyout } from './context_editor_flyout';
+import { ReplacementsContextViewer } from './replacements_context_viewer';
 
 const EditorContainer = styled.div`
   overflow-x: auto;
@@ -27,14 +25,14 @@ export interface Props {
   setSelectedPromptContexts: React.Dispatch<
     React.SetStateAction<Record<string, SelectedPromptContext>>
   >;
+  currentReplacements: AnonymizedData['replacements'] | undefined;
 }
 
 const DataAnonymizationEditorComponent: React.FC<Props> = ({
   selectedPromptContext,
   setSelectedPromptContexts,
+  currentReplacements,
 }) => {
-  const { defaultAllow, defaultAllowReplacement, setDefaultAllow, setDefaultAllowReplacement } =
-    useAssistantContext();
   const isDataAnonymizable = useMemo<boolean>(
     () => getIsDataAnonymizable(selectedPromptContext.rawData),
     [selectedPromptContext]
@@ -57,44 +55,31 @@ const DataAnonymizationEditorComponent: React.FC<Props> = ({
         ...prev,
         [selectedPromptContext.promptContextId]: updatedPromptContext,
       }));
-
-      updateDefaults({
-        defaultAllow,
-        defaultAllowReplacement,
-        setDefaultAllow,
-        setDefaultAllowReplacement,
-        updates,
-      });
     },
-    [
-      defaultAllow,
-      defaultAllowReplacement,
-      selectedPromptContext,
-      setDefaultAllow,
-      setDefaultAllowReplacement,
-      setSelectedPromptContexts,
-    ]
+    [selectedPromptContext, setSelectedPromptContexts]
   );
 
   return (
     <EditorContainer data-test-subj="dataAnonymizationEditor">
-      <Stats
-        isDataAnonymizable={isDataAnonymizable}
-        selectedPromptContext={selectedPromptContext}
-      />
-
-      <EuiSpacer size="s" />
-
-      {typeof selectedPromptContext.rawData === 'string' ? (
-        <ReadOnlyContextViewer rawData={selectedPromptContext.rawData} />
-      ) : (
-        <ContextEditor
-          allow={selectedPromptContext.allow}
-          allowReplacement={selectedPromptContext.allowReplacement}
-          onListUpdated={onListUpdated}
-          rawData={selectedPromptContext.rawData}
-        />
-      )}
+      <EuiPanel hasShadow={false} paddingSize="m">
+        {typeof selectedPromptContext.rawData === 'string' ? (
+          selectedPromptContext.replacements != null ? (
+            <ReplacementsContextViewer
+              markdown={selectedPromptContext.rawData}
+              replacements={selectedPromptContext.replacements}
+            />
+          ) : (
+            <ReadOnlyContextViewer rawData={selectedPromptContext.rawData} />
+          )
+        ) : (
+          <ContextEditorFlyout
+            selectedPromptContext={selectedPromptContext}
+            onListUpdated={onListUpdated}
+            currentReplacements={currentReplacements}
+            isDataAnonymizable={isDataAnonymizable}
+          />
+        )}
+      </EuiPanel>
     </EditorContainer>
   );
 };

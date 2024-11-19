@@ -63,6 +63,7 @@ const StyledEuiAccordion = styled(EuiAccordion)`
 `;
 
 const CollapsablePanel: React.FC<{
+  children: React.ReactNode;
   id: string;
   title: React.ReactNode;
   'data-test-subj'?: string;

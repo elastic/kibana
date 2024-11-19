@@ -1,16 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, useContext } from 'react';
-import type { Observable } from 'rxjs';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useContext } from 'react';
+
+import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { NotificationsStart, ToastOptions } from '@kbn/core-notifications-browser';
-import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { toMountPoint } from '@kbn/react-kibana-mount';
 
 import type { UserProfileAPIClient } from './types';
 
@@ -29,7 +32,10 @@ const UserProfilesContext = React.createContext<Services | null>(null);
 /**
  * Abstract external service Provider.
  */
-export const UserProfilesProvider: FC<Services> = ({ children, ...services }) => {
+export const UserProfilesProvider: FC<PropsWithChildren<Services>> = ({
+  children,
+  ...services
+}) => {
   return <UserProfilesContext.Provider value={services}>{children}</UserProfilesContext.Provider>;
 };
 
@@ -41,34 +47,32 @@ export interface UserProfilesKibanaDependencies {
   core: {
     notifications: NotificationsStart;
     theme: ThemeServiceStart;
+    i18n: I18nStart;
   };
   security: {
     userProfiles: UserProfileAPIClient;
   };
   /**
-   * Handler from the '@kbn/kibana-react-plugin/public' Plugin
+   * Handler from the '@kbn/react-kibana-mount' Package
    *
    * ```
-   * import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+   * import { toMountPoint } from '@kbn/react-kibana-mount';
    * ```
    */
-  toMountPoint: (
-    node: React.ReactNode,
-    options?: { theme$: Observable<{ readonly darkMode: boolean }> }
-  ) => MountPoint;
+  toMountPoint: typeof toMountPoint;
 }
 
 /**
  * Kibana-specific Provider that maps to known dependency types.
  */
-export const UserProfilesKibanaProvider: FC<UserProfilesKibanaDependencies> = ({
+export const UserProfilesKibanaProvider: FC<PropsWithChildren<UserProfilesKibanaDependencies>> = ({
   children,
   ...services
 }) => {
   const {
-    core: { notifications, theme },
+    core: { notifications, i18n, theme },
     security: { userProfiles: userProfileApiClient },
-    toMountPoint,
+    toMountPoint: toMountPointUtility,
   } = services;
 
   return (
@@ -82,7 +86,7 @@ export const UserProfilesKibanaProvider: FC<UserProfilesKibanaDependencies> = ({
         notifications.toasts.addSuccess(
           {
             title,
-            text: text ? toMountPoint(text, { theme$: theme.theme$ }) : undefined,
+            text: text ? toMountPointUtility(text, { i18n, theme }) : undefined,
           },
           toastOptions
         );

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { mockDiscover, mockPackage } from './plugins_service.test.mocks';
@@ -25,7 +26,7 @@ import { PluginWrapper } from './plugin';
 import { PluginsService } from './plugins_service';
 import { PluginsSystem } from './plugins_system';
 import { config, PluginsConfigType } from './plugins_config';
-import { take } from 'rxjs/operators';
+import { take } from 'rxjs';
 import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
 import { DiscoveredPlugin, PluginType } from '@kbn/core-base-common';
 
@@ -1046,7 +1047,7 @@ describe('PluginsService', () => {
       const prebootUIConfig$ = preboot.uiPlugins.browserConfigs.get('plugin-with-expose-preboot')!;
       await expect(prebootUIConfig$.pipe(take(1)).toPromise()).resolves.toEqual({
         browserConfig: { sharedProp: 'sharedProp default value plugin-with-expose-preboot' },
-        exposedConfigKeys: { sharedProp: 'string' },
+        exposedConfigKeys: { sharedProp: 'string?' },
       });
 
       const standardUIConfig$ = standard.uiPlugins.browserConfigs.get(
@@ -1054,7 +1055,7 @@ describe('PluginsService', () => {
       )!;
       await expect(standardUIConfig$.pipe(take(1)).toPromise()).resolves.toEqual({
         browserConfig: { sharedProp: 'sharedProp default value plugin-with-expose-standard' },
-        exposedConfigKeys: { sharedProp: 'string' },
+        exposedConfigKeys: { sharedProp: 'string?' },
       });
     });
 
@@ -1301,31 +1302,6 @@ describe('PluginsService', () => {
       expect(standardMockPluginSystem.setupPlugins).not.toHaveBeenCalled();
     });
 
-    it('#preboot registers expected static dirs', async () => {
-      prebootDeps.http.staticAssets.getPluginServerPath.mockImplementation(
-        (pluginName: string) => `/static-assets/${pluginName}`
-      );
-      await pluginsService.discover({ environment: environmentPreboot, node: nodePreboot });
-      await pluginsService.preboot(prebootDeps);
-      expect(prebootDeps.http.registerStaticDir).toHaveBeenCalledTimes(prebootPlugins.length * 2);
-      expect(prebootDeps.http.registerStaticDir).toHaveBeenCalledWith(
-        '/static-assets/plugin-1-preboot',
-        expect.any(String)
-      );
-      expect(prebootDeps.http.registerStaticDir).toHaveBeenCalledWith(
-        '/plugins/plugin-1-preboot/assets/{path*}',
-        expect.any(String)
-      );
-      expect(prebootDeps.http.registerStaticDir).toHaveBeenCalledWith(
-        '/static-assets/plugin-2-preboot',
-        expect.any(String)
-      );
-      expect(prebootDeps.http.registerStaticDir).toHaveBeenCalledWith(
-        '/plugins/plugin-2-preboot/assets/{path*}',
-        expect.any(String)
-      );
-    });
-
     it('#setup does initialize `standard` plugins if plugins.initialize is true', async () => {
       config$.next({ plugins: { initialize: true } });
       await pluginsService.discover({ environment: environmentPreboot, node: nodePreboot });
@@ -1345,32 +1321,6 @@ describe('PluginsService', () => {
       expect(standardMockPluginSystem.setupPlugins).not.toHaveBeenCalled();
       expect(prebootMockPluginSystem.setupPlugins).not.toHaveBeenCalled();
       expect(initialized).toBe(false);
-    });
-
-    it('#setup registers expected static dirs', async () => {
-      await pluginsService.discover({ environment: environmentPreboot, node: nodePreboot });
-      await pluginsService.preboot(prebootDeps);
-      setupDeps.http.staticAssets.getPluginServerPath.mockImplementation(
-        (pluginName: string) => `/static-assets/${pluginName}`
-      );
-      await pluginsService.setup(setupDeps);
-      expect(setupDeps.http.registerStaticDir).toHaveBeenCalledTimes(standardPlugins.length * 2);
-      expect(setupDeps.http.registerStaticDir).toHaveBeenCalledWith(
-        '/static-assets/plugin-1-standard',
-        expect.any(String)
-      );
-      expect(setupDeps.http.registerStaticDir).toHaveBeenCalledWith(
-        '/plugins/plugin-1-standard/assets/{path*}',
-        expect.any(String)
-      );
-      expect(setupDeps.http.registerStaticDir).toHaveBeenCalledWith(
-        '/static-assets/plugin-2-standard',
-        expect.any(String)
-      );
-      expect(setupDeps.http.registerStaticDir).toHaveBeenCalledWith(
-        '/plugins/plugin-2-standard/assets/{path*}',
-        expect.any(String)
-      );
     });
   });
 

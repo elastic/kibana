@@ -44,7 +44,6 @@ import { addItemToRecentlyAccessed } from '../../util/recently_accessed';
 import { EmbeddedMapComponentWrapper } from './explorer_chart_embedded_map';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { BarSeries, Chart, Settings, LEGACY_LIGHT_THEME } from '@elastic/charts';
-import useObservable from 'react-use/lib/useObservable';
 import { escapeKueryForFieldValuePair } from '../../util/string_utils';
 
 const textTooManyBuckets = i18n.translate('xpack.ml.explorer.charts.tooManyBucketsDescription', {
@@ -78,25 +77,26 @@ export function getEntitiesQuery(series) {
 
 // create a somewhat unique ID
 // from charts metadata for React's key attribute
-function getChartId(series) {
-  const { jobId, detectorLabel, entityFields } = series;
-  const entities = entityFields.map((ef) => `${ef.fieldName}/${ef.fieldValue}`).join(',');
-  const id = `${jobId}_${detectorLabel}_${entities}`;
+function getChartId(series, randomId) {
+  const { jobId, detectorLabel } = series;
+  const id = `${jobId}${detectorLabel}`.replace(/[^a-zA-Z]+/g, '') + randomId;
   return id;
 }
 
 // Wrapper for a single explorer chart
 function ExplorerChartContainer({
+  id,
+  isEmbeddable,
   series,
   severity,
   tooManyBuckets,
   wrapLabel,
   mlLocator,
+  tableData,
   timeBuckets,
   timefilter,
   timeRange,
   onSelectEntity,
-  recentlyAccessed,
   tooManyBucketsCalloutMsg,
   showSelectedInterval,
   chartsService,
@@ -106,6 +106,7 @@ function ExplorerChartContainer({
 
   const {
     services: {
+      chrome: { recentlyAccessed },
       share,
       application: { navigateToApp },
     },
@@ -194,8 +195,6 @@ function ExplorerChartContainer({
     isDateHistogram: true,
   });
 
-  const cursor = useObservable(chartsService.activeCursor.activeCursor$)?.cursor;
-
   const addToRecentlyAccessed = useCallback(() => {
     if (recentlyAccessed) {
       addItemToRecentlyAccessed(
@@ -253,6 +252,7 @@ function ExplorerChartContainer({
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <ExplorerChartLabel
+            isEmbeddable={isEmbeddable}
             detectorLabel={DetectorLabel}
             entityFields={entityFields}
             infoTooltip={{ ...series.infoTooltip, chartType }}
@@ -282,7 +282,7 @@ function ExplorerChartContainer({
                 {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
                 <EuiButtonEmpty
                   iconSide="right"
-                  iconType="visLine"
+                  iconType="singleMetricViewer"
                   size="xs"
                   href={explorerSeriesLink}
                   onClick={addToRecentlyAccessed}
@@ -333,6 +333,8 @@ function ExplorerChartContainer({
             <MlTooltipComponent>
               {(tooltipService) => (
                 <ExplorerChartDistribution
+                  id={id}
+                  tableData={tableData}
                   timeBuckets={timeBuckets}
                   tooManyBuckets={tooManyBuckets}
                   seriesConfig={series}
@@ -341,7 +343,7 @@ function ExplorerChartContainer({
                   showSelectedInterval={showSelectedInterval}
                   onPointerUpdate={handleCursorUpdate}
                   chartTheme={chartTheme}
-                  cursor={cursor}
+                  cursor$={chartsService.activeCursor.activeCursor$}
                 />
               )}
             </MlTooltipComponent>
@@ -352,6 +354,8 @@ function ExplorerChartContainer({
             <MlTooltipComponent>
               {(tooltipService) => (
                 <ExplorerChartSingleMetric
+                  id={id}
+                  tableData={tableData}
                   timeBuckets={timeBuckets}
                   tooManyBuckets={tooManyBuckets}
                   seriesConfig={series}
@@ -360,7 +364,7 @@ function ExplorerChartContainer({
                   showSelectedInterval={showSelectedInterval}
                   onPointerUpdate={handleCursorUpdate}
                   chartTheme={chartTheme}
-                  cursor={cursor}
+                  cursor$={chartsService.activeCursor.activeCursor$}
                 />
               )}
             </MlTooltipComponent>
@@ -373,6 +377,8 @@ function ExplorerChartContainer({
 
 // Flex layout wrapper for all explorer charts
 export const ExplorerChartsContainerUI = ({
+  id: uuid,
+  isEmbeddable,
   chartsPerRow,
   seriesToPlot,
   severity,
@@ -380,6 +386,7 @@ export const ExplorerChartsContainerUI = ({
   kibana,
   errorMessages,
   mlLocator,
+  tableData,
   timeBuckets,
   timefilter,
   timeRange,
@@ -389,11 +396,7 @@ export const ExplorerChartsContainerUI = ({
   chartsService,
 }) => {
   const {
-    services: {
-      chrome: { recentlyAccessed },
-      embeddable: embeddablePlugin,
-      maps: mapsPlugin,
-    },
+    services: { embeddable: embeddablePlugin, maps: mapsPlugin },
   } = kibana;
 
   let seriesToPlotFiltered;
@@ -422,6 +425,7 @@ export const ExplorerChartsContainerUI = ({
   const chartsColumns = chartsPerRow === 1 ? 0 : chartsPerRow;
 
   const wrapLabel = seriesToUse.some((series) => isLabelLengthAboveThreshold(series));
+
   return (
     <>
       <ExplorerChartsErrorCallOuts errorMessagesByType={errorMessages} />
@@ -431,29 +435,35 @@ export const ExplorerChartsContainerUI = ({
         data-test-subj="mlExplorerChartsContainer"
       >
         {seriesToUse.length > 0 &&
-          seriesToUse.map((series) => (
-            <EuiFlexItem
-              key={getChartId(series)}
-              className="ml-explorer-chart-container"
-              style={{ minWidth: chartsWidth }}
-            >
-              <ExplorerChartContainer
-                series={series}
-                severity={severity}
-                tooManyBuckets={tooManyBuckets}
-                wrapLabel={wrapLabel}
-                mlLocator={mlLocator}
-                timeBuckets={timeBuckets}
-                timefilter={timefilter}
-                timeRange={timeRange}
-                onSelectEntity={onSelectEntity}
-                recentlyAccessed={recentlyAccessed}
-                tooManyBucketsCalloutMsg={tooManyBucketsCalloutMsg}
-                showSelectedInterval={showSelectedInterval}
-                chartsService={chartsService}
-              />
-            </EuiFlexItem>
-          ))}
+          seriesToUse.map((series, idx) => {
+            const chartId = getChartId(series, '-' + (uuid ?? '') + idx);
+            return (
+              <EuiFlexItem
+                key={chartId}
+                className="ml-explorer-chart-container"
+                style={{ minWidth: chartsWidth }}
+              >
+                <ExplorerChartContainer
+                  key={chartId}
+                  id={chartId}
+                  isEmbeddable={isEmbeddable}
+                  series={series}
+                  severity={severity}
+                  tooManyBuckets={tooManyBuckets}
+                  wrapLabel={wrapLabel}
+                  mlLocator={mlLocator}
+                  tableData={tableData}
+                  timeBuckets={timeBuckets}
+                  timefilter={timefilter}
+                  timeRange={timeRange}
+                  onSelectEntity={onSelectEntity}
+                  tooManyBucketsCalloutMsg={tooManyBucketsCalloutMsg}
+                  showSelectedInterval={showSelectedInterval}
+                  chartsService={chartsService}
+                />
+              </EuiFlexItem>
+            );
+          })}
       </EuiFlexGrid>
     </>
   );

@@ -12,7 +12,7 @@ import type { ApplicationStart } from '@kbn/core-application-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { useFetchAgentByAgentPolicySummary } from '../../../../hooks/policy/use_fetch_endpoint_policy_agent_summary';
@@ -33,176 +33,194 @@ import { ConfirmUpdate } from './components/policy_form_confirm_update';
 
 export interface PolicySettingsLayoutProps {
   policy: MaybeImmutable<PolicyData>;
+  setUnsavedChanges: (isModified: boolean) => void;
 }
 
-export const PolicySettingsLayout = memo<PolicySettingsLayoutProps>(({ policy: _policy }) => {
-  const policy = _policy as PolicyData;
-  const {
-    services: {
-      application: { navigateToApp },
-    },
-  } = useKibana();
-  const toasts = useToasts();
-  const dispatch = useDispatch();
-  const { state: locationRouteState } = useLocation<PolicyDetailsRouteState>();
-  const { canWritePolicyManagement } = useUserPrivileges().endpointPrivileges;
-  const { isLoading: isUpdating, mutateAsync: sendPolicyUpdate } = useUpdateEndpointPolicy();
-  const { data: agentSummaryData } = useFetchAgentByAgentPolicySummary(policy.policy_id);
-
-  const [policySettings, setPolicySettings] = useState<PolicyConfig>(
-    cloneDeep(policy.inputs[0].config.policy.value)
-  );
-  const [showConfirm, setShowConfirm] = useState<boolean>(false);
-  const [routeState, setRouteState] = useState<PolicyDetailsRouteState>();
-
-  const isEditMode = canWritePolicyManagement;
-  const policyName = policy?.name ?? '';
-  const routingOnCancelNavigateTo = routeState?.onCancelNavigateTo;
-
-  const navigateToAppArguments = useMemo((): Parameters<ApplicationStart['navigateToApp']> => {
-    if (routingOnCancelNavigateTo) {
-      return routingOnCancelNavigateTo;
-    }
-
-    return [
-      APP_UI_ID,
-      {
-        path: getPoliciesPath(),
+export const PolicySettingsLayout = memo<PolicySettingsLayoutProps>(
+  ({ policy: _policy, setUnsavedChanges }) => {
+    const policy = _policy as PolicyData;
+    const {
+      services: {
+        application: { navigateToApp },
       },
-    ];
-  }, [routingOnCancelNavigateTo]);
+    } = useKibana();
+    const toasts = useToasts();
+    const dispatch = useDispatch();
+    const { state: locationRouteState } = useLocation<PolicyDetailsRouteState>();
+    const { canWritePolicyManagement } = useUserPrivileges().endpointPrivileges;
+    const { isLoading: isUpdating, mutateAsync: sendPolicyUpdate } = useUpdateEndpointPolicy();
+    const { data: agentSummaryData } = useFetchAgentByAgentPolicySummary(policy.policy_ids);
 
-  const handleSettingsOnChange: PolicySettingsFormProps['onChange'] = useCallback((updates) => {
-    setPolicySettings(updates.updatedPolicy);
-  }, []);
+    const [policySettings, setPolicySettings] = useState<PolicyConfig>(
+      cloneDeep(policy.inputs[0].config.policy.value)
+    );
 
-  const handleCancelOnClick = useNavigateToAppEventHandler(...navigateToAppArguments);
+    const [policyModified, setPolicyModified] = useState<boolean>(false);
 
-  const handleSaveOnClick = useCallback(() => {
-    setShowConfirm(true);
-  }, []);
+    const [showConfirm, setShowConfirm] = useState<boolean>(false);
+    const [routeState, setRouteState] = useState<PolicyDetailsRouteState>();
 
-  const handleSaveCancel = useCallback(() => {
-    setShowConfirm(false);
-  }, []);
+    const isEditMode = canWritePolicyManagement;
+    const policyName = policy?.name ?? '';
+    const routingOnCancelNavigateTo = routeState?.onCancelNavigateTo;
 
-  const handleSaveConfirmation = useCallback(() => {
-    const update = cloneDeep(policy);
+    const navigateToAppArguments = useMemo((): Parameters<ApplicationStart['navigateToApp']> => {
+      if (routingOnCancelNavigateTo) {
+        return routingOnCancelNavigateTo;
+      }
 
-    update.inputs[0].config.policy.value = policySettings;
-    sendPolicyUpdate({ policy: update })
-      .then(({ item: policyItem }) => {
-        toasts.addSuccess({
-          'data-test-subj': 'policyDetailsSuccessMessage',
-          title: i18n.translate(
-            'xpack.securitySolution.endpoint.policy.details.updateSuccessTitle',
-            {
-              defaultMessage: 'Success!',
-            }
-          ),
-          text: i18n.translate(
-            'xpack.securitySolution.endpoint.policy.details.updateSuccessMessage',
-            {
-              defaultMessage: 'Integration {name} has been updated.',
-              values: { name: policyName },
-            }
-          ),
-        });
+      return [
+        APP_UI_ID,
+        {
+          path: getPoliciesPath(),
+        },
+      ];
+    }, [routingOnCancelNavigateTo]);
 
-        if (routeState && routeState.onSaveNavigateTo) {
-          navigateToApp(...routeState.onSaveNavigateTo);
-        } else {
-          // Since the 'policyItem' is stored in a store and fetched as a result of an action on urlChange, we still need to dispatch an action even though Redux was removed from this component.
-          dispatch({
-            type: 'serverReturnedPolicyDetailsData',
-            payload: {
-              policyItem,
-            },
+    const handleSettingsOnChange: PolicySettingsFormProps['onChange'] = useCallback(
+      (updates) => {
+        setPolicySettings(updates.updatedPolicy);
+        setPolicyModified(!isEqual(updates.updatedPolicy, policy.inputs[0].config.policy.value));
+      },
+      [policy.inputs]
+    );
+    const handleCancelOnClick = useNavigateToAppEventHandler(...navigateToAppArguments);
+
+    const handleSaveOnClick = useCallback(() => {
+      setShowConfirm(true);
+    }, []);
+
+    const handleSaveCancel = useCallback(() => {
+      setShowConfirm(false);
+    }, []);
+
+    const handleSaveConfirmation = useCallback(() => {
+      const update = cloneDeep(policy);
+
+      update.inputs[0].config.policy.value = policySettings;
+      sendPolicyUpdate({ policy: update })
+        .then(({ item: policyItem }) => {
+          toasts.addSuccess({
+            'data-test-subj': 'policyDetailsSuccessMessage',
+            title: i18n.translate(
+              'xpack.securitySolution.endpoint.policy.details.updateSuccessTitle',
+              {
+                defaultMessage: 'Success!',
+              }
+            ),
+            text: i18n.translate(
+              'xpack.securitySolution.endpoint.policy.details.updateSuccessMessage',
+              {
+                defaultMessage: 'Integration {name} has been updated.',
+                values: { name: policyName },
+              }
+            ),
           });
-        }
-      })
-      .catch((err) => {
-        toasts.addDanger({
-          'data-test-subj': 'policyDetailsFailureMessage',
-          title: i18n.translate('xpack.securitySolution.endpoint.policy.details.updateErrorTitle', {
-            defaultMessage: 'Failed!',
-          }),
-          text: err.message,
+
+          if (routeState && routeState.onSaveNavigateTo) {
+            navigateToApp(...routeState.onSaveNavigateTo);
+          } else {
+            setPolicyModified(false);
+            // Since the 'policyItem' is stored in a store and fetched as a result of an action on urlChange, we still need to dispatch an action even though Redux was removed from this component.
+            dispatch({
+              type: 'serverReturnedPolicyDetailsData',
+              payload: {
+                policyItem,
+              },
+            });
+          }
+        })
+        .catch((err) => {
+          toasts.addDanger({
+            'data-test-subj': 'policyDetailsFailureMessage',
+            title: i18n.translate(
+              'xpack.securitySolution.endpoint.policy.details.updateErrorTitle',
+              {
+                defaultMessage: 'Failed!',
+              }
+            ),
+            text: err.message,
+          });
         });
-      });
 
-    handleSaveCancel();
-  }, [
-    dispatch,
-    handleSaveCancel,
-    navigateToApp,
-    policy,
-    policyName,
-    policySettings,
-    routeState,
-    sendPolicyUpdate,
-    toasts,
-  ]);
+      handleSaveCancel();
+    }, [
+      dispatch,
+      handleSaveCancel,
+      navigateToApp,
+      policy,
+      policyName,
+      policySettings,
+      routeState,
+      sendPolicyUpdate,
+      toasts,
+    ]);
 
-  useEffect(() => {
-    if (!routeState && locationRouteState) {
-      setRouteState(locationRouteState);
-    }
-  }, [locationRouteState, routeState]);
+    useEffect(() => {
+      if (!routeState && locationRouteState) {
+        setRouteState(locationRouteState);
+      }
+    }, [locationRouteState, routeState]);
 
-  return (
-    <>
-      {showConfirm && (
-        <ConfirmUpdate
-          endpointCount={agentSummaryData ? agentSummaryData.all : 0}
-          onCancel={handleSaveCancel}
-          onConfirm={handleSaveConfirmation}
+    useEffect(() => {
+      setUnsavedChanges(policyModified);
+    }, [policyModified, setUnsavedChanges]);
+
+    return (
+      <>
+        {showConfirm && (
+          <ConfirmUpdate
+            endpointCount={agentSummaryData ? agentSummaryData.all : 0}
+            onCancel={handleSaveCancel}
+            onConfirm={handleSaveConfirmation}
+          />
+        )}
+
+        <PolicySettingsForm
+          policy={policySettings}
+          onChange={handleSettingsOnChange}
+          mode={isEditMode ? 'edit' : 'view'}
+          data-test-subj="endpointPolicyForm"
         />
-      )}
 
-      <PolicySettingsForm
-        policy={policySettings}
-        onChange={handleSettingsOnChange}
-        mode={isEditMode ? 'edit' : 'view'}
-        data-test-subj="endpointPolicyForm"
-      />
+        <EuiSpacer size="xxl" />
 
-      <EuiSpacer size="xxl" />
-
-      <KibanaPageTemplate.BottomBar paddingSize="s">
-        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              color="text"
-              onClick={handleCancelOnClick}
-              data-test-subj="policyDetailsCancelButton"
-              disabled={isUpdating}
-            >
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.policy.details.cancel"
-                defaultMessage="Cancel"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          {isEditMode && (
+        <KibanaPageTemplate.BottomBar paddingSize="s">
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiButton
-                fill={true}
-                iconType="save"
-                data-test-subj="policyDetailsSaveButton"
-                onClick={handleSaveOnClick}
-                isLoading={isUpdating}
+              <EuiButtonEmpty
+                color="text"
+                onClick={handleCancelOnClick}
+                data-test-subj="policyDetailsCancelButton"
+                disabled={isUpdating}
               >
                 <FormattedMessage
-                  id="xpack.securitySolution.endpoint.policy.details.save"
-                  defaultMessage="Save"
+                  id="xpack.securitySolution.endpoint.policy.details.cancel"
+                  defaultMessage="Cancel"
                 />
-              </EuiButton>
+              </EuiButtonEmpty>
             </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </KibanaPageTemplate.BottomBar>
-    </>
-  );
-});
+            {isEditMode && (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  disabled={!policyModified}
+                  fill={true}
+                  iconType="save"
+                  data-test-subj="policyDetailsSaveButton"
+                  onClick={handleSaveOnClick}
+                  isLoading={isUpdating}
+                >
+                  <FormattedMessage
+                    id="xpack.securitySolution.endpoint.policy.details.save"
+                    defaultMessage="Save"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </KibanaPageTemplate.BottomBar>
+      </>
+    );
+  }
+);
 PolicySettingsLayout.displayName = 'PolicySettingsLayout';

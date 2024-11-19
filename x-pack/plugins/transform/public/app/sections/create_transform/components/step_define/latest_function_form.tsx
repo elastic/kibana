@@ -10,8 +10,9 @@ import React, { type FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonIcon, EuiCallOut, EuiComboBox, EuiCopy, EuiFormRow } from '@elastic/eui';
-import { useAppDependencies } from '../../../../app_dependencies';
-import { LatestFunctionService } from './hooks/use_latest_function_config';
+import type { DropDownLabel } from '@kbn/ml-field-stats-flyout';
+import { OptionListWithFieldStats, useFieldStatsTrigger } from '@kbn/ml-field-stats-flyout';
+import type { LatestFunctionService } from './hooks/use_latest_function_config';
 
 interface LatestFunctionFormProps {
   copyToClipboard: string;
@@ -24,9 +25,6 @@ export const LatestFunctionForm: FC<LatestFunctionFormProps> = ({
   copyToClipboardDescription,
   latestFunctionService,
 }) => {
-  const {
-    ml: { useFieldStatsTrigger },
-  } = useAppDependencies();
   const { renderOption, closeFlyout } = useFieldStatsTrigger();
   return (
     <>
@@ -76,7 +74,7 @@ export const LatestFunctionForm: FC<LatestFunctionFormProps> = ({
       >
         <>
           {latestFunctionService.sortFieldOptions.length > 0 && (
-            <EuiComboBox
+            <OptionListWithFieldStats
               fullWidth
               placeholder={i18n.translate('xpack.transform.stepDefineForm.sortPlaceholder', {
                 defaultMessage: 'Add a date field ...',
@@ -86,15 +84,19 @@ export const LatestFunctionForm: FC<LatestFunctionFormProps> = ({
               selectedOptions={
                 latestFunctionService.config.sort ? [latestFunctionService.config.sort] : []
               }
-              onChange={(selected) => {
-                latestFunctionService.updateLatestFunctionConfig({
-                  sort: { value: selected[0].value, label: selected[0].label as string },
-                });
+              onChange={(selected: DropDownLabel[]) => {
+                if (typeof selected[0].value === 'string') {
+                  latestFunctionService.updateLatestFunctionConfig({
+                    sort: {
+                      value: selected[0].value,
+                      label: selected[0].label?.toString(),
+                    },
+                  });
+                }
                 closeFlyout();
               }}
               isClearable={false}
               data-test-subj="transformWizardSortFieldSelector"
-              renderOption={renderOption}
             />
           )}
           {latestFunctionService.sortFieldOptions.length === 0 && (

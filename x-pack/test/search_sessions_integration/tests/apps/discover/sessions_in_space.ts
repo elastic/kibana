@@ -11,17 +11,17 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const spacesService = getService('spaces');
-  const security = getService('security');
+  const securityService = getService('security');
   const inspector = getService('inspector');
-  const PageObjects = getPageObjects([
-    'common',
-    'header',
-    'discover',
-    'visChart',
-    'security',
-    'timePicker',
-    'searchSessionsManagement',
-  ]);
+  const { common, header, discover, security, timePicker, searchSessionsManagement } =
+    getPageObjects([
+      'common',
+      'header',
+      'discover',
+      'security',
+      'timePicker',
+      'searchSessionsManagement',
+    ]);
   const browser = getService('browser');
   const searchSessions = getService('searchSessions');
   const kibanaServer = getService('kibanaServer');
@@ -33,11 +33,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async () => await load(['all']));
 
       it('Saves and restores a session', async () => {
-        await PageObjects.common.navigateToApp('discover', { basePath: 's/another-space' });
+        await common.navigateToApp('discover', { basePath: 's/another-space' });
 
-        await PageObjects.discover.selectIndexPattern('logstash-*');
+        await discover.selectIndexPattern('logstash-*');
 
-        await PageObjects.discover.waitForDocTableLoadingComplete();
+        await discover.waitForDocTableLoadingComplete();
 
         await searchSessions.expectState('completed');
         await searchSessions.save();
@@ -56,7 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // https://github.com/elastic/kibana/issues/106074#issuecomment-920462094
         await browser.refresh();
 
-        const searchSessionList = await PageObjects.searchSessionsManagement.getList();
+        const searchSessionList = await searchSessionsManagement.getList();
         const searchSessionItem = searchSessionList.find(
           (session) => session.id === savedSessionId
         );
@@ -66,35 +66,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // navigate to discover
         await searchSessionItem.view();
 
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.waitForDocTableLoadingComplete();
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitForDocTableLoadingComplete();
 
         // Check that session is restored
         await searchSessions.expectState('restored');
-        expect(await toasts.getToastCount()).to.be(0); // no session restoration related warnings
+        expect(await toasts.getCount()).to.be(0); // no session restoration related warnings
       });
     });
     describe('Disabled storing search sessions in space', () => {
       before(async () => await load(['read']));
 
       it("Doesn't allow to store a session", async () => {
-        await PageObjects.common.navigateToApp('discover', { basePath: 's/another-space' });
+        await common.navigateToApp('discover', { basePath: 's/another-space' });
 
-        await PageObjects.discover.selectIndexPattern('logstash-*');
+        await discover.selectIndexPattern('logstash-*');
 
-        await PageObjects.timePicker.setAbsoluteRange(
+        await timePicker.setAbsoluteRange(
           'Sep 1, 2015 @ 00:00:00.000',
           'Oct 1, 2015 @ 00:00:00.000'
         );
 
-        await PageObjects.discover.waitForDocTableLoadingComplete();
+        await discover.waitForDocTableLoadingComplete();
 
         await searchSessions.expectState('completed');
         await searchSessions.disabledOrFail();
       });
     });
   });
-  async function load(discover: string[]) {
+  async function load(discoverIDs: string[]) {
     await kibanaServer.importExport.load(
       `x-pack/test/functional/fixtures/kbn_archiver/dashboard/session_in_space`
     );
@@ -112,29 +112,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       { space: 'another-space' }
     );
 
-    await security.role.create('data_analyst', {
+    await securityService.role.create('data_analyst', {
       elasticsearch: {
         indices: [{ names: ['logstash-*'], privileges: ['all'] }],
       },
       kibana: [
         {
           feature: {
-            discover,
+            discover: discoverIDs,
           },
           spaces: ['another-space'],
         },
       ],
     });
 
-    await security.user.create('analyst', {
+    await securityService.user.create('analyst', {
       password: 'analyst-password',
       roles: ['data_analyst'],
       full_name: 'test user',
     });
 
-    await PageObjects.security.forceLogout();
+    await security.forceLogout();
 
-    await PageObjects.security.login('analyst', 'analyst-password', {
+    await security.login('analyst', 'analyst-password', {
       expectSpaceSelector: false,
     });
   }
@@ -143,9 +143,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       'x-pack/test/functional/fixtures/kbn_archiver/dashboard/session_in_space'
     );
     // NOTE: Logout needs to happen before anything else to avoid flaky behavior
-    await PageObjects.security.forceLogout();
-    await security.role.delete('data_analyst');
-    await security.user.delete('analyst');
+    await security.forceLogout();
+    await securityService.role.delete('data_analyst');
+    await securityService.user.delete('analyst');
     await spacesService.delete('another-space');
     await searchSessions.deleteAllSearchSessions();
   }

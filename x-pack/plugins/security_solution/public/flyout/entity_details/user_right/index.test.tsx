@@ -11,11 +11,8 @@ import { TestProviders } from '../../../common/mock';
 import type { UserPanelProps } from '.';
 import { UserPanel } from '.';
 
-import {
-  mockManagedUserData,
-  mockRiskScoreState,
-} from '../../../timelines/components/side_panel/new_user_detail/__mocks__';
-import { mockObservedUser } from './mocks';
+import { mockManagedUserData, mockObservedUser } from './mocks';
+import { mockRiskScoreState } from '../../shared/mocks';
 
 const mockProps: UserPanelProps = {
   userName: 'test',
@@ -34,12 +31,9 @@ jest.mock('../../../entity_analytics/api/hooks/use_risk_score', () => ({
 const mockedUseManagedUser = jest.fn().mockReturnValue(mockManagedUserData);
 const mockedUseObservedUser = jest.fn().mockReturnValue(mockObservedUser);
 
-jest.mock(
-  '../../../timelines/components/side_panel/new_user_detail/hooks/use_managed_user',
-  () => ({
-    useManagedUser: () => mockedUseManagedUser(),
-  })
-);
+jest.mock('../shared/hooks/use_managed_user', () => ({
+  useManagedUser: () => mockedUseManagedUser(),
+}));
 
 jest.mock('./hooks/use_observed_user', () => ({
   useObservedUser: () => mockedUseObservedUser(),
@@ -67,22 +61,6 @@ describe('UserPanel', () => {
     expect(getByTestId('user-panel-header')).toBeInTheDocument();
     expect(queryByTestId('securitySolutionFlyoutLoading')).not.toBeInTheDocument();
     expect(getByTestId('securitySolutionFlyoutNavigationExpandDetailButton')).toBeInTheDocument();
-  });
-
-  it('renders loading state when risk score is loading', () => {
-    mockedUseRiskScore.mockReturnValue({
-      ...mockRiskScoreState,
-      data: undefined,
-      loading: true,
-    });
-
-    const { getByTestId } = render(
-      <TestProviders>
-        <UserPanel {...mockProps} />
-      </TestProviders>
-    );
-
-    expect(getByTestId('securitySolutionFlyoutLoading')).toBeInTheDocument();
   });
 
   it('renders loading state when observed user is loading', () => {

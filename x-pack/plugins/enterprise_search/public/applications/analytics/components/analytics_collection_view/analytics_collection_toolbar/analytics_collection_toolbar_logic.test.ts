@@ -80,7 +80,7 @@ describe('AnalyticsCollectionToolbarLogic', () => {
 
       AnalyticsCollectionToolbarLogic.actions.onTimeRefresh();
 
-      expect(KibanaLogic.values.data.search.session.start).toHaveBeenCalled();
+      expect(KibanaLogic.values.data?.search.session.start).toHaveBeenCalled();
       expect(AnalyticsCollectionToolbarLogic.actions.setSearchSessionId).toHaveBeenCalledWith(
         'some-search-session-id'
       );

@@ -444,7 +444,10 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async setSortFieldValue(identificator: string, label: string) {
-      await comboBox.set('transformWizardSortFieldSelector > comboBoxInput', identificator);
+      await ml.commonUI.setOptionsListWithFieldStatsValue(
+        'transformWizardSortFieldSelector > comboBoxInput',
+        identificator
+      );
       await this.assertSortFieldInputValue(identificator);
     },
 
@@ -507,7 +510,10 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       expectedLabel: string,
       expectedIntervalLabel?: string
     ) {
-      await comboBox.set('transformGroupBySelection > comboBoxInput', identifier);
+      await ml.commonUI.setOptionsListWithFieldStatsValue(
+        'transformGroupBySelection > comboBoxInput',
+        identifier
+      );
       await this.assertGroupByInputValue([]);
       await this.assertGroupByEntryExists(index, expectedLabel, expectedIntervalLabel);
     },
@@ -582,7 +588,10 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       formData?: Record<string, any>,
       parentSelector = ''
     ) {
-      await comboBox.set(this.getAggComboBoxInputSelector(parentSelector), identifier);
+      await ml.commonUI.setOptionsListWithFieldStatsValue(
+        this.getAggComboBoxInputSelector(parentSelector),
+        identifier
+      );
       await this.assertAggregationInputValue([], parentSelector);
       await this.assertAggregationEntryExists(index, expectedLabel, parentSelector);
 
@@ -1178,10 +1187,10 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async assertErrorToastsNotExist() {
-      const toastCount = await toasts.getToastCount();
+      const toastCount = await toasts.getCount();
       // Toast element index starts at 1, not 0
       for (let toastIdx = 1; toastIdx < toastCount + 1; toastIdx++) {
-        const toast = await toasts.getToastElement(toastIdx);
+        const toast = await toasts.getElementByIndex(toastIdx);
         const isErrorToast = await toast.elementHasClass('euiToast--danger');
         expect(isErrorToast).to.eql(false, `Expected toast message to be successful, got error.`);
       }

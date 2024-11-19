@@ -4,15 +4,28 @@
     "classes": [],
     "functions": [],
     "interfaces": [],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "aiAssistantManagementSelection",
+        "id": "def-public.AIAssistantType",
+        "type": "Enum",
+        "tags": [],
+        "label": "AIAssistantType",
+        "description": [],
+        "path": "src/plugins/ai_assistant_management/selection/common/ai_assistant_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [],
     "objects": [],
     "setup": {
       "parentPluginId": "aiAssistantManagementSelection",
-      "id": "def-public.AiAssistantManagementSelectionPluginSetup",
+      "id": "def-public.AIAssistantManagementSelectionPluginPublicSetup",
       "type": "Interface",
       "tags": [],
-      "label": "AiAssistantManagementSelectionPluginSetup",
+      "label": "AIAssistantManagementSelectionPluginPublicSetup",
       "description": [],
       "path": "src/plugins/ai_assistant_management/selection/public/plugin.ts",
       "deprecated": false,
@@ -23,15 +36,33 @@
     },
     "start": {
       "parentPluginId": "aiAssistantManagementSelection",
-      "id": "def-public.AiAssistantManagementSelectionPluginStart",
+      "id": "def-public.AIAssistantManagementSelectionPluginPublicStart",
       "type": "Interface",
       "tags": [],
-      "label": "AiAssistantManagementSelectionPluginStart",
+      "label": "AIAssistantManagementSelectionPluginPublicStart",
       "description": [],
       "path": "src/plugins/ai_assistant_management/selection/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "aiAssistantManagementSelection",
+          "id": "def-public.AIAssistantManagementSelectionPluginPublicStart.aiAssistantType$",
+          "type": "Object",
+          "tags": [],
+          "label": "aiAssistantType$",
+          "description": [],
+          "signature": [
+            "Observable",
+            "<",
+            "AIAssistantType",
+            ">"
+          ],
+          "path": "src/plugins/ai_assistant_management/selection/public/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
       "lifecycle": "start",
       "initialIsOpen": true
     }

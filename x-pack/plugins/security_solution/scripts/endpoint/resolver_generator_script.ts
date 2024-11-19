@@ -14,13 +14,14 @@ import { CA_CERT_PATH } from '@kbn/dev-utils';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClientOptions } from '@kbn/test';
 import { KbnClient } from '@kbn/test';
+import { isServerlessKibanaFlavor } from '../../common/endpoint/utils/kibana_status';
 import { createToolingLogger } from '../../common/endpoint/data_loaders/utils';
 import { EndpointSecurityTestRolesLoader } from './common/role_and_user_loader';
 import { METADATA_DATASTREAM } from '../../common/endpoint/constants';
 import { EndpointMetadataGenerator } from '../../common/endpoint/data_generators/endpoint_metadata_generator';
 import { indexHostsAndAlerts } from '../../common/endpoint/index_data';
 import { ANCESTRY_LIMIT, EndpointDocGenerator } from '../../common/endpoint/generate_data';
-import { fetchStackVersion, isServerlessKibanaFlavor } from './common/stack_services';
+import { fetchStackVersion } from './common/stack_services';
 import { ENDPOINT_ALERTS_INDEX, ENDPOINT_EVENTS_INDEX } from './common/constants';
 
 main();

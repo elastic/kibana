@@ -6,7 +6,8 @@
  */
 
 import { EuiForm, EuiSpacer } from '@elastic/eui';
-import React, { FC, useCallback, useEffect, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
@@ -67,7 +68,7 @@ const TransformHealthRuleTrigger: FC<TransformHealthRuleTriggerProps> = ({
     <EuiForm
       data-test-subj={'transformHealthAlertingRuleForm'}
       invalidCallout={'none'}
-      error={formErrors}
+      error={formErrors as string[]}
       isInvalid={isFormInvalid}
     >
       <TransformSelectorControl

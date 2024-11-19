@@ -1,0 +1,6 @@
+{
+  "type": "test-helper",
+  "id": "@kbn/test-suites-src",
+  "owner": [],
+  "devOnly": true
+}

@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
+import { coreMock } from '@kbn/core/public/mocks';
 import { DataViewField, DataView, DataViewType } from '@kbn/data-views-plugin/public';
 import { IndexedFieldsTable } from './indexed_fields_table';
 import { getFieldInfo } from '../../utils';
@@ -28,8 +30,8 @@ jest.mock('./components/table', () => ({
 }));
 
 const helpers = {
-  editField: (fieldName: string) => {},
-  deleteField: (fieldName: string[]) => {},
+  editField: (_fieldName: string) => {},
+  deleteField: (_fieldName: string[]) => {},
   // getFieldInfo handles non rollups as well
   getFieldInfo,
 };
@@ -99,6 +101,8 @@ const fields = [
   },
 ].map(mockFieldToIndexPatternField);
 
+const startServices = coreMock.createStart();
+
 const mockedServices = {
   userEditPermission: false,
   openModal: () => ({ onClose: new Promise<void>(() => {}), close: async () => {} }),
@@ -119,6 +123,7 @@ describe('IndexedFieldsTable', () => {
         schemaFieldTypeFilter={[]}
         fieldFilter=""
         compositeRuntimeFields={{}}
+        startServices={startServices}
         {...mockedServices}
       />
     );
@@ -126,7 +131,7 @@ describe('IndexedFieldsTable', () => {
     await new Promise((resolve) => process.nextTick(resolve));
     component.update();
 
-    expect(component).toMatchSnapshot();
+    expect({ items: component.props().children.props.items }).toMatchSnapshot();
   });
 
   test('should filter based on the query bar', async () => {
@@ -142,6 +147,7 @@ describe('IndexedFieldsTable', () => {
         schemaFieldTypeFilter={[]}
         fieldFilter=""
         compositeRuntimeFields={{}}
+        startServices={startServices}
         {...mockedServices}
       />
     );
@@ -150,7 +156,7 @@ describe('IndexedFieldsTable', () => {
     component.setProps({ fieldFilter: 'Elast' });
     component.update();
 
-    expect(component).toMatchSnapshot();
+    expect({ items: component.props().children.props.items }).toMatchSnapshot();
   });
 
   test('should filter based on the type filter', async () => {
@@ -166,6 +172,7 @@ describe('IndexedFieldsTable', () => {
         schemaFieldTypeFilter={[]}
         fieldFilter=""
         compositeRuntimeFields={{}}
+        startServices={startServices}
         {...mockedServices}
       />
     );
@@ -174,7 +181,7 @@ describe('IndexedFieldsTable', () => {
     component.setProps({ indexedFieldTypeFilter: ['date'] });
     component.update();
 
-    expect(component).toMatchSnapshot();
+    expect({ items: component.props().children.props.items }).toMatchSnapshot();
   });
 
   test('should filter based on the schema filter', async () => {
@@ -190,6 +197,7 @@ describe('IndexedFieldsTable', () => {
         schemaFieldTypeFilter={[]}
         fieldFilter=""
         compositeRuntimeFields={{}}
+        startServices={startServices}
         {...mockedServices}
       />
     );
@@ -198,7 +206,7 @@ describe('IndexedFieldsTable', () => {
     component.setProps({ schemaFieldTypeFilter: ['runtime'] });
     component.update();
 
-    expect(component).toMatchSnapshot();
+    expect({ items: component.props().children.props.items }).toMatchSnapshot();
   });
 
   describe('IndexedFieldsTable with rollup index pattern', () => {
@@ -215,6 +223,7 @@ describe('IndexedFieldsTable', () => {
           schemaFieldTypeFilter={[]}
           fieldFilter=""
           compositeRuntimeFields={{}}
+          startServices={startServices}
           {...mockedServices}
         />
       );
@@ -222,7 +231,7 @@ describe('IndexedFieldsTable', () => {
       await new Promise((resolve) => process.nextTick(resolve));
       component.update();
 
-      expect(component).toMatchSnapshot();
+      expect({ items: component.props().children.props.items }).toMatchSnapshot();
     });
   });
 });

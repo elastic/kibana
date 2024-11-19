@@ -60,7 +60,7 @@ export function deserializeComponentTemplate(
     template,
     version,
     _meta,
-    isDeprecated: Boolean(deprecated === true),
+    deprecated,
     _kbnMeta: {
       usedBy: indexTemplatesToUsedBy[name] || [],
       isManaged: Boolean(_meta?.managed === true),
@@ -95,11 +95,12 @@ export function deserializeComponentTemplateList(
 export function serializeComponentTemplate(
   componentTemplateDeserialized: ComponentTemplateDeserialized
 ): ComponentTemplateSerialized {
-  const { version, template, _meta } = componentTemplateDeserialized;
+  const { version, template, _meta, deprecated } = componentTemplateDeserialized;
 
   return {
     version,
     template,
     _meta,
+    deprecated,
   };
 }

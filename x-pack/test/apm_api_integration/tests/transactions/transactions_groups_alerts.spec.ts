@@ -13,10 +13,10 @@ import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { AggregationType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { ApmRuleType } from '@kbn/rule-data-utils';
+import { waitForAlertsForRule } from '../alerts/helpers/wait_for_alerts_for_rule';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createApmRule, runRuleSoon, ApmAlertFields } from '../alerts/helpers/alerting_api_helper';
 import { waitForActiveRule } from '../alerts/helpers/wait_for_active_rule';
-import { waitForAlertsForRule } from '../alerts/helpers/wait_for_alerts_for_rule';
 import { cleanupRuleAndAlertState } from '../alerts/helpers/cleanup_rule_and_alert_state';
 
 type TransactionsGroupsMainStatistics =
@@ -25,7 +25,7 @@ type TransactionsGroupsMainStatistics =
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
   const supertest = getService('supertest');
   const es = getService('es');
   const serviceName = 'synth-go';
@@ -72,6 +72,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     return response.body as TransactionsGroupsMainStatistics;
   }
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177617
   registry.when('when data is loaded', { config: 'basic', archives: [] }, () => {
     describe('Alerts', () => {
       const transactions = [
@@ -106,7 +107,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .service({ name: serviceName, environment: 'production', agentName: 'go' })
           .instance('instance-a');
 
-        await synthtraceEsClient.index([
+        await apmSynthtraceEsClient.index([
           timerange(start, end)
             .interval('1m')
             .rate(1)
@@ -134,9 +135,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ]);
       });
 
-      after(() => synthtraceEsClient.clean());
+      after(() => apmSynthtraceEsClient.clean());
 
-      describe('Transaction groups with avg transaction duration alerts', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/198866
+      describe.skip('Transaction groups with avg transaction duration alerts', () => {
         let ruleId: string;
         let alerts: ApmAlertFields[];
 

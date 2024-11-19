@@ -44,105 +44,91 @@ const waitForPageTitleToBeShown = () => {
   cy.get(PAGE_TITLE).should('be.visible');
 };
 
-describe(
-  'Detections > Callouts',
-  { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] },
-  () => {
-    before(() => {
-      // First, we have to open the app on behalf of a privileged user in order to initialize it.
-      // Otherwise the app will be disabled and show a "welcome"-like page.
-      login();
-      visit(ALERTS_URL);
-      waitForPageTitleToBeShown();
-    });
+describe('Detections > Callouts', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
+  before(() => {
+    // First, we have to open the app on behalf of a privileged user in order to initialize it.
+    // Otherwise the app will be disabled and show a "welcome"-like page.
+    login();
+    visit(ALERTS_URL);
+    waitForPageTitleToBeShown();
+  });
 
-    context('indicating read-only access to resources', () => {
-      context('On Detections home page', () => {
-        beforeEach(() => {
-          loadPageAsReadOnlyUser(ALERTS_URL);
-        });
-
-        it('We show one primary callout', () => {
-          waitForCallOutToBeShown(MISSING_PRIVILEGES_CALLOUT, 'primary');
-        });
-
-        context('When a user clicks Dismiss on the callout', () => {
-          it('We hide it and persist the dismissal', () => {
-            waitForCallOutToBeShown(MISSING_PRIVILEGES_CALLOUT, 'primary');
-            dismissCallOut(MISSING_PRIVILEGES_CALLOUT);
-            reloadPage();
-            getCallOut(MISSING_PRIVILEGES_CALLOUT).should('not.exist');
-          });
-        });
+  context('indicating read-only access to resources', () => {
+    context('On Detections home page', () => {
+      beforeEach(() => {
+        loadPageAsReadOnlyUser(ALERTS_URL);
       });
 
-      // FYI: Rules Management check moved to ../detection_rules/all_rules_read_only.spec.ts
+      it('dismisses callout and persists its state', () => {
+        waitForCallOutToBeShown(MISSING_PRIVILEGES_CALLOUT, 'primary');
 
-      context('On Rule Details page', () => {
-        beforeEach(() => {
-          createRule(getNewRule()).then((rule) =>
-            loadPageAsReadOnlyUser(ruleDetailsUrl(rule.body.id))
-          );
-        });
+        dismissCallOut(MISSING_PRIVILEGES_CALLOUT);
+        reloadPage();
 
-        afterEach(() => {
-          deleteCustomRule();
-        });
-
-        it('We show one primary callout', () => {
-          waitForCallOutToBeShown(MISSING_PRIVILEGES_CALLOUT, 'primary');
-        });
-
-        context('When a user clicks Dismiss on the callouts', () => {
-          it('We hide them and persist the dismissal', () => {
-            waitForCallOutToBeShown(MISSING_PRIVILEGES_CALLOUT, 'primary');
-
-            dismissCallOut(MISSING_PRIVILEGES_CALLOUT);
-            reloadPage();
-
-            getCallOut(MISSING_PRIVILEGES_CALLOUT).should('not.exist');
-          });
-        });
+        getCallOut(MISSING_PRIVILEGES_CALLOUT).should('not.exist');
       });
     });
 
-    context('indicating read-write access to resources', () => {
-      context('On Detections home page', () => {
-        beforeEach(() => {
-          loadPageAsPlatformEngineer(ALERTS_URL);
-        });
+    // FYI: Rules Management check moved to ../detection_rules/all_rules_read_only.spec.ts
 
-        it('We show no callout', () => {
-          getCallOut(MISSING_PRIVILEGES_CALLOUT).should('not.exist');
-        });
+    context('On Rule Details page', () => {
+      beforeEach(() => {
+        createRule(getNewRule()).then((rule) =>
+          loadPageAsReadOnlyUser(ruleDetailsUrl(rule.body.id))
+        );
       });
 
-      context('On Rules Management page', () => {
-        beforeEach(() => {
-          login(ROLES.platform_engineer);
-          loadPageAsPlatformEngineer(RULES_MANAGEMENT_URL);
-        });
-
-        it('We show no callout', () => {
-          getCallOut(MISSING_PRIVILEGES_CALLOUT).should('not.exist');
-        });
+      afterEach(() => {
+        deleteCustomRule();
       });
 
-      context('On Rule Details page', () => {
-        beforeEach(() => {
-          createRule(getNewRule()).then((rule) =>
-            loadPageAsPlatformEngineer(ruleDetailsUrl(rule.body.id))
-          );
-        });
+      it('dismisses callout and persists its state', () => {
+        waitForCallOutToBeShown(MISSING_PRIVILEGES_CALLOUT, 'primary');
 
-        afterEach(() => {
-          deleteCustomRule();
-        });
+        dismissCallOut(MISSING_PRIVILEGES_CALLOUT);
+        reloadPage();
 
-        it('We show no callouts', () => {
-          getCallOut(MISSING_PRIVILEGES_CALLOUT).should('not.exist');
-        });
+        getCallOut(MISSING_PRIVILEGES_CALLOUT).should('not.exist');
       });
     });
-  }
-);
+  });
+
+  context('indicating read-write access to resources', () => {
+    context('On Detections home page', () => {
+      beforeEach(() => {
+        loadPageAsPlatformEngineer(ALERTS_URL);
+      });
+
+      it('We show no callout', () => {
+        getCallOut(MISSING_PRIVILEGES_CALLOUT).should('not.exist');
+      });
+    });
+
+    context('On Rules Management page', () => {
+      beforeEach(() => {
+        login(ROLES.platform_engineer);
+        loadPageAsPlatformEngineer(RULES_MANAGEMENT_URL);
+      });
+
+      it('We show no callout', () => {
+        getCallOut(MISSING_PRIVILEGES_CALLOUT).should('not.exist');
+      });
+    });
+
+    context('On Rule Details page', () => {
+      beforeEach(() => {
+        createRule(getNewRule()).then((rule) =>
+          loadPageAsPlatformEngineer(ruleDetailsUrl(rule.body.id))
+        );
+      });
+
+      afterEach(() => {
+        deleteCustomRule();
+      });
+
+      it('We show no callouts', () => {
+        getCallOut(MISSING_PRIVILEGES_CALLOUT).should('not.exist');
+      });
+    });
+  });
+});

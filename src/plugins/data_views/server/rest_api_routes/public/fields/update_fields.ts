@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -12,7 +13,8 @@ import { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { DataViewsService } from '../../../../common';
 import { handleErrors } from '../util/handle_errors';
-import { serializedFieldFormatSchema } from '../../../../common/schemas';
+import { serializedFieldFormatSchema } from '../../../schemas';
+import { MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH } from '../../../../common/constants';
 import { dataViewSpecSchema } from '../../schema';
 import { DataViewSpecRestResponse } from '../../route_types';
 import type {
@@ -25,6 +27,7 @@ import {
   SERVICE_KEY,
   SERVICE_KEY_LEGACY,
   INITIAL_REST_VERSION,
+  UPDATE_DATA_VIEW_FIELDS_DESCRIPTION,
 } from '../../../constants';
 
 interface UpdateFieldsArgs {
@@ -43,7 +46,7 @@ export const updateFields = async ({
   fields,
 }: UpdateFieldsArgs) => {
   usageCollection?.incrementCounter({ counterName });
-  const dataView = await dataViewsService.get(id);
+  const dataView = await dataViewsService.getDataViewLazy(id);
 
   const fieldNames = Object.keys(fields);
 
@@ -58,6 +61,11 @@ export const updateFields = async ({
     if (field.customLabel !== undefined) {
       changeCount++;
       dataView.setFieldCustomLabel(fieldName, field.customLabel);
+    }
+
+    if (field.customDescription !== undefined) {
+      changeCount++;
+      dataView.setFieldCustomDescription(fieldName, field.customDescription);
     }
 
     if (field.count !== undefined) {
@@ -85,6 +93,7 @@ export const updateFields = async ({
 
 interface FieldUpdateType {
   customLabel?: string | null;
+  customDescription?: string | null;
   count?: number | null;
   format?: SerializedFieldFormat | null;
 }
@@ -98,11 +107,19 @@ const fieldUpdateSchema = schema.object({
       })
     )
   ),
+  customDescription: schema.maybe(
+    schema.nullable(
+      schema.string({
+        minLength: 1,
+        maxLength: MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH,
+      })
+    )
+  ),
   count: schema.maybe(schema.nullable(schema.number())),
   format: schema.maybe(schema.nullable(serializedFieldFormatSchema)),
 });
 
-const updateFieldsActionRouteFactory = (path: string, serviceKey: string) => {
+const updateFieldsActionRouteFactory = (path: string, serviceKey: string, description?: string) => {
   return (
     router: IRouter,
     getStartServices: StartServicesAccessor<
@@ -111,7 +128,7 @@ const updateFieldsActionRouteFactory = (path: string, serviceKey: string) => {
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.versioned.post({ path, access: 'public' }).addVersion(
+    router.versioned.post({ path, access: 'public', description }).addVersion(
       {
         version: INITIAL_REST_VERSION,
         validate: {
@@ -137,9 +154,10 @@ const updateFieldsActionRouteFactory = (path: string, serviceKey: string) => {
           },
           response: {
             200: {
-              body: schema.object({
-                [serviceKey]: dataViewSpecSchema,
-              }),
+              body: () =>
+                schema.object({
+                  [serviceKey]: dataViewSpecSchema,
+                }),
             },
           },
         },
@@ -167,7 +185,7 @@ const updateFieldsActionRouteFactory = (path: string, serviceKey: string) => {
           });
 
           const body: Record<string, DataViewSpecRestResponse> = {
-            [serviceKey]: dataView.toSpec(),
+            [serviceKey]: await dataView.toSpec({ fieldParams: { fieldName: ['*'] } }),
           };
 
           return res.ok({
@@ -184,7 +202,8 @@ const updateFieldsActionRouteFactory = (path: string, serviceKey: string) => {
 
 export const registerUpdateFieldsRouteLegacy = updateFieldsActionRouteFactory(
   `${SPECIFIC_DATA_VIEW_PATH}/fields`,
-  SERVICE_KEY
+  SERVICE_KEY,
+  UPDATE_DATA_VIEW_FIELDS_DESCRIPTION
 );
 
 export const registerUpdateFieldsRoute = updateFieldsActionRouteFactory(

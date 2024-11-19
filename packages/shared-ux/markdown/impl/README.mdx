@@ -11,6 +11,7 @@ date: 2022-10-03
 
 This markdown component uses the **EuiMarkdownEditor** and **EuiMarkdownFormat** managed by `@elastic/eui`. If `readOnly` is set to true, and `markdownContent` or `children` are set, then the component renders **EuiMarkdownFormat** text. Otherwise the component will render the **EuiMarkdownEditor**. The height of the component can be set, but in order the control the width of the component, you can place the `<Markdown />` component in another component.
 Markdown extends all the EuiMarkdownEditorProps except for the `editorId`, `uiPlugins`, and `MarkdownFormatProps`.
+Like the legacy React `<Markdown>` component, `style` can be set but will only be passed to **EuiMarkdownFormat**.
 
 ## Component Properties 
 

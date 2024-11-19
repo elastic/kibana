@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { groupBy } from 'lodash';
@@ -20,6 +21,7 @@ import {
   type OverrideFieldGroupDetails,
   FieldsGroupNames,
   ExistenceFetchStatus,
+  AdditionalFieldGroups,
 } from '../types';
 import { useExistingFieldsReader } from './use_existing_fields';
 import {
@@ -43,6 +45,7 @@ export interface GroupedFieldsParams<T extends FieldListItem> {
   onSupportedFieldFilter?: (field: T) => boolean;
   onSelectedFieldFilter?: (field: T) => boolean;
   getNewFieldsBySpec?: UseNewFieldsParams<T>['getNewFieldsBySpec'];
+  additionalFieldGroups?: AdditionalFieldGroups<T>;
 }
 
 export interface GroupedFieldsResult<T extends FieldListItem> {
@@ -70,6 +73,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
   onSupportedFieldFilter,
   onSelectedFieldFilter,
   getNewFieldsBySpec,
+  additionalFieldGroups,
 }: GroupedFieldsParams<T>): GroupedFieldsResult<T> {
   const fieldsExistenceReader = useExistingFieldsReader();
   const fieldListFilters = useFieldFilters<T>({
@@ -182,6 +186,8 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
           .slice(0, popularFieldsLimit)
       : [];
 
+    const smartFields = additionalFieldGroups?.smartFields || [];
+
     let fieldGroupDefinitions: FieldListGroups<T> = {
       SpecialFields: {
         fields: groupedFields.specialFields,
@@ -244,7 +250,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
         defaultNoFieldsMessage: i18n.translate(
           'unifiedFieldList.useGroupedFields.noAvailableDataLabel',
           {
-            defaultMessage: `There are no available fields that contain data.`,
+            defaultMessage: `No available fields containing data.`,
           }
         ),
       },
@@ -305,6 +311,19 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
           }
         ),
       },
+      SmartFields: {
+        fields: smartFields,
+        fieldCount: smartFields.length,
+        isAffectedByGlobalFilter: false,
+        isAffectedByTimeFilter: false,
+        isInitiallyOpen: true,
+        showInAccordion: true,
+        hideDetails: false,
+        hideIfEmpty: true,
+        title: i18n.translate('unifiedFieldList.useGroupedFields.smartFieldsLabel', {
+          defaultMessage: 'Smart fields',
+        }),
+      },
     };
 
     // the fieldsExistenceInfoUnavailable check should happen only for dataview based
@@ -347,6 +366,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
     isAffectedByTimeFilter,
     popularFieldsLimit,
     sortedSelectedFields,
+    additionalFieldGroups,
   ]);
 
   const fieldGroups: FieldListGroups<T> = useMemo(() => {
@@ -413,6 +433,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
 const collator = new Intl.Collator(undefined, {
   sensitivity: 'base',
 });
+
 function sortFields<T extends FieldListItem>(fieldA: T, fieldB: T) {
   return collator.compare(fieldA.displayName || fieldA.name, fieldB.displayName || fieldB.name);
 }

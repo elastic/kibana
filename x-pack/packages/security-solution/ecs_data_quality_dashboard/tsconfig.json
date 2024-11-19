@@ -16,7 +16,6 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/ecs",
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/ui-theme",

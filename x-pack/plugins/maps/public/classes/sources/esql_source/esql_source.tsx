@@ -8,13 +8,18 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { tap } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import { getIndexPatternFromESQLQuery, getLimitFromESQLQuery } from '@kbn/esql-utils';
+import {
+  getIndexPatternFromESQLQuery,
+  getLimitFromESQLQuery,
+  getStartEndParams,
+  hasStartEndParams,
+} from '@kbn/esql-utils';
 import { buildEsQuery } from '@kbn/es-query';
 import type { Filter, Query } from '@kbn/es-query';
-import type { ESQLSearchParams, ESQLSearchReponse } from '@kbn/es-types';
+import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import { getEsQueryConfig } from '@kbn/data-service/src/es_query';
 import { getTime } from '@kbn/data-plugin/public';
 import { FIELD_ORIGIN, SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
@@ -28,6 +33,7 @@ import { isValidStringConfig } from '../../util/valid_string_config';
 import type { SourceEditorArgs } from '../source';
 import { AbstractVectorSource, getLayerFeaturesRequestName } from '../vector_source';
 import type { IVectorSource, GeoJsonWithMeta, SourceStatus } from '../vector_source';
+import type { IESSource } from '../es_source';
 import type { IField } from '../../fields/field';
 import { InlineField } from '../../fields/inline_field';
 import { getData, getUiSettings } from '../../../kibana_services';
@@ -44,7 +50,10 @@ export const sourceTitle = i18n.translate('xpack.maps.source.esqlSearchTitle', {
   defaultMessage: 'ES|QL',
 });
 
-export class ESQLSource extends AbstractVectorSource implements IVectorSource {
+export class ESQLSource
+  extends AbstractVectorSource
+  implements IVectorSource, Pick<IESSource, 'getIndexPatternId' | 'getGeoFieldName'>
+{
   readonly _descriptor: ESQLSourceDescriptor;
 
   static createDescriptor(descriptor: Partial<ESQLSourceDescriptor>): ESQLSourceDescriptor {
@@ -108,11 +117,11 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
   }
 
   getApplyGlobalQuery() {
-    return this._descriptor.narrowByGlobalSearch;
+    return this._descriptor.narrowByGlobalSearch || hasStartEndParams(this._descriptor.esql);
   }
 
   async isTimeAware() {
-    return this._descriptor.narrowByGlobalTime;
+    return this._descriptor.narrowByGlobalTime || hasStartEndParams(this._descriptor.esql);
   }
 
   getApplyGlobalTime() {
@@ -179,6 +188,14 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
       filters.push(extentFilter);
     }
 
+    const timeRange = requestMeta.timeslice
+      ? {
+          from: new Date(requestMeta.timeslice.from).toISOString(),
+          to: new Date(requestMeta.timeslice.to).toISOString(),
+          mode: 'absolute' as 'absolute',
+        }
+      : requestMeta.timeFilters;
+
     if (requestMeta.applyGlobalTime) {
       if (!this._descriptor.dateField) {
         throw new Error(
@@ -188,19 +205,18 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
           })
         );
       }
-      const timeRange = requestMeta.timeslice
-        ? {
-            from: new Date(requestMeta.timeslice.from).toISOString(),
-            to: new Date(requestMeta.timeslice.to).toISOString(),
-            mode: 'absolute' as 'absolute',
-          }
-        : requestMeta.timeFilters;
       const timeFilter = getTime(undefined, timeRange, {
         fieldName: this._descriptor.dateField,
       });
+
       if (timeFilter) {
         filters.push(timeFilter);
       }
+    }
+
+    const namedParams = getStartEndParams(this._descriptor.esql, timeRange);
+    if (namedParams.length) {
+      params.params = namedParams;
     }
 
     params.filter = buildEsQuery(undefined, query, filters, getEsQueryConfig(getUiSettings()));
@@ -234,7 +250,7 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
 
     requestResponder.ok({ json: rawResponse, requestParams });
 
-    const esqlSearchResponse = rawResponse as unknown as ESQLSearchReponse;
+    const esqlSearchResponse = rawResponse as unknown as ESQLSearchResponse;
     const resultsCount = esqlSearchResponse.values.length;
     return {
       data: convertToGeoJson(esqlSearchResponse),
@@ -324,5 +340,9 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
 
   getIndexPatternId() {
     return this._descriptor.dataViewId;
+  }
+
+  getGeoFieldName() {
+    return this._descriptor.geoField;
   }
 }

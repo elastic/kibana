@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -23,10 +24,13 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import {
+  composeValidators,
+  requiredValidator,
+  timeIntervalInputValidator,
+} from '@kbn/ml-validators';
 import type { AlertingApiService } from '../../application/services/ml_api_service/alerting';
-import { MlAnomalyDetectionAlertParams, PreviewResponse } from '../../../common/types/alerts';
-import { composeValidators } from '../../../common';
-import { requiredValidator, timeIntervalInputValidator } from '../../../common/util/validators';
+import type { MlAnomalyDetectionAlertParams, PreviewResponse } from '../../../common/types/alerts';
 import { invalidTimeIntervalMessage } from '../../application/jobs/new_job/common/job_validator/util';
 import { ALERT_PREVIEW_SAMPLE_SIZE } from '../../../common/constants/alerts';
 

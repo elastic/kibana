@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { type ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { EndpointHeartbeat } from '@kbn/security-solution-plugin/common/endpoint/types';
-import { ENDPOINT_HEARTBEAT_INDEX } from '@kbn/security-solution-plugin/common/endpoint/constants';
 
-import { ProductLine, ProductTier } from '../../../common/product';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { ENDPOINT_HEARTBEAT_INDEX_PATTERN } from '@kbn/security-solution-plugin/common/endpoint/constants';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import type { ServerlessSecurityConfig } from '../../config';
+
+import { ProductLine, ProductTier } from '../../../common/product';
 import { METERING_TASK } from '../constants/metering';
 
 import { EndpointMeteringService } from './metering_service';
@@ -59,7 +61,7 @@ describe('EndpointMeteringService', () => {
       hits: {
         hits: [
           {
-            _index: ENDPOINT_HEARTBEAT_INDEX,
+            _index: ENDPOINT_HEARTBEAT_INDEX_PATTERN,
             _id: 'test-heartbeat-doc-id',
             _source: {
               agent: {
@@ -93,9 +95,9 @@ describe('EndpointMeteringService', () => {
       };
       (args.esClient as ElasticsearchClientMock).search.mockResolvedValueOnce(esSearchResponse);
       const endpointMeteringService = new EndpointMeteringService();
-      const usageRecords = await endpointMeteringService.getUsageRecords(args);
+      const { records } = await endpointMeteringService.getUsageRecords(args);
 
-      expect(usageRecords[0]).toEqual({
+      expect(records[0]).toEqual({
         id: `endpoint-${agentId}-${timestamp.toISOString()}`,
         usage_timestamp: heartbeatDocSrc!.event.ingested,
         creation_timestamp: heartbeatDocSrc!.event.ingested,
@@ -133,13 +135,13 @@ describe('EndpointMeteringService', () => {
       };
       (args.esClient as ElasticsearchClientMock).search.mockResolvedValueOnce(esSearchResponse);
       const endpointMeteringService = new EndpointMeteringService();
-      const usageRecords = await endpointMeteringService.getUsageRecords(args);
+      const { records } = await endpointMeteringService.getUsageRecords(args);
       const usageTypePostfix =
         productLine === ProductLine.endpoint
           ? productLine
           : `${ProductLine.cloud}_${ProductLine.endpoint}`;
 
-      expect(usageRecords[0]).toEqual({
+      expect(records[0]).toEqual({
         id: `endpoint-${agentId}-${timestamp.toISOString()}`,
         usage_timestamp: heartbeatDocSrc!.event.ingested,
         creation_timestamp: heartbeatDocSrc!.event.ingested,

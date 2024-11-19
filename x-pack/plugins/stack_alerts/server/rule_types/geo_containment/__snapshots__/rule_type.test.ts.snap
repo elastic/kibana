@@ -12,11 +12,11 @@ Object {
       "name": "entityDateTime",
     },
     Object {
-      "description": "The id of the contained entity document",
+      "description": "The ID of the contained entity document",
       "name": "entityDocumentId",
     },
     Object {
-      "description": "The alert interval end time this change was recorded",
+      "description": "The end of the check interval when the alert occurred",
       "name": "detectionDateTime",
     },
     Object {
@@ -24,7 +24,7 @@ Object {
       "name": "entityLocation",
     },
     Object {
-      "description": "The id of the boundary containing the entity. Value not set for recovered alerts",
+      "description": "The ID of the boundary containing the entity. Value not set for recovered alerts",
       "name": "containingBoundaryId",
     },
     Object {

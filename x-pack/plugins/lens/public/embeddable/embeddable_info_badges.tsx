@@ -20,6 +20,7 @@ import React, { Fragment } from 'react';
 import { useState } from 'react';
 import type { UserMessage } from '../types';
 import './embeddable_info_badges.scss';
+import { getLongMessage } from '../user_messages_utils';
 
 export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }) => {
   const { euiTheme } = useEuiTheme();
@@ -36,20 +37,13 @@ export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }
       count: messages.length,
     },
   });
-
-  const messagesWithoutUniqueId = messages.filter(({ uniqueId }) => !uniqueId);
   // compact messages be grouping longMessage together on matching unique-id
-  const messagesGroupedByUniqueId: Record<string, UserMessage[]> = {};
+  const groupedMessages: Map<string, UserMessage[]> = new Map();
   for (const message of messages) {
-    if (message.uniqueId) {
-      if (!messagesGroupedByUniqueId[message.uniqueId]) {
-        messagesGroupedByUniqueId[message.uniqueId] = [];
-      }
-      messagesGroupedByUniqueId[message.uniqueId].push(message);
-    }
+    const group = groupedMessages.get(message.uniqueId) ?? [];
+    group.push(message);
+    groupedMessages.set(message.uniqueId, group);
   }
-  const messageCount =
-    messagesWithoutUniqueId.length + Object.keys(messagesGroupedByUniqueId).length;
   return (
     <EuiPopover
       panelPaddingSize="none"
@@ -73,7 +67,7 @@ export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }
             `}
             iconType="wrench"
           >
-            {messageCount}
+            {groupedMessages.size}
           </EuiButtonEmpty>
         </EuiToolTip>
       }
@@ -86,39 +80,16 @@ export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }
         `}
         data-test-subj="lns-feature-badges-panel"
       >
-        {messagesWithoutUniqueId.map(({ shortMessage, longMessage }, index) => {
-          return (
-            <Fragment key={`${shortMessage}-${index}`}>
-              {index ? (
-                <EuiHorizontalRule
-                  margin="none"
-                  data-test-subj="lns-feature-badges-horizontal-rule"
-                />
-              ) : null}
-              <aside
-                css={css`
-                  padding: ${euiTheme.size.base};
-                `}
-              >
-                <EuiTitle size="xxs" css={css`color=${euiTheme.colors.title}`}>
-                  <h3>{shortMessage}</h3>
-                </EuiTitle>
-                <ul className="lnsEmbeddablePanelFeatureList">{longMessage}</ul>
-              </aside>
-            </Fragment>
-          );
-        })}
-        {Object.entries(messagesGroupedByUniqueId).map(([uniqueId, messagesByUniqueId], index) => {
-          const hasHorizontalRule = messagesWithoutUniqueId.length || index;
-          const [{ shortMessage }] = messagesByUniqueId;
+        {[...groupedMessages.entries()].map(([uniqueId, messageGroup], index) => {
+          const [{ shortMessage }] = messageGroup;
           return (
             <Fragment key={uniqueId}>
-              {hasHorizontalRule ? (
+              {index > 0 && (
                 <EuiHorizontalRule
                   margin="none"
                   data-test-subj="lns-feature-badges-horizontal-rule"
                 />
-              ) : null}
+              )}
               <aside
                 css={css`
                   padding: ${euiTheme.size.base};
@@ -128,8 +99,8 @@ export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }
                   <h3>{shortMessage}</h3>
                 </EuiTitle>
                 <ul className="lnsEmbeddablePanelFeatureList">
-                  {messagesByUniqueId.map(({ longMessage }, i) => (
-                    <Fragment key={`${uniqueId}-${i}`}>{longMessage}</Fragment>
+                  {messageGroup.map((message, i) => (
+                    <Fragment key={`${uniqueId}-${i}`}>{getLongMessage(message)}</Fragment>
                   ))}
                 </ul>
               </aside>

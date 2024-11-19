@@ -26,7 +26,7 @@ describe('Cloud Links Plugin - public', () => {
 
   describe('start', () => {
     beforeEach(() => {
-      plugin.setup();
+      plugin.setup(coreMock.createSetup());
     });
 
     afterEach(() => {

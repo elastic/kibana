@@ -36,15 +36,10 @@ describe('useNetworkTopNFlow', () => {
       result: {
         edges: [],
         totalCount: -1,
-        pageInfo: {
-          activePage: 0,
-          fakeTotalCount: 0,
-          showMorePagesIndicator: false,
-        },
       },
       search: mockSearch,
       refetch: jest.fn(),
-      inspect: {},
+      inspect: { dsl: [], response: [] },
     });
   });
 
@@ -77,7 +72,11 @@ describe('useNetworkTopNFlow', () => {
     });
     localProps.skip = true;
     act(() => rerender());
-    expect(mockUseSearchStrategy).toHaveBeenCalledTimes(3);
-    expect(mockUseSearchStrategy.mock.calls[2][0].abort).toEqual(true);
+
+    // there are 2 calls inside the hook, 3 renders for each call
+    expect(mockUseSearchStrategy).toHaveBeenCalledTimes(6);
+    // last two calls are the ones that are aborted
+    expect(mockUseSearchStrategy.mock.calls[4][0].abort).toEqual(true);
+    expect(mockUseSearchStrategy.mock.calls[5][0].abort).toEqual(true);
   });
 });

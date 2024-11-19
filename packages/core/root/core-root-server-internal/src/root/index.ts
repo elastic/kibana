@@ -1,20 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ConnectableObservable, Subscription } from 'rxjs';
-import {
-  first,
-  publishReplay,
-  switchMap,
-  concatMap,
-  tap,
-  distinctUntilChanged,
-} from 'rxjs/operators';
+import { first, publishReplay, switchMap, concatMap, tap, distinctUntilChanged } from 'rxjs';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import type { Env, RawConfigurationProvider } from '@kbn/config';
 import { LoggingConfigType, LoggingSystem } from '@kbn/core-logging-server-internal';

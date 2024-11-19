@@ -7,7 +7,8 @@
 
 import { cloneDeep } from 'lodash/fp';
 
-import { DataProviderType, EXISTS_OPERATOR, IS_OPERATOR } from './data_providers/data_provider';
+import { EXISTS_OPERATOR, IS_OPERATOR } from './data_providers/data_provider';
+import { DataProviderTypeEnum } from '../../../../common/api/timeline';
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
 
 import {
@@ -16,6 +17,7 @@ import {
   buildIsOneOfQueryMatch,
   buildIsQueryMatch,
   handleIsOperator,
+  isFullScreen,
   isPrimitiveArray,
   showGlobalFilters,
 } from './helpers';
@@ -33,7 +35,7 @@ describe('Build KQL Query', () => {
 
   test('Build KQL query with one template data provider', () => {
     const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
-    dataProviders[0].type = DataProviderType.template;
+    dataProviders[0].type = DataProviderTypeEnum.template;
     const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
     expect(cleanUpKqlQuery(kqlQuery)).toEqual('name :*');
   });
@@ -133,14 +135,14 @@ describe('Build KQL Query', () => {
 
   test('Build KQL query with two data provider (first is template)', () => {
     const dataProviders = cloneDeep(mockDataProviders.slice(0, 2));
-    dataProviders[0].type = DataProviderType.template;
+    dataProviders[0].type = DataProviderTypeEnum.template;
     const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
     expect(cleanUpKqlQuery(kqlQuery)).toEqual('(name :*) or (name : "Provider 2")');
   });
 
   test('Build KQL query with two data provider (second is template)', () => {
     const dataProviders = cloneDeep(mockDataProviders.slice(0, 2));
-    dataProviders[1].type = DataProviderType.template;
+    dataProviders[1].type = DataProviderTypeEnum.template;
     const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
     expect(cleanUpKqlQuery(kqlQuery)).toEqual('(name : "Provider 1") or (name :*)');
   });
@@ -388,6 +390,45 @@ describe('isStringOrNumberArray', () => {
           value: [],
         })
       ).toBe("kibana.alert.worflow_status : ''");
+    });
+  });
+});
+
+describe('isFullScreen', () => {
+  describe('globalFullScreen is false', () => {
+    it('should return false if isActiveTimelines is false', () => {
+      const result = isFullScreen({
+        globalFullScreen: false,
+        isActiveTimelines: false,
+        timelineFullScreen: true,
+      });
+      expect(result).toBe(false);
+    });
+    it('should return false if timelineFullScreen is false', () => {
+      const result = isFullScreen({
+        globalFullScreen: false,
+        isActiveTimelines: true,
+        timelineFullScreen: false,
+      });
+      expect(result).toBe(false);
+    });
+  });
+  describe('globalFullScreen is true', () => {
+    it('should return true if isActiveTimelines is true and timelineFullScreen is true', () => {
+      const result = isFullScreen({
+        globalFullScreen: true,
+        isActiveTimelines: true,
+        timelineFullScreen: true,
+      });
+      expect(result).toBe(true);
+    });
+    it('should return true if isActiveTimelines is false', () => {
+      const result = isFullScreen({
+        globalFullScreen: true,
+        isActiveTimelines: false,
+        timelineFullScreen: false,
+      });
+      expect(result).toBe(true);
     });
   });
 });

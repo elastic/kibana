@@ -38,9 +38,11 @@ import type {
   WrapSuppressedHits,
   OverrideBodyQuery,
   RunOpts,
+  CreateRuleOptions,
 } from '../../types';
 import type { CompleteRule, ThreatRuleParams } from '../../../rule_schema';
 import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
+import type { ExperimentalFeatures } from '../../../../../../common';
 
 export type SortOrderOrUndefined = 'asc' | 'desc' | undefined;
 
@@ -76,9 +78,10 @@ export interface CreateThreatSignalsOptions {
   secondaryTimestamp?: string;
   exceptionFilter: Filter | undefined;
   unprocessedExceptions: ExceptionListItemSchema[];
-  inputIndexFields: DataViewFieldBase[];
   runOpts: RunOpts<ThreatRuleParams>;
   licensing: LicensingPluginSetup;
+  experimentalFeatures: ExperimentalFeatures;
+  scheduleNotificationResponseActionsService: CreateRuleOptions['scheduleNotificationResponseActionsService'];
 }
 
 export interface CreateThreatSignalOptions {
@@ -122,6 +125,7 @@ export interface CreateThreatSignalOptions {
   runOpts: RunOpts<ThreatRuleParams>;
   sortOrder?: SortOrderOrUndefined;
   isAlertSuppressionActive: boolean;
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 export interface CreateEventSignalOptions {
@@ -166,9 +170,11 @@ export interface CreateEventSignalOptions {
   runOpts: RunOpts<ThreatRuleParams>;
   sortOrder?: SortOrderOrUndefined;
   isAlertSuppressionActive: boolean;
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 type EntryKey = 'field' | 'value';
+
 export interface BuildThreatMappingFilterOptions {
   chunkSize?: number;
   threatList: ThreatListItem[];
@@ -270,6 +276,7 @@ interface BaseThreatNamedQuery {
   value: string;
   queryType: string;
 }
+
 export interface ThreatMatchNamedQuery extends BaseThreatNamedQuery {
   id: string;
   index: string;
@@ -322,6 +329,7 @@ export interface EventDoc {
 }
 
 export type EventItem = estypes.SearchHit<EventDoc>;
+
 export interface EventCountOptions {
   esClient: ElasticsearchClient;
   index: string[];

@@ -7,13 +7,17 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import {
+  getTransformStatsQuerySchema,
+  type GetTransformStatsQuerySchema,
+} from '../../api_schemas/transforms_stats';
 import { addInternalBasePath } from '../../../../common/constants';
 
 import type { RouteDependencies } from '../../../types';
 
 import { routeHandler } from './route_handler';
 
-export function registerRoute({ router, license }: RouteDependencies) {
+export function registerRoute({ router, getLicense }: RouteDependencies) {
   /**
    * @apiGroup Transforms
    *
@@ -26,13 +30,33 @@ export function registerRoute({ router, license }: RouteDependencies) {
       path: addInternalBasePath('transforms/_stats'),
       access: 'internal',
     })
-    .addVersion(
+    .addVersion<
+      estypes.TransformGetTransformStatsResponse,
+      GetTransformStatsQuerySchema,
+      undefined
+    >(
       {
         version: '1',
-        validate: false,
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'This route is opted out from authorization because permissions will be checked by elasticsearch',
+          },
+        },
+        validate: {
+          request: {
+            query: getTransformStatsQuerySchema,
+          },
+        },
       },
-      license.guardApiRoute<estypes.TransformGetTransformStatsResponse, undefined, undefined>(
-        routeHandler
-      )
+      async (ctx, request, response) => {
+        const license = await getLicense();
+        return license.guardApiRoute<
+          estypes.TransformGetTransformStatsResponse,
+          GetTransformStatsQuerySchema,
+          undefined
+        >(routeHandler)(ctx, request, response);
+      }
     );
 }

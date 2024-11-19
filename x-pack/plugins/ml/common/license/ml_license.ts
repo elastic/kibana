@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { ILicense } from '@kbn/licensing-plugin/common/types';
-import { distinctUntilChanged, map } from 'rxjs/operators';
+import type { Observable, Subscription } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import { distinctUntilChanged, map } from 'rxjs';
 import { isEqual } from 'lodash';
 import { PLUGIN_ID } from '../constants/app';
 
@@ -134,7 +135,7 @@ export function isTrialLicense(license: ILicense) {
 }
 
 export function isMinimumLicense(license: ILicense) {
-  return license.check(PLUGIN_ID, MINIMUM_LICENSE).state === 'valid';
+  return license.check(PLUGIN_ID, MINIMUM_LICENSE).state === 'valid' || license.isAvailable;
 }
 
 export function isMlEnabled(license: ILicense) {

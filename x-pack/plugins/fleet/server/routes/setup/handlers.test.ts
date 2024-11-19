@@ -14,6 +14,7 @@ import { RegistryError } from '../../errors';
 import {
   createAppContextStartContractMock,
   createPackagePolicyServiceMock,
+  createUninstallTokenServiceMock,
   xpackMocks,
 } from '../../mocks';
 import { agentServiceMock } from '../../services/agents/agent_service.mock';
@@ -24,6 +25,7 @@ import { hasFleetServers } from '../../services/fleet_server';
 import { createFleetAuthzMock } from '../../../common/mocks';
 
 import { fleetSetupHandler, getFleetStatusHandler } from './handlers';
+import { FleetSetupResponseSchema, GetAgentsSetupResponseSchema } from '.';
 
 jest.mock('../../services/setup', () => {
   return {
@@ -45,6 +47,10 @@ describe('FleetSetupHandler', () => {
     context = {
       ...xpackMocks.createRequestHandlerContext(),
       fleet: {
+        uninstallTokenService: {
+          asCurrentUser: createUninstallTokenServiceMock(),
+        },
+        getAllSpaces: jest.fn(),
         agentClient: {
           asCurrentUser: agentServiceMock.createClient(),
           asInternalUser: agentServiceMock.createClient(),
@@ -89,6 +95,8 @@ describe('FleetSetupHandler', () => {
     };
     expect(response.customError).toHaveBeenCalledTimes(0);
     expect(response.ok).toHaveBeenCalledWith({ body: expectedBody });
+    const validationResp = FleetSetupResponseSchema.validate(expectedBody);
+    expect(validationResp).toEqual(expectedBody);
   });
 
   it('POST /setup fails w/500 on custom error', async () => {
@@ -129,6 +137,10 @@ describe('FleetStatusHandler', () => {
     context = {
       ...xpackMocks.createRequestHandlerContext(),
       fleet: {
+        uninstallTokenService: {
+          asCurrentUser: createUninstallTokenServiceMock(),
+        },
+        getAllSpaces: jest.fn(),
         agentClient: {
           asCurrentUser: agentServiceMock.createClient(),
           asInternalUser: agentServiceMock.createClient(),
@@ -171,6 +183,8 @@ describe('FleetStatusHandler', () => {
 
     const expectedBody = {
       isReady: true,
+      is_secrets_storage_enabled: false,
+      is_space_awareness_enabled: false,
       missing_optional_features: [],
       missing_requirements: [],
     };
@@ -191,11 +205,15 @@ describe('FleetStatusHandler', () => {
 
     const expectedBody = {
       isReady: false,
+      is_secrets_storage_enabled: false,
+      is_space_awareness_enabled: false,
       missing_optional_features: [],
       missing_requirements: ['api_keys', 'fleet_server'],
     };
     expect(response.customError).toHaveBeenCalledTimes(0);
     expect(response.ok).toHaveBeenCalledWith({ body: expectedBody });
+    const validationResp = GetAgentsSetupResponseSchema.validate(expectedBody);
+    expect(validationResp).toEqual(expectedBody);
   });
 
   it('POST /status  w/200 with fleet server standalone', async () => {
@@ -218,6 +236,8 @@ describe('FleetStatusHandler', () => {
 
     const expectedBody = {
       isReady: true,
+      is_secrets_storage_enabled: false,
+      is_space_awareness_enabled: false,
       missing_optional_features: [],
       missing_requirements: [],
     };

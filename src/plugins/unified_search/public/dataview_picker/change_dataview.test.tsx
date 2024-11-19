@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -16,8 +17,8 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { ChangeDataView } from './change_dataview';
 import { DataViewSelector } from './data_view_selector';
-import { dataViewMock } from './mocks/dataview';
-import { DataViewPickerPropsExtended, TextBasedLanguages } from './data_view_picker';
+import { dataViewMock, dataViewMockEsql } from './mocks/dataview';
+import { DataViewPickerProps } from './data_view_picker';
 
 describe('DataView component', () => {
   const createMockWebStorage = () => ({
@@ -43,7 +44,7 @@ describe('DataView component', () => {
   };
 
   function wrapDataViewComponentInContext(
-    testProps: DataViewPickerPropsExtended,
+    testProps: DataViewPickerProps,
     storageValue: boolean,
     uiSettingValue: boolean = false
   ) {
@@ -75,7 +76,7 @@ describe('DataView component', () => {
       </I18nProvider>
     );
   }
-  let props: DataViewPickerPropsExtended;
+  let props: DataViewPickerProps;
   beforeEach(() => {
     props = {
       currentDataViewId: 'dataview-1',
@@ -86,7 +87,6 @@ describe('DataView component', () => {
         'data-test-subj': 'dataview-trigger',
       },
       onChangeDataView: jest.fn(),
-      onTextLangQuerySubmit: jest.fn(),
     };
   });
 
@@ -132,68 +132,7 @@ describe('DataView component', () => {
     expect(addDataViewSpy).toHaveBeenCalled();
   });
 
-  it('should render the text based languages panels if languages are given', async () => {
-    const component = mount(
-      wrapDataViewComponentInContext(
-        {
-          ...props,
-          textBasedLanguages: [TextBasedLanguages.ESQL],
-          textBasedLanguage: TextBasedLanguages.ESQL,
-        },
-        false
-      )
-    );
-    findTestSubject(component, 'dataview-trigger').simulate('click');
-    const text = component.find('[data-test-subj="select-text-based-language-panel"]');
-    expect(text.length).not.toBe(0);
-  });
-
-  it('should cleanup the query is on text based mode and add new dataview', async () => {
-    const component = mount(
-      wrapDataViewComponentInContext(
-        {
-          ...props,
-          onDataViewCreated: jest.fn(),
-          textBasedLanguages: [TextBasedLanguages.ESQL, TextBasedLanguages.SQL],
-          textBasedLanguage: TextBasedLanguages.SQL,
-        },
-        false
-      )
-    );
-    findTestSubject(component, 'dataview-trigger').simulate('click');
-    component.find('[data-test-subj="dataview-create-new"]').first().simulate('click');
-    expect(props.onTextLangQuerySubmit).toHaveBeenCalled();
-  });
-
-  it('should not propagate the adHoc dataviews for text based mode', async () => {
-    const component = mount(
-      wrapDataViewComponentInContext(
-        {
-          ...props,
-          onDataViewCreated: jest.fn(),
-          textBasedLanguages: [TextBasedLanguages.ESQL, TextBasedLanguages.SQL],
-          textBasedLanguage: TextBasedLanguages.ESQL,
-          savedDataViews: [
-            {
-              id: 'dataview-1',
-              title: 'dataview-1',
-            },
-          ],
-          adHocDataViews: [dataViewMock],
-        },
-        false
-      )
-    );
-    findTestSubject(component, 'dataview-trigger').simulate('click');
-    expect(component.find(DataViewSelector).prop('dataViewsList')).toStrictEqual([
-      {
-        id: 'dataview-1',
-        title: 'dataview-1',
-      },
-    ]);
-  });
-
-  it('should propagate the adHoc dataviews for dataview mode', async () => {
+  it('should properly handle ad hoc data views', async () => {
     const component = mount(
       wrapDataViewComponentInContext(
         {
@@ -220,6 +159,40 @@ describe('DataView component', () => {
         id: 'the-data-view-id',
         title: 'the-data-view-title',
         name: 'the-data-view',
+        type: 'default',
+        isAdhoc: true,
+      },
+    ]);
+  });
+
+  it('should properly handle ES|QL ad hoc data views', async () => {
+    const component = mount(
+      wrapDataViewComponentInContext(
+        {
+          ...props,
+          onDataViewCreated: jest.fn(),
+          savedDataViews: [
+            {
+              id: 'dataview-1',
+              title: 'dataview-1',
+            },
+          ],
+          adHocDataViews: [dataViewMockEsql],
+        },
+        false
+      )
+    );
+    findTestSubject(component, 'dataview-trigger').simulate('click');
+    expect(component.find(DataViewSelector).prop('dataViewsList')).toStrictEqual([
+      {
+        id: 'dataview-1',
+        title: 'dataview-1',
+      },
+      {
+        id: 'the-data-view-esql-id',
+        title: 'the-data-view-esql-title',
+        name: 'the-data-view-esql',
+        type: 'esql',
         isAdhoc: true,
       },
     ]);

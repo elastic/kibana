@@ -27,11 +27,16 @@ const OverlayRootContainer = styled.div`
   top: var(--euiFixedHeadersOffset, 0);
   bottom: 0;
   right: 0;
+  left: var(--euiCollapsibleNavOffset, 0);
 
+  width: calc(100% - var(--euiCollapsibleNavOffset, 0));
   height: calc(100% - var(--euiFixedHeadersOffset, 0));
-  width: 100%;
 
-  z-index: ${({ theme: { eui } }) => eui.euiZFlyout};
+  border-left: 1px solid ${({ theme: { eui } }) => eui.euiColorLightestShade};
+
+  z-index: ${({ theme: { eui } }) =>
+    eui.euiZFlyout +
+    3}; // we need to have this response div rendered above the timeline flyout (with z-index at 1002)
 
   background-color: ${({ theme: { eui } }) => eui.euiColorEmptyShade};
 
@@ -195,9 +200,9 @@ export const PageOverlay = memo<PageOverlayProps>(
     const isMounted = useIsMounted();
     const showInFullScreen = useHasFullScreenContent();
     const [openedOnPathName, setOpenedOnPathName] = useState<null | string>(null);
-    const portalEleRef = useRef<Node>();
+    const portalEleRef = useRef<HTMLElement | null>();
 
-    const setPortalEleRef: EuiPortalProps['portalRef'] = useCallback((node) => {
+    const setPortalEleRef = useCallback<NonNullable<EuiPortalProps['portalRef']>>((node) => {
       portalEleRef.current = node;
     }, []);
 

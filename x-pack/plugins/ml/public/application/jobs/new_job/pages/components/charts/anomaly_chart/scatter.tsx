@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
+import type { LineSeriesStyle, RecursivePartial } from '@elastic/charts';
 import { LineSeries, ScaleType, CurveType } from '@elastic/charts';
-import { seriesStyle, useChartColors } from '../common/settings';
+import { lineSeriesStyle, useChartColors } from '../common/settings';
 
 interface Props {
   chartData: any[];
@@ -15,15 +17,15 @@ interface Props {
 
 const SPEC_ID = 'scatter';
 
-const scatterSeriesStyle = {
-  ...seriesStyle,
+const scatterSeriesStyle: RecursivePartial<LineSeriesStyle> = {
+  ...lineSeriesStyle,
   line: {
-    ...seriesStyle.line,
+    ...lineSeriesStyle.line,
     visible: false,
   },
   point: {
-    ...seriesStyle.point,
-    visible: true,
+    ...lineSeriesStyle.point,
+    visible: 'always',
   },
 };
 

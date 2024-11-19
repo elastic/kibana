@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
-import type { PublishesPanelTitle } from '@kbn/presentation-publishing';
+import { getPanelTitle, type PublishesPanelTitle } from '@kbn/presentation-publishing';
 import {
   ChartActionContext,
   isRangeSelectTriggerContext,
@@ -103,9 +103,10 @@ const getEventScopeFromRowClickTriggerContext = (
   for (const columnId of columns) {
     const column = data.table.columns.find(({ id }) => id === columnId);
     if (!column) {
-      // This should never happe, but in case it does we log data necessary for debugging.
+      // This should never happen, but in case it does we log data necessary for debugging.
+      const title = getPanelTitle(api);
       // eslint-disable-next-line no-console
-      console.error(data, api?.panelTitle ? `Embeddable [${api.panelTitle.value}]` : null);
+      console.error(data, title ? `Embeddable [${title}]` : null);
       throw new Error('Could not find a datatable column.');
     }
     values.push(row[columnId]);

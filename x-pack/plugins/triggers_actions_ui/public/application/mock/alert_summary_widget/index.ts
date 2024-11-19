@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { LIGHT_THEME } from '@elastic/charts';
 import { AlertSummaryTimeRange, ChartProps } from '../../sections/alert_summary_widget/types';
 
 export const mockedAlertSummaryResponse = {
@@ -38,6 +37,4 @@ export const mockedAlertSummaryTimeRange: AlertSummaryTimeRange = {
   title: 'mockedTitle',
 };
 
-export const mockedChartProps: ChartProps = {
-  baseTheme: LIGHT_THEME,
-};
+export const mockedChartProps: ChartProps = {};

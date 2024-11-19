@@ -6,19 +6,22 @@
  */
 
 // TODO Consolidate with duplicate component `CorrelationsProgressControls` in
-// `x-pack/plugins/apm/public/components/app/correlations/progress_controls.tsx`
+// `x-pack/plugins/observability_solution/apm/public/components/app/correlations/progress_controls.tsx`
 import { cloneDeep } from 'lodash';
-import { IUiSettingsClient } from '@kbn/core/public';
-import { buildEsQuery, Query, Filter } from '@kbn/es-query';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { Query, Filter, AggregateQuery } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { getEsQueryConfig, SearchSource } from '@kbn/data-plugin/common';
-import { FilterManager, mapAndFlattenFilters } from '@kbn/data-plugin/public';
+import type { FilterManager } from '@kbn/data-plugin/public';
 import { getDefaultDSLQuery } from '@kbn/ml-query-utils';
-import { SearchQueryLanguage } from '@kbn/ml-query-utils';
+import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { isDefined } from '@kbn/ml-is-defined';
-import { isSavedSearchSavedObject, SavedSearchSavedObject } from '../../../../common/types';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { SavedSearchSavedObject } from '../../../../common/types';
+import { isSavedSearchSavedObject } from '../../../../common/types';
 
 /**
  * Parse the stringified searchSourceJSON
@@ -60,6 +63,10 @@ function getSavedSearchSource(savedSearch?: SavedSearch | null) {
     : undefined;
 }
 
+function isNonAggregateQuery(query?: Query | AggregateQuery): query is Query {
+  return isPopulatedObject(query, ['query', 'language']);
+}
+
 /**
  * Extract query data from the saved search object
  * with overrides from the provided query data and/or filters
@@ -75,18 +82,17 @@ export function getEsQueryFromSavedSearch({
   dataView: DataView;
   uiSettings: IUiSettingsClient;
   savedSearch: SavedSearch | null | undefined;
-  query?: Query;
+  query?: Query | AggregateQuery;
   filters?: Filter[];
   filterManager?: FilterManager;
 }) {
   if (!dataView && !savedSearch) return;
 
+  // Cannot support AggregateQuery (esql or sql) here
+  if (query && !isNonAggregateQuery(query)) return;
+
   const userQuery = query;
   const userFilters = filters;
-
-  if (filterManager && userFilters) {
-    filterManager.addFilters(userFilters);
-  }
 
   const savedSearchSource = getSavedSearchSource(savedSearch);
 
@@ -104,7 +110,7 @@ export function getEsQueryFromSavedSearch({
     if (Array.isArray(savedQuery.bool.filter) && timeField !== undefined) {
       savedQuery.bool.filter = savedQuery.bool.filter.filter(
         (c: QueryDslQueryContainer) =>
-          !(c.hasOwnProperty('range') && c.range?.hasOwnProperty(timeField))
+          !(Object.hasOwn(c, 'range') && Object.hasOwn(c.range ?? {}, timeField))
       );
     }
 
@@ -123,7 +129,7 @@ export function getEsQueryFromSavedSearch({
     const combinedQuery = buildEsQuery(
       dataView,
       userQuery ?? [],
-      filterManager?.getFilters() ?? [],
+      [...(filterManager?.getFilters() ?? []), ...(userFilters ?? [])],
       uiSettings ? getEsQueryConfig(uiSettings) : undefined
     );
 
@@ -137,16 +143,17 @@ export function getEsQueryFromSavedSearch({
   // If saved search available, merge saved search with the latest user query or filters
   // which might differ from extracted saved search data
   if (savedSearchSource) {
-    // FIXME: Add support for AggregateQuery type #150091
     const currentQuery = userQuery ?? (savedSearchSource.getField('query') as Query);
-    const currentFilters =
-      userFilters ?? mapAndFlattenFilters(savedSearchSource.getField('filter') as Filter[]);
-    if (filterManager) filterManager.addFilters(currentFilters);
-
+    if (savedSearchSource.getField('filter')) {
+      // Rehydrate filter from saved search object into filter manager's store
+      if (filterManager) {
+        filterManager.addFilters(savedSearchSource.getField('filter') as Filter[]);
+      }
+    }
     const combinedQuery = buildEsQuery(
       dataView,
       currentQuery,
-      filterManager ? filterManager?.getFilters() : currentFilters,
+      [...(filterManager?.getFilters() ?? []), ...(userFilters ?? [])],
       uiSettings ? getEsQueryConfig(uiSettings) : undefined
     );
 

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -74,6 +75,25 @@ describe('DocViewerRegistry', () => {
     });
   });
 
+  describe('#enableById & #disableById', () => {
+    test('should enable/disable a doc view given the passed id', () => {
+      const registry = new DocViewsRegistry([fnDocView, componentDocView]);
+
+      const docViews = registry.getAll();
+
+      expect(docViews[0]).toHaveProperty('enabled', true);
+      expect(docViews[1]).toHaveProperty('enabled', true);
+
+      registry.disableById('function-doc-view');
+
+      expect(registry.getAll()[0]).toHaveProperty('enabled', false);
+
+      registry.enableById('function-doc-view');
+
+      expect(registry.getAll()[0]).toHaveProperty('enabled', true);
+    });
+  });
+
   describe('#clone', () => {
     test('should return a new DocViewRegistry instance starting from the current one', () => {
       const registry = new DocViewsRegistry([fnDocView, componentDocView]);
@@ -84,6 +104,24 @@ describe('DocViewerRegistry', () => {
       expect(docViews[0]).toHaveProperty('id', 'function-doc-view');
       expect(docViews[1]).toHaveProperty('id', 'component-doc-view');
       expect(registry).not.toBe(clonedRegistry);
+
+      // Test against shared references between clones
+      expect(clonedRegistry).not.toBe(registry);
+
+      // Mutating a cloned registry should not affect the original registry
+      registry.disableById('function-doc-view');
+      expect(registry.getAll()[0]).toHaveProperty('enabled', false);
+      expect(clonedRegistry.getAll()[0]).toHaveProperty('enabled', true);
+
+      clonedRegistry.add({
+        id: 'additional-doc-view',
+        order: 20,
+        title: 'Render function',
+        render: jest.fn(),
+      });
+
+      expect(registry.getAll().length).toBe(2);
+      expect(clonedRegistry.getAll().length).toBe(3);
     });
   });
 });

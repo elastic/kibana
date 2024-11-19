@@ -16,7 +16,7 @@ export interface RefreshConfig {
 }
 
 // parsed contents of mapStateJSON
-export interface SerializedMapState {
+export interface ParsedMapStateJSON {
   adHocDataViews?: DataViewSpec[];
   zoom: number;
   center: MapCenter;
@@ -28,7 +28,7 @@ export interface SerializedMapState {
 }
 
 // parsed contents of uiStateJSON
-export interface SerializedUiState {
+export interface ParsedUiStateJSON {
   isLayerTOCOpen: boolean;
   openTOCDetails: string[];
 }

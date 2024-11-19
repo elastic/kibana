@@ -19,6 +19,7 @@
     "@kbn/securitysolution-autocomplete",
     "@kbn/ui-theme",
     "@kbn/i18n",
+    "@kbn/i18n-react",
   ],
   "exclude": [
     "target/**/*",

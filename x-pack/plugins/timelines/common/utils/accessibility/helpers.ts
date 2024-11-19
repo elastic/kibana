@@ -638,13 +638,6 @@ export const onKeyDownFocusHandler = ({
   }
 };
 
-/**
- * An `onFocus` event handler that focuses the first child draggable
- * keyboard handler
- */
-export const onFocusReFocusDraggable = (event: React.FocusEvent<HTMLElement>) =>
-  event.target.querySelector<HTMLDivElement>(`.${DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME}`)?.focus();
-
 /** Returns `true` when the element, or one of it's children has focus */
 export const elementOrChildrenHasFocus = (element: HTMLElement | null | undefined): boolean =>
   element === document.activeElement || element?.querySelector(':focus-within') != null;
@@ -660,18 +653,6 @@ export type FocusableElement =
   | HTMLSelectElement
   | HTMLTextAreaElement
   | HTMLVideoElement;
-
-/**
- * This function has a side effect. It focuses the first element with a
- * matching `className` in the `containerElement`.
- */
-export const skipFocusInContainerTo = ({
-  containerElement,
-  className,
-}: {
-  containerElement: HTMLElement | null;
-  className: string;
-}) => containerElement?.querySelector<FocusableElement>(`.${className}`)?.focus();
 
 /**
  * Returns a table cell's focusable children, which may be one of the following

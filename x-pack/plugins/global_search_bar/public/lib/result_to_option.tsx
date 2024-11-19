@@ -8,7 +8,8 @@
 import React from 'react';
 import type { EuiSelectableTemplateSitewideOption } from '@elastic/eui';
 import type { GlobalSearchResult } from '@kbn/global-search-plugin/common/types';
-import type { SavedObjectTaggingPluginStart, Tag } from '@kbn/saved-objects-tagging-plugin/public';
+import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import type { Tag } from '@kbn/saved-objects-tagging-oss-plugin/common';
 import { ResultTagList } from '../components/result_tag_list';
 
 const cleanMeta = (str: string) => (str.charAt(0).toUpperCase() + str.slice(1)).replace(/-/g, ' ');
@@ -16,7 +17,7 @@ const cleanMeta = (str: string) => (str.charAt(0).toUpperCase() + str.slice(1)).
 export const resultToOption = (
   result: GlobalSearchResult,
   searchTagIds: string[],
-  getTag?: SavedObjectTaggingPluginStart['ui']['getTag']
+  getTagList?: SavedObjectTaggingPluginStart['ui']['getTagList']
 ): EuiSelectableTemplateSitewideOption => {
   const { id, title, url, icon, type, meta = {} } = result;
   const { tagIds = [], categoryLabel = '' } = meta as { tagIds: string[]; categoryLabel: string };
@@ -25,7 +26,9 @@ export const resultToOption = (
     type === 'application' ||
     type === 'integration' ||
     type.toLowerCase() === 'enterprise search' ||
-    type.toLowerCase() === 'search';
+    type.toLowerCase() === 'search' ||
+    type.toLowerCase() === 'index' ||
+    type.toLowerCase() === 'connector';
   const option: EuiSelectableTemplateSitewideOption = {
     key: id,
     label: title,
@@ -40,21 +43,22 @@ export const resultToOption = (
       ? [{ text: categoryLabel }]
       : [{ text: cleanMeta((meta.displayName as string) ?? type) }];
 
-  if (getTag && tagIds.length) {
-    const tags = tagIds.map(getTag).filter((tag, index) => {
-      if (!tag) {
-        // eslint-disable-next-line no-console
+  if (tagIds.length && getTagList) {
+    const tagList = getTagList();
+    const tags: Tag[] = [];
+    for (let i = 0; i < tagIds.length; i++) {
+      const foundTag = tagList.find((tag) => tag.id === tagIds[i]);
+      if (!foundTag) {
+        //  eslint-disable-next-line no-console
         console.warn(
-          `SearchBar: Tag with id "${tagIds[index]}" not found. Tag "${tagIds[index]}" is referenced by the search result "${result.type}:${result.id}". Skipping displaying the missing tag.`
+          `SearchBar: Tag with id "${tagIds[i]}" not found. Tag "${tagIds[i]}" is referenced by the search result "${result.type}:${result.id}". Skipping displaying the missing tag.`
         );
-        return false;
+      } else {
+        tags.push(foundTag);
       }
-
-      return true;
-    }) as Tag[];
+    }
 
     if (tags.length) {
-      // TODO #85189 - refactor to use TagList instead of getTag
       option.append = <ResultTagList tags={tags} searchTagIds={searchTagIds} />;
     }
   }

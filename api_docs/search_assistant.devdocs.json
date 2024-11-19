@@ -1,0 +1,114 @@
+{
+  "id": "searchAssistant",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "searchAssistant",
+      "id": "def-public.SearchAssistantPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "SearchAssistantPluginSetup",
+      "description": [],
+      "path": "x-pack/plugins/search_assistant/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "searchAssistant",
+      "id": "def-public.SearchAssistantPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "SearchAssistantPluginStart",
+      "description": [],
+      "path": "x-pack/plugins/search_assistant/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "searchAssistant",
+      "id": "def-server.SearchAssistantPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "SearchAssistantPluginSetup",
+      "description": [],
+      "path": "x-pack/plugins/search_assistant/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "searchAssistant",
+      "id": "def-server.SearchAssistantPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "SearchAssistantPluginStart",
+      "description": [],
+      "path": "x-pack/plugins/search_assistant/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "searchAssistant",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"searchAssistant\""
+        ],
+        "path": "x-pack/plugins/search_assistant/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "searchAssistant",
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "signature": [
+          "\"searchAssistant\""
+        ],
+        "path": "x-pack/plugins/search_assistant/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

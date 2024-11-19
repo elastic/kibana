@@ -5,14 +5,13 @@
  * 2.0.
  */
 
+import type { SyntheticEvent } from 'react';
 import React from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
 import styled from 'styled-components';
-import { UsersTableType } from '../../../explore/users/store/model';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { HostDetailsLink, UserDetailsLink } from '../../../common/components/links';
-import { HostsTableType } from '../../../explore/hosts/store/model';
 import { RiskScoreLevel } from '../severity/common';
 import { CELL_ACTIONS_TELEMETRY } from '../risk_score/constants';
 import type {
@@ -31,6 +30,7 @@ import {
   SecurityCellActionType,
 } from '../../../common/components/cell_actions';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
+import { formatRiskScore } from '../../common';
 
 type HostRiskScoreColumns = Array<EuiBasicTableColumn<HostRiskScore & UserRiskScore>>;
 
@@ -39,10 +39,12 @@ const StyledCellActions = styled(SecurityCellActions)`
 `;
 
 type OpenEntityOnAlertsPage = (entityName: string) => void;
+type OpenEntityOnExpandableFlyout = (entityName: string) => void;
 
 export const getRiskScoreColumns = (
   riskEntity: RiskScoreEntity,
-  openEntityOnAlertsPage: OpenEntityOnAlertsPage
+  openEntityOnAlertsPage: OpenEntityOnAlertsPage,
+  openEntityOnExpandableFlyout: OpenEntityOnExpandableFlyout
 ): HostRiskScoreColumns => [
   {
     field: riskEntity === RiskScoreEntity.host ? 'host.name' : 'user.name',
@@ -51,10 +53,15 @@ export const getRiskScoreColumns = (
     mobileOptions: { show: true },
     className: 'inline-actions-table-cell',
     render: (entityName: string) => {
+      const onEntityDetailsLinkClick = (e: SyntheticEvent) => {
+        e.preventDefault();
+        openEntityOnExpandableFlyout(entityName);
+      };
+
       if (entityName != null && entityName.length > 0) {
         return riskEntity === RiskScoreEntity.host ? (
           <>
-            <HostDetailsLink hostName={entityName} hostTab={HostsTableType.risk} />
+            <HostDetailsLink hostName={entityName} onClick={onEntityDetailsLinkClick} />
             <StyledCellActions
               data={{
                 value: entityName,
@@ -74,7 +81,8 @@ export const getRiskScoreColumns = (
           </>
         ) : (
           <>
-            <UserDetailsLink userName={entityName} userTab={UsersTableType.risk} />
+            <UserDetailsLink userName={entityName} onClick={onEntityDetailsLinkClick} />
+
             <StyledCellActions
               data={{
                 value: entityName,
@@ -121,7 +129,7 @@ export const getRiskScoreColumns = (
       if (riskScore != null) {
         return (
           <span data-test-subj="risk-score-truncate" title={`${riskScore}`}>
-            {Math.round(riskScore)}
+            {formatRiskScore(riskScore)}
           </span>
         );
       }

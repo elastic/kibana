@@ -61,4 +61,4 @@ include::install/deb.asciidoc[]
 
 include::install/rpm.asciidoc[]
 
-include::{kib-repo-dir}/setup/docker.asciidoc[]
+include::{kibana-root}/docs/setup/docker.asciidoc[]

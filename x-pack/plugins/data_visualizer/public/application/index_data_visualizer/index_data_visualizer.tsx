@@ -6,16 +6,18 @@
  */
 import '../_index.scss';
 import { pick } from 'lodash';
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { parse, stringify } from 'query-string';
 import { isEqual } from 'lodash';
 import { encode } from '@kbn/rison';
 import { i18n } from '@kbn/i18n';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { getNestedProperty } from '@kbn/ml-nested-property';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
@@ -29,6 +31,9 @@ import {
   UrlStateProvider,
 } from '@kbn/ml-url-state';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { EuiCallOut } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
 import {
   type IndexDataVisualizerViewProps,
@@ -42,8 +47,6 @@ import { DATA_VISUALIZER_APP_LOCATOR, type IndexDataVisualizerLocatorParams } fr
 import { DATA_VISUALIZER_INDEX_VIEWER } from './constants/index_data_visualizer_viewer';
 import { INDEX_DATA_VISUALIZER_NAME } from '../common/constants';
 import { DV_STORAGE_KEYS } from './types/storage';
-
-const XXL_BREAKPOINT = 1400;
 
 const localStorage = new Storage(window.localStorage);
 
@@ -84,6 +87,22 @@ export const getLocatorParams = (params: {
 };
 
 const DataVisualizerESQLStateContextProvider = () => {
+  const { services } = useDataVisualizerKibana();
+  const isEsqlEnabled = useMemo(() => services.uiSettings.get(ENABLE_ESQL), [services.uiSettings]);
+
+  if (!isEsqlEnabled) {
+    return (
+      <EuiCallOut
+        title={
+          <FormattedMessage
+            id="xpack.dataVisualizer.esqlNotEnabledCalloutTitle"
+            defaultMessage="ES|QL is not enabled"
+          />
+        }
+      />
+    );
+  }
+
   return (
     <UrlStateProvider>
       <IndexDataVisualizerESQL />
@@ -207,7 +226,7 @@ const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderP
       const urlState = parseUrlState(prevSearchString);
       const parsedQueryString = parse(prevSearchString, { sort: false });
 
-      if (!Object.prototype.hasOwnProperty.call(urlState, accessor)) {
+      if (!Object.hasOwn(urlState, accessor)) {
         urlState[accessor] = {};
       }
 
@@ -272,7 +291,7 @@ const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderP
   );
 };
 
-interface Props {
+export interface Props {
   getAdditionalLinks?: GetAdditionalLinks;
   showFrozenDataTierChoice?: boolean;
   esql?: boolean;
@@ -288,9 +307,7 @@ export const IndexDataVisualizer: FC<Props> = ({
     data,
     maps,
     embeddable,
-    discover,
     share,
-    security,
     fileUpload,
     lens,
     dataViewFieldEditor,
@@ -299,20 +316,20 @@ export const IndexDataVisualizer: FC<Props> = ({
     unifiedSearch,
   } = getPluginsStart();
   const services = {
+    ...coreStart,
     data,
     maps,
     embeddable,
-    discover,
     share,
-    security,
     fileUpload,
     lens,
     dataViewFieldEditor,
     uiActions,
     charts,
     unifiedSearch,
-    ...coreStart,
   };
+
+  const startServices = pick(coreStart, 'analytics', 'i18n', 'theme');
   const datePickerDeps: DatePickerDependencies = {
     ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
     uiSettingsKeys: UI_SETTINGS,
@@ -320,14 +337,7 @@ export const IndexDataVisualizer: FC<Props> = ({
   };
 
   return (
-    <KibanaThemeProvider
-      theme$={coreStart.theme.theme$}
-      modify={{
-        breakpoint: {
-          xxl: XXL_BREAKPOINT,
-        },
-      }}
-    >
+    <KibanaRenderContextProvider {...startServices}>
       <KibanaContextProvider services={{ ...services }}>
         <StorageContextProvider storage={localStorage} storageKeys={DV_STORAGE_KEYS}>
           <DatePickerContextProvider {...datePickerDeps}>
@@ -342,6 +352,6 @@ export const IndexDataVisualizer: FC<Props> = ({
           </DatePickerContextProvider>
         </StorageContextProvider>
       </KibanaContextProvider>
-    </KibanaThemeProvider>
+    </KibanaRenderContextProvider>
   );
 };

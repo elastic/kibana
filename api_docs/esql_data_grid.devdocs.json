@@ -1,0 +1,61 @@
+{
+  "id": "esqlDataGrid",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "esqlDataGrid",
+        "id": "def-public.ESQLDataGrid",
+        "type": "Function",
+        "tags": [],
+        "label": "ESQLDataGrid",
+        "description": [],
+        "signature": [
+          "(props: ESQLDataGridProps) => React.JSX.Element"
+        ],
+        "path": "src/plugins/esql_datagrid/public/create_datagrid.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "esqlDataGrid",
+            "id": "def-public.ESQLDataGrid.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "ESQLDataGridProps"
+            ],
+            "path": "src/plugins/esql_datagrid/public/create_datagrid.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -22,6 +22,9 @@ export const runSoonRoute = (
   router.post(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}/_run_soon`,
+      options: {
+        access: 'internal',
+      },
       validate: {
         params: paramSchema,
       },

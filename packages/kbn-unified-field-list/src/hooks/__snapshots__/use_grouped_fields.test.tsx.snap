@@ -3,7 +3,7 @@
 exports[`UnifiedFieldList useGroupedFields() should work correctly for no data 1`] = `
 Object {
   "AvailableFields": Object {
-    "defaultNoFieldsMessage": "There are no available fields that contain data.",
+    "defaultNoFieldsMessage": "No available fields containing data.",
     "fieldCount": 0,
     "fields": Array [],
     "hideDetails": false,
@@ -60,6 +60,17 @@ Object {
     "isInitiallyOpen": true,
     "showInAccordion": true,
     "title": "Selected fields",
+  },
+  "SmartFields": Object {
+    "fieldCount": 0,
+    "fields": Array [],
+    "hideDetails": false,
+    "hideIfEmpty": true,
+    "isAffectedByGlobalFilter": false,
+    "isAffectedByTimeFilter": false,
+    "isInitiallyOpen": true,
+    "showInAccordion": true,
+    "title": "Smart fields",
   },
   "SpecialFields": Object {
     "fieldCount": 0,
@@ -89,7 +100,7 @@ Object {
 exports[`UnifiedFieldList useGroupedFields() should work correctly in loading state 1`] = `
 Object {
   "AvailableFields": Object {
-    "defaultNoFieldsMessage": "There are no available fields that contain data.",
+    "defaultNoFieldsMessage": "No available fields containing data.",
     "fieldCount": 0,
     "fields": Array [],
     "hideDetails": false,
@@ -146,6 +157,17 @@ Object {
     "isInitiallyOpen": true,
     "showInAccordion": true,
     "title": "Selected fields",
+  },
+  "SmartFields": Object {
+    "fieldCount": 0,
+    "fields": Array [],
+    "hideDetails": false,
+    "hideIfEmpty": true,
+    "isAffectedByGlobalFilter": false,
+    "isAffectedByTimeFilter": false,
+    "isInitiallyOpen": true,
+    "showInAccordion": true,
+    "title": "Smart fields",
   },
   "SpecialFields": Object {
     "fieldCount": 0,
@@ -175,7 +197,7 @@ Object {
 exports[`UnifiedFieldList useGroupedFields() should work correctly when global filters are set 1`] = `
 Object {
   "AvailableFields": Object {
-    "defaultNoFieldsMessage": "There are no available fields that contain data.",
+    "defaultNoFieldsMessage": "No available fields containing data.",
     "fieldCount": 0,
     "fields": Array [],
     "hideDetails": false,
@@ -232,6 +254,17 @@ Object {
     "isInitiallyOpen": true,
     "showInAccordion": true,
     "title": "Selected fields",
+  },
+  "SmartFields": Object {
+    "fieldCount": 0,
+    "fields": Array [],
+    "hideDetails": false,
+    "hideIfEmpty": true,
+    "isAffectedByGlobalFilter": false,
+    "isAffectedByTimeFilter": false,
+    "isInitiallyOpen": true,
+    "showInAccordion": true,
+    "title": "Smart fields",
   },
   "SpecialFields": Object {
     "fieldCount": 0,

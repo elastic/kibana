@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { buildDataTelemetryPayload, getDataTelemetry } from './get_data_telemetry';
@@ -71,6 +72,9 @@ describe('get_data_telemetry', () => {
           { name: 'filebeat-12314', docCount: 100, sizeInBytes: 10 },
           { name: 'metricbeat-1234', docCount: 100, sizeInBytes: 10, isECS: false },
           { name: '.app-search-1234', docCount: 0 },
+          { name: '.internal.alerts-stack.alerts-default-0000001', sizeInBytes: 999 },
+          { name: 'some-random-logs', docCount: 100, sizeInBytes: 10 },
+          { name: 'my-prod-filebeat-123', docCount: 100, sizeInBytes: 10 },
           { name: 'logs-endpoint.1234', docCount: 0 }, // Matching pattern with a dot in the name
           { name: 'ml_host_risk_score_latest_default', docCount: 0 },
           { name: 'ml_host_risk_score_latest', docCount: 0 }, // This should not match,
@@ -153,8 +157,21 @@ describe('get_data_telemetry', () => {
           size_in_bytes: 10,
         },
         {
+          pattern_name: 'generic-filebeat',
+          index_count: 2,
+          doc_count: 200,
+          size_in_bytes: 20,
+        },
+        {
           pattern_name: 'metricbeat',
           shipper: 'metricbeat',
+          index_count: 1,
+          ecs_index_count: 0,
+          doc_count: 100,
+          size_in_bytes: 10,
+        },
+        {
+          pattern_name: 'generic-metricbeat',
           index_count: 1,
           ecs_index_count: 0,
           doc_count: 100,
@@ -164,6 +181,17 @@ describe('get_data_telemetry', () => {
           pattern_name: 'app-search',
           index_count: 1,
           doc_count: 0,
+        },
+        {
+          pattern_name: 'alerts',
+          index_count: 1,
+          size_in_bytes: 999,
+        },
+        {
+          pattern_name: 'generic-logs',
+          index_count: 2,
+          doc_count: 100,
+          size_in_bytes: 10,
         },
         {
           pattern_name: 'logs-endpoint',
@@ -225,6 +253,11 @@ describe('get_data_telemetry', () => {
           index_count: 1,
           ecs_index_count: 0,
         },
+        {
+          pattern_name: 'generic-filebeat',
+          index_count: 1,
+          ecs_index_count: 0,
+        },
       ]);
       expect(esClient.indices.getMapping).toHaveBeenCalledTimes(1);
       expect(esClient.indices.stats).toHaveBeenCalledTimes(1);
@@ -244,6 +277,13 @@ describe('get_data_telemetry', () => {
         {
           pattern_name: 'filebeat',
           shipper: 'filebeat',
+          index_count: 1,
+          ecs_index_count: 1,
+          doc_count: 100,
+          size_in_bytes: 10,
+        },
+        {
+          pattern_name: 'generic-filebeat',
           index_count: 1,
           ecs_index_count: 1,
           doc_count: 100,

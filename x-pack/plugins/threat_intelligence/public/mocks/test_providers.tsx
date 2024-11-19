@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment/moment';
-import React, { FC } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -71,18 +71,17 @@ const dataServiceMock = {
     ...data.query,
     savedQueries: {
       ...data.query.savedQueries,
-      getAllSavedQueries: jest.fn(() =>
-        Promise.resolve({
-          id: '123',
-          attributes: {
-            total: 123,
-          },
-        })
-      ),
       findSavedQueries: jest.fn(() =>
         Promise.resolve({
           total: 123,
-          queries: [],
+          queries: [
+            {
+              id: '123',
+              attributes: {
+                total: 123,
+              },
+            },
+          ],
         })
       ),
     },
@@ -114,6 +113,8 @@ const mockSecurityContext: SecuritySolutionPluginContext = getSecuritySolutionCo
 
 const casesServiceMock = casesPluginMock.createStartContract();
 
+export const EMPTY_PAGE_SECURITY_TEMPLATE = 'empty-page-security-template' as const;
+
 export const mockedServices = {
   ...coreServiceMock,
   data: dataServiceMock,
@@ -127,13 +128,17 @@ export const mockedServices = {
   securityLayout: {
     getPluginWrapper:
       () =>
-      ({ children }: any) => {
+      ({ children, isEmptyState, emptyPageBody }: any) => {
+        if (isEmptyState && emptyPageBody) {
+          return <div data-test-subj={EMPTY_PAGE_SECURITY_TEMPLATE}>{emptyPageBody}</div>;
+        }
+
         return <>{children}</>;
       },
   },
 };
 
-export const TestProvidersComponent: FC = ({ children }) => (
+export const TestProvidersComponent: FC<PropsWithChildren<any>> = ({ children }) => (
   <MemoryRouter>
     <InspectorContext.Provider value={{ requests: new RequestAdapter() }}>
       <QueryClientProvider client={new QueryClient()}>

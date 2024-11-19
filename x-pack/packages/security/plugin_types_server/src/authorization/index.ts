@@ -15,6 +15,7 @@ export type {
   SpaceActions,
   UIActions,
 } from './actions';
+export { ApiOperation } from './actions';
 export type { AuthorizationServiceSetup } from './authorization_service';
 export type {
   CheckPrivilegesOptions,
@@ -42,7 +43,6 @@ export type {
   PrivilegeDeprecationsRolesByFeatureIdResponse,
 } from './deprecations';
 export type { AuthorizationMode } from './mode';
-export type { ElasticsearchPrivilegesType, KibanaPrivilegesType } from './role_schema';
 
 export { GLOBAL_RESOURCE } from './constants';
 export { elasticsearchRoleSchema, getKibanaRoleSchema } from './role_schema';

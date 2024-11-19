@@ -6,11 +6,10 @@
  */
 
 import { mockBrowserFields } from '../../../../../common/containers/source/mock';
-import '../../../../../common/mock/match_media';
 import type { BrowserFields } from '../../../../../../common/search_strategy';
 import type { ColumnHeaderOptions } from '../../../../../../common/types';
 import { DEFAULT_COLUMN_MIN_WIDTH, DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../constants';
-import { defaultHeaders } from './default_headers';
+import { defaultUdtHeaders } from './default_headers';
 import {
   getColumnWidthFromType,
   getColumnHeaders,
@@ -87,6 +86,17 @@ describe('helpers', () => {
         type: 'date',
       });
     });
+
+    test('should return the expected metadata in case of default header', () => {
+      const inputHeaders = defaultUdtHeaders;
+      expect(getColumnHeader('@timestamp', inputHeaders)).toEqual({
+        columnHeaderType: 'not-filtered',
+        id: '@timestamp',
+        initialWidth: 215,
+        esTypes: ['date'],
+        type: 'date',
+      });
+    });
   });
 
   describe('getColumnHeaders', () => {
@@ -94,54 +104,35 @@ describe('helpers', () => {
       const expectedData = [
         {
           aggregatable: true,
-          category: 'base',
           columnHeaderType: 'not-filtered',
-          description:
-            'Date/time when the event originated. For log events this is the date/time when the event was generated, and not when it was read. Required field for all events.',
-          example: '2016-05-23T08:05:34.853Z',
-          format: '',
           id: '@timestamp',
-          indexes: ['auditbeat', 'filebeat', 'packetbeat'],
           name: '@timestamp',
           readFromDocValues: true,
           searchable: true,
           type: 'date',
           esTypes: ['date'],
-          initialWidth: 190,
+          initialWidth: 215,
         },
         {
           aggregatable: true,
-          category: 'source',
           columnHeaderType: 'not-filtered',
-          description: 'IP address of the source. Can be one or multiple IPv4 or IPv6 addresses.',
-          example: '',
-          format: '',
           id: 'source.ip',
-          indexes: ['auditbeat', 'filebeat', 'packetbeat'],
           name: 'source.ip',
           searchable: true,
           type: 'ip',
           esTypes: ['ip'],
-          initialWidth: 180,
         },
         {
           aggregatable: true,
-          category: 'destination',
           columnHeaderType: 'not-filtered',
-          description:
-            'IP address of the destination. Can be one or multiple IPv4 or IPv6 addresses.',
-          example: '',
-          format: '',
           id: 'destination.ip',
-          indexes: ['auditbeat', 'filebeat', 'packetbeat'],
           name: 'destination.ip',
           searchable: true,
           type: 'ip',
           esTypes: ['ip'],
-          initialWidth: 180,
         },
       ];
-      const mockHeader = defaultHeaders.filter((h) =>
+      const mockHeader = defaultUdtHeaders.filter((h) =>
         ['@timestamp', 'source.ip', 'destination.ip'].includes(h.id)
       );
       expect(getColumnHeaders(mockHeader, mockBrowserFields)).toEqual(expectedData);
@@ -159,13 +150,9 @@ describe('helpers', () => {
       expect(getColumnHeaders(headers, mockBrowserFields)).toEqual([
         {
           aggregatable: false,
-          category: 'base',
           columnHeaderType: 'not-filtered',
-          description: 'Each document has an _id that uniquely identifies it',
           esTypes: [],
-          example: 'Y-6TfmcB0WOhS6qyMv3s',
           id: '_id',
-          indexes: ['auditbeat', 'filebeat', 'packetbeat'],
           initialWidth: 180,
           name: '_id',
           searchable: true,
@@ -188,21 +175,8 @@ describe('helpers', () => {
           fields: {
             test_field_1: {
               aggregatable: true,
-              category: 'test_field_1',
               esTypes: ['keyword'],
-              format: 'string',
-              indexes: [
-                '-*elastic-cloud-logs-*',
-                '.alerts-security.alerts-default',
-                'apm-*-transaction*',
-                'auditbeat-*',
-                'endgame-*',
-                'filebeat-*',
-                'logs-*',
-                'packetbeat-*',
-                'traces-apm*',
-                'winlogbeat-*',
-              ],
+              format: { id: 'string' },
               name: 'test_field_1',
               readFromDocValues: true,
               searchable: true,
@@ -215,23 +189,10 @@ describe('helpers', () => {
       expect(getColumnHeaders(headers, oneLevelDeep)).toEqual([
         {
           aggregatable: true,
-          category: 'test_field_1',
           columnHeaderType: 'not-filtered',
           esTypes: ['keyword'],
-          format: 'string',
+          format: { id: 'string' },
           id: 'test_field_1',
-          indexes: [
-            '-*elastic-cloud-logs-*',
-            '.alerts-security.alerts-default',
-            'apm-*-transaction*',
-            'auditbeat-*',
-            'endgame-*',
-            'filebeat-*',
-            'logs-*',
-            'packetbeat-*',
-            'traces-apm*',
-            'winlogbeat-*',
-          ],
           initialWidth: 180,
           name: 'test_field_1',
           readFromDocValues: true,
@@ -255,21 +216,8 @@ describe('helpers', () => {
           fields: {
             'foo.bar': {
               aggregatable: true,
-              category: 'foo',
               esTypes: ['keyword'],
-              format: 'string',
-              indexes: [
-                '-*elastic-cloud-logs-*',
-                '.alerts-security.alerts-default',
-                'apm-*-transaction*',
-                'auditbeat-*',
-                'endgame-*',
-                'filebeat-*',
-                'logs-*',
-                'packetbeat-*',
-                'traces-apm*',
-                'winlogbeat-*',
-              ],
+              format: { id: 'string' },
               name: 'foo.bar',
               readFromDocValues: true,
               searchable: true,
@@ -282,23 +230,10 @@ describe('helpers', () => {
       expect(getColumnHeaders(headers, twoLevelsDeep)).toEqual([
         {
           aggregatable: true,
-          category: 'foo',
           columnHeaderType: 'not-filtered',
           esTypes: ['keyword'],
-          format: 'string',
+          format: { id: 'string' },
           id: 'foo.bar',
-          indexes: [
-            '-*elastic-cloud-logs-*',
-            '.alerts-security.alerts-default',
-            'apm-*-transaction*',
-            'auditbeat-*',
-            'endgame-*',
-            'filebeat-*',
-            'logs-*',
-            'packetbeat-*',
-            'traces-apm*',
-            'winlogbeat-*',
-          ],
           initialWidth: 180,
           name: 'foo.bar',
           readFromDocValues: true,

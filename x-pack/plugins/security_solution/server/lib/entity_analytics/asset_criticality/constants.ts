@@ -4,8 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { FieldMap } from '@kbn/alerts-as-data-utils';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
+
+export type CriticalityValues = AssetCriticalityRecord['criticality_level'] | 'deleted';
+
+const assetCriticalityMapping = {
+  type: 'keyword',
+  array: false,
+  required: false,
+};
 
 export const assetCriticalityFieldMap: FieldMap = {
   '@timestamp': {
@@ -23,24 +32,35 @@ export const assetCriticalityFieldMap: FieldMap = {
     array: false,
     required: false,
   },
-  criticality_level: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
+  criticality_level: assetCriticalityMapping,
   updated_at: {
     type: 'date',
     array: false,
     required: false,
   },
+  'asset.criticality': {
+    type: 'keyword',
+    array: false,
+    required: true,
+  },
+  'host.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'host.asset.criticality': assetCriticalityMapping,
+  'user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'user.asset.criticality': assetCriticalityMapping,
 } as const;
 
-/**
- * CriticalityModifiers are used to adjust the risk score based on the criticality of the asset.
- */
-export const CriticalityModifiers: Record<AssetCriticalityRecord['criticality_level'], number> = {
-  very_important: 2,
-  important: 1.5,
-  normal: 1,
-  not_important: 0.5,
+export const CRITICALITY_VALUES: { readonly [K in CriticalityValues as Uppercase<K>]: K } = {
+  LOW_IMPACT: 'low_impact',
+  MEDIUM_IMPACT: 'medium_impact',
+  HIGH_IMPACT: 'high_impact',
+  EXTREME_IMPACT: 'extreme_impact',
+  DELETED: 'deleted',
 };

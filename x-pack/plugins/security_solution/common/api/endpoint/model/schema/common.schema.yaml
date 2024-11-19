@@ -54,6 +54,7 @@ components:
         - get-file
         - execute
         - upload
+        - scan
       minLength: 1
       description: The command to be executed (cannot be an empty string)
 
@@ -101,16 +102,18 @@ components:
           minItems: 1
         - type: string
           minLength: 1
-      description: With Outputs
+      description: Shows detailed outputs for an action response
 
     Type:
       type: string
+      description: Type of response action
       enum:
         - automated
         - manual
 
     Types:
       type: array
+      description: List of types of response actions
       items:
         $ref: '#/components/schemas/Type'
       minLength: 1
@@ -123,13 +126,6 @@ components:
         minLength: 1
       minItems: 1
       description: List of endpoint IDs (cannot contain empty strings)
-    AlertIds:
-      type: array
-      items:
-        type: string
-        minLength: 1
-      minItems: 1
-      description: If defined, any case associated with the given IDs will be updated (cannot contain empty strings)
     CaseIds:
       type: array
       items:
@@ -143,6 +139,12 @@ components:
     Parameters:
       type: object
       description: Optional parameters object
+    AgentTypes:
+      type: string
+      enum:
+        - endpoint
+        - sentinel_one
+        - crowdstrike
 
     BaseActionSchema:
       x-inline: true
@@ -151,33 +153,46 @@ components:
         endpoint_ids:
           $ref: '#/components/schemas/EndpointIds'
         alert_ids:
-          $ref: '#/components/schemas/AlertIds'
+          $ref: '../../../model/alert.schema.yaml#/components/schemas/AlertIds'
         case_ids:
           $ref: '#/components/schemas/CaseIds'
         comment:
           $ref: '#/components/schemas/Comment'
         parameters:
           $ref: '#/components/schemas/Parameters'
+        agent_type:
+          $ref: '#/components/schemas/AgentTypes'
+      required:
+        - endpoint_ids
 
-    ProcessActionSchemas:
-      allOf:
-        - $ref: '#/components/schemas/BaseActionSchema'
-        - type: object
-          required:
-            - parameters
-          properties:
-            parameters:
-              oneOf:
-                - type: object
-                  properties:
-                    pid:
-                      type: integer
-                      minimum: 1
-                - type: object
-                  properties:
-                    entity_id:
-                      type: string
-                      minLength: 1
+    NoParametersRequestSchema:
+      type: object
+      required:
+        - body
+      properties:
+        body:
+          $ref: '#/components/schemas/BaseActionSchema'
+
+    Pid:
+      type: object
+      properties:
+        pid:
+          type: integer
+          minimum: 1
+
+    EntityId:
+      type: object
+      properties:
+        entity_id:
+          type: string
+          minLength: 1
+
+    ProtectionUpdatesNoteResponse:
+      type: object
+      properties:
+        note:
+          type: string
+
     SuccessResponse:
       type: object
       properties: {}

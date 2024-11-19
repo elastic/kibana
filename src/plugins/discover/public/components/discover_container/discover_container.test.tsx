@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -13,15 +14,12 @@ import {
   DiscoverContainerInternal,
   type DiscoverContainerInternalProps,
 } from './discover_container';
-import type { ScopedHistory } from '@kbn/core-application-browser';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 const mockOverrideService = {};
-const getDiscoverServicesMock = jest.fn(
-  () => new Promise<DiscoverServices>((resolve) => resolve(discoverServiceMock))
-);
+const getDiscoverServicesMock = jest.fn(() => discoverServiceMock);
 
 jest.mock('../../application/main', () => {
   return {
@@ -31,7 +29,7 @@ jest.mock('../../application/main', () => {
 
 jest.mock('@kbn/kibana-react-plugin/public');
 
-const { history } = discoverServiceMock;
+const { getScopedHistory } = discoverServiceMock;
 
 const customizeMock = jest.fn();
 
@@ -40,8 +38,7 @@ const TestComponent = (props: Partial<DiscoverContainerInternalProps>) => {
     <DiscoverContainerInternal
       overrideServices={props.overrideServices ?? mockOverrideService}
       customizationCallbacks={props.customizationCallbacks ?? [customizeMock]}
-      isDev={props.isDev ?? false}
-      scopedHistory={props.scopedHistory ?? (history() as ScopedHistory<unknown>)}
+      scopedHistory={props.scopedHistory ?? getScopedHistory()!}
       getDiscoverServices={getDiscoverServicesMock}
     />
   );
@@ -59,8 +56,7 @@ describe('DiscoverContainerInternal should render properly', () => {
   afterEach(() => jest.clearAllMocks());
 
   it('should render', async () => {
-    const { getByTestId, queryByTestId } = render(<TestComponent />);
-    expect(queryByTestId(TEST_IDS.DISCOVER_CONTAINER_INTERNAL)).not.toBeInTheDocument();
+    const { getByTestId } = render(<TestComponent />);
 
     expect(getDiscoverServicesMock).toHaveBeenCalledTimes(1);
 

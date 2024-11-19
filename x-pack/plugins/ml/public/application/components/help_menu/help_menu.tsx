@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useEffect } from 'react';
+import type { FC } from 'react';
+import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useMlKibana } from '../../contexts/kibana';
 

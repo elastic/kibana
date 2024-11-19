@@ -9,6 +9,7 @@ import { modelsProvider } from './models_provider';
 import { type IScopedClusterClient } from '@kbn/core/server';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import type { MlClient } from '../../lib/ml_client';
+import downloadTasksResponse from './__mocks__/mock_download_tasks.json';
 
 describe('modelsProvider', () => {
   const mockClient = {
@@ -34,6 +35,9 @@ describe('modelsProvider', () => {
           },
         }),
       },
+      tasks: {
+        list: jest.fn().mockResolvedValue({ tasks: [] }),
+      },
     },
   } as unknown as jest.Mocked<IScopedClusterClient>;
 
@@ -54,6 +58,7 @@ describe('modelsProvider', () => {
           config: { input: { field_names: ['text_field'] } },
           description: 'Elastic Learned Sparse EncodeR v1 (Tech Preview)',
           hidden: true,
+          supported: false,
           model_id: '.elser_model_1',
           version: 1,
           modelName: 'elser',
@@ -62,6 +67,7 @@ describe('modelsProvider', () => {
         {
           config: { input: { field_names: ['text_field'] } },
           default: true,
+          supported: true,
           description: 'Elastic Learned Sparse EncodeR v2',
           model_id: '.elser_model_2',
           version: 2,
@@ -75,6 +81,7 @@ describe('modelsProvider', () => {
           model_id: '.elser_model_2_linux-x86_64',
           os: 'Linux',
           recommended: true,
+          supported: true,
           version: 2,
           modelName: 'elser',
           type: ['elastic', 'pytorch', 'text_expansion'],
@@ -82,8 +89,11 @@ describe('modelsProvider', () => {
         {
           config: { input: { field_names: ['text_field'] } },
           description: 'E5 (EmbEddings from bidirEctional Encoder rEpresentations)',
+          disclaimer:
+            'This E5 model, as defined, hosted, integrated and used in conjunction with our other Elastic Software is covered by our standard warranty.',
           model_id: '.multilingual-e5-small',
           default: true,
+          supported: true,
           version: 1,
           modelName: 'e5',
           license: 'MIT',
@@ -95,9 +105,12 @@ describe('modelsProvider', () => {
           config: { input: { field_names: ['text_field'] } },
           description:
             'E5 (EmbEddings from bidirEctional Encoder rEpresentations), optimized for linux-x86_64',
+          disclaimer:
+            'This E5 model, as defined, hosted, integrated and used in conjunction with our other Elastic Software is covered by our standard warranty.',
           model_id: '.multilingual-e5-small_linux-x86_64',
           os: 'Linux',
           recommended: true,
+          supported: true,
           version: 1,
           modelName: 'e5',
           license: 'MIT',
@@ -136,6 +149,7 @@ describe('modelsProvider', () => {
           config: { input: { field_names: ['text_field'] } },
           description: 'Elastic Learned Sparse EncodeR v1 (Tech Preview)',
           hidden: true,
+          supported: false,
           model_id: '.elser_model_1',
           version: 1,
           modelName: 'elser',
@@ -144,6 +158,7 @@ describe('modelsProvider', () => {
         {
           config: { input: { field_names: ['text_field'] } },
           recommended: true,
+          supported: true,
           description: 'Elastic Learned Sparse EncodeR v2',
           model_id: '.elser_model_2',
           version: 2,
@@ -159,12 +174,16 @@ describe('modelsProvider', () => {
           version: 2,
           modelName: 'elser',
           type: ['elastic', 'pytorch', 'text_expansion'],
+          supported: false,
         },
         {
           config: { input: { field_names: ['text_field'] } },
           description: 'E5 (EmbEddings from bidirEctional Encoder rEpresentations)',
+          disclaimer:
+            'This E5 model, as defined, hosted, integrated and used in conjunction with our other Elastic Software is covered by our standard warranty.',
           model_id: '.multilingual-e5-small',
           recommended: true,
+          supported: true,
           version: 1,
           modelName: 'e5',
           type: ['pytorch', 'text_embedding'],
@@ -176,8 +195,11 @@ describe('modelsProvider', () => {
           config: { input: { field_names: ['text_field'] } },
           description:
             'E5 (EmbEddings from bidirEctional Encoder rEpresentations), optimized for linux-x86_64',
+          disclaimer:
+            'This E5 model, as defined, hosted, integrated and used in conjunction with our other Elastic Software is covered by our standard warranty.',
           model_id: '.multilingual-e5-small_linux-x86_64',
           os: 'Linux',
+          supported: false,
           version: 1,
           modelName: 'e5',
           type: ['pytorch', 'text_embedding'],
@@ -261,6 +283,23 @@ describe('modelsProvider', () => {
 
       const result = await modelService.getCuratedModelConfig('e5');
       expect(result.model_id).toEqual('.multilingual-e5-small');
+    });
+  });
+
+  describe('getModelsDownloadStatus', () => {
+    test('returns null if no model download is in progress', async () => {
+      const result = await modelService.getModelsDownloadStatus();
+      expect(result).toEqual({});
+    });
+    test('provides download status for all models', async () => {
+      (mockClient.asInternalUser.tasks.list as jest.Mock).mockResolvedValueOnce(
+        downloadTasksResponse
+      );
+      const result = await modelService.getModelsDownloadStatus();
+      expect(result).toEqual({
+        '.elser_model_2': { downloaded_parts: 0, total_parts: 418 },
+        '.elser_model_2_linux-x86_64': { downloaded_parts: 96, total_parts: 263 },
+      });
     });
   });
 });

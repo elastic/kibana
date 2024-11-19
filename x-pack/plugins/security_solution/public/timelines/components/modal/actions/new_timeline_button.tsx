@@ -8,7 +8,7 @@
 import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import React, { useMemo, useState, useCallback } from 'react';
 import { useCreateTimeline } from '../../../hooks/use_create_timeline';
-import { TimelineType } from '../../../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 import * as i18n from './translations';
 
 interface NewTimelineButtonProps {
@@ -27,12 +27,12 @@ export const NewTimelineButton = React.memo(({ timelineId }: NewTimelineButtonPr
 
   const createNewTimeline = useCreateTimeline({
     timelineId,
-    timelineType: TimelineType.default,
+    timelineType: TimelineTypeEnum.default,
     onClick: togglePopover,
   });
   const createNewTimelineTemplate = useCreateTimeline({
     timelineId,
-    timelineType: TimelineType.template,
+    timelineType: TimelineTypeEnum.template,
     onClick: togglePopover,
   });
 
@@ -49,13 +49,21 @@ export const NewTimelineButton = React.memo(({ timelineId }: NewTimelineButtonPr
     );
   }, [togglePopover]);
 
+  const handleCreateNewTimeline = useCallback(async () => {
+    await createNewTimeline();
+  }, [createNewTimeline]);
+
+  const handleCreateNewTimelineTemplate = useCallback(async () => {
+    await createNewTimelineTemplate();
+  }, [createNewTimelineTemplate]);
+
   const items = useMemo(
     () => [
       <EuiContextMenuItem
         key="new-timeline"
         icon="plusInCircle"
         data-test-subj={'timeline-modal-new-timeline'}
-        onClick={() => createNewTimeline()}
+        onClick={handleCreateNewTimeline}
       >
         {i18n.NEW_TIMELINE}
       </EuiContextMenuItem>,
@@ -63,12 +71,12 @@ export const NewTimelineButton = React.memo(({ timelineId }: NewTimelineButtonPr
         key="new-timeline-template"
         icon="plusInCircle"
         data-test-subj={'timeline-modal-new-timeline-template'}
-        onClick={() => createNewTimelineTemplate()}
+        onClick={handleCreateNewTimelineTemplate}
       >
         {i18n.NEW_TEMPLATE_TIMELINE}
       </EuiContextMenuItem>,
     ],
-    [createNewTimeline, createNewTimelineTemplate]
+    [handleCreateNewTimeline, handleCreateNewTimelineTemplate]
   );
 
   return (

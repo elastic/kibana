@@ -5,30 +5,22 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 
-import { useGetAgentPolicies } from '../../../hooks';
-import { policyHasFleetServer } from '../../../services';
+import { useGetEnrollmentSettings } from '../../../hooks';
 
 export const useSelectFleetServerPolicy = (defaultAgentPolicyId?: string) => {
   const [fleetServerPolicyId, setFleetServerPolicyId] = useState<string | undefined>(
     defaultAgentPolicyId
   );
-  const {
-    isLoading,
-    isInitialRequest,
-    data: agentPoliciesData,
-    resendRequest,
-  } = useGetAgentPolicies({
-    full: true,
-  });
+  const { isLoading, isInitialRequest, data, resendRequest } = useGetEnrollmentSettings();
 
   const eligibleFleetServerPolicies = useMemo(
     () =>
-      agentPoliciesData
-        ? agentPoliciesData.items?.filter((item) => policyHasFleetServer(item))
+      data?.fleet_server?.policies
+        ? data?.fleet_server?.policies?.filter((item) => !item.is_managed)
         : [],
-    [agentPoliciesData]
+    [data?.fleet_server?.policies]
   );
 
   useEffect(() => {
@@ -42,7 +34,7 @@ export const useSelectFleetServerPolicy = (defaultAgentPolicyId?: string) => {
     isSelectFleetServerPolicyLoading: isLoading && isInitialRequest,
     fleetServerPolicyId,
     setFleetServerPolicyId,
-    eligibleFleetServerPolicies,
+    eligibleFleetServerPolicies: eligibleFleetServerPolicies || [],
     refreshEligibleFleetServerPolicies: resendRequest,
   };
 };

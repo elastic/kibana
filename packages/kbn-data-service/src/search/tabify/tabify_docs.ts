@@ -1,14 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isPlainObject } from 'lodash';
-import { Datatable, DatatableColumn, DatatableColumnType } from '@kbn/expressions-plugin/common';
+import {
+  Datatable,
+  DatatableColumn,
+  DatatableRow,
+  DatatableColumnType,
+} from '@kbn/expressions-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 
 // meta fields we won't merge with our result hit
@@ -31,7 +37,58 @@ interface TabifyDocsOptions {
 
 // This is an overwrite of the SearchHit type to add the ignored_field_values.
 // Can be removed once the estypes.SearchHit knows about ignored_field_values
-type Hit<T = unknown> = estypes.SearchHit<T> & { ignored_field_values?: Record<string, unknown[]> };
+type Hit<T = unknown> = Partial<estypes.SearchHit<T>> & {
+  ignored_field_values?: Record<string, unknown[]>;
+};
+
+function flattenAccum(
+  flat: Record<string, any>,
+  obj: Record<string, any>,
+  keyPrefix: string,
+  indexPattern?: DataView,
+  params?: TabifyDocsOptions
+) {
+  for (const k in obj) {
+    if (!Object.hasOwn(obj, k)) {
+      continue;
+    }
+    const val = obj[k];
+
+    const key = keyPrefix + k;
+    const field = indexPattern?.fields.getByName(key);
+
+    if (params?.shallow === false) {
+      const isNestedField = field?.type === 'nested';
+      if (Array.isArray(val) && !isNestedField) {
+        for (let i = 0; i < val.length; i++) {
+          const v = val[i];
+          if (isPlainObject(v)) {
+            flattenAccum(flat, v, key + '.', indexPattern, params);
+          }
+        }
+        continue;
+      }
+    } else if (flat[key] !== undefined) {
+      continue;
+    }
+
+    const hasValidMapping = field && field.type !== 'conflict';
+    const isValue = !isPlainObject(val);
+
+    if (hasValidMapping || isValue) {
+      if (!flat[key]) {
+        flat[key] = val;
+      } else if (Array.isArray(flat[key])) {
+        flat[key].push(val);
+      } else {
+        flat[key] = [flat[key], val];
+      }
+      continue;
+    }
+
+    flattenAccum(flat, val, key + '.', indexPattern, params);
+  }
+}
 
 /**
  * Flattens an individual hit (from an ES response) into an object. This will
@@ -41,46 +98,17 @@ type Hit<T = unknown> = estypes.SearchHit<T> & { ignored_field_values?: Record<s
  * @param indexPattern The index pattern for the requested index if available.
  * @param params Parameters how to flatten the hit
  */
-export function flattenHit(hit: Hit, indexPattern?: DataView, params?: TabifyDocsOptions) {
+export function flattenHit(
+  hit: Hit,
+  indexPattern?: DataView,
+  params?: TabifyDocsOptions & { flattenedFieldsComparator?: FlattenedFieldsComparator }
+) {
   const flat = {} as Record<string, any>;
 
-  function flatten(obj: Record<string, any>, keyPrefix: string = '') {
-    for (const [k, val] of Object.entries(obj)) {
-      const key = keyPrefix + k;
+  flattenAccum(flat, hit.fields || {}, '', indexPattern, params);
 
-      const field = indexPattern?.fields.getByName(key);
-
-      if (params?.shallow === false) {
-        const isNestedField = field?.type === 'nested';
-        if (Array.isArray(val) && !isNestedField) {
-          val.forEach((v) => isPlainObject(v) && flatten(v, key + '.'));
-          continue;
-        }
-      } else if (flat[key] !== undefined) {
-        continue;
-      }
-
-      const hasValidMapping = field && field.type !== 'conflict';
-      const isValue = !isPlainObject(val);
-
-      if (hasValidMapping || isValue) {
-        if (!flat[key]) {
-          flat[key] = val;
-        } else if (Array.isArray(flat[key])) {
-          flat[key].push(val);
-        } else {
-          flat[key] = [flat[key], val];
-        }
-        continue;
-      }
-
-      flatten(val, key + '.');
-    }
-  }
-
-  flatten(hit.fields || {});
   if (params?.source !== false && hit._source) {
-    flatten(hit._source as Record<string, any>);
+    flattenAccum(flat, hit._source as Record<string, any>, '', indexPattern, params);
   } else if (params?.includeIgnoredValues && hit.ignored_field_values) {
     // If enabled merge the ignored_field_values into the flattened hit. This will
     // merge values that are not actually indexed by ES (i.e. ignored), e.g. because
@@ -90,7 +118,11 @@ export function flattenHit(hit: Hit, indexPattern?: DataView, params?: TabifyDoc
     // merged them both together. We do not merge this (even if enabled) in case source has been
     // merged, since we would otherwise duplicate values, since ignore_field_values and _source
     // contain the same values.
-    Object.entries(hit.ignored_field_values).forEach(([fieldName, fieldValue]) => {
+    for (const fieldName in hit.ignored_field_values) {
+      if (!Object.hasOwn(hit.ignored_field_values, fieldName)) {
+        continue;
+      }
+      const fieldValue = hit.ignored_field_values[fieldName];
       if (flat[fieldName]) {
         // If there was already a value from the fields API, make sure we're merging both together
         if (Array.isArray(flat[fieldName])) {
@@ -102,37 +134,90 @@ export function flattenHit(hit: Hit, indexPattern?: DataView, params?: TabifyDoc
         // If no previous value was assigned we can simply use the value from `ignored_field_values` as it is
         flat[fieldName] = fieldValue;
       }
-    });
+    }
   }
 
   // Merge all valid meta fields into the flattened object
-  indexPattern?.metaFields?.forEach((fieldName) => {
-    const isExcludedMetaField =
-      EXCLUDED_META_FIELDS.includes(fieldName) || fieldName.charAt(0) !== '_';
-    if (isExcludedMetaField) {
-      return;
+  if (indexPattern?.metaFields) {
+    for (let i = 0; i < indexPattern?.metaFields.length; i++) {
+      const fieldName = indexPattern?.metaFields[i];
+      const isExcludedMetaField =
+        EXCLUDED_META_FIELDS.includes(fieldName) || fieldName.charAt(0) !== '_';
+      if (!isExcludedMetaField) {
+        flat[fieldName] = hit[fieldName as keyof Hit];
+      }
     }
-    flat[fieldName] = hit[fieldName as keyof estypes.SearchHit];
-  });
+  }
 
   // Use a proxy to make sure that keys are always returned in a specific order,
   // so we have a guarantee on the flattened order of keys.
+  return makeProxy(flat, indexPattern, params?.flattenedFieldsComparator);
+}
+
+export const getFlattenedFieldsComparator = (indexPattern?: DataView) => {
+  const metaFields = new Set(indexPattern?.metaFields);
+  const lowerMap = new Map<string, string>();
+  let aLower: string | undefined;
+  let bLower: string | undefined;
+
+  const compareLower = (a: string, b: string) => {
+    aLower = lowerMap.get(a);
+    if (aLower === undefined) {
+      aLower = a.toLowerCase();
+      lowerMap.set(a, aLower);
+    }
+    bLower = lowerMap.get(b);
+    if (bLower === undefined) {
+      bLower = b.toLowerCase();
+      lowerMap.set(b, bLower);
+    }
+    return aLower < bLower ? -1 : aLower > bLower ? 1 : 0;
+  };
+
+  return (a: string | symbol, b: string | symbol) => {
+    if (typeof a === 'symbol' || typeof b === 'symbol') {
+      return 0;
+    }
+    const aIsMeta = metaFields.has(a);
+    const bIsMeta = metaFields.has(b);
+    if (aIsMeta && bIsMeta) {
+      return compareLower(a, b);
+    }
+    if (aIsMeta) {
+      return 1;
+    }
+    if (bIsMeta) {
+      return -1;
+    }
+    return compareLower(a, b);
+  };
+};
+
+export type FlattenedFieldsComparator = ReturnType<typeof getFlattenedFieldsComparator>;
+
+function makeProxy(
+  flat: Record<string, any>,
+  indexPattern?: DataView,
+  flattenedFieldsComparator?: FlattenedFieldsComparator
+) {
+  let cachedKeys: Array<string | symbol> | undefined;
+
   return new Proxy(flat, {
+    defineProperty: (...args) => {
+      cachedKeys = undefined;
+      return Reflect.defineProperty(...args);
+    },
+    deleteProperty: (...args) => {
+      cachedKeys = undefined;
+      return Reflect.deleteProperty(...args);
+    },
     ownKeys: (target) => {
-      return Reflect.ownKeys(target).sort((a, b) => {
-        const aIsMeta = indexPattern?.metaFields?.includes(String(a));
-        const bIsMeta = indexPattern?.metaFields?.includes(String(b));
-        if (aIsMeta && bIsMeta) {
-          return String(a).localeCompare(String(b));
-        }
-        if (aIsMeta) {
-          return 1;
-        }
-        if (bIsMeta) {
-          return -1;
-        }
-        return String(a).localeCompare(String(b));
-      });
+      if (!cachedKeys) {
+        cachedKeys = Reflect.ownKeys(target).sort(
+          flattenedFieldsComparator ?? getFlattenedFieldsComparator(indexPattern)
+        );
+      }
+      return cachedKeys;
     },
   });
 }
@@ -144,9 +229,12 @@ export const tabifyDocs = (
 ): Datatable => {
   const columns: DatatableColumn[] = [];
 
-  const rows = esResponse.hits.hits
+  const rows: Array<DatatableRow | undefined> = esResponse.hits.hits
     .map((hit) => {
       const flat = flattenHit(hit, index, params);
+      if (!flat) {
+        return;
+      }
       for (const [key, value] of Object.entries(flat)) {
         const field = index?.fields.getByName(key);
         const fieldName = field?.name || key;
@@ -172,6 +260,6 @@ export const tabifyDocs = (
   return {
     type: 'datatable',
     columns,
-    rows,
+    rows: rows as DatatableRow[],
   };
 };

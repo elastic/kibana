@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { ReactElement } from 'react';
@@ -13,18 +14,17 @@ import type { Capabilities } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Suggestion } from '@kbn/lens-plugin/public';
 import type { UnifiedHistogramFetchStatus } from '../types';
-import { Chart } from './chart';
+import { Chart, type ChartProps } from './chart';
 import type { ReactWrapper } from 'enzyme';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
+import { getLensVisMock } from '../__mocks__/lens_vis';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { of } from 'rxjs';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { dataViewMock } from '../__mocks__/data_view';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
-import { SuggestionSelector } from './suggestion_selector';
 import { checkChartAvailability } from './check_chart_availability';
-
-import { currentSuggestionMock, allSuggestionsMock } from '../__mocks__/suggestions';
+import { allSuggestionsMock } from '../__mocks__/suggestions';
 
 let mockUseEditVisualization: jest.Mock | undefined = jest.fn();
 
@@ -40,11 +40,11 @@ async function mountComponent({
   chartHidden = false,
   appendHistogram,
   dataView = dataViewWithTimefieldMock,
-  currentSuggestion,
   allSuggestions,
   isPlainRecord,
   hasDashboardPermissions,
   isChartLoading,
+  hasHistogramSuggestionForESQL,
 }: {
   customToggle?: ReactElement;
   noChart?: boolean;
@@ -53,11 +53,11 @@ async function mountComponent({
   chartHidden?: boolean;
   appendHistogram?: ReactElement;
   dataView?: DataView;
-  currentSuggestion?: Suggestion;
   allSuggestions?: Suggestion[];
   isPlainRecord?: boolean;
   hasDashboardPermissions?: boolean;
   isChartLoading?: boolean;
+  hasHistogramSuggestionForESQL?: boolean;
 } = {}) {
   (searchSourceInstanceMock.fetch$ as jest.Mock).mockImplementation(
     jest.fn().mockReturnValue(of({ rawResponse: { hits: { total: noHits ? 0 : 2 } } }))
@@ -85,25 +85,46 @@ async function mountComponent({
         },
       };
 
-  const props = {
-    dataView,
-    query: {
-      language: 'kuery',
-      query: '',
-    },
+  const requestParams = {
+    query: isPlainRecord
+      ? { esql: 'from logs | limit 10' }
+      : {
+          language: 'kuery',
+          query: '',
+        },
     filters: [],
-    timeRange: { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' },
+    relativeTimeRange: { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' },
+    getTimeRange: () => ({ from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' }),
+    updateTimeRange: () => {},
+  };
+
+  const lensVisService = (
+    await getLensVisMock({
+      query: requestParams.query,
+      filters: requestParams.filters,
+      isPlainRecord: Boolean(isPlainRecord),
+      timeInterval: 'auto',
+      dataView,
+      breakdownField: undefined,
+      columns: [],
+      allSuggestions,
+      hasHistogramSuggestionForESQL,
+    })
+  ).lensService;
+
+  const props: ChartProps = {
+    lensVisService,
+    dataView,
+    requestParams,
     services,
     hits: noHits
       ? undefined
       : {
           status: 'complete' as UnifiedHistogramFetchStatus,
-          number: 2,
+          total: 2,
         },
     chart,
     breakdown: noBreakdown ? undefined : { field: undefined },
-    currentSuggestion,
-    allSuggestions,
     isChartLoading: Boolean(isChartLoading),
     isPlainRecord,
     appendHistogram,
@@ -246,17 +267,8 @@ describe('Chart', () => {
     expect(component.find(BreakdownFieldSelector).exists()).toBeFalsy();
   });
 
-  it('should render the Lens SuggestionsSelector when chart is visible and suggestions exist', async () => {
-    const component = await mountComponent({
-      currentSuggestion: currentSuggestionMock,
-      allSuggestions: allSuggestionsMock,
-    });
-    expect(component.find(SuggestionSelector).exists()).toBeTruthy();
-  });
-
   it('should render the edit on the fly button when chart is visible and suggestions exist', async () => {
     const component = await mountComponent({
-      currentSuggestion: currentSuggestionMock,
       allSuggestions: allSuggestionsMock,
       isPlainRecord: true,
     });
@@ -267,8 +279,8 @@ describe('Chart', () => {
 
   it('should not render the edit on the fly button when chart is visible and suggestions dont exist', async () => {
     const component = await mountComponent({
-      currentSuggestion: undefined,
-      allSuggestions: undefined,
+      allSuggestions: [],
+      hasHistogramSuggestionForESQL: false,
       isPlainRecord: true,
     });
     expect(
@@ -278,8 +290,8 @@ describe('Chart', () => {
 
   it('should render the save button when chart is visible and suggestions exist', async () => {
     const component = await mountComponent({
-      currentSuggestion: currentSuggestionMock,
       allSuggestions: allSuggestionsMock,
+      isPlainRecord: true,
     });
     expect(
       component.find('[data-test-subj="unifiedHistogramSaveVisualization"]').exists()
@@ -288,26 +300,11 @@ describe('Chart', () => {
 
   it('should not render the save button when the dashboard save by value permissions are false', async () => {
     const component = await mountComponent({
-      currentSuggestion: currentSuggestionMock,
       allSuggestions: allSuggestionsMock,
       hasDashboardPermissions: false,
     });
     expect(
       component.find('[data-test-subj="unifiedHistogramSaveVisualization"]').exists()
     ).toBeFalsy();
-  });
-
-  it('should not render the Lens SuggestionsSelector when chart is hidden', async () => {
-    const component = await mountComponent({
-      chartHidden: true,
-      currentSuggestion: currentSuggestionMock,
-      allSuggestions: allSuggestionsMock,
-    });
-    expect(component.find(SuggestionSelector).exists()).toBeFalsy();
-  });
-
-  it('should not render the Lens SuggestionsSelector when chart is visible and suggestions are undefined', async () => {
-    const component = await mountComponent({ currentSuggestion: currentSuggestionMock });
-    expect(component.find(SuggestionSelector).exists()).toBeFalsy();
   });
 });

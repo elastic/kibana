@@ -68,7 +68,7 @@ const POLICIES_TABLE_COLUMNS: Array<EuiBasicTableColumn<CloudDefendPolicy>> = [
       <IntegrationButtonLink
         packageName={packageName}
         packagePolicyId={policy.package_policy.id}
-        policyId={policy.package_policy.policy_id}
+        policyId={policy.package_policy.policy_ids[0]}
       />
     ),
     truncateText: true,

@@ -170,19 +170,21 @@ export class BaseRule {
       if (!action) {
         continue;
       }
-      ruleActions.push({
-        group: 'default',
-        id: actionData.id,
-        params: {
-          message: '{{context.internalShortMessage}}',
-          ...actionData.config,
-        },
-        frequency: {
-          summary: false,
-          notifyWhen: RuleNotifyWhen.THROTTLE,
-          throttle,
-        },
-      });
+      if (!action.isSystemAction) {
+        ruleActions.push({
+          group: 'default',
+          id: actionData.id,
+          params: {
+            message: '{{context.internalShortMessage}}',
+            ...actionData.config,
+          },
+          frequency: {
+            summary: false,
+            notifyWhen: RuleNotifyWhen.THROTTLE,
+            throttle,
+          },
+        });
+      }
     }
 
     return await rulesClient.create<RuleTypeParams>({
@@ -262,7 +264,8 @@ export class BaseRule {
     DefaultAlert
   >): Promise<any> {
     this.scopedLogger.debug(
-      `Executing alert with params: ${JSON.stringify(params)} and state: ${JSON.stringify(state)}`
+      () =>
+        `Executing alert with params: ${JSON.stringify(params)} and state: ${JSON.stringify(state)}`
     );
 
     const { alertsClient } = services;
@@ -402,7 +405,7 @@ export class BaseRule {
   }
 
   protected createGlobalStateLink(link: string, clusterUuid: string, ccs?: string) {
-    const globalState = [`cluster_uuid:${clusterUuid}`];
+    const globalState = [`cluster_uuid:'${clusterUuid}'`];
     if (ccs) {
       globalState.push(`ccs:${ccs}`);
     }

@@ -12,7 +12,7 @@ import { render } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
-import { alertDataMock } from '../mocks';
+import { alertInputDataMock } from '../mocks';
 import { useRiskInputActionsPanels } from './use_risk_input_actions_panels';
 
 const casesServiceMock = casesPluginMock.createStartContract();
@@ -47,7 +47,7 @@ const TestMenu = ({ panels }: { panels: EuiContextMenuPanelDescriptor[] }) => (
   <EuiContextMenu initialPanelId={0} panels={panels} />
 );
 
-const customRender = (alerts = [alertDataMock]) => {
+const customRender = (alerts = [alertInputDataMock]) => {
   const { result } = renderHook(() => useRiskInputActionsPanels(alerts, () => {}), {
     wrapper: TestProviders,
   });
@@ -67,7 +67,7 @@ describe('useRiskInputActionsPanels', () => {
   });
 
   it('displays number of selected alerts when more than one alert is selected', () => {
-    const { getByTestId } = customRender([alertDataMock, alertDataMock]);
+    const { getByTestId } = customRender([alertInputDataMock, alertInputDataMock]);
 
     expect(getByTestId('contextMenuPanelTitle')).toHaveTextContent('2 selected');
   });

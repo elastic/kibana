@@ -24,36 +24,92 @@ describe('getTimeRange', () => {
     jest.resetAllMocks();
   });
 
-  test('returns time range with no query delay', () => {
-    const { dateStart, dateEnd } = getTimeRange(logger, { delay: 0 }, '5m');
-    expect(dateStart).toBe('2023-10-03T23:55:00.000Z');
-    expect(dateEnd).toBe('2023-10-04T00:00:00.000Z');
-    expect(logger.debug).toHaveBeenCalledWith('Adjusting rule query time range by 0 seconds');
-  });
-
-  test('returns time range with a query delay', () => {
-    const { dateStart, dateEnd } = getTimeRange(logger, { delay: 45 }, '5m');
-    expect(dateStart).toBe('2023-10-03T23:54:15.000Z');
-    expect(dateEnd).toBe('2023-10-03T23:59:15.000Z');
-    expect(logger.debug).toHaveBeenCalledWith('Adjusting rule query time range by 45 seconds');
-  });
-
-  test('returns time range with no query delay and no time range', () => {
-    const { dateStart, dateEnd } = getTimeRange(logger, { delay: 0 });
+  test(`returns time range with no options`, () => {
+    const { dateStart, dateEnd } = getTimeRange({
+      logger,
+    });
     expect(dateStart).toBe('2023-10-04T00:00:00.000Z');
     expect(dateEnd).toBe('2023-10-04T00:00:00.000Z');
     expect(logger.debug).toHaveBeenCalledWith('Adjusting rule query time range by 0 seconds');
   });
 
-  test('returns time range with a query delay and no time range', () => {
-    const { dateStart, dateEnd } = getTimeRange(logger, { delay: 45 });
-    expect(dateStart).toBe('2023-10-03T23:59:15.000Z');
-    expect(dateEnd).toBe('2023-10-03T23:59:15.000Z');
+  test(`returns time range with window`, () => {
+    const { dateStart, dateEnd } = getTimeRange({
+      logger,
+      window: '5m',
+    });
+    expect(dateStart).toBe('2023-10-03T23:55:00.000Z');
+    expect(dateEnd).toBe('2023-10-04T00:00:00.000Z');
+    expect(logger.debug).toHaveBeenCalledWith('Adjusting rule query time range by 0 seconds');
+  });
+
+  test(`returns time range with queryDelay`, () => {
+    const { dateStart, dateEnd } = getTimeRange({
+      logger,
+      queryDelay: 30,
+    });
+    expect(dateStart).toBe('2023-10-03T23:59:30.000Z');
+    expect(dateEnd).toBe('2023-10-03T23:59:30.000Z');
+    expect(logger.debug).toHaveBeenCalledWith('Adjusting rule query time range by 30 seconds');
+  });
+
+  test(`returns time range with forceNow`, () => {
+    const { dateStart, dateEnd } = getTimeRange({
+      logger,
+      forceNow: new Date('2022-10-04T00:00:00.000Z'),
+    });
+    expect(dateStart).toBe('2022-10-04T00:00:00.000Z');
+    expect(dateEnd).toBe('2022-10-04T00:00:00.000Z');
+    expect(logger.debug).toHaveBeenCalledWith('Adjusting rule query time range by 0 seconds');
+  });
+
+  test(`returns time range with window and queryDelay`, () => {
+    const { dateStart, dateEnd } = getTimeRange({
+      logger,
+      window: '5m',
+      queryDelay: 30,
+    });
+    expect(dateStart).toBe('2023-10-03T23:54:30.000Z');
+    expect(dateEnd).toBe('2023-10-03T23:59:30.000Z');
+    expect(logger.debug).toHaveBeenCalledWith('Adjusting rule query time range by 30 seconds');
+  });
+
+  test(`returns time range with window and forceNow`, () => {
+    const { dateStart, dateEnd } = getTimeRange({
+      logger,
+      window: '5m',
+      forceNow: new Date('2022-10-04T00:00:00.000Z'),
+    });
+    expect(dateStart).toBe('2022-10-03T23:55:00.000Z');
+    expect(dateEnd).toBe('2022-10-04T00:00:00.000Z');
+    expect(logger.debug).toHaveBeenCalledWith('Adjusting rule query time range by 0 seconds');
+  });
+
+  test(`returns time range with queryDelay and forceNow`, () => {
+    const { dateStart, dateEnd } = getTimeRange({
+      logger,
+      forceNow: new Date('2022-10-04T00:00:00.000Z'),
+      queryDelay: 30,
+    });
+    expect(dateStart).toBe('2022-10-03T23:59:30.000Z');
+    expect(dateEnd).toBe('2022-10-03T23:59:30.000Z');
+    expect(logger.debug).toHaveBeenCalledWith('Adjusting rule query time range by 30 seconds');
+  });
+
+  test(`returns time range with all options specified`, () => {
+    const { dateStart, dateEnd } = getTimeRange({
+      logger,
+      window: '5m',
+      queryDelay: 45,
+      forceNow: new Date('2022-10-04T00:00:00.000Z'),
+    });
+    expect(dateStart).toBe('2022-10-03T23:54:15.000Z');
+    expect(dateEnd).toBe('2022-10-03T23:59:15.000Z');
     expect(logger.debug).toHaveBeenCalledWith('Adjusting rule query time range by 45 seconds');
   });
 
-  test('throws an error when the time window is invalid', () => {
-    expect(() => getTimeRange(logger, { delay: 45 }, '5k')).toThrowErrorMatchingInlineSnapshot(
+  test('throws an error when window is invalid', () => {
+    expect(() => getTimeRange({ logger, window: '5k' })).toThrowErrorMatchingInlineSnapshot(
       `"Invalid format for windowSize: \\"5k\\""`
     );
     expect(logger.debug).not.toHaveBeenCalled();

@@ -145,7 +145,7 @@ export class NodesChangedRule extends BaseRule {
     const addedText =
       states.added.length > 0
         ? i18n.translate('xpack.monitoring.alerts.nodesChanged.ui.addedFiringMessage', {
-            defaultMessage: `Elasticsearch nodes '{added}' added to this cluster.`,
+            defaultMessage: `Elasticsearch nodes ''{added}'' added to this cluster.`,
             values: {
               added: states.added.map((n) => n.nodeName).join(','),
             },
@@ -154,7 +154,7 @@ export class NodesChangedRule extends BaseRule {
     const removedText =
       states.removed.length > 0
         ? i18n.translate('xpack.monitoring.alerts.nodesChanged.ui.removedFiringMessage', {
-            defaultMessage: `Elasticsearch nodes '{removed}' removed from this cluster.`,
+            defaultMessage: `Elasticsearch nodes ''{removed}'' removed from this cluster.`,
             values: {
               removed: states.removed.map((n) => n.nodeName).join(','),
             },
@@ -163,7 +163,7 @@ export class NodesChangedRule extends BaseRule {
     const restartedText =
       states.restarted.length > 0
         ? i18n.translate('xpack.monitoring.alerts.nodesChanged.ui.restartedFiringMessage', {
-            defaultMessage: `Elasticsearch nodes '{restarted}' restarted in this cluster.`,
+            defaultMessage: `Elasticsearch nodes ''{restarted}'' restarted in this cluster.`,
             values: {
               restarted: states.restarted.map((n) => n.nodeName).join(','),
             },
@@ -203,9 +203,9 @@ export class NodesChangedRule extends BaseRule {
     });
     const action = `[${fullActionText}](elasticsearch/nodes)`;
     const states = getNodeStates(nodes);
-    const added = states.added.map((node) => node.nodeName).join(',');
-    const removed = states.removed.map((node) => node.nodeName).join(',');
-    const restarted = states.restarted.map((node) => node.nodeName).join(',');
+    const added = states.added.map((node) => node.nodeName).join(',') || 'none';
+    const removed = states.removed.map((node) => node.nodeName).join(',') || 'none';
+    const restarted = states.restarted.map((node) => node.nodeName).join(',') || 'none';
     const internalShortMessage = i18n.translate(
       'xpack.monitoring.alerts.nodesChanged.firing.internalShortMessage',
       {
@@ -223,7 +223,7 @@ export class NodesChangedRule extends BaseRule {
         internalFullMessage: i18n.translate(
           'xpack.monitoring.alerts.nodesChanged.firing.internalFullMessage',
           {
-            defaultMessage: `Nodes changed alert is firing for {clusterName}. The following Elasticsearch nodes have been added:{added} removed:{removed} restarted:{restarted}. {action}`,
+            defaultMessage: `Nodes changed alert is firing for {clusterName}. The following Elasticsearch nodes have been added: {added} / removed: {removed} / restarted: {restarted}. {action}`,
             values: {
               clusterName: cluster.clusterName,
               added,

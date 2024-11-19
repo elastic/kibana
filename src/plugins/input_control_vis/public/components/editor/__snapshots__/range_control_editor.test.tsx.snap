@@ -2,13 +2,13 @@
 
 exports[`renders RangeControlEditor 1`] = `
 <Fragment>
-  <InjectIntl(IndexPatternSelectFormRowUi)
+  <injectIntl(IndexPatternSelectFormRowUi)
     IndexPatternSelect={[Function]}
     controlIndex={0}
     indexPatternId="indexPattern1"
     onChange={[Function]}
   />
-  <InjectIntl(FieldSelectUi)
+  <injectIntl(FieldSelectUi)
     controlIndex={0}
     fieldName="numberField"
     filterField={[Function]}
@@ -17,19 +17,13 @@ exports[`renders RangeControlEditor 1`] = `
     onChange={[Function]}
   />
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     id="stepSize-0"
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Step Size"
         id="inputControl.editor.rangeControl.stepSizeLabel"
-        values={Object {}}
       />
     }
-    labelType="label"
   >
     <EuiFieldNumber
       data-test-subj="rangeControlSizeInput0"
@@ -38,19 +32,13 @@ exports[`renders RangeControlEditor 1`] = `
     />
   </EuiFormRow>
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     id="decimalPlaces-0"
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Decimal Places"
         id="inputControl.editor.rangeControl.decimalPlacesLabel"
-        values={Object {}}
       />
     }
-    labelType="label"
   >
     <EuiFieldNumber
       data-test-subj="rangeControlDecimalPlacesInput0"

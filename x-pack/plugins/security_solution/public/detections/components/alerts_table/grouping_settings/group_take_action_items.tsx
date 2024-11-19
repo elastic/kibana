@@ -28,7 +28,7 @@ import {
 import { FILTER_ACKNOWLEDGED, FILTER_CLOSED, FILTER_OPEN } from '../../../../../common/types';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import * as i18n from '../translations';
-import { getTelemetryEvent, METRIC_TYPE, track } from '../../../../common/lib/telemetry';
+import { AlertsEventTypes, METRIC_TYPE, track } from '../../../../common/lib/telemetry';
 import type { StartServices } from '../../../../types';
 
 export interface TakeActionsProps {
@@ -36,13 +36,25 @@ export interface TakeActionsProps {
   showAlertStatusActions?: boolean;
 }
 
+const getTelemetryEvent = {
+  groupedAlertsTakeAction: ({
+    tableId,
+    groupNumber,
+    status,
+  }: {
+    tableId: string;
+    groupNumber: number;
+    status: AlertWorkflowStatus;
+  }) => `alerts_table_${tableId}_group-${groupNumber}_mark-${status}`,
+};
+
 export const useGroupTakeActionsItems = ({
   currentStatus,
   showAlertStatusActions = true,
 }: TakeActionsProps) => {
   const { addSuccess, addError, addWarning } = useAppToasts();
   const { startTransaction } = useStartTransaction();
-  const getGlobalQuerySelector = inputsSelectors.globalQuery();
+  const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuery(), []);
   const globalQueries = useDeepEqualSelector(getGlobalQuerySelector);
   const refetchQuery = useCallback(() => {
     globalQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
@@ -58,7 +70,7 @@ export const useGroupTakeActionsItems = ({
       status: 'open' | 'closed' | 'acknowledged';
       groupByField: string;
     }) => {
-      telemetry.reportAlertsGroupingTakeAction(params);
+      telemetry.reportEvent(AlertsEventTypes.AlertsGroupingTakeAction, params);
     },
     [telemetry]
   );

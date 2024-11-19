@@ -101,6 +101,45 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-logging-common-internal",
+        "id": "def-common.BrowserLoggerConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "BrowserLoggerConfig",
+        "description": [],
+        "path": "packages/core/logging/core-logging-common-internal/src/browser_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-logging-common-internal",
+            "id": "def-common.BrowserLoggerConfig.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "packages/core/logging/core-logging-common-internal/src/browser_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-common-internal",
+            "id": "def-common.BrowserLoggerConfig.level",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "level",
+            "description": [],
+            "signature": [
+              "\"error\" | \"info\" | \"all\" | \"off\" | \"trace\" | \"debug\" | \"warn\" | \"fatal\""
+            ],
+            "path": "packages/core/logging/core-logging-common-internal/src/browser_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-logging-common-internal",
         "id": "def-common.Conversion",
         "type": "Interface",
         "tags": [],

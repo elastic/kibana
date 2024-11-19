@@ -65,7 +65,7 @@ export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
     numberOfExecutions
   );
 
-  const onChange = useCallback(
+  const onChange: React.ChangeEventHandler<HTMLSelectElement> = useCallback(
     ({ target }) => onChangeDuration(Number(target.value)),
     [onChangeDuration]
   );
@@ -116,7 +116,7 @@ export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
               <Settings
                 theme={{
                   lineSeriesStyle: {
-                    point: { visible: false },
+                    point: { visible: 'never' },
                     line: { stroke: lightEuiTheme.euiColorAccent },
                   },
                 }}

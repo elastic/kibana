@@ -1,25 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useState } from 'react';
 
 import {
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiFilterButton,
+  EuiFilterButtonProps,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInputPopover,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-  EuiFilterButton,
-  EuiFilterButtonProps,
 } from '@elastic/eui';
-import { FieldIcon } from '@kbn/react-field';
+import { getFieldTypeName } from '@kbn/field-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { FieldIcon } from '@kbn/react-field';
 
 export interface Props {
   onFieldTypesChange: (value: string[]) => void;
@@ -61,7 +63,7 @@ export function FieldTypeFilter({
   );
 
   return (
-    <EuiFilterGroup fullWidth>
+    <EuiFilterGroup compressed fullWidth>
       <EuiInputPopover
         panelPaddingSize="none"
         display="block"
@@ -94,7 +96,7 @@ export function FieldTypeFilter({
                 <EuiFlexItem grow={false}>
                   <FieldIcon type={type} label={type} />
                 </EuiFlexItem>
-                <EuiFlexItem>{type}</EuiFlexItem>
+                <EuiFlexItem>{getFieldTypeName(type)}</EuiFlexItem>
               </EuiFlexGroup>
             </EuiContextMenuItem>
           ))}

@@ -7,7 +7,7 @@
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { sortBy } from 'lodash';
-import { TransformListRow } from '../../../../common';
+import type { TransformListRow } from '../../../../common';
 
 // For transforms, some might be part of a integration package
 // A transform might be dependent on the results of another transform

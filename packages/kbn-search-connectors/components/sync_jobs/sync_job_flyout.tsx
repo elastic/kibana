@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -68,15 +69,20 @@ export const SyncJobFlyout: React.FC<SyncJobFlyoutProps> = ({ onClose, syncJob }
                       defaultMessage: 'ID',
                     }),
                   },
+                  {
+                    field: 'index_name',
+                    name: i18n.translate('searchConnectors.syncJobs.flyout.sync.index', {
+                      defaultMessage: 'Index name',
+                    }),
+                  },
                 ]}
-                items={[{ id: syncJob.id }]}
+                items={[{ id: syncJob.id, index_name: syncJob.connector.index_name }]}
               />
             </FlyoutPanel>
           </EuiFlexItem>
           <EuiFlexItem>
             <SyncJobDocumentsPanel
               added={syncJob.indexed_document_count}
-              total={syncJob.total_document_count ?? 0}
               removed={syncJob.deleted_document_count}
               volume={syncJob.indexed_document_volume ?? 0}
             />

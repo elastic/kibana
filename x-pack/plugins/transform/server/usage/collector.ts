@@ -7,7 +7,7 @@
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { getResultTestConfig } from '../../common/utils/alerts';
-import { TransformHealthRuleParams } from '../../common/types/alerting';
+import type { TransformHealthRuleParams } from '../../common/types/alerting';
 import { TRANSFORM_RULE_TYPE } from '../../common';
 
 export interface TransformAlertsUsageData {
@@ -22,7 +22,10 @@ export interface TransformAlertsUsageData {
   };
 }
 
-export function registerCollector(usageCollection: UsageCollectionSetup, alertIndex: string) {
+export function registerCollector(
+  usageCollection: UsageCollectionSetup,
+  getAlertIndex: () => Promise<string>
+) {
   const collector = usageCollection.makeUsageCollector<TransformAlertsUsageData>({
     type: 'transform',
     schema: {
@@ -62,7 +65,7 @@ export function registerCollector(usageCollection: UsageCollectionSetup, alertIn
         };
       }>(
         {
-          index: alertIndex,
+          index: await getAlertIndex(),
           size: 10000,
           query: {
             bool: {

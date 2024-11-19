@@ -14,7 +14,12 @@ import { bulkRequestDiagnostics, requestDiagnostics } from './request_diagnostic
 
 describe('requestDiagnostics', () => {
   beforeEach(async () => {
-    appContextService.start(createAppContextStartContractMock());
+    const { soClient } = createClientMock();
+    appContextService.start(
+      createAppContextStartContractMock({}, false, {
+        withoutSpaceExtensions: soClient,
+      })
+    );
   });
 
   afterEach(() => {
@@ -23,14 +28,15 @@ describe('requestDiagnostics', () => {
 
   describe('requestDiagnostics (singular)', () => {
     it('can request diagnostics for single agent', async () => {
-      const { esClient, agentInRegularDoc } = createClientMock();
-      await requestDiagnostics(esClient, agentInRegularDoc._id);
+      const { soClient, esClient, agentInRegularDoc } = createClientMock();
+      await requestDiagnostics(esClient, soClient, agentInRegularDoc._id);
 
       expect(esClient.create).toHaveBeenCalledWith(
         expect.objectContaining({
           body: expect.objectContaining({
             agents: ['agent-in-regular-policy'],
             type: 'REQUEST_DIAGNOSTICS',
+            expiration: expect.anything(),
           }),
           index: '.fleet-actions',
         })
@@ -50,6 +56,7 @@ describe('requestDiagnostics', () => {
           body: expect.objectContaining({
             agents: ['agent-in-regular-policy-newer', 'agent-in-regular-policy-newer2'],
             type: 'REQUEST_DIAGNOSTICS',
+            expiration: expect.anything(),
           }),
           index: '.fleet-actions',
         })
@@ -66,6 +73,7 @@ describe('requestDiagnostics', () => {
           body: expect.objectContaining({
             agents: ['agent-in-regular-policy-newer', 'agent-in-regular-policy'],
             type: 'REQUEST_DIAGNOSTICS',
+            expiration: expect.anything(),
           }),
           index: '.fleet-actions',
         })

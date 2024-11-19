@@ -123,7 +123,7 @@ export const WorkpadTemplates = ({ templates, onCreateWorkpad }: Props) => {
 const strings = {
   getCloneTemplateLinkAriaLabel: (templateName: string) =>
     i18n.translate('xpack.canvas.workpadTemplates.cloneTemplateLinkAriaLabel', {
-      defaultMessage: `Clone workpad template '{templateName}'`,
+      defaultMessage: `Clone workpad template ''{templateName}''`,
       values: {
         templateName,
       },
@@ -149,7 +149,7 @@ const strings = {
     }),
   getCreatingTemplateLabel: (templateName: string) =>
     i18n.translate('xpack.canvas.workpadTemplates.creatingTemplateLabel', {
-      defaultMessage: `Creating from template '{templateName}'`,
+      defaultMessage: `Creating from template ''{templateName}''`,
       values: {
         templateName,
       },

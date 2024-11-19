@@ -12,6 +12,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
 
   describe('discover/group2', function () {
+    this.tags(['esGate']);
+
     before(async function () {
       await browser.setWindowSize(1600, 1200);
     });
@@ -22,6 +24,5 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./_data_grid_doc_navigation'));
     loadTestFile(require.resolve('./_data_grid_doc_table'));
-    loadTestFile(require.resolve('./_adhoc_data_views'));
   });
 }

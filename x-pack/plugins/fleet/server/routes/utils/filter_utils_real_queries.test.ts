@@ -8,7 +8,7 @@
 import * as esKuery from '@kbn/es-query';
 
 import {
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   AGENTS_PREFIX,
   AGENT_POLICY_MAPPINGS,
@@ -19,17 +19,22 @@ import {
 
 import { FLEET_ENROLLMENT_API_PREFIX } from '../../../common/constants';
 
+import { appContextService } from '../../services/app_context';
+
 import { validateFilterKueryNode, validateKuery } from './filter_utils';
+
+jest.mock('../../services/app_context');
+const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
 
 describe('ValidateFilterKueryNode validates real kueries through KueryNode', () => {
   describe('Agent policies', () => {
     it('Search by data_output_id', async () => {
       const astFilter = esKuery.fromKueryExpression(
-        `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id: test_id`
+        `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id: test_id`
       );
       const validationObject = validateFilterKueryNode({
         astFilter,
-        types: [AGENT_POLICY_SAVED_OBJECT_TYPE],
+        types: [LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE],
         indexMapping: AGENT_POLICY_MAPPINGS,
         storeValue: true,
       });
@@ -46,11 +51,11 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
 
     it('Search by inactivity timeout', async () => {
       const astFilter = esKuery.fromKueryExpression(
-        `${AGENT_POLICY_SAVED_OBJECT_TYPE}.inactivity_timeout:*`
+        `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.inactivity_timeout:*`
       );
       const validationObject = validateFilterKueryNode({
         astFilter,
-        types: [AGENT_POLICY_SAVED_OBJECT_TYPE],
+        types: [LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE],
         indexMapping: AGENT_POLICY_MAPPINGS,
         storeValue: true,
       });
@@ -68,9 +73,9 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
     it('Complex query', async () => {
       const validationObject = validateFilterKueryNode({
         astFilter: esKuery.fromKueryExpression(
-          `${AGENT_POLICY_SAVED_OBJECT_TYPE}.download_source_id:some_id or (not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.download_source_id:*)`
+          `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.download_source_id:some_id or (not ${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.download_source_id:*)`
         ),
-        types: [AGENT_POLICY_SAVED_OBJECT_TYPE],
+        types: [LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE],
         indexMapping: AGENT_POLICY_MAPPINGS,
         storeValue: true,
       });
@@ -95,11 +100,11 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
 
     it('Test another complex query', async () => {
       const astFilter = esKuery.fromKueryExpression(
-        `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id: test_id or ${AGENT_POLICY_SAVED_OBJECT_TYPE}.monitoring_output_id: test_id  or (not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*)`
+        `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id: test_id or ${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.monitoring_output_id: test_id  or (not ${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*)`
       );
       const validationObject = validateFilterKueryNode({
         astFilter,
-        types: [AGENT_POLICY_SAVED_OBJECT_TYPE],
+        types: [LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE],
         indexMapping: AGENT_POLICY_MAPPINGS,
         storeValue: true,
       });
@@ -131,11 +136,11 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
 
     it('Returns error if the attribute does not exist', async () => {
       const astFilter = esKuery.fromKueryExpression(
-        `${AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies:test_id_1 or ${AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies:test_id_2`
+        `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies:test_id_1 or ${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies:test_id_2`
       );
       const validationObject = validateFilterKueryNode({
         astFilter,
-        types: [AGENT_POLICY_SAVED_OBJECT_TYPE],
+        types: [LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE],
         indexMapping: AGENT_POLICY_MAPPINGS,
         storeValue: true,
       });
@@ -507,11 +512,19 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
 });
 
 describe('validateKuery validates real kueries', () => {
+  beforeEach(() => {
+    mockedAppContextService.getExperimentalFeatures.mockReturnValue({
+      enableStrictKQLValidation: true,
+    } as any);
+  });
+  afterEach(() => {
+    mockedAppContextService.getExperimentalFeatures.mockReset();
+  });
   describe('Agent policies', () => {
     it('Search by data_output_id', async () => {
       const validationObj = validateKuery(
-        `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id: test_id`,
-        [AGENT_POLICY_SAVED_OBJECT_TYPE],
+        `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id: test_id`,
+        [LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE],
         AGENT_POLICY_MAPPINGS,
         true
       );
@@ -520,8 +533,8 @@ describe('validateKuery validates real kueries', () => {
 
     it('Search by data_output_id without SO wrapping', async () => {
       const validationObj = validateKuery(
-        `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id: test_id`,
-        [AGENT_POLICY_SAVED_OBJECT_TYPE],
+        `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id: test_id`,
+        [LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE],
         AGENT_POLICY_MAPPINGS,
         true
       );
@@ -530,29 +543,18 @@ describe('validateKuery validates real kueries', () => {
 
     it('Search by name', async () => {
       const validationObj = validateKuery(
-        `${AGENT_POLICY_SAVED_OBJECT_TYPE}.name: test_id`,
-        [AGENT_POLICY_SAVED_OBJECT_TYPE],
+        `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.name: test_id`,
+        [LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE],
         AGENT_POLICY_MAPPINGS,
         true
       );
       expect(validationObj?.isValid).toEqual(true);
     });
 
-    it('Invalid kuery', async () => {
-      const validationObj = validateKuery(
-        'test%3A',
-        [AGENT_POLICY_SAVED_OBJECT_TYPE],
-        AGENT_POLICY_MAPPINGS,
-        true
-      );
-      expect(validationObj?.isValid).toEqual(false);
-      expect(validationObj?.error).toContain(`KQLSyntaxError: Invalid key`);
-    });
-
     it('Kuery with non existent parameter wrapped by SO', async () => {
       const validationObj = validateKuery(
-        `${AGENT_POLICY_SAVED_OBJECT_TYPE}.non_existent_parameter: 'test_id'`,
-        [AGENT_POLICY_SAVED_OBJECT_TYPE],
+        `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.non_existent_parameter: 'test_id'`,
+        [LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE],
         AGENT_POLICY_MAPPINGS,
         true
       );
@@ -565,7 +567,7 @@ describe('validateKuery validates real kueries', () => {
     it('Invalid search by non existent parameter', async () => {
       const validationObj = validateKuery(
         `non_existent_parameter: 'test_id'`,
-        [AGENT_POLICY_SAVED_OBJECT_TYPE],
+        [LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE],
         AGENT_POLICY_MAPPINGS,
         true
       );
@@ -821,15 +823,45 @@ describe('validateKuery validates real kueries', () => {
       expect(validationObj?.isValid).toEqual(true);
     });
 
-    it('Invalid search by non existent parameter', async () => {
+    it('Search without field parameter', async () => {
       const validationObj = validateKuery(
         `policyId1`,
         [FLEET_ENROLLMENT_API_PREFIX],
         ENROLLMENT_API_KEY_MAPPINGS,
         true
       );
-      expect(validationObj?.isValid).toEqual(false);
-      expect(validationObj?.error).toEqual(`KQLSyntaxError: Invalid key`);
+      expect(validationObj?.isValid).toEqual(true);
+      expect(validationObj?.error).toEqual(undefined);
+    });
+  });
+  describe('Feature flag enableStrictKQLValidation', () => {
+    beforeEach(() => {
+      mockedAppContextService.getExperimentalFeatures.mockReturnValue({
+        enableStrictKQLValidation: false,
+      } as any);
+    });
+
+    it('Allows to skip validation for a free text query', async () => {
+      const validationObj = validateKuery(`test`, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
+      expect(validationObj?.isValid).toEqual(true);
+      expect(validationObj?.error).toEqual(undefined);
+    });
+
+    it('Allows to skip validation for a catch all query', async () => {
+      const validationObj = validateKuery(`*`, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
+      expect(validationObj?.isValid).toEqual(true);
+      expect(validationObj?.error).toEqual(undefined);
+    });
+
+    it('Allows to skip validation for a disallowed query too', async () => {
+      const validationObj = validateKuery(
+        `non_existent_parameter: 'test_id'`,
+        [AGENTS_PREFIX],
+        AGENT_MAPPINGS,
+        true
+      );
+      expect(validationObj?.isValid).toEqual(true);
+      expect(validationObj?.error).toEqual(undefined);
     });
   });
 });

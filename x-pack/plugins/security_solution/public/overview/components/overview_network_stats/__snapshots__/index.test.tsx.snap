@@ -18,10 +18,9 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
           grow={false}
         >
           <EuiText>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Auditbeat"
               id="xpack.securitySolution.overview.networkStatGroupAuditbeat"
-              values={Object {}}
             />
           </EuiText>
         </EuiFlexItem>
@@ -54,10 +53,9 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             size="s"
           >
             <styled.div>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Socket"
                 id="xpack.securitySolution.overview.auditBeatSocketTitle"
-                values={Object {}}
               />
             </styled.div>
           </EuiText>
@@ -92,10 +90,9 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
           grow={false}
         >
           <EuiText>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Filebeat"
               id="xpack.securitySolution.overview.networkStatGroupFilebeat"
-              values={Object {}}
             />
           </EuiText>
         </EuiFlexItem>
@@ -128,10 +125,9 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             size="s"
           >
             <styled.div>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Cisco"
                 id="xpack.securitySolution.overview.filebeatCiscoTitle"
-                values={Object {}}
               />
             </styled.div>
           </EuiText>
@@ -163,10 +159,9 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             size="s"
           >
             <styled.div>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Netflow"
                 id="xpack.securitySolution.overview.filebeatNetflowTitle"
-                values={Object {}}
               />
             </styled.div>
           </EuiText>
@@ -198,10 +193,9 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             size="s"
           >
             <styled.div>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Palo Alto Networks"
                 id="xpack.securitySolution.overview.filebeatPanwTitle"
-                values={Object {}}
               />
             </styled.div>
           </EuiText>
@@ -233,10 +227,9 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             size="s"
           >
             <styled.div>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Suricata"
                 id="xpack.securitySolution.overview.fileBeatSuricataTitle"
-                values={Object {}}
               />
             </styled.div>
           </EuiText>
@@ -268,10 +261,9 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             size="s"
           >
             <styled.div>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Zeek"
                 id="xpack.securitySolution.overview.fileBeatZeekTitle"
-                values={Object {}}
               />
             </styled.div>
           </EuiText>
@@ -306,10 +298,9 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
           grow={false}
         >
           <EuiText>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Packetbeat"
               id="xpack.securitySolution.overview.networkStatGroupPacketbeat"
-              values={Object {}}
             />
           </EuiText>
         </EuiFlexItem>
@@ -342,10 +333,9 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             size="s"
           >
             <styled.div>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="DNS"
                 id="xpack.securitySolution.overview.packetBeatDnsTitle"
-                values={Object {}}
               />
             </styled.div>
           </EuiText>
@@ -377,10 +367,9 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             size="s"
           >
             <styled.div>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Flow"
                 id="xpack.securitySolution.overview.packetBeatFlowTitle"
-                values={Object {}}
               />
             </styled.div>
           </EuiText>
@@ -412,10 +401,9 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             size="s"
           >
             <styled.div>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="TLS"
                 id="xpack.securitySolution.overview.packetbeatTLSTitle"
-                values={Object {}}
               />
             </styled.div>
           </EuiText>

@@ -2,26 +2,10 @@
   "id": "@kbn/management-settings-components-field-input",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/management-settings-components-field-input",
-        "id": "def-common.FieldInput",
+        "id": "def-public.FieldInput",
         "type": "Function",
         "tags": [],
         "label": "FieldInput",
@@ -32,9 +16,9 @@
           "React.ForwardRefExoticComponent<",
           {
             "pluginId": "@kbn/management-settings-components-field-input",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsComponentsFieldInputPluginApi",
-            "section": "def-common.FieldInputProps",
+            "section": "def-public.FieldInputProps",
             "text": "FieldInputProps"
           },
           "<",
@@ -48,9 +32,9 @@
           "> & React.RefAttributes<",
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.ResetInputRef",
+            "section": "def-public.ResetInputRef",
             "text": "ResetInputRef"
           },
           ">>"
@@ -62,7 +46,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-components-field-input",
-            "id": "def-common.FieldInput.$1",
+            "id": "def-public.FieldInput.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -72,7 +56,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -83,7 +67,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/management-settings-components-field-input",
-        "id": "def-common.FieldInputKibanaDependencies",
+        "id": "def-public.FieldInputKibanaDependencies",
         "type": "Interface",
         "tags": [],
         "label": "FieldInputKibanaDependencies",
@@ -96,7 +80,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-components-field-input",
-            "id": "def-common.FieldInputKibanaDependencies.notifications",
+            "id": "def-public.FieldInputKibanaDependencies.notifications",
             "type": "Object",
             "tags": [],
             "label": "notifications",
@@ -107,9 +91,9 @@
               "{ toasts: Pick<",
               {
                 "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.IToasts",
+                "section": "def-public.IToasts",
                 "text": "IToasts"
               },
               ", \"addDanger\">; }"
@@ -120,7 +104,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-components-field-input",
-            "id": "def-common.FieldInputKibanaDependencies.settings",
+            "id": "def-public.FieldInputKibanaDependencies.settings",
             "type": "Object",
             "tags": [],
             "label": "settings",
@@ -129,9 +113,9 @@
               "{ client: ",
               {
                 "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-common.IUiSettingsClient",
+                "section": "def-public.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               },
               "; }"
@@ -145,7 +129,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-components-field-input",
-        "id": "def-common.FieldInputProps",
+        "id": "def-public.FieldInputProps",
         "type": "Interface",
         "tags": [],
         "label": "FieldInputProps",
@@ -155,9 +139,9 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-components-field-input",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsComponentsFieldInputPluginApi",
-            "section": "def-common.FieldInputProps",
+            "section": "def-public.FieldInputProps",
             "text": "FieldInputProps"
           },
           "<T>"
@@ -168,7 +152,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-components-field-input",
-            "id": "def-common.FieldInputProps.field",
+            "id": "def-public.FieldInputProps.field",
             "type": "Object",
             "tags": [],
             "label": "field",
@@ -176,7 +160,7 @@
               "The {@link FieldDefinition} for the component."
             ],
             "signature": [
-              "{ type: T; id: string; name: string; ariaAttributes: { ariaLabel: string; ariaDescribedBy?: string | undefined; }; }"
+              "{ id: string; type: T; name: string; ariaAttributes: { ariaLabel: string; ariaDescribedBy?: string | undefined; }; }"
             ],
             "path": "packages/kbn-management/settings/components/field_input/field_input.tsx",
             "deprecated": false,
@@ -184,7 +168,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-components-field-input",
-            "id": "def-common.FieldInputProps.unsavedChange",
+            "id": "def-public.FieldInputProps.unsavedChange",
             "type": "Object",
             "tags": [],
             "label": "unsavedChange",
@@ -194,9 +178,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/management-settings-types",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnManagementSettingsTypesPluginApi",
-                "section": "def-common.UnsavedFieldChange",
+                "section": "def-public.UnsavedFieldChange",
                 "text": "UnsavedFieldChange"
               },
               "<T> | undefined"
@@ -207,7 +191,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-components-field-input",
-            "id": "def-common.FieldInputProps.onInputChange",
+            "id": "def-public.FieldInputProps.onInputChange",
             "type": "Function",
             "tags": [],
             "label": "onInputChange",
@@ -218,9 +202,9 @@
               "(change?: ",
               {
                 "pluginId": "@kbn/management-settings-types",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnManagementSettingsTypesPluginApi",
-                "section": "def-common.UnsavedFieldChange",
+                "section": "def-public.UnsavedFieldChange",
                 "text": "UnsavedFieldChange"
               },
               "<T> | undefined) => void"
@@ -232,7 +216,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/management-settings-components-field-input",
-                "id": "def-common.FieldInputProps.onInputChange.$1",
+                "id": "def-public.FieldInputProps.onInputChange.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "change",
@@ -240,9 +224,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/management-settings-types",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnManagementSettingsTypesPluginApi",
-                    "section": "def-common.UnsavedFieldChange",
+                    "section": "def-public.UnsavedFieldChange",
                     "text": "UnsavedFieldChange"
                   },
                   "<T> | undefined"
@@ -255,7 +239,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-components-field-input",
-            "id": "def-common.FieldInputProps.isSavingEnabled",
+            "id": "def-public.FieldInputProps.isSavingEnabled",
             "type": "boolean",
             "tags": [],
             "label": "isSavingEnabled",
@@ -268,7 +252,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-components-field-input",
-            "id": "def-common.FieldInputProps.isInvalid",
+            "id": "def-public.FieldInputProps.isInvalid",
             "type": "CompoundType",
             "tags": [],
             "label": "isInvalid",
@@ -287,7 +271,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-components-field-input",
-        "id": "def-common.FieldInputServices",
+        "id": "def-public.FieldInputServices",
         "type": "Interface",
         "tags": [],
         "label": "FieldInputServices",
@@ -300,7 +284,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-components-field-input",
-            "id": "def-common.FieldInputServices.showDanger",
+            "id": "def-public.FieldInputServices.showDanger",
             "type": "Function",
             "tags": [],
             "label": "showDanger",
@@ -316,7 +300,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/management-settings-components-field-input",
-                "id": "def-common.FieldInputServices.showDanger.$1",
+                "id": "def-public.FieldInputServices.showDanger.$1",
                 "type": "string",
                 "tags": [],
                 "label": "value",
@@ -336,7 +320,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-components-field-input",
-            "id": "def-common.FieldInputServices.validateChange",
+            "id": "def-public.FieldInputServices.validateChange",
             "type": "Function",
             "tags": [],
             "label": "validateChange",
@@ -352,7 +336,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/management-settings-components-field-input",
-                "id": "def-common.FieldInputServices.validateChange.$1",
+                "id": "def-public.FieldInputServices.validateChange.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
@@ -367,7 +351,7 @@
               },
               {
                 "parentPluginId": "@kbn/management-settings-components-field-input",
-                "id": "def-common.FieldInputServices.validateChange.$2",
+                "id": "def-public.FieldInputServices.validateChange.$2",
                 "type": "Any",
                 "tags": [],
                 "label": "value",
@@ -388,7 +372,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-components-field-input",
-        "id": "def-common.InputProps",
+        "id": "def-public.InputProps",
         "type": "Interface",
         "tags": [],
         "label": "InputProps",
@@ -398,9 +382,9 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-components-field-input",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsComponentsFieldInputPluginApi",
-            "section": "def-common.InputProps",
+            "section": "def-public.InputProps",
             "text": "InputProps"
           },
           "<T>"
@@ -411,26 +395,26 @@
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-components-field-input",
-            "id": "def-common.InputProps.field",
+            "id": "def-public.InputProps.field",
             "type": "Object",
             "tags": [],
             "label": "field",
             "description": [],
             "signature": [
-              "{ type: T; id: string; defaultValue?: ",
+              "{ id: string; type: T; defaultValue?: ",
               {
                 "pluginId": "@kbn/management-settings-types",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnManagementSettingsTypesPluginApi",
-                "section": "def-common.KnownTypeToValue",
+                "section": "def-public.KnownTypeToValue",
                 "text": "KnownTypeToValue"
               },
               "<T> | null | undefined; name: string; isOverridden: boolean; ariaAttributes: { ariaLabel: string; ariaDescribedBy?: string | undefined; }; savedValue?: ",
               {
                 "pluginId": "@kbn/management-settings-types",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnManagementSettingsTypesPluginApi",
-                "section": "def-common.KnownTypeToValue",
+                "section": "def-public.KnownTypeToValue",
                 "text": "KnownTypeToValue"
               },
               "<T> | null | undefined; }"
@@ -441,7 +425,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-components-field-input",
-            "id": "def-common.InputProps.unsavedChange",
+            "id": "def-public.InputProps.unsavedChange",
             "type": "Object",
             "tags": [],
             "label": "unsavedChange",
@@ -449,9 +433,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/management-settings-types",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnManagementSettingsTypesPluginApi",
-                "section": "def-common.UnsavedFieldChange",
+                "section": "def-public.UnsavedFieldChange",
                 "text": "UnsavedFieldChange"
               },
               "<T> | undefined"
@@ -462,7 +446,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-components-field-input",
-            "id": "def-common.InputProps.isSavingEnabled",
+            "id": "def-public.InputProps.isSavingEnabled",
             "type": "boolean",
             "tags": [],
             "label": "isSavingEnabled",
@@ -473,7 +457,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-components-field-input",
-            "id": "def-common.InputProps.onInputChange",
+            "id": "def-public.InputProps.onInputChange",
             "type": "Function",
             "tags": [],
             "label": "onInputChange",
@@ -484,9 +468,9 @@
               "(change?: ",
               {
                 "pluginId": "@kbn/management-settings-types",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnManagementSettingsTypesPluginApi",
-                "section": "def-common.UnsavedFieldChange",
+                "section": "def-public.UnsavedFieldChange",
                 "text": "UnsavedFieldChange"
               },
               "<T> | undefined) => void"
@@ -498,7 +482,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/management-settings-components-field-input",
-                "id": "def-common.InputProps.onInputChange.$1",
+                "id": "def-public.InputProps.onInputChange.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "change",
@@ -506,9 +490,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/management-settings-types",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnManagementSettingsTypesPluginApi",
-                    "section": "def-common.UnsavedFieldChange",
+                    "section": "def-public.UnsavedFieldChange",
                     "text": "UnsavedFieldChange"
                   },
                   "<T> | undefined"
@@ -523,6 +507,22 @@
         "initialIsOpen": false
       }
     ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": []

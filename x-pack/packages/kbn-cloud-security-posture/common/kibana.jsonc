@@ -1,0 +1,5 @@
+{
+  "id": "@kbn/cloud-security-posture-common",
+  "owner": "@elastic/kibana-cloud-security-posture",
+  "type": "shared-common"
+}

@@ -8,6 +8,6 @@
 import { encode } from '../../../../common/lib/embeddable_dataurl';
 import { EmbeddableInput } from '../../../expression_types';
 
-export function toExpression(input: EmbeddableInput, embeddableType: string): string {
-  return `embeddable config="${encode(input)}" type="${embeddableType}"`;
+export function toExpression(input: Omit<EmbeddableInput, 'id'>, embeddableType: string): string {
+  return `embeddable config="${encode(input)}" type="${embeddableType}" | render`;
 }

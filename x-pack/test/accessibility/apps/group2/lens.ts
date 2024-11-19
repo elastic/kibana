@@ -9,7 +9,12 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'visualize', 'timePicker', 'home', 'lens']);
+  const { common, visualize, timePicker, lens } = getPageObjects([
+    'common',
+    'visualize',
+    'timePicker',
+    'lens',
+  ]);
   const a11y = getService('a11y');
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
@@ -40,25 +45,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('lens', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.timePicker.ensureHiddenNoDataPopover();
+      await visualize.navigateToNewVisualization();
+      await visualize.clickVisType('lens');
+      await timePicker.ensureHiddenNoDataPopover();
       await a11y.testAppSnapshot();
     });
 
     it('lens XY chart', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.timePicker.ensureHiddenNoDataPopover();
-      await PageObjects.lens.goToTimeRange();
+      await visualize.navigateToNewVisualization();
+      await visualize.clickVisType('lens');
+      await timePicker.ensureHiddenNoDataPopover();
+      await lens.goToTimeRange();
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'ip',
       });
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'average',
         field: 'bytes',
@@ -68,74 +73,74 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('lens pie chart', async () => {
-      await PageObjects.lens.switchToVisualization('pie');
+      await lens.switchToVisualization('pie');
       await a11y.testAppSnapshot();
     });
 
     it('lens datatable', async () => {
-      await PageObjects.lens.switchToVisualization('lnsDatatable');
+      await lens.switchToVisualization('lnsDatatable');
       await a11y.testAppSnapshot();
     });
 
     it('lens datatable with dynamic cell colouring', async () => {
-      await PageObjects.lens.openDimensionEditor('lnsDatatable_metrics > lns-dimensionTrigger');
-      await PageObjects.lens.setTableDynamicColoring('cell');
+      await lens.openDimensionEditor('lnsDatatable_metrics > lns-dimensionTrigger');
+      await lens.setTableDynamicColoring('cell');
       await a11y.testAppSnapshot();
     });
 
     it('lens datatable with dynamic text colouring', async () => {
-      await PageObjects.lens.setTableDynamicColoring('text');
+      await lens.setTableDynamicColoring('text');
       await a11y.testAppSnapshot();
     });
 
     it('lens datatable with palette panel open', async () => {
-      await PageObjects.lens.openPalettePanel('lnsDatatable');
+      await lens.openPalettePanel();
       await a11y.testAppSnapshot();
     });
 
     it('lens datatable with custom palette stops', async () => {
-      await PageObjects.lens.changePaletteTo('custom');
+      await lens.changePaletteTo('custom');
       await a11y.testAppSnapshot();
-      await PageObjects.lens.closePaletteEditor();
-      await PageObjects.lens.closeDimensionEditor();
+      await lens.closePaletteEditor();
+      await lens.closeDimensionEditor();
     });
 
     it('lens metric chart', async () => {
-      await PageObjects.lens.switchToVisualization('lnsLegacyMetric');
+      await lens.switchToVisualization('lnsLegacyMetric');
       await a11y.testAppSnapshot();
     });
 
     it('dimension configuration panel', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.timePicker.ensureHiddenNoDataPopover();
-      await PageObjects.lens.goToTimeRange();
+      await visualize.navigateToNewVisualization();
+      await visualize.clickVisType('lens');
+      await timePicker.ensureHiddenNoDataPopover();
+      await lens.goToTimeRange();
 
-      await PageObjects.lens.openDimensionEditor('lnsXY_xDimensionPanel > lns-empty-dimension');
+      await lens.openDimensionEditor('lnsXY_xDimensionPanel > lns-empty-dimension');
       await a11y.testAppSnapshot();
 
-      await PageObjects.lens.closeDimensionEditor();
-      await PageObjects.lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-empty-dimension');
+      await lens.closeDimensionEditor();
+      await lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-empty-dimension');
       await a11y.testAppSnapshot();
 
-      await PageObjects.lens.closeDimensionEditor();
+      await lens.closeDimensionEditor();
     });
 
     it('change chart type', async () => {
-      await PageObjects.lens.openChartSwitchPopover();
-      await PageObjects.lens.waitForSearchInputValue('line');
+      await lens.openChartSwitchPopover();
+      await lens.waitForSearchInputValue('line');
       await a11y.testAppSnapshot();
       await testSubjects.click('lnsChartSwitchPopover_line');
     });
 
     it('change chart type via suggestions', async () => {
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
         field: '@timestamp',
       });
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'average',
         field: 'bytes',
@@ -146,16 +151,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('lens XY chart with multiple layers', async () => {
-      await PageObjects.lens.createLayer();
+      await lens.createLayer();
 
-      await PageObjects.lens.switchToVisualization('area');
-      await PageObjects.lens.configureDimension({
+      await lens.switchToVisualization('area');
+      await lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
         field: '@timestamp',
       });
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'median',
         field: 'bytes',
@@ -164,42 +169,42 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('lens XY chart with reference line layer', async () => {
-      await PageObjects.lens.createLayer('referenceLine');
+      await lens.createLayer('referenceLine');
       await a11y.testAppSnapshot();
     });
 
     it('lens XY chart with annotations layer', async () => {
-      await PageObjects.lens.createLayer('annotations');
+      await lens.createLayer('annotations');
       await a11y.testAppSnapshot();
     });
 
     it('saves lens chart', async () => {
-      await PageObjects.lens.save(lensChartName);
+      await lens.save(lensChartName);
       await a11y.testAppSnapshot();
       // delete newly created Lens
-      await PageObjects.common.navigateToApp('visualize');
+      await common.navigateToApp('visualize');
       await listingTable.searchForItemWithName(lensChartName);
       await listingTable.checkListingSelectAllCheckbox();
       await listingTable.clickDeleteSelected();
-      await PageObjects.common.clickConfirmOnModal();
+      await common.clickConfirmOnModal();
     });
 
     describe('focus behavior when adding or removing layers', () => {
       it('should focus the added layer', async () => {
-        await PageObjects.visualize.navigateToNewVisualization();
-        await PageObjects.visualize.clickVisType('lens');
-        await PageObjects.lens.createLayer();
+        await visualize.navigateToNewVisualization();
+        await visualize.clickVisType('lens');
+        await lens.createLayer();
         expect(await hasFocus('lns-layerPanel-1')).to.be(true);
       });
       it('should focus the remaining layer when the first is removed', async () => {
-        await PageObjects.lens.removeLayer(0);
+        await lens.removeLayer(0);
         expect(await hasFocus('lns-layerPanel-0')).to.be(true);
-        await PageObjects.lens.createLayer();
-        await PageObjects.lens.removeLayer(1);
+        await lens.createLayer();
+        await lens.removeLayer(1);
         expect(await hasFocus('lns-layerPanel-0')).to.be(true);
       });
       it('should focus the only layer when resetting the layer', async () => {
-        await PageObjects.lens.removeLayer();
+        await lens.removeLayer();
         expect(await hasFocus('lns-layerPanel-0')).to.be(true);
       });
     });

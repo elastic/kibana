@@ -218,4 +218,40 @@ describe('group by expression', () => {
     expect(onChangeSelectedTermField).toHaveBeenCalledTimes(2);
     expect(onChangeSelectedTermField).toHaveBeenCalledWith(['field1', 'field2']);
   });
+
+  it('do NOT clear selected agg field if fields is undefined', async () => {
+    const onChangeSelectedTermField = jest.fn();
+    render(
+      <IntlProvider locale="en">
+        <GroupByExpression
+          errors={{ termSize: [], termField: [] }}
+          fields={undefined}
+          termField={['test', 'unknown']}
+          groupBy={'top'}
+          onChangeSelectedGroupBy={() => {}}
+          onChangeSelectedTermSize={() => {}}
+          onChangeSelectedTermField={onChangeSelectedTermField}
+        />
+      </IntlProvider>
+    );
+    expect(onChangeSelectedTermField).toHaveBeenCalledTimes(0);
+  });
+
+  it('do NOT clear selected agg field if fields is an empty array', async () => {
+    const onChangeSelectedTermField = jest.fn();
+    render(
+      <IntlProvider locale="en">
+        <GroupByExpression
+          errors={{ termSize: [], termField: [] }}
+          fields={[]}
+          termField={['test', 'unknown']}
+          groupBy={'top'}
+          onChangeSelectedGroupBy={() => {}}
+          onChangeSelectedTermSize={() => {}}
+          onChangeSelectedTermField={onChangeSelectedTermField}
+        />
+      </IntlProvider>
+    );
+    expect(onChangeSelectedTermField).toHaveBeenCalledTimes(0);
+  });
 });

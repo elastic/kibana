@@ -10,7 +10,7 @@ import { findIndex } from 'lodash';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { ObjectRemover } from '../../../lib/object_remover';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { getTestActionData, getTestAlertData } from '../../../lib/get_test_data';
+import { getTestConnectorData, getTestAlertData } from '../../../lib/get_test_data';
 
 export const createSlackConnectorAndObjectRemover = async ({
   getService,
@@ -20,12 +20,12 @@ export const createSlackConnectorAndObjectRemover = async ({
   const supertest = getService('supertest');
   const objectRemover = new ObjectRemover(supertest);
 
-  const testData = getTestActionData();
+  const testData = getTestConnectorData();
   const createdAction = await createSlackConnector({
     name: testData.name,
     getService,
   });
-  objectRemover.add(createdAction.id, 'action', 'actions');
+  objectRemover.add(createdAction.id, 'connector', 'actions');
 
   return objectRemover;
 };
@@ -48,10 +48,7 @@ export const createSlackConnector = async ({
   return connector;
 };
 
-export const getConnectorByName = async (
-  name: string,
-  supertest: SuperTest.SuperTest<SuperTest.Test>
-) => {
+export const getConnectorByName = async (name: string, supertest: SuperTest.Agent) => {
   const { body } = await supertest
     .get(`/api/actions/connectors`)
     .set('kbn-xsrf', 'foo')
@@ -65,7 +62,7 @@ export async function createRuleWithActionsAndParams(
   testRunUuid: string,
   params: Record<string, any> = {},
   overwrites: Record<string, any> = {},
-  supertest: SuperTest.SuperTest<SuperTest.Test>
+  supertest: SuperTest.Agent
 ) {
   return await createAlwaysFiringRule(
     {
@@ -94,7 +91,7 @@ export async function createRuleWithActionsAndParams(
 
 async function createAlwaysFiringRule(
   overwrites: Record<string, any> = {},
-  supertest: SuperTest.SuperTest<SuperTest.Test>
+  supertest: SuperTest.Agent
 ) {
   const { body: createdRule } = await supertest
     .post(`/api/alerting/rule`)
@@ -109,10 +106,7 @@ async function createAlwaysFiringRule(
   return createdRule;
 }
 
-export async function getAlertSummary(
-  ruleId: string,
-  supertest: SuperTest.SuperTest<SuperTest.Test>
-) {
+export async function getAlertSummary(ruleId: string, supertest: SuperTest.Agent) {
   const { body: summary } = await supertest
     .get(`/internal/alerting/rule/${encodeURIComponent(ruleId)}/_alert_summary`)
     .expect(200);

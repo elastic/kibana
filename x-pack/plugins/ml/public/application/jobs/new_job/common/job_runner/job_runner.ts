@@ -6,10 +6,9 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { ml } from '../../../../services/ml_api_service';
-import { mlJobService } from '../../../../services/job_service';
-import { JobCreator } from '../job_creator';
-import { DatafeedId, JobId } from '../../../../../../common/types/anomaly_detection_jobs';
+import type { MlApi } from '../../../../services/ml_api_service';
+import type { JobCreator } from '../job_creator';
+import type { DatafeedId, JobId } from '../../../../../../common/types/anomaly_detection_jobs';
 import { DATAFEED_STATE } from '../../../../../../common/constants/states';
 
 const REFRESH_INTERVAL_MS = 250;
@@ -22,6 +21,7 @@ export type ProgressSubscriber = (progress: number) => void;
 export type JobAssignmentSubscriber = (assigned: boolean) => void;
 
 export class JobRunner {
+  private _mlApi: MlApi;
   private _jobId: JobId;
   private _datafeedId: DatafeedId;
   private _start: number = 0;
@@ -42,6 +42,7 @@ export class JobRunner {
   private _jobAssignedToNode$: BehaviorSubject<boolean>;
 
   constructor(jobCreator: JobCreator) {
+    this._mlApi = jobCreator.mlApi;
     this._jobId = jobCreator.jobId;
     this._datafeedId = jobCreator.datafeedId;
     this._start = jobCreator.start;
@@ -68,7 +69,7 @@ export class JobRunner {
 
   private async openJob(): Promise<void> {
     try {
-      const { node }: { node?: string } = await mlJobService.openJob(this._jobId);
+      const { node }: { node?: string } = await this._mlApi.openJob({ jobId: this._jobId });
       this._jobAssignedToNode = node !== undefined && node.length > 0;
       this._jobAssignedToNode$.next(this._jobAssignedToNode);
     } catch (error) {
@@ -92,12 +93,11 @@ export class JobRunner {
         pollProgress === true ? this._subscribers.map((s) => this._progress$.subscribe(s)) : [];
 
       await this.openJob();
-      const { started } = await mlJobService.startDatafeed(
-        this._datafeedId,
-        this._jobId,
+      const { started } = await this._mlApi.startDatafeed({
+        datafeedId: this._datafeedId,
         start,
-        end
-      );
+        end,
+      });
 
       this._datafeedState = DATAFEED_STATE.STARTED;
       this._percentageComplete = 0;
@@ -189,7 +189,7 @@ export class JobRunner {
   }
 
   private async _isJobAssigned(): Promise<boolean> {
-    const { jobs } = await ml.getJobStats({ jobId: this._jobId });
+    const { jobs } = await this._mlApi.getJobStats({ jobId: this._jobId });
     return jobs.length > 0 && jobs[0].node !== undefined;
   }
 
@@ -208,7 +208,7 @@ export class JobRunner {
     isRunning: boolean;
     isJobClosed: boolean;
   }> {
-    return await ml.jobs.getLookBackProgress(this._jobId, this._start, this._end);
+    return await this._mlApi.jobs.getLookBackProgress(this._jobId, this._start, this._end);
   }
 
   public subscribeToProgress(func: ProgressSubscriber) {

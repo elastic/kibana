@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { FilterManager } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
-import type { ExpandedDetailTimeline, SessionViewConfig } from '../../../common/types';
+import type { SessionViewConfig } from '../../../common/types';
 import type {
   EqlOptionsSelected,
   TimelineNonEcsData,
@@ -101,12 +100,11 @@ export interface TimelineModel {
   deletedEventIds: string[];
   documentType: string;
   excludedRowRendererIds: RowRendererId[];
-  filterManager?: FilterManager;
+  filters?: Filter[];
   footerText?: string | React.ReactNode;
   loadingText?: string | React.ReactNode;
   queryFields: string[];
   /** This holds the view information for the flyout when viewing timeline in a consuming view (i.e. hosts page) or the side panel in the primary timeline view */
-  expandedDetail: ExpandedDetailTimeline;
   /** When non-empty, display a graph view for this event */
   graphEventId?: string;
   indexNames: string[];
@@ -128,20 +126,23 @@ export interface TimelineModel {
   };
   /** Uniquely identifies the timeline */
   id: string;
-  filters?: Filter[];
   selectedEventIds: Record<string, TimelineNonEcsData[]>;
   /** If selectAll checkbox in header is checked **/
   isSelectAllChecked: boolean;
-  isLoading: boolean;
   selectAll: boolean;
   /* discover saved search Id */
   savedSearchId: string | null;
   /* local saved search object, it's not sent to the server */
   savedSearch: SavedSearch | null;
-  isDiscoverSavedSearchLoaded?: boolean;
   isDataProviderVisible: boolean;
   /** used to mark the timeline as unsaved in the UI */
   changed?: boolean;
+  /* row height, used only by unified data table */
+  rowHeight?: number;
+  /* sample size, total record number stored in in memory EuiDataGrid */
+  sampleSize: number;
+  /** the note id pending deletion */
+  confirmingNoteId?: string | null;
 }
 
 export type SubsetTimelineModel = Readonly<
@@ -159,7 +160,6 @@ export type SubsetTimelineModel = Readonly<
     | 'eventType'
     | 'eventIdToNoteIds'
     | 'excludedRowRendererIds'
-    | 'expandedDetail'
     | 'footerText'
     | 'graphEventId'
     | 'highlightedDropAndProviderId'
@@ -189,15 +189,12 @@ export type SubsetTimelineModel = Readonly<
     | 'show'
     | 'sort'
     | 'isSaving'
-    | 'isLoading'
     | 'savedObjectId'
     | 'version'
     | 'status'
     | 'filters'
-    | 'filterManager'
     | 'savedSearchId'
     | 'savedSearch'
-    | 'isDiscoverSavedSearchLoaded'
     | 'isDataProviderVisible'
     | 'changed'
   >

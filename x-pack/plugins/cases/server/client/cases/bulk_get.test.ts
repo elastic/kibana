@@ -5,13 +5,23 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { MAX_BULK_GET_CASES } from '../../../common/constants';
+import { mockCases } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
 import { bulkGet } from './bulk_get';
 
 describe('bulkGet', () => {
+  const caseSO = mockCases[0];
+
   describe('errors', () => {
     const clientArgs = createCasesClientMockArgs();
+    clientArgs.authorization.getAndEnsureAuthorizedEntities.mockResolvedValue({
+      authorized: [caseSO],
+      unauthorized: [],
+    });
+
+    clientArgs.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(new Map());
 
     beforeEach(() => {
       jest.clearAllMocks();
@@ -39,6 +49,68 @@ describe('bulkGet', () => {
           clientArgs
         )
       ).rejects.toThrow('invalid keys "foo"');
+    });
+
+    it('constructs the case error correctly', async () => {
+      clientArgs.services.caseService.getCases.mockResolvedValue({
+        saved_objects: [
+          caseSO,
+          {
+            id: '1',
+            type: 'cases',
+            error: {
+              error: 'My error',
+              message: 'not found',
+              statusCode: 404,
+            },
+            references: [],
+          },
+        ],
+      });
+
+      const res = await bulkGet({ ids: ['my-case-1'] }, clientArgs);
+
+      expect(res.cases.length).toBe(1);
+      expect(res.errors.length).toBe(1);
+
+      expect(res.errors[0]).toEqual({
+        caseId: '1',
+        error: 'My error',
+        message: 'not found',
+        status: 404,
+      });
+    });
+
+    it('constructs the case error correctly in case of an SO decorated error', async () => {
+      clientArgs.services.caseService.getCases.mockResolvedValue({
+        saved_objects: [
+          caseSO,
+          {
+            id: '1',
+            type: 'cases',
+            // @ts-expect-error: the error property of the SO client is not typed correctly
+            error: {
+              ...Boom.boomify(new Error('My error'), {
+                statusCode: 404,
+                message: 'SO not found',
+              }),
+            },
+            references: [],
+          },
+        ],
+      });
+
+      const res = await bulkGet({ ids: ['my-case-1'] }, clientArgs);
+
+      expect(res.cases.length).toBe(1);
+      expect(res.errors.length).toBe(1);
+
+      expect(res.errors[0]).toEqual({
+        caseId: '1',
+        error: 'Not Found',
+        message: 'SO not found: My error',
+        status: 404,
+      });
     });
   });
 });

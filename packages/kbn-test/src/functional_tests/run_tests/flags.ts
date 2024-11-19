@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -30,6 +31,7 @@ export const FLAG_OPTIONS: FlagOptions = {
     'exclude-tag',
     'include',
     'exclude',
+    'writeLogsToPath',
   ],
   alias: {
     updateAll: 'u',
@@ -47,6 +49,7 @@ export const FLAG_OPTIONS: FlagOptions = {
     --kibana-install-dir Run Kibana from existing install directory instead of from source
     --bail               Stop the test run at the first failure
     --logToFile          Write the log output from Kibana/ES to files instead of to stdout
+    --writeLogsToPath    Write the log output from Kibana/ES to files in specified path
     --dry-run            Report tests without executing them
     --updateBaselines    Replace baseline screenshots with whatever is generated from the test
     --updateSnapshots    Replace inline and file snapshots with whatever is generated from the test
@@ -73,6 +76,12 @@ export function parseFlags(flags: FlagsReader) {
 
   const esVersionString = flags.string('es-version');
 
+  const logsDir = flags.path('writeLogsToPath')
+    ? Path.resolve(REPO_ROOT, flags.path('writeLogsToPath')!)
+    : flags.boolean('logToFile')
+    ? Path.resolve(REPO_ROOT, 'data/ftr_servers_logs', uuidV4())
+    : undefined;
+
   return {
     configs,
     esVersion: esVersionString ? new EsVersion(esVersionString) : EsVersion.getDefault(),
@@ -80,9 +89,7 @@ export function parseFlags(flags: FlagsReader) {
     dryRun: flags.boolean('dry-run'),
     updateBaselines: flags.boolean('updateBaselines') || flags.boolean('updateAll'),
     updateSnapshots: flags.boolean('updateSnapshots') || flags.boolean('updateAll'),
-    logsDir: flags.boolean('logToFile')
-      ? Path.resolve(REPO_ROOT, 'data/ftr_servers_logs', uuidV4())
-      : undefined,
+    logsDir,
     esFrom: flags.enum('esFrom', ['snapshot', 'source', 'serverless']),
     esServerlessImage: flags.string('esServerlessImage'),
     installDir: flags.path('kibana-install-dir'),

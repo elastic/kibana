@@ -326,7 +326,6 @@ export class FollowerIndicesTable extends PureComponent {
                 pagination={pagination}
                 sorting={sorting}
                 selection={selection}
-                isSelectable={true}
                 rowProps={() => ({
                   'data-test-subj': 'row',
                 })}

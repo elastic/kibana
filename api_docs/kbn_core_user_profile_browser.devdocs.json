@@ -1,0 +1,704 @@
+{
+  "id": "@kbn/core-user-profile-browser",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-user-profile-browser",
+        "id": "def-public.GetUserProfileResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetUserProfileResponse",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-user-profile-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+            "section": "def-public.GetUserProfileResponse",
+            "text": "GetUserProfileResponse"
+          },
+          "<D> extends ",
+          {
+            "pluginId": "@kbn/core-user-profile-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUserProfileCommonPluginApi",
+            "section": "def-common.UserProfileWithSecurity",
+            "text": "UserProfileWithSecurity"
+          },
+          "<D, ",
+          {
+            "pluginId": "@kbn/core-user-profile-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUserProfileCommonPluginApi",
+            "section": "def-common.UserProfileLabels",
+            "text": "UserProfileLabels"
+          },
+          ">"
+        ],
+        "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-user-profile-browser",
+            "id": "def-public.GetUserProfileResponse.user",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "user",
+            "description": [
+              "\nInformation about the currently authenticated user that owns the profile."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-user-profile-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUserProfileCommonPluginApi",
+                "section": "def-common.UserProfileUserInfoWithSecurity",
+                "text": "UserProfileUserInfoWithSecurity"
+              },
+              " & Pick<",
+              {
+                "pluginId": "@kbn/core-security-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityCommonPluginApi",
+                "section": "def-common.AuthenticatedUser",
+                "text": "AuthenticatedUser"
+              },
+              ", \"authentication_provider\">"
+            ],
+            "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-user-profile-browser",
+        "id": "def-public.UserProfileBulkGetParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserProfileBulkGetParams",
+        "description": [
+          "\nParameters for the bulk get API."
+        ],
+        "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-user-profile-browser",
+            "id": "def-public.UserProfileBulkGetParams.uids",
+            "type": "Object",
+            "tags": [],
+            "label": "uids",
+            "description": [
+              "\nList of user profile identifiers."
+            ],
+            "signature": [
+              "Set<string>"
+            ],
+            "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-user-profile-browser",
+            "id": "def-public.UserProfileBulkGetParams.dataPath",
+            "type": "string",
+            "tags": [],
+            "label": "dataPath",
+            "description": [
+              "\nBy default, suggest API returns user information, but does not return any user data. The optional \"dataPath\"\nparameter can be used to return personal data for this user (within `kibana` namespace only)."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-user-profile-browser",
+        "id": "def-public.UserProfileGetCurrentParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserProfileGetCurrentParams",
+        "description": [
+          "\nParameters for the get user profile for the current user API."
+        ],
+        "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-user-profile-browser",
+            "id": "def-public.UserProfileGetCurrentParams.dataPath",
+            "type": "string",
+            "tags": [],
+            "label": "dataPath",
+            "description": [
+              "\nBy default, get API returns user information, but does not return any user data. The optional \"dataPath\"\nparameter can be used to return personal data for this user (within `kibana` namespace only)."
+            ],
+            "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-user-profile-browser",
+        "id": "def-public.UserProfileService",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserProfileService",
+        "description": [],
+        "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-user-profile-browser",
+            "id": "def-public.UserProfileService.getUserProfile$",
+            "type": "Function",
+            "tags": [],
+            "label": "getUserProfile$",
+            "description": [
+              "\nRetrieve an observable emitting when the user profile is loaded."
+            ],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/core-user-profile-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUserProfileCommonPluginApi",
+                "section": "def-common.UserProfileData",
+                "text": "UserProfileData"
+              },
+              " | null>"
+            ],
+            "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-user-profile-browser",
+            "id": "def-public.UserProfileService.getCurrent",
+            "type": "Function",
+            "tags": [],
+            "label": "getCurrent",
+            "description": [
+              "\nRetrieves the user profile of the current user. If the profile isn't available, e.g. for the anonymous users or\nusers authenticated via authenticating proxies, the `null` value is returned."
+            ],
+            "signature": [
+              "<D extends ",
+              {
+                "pluginId": "@kbn/core-user-profile-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUserProfileCommonPluginApi",
+                "section": "def-common.UserProfileData",
+                "text": "UserProfileData"
+              },
+              ">(params?: ",
+              {
+                "pluginId": "@kbn/core-user-profile-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+                "section": "def-public.UserProfileGetCurrentParams",
+                "text": "UserProfileGetCurrentParams"
+              },
+              " | undefined) => Promise<",
+              {
+                "pluginId": "@kbn/core-user-profile-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+                "section": "def-public.GetUserProfileResponse",
+                "text": "GetUserProfileResponse"
+              },
+              "<D>>"
+            ],
+            "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-user-profile-browser",
+                "id": "def-public.UserProfileService.getCurrent.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [
+                  "Get current user profile operation parameters."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-user-profile-browser",
+                    "scope": "public",
+                    "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+                    "section": "def-public.UserProfileGetCurrentParams",
+                    "text": "UserProfileGetCurrentParams"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-user-profile-browser",
+            "id": "def-public.UserProfileService.bulkGet",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkGet",
+            "description": [
+              "\nRetrieves multiple user profiles by their identifiers."
+            ],
+            "signature": [
+              "<D extends ",
+              {
+                "pluginId": "@kbn/core-user-profile-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUserProfileCommonPluginApi",
+                "section": "def-common.UserProfileData",
+                "text": "UserProfileData"
+              },
+              ">(params: ",
+              {
+                "pluginId": "@kbn/core-user-profile-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+                "section": "def-public.UserProfileBulkGetParams",
+                "text": "UserProfileBulkGetParams"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/core-user-profile-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUserProfileCommonPluginApi",
+                "section": "def-common.UserProfile",
+                "text": "UserProfile"
+              },
+              "<D>[]>"
+            ],
+            "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-user-profile-browser",
+                "id": "def-public.UserProfileService.bulkGet.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [
+                  "Bulk get operation parameters."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-user-profile-browser",
+                    "scope": "public",
+                    "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+                    "section": "def-public.UserProfileBulkGetParams",
+                    "text": "UserProfileBulkGetParams"
+                  }
+                ],
+                "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-user-profile-browser",
+            "id": "def-public.UserProfileService.suggest",
+            "type": "Function",
+            "tags": [],
+            "label": "suggest",
+            "description": [
+              "\nSuggests multiple user profiles by search criteria.\n\nNote: This endpoint is not provided out-of-the-box by the platform. You need to expose your own\nversion within your app. An example of how to do this can be found in:\n`examples/user_profile_examples/server/plugin.ts`\n"
+            ],
+            "signature": [
+              "<D extends ",
+              {
+                "pluginId": "@kbn/core-user-profile-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUserProfileCommonPluginApi",
+                "section": "def-common.UserProfileData",
+                "text": "UserProfileData"
+              },
+              ">(path: string, params: ",
+              {
+                "pluginId": "@kbn/core-user-profile-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+                "section": "def-public.UserProfileSuggestParams",
+                "text": "UserProfileSuggestParams"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/core-user-profile-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUserProfileCommonPluginApi",
+                "section": "def-common.UserProfile",
+                "text": "UserProfile"
+              },
+              "<D>[]>"
+            ],
+            "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-user-profile-browser",
+                "id": "def-public.UserProfileService.suggest.$1",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [
+                  "Path to your app's suggest endpoint."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-user-profile-browser",
+                "id": "def-public.UserProfileService.suggest.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [
+                  "Suggest operation parameters."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-user-profile-browser",
+                    "scope": "public",
+                    "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+                    "section": "def-public.UserProfileSuggestParams",
+                    "text": "UserProfileSuggestParams"
+                  }
+                ],
+                "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-user-profile-browser",
+            "id": "def-public.UserProfileService.update",
+            "type": "Function",
+            "tags": [],
+            "label": "update",
+            "description": [
+              "\nUpdates user profile data of the current user."
+            ],
+            "signature": [
+              "<D extends ",
+              {
+                "pluginId": "@kbn/core-user-profile-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUserProfileCommonPluginApi",
+                "section": "def-common.UserProfileData",
+                "text": "UserProfileData"
+              },
+              ">(data: D) => Promise<void>"
+            ],
+            "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-user-profile-browser",
+                "id": "def-public.UserProfileService.update.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "data",
+                "description": [
+                  "Application data to be written (merged with existing data)."
+                ],
+                "signature": [
+                  "D"
+                ],
+                "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-user-profile-browser",
+            "id": "def-public.UserProfileService.partialUpdate",
+            "type": "Function",
+            "tags": [],
+            "label": "partialUpdate",
+            "description": [
+              "\nPartially updates user profile data of the current user, merging the previous data with the provided data."
+            ],
+            "signature": [
+              "<D extends Partial<",
+              {
+                "pluginId": "@kbn/core-user-profile-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUserProfileCommonPluginApi",
+                "section": "def-common.UserProfileData",
+                "text": "UserProfileData"
+              },
+              ">>(data: D) => Promise<void>"
+            ],
+            "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-user-profile-browser",
+                "id": "def-public.UserProfileService.partialUpdate.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "data",
+                "description": [
+                  "Application data to be merged with existing data."
+                ],
+                "signature": [
+                  "D"
+                ],
+                "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-user-profile-browser",
+        "id": "def-public.UserProfileServiceSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserProfileServiceSetup",
+        "description": [
+          "\nSetup contract for Core's userProfile service.\n"
+        ],
+        "path": "packages/core/user-profile/core-user-profile-browser/src/contracts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-user-profile-browser",
+            "id": "def-public.UserProfileServiceSetup.registerUserProfileDelegate",
+            "type": "Function",
+            "tags": [],
+            "label": "registerUserProfileDelegate",
+            "description": [
+              "\nRegister the userProfile implementation that will be used and re-exposed by Core.\n"
+            ],
+            "signature": [
+              "(delegate: ",
+              {
+                "pluginId": "@kbn/core-user-profile-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+                "section": "def-public.CoreUserProfileDelegateContract",
+                "text": "CoreUserProfileDelegateContract"
+              },
+              ") => void"
+            ],
+            "path": "packages/core/user-profile/core-user-profile-browser/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-user-profile-browser",
+                "id": "def-public.UserProfileServiceSetup.registerUserProfileDelegate.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "delegate",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-user-profile-browser",
+                    "scope": "public",
+                    "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+                    "section": "def-public.CoreUserProfileDelegateContract",
+                    "text": "CoreUserProfileDelegateContract"
+                  }
+                ],
+                "path": "packages/core/user-profile/core-user-profile-browser/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-user-profile-browser",
+        "id": "def-public.UserProfileSuggestParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserProfileSuggestParams",
+        "description": [
+          "\nParameters for the suggest API."
+        ],
+        "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-user-profile-browser",
+            "id": "def-public.UserProfileSuggestParams.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nQuery string used to match name-related fields in user profiles. The following fields are treated as\nname-related: username, full_name and email."
+            ],
+            "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-user-profile-browser",
+            "id": "def-public.UserProfileSuggestParams.size",
+            "type": "number",
+            "tags": [],
+            "label": "size",
+            "description": [
+              "\nDesired number of suggestions to return. The default value is 10."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-user-profile-browser",
+            "id": "def-public.UserProfileSuggestParams.dataPath",
+            "type": "string",
+            "tags": [],
+            "label": "dataPath",
+            "description": [
+              "\nBy default, suggest API returns user information, but does not return any user data. The optional \"dataPath\"\nparameter can be used to return personal data for this user (within `kibana` namespace only)."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-user-profile-browser",
+        "id": "def-public.CoreUserProfileDelegateContract",
+        "type": "Type",
+        "tags": [],
+        "label": "CoreUserProfileDelegateContract",
+        "description": [],
+        "signature": [
+          "Omit<",
+          {
+            "pluginId": "@kbn/core-user-profile-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+            "section": "def-public.UserProfileService",
+            "text": "UserProfileService"
+          },
+          ", \"getUserProfile$\"> & { userProfile$: ",
+          "Observable",
+          "<",
+          {
+            "pluginId": "@kbn/core-user-profile-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUserProfileCommonPluginApi",
+            "section": "def-common.UserProfileData",
+            "text": "UserProfileData"
+          },
+          " | null>; }"
+        ],
+        "path": "packages/core/user-profile/core-user-profile-browser/src/api_provider.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-user-profile-browser",
+        "id": "def-public.UserProfileServiceStart",
+        "type": "Type",
+        "tags": [],
+        "label": "UserProfileServiceStart",
+        "description": [
+          "\nStart contract for Core's userProfile service.\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-user-profile-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+            "section": "def-public.UserProfileService",
+            "text": "UserProfileService"
+          }
+        ],
+        "path": "packages/core/user-profile/core-user-profile-browser/src/contracts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

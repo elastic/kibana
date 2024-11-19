@@ -1,20 +1,29 @@
 {
   "type": "plugin",
   "id": "@kbn/security-solution-ess",
-  "owner": "@elastic/security-solution",
+  "owner": [
+    "@elastic/security-solution"
+  ],
+  "group": "security",
+  "visibility": "private",
   "description": "ESS customizations for Security Solution.",
   "plugin": {
     "id": "securitySolutionEss",
-    "server": true,
     "browser": true,
-    "configPath": ["xpack", "securitySolutionEss"],
+    "server": true,
+    "configPath": [
+      "xpack",
+      "securitySolutionEss"
+    ],
     "requiredPlugins": [
       "securitySolution",
-      "licensing",
+      "management",
+      "navigation",
+      "licensing"
     ],
-    "optionalPlugins": [
-      "cloudExperiments",
-    ],
-    "requiredBundles": [ "kibanaReact"]
+    "optionalPlugins": [],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
   }
 }

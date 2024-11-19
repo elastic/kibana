@@ -6,14 +6,15 @@
  */
 
 import moment from 'moment';
-import { Tag, TagAttributes } from '../../../common/types';
-import { TagsCache, CacheRefreshHandler } from './tags_cache';
+import type { Tag, TagAttributes } from '../../../common/types';
+import { TagsCache, type CacheRefreshHandler } from './tags_cache';
 
 const createTag = (parts: Partial<Tag>): Tag => ({
   id: 'tag-id',
   name: 'some-tag',
   description: 'Some tag',
   color: '#FF00CC',
+  managed: false,
   ...parts,
 });
 
@@ -92,6 +93,7 @@ describe('TagsCache', () => {
       expect(cacheState.map((tag) => tag.id)).toEqual(['tag-1', 'tag-2', 'tag-3']);
       expect(cacheState[1]).toEqual({
         id: 'tag-2',
+        managed: false,
         ...updatedAttributes,
       });
     });

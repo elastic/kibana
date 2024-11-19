@@ -1,0 +1,484 @@
+{
+  "id": "esql",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "esql",
+        "id": "def-public.ESQLLangEditor",
+        "type": "Function",
+        "tags": [],
+        "label": "ESQLLangEditor",
+        "description": [],
+        "signature": [
+          "(props: ",
+          {
+            "pluginId": "@kbn/esql-editor",
+            "scope": "public",
+            "docId": "kibKbnEsqlEditorPluginApi",
+            "section": "def-public.ESQLEditorProps",
+            "text": "ESQLEditorProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "src/plugins/esql/public/create_editor.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "esql",
+            "id": "def-public.ESQLLangEditor.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-editor",
+                "scope": "public",
+                "docId": "kibKbnEsqlEditorPluginApi",
+                "section": "def-public.ESQLEditorProps",
+                "text": "ESQLEditorProps"
+              }
+            ],
+            "path": "src/plugins/esql/public/create_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "esql",
+        "id": "def-public.ESQLEditorProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ESQLEditorProps",
+        "description": [],
+        "path": "packages/kbn-esql-editor/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "esql",
+            "id": "def-public.ESQLEditorProps.query",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [
+              "The aggregate type query"
+            ],
+            "signature": [
+              "{ esql: string; }"
+            ],
+            "path": "packages/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "esql",
+            "id": "def-public.ESQLEditorProps.onTextLangQueryChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onTextLangQueryChange",
+            "description": [
+              "Callback running everytime the query changes"
+            ],
+            "signature": [
+              "(query: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              ") => void"
+            ],
+            "path": "packages/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "esql",
+                "id": "def-public.ESQLEditorProps.onTextLangQueryChange.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "query",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.AggregateQuery",
+                    "text": "AggregateQuery"
+                  }
+                ],
+                "path": "packages/kbn-esql-editor/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "esql",
+            "id": "def-public.ESQLEditorProps.onTextLangQuerySubmit",
+            "type": "Function",
+            "tags": [],
+            "label": "onTextLangQuerySubmit",
+            "description": [
+              "Callback running when the user submits the query"
+            ],
+            "signature": [
+              "(query?: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              " | undefined, abortController?: AbortController | undefined) => Promise<void>"
+            ],
+            "path": "packages/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "esql",
+                "id": "def-public.ESQLEditorProps.onTextLangQuerySubmit.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "query",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.AggregateQuery",
+                    "text": "AggregateQuery"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-esql-editor/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "esql",
+                "id": "def-public.ESQLEditorProps.onTextLangQuerySubmit.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "abortController",
+                "description": [],
+                "signature": [
+                  "AbortController | undefined"
+                ],
+                "path": "packages/kbn-esql-editor/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "esql",
+            "id": "def-public.ESQLEditorProps.detectedTimestamp",
+            "type": "string",
+            "tags": [],
+            "label": "detectedTimestamp",
+            "description": [
+              "If it is true, the editor displays the message @timestamp found\nThe text based queries are relying on adhoc dataviews which\ncan have an @timestamp timefield or nothing"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "esql",
+            "id": "def-public.ESQLEditorProps.errors",
+            "type": "Array",
+            "tags": [],
+            "label": "errors",
+            "description": [
+              "Array of errors"
+            ],
+            "signature": [
+              "Error[] | undefined"
+            ],
+            "path": "packages/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "esql",
+            "id": "def-public.ESQLEditorProps.warning",
+            "type": "string",
+            "tags": [],
+            "label": "warning",
+            "description": [
+              "Warning string as it comes from ES"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "esql",
+            "id": "def-public.ESQLEditorProps.isLoading",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isLoading",
+            "description": [
+              "Disables the editor and displays loading icon in run button\nIt is also used for hiding the history component if it is not defined"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "esql",
+            "id": "def-public.ESQLEditorProps.isDisabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isDisabled",
+            "description": [
+              "Disables the editor"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "esql",
+            "id": "def-public.ESQLEditorProps.dataTestSubj",
+            "type": "string",
+            "tags": [],
+            "label": "dataTestSubj",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "esql",
+            "id": "def-public.ESQLEditorProps.hideRunQueryText",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideRunQueryText",
+            "description": [
+              "Hide the Run query information which appears on the footer"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "esql",
+            "id": "def-public.ESQLEditorProps.editorIsInline",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "editorIsInline",
+            "description": [
+              "This is used for applications (such as the inline editing flyout in dashboards)\nwhich want to add the editor without being part of the Unified search component\nIt renders a submit query button inside the editor"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "esql",
+            "id": "def-public.ESQLEditorProps.disableSubmitAction",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "disableSubmitAction",
+            "description": [
+              "Disables the submit query action"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "esql",
+            "id": "def-public.ESQLEditorProps.allowQueryCancellation",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowQueryCancellation",
+            "description": [
+              "when set to true enables query cancellation"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "esql",
+            "id": "def-public.ESQLEditorProps.hideTimeFilterInfo",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideTimeFilterInfo",
+            "description": [
+              "hide @timestamp info"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "esql",
+            "id": "def-public.ESQLEditorProps.hideQueryHistory",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideQueryHistory",
+            "description": [
+              "hide query history"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "esql",
+            "id": "def-public.ESQLEditorProps.hasOutline",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasOutline",
+            "description": [
+              "adds border in the editor"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "esql",
+            "id": "def-public.ESQLEditorProps.displayDocumentationAsFlyout",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "displayDocumentationAsFlyout",
+            "description": [
+              "adds a documentation icon in the footer which opens the inline docs as a flyout"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "esql",
+        "id": "def-public.EsqlPluginStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "EsqlPluginStart",
+        "description": [],
+        "path": "src/plugins/esql/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "esql",
+            "id": "def-public.EsqlPluginStart.Editor",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "Editor",
+            "description": [],
+            "signature": [
+              "React.ComponentClass<",
+              {
+                "pluginId": "@kbn/esql-editor",
+                "scope": "public",
+                "docId": "kibKbnEsqlEditorPluginApi",
+                "section": "def-public.ESQLEditorProps",
+                "text": "ESQLEditorProps"
+              },
+              ", any> | React.FunctionComponent<",
+              {
+                "pluginId": "@kbn/esql-editor",
+                "scope": "public",
+                "docId": "kibKbnEsqlEditorPluginApi",
+                "section": "def-public.ESQLEditorProps",
+                "text": "ESQLEditorProps"
+              },
+              ">"
+            ],
+            "path": "src/plugins/esql/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

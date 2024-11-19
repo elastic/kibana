@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { riskScorePreviewRoute } from './preview';
+export { registerRiskScoreRoutes } from './register_risk_score_routes';

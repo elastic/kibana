@@ -11,11 +11,13 @@ import { getESAssetMetadata } from '../services/epm/elasticsearch/meta';
 
 const meta = getESAssetMetadata();
 
-export const FLEET_INSTALL_FORMAT_VERSION = '1.2.0';
+export const FLEET_INSTALL_FORMAT_VERSION = '1.3.0';
 
 export const FLEET_AGENT_POLICIES_SCHEMA_VERSION = '1.1.1';
 
 export const FLEET_FINAL_PIPELINE_ID = '.fleet_final_pipeline-1';
+
+export const FLEET_EVENT_INGESTED_PIPELINE_ID = '.fleet_event_ingested_pipeline-1';
 
 export const FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME = '.fleet_globals-1';
 
@@ -46,6 +48,12 @@ export const FLEET_GLOBALS_COMPONENT_TEMPLATE_CONTENT = {
 };
 export const FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME = '.fleet_agent_id_verification-1';
 
+export const INGESTED_MAPPING = {
+  type: 'date',
+  format: 'strict_date_time_no_millis||strict_date_optional_time||epoch_millis',
+  ignore_malformed: false,
+};
+
 export const FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_CONTENT = {
   _meta: meta,
   template: {
@@ -58,14 +66,33 @@ export const FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_CONTENT = {
       properties: {
         event: {
           properties: {
-            ingested: {
-              type: 'date',
-              format: 'strict_date_time_no_millis||strict_date_optional_time||epoch_millis',
-            },
+            ingested: INGESTED_MAPPING,
             agent_id_status: {
               ignore_above: 1024,
               type: 'keyword',
             },
+          },
+        },
+      },
+    },
+  },
+};
+
+export const FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_NAME = '.fleet_event_ingested-1';
+
+export const FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_CONTENT = {
+  _meta: meta,
+  template: {
+    settings: {
+      index: {
+        final_pipeline: FLEET_EVENT_INGESTED_PIPELINE_ID,
+      },
+    },
+    mappings: {
+      properties: {
+        event: {
+          properties: {
+            ingested: INGESTED_MAPPING,
           },
         },
       },
@@ -79,19 +106,78 @@ export const FLEET_COMPONENT_TEMPLATES = [
     name: FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
     body: FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_CONTENT,
   },
+  {
+    name: FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_NAME,
+    body: FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_CONTENT,
+  },
 ];
 
 export const STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS = `logs@settings`;
+export const STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS = `logs@mappings`;
 export const STACK_COMPONENT_TEMPLATE_METRICS_SETTINGS = `metrics@settings`;
 export const STACK_COMPONENT_TEMPLATE_METRICS_TSDB_SETTINGS = `metrics@tsdb-settings`;
 export const STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS = 'ecs@mappings';
 
 export const STACK_COMPONENT_TEMPLATES = [
+  STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
   STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
   STACK_COMPONENT_TEMPLATE_METRICS_SETTINGS,
   STACK_COMPONENT_TEMPLATE_METRICS_TSDB_SETTINGS,
   STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
 ];
+
+export const FLEET_EVENT_INGESTED_PIPELINE_VERSION = 1;
+
+// If the content is updated you probably need to update the FLEET_EVENT_INGESTED_PIPELINE_VERSION too to allow upgrade of the pipeline
+export const FLEET_EVENT_INGESTED_PIPELINE_CONTENT = `---
+version: ${FLEET_EVENT_INGESTED_PIPELINE_VERSION}
+_meta:
+  managed_by: ${meta.managed_by}
+  managed: ${meta.managed}
+description: >
+  Pipeline for processing all incoming Fleet Agent documents that adds event.ingested.
+processors:
+  - script:
+      description: Add time when event was ingested (and remove sub-seconds to improve storage efficiency)
+      tag: truncate-subseconds-event-ingested
+      ignore_failure: true
+      source: |-
+        if (ctx?.event == null) {
+          ctx.event = [:];
+        }
+
+        ctx.event.ingested = metadata().now.withNano(0).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+  - remove:
+      description: Remove any pre-existing untrusted values.
+      field:
+        - event.agent_id_status
+        - _security
+      ignore_missing: true
+  - remove:
+      description: Remove event.original unless the preserve_original_event tag is set
+      field: event.original
+      if: "ctx?.tags == null || !(ctx.tags.contains('preserve_original_event'))"
+      ignore_failure: true
+      ignore_missing: true
+  - set_security_user:
+      field: _security
+      properties:
+        - authentication_type
+        - username
+        - realm
+        - api_key
+  - remove:
+      field: _security
+      ignore_missing: true
+on_failure:
+  - remove:
+      field: _security
+      ignore_missing: true
+      ignore_failure: true
+  - append:
+      field: error.message
+      value:
+        - 'failed in Fleet agent event_ingested_pipeline: {{ _ingest.on_failure_message }}'`;
 
 export const FLEET_FINAL_PIPELINE_VERSION = 4;
 

@@ -21,27 +21,36 @@ import { LogsExplorerTabs } from '@kbn/discover-plugin/public';
 import React, { useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { filter, take } from 'rxjs';
-import { betaBadgeDescription, betaBadgeTitle } from '../../common/translations';
+import {
+  deprecationBadgeDescription,
+  deprecationBadgeGuideline,
+  deprecationBadgeTitle,
+} from '../../common/translations';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 import { ConnectedDiscoverLink } from './discover_link';
 import { FeedbackLink } from './feedback_link';
 import { ConnectedOnboardingLink } from './onboarding_link';
 import { AlertsPopover } from './alerts_popover';
+import { ConnectedDatasetQualityLink } from './dataset_quality_link';
 
 export const LogsExplorerTopNavMenu = () => {
   const {
-    services: { serverless },
+    services: { chrome },
   } = useKibanaContextForPlugin();
 
-  return Boolean(serverless) ? <ServerlessTopNav /> : <StatefulTopNav />;
+  const chromeStyle = useObservable(chrome.getChromeStyle$());
+
+  return chromeStyle === 'project' ? <ProjectTopNav /> : <ClassicTopNav />;
 };
 
-const ServerlessTopNav = () => {
+const ProjectTopNav = () => {
   const { services } = useKibanaContextForPlugin();
-  const { ObservabilityAIAssistantActionMenuItem } = services.observabilityAIAssistant;
 
   return (
-    <EuiHeader data-test-subj="logsExplorerHeaderMenu" css={{ boxShadow: 'none' }}>
+    <EuiHeader
+      data-test-subj="logsExplorerHeaderMenu"
+      css={{ boxShadow: 'none', backgroundColor: euiThemeVars.euiPageBackgroundColor }}
+    >
       <EuiHeaderSection>
         <EuiHeaderSectionItem>
           <LogsExplorerTabs services={services} selectedTab="logs-explorer" />
@@ -54,25 +63,17 @@ const ServerlessTopNav = () => {
         `}
       >
         <EuiHeaderSectionItem>
-          <EuiBetaBadge
-            size="s"
-            iconType="beta"
-            label={betaBadgeTitle}
-            tooltipContent={betaBadgeDescription}
-            alignment="middle"
-          />
+          <DeprecationNoticeBadge />
         </EuiHeaderSectionItem>
         <EuiHeaderSectionItem>
           <EuiHeaderLinks gutterSize="xs">
             <ConnectedDiscoverLink />
+            <ConditionalVerticalRule Component={ConnectedDatasetQualityLink()} />
             <VerticalRule />
             <FeedbackLink />
             <VerticalRule />
             <AlertsPopover />
             <VerticalRule />
-            {ObservabilityAIAssistantActionMenuItem ? (
-              <ObservabilityAIAssistantActionMenuItem />
-            ) : null}
           </EuiHeaderLinks>
         </EuiHeaderSectionItem>
         <EuiHeaderSectionItem>
@@ -83,17 +84,15 @@ const ServerlessTopNav = () => {
   );
 };
 
-const StatefulTopNav = () => {
+const ClassicTopNav = () => {
   const {
     services: {
       appParams: { setHeaderActionMenu },
-      observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem },
       chrome,
-      i18n,
+      i18n: i18nStart,
       theme,
     },
   } = useKibanaContextForPlugin();
-
   /**
    * Since the breadcrumbsAppendExtension might be set only during a plugin start (e.g. search session)
    * we retrieve the latest valid extension in order to restore it once we unmount the beta badge.
@@ -115,19 +114,10 @@ const StatefulTopNav = () => {
             `}
           >
             <EuiHeaderSectionItem>
-              <EuiBetaBadge
-                size="s"
-                iconType="beta"
-                label={betaBadgeTitle}
-                tooltipContent={betaBadgeDescription}
-                alignment="middle"
-              />
-            </EuiHeaderSectionItem>
-            <EuiHeaderSectionItem>
               <FeedbackLink />
             </EuiHeaderSectionItem>
           </EuiHeaderSection>,
-          { theme, i18n }
+          { theme, i18n: i18nStart }
         ),
       });
     }
@@ -137,20 +127,21 @@ const StatefulTopNav = () => {
         chrome.setBreadcrumbsAppendExtension(previousAppendExtension);
       }
     };
-  }, [chrome, i18n, previousAppendExtension, theme]);
+  }, [chrome, i18nStart, previousAppendExtension, theme]);
 
   return (
     <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme.theme$}>
       <EuiHeaderSection data-test-subj="logsExplorerHeaderMenu">
         <EuiHeaderSectionItem>
           <EuiHeaderLinks gutterSize="xs">
+            <EuiHeaderSectionItem>
+              <DeprecationNoticeBadge />
+            </EuiHeaderSectionItem>
             <ConnectedDiscoverLink />
+            <ConditionalVerticalRule Component={ConnectedDatasetQualityLink()} />
             <VerticalRule />
             <AlertsPopover />
             <VerticalRule />
-            {ObservabilityAIAssistantActionMenuItem ? (
-              <ObservabilityAIAssistantActionMenuItem />
-            ) : null}
             <ConnectedOnboardingLink />
           </EuiHeaderLinks>
         </EuiHeaderSectionItem>
@@ -164,3 +155,27 @@ const VerticalRule = styled.span`
   height: 20px;
   background-color: ${euiThemeVars.euiColorLightShade};
 `;
+
+const ConditionalVerticalRule = ({ Component }: { Component: JSX.Element | null }) =>
+  Component && (
+    <>
+      <VerticalRule />
+      {Component}
+    </>
+  );
+
+const DeprecationNoticeBadge = () => (
+  <EuiBetaBadge
+    label={deprecationBadgeTitle}
+    color="subdued"
+    tooltipContent={
+      <>
+        {deprecationBadgeDescription}
+        <br />
+        <br />
+        {deprecationBadgeGuideline}
+      </>
+    }
+    alignment="middle"
+  />
+);

@@ -14,7 +14,6 @@ import {
   buildListItems,
   getDescriptionItem,
 } from '.';
-import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import { FilterManager, UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
@@ -31,6 +30,15 @@ import { schema } from '../step_about_rule/schema';
 import type { ListItems } from './types';
 import type { AboutStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import { createLicenseServiceMock } from '../../../../../common/license/mocks';
+import {
+  ALERT_SUPPRESSION_DURATION_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_UNIT_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_VALUE_FIELD_NAME,
+  ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
+  ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
+} from '../../../rule_creation/components/alert_suppression_edit';
+import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../rule_creation/components/threshold_alert_suppression_edit';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -263,7 +271,7 @@ describe('description_step', () => {
         mockLicenseService
       );
 
-      expect(result.length).toEqual(12);
+      expect(result.length).toEqual(14);
     });
   });
 
@@ -330,6 +338,29 @@ describe('description_step', () => {
         expect(shallow(result[0].description as React.ReactElement).text()).toEqual(
           mockQueryBar.queryBar.query.query
         );
+      });
+
+      test('returns correct field name when queryBar exist', () => {
+        const mockQueryBar = {
+          ruleType: 'eql',
+          queryBar: {
+            query: {
+              query: 'user.name: root or user.name: admin',
+              language: 'kuery',
+            },
+            filters: null,
+            saved_id: null,
+          },
+        };
+        const result: ListItems[] = getDescriptionItem(
+          'queryBar',
+          'Query bar label',
+          mockQueryBar,
+          mockFilterManager,
+          mockLicenseService
+        );
+
+        expect(result[0].title).toEqual(<>{i18n.EQL_QUERY_LABEL}</>);
       });
     });
 
@@ -536,45 +567,42 @@ describe('description_step', () => {
       });
     });
 
+    describe('setup', () => {
+      test('returns default "setup" description', () => {
+        const result: ListItems[] = getDescriptionItem(
+          'setup',
+          'Setup guide',
+          mockAboutStep,
+          mockFilterManager,
+          mockLicenseService
+        );
+
+        expect(result[0].title).toEqual('Setup guide');
+        expect(React.isValidElement(result[0].description)).toBeTruthy();
+      });
+    });
+
     describe('alert suppression', () => {
-      const ruleTypesWithoutSuppression: Type[] = ['eql', 'esql', 'machine_learning', 'new_terms'];
       const suppressionFields = {
-        groupByDuration: {
-          unit: 'm',
-          value: 50,
+        [ALERT_SUPPRESSION_DURATION_FIELD_NAME]: {
+          [ALERT_SUPPRESSION_DURATION_VALUE_FIELD_NAME]: 50,
+          [ALERT_SUPPRESSION_DURATION_UNIT_FIELD_NAME]: 'm',
         },
-        groupByRadioSelection: 'per-time-period',
-        enableThresholdSuppression: true,
-        groupByFields: ['agent.name'],
-        suppressionMissingFields: 'suppress',
+        [ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME]: 'per-time-period',
+        [THRESHOLD_ALERT_SUPPRESSION_ENABLED]: true,
+        [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: ['agent.name'],
+        [ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME]: 'suppress',
       };
-      describe('groupByDuration', () => {
-        ruleTypesWithoutSuppression.forEach((ruleType) => {
-          test(`should be empty if rule is ${ruleType}`, () => {
-            const result: ListItems[] = getDescriptionItem(
-              'groupByDuration',
-              'label',
-              {
-                ruleType,
-                ...suppressionFields,
-              },
-              mockFilterManager,
-              mockLicenseService
-            );
-
-            expect(result).toEqual([]);
-          });
-        });
-
+      describe(ALERT_SUPPRESSION_DURATION_FIELD_NAME, () => {
         ['query', 'saved_query'].forEach((ruleType) => {
-          test(`should be empty if groupByFields empty for ${ruleType} rule`, () => {
+          test(`should be empty if ${ALERT_SUPPRESSION_FIELDS_FIELD_NAME} empty for ${ruleType} rule`, () => {
             const result: ListItems[] = getDescriptionItem(
-              'groupByDuration',
+              ALERT_SUPPRESSION_DURATION_FIELD_NAME,
               'label',
               {
                 ruleType: 'query',
                 ...suppressionFields,
-                groupByFields: [],
+                [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: [],
               },
               mockFilterManager,
               mockLicenseService
@@ -585,7 +613,7 @@ describe('description_step', () => {
 
           test(`should return item for ${ruleType} rule`, () => {
             const result: ListItems[] = getDescriptionItem(
-              'groupByDuration',
+              ALERT_SUPPRESSION_DURATION_FIELD_NAME,
               'label',
               {
                 ruleType: 'query',
@@ -601,7 +629,7 @@ describe('description_step', () => {
 
         test('should return item for threshold rule', () => {
           const result: ListItems[] = getDescriptionItem(
-            'groupByDuration',
+            ALERT_SUPPRESSION_DURATION_FIELD_NAME,
             'label',
             {
               ruleType: 'threshold',
@@ -614,14 +642,14 @@ describe('description_step', () => {
           expect(result[0].description).toBe('50m');
         });
 
-        test('should return item for threshold rule if groupByFields empty', () => {
+        test(`should return item for threshold rule if ${ALERT_SUPPRESSION_FIELDS_FIELD_NAME} empty`, () => {
           const result: ListItems[] = getDescriptionItem(
-            'groupByDuration',
+            ALERT_SUPPRESSION_DURATION_FIELD_NAME,
             'label',
             {
               ruleType: 'threshold',
               ...suppressionFields,
-              groupByFields: [],
+              [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: [],
             },
             mockFilterManager,
             mockLicenseService
@@ -632,12 +660,12 @@ describe('description_step', () => {
 
         test('should be empty for threshold rule if suppression not enabled', () => {
           const result: ListItems[] = getDescriptionItem(
-            'groupByDuration',
+            ALERT_SUPPRESSION_DURATION_FIELD_NAME,
             'label',
             {
               ruleType: 'threshold',
               ...suppressionFields,
-              enableThresholdSuppression: false,
+              [THRESHOLD_ALERT_SUPPRESSION_ENABLED]: false,
             },
             mockFilterManager,
             mockLicenseService
@@ -647,27 +675,26 @@ describe('description_step', () => {
         });
       });
 
-      describe('groupByFields', () => {
-        [...ruleTypesWithoutSuppression, 'threshold'].forEach((ruleType) => {
-          test(`should be empty if rule is ${ruleType}`, () => {
-            const result: ListItems[] = getDescriptionItem(
-              'groupByFields',
-              'label',
-              {
-                ruleType,
-                ...suppressionFields,
-              },
-              mockFilterManager,
-              mockLicenseService
-            );
+      describe(ALERT_SUPPRESSION_FIELDS_FIELD_NAME, () => {
+        test(`should be empty if rule type is 'threshold'`, () => {
+          const result: ListItems[] = getDescriptionItem(
+            ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
+            'label',
+            {
+              ruleType: 'threshold',
+              ...suppressionFields,
+            },
+            mockFilterManager,
+            mockLicenseService
+          );
 
-            expect(result).toEqual([]);
-          });
+          expect(result).toEqual([]);
         });
+
         ['query', 'saved_query'].forEach((ruleType) => {
           test(`should return item for ${ruleType} rule`, () => {
             const result: ListItems[] = getDescriptionItem(
-              'groupByFields',
+              ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
               'label',
               {
                 ruleType,
@@ -681,27 +708,26 @@ describe('description_step', () => {
         });
       });
 
-      describe('suppressionMissingFields', () => {
-        [...ruleTypesWithoutSuppression, 'threshold'].forEach((ruleType) => {
-          test(`should be empty if rule is ${ruleType}`, () => {
-            const result: ListItems[] = getDescriptionItem(
-              'suppressionMissingFields',
-              'label',
-              {
-                ruleType,
-                ...suppressionFields,
-              },
-              mockFilterManager,
-              mockLicenseService
-            );
+      describe(ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME, () => {
+        test(`should be empty if rule type is 'threshold'`, () => {
+          const result: ListItems[] = getDescriptionItem(
+            ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
+            'label',
+            {
+              ruleType: 'threshold',
+              ...suppressionFields,
+            },
+            mockFilterManager,
+            mockLicenseService
+          );
 
-            expect(result).toEqual([]);
-          });
+          expect(result).toEqual([]);
         });
+
         ['query', 'saved_query'].forEach((ruleType) => {
           test(`should return item for ${ruleType} rule`, () => {
             const result: ListItems[] = getDescriptionItem(
-              'suppressionMissingFields',
+              ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
               'label',
               {
                 ruleType,
@@ -713,14 +739,14 @@ describe('description_step', () => {
             expect(result[0].description).toContain('Suppress');
           });
 
-          test(`should be empty if groupByFields empty for ${ruleType} rule`, () => {
+          test(`should be empty if ${ALERT_SUPPRESSION_FIELDS_FIELD_NAME} empty for ${ruleType} rule`, () => {
             const result: ListItems[] = getDescriptionItem(
-              'suppressionMissingFields',
+              ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
               'label',
               {
                 ruleType: 'query',
                 ...suppressionFields,
-                groupByFields: [],
+                [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: [],
               },
               mockFilterManager,
               mockLicenseService
@@ -728,6 +754,33 @@ describe('description_step', () => {
 
             expect(result).toEqual([]);
           });
+        });
+      });
+
+      describe('maxSignals', () => {
+        test('returns default "max signals" description', () => {
+          const result: ListItems[] = getDescriptionItem(
+            'maxSignals',
+            'Max alerts per run',
+            mockAboutStep,
+            mockFilterManager,
+            mockLicenseService
+          );
+
+          expect(result[0].title).toEqual('Max alerts per run');
+          expect(result[0].description).toEqual(100);
+        });
+
+        test('returns empty array when "value" is a undefined', () => {
+          const result: ListItems[] = getDescriptionItem(
+            'maxSignals',
+            'Max alerts per run',
+            { ...mockAboutStep, maxSignals: undefined },
+            mockFilterManager,
+            mockLicenseService
+          );
+
+          expect(result.length).toEqual(0);
         });
       });
     });

@@ -7,13 +7,14 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { map, reduce, upperFirst } from 'lodash';
+import { map, reduce } from 'lodash';
 import ReactMarkdown from 'react-markdown';
 import { ResponseActionsWrapper } from './response_actions_wrapper';
 import { FORM_ERRORS_TITLE } from '../rule_creation/components/rule_actions_field/translations';
 import { ResponseActionsHeader } from './response_actions_header';
 import type { ArrayItem, FormHook } from '../../shared_imports';
 import { useSupportedResponseActionTypes } from './use_supported_response_action_types';
+import { getActionDetails } from './constants';
 
 interface ResponseActionsFormProps {
   items: ArrayItem[];
@@ -58,9 +59,9 @@ export const ResponseActionsForm = ({
 
             if (name.includes(paramsPath)) {
               if (fields[name]?.errors?.length) {
-                const responseActionType = upperFirst(
-                  (fields[`${path}.actionTypeId`].value as string).substring(1)
-                );
+                const responseActionType = getActionDetails(
+                  fields[`${path}.actionTypeId`].value as string
+                ).name;
                 acc.push({
                   type: responseActionType,
                   errors: map(fields[name].errors, 'message'),

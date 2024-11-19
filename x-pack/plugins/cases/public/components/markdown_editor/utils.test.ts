@@ -12,7 +12,7 @@ describe('getMarkdownEditorStorageKey', () => {
     const appId = 'security-solution';
     const caseId = 'case-id';
     const commentId = 'comment-id';
-    const sessionKey = getMarkdownEditorStorageKey(appId, caseId, commentId);
+    const sessionKey = getMarkdownEditorStorageKey({ appId, caseId, commentId });
     expect(sessionKey).toEqual(`cases.${appId}.${caseId}.${commentId}.markdownEditor`);
   });
 
@@ -20,7 +20,7 @@ describe('getMarkdownEditorStorageKey', () => {
     const appId = 'security-solution';
     const caseId = 'case-id';
     const commentId = '';
-    const sessionKey = getMarkdownEditorStorageKey(appId, caseId, commentId);
+    const sessionKey = getMarkdownEditorStorageKey({ appId, caseId, commentId });
     expect(sessionKey).toEqual(`cases.${appId}.${caseId}.comment.markdownEditor`);
   });
 
@@ -28,7 +28,7 @@ describe('getMarkdownEditorStorageKey', () => {
     const appId = 'security-solution';
     const caseId = '';
     const commentId = 'comment-id';
-    const sessionKey = getMarkdownEditorStorageKey(appId, caseId, commentId);
+    const sessionKey = getMarkdownEditorStorageKey({ appId, caseId, commentId });
     expect(sessionKey).toEqual(`cases.${appId}.case.${commentId}.markdownEditor`);
   });
 
@@ -36,7 +36,14 @@ describe('getMarkdownEditorStorageKey', () => {
     const appId = '';
     const caseId = 'case-id';
     const commentId = 'comment-id';
-    const sessionKey = getMarkdownEditorStorageKey(appId, caseId, commentId);
+    const sessionKey = getMarkdownEditorStorageKey({ appId, caseId, commentId });
+    expect(sessionKey).toEqual(`cases.cases.${caseId}.${commentId}.markdownEditor`);
+  });
+
+  it('should return default key when app id is undefined', () => {
+    const caseId = 'case-id';
+    const commentId = 'comment-id';
+    const sessionKey = getMarkdownEditorStorageKey({ caseId, commentId });
     expect(sessionKey).toEqual(`cases.cases.${caseId}.${commentId}.markdownEditor`);
   });
 });

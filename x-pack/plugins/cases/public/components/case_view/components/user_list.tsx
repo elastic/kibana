@@ -9,16 +9,18 @@ import React, { useCallback } from 'react';
 import { isEmpty } from 'lodash/fp';
 import { sortBy } from 'lodash';
 
+import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiButtonIcon,
-  EuiText,
+  EuiTitle,
   EuiHorizontalRule,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
+  useEuiTheme,
 } from '@elastic/eui';
 
-import styled, { css } from 'styled-components';
+import { css } from '@emotion/react';
 
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { useCaseViewNavigation } from '../../../common/navigation';
@@ -38,18 +40,20 @@ interface UserListProps {
   dataTestSubj?: string;
 }
 
-const MyFlexGroup = styled(EuiFlexGroup)`
-  ${({ theme }) => css`
-    margin-top: ${theme.eui.euiSizeM};
-  `}
-`;
-
 const renderUsers = (
   users: UserInfoWithAvatar[],
-  handleSendEmail: (emailAddress: string | undefined | null) => void
+  handleSendEmail: (emailAddress: string | undefined | null) => void,
+  euiTheme: EuiThemeComputed<{}>
 ) =>
   users.map((userInfo, key) => (
-    <MyFlexGroup key={key} justifyContent="spaceBetween" responsive={false}>
+    <EuiFlexGroup
+      css={css`
+        margin-top: ${euiTheme.size.m};
+      `}
+      key={key}
+      justifyContent="spaceBetween"
+      responsive={false}
+    >
       <EuiFlexItem grow={false}>
         <HoverableUserWithAvatar userInfo={userInfo} />
       </EuiFlexItem>
@@ -64,7 +68,7 @@ const renderUsers = (
           isDisabled={isEmpty(userInfo.user?.email)}
         />
       </EuiFlexItem>
-    </MyFlexGroup>
+    </EuiFlexGroup>
   ));
 
 const getEmailContent = ({ caseTitle, caseUrl }: { caseTitle: string; caseUrl: string }) => ({
@@ -75,7 +79,7 @@ const getEmailContent = ({ caseTitle, caseUrl }: { caseTitle: string; caseUrl: s
 export const UserList: React.FC<UserListProps> = React.memo(
   ({ theCase, userProfiles, headline, loading, users, dataTestSubj }) => {
     const { getCaseViewUrl } = useCaseViewNavigation();
-
+    const { euiTheme } = useEuiTheme();
     const caseUrl = getCaseViewUrl({ detailName: theCase.id });
     const email = getEmailContent({ caseTitle: theCase.title, caseUrl });
 
@@ -99,19 +103,19 @@ export const UserList: React.FC<UserListProps> = React.memo(
     }
 
     return (
-      <EuiFlexItem grow={false}>
-        <EuiText data-test-subj={dataTestSubj}>
-          <h4>{headline}</h4>
-          <EuiHorizontalRule margin="xs" />
-          {loading && (
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiLoadingSpinner data-test-subj="users-list-loading-spinner" />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
-          {renderUsers(orderedUsers, handleSendEmail)}
-        </EuiText>
+      <EuiFlexItem grow={false} data-test-subj={dataTestSubj}>
+        <EuiTitle size="xs">
+          <h3>{headline}</h3>
+        </EuiTitle>
+        <EuiHorizontalRule margin="xs" />
+        {loading && (
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiLoadingSpinner data-test-subj="users-list-loading-spinner" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+        {renderUsers(orderedUsers, handleSendEmail, euiTheme)}
       </EuiFlexItem>
     );
   }

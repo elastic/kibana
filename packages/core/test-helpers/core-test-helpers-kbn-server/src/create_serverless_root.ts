@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -14,6 +15,8 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import { esTestConfig } from '@kbn/test';
 import { CliArgs } from '@kbn/config';
+import { kibanaDevServiceAccount } from '@kbn/dev-utils';
+import { systemIndicesSuperuser } from '@kbn/test';
 import { createRoot, type TestElasticsearchUtils, type TestKibanaUtils } from './create_root';
 
 export type TestServerlessESUtils = Pick<TestElasticsearchUtils, 'stop' | 'es'> & {
@@ -27,7 +30,6 @@ export interface TestServerlessUtils {
 }
 
 const ES_BASE_PATH_DIR = Path.join(REPO_ROOT, '.es/es_test_serverless');
-
 const projectType: ServerlessProjectType = 'es';
 
 /**
@@ -38,13 +40,18 @@ const projectType: ServerlessProjectType = 'es';
  */
 export function createTestServerlessInstances({
   adjustTimeout,
+  kibana = {},
 }: {
-  adjustTimeout: (timeout: number) => void;
-}): TestServerlessUtils {
+  kibana?: {
+    settings?: {};
+    cliArgs?: Partial<CliArgs>;
+  };
+  adjustTimeout?: (timeout: number) => void;
+} = {}): TestServerlessUtils {
   adjustTimeout?.(150_000);
 
   const esUtils = createServerlessES();
-  const kbUtils = createServerlessKibana();
+  const kbUtils = createServerlessKibana(kibana.settings, kibana.cliArgs);
 
   return {
     startES: async () => {
@@ -77,6 +84,9 @@ function createServerlessES() {
   });
   const es = new Cluster({ log });
   const esPort = esTestConfig.getPort();
+  const esServerlessImageParams = parseEsServerlessImageOverride(
+    esTestConfig.getESServerlessImage()
+  );
   return {
     es,
     start: async () => {
@@ -88,8 +98,7 @@ function createServerlessES() {
         clean: true,
         kill: true,
         waitForReady: true,
-        // security is enabled by default, if needed kibana requires serviceAccountToken
-        esArgs: ['xpack.security.enabled=false'],
+        ...esServerlessImageParams,
       });
       const client = getServerlessESClient({ port: esPort });
 
@@ -107,13 +116,14 @@ const getServerlessESClient = ({ port }: { port: number }) => {
   return new Client({
     node: `http://localhost:${port}`,
     Connection: HttpConnection,
+    auth: { ...systemIndicesSuperuser },
   });
 };
 
 const getServerlessDefault = () => {
   return {
     server: {
-      restrictInternalApis: true,
+      restrictInternalApis: true, // has no effect, defaults to true
       versioned: {
         versionResolution: 'newest',
         strictClientVersionCheck: false,
@@ -121,6 +131,7 @@ const getServerlessDefault = () => {
     },
     elasticsearch: {
       hosts: [`http://localhost:${esTestConfig.getPort()}`],
+      serviceAccountToken: kibanaDevServiceAccount.token,
     },
     migrations: {
       algorithm: 'zdt',
@@ -154,4 +165,21 @@ function createServerlessKibana(settings = {}, cliArgs: Partial<CliArgs> = {}) {
     ...cliArgs,
     serverless: true,
   });
+}
+
+function parseEsServerlessImageOverride(dockerImageOrTag: string | undefined): {
+  image?: string;
+  tag?: string;
+} {
+  if (!dockerImageOrTag) {
+    return {};
+  } else if (dockerImageOrTag.includes(':')) {
+    return {
+      image: dockerImageOrTag,
+    };
+  } else {
+    return {
+      tag: dockerImageOrTag,
+    };
+  }
 }

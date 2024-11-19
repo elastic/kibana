@@ -7,6 +7,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import type {
+  GetActionStatusRequest,
   GetActionStatusResponse,
   GetAgentTagsResponse,
   GetAgentUploadsResponse,
@@ -14,7 +15,9 @@ import type {
   PostBulkRequestDiagnosticsResponse,
   PostBulkUpdateAgentTagsRequest,
   PostRequestBulkDiagnosticsRequest,
+  PostRequestDiagnosticsRequest,
   PostRequestDiagnosticsResponse,
+  DeleteAgentUploadResponse,
   UpdateAgentRequest,
 } from '../../../common/types';
 
@@ -50,7 +53,7 @@ import type {
   PostRetrieveAgentsByActionsResponse,
 } from '../../types';
 
-import { useRequest, sendRequest } from './use_request';
+import { useRequest, sendRequest, sendRequestForRq } from './use_request';
 import type { UseRequestConfig } from './use_request';
 
 type RequestOptions = Pick<Partial<UseRequestConfig>, 'pollIntervalMs'>;
@@ -206,10 +209,15 @@ export function sendPostAgentUpgrade(
   });
 }
 
-export function sendPostRequestDiagnostics(agentId: string, options?: RequestOptions) {
+export function sendPostRequestDiagnostics(
+  agentId: string,
+  body: PostRequestDiagnosticsRequest['body'],
+  options?: RequestOptions
+) {
   return sendRequest<PostRequestDiagnosticsResponse>({
     path: agentRouteService.getRequestDiagnosticsPath(agentId),
     method: 'post',
+    body,
     version: API_VERSIONS.public.v1,
     ...options,
   });
@@ -232,6 +240,15 @@ export function sendGetAgentUploads(agentId: string, options?: RequestOptions) {
   return sendRequest<GetAgentUploadsResponse>({
     path: agentRouteService.getListAgentUploads(agentId),
     method: 'get',
+    version: API_VERSIONS.public.v1,
+    ...options,
+  });
+}
+
+export function sendDeleteAgentUpload(fileId: string, options?: RequestOptions) {
+  return sendRequest<DeleteAgentUploadResponse>({
+    path: agentRouteService.getAgentFileDeletePath(fileId),
+    method: 'delete',
     version: API_VERSIONS.public.v1,
     ...options,
   });
@@ -273,11 +290,12 @@ export function sendPostBulkAgentUpgrade(
   });
 }
 
-export function sendGetActionStatus() {
+export function sendGetActionStatus(query: GetActionStatusRequest['query'] = {}) {
   return sendRequest<GetActionStatusResponse>({
     path: agentRouteService.getActionStatusPath(),
     method: 'get',
     version: API_VERSIONS.public.v1,
+    query,
   });
 }
 
@@ -330,5 +348,19 @@ export function sendGetAgentsAvailableVersions() {
     method: 'get',
     path: agentRouteService.getAvailableVersionsPath(),
     version: API_VERSIONS.public.v1,
+  });
+}
+
+export function sendGetAgentStatusRuntimeField() {
+  return sendRequestForRq<string>({
+    method: 'get',
+    path: '/internal/fleet/agents/status_runtime_field',
+    version: API_VERSIONS.internal.v1,
+  });
+}
+
+export function useGetAgentStatusRuntimeFieldQuery(options: Partial<{ enabled: boolean }> = {}) {
+  return useQuery(['status_runtime_field'], () => sendGetAgentStatusRuntimeField(), {
+    enabled: options.enabled,
   });
 }

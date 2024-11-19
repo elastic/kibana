@@ -184,19 +184,17 @@ export function FieldSelect({
 
   return (
     <FieldPicker<FieldChoiceWithOperationType>
-      selectedOptions={
+      activeField={
         (selectedOperationType && selectedField
-          ? [
-              {
-                label:
-                  (selectedOperationType &&
-                    selectedField &&
-                    currentIndexPattern.getFieldByName(selectedField)?.displayName) ??
-                  selectedField,
-                value: { type: 'field', field: selectedField },
-              },
-            ]
-          : []) as unknown as Array<FieldOption<FieldChoiceWithOperationType>>
+          ? {
+              label:
+                (selectedOperationType &&
+                  selectedField &&
+                  currentIndexPattern.getFieldByName(selectedField)?.displayName) ??
+                selectedField,
+              value: { type: 'field', field: selectedField },
+            }
+          : undefined) as unknown as FieldOption<FieldChoiceWithOperationType>
       }
       options={memoizedFieldOptions as Array<FieldOption<FieldChoiceWithOperationType>>}
       onChoose={(choice) => {

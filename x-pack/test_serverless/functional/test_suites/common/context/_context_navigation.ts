@@ -49,7 +49,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         defaultIndex: 'logstash-*',
       });
       // TODO: Serverless tests require login first
-      await PageObjects.svlCommonPage.loginWithRole('viewer');
+      await PageObjects.svlCommonPage.loginAsViewer();
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.header.waitUntilLoadingHasFinished();
       for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {

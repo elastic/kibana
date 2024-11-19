@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Entity Analytics Common Schema
   description: Common schema for Entity Analytics
-  version: 1.0.0
+  version: '1'
 paths: {}
 components:
   schemas:
@@ -23,36 +23,35 @@ components:
               properties:
                 cluster:
                   type: object
-                  properties:
-                    manage_index_templates:
-                      type: boolean
-                    manage_transform:
-                      type: boolean
+                  additionalProperties:
+                    type: boolean
                 index:
                   type: object
                   additionalProperties:
                     type: object
-                    properties:
-                      read:
-                        type: boolean
-                      write:
-                        type: boolean
+                    additionalProperties:
+                      type: boolean
+            kibana:
+              type: object
+              additionalProperties:
+                type: boolean
           required:
             - elasticsearch
       required:
         - has_all_required
         - privileges
+    EntityAfterKey:
+      type: object
+      additionalProperties:
+        type: string
+
     AfterKeys:
       type: object
       properties:
         host:
-          type: object
-          additionalProperties:
-            type: string
+          $ref: '#/components/schemas/EntityAfterKey'
         user:
-          type: object
-          additionalProperties:
-            type: string
+          $ref: '#/components/schemas/EntityAfterKey'
       example:
         host:
           'host.name': 'example.host'
@@ -67,6 +66,7 @@ components:
     Filter:
       description: An elasticsearch DSL filter object. Used to filter the risk inputs involved, which implicitly filters the risk scores themselves.
       type: object
+      additionalProperties: true
 
     PageSize:
       description: Specifies how many scores will be involved in a given calculation. Note that this value is per `identifier_type`, i.e. a value of 10 will calculate 10 host scores and 10 user scores, if available. To avoid missed data, keep this value consistent while paginating through scores.
@@ -98,6 +98,11 @@ components:
     RiskScoreInput:
       description: A generic representation of a document contributing to a Risk Score.
       type: object
+      required:
+        - id
+        - index
+        - description
+        - category
       properties:
         id:
           type: string
@@ -125,8 +130,25 @@ components:
           type: string
           example: '2017-07-21T17:32:28Z'
           description: The @timestamp of the risk input document.
+        contribution_score:
+          type: number
+          format: double
 
-    RiskScore:
+    RiskScoreCategories:
+      type: string
+      enum:
+        - category_1
+
+    EntityRiskLevels:
+      type: string
+      enum:
+        - 'Unknown'
+        - 'Low'
+        - 'Moderate'
+        - 'High'
+        - 'Critical'
+
+    EntityRiskScoreRecord:
       type: object
       required:
         - '@timestamp'
@@ -138,6 +160,7 @@ components:
         - category_1_score
         - category_1_count
         - inputs
+        - notes
       properties:
         '@timestamp':
           type: string
@@ -153,7 +176,7 @@ components:
           example: 'example.host'
           description: The identifier value defining this risk score. Coupled with `id_field`, uniquely identifies the entity being scored.
         calculated_level:
-          type: string
+          $ref: '#/components/schemas/EntityRiskLevels'
           example: 'Critical'
           description: Lexical description of the entity's risk.
         calculated_score:
@@ -179,32 +202,62 @@ components:
           description: A list of the highest-risk documents contributing to this risk score. Useful for investigative purposes.
           items:
             $ref: '#/components/schemas/RiskScoreInput'
+        category_2_score:
+          type: number
+          format: double
+        category_2_count:
+          type: number
+          format: integer
+        notes:
+          type: array
+          items:
+            type: string
+        criticality_modifier:
+          type: number
+          format: double
+        criticality_level:
+          $ref: '../asset_criticality/common.schema.yaml#/components/schemas/AssetCriticalityLevel'
 
-    RiskScoreWeight:
-      description: "Configuration used to tune risk scoring. Weights can be used to change the score contribution of risk inputs for hosts and users at both a global level and also for Risk Input categories (e.g. 'category_1')."
+    RiskScoreEntityIdentifierWeights:
+      type: number
+      format: double
+      minimum: 0
+      maximum: 1
+
+    RiskScoreWeightGlobalShared:
+      x-inline: true
       type: object
       required:
         - type
       properties:
         type:
           type: string
-        value:
-          type: string
-        host:
-          type: number
-          format: double
-          minimum: 0
-          maximum: 1
-        user:
-          type: number
-          format: double
-          minimum: 0
-          maximum: 1
-      example:
-        type: 'risk_category'
-        value: 'category_1'
-        host: 0.8
-        user: 0.4
+          enum:
+            - global_identifier
+
+    RiskScoreWeight:
+      oneOf:
+        - allOf:
+            - $ref: '#/components/schemas/RiskScoreWeightGlobalShared'
+            - type: object
+              required:
+                - host
+              properties:
+                host:
+                  $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
+                user:
+                  $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
+
+        - allOf:
+            - $ref: '#/components/schemas/RiskScoreWeightGlobalShared'
+            - type: object
+              required:
+                - user
+              properties:
+                host:
+                  $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
+                user:
+                  $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
 
     RiskScoreWeights:
       description: 'A list of weights to be applied to the scoring calculation.'
@@ -212,23 +265,19 @@ components:
       items:
         $ref: '#/components/schemas/RiskScoreWeight'
       example:
-        - type: 'risk_category'
-          value: 'category_1'
-          host: 0.8
-          user: 0.4
         - type: 'global_identifier'
           host: 0.5
           user: 0.1
 
-    RiskEngineInitStep:
+    TaskManagerUnavailableResponse:
+      description: Task manager is unavailable
       type: object
       required:
-        - type
-        - success
+        - status_code
+        - message
       properties:
-        type:
-          type: string
-        success:
-          type: boolean
-        error:
+        status_code:
+          type: integer
+          minimum: 400
+        message:
           type: string

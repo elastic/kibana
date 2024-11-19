@@ -1,65 +1,81 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
-import { CONNECTORS_INDEX } from '..';
-import { fetchConnectorById } from './fetch_connectors';
-import { ConnectorStatus } from '../types/connectors';
+import { errors } from '@elastic/elasticsearch';
 
 import { updateConnectorConfiguration } from './update_connector_configuration';
+import { fetchConnectorById } from './fetch_connectors';
 
 jest.mock('./fetch_connectors', () => ({ fetchConnectorById: jest.fn() }));
 
 describe('updateConnectorConfiguration lib function', () => {
   const mockClient = {
-    update: jest.fn(),
+    transport: {
+      request: jest.fn(),
+    },
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (fetchConnectorById as jest.Mock).mockResolvedValue({
-      primaryTerm: 0,
-      seqNo: 3,
-      value: {
-        configuration: { test: { label: 'haha', value: 'this' } },
-        id: 'connectorId',
-        status: ConnectorStatus.NEEDS_CONFIGURATION,
-      },
-    });
   });
 
   it('should update configuration', async () => {
+    (fetchConnectorById as jest.Mock).mockResolvedValue({
+      configuration: { test: { value: 'haha' } },
+    });
+
+    mockClient.transport.request.mockResolvedValueOnce({ result: 'updated' });
+
     await expect(
       updateConnectorConfiguration(mockClient as unknown as ElasticsearchClient, 'connectorId', {
-        test: 'newValue',
+        test: 'haha',
       })
-    ).resolves.toEqual({ test: { label: 'haha', value: 'newValue' } });
-    expect(mockClient.update).toHaveBeenCalledWith({
-      doc: {
-        configuration: { test: { label: 'haha', value: 'newValue' } },
-        status: ConnectorStatus.CONFIGURED,
+    ).resolves.toEqual({ test: { value: 'haha' } });
+    expect(mockClient.transport.request).toHaveBeenCalledWith({
+      body: {
+        values: {
+          test: 'haha',
+        },
       },
-      id: 'connectorId',
-      if_primary_term: 0,
-      if_seq_no: 3,
-      index: CONNECTORS_INDEX,
+      method: 'PUT',
+      path: '/_connector/connectorId/_configuration',
     });
   });
 
   it('should reject if connector does not exist', async () => {
-    (fetchConnectorById as jest.Mock).mockImplementation(() => undefined);
-
+    mockClient.transport.request.mockImplementationOnce(() => {
+      return Promise.reject(
+        new errors.ResponseError({
+          statusCode: 404,
+          body: {
+            error: {
+              type: `document_missing_exception`,
+            },
+          },
+        } as any)
+      );
+    });
     await expect(
       updateConnectorConfiguration(mockClient as unknown as ElasticsearchClient, 'connectorId', {
-        test: 'newValue',
+        test: 'haha',
       })
-    ).rejects.toEqual(new Error('Could not find connector'));
-    expect(mockClient.update).not.toHaveBeenCalled();
+    ).rejects.toEqual(
+      new errors.ResponseError({
+        statusCode: 404,
+        body: {
+          error: {
+            type: `document_missing_exception`,
+          },
+        },
+      } as any)
+    );
   });
 });

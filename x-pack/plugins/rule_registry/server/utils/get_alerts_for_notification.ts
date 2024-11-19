@@ -16,6 +16,7 @@ import {
   EVENT_ACTION,
   ALERT_TIME_RANGE,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_CONSECUTIVE_MATCHES,
 } from '@kbn/rule-data-utils';
 
 export function getAlertsForNotification(
@@ -55,6 +56,10 @@ export function getAlertsForNotification(
         }
       }
     } else if (trackedEvent.event[ALERT_STATUS] === ALERT_STATUS_RECOVERED) {
+      // if alert has not reached the alertDelay threshold don't recover the alert
+      if (trackedEvent.activeCount < alertDelay) {
+        continue;
+      }
       trackedEvent.activeCount = 0;
       if (flappingSettings.enabled) {
         if (trackedEvent.flapping) {
@@ -72,6 +77,7 @@ export function getAlertsForNotification(
         trackedEvent.pendingRecoveredCount = 0;
       }
     }
+    trackedEvent.event[ALERT_CONSECUTIVE_MATCHES] = trackedEvent.activeCount;
     events.push(trackedEvent);
   }
   return events;

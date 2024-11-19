@@ -14,10 +14,11 @@ import {
 } from '@kbn/es-query';
 import { get, isEmpty } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
+import type { DataViewSpec } from '@kbn/data-plugin/common';
 import { prepareKQLParam } from '../../../../common/utils/kql';
 import type { BrowserFields } from '../../../../common/search_strategy';
 import type { DataProvider, DataProvidersAnd } from '../../../../common/types';
-import { DataProviderType } from '../../../../common/api/timeline';
+import { DataProviderTypeEnum } from '../../../../common/api/timeline';
 import { EXISTS_OPERATOR } from '../../../../common/types/timeline';
 
 export type PrimitiveOrArrayOfPrimitives =
@@ -29,7 +30,7 @@ export type PrimitiveOrArrayOfPrimitives =
 export interface CombineQueries {
   config: EsQueryConfig;
   dataProviders: DataProvider[];
-  indexPattern: DataViewBase;
+  indexPattern?: DataViewSpec;
   browserFields: BrowserFields;
   filters: Filter[];
   kqlQuery: Query;
@@ -125,7 +126,7 @@ const buildQueryMatch = (
 ) =>
   `${dataProvider.excluded ? 'NOT ' : ''}${
     dataProvider.queryMatch.operator !== EXISTS_OPERATOR &&
-    dataProvider.type !== DataProviderType.template
+    dataProvider.type !== DataProviderTypeEnum.template
       ? checkIfFieldTypeIsNested(dataProvider.queryMatch.field, browserFields)
         ? convertNestedFieldToQuery(
             dataProvider.queryMatch.field,
@@ -136,7 +137,7 @@ const buildQueryMatch = (
         ? convertDateFieldToQuery(dataProvider.queryMatch.field, dataProvider.queryMatch.value)
         : `${dataProvider.queryMatch.field} : ${
             Array.isArray(dataProvider.queryMatch.value)
-              ? dataProvider.queryMatch.value
+              ? `(${dataProvider.queryMatch.value.join(' OR ')})`
               : prepareKQLParam(dataProvider.queryMatch.value)
           }`
       : checkIfFieldTypeIsNested(dataProvider.queryMatch.field, browserFields)
@@ -199,14 +200,18 @@ export const isDataProviderEmpty = (dataProviders: DataProvider[]) => {
   return isEmpty(dataProviders) || isEmpty(dataProviders.filter((d) => d.enabled === true));
 };
 
+export const dataViewSpecToViewBase = (dataViewSpec?: DataViewSpec): DataViewBase => {
+  return { title: dataViewSpec?.title || '', fields: Object.values(dataViewSpec?.fields || {}) };
+};
+
 export const convertToBuildEsQuery = ({
   config,
-  indexPattern,
+  dataViewSpec,
   queries,
   filters,
 }: {
   config: EsQueryConfig;
-  indexPattern: DataViewBase | undefined;
+  dataViewSpec: DataViewSpec | undefined;
   queries: Query[];
   filters: Filter[];
 }): [string, undefined] | [undefined, Error] => {
@@ -214,7 +219,7 @@ export const convertToBuildEsQuery = ({
     return [
       JSON.stringify(
         buildEsQuery(
-          indexPattern,
+          dataViewSpecToViewBase(dataViewSpec),
           queries,
           filters.filter((f) => f.meta.disabled === false),
           {
@@ -231,6 +236,12 @@ export const convertToBuildEsQuery = ({
   }
 };
 
+export interface CombinedQuery {
+  filterQuery: string | undefined;
+  kqlError: Error | undefined;
+  baseKqlQuery: Query;
+}
+
 export const combineQueries = ({
   config,
   dataProviders = [],
@@ -239,7 +250,7 @@ export const combineQueries = ({
   filters = [],
   kqlQuery,
   kqlMode,
-}: CombineQueries): { filterQuery: string | undefined; kqlError: Error | undefined } | null => {
+}: CombineQueries): CombinedQuery | null => {
   const kuery: Query = { query: '', language: kqlQuery.language };
   if (isDataProviderEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEmpty(filters)) {
     return null;
@@ -247,13 +258,14 @@ export const combineQueries = ({
     const [filterQuery, kqlError] = convertToBuildEsQuery({
       config,
       queries: [kuery],
-      indexPattern,
+      dataViewSpec: indexPattern,
       filters,
     });
 
     return {
       filterQuery,
       kqlError,
+      baseKqlQuery: kuery,
     };
   }
 
@@ -274,12 +286,13 @@ export const combineQueries = ({
   const [filterQuery, kqlError] = convertToBuildEsQuery({
     config,
     queries: [kuery],
-    indexPattern,
+    dataViewSpec: indexPattern,
     filters,
   });
 
   return {
     filterQuery,
     kqlError,
+    baseKqlQuery: kuery,
   };
 };

@@ -6,15 +6,19 @@
  */
 
 import React from 'react';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
+import { documentationService } from '../../../../services';
 import { useAppContext } from '../../../../app_context';
 
 export const EmptyState = () => {
-  const { history } = useAppContext();
+  const {
+    history,
+    plugins: { share },
+  } = useAppContext();
 
   return (
     <KibanaPageTemplate.EmptyPrompt
@@ -29,12 +33,32 @@ export const EmptyState = () => {
         </h2>
       }
       body={
-        <p>
-          <FormattedMessage
-            id="xpack.idxMgmt.enrichPolicies.list.emptyPromptDescription"
-            defaultMessage="Use an enrich policy to add data from existing indices into incoming documents during ingest."
-          />
-        </p>
+        <>
+          <p>
+            <FormattedMessage
+              id="xpack.idxMgmt.enrichPolicies.list.emptyPromptDescription"
+              defaultMessage="Use an enrich policy as a lookup reference, to add fields to incoming documents during ingest with {ingestPipelinesLink} or to use the ENRICH command in ES|QL"
+              values={{
+                ingestPipelinesLink: (
+                  <EuiLink
+                    href={share.url.locators.get('INGEST_PIPELINES_APP_LOCATOR')?.useUrl({})}
+                  >
+                    <FormattedMessage
+                      id="xpack.idxMgmt.enrichPolicies.list.emptyPromptIngestPipelinesLink"
+                      defaultMessage="ingest pipelines"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </p>
+          <EuiLink href={documentationService.getEnrichIngestDataLink()} target="_blank">
+            <FormattedMessage
+              id="xpack.idxMgmt.enrichPolicies.list.emptyPromptLearnMoreLink"
+              defaultMessage="Learn more about enriching your data"
+            />
+          </EuiLink>
+        </>
       }
       actions={
         <EuiButton

@@ -42,10 +42,10 @@ export const useListsConfig = (): UseListsConfigReturn => {
   const canCreateIndex = canManageIndex && canManageCluster;
 
   useEffect(() => {
-    if (needsIndex && canCreateIndex) {
+    if (needsIndex && canCreateIndex && !indexLoading) {
       createIndex();
     }
-  }, [createIndex, needsIndex, canCreateIndex]);
+  }, [createIndex, needsIndex, canCreateIndex, indexLoading]);
 
   return {
     canManageIndex,

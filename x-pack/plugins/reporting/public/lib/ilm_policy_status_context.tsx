@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React, { createContext, useContext } from 'react';
 import type { IlmPolicyStatusResponse } from '@kbn/reporting-common/types';
-
-import { useCheckIlmPolicyStatus } from './reporting_api_client';
+import { useCheckIlmPolicyStatus } from '@kbn/reporting-public';
 
 type UseCheckIlmPolicyStatus = ReturnType<typeof useCheckIlmPolicyStatus>;
 
@@ -21,7 +20,7 @@ interface ContextValue {
 
 const IlmPolicyStatusContext = createContext<undefined | ContextValue>(undefined);
 
-export const IlmPolicyStatusContextProvider: FunctionComponent = ({ children }) => {
+export const IlmPolicyStatusContextProvider: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const { isLoading, data, resendRequest: recheckStatus } = useCheckIlmPolicyStatus();
 
   return (

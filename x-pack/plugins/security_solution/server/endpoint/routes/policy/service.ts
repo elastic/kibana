@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient, KibanaRequest } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { Agent } from '@kbn/fleet-plugin/common/types/models';
-import type { ISearchRequestParams } from '@kbn/data-plugin/common';
-import type { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
-import { INITIAL_POLICY_ID } from '.';
+import type { ISearchRequestParams } from '@kbn/search-types';
+import type { EndpointFleetServicesInterface } from '../../services/fleet';
+import { policyIndexPattern } from '../../../../common/endpoint/constants';
+import { catchAndWrapError } from '../../utils';
 import type { EndpointAppContext } from '../../types';
+import { INITIAL_POLICY_ID } from '.';
+import type { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
 
 export const getESQueryPolicyResponseByAgentID = (
   agentID: string,
@@ -46,52 +49,23 @@ export const getESQueryPolicyResponseByAgentID = (
 };
 
 export async function getPolicyResponseByAgentId(
-  index: string,
   agentID: string,
-  dataClient: IScopedClusterClient
+  esClient: ElasticsearchClient,
+  fleetServices: EndpointFleetServicesInterface
 ): Promise<GetHostPolicyResponse | undefined> {
-  const query = getESQueryPolicyResponseByAgentID(agentID, index);
-  const response = await dataClient.asInternalUser.search<HostPolicyResponse>(query);
+  const query = getESQueryPolicyResponseByAgentID(agentID, policyIndexPattern);
+  const response = await esClient.search<HostPolicyResponse>(query).catch(catchAndWrapError);
 
   if (response.hits.hits.length > 0 && response.hits.hits[0]._source != null) {
+    // Ensure agent is in the current space id. Call to fleet will Error if agent is not in current space
+    await fleetServices.ensureInCurrentSpace({ agentIds: [agentID] });
+
     return {
       policy_response: response.hits.hits[0]._source,
     };
   }
 
   return undefined;
-}
-
-const transformAgentVersionMap = (versionMap: Map<string, number>): { [key: string]: number } => {
-  const data: { [key: string]: number } = {};
-  versionMap.forEach((value, key) => {
-    data[key] = value;
-  });
-  return data;
-};
-
-export async function getAgentPolicySummary(
-  endpointAppContext: EndpointAppContext,
-  request: KibanaRequest,
-  packageName: string,
-  policyId?: string,
-  pageSize: number = 1000
-): Promise<{ [key: string]: number }> {
-  const agentQuery = `packages:"${packageName}"`;
-  if (policyId) {
-    return transformAgentVersionMap(
-      await agentVersionsMap(
-        endpointAppContext,
-        request,
-        `${agentQuery} AND policy_id:${policyId}`,
-        pageSize
-      )
-    );
-  }
-
-  return transformAgentVersionMap(
-    await agentVersionsMap(endpointAppContext, request, agentQuery, pageSize)
-  );
 }
 
 export async function agentVersionsMap(

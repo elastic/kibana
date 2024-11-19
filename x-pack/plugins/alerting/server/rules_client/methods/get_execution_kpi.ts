@@ -19,7 +19,7 @@ import {
 } from '../../lib/get_execution_log_aggregation';
 import { RulesClientContext } from '../types';
 import { parseDate } from '../common';
-import { get } from './get';
+import { getRule } from '../../application/rule/methods/get/get_rule';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 export interface GetRuleExecutionKPIParams {
@@ -41,7 +41,7 @@ export async function getRuleExecutionKPI(
   { id, dateStart, dateEnd, filter }: GetRuleExecutionKPIParams
 ) {
   context.logger.debug(`getRuleExecutionKPI(): getting execution KPI for rule ${id}`);
-  const rule = (await get(context, { id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
+  const rule = (await getRule(context, { id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
 
   try {
     // Make sure user has access to this rule
@@ -55,7 +55,7 @@ export async function getRuleExecutionKPI(
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.GET_RULE_EXECUTION_KPI,
-        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: rule.name },
         error,
       })
     );
@@ -65,7 +65,7 @@ export async function getRuleExecutionKPI(
   context.auditLogger?.log(
     ruleAuditEvent({
       action: RuleAuditAction.GET_RULE_EXECUTION_KPI,
-      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: rule.name },
     })
   );
 

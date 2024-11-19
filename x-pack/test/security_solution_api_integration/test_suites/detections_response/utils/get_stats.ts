@@ -22,7 +22,7 @@ import { getDetectionMetricsFromBody } from './get_detection_metrics_from_body';
  * @returns The detection metrics
  */
 export const getStats = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog
 ): Promise<DetectionMetrics> => {
   const response = await supertest

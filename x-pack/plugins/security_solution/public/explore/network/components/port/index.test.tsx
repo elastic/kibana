@@ -9,7 +9,6 @@ import { shallow } from 'enzyme';
 import React from 'react';
 
 import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
-import '../../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock/test_providers';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 

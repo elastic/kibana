@@ -40,20 +40,19 @@ export function getSuggestions({
     return [];
   }
 
-  // do not return the legacy metric vis for the textbased mode (i.e. ES|QL)
-  if (datasourceId === 'textBased') {
-    return [];
-  }
-
-  return [getSuggestion(table)];
+  return [getSuggestion(table, datasourceId)];
 }
 
-function getSuggestion(table: TableSuggestion): VisualizationSuggestion<LegacyMetricState> {
+function getSuggestion(
+  table: TableSuggestion,
+  datasourceId?: string
+): VisualizationSuggestion<LegacyMetricState> {
   const col = table.columns[0];
   const title = table.label || col.operation.label;
 
   return {
     title,
+    hide: true,
     score: 0.1,
     previewIcon: IconChartMetric,
     state: {

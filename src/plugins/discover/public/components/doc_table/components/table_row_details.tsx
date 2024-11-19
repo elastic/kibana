@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -16,14 +17,14 @@ import { useNavigationProps } from '../../../hooks/use_navigation_props';
 interface TableRowDetailsProps {
   children: JSX.Element;
   colLength: number;
-  rowIndex: string;
-  rowId: string;
+  rowIndex: string | undefined;
+  rowId: string | undefined;
   columns: string[];
   isTimeBased: boolean;
   dataView: DataView;
   filters?: Filter[];
   savedSearchId?: string;
-  isPlainRecord?: boolean;
+  isEsqlMode?: boolean;
 }
 
 export const TableRowDetails = ({
@@ -36,7 +37,7 @@ export const TableRowDetails = ({
   columns,
   filters,
   savedSearchId,
-  isPlainRecord,
+  isEsqlMode,
 }: TableRowDetailsProps) => {
   const { singleDocHref, contextViewHref, onOpenSingleDoc, onOpenContextView } = useNavigationProps(
     {
@@ -58,15 +59,15 @@ export const TableRowDetails = ({
               <EuiIcon type="folderOpen" size="m" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiTitle size="xxs" data-test-subj="docTableRowDetailsTitle">
+              <EuiTitle size="xxs" data-test-subj="docViewerRowDetailsTitle">
                 <h4>
-                  {isPlainRecord && (
+                  {isEsqlMode && (
                     <FormattedMessage
-                      id="discover.grid.tableRow.textBasedDetailHeading"
-                      defaultMessage="Expanded row"
+                      id="discover.grid.tableRow.esqlDetailHeading"
+                      defaultMessage="Expanded result"
                     />
                   )}
-                  {!isPlainRecord && (
+                  {!isEsqlMode && (
                     <FormattedMessage
                       id="discover.docTable.tableRow.detailHeading"
                       defaultMessage="Expanded document"
@@ -77,7 +78,7 @@ export const TableRowDetails = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        {!isPlainRecord && (
+        {!isEsqlMode && (
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="l" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>

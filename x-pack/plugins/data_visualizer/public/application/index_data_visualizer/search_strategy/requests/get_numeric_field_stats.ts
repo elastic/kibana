@@ -7,14 +7,15 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { find, get } from 'lodash';
-import { catchError, map } from 'rxjs/operators';
-import { Observable, of } from 'rxjs';
-import { AggregationsTermsAggregation } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { catchError, map } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { of } from 'rxjs';
+import type { AggregationsTermsAggregation } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
-  IKibanaSearchRequest,
   IKibanaSearchResponse,
+  IKibanaSearchRequest,
   ISearchOptions,
-} from '@kbn/data-plugin/common';
+} from '@kbn/search-types';
 import type { ISearchStart } from '@kbn/data-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';

@@ -8,7 +8,7 @@
 import { IconType } from '@elastic/eui';
 import { IndexPattern } from '@kbn/io-ts-utils';
 import { TIMESTAMP_FIELD } from '../../constants';
-import { DataViewSpecWithId } from '../../dataset_selection';
+import { DataViewSpecWithId } from '../../data_source_selection';
 import { DatasetId, DatasetType, IntegrationType } from '../types';
 
 type IntegrationBase = Partial<Pick<IntegrationType, 'name' | 'title' | 'icons' | 'version'>>;
@@ -72,9 +72,9 @@ export class Dataset {
     return new Dataset({ ...dataset, title: datasetTitle }, parentIntegration);
   }
 
-  public static createAllLogsDataset() {
+  public static createAllLogsDataset({ indices }: { indices: string }) {
     return new Dataset({
-      name: 'logs-*-*' as IndexPattern,
+      name: indices as IndexPattern,
       title: 'All logs',
       iconType: 'pagesSelect',
     });

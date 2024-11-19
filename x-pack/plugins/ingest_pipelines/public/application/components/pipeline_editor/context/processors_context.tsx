@@ -59,6 +59,7 @@ export interface Props {
    */
   onFlyoutOpen: () => void;
   onUpdate: (arg: OnUpdateHandlerArg) => void;
+  children?: React.ReactNode;
 }
 
 export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({

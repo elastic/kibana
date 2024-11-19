@@ -187,7 +187,7 @@ describe('EndpointResponseActionsUtils', () => {
           'process.pid': {
             alert_ids: ['alert4', 'alert5'],
             endpoint_ids: ['agent-id-1'],
-            error: 'process.pid',
+            error: 'The action was called with a non-existing event field name: process.pid',
             hosts: {
               'agent-id-1': {
                 id: 'agent-id-1',
@@ -211,7 +211,7 @@ describe('EndpointResponseActionsUtils', () => {
           'process.entity_id': {
             alert_ids: ['alert1', 'alert3', 'alert4'],
             endpoint_ids: ['agent-id-1'],
-            error: 'process.entity_id',
+            error: 'The action was called with a non-existing event field name: process.entity_id',
             hosts: {
               'agent-id-1': {
                 id: 'agent-id-1',
@@ -225,7 +225,7 @@ describe('EndpointResponseActionsUtils', () => {
           'process.entity_id': {
             alert_ids: ['alert2'],
             endpoint_ids: ['agent-id-2'],
-            error: 'process.entity_id',
+            error: 'The action was called with a non-existing event field name: process.entity_id',
             hosts: {
               'agent-id-2': {
                 id: 'agent-id-2',

@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Position, ScaleType as ECScaleType } from '@elastic/charts';
+import { LegendValue, Position, ScaleType as ECScaleType } from '@elastic/charts';
 import {
   SeriesTypes,
   Column,
@@ -235,6 +236,9 @@ export const getConfiguration = (
       shouldTruncate: vis.params.truncateLegend ?? vis.type.visConfig.defaults.truncateLegend,
       maxLines: vis.params.maxLegendLines ?? vis.type.visConfig.defaults.maxLegendLines,
       showSingleSeries: true,
+      legendStats: Boolean(vis.params.labels.show ?? vis.type.visConfig.defaults.labels?.show)
+        ? [LegendValue.CurrentAndLastValue]
+        : undefined,
     },
     fittingFunction: fittingFunction
       ? fittingFunction[0].toUpperCase() + fittingFunction.slice(1)
@@ -269,7 +273,6 @@ export const getConfiguration = (
     xTitle: xAxis.title.text,
     valueLabels:
       vis.params.labels.show ?? vis.type.visConfig.defaults.labels?.show ? 'show' : 'hide',
-    valuesInLegend: Boolean(vis.params.labels.show ?? vis.type.visConfig.defaults.labels?.show),
     showCurrentTimeMarker: isTimeChart
       ? Boolean(vis.params.addTimeMarker ?? vis.type.visConfig.defaults.addTimeMarker)
       : undefined,

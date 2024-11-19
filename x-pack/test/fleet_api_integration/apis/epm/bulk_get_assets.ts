@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { GetBulkAssetsResponse } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
+import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
-  const dockerServers = getService('dockerServers');
-  const server = dockerServers.get('registry');
+  const fleetAndAgents = getService('fleetAndAgents');
+
   const pkgName = 'all_assets';
   const pkgVersion = '0.1.0';
 
@@ -29,52 +27,45 @@ export default function (providerContext: FtrProviderContext) {
       .send({ force: true });
   };
 
-  describe('Bulk get assets', async () => {
+  describe('Bulk get assets', () => {
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
 
-    describe('installs all assets when installing a package for the first time', async () => {
+    before(async () => {
+      await fleetAndAgents.setup();
+    });
+
+    describe('installs all assets when installing a package for the first time', () => {
       before(async () => {
-        if (!server.enabled) return;
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await installPackage(pkgName, pkgVersion);
       });
       after(async () => {
-        if (!server.enabled) return;
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await uninstallPackage(pkgName, pkgVersion);
       });
 
       it('should get the assets based on the required objects', async () => {
+        const packageInfo = await supertest
+          .get(`/api/fleet/epm/packages/${pkgName}/${pkgVersion}`)
+          .expect(200);
+        const installationInfo = packageInfo.body.item.installationInfo;
         const { body }: { body: GetBulkAssetsResponse } = await supertest
           .post(`/api/fleet/epm/bulk_assets`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            assetIds: [
-              {
-                type: 'dashboard',
-                id: 'sample_dashboard',
-              },
-              {
-                id: 'sample_visualization',
-                type: 'visualization',
-              },
-            ],
+            assetIds: [...installationInfo.installed_es, ...installationInfo.installed_kibana],
           })
           .expect(200);
-        const asset1 = body.items[0];
-        expect(asset1.id).to.equal('sample_dashboard');
-        expect(asset1.type).to.equal('dashboard');
-        expect(asset1.attributes).to.eql({
-          title: '[Logs Sample] Overview ECS',
-          description: 'Sample dashboard',
-        });
 
-        const asset2 = body.items[1];
-        expect(asset2.id).to.equal('sample_visualization');
-        expect(asset2.type).to.equal('visualization');
-        expect(asset2.attributes).to.eql({
-          title: 'sample vis title',
-          description: 'sample visualization update',
-        });
+        // check overall list of assets and app links
+        expectSnapshot(
+          body.items.map((item) => ({
+            type: item.type,
+            id: item.id,
+            appLink: item.appLink,
+            attributes: item.attributes,
+          }))
+        ).toMatch();
       });
     });
   });

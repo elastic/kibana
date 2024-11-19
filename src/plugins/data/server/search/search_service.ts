@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { concatMap, firstValueFrom, from, Observable, of, throwError } from 'rxjs';
@@ -19,13 +20,19 @@ import {
   SharedGlobalConfig,
   StartServicesAccessor,
 } from '@kbn/core/server';
-import { catchError, map, switchMap, tap } from 'rxjs/operators';
+import { catchError, map, switchMap, tap } from 'rxjs';
+import type {
+  IKibanaSearchResponse,
+  IKibanaSearchRequest,
+  ISearchOptions,
+  IEsSearchRequest,
+  IEsSearchResponse,
+} from '@kbn/search-types';
 import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
 import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type {
   DataRequestHandlerContext,
@@ -56,13 +63,8 @@ import {
   fieldFunction,
   geoBoundingBoxFunction,
   geoPointFunction,
-  IEsSearchRequest,
-  IEsSearchResponse,
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
   ipPrefixFunction,
   ipRangeFunction,
-  ISearchOptions,
   kibana,
   kibanaFilterFunction,
   kibanaTimerangeFunction,
@@ -89,7 +91,7 @@ import {
   SHARD_DELAY_AGG_NAME,
 } from '../../common/search/aggs/buckets/shard_delay';
 import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
-import { ConfigSchema } from '../../config';
+import { ConfigSchema } from '../config';
 import { SearchSessionService } from './session';
 import { registerBsearchRoute } from './routes/bsearch';
 import { enhancedEsSearchStrategyProvider } from './strategies/ese_search';
@@ -108,7 +110,6 @@ export interface SearchServiceSetupDependencies {
   bfetch: BfetchServerSetup;
   expressions: ExpressionsServerSetup;
   usageCollection?: UsageCollectionSetup;
-  security?: SecurityPluginSetup;
 }
 
 /** @internal */
@@ -145,7 +146,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   public setup(
     core: CoreSetup<DataPluginStartDependencies, DataPluginStart>,
-    { bfetch, expressions, usageCollection, security }: SearchServiceSetupDependencies
+    { bfetch, expressions, usageCollection }: SearchServiceSetupDependencies
   ): ISearchSetup {
     core.savedObjects.registerType(searchSessionSavedObjectType);
     const usage = usageCollection ? usageProvider(core) : undefined;
@@ -154,7 +155,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     registerSearchRoute(router);
     registerSessionRoutes(router, this.logger);
 
-    this.sessionService.setup(core, { security });
+    this.sessionService.setup(core, {});
 
     core.http.registerRouteHandlerContext<DataRequestHandlerContext, 'search'>(
       'search',
@@ -256,7 +257,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       registerFunction: expressions.registerFunction,
     });
 
-    firstValueFrom(this.initializerContext.config.create<ConfigSchema>()).then((value) => {
+    void firstValueFrom(this.initializerContext.config.create<ConfigSchema>()).then((value) => {
       if (value.search.aggs.shardDelay.enabled) {
         aggs.types.registerBucket(SHARD_DELAY_AGG_NAME, getShardDelayBucketAgg);
         expressions.registerFunction(aggShardDelay);
@@ -314,6 +315,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
             getConfig: <T = any>(key: string): T => uiSettingsCache[key],
             search: this.asScoped(request).search,
             onResponse: (req, res) => res,
+            dataViews: scopedIndexPatterns,
             scriptedFieldsEnabled: true,
           };
 

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -78,7 +79,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
   const documentMigrator = createDocumentMigrator(registry);
 
   // const currentSpace = 'foo-namespace';
-  const defaultOptions = { ignore: [404], maxRetries: 0, meta: true }; // These are just the hard-coded options passed in via the repo
+  const defaultOptions = { ignore: [404], meta: true }; // These are just the hard-coded options passed in via the repo
 
   const instantiateRepository = () => {
     const allTypes = registry.getAllTypes().map((type) => type.name);
@@ -283,7 +284,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
                   : { type: CUSTOM_INDEX_TYPE, customIndex: attributes }
               ),
             }),
-            { maxRetries: 0, meta: true }
+            { meta: true }
           );
         });
       });
@@ -316,7 +317,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
             expect.objectContaining({
               id: expect.stringMatching(regex),
             }),
-            { ignore: [404], maxRetries: 0, meta: true }
+            { ignore: [404], meta: true }
           );
         });
       });
@@ -391,7 +392,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
                 ]),
               }),
             }),
-            { ignore: [404], maxRetries: 0, meta: true }
+            { ignore: [404], meta: true }
           );
         });
       });
@@ -582,7 +583,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
                 ]),
               }),
             }),
-            { ignore: [404], maxRetries: 0, meta: true }
+            { ignore: [404], meta: true }
           );
         });
 
@@ -652,7 +653,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
                 }),
               ]),
             }),
-            { maxRetries: 0 }
+            {}
           );
         });
       });
@@ -717,7 +718,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
                 }),
               ]),
             }),
-            { maxRetries: 0 }
+            {}
           );
         });
       });
@@ -869,7 +870,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
                 }),
               ]),
             }),
-            { maxRetries: 0 }
+            {}
           );
         });
       });
@@ -1259,6 +1260,9 @@ describe('SavedObjectsRepository Spaces Extension', () => {
       serializer = createSpySerializer(registry);
       mockSpacesExt = savedObjectsExtensionsMock.createSpacesExtension();
       mockEncryptionExt = savedObjectsExtensionsMock.createEncryptionExtension();
+      mockEncryptionExt.encryptAttributes.mockImplementation((desc, attributes) =>
+        Promise.resolve(attributes)
+      );
       mockGetCurrentTime.mockReturnValue(mockTimestamp);
       mockGetSearchDsl.mockClear();
       repository = instantiateRepository();

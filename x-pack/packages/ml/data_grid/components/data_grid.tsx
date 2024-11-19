@@ -6,8 +6,14 @@
  */
 
 import { isEqual } from 'lodash';
-import React, { memo, useEffect, useRef, FC } from 'react';
+import type { FC } from 'react';
+import React, { memo, useEffect, useRef } from 'react';
 
+import type {
+  EuiDataGridCellPopoverElementProps,
+  EuiDataGridProps,
+  UseEuiTheme,
+} from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -15,26 +21,23 @@ import {
   EuiCodeBlock,
   EuiCopy,
   EuiDataGrid,
-  EuiDataGridCellPopoverElementProps,
-  EuiDataGridProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiMutationObserver,
   EuiSpacer,
   EuiTitle,
   EuiToolTip,
-  UseEuiTheme,
   mathWithUnits,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CoreSetup } from '@kbn/core/public';
+import type { CoreSetup } from '@kbn/core/public';
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import { euiDataGridStyle, euiDataGridToolbarSettings, INDEX_STATUS } from '../lib/common';
-import { UseIndexDataReturnType } from '../lib/types';
+import type { UseIndexDataReturnType } from '../lib/types';
 
 const histogramHeaderProps = { className: 'cellHeaderWithHistogramChart' };
 const cssOverride = ({ euiTheme }: UseEuiTheme) =>
@@ -141,7 +144,7 @@ export const DataGrid: FC<Props> = memo(
         invalidSortingColumnns.forEach((columnId) => {
           toastNotifications.addDanger(
             i18n.translate('xpack.ml.dataGrid.invalidSortingColumnError', {
-              defaultMessage: `The column '{columnId}' cannot be used for sorting.`,
+              defaultMessage: `The column ''{columnId}'' cannot be used for sorting.`,
               values: { columnId },
             })
           );
@@ -151,7 +154,9 @@ export const DataGrid: FC<Props> = memo(
 
     const wrapperEl = useRef<HTMLDivElement>(null);
 
-    if (status === INDEX_STATUS.LOADED && data.length === 0) {
+    // `UNUSED` occurs if we were not able to identify populated fields, because
+    // then the query to fetch actual docs would not have triggered yet.
+    if ((status === INDEX_STATUS.UNUSED || status === INDEX_STATUS.LOADED) && data.length === 0) {
       return (
         <div data-test-subj={`${dataTestSubj} empty`}>
           {isWithHeader(props) && <DataGridTitle title={props.title} />}

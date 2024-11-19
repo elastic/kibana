@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import dateMath from '@kbn/datemath';
 import classNames from 'classnames';
+import { css } from '@emotion/react';
 import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import useObservable from 'react-use/lib/useObservable';
@@ -18,9 +20,9 @@ import {
   isOfAggregateQueryType,
   getLanguageDisplayName,
 } from '@kbn/es-query';
-import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
+import { ESQLLangEditor } from '@kbn/esql/public';
 import { EMPTY } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 import { throttle } from 'lodash';
 import {
   EuiFlexGroup,
@@ -35,6 +37,7 @@ import {
   EuiToolTip,
   EuiButton,
   EuiButtonIcon,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TimeHistoryContract, getQueryLog } from '@kbn/data-plugin/public';
@@ -47,11 +50,8 @@ import QueryStringInputUI from './query_string_input';
 import { NoDataPopover } from './no_data_popover';
 import { shallowEqual } from '../utils/shallow_equal';
 import { AddFilterPopover } from './add_filter_popover';
-import {
-  DataViewPicker,
-  DataViewPickerProps,
-  OnSaveTextLanguageQueryProps,
-} from '../dataview_picker';
+import { DataViewPicker, DataViewPickerProps } from '../dataview_picker';
+import { ESQLMenuPopover, type ESQLMenuPopoverProps } from './esql_menu_popover';
 
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
 import type {
@@ -60,14 +60,25 @@ import type {
 } from '../typeahead/suggestions_component';
 import './query_bar.scss';
 
+const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
+const COMMAND_KEY = isMac ? '⌘' : 'CTRL';
+
 export const strings = {
   getNeedsUpdatingLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.update', {
       defaultMessage: 'Needs updating',
     }),
+  getUpdateButtonLabel: () =>
+    i18n.translate('unifiedSearch.queryBarTopRow.submitButton.updateButton', {
+      defaultMessage: 'Update',
+    }),
   getRefreshQueryLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.refresh', {
       defaultMessage: 'Refresh query',
+    }),
+  getRefreshButtonLabel: () =>
+    i18n.translate('unifiedSearch.queryBarTopRow.submitButton.refreshButton', {
+      defaultMessage: 'Refresh',
     }),
   getCancelQueryLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.cancel', {
@@ -76,6 +87,10 @@ export const strings = {
   getRunQueryLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.run', {
       defaultMessage: 'Run query',
+    }),
+  getRunButtonLabel: () =>
+    i18n.translate('unifiedSearch.queryBarTopRow.submitButton.runButton', {
+      defaultMessage: 'Run',
     }),
   getDisabledDatePickerLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.datePicker.disabledLabel', {
@@ -138,6 +153,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   prepend?: React.ComponentProps<typeof EuiFieldText>['prepend'];
   query?: Query | QT;
   refreshInterval?: number;
+  minRefreshInterval?: number;
   screenTitle?: string;
   showQueryInput?: boolean;
   showAddFilter?: boolean;
@@ -152,8 +168,6 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   dataViewPickerComponentProps?: DataViewPickerProps;
   textBasedLanguageModeErrors?: Error[];
   textBasedLanguageModeWarning?: string;
-  hideTextBasedRunQueryLabel?: boolean;
-  onTextBasedSavedAndExit?: ({ onSave }: OnSaveTextLanguageQueryProps) => void;
   filterBar?: React.ReactNode;
   showDatePickerAsBadge?: boolean;
   showSubmitButton?: boolean;
@@ -171,6 +185,8 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   onTextLangQueryChange: (query: AggregateQuery) => void;
   submitOnBlur?: boolean;
   renderQueryInputAppend?: () => React.ReactNode;
+  disableExternalPadding?: boolean;
+  onESQLDocsFlyoutVisibilityChanged?: ESQLMenuPopoverProps['onESQLDocsFlyoutVisibilityChanged'];
 }
 
 export const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -193,7 +209,7 @@ export const SharingMetaFields = React.memo(function SharingMetaFields({
   try {
     const dateRangePretty = usePrettyDuration({
       timeFrom: toAbsoluteString(from),
-      timeTo: toAbsoluteString(to),
+      timeTo: toAbsoluteString(to, true),
       quickRanges: [],
       dateFormat,
     });
@@ -218,7 +234,6 @@ export const QueryBarTopRow = React.memo(
   ) {
     const isMobile = useIsWithinBreakpoints(['xs', 's']);
     const [isXXLarge, setIsXXLarge] = useState<boolean>(false);
-    const [codeEditorIsExpanded, setCodeEditorIsExpanded] = useState<boolean>(false);
     const submitButtonStyle: QueryBarTopRowProps['submitButtonStyle'] =
       props.submitButtonStyle ?? 'auto';
     const submitButtonIconOnly =
@@ -452,7 +467,10 @@ export const QueryBarTopRow = React.memo(
     }
 
     function shouldShowDatePickerAsBadge(): boolean {
-      return Boolean(props.showDatePickerAsBadge) && !shouldRenderQueryInput();
+      return (
+        (Boolean(props.showDatePickerAsBadge) && !shouldRenderQueryInput()) ||
+        Boolean(isQueryLangSelected && props.query && isOfAggregateQueryType(props.query))
+      );
     }
 
     function renderDatePicker() {
@@ -488,6 +506,7 @@ export const QueryBarTopRow = React.memo(
           end={props.dateRangeTo}
           isPaused={props.isRefreshPaused}
           refreshInterval={props.refreshInterval}
+          refreshMinInterval={props.minRefreshInterval}
           onTimeChange={onTimeChange}
           onRefresh={onRefresh}
           onRefreshChange={props.onRefreshChange}
@@ -545,12 +564,19 @@ export const QueryBarTopRow = React.memo(
       if (!shouldRenderUpdatebutton() && !shouldRenderDatePicker()) {
         return null;
       }
+      const textBasedRunShortcut = `${COMMAND_KEY} + Enter`;
       const buttonLabelUpdate = strings.getNeedsUpdatingLabel();
-      const buttonLabelRefresh = strings.getRefreshQueryLabel();
-      const buttonLabelRun = strings.getRunQueryLabel();
+      const buttonLabelRefresh = Boolean(isQueryLangSelected)
+        ? textBasedRunShortcut
+        : strings.getRefreshQueryLabel();
+      const buttonLabelRun = textBasedRunShortcut;
 
-      const iconDirty = Boolean(isQueryLangSelected) ? 'play' : 'kqlFunction';
+      const iconDirty = Boolean(isQueryLangSelected) ? 'playFilled' : 'kqlFunction';
       const tooltipDirty = Boolean(isQueryLangSelected) ? buttonLabelRun : buttonLabelUpdate;
+
+      const isDirtyButtonLabel = Boolean(isQueryLangSelected)
+        ? strings.getRunButtonLabel()
+        : strings.getUpdateButtonLabel();
 
       const button = props.customSubmitButton ? (
         React.cloneElement(props.customSubmitButton, { onClick: onClickSubmitButton })
@@ -567,16 +593,17 @@ export const QueryBarTopRow = React.memo(
               onClick={onClickSubmitButton}
               size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
               color={props.isDirty ? 'success' : 'primary'}
-              fill={props.isDirty}
+              fill={false}
               needsUpdate={props.isDirty}
               data-test-subj="querySubmitButton"
-              // @ts-expect-error Need to fix expecting `children` in EUI
               toolTipProps={{
                 content: props.isDirty ? tooltipDirty : buttonLabelRefresh,
                 delay: 'long',
                 position: 'bottom',
               }}
-            />
+            >
+              {props.isDirty ? isDirtyButtonLabel : strings.getRefreshButtonLabel()}
+            </EuiSuperUpdateButton>
           )}
         </EuiFlexItem>
       );
@@ -599,24 +626,17 @@ export const QueryBarTopRow = React.memo(
     }
 
     function renderDataViewsPicker() {
-      if (!props.dataViewPickerComponentProps) return;
-      let textBasedLanguage;
-      if (Boolean(isQueryLangSelected)) {
-        const query = props.query as AggregateQuery;
-        textBasedLanguage = getAggregateQueryMode(query);
+      if (props.dataViewPickerComponentProps && !Boolean(isQueryLangSelected)) {
+        return (
+          <EuiFlexItem style={{ maxWidth: '100%' }} grow={isMobile}>
+            <DataViewPicker
+              {...props.dataViewPickerComponentProps}
+              trigger={{ fullWidth: isMobile, ...props.dataViewPickerComponentProps.trigger }}
+              isDisabled={props.isDisabled}
+            />
+          </EuiFlexItem>
+        );
       }
-      return (
-        <EuiFlexItem style={{ maxWidth: '100%' }} grow={isMobile}>
-          <DataViewPicker
-            {...props.dataViewPickerComponentProps}
-            trigger={{ fullWidth: isMobile, ...props.dataViewPickerComponentProps.trigger }}
-            onTextLangQuerySubmit={props.onTextLangQuerySubmit}
-            textBasedLanguage={textBasedLanguage}
-            onSaveTextLanguageQuery={props.onTextBasedSavedAndExit}
-            isDisabled={props.isDisabled}
-          />
-        </EuiFlexItem>
-      );
     }
 
     function renderAddButton() {
@@ -701,22 +721,20 @@ export const QueryBarTopRow = React.memo(
 
     function renderTextLangEditor() {
       const adHocDataview = props.indexPatterns?.[0];
-      let detectTimestamp = false;
+      let detectedTimestamp;
       if (adHocDataview && typeof adHocDataview !== 'string') {
-        detectTimestamp = Boolean(adHocDataview?.timeFieldName);
+        detectedTimestamp = adHocDataview?.timeFieldName;
       }
       return (
         isQueryLangSelected &&
         props.query &&
         isOfAggregateQueryType(props.query) && (
-          <TextBasedLangEditor
+          <ESQLLangEditor
             query={props.query}
             onTextLangQueryChange={props.onTextLangQueryChange}
-            expandCodeEditor={(status: boolean) => setCodeEditorIsExpanded(status)}
-            isCodeEditorExpanded={codeEditorIsExpanded}
             errors={props.textBasedLanguageModeErrors}
             warning={props.textBasedLanguageModeWarning}
-            detectTimestamp={detectTimestamp}
+            detectedTimestamp={detectedTimestamp}
             onTextLangQuerySubmit={async () =>
               onSubmit({
                 query: queryRef.current,
@@ -724,13 +742,14 @@ export const QueryBarTopRow = React.memo(
               })
             }
             isDisabled={props.isDisabled}
-            hideRunQueryText={props.hideTextBasedRunQueryLabel}
+            hideRunQueryText={true}
             data-test-subj="unifiedTextLangEditor"
+            isLoading={props.isLoading}
           />
         )
       );
     }
-
+    const { euiTheme } = useEuiTheme();
     const isScreenshotMode = props.isScreenshotMode === true;
 
     return (
@@ -747,26 +766,39 @@ export const QueryBarTopRow = React.memo(
               direction={isMobile && !shouldShowDatePickerAsBadge() ? 'column' : 'row'}
               responsive={false}
               gutterSize="s"
+              css={css`
+                padding: ${isQueryLangSelected && !props.disableExternalPadding
+                  ? euiTheme.size.s
+                  : 0};
+              `}
               justifyContent={shouldShowDatePickerAsBadge() ? 'flexStart' : 'flexEnd'}
               wrap
             >
               {props.dataViewPickerOverride || renderDataViewsPicker()}
+              {Boolean(isQueryLangSelected) && (
+                <ESQLMenuPopover
+                  onESQLDocsFlyoutVisibilityChanged={props.onESQLDocsFlyoutVisibilityChanged}
+                  onESQLQuerySubmit={(queryString: string) => {
+                    onSubmit({
+                      query: { esql: queryString } as QT,
+                      dateRange: dateRangeRef.current,
+                    });
+                  }}
+                  adHocDataview={props.indexPatterns?.[0]}
+                />
+              )}
               <EuiFlexItem
                 grow={!shouldShowDatePickerAsBadge()}
                 style={{ minWidth: shouldShowDatePickerAsBadge() ? 'auto' : 320, maxWidth: '100%' }}
               >
-                {!isQueryLangSelected
-                  ? renderQueryInput()
-                  : !codeEditorIsExpanded
-                  ? renderTextLangEditor()
-                  : null}
+                {!isQueryLangSelected ? renderQueryInput() : null}
               </EuiFlexItem>
               {props.renderQueryInputAppend?.()}
               {shouldShowDatePickerAsBadge() && props.filterBar}
               {renderUpdateButton()}
             </EuiFlexGroup>
             {!shouldShowDatePickerAsBadge() && props.filterBar}
-            {codeEditorIsExpanded && renderTextLangEditor()}
+            {renderTextLangEditor()}
           </>
         )}
       </>

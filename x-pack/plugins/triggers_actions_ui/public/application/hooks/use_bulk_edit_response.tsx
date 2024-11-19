@@ -8,7 +8,7 @@ import React, { useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { useKibana } from '../../common/lib/kibana';
 import { BulkEditResponse } from '../../types';
 
@@ -63,6 +63,8 @@ export interface UseBulkEditResponseProps {
 export function useBulkEditResponse(props: UseBulkEditResponseProps) {
   const { onSearchPopulate } = props;
   const {
+    i18n: i18nStart,
+    theme,
     notifications: { toasts },
   } = useKibana().services;
 
@@ -122,7 +124,7 @@ export function useBulkEditResponse(props: UseBulkEditResponseProps) {
       if (numberOfErrors === total) {
         toasts.addDanger({
           title: failureMessage(numberOfErrors, translationMap[property]),
-          text: toMountPoint(renderToastErrorBody(response)),
+          text: toMountPoint(renderToastErrorBody(response), { i18n: i18nStart, theme }),
         });
         return;
       }
@@ -130,10 +132,10 @@ export function useBulkEditResponse(props: UseBulkEditResponseProps) {
       // Some failure
       toasts.addWarning({
         title: someSuccessMessage(numberOfSuccess, numberOfErrors, translationMap[property]),
-        text: toMountPoint(renderToastErrorBody(response)),
+        text: toMountPoint(renderToastErrorBody(response), { i18n: i18nStart, theme }),
       });
     },
-    [toasts, renderToastErrorBody]
+    [i18nStart, theme, toasts, renderToastErrorBody]
   );
 
   return useMemo(() => {

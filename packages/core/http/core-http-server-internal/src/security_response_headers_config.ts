@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { PermissionsPolicyConfigType } from './permissions_policy';
 
 export const securityResponseHeadersSchema = schema.object({
   strictTransportSecurity: schema.oneOf([schema.string(), schema.literal(null)], {
@@ -30,7 +32,7 @@ export const securityResponseHeadersSchema = schema.object({
       schema.literal('unsafe-url'),
       schema.literal(null),
     ],
-    { defaultValue: 'no-referrer-when-downgrade' }
+    { defaultValue: 'strict-origin-when-cross-origin' }
   ),
   permissionsPolicy: schema.oneOf([schema.string(), schema.literal(null)], {
     // See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy
@@ -38,6 +40,7 @@ export const securityResponseHeadersSchema = schema.object({
     defaultValue:
       'camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()',
   }),
+  permissionsPolicyReportOnly: schema.maybe(schema.oneOf([schema.string(), schema.literal(null)])),
   disableEmbedding: schema.boolean({ defaultValue: false }), // is used to control X-Frame-Options and CSP headers
   crossOriginOpenerPolicy: schema.oneOf(
     // See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy
@@ -58,7 +61,8 @@ export const securityResponseHeadersSchema = schema.object({
  * @internal
  */
 export function parseRawSecurityResponseHeadersConfig(
-  raw: TypeOf<typeof securityResponseHeadersSchema>
+  raw: TypeOf<typeof securityResponseHeadersSchema>,
+  rawPermissionsPolicyConfig: PermissionsPolicyConfigType
 ) {
   const securityResponseHeaders: Record<string, string | string[]> = {};
   const { disableEmbedding } = raw;
@@ -72,9 +76,21 @@ export function parseRawSecurityResponseHeadersConfig(
   if (raw.referrerPolicy) {
     securityResponseHeaders['Referrer-Policy'] = raw.referrerPolicy;
   }
+
+  const reportTo = rawPermissionsPolicyConfig.report_to.length
+    ? `;report-to=${rawPermissionsPolicyConfig.report_to}`
+    : '';
+
   if (raw.permissionsPolicy) {
-    securityResponseHeaders['Permissions-Policy'] = raw.permissionsPolicy;
+    securityResponseHeaders['Permissions-Policy'] = `${raw.permissionsPolicy}${reportTo}`;
   }
+
+  if (raw.permissionsPolicyReportOnly && reportTo) {
+    securityResponseHeaders[
+      'Permissions-Policy-Report-Only'
+    ] = `${raw.permissionsPolicyReportOnly}${reportTo}`;
+  }
+
   if (raw.crossOriginOpenerPolicy) {
     securityResponseHeaders['Cross-Origin-Opener-Policy'] = raw.crossOriginOpenerPolicy;
   }

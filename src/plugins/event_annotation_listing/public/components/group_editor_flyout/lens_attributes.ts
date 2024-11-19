@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import { FieldBasedIndexPatternColumn, TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { XYPersistedByValueAnnotationLayerConfig } from '@kbn/lens-plugin/public/async_services';
 
 export const DATA_LAYER_ID = 'data-layer-id';
 export const DATE_HISTOGRAM_COLUMN_ID = 'date-histogram-column-id';
@@ -64,7 +64,7 @@ export const getLensAttributes = (group: EventAnnotationGroupConfig, timeField: 
             layerType: 'annotations',
             persistanceType: 'byValue',
             ...group,
-          } as XYPersistedByValueAnnotationLayerConfig,
+          },
         ],
       },
       query: {
@@ -72,6 +72,7 @@ export const getLensAttributes = (group: EventAnnotationGroupConfig, timeField: 
         language: 'kuery',
       },
       filters: [],
+      showBorder: false,
       datasourceStates: {
         formBased: {
           layers: {

@@ -54,7 +54,7 @@ export function sendTelemetryEvents(
       },
     ]);
   } catch (exc) {
-    logger.error(`queing telemetry events failed ${exc}`);
+    logger.error(`queuing telemetry events failed ${exc}`);
   }
 }
 

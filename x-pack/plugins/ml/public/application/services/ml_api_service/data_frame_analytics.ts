@@ -7,6 +7,7 @@
 
 import { useMemo } from 'react';
 
+import type { DeepPartial } from '@kbn/utility-types';
 import type { NewJobCapsResponse } from '@kbn/ml-anomaly-utils';
 import type {
   AnalyticsMapReturnType,
@@ -15,14 +16,15 @@ import type {
   DeleteDataFrameAnalyticsWithIndexStatus,
   UpdateDataFrameAnalyticsConfig,
 } from '@kbn/ml-data-frame-analytics-utils';
+import type { ValidateAnalyticsJobResponse } from '@kbn/ml-validators';
 
 import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
-import { HttpService } from '../http_service';
+import type { JobMessage } from '../../../../common/types/audit_message';
+import type { PutDataFrameAnalyticsResponseSchema } from '../../../../server/routes/schemas/data_frame_analytics_schema';
+
 import { useMlKibana } from '../../contexts/kibana';
 
-import type { ValidateAnalyticsJobResponse } from '../../../../common/constants/validation';
-import type { DeepPartial } from '../../../../common/types/common';
-import type { JobMessage } from '../../../../common/types/audit_message';
+import type { HttpService } from '../http_service';
 
 export interface GetDataFrameAnalyticsStatsResponseOk {
   node_failures?: object;
@@ -88,7 +90,7 @@ export const dataFrameAnalyticsApiProvider = (httpService: HttpService) => ({
     timeFieldName?: string
   ) {
     const body = JSON.stringify(analyticsConfig);
-    return httpService.http<any>({
+    return httpService.http<PutDataFrameAnalyticsResponseSchema>({
       path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/${analyticsId}`,
       method: 'PUT',
       query: { createDataView, timeFieldName },

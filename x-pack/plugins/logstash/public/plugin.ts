@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { Subscription, Subject, combineLatest } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 import { once } from 'lodash';
 
 import { Capabilities, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
@@ -16,6 +16,7 @@ import { ManagementSetup } from '@kbn/management-plugin/public';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 
 // @ts-ignore
+import type { PluginInitializerContext } from '@kbn/core-plugins-browser';
 import { LogstashLicenseService } from './services';
 
 interface SetupDeps {
@@ -26,26 +27,47 @@ interface SetupDeps {
 }
 
 export class LogstashPlugin implements Plugin<void, void, SetupDeps> {
+  private readonly isServerless: boolean;
   private licenseSubscription?: Subscription;
   private capabilities$ = new Subject<Capabilities>();
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
+  }
 
   public setup(core: CoreSetup, plugins: SetupDeps) {
     const logstashLicense$ = plugins.licensing.license$.pipe(
       map((license) => new LogstashLicenseService(license))
     );
 
+    const pluginName = i18n.translate('xpack.logstash.managementSection.pipelinesTitle', {
+      defaultMessage: 'Logstash Pipelines',
+    });
+
     const managementApp = plugins.management.sections.section.ingest.registerApp({
       id: 'pipelines',
-      title: i18n.translate('xpack.logstash.managementSection.pipelinesTitle', {
-        defaultMessage: 'Logstash Pipelines',
-      }),
+      title: pluginName,
       order: 1,
       mount: async (params) => {
         const [coreStart] = await core.getStartServices();
         const { renderApp } = await import('./application');
         const isMonitoringEnabled = 'monitoring' in plugins;
 
-        return renderApp(coreStart, params, isMonitoringEnabled, logstashLicense$);
+        const { docTitle } = coreStart.chrome;
+        docTitle.change(pluginName);
+
+        const unmountAppCallback = await renderApp(
+          coreStart,
+          params,
+          isMonitoringEnabled,
+          logstashLicense$,
+          this.isServerless
+        );
+
+        return () => {
+          docTitle.reset();
+          unmountAppCallback();
+        };
       },
     });
 

@@ -7,13 +7,13 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { AggConfigs, FieldParamType } from '@kbn/data-plugin/common';
 import { isCounterTimeSeriesMetric } from '@kbn/ml-agg-utils';
-import { LatestFunctionConfigUI } from '../../../../../../../common/types/transform';
-import { StepDefineFormProps } from '../step_define_form';
-import { StepDefineExposedState } from '../common';
-import { LatestFunctionConfig } from '../../../../../../../common/api_schemas/transforms';
+import type { LatestFunctionConfig } from '../../../../../../../server/routes/api_schemas/transforms';
+import type { LatestFunctionConfigUI } from '../../../../../../../common/types/transform';
+import type { StepDefineFormProps } from '../step_define_form';
+import type { StepDefineExposedState } from '../common';
 import { useAppDependencies } from '../../../../../app_dependencies';
 
 /**
@@ -49,7 +49,15 @@ function getOptions(
         .filter((ip) => ip.runtimeField === undefined)
     : [];
 
-  const ignoreFieldNames = new Set(['_source', '_type', '_index', '_id', '_version', '_score']);
+  const ignoreFieldNames = new Set([
+    '_source',
+    '_type',
+    '_index',
+    '_id',
+    '_version',
+    '_score',
+    '_ignored',
+  ]);
 
   const runtimeFieldsOptions = runtimeMappings
     ? Object.entries(runtimeMappings).map(([fieldName, fieldMapping]) => ({
@@ -153,7 +161,7 @@ export function useLatestFunctionConfig(
   }, [dataView, data.search.aggs, runtimeMappings]);
 
   const updateLatestFunctionConfig = useCallback(
-    (update) =>
+    (update: any) =>
       setLatestFunctionConfig({
         ...config,
         ...update,

@@ -14,7 +14,7 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
   return {
     connectorConfigurationPage: {
       async createConnector() {
-        await testSubjects.click('serverlessSearchConnectorsOverviewCreateConnectorButton');
+        await testSubjects.click('serverlessSearchEmptyConnectorsPromptCreateConnectorButton');
         await testSubjects.existOrFail('serverlessSearchEditConnectorButton');
         await testSubjects.exists('serverlessSearchConnectorLinkElasticsearchRunWithDockerButton');
         await testSubjects.exists('serverlessSearchConnectorLinkElasticsearchRunFromSourceButton');
@@ -50,7 +50,7 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
         expect(await testSubjects.getVisibleText('serverlessSearchConnectorName')).to.be(name);
       },
       async editType(type: string) {
-        await testSubjects.existOrFail('serverlessSearchEditConnectorTypeLabel');
+        await testSubjects.existOrFail('serverlessSearchEditConnectorType');
         await testSubjects.existOrFail('serverlessSearchEditConnectorTypeChoices');
         await testSubjects.click('serverlessSearchEditConnectorTypeChoices');
         await testSubjects.exists('serverlessSearchConnectorServiceType-zoom');
@@ -90,9 +90,9 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
       },
       async expectConnectorOverviewPageComponentsToExist() {
         await testSubjects.existOrFail('serverlessSearchConnectorsTitle');
-        await testSubjects.existOrFail('serverlessSearchConnectorsOverviewElasticConnectorsLink');
+        // await testSubjects.existOrFail('serverlessSearchConnectorsOverviewElasticConnectorsLink');
         await testSubjects.exists('serverlessSearchEmptyConnectorsPromptCreateConnectorButton');
-        await testSubjects.existOrFail('serverlessSearchConnectorsOverviewCreateConnectorButton');
+        // await testSubjects.existOrFail('serverlessSearchConnectorsOverviewCreateConnectorButton');
       },
       async expectConnectorTableToExist() {
         await testSubjects.existOrFail('serverlessSearchConnectorTable');

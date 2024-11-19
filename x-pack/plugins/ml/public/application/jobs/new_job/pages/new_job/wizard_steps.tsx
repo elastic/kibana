@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useState, useMemo, useEffect, useContext } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { Fragment, useState, useMemo, useEffect, useContext } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiSpacer, EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
+import { FieldStatsFlyoutProvider } from '@kbn/ml-field-stats-flyout';
 import { JobCreatorContext } from '../components/job_creator_context';
 import { useMlKibana } from '../../../../contexts/kibana';
-import { FieldStatsFlyoutProvider } from '../../../../components/field_stats_flyout';
 import { WIZARD_STEPS } from '../components/step_types';
 
 import { TimeRangeStep } from '../components/time_range_step';
@@ -122,6 +123,7 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
             fieldStatsServices={fieldStatsServices}
             timeRangeMs={timeRangeMs}
             dslQuery={jobCreator.query}
+            theme={services.theme}
           >
             <>
               <EuiFlexGroup gutterSize="s">
@@ -187,7 +189,10 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
   );
 };
 
-const Title: FC<{ 'data-test-subj': string }> = ({ 'data-test-subj': dataTestSubj, children }) => {
+const Title: FC<PropsWithChildren<{ 'data-test-subj': string }>> = ({
+  'data-test-subj': dataTestSubj,
+  children,
+}) => {
   return (
     <Fragment>
       <EuiTitle size="s">

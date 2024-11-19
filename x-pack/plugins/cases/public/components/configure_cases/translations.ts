@@ -35,6 +35,10 @@ export const ADD_NEW_CONNECTOR = i18n.translate('xpack.cases.configureCases.addN
   defaultMessage: 'Add new connector',
 });
 
+export const ADD_CONNECTOR = i18n.translate('xpack.cases.configureCases.addConnector', {
+  defaultMessage: 'Add connector',
+});
+
 export const CASE_CLOSURE_OPTIONS_TITLE = i18n.translate(
   'xpack.cases.configureCases.caseClosureOptionsTitle',
   {
@@ -160,3 +164,25 @@ export const CASES_WEBHOOK_MAPPINGS = i18n.translate(
       'Webhook - Case Management field mappings are configured in the connector settings in the third-party REST API JSON.',
   }
 );
+
+export const ADD_CUSTOM_FIELD = i18n.translate(
+  'xpack.cases.configureCases.customFields.addCustomField',
+  {
+    defaultMessage: 'Add field',
+  }
+);
+
+export const EDIT_CUSTOM_FIELD = i18n.translate(
+  'xpack.cases.configureCases.customFields.editCustomField',
+  {
+    defaultMessage: 'Edit field',
+  }
+);
+
+export const CREATE_TEMPLATE = i18n.translate('xpack.cases.configureCases.templates.flyoutTitle', {
+  defaultMessage: 'Add template',
+});
+
+export const EDIT_TEMPLATE = i18n.translate('xpack.cases.configureCases.templates.editTemplate', {
+  defaultMessage: 'Edit template',
+});

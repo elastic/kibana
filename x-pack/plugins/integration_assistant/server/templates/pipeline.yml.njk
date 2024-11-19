@@ -1,0 +1,149 @@
+---
+description: Pipeline to process {{ package_name }} {{ data_stream_name }} logs
+processors:
+  - set:
+      field: ecs.version
+      tag: set_ecs_version
+      value: '{{ ecs_version }}'
+  - set:
+      field: originalMessage
+      copy_from: message
+      tag: copy_original_message
+  - rename:
+      field: originalMessage
+      target_field: event.original
+      tag: rename_message
+      ignore_missing: true
+      if: ctx.event?.original == null
+  - remove:
+      field: originalMessage
+      ignore_missing: true
+      tag: remove_copied_message
+      if: 'ctx.event?.original != null'
+  - remove:
+      field: message
+      ignore_missing: true
+      tag: remove_message{% if (log_format == 'json') or (log_format == 'ndjson') %}
+  - json:
+      field: event.original
+      tag: json_original
+      target_field: {{ package_name }}.{{ data_stream_name }}{% endif %}
+{% for processor in processors %}{% for key, value in processor %}
+  {% if key == 'rename' %}
+  - {{ key }}:
+      field: {{ value.field }}
+      target_field: {% if value.target_field | startswith('@') %}"{{ value.target_field }}"{% else %}{{ value.target_field }}{% endif %}
+      ignore_missing: true{% endif %}
+  {% if key == 'date' %}
+  - script:
+      description: Ensures the date processor does not receive an array value.
+      tag: script_convert_array_to_string
+      lang: painless
+      {% raw %}source: |
+        if (ctx.{% endraw %}{{ value.field.replaceAll('.', '?.') }}{% raw %} != null &&
+            ctx.{% endraw %}{{ value.field }}{% raw %} instanceof ArrayList){
+            ctx.{% endraw %}{{ value.field }}{% raw %} = ctx.{% endraw %}{{ value.field }}{% raw %}[0];
+        }{% endraw %}
+  - {{ key }}:
+      field: {{ value.field }}
+      target_field: {% if value.target_field | startswith('@') %}"{{ value.target_field }}"{% else %}{{ value.target_field }}{% endif %}
+      formats:
+      {% for format in value.formats %}
+        - {{ format }}
+      {% endfor %}
+      tag: date_processor_{{ value.field}}
+      if: "ctx.{{ value.if }} != null"{% endif %}
+  {% if key == 'convert' %}
+  - {{ key }}:
+      field: {{ value.field }}
+      target_field: {% if value.target_field | startswith('@') %}"{{ value.target_field }}"{% else %}{{ value.target_field }}{% endif %}
+      ignore_missing: true
+      ignore_failure: true
+      type: {{value.type}}{% endif %}{% endfor %}{% endfor %}
+  - script:
+      description: Drops null/empty values recursively.
+      tag: script_drop_null_empty_values
+      lang: painless
+      {% raw %}source: |
+        boolean dropEmptyFields(Object object) {
+          if (object == null || object == "") {
+            return true;
+          } else if (object instanceof Map) {
+            ((Map) object).values().removeIf(value -> dropEmptyFields(value));
+            return (((Map) object).size() == 0);
+          } else if (object instanceof List) {
+            ((List) object).removeIf(value -> dropEmptyFields(value));
+            return (((List) object).length == 0);
+          }
+          return false;
+        }
+        dropEmptyFields(ctx);{% endraw %}
+  - geoip:
+      field: source.ip
+      tag: geoip_source_ip
+      target_field: source.geo
+      ignore_missing: true
+  - geoip:
+      ignore_missing: true
+      database_file: GeoLite2-ASN.mmdb
+      field: source.ip
+      tag: geoip_source_asn
+      target_field: source.as
+      properties:
+        - asn
+        - organization_name
+  - rename:
+      field: source.as.asn
+      tag: rename_source_as_asn
+      target_field: source.as.number
+      ignore_missing: true
+  - rename:
+      field: source.as.organization_name
+      tag: rename_source_as_organization_name
+      target_field: source.as.organization.name
+      ignore_missing: true
+  - geoip:
+      field: destination.ip
+      tag: geoip_destination_ip
+      target_field: destination.geo
+      ignore_missing: true
+  - geoip:
+      database_file: GeoLite2-ASN.mmdb
+      field: destination.ip
+      tag: geoip_destination_asn
+      target_field: destination.as
+      properties:
+        - asn
+        - organization_name
+      ignore_missing: true
+  - rename:
+      field: destination.as.asn
+      tag: rename_destination_as_asn
+      target_field: destination.as.number
+      ignore_missing: true
+  - rename:
+      field: destination.as.organization_name
+      tag: rename_destination_as_organization_name
+      target_field: destination.as.organization.name
+      ignore_missing: true
+{% if fields_to_remove.length > 0 %}
+  - remove:
+      field: 
+      {% for field in fields_to_remove %}
+        - {{ field }}
+      {% endfor %}
+      ignore_missing: true
+      tag: remove_fields{% endif %}
+  - remove:
+      field: event.original
+      tag: remove_original_event
+      if: ctx?.tags == null || !(ctx.tags.contains("preserve_original_event"))
+      ignore_failure: true
+      ignore_missing: true
+on_failure:
+  - append:
+      field: error.message
+      value: '{% raw %}Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.on_failure_pipeline}}} failed with message: {{{_ingest.on_failure_message}}}{% endraw %}'
+  - set:
+      field: event.kind
+      value: pipeline_error

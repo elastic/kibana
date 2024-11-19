@@ -1,10 +1,11 @@
-
 .errorEmbeddableCompact__popover {
   height: 100%;
   max-width: 100%;
 }
 
 .errorEmbeddableCompact__button {
+  height: $euiButtonHeightSmall;
+
   :hover {
     text-decoration: underline;
     text-decoration-color: $euiTextSubduedColor !important;

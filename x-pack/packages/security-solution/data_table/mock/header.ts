@@ -102,7 +102,7 @@ export const defaultHeaders: ColumnHeaderOptions[] = [
     columnHeaderType: defaultColumnHeaderType,
     description: 'Bytes sent from the source to the destination',
     example: '123',
-    format: 'bytes',
+    format: { id: 'bytes' },
     id: 'destination.bytes',
     type: 'number',
     esTypes: ['long'],

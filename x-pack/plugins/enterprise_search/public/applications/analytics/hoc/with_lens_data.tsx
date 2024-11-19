@@ -52,9 +52,7 @@ export const withLensData = <T extends {} = {}, OutputState extends {} = {}>(
   }: WithLensDataParams<Omit<T, keyof OutputState>, OutputState>
 ) => {
   const ComponentWithLensData: React.FC<T & WithLensDataInputProps> = (props) => {
-    const {
-      lens: { EmbeddableComponent, stateHelperApi },
-    } = useValues(KibanaLogic);
+    const { lens } = useValues(KibanaLogic);
     const [dataView, setDataView] = useState<DataView | null>(null);
     const [data, setData] = useState<OutputState>(initialValues);
     const [formula, setFormula] = useState<FormulaPublicApi | null>(null);
@@ -79,12 +77,16 @@ export const withLensData = <T extends {} = {}, OutputState extends {} = {}>(
     }, [props]);
     useEffect(() => {
       (async () => {
-        const helper = await stateHelperApi();
-
-        setFormula(helper.formula);
+        if (lens?.stateHelperApi) {
+          const helper = await lens.stateHelperApi();
+          setFormula(helper.formula);
+        }
       })();
     }, []);
 
+    if (!lens) return null;
+
+    const { EmbeddableComponent } = lens;
     return (
       <>
         <Component {...(props as T)} {...data} />

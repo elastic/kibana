@@ -3,19 +3,13 @@
 exports[`TruncateFormatEditor should render normally 1`] = `
 <Fragment>
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     isInvalid={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Field length"
         id="indexPatternFieldEditor.truncate.lengthLabel"
-        values={Object {}}
       />
     }
-    labelType="label"
   >
     <EuiFieldNumber
       data-test-subj="truncateEditorLength"

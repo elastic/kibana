@@ -6,16 +6,16 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import type { FindResult, RulesClient } from '@kbn/alerting-plugin/server';
 import type { RuleParams } from '@kbn/alerting-plugin/server/application/rule/types';
 import type {
   CspBenchmarkRule,
   RulesToUpdate,
-  CspBenchmarkRulesStates,
   CspSettings,
-} from '../../../../common/types/rules/v4';
+} from '@kbn/cloud-security-posture-common/schema/rules/v4';
 import {
-  convertRuleTagsToKQL,
+  convertRuleTagsToMatchAllKQL,
   generateBenchmarkRuleTags,
 } from '../../../../common/utils/detection_rules';
 
@@ -42,8 +42,9 @@ const disableDetectionRules = async (
 ): Promise<string[]> => {
   const detectionRulesIdsToDisable = await getDetectionRuleIdsToDisable(detectionRules);
   if (!detectionRulesIdsToDisable.length) return [];
-  await detectionRulesClient.bulkDisableRules({ ids: detectionRulesIdsToDisable });
-  return detectionRulesIdsToDisable;
+  const uniqueDetectionRulesIdsToDisable = [...new Set(detectionRulesIdsToDisable)]; // Prevent muting the same rule twice.
+  await detectionRulesClient.bulkDisableRules({ ids: uniqueDetectionRulesIdsToDisable });
+  return uniqueDetectionRulesIdsToDisable;
 };
 
 export const getDetectionRules = async (
@@ -55,10 +56,10 @@ export const getDetectionRules = async (
       return detectionRulesClient.find({
         excludeFromPublicApi: false,
         options: {
-          filter: convertRuleTagsToKQL(ruleTags),
+          filter: convertRuleTagsToMatchAllKQL(ruleTags),
           searchFields: ['tags'],
           page: 1,
-          per_page: 1,
+          perPage: 100, // Disable up to 100 detection rules per benchmark rule at a time
         },
       });
     })

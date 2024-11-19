@@ -9,19 +9,19 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import type { Filter, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
-import type { GroupingAggregation } from '@kbn/securitysolution-grouping';
-import { isNoneGroup } from '@kbn/securitysolution-grouping';
+import type { GroupingAggregation } from '@kbn/grouping';
+import { isNoneGroup } from '@kbn/grouping';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import type { DynamicGroupingProps } from '@kbn/securitysolution-grouping/src';
+import type { DynamicGroupingProps } from '@kbn/grouping/src';
+import { parseGroupingQuery } from '@kbn/grouping/src';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
-import { parseGroupingQuery } from '@kbn/securitysolution-grouping/src';
-import type { RunTimeMappings } from '../../../common/store/sourcerer/model';
+import type { RunTimeMappings } from '../../../sourcerer/store/model';
 import { combineQueries } from '../../../common/lib/kuery';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 import type { AlertsGroupingAggregation } from './grouping_settings/types';
 import type { Status } from '../../../../common/api/detection_engine';
 import { InspectButton } from '../../../common/components/inspect';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useKibana } from '../../../common/lib/kibana';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
@@ -91,15 +91,15 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   const {
     services: { uiSettings },
   } = useKibana();
-  const { browserFields, indexPattern } = useSourcererDataView(SourcererScopeName.detections);
+  const { browserFields, sourcererDataView } = useSourcererDataView(SourcererScopeName.detections);
 
   const getGlobalQuery = useCallback(
     (customFilters: Filter[]) => {
-      if (browserFields != null && indexPattern != null) {
+      if (browserFields != null && sourcererDataView) {
         return combineQueries({
           config: getEsQueryConfig(uiSettings),
           dataProviders: [],
-          indexPattern,
+          indexPattern: sourcererDataView,
           browserFields,
           filters: [
             ...(defaultFilters ?? []),
@@ -120,10 +120,10 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
       from,
       globalFilters,
       globalQuery,
-      indexPattern,
       parentGroupingFilter,
       to,
       uiSettings,
+      sourcererDataView,
     ]
   );
 

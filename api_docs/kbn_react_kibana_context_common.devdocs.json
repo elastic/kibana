@@ -72,6 +72,47 @@
           "EuiThemeColorModeStandard"
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-kibana-context-common",
+        "id": "def-common.getThemeConfigByName",
+        "type": "Function",
+        "tags": [],
+        "label": "getThemeConfigByName",
+        "description": [],
+        "signature": [
+          "(name: string) => ",
+          {
+            "pluginId": "@kbn/react-kibana-context-common",
+            "scope": "common",
+            "docId": "kibKbnReactKibanaContextCommonPluginApi",
+            "section": "def-common.ThemeConfig",
+            "text": "ThemeConfig"
+          },
+          " | null"
+        ],
+        "path": "packages/react/kibana_context/common/theme.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-kibana-context-common",
+            "id": "def-common.getThemeConfigByName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/react/kibana_context/common/theme.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -98,6 +139,51 @@
               "is dark mode enabled or not"
             ],
             "path": "packages/react/kibana_context/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/react-kibana-context-common",
+            "id": "def-common.KibanaTheme.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nName of the active theme"
+            ],
+            "path": "packages/react/kibana_context/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-kibana-context-common",
+        "id": "def-common.ThemeConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "ThemeConfig",
+        "description": [],
+        "path": "packages/react/kibana_context/common/theme.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-kibana-context-common",
+            "id": "def-common.ThemeConfig.euiTheme",
+            "type": "Object",
+            "tags": [],
+            "label": "euiTheme",
+            "description": [],
+            "signature": [
+              "{ root: ",
+              "EuiThemeShape",
+              "; model: ",
+              "EuiThemeShape",
+              "; key: string; }"
+            ],
+            "path": "packages/react/kibana_context/common/theme.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -149,6 +235,27 @@
     "objects": [
       {
         "parentPluginId": "@kbn/react-kibana-context-common",
+        "id": "def-common.DEFAULT_THEME_CONFIG",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_THEME_CONFIG",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/react-kibana-context-common",
+            "scope": "common",
+            "docId": "kibKbnReactKibanaContextCommonPluginApi",
+            "section": "def-common.ThemeConfig",
+            "text": "ThemeConfig"
+          }
+        ],
+        "path": "packages/react/kibana_context/common/theme.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-kibana-context-common",
         "id": "def-common.defaultTheme",
         "type": "Object",
         "tags": [],
@@ -170,6 +277,17 @@
             "signature": [
               "false"
             ],
+            "path": "packages/react/kibana_context/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/react-kibana-context-common",
+            "id": "def-common.defaultTheme.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
             "path": "packages/react/kibana_context/common/index.ts",
             "deprecated": false,
             "trackAdoption": false

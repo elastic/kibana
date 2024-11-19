@@ -13,6 +13,7 @@ import { actionsMock } from '../mocks';
 import { TestSubActionConnector } from './mocks';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import * as utils from '../lib/axios_utils';
+import { ConnectorUsageCollector } from '../usage';
 
 jest.mock('axios');
 
@@ -43,6 +44,7 @@ describe('SubActionConnector', () => {
   let services: ReturnType<typeof actionsMock.createServices>;
   let mockedActionsConfig: jest.Mocked<ActionsConfigurationUtilities>;
   let service: TestSubActionConnector;
+  let connectorUsageCollector: ConnectorUsageCollector;
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -70,6 +72,11 @@ describe('SubActionConnector', () => {
       secrets: { username: 'elastic', password: 'changeme' },
       services,
     });
+
+    connectorUsageCollector = new ConnectorUsageCollector({
+      logger,
+      connectorId: 'test-connector-id',
+    });
   });
 
   describe('Sub actions', () => {
@@ -85,34 +92,37 @@ describe('SubActionConnector', () => {
 
   describe('URL validation', () => {
     it('removes double slashes correctly', async () => {
-      await service.testUrl({ url: 'https://example.com//api///test-endpoint' });
+      await service.testUrl(
+        { url: 'https://example.com//api///test-endpoint' },
+        connectorUsageCollector
+      );
       expect(requestMock.mock.calls[0][0].url).toBe('https://example.com/api/test-endpoint');
     });
 
     it('removes the ending slash correctly', async () => {
-      await service.testUrl({ url: 'https://example.com/' });
+      await service.testUrl({ url: 'https://example.com/' }, connectorUsageCollector);
       expect(requestMock.mock.calls[0][0].url).toBe('https://example.com');
     });
 
     it('throws an error if the url is invalid', async () => {
       expect.assertions(1);
-      await expect(async () => service.testUrl({ url: 'invalid-url' })).rejects.toThrow(
-        'URL Error: Invalid URL: invalid-url'
-      );
+      await expect(async () =>
+        service.testUrl({ url: 'invalid-url' }, connectorUsageCollector)
+      ).rejects.toThrow('URL Error: Invalid URL: invalid-url');
     });
 
     it('throws an error if the url starts with backslashes', async () => {
       expect.assertions(1);
-      await expect(async () => service.testUrl({ url: '//example.com/foo' })).rejects.toThrow(
-        'URL Error: Invalid URL: //example.com/foo'
-      );
+      await expect(async () =>
+        service.testUrl({ url: '//example.com/foo' }, connectorUsageCollector)
+      ).rejects.toThrow('URL Error: Invalid URL: //example.com/foo');
     });
 
     it('throws an error if the protocol is not supported', async () => {
       expect.assertions(1);
-      await expect(async () => service.testUrl({ url: 'ftp://example.com' })).rejects.toThrow(
-        'URL Error: Invalid protocol'
-      );
+      await expect(async () =>
+        service.testUrl({ url: 'ftp://example.com' }, connectorUsageCollector)
+      ).rejects.toThrow('URL Error: Invalid protocol');
     });
 
     it('throws if the host is the URI is not allowed', async () => {
@@ -122,15 +132,15 @@ describe('SubActionConnector', () => {
         throw new Error('URI is not allowed');
       });
 
-      await expect(async () => service.testUrl({ url: 'https://example.com' })).rejects.toThrow(
-        'error configuring connector action: URI is not allowed'
-      );
+      await expect(async () =>
+        service.testUrl({ url: 'https://example.com' }, connectorUsageCollector)
+      ).rejects.toThrow('error configuring connector action: URI is not allowed');
     });
   });
 
   describe('Data', () => {
     it('sets data to an empty object if the data are null', async () => {
-      await service.testUrl({ url: 'https://example.com', data: null });
+      await service.testUrl({ url: 'https://example.com', data: null }, connectorUsageCollector);
 
       expect(requestMock).toHaveBeenCalledTimes(1);
       const { data } = requestMock.mock.calls[0][0];
@@ -138,7 +148,10 @@ describe('SubActionConnector', () => {
     });
 
     it('pass data to axios correctly if not null', async () => {
-      await service.testUrl({ url: 'https://example.com', data: { foo: 'foo' } });
+      await service.testUrl(
+        { url: 'https://example.com', data: { foo: 'foo' } },
+        connectorUsageCollector
+      );
 
       expect(requestMock).toHaveBeenCalledTimes(1);
       const { data } = requestMock.mock.calls[0][0];
@@ -146,7 +159,10 @@ describe('SubActionConnector', () => {
     });
 
     it('removeNullOrUndefinedFields: removes null values and undefined values correctly', async () => {
-      await service.testData({ data: { foo: 'foo', bar: null, baz: undefined } });
+      await service.testData(
+        { data: { foo: 'foo', bar: null, baz: undefined } },
+        connectorUsageCollector
+      );
 
       expect(requestMock).toHaveBeenCalledTimes(1);
       const { data } = requestMock.mock.calls[0][0];
@@ -167,7 +183,7 @@ describe('SubActionConnector', () => {
 
   describe('Fetching', () => {
     it('fetch correctly', async () => {
-      const res = await service.testUrl({ url: 'https://example.com' });
+      const res = await service.testUrl({ url: 'https://example.com' }, connectorUsageCollector);
 
       expect(requestMock).toHaveBeenCalledTimes(1);
       expect(requestMock).toBeCalledWith({
@@ -181,6 +197,7 @@ describe('SubActionConnector', () => {
           'X-Test-Header': 'test',
         },
         url: 'https://example.com',
+        connectorUsageCollector,
       });
 
       expect(logger.debug).toBeCalledWith(
@@ -192,7 +209,9 @@ describe('SubActionConnector', () => {
 
     it('validates the response correctly', async () => {
       requestMock.mockReturnValue({ data: { invalidField: 'test' } });
-      await expect(async () => service.testUrl({ url: 'https://example.com' })).rejects.toThrow(
+      await expect(async () =>
+        service.testUrl({ url: 'https://example.com' }, connectorUsageCollector)
+      ).rejects.toThrow(
         'Response validation failed (Error: [status]: expected value of type [string] but got [undefined])'
       );
     });
@@ -202,13 +221,56 @@ describe('SubActionConnector', () => {
         throw createAxiosError();
       });
 
-      await expect(async () => service.testUrl({ url: 'https://example.com' })).rejects.toThrow(
-        'Message: An error occurred. Code: 500'
-      );
+      await expect(async () =>
+        service.testUrl({ url: 'https://example.com' }, connectorUsageCollector)
+      ).rejects.toThrow('Message: An error occurred. Code: 500');
 
       expect(logger.debug).toHaveBeenLastCalledWith(
         'Request to external service failed. Connector Id: test-id. Connector type: .test. Method: get. URL: https://example.com'
       );
+    });
+
+    it('converts auth axios property to a basic auth header if provided', async () => {
+      await service.testAuth(undefined, connectorUsageCollector);
+
+      expect(requestMock).toHaveBeenCalledTimes(1);
+      expect(requestMock).toBeCalledWith({
+        axios: axiosInstanceMock,
+        configurationUtilities: mockedActionsConfig,
+        logger,
+        method: 'get',
+        data: {},
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Test-Header': 'test',
+          Authorization: `Basic ${Buffer.from('username:password').toString('base64')}`,
+        },
+        url: 'https://example.com',
+        connectorUsageCollector,
+      });
+    });
+
+    it('does not override an authorization header if provided', async () => {
+      await service.testAuth(
+        { headers: { Authorization: 'Bearer my_token' } },
+        connectorUsageCollector
+      );
+
+      expect(requestMock).toHaveBeenCalledTimes(1);
+      expect(requestMock).toBeCalledWith({
+        axios: axiosInstanceMock,
+        configurationUtilities: mockedActionsConfig,
+        logger,
+        method: 'get',
+        data: {},
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Test-Header': 'test',
+          Authorization: 'Bearer my_token',
+        },
+        url: 'https://example.com',
+        connectorUsageCollector,
+      });
     });
   });
 });

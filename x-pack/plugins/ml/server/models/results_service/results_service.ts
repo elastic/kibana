@@ -9,7 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { sortBy, slice, get, cloneDeep } from 'lodash';
 import moment from 'moment';
 import Boom from '@hapi/boom';
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import {
   showActualForFunction,
   showTypicalForFunction,
@@ -22,12 +22,12 @@ import {
 import { buildAnomalyTableItems } from './build_anomaly_table_items';
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
 import { getPartitionFieldsValuesFactory } from './get_partition_fields_values';
-import {
+import type {
   GetStoppedPartitionResult,
   GetDatafeedResultsChartDataResult,
-  defaultSearchQuery,
   DatafeedResultsChartDataParams,
 } from '../../../common/types/results';
+import { defaultSearchQuery } from '../../../common/types/results';
 import type { MlClient } from '../../lib/ml_client';
 import { datafeedsProvider } from '../job_service/datafeeds';
 import { annotationServiceProvider } from '../annotation_service';
@@ -54,7 +54,7 @@ interface Influencer {
  * @param source
  */
 export function getTypicalAndActualValues(source: MlAnomalyRecordDoc) {
-  const result: { actual?: number[]; typical?: number[] } = {};
+  const result: { actual?: number[]; typical?: number[] } = Object.create(null);
 
   const functionDescription = source.function_description || '';
   const causes = source.causes || [];
@@ -157,7 +157,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
       });
     }
 
-    if (influencersFilterQuery !== undefined) {
+    if (influencersFilterQuery) {
       boolCriteria.push(influencersFilterQuery);
     }
 
@@ -254,9 +254,9 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
         (item: any) => item.entityName === 'mlcategory'
       );
       if (categoryAnomalies.length > 0) {
-        tableData.examplesByJobId = {};
+        tableData.examplesByJobId = Object.create(null);
 
-        const categoryIdsByJobId: { [key: string]: any } = {};
+        const categoryIdsByJobId: { [key: string]: any } = Object.create(null);
         categoryAnomalies.forEach((anomaly) => {
           if (categoryIdsByJobId[anomaly.jobId] === undefined) {
             categoryIdsByJobId[anomaly.jobId] = [];
@@ -420,7 +420,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
       ['aggregations', 'byJobId', 'buckets'],
       []
     );
-    const timestampByJobId: { [key: string]: number | undefined } = {};
+    const timestampByJobId: { [key: string]: number | undefined } = Object.create(null);
     bucketsByJobId.forEach((bucket) => {
       timestampByJobId[bucket.key] = bucket.maxTimestamp.value;
     });
@@ -446,7 +446,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
       [jobId]
     );
 
-    const examplesByCategoryId: { [key: string]: any } = {};
+    const examplesByCategoryId: { [key: string]: any } = Object.create(null);
     // @ts-expect-error incorrect search response type
     if (body.hits.total.value > 0) {
       body.hits.hits.forEach((hit: any) => {

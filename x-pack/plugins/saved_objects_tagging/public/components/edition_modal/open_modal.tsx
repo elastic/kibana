@@ -7,20 +7,13 @@
 
 import React from 'react';
 import { EuiDelayRender, EuiLoadingSpinner } from '@elastic/eui';
-import type {
-  OverlayStart,
-  OverlayRef,
-  ThemeServiceStart,
-  NotificationsStart,
-} from '@kbn/core/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { Tag, TagAttributes } from '../../../common/types';
-import { ITagInternalClient } from '../../services';
+import type { OverlayRef } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { Tag, TagAttributes } from '../../../common/types';
+import type { ITagInternalClient } from '../../services';
+import type { StartServices } from '../../types';
 
-interface GetModalOpenerOptions {
-  overlays: OverlayStart;
-  notifications: NotificationsStart;
-  theme: ThemeServiceStart;
+interface GetModalOpenerOptions extends StartServices {
   tagClient: ITagInternalClient;
 }
 
@@ -46,7 +39,12 @@ const LazyEditTagModal = React.lazy(() =>
 );
 
 export const getCreateModalOpener =
-  ({ overlays, theme, tagClient, notifications }: GetModalOpenerOptions): CreateModalOpener =>
+  ({
+    overlays,
+    tagClient,
+    notifications,
+    ...startServices
+  }: GetModalOpenerOptions): CreateModalOpener =>
   async ({ onCreate, defaultValues }: OpenCreateModalOptions) => {
     const modal = overlays.openModal(
       toMountPoint(
@@ -64,7 +62,7 @@ export const getCreateModalOpener =
             notifications={notifications}
           />
         </React.Suspense>,
-        { theme$: theme.theme$ }
+        startServices
       )
     );
     return modal;
@@ -76,7 +74,7 @@ interface OpenEditModalOptions {
 }
 
 export const getEditModalOpener =
-  ({ overlays, theme, tagClient, notifications }: GetModalOpenerOptions) =>
+  ({ overlays, tagClient, notifications, ...startServices }: GetModalOpenerOptions) =>
   async ({ tagId, onUpdate }: OpenEditModalOptions) => {
     const tag = await tagClient.get(tagId);
 
@@ -96,7 +94,7 @@ export const getEditModalOpener =
             notifications={notifications}
           />
         </React.Suspense>,
-        { theme$: theme.theme$ }
+        startServices
       )
     );
 

@@ -14,25 +14,25 @@ import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { UserProfileService } from '@kbn/core/public';
 import { AssistantProvider, AssistantProviderProps } from '../../assistant_context';
-import { AssistantAvailability, Conversation } from '../../assistant_context/types';
+import { AssistantAvailability } from '../../assistant_context/types';
 
 interface Props {
   assistantAvailability?: AssistantAvailability;
   children: React.ReactNode;
-  getInitialConversations?: () => Record<string, Conversation>;
   providerContext?: Partial<AssistantProviderProps>;
 }
 
 window.scrollTo = jest.fn();
 window.HTMLElement.prototype.scrollIntoView = jest.fn();
 
-const mockGetInitialConversations = () => ({});
-
 export const mockAssistantAvailability: AssistantAvailability = {
   hasAssistantPrivilege: false,
   hasConnectorsAllPrivilege: true,
   hasConnectorsReadPrivilege: true,
+  hasUpdateAIAssistantAnonymization: true,
+  hasManageGlobalKnowledgeBase: true,
   isAssistantEnabled: true,
 };
 
@@ -40,7 +40,6 @@ export const mockAssistantAvailability: AssistantAvailability = {
 export const TestProvidersComponent: React.FC<Props> = ({
   assistantAvailability = mockAssistantAvailability,
   children,
-  getInitialConversations = mockGetInitialConversations,
   providerContext,
 }) => {
   const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -52,6 +51,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
   });
   const mockGetComments = jest.fn(() => []);
   const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
+  const mockNavigateToApp = jest.fn();
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -73,22 +73,18 @@ export const TestProvidersComponent: React.FC<Props> = ({
             actionTypeRegistry={actionTypeRegistry}
             assistantAvailability={assistantAvailability}
             augmentMessageCodeBlocks={jest.fn().mockReturnValue([])}
-            baseAllow={[]}
-            baseAllowReplacement={[]}
             basePath={'https://localhost:5601/kbn'}
-            defaultAllow={[]}
-            defaultAllowReplacement={[]}
             docLinks={{
               ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
               DOC_LINK_VERSION: 'current',
             }}
             getComments={mockGetComments}
-            getInitialConversations={getInitialConversations}
-            setConversations={jest.fn()}
-            setDefaultAllow={jest.fn()}
-            setDefaultAllowReplacement={jest.fn()}
             http={mockHttp}
+            baseConversations={{}}
+            navigateToApp={mockNavigateToApp}
             {...providerContext}
+            currentAppId={'test'}
+            userProfileService={jest.fn() as unknown as UserProfileService}
           >
             {children}
           </AssistantProvider>

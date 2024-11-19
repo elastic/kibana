@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /* Steps for version conflict test
@@ -28,6 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const scriptedFiledName = 'versionConflictScript';
   const PageObjects = getPageObjects(['common', 'home', 'settings', 'discover', 'header']);
   const log = getService('log');
+  const toasts = getService('toasts');
 
   describe('FOO index version conflict', function describeIndexTests() {
     before(async function () {
@@ -62,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.settings.setFieldFormat('url');
       await PageObjects.settings.clickSaveScriptedField();
       await retry.try(async function () {
-        const message = await PageObjects.common.closeToast();
+        const message = await toasts.getTitleAndDismiss();
         expect(message).to.contain('Unable');
       });
     });
@@ -95,7 +97,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(response.body.result).to.be('updated');
       await PageObjects.settings.controlChangeSave();
       await retry.try(async function () {
-        const message = await PageObjects.common.closeToast();
+        const message = await toasts.getTitleAndDismiss();
         expect(message).to.contain('Unable');
       });
     });

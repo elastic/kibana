@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-export { AgentActivityFlyout } from './agent_activity_flyout';
-export { AgentActivityButton } from './agent_activity_button';
+export { AgentListTable } from './agent_list_table';
 export { AgentSoftLimitCallout } from './agent_soft_limit_callout';
+export { AgentTableHeader } from './table_header';
+export { SearchAndFilterBar } from './search_and_filter_bar';
+export { TableRowActions } from './table_row_actions';
+export { TagsAddRemove } from './tags_add_remove';

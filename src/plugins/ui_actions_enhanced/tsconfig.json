@@ -24,6 +24,7 @@
     "@kbn/rison",
     "@kbn/datemath",
     "@kbn/monaco",
+    "@kbn/presentation-publishing",
   ],
   "exclude": [
     "target/**/*",

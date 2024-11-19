@@ -6,7 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { routeToHome, routeToConnectors, routeToRules, routeToLogs } from '../constants';
+import {
+  routeToHome,
+  routeToConnectors,
+  routeToRules,
+  routeToLogs,
+  legacyRouteToAlerts,
+} from '../constants';
 
 export const getAlertingSectionBreadcrumb = (
   type: string,
@@ -46,6 +52,29 @@ export const getAlertingSectionBreadcrumb = (
               href: `${routeToRules}`,
             }
           : {}),
+      };
+    case 'alerts':
+      return {
+        text: i18n.translate('xpack.triggersActionsUI.alerts.breadcrumbTitle', {
+          defaultMessage: 'Alerts',
+        }),
+        ...(returnHref
+          ? {
+              href: `${legacyRouteToAlerts}`,
+            }
+          : {}),
+      };
+    case 'createRule':
+      return {
+        text: i18n.translate('xpack.triggersActionsUI.rules.create.breadcrumbTitle', {
+          defaultMessage: 'Create',
+        }),
+      };
+    case 'editRule':
+      return {
+        text: i18n.translate('xpack.triggersActionsUI.rules.edit.breadcrumbTitle', {
+          defaultMessage: 'Edit',
+        }),
       };
     default:
       return {

@@ -39,6 +39,11 @@
     "@kbn/ui-theme",
     "@kbn/cases-components",
     "@kbn/code-editor-mock",
+    "@kbn/utility-types",
+    "@kbn/task-manager-plugin",
+    "@kbn/alerting-types",
+    "@kbn/alerts-ui-shared",
+    "@kbn/core-notifications-browser",
   ],
   "exclude": [
     "target/**/*",

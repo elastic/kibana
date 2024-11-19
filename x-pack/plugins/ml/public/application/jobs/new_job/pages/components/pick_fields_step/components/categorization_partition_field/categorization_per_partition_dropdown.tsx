@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { Dispatch, SetStateAction, useContext, useEffect, useState, useMemo } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
+import React, { useContext, useEffect, useState, useMemo } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { CategorizationJobCreator } from '../../../../../common/job_creator';
-import { newJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
+import type { CategorizationJobCreator } from '../../../../../common/job_creator';
+import { useNewJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { CategorizationPerPartitionFieldSelect } from './categorization_per_partition_input';
 
 export const CategorizationPerPartitionFieldDropdown = ({
@@ -24,7 +25,7 @@ export const CategorizationPerPartitionFieldDropdown = ({
   const [categorizationPartitionFieldName, setCategorizationPartitionFieldName] = useState<
     string | null
   >(jobCreator.categorizationPerPartitionField);
-  const { categoryFields } = newJobCapsService;
+  const { categoryFields } = useNewJobCapsService();
 
   const filteredCategories = useMemo(
     () => categoryFields.filter((c) => c.id !== jobCreator.categorizationFieldName),

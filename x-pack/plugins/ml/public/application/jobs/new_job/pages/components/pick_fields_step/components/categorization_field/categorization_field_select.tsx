@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useContext, useMemo } from 'react';
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import type { FC } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 
 import type { Field } from '@kbn/ml-anomaly-utils';
-import { useFieldStatsTrigger } from '../../../../../../../components/field_stats_flyout/use_field_stats_trigger';
+import { OptionListWithFieldStats, useFieldStatsTrigger } from '@kbn/ml-field-stats-flyout';
+
 import { JobCreatorContext } from '../../../job_creator_context';
 import { createFieldOptions } from '../../../../../common/job_creator/util/general';
 
@@ -21,7 +23,7 @@ interface Props {
 
 export const CategorizationFieldSelect: FC<Props> = ({ fields, changeHandler, selectedField }) => {
   const { jobCreator, jobCreatorUpdated } = useContext(JobCreatorContext);
-  const { renderOption, optionCss } = useFieldStatsTrigger();
+  const { optionCss } = useFieldStatsTrigger();
 
   const options: EuiComboBoxOptionOption[] = useMemo(
     () =>
@@ -48,14 +50,13 @@ export const CategorizationFieldSelect: FC<Props> = ({ fields, changeHandler, se
   );
 
   return (
-    <EuiComboBox
+    <OptionListWithFieldStats
       singleSelection={{ asPlainText: true }}
       options={options}
       selectedOptions={selection}
       onChange={onChange}
       isClearable={true}
       data-test-subj="mlCategorizationFieldNameSelect"
-      renderOption={renderOption}
     />
   );
 };

@@ -11,9 +11,9 @@ import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form
 import { Form, UseField, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { MarkdownEditorForm } from '.';
 import { removeItemFromSessionStorage } from '../utils';
-import { useCasesContext } from '../cases_context/use_cases_context';
 import { getMarkdownEditorStorageKey } from './utils';
 import { EditableMarkdownFooter } from './editable_markdown_footer';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 export interface EditableMarkdownRefObject {
   setComment: (newComment: string) => void;
@@ -37,8 +37,9 @@ const EditableMarkDownRenderer = forwardRef<
     { id, content, caseId, fieldName, onChangeEditable, onSaveContent, editorRef, formSchema },
     ref
   ) => {
-    const { appId } = useCasesContext();
-    const draftStorageKey = getMarkdownEditorStorageKey(appId, caseId, id);
+    const { owner } = useCasesContext();
+    const draftStorageKey = getMarkdownEditorStorageKey({ appId: owner[0], caseId, commentId: id });
+
     const initialState = { content };
 
     const { form } = useForm({
@@ -49,7 +50,7 @@ const EditableMarkDownRenderer = forwardRef<
     const { submit, setFieldValue, isValid: isFormValid } = form;
 
     const setComment = useCallback(
-      (newComment) => {
+      (newComment: string) => {
         setFieldValue(fieldName, newComment);
       },
       [setFieldValue, fieldName]

@@ -6,33 +6,46 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
-import type { ESClusterInfo, ESLicense, TelemetryEvent } from '../types';
+import type { ITaskMetricsService } from '../task_metrics.types';
+import type { TelemetryEvent } from '../types';
 import type { TaskExecutionPeriod } from '../task';
-import { TELEMETRY_CHANNEL_DETECTION_ALERTS, TASK_METRICS_CHANNEL } from '../constants';
-import { batchTelemetryRecords, createTaskMetric, processK8sUsernames, tlog } from '../helpers';
+import { TELEMETRY_CHANNEL_DETECTION_ALERTS } from '../constants';
+import {
+  batchTelemetryRecords,
+  processK8sUsernames,
+  newTelemetryLogger,
+  getPreviousDailyTaskTimestamp,
+  safeValue,
+} from '../helpers';
 import { copyAllowlistedFields, filterList } from '../filterlists';
 
 export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: number) {
+  const taskName = 'Security Solution - Prebuilt Rule and Elastic ML Alerts Telemetry';
   const taskVersion = '1.2.0';
-
+  const taskType = 'security:telemetry-prebuilt-rule-alerts';
   return {
-    type: 'security:telemetry-prebuilt-rule-alerts',
-    title: 'Security Solution - Prebuilt Rule and Elastic ML Alerts Telemetry',
+    type: taskType,
+    title: taskName,
     interval: '1h',
     timeout: '15m',
     version: taskVersion,
+    getLastExecutionTime: getPreviousDailyTaskTimestamp,
     runTask: async (
       taskId: string,
       logger: Logger,
       receiver: ITelemetryReceiver,
       sender: ITelemetryEventsSender,
+      taskMetricsService: ITaskMetricsService,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
-      const startTime = Date.now();
-      const taskName = 'Security Solution - Prebuilt Rule and Elastic ML Alerts Telemetry';
+      const mdc = { task_id: taskId, task_execution_period: taskExecutionPeriod };
+      const log = newTelemetryLogger(logger.get('prebuilt_rule_alerts'), mdc);
+      const trace = taskMetricsService.start(taskType);
+
+      log.l('Running telemetry task');
+
       try {
         const [clusterInfoPromise, licenseInfoPromise, packageVersion] = await Promise.allSettled([
           receiver.fetchClusterInfo(),
@@ -40,38 +53,27 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
           receiver.fetchDetectionRulesPackageVersion(),
         ]);
 
-        const clusterInfo =
-          clusterInfoPromise.status === 'fulfilled'
-            ? clusterInfoPromise.value
-            : ({} as ESClusterInfo);
-        const licenseInfo =
-          licenseInfoPromise.status === 'fulfilled'
-            ? licenseInfoPromise.value
-            : ({} as ESLicense | undefined);
-        const packageInfo =
-          packageVersion.status === 'fulfilled' ? packageVersion.value : undefined;
+        const clusterInfo = safeValue(clusterInfoPromise);
+        const licenseInfo = safeValue(licenseInfoPromise);
+        const packageInfo = safeValue(packageVersion, undefined);
+
         const index = receiver.getAlertsIndex();
 
         if (index === undefined) {
-          tlog(logger, `alerts index is not ready yet, skipping telemetry task`);
+          log.warn(`alerts index is not ready yet, skipping telemetry task`);
+          await taskMetricsService.end(trace);
           return 0;
         }
 
-        let fetchMore = true;
-        let searchAfterValue: SortResults | undefined;
-        let pitId = await receiver.openPointInTime(index);
-
-        while (fetchMore) {
-          const { moreToFetch, newPitId, searchAfter, alerts } =
-            await receiver.fetchPrebuiltRuleAlertsBatch(pitId, searchAfterValue);
-
+        for await (const alerts of receiver.fetchPrebuiltRuleAlertsBatch(
+          index,
+          taskExecutionPeriod.last ?? 'now-1h',
+          taskExecutionPeriod.current
+        )) {
           if (alerts.length === 0) {
+            await taskMetricsService.end(trace);
             return 0;
           }
-
-          fetchMore = moreToFetch;
-          searchAfterValue = searchAfter;
-          pitId = newPitId;
 
           const processedAlerts = alerts.map(
             (event: TelemetryEvent): TelemetryEvent =>
@@ -94,23 +96,21 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
             })
           );
 
-          tlog(logger, `sending ${enrichedAlerts.length} elastic prebuilt alerts`);
+          log.l('sending elastic prebuilt alerts', { length: enrichedAlerts.length });
           const batches = batchTelemetryRecords(enrichedAlerts, maxTelemetryBatch);
 
           const promises = batches.map(async (batch) => {
-            sender.sendOnDemand(TELEMETRY_CHANNEL_DETECTION_ALERTS, batch);
+            await sender.sendOnDemand(TELEMETRY_CHANNEL_DETECTION_ALERTS, batch);
           });
 
           await Promise.all(promises);
         }
 
-        await receiver.closePointInTime(pitId);
+        await taskMetricsService.end(trace);
         return 0;
       } catch (err) {
-        logger.error('could not complete prebuilt alerts telemetry task');
-        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
-          createTaskMetric(taskName, false, startTime, err.message),
-        ]);
+        logger.error('could not complete task', { error: err });
+        await taskMetricsService.end(trace, err);
         return 0;
       }
     },

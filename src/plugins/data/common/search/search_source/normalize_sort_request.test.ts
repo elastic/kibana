@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { normalizeSortRequest } from './normalize_sort_request';
@@ -29,14 +30,15 @@ describe('SearchSource#normalizeSortRequest', function () {
     name: 'script boolean',
     type: 'boolean',
   };
-  const murmurScriptedField = {
-    ...scriptedField,
-    sortable: false,
-    name: 'murmur script',
-    type: 'murmur3',
-  };
+
+  const fields = [scriptedField, stringScriptedField, booleanScriptedField];
+
   const indexPattern = {
-    fields: [scriptedField, stringScriptedField, booleanScriptedField, murmurScriptedField],
+    fields,
+    getScriptedField: (name: string) => {
+      return fields.find((field) => field.name === name);
+    },
+    getRuntimeField: (name: string) => null,
   } as DataView;
 
   it('should return an array', function () {
@@ -147,25 +149,6 @@ describe('SearchSource#normalizeSortRequest', function () {
             lang: booleanScriptedField.lang,
           },
           type: 'string',
-          order: SortDirection.asc,
-        },
-      },
-    ]);
-  });
-
-  it('should use script based sorting only on sortable types', function () {
-    const result = normalizeSortRequest(
-      [
-        {
-          [murmurScriptedField.name]: SortDirection.asc,
-        },
-      ],
-      indexPattern
-    );
-
-    expect(result).toEqual([
-      {
-        [murmurScriptedField.name]: {
           order: SortDirection.asc,
         },
       },

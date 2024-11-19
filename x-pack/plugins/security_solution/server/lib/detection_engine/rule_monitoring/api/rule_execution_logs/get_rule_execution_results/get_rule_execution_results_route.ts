@@ -7,8 +7,8 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
-import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';
 
 import type { GetRuleExecutionResultsResponse } from '../../../../../../../common/api/detection_engine/rule_monitoring';
@@ -27,8 +27,10 @@ export const getRuleExecutionResultsRoute = (router: SecuritySolutionPluginRoute
     .get({
       access: 'internal',
       path: GET_RULE_EXECUTION_RESULTS_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(
@@ -56,6 +58,7 @@ export const getRuleExecutionResultsRoute = (router: SecuritySolutionPluginRoute
           per_page: perPage,
           sort_field: sortField,
           sort_order: sortOrder,
+          run_type_filters: runTypeFilters,
         } = request.query;
 
         const siemResponse = buildSiemResponse(response);
@@ -73,6 +76,7 @@ export const getRuleExecutionResultsRoute = (router: SecuritySolutionPluginRoute
             perPage,
             sortField,
             sortOrder,
+            runTypeFilters,
           });
 
           return response.ok({ body: executionResultsResponse });

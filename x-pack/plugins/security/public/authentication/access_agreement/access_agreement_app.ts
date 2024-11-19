@@ -23,14 +23,14 @@ export const accessAgreementApp = Object.freeze({
       }),
       chromeless: true,
       appRoute: '/security/access_agreement',
-      async mount({ element, theme$ }: AppMountParameters) {
+      async mount({ element }: AppMountParameters) {
         const [[coreStart], { renderAccessAgreementPage }] = await Promise.all([
           getStartServices(),
           import('./access_agreement_page'),
         ]);
         return renderAccessAgreementPage(
-          coreStart.i18n,
-          { element, theme$ },
+          coreStart,
+          { element },
           {
             http: coreStart.http,
             notifications: coreStart.notifications,

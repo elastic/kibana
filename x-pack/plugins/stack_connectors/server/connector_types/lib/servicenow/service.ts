@@ -8,6 +8,7 @@
 import { AxiosResponse } from 'axios';
 
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
+import { isEmpty } from 'lodash';
 import {
   ExternalService,
   ExternalServiceParamsCreate,
@@ -22,7 +23,12 @@ import {
 
 import * as i18n from './translations';
 import { ServiceNowPublicConfigurationType, ServiceNowSecretConfigurationType } from './types';
-import { createServiceError, getPushedDate, prepareIncident } from './utils';
+import {
+  createServiceError,
+  getPushedDate,
+  prepareIncident,
+  throwIfAdditionalFieldsNotSupported,
+} from './utils';
 
 export const SYS_DICTIONARY_ENDPOINT = `api/now/table/sys_dictionary`;
 
@@ -32,6 +38,7 @@ export const createExternalService: ServiceFactory = ({
   configurationUtilities,
   serviceConfig,
   axiosInstance,
+  connectorUsageCollector,
 }): ExternalService => {
   const { config, secrets } = credentials;
   const { table, importSetTable, useImportAPI, appScope } = serviceConfig;
@@ -127,6 +134,7 @@ export const createExternalService: ServiceFactory = ({
         logger,
         configurationUtilities,
         method: 'get',
+        connectorUsageCollector, // TODO check if this is internal
       });
 
       checkInstance(res);
@@ -155,6 +163,7 @@ export const createExternalService: ServiceFactory = ({
         logger,
         configurationUtilities,
         method: 'get',
+        connectorUsageCollector,
       });
 
       checkInstance(res);
@@ -173,6 +182,7 @@ export const createExternalService: ServiceFactory = ({
         logger,
         params,
         configurationUtilities,
+        connectorUsageCollector,
       });
 
       checkInstance(res);
@@ -186,6 +196,7 @@ export const createExternalService: ServiceFactory = ({
 
   const createIncident = async ({ incident }: ExternalServiceParamsCreate) => {
     try {
+      throwIfAdditionalFieldsNotSupported(useTableApi, incident);
       await checkIfApplicationIsInstalled();
 
       const res = await request({
@@ -195,6 +206,7 @@ export const createExternalService: ServiceFactory = ({
         method: 'post',
         data: prepareIncident(useTableApi, incident),
         configurationUtilities,
+        connectorUsageCollector,
       });
 
       checkInstance(res);
@@ -219,6 +231,7 @@ export const createExternalService: ServiceFactory = ({
 
   const updateIncident = async ({ incidentId, incident }: ExternalServiceParamsUpdate) => {
     try {
+      throwIfAdditionalFieldsNotSupported(useTableApi, incident);
       await checkIfApplicationIsInstalled();
 
       const res = await request({
@@ -233,6 +246,7 @@ export const createExternalService: ServiceFactory = ({
           ...(useTableApi ? {} : { elastic_incident_id: incidentId }),
         },
         configurationUtilities,
+        connectorUsageCollector,
       });
 
       checkInstance(res);
@@ -265,6 +279,7 @@ export const createExternalService: ServiceFactory = ({
         method: 'get',
         logger,
         configurationUtilities,
+        connectorUsageCollector,
       });
 
       checkInstance(res);
@@ -292,7 +307,7 @@ export const createExternalService: ServiceFactory = ({
         incidentToBeClosed = await getIncidentByCorrelationId(correlationId);
       }
 
-      if (incidentToBeClosed === null) {
+      if (incidentToBeClosed === null || isEmpty(incidentToBeClosed)) {
         logger.warn(
           `[ServiceNow][CloseIncident] No incident found with correlation_id: ${correlationId} or incidentId: ${incidentId}.`
         );
@@ -343,6 +358,7 @@ export const createExternalService: ServiceFactory = ({
         url: fieldsUrl,
         logger,
         configurationUtilities,
+        connectorUsageCollector,
       });
 
       checkInstance(res);
@@ -360,6 +376,7 @@ export const createExternalService: ServiceFactory = ({
         url: getChoicesURL(fields),
         logger,
         configurationUtilities,
+        connectorUsageCollector,
       });
       checkInstance(res);
       return res.data.result;

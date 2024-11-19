@@ -232,6 +232,9 @@ Object {
       "legend": Object {
         "isVisible": true,
         "legendSize": "xlarge",
+        "legendStats": Array [
+          "currentAndLastValue",
+        ],
         "position": "right",
       },
       "preferredSeriesType": "bar_stacked",
@@ -241,7 +244,6 @@ Object {
         "yRight": true,
       },
       "valueLabels": "hide",
-      "valuesInLegend": true,
       "yLeftExtent": Object {
         "mode": "full",
       },

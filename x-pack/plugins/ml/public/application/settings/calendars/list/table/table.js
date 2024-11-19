@@ -26,8 +26,11 @@ export const CalendarsListTable = ({
   canDeleteCalendar,
   mlNodesAvailable,
   itemsSelected,
+  isDst,
 }) => {
-  const redirectToNewCalendarPage = useCreateAndNavigateToMlLink(ML_PAGES.CALENDARS_NEW);
+  const redirectToNewCalendarPage = useCreateAndNavigateToMlLink(
+    isDst ? ML_PAGES.CALENDARS_DST_NEW : ML_PAGES.CALENDARS_NEW
+  );
 
   const sorting = {
     sort: {
@@ -51,7 +54,10 @@ export const CalendarsListTable = ({
       truncateText: true,
       scope: 'row',
       render: (id) => (
-        <Link to={`/${ML_PAGES.CALENDARS_EDIT}/${id}`} data-test-subj="mlEditCalendarLink">
+        <Link
+          to={`/${isDst ? ML_PAGES.CALENDARS_DST_EDIT : ML_PAGES.CALENDARS_EDIT}/${id}`}
+          data-test-subj="mlEditCalendarLink"
+        >
           {id}
         </Link>
       ),
@@ -142,7 +148,6 @@ export const CalendarsListTable = ({
         sorting={sorting}
         loading={loading}
         selection={tableSelection}
-        isSelectable={true}
         data-test-subj={loading ? 'mlCalendarTable loading' : 'mlCalendarTable loaded'}
         rowProps={(item) => ({
           'data-test-subj': `mlCalendarListRow row-${item.calendar_id}`,

@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { groups } from './groups.json';
+import { BuildkiteStep, expandAgentQueue } from '#pipeline-utils';
 
 const configJson = process.env.KIBANA_FLAKY_TEST_RUNNER_CONFIG;
 if (!configJson) {
@@ -49,8 +51,10 @@ function getTestSuitesFromJson(json: string) {
     fail(`JSON test config must be an array`);
   }
 
-  /** @type {Array<{ type: 'group', key: string; count: number } | { type: 'ftrConfig', ftrConfig: string; count: number }>} */
-  const testSuites = [];
+  const testSuites: Array<
+    | { type: 'group'; key: string; count: number }
+    | { type: 'ftrConfig'; ftrConfig: string; count: number }
+  > = [];
   for (const item of parsed) {
     if (typeof item !== 'object' || item === null) {
       fail(`testSuites must be objects`);
@@ -73,6 +77,7 @@ function getTestSuitesFromJson(json: string) {
       }
 
       testSuites.push({
+        type: 'ftrConfig',
         ftrConfig,
         count,
       });
@@ -84,6 +89,7 @@ function getTestSuitesFromJson(json: string) {
       fail(`testSuite.key must be a string`);
     }
     testSuites.push({
+      type: 'group',
       key,
       count,
     });
@@ -106,7 +112,7 @@ if (totalJobs > MAX_JOBS) {
   process.exit(1);
 }
 
-const steps: any[] = [];
+const steps: BuildkiteStep[] = [];
 const pipeline = {
   env: {
     IGNORE_SHIP_CI_STATS_ERROR: 'true',
@@ -116,31 +122,31 @@ const pipeline = {
 
 steps.push({
   command: '.buildkite/scripts/steps/build_kibana.sh',
-  label: 'Build Kibana Distribution and Plugins',
-  agents: { queue: 'c2-8' },
+  label: 'Build Kibana Distribution',
+  agents: expandAgentQueue('c2-8'),
   key: 'build',
   if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''",
 });
 
+let suiteIndex = 0;
 for (const testSuite of testSuites) {
   if (testSuite.count <= 0) {
     continue;
   }
 
-  if (testSuite.ftrConfig) {
+  if (testSuite.type === 'ftrConfig') {
     steps.push({
       command: `.buildkite/scripts/steps/test/ftr_configs.sh`,
       env: {
         FTR_CONFIG: testSuite.ftrConfig,
       },
+      key: `ftr-suite-${suiteIndex++}`,
       label: `${testSuite.ftrConfig}`,
       parallelism: testSuite.count,
       concurrency,
       concurrency_group: process.env.UUID,
       concurrency_method: 'eager',
-      agents: {
-        queue: 'n2-4-spot-2',
-      },
+      agents: expandAgentQueue('n2-4-spot'),
       depends_on: 'build',
       timeout_in_minutes: 150,
       cancel_on_build_failing: true,
@@ -164,7 +170,8 @@ for (const testSuite of testSuites) {
       steps.push({
         command: `.buildkite/scripts/steps/functional/${suiteName}.sh`,
         label: group.name,
-        agents: { queue: agentQueue },
+        agents: expandAgentQueue(agentQueue),
+        key: `cypress-suite-${suiteIndex++}`,
         depends_on: 'build',
         timeout_in_minutes: 150,
         parallelism: testSuite.count,
@@ -190,5 +197,21 @@ for (const testSuite of testSuites) {
       throw new Error(`unknown test suite: ${testSuite.key}`);
   }
 }
+
+pipeline.steps.push({
+  wait: '~',
+  continue_on_failure: true,
+});
+
+pipeline.steps.push({
+  command: 'ts-node .buildkite/pipelines/flaky_tests/post_stats_on_pr.ts',
+  label: 'Post results on Github pull request',
+  agents: expandAgentQueue('n2-4-spot'),
+  timeout_in_minutes: 15,
+  retry: {
+    automatic: [{ exit_status: '-1', limit: 3 }],
+  },
+  soft_fail: true,
+});
 
 console.log(JSON.stringify(pipeline, null, 2));

@@ -49,14 +49,15 @@ export default function resilientTest({ getService }: FtrProviderContext) {
       );
     });
 
-    it('should return 403 when creating a resilient action', async () => {
+    it('should return 403 when creating a resilient connector', async () => {
       await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'foo')
         .send({
-          name: 'A resilient action',
-          actionTypeId: '.resilient',
+          name: 'A resilient connector',
+          connector_type_id: '.resilient',
           config: {
+            ...mockResilient.config,
             apiUrl: resilientSimulatorURL,
           },
           secrets: mockResilient.secrets,

@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { CellActionsProvider } from '../context';
 import { makeAction } from '../mocks/helpers';
-import { CellActionExecutionContext } from '../types';
+import type { CellActionExecutionContext } from '../types';
 import { HoverActionsPopover } from './hover_actions_popover';
 
 const defaultProps = {
@@ -31,14 +32,16 @@ describe('HoverActionsPopover', () => {
   const TestComponent = () => <span data-test-subj="test-component" />;
   jest.useFakeTimers();
 
-  it('renders', () => {
+  it('renders the children', () => {
     const getActions = () => Promise.resolve([]);
-    const { queryByTestId } = render(
+    const { getByTestId } = render(
       <CellActionsProvider getTriggerCompatibleActions={getActions}>
-        <HoverActionsPopover {...defaultProps} children={null} />
+        <HoverActionsPopover {...defaultProps}>
+          <TestComponent />
+        </HoverActionsPopover>
       </CellActionsProvider>
     );
-    expect(queryByTestId('hoverActionsPopover')).toBeInTheDocument();
+    expect(getByTestId('test-component')).toBeInTheDocument();
   });
 
   it('renders actions when hovered', async () => {

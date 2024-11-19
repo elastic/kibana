@@ -125,7 +125,7 @@ class FieldsService {
   // the _indexPattern will be replaced with a comma separated list
   // of index patterns from all of the rollup jobs
   public async getData(includeNested: boolean = false): Promise<NewJobCaps> {
-    let rollupFields: RollupFields = {};
+    let rollupFields: RollupFields = Object.create(null);
 
     if (this._isRollup) {
       const rollupService = await rollupServiceProvider(
@@ -159,7 +159,7 @@ class FieldsService {
 function combineAllRollupFields(
   rollupConfigs: estypes.RollupGetRollupCapsRollupCapabilitySummary[]
 ): RollupFields {
-  const rollupFields: RollupFields = {};
+  const rollupFields: RollupFields = Object.create(null);
   rollupConfigs.forEach((conf) => {
     Object.keys(conf.fields).forEach((fieldName) => {
       if (rollupFields[fieldName] === undefined) {

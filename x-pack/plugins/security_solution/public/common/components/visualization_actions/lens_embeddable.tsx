@@ -19,6 +19,7 @@ import type {
   TypedLensByValueInput,
   XYState,
 } from '@kbn/lens-plugin/public';
+import type { LensBaseEmbeddableInput } from '@kbn/lens-plugin/public/embeddable';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { useKibana } from '../../lib/kibana';
 import { useLensAttributes } from './use_lens_attributes';
@@ -27,31 +28,20 @@ import { DEFAULT_ACTIONS, useActions } from './use_actions';
 
 import { ModalInspectQuery } from '../inspect/modal';
 import { InputsModelId } from '../../store/inputs/constants';
-import { SourcererScopeName } from '../../store/sourcerer/model';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { VisualizationActions } from './actions';
 import { useEmbeddableInspect } from './use_embeddable_inspect';
 import { useVisualizationResponse } from './use_visualization_response';
 import { useInspect } from '../inspect/use_inspect';
 
-const HOVER_ACTIONS_PADDING = 24;
 const DISABLED_ACTIONS = ['ACTION_CUSTOMIZE_PANEL'];
 
 const LensComponentWrapper = styled.div<{
   $height?: number;
   width?: string | number;
-  $addHoverActionsPadding?: boolean;
 }>`
   height: ${({ $height }) => ($height ? `${$height}px` : 'auto')};
   width: ${({ width }) => width ?? 'auto'};
-
-  ${({ $addHoverActionsPadding }) =>
-    $addHoverActionsPadding ? `.embPanel__header { top: ${HOVER_ACTIONS_PADDING * -1}px; }` : ''}
-
-  .embPanel__header {
-    z-index: 2;
-    position: absolute;
-    right: 0;
-  }
 
   .expExpressionRenderer__expression {
     padding: 2px 0 0 0 !important;
@@ -63,6 +53,7 @@ const LensComponentWrapper = styled.div<{
 
 const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   applyGlobalQueriesAndFilters = true,
+  applyPageAndTabsFilters = true,
   extraActions,
   extraOptions,
   getLensAttributes,
@@ -99,6 +90,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   const { searchSessionId } = useVisualizationResponse({ visualizationId: id });
   const attributes = useLensAttributes({
     applyGlobalQueriesAndFilters,
+    applyPageAndTabsFilters,
     extraOptions,
     getLensAttributes,
     lensAttributes,
@@ -107,10 +99,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     title: '',
   });
   const preferredSeriesType = (attributes?.state?.visualization as XYState)?.preferredSeriesType;
-  // Avoid hover actions button overlaps with its chart
-  const addHoverActionsPadding =
-    attributes?.visualizationType !== 'lnsLegacyMetric' &&
-    attributes?.visualizationType !== 'lnsPie';
+
   const LensComponent = lens.EmbeddableComponent;
 
   const overrides: TypedLensByValueInput['overrides'] = useMemo(
@@ -157,7 +146,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   });
 
   const updateDateRange = useCallback(
-    ({ range }) => {
+    ({ range }: { range: Array<number | string> }) => {
       const [min, max] = range;
       dispatch(
         setAbsoluteRangeDatePicker({
@@ -170,7 +159,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     [dispatch, inputsModelId]
   );
 
-  const onFilterCallback = useCallback(
+  const onFilterCallback = useCallback<Required<LensBaseEmbeddableInput>['onFilter']>(
     (event) => {
       if (disableOnClickFilter) {
         event.preventDefault();
@@ -252,11 +241,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   return (
     <>
       {attributes && searchSessionId && (
-        <LensComponentWrapper
-          $height={wrapperHeight}
-          width={wrapperWidth}
-          $addHoverActionsPadding={addHoverActionsPadding}
-        >
+        <LensComponentWrapper $height={wrapperHeight} width={wrapperWidth}>
           <LensComponent
             attributes={attributes}
             disabledActions={DISABLED_ACTIONS}

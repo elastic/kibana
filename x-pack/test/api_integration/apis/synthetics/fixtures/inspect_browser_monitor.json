@@ -18,8 +18,8 @@
   "name": "check if title is present",
   "locations": [
     {
-      "id": "localhost",
-      "label": "Local Synthetics Service",
+      "id": "dev",
+      "label": "Dev Service",
       "geo": {
         "lat": 0,
         "lon": 0

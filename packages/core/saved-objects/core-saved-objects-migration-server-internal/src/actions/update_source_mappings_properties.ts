@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { omit } from 'lodash';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { pipe } from 'fp-ts/lib/function';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
-import { diffMappings } from '../core/build_active_mappings';
+import type { IndexMapping, VirtualVersionMap } from '@kbn/core-saved-objects-base-server-internal';
+import { diffMappings } from '../core/diff_mappings';
 import type { RetryableEsClientError } from './catch_retryable_es_client_errors';
 import { updateMappings } from './update_mappings';
 import type { IncompatibleMappingException } from './update_mappings';
@@ -20,8 +21,11 @@ import type { IncompatibleMappingException } from './update_mappings';
 export interface UpdateSourceMappingsPropertiesParams {
   client: ElasticsearchClient;
   sourceIndex: string;
-  sourceMappings: IndexMapping;
-  targetMappings: IndexMapping;
+  indexMappings: IndexMapping;
+  appMappings: IndexMapping;
+  indexTypes: string[];
+  latestMappingsVersions: VirtualVersionMap;
+  hashToVersionMap: Record<string, string>;
 }
 
 /**
@@ -31,14 +35,23 @@ export interface UpdateSourceMappingsPropertiesParams {
 export const updateSourceMappingsProperties = ({
   client,
   sourceIndex,
-  sourceMappings,
-  targetMappings,
+  indexMappings,
+  appMappings,
+  indexTypes,
+  latestMappingsVersions,
+  hashToVersionMap,
 }: UpdateSourceMappingsPropertiesParams): TaskEither.TaskEither<
   RetryableEsClientError | IncompatibleMappingException,
   'update_mappings_succeeded'
 > => {
   return pipe(
-    diffMappings(sourceMappings, targetMappings),
+    diffMappings({
+      indexMappings,
+      appMappings,
+      indexTypes,
+      latestMappingsVersions,
+      hashToVersionMap,
+    }),
     TaskEither.fromPredicate(
       (changes) => !!changes,
       () => 'update_mappings_succeeded' as const
@@ -48,7 +61,7 @@ export const updateSourceMappingsProperties = ({
       updateMappings({
         client,
         index: sourceIndex,
-        mappings: omit(targetMappings, ['_meta']), // ._meta property will be updated on a later step
+        mappings: omit(appMappings, ['_meta']), // ._meta property will be updated on a later step
       })
     )
   );

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { Component } from 'react';
@@ -147,7 +148,7 @@ export class SavedObjectEdition extends Component<
           }
         ),
         title: i18n.translate('savedObjectsManagement.deleteConfirm.modalTitle', {
-          defaultMessage: `Delete '{title}'?`,
+          defaultMessage: `Delete ''{title}''?`,
           values: {
             title: object?.meta?.title || 'saved Kibana object',
           },
@@ -165,7 +166,7 @@ export class SavedObjectEdition extends Component<
         title: i18n.translate(
           'savedObjectsManagement.objectView.unableDeleteSavedObjectNotificationMessage',
           {
-            defaultMessage: `Failed to delete '{title}' {type} object`,
+            defaultMessage: `Failed to delete ''{title}'' {type} object`,
             values: {
               type,
               title: object?.meta?.title,
@@ -178,7 +179,15 @@ export class SavedObjectEdition extends Component<
       return;
     }
 
-    notifications.toasts.addSuccess(`Deleted '${object?.meta?.title}' ${type} object`);
+    notifications.toasts.addSuccess(
+      i18n.translate('savedObjectsManagement.objectView.deleteSavedObjectNotificationMessage', {
+        defaultMessage: `Deleted ''{title}'' {type} object`,
+        values: {
+          type,
+          title: object?.meta?.title,
+        },
+      })
+    );
     this.redirectToListing();
   }
 

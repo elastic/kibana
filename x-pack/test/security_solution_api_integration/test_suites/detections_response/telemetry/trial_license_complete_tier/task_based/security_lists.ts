@@ -12,14 +12,16 @@ import {
   ENDPOINT_TRUSTED_APPS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
 import {
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
   getSecurityTelemetryStats,
   createExceptionListItem,
   createExceptionList,
-  removeTimeFieldsFromTelemetryStats,
+  removeExtraFieldsFromTelemetryStats,
 } from '../../../utils';
+import {
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+} from '../../../../../../common/utils/security_solution';
 import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
@@ -31,7 +33,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
 
   // Failing: See https://github.com/elastic/kibana/issues/164334
-  describe.skip('@ess @serverless Security lists task telemetry', async () => {
+  describe.skip('@ess @serverless Security lists task telemetry', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/telemetry');
     });
@@ -74,7 +76,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           const trustedApplication = stats.security_lists
             .flat()
             .map((obj: any) => (obj.passed != null ? obj : obj.trusted_application));
@@ -144,7 +146,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           const trustedApplication = stats.security_lists
             .flat()
             .map((obj: any) => (obj.passed != null ? obj : obj.trusted_application))
@@ -220,7 +222,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           const securityLists = stats.security_lists
             .flat()
             .map((obj: any) => (obj.passed != null ? obj : obj.endpoint_exception));
@@ -286,7 +288,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           const securityLists = stats.security_lists
             .flat()
             .map((obj: any) => (obj.passed != null ? obj : obj.endpoint_exception))
@@ -366,7 +368,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           const endPointEventFilter = stats.security_lists
             .flat()
             .map((obj: any) => (obj.passed != null ? obj : obj.endpoint_event_filter));
@@ -433,7 +435,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           const endPointEventFilter = stats.security_lists
             .flat()
             .map((obj: any) => (obj.passed != null ? obj : obj.endpoint_event_filter))

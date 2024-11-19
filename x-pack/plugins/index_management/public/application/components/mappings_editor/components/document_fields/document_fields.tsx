@@ -5,92 +5,99 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useEffect } from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo } from 'react';
 
-import { GlobalFlyout } from '../../shared_imports';
-import { useMappingsState, useDispatch } from '../../mappings_state_context';
 import { deNormalize } from '../../lib';
-import { EditFieldContainer, EditFieldContainerProps, defaultFlyoutProps } from './fields';
-import { DocumentFieldsHeader } from './document_fields_header';
+import { useDispatch, useMappingsState } from '../../mappings_state_context';
+import { GlobalFlyout } from '../../shared_imports';
+import {
+  defaultFlyoutProps,
+  EditFieldContainer,
+  EditFieldContainerProps,
+  SemanticTextInfo,
+} from './fields';
 import { DocumentFieldsJsonEditor } from './fields_json_editor';
 import { DocumentFieldsTreeEditor } from './fields_tree_editor';
-import { SearchResult } from './search_fields';
 
 const { useGlobalFlyout } = GlobalFlyout;
 
-export const DocumentFields = React.memo(() => {
-  const { fields, search, documentFields } = useMappingsState();
-  const dispatch = useDispatch();
-  const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
-    useGlobalFlyout();
+interface Props {
+  searchComponent?: React.ReactElement;
+  searchResultComponent?: React.ReactElement;
+  onCancelAddingNewFields?: () => void;
+  isAddingFields?: boolean;
+  semanticTextInfo?: SemanticTextInfo;
+}
+export const DocumentFields = React.memo(
+  ({
+    searchComponent,
+    searchResultComponent,
+    onCancelAddingNewFields,
+    isAddingFields,
+    semanticTextInfo,
+  }: Props) => {
+    const { fields, documentFields } = useMappingsState();
+    const dispatch = useDispatch();
+    const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
+      useGlobalFlyout();
 
-  const { editor: editorType } = documentFields;
-  const isEditing = documentFields.status === 'editingField';
+    const { editor: editorType } = documentFields;
+    const isEditing = documentFields.status === 'editingField';
 
-  const jsonEditorDefaultValue = useMemo(() => {
-    if (editorType === 'json') {
-      return deNormalize(fields);
-    }
-  }, [editorType, fields]);
-
-  const editor =
-    editorType === 'json' ? (
-      <DocumentFieldsJsonEditor defaultValue={jsonEditorDefaultValue!} />
-    ) : (
-      <DocumentFieldsTreeEditor />
-    );
-
-  const onSearchChange = useCallback(
-    (value: string) => {
-      dispatch({ type: 'search:update', value });
-    },
-    [dispatch]
-  );
-
-  const exitEdit = useCallback(() => {
-    dispatch({ type: 'documentField.changeStatus', value: 'idle' });
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (isEditing) {
-      // Open the flyout with the <EditField /> content
-      addContentToGlobalFlyout<EditFieldContainerProps>({
-        id: 'mappingsEditField',
-        Component: EditFieldContainer,
-        props: { exitEdit },
-        flyoutProps: { ...defaultFlyoutProps, onClose: exitEdit },
-        cleanUpFunc: exitEdit,
-      });
-    }
-  }, [isEditing, addContentToGlobalFlyout, fields.byId, exitEdit]);
-
-  useEffect(() => {
-    if (!isEditing) {
-      removeContentFromGlobalFlyout('mappingsEditField');
-    }
-  }, [isEditing, removeContentFromGlobalFlyout]);
-
-  useEffect(() => {
-    return () => {
-      if (isEditing) {
-        // When the component unmounts, exit edit mode.
-        exitEdit();
+    const jsonEditorDefaultValue = useMemo(() => {
+      if (editorType === 'json') {
+        return deNormalize(fields);
       }
-    };
-  }, [isEditing, exitEdit]);
+    }, [editorType, fields]);
 
-  const searchTerm = search.term.trim();
-
-  return (
-    <div data-test-subj="documentFields">
-      <DocumentFieldsHeader searchValue={search.term} onSearchChange={onSearchChange} />
-      <EuiSpacer size="m" />
-      {searchTerm !== '' ? (
-        <SearchResult result={search.result} documentFieldsState={documentFields} />
+    const editor =
+      editorType === 'json' ? (
+        <DocumentFieldsJsonEditor defaultValue={jsonEditorDefaultValue!} />
       ) : (
-        editor
-      )}
-    </div>
-  );
-});
+        <DocumentFieldsTreeEditor
+          onCancelAddingNewFields={onCancelAddingNewFields}
+          isAddingFields={isAddingFields}
+          semanticTextInfo={semanticTextInfo}
+        />
+      );
+
+    const exitEdit = useCallback(() => {
+      dispatch({ type: 'documentField.changeStatus', value: 'idle' });
+    }, [dispatch]);
+
+    useEffect(() => {
+      if (isEditing) {
+        // Open the flyout with the <EditField /> content
+        addContentToGlobalFlyout<EditFieldContainerProps>({
+          id: 'mappingsEditField',
+          Component: EditFieldContainer,
+          props: { exitEdit },
+          flyoutProps: { ...defaultFlyoutProps, onClose: exitEdit },
+          cleanUpFunc: exitEdit,
+        });
+      }
+    }, [isEditing, addContentToGlobalFlyout, fields.byId, exitEdit]);
+
+    useEffect(() => {
+      if (!isEditing) {
+        removeContentFromGlobalFlyout('mappingsEditField');
+      }
+    }, [isEditing, removeContentFromGlobalFlyout]);
+
+    useEffect(() => {
+      return () => {
+        if (isEditing) {
+          // When the component unmounts, exit edit mode.
+          exitEdit();
+        }
+      };
+    }, [isEditing, exitEdit]);
+
+    return (
+      <div data-test-subj="documentFields">
+        {searchComponent}
+        {searchResultComponent ? searchResultComponent : editor}
+      </div>
+    );
+  }
+);

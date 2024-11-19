@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { nodeTypes } from '../node_types';
@@ -15,8 +16,6 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { KQL_NODE_TYPE_WILDCARD } from '../node_types/wildcard';
 import { KQL_NODE_TYPE_LITERAL } from '../node_types/literal';
 import { KqlIsFunctionNode } from './is';
-
-jest.mock('../grammar');
 
 describe('kuery functions', () => {
   describe('is', () => {
@@ -72,19 +71,6 @@ describe('kuery functions', () => {
         };
         const node = nodeTypes.function.buildNode('is', '*', '*') as KqlIsFunctionNode;
         const result = is.toElasticsearchQuery(node, indexPattern);
-
-        expect(result).toEqual(expected);
-      });
-
-      test('should return an ES match_all query for queries that match all fields and values', () => {
-        const expected = {
-          match_all: {},
-        };
-        const node = nodeTypes.function.buildNode('is', 'n*', '*') as KqlIsFunctionNode;
-        const result = is.toElasticsearchQuery(node, {
-          ...indexPattern,
-          fields: indexPattern.fields.filter((field) => field.name.startsWith('n')),
-        });
 
         expect(result).toEqual(expected);
       });

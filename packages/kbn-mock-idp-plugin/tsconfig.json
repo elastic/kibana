@@ -12,7 +12,6 @@
   ],
   "kbn_references": [
     "@kbn/config-schema",
-    "@kbn/core-application-browser",
     "@kbn/core-i18n-browser",
     "@kbn/core-lifecycle-browser",
     "@kbn/core-notifications-browser",

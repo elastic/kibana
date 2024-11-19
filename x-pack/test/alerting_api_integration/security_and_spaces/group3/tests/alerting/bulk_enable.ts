@@ -15,7 +15,12 @@ import {
   getUnauthorizedErrorMessage,
 } from '../../../../common/lib';
 
-const defaultSuccessfulResponse = { total: 1, rules: [], errors: [], taskIdsFailedToBeEnabled: [] };
+const defaultSuccessfulResponse = {
+  total: 1,
+  rules: [],
+  errors: [],
+  task_ids_failed_to_be_enabled: [],
+};
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -81,38 +86,39 @@ export default ({ getService }: FtrProviderContext) => {
                 rules: [
                   {
                     id: response.body.rules[0].id,
-                    notifyWhen: 'onThrottleInterval',
+                    notify_when: 'onThrottleInterval',
                     enabled: true,
                     name: 'abc',
                     tags: ['foo'],
                     consumer: 'alertsFixture',
                     throttle: '1m',
-                    alertTypeId: 'test.noop',
-                    apiKeyCreatedByUser: false,
-                    apiKeyOwner: response.body.rules[0].apiKeyOwner,
-                    createdBy: 'elastic',
-                    updatedBy: response.body.rules[0].updatedBy,
-                    muteAll: false,
-                    mutedInstanceIds: [],
+                    rule_type_id: 'test.noop',
+                    api_key_created_by_user: false,
+                    api_key_owner: response.body.rules[0].api_key_owner,
+                    created_by: 'elastic',
+                    updated_by: response.body.rules[0].updated_by,
+                    mute_all: false,
+                    muted_alert_ids: [],
                     schedule: { interval: '1m' },
                     actions: [],
                     params: {},
                     running: false,
-                    snoozeSchedule: [],
-                    updatedAt: response.body.rules[0].updatedAt,
-                    createdAt: response.body.rules[0].createdAt,
+                    snooze_schedule: [],
+                    updated_at: response.body.rules[0].updated_at,
+                    created_at: response.body.rules[0].created_at,
                     revision: 0,
-                    scheduledTaskId: response.body.rules[0].scheduledTaskId,
-                    executionStatus: {
-                      lastDuration: 0,
-                      lastExecutionDate: response.body.rules[0].executionStatus.lastExecutionDate,
+                    scheduled_task_id: response.body.rules[0].scheduled_task_id,
+                    execution_status: {
+                      last_duration: 0,
+                      last_execution_date:
+                        response.body.rules[0].execution_status.last_execution_date,
                       status: 'pending',
                     },
                     monitoring: response.body.rules[0].monitoring,
                   },
                 ],
                 errors: [],
-                taskIdsFailedToBeEnabled: [],
+                task_ids_failed_to_be_enabled: [],
               });
               break;
             default:
@@ -172,7 +178,49 @@ export default ({ getService }: FtrProviderContext) => {
               break;
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.body).to.eql(defaultSuccessfulResponse);
+              expect(response.body).to.eql({
+                ...defaultSuccessfulResponse,
+                rules: [
+                  {
+                    id: response.body.rules[0].id,
+                    notify_when: 'onThrottleInterval',
+                    enabled: true,
+                    name: 'abc',
+                    tags: ['foo'],
+                    consumer: 'alertsRestrictedFixture',
+                    throttle: '1m',
+                    rule_type_id: 'test.restricted-noop',
+                    api_key_created_by_user: false,
+                    api_key_owner: response.body.rules[0].api_key_owner,
+                    created_by: 'elastic',
+                    updated_by: response.body.rules[0].updated_by,
+                    mute_all: false,
+                    muted_alert_ids: [],
+                    schedule: { interval: '1m' },
+                    actions: [],
+                    params: {},
+                    running: false,
+                    snooze_schedule: [],
+                    updated_at: response.body.rules[0].updated_at,
+                    created_at: response.body.rules[0].created_at,
+                    revision: 0,
+                    scheduled_task_id: response.body.rules[0].scheduled_task_id,
+                    ...(response.body.rules[0].last_run
+                      ? { last_run: response.body.rules[0].last_run }
+                      : {}),
+                    execution_status: {
+                      last_duration: 0,
+                      last_execution_date:
+                        response.body.rules[0].execution_status.last_execution_date,
+                      status: 'pending',
+                    },
+                    ...(response.body.rules[0].next_run
+                      ? { next_run: response.body.rules[0].next_run }
+                      : {}),
+                    monitoring: response.body.rules[0].monitoring,
+                  },
+                ],
+              });
               expect(response.statusCode).to.eql(200);
               break;
             default:
@@ -269,7 +317,49 @@ export default ({ getService }: FtrProviderContext) => {
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.body).to.eql(defaultSuccessfulResponse);
+              expect(response.body).to.eql({
+                ...defaultSuccessfulResponse,
+                rules: [
+                  {
+                    id: response.body.rules[0].id,
+                    notify_when: 'onThrottleInterval',
+                    enabled: true,
+                    name: 'abc',
+                    tags: ['foo'],
+                    consumer: 'alerts',
+                    throttle: '1m',
+                    rule_type_id: 'test.noop',
+                    api_key_created_by_user: false,
+                    api_key_owner: response.body.rules[0].api_key_owner,
+                    created_by: 'elastic',
+                    updated_by: response.body.rules[0].updated_by,
+                    mute_all: false,
+                    muted_alert_ids: [],
+                    schedule: { interval: '1m' },
+                    actions: [],
+                    params: {},
+                    running: false,
+                    snooze_schedule: [],
+                    updated_at: response.body.rules[0].updated_at,
+                    created_at: response.body.rules[0].created_at,
+                    revision: 0,
+                    scheduled_task_id: response.body.rules[0].scheduled_task_id,
+                    ...(response.body.rules[0].last_run
+                      ? { last_run: response.body.rules[0].last_run }
+                      : {}),
+                    execution_status: {
+                      last_duration: 0,
+                      last_execution_date:
+                        response.body.rules[0].execution_status.last_execution_date,
+                      status: 'pending',
+                    },
+                    ...(response.body.rules[0].next_run
+                      ? { next_run: response.body.rules[0].next_run }
+                      : {}),
+                    monitoring: response.body.rules[0].monitoring,
+                  },
+                ],
+              });
               expect(response.statusCode).to.eql(200);
               break;
             default:
@@ -283,7 +373,7 @@ export default ({ getService }: FtrProviderContext) => {
               supertest
                 .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
                 .set('kbn-xsrf', 'foo')
-                .send(getTestRuleData({ tags: ['multiple-rules-edit'] }))
+                .send(getTestRuleData({ tags: ['multiple-rules-edit-with-ids'] }))
                 .expect(200)
             )
           );
@@ -319,7 +409,126 @@ export default ({ getService }: FtrProviderContext) => {
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.body).to.eql({ ...defaultSuccessfulResponse, total: 3 });
+              expect(response.body).to.eql({
+                ...defaultSuccessfulResponse,
+                rules: [
+                  {
+                    id: response.body.rules[0].id,
+                    notify_when: 'onThrottleInterval',
+                    enabled: true,
+                    name: 'abc',
+                    tags: ['multiple-rules-edit-with-ids'],
+                    consumer: 'alertsFixture',
+                    throttle: '1m',
+                    rule_type_id: 'test.noop',
+                    api_key_created_by_user: false,
+                    api_key_owner: response.body.rules[0].api_key_owner,
+                    created_by: 'elastic',
+                    updated_by: response.body.rules[0].updated_by,
+                    mute_all: false,
+                    muted_alert_ids: [],
+                    schedule: { interval: '1m' },
+                    actions: [],
+                    params: {},
+                    running: false,
+                    snooze_schedule: [],
+                    updated_at: response.body.rules[0].updated_at,
+                    created_at: response.body.rules[0].created_at,
+                    revision: 0,
+                    scheduled_task_id: response.body.rules[0].scheduled_task_id,
+                    ...(response.body.rules[0].last_run
+                      ? { last_run: response.body.rules[0].last_run }
+                      : {}),
+                    execution_status: {
+                      last_duration: 0,
+                      last_execution_date:
+                        response.body.rules[0].execution_status.last_execution_date,
+                      status: 'pending',
+                    },
+                    ...(response.body.rules[0].next_run
+                      ? { next_run: response.body.rules[0].next_run }
+                      : {}),
+                    monitoring: response.body.rules[0].monitoring,
+                  },
+                  {
+                    id: response.body.rules[1].id,
+                    notify_when: 'onThrottleInterval',
+                    enabled: true,
+                    name: 'abc',
+                    tags: ['multiple-rules-edit-with-ids'],
+                    consumer: 'alertsFixture',
+                    throttle: '1m',
+                    rule_type_id: 'test.noop',
+                    api_key_created_by_user: false,
+                    api_key_owner: response.body.rules[1].api_key_owner,
+                    created_by: 'elastic',
+                    updated_by: response.body.rules[1].updated_by,
+                    mute_all: false,
+                    muted_alert_ids: [],
+                    schedule: { interval: '1m' },
+                    actions: [],
+                    params: {},
+                    running: false,
+                    snooze_schedule: [],
+                    updated_at: response.body.rules[1].updated_at,
+                    created_at: response.body.rules[1].created_at,
+                    revision: 0,
+                    scheduled_task_id: response.body.rules[1].scheduled_task_id,
+                    ...(response.body.rules[1].last_run
+                      ? { last_run: response.body.rules[1].last_run }
+                      : {}),
+                    execution_status: {
+                      last_duration: 0,
+                      last_execution_date:
+                        response.body.rules[1].execution_status.last_execution_date,
+                      status: 'pending',
+                    },
+                    ...(response.body.rules[1].next_run
+                      ? { next_run: response.body.rules[1].next_run }
+                      : {}),
+                    monitoring: response.body.rules[1].monitoring,
+                  },
+                  {
+                    id: response.body.rules[2].id,
+                    notify_when: 'onThrottleInterval',
+                    enabled: true,
+                    name: 'abc',
+                    tags: ['multiple-rules-edit-with-ids'],
+                    consumer: 'alertsFixture',
+                    throttle: '1m',
+                    rule_type_id: 'test.noop',
+                    api_key_created_by_user: false,
+                    api_key_owner: response.body.rules[2].api_key_owner,
+                    created_by: 'elastic',
+                    updated_by: response.body.rules[2].updated_by,
+                    mute_all: false,
+                    muted_alert_ids: [],
+                    schedule: { interval: '1m' },
+                    actions: [],
+                    params: {},
+                    running: false,
+                    snooze_schedule: [],
+                    updated_at: response.body.rules[2].updated_at,
+                    created_at: response.body.rules[2].created_at,
+                    revision: 0,
+                    scheduled_task_id: response.body.rules[2].scheduled_task_id,
+                    ...(response.body.rules[2].last_run
+                      ? { last_run: response.body.rules[2].last_run }
+                      : {}),
+                    execution_status: {
+                      last_duration: 0,
+                      last_execution_date:
+                        response.body.rules[2].execution_status.last_execution_date,
+                      status: 'pending',
+                    },
+                    ...(response.body.rules[2].next_run
+                      ? { next_run: response.body.rules[2].next_run }
+                      : {}),
+                    monitoring: response.body.rules[2].monitoring,
+                  },
+                ],
+                total: 3,
+              });
               expect(response.statusCode).to.eql(200);
               break;
             default:
@@ -333,7 +542,7 @@ export default ({ getService }: FtrProviderContext) => {
               supertest
                 .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
                 .set('kbn-xsrf', 'foo')
-                .send(getTestRuleData({ tags: ['multiple-rules-enable'] }))
+                .send(getTestRuleData({ tags: ['multiple-rules-edit-with-filter'] }))
                 .expect(200)
             )
           );
@@ -344,7 +553,7 @@ export default ({ getService }: FtrProviderContext) => {
           const response = await supertestWithoutAuth
             .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_enable`)
             .set('kbn-xsrf', 'foo')
-            .send({ filter: `alert.attributes.tags: "multiple-rules-enable"` })
+            .send({ filter: `alert.attributes.tags: "multiple-rules-edit-with-filter"` })
             .auth(user.username, user.password);
 
           switch (scenario.id) {
@@ -369,7 +578,126 @@ export default ({ getService }: FtrProviderContext) => {
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.body).to.eql({ ...defaultSuccessfulResponse, total: 3 });
+              expect(response.body).to.eql({
+                ...defaultSuccessfulResponse,
+                total: 3,
+                rules: [
+                  {
+                    id: response.body.rules[0].id,
+                    notify_when: 'onThrottleInterval',
+                    enabled: true,
+                    name: 'abc',
+                    tags: ['multiple-rules-edit-with-filter'],
+                    consumer: 'alertsFixture',
+                    throttle: '1m',
+                    rule_type_id: 'test.noop',
+                    api_key_created_by_user: false,
+                    api_key_owner: response.body.rules[0].api_key_owner,
+                    created_by: 'elastic',
+                    updated_by: response.body.rules[0].updated_by,
+                    mute_all: false,
+                    muted_alert_ids: [],
+                    schedule: { interval: '1m' },
+                    actions: [],
+                    params: {},
+                    running: false,
+                    snooze_schedule: [],
+                    updated_at: response.body.rules[0].updated_at,
+                    created_at: response.body.rules[0].created_at,
+                    revision: 0,
+                    scheduled_task_id: response.body.rules[0].scheduled_task_id,
+                    ...(response.body.rules[0].last_run
+                      ? { last_run: response.body.rules[0].last_run }
+                      : {}),
+                    execution_status: {
+                      last_duration: 0,
+                      last_execution_date:
+                        response.body.rules[0].execution_status.last_execution_date,
+                      status: 'pending',
+                    },
+                    ...(response.body.rules[0].next_run
+                      ? { next_run: response.body.rules[0].next_run }
+                      : {}),
+                    monitoring: response.body.rules[0].monitoring,
+                  },
+                  {
+                    id: response.body.rules[1].id,
+                    notify_when: 'onThrottleInterval',
+                    enabled: true,
+                    name: 'abc',
+                    tags: ['multiple-rules-edit-with-filter'],
+                    consumer: 'alertsFixture',
+                    throttle: '1m',
+                    rule_type_id: 'test.noop',
+                    api_key_created_by_user: false,
+                    api_key_owner: response.body.rules[1].api_key_owner,
+                    created_by: 'elastic',
+                    updated_by: response.body.rules[1].updated_by,
+                    mute_all: false,
+                    muted_alert_ids: [],
+                    schedule: { interval: '1m' },
+                    actions: [],
+                    params: {},
+                    running: false,
+                    snooze_schedule: [],
+                    updated_at: response.body.rules[1].updated_at,
+                    created_at: response.body.rules[1].created_at,
+                    revision: 0,
+                    scheduled_task_id: response.body.rules[1].scheduled_task_id,
+                    ...(response.body.rules[1].last_run
+                      ? { last_run: response.body.rules[1].last_run }
+                      : {}),
+                    execution_status: {
+                      last_duration: 0,
+                      last_execution_date:
+                        response.body.rules[1].execution_status.last_execution_date,
+                      status: 'pending',
+                    },
+                    ...(response.body.rules[1].next_run
+                      ? { next_run: response.body.rules[1].next_run }
+                      : {}),
+                    monitoring: response.body.rules[1].monitoring,
+                  },
+                  {
+                    id: response.body.rules[2].id,
+                    notify_when: 'onThrottleInterval',
+                    enabled: true,
+                    name: 'abc',
+                    tags: ['multiple-rules-edit-with-filter'],
+                    consumer: 'alertsFixture',
+                    throttle: '1m',
+                    rule_type_id: 'test.noop',
+                    api_key_created_by_user: false,
+                    api_key_owner: response.body.rules[2].api_key_owner,
+                    created_by: 'elastic',
+                    updated_by: response.body.rules[2].updated_by,
+                    mute_all: false,
+                    muted_alert_ids: [],
+                    schedule: { interval: '1m' },
+                    actions: [],
+                    params: {},
+                    running: false,
+                    snooze_schedule: [],
+                    updated_at: response.body.rules[2].updated_at,
+                    created_at: response.body.rules[2].created_at,
+                    revision: 0,
+                    scheduled_task_id: response.body.rules[2].scheduled_task_id,
+                    ...(response.body.rules[2].last_run
+                      ? { last_run: response.body.rules[2].last_run }
+                      : {}),
+                    execution_status: {
+                      last_duration: 0,
+                      last_execution_date:
+                        response.body.rules[2].execution_status.last_execution_date,
+                      status: 'pending',
+                    },
+                    ...(response.body.rules[2].next_run
+                      ? { next_run: response.body.rules[2].next_run }
+                      : {}),
+                    monitoring: response.body.rules[2].monitoring,
+                  },
+                ],
+              });
               expect(response.statusCode).to.eql(200);
               break;
             default:
@@ -394,7 +722,49 @@ export default ({ getService }: FtrProviderContext) => {
           switch (scenario.id) {
             // This superuser has more privileges that we think
             case 'superuser at space1':
-              expect(response.body).to.eql(defaultSuccessfulResponse);
+              expect(response.body).to.eql({
+                ...defaultSuccessfulResponse,
+                rules: [
+                  {
+                    id: response.body.rules[0].id,
+                    notify_when: 'onThrottleInterval',
+                    enabled: true,
+                    name: 'abc',
+                    tags: ['foo'],
+                    consumer: 'alertsFixture',
+                    throttle: '1m',
+                    rule_type_id: 'test.noop',
+                    api_key_created_by_user: false,
+                    api_key_owner: response.body.rules[0].api_key_owner,
+                    created_by: 'elastic',
+                    updated_by: response.body.rules[0].updated_by,
+                    mute_all: false,
+                    muted_alert_ids: [],
+                    schedule: { interval: '1m' },
+                    actions: [],
+                    params: {},
+                    running: false,
+                    snooze_schedule: [],
+                    updated_at: response.body.rules[0].updated_at,
+                    created_at: response.body.rules[0].created_at,
+                    revision: 0,
+                    scheduled_task_id: response.body.rules[0].scheduled_task_id,
+                    ...(response.body.rules[0].last_run
+                      ? { last_run: response.body.rules[0].last_run }
+                      : {}),
+                    execution_status: {
+                      last_duration: 0,
+                      last_execution_date:
+                        response.body.rules[0].execution_status.last_execution_date,
+                      status: 'pending',
+                    },
+                    ...(response.body.rules[0].next_run
+                      ? { next_run: response.body.rules[0].next_run }
+                      : {}),
+                    monitoring: response.body.rules[0].monitoring,
+                  },
+                ],
+              });
               expect(response.statusCode).to.eql(200);
               break;
             case 'global_read at space1':
@@ -511,6 +881,72 @@ export default ({ getService }: FtrProviderContext) => {
           message: "Either 'ids' or 'filter' property in method's arguments should be provided",
           statusCode: 400,
         });
+      });
+    });
+
+    describe('Actions', () => {
+      const { user, space } = SuperuserAtSpace1;
+
+      it('should return the actions correctly', async () => {
+        const { body: createdAction } = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'MY action',
+            connector_type_id: 'test.noop',
+            config: {},
+            secrets: {},
+          })
+          .expect(200);
+
+        const { body: createdRule1 } = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              enabled: false,
+              actions: [
+                {
+                  id: createdAction.id,
+                  group: 'default',
+                  params: {},
+                },
+                {
+                  id: 'system-connector-test.system-action',
+                  params: {},
+                },
+              ],
+            })
+          )
+          .expect(200);
+
+        objectRemover.add(space.id, createdRule1.id, 'rule', 'alerting');
+
+        const response = await supertestWithoutAuth
+          .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_enable`)
+          .set('kbn-xsrf', 'foo')
+          .send({ ids: [createdRule1.id] })
+          .auth(user.username, user.password);
+
+        const action = response.body.rules[0].actions[0];
+        const systemAction = response.body.rules[0].actions[1];
+        const { uuid, ...restAction } = action;
+        const { uuid: systemActionUuid, ...restSystemAction } = systemAction;
+
+        expect([restAction, restSystemAction]).to.eql([
+          {
+            id: createdAction.id,
+            connector_type_id: 'test.noop',
+            group: 'default',
+            params: {},
+          },
+          {
+            id: 'system-connector-test.system-action',
+            connector_type_id: 'test.system-action',
+            params: {},
+          },
+          ,
+        ]);
       });
     });
   });

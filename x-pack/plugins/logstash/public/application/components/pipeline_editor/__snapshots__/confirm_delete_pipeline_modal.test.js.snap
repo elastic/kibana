@@ -4,24 +4,22 @@ exports[`ConfirmDeletePipelineModal component renders as expected 1`] = `
 <EuiConfirmModal
   buttonColor="danger"
   cancelButtonText={
-    <FormattedMessage
+    <Memo(MemoizedFormattedMessage)
       defaultMessage="Cancel"
       id="xpack.logstash.confirmDeletePipelineModal.cancelButtonText"
-      values={Object {}}
     />
   }
   confirmButtonText={
-    <FormattedMessage
+    <Memo(MemoizedFormattedMessage)
       defaultMessage="Delete pipeline"
       id="xpack.logstash.confirmDeletePipelineModal.confirmButtonText"
-      values={Object {}}
     />
   }
   defaultFocusedButton="cancel"
   onCancel={[MockFunction]}
   onConfirm={[MockFunction]}
   title={
-    <FormattedMessage
+    <Memo(MemoizedFormattedMessage)
       defaultMessage="Delete pipeline {id}"
       id="xpack.logstash.confirmDeletePipelineModal.deletePipelineTitle"
       values={

@@ -6,11 +6,8 @@
  */
 
 import { useEffect, useState } from 'react';
-import {
-  IEsSearchRequest,
-  IKibanaSearchResponse,
-  isRunningResponse,
-} from '@kbn/data-plugin/common';
+import type { IKibanaSearchResponse, IEsSearchRequest } from '@kbn/search-types';
+import { isRunningResponse } from '@kbn/data-plugin/common';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useSourcererDataView } from './use_sourcerer_data_view';
 import type { RawIndicatorsResponse } from '../services/fetch_indicators';
@@ -24,9 +21,7 @@ export const useIndicatorsTotalCount = () => {
   const [count, setCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const {
-    sourcererDataView: { selectedPatterns, loading: loadingDataView },
-  } = useSourcererDataView();
+  const { selectedPatterns, loading: loadingDataView } = useSourcererDataView();
 
   useEffect(() => {
     const query = {

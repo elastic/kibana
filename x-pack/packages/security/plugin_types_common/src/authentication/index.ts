@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export type { AuthenticatedUser, UserRealm } from './authenticated_user';
-export type { User } from './user';
-export type { AuthenticationProvider } from './authentication_provider';
+// re-exporting from core package to avoid changing all imports
+export type {
+  User,
+  UserRealm,
+  AuthenticatedUser,
+  AuthenticationProvider,
+} from '@kbn/core-security-common';

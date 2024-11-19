@@ -14,6 +14,7 @@ import {
 } from '@kbn/security-solution-plugin/common/constants';
 import { DetectionAlert } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
+import { setAlertAssignees } from '../../../../utils';
 import {
   createAlertsIndex,
   createRule,
@@ -22,10 +23,9 @@ import {
   getAlertsByIds,
   getQueryAlertIds,
   getRuleForAlertTesting,
-  setAlertAssignees,
   waitForAlertsToBePresent,
   waitForRuleSuccess,
-} from '../../../../utils';
+} from '../../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 
@@ -39,7 +39,7 @@ export default ({ getService }: FtrProviderContext) => {
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const path = dataPathBuilder.getPath('auditbeat/hosts');
 
-  describe('@ess @serverless Alert User Assignment - ESS & Serverless', () => {
+  describe('@ess @serverless @serverlessQA Alert User Assignment - ESS & Serverless', () => {
     describe('validation checks', () => {
       it('should give errors when no alert ids are provided', async () => {
         const { body } = await supertest
@@ -118,7 +118,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccess({ supertest, log, id });
           await waitForAlertsToBePresent(supertest, log, 10, [id]);
           const alerts = await getAlertsByIds(supertest, log, [id]);
-          const alertIds = alerts.hits.hits.map((alert) => alert._id);
+          const alertIds = alerts.hits.hits.map((alert) => alert._id!);
           const alertId = alertIds[0];
 
           await supertest
@@ -153,7 +153,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccess({ supertest, log, id });
           await waitForAlertsToBePresent(supertest, log, 10, [id]);
           const alerts = await getAlertsByIds(supertest, log, [id]);
-          const alertIds = alerts.hits.hits.map((alert) => alert._id);
+          const alertIds = alerts.hits.hits.map((alert) => alert._id!);
 
           await supertest
             .post(DETECTION_ENGINE_ALERT_ASSIGNEES_URL)
@@ -190,7 +190,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccess({ supertest, log, id });
           await waitForAlertsToBePresent(supertest, log, 10, [id]);
           const alerts = await getAlertsByIds(supertest, log, [id]);
-          const alertIds = alerts.hits.hits.map((alert) => alert._id);
+          const alertIds = alerts.hits.hits.map((alert) => alert._id!);
           const alertId = alertIds[0];
 
           // Assign users
@@ -242,7 +242,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccess({ supertest, log, id });
           await waitForAlertsToBePresent(supertest, log, 10, [id]);
           const alerts = await getAlertsByIds(supertest, log, [id]);
-          const alertIds = alerts.hits.hits.map((alert) => alert._id);
+          const alertIds = alerts.hits.hits.map((alert) => alert._id!);
 
           // Assign users
           await supertest
@@ -293,7 +293,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccess({ supertest, log, id });
           await waitForAlertsToBePresent(supertest, log, 10, [id]);
           const alerts = await getAlertsByIds(supertest, log, [id]);
-          const alertIds = alerts.hits.hits.map((alert) => alert._id);
+          const alertIds = alerts.hits.hits.map((alert) => alert._id!);
 
           await supertest
             .post(DETECTION_ENGINE_ALERT_ASSIGNEES_URL)
@@ -330,7 +330,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccess({ supertest, log, id });
           await waitForAlertsToBePresent(supertest, log, 10, [id]);
           const alerts = await getAlertsByIds(supertest, log, [id]);
-          const alertIds = alerts.hits.hits.map((alert) => alert._id);
+          const alertIds = alerts.hits.hits.map((alert) => alert._id!);
 
           await supertest
             .post(DETECTION_ENGINE_ALERT_ASSIGNEES_URL)
@@ -376,7 +376,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccess({ supertest, log, id });
           await waitForAlertsToBePresent(supertest, log, 10, [id]);
           const alerts = await getAlertsByIds(supertest, log, [id]);
-          const alertIds = alerts.hits.hits.map((alert) => alert._id);
+          const alertIds = alerts.hits.hits.map((alert) => alert._id!);
 
           await supertest
             .post(DETECTION_ENGINE_ALERT_ASSIGNEES_URL)
@@ -425,7 +425,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccess({ supertest, log, id });
           await waitForAlertsToBePresent(supertest, log, 10, [id]);
           const alerts = await getAlertsByIds(supertest, log, [id]);
-          const alertIds = alerts.hits.hits.map((alert) => alert._id);
+          const alertIds = alerts.hits.hits.map((alert) => alert._id!);
 
           await supertest
             .post(DETECTION_ENGINE_ALERT_ASSIGNEES_URL)
@@ -474,7 +474,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccess({ supertest, log, id });
           await waitForAlertsToBePresent(supertest, log, 10, [id]);
           const alerts = await getAlertsByIds(supertest, log, [id]);
-          const alertIds = alerts.hits.hits.map((alert) => alert._id);
+          const alertIds = alerts.hits.hits.map((alert) => alert._id!);
 
           await supertest
             .post(DETECTION_ENGINE_ALERT_ASSIGNEES_URL)

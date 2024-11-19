@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { schema } from '../..';
+import { META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES } from '../oas_meta_fields';
 
 test('handles object as input', () => {
   const type = schema.recordOf(schema.string(), schema.string());
@@ -207,4 +209,15 @@ describe('#extendsDeep', () => {
       forbidSchema.validate({ key: { foo: 'test', bar: 'test' } })
     ).toThrowErrorMatchingInlineSnapshot(`"[key.bar]: definition for this key is missing"`);
   });
+});
+
+test('meta', () => {
+  const stringSchema = schema.string();
+  const type = schema.mapOf(schema.string(), stringSchema);
+  const result = type
+    .getSchema()
+    .describe()
+    .metas![0][META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES]();
+
+  expect(result).toBe(stringSchema.getSchema());
 });

@@ -7,25 +7,42 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
+  let roleAuthc: RoleCredentials;
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('translations', () => {
+    before(async () => {
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
+    });
+    after(async () => {
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+    });
     it(`returns the translations with the correct headers`, async () => {
-      await supertest.get('/translations/en.json').then((response) => {
-        expect(response.body.locale).to.eql('en');
+      const response = await supertestWithoutAuth
+        .get('/translations/en.json')
+        .set(svlCommonApi.getInternalRequestHeader())
+        .set(roleAuthc.apiKeyHeader);
+      expect(response.body.locale).to.eql('en');
 
-        expect(response.header).to.have.property('content-type', 'application/json; charset=utf-8');
-        expect(response.header).to.have.property('cache-control', 'must-revalidate');
-        expect(response.header).to.have.property('etag');
-      });
+      expect(response.header).to.have.property('content-type', 'application/json; charset=utf-8');
+      expect(response.header).to.have.property(
+        'cache-control',
+        'public, max-age=31536000, immutable'
+      );
+      expect(response.header).not.to.have.property('etag');
     });
 
     it(`returns a 404 when not using the correct locale`, async () => {
-      await supertest.get('/translations/foo.json').then((response) => {
-        expect(response.status).to.eql(404);
-      });
+      const response = await supertestWithoutAuth
+        .get('/translations/foo.json')
+        .set(svlCommonApi.getInternalRequestHeader())
+        .set(roleAuthc.apiKeyHeader);
+      expect(response.status).to.eql(404);
     });
   });
 }

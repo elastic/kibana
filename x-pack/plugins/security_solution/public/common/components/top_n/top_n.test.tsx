@@ -10,8 +10,7 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 
-import '../../mock/match_media';
-import { TestProviders, mockIndexPattern } from '../../mock';
+import { TestProviders, mockDataViewSpec } from '../../mock';
 
 import { allEvents, defaultOptions } from './helpers';
 import type { Props as TopNProps } from './top_n';
@@ -44,7 +43,7 @@ jest.mock('uuid', () => {
 });
 
 const field = 'host.name';
-const combinedQueries = {
+const filterQuery = {
   bool: {
     must: [],
     filter: [
@@ -108,7 +107,7 @@ describe('TopN', () => {
     field,
     filters: [],
     from: '2020-04-14T00:31:47.695Z',
-    indexPattern: mockIndexPattern,
+    indexPattern: mockDataViewSpec,
     options: defaultOptions,
     query,
     setAbsoluteRangeDatePickerTarget: InputsModelId.global,
@@ -200,7 +199,7 @@ describe('TopN', () => {
       };
       wrapper = mount(
         <TestProviders>
-          <TopN {...testProps} combinedQueries={JSON.stringify(combinedQueries)} />
+          <TopN {...testProps} filterQuery={JSON.stringify(filterQuery)} />
         </TestProviders>
       );
     });

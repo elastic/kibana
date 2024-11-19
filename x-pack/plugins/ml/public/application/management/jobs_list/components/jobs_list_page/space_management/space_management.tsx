@@ -4,9 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useState, FC, useCallback, useMemo, useRef } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { SearchFilterConfig, EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiSpacer,
@@ -14,8 +16,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
-  SearchFilterConfig,
-  EuiBasicTableColumn,
   EuiProgress,
 } from '@elastic/eui';
 
@@ -34,10 +34,11 @@ import { getFilters } from './filters';
 
 interface Props {
   spacesApi?: SpacesPluginStart;
-  setCurrentTab: (tabId: MlSavedObjectType) => void;
+  onTabChange: (tabId: MlSavedObjectType) => void;
+  onReload: React.Dispatch<React.SetStateAction<(() => void) | null>>;
 }
 
-export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
+export const SpaceManagement: FC<Props> = ({ spacesApi, onTabChange, onReload }) => {
   const { getList } = useManagementApiService();
 
   const [currentTabId, setCurrentTabId] = useState<MlSavedObjectType | null>(null);
@@ -101,12 +102,19 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
     [getList, loadingTab]
   );
 
+  useEffect(() => {
+    onReload(() => () => refresh(currentTabId));
+    return () => {
+      onReload(null);
+    };
+  }, [currentTabId, refresh, onReload]);
+
   useEffect(
     function refreshOnTabChange() {
       setItems(undefined);
       if (currentTabId !== null) {
         setColumns(createColumns());
-        setCurrentTab(currentTabId);
+        onTabChange(currentTabId);
         refresh(currentTabId);
         setPageIndex(0);
       }

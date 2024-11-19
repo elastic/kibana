@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { IncomingHttpHeaders } from 'http';
@@ -12,7 +13,7 @@ import { stringify } from 'querystring';
 import { errors, DiagnosticResult, RequestBody, Client } from '@elastic/elasticsearch';
 import numeral from '@elastic/numeral';
 import type { Logger } from '@kbn/logging';
-import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
+import { isMaximumResponseSizeExceededError, type ElasticsearchErrorDetails } from '@kbn/es-errors';
 import type { ElasticsearchApiToRedactInLogs } from '@kbn/core-elasticsearch-server';
 import { getEcsResponseLog } from './get_ecs_response_log';
 
@@ -171,6 +172,16 @@ function getQueryMessage(
   }
 }
 
+function getResponseSizeExceededErrorMessage(error: errors.RequestAbortedError): string {
+  if (error.meta) {
+    const params = error.meta.meta.request.params;
+    return `Request against ${params.method} ${params.path} was aborted: ${error.message}`;
+  } else {
+    // in theory meta is always populated for such errors, but better safe than sorry
+    return `Request was aborted: ${error.message}`;
+  }
+}
+
 export const instrumentEsQueryAndDeprecationLogger = ({
   logger,
   client,
@@ -184,12 +195,17 @@ export const instrumentEsQueryAndDeprecationLogger = ({
 }) => {
   const queryLogger = logger.get('query', type);
   const deprecationLogger = logger.get('deprecation');
+  const warningLogger = logger.get('warnings'); // elasticsearch.warnings
 
   client.diagnostic.on('response', (error, event) => {
     // we could check this once and not subscribe to response events if both are disabled,
     // but then we would not be supporting hot reload of the logging configuration.
     const logQuery = queryLogger.isLevelEnabled('debug');
     const logDeprecation = deprecationLogger.isLevelEnabled('debug');
+
+    if (error && isMaximumResponseSizeExceededError(error)) {
+      warningLogger.warn(getResponseSizeExceededErrorMessage(error));
+    }
 
     if (event && (logQuery || logDeprecation)) {
       const bytes = getContentLength(event.headers);

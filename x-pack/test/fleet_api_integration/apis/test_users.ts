@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SecurityService } from '../../../../test/common/services/security/security';
+import type { SecurityService } from '@kbn/ftr-common-functional-ui-services';
 
 export const testUsers: {
   [rollName: string]: { username: string; password: string; permissions?: any };
@@ -19,6 +19,107 @@ export const testUsers: {
       spaces: ['*'],
     },
     username: 'fleet_all_int_all',
+    password: 'changeme',
+  },
+  fleet_all_int_all_default_space_only: {
+    permissions: {
+      feature: {
+        fleetv2: ['all'],
+        fleet: ['all'],
+      },
+      spaces: ['default'],
+    },
+    username: 'fleet_all_int_all_default_space_only',
+    password: 'changeme',
+  },
+  fleet_read_only: {
+    permissions: {
+      feature: {
+        fleetv2: ['read'],
+      },
+      spaces: ['*'],
+    },
+    username: 'fleet_read_only',
+    password: 'changeme',
+  },
+  fleet_minimal_all_only: {
+    permissions: {
+      feature: {
+        fleetv2: ['minimal_all'],
+      },
+      spaces: ['*'],
+    },
+    username: 'fleet_minimal_all_only',
+    password: 'changeme',
+  },
+  fleet_minimal_read_only: {
+    permissions: {
+      feature: {
+        fleetv2: ['minimal_read'],
+      },
+      spaces: ['*'],
+    },
+    username: 'fleet_minimal_read_only',
+    password: 'changeme',
+  },
+  fleet_agents_read_only: {
+    permissions: {
+      feature: {
+        fleetv2: ['agents_read'],
+      },
+      spaces: ['*'],
+    },
+    username: 'fleet_agents_read_only',
+    password: 'changeme',
+  },
+  fleet_agents_all_only: {
+    permissions: {
+      feature: {
+        fleetv2: ['agents_all'],
+      },
+      spaces: ['*'],
+    },
+    username: 'fleet_agents_all_only',
+    password: 'changeme',
+  },
+  fleet_settings_read_only: {
+    permissions: {
+      feature: {
+        fleetv2: ['settings_read'],
+      },
+      spaces: ['*'],
+    },
+    username: 'fleet_settings_read_only',
+    password: 'changeme',
+  },
+  fleet_settings_all_only: {
+    permissions: {
+      feature: {
+        fleetv2: ['settings_all'],
+      },
+      spaces: ['*'],
+    },
+    username: 'fleet_settings_all_only',
+    password: 'changeme',
+  },
+  fleet_agent_policies_read_only: {
+    permissions: {
+      feature: {
+        fleetv2: ['agent_policies_read'],
+      },
+      spaces: ['*'],
+    },
+    username: 'fleet_agent_policies_read_only',
+    password: 'changeme',
+  },
+  fleet_agent_policies_all_only: {
+    permissions: {
+      feature: {
+        fleetv2: ['agent_policies_all'],
+      },
+      spaces: ['*'],
+    },
+    username: 'fleet_agent_policies_all_only',
     password: 'changeme',
   },
   setup: {
@@ -141,9 +242,12 @@ export const testUsers: {
   },
 };
 
-export const setupTestUsers = async (security: SecurityService) => {
+export const setupTestUsers = async (security: SecurityService, spaceAwarenessEnabled = false) => {
   for (const roleName in testUsers) {
-    if (testUsers.hasOwnProperty(roleName)) {
+    if (!spaceAwarenessEnabled && roleName === 'fleet_all_int_all_default_space_only') {
+      continue;
+    }
+    if (Object.hasOwn(testUsers, roleName)) {
       const user = testUsers[roleName];
 
       if (user.permissions) {

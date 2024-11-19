@@ -1,0 +1,22 @@
+{
+  "connector.delete": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "delete_sync_jobs": "__flag__"
+    },
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_connector/{connector_id}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/delete-connector-api.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

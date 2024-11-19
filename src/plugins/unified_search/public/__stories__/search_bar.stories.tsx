@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { action } from '@storybook/addon-actions';
-import type { DataViewBase, Query } from '@kbn/es-query';
+import { DataViewBase, Query } from '@kbn/es-query';
 import { storiesOf } from '@storybook/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -566,7 +567,7 @@ storiesOf('SearchBar', module)
       ],
     } as unknown as SearchBarProps)
   )
-  .add('with dataviewPicker with ESQL', () =>
+  .add('with dataviewPicker with ES|QL', () =>
     wrapSearchBarInContext({
       dataViewPickerComponentProps: {
         currentDataViewId: '1234',
@@ -582,13 +583,13 @@ storiesOf('SearchBar', module)
       },
     } as SearchBarProps)
   )
-  .add('with dataviewPicker with ESQL and ESQL query', () =>
+  .add('with dataviewPicker with ES|QL and ES|QL query', () =>
     wrapSearchBarInContext({
       dataViewPickerComponentProps: {
         currentDataViewId: '1234',
         trigger: {
           'data-test-subj': 'dataView-switch-link',
-          label: 'ESQL',
+          label: 'ES|QL',
           title: 'ESQL',
         },
         onChangeDataView: action('onChangeDataView'),
@@ -599,13 +600,13 @@ storiesOf('SearchBar', module)
       query: { esql: 'from dataview | project field1, field2' },
     } as unknown as SearchBarProps<Query>)
   )
-  .add('with dataviewPicker with ESQL and large ESQL query', () =>
+  .add('with dataviewPicker with ES|QL and large ES|QL query', () =>
     wrapSearchBarInContext({
       dataViewPickerComponentProps: {
         currentDataViewId: '1234',
         trigger: {
           'data-test-subj': 'dataView-switch-link',
-          label: 'ESQL',
+          label: 'ES|QL',
           title: 'ESQL',
         },
         onChangeDataView: action('onChangeDataView'),
@@ -618,13 +619,13 @@ storiesOf('SearchBar', module)
       },
     } as unknown as SearchBarProps<Query>)
   )
-  .add('with dataviewPicker with ESQL and errors in ESQL query', () =>
+  .add('with dataviewPicker with ES|QL and errors in ES|QL query', () =>
     wrapSearchBarInContext({
       dataViewPickerComponentProps: {
         currentDataViewId: '1234',
         trigger: {
           'data-test-subj': 'dataView-switch-link',
-          label: 'ESQL',
+          label: 'ES|QL',
           title: 'ESQL',
         },
         onChangeDataView: action('onChangeDataView'),
@@ -710,5 +711,40 @@ storiesOf('SearchBar', module)
       },
       submitButtonStyle: 'full',
       renderQueryInputAppend: () => <EuiButton onClick={() => {}}>Append</EuiButton>,
+    })
+  )
+  .add('with additional query bar menu items', () =>
+    wrapSearchBarInContext({
+      showFilterBar: true,
+      additionalQueryBarMenuItems: {
+        items: [
+          {
+            name: 'Observability rule types',
+            icon: 'logoObservability',
+          },
+          {
+            name: 'Security rule types',
+            icon: 'logoSecurity',
+          },
+          {
+            name: 'Status',
+            panel: 'status-panel',
+          },
+        ],
+        panels: [
+          {
+            id: 'status-panel',
+            title: 'Status',
+            items: [
+              {
+                name: 'Active',
+              },
+              {
+                name: 'Inactive',
+              },
+            ],
+          },
+        ],
+      },
     })
   );

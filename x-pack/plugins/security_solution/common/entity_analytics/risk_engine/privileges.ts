@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import type { EntityAnalyticsPrivileges } from '../../api/entity_analytics/common';
+import type { NonEmptyArray } from 'fp-ts/NonEmptyArray';
+import type { EntityAnalyticsPrivileges } from '../../api/entity_analytics';
+import type { RiskEngineIndexPrivilege } from './constants';
 import {
   RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES,
   RISK_ENGINE_REQUIRED_ES_INDEX_PRIVILEGES,
@@ -20,7 +22,8 @@ export interface MissingPrivileges {
 }
 
 export const getMissingIndexPrivileges = (
-  privileges: EntityAnalyticsPrivileges['privileges']['elasticsearch']['index']
+  privileges: EntityAnalyticsPrivileges['privileges']['elasticsearch']['index'],
+  required: NonEmptyArray<RiskEngineIndexPrivilege> = ['read', 'write']
 ): MissingIndexPrivileges => {
   const missingIndexPrivileges: MissingIndexPrivileges = [];
 
@@ -28,10 +31,10 @@ export const getMissingIndexPrivileges = (
     return missingIndexPrivileges;
   }
 
-  for (const [indexName, requiredPrivileges] of Object.entries(
+  for (const [indexName, defaultRequiredPrivileges] of Object.entries(
     RISK_ENGINE_REQUIRED_ES_INDEX_PRIVILEGES
   )) {
-    const missingPrivileges = requiredPrivileges.filter(
+    const missingPrivileges = (required || defaultRequiredPrivileges).filter(
       (privilege) => !privileges[indexName][privilege]
     );
 
@@ -44,9 +47,13 @@ export const getMissingIndexPrivileges = (
 };
 
 export const getMissingRiskEnginePrivileges = (
-  privileges: EntityAnalyticsPrivileges['privileges']
+  privileges: EntityAnalyticsPrivileges['privileges'],
+  required?: NonEmptyArray<RiskEngineIndexPrivilege>
 ): MissingPrivileges => {
-  const missingIndexPrivileges = getMissingIndexPrivileges(privileges.elasticsearch.index);
+  const missingIndexPrivileges = getMissingIndexPrivileges(
+    privileges.elasticsearch.index,
+    required
+  );
   const missingClusterPrivileges = RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES.filter(
     (privilege) => !privileges.elasticsearch.cluster?.[privilege]
   );

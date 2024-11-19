@@ -104,8 +104,8 @@ describe('useTourContext', () => {
           wrapper: TourContextProvider,
         });
         await waitForNextUpdate();
-        result.current.setStep(tourId, 7);
-        expect(result.current.activeStep).toBe(7);
+        result.current.setStep(tourId, 6);
+        expect(result.current.activeStep).toBe(6);
       });
     });
 
@@ -115,6 +115,7 @@ describe('useTourContext', () => {
           wrapper: TourContextProvider,
         });
         await waitForNextUpdate();
+        // @ts-expect-error testing invalid step
         result.current.setStep(tourId, 88);
         expect(result.current.activeStep).toBe(1);
       });

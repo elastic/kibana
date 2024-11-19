@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { MlFeatures } from '../../../common/constants/app';
 import type { MLSavedObjectService } from '../../saved_objects';
@@ -273,7 +273,7 @@ export class NotificationsService {
 
     return res.reduce((acc, curr) => {
       for (const levelKey in curr) {
-        if (curr.hasOwnProperty(levelKey)) {
+        if (Object.hasOwn(curr, levelKey)) {
           acc[levelKey as MlNotificationMessageLevel] +=
             curr[levelKey as MlNotificationMessageLevel];
         }

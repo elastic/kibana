@@ -19,6 +19,9 @@ export function disableElasticsearchInternalCollectionRoute(server: MonitoringCo
     validate: {
       params: createValidationFunction(postDisableInternalCollectionRequestParamsRT),
     },
+    options: {
+      access: 'internal',
+    },
     handler: async (req) => {
       // NOTE using try/catch because checkMonitoringAuth is expected to throw
       // an error when current logged-in user doesn't have permission to read

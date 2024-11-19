@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createAnalytics, type AnalyticsClient } from '@kbn/analytics-client';
+import { createAnalytics, type AnalyticsClient } from '@elastic/ebt/client';
 import { loggerMock } from '@kbn/logging-mocks';
 import { registerPerformanceMetricEventType, reportPerformanceMetricEvent } from './helpers';
 import { METRIC_EVENT_SCHEMA } from './schema';
@@ -18,7 +19,6 @@ describe('performance metric event helpers', () => {
     beforeEach(() => {
       analyticsClient = createAnalytics({
         isDev: true, // Explicitly setting `true` to ensure we have event validation to make sure the events sent pass our validation.
-        sendTo: 'staging',
         logger: loggerMock.create(),
       });
     });
@@ -39,7 +39,6 @@ describe('performance metric event helpers', () => {
     beforeEach(() => {
       analyticsClient = createAnalytics({
         isDev: true, // Explicitly setting `true` to ensure we have event validation to make sure the events sent pass our validation.
-        sendTo: 'staging',
         logger: loggerMock.create(),
       });
       registerPerformanceMetricEventType(analyticsClient);

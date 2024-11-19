@@ -7,11 +7,8 @@
 
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 
-import {
-  getDataGridSchemaFromKibanaFieldType,
-  MultiColumnSorter,
-  multiColumnSortFactory,
-} from './common';
+import type { MultiColumnSorter } from './common';
+import { getDataGridSchemaFromKibanaFieldType, multiColumnSortFactory } from './common';
 
 const data = [
   { s: 'a', n: 1 },

@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import type { RootSchema } from '@kbn/analytics-client';
-import type { TelemetryEventTypes } from '../../constants';
+import type { RootSchema } from '@kbn/core/public';
+
+export enum DataQualityEventTypes {
+  DataQualityIndexChecked = 'Data Quality Index Checked',
+  DataQualityCheckAllCompleted = 'Data Quality Check All Completed',
+}
 
 export type ReportDataQualityIndexCheckedParams = ReportDataQualityCheckAllCompletedParams & {
   errorCount?: number;
   ilmPhase?: string;
-  indexId: string;
+  indexId?: string | null;
   indexName: string;
   sameFamilyFields?: string[];
   unallowedMappingFields?: string[];
@@ -34,16 +38,12 @@ export interface ReportDataQualityCheckAllCompletedParams {
   timeConsumedMs?: number;
 }
 
-export interface DataQualityTelemetryIndexCheckedEvent {
-  eventType: TelemetryEventTypes.DataQualityIndexChecked;
-  schema: RootSchema<ReportDataQualityIndexCheckedParams>;
+export interface DataQualityTelemetryEventsMap {
+  [DataQualityEventTypes.DataQualityIndexChecked]: ReportDataQualityIndexCheckedParams;
+  [DataQualityEventTypes.DataQualityCheckAllCompleted]: ReportDataQualityCheckAllCompletedParams;
 }
 
-export interface DataQualityTelemetryCheckAllCompletedEvent {
-  eventType: TelemetryEventTypes.DataQualityCheckAllCompleted;
-  schema: RootSchema<ReportDataQualityCheckAllCompletedParams>;
+export interface DataQualityTelemetryEvents {
+  eventType: DataQualityEventTypes;
+  schema: RootSchema<DataQualityTelemetryEventsMap[DataQualityEventTypes]>;
 }
-
-export type DataQualityTelemetryEvents =
-  | DataQualityTelemetryIndexCheckedEvent
-  | DataQualityTelemetryCheckAllCompletedEvent;

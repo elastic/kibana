@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -17,7 +18,6 @@ import {
   getKibanaMigratorTestKit,
   startElasticsearch,
 } from '../../migrations/kibana_migrator_test_kit';
-import { delay } from '../../migrations/test_utils';
 import { getBaseMigratorParams } from '../../migrations/fixtures/zdt_base.fixtures';
 
 export const logFilePath = Path.join(__dirname, 'bulk_update.test.log');
@@ -30,7 +30,11 @@ describe('SOR - bulk_update API', () => {
     esServer = await startElasticsearch();
   });
 
-  const getType = (version: 'v1' | 'v2'): SavedObjectsType => {
+  afterAll(async () => {
+    await esServer?.stop();
+  });
+
+  const getCrossVersionType = (version: 'v1' | 'v2'): SavedObjectsType => {
     const versionMap: SavedObjectsModelVersionMap = {
       1: {
         changes: [],
@@ -117,16 +121,29 @@ describe('SOR - bulk_update API', () => {
       modelVersions: versionOtherMap,
     };
   };
-  afterAll(async () => {
-    await esServer?.stop();
-    await delay(10);
-  });
+
+  const getFullUpdateType = (): SavedObjectsType => {
+    return {
+      name: 'update-test-type',
+      hidden: false,
+      namespaceType: 'single',
+      mappings: {
+        dynamic: false,
+        properties: {},
+      },
+      management: {
+        importableAndExportable: true,
+      },
+      switchToModelVersionAt: '8.10.0',
+      modelVersions: {},
+    };
+  };
 
   const setup = async () => {
     const { runMigrations: runMigrationV1, savedObjectsRepository: repositoryV1 } =
       await getKibanaMigratorTestKit({
         ...getBaseMigratorParams(),
-        types: [getType('v1'), getOtherType('v1')],
+        types: [getCrossVersionType('v1'), getOtherType('v1')],
       });
     await runMigrationV1();
 
@@ -136,7 +153,7 @@ describe('SOR - bulk_update API', () => {
       client: esClient,
     } = await getKibanaMigratorTestKit({
       ...getBaseMigratorParams(),
-      types: [getType('v2'), getOtherType('v2')],
+      types: [getCrossVersionType('v2'), getOtherType('v2'), getFullUpdateType()],
     });
     await runMigrationV2();
 
@@ -223,6 +240,49 @@ describe('SOR - bulk_update API', () => {
         },
       })
     );
+  });
+
+  it('supports update with attributes override', async () => {
+    const { repositoryV2: repository } = await setup();
+
+    await repository.create('update-test-type', { foo: 'bar' }, { id: 'my-id' });
+
+    let docs = await repository.bulkGet([{ type: 'update-test-type', id: 'my-id' }]);
+    const [doc] = docs.saved_objects;
+
+    expect(doc.attributes).toEqual({
+      foo: 'bar',
+    });
+
+    await repository.bulkUpdate([
+      { type: 'update-test-type', id: doc.id, attributes: { hello: 'dolly' } },
+    ]);
+
+    docs = await repository.bulkGet([{ type: 'update-test-type', id: 'my-id' }]);
+    const [doc1] = docs.saved_objects;
+
+    expect(doc1.attributes).toEqual({
+      foo: 'bar',
+      hello: 'dolly',
+    });
+
+    await repository.bulkUpdate([
+      {
+        type: 'update-test-type',
+        id: doc1.id,
+        attributes: {
+          over: '9000',
+        },
+        mergeAttributes: false,
+      },
+    ]);
+
+    docs = await repository.bulkGet([{ type: 'update-test-type', id: 'my-id' }]);
+    const [doc2] = docs.saved_objects;
+
+    expect(doc2.attributes).toEqual({
+      over: '9000',
+    });
   });
 
   const fetchDoc = async (client: ElasticsearchClient, type: string, id: string) => {

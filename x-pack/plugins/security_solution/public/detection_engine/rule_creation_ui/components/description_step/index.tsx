@@ -47,6 +47,9 @@ import {
   buildAlertSuppressionWindowDescription,
   buildAlertSuppressionMissingFieldsDescription,
   buildHighlightedFieldsOverrideDescription,
+  buildSetupDescription,
+  getQueryLabel,
+  buildIntervalDescription,
 } from './helpers';
 import * as i18n from './translations';
 import { buildMlJobsDescription } from './build_ml_jobs_description';
@@ -62,6 +65,13 @@ import {
   isSuppressionRuleConfiguredWithGroupBy,
   isSuppressionRuleConfiguredWithDuration,
 } from '../../../../../common/detection_engine/utils';
+import {
+  ALERT_SUPPRESSION_DURATION_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
+  ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
+  ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
+} from '../../../rule_creation/components/alert_suppression_edit';
+import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../rule_creation/components/threshold_alert_suppression_edit';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
   max-width: 600px;
@@ -76,6 +86,7 @@ interface StepRuleDescriptionProps<T> {
   columns?: 'multi' | 'single' | 'singleSplit';
   data: unknown;
   indexPatterns?: DataViewBase;
+  // @ts-expect-error upgrade typescript v4.9.5
   schema: FormSchema<T>;
 }
 
@@ -153,6 +164,7 @@ export const StepRuleDescription = memo(StepRuleDescriptionComponent);
 
 export const buildListItems = <T,>(
   data: unknown,
+  // @ts-expect-error upgrade typescript v4.9.5
   schema: FormSchema<T>,
   filterManager: FilterManager,
   license: LicenseService,
@@ -198,18 +210,21 @@ export const getDescriptionItem = (
     const query = get('queryBar.query.query', data);
     const savedId = get('queryBar.saved_id', data);
     const savedQueryName = get('queryBar.title', data);
+    const ruleType: Type = get('ruleType', data);
+    const queryLabel = getQueryLabel(ruleType);
     return buildQueryBarDescription({
       field,
       filters,
       filterManager,
       query,
+      queryLabel,
       savedId,
       savedQueryName,
       indexPatterns,
     });
   } else if (field === 'responseActions') {
     return [];
-  } else if (field === 'groupByFields') {
+  } else if (field === ALERT_SUPPRESSION_FIELDS_FIELD_NAME) {
     const ruleType: Type = get('ruleType', data);
 
     const ruleCanHaveGroupByFields = isSuppressionRuleConfiguredWithGroupBy(ruleType);
@@ -217,10 +232,10 @@ export const getDescriptionItem = (
       return [];
     }
     const values: string[] = get(field, data);
-    return buildAlertSuppressionDescription(label, values);
-  } else if (field === 'groupByRadioSelection') {
+    return buildAlertSuppressionDescription(label, values, ruleType);
+  } else if (field === ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME) {
     return [];
-  } else if (field === 'groupByDuration') {
+  } else if (field === ALERT_SUPPRESSION_DURATION_FIELD_NAME) {
     const ruleType: Type = get('ruleType', data);
 
     const ruleCanHaveDuration = isSuppressionRuleConfiguredWithDuration(ruleType);
@@ -231,20 +246,21 @@ export const getDescriptionItem = (
     // threshold rule has suppression duration without grouping fields, but suppression should be explicitly enabled by user
     // query rule have suppression duration only if group by fields selected
     const showDuration = isThresholdRule(ruleType)
-      ? get('enableThresholdSuppression', data) === true
-      : get('groupByFields', data).length > 0;
+      ? get(THRESHOLD_ALERT_SUPPRESSION_ENABLED, data) === true
+      : get(ALERT_SUPPRESSION_FIELDS_FIELD_NAME, data).length > 0;
 
     if (showDuration) {
       const value: Duration = get(field, data);
       return buildAlertSuppressionWindowDescription(
         label,
         value,
-        get('groupByRadioSelection', data)
+        get(ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME, data),
+        ruleType
       );
     } else {
       return [];
     }
-  } else if (field === 'suppressionMissingFields') {
+  } else if (field === ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME) {
     const ruleType: Type = get('ruleType', data);
     const ruleCanHaveSuppressionMissingFields =
       isSuppressionRuleConfiguredWithMissingFields(ruleType);
@@ -252,9 +268,9 @@ export const getDescriptionItem = (
     if (!ruleCanHaveSuppressionMissingFields) {
       return [];
     }
-    if (get('groupByFields', data).length > 0) {
+    if (get(ALERT_SUPPRESSION_FIELDS_FIELD_NAME, data).length > 0) {
       const value = get(field, data);
-      return buildAlertSuppressionMissingFieldsDescription(label, value);
+      return buildAlertSuppressionMissingFieldsDescription(label, value, ruleType);
     } else {
       return [];
     }
@@ -299,6 +315,9 @@ export const getDescriptionItem = (
   } else if (field === 'note') {
     const val: string = get(field, data);
     return buildNoteDescription(label, val);
+  } else if (field === 'setup') {
+    const val: string = get(field, data);
+    return buildSetupDescription(label, val);
   } else if (field === 'ruleType') {
     const ruleType: Type = get(field, data);
     return buildRuleTypeDescription(label, ruleType);
@@ -331,6 +350,11 @@ export const getDescriptionItem = (
     return get('isBuildingBlock', data)
       ? [{ title: i18n.BUILDING_BLOCK_LABEL, description: i18n.BUILDING_BLOCK_DESCRIPTION }]
       : [];
+  } else if (['interval', 'from'].includes(field)) {
+    return buildIntervalDescription(label, get(field, data));
+  } else if (field === 'maxSignals') {
+    const value: number | undefined = get(field, data);
+    return value ? [{ title: label, description: value }] : [];
   }
 
   const description: string = get(field, data);

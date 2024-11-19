@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React, { createContext, FC, useContext, useMemo } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
+import type { ExperimentalFeatures } from '../../server/config';
 
 export interface TransformEnabledFeatures {
   showNodeInfo: boolean;
@@ -14,9 +16,11 @@ export const EnabledFeaturesContext = createContext({
   showNodeInfo: true,
 });
 
-export const EnabledFeaturesContextProvider: FC<{ enabledFeatures: TransformEnabledFeatures }> = (
-  props
-) => {
+export const EnabledFeaturesContextProvider: FC<
+  PropsWithChildren<{
+    enabledFeatures: TransformEnabledFeatures;
+  }>
+> = (props) => {
   const { children, enabledFeatures } = props;
   return (
     <EnabledFeaturesContext.Provider value={enabledFeatures}>
@@ -25,8 +29,31 @@ export const EnabledFeaturesContextProvider: FC<{ enabledFeatures: TransformEnab
   );
 };
 
+export const ExperimentalFeaturesContext = createContext<ExperimentalFeatures>({
+  ruleFormV2Enabled: false,
+});
+export const ExperimentalFeaturesContextProvider: FC<
+  PropsWithChildren<{
+    experimentalFeatures: ExperimentalFeatures;
+  }>
+> = (props) => {
+  const { children, experimentalFeatures } = props;
+  return (
+    <ExperimentalFeaturesContext.Provider value={experimentalFeatures}>
+      {children}
+    </ExperimentalFeaturesContext.Provider>
+  );
+};
+
 export function useEnabledFeatures() {
   const context = useContext(EnabledFeaturesContext);
+  return useMemo(() => {
+    return context;
+  }, [context]);
+}
+
+export function useExperimentalFeatures() {
+  const context = useContext(ExperimentalFeaturesContext);
   return useMemo(() => {
     return context;
   }, [context]);

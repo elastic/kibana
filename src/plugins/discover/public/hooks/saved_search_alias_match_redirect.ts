@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { History } from 'history';
@@ -15,7 +16,7 @@ import { getSavedSearchUrl, SavedSearch } from '@kbn/saved-search-plugin/public'
 interface SavedSearchAliasMatchRedirectProps {
   savedSearch?: SavedSearch;
   spaces?: SpacesApi;
-  history: () => History;
+  history: History;
 }
 
 export const useSavedSearchAliasMatchRedirect = ({
@@ -31,7 +32,7 @@ export const useSavedSearchAliasMatchRedirect = ({
 
         if (spaces && aliasTargetId && outcome === 'aliasMatch') {
           await spaces.ui.redirectLegacyUrl({
-            path: `${getSavedSearchUrl(aliasTargetId)}${history().location.search}`,
+            path: `${getSavedSearchUrl(aliasTargetId)}${history.location.search}`,
             aliasPurpose,
             objectNoun: i18n.translate('discover.savedSearchAliasMatchRedirect.objectNoun', {
               defaultMessage: '{savedSearch} search',

@@ -14,6 +14,8 @@ export type ExperimentalFeatures = typeof allowedExperimentalValues;
 export const allowedExperimentalValues = Object.freeze({
   isMustacheAutocompleteOn: false,
   sentinelOneConnectorOn: true,
+  crowdstrikeConnectorOn: true,
+  inferenceConnectorOn: false,
 });
 
 export type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

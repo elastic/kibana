@@ -9,6 +9,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { useUpdateUserProfile } from '@kbn/user-profile-components';
+import useMountedState from 'react-use/lib/useMountedState';
 
 interface Deps {
   uiSettingsClient: IUiSettingsClient;
@@ -16,6 +17,8 @@ interface Deps {
 
 export const useThemeDarkmodeToggle = ({ uiSettingsClient }: Deps) => {
   const [isDarkModeOn, setIsDarkModeOn] = useState(false);
+  const isMounted = useMountedState();
+
   // If a value is set in kibana.yml (uiSettings.overrides.theme:darkMode)
   // we don't allow the user to change the theme color.
   const valueSetInKibanaConfig = uiSettingsClient.isOverridden('theme:darkMode');
@@ -37,14 +40,23 @@ export const useThemeDarkmodeToggle = ({ uiSettingsClient }: Deps) => {
     },
   });
 
-  const { userSettings: { darkMode: colorScheme } = { darkMode: undefined } } =
-    userProfileData ?? {};
+  const {
+    userSettings: {
+      darkMode: colorScheme = uiSettingsClient.get('theme:darkMode') === true ? 'dark' : 'light',
+    } = {},
+  } = userProfileData ?? {
+    userSettings: {},
+  };
 
   const toggle = useCallback(
     (on: boolean) => {
       if (isLoading) {
         return;
       }
+
+      // optimistic update
+      setIsDarkModeOn(on);
+
       update({
         userSettings: {
           darkMode: on ? 'dark' : 'light',
@@ -55,17 +67,9 @@ export const useThemeDarkmodeToggle = ({ uiSettingsClient }: Deps) => {
   );
 
   useEffect(() => {
-    let updatedValue = false;
-
-    if (typeof colorScheme !== 'string') {
-      // User profile does not have yet any preference -> default to space dark mode value
-      updatedValue = uiSettingsClient.get('theme:darkMode') ?? false;
-    } else {
-      updatedValue = colorScheme === 'dark';
-    }
-
-    setIsDarkModeOn(updatedValue);
-  }, [colorScheme, uiSettingsClient]);
+    if (!isMounted()) return;
+    setIsDarkModeOn(colorScheme === 'dark');
+  }, [isMounted, colorScheme]);
 
   return {
     isVisible: valueSetInKibanaConfig ? false : Boolean(userProfileData),

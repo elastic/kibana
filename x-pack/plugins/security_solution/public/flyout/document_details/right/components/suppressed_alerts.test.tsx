@@ -9,45 +9,59 @@ import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import {
-  SUMMARY_ROW_ICON_TEST_ID,
-  SUMMARY_ROW_VALUE_TEST_ID,
+  SUMMARY_ROW_TEXT_TEST_ID,
   CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID,
   CORRELATIONS_SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID,
+  SUMMARY_ROW_BUTTON_TEST_ID,
 } from './test_ids';
 import { SuppressedAlerts } from './suppressed_alerts';
+import { isSuppressionRuleInGA } from '../../../../../common/detection_engine/utils';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { LeftPanelInsightsTab } from '../../left';
+import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
+import { useDocumentDetailsContext } from '../../shared/context';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
-const ICON_TEST_ID = SUMMARY_ROW_ICON_TEST_ID(CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID);
-const VALUE_TEST_ID = SUMMARY_ROW_VALUE_TEST_ID(CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID);
+jest.mock('@kbn/expandable-flyout');
+jest.mock('../../shared/context');
+jest.mock('../../../../../common/detection_engine/utils', () => ({
+  isSuppressionRuleInGA: jest.fn().mockReturnValue(false),
+}));
+
+const TEXT_TEST_ID = SUMMARY_ROW_TEXT_TEST_ID(CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID);
+const BUTTON_TEST_ID = SUMMARY_ROW_BUTTON_TEST_ID(CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID);
 
 const renderSuppressedAlerts = (alertSuppressionCount: number) =>
   render(
     <IntlProvider locale="en">
-      <SuppressedAlerts alertSuppressionCount={alertSuppressionCount} />
+      <SuppressedAlerts alertSuppressionCount={alertSuppressionCount} ruleType="query" />
     </IntlProvider>
   );
 
-describe('<SuppressedAlerts />', () => {
-  it('should render zero suppressed alert correctly', () => {
-    const { getByTestId } = renderSuppressedAlerts(0);
+const mockOpenLeftPanel = jest.fn();
+const scopeId = 'scopeId';
+const eventId = 'eventId';
+const indexName = 'indexName';
+const isSuppressionRuleInGAMock = isSuppressionRuleInGA as jest.Mock;
 
-    expect(getByTestId(ICON_TEST_ID)).toBeInTheDocument();
-    const value = getByTestId(VALUE_TEST_ID);
-    expect(value).toBeInTheDocument();
-    expect(value).toHaveTextContent('0 suppressed alert');
-    expect(getByTestId(VALUE_TEST_ID)).toBeInTheDocument();
-    expect(
-      getByTestId(CORRELATIONS_SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID)
-    ).toBeInTheDocument();
+describe('<SuppressedAlerts />', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    (useDocumentDetailsContext as jest.Mock).mockReturnValue({
+      eventId,
+      indexName,
+      scopeId,
+      isPreviewMode: false,
+    });
+    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ openLeftPanel: mockOpenLeftPanel });
   });
 
   it('should render single suppressed alert correctly', () => {
     const { getByTestId } = renderSuppressedAlerts(1);
 
-    expect(getByTestId(ICON_TEST_ID)).toBeInTheDocument();
-    const value = getByTestId(VALUE_TEST_ID);
-    expect(value).toBeInTheDocument();
-    expect(value).toHaveTextContent('1 suppressed alert');
-    expect(getByTestId(VALUE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(TEXT_TEST_ID)).toHaveTextContent('Suppressed alert');
+    expect(getByTestId(BUTTON_TEST_ID)).toHaveTextContent('1');
     expect(
       getByTestId(CORRELATIONS_SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID)
     ).toBeInTheDocument();
@@ -56,13 +70,34 @@ describe('<SuppressedAlerts />', () => {
   it('should render multiple suppressed alerts row correctly', () => {
     const { getByTestId } = renderSuppressedAlerts(2);
 
-    expect(getByTestId(ICON_TEST_ID)).toBeInTheDocument();
-    const value = getByTestId(VALUE_TEST_ID);
-    expect(value).toBeInTheDocument();
-    expect(value).toHaveTextContent('2 suppressed alerts');
-    expect(getByTestId(VALUE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(TEXT_TEST_ID)).toHaveTextContent('Suppressed alerts');
+    expect(getByTestId(BUTTON_TEST_ID)).toHaveTextContent('2');
+  });
+
+  it('should not render Technical Preview badge if rule type is in GA', () => {
+    isSuppressionRuleInGAMock.mockReturnValueOnce(true);
+    const { queryByTestId } = renderSuppressedAlerts(2);
+
     expect(
-      getByTestId(CORRELATIONS_SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID)
-    ).toBeInTheDocument();
+      queryByTestId(CORRELATIONS_SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID)
+    ).not.toBeInTheDocument();
+  });
+
+  it('should open the expanded section to the correct tab when the number is clicked', () => {
+    const { getByTestId } = renderSuppressedAlerts(1);
+    getByTestId(BUTTON_TEST_ID).click();
+
+    expect(mockOpenLeftPanel).toHaveBeenCalledWith({
+      id: DocumentDetailsLeftPanelKey,
+      path: {
+        tab: LeftPanelInsightsTab,
+        subTab: CORRELATIONS_TAB_ID,
+      },
+      params: {
+        id: eventId,
+        indexName,
+        scopeId,
+      },
+    });
   });
 });

@@ -13,7 +13,7 @@ test('Should return original state and empty references with by-reference embedd
     type: 'map',
   };
 
-  expect(extract!(mapByReferenceInput)).toEqual({
+  expect(extract(mapByReferenceInput)).toEqual({
     state: mapByReferenceInput,
     references: [],
   });
@@ -29,7 +29,7 @@ test('Should update state with refNames with by-value embeddable state', () => {
     type: 'map',
   };
 
-  expect(extract!(mapByValueInput)).toEqual({
+  expect(extract(mapByValueInput)).toEqual({
     references: [
       {
         id: '90943e30-9a47-11e8-b64d-95841ca0b247',

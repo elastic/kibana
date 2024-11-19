@@ -12,6 +12,7 @@ import { useFleetStatus } from '../../../../hooks/use_fleet_status';
 import { useAuthz } from '../../../../hooks/use_authz';
 
 import { AgentsApp } from '.';
+import { useGetSpaceSettings } from '../../hooks';
 
 jest.mock('../../../../hooks/use_fleet_status', () => ({
   ...jest.requireActual('../../../../hooks/use_fleet_status'),
@@ -46,9 +47,12 @@ describe('AgentApp', () => {
   beforeEach(() => {
     mockedUseAuthz.mockReturnValue({
       fleet: {
-        all: true,
+        readAgents: true,
+        allAgents: true,
       },
+      integrations: {},
     } as any);
+    jest.mocked(useGetSpaceSettings).mockReturnValue({} as any);
   });
 
   it('should render the loading component if the status is loading', async () => {
@@ -56,7 +60,7 @@ describe('AgentApp', () => {
       isLoading: true,
       enabled: true,
       isReady: false,
-      refresh: async () => {},
+      refetch: async () => {},
       forceDisplayInstructions: false,
       setForceDisplayInstructions: () => {},
     });
@@ -71,7 +75,7 @@ describe('AgentApp', () => {
       enabled: true,
       isReady: false,
       missingRequirements: ['api_keys'],
-      refresh: async () => {},
+      refetch: async () => {},
       forceDisplayInstructions: false,
       setForceDisplayInstructions: () => {},
     });
@@ -86,7 +90,7 @@ describe('AgentApp', () => {
       enabled: true,
       isReady: false,
       missingRequirements: ['fleet_server'],
-      refresh: async () => {},
+      refetch: async () => {},
       forceDisplayInstructions: false,
       setForceDisplayInstructions: () => {},
     });
@@ -102,7 +106,7 @@ describe('AgentApp', () => {
       isReady: false,
       missingRequirements: [],
       missingOptionalFeatures: ['encrypted_saved_object_encryption_key_required'],
-      refresh: async () => {},
+      refetch: async () => {},
       forceDisplayInstructions: false,
       setForceDisplayInstructions: () => {},
     });

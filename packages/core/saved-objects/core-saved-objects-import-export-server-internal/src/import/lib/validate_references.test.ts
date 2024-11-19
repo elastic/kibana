@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
@@ -265,5 +266,37 @@ describe('validateReferences()', () => {
     await expect(() => validateReferences(params)).rejects.toThrowError(
       'Error fetching references for imported objects'
     );
+  });
+
+  // test that when references are missing returns only deduplicated errors
+  test('returns only deduplicated errors when references are missing', async () => {
+    const params = setup({
+      objects: [
+        {
+          id: '2',
+          type: 'visualization',
+          attributes: { title: 'My Visualization 2' },
+          references: [
+            { name: 'ref_0', type: 'index-pattern', id: '3' },
+            { name: 'ref_0', type: 'index-pattern', id: '3' },
+          ],
+        },
+      ],
+    });
+    params.savedObjectsClient.bulkGet.mockResolvedValue({
+      saved_objects: [createNotFoundError({ type: 'index-pattern', id: '3' })],
+    });
+
+    const result = await validateReferences(params);
+    expect(result).toEqual([
+      expect.objectContaining({
+        type: 'visualization',
+        id: '2',
+        error: {
+          type: 'missing_references',
+          references: [{ type: 'index-pattern', id: '3' }],
+        },
+      }),
+    ]);
   });
 });

@@ -13,7 +13,7 @@
         "signature": [
           "({ href: srcHref, category, description, ...props }: ",
           "NoDataCardComponentProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/shared-ux/card/no_data/impl/src/no_data_card.tsx",
         "deprecated": false,
@@ -50,7 +50,7 @@
         "signature": [
           "({ children, ...dependencies }: React.PropsWithChildren<",
           "NoDataCardKibanaDependencies",
-          ">) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/shared-ux/card/no_data/impl/src/services.tsx",
         "deprecated": false,
@@ -89,7 +89,7 @@
         "signature": [
           "({ children, ...services }: React.PropsWithChildren<",
           "NoDataCardServices",
-          ">) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/shared-ux/card/no_data/impl/src/services.tsx",
         "deprecated": false,
@@ -100,7 +100,7 @@
             "id": "def-public.NoDataCardProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{ children, ...services }",
+            "label": "{\n  children,\n  ...services\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",

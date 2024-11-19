@@ -4,7 +4,8 @@
       "error_trace": "__flag__",
       "filter_path": [],
       "human": "__flag__",
-      "pretty": "__flag__"
+      "pretty": "__flag__",
+      "typed_keys": "__flag__"
     },
     "methods": [
       "GET",

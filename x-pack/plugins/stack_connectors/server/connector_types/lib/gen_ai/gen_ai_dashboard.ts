@@ -5,30 +5,54 @@
  * 2.0.
  */
 
-import { DashboardAttributes } from '@kbn/dashboard-plugin/common';
+import type { DashboardSavedObjectAttributes } from '@kbn/dashboard-plugin/server';
 import { v4 as uuidv4 } from 'uuid';
 import { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import { OPENAI_TITLE, OPENAI_CONNECTOR_ID } from '../../../../common/openai/constants';
 import { BEDROCK_TITLE, BEDROCK_CONNECTOR_ID } from '../../../../common/bedrock/constants';
+import { GEMINI_TITLE, GEMINI_CONNECTOR_ID } from '../../../../common/gemini/constants';
+import {
+  INFERENCE_CONNECTOR_TITLE,
+  INFERENCE_CONNECTOR_ID,
+} from '../../../../common/inference/constants';
 
-const getDashboardTitle = (title: string) => `${title} Token Usage`;
+export const getDashboardTitle = (title: string) => `${title} Token Usage`;
 
 export const getDashboard = (
-  genAIProvider: 'OpenAI' | 'Bedrock',
+  genAIProvider: 'OpenAI' | 'Bedrock' | 'Gemini' | 'Inference',
   dashboardId: string
-): SavedObject<DashboardAttributes> => {
-  const attributes =
-    genAIProvider === 'OpenAI'
-      ? {
-          provider: OPENAI_TITLE,
-          dashboardTitle: getDashboardTitle(OPENAI_TITLE),
-          actionTypeId: OPENAI_CONNECTOR_ID,
-        }
-      : {
-          provider: BEDROCK_TITLE,
-          dashboardTitle: getDashboardTitle(BEDROCK_TITLE),
-          actionTypeId: BEDROCK_CONNECTOR_ID,
-        };
+): SavedObject<DashboardSavedObjectAttributes> => {
+  let attributes = {
+    provider: OPENAI_TITLE,
+    dashboardTitle: getDashboardTitle(OPENAI_TITLE),
+    actionTypeId: OPENAI_CONNECTOR_ID,
+  };
+
+  if (genAIProvider === 'OpenAI') {
+    attributes = {
+      provider: OPENAI_TITLE,
+      dashboardTitle: getDashboardTitle(OPENAI_TITLE),
+      actionTypeId: OPENAI_CONNECTOR_ID,
+    };
+  } else if (genAIProvider === 'Bedrock') {
+    attributes = {
+      provider: BEDROCK_TITLE,
+      dashboardTitle: getDashboardTitle(BEDROCK_TITLE),
+      actionTypeId: BEDROCK_CONNECTOR_ID,
+    };
+  } else if (genAIProvider === 'Gemini') {
+    attributes = {
+      provider: GEMINI_TITLE,
+      dashboardTitle: getDashboardTitle(GEMINI_TITLE),
+      actionTypeId: GEMINI_CONNECTOR_ID,
+    };
+  } else if (genAIProvider === 'Inference') {
+    attributes = {
+      provider: INFERENCE_CONNECTOR_TITLE,
+      dashboardTitle: getDashboardTitle(INFERENCE_CONNECTOR_TITLE),
+      actionTypeId: INFERENCE_CONNECTOR_ID,
+    };
+  }
 
   const ids: Record<string, string> = {
     genAiSavedObjectId: dashboardId,

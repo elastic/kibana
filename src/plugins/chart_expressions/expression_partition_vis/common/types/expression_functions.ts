@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { PartitionProps } from '@elastic/charts';
@@ -13,6 +14,8 @@ import {
   Datatable,
   ExpressionValueRender,
   ExpressionValueBoxed,
+  DefaultInspectorAdapters,
+  ExecutionContext,
 } from '@kbn/expressions-plugin/common';
 import {
   PARTITION_LABELS_VALUE,
@@ -65,28 +68,32 @@ export type PieVisExpressionFunctionDefinition = ExpressionFunctionDefinition<
   typeof PIE_VIS_EXPRESSION_NAME,
   Datatable,
   PieVisConfig,
-  ExpressionValueRender<PartitionChartProps>
+  ExpressionValueRender<PartitionChartProps>,
+  ExecutionContext<DefaultInspectorAdapters>
 >;
 
 export type TreemapVisExpressionFunctionDefinition = ExpressionFunctionDefinition<
   typeof TREEMAP_VIS_EXPRESSION_NAME,
   Datatable,
   TreemapVisConfig,
-  ExpressionValueRender<PartitionChartProps>
+  ExpressionValueRender<PartitionChartProps>,
+  ExecutionContext<DefaultInspectorAdapters>
 >;
 
 export type MosaicVisExpressionFunctionDefinition = ExpressionFunctionDefinition<
   typeof MOSAIC_VIS_EXPRESSION_NAME,
   Datatable,
   MosaicVisConfig,
-  ExpressionValueRender<PartitionChartProps>
+  ExpressionValueRender<PartitionChartProps>,
+  ExecutionContext<DefaultInspectorAdapters>
 >;
 
 export type WaffleVisExpressionFunctionDefinition = ExpressionFunctionDefinition<
   typeof WAFFLE_VIS_EXPRESSION_NAME,
   Datatable,
   WaffleVisConfig,
-  ExpressionValueRender<PartitionChartProps>
+  ExpressionValueRender<PartitionChartProps>,
+  ExecutionContext<DefaultInspectorAdapters>
 >;
 
 export enum ChartTypes {

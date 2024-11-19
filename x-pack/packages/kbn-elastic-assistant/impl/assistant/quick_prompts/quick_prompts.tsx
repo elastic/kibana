@@ -6,26 +6,32 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiPopover, EuiButtonEmpty } from '@elastic/eui';
-// eslint-disable-next-line @kbn/eslint/module_migration
-import styled from 'styled-components';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiBadge,
+  EuiPopover,
+  EuiButtonIcon,
+  EuiButtonEmpty,
+} from '@elastic/eui';
+import useMeasure from 'react-use/lib/useMeasure';
 
-import { QuickPrompt } from '../../..';
+import { css } from '@emotion/react';
+import {
+  PromptResponse,
+  PromptTypeEnum,
+} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
-import { QUICK_PROMPTS_TAB } from '../settings/assistant_settings';
-
-const QuickPromptsFlexGroup = styled(EuiFlexGroup)`
-  margin: 16px;
-`;
+import { QUICK_PROMPTS_TAB } from '../settings/const';
 
 export const KNOWLEDGE_BASE_CATEGORY = 'knowledge-base';
 
-const COUNT_BEFORE_OVERFLOW = 5;
 interface QuickPromptsProps {
   setInput: (input: string) => void;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   trackPrompt: (prompt: string) => void;
+  allPrompts: PromptResponse[];
 }
 
 /**
@@ -34,27 +40,31 @@ interface QuickPromptsProps {
  * and localstorage for storing new and edited prompts.
  */
 export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
-  ({ setInput, setIsSettingsModalVisible, trackPrompt }) => {
-    const { allQuickPrompts, knowledgeBase, promptContexts, setSelectedSettingsTab } =
-      useAssistantContext();
+  ({ setInput, setIsSettingsModalVisible, trackPrompt, allPrompts }) => {
+    const [quickPromptsContainerRef, { width }] = useMeasure();
+
+    const { promptContexts, setSelectedSettingsTab } = useAssistantContext();
 
     const contextFilteredQuickPrompts = useMemo(() => {
       const registeredPromptContextTitles = Object.values(promptContexts).map((pc) => pc.category);
-      // If KB is enabled, include KNOWLEDGE_BASE_CATEGORY so KB dependent quick prompts are shown
-      if (knowledgeBase.isEnabledKnowledgeBase) {
-        registeredPromptContextTitles.push(KNOWLEDGE_BASE_CATEGORY);
-      }
-      return allQuickPrompts.filter((quickPrompt) => {
+      // include KNOWLEDGE_BASE_CATEGORY so KB dependent quick prompts are shown
+      registeredPromptContextTitles.push(KNOWLEDGE_BASE_CATEGORY);
+
+      return allPrompts.filter((prompt) => {
+        // only quick prompts
+        if (prompt.promptType !== PromptTypeEnum.quick) {
+          return false;
+        }
         // Return quick prompt as match if it has no categories, otherwise ensure category exists in registered prompt contexts
-        if (quickPrompt.categories == null || quickPrompt.categories.length === 0) {
+        if (!prompt.categories || prompt.categories.length === 0) {
           return true;
         } else {
-          return quickPrompt.categories.some((category) => {
+          return prompt.categories?.some((category) => {
             return registeredPromptContextTitles.includes(category);
           });
         }
       });
-    }, [allQuickPrompts, knowledgeBase.isEnabledKnowledgeBase, promptContexts]);
+    }, [allPrompts, promptContexts]);
 
     // Overflow state
     const [isOverflowPopoverOpen, setIsOverflowPopoverOpen] = useState(false);
@@ -65,10 +75,10 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
     const closeOverflowPopover = useCallback(() => setIsOverflowPopoverOpen(false), []);
 
     const onClickAddQuickPrompt = useCallback(
-      (badge: QuickPrompt) => {
-        setInput(badge.prompt);
+      (badge: PromptResponse) => {
+        setInput(badge.content);
         if (badge.isDefault) {
-          trackPrompt(badge.title);
+          trackPrompt(badge.name);
         } else {
           trackPrompt('Custom');
         }
@@ -77,7 +87,7 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
     );
 
     const onClickOverflowQuickPrompt = useCallback(
-      (badge: QuickPrompt) => {
+      (badge: PromptResponse) => {
         onClickAddQuickPrompt(badge);
         closeOverflowPopover();
       },
@@ -89,50 +99,78 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
       setSelectedSettingsTab(QUICK_PROMPTS_TAB);
     }, [setIsSettingsModalVisible, setSelectedSettingsTab]);
 
+    const quickPrompts = useMemo(() => {
+      const visibleCount = Math.floor(width / 120);
+      const visibleItems = contextFilteredQuickPrompts.slice(0, visibleCount);
+      const overflowItems = contextFilteredQuickPrompts.slice(visibleCount);
+
+      return { visible: visibleItems, overflow: overflowItems };
+    }, [contextFilteredQuickPrompts, width]);
+
     return (
-      <QuickPromptsFlexGroup gutterSize="s" alignItems="center">
-        {contextFilteredQuickPrompts.slice(0, COUNT_BEFORE_OVERFLOW).map((badge, index) => (
-          <EuiFlexItem key={index} grow={false}>
-            <EuiBadge
-              color={badge.color}
-              onClick={() => onClickAddQuickPrompt(badge)}
-              onClickAriaLabel={badge.title}
-            >
-              {badge.title}
-            </EuiBadge>
-          </EuiFlexItem>
-        ))}
-        {contextFilteredQuickPrompts.length > COUNT_BEFORE_OVERFLOW && (
-          <EuiFlexItem grow={false}>
-            <EuiPopover
-              button={
+      <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent={'spaceBetween'}>
+        <EuiFlexItem
+          css={css`
+            overflow: hidden;
+          `}
+        >
+          <EuiFlexGroup
+            ref={quickPromptsContainerRef}
+            gutterSize="s"
+            alignItems="center"
+            wrap={false}
+          >
+            {quickPrompts.visible.map((badge, index) => (
+              <EuiFlexItem
+                grow={false}
+                key={index}
+                css={css`
+                  overflow: hidden;
+                `}
+              >
                 <EuiBadge
-                  color={'hollow'}
-                  iconType={'boxesHorizontal'}
-                  onClick={toggleOverflowPopover}
-                  onClickAriaLabel={i18n.QUICK_PROMPT_OVERFLOW_ARIA}
-                />
-              }
-              isOpen={isOverflowPopoverOpen}
-              closePopover={closeOverflowPopover}
-              anchorPosition="rightUp"
-            >
-              <EuiFlexGroup direction="column" gutterSize="s">
-                {contextFilteredQuickPrompts.slice(COUNT_BEFORE_OVERFLOW).map((badge, index) => (
-                  <EuiFlexItem key={index} grow={false}>
-                    <EuiBadge
-                      color={badge.color}
-                      onClick={() => onClickOverflowQuickPrompt(badge)}
-                      onClickAriaLabel={badge.title}
-                    >
-                      {badge.title}
-                    </EuiBadge>
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            </EuiPopover>
-          </EuiFlexItem>
-        )}
+                  color={badge.color}
+                  data-test-subj={`quickPrompt-${badge.name}`}
+                  onClick={() => onClickAddQuickPrompt(badge)}
+                  onClickAriaLabel={badge.name}
+                >
+                  {badge.name}
+                </EuiBadge>
+              </EuiFlexItem>
+            ))}
+            {quickPrompts.overflow.length > 0 && (
+              <EuiFlexItem grow={false}>
+                <EuiPopover
+                  button={
+                    <EuiButtonIcon
+                      color={'primary'}
+                      iconType={'boxesHorizontal'}
+                      onClick={toggleOverflowPopover}
+                      aria-label={i18n.QUICK_PROMPT_OVERFLOW_ARIA}
+                    />
+                  }
+                  isOpen={isOverflowPopoverOpen}
+                  closePopover={closeOverflowPopover}
+                  anchorPosition="rightUp"
+                >
+                  <EuiFlexGroup direction="column" gutterSize="s">
+                    {quickPrompts.overflow.map((badge, index) => (
+                      <EuiFlexItem key={index} grow={false}>
+                        <EuiBadge
+                          color={badge.color}
+                          onClick={() => onClickOverflowQuickPrompt(badge)}
+                          onClickAriaLabel={badge.name}
+                        >
+                          {badge.name}
+                        </EuiBadge>
+                      </EuiFlexItem>
+                    ))}
+                  </EuiFlexGroup>
+                </EuiPopover>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             data-test-subj="addQuickPrompt"
@@ -143,7 +181,7 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
             {i18n.ADD_QUICK_PROMPT}
           </EuiButtonEmpty>
         </EuiFlexItem>
-      </QuickPromptsFlexGroup>
+      </EuiFlexGroup>
     );
   }
 );

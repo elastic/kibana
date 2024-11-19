@@ -45,7 +45,7 @@ import {
   PieChartTypes,
 } from '../../../common/constants';
 import { suggestions } from './suggestions';
-import { PartitionChartsMeta } from './partition_charts_meta';
+import { PartitionChartsMeta, visualizationTypes } from './partition_charts_meta';
 import { PieToolbar } from './toolbar';
 import { DimensionDataExtraEditor, DimensionEditor } from './dimension_editor';
 import { LayerSettings } from './layer_settings';
@@ -53,6 +53,12 @@ import { checkTableForContainsSmallValues } from './render_helpers';
 import { DatasourcePublicAPI } from '../..';
 import { nonNullable, getColorMappingDefaults } from '../../utils';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
+import { PersistedPieVisualizationState, convertToRuntime } from './persistence';
+import {
+  PIE_RENDER_ARRAY_VALUES,
+  PIE_TOO_MANY_DIMENSIONS,
+  WAFFLE_SMALL_VALUES,
+} from '../../user_messages_ids';
 
 const metricLabel = i18n.translate('xpack.lens.pie.groupMetricLabelSingular', {
   defaultMessage: 'Metric',
@@ -123,19 +129,11 @@ export const getPieVisualization = ({
 }: {
   paletteService: PaletteRegistry;
   kibanaTheme: ThemeServiceStart;
-}): Visualization<PieVisualizationState> => ({
+}): Visualization<PieVisualizationState, PersistedPieVisualizationState> => ({
   id: 'lnsPie',
-
-  visualizationTypes: Object.entries(PartitionChartsMeta).map(([key, meta]) => ({
-    id: key,
-    icon: meta.icon,
-    label: meta.label,
-    groupLabel: meta.groupLabel,
-    showExperimentalBadge: meta.isExperimental,
-  })),
-
+  visualizationTypes,
   getVisualizationTypeId(state) {
-    return state.shape;
+    return state.shape === 'donut' ? 'pie' : state.shape;
   },
 
   getLayerIds(state) {
@@ -163,18 +161,19 @@ export const getPieVisualization = ({
   triggers: [VIS_EVENT_TO_TRIGGER.filter],
 
   initialize(addNewLayer, state, mainPalette) {
-    return (
-      state || {
-        shape: PieChartTypes.DONUT,
-        layers: [
-          newLayerState(
-            addNewLayer(),
-            mainPalette?.type === 'colorMapping' ? mainPalette.value : getColorMappingDefaults()
-          ),
-        ],
-        palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
-      }
-    );
+    if (state) {
+      return convertToRuntime(state);
+    }
+    return {
+      shape: PieChartTypes.DONUT,
+      layers: [
+        newLayerState(
+          addNewLayer(),
+          mainPalette?.type === 'colorMapping' ? mainPalette.value : getColorMappingDefaults()
+        ),
+      ],
+      palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
+    };
   },
 
   getMainPalette: (state) => {
@@ -495,7 +494,10 @@ export const getPieVisualization = ({
     };
   },
   DimensionEditorComponent(props) {
-    const isDarkMode = useObservable(kibanaTheme.theme$, { darkMode: false }).darkMode;
+    const isDarkMode = useObservable(kibanaTheme.theme$, {
+      darkMode: false,
+      name: 'amsterdam',
+    }).darkMode;
     return <DimensionEditor {...props} paletteService={paletteService} isDarkMode={isDarkMode} />;
   },
   DimensionEditorDataExtraComponent(props) {
@@ -575,6 +577,7 @@ export const getPieVisualization = ({
     const errors: UserMessage[] = hasTooManyBucketDimensions
       ? [
           {
+            uniqueId: PIE_TOO_MANY_DIMENSIONS,
             severity: 'error',
             fixableInEditor: true,
             displayLocations: [{ id: 'visualization' }],
@@ -617,6 +620,7 @@ export const getPieVisualization = ({
           checkTableForContainsSmallValues(frame.activeData[layerId], numericColumn.id, 1)
         ) {
           warningMessages.push({
+            uniqueId: WAFFLE_SMALL_VALUES,
             severity: 'warning',
             fixableInEditor: true,
             displayLocations: [{ id: 'toolbar' }],
@@ -644,6 +648,7 @@ export const getPieVisualization = ({
               frame.datasourceLayers[layerId]?.getOperationForColumnId(colId)?.label || colId
           );
           warningMessages.push({
+            uniqueId: PIE_RENDER_ARRAY_VALUES,
             severity: 'warning',
             fixableInEditor: true,
             displayLocations: [{ id: 'toolbar' }],

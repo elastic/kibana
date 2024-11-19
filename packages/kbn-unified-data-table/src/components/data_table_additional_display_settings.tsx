@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiFormRow, EuiRange } from '@elastic/eui';
+import { EuiFormRow, EuiHorizontalRule, EuiRange, EuiRangeProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
+import { RowHeightSettings, RowHeightSettingsProps } from './row_height_settings';
 
 export const DEFAULT_MAX_ALLOWED_SAMPLE_SIZE = 1000;
 export const MIN_ALLOWED_SAMPLE_SIZE = 1;
@@ -17,14 +19,32 @@ export const RANGE_MIN_SAMPLE_SIZE = 10; // it's necessary to be able to use `st
 export const RANGE_STEP_SAMPLE_SIZE = 10;
 
 export interface UnifiedDataTableAdditionalDisplaySettingsProps {
+  rowHeight: RowHeightSettingsProps['rowHeight'];
+  rowHeightLines: RowHeightSettingsProps['rowHeightLines'];
+  onChangeRowHeight?: (rowHeight: RowHeightSettingsProps['rowHeight']) => void;
+  onChangeRowHeightLines?: (rowHeightLines: number) => void;
+  headerRowHeight: RowHeightSettingsProps['rowHeight'];
+  headerRowHeightLines: RowHeightSettingsProps['rowHeightLines'];
+  onChangeHeaderRowHeight?: (headerRowHeight: RowHeightSettingsProps['rowHeight']) => void;
+  onChangeHeaderRowHeightLines?: (headerRowHeightLines: number) => void;
   maxAllowedSampleSize?: number;
   sampleSize: number;
-  onChangeSampleSize: (sampleSize: number) => void;
+  onChangeSampleSize?: (sampleSize: number) => void;
 }
+
+const defaultOnChangeSampleSize = () => {};
 
 export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
   UnifiedDataTableAdditionalDisplaySettingsProps
 > = ({
+  rowHeight,
+  rowHeightLines,
+  onChangeRowHeight,
+  onChangeRowHeightLines,
+  headerRowHeight,
+  headerRowHeightLines,
+  onChangeHeaderRowHeight,
+  onChangeHeaderRowHeightLines,
   maxAllowedSampleSize = DEFAULT_MAX_ALLOWED_SAMPLE_SIZE,
   sampleSize,
   onChangeSampleSize,
@@ -36,18 +56,22 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
   ); // flexible: allows to go lower than RANGE_MIN_SAMPLE_SIZE but greater than MIN_ALLOWED_SAMPLE_SIZE
 
   const debouncedOnChangeSampleSize = useMemo(
-    () => debounce(onChangeSampleSize, 300, { leading: false, trailing: true }),
+    () =>
+      debounce(onChangeSampleSize ?? defaultOnChangeSampleSize, 300, {
+        leading: false,
+        trailing: true,
+      }),
     [onChangeSampleSize]
   );
 
-  const onChangeActiveSampleSize = useCallback(
+  const onChangeActiveSampleSize = useCallback<NonNullable<EuiRangeProps['onChange']>>(
     (event) => {
-      if (!event.target.value) {
+      if (!('value' in event.target) || !event.target.value) {
         setActiveSampleSize('');
         return;
       }
 
-      const newSampleSize = Number(event.target.value);
+      const newSampleSize = parseInt(event.target.value, 10) ?? RANGE_MIN_SAMPLE_SIZE;
 
       if (newSampleSize >= MIN_ALLOWED_SAMPLE_SIZE) {
         setActiveSampleSize(newSampleSize);
@@ -67,19 +91,80 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
     setActiveSampleSize(sampleSize); // reset local state
   }, [sampleSize, setActiveSampleSize]);
 
-  return (
-    <EuiFormRow label={sampleSizeLabel} display="columnCompressed">
-      <EuiRange
-        compressed
-        fullWidth
-        min={minRangeSampleSize}
-        max={maxAllowedSampleSize}
-        step={minRangeSampleSize === RANGE_MIN_SAMPLE_SIZE ? RANGE_STEP_SAMPLE_SIZE : 1}
-        showInput
-        value={activeSampleSize}
-        onChange={onChangeActiveSampleSize}
-        data-test-subj="unifiedDataTableSampleSizeInput"
+  const settings = [];
+
+  if (onChangeHeaderRowHeight && onChangeHeaderRowHeightLines) {
+    settings.push(
+      <RowHeightSettings
+        rowHeight={headerRowHeight}
+        rowHeightLines={headerRowHeightLines}
+        label={i18n.translate('unifiedDataTable.headerRowHeightLabel', {
+          defaultMessage: 'Header row height',
+        })}
+        onChangeRowHeight={onChangeHeaderRowHeight}
+        onChangeRowHeightLines={onChangeHeaderRowHeightLines}
+        data-test-subj="unifiedDataTableHeaderRowHeightSettings"
+        maxRowHeight={5}
       />
-    </EuiFormRow>
+    );
+  }
+
+  if (onChangeRowHeight && onChangeRowHeightLines) {
+    settings.push(
+      <RowHeightSettings
+        rowHeight={rowHeight}
+        rowHeightLines={rowHeightLines}
+        label={i18n.translate('unifiedDataTable.rowHeightLabel', {
+          defaultMessage: 'Cell row height',
+        })}
+        onChangeRowHeight={onChangeRowHeight}
+        onChangeRowHeightLines={onChangeRowHeightLines}
+        data-test-subj="unifiedDataTableRowHeightSettings"
+      />
+    );
+  }
+
+  if (onChangeSampleSize) {
+    let step = minRangeSampleSize === RANGE_MIN_SAMPLE_SIZE ? RANGE_STEP_SAMPLE_SIZE : 1;
+
+    if (
+      step > 1 &&
+      ((activeSampleSize && !checkIfValueIsMultipleOfStep(activeSampleSize, step)) ||
+        !checkIfValueIsMultipleOfStep(minRangeSampleSize, step) ||
+        !checkIfValueIsMultipleOfStep(maxAllowedSampleSize, step))
+    ) {
+      step = 1; // Eui is very strict about step, so we need to switch to 1 if the value is not a multiple of the step
+    }
+
+    settings.push(
+      <EuiFormRow label={sampleSizeLabel} display="columnCompressed">
+        <EuiRange
+          compressed
+          fullWidth
+          min={minRangeSampleSize}
+          max={maxAllowedSampleSize}
+          step={step}
+          showInput
+          value={activeSampleSize}
+          onChange={onChangeActiveSampleSize}
+          data-test-subj="unifiedDataTableSampleSizeInput"
+        />
+      </EuiFormRow>
+    );
+  }
+
+  return (
+    <>
+      {settings.map((setting, index) => (
+        <React.Fragment key={`setting-${index}`}>
+          {index > 0 && <EuiHorizontalRule margin="s" />}
+          {setting}
+        </React.Fragment>
+      ))}
+    </>
   );
 };
+
+function checkIfValueIsMultipleOfStep(value: number, step: number) {
+  return value % step === 0;
+}

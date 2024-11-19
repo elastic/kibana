@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useState, memo, useCallback, useMemo } from 'react';
@@ -19,7 +20,8 @@ import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { withSuspense } from '@kbn/shared-ux-utility';
-import { isOfEsqlQueryType } from '@kbn/es-query';
+import { getInitialESQLQuery } from '@kbn/esql-utils';
+import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { useUrl } from './hooks/use_url';
 import { useDiscoverStateContainer } from './hooks/use_discover_state_container';
 import { MainHistoryLocationState } from '../../../common';
@@ -28,16 +30,18 @@ import { setBreadcrumbs } from '../../utils/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { DiscoverError } from '../../components/common/error_alert';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { getScopedHistory, getUrlTracker } from '../../kibana_services';
 import { useAlertResultsToast } from './hooks/use_alert_results_toast';
-import { DiscoverMainProvider } from './services/discover_state_provider';
+import { DiscoverMainProvider } from './state_management/discover_state_provider';
 import {
   CustomizationCallback,
+  DiscoverCustomizationContext,
   DiscoverCustomizationProvider,
   useDiscoverCustomizationService,
 } from '../../customizations';
-import type { DiscoverCustomizationContext } from '../types';
-import { DiscoverTopNavServerless } from './components/top_nav/discover_topnav_serverless';
+import { DiscoverTopNavInline } from './components/top_nav/discover_topnav_inline';
+import { DiscoverStateContainer, LoadParams } from './state_management/discover_state';
+import { DataSourceType, isDataSourceType } from '../../../common/data_sources';
+import { useRootProfile } from '../../context_awareness';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -46,14 +50,13 @@ interface DiscoverLandingParams {
 }
 
 export interface MainRouteProps {
-  customizationCallbacks: CustomizationCallback[];
+  customizationCallbacks?: CustomizationCallback[];
   stateStorageContainer?: IKbnUrlStateStorage;
-  isDev: boolean;
   customizationContext: DiscoverCustomizationContext;
 }
 
 export function DiscoverMainRoute({
-  customizationCallbacks,
+  customizationCallbacks = [],
   customizationContext,
   stateStorageContainer,
 }: MainRouteProps) {
@@ -67,6 +70,7 @@ export function DiscoverMainRoute({
     http: { basePath },
     dataViewEditor,
     share,
+    getScopedHistory,
   } = services;
   const { id: savedSearchId } = useParams<DiscoverLandingParams>();
   const [stateContainer, { reset: resetStateContainer }] = useDiscoverStateContainer({
@@ -75,7 +79,6 @@ export function DiscoverMainRoute({
     customizationContext,
     stateStorageContainer,
   });
-
   const { customizationService, isInitialized: isCustomizationServiceInitialized } =
     useDiscoverCustomizationService({
       customizationCallbacks,
@@ -83,17 +86,19 @@ export function DiscoverMainRoute({
     });
   const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState(true);
-  const [hasESData, setHasESData] = useState(false);
-  const [hasUserDataView, setHasUserDataView] = useState(false);
-  const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
+  const [noDataState, setNoDataState] = useState({
+    hasESData: false,
+    hasUserDataView: false,
+    showNoDataPage: false,
+  });
   const hasCustomBranding = useObservable(core.customBranding.hasCustomBranding$, false);
 
   /**
    * Get location state of scoped history only on initial load
    */
   const historyLocationState = useMemo(
-    () => getScopedHistory().location.state as MainHistoryLocationState | undefined,
-    []
+    () => getScopedHistory<MainHistoryLocationState>()?.location.state,
+    [getScopedHistory]
   );
 
   useAlertResultsToast({
@@ -106,62 +111,64 @@ export function DiscoverMainRoute({
     page: 'app',
     id: savedSearchId || 'new',
   });
-
-  const checkData = useCallback(async () => {
-    try {
-      if (savedSearchId) {
-        return true; // bypass NoData screen
-      }
-
-      if (isOfEsqlQueryType(stateContainer.appState.getState().query)) {
-        return true;
-      }
-
-      const hasUserDataViewValue = await data.dataViews.hasData
-        .hasUserDataView()
-        .catch(() => false);
-      const hasESDataValue = await data.dataViews.hasData.hasESData().catch(() => false);
-      setHasUserDataView(hasUserDataViewValue);
-      setHasESData(hasESDataValue);
-
-      if (!hasUserDataViewValue) {
-        setShowNoDataPage(true);
-        return false;
-      }
-
-      let defaultDataViewExists: boolean = false;
+  /**
+   * Helper function to determine when to skip the no data page
+   */
+  const skipNoDataPage = useCallback(
+    async (nextDataView?: DataView) => {
       try {
-        defaultDataViewExists = await data.dataViews.defaultDataViewExists();
-      } catch (e) {
-        //
-      }
+        const { dataSource } = stateContainer.appState.getState();
+        const isEsqlQuery = isDataSourceType(dataSource, DataSourceType.Esql);
 
-      if (!defaultDataViewExists) {
-        setShowNoDataPage(true);
+        if (savedSearchId || isEsqlQuery || nextDataView) {
+          // Although ES|QL doesn't need a data view, we still need to load the data view list to
+          // ensure the data view is available for the user to switch to classic mode
+          await stateContainer.actions.loadDataViewList();
+          return true;
+        }
+
+        const [hasUserDataViewValue, hasESDataValue, defaultDataViewExists] = await Promise.all([
+          data.dataViews.hasData.hasUserDataView().catch(() => false),
+          data.dataViews.hasData.hasESData().catch(() => false),
+          data.dataViews.defaultDataViewExists().catch(() => false),
+          stateContainer.actions.loadDataViewList(),
+        ]);
+
+        if (!hasUserDataViewValue || !defaultDataViewExists) {
+          setNoDataState({
+            showNoDataPage: true,
+            hasESData: hasESDataValue,
+            hasUserDataView: hasUserDataViewValue,
+          });
+          return false;
+        }
+        return true;
+      } catch (e) {
+        setError(e);
         return false;
       }
-      return true;
-    } catch (e) {
-      setError(e);
-      return false;
-    }
-  }, [data.dataViews, savedSearchId, stateContainer.appState]);
+    },
+    [data.dataViews, savedSearchId, stateContainer]
+  );
 
   const loadSavedSearch = useCallback(
-    async (nextDataView?: DataView) => {
+    async ({
+      nextDataView,
+      initialAppState,
+    }: { nextDataView?: DataView; initialAppState?: LoadParams['initialAppState'] } = {}) => {
       const loadSavedSearchStartTime = window.performance.now();
       setLoading(true);
-      if (!nextDataView && !(await checkData())) {
+      const skipNoData = await skipNoDataPage(nextDataView);
+      if (!skipNoData) {
         setLoading(false);
         return;
       }
       try {
-        await stateContainer.actions.loadDataViewList();
-
         const currentSavedSearch = await stateContainer.actions.loadSavedSearch({
           savedSearchId,
           dataView: nextDataView,
           dataViewSpec: historyLocationState?.dataViewSpec,
+          initialAppState,
         });
         if (customizationContext.displayMode === 'standalone') {
           if (currentSavedSearch?.id) {
@@ -197,7 +204,7 @@ export function DiscoverMainRoute({
             },
             toastNotifications,
             onBeforeRedirect() {
-              getUrlTracker().setTrackedUrl('/');
+              services.urlTracker.setTrackedUrl('/');
             },
             theme: core.theme,
           })(e);
@@ -207,8 +214,8 @@ export function DiscoverMainRoute({
       }
     },
     [
-      checkData,
-      stateContainer.actions,
+      skipNoDataPage,
+      stateContainer,
       savedSearchId,
       historyLocationState?.dataViewSpec,
       customizationContext.displayMode,
@@ -224,14 +231,19 @@ export function DiscoverMainRoute({
 
   useEffect(() => {
     if (!isCustomizationServiceInitialized) return;
-
     setLoading(true);
-    setHasESData(false);
-    setHasUserDataView(false);
-    setShowNoDataPage(false);
+    setNoDataState({
+      hasESData: false,
+      hasUserDataView: false,
+      showNoDataPage: false,
+    });
     setError(undefined);
-    // restore the previously selected data view for a new state
-    loadSavedSearch(!savedSearchId ? stateContainer.internalState.getState().dataView : undefined);
+    if (savedSearchId) {
+      loadSavedSearch();
+    } else {
+      // restore the previously selected data view for a new state (when a saved search was open)
+      loadSavedSearch(getLoadParamsForNewSearch(stateContainer));
+    }
   }, [isCustomizationServiceInitialized, loadSavedSearch, savedSearchId, stateContainer]);
 
   // secondary fetch: in case URL is set to `/`, used to reset to 'new' state, keeping the current data view
@@ -240,8 +252,7 @@ export function DiscoverMainRoute({
     savedSearchId,
     onNewUrl: () => {
       // restore the previously selected data view for a new state
-      const dataView = stateContainer.internalState.getState().dataView;
-      loadSavedSearch(dataView);
+      loadSavedSearch(getLoadParamsForNewSearch(stateContainer));
     },
   });
 
@@ -249,9 +260,9 @@ export function DiscoverMainRoute({
     async (nextDataView: unknown) => {
       if (nextDataView) {
         setLoading(true);
-        setShowNoDataPage(false);
+        setNoDataState((state) => ({ ...state, showNoDataPage: false }));
         setError(undefined);
-        await loadSavedSearch(nextDataView as DataView);
+        await loadSavedSearch({ nextDataView: nextDataView as DataView });
       }
     },
     [loadSavedSearch]
@@ -271,15 +282,15 @@ export function DiscoverMainRoute({
 
           // We've already called this, so we can optimize the analytics services to
           // use the already-retrieved data to avoid a double-call.
-          hasESData: () => Promise.resolve(hasESData),
-          hasUserDataView: () => Promise.resolve(hasUserDataView),
+          hasESData: () => Promise.resolve(noDataState.hasESData),
+          hasUserDataView: () => Promise.resolve(noDataState.hasUserDataView),
         },
       },
       share,
       dataViewEditor,
       noDataPage: services.noDataPage,
     }),
-    [core, data.dataViews, dataViewEditor, hasESData, hasUserDataView, services.noDataPage, share]
+    [core, data.dataViews, dataViewEditor, noDataState, services.noDataPage, share]
   );
 
   const loadingIndicator = useMemo(
@@ -288,7 +299,7 @@ export function DiscoverMainRoute({
   );
 
   const mainContent = useMemo(() => {
-    if (showNoDataPage) {
+    if (noDataState.showNoDataPage) {
       const importPromise = import('@kbn/shared-ux-page-analytics-no-data');
       const AnalyticsNoDataPageKibanaProvider = withSuspense(
         React.lazy(() =>
@@ -326,28 +337,56 @@ export function DiscoverMainRoute({
     noDataDependencies,
     onDataViewCreated,
     onESQLNavigationComplete,
-    showNoDataPage,
+    noDataState.showNoDataPage,
     stateContainer,
   ]);
+
+  const rootProfileState = useRootProfile();
 
   if (error) {
     return <DiscoverError error={error} />;
   }
 
-  if (!customizationService) {
+  if (!customizationService || rootProfileState.rootProfileLoading) {
     return loadingIndicator;
   }
 
   return (
     <DiscoverCustomizationProvider value={customizationService}>
       <DiscoverMainProvider value={stateContainer}>
-        <>
-          <DiscoverTopNavServerless stateContainer={stateContainer} hideNavMenuItems={loading} />
+        <rootProfileState.AppWrapper>
+          <DiscoverTopNavInline
+            stateContainer={stateContainer}
+            hideNavMenuItems={loading || noDataState.showNoDataPage}
+          />
           {mainContent}
-        </>
+        </rootProfileState.AppWrapper>
       </DiscoverMainProvider>
     </DiscoverCustomizationProvider>
   );
 }
 // eslint-disable-next-line import/no-default-export
 export default DiscoverMainRoute;
+
+function getLoadParamsForNewSearch(stateContainer: DiscoverStateContainer): {
+  nextDataView: LoadParams['dataView'];
+  initialAppState: LoadParams['initialAppState'];
+} {
+  const prevAppState = stateContainer.appState.getState();
+  const prevDataView = stateContainer.internalState.getState().dataView;
+  const initialAppState =
+    isDataSourceType(prevAppState.dataSource, DataSourceType.Esql) &&
+    prevDataView &&
+    prevDataView.type === ESQL_TYPE
+      ? {
+          // reset to a default ES|QL query
+          query: {
+            esql: getInitialESQLQuery(prevDataView),
+          },
+        }
+      : undefined;
+  return {
+    nextDataView: prevDataView,
+    initialAppState,
+  };
+}

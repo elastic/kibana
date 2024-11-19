@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { i18n } from '@kbn/i18n';
 import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common/types';
@@ -16,11 +18,43 @@ const getAccessorByIndex = (accessor: number, columns: Datatable['columns']) =>
 const getAccessorById = (accessor: DatatableColumn['id'], columns: Datatable['columns']) =>
   columns.find((c) => c.id === accessor);
 
-export const findAccessorOrFail = (accessor: string | number, columns: DatatableColumn[]) => {
-  const foundAccessor =
-    typeof accessor === 'number'
-      ? getAccessorByIndex(accessor, columns)
-      : getAccessorById(accessor, columns);
+export function findAccessor(
+  accessor: string,
+  columns: DatatableColumn[]
+): DatatableColumn | undefined;
+export function findAccessor(
+  accessor: number,
+  columns: DatatableColumn[]
+): number | DatatableColumn | undefined;
+export function findAccessor(
+  // eslint-disable-next-line @typescript-eslint/unified-signatures
+  accessor: string | number,
+  columns: DatatableColumn[]
+): number | DatatableColumn | undefined;
+export function findAccessor(
+  accessor: string | number,
+  columns: DatatableColumn[]
+): number | DatatableColumn | undefined {
+  return typeof accessor === 'number'
+    ? getAccessorByIndex(accessor, columns)
+    : getAccessorById(accessor, columns);
+}
+
+export function findAccessorOrFail(accessor: string, columns: DatatableColumn[]): DatatableColumn;
+export function findAccessorOrFail(
+  accessor: number,
+  columns: DatatableColumn[]
+): number | DatatableColumn;
+export function findAccessorOrFail(
+  // eslint-disable-next-line @typescript-eslint/unified-signatures
+  accessor: string | number,
+  columns: DatatableColumn[]
+): number | DatatableColumn;
+export function findAccessorOrFail(
+  accessor: string | number,
+  columns: DatatableColumn[]
+): number | DatatableColumn {
+  const foundAccessor = findAccessor(accessor, columns);
 
   if (foundAccessor === undefined) {
     throw new Error(
@@ -32,7 +66,7 @@ export const findAccessorOrFail = (accessor: string | number, columns: Datatable
   }
 
   return foundAccessor;
-};
+}
 
 export const getAccessorByDimension = (
   dimension: string | ExpressionValueVisDimension,
@@ -71,7 +105,7 @@ export function getFormatByAccessor(
   defaultColumnFormat?: SerializedFieldFormat
 ): SerializedFieldFormat | undefined {
   return typeof dimension === 'string'
-    ? getColumnByAccessor(dimension, columns)?.meta.params || defaultColumnFormat
+    ? getColumnByAccessor(dimension, columns)?.meta?.params || defaultColumnFormat
     : dimension.format || defaultColumnFormat;
 }
 

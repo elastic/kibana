@@ -1,29 +1,30 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Redirect } from 'react-router-dom';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { getUrlTracker } from '../../kibana_services';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 let bannerId: string | undefined;
 
 export function NotFoundRoute() {
   const services = useDiscoverServices();
-  const { urlForwarding, core, history } = services;
-  const currentLocation = history().location.pathname;
+  const { urlForwarding, urlTracker, core, history } = services;
+  const currentLocation = history.location.pathname;
 
   useEffect(() => {
     const path = window.location.hash.substr(1);
-    getUrlTracker().restorePreviousUrl();
+    urlTracker.restorePreviousUrl();
     urlForwarding.navigateToLegacyKibanaUrl(path);
 
     const bannerMessage = i18n.translate('discover.noMatchRoute.bannerTitleText', {
@@ -39,15 +40,12 @@ export function NotFoundRoute() {
               id="discover.noMatchRoute.bannerText"
               defaultMessage="Discover application doesn't recognize this route: {route}"
               values={{
-                route: history().location.state.referrer,
+                route: history.location.state.referrer,
               }}
             />
           </p>
         </EuiCallOut>,
-        {
-          theme: core.theme,
-          i18n: core.i18n,
-        }
+        core
       )
     );
 
@@ -57,7 +55,7 @@ export function NotFoundRoute() {
         core.overlays.banners.remove(bannerId);
       }
     }, 15000);
-  }, [core, history, urlForwarding]);
+  }, [core, history, urlForwarding, urlTracker]);
 
   return <Redirect to={{ pathname: '/', state: { referrer: currentLocation } }} />;
 }

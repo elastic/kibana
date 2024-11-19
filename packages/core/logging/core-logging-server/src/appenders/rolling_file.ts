@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { ByteSizeValue } from '@kbn/config-schema';
@@ -32,6 +33,10 @@ export interface RollingFileAppenderConfig {
    * The {@link RollingStrategy | rollout strategy} to use for rolling.
    */
   strategy: RollingStrategyConfig;
+  /**
+   * The {@link RetentionPolicy | retention strategy} to use to know which files to keep.
+   */
+  retention?: RetentionPolicyConfig;
 }
 
 /**
@@ -106,6 +111,14 @@ export interface NumericRollingStrategyConfig {
   /**
    * The maximum number of files to keep. Once this number is reached, oldest
    * files will be deleted. Defaults to `7`
+   *
+   * @deprecated use retention policy instead
    */
   max: number;
+}
+
+export interface RetentionPolicyConfig {
+  maxFiles?: number;
+  maxAccumulatedFileSize?: ByteSizeValue;
+  removeOlderThan?: Duration;
 }

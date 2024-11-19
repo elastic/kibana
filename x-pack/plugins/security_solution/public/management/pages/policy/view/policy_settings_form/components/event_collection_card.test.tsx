@@ -17,7 +17,8 @@ import { EventCollectionCard } from './event_collection_card';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { expectIsViewOnly, exactMatchText } from '../mocks';
 import userEvent from '@testing-library/user-event';
-import { cloneDeep, set } from 'lodash';
+import { cloneDeep } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import { within } from '@testing-library/react';
 
 describe('Policy Event Collection Card common component', () => {
@@ -76,11 +77,11 @@ describe('Policy Event Collection Card common component', () => {
     expect(isChecked('test-network')).toBe(true);
   });
 
-  it('should allow items to be unchecked', () => {
+  it('should allow items to be unchecked', async () => {
     const expectedUpdatedPolicy = cloneDeep(formProps.policy);
     set(expectedUpdatedPolicy, 'windows.events.file', false);
     render();
-    userEvent.click(renderResult.getByTestId('test-file'));
+    await userEvent.click(renderResult.getByTestId('test-file'));
 
     expect(formProps.onChange).toHaveBeenCalledWith({
       isValid: true,
@@ -88,7 +89,7 @@ describe('Policy Event Collection Card common component', () => {
     });
   });
 
-  it('should allow items to be checked', () => {
+  it('should allow items to be checked', async () => {
     set(formProps.policy, 'windows.events.file', false);
     formProps.selection.file = false;
 
@@ -102,7 +103,7 @@ describe('Policy Event Collection Card common component', () => {
     );
     expect(isChecked('test-file')).toBe(false);
 
-    userEvent.click(getByTestId('test-file'));
+    await userEvent.click(getByTestId('test-file'));
 
     expect(formProps.onChange).toHaveBeenCalledWith({
       isValid: true,
@@ -120,7 +121,6 @@ describe('Policy Event Collection Card common component', () => {
         name: 'Collect DNS',
         id: 'dns',
         title: 'DNS collection',
-        uncheckedName: 'Do not collect DNS',
         description: 'This collects info about DNS',
         tooltipText: 'This is a tooltip',
       };
@@ -201,7 +201,7 @@ describe('Policy Event Collection Card common component', () => {
       );
     });
 
-    it('should only display events that were checked', () => {
+    it('should display all events, even unchecked ones', () => {
       set(formProps.policy, 'windows.events.file', false);
       formProps.selection.file = false;
       render();
@@ -209,7 +209,9 @@ describe('Policy Event Collection Card common component', () => {
       expect(renderResult.getByTestId('test-selectedCount')).toHaveTextContent(
         exactMatchText('1 / 2 event collections enabled')
       );
-      expect(renderResult.getByTestId('test-options')).toHaveTextContent(exactMatchText('Network'));
+      expect(renderResult.getByTestId('test-options')).toHaveTextContent(
+        exactMatchText(['File', 'Network'].join(''))
+      );
     });
 
     it('should show empty value if no events are selected', () => {
@@ -235,7 +237,6 @@ describe('Policy Event Collection Card common component', () => {
           name: 'Collect DNS',
           id: 'dns',
           title: 'DNS collection',
-          uncheckedName: 'Do not collect DNS',
           description: 'This collects info about DNS',
           tooltipText: 'This is a tooltip',
         };
@@ -244,12 +245,16 @@ describe('Policy Event Collection Card common component', () => {
 
       it('should render expected content when option is checked', () => {
         render();
-        const dnsOption = renderResult.getByTestId('test-dnsContainer');
+        const dnsContainer = renderResult.getByTestId('test-dnsContainer');
 
-        expectIsViewOnly(dnsOption);
-        expect(dnsOption).toHaveTextContent(
+        expectIsViewOnly(dnsContainer);
+        expect(dnsContainer).toHaveTextContent(
           exactMatchText('DNS collectionThis collects info about DNSCollect DNSInfo')
         );
+
+        const dnsOption = renderResult.getByTestId('test-dns');
+        expect(dnsOption).toHaveAttribute('disabled');
+        expect(dnsOption).toHaveAttribute('checked');
       });
 
       it('should not render option if un-checked', () => {
@@ -257,7 +262,14 @@ describe('Policy Event Collection Card common component', () => {
         formProps.selection.dns = false;
         render();
 
-        expect(renderResult.queryByTestId('test-dnsContainer')).toBeNull();
+        const dnsContainer = renderResult.getByTestId('test-dnsContainer');
+        const dnsOption = renderResult.getByTestId('test-dns');
+        expectIsViewOnly(dnsContainer);
+        expect(dnsContainer).toHaveTextContent(
+          exactMatchText('DNS collectionThis collects info about DNSCollect DNSInfo')
+        );
+        expect(dnsOption).toHaveAttribute('disabled');
+        expect(dnsOption).not.toHaveAttribute('checked');
       });
     });
   });

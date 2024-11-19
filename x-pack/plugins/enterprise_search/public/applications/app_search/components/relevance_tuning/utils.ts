@@ -45,7 +45,7 @@ const toArray = <T>(v: T | T[]): T[] => (Array.isArray(v) ? v : [v]);
 const toString = <T>(v1: T) => String(v1);
 
 const normalizeBoostValue = (boost: RawBoost): Boost => {
-  if (!boost.hasOwnProperty('value')) {
+  if (!Object.hasOwn(boost, 'value')) {
     // Can't simply do `return boost` here as TS can't infer the correct type
     return omit(boost, 'value');
   }

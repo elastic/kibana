@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { shallow } from 'enzyme';
@@ -61,20 +62,20 @@ describe('UserToolTip', () => {
             </EuiFlexItem>
             <EuiFlexItem
               grow={true}
+              style={
+                Object {
+                  "minWidth": 0,
+                }
+              }
             >
-              <EuiFlexGroup
-                direction="column"
-                gutterSize="none"
+              <div>
+                Delighted Nightingale
+              </div>
+              <EuiText
+                size="xs"
               >
-                <EuiFlexItem>
-                  <strong>
-                    Delighted Nightingale
-                  </strong>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  delighted_nightingale@elastic.co
-                </EuiFlexItem>
-              </EuiFlexGroup>
+                delighted_nightingale@elastic.co
+              </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
         }

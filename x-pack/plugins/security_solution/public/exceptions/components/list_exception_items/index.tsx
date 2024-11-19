@@ -23,6 +23,7 @@ import { LinkToRuleDetails } from '../link_to_rule_details';
 import { ExceptionsUtility } from '../exceptions_utility';
 import * as i18n from '../../translations/list_exception_items';
 import { useEndpointExceptionsCapability } from '../../hooks/use_endpoint_exceptions_capability';
+import { ShowValueListModal } from '../../../value_list/components/show_value_list_modal';
 
 interface ListExceptionItemsProps {
   isReadOnly: boolean;
@@ -104,6 +105,7 @@ const ListExceptionItemsComponent: FC<ListExceptionItemsProps> = ({
             />
           )
         }
+        showValueListModal={ShowValueListModal}
       />
     </>
   );

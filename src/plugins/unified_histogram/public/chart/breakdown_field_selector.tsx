@@ -1,19 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiSelectableOption } from '@elastic/eui';
-import { FieldIcon, getFieldIconProps } from '@kbn/field-utils';
+import {
+  FieldIcon,
+  getFieldIconProps,
+  comboBoxFieldOptionMatcher,
+  fieldSupportsBreakdown,
+} from '@kbn/field-utils';
 import { css } from '@emotion/react';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { isESQLColumnGroupable } from '@kbn/esql-utils';
+import { type DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
 import { i18n } from '@kbn/i18n';
 import { UnifiedHistogramBreakdownContext } from '../types';
-import { fieldSupportsBreakdown } from './utils/field_supports_breakdown';
 import {
   ToolbarSelector,
   ToolbarSelectorProps,
@@ -24,19 +32,35 @@ import {
 export interface BreakdownFieldSelectorProps {
   dataView: DataView;
   breakdown: UnifiedHistogramBreakdownContext;
+  esqlColumns?: DatatableColumn[];
   onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
 }
+
+const mapToDropdownFields = (dataView: DataView, esqlColumns?: DatatableColumn[]) => {
+  if (esqlColumns) {
+    return (
+      // filter out unsupported field types and counter time series metrics
+      esqlColumns
+        .filter(isESQLColumnGroupable)
+        .map((column) => new DataViewField(convertDatatableColumnToDataViewFieldSpec(column)))
+    );
+  }
+
+  return dataView.fields.filter(fieldSupportsBreakdown);
+};
 
 export const BreakdownFieldSelector = ({
   dataView,
   breakdown,
+  esqlColumns,
   onBreakdownFieldChange,
 }: BreakdownFieldSelectorProps) => {
+  const fields = useMemo(() => mapToDropdownFields(dataView, esqlColumns), [dataView, esqlColumns]);
   const fieldOptions: SelectableEntry[] = useMemo(() => {
-    const options: SelectableEntry[] = dataView.fields
-      .filter(fieldSupportsBreakdown)
+    const options: SelectableEntry[] = fields
       .map((field) => ({
         key: field.name,
+        name: field.name,
         label: field.displayName,
         value: field.name,
         checked:
@@ -67,16 +91,16 @@ export const BreakdownFieldSelector = ({
     });
 
     return options;
-  }, [dataView, breakdown.field]);
+  }, [fields, breakdown?.field]);
 
-  const onChange: ToolbarSelectorProps['onChange'] = useCallback(
+  const onChange = useCallback<NonNullable<ToolbarSelectorProps['onChange']>>(
     (chosenOption) => {
-      const field = chosenOption?.value
-        ? dataView.fields.find((currentField) => currentField.name === chosenOption.value)
+      const breakdownField = chosenOption?.value
+        ? fields.find((currentField) => currentField.name === chosenOption.value)
         : undefined;
-      onBreakdownFieldChange?.(field);
+      onBreakdownFieldChange?.(breakdownField);
     },
-    [dataView.fields, onBreakdownFieldChange]
+    [fields, onBreakdownFieldChange]
   );
 
   return (
@@ -102,8 +126,12 @@ export const BreakdownFieldSelector = ({
           defaultMessage: 'Select breakdown field',
         }
       )}
+      optionMatcher={comboBoxFieldOptionMatcher}
       options={fieldOptions}
       onChange={onChange}
     />
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export default BreakdownFieldSelector;

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -60,7 +61,14 @@ describe('Header', () => {
     const breadcrumbs$ = new BehaviorSubject([{ text: 'test' }]);
     const isLocked$ = new BehaviorSubject(false);
     const navLinks$ = new BehaviorSubject([
-      { id: 'kibana', title: 'kibana', baseUrl: '', href: '', url: '' },
+      {
+        id: 'kibana',
+        title: 'kibana',
+        baseUrl: '',
+        href: '',
+        url: '',
+        visibleIn: ['globalSearch' as const],
+      },
     ]);
     const headerBanner$ = new BehaviorSubject(undefined);
     const customNavLink$ = new BehaviorSubject({
@@ -69,6 +77,7 @@ describe('Header', () => {
       baseUrl: '',
       url: '',
       href: '',
+      visibleIn: ['globalSearch' as const],
     });
     const recentlyAccessed$ = new BehaviorSubject([
       { link: '', label: 'dashboard', id: 'dashboard' },
@@ -87,6 +96,7 @@ describe('Header', () => {
         breadcrumbsAppendExtension$={breadcrumbsAppendExtension$}
         headerBanner$={headerBanner$}
         helpMenuLinks$={of([])}
+        isServerless={false}
       />
     );
     expect(component.find('EuiHeader').exists()).toBeTruthy();

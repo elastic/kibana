@@ -8,8 +8,12 @@
 import React, { memo } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
-import { EuiLoadingSpinner } from '@elastic/eui';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
+import { EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { NotesContainer } from './notes';
+import { ManagementEmptyStateWrapper } from '../components/management_empty_state_wrapper';
 import {
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
   MANAGEMENT_ROUTING_EVENT_FILTERS_PATH,
@@ -18,6 +22,7 @@ import {
   MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
   MANAGEMENT_ROUTING_BLOCKLIST_PATH,
   MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH,
+  MANAGEMENT_ROUTING_NOTES_PATH,
 } from '../common/constants';
 import { NotFoundPage } from '../../app/404';
 import { EndpointsContainer } from './endpoint_hosts';
@@ -75,7 +80,18 @@ const ResponseActionsTelemetry = () => (
   </TrackApplicationView>
 );
 
+const NotesTelemetry = () => (
+  <TrackApplicationView viewId={SecurityPageName.notes}>
+    <NotesContainer />
+    <SpyRoute pageName={SecurityPageName.notes} />
+  </TrackApplicationView>
+);
+
 export const ManagementContainer = memo(() => {
+  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesDisabled'
+  );
+
   const {
     loading,
     canReadPolicyManagement,
@@ -89,7 +105,23 @@ export const ManagementContainer = memo(() => {
 
   // Lets wait until we can verify permissions
   if (loading) {
-    return <EuiLoadingSpinner />;
+    return (
+      <ManagementEmptyStateWrapper>
+        <EuiEmptyPrompt
+          icon={<EuiLoadingLogo logo="logoSecurity" size="xl" />}
+          title={
+            <h2>
+              {i18n.translate(
+                'xpack.securitySolution.endpoint.managementContainer.loadingEndpointManagement',
+                {
+                  defaultMessage: 'Loading Endpoint Management',
+                }
+              )}
+            </h2>
+          }
+        />
+      </ManagementEmptyStateWrapper>
+    );
   }
 
   return (
@@ -129,6 +161,10 @@ export const ManagementContainer = memo(() => {
         component={ResponseActionsTelemetry}
         hasPrivilege={canReadActionsLogManagement}
       />
+
+      {!securitySolutionNotesDisabled && (
+        <Route path={MANAGEMENT_ROUTING_NOTES_PATH} component={NotesTelemetry} />
+      )}
 
       {canReadEndpointList && (
         <Route path={MANAGEMENT_PATH} exact>

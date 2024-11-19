@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import thunk from 'redux-thunk';
 import type {
   Action,
   Store,
@@ -20,6 +21,8 @@ import type { EnhancerOptions } from 'redux-devtools-extension';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import reduceReducers from 'reduce-reducers';
+import { TimelineTypeEnum } from '../../../common/api/timeline';
+import { TimelineId } from '../../../common/types';
 import { initialGroupingState } from './grouping/reducer';
 import type { GroupState } from './grouping/types';
 import {
@@ -37,16 +40,22 @@ import type { AppAction } from './actions';
 import type { Immutable } from '../../../common/endpoint/types';
 import type { State } from './types';
 import type { TimelineState } from '../../timelines/store/types';
-import type { KibanaDataView, SourcererModel, SourcererDataView } from './sourcerer/model';
-import { initDataView } from './sourcerer/model';
+import type {
+  KibanaDataView,
+  SourcererModel,
+  SourcererDataView,
+} from '../../sourcerer/store/model';
+import { initDataView } from '../../sourcerer/store/model';
 import type { StartedSubPlugins, StartPlugins } from '../../types';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
-import { createSourcererDataView } from '../containers/sourcerer/create_sourcerer_data_view';
+import { createSourcererDataView } from '../../sourcerer/containers/create_sourcerer_data_view';
 import type { AnalyzerState } from '../../resolver/types';
 import { resolverMiddlewareFactory } from '../../resolver/store/middleware';
 import { dataAccessLayerFactory } from '../../resolver/data_access_layer/factory';
-import { sourcererActions } from './sourcerer';
+import { sourcererActions } from '../../sourcerer/store';
 import { createMiddlewares } from './middlewares';
+import { addNewTimeline } from '../../timelines/store/helpers';
+import { initialNotesState } from '../../notes/store/notes.slice';
 
 let store: Store<State, Action> | null = null;
 
@@ -57,7 +66,10 @@ export const createStoreFactory = async (
   storage: Storage,
   enableExperimental: ExperimentalFeatures
 ): Promise<Store<State, Action>> => {
-  let signal: { name: string | null } = { name: null };
+  let signal: { name: string | null; index_mapping_outdated: null | boolean } = {
+    name: null,
+    index_mapping_outdated: null,
+  };
   try {
     if (coreStart.application.capabilities[SERVER_APP_ID].show === true) {
       signal = await coreStart.http.fetch(DETECTION_ENGINE_INDEX_URL, {
@@ -66,7 +78,7 @@ export const createStoreFactory = async (
       });
     }
   } catch {
-    signal = { name: null };
+    signal = { name: null, index_mapping_outdated: null };
   }
 
   const configPatternList = coreStart.uiSettings.get(DEFAULT_INDEX_KEY);
@@ -101,6 +113,15 @@ export const createStoreFactory = async (
       ...subPlugins.timelines.store.initialState.timeline!,
       timelineById: {
         ...subPlugins.timelines.store.initialState.timeline.timelineById,
+        ...addNewTimeline({
+          id: TimelineId.active,
+          timelineById: {},
+          show: false,
+          timelineType: TimelineTypeEnum.default,
+          columns: [],
+          dataViewId: null,
+          indexNames: [],
+        }),
       },
     },
   };
@@ -144,11 +165,13 @@ export const createStoreFactory = async (
       defaultDataView,
       kibanaDataViews,
       signalIndexName: signal.name,
+      signalIndexMappingOutdated: signal.index_mapping_outdated,
       enableExperimental,
     },
     dataTableInitialState,
     groupsInitialState,
-    analyzerInitialState
+    analyzerInitialState,
+    initialNotesState
   );
 
   const rootReducer = {
@@ -218,7 +241,6 @@ const sanitizeDataView = (dataView: SourcererDataView) => {
 const sanitizeTimelineModel = (timeline: TimelineModel) => {
   return {
     ...timeline,
-    filterManager: 'filterManager',
     footerText: 'footerText',
     loadingText: 'loadingText',
   };
@@ -265,7 +287,8 @@ export const createStore = (
   const middlewareEnhancer = applyMiddleware(
     ...createMiddlewares(kibana, storage),
     telemetryMiddleware,
-    ...(additionalMiddleware ?? [])
+    ...(additionalMiddleware ?? []),
+    thunk
   );
 
   store = createReduxStore(

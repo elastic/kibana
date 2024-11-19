@@ -1,0 +1,688 @@
+{
+ "cells": [
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "s49gpkvZ7q53"
+   },
+   "source": [
+    "# Multilingual semantic search\n",
+    "\n",
+    "[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/elastic/elasticsearch-labs/blob/main/notebooks/search/04-multilingual.ipynb)\n",
+    "\n",
+    "In this example we'll use a multilingual embedding model\n",
+    "[multilingual-e5-base](https://huggingface.co/intfloat/multilingual-e5-base) to perform search on a dataset of mixed\n",
+    "language documents. Using this model, we can search in two ways:\n",
+    " * Across languages, for example using a query in German to find documents in English\n",
+    " * Within a non-English language, for example using a query in German to find documents in German\n",
+    "\n",
+    " While this example is using dense retrieval only, it's possible to also combine dense and traditional lexical retrieval\n",
+    " with hybrid search. For more information on lexical multilingual search, please see the blog post\n",
+    " [Multilingual search using language identification in Elasticsearch](https://www.elastic.co/search-labs/multilingual-vector-search-e5-embedding-model).\n",
+    "\n",
+    " The dataset used contains snippets of Wikipedia passages from the [MIRACL](https://project-miracl.github.io/) dataset."
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "Y01AXpELkygt"
+   },
+   "source": [
+    "# 🧰 Requirements\n",
+    "\n",
+    "For this example, you will need:\n",
+    "\n",
+    "- Python 3.6 or later\n",
+    "- An Elastic deployment with a machine learning node\n",
+    "   - We'll be using [Elastic Cloud](https://www.elastic.co/guide/en/cloud/current/ec-getting-started.html) for this example (available with a [free trial](https://cloud.elastic.co/registration?onboarding_token=vectorsearch&utm_source=github&utm_content=elasticsearch-labs-notebook))\n",
+    "- The [Elastic Python client](https://www.elastic.co/guide/en/elasticsearch/client/python-api/current/installation.html)\n"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "N4pI1-eIvWrI"
+   },
+   "source": [
+    "## Create Elastic Cloud deployment\n",
+    "\n",
+    "If you don't have an Elastic Cloud deployment, sign up [here](https://cloud.elastic.co/registration?onboarding_token=vectorsearch&utm_source=github&utm_content=elasticsearch-labs-notebook) for a free trial.\n",
+    "\n",
+    "Once logged in to your Elastic Cloud account, go to the [Create deployment](https://cloud.elastic.co/deployments/create) page and select **Create deployment**. Leave all settings with their default values."
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "gaTFHLJC-Mgi"
+   },
+   "source": [
+    "# Install packages and initialize the Elasticsearch Python client\n",
+    "\n",
+    "To get started, we'll need to connect to our Elastic deployment using the Python client.\n",
+    "Because we're using an Elastic Cloud deployment, we'll use the **Cloud ID** to identify our deployment.\n",
+    "\n",
+    "First we need to `pip` install the packages we need for this example."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/"
+    },
+    "id": "K9Q1p2C9-wce",
+    "outputId": "204d5aee-571e-4363-be6e-f87d058f2d29"
+   },
+   "outputs": [],
+   "source": [
+    "!pip install -qU elasticsearch sentence-transformers==2.7.0"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "gEzq2Z1wBs3M"
+   },
+   "source": [
+    "Next we need to import the `elasticsearch` module and the `getpass` module.\n",
+    "`getpass` is part of the Python standard library and is used to securely prompt for credentials."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {
+    "id": "uP_GTVRi-d96"
+   },
+   "outputs": [
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "7ea79a149aaf42cd8e178597038deb3c",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Downloading pytorch_model.bin:   0%|          | 0.00/1.11G [00:00<?, ?B/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "80deb793d54246f1b9e5251273f109c1",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Downloading (…)nce_bert_config.json:   0%|          | 0.00/57.0 [00:00<?, ?B/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "5c239de257bc460bae63a65f8b7154fa",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Downloading (…)tencepiece.bpe.model:   0%|          | 0.00/5.07M [00:00<?, ?B/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "a1faf9151ca64a76873a6433ba5cfffc",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Downloading (…)cial_tokens_map.json:   0%|          | 0.00/280 [00:00<?, ?B/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "ffe44efdaac4450598681296e13e6542",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Downloading tokenizer.json:   0%|          | 0.00/17.1M [00:00<?, ?B/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "18e5f7e7776a4b34a729ff37fc46e32e",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Downloading tokenizer_config.json:   0%|          | 0.00/418 [00:00<?, ?B/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "741b0b8d00cd489598e08b8ae1e7f662",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Downloading modules.json:   0%|          | 0.00/387 [00:00<?, ?B/s]"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "from getpass import getpass\n",
+    "from urllib.request import urlopen\n",
+    "import json\n",
+    "import textwrap\n",
+    "from elasticsearch import Elasticsearch\n",
+    "from sentence_transformers import SentenceTransformer\n",
+    "\n",
+    "model = SentenceTransformer(\"intfloat/multilingual-e5-base\")"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "AMSePFiZCRqX"
+   },
+   "source": [
+    "Now we can instantiate the Python Elasticsearch client.\n",
+    "First we prompt the user for their password and Cloud ID.\n",
+    "\n",
+    "🔐 NOTE: `getpass` enables us to securely prompt the user for credentials without echoing them to the terminal, or storing it in memory.\n",
+    "\n",
+    "Then we create a `client` object that instantiates an instance of the `Elasticsearch` class."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/"
+    },
+    "id": "h0MdAZ53CdKL",
+    "outputId": "96ea6f81-f935-4d51-c4a7-af5a896180f1"
+   },
+   "outputs": [],
+   "source": [
+    "# https://www.elastic.co/search-labs/tutorials/install-elasticsearch/elastic-cloud#finding-your-cloud-id\n",
+    "ELASTIC_CLOUD_ID = getpass(\"Elastic Cloud ID: \")\n",
+    "\n",
+    "# https://www.elastic.co/search-labs/tutorials/install-elasticsearch/elastic-cloud#creating-an-api-key\n",
+    "ELASTIC_API_KEY = getpass(\"Elastic Api Key: \")\n",
+    "\n",
+    "# Create the client instance\n",
+    "client = Elasticsearch(\n",
+    "    # For local development\n",
+    "    # hosts=[\"http://localhost:9200\"]\n",
+    "    cloud_id=ELASTIC_CLOUD_ID,\n",
+    "    api_key=ELASTIC_API_KEY,\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Enable Telemetry\n",
+    "\n",
+    "Knowing that you are using this notebook helps us decide where to invest our efforts to improve our products. We would like to ask you that you run the following code to let us gather anonymous usage statistics. See [telemetry.py](https://github.com/elastic/elasticsearch-labs/blob/main/telemetry/telemetry.py) for details. Thank you!"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "!curl -O -s https://raw.githubusercontent.com/elastic/elasticsearch-labs/main/telemetry/telemetry.py\n",
+    "from telemetry import enable_telemetry\n",
+    "\n",
+    "client = enable_telemetry(client, \"04-multilingual\")"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "bRHbecNeEDL3"
+   },
+   "source": [
+    "### Test the Client\n",
+    "Before you continue, confirm that the client has connected with this test."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/"
+    },
+    "id": "rdiUKqZbEKfF",
+    "outputId": "43b6f1cd-a43e-4dbe-caa5-7fd170464881"
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "{'name': 'instance-0000000011', 'cluster_name': 'd1bd36862ce54c7b903e2aacd4cd7f0a', 'cluster_uuid': 'tIkh0X_UQKmMFQKSfUw-VQ', 'version': {'number': '8.11.1', 'build_flavor': 'default', 'build_type': 'docker', 'build_hash': '6f9ff581fbcde658e6f69d6ce03050f060d1fd0c', 'build_date': '2023-11-11T10:05:59.421038163Z', 'build_snapshot': False, 'lucene_version': '9.8.0', 'minimum_wire_compatibility_version': '7.17.0', 'minimum_index_compatibility_version': '7.0.0'}, 'tagline': 'You Know, for Search'}\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(client.info())"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "enHQuT57DhD1"
+   },
+   "source": [
+    "Refer to https://www.elastic.co/guide/en/elasticsearch/client/python-api/current/connecting.html#connect-self-managed-new to learn how to connect to a self-managed deployment.\n",
+    "\n",
+    "Read https://www.elastic.co/guide/en/elasticsearch/client/python-api/current/connecting.html#connect-self-managed-new to learn how to connect using API keys.\n"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "TF_wxIAhD07a"
+   },
+   "source": [
+    "# Create Elasticsearch index with required mappings\n",
+    "\n",
+    "We need to add a field to support dense vector storage and search.\n",
+    "Note the `passage_embedding` field below, which is used to store the dense vector representation of the `passage` field."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/"
+    },
+    "id": "cvYECABJJs_2",
+    "outputId": "18fb51e4-c4f6-4d1b-cb2d-bc6f8ec1aa84"
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "ObjectApiResponse({'acknowledged': True, 'shards_acknowledged': True, 'index': 'articles'})"
+      ]
+     },
+     "execution_count": 5,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Define the mapping\n",
+    "mappings = {\n",
+    "    \"properties\": {\n",
+    "        \"language\": {\"type\": \"keyword\"},\n",
+    "        \"id\": {\"type\": \"keyword\"},\n",
+    "        \"title\": {\"type\": \"text\"},\n",
+    "        \"passage\": {\"type\": \"text\"},\n",
+    "        \"passage_embedding\": {\n",
+    "            \"type\": \"dense_vector\",\n",
+    "            \"dims\": 768,\n",
+    "            \"index\": \"true\",\n",
+    "            \"similarity\": \"cosine\",\n",
+    "        },\n",
+    "    }\n",
+    "}\n",
+    "\n",
+    "# Create the index (deleting any previously existing index)\n",
+    "client.indices.delete(index=\"articles\", ignore_unavailable=True)\n",
+    "client.indices.create(index=\"articles\", mappings=mappings)"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Dataset\n",
+    "\n",
+    "Let's index some data.\n",
+    "Note that we are embedding the `passage` field using the sentence transformer model.\n",
+    "Once indexed, you'll see that your documents contain a `passage_embedding` field (`\"type\": \"dense_vector\"`) which contains a vector of floating point values.\n",
+    "This is the embedding of the `passage` field in vector space.\n",
+    "We'll use this field to perform semantic search using kNN."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "url = \"https://raw.githubusercontent.com/elastic/elasticsearch-labs/main/notebooks/search/articles.json\"\n",
+    "response = urlopen(url)\n",
+    "articles = json.loads(response.read())"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Index documents\n",
+    "\n",
+    "Our dataset is a Python list that contains dictionaries of passages from Wikipedia articles in two languages.\n",
+    "We'll use the `client.bulk` method to index our documents in batches.\n",
+    "\n",
+    "The following code iterates over the articles and creates a list of actions to be performed.\n",
+    "Each action is a dictionary containing an \"index\" operation on our Elasticsearch index.\n",
+    "The passage is encoded using our selected model, and the encoded vector is added to the article document.\n",
+    "Note that the E5 models require that a prefix instruction is used \"passage: \" to tell the model that it is to embed a passage.\n",
+    "On the query side, the query string will be prefixed with \"query: \".\n",
+    "The article document is then added to the list of operations.\n",
+    "\n",
+    "Finally, we call the `bulk` method, specifying the index name and the list of actions."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "ObjectApiResponse({'errors': False, 'took': 49, 'items': [{'index': {'_index': 'articles', '_id': 'XvGt7osBeCQuLJUsDG6m', '_version': 1, 'result': 'created', 'forced_refresh': True, '_shards': {'total': 2, 'successful': 1, 'failed': 0}, '_seq_no': 0, '_primary_term': 1, 'status': 201}}, {'index': {'_index': 'articles', '_id': 'X_Gt7osBeCQuLJUsDG6m', '_version': 1, 'result': 'created', 'forced_refresh': True, '_shards': {'total': 2, 'successful': 1, 'failed': 0}, '_seq_no': 1, '_primary_term': 1, 'status': 201}}, {'index': {'_index': 'articles', '_id': 'YPGt7osBeCQuLJUsDG6m', '_version': 1, 'result': 'created', 'forced_refresh': True, '_shards': {'total': 2, 'successful': 1, 'failed': 0}, '_seq_no': 2, '_primary_term': 1, 'status': 201}}, {'index': {'_index': 'articles', '_id': 'YfGt7osBeCQuLJUsDG6m', '_version': 1, 'result': 'created', 'forced_refresh': True, '_shards': {'total': 2, 'successful': 1, 'failed': 0}, '_seq_no': 3, '_primary_term': 1, 'status': 201}}, {'index': {'_index': 'articles', '_id': 'YvGt7osBeCQuLJUsDG6m', '_version': 1, 'result': 'created', 'forced_refresh': True, '_shards': {'total': 2, 'successful': 1, 'failed': 0}, '_seq_no': 4, '_primary_term': 1, 'status': 201}}, {'index': {'_index': 'articles', '_id': 'Y_Gt7osBeCQuLJUsDG6m', '_version': 1, 'result': 'created', 'forced_refresh': True, '_shards': {'total': 2, 'successful': 1, 'failed': 0}, '_seq_no': 5, '_primary_term': 1, 'status': 201}}, {'index': {'_index': 'articles', '_id': 'ZPGt7osBeCQuLJUsDG6m', '_version': 1, 'result': 'created', 'forced_refresh': True, '_shards': {'total': 2, 'successful': 1, 'failed': 0}, '_seq_no': 6, '_primary_term': 1, 'status': 201}}]})"
+      ]
+     },
+     "execution_count": 7,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "operations = []\n",
+    "for article in articles:\n",
+    "    operations.append({\"index\": {\"_index\": \"articles\"}})\n",
+    "    passage = article[\"passage\"]\n",
+    "    passageEmbedding = model.encode(f\"passage: {passage}\").tolist()\n",
+    "    article[\"passage_embedding\"] = passageEmbedding\n",
+    "    operations.append(article)\n",
+    "\n",
+    "client.bulk(index=\"articles\", operations=operations, refresh=True)"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "MrBCHdH1u8Wd"
+   },
+   "source": [
+    "# Multilingual Semantic Search\n",
+    "\n",
+    "The `query` function shown below can search for a given text in the dataset, with the query text given in any language. The function supports an optional `language` argument, which when given, restricts the search to passages in the selected language."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def query(q, language=None):\n",
+    "    knn = {\n",
+    "        \"field\": \"passage_embedding\",\n",
+    "        \"query_vector\": model.encode(f\"query: {q}\").tolist(),\n",
+    "        \"k\": 2,\n",
+    "        \"num_candidates\": 5,\n",
+    "    }\n",
+    "\n",
+    "    if language:\n",
+    "        knn[\"filter\"] = {\n",
+    "            \"term\": {\n",
+    "                \"language\": language,\n",
+    "            }\n",
+    "        }\n",
+    "\n",
+    "    return client.search(index=\"articles\", knn=knn)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "To make it convenient to experient with this dataset, we will use the following function to format query resposes."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def pretty_response(response):\n",
+    "    if len(response[\"hits\"][\"hits\"]) == 0:\n",
+    "        print(\"Your search returned no results.\")\n",
+    "    else:\n",
+    "        for hit in response[\"hits\"][\"hits\"]:\n",
+    "            score = hit[\"_score\"]\n",
+    "            language = hit[\"_source\"][\"language\"]\n",
+    "            id = hit[\"_source\"][\"id\"]\n",
+    "            title = hit[\"_source\"][\"title\"]\n",
+    "            passage = hit[\"_source\"][\"passage\"]\n",
+    "            print()\n",
+    "            print(f\"ID: {id}\")\n",
+    "            print(f\"Language: {language}\")\n",
+    "            print(f\"Title: {title}\")\n",
+    "            print(f\"Passage: {textwrap.fill(passage, 120)}\")\n",
+    "            print(f\"Score: {score}\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "For those unfamiliar with German, here is a quick translation of search words used in the examples:\n",
+    " * \"health\" -> \"Gesundheit\"\n",
+    " * \"wall\" -> \"Mauer\"\n",
+    "\n",
+    "The first example searches for a word in English."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "ID: 9002#0\n",
+      "Language: de\n",
+      "Title: Gesundheits- und Krankenpflege\n",
+      "Passage: Die Gesundheits- und Krankenpflege als Berufsfeld umfasst die Versorgung und Betreuung von Menschen aller Altersgruppen,\n",
+      "insbesondere kranke, behinderte und sterbende Erwachsene. Die Gesundheits- und Kinderkrankenpflege hat ihren Schwerpunkt\n",
+      "in der Versorgung von Kindern und Jugendlichen. In beiden Fachrichtungen gehört die Verhütung von Krankheiten und\n",
+      "Gesunderhaltung zum Aufgabengebiet der professionellen Pflege.\n",
+      "Score: 0.8986236\n",
+      "\n",
+      "ID: 8881#0\n",
+      "Language: en\n",
+      "Title: Doctor (title)\n",
+      "Passage: Doctor is an academic title that originates from the Latin word of the same spelling and meaning. The word is originally\n",
+      "an agentive noun of the Latin verb \"docēre\" [dɔˈkeːrɛ] 'to teach'. It has been used as an academic title in Europe since\n",
+      "the 13th century, when the first Doctorates were awarded at the University of Bologna and the University of Paris.\n",
+      "Having become established in European universities, this usage spread around the world. Contracted \"Dr\" or \"Dr.\", it is\n",
+      "used as a designation for a person who has obtained a Doctorate (e.g. PhD). In many parts of the world it is also used\n",
+      "by medical practitioners, regardless of whether or not they hold a doctoral-level degree.\n",
+      "Score: 0.8904184\n"
+     ]
+    }
+   ],
+   "source": [
+    "pretty_response(query(\"health\"))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Note that in the results above, we see that the document about healthcare,\n",
+    "even though it's in German, matches better to the query \"health\",\n",
+    "versus the English document which doesn't talk about health specifically but about doctors more generally.\n",
+    "This is the power of a multilingual embedding which embeds meaning across languages.\n",
+    "\n",
+    "The next example also searches for a word in English, but only retrieves results in German."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "ID: 2270104#0\n",
+      "Language: de\n",
+      "Title: London Wall\n",
+      "Passage: London Wall ist die strategische Stadtmauer, die die Römer um Londinium gebaut haben, um die Stadt zu schützen, die über\n",
+      "den wichtigen Hafen an der Themse verfügte. Bis ins späte Mittelalter hinein bildete diese Stadtmauer die Grenzen von\n",
+      "London. Heute ist \"London Wall\" auch der Name einer Straße, die an einem noch bestehenden Abschnitt der Stadtmauer\n",
+      "verläuft.\n",
+      "Score: 0.8941858\n",
+      "\n",
+      "ID: 2270104#1\n",
+      "Language: de\n",
+      "Title: London Wall\n",
+      "Passage: Die Mauer wurde Ende des zweiten oder Anfang des dritten Jahrhunderts erbaut, wahrscheinlich zwischen 190 und 225,\n",
+      "vermutlich zwischen 200 und 220. Sie entstand somit etwa achtzig Jahre nach dem im Jahr 120 erfolgten Bau der Festung,\n",
+      "deren nördliche und westliche Mauern verstärkt und in der Höhe verdoppelt wurden, um einen Teil der neuen Stadtmauer zu\n",
+      "bilden. Die Anlage wurde zumindest bis zum Ende des vierten Jahrhunderts weiter ausgebaut. Sie zählt zu den letzten\n",
+      "großen Bauprojekten der Römer vor deren Rückzug aus Britannien im Jahr 410.\n",
+      "Score: 0.870095\n"
+     ]
+    }
+   ],
+   "source": [
+    "pretty_response(query(\"wall\", language=\"de\"))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "In the final example, the query is given in German, and only German results are requested."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "ID: 2270104#1\n",
+      "Language: de\n",
+      "Title: London Wall\n",
+      "Passage: Die Mauer wurde Ende des zweiten oder Anfang des dritten Jahrhunderts erbaut, wahrscheinlich zwischen 190 und 225,\n",
+      "vermutlich zwischen 200 und 220. Sie entstand somit etwa achtzig Jahre nach dem im Jahr 120 erfolgten Bau der Festung,\n",
+      "deren nördliche und westliche Mauern verstärkt und in der Höhe verdoppelt wurden, um einen Teil der neuen Stadtmauer zu\n",
+      "bilden. Die Anlage wurde zumindest bis zum Ende des vierten Jahrhunderts weiter ausgebaut. Sie zählt zu den letzten\n",
+      "großen Bauprojekten der Römer vor deren Rückzug aus Britannien im Jahr 410.\n",
+      "Score: 0.88160384\n",
+      "\n",
+      "ID: 2270104#0\n",
+      "Language: de\n",
+      "Title: London Wall\n",
+      "Passage: London Wall ist die strategische Stadtmauer, die die Römer um Londinium gebaut haben, um die Stadt zu schützen, die über\n",
+      "den wichtigen Hafen an der Themse verfügte. Bis ins späte Mittelalter hinein bildete diese Stadtmauer die Grenzen von\n",
+      "London. Heute ist \"London Wall\" auch der Name einer Straße, die an einem noch bestehenden Abschnitt der Stadtmauer\n",
+      "verläuft.\n",
+      "Score: 0.876139\n"
+     ]
+    }
+   ],
+   "source": [
+    "pretty_response(query(\"Mauer\", language=\"de\"))"
+   ]
+  }
+ ],
+ "metadata": {
+  "colab": {
+   "provenance": []
+  },
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.10.13"
+  },
+  "vscode": {
+   "interpreter": {
+    "hash": "b0fa6594d8f4cbf19f97940f81e996739fb7646882a419484c72d19e05852a7e"
+   }
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}

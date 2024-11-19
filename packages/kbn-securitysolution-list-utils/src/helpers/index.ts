@@ -1,13 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { addIdToItem, removeIdFromItem } from '@kbn/securitysolution-utils';
+import {
+  addIdToItem,
+  removeIdFromItem,
+  validateHasWildcardWithWrongOperator,
+} from '@kbn/securitysolution-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import {
   CreateExceptionListItemSchema,
@@ -1020,4 +1025,65 @@ export const getMappingConflictsInfo = (field: DataViewField): FieldConflictsInf
     });
   }
   return conflicts;
+};
+
+/**
+ * Given an exceptions list, determine if any entries have an "IS" operator with a wildcard value
+ */
+export const hasWrongOperatorWithWildcard = (
+  items: ExceptionsBuilderReturnExceptionItem[]
+): boolean => {
+  // flattens array of multiple entries added with OR
+  const multipleEntries = items.flatMap((item) => item.entries);
+  // flattens nested entries
+  const allEntries = multipleEntries.flatMap((item) => {
+    if (item.type === 'nested') {
+      return item.entries;
+    }
+    return item;
+  });
+
+  return allEntries.some((e) => {
+    if (e.type !== 'list' && 'value' in e) {
+      return validateHasWildcardWithWrongOperator({
+        operator: e.type,
+        value: e.value,
+      });
+    }
+  });
+};
+
+/**
+ * Event filters helper where given an exceptions list,
+ * determine if both 'subject_name' and 'trusted' are
+ * included in an entry with 'code_signature'
+ */
+export const hasPartialCodeSignatureEntry = (
+  items: ExceptionsBuilderReturnExceptionItem[]
+): boolean => {
+  const { os_types: os = ['windows'], entries = [] } = items[0] || {};
+  let name = false;
+  let trusted = false;
+
+  for (const e of entries) {
+    if (e.type === 'nested' && e.field === 'process.Ext.code_signature') {
+      const includesNestedName = e.entries.some(
+        (nestedEntry) => nestedEntry.field === 'subject_name'
+      );
+      const includesNestedTrusted = e.entries.some(
+        (nestedEntry) => nestedEntry.field === 'trusted'
+      );
+      if (includesNestedName !== includesNestedTrusted) {
+        return true;
+      }
+    } else if (
+      e.field === 'process.code_signature.subject_name' ||
+      (os.includes('macos') && e.field === 'process.code_signature.team_id')
+    ) {
+      name = true;
+    } else if (e.field === 'process.code_signature.trusted') {
+      trusted = true;
+    }
+  }
+  return name !== trusted;
 };

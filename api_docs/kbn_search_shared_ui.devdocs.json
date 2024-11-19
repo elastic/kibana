@@ -1,0 +1,61 @@
+{
+  "id": "@kbn/search-shared-ui",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/search-shared-ui",
+        "id": "def-public.FormInfoField",
+        "type": "Function",
+        "tags": [],
+        "label": "FormInfoField",
+        "description": [],
+        "signature": [
+          "({ actions, label, value, copyValue, dataTestSubj, copyValueDataTestSubj, }: FormInfoFieldProps) => React.JSX.Element"
+        ],
+        "path": "x-pack/packages/search/shared_ui/src/form_info_field/form_info_field.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-shared-ui",
+            "id": "def-public.FormInfoField.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  actions = [],\n  label,\n  value,\n  copyValue,\n  dataTestSubj,\n  copyValueDataTestSubj,\n}",
+            "description": [],
+            "signature": [
+              "FormInfoFieldProps"
+            ],
+            "path": "x-pack/packages/search/shared_ui/src/form_info_field/form_info_field.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

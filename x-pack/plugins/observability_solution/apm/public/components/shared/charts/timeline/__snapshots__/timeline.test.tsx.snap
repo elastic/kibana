@@ -1,0 +1,362 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Timeline TimelineAxisContainer should render with data 1`] = `
+.c0 {
+  position: absolute;
+  bottom: 0;
+}
+
+<div
+  style={
+    Object {
+      "height": "100%",
+      "width": "100%",
+    }
+  }
+>
+  <div
+    style={
+      Object {
+        "height": 100,
+        "width": "100%",
+      }
+    }
+  >
+    <svg
+      height={100}
+      style={
+        Object {
+          "left": 0,
+          "position": "absolute",
+          "top": 0,
+        }
+      }
+      width={0}
+    >
+      <g
+        transform="translate(0 80)"
+      >
+        <text
+          fill="#69707d"
+          fontSize={11}
+          textAnchor="middle"
+          x={50}
+          y={0}
+        >
+          0 μs
+        </text>
+        <text
+          fill="#69707d"
+          fontSize={11}
+          textAnchor="middle"
+          x={30}
+          y={0}
+        >
+          200 μs
+        </text>
+        <text
+          fill="#69707d"
+          fontSize={11}
+          textAnchor="middle"
+          x={10}
+          y={0}
+        >
+          400 μs
+        </text>
+        <text
+          fill="#69707d"
+          fontSize={11}
+          textAnchor="middle"
+          x={-10}
+          y={0}
+        >
+          600 μs
+        </text>
+        <text
+          fill="#69707d"
+          fontSize={11}
+          textAnchor="middle"
+          x={-30}
+          y={0}
+        >
+          800 μs
+        </text>
+        <text
+          fill="#343741"
+          textAnchor="middle"
+          x={-50}
+          y={0}
+        >
+          1,000 μs
+        </text>
+      </g>
+    </svg>
+    <div
+      className="c0"
+      style={
+        Object {
+          "left": -9955.5,
+        }
+      }
+    >
+      
+      .c0 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  font-size: 14px;
+  color: #69707d;
+  cursor: pointer;
+  opacity: 1;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.c1 {
+  width: 11px;
+  height: 11px;
+  margin-right: 0;
+  background: #98a2b3;
+  border-radius: 100%;
+}
+
+<span
+        className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+        onKeyDown={[Function]}
+        onMouseOut={[Function]}
+        onMouseOver={[Function]}
+      >
+        <div
+          className="c0"
+          disabled={false}
+          onBlur={[Function]}
+          onFocus={[Function]}
+        >
+          <span
+            className="c1"
+            color="#98a2b3"
+            shape="circle"
+          />
+        </div>
+      </span>
+    </div>
+    <div
+      className="c0"
+      style={
+        Object {
+          "left": -10955.5,
+        }
+      }
+    >
+      
+      .c0 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  font-size: 14px;
+  color: #69707d;
+  cursor: pointer;
+  opacity: 1;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.c1 {
+  width: 11px;
+  height: 11px;
+  margin-right: 0;
+  background: #98a2b3;
+  border-radius: 100%;
+}
+
+<span
+        className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+        onKeyDown={[Function]}
+        onMouseOut={[Function]}
+        onMouseOver={[Function]}
+      >
+        <div
+          className="c0"
+          disabled={false}
+          onBlur={[Function]}
+          onFocus={[Function]}
+        >
+          <span
+            className="c1"
+            color="#98a2b3"
+            shape="circle"
+          />
+        </div>
+      </span>
+    </div>
+    <div
+      className="c0"
+      style={
+        Object {
+          "left": -18955.5,
+        }
+      }
+    >
+      
+      .c0 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  font-size: 14px;
+  color: #69707d;
+  cursor: pointer;
+  opacity: 1;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.c1 {
+  width: 11px;
+  height: 11px;
+  margin-right: 0;
+  background: #98a2b3;
+  border-radius: 100%;
+}
+
+<span
+        className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+        onKeyDown={[Function]}
+        onMouseOut={[Function]}
+        onMouseOver={[Function]}
+      >
+        <div
+          className="c0"
+          disabled={false}
+          onBlur={[Function]}
+          onFocus={[Function]}
+        >
+          <span
+            className="c1"
+            color="#98a2b3"
+            shape="circle"
+          />
+        </div>
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Timeline VerticalLinesContainer should render with data 1`] = `
+<div
+  style={
+    Object {
+      "height": "100%",
+      "width": "100%",
+    }
+  }
+>
+  <svg
+    height="100%"
+    style={
+      Object {
+        "left": 0,
+        "position": "absolute",
+        "top": 0,
+      }
+    }
+    width={0}
+  >
+    <g
+      transform="translate(0 100)"
+    >
+      <line
+        stroke="#f5f7fa"
+        x1={50}
+        x2={50}
+        y1={0}
+        y2="100%"
+      />
+      <line
+        stroke="#f5f7fa"
+        x1={30}
+        x2={30}
+        y1={0}
+        y2="100%"
+      />
+      <line
+        stroke="#f5f7fa"
+        x1={10}
+        x2={10}
+        y1={0}
+        y2="100%"
+      />
+      <line
+        stroke="#f5f7fa"
+        x1={-10}
+        x2={-10}
+        y1={0}
+        y2="100%"
+      />
+      <line
+        stroke="#f5f7fa"
+        x1={-30}
+        x2={-30}
+        y1={0}
+        y2="100%"
+      />
+      <line
+        stroke="#f5f7fa"
+        x1={-50}
+        x2={-50}
+        y1={0}
+        y2="100%"
+      />
+      <line
+        stroke="#98a2b3"
+        x1={-9950}
+        x2={-9950}
+        y1={0}
+        y2="100%"
+      />
+      <line
+        stroke="#98a2b3"
+        x1={-10950}
+        x2={-10950}
+        y1={0}
+        y2="100%"
+      />
+      <line
+        stroke="#98a2b3"
+        x1={-18950}
+        x2={-18950}
+        y1={0}
+        y2="100%"
+      />
+      <line
+        stroke="#98a2b3"
+        x1={-50}
+        x2={-50}
+        y1={0}
+        y2="100%"
+      />
+    </g>
+  </svg>
+</div>
+`;

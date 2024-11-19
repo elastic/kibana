@@ -10,16 +10,17 @@ import { BASE_ALERTING_API_PATH } from '@kbn/alerting-plugin/common';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
   createLegacyRuleAction,
-  createRule,
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
   getSimpleRule,
   getSlackAction,
   getWebHookAction,
   getLegacyActionSO,
 } from '../../../utils';
-
+import {
+  createRule,
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+} from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
@@ -44,7 +45,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should have exactly 1 legacy action before a delete within alerting', async () => {
         // create an action
         const { body: hookAction } = await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'true')
           .send(getWebHookAction())
           .expect(200);
@@ -80,7 +81,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should return the legacy action in the response body when it deletes a rule that has one', async () => {
         // create an action
         const { body: hookAction } = await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'true')
           .send(getSlackAction())
           .expect(200);
@@ -102,7 +103,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body.actions).to.eql([
           {
             id: hookAction.id,
-            action_type_id: hookAction.actionTypeId,
+            action_type_id: hookAction.connector_type_id,
             group: 'default',
             params: {
               message:
@@ -119,7 +120,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should delete a legacy action when it deletes a rule that has one', async () => {
         // create an action
         const { body: hookAction } = await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'true')
           .send(getWebHookAction())
           .expect(200);

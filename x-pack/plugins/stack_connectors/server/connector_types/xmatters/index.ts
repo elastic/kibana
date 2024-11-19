@@ -8,13 +8,16 @@
 import { isString } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
-import type {
+import {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
   ValidatorServices,
 } from '@kbn/actions-plugin/server/types';
-import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common/types';
+import {
+  AlertingConnectorFeatureId,
+  SecurityConnectorFeatureId,
+} from '@kbn/actions-plugin/common/types';
 import { postXmatters } from './post_xmatters';
 
 export type XmattersConnectorType = ConnectorType<
@@ -66,7 +69,7 @@ export function getConnectorType(): XmattersConnectorType {
     name: i18n.translate('xpack.stackConnectors.xmatters.title', {
       defaultMessage: 'xMatters',
     }),
-    supportedFeatureIds: [AlertingConnectorFeatureId],
+    supportedFeatureIds: [AlertingConnectorFeatureId, SecurityConnectorFeatureId],
     validate: {
       config: {
         schema: ConfigSchema,
@@ -102,7 +105,7 @@ function validateConnectorTypeConfig(
       i18n.translate('xpack.stackConnectors.xmatters.configurationErrorNoHostname', {
         defaultMessage: 'Error configuring xMatters action: unable to parse url: {err}',
         values: {
-          err,
+          err: err.message,
         },
       })
     );
@@ -207,7 +210,7 @@ function validateConnectorTypeSecrets(
         i18n.translate('xpack.stackConnectors.xmatters.invalidUrlError', {
           defaultMessage: 'Invalid secretsUrl: {err}',
           values: {
-            err,
+            err: err.toString(),
           },
         })
       );
@@ -244,7 +247,8 @@ function validateConnectorTypeSecrets(
 export async function executor(
   execOptions: XmattersConnectorTypeExecutorOptions
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
-  const { actionId, configurationUtilities, config, params, logger } = execOptions;
+  const { actionId, configurationUtilities, config, params, logger, connectorUsageCollector } =
+    execOptions;
   const { configUrl, usesBasic } = config;
   const data = getPayloadForRequest(params);
 
@@ -260,7 +264,12 @@ export async function executor(
     if (!url) {
       throw new Error('Error: no url provided');
     }
-    result = await postXmatters({ url, data, basicAuth }, logger, configurationUtilities);
+    result = await postXmatters(
+      { url, data, basicAuth },
+      logger,
+      configurationUtilities,
+      connectorUsageCollector
+    );
   } catch (err) {
     const message = i18n.translate('xpack.stackConnectors.xmatters.postingErrorMessage', {
       defaultMessage: 'Error triggering xMatters workflow',

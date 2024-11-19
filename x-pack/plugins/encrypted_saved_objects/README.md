@@ -180,7 +180,7 @@ savedObjects.registerType({
 });
 ```
 
-### Example: Migating a Type
+### Example: Migrating a Type
 If your migration needs to change the type by, for example, removing an encrypted field, you will have to specify the legacy type for the input.
 
 ```typescript

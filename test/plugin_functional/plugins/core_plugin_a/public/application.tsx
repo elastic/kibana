@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { History } from 'history';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { withRouter, RouteComponentProps, Redirect } from 'react-router-dom';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Router, Route } from '@kbn/shared-ux-router';
 
 import {
@@ -100,16 +102,18 @@ const Nav = withRouter(({ history, navigateToApp }: NavProps) => (
 ));
 
 const FooApp = ({ history, coreStart }: { history: History; coreStart: CoreStart }) => (
-  <Router history={history}>
-    <EuiPage>
-      <EuiPageSidebar>
-        <Nav navigateToApp={coreStart.application.navigateToApp} />
-      </EuiPageSidebar>
-      <Route path="/" exact render={() => <Redirect to="/home" />} />
-      <Route path="/home" exact component={Home} />
-      <Route path="/page-a" component={PageA} />
-    </EuiPage>
-  </Router>
+  <KibanaRenderContextProvider {...coreStart}>
+    <Router history={history}>
+      <EuiPage>
+        <EuiPageSidebar>
+          <Nav navigateToApp={coreStart.application.navigateToApp} />
+        </EuiPageSidebar>
+        <Route path="/" exact render={() => <Redirect to="/home" />} />
+        <Route path="/home" exact component={Home} />
+        <Route path="/page-a" component={PageA} />
+      </EuiPage>
+    </Router>
+  </KibanaRenderContextProvider>
 );
 
 export const renderApp = (coreStart: CoreStart, { history, element }: AppMountParameters) => {

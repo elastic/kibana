@@ -1,21 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { SavedObjectSaveModal } from './saved_object_save_modal';
 
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { I18nProvider } from '@kbn/i18n-react';
 
 describe('SavedObjectSaveModal', () => {
   it('should render matching snapshot', () => {
-    const wrapper = shallow(
+    const wrapper = shallowWithIntl(
       <SavedObjectSaveModal
         onSave={() => void 0}
         onClose={() => void 0}
@@ -29,7 +31,7 @@ describe('SavedObjectSaveModal', () => {
   });
 
   it('should render matching snapshot when given options', () => {
-    const wrapper = shallow(
+    const wrapper = shallowWithIntl(
       <SavedObjectSaveModal
         onSave={() => void 0}
         onClose={() => void 0}
@@ -45,7 +47,7 @@ describe('SavedObjectSaveModal', () => {
   });
 
   it('should render matching snapshot when custom isValid is set', () => {
-    const falseWrapper = shallow(
+    const falseWrapper = shallowWithIntl(
       <SavedObjectSaveModal
         onSave={() => void 0}
         onClose={() => void 0}
@@ -58,7 +60,7 @@ describe('SavedObjectSaveModal', () => {
     );
     expect(falseWrapper).toMatchSnapshot();
 
-    const trueWrapper = shallow(
+    const trueWrapper = shallowWithIntl(
       <SavedObjectSaveModal
         onSave={() => void 0}
         onClose={() => void 0}
@@ -76,15 +78,17 @@ describe('SavedObjectSaveModal', () => {
     const confirmButtonLabel = 'Save and done';
 
     render(
-      <SavedObjectSaveModal
-        onSave={() => void 0}
-        onClose={() => void 0}
-        title={'Saved Object title'}
-        showCopyOnSave={false}
-        objectType="visualization"
-        showDescription={true}
-        confirmButtonLabel={confirmButtonLabel}
-      />
+      <I18nProvider>
+        <SavedObjectSaveModal
+          onSave={() => void 0}
+          onClose={() => void 0}
+          title={'Saved Object title'}
+          showCopyOnSave={false}
+          objectType="visualization"
+          showDescription={true}
+          confirmButtonLabel={confirmButtonLabel}
+        />
+      </I18nProvider>
     );
 
     expect(screen.queryByText(confirmButtonLabel)).toBeInTheDocument();
@@ -94,25 +98,77 @@ describe('SavedObjectSaveModal', () => {
     const onSave = jest.fn();
 
     render(
-      <SavedObjectSaveModal
-        onSave={onSave}
-        onClose={() => void 0}
-        title={'Saved Object title'}
-        objectType="visualization"
-        showDescription={true}
-        showCopyOnSave={true}
-        mustCopyOnSaveMessage="You must save a copy of the object."
-      />
+      <I18nProvider>
+        <SavedObjectSaveModal
+          onSave={onSave}
+          onClose={() => void 0}
+          title={'Saved Object title'}
+          objectType="visualization"
+          showDescription={true}
+          showCopyOnSave={true}
+          mustCopyOnSaveMessage="You must save a copy of the object."
+        />
+      </I18nProvider>
     );
 
     expect(onSave).not.toHaveBeenCalled();
 
     expect(screen.getByTestId('saveAsNewCheckbox')).toBeDisabled();
-    userEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }));
 
     await waitFor(() => {
       expect(onSave).toHaveBeenCalled();
       expect(onSave.mock.calls[0][0].newCopyOnSave).toBe(true);
+    });
+  });
+
+  describe('handle title duplication logic', () => {
+    it('should append "[1]" to title if no number is present', async () => {
+      const onSave = jest.fn();
+
+      render(
+        <I18nProvider>
+          <SavedObjectSaveModal
+            onSave={onSave}
+            onClose={() => {}}
+            title="Saved Object"
+            objectType="visualization"
+            showDescription={true}
+            showCopyOnSave={true}
+          />
+        </I18nProvider>
+      );
+
+      const switchElement = screen.getByTestId('saveAsNewCheckbox');
+      await userEvent.click(switchElement);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('savedObjectTitle')).toHaveValue('Saved Object [1]');
+      });
+    });
+
+    it('should increment the number by one when a number is already present', async () => {
+      const onSave = jest.fn();
+
+      render(
+        <I18nProvider>
+          <SavedObjectSaveModal
+            onSave={onSave}
+            onClose={() => {}}
+            title="Saved Object [1]"
+            objectType="visualization"
+            showDescription={true}
+            showCopyOnSave={true}
+          />
+        </I18nProvider>
+      );
+
+      const switchElement = screen.getByTestId('saveAsNewCheckbox');
+      await userEvent.click(switchElement);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('savedObjectTitle')).toHaveValue('Saved Object [2]');
+      });
     });
   });
 });

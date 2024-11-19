@@ -1,23 +1,33 @@
 [[esql]]
 === {esql}
 
-preview::["Do not use {esql} on production environments. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."]
+The Elasticsearch Query Language, {esql}, makes it faster and easier to explore your data.
 
-The Elasticsearch Query Language, {esql}, has been created to make exploring your data faster and easier using the **Discover** application. From version 8.11 you can try this new feature, which is enabled by default. 
+{esql} is a piped language which allows you to chain together multiple commands to query your data.
+Based on the query, Lens suggestions in Discover create a visualization of the query results.
 
-[role="screenshot"]
-image:images/esql-data-view-menu.png[An image of the Discover UI where users can access the {esql} feature, width=30%]
+{esql} comes with its own dedicated {esql} Compute Engine for greater efficiency. With one query you can search, aggregate, calculate and perform data transformations without leaving **Discover**. Write your query directly in **Discover** or use the **Dev Tools** with the {ref}/esql-rest.html[{esql} API].
 
-This new piped language allows you to chain together multiple commands to query your data. Based on the query, Lens suggestions in Discover create a visualization of the query results.
+You can switch to the ES|QL mode of Discover from the application menu bar.
 
-{esql} comes with its own dedicated {esql} Compute Engine for greater efficiency. From one query you can search, aggregate, calculate and perform data transformations without leaving **Discover**. Write your query directly in **Discover** or use the **Dev Tools** with the {ref}/esql-rest.html[{esql} API]. 
-
-{esql} also features in-app help, so you can get started faster and don't have to leave the application to check syntax. 
+{esql} also features in-app help and suggestions, so you can get started faster and don't have to leave the application to check syntax. 
 
 [role="screenshot"]
-image:images/esql-in-app-help.png[An image of the Discover UI where users can browse the in-app help]
+image:images/esql-in-app-help.png[The ES|QL syntax reference and the autocomplete menu]
 
-For more detailed information about the {esql} language, refer to {ref}/esql-language.html[Learning {esql}].
+You can also use ES|QL queries to create panels on your dashboards, create enrich policies, and create alerting rules.
+
+For more detailed information about {esql} in Kibana, refer to {ref}/esql-kibana.html[Using {esql} in {kib}].
+
+[NOTE]
+====
+{esql} is enabled by default in {kib}. It can be
+disabled using the `enableESQL` setting from the
+{kibana-ref}/advanced-options.html[Advanced Settings].
+
+This will hide the {esql} user interface from various applications.
+However, users will be able to access existing {esql} artifacts like saved searches and visualizations.
+====
 
 [float]
 [[esql-observability]]
@@ -35,6 +45,6 @@ Use {esql} to retrieve important information for investigation by using lookups.
 [[esql-whats-next]]
 ==== What's next?
 
-Full documentation for this language is available in the {es} documentation, refer to {ref}/esql.html[{esql}].
+The main documentation for {esql} lives in the {ref}/esql.html[{es} docs].
 
-Alternatively, a short tutorial is available in the **Discover** section <<try-esql, Try {esql}L>>.
+We also have a short tutorial in the **Discover** docs: <<try-esql,Using {esql}>>.

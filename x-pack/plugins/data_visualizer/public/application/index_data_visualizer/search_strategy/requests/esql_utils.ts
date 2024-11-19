@@ -23,7 +23,7 @@ export const getSafeESQLName = (str: string) => {
 };
 
 export function isESQLQuery(arg: unknown): arg is ESQLQuery {
-  return isPopulatedObject(arg, ['esql']);
+  return isPopulatedObject(arg, ['esql']) && typeof arg.esql === 'string';
 }
 export const PERCENTS = Array.from(
   Array(MAX_PERCENT / PERCENTILE_SPACING + 1),
@@ -35,8 +35,3 @@ export const getESQLPercentileQueryArray = (fieldName: string, percents = PERCEN
     (p) =>
       `${getSafeESQLName(`${fieldName}_p${p}`)} = PERCENTILE(${getSafeESQLName(fieldName)}, ${p})`
   );
-
-export const getSafeESQLLimitSize = (str?: string) => {
-  if (str === 'none' || !str) return '';
-  return ` | LIMIT ${str}`;
-};

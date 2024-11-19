@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FC, PropsWithChildren } from 'react';
 import React, { useState } from 'react';
 import type { EuiMarkdownEditorUiPlugin, EuiMarkdownAstNodePosition } from '@elastic/eui';
 import type { Plugin } from 'unified';
@@ -41,9 +42,6 @@ export interface CasesTimelineIntegration {
       onChange: (newValue: string) => void
     ) => UseInsertTimelineReturn;
   };
-  ui?: {
-    renderTimelineDetailsPanel?: () => JSX.Element;
-  };
 }
 
 // This context is available to all children of the stateful_event component where the provider is currently set
@@ -51,9 +49,11 @@ export const CasesTimelineIntegrationContext = React.createContext<CasesTimeline
   null
 );
 
-export const CasesTimelineIntegrationProvider: React.FC<{
-  timelineIntegration?: CasesTimelineIntegration;
-}> =
+export const CasesTimelineIntegrationProvider: FC<
+  PropsWithChildren<{
+    timelineIntegration?: CasesTimelineIntegration;
+  }>
+> =
   // TODO: Fix this manually. Issue #123375
   // eslint-disable-next-line react/display-name
   ({ children, timelineIntegration }) => {

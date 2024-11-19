@@ -11,18 +11,20 @@ import expect from '@kbn/expect';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
 import {
-  createRule,
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
   fetchRule,
-  getRuleForAlertTesting,
   installMockPrebuiltRules,
   getSecurityTelemetryStats,
   createExceptionList,
   createExceptionListItem,
-  removeTimeFieldsFromTelemetryStats,
+  removeExtraFieldsFromTelemetryStats,
 } from '../../../utils';
+import {
+  createRule,
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+  getRuleForAlertTesting,
+} from '../../../../../../common/utils/security_solution';
 import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
@@ -33,7 +35,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const retry = getService('retry');
 
-  describe('@ess @serverless Detection rule task telemetry', async () => {
+  describe('@ess @serverless Detection rule task telemetry', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/telemetry');
     });
@@ -53,7 +55,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('custom rules should never show any detection_rules telemetry data for each list type', () => {
-      it('@skipInQA should NOT give telemetry/stats for an exception list of type "detection"', async () => {
+      it('@skipInServerlessMKI should NOT give telemetry/stats for an exception list of type "detection"', async () => {
         const rule = getRuleForAlertTesting(['telemetry'], 'rule-1', false);
 
         // create an exception list container of type "detection"
@@ -97,11 +99,11 @@ export default ({ getService }: FtrProviderContext) => {
         // Get the stats and ensure they're empty
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           expect(stats.detection_rules).to.eql([
             [
               {
-                name: 'Security Solution Detection Rule Lists Telemetry',
+                name: 'security:telemetry-detection-rules',
                 passed: true,
               },
             ],
@@ -109,7 +111,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('@skipInQA should NOT give telemetry/stats for an exception list of type "endpoint"', async () => {
+      it('@skipInServerlessMKI should NOT give telemetry/stats for an exception list of type "endpoint"', async () => {
         const rule = getRuleForAlertTesting(['telemetry'], 'rule-1', false);
 
         // create an exception list container of type "detection"
@@ -153,11 +155,11 @@ export default ({ getService }: FtrProviderContext) => {
         // Get the stats and ensure they're empty
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           expect(stats.detection_rules).to.eql([
             [
               {
-                name: 'Security Solution Detection Rule Lists Telemetry',
+                name: 'security:telemetry-detection-rules',
                 passed: true,
               },
             ],
@@ -165,7 +167,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('@skipInQA should NOT give telemetry/stats for an exception list of type "endpoint_trusted_apps"', async () => {
+      it('@skipInServerlessMKI should NOT give telemetry/stats for an exception list of type "endpoint_trusted_apps"', async () => {
         const rule = getRuleForAlertTesting(['telemetry'], 'rule-1', false);
 
         // create an exception list container of type "detection"
@@ -209,11 +211,11 @@ export default ({ getService }: FtrProviderContext) => {
         // Get the stats and ensure they're empty
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           expect(stats.detection_rules).to.eql([
             [
               {
-                name: 'Security Solution Detection Rule Lists Telemetry',
+                name: 'security:telemetry-detection-rules',
                 passed: true,
               },
             ],
@@ -221,7 +223,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('@skipInQA should NOT give telemetry/stats for an exception list of type "endpoint_events"', async () => {
+      it('@skipInServerlessMKI should NOT give telemetry/stats for an exception list of type "endpoint_events"', async () => {
         const rule = getRuleForAlertTesting(['telemetry'], 'rule-1', false);
 
         // create an exception list container of type "detection"
@@ -265,11 +267,11 @@ export default ({ getService }: FtrProviderContext) => {
         // Get the stats and ensure they're empty
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           expect(stats.detection_rules).to.eql([
             [
               {
-                name: 'Security Solution Detection Rule Lists Telemetry',
+                name: 'security:telemetry-detection-rules',
                 passed: true,
               },
             ],
@@ -277,7 +279,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('@skipInQA should NOT give telemetry/stats for an exception list of type "endpoint_host_isolation_exceptions"', async () => {
+      it('@skipInServerlessMKI should NOT give telemetry/stats for an exception list of type "endpoint_host_isolation_exceptions"', async () => {
         const rule = getRuleForAlertTesting(['telemetry'], 'rule-1', false);
 
         // create an exception list container of type "detection"
@@ -321,11 +323,11 @@ export default ({ getService }: FtrProviderContext) => {
         // Get the stats and ensure they're empty
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           expect(stats.detection_rules).to.eql([
             [
               {
-                name: 'Security Solution Detection Rule Lists Telemetry',
+                name: 'security:telemetry-detection-rules',
                 passed: true,
               },
             ],
@@ -334,7 +336,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('@skipInQA pre-built/immutable/elastic rules should show detection_rules telemetry data for each list type', () => {
+    describe('@skipInServerlessMKI pre-built/immutable/elastic rules should show detection_rules telemetry data for each list type', () => {
       beforeEach(async () => {
         // install prepackaged rules to get immutable rules for testing
         await installMockPrebuiltRules(supertest, es);
@@ -449,7 +451,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           const detectionRules = stats.detection_rules
             .flat()
             .map((obj: any) => (obj.passed != null ? obj : obj.detection_rule));
@@ -471,7 +473,7 @@ export default ({ getService }: FtrProviderContext) => {
               rule_version: detectionRules[0].rule_version,
             },
             {
-              name: 'Security Solution Detection Rule Lists Telemetry',
+              name: 'security:telemetry-detection-rules',
               passed: true,
             },
           ]);
@@ -526,7 +528,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           const detectionRules = stats.detection_rules
             .flat()
             .map((obj: any) => (obj.passed != null ? obj : obj.detection_rule));
@@ -548,7 +550,7 @@ export default ({ getService }: FtrProviderContext) => {
               rule_version: detectionRules[0].rule_version,
             },
             {
-              name: 'Security Solution Detection Rule Lists Telemetry',
+              name: 'security:telemetry-detection-rules',
               passed: true,
             },
           ]);
@@ -603,7 +605,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           const detectionRules = stats.detection_rules
             .flat()
             .map((obj: any) => (obj.passed != null ? obj : obj.detection_rule));
@@ -625,7 +627,7 @@ export default ({ getService }: FtrProviderContext) => {
               rule_version: detectionRules[0].rule_version,
             },
             {
-              name: 'Security Solution Detection Rule Lists Telemetry',
+              name: 'security:telemetry-detection-rules',
               passed: true,
             },
           ]);
@@ -680,7 +682,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           const detectionRules = stats.detection_rules
             .flat()
             .map((obj: any) => (obj.passed != null ? obj : obj.detection_rule));
@@ -702,7 +704,7 @@ export default ({ getService }: FtrProviderContext) => {
               rule_version: detectionRules[0].rule_version,
             },
             {
-              name: 'Security Solution Detection Rule Lists Telemetry',
+              name: 'security:telemetry-detection-rules',
               passed: true,
             },
           ]);
@@ -757,7 +759,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           const detectionRules = stats.detection_rules
             .flat()
             .map((obj: any) => (obj.passed != null ? obj : obj.detection_rule));
@@ -779,7 +781,7 @@ export default ({ getService }: FtrProviderContext) => {
               rule_version: detectionRules[0].rule_version,
             },
             {
-              name: 'Security Solution Detection Rule Lists Telemetry',
+              name: 'security:telemetry-detection-rules',
               passed: true,
             },
           ]);
@@ -787,7 +789,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('@skipInQA pre-built/immutable/elastic rules should show detection_rules telemetry data for multiple list items and types', () => {
+    describe('@skipInServerlessMKI pre-built/immutable/elastic rules should show detection_rules telemetry data for multiple list items and types', () => {
       beforeEach(async () => {
         // install prepackaged rules to get immutable rules for testing
         await installMockPrebuiltRules(supertest, es);
@@ -858,7 +860,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           const detectionRules = stats.detection_rules
             .flat()
             .map((obj: any) => (obj.passed != null ? obj : obj.detection_rule))
@@ -898,7 +900,7 @@ export default ({ getService }: FtrProviderContext) => {
               rule_version: detectionRules[1].rule_version,
             },
             {
-              name: 'Security Solution Detection Rule Lists Telemetry',
+              name: 'security:telemetry-detection-rules',
               passed: true,
             },
           ]);

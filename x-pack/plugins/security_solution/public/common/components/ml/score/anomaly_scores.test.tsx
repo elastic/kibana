@@ -9,7 +9,6 @@ import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
-import '../../../mock/match_media';
 import { AnomalyScoresComponent, createJobKey } from './anomaly_scores';
 import { mockAnomalies } from '../mock';
 import { TestProviders } from '../../../mock/test_providers';

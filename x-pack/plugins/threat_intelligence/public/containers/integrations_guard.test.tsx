@@ -9,7 +9,7 @@ import { UseQueryResult } from '@tanstack/react-query';
 import { render } from '@testing-library/react';
 import React from 'react';
 import { IntegrationsGuard } from './integrations_guard';
-import { TestProvidersComponent } from '../mocks/test_providers';
+import { EMPTY_PAGE_SECURITY_TEMPLATE, TestProvidersComponent } from '../mocks/test_providers';
 import { Integration, useIntegrations } from '../hooks/use_integrations';
 import { useIntegrationsPageLink } from '../hooks/use_integrations_page_link';
 import { useTIDocumentationLink } from '../hooks/use_documentation_link';
@@ -47,6 +47,7 @@ describe('IntegrationsGuard', () => {
     });
 
     expect(getByTestId(LOADING_LOGO_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(EMPTY_PAGE_SECURITY_TEMPLATE)).toBeInTheDocument();
   });
 
   it('should render loading when indicator only is loading', async () => {
@@ -72,21 +73,23 @@ describe('IntegrationsGuard', () => {
     });
 
     expect(getByTestId(LOADING_LOGO_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(EMPTY_PAGE_SECURITY_TEMPLATE)).toBeInTheDocument();
   });
 
   it('should render loading when integrations only are loading', async () => {
-    (
-      useIndicatorsTotalCount as jest.MockedFunction<typeof useIndicatorsTotalCount>
-    ).mockReturnValue({
-      count: 0,
-      isLoading: true,
-    });
     (
       useIntegrationsPageLink as jest.MockedFunction<typeof useIntegrationsPageLink>
     ).mockReturnValue('');
     (useTIDocumentationLink as jest.MockedFunction<typeof useTIDocumentationLink>).mockReturnValue(
       ''
     );
+
+    (
+      useIndicatorsTotalCount as jest.MockedFunction<typeof useIndicatorsTotalCount>
+    ).mockReturnValue({
+      count: 0,
+      isLoading: true,
+    });
     (useIntegrations as jest.MockedFunction<typeof useIntegrations>).mockReturnValue({
       isLoading: true,
       data: [],
@@ -97,6 +100,7 @@ describe('IntegrationsGuard', () => {
     });
 
     expect(getByTestId(LOADING_LOGO_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(EMPTY_PAGE_SECURITY_TEMPLATE)).toBeInTheDocument();
   });
 
   it('should render empty page when no indicators are found and no ti integrations are installed', async () => {
@@ -121,6 +125,7 @@ describe('IntegrationsGuard', () => {
       wrapper: TestProvidersComponent,
     });
     expect(getByTestId(EMPTY_PROMPT_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(EMPTY_PAGE_SECURITY_TEMPLATE)).toBeInTheDocument();
   });
 
   it('should render indicators table when we have some indicators', async () => {

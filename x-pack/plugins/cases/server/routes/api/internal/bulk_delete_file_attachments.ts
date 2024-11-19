@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { decodeWithExcessOrThrow } from '../../../../common/api';
+import { decodeWithExcessOrThrow } from '../../../common/runtime_types';
 import { INTERNAL_DELETE_FILE_ATTACHMENTS_URL } from '../../../../common/constants';
 import { createCasesRoute } from '../create_cases_route';
 import { createCaseError } from '../../../common/error';
@@ -23,6 +23,9 @@ export const bulkDeleteFileAttachments = createCasesRoute({
       case_id: schema.string(),
     }),
     body: escapeHatch,
+  },
+  routerOptions: {
+    access: 'internal',
   },
   handler: async ({ context, request, response }) => {
     try {

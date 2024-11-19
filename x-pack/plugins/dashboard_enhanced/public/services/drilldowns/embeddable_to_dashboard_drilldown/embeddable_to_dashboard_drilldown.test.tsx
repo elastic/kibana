@@ -6,15 +6,14 @@
  */
 
 import { Filter, RangeFilter, FilterStateStore, Query, TimeRange } from '@kbn/es-query';
-import { EmbeddableToDashboardDrilldown } from './embeddable_to_dashboard_drilldown';
+import { type Context, EmbeddableToDashboardDrilldown } from './embeddable_to_dashboard_drilldown';
 import { AbstractDashboardDrilldownConfig as Config } from '../abstract_dashboard_drilldown';
 import { savedObjectsServiceMock } from '@kbn/core/public/mocks';
-import { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
 import { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
 import { StartDependencies } from '../../../plugin';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public/core';
-import { EnhancedEmbeddableContext } from '@kbn/embeddable-enhanced-plugin/public';
 import { DashboardAppLocatorDefinition } from '@kbn/dashboard-plugin/public/dashboard_app/locator/locator';
+import { BehaviorSubject } from 'rxjs';
 
 describe('.isConfigValid()', () => {
   const drilldown = new EmbeddableToDashboardDrilldown({} as any);
@@ -118,15 +117,18 @@ describe('.execute() & getHref', () => {
     const context = {
       filters: filtersFromEvent,
       embeddable: {
-        getInput: () => ({
-          filters: [],
-          timeRange: { from: 'now-15m', to: 'now' },
-          query: { query: 'test', language: 'kuery' },
-          ...embeddableInput,
-        }),
+        parentApi: {
+          filters$: new BehaviorSubject(embeddableInput.filters ? embeddableInput.filters : []),
+          query$: new BehaviorSubject(
+            embeddableInput.query ? embeddableInput.query : { query: 'test', language: 'kuery' }
+          ),
+          timeRange$: new BehaviorSubject(
+            embeddableInput.timeRange ? embeddableInput.timeRange : { from: 'now-15m', to: 'now' }
+          ),
+        },
       },
       timeFieldName,
-    } as unknown as ApplyGlobalFilterActionContext & EnhancedEmbeddableContext;
+    } as Context;
 
     await drilldown.execute(completeConfig, context);
 

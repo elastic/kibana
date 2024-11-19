@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import '../../../../common/mock/match_media';
 import {
   DEFAULT_ICON,
   EXTERNAL,

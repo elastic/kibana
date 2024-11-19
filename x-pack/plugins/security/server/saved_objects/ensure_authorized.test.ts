@@ -79,7 +79,7 @@ describe('ensureAuthorized', () => {
   test('throws an error when privilege check fails', async () => {
     const deps = setupDependencies();
     deps.checkSavedObjectsPrivilegesAsCurrentUser.mockRejectedValue(new Error('Oh no!'));
-    expect(ensureAuthorized(deps, [], [], [])).rejects.toThrowError('Oh no!');
+    await expect(ensureAuthorized(deps, [], [], [])).rejects.toThrowError('Oh no!');
   });
 
   describe('fully authorized', () => {
@@ -149,7 +149,7 @@ describe('ensureAuthorized', () => {
     test('with default options', async () => {
       const deps = setupDependencies();
       deps.checkSavedObjectsPrivilegesAsCurrentUser.mockResolvedValue(resolvedPrivileges);
-      expect(
+      await expect(
         ensureAuthorized(deps, types, actions, namespaces)
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"Unable to (bar a),(bar b),(bar c),(foo c)"`);
     });
@@ -199,7 +199,7 @@ describe('ensureAuthorized', () => {
     test('with default options', async () => {
       const deps = setupDependencies();
       deps.checkSavedObjectsPrivilegesAsCurrentUser.mockResolvedValue(resolvedPrivileges);
-      expect(
+      await expect(
         ensureAuthorized(deps, types, actions, namespaces)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Unable to (bar a),(bar b),(bar c),(foo a),(foo b),(foo c)"`

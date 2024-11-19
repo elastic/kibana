@@ -72,9 +72,11 @@ export const DefaultDeprecationFlyout = ({
       <EuiFlyoutBody>
         <EuiText>
           <p className="eui-textBreakWord">{details}</p>
-          <p>
-            <DeprecationFlyoutLearnMoreLink documentationUrl={url} />
-          </p>
+          {url && (
+            <p>
+              <DeprecationFlyoutLearnMoreLink documentationUrl={url} />
+            </p>
+          )}
         </EuiText>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

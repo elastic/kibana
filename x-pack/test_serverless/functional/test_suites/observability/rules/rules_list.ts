@@ -7,27 +7,23 @@
 
 import { expect } from 'expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import {
-  createAnomalyRule as createRule,
-  disableRule,
-  enableRule,
-  runRule,
-  createIndexConnector,
-  snoozeRule,
-  createLatencyThresholdRule,
-  createEsQueryRule,
-} from '../../../../api_integration/test_suites/common/alerting/helpers/alerting_api_helper';
+import { RoleCredentials } from '../../../../shared/services';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlCommonPage = getPageObject('svlCommonPage');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlTriggersActionsUI = getPageObject('svlTriggersActionsUI');
+  const header = getPageObject('header');
   const svlObltNavigation = getService('svlObltNavigation');
   const testSubjects = getService('testSubjects');
   const supertest = getService('supertest');
   const find = getService('find');
   const retry = getService('retry');
   const toasts = getService('toasts');
+  const log = getService('log');
+  const svlUserManager = getService('svlUserManager');
+  const alertingApi = getService('alertingApi');
+  let roleAuthc: RoleCredentials;
 
   async function refreshRulesList() {
     const existsClearFilter = await testSubjects.exists('rules-list-clear-filter');
@@ -49,10 +45,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     numAttempts: number;
   }) {
     for (let i = 0; i < numAttempts; i++) {
-      await runRule({ supertest, ruleId });
+      await alertingApi.helpers.runRule({ roleAuthc, ruleId });
       await new Promise((resolve) => setTimeout(resolve, intervalMilliseconds));
 
-      await disableRule({ supertest, ruleId });
+      await alertingApi.helpers.disableRule({
+        roleAuthc,
+        ruleId,
+      });
       await new Promise((resolve) => setTimeout(resolve, intervalMilliseconds));
 
       await refreshRulesList();
@@ -60,7 +59,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       const rulesStatuses = result.map((item: { status: string }) => item.status);
       if (rulesStatuses.includes('Failed')) return;
 
-      await enableRule({ supertest, ruleId });
+      await alertingApi.helpers.enableRule({ roleAuthc, ruleId });
     }
   }
 
@@ -75,7 +74,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     };
 
     before(async () => {
-      await svlCommonPage.login();
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
+      await svlCommonPage.loginWithPrivilegedRole();
       await svlObltNavigation.navigateToLandingPage();
       await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
       await testSubjects.click('manageRulesPageButton');
@@ -93,12 +93,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await svlCommonPage.forceLogout();
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     it('should create an ES Query Rule and display it when consumer is observability', async () => {
-      const esQuery = await createEsQueryRule({
-        supertest,
+      const esQuery = await alertingApi.helpers.createEsQueryRule({
+        roleAuthc,
         name: 'ES Query',
         consumer: 'observability',
         ruleTypeId: '.es-query',
@@ -122,8 +122,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('should create an ES Query rule but not display it when consumer is stackAlerts', async () => {
-      const esQuery = await createEsQueryRule({
-        supertest,
+      const esQuery = await alertingApi.helpers.createEsQueryRule({
+        roleAuthc,
         name: 'ES Query',
         consumer: 'stackAlerts',
         ruleTypeId: '.es-query',
@@ -145,7 +145,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('should create and display an APM latency rule', async () => {
-      const apmLatency = await createLatencyThresholdRule({ supertest, name: 'Apm latency' });
+      const apmLatency = await alertingApi.helpers.createLatencyThresholdRule({
+        roleAuthc,
+        name: 'Apm latency',
+      });
       ruleIdList = [apmLatency.id];
 
       await refreshRulesList();
@@ -155,16 +158,16 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('should display rules in alphabetical order', async () => {
-      const rule1 = await createRule({
-        supertest,
+      const rule1 = await alertingApi.helpers.createAnomalyRule({
+        roleAuthc,
         name: 'b',
       });
-      const rule2 = await createRule({
-        supertest,
+      const rule2 = await alertingApi.helpers.createAnomalyRule({
+        roleAuthc,
         name: 'c',
       });
-      const rule3 = await createRule({
-        supertest,
+      const rule3 = await alertingApi.helpers.createAnomalyRule({
+        roleAuthc,
         name: 'a',
       });
 
@@ -180,8 +183,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('should search for rule', async () => {
-      const rule1 = await createRule({
-        supertest,
+      const rule1 = await alertingApi.helpers.createAnomalyRule({
+        roleAuthc,
       });
 
       ruleIdList = [rule1.id];
@@ -201,13 +204,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('should update rule list on the search clear button click', async () => {
-      const rule1 = await createRule({
-        supertest,
+      const rule1 = await alertingApi.helpers.createAnomalyRule({
+        roleAuthc,
         name: 'a',
       });
 
-      const rule2 = await createRule({
-        supertest,
+      const rule2 = await alertingApi.helpers.createAnomalyRule({
+        roleAuthc,
         name: 'b',
         tags: [],
       });
@@ -252,8 +255,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('should search for tags', async () => {
-      const rule1 = await createRule({
-        supertest,
+      const rule1 = await alertingApi.helpers.createAnomalyRule({
+        roleAuthc,
         name: 'a',
         tags: ['tag', 'tagtag', 'taggity tag'],
       });
@@ -275,8 +278,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('should display an empty list when search did not return any rules', async () => {
-      const rule1 = await createRule({
-        supertest,
+      const rule1 = await alertingApi.helpers.createAnomalyRule({
+        roleAuthc,
       });
 
       ruleIdList = [rule1.id];
@@ -287,8 +290,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('should disable single rule', async () => {
-      const rule1 = await createRule({
-        supertest,
+      const rule1 = await alertingApi.helpers.createAnomalyRule({
+        roleAuthc,
       });
 
       ruleIdList = [rule1.id];
@@ -299,6 +302,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       await testSubjects.click('collapsedItemActions');
       await testSubjects.click('disableButton');
+
+      await testSubjects.click('confirmModalConfirmButton');
+
+      await header.waitUntilLoadingHasFinished();
 
       await refreshRulesList();
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
@@ -311,14 +318,17 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('should re-enable single rule', async () => {
-      const rule1 = await createRule({
-        supertest,
+      const rule1 = await alertingApi.helpers.createAnomalyRule({
+        roleAuthc,
         name: 'a',
       });
 
       ruleIdList = [rule1.id];
 
-      await disableRule({ supertest, ruleId: rule1.id });
+      await alertingApi.helpers.disableRule({
+        roleAuthc,
+        ruleId: rule1.id,
+      });
       await refreshRulesList();
 
       await svlTriggersActionsUI.searchRules(rule1.name);
@@ -342,13 +352,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('should delete single rule', async () => {
-      const rule1 = await createRule({
-        supertest,
+      const rule1 = await alertingApi.helpers.createAnomalyRule({
+        roleAuthc,
         name: 'a',
       });
 
-      const rule2 = await createRule({
-        supertest,
+      const rule2 = await alertingApi.helpers.createAnomalyRule({
+        roleAuthc,
         name: 'b',
       });
 
@@ -363,7 +373,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {
-        const resultToast = await toasts.getToastElement(1);
+        const resultToast = await toasts.getElementByIndex(1);
         const toastText = await resultToast.getVisibleText();
         expect(toastText).toEqual('Deleted 1 rule');
       });
@@ -374,8 +384,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('should disable all selection', async () => {
-      const createdRule1 = await createRule({
-        supertest,
+      const createdRule1 = await alertingApi.helpers.createAnomalyRule({
+        roleAuthc,
       });
 
       ruleIdList = [createdRule1.id];
@@ -387,8 +397,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await testSubjects.click('bulkAction');
       await testSubjects.click('bulkDisable');
 
+      await testSubjects.click('confirmModalConfirmButton');
+      await header.waitUntilLoadingHasFinished();
+
       await retry.try(async () => {
-        const resultToast = await toasts.getToastElement(1);
+        const resultToast = await toasts.getElementByIndex(1);
         const toastText = await resultToast.getVisibleText();
         expect(toastText).toEqual('Disabled 1 rule');
       });
@@ -401,13 +414,16 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('should enable all selection', async () => {
-      const rule1 = await createRule({
-        supertest,
+      const rule1 = await alertingApi.helpers.createAnomalyRule({
+        roleAuthc,
       });
 
       ruleIdList = [rule1.id];
 
-      await disableRule({ supertest, ruleId: rule1.id });
+      await alertingApi.helpers.disableRule({
+        roleAuthc,
+        ruleId: rule1.id,
+      });
 
       await refreshRulesList();
       await svlTriggersActionsUI.searchRules(rule1.name);
@@ -424,8 +440,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('should render percentile column and cells correctly', async () => {
-      const rule1 = await createRule({
-        supertest,
+      const rule1 = await alertingApi.helpers.createAnomalyRule({
+        roleAuthc,
       });
 
       ruleIdList = [rule1.id];
@@ -460,8 +476,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('should delete all selection', async () => {
-      const createdRule1 = await createRule({
-        supertest,
+      const createdRule1 = await alertingApi.helpers.createAnomalyRule({
+        roleAuthc,
       });
 
       ruleIdList = [createdRule1.id];
@@ -476,7 +492,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {
-        const resultToast = await toasts.getToastElement(1);
+        const resultToast = await toasts.getElementByIndex(1);
         const toastText = await resultToast.getVisibleText();
         expect(toastText).toEqual('Deleted 1 rule');
       });
@@ -487,12 +503,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it.skip('should filter rules by the status', async () => {
-      const rule1 = await createRule({
-        supertest,
+      const rule1 = await alertingApi.helpers.createAnomalyRule({
+        roleAuthc,
       });
 
-      const failedRule = await createRule({
-        supertest,
+      const failedRule = await alertingApi.helpers.createAnomalyRule({
+        roleAuthc,
       });
 
       ruleIdList = [rule1.id, failedRule.id];
@@ -537,8 +553,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it.skip('should display total rules by status and error banner only when exists rules with status error', async () => {
-      const rule1 = await createRule({
-        supertest,
+      const rule1 = await alertingApi.helpers.createAnomalyRule({
+        roleAuthc,
       });
 
       await refreshRulesList();
@@ -561,8 +577,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       );
       expect(alertsErrorBannerWhenNoErrors).toHaveLength(0);
 
-      const failedRule = await createRule({
-        supertest,
+      const failedRule = await alertingApi.helpers.createAnomalyRule({
+        roleAuthc,
       });
 
       ruleIdList = [rule1.id, failedRule.id];
@@ -596,8 +612,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it.skip('Expand error in rules table when there is rule with an error associated', async () => {
-      const rule1 = await createRule({
-        supertest,
+      const rule1 = await alertingApi.helpers.createAnomalyRule({
+        roleAuthc,
         name: 'a',
       });
 
@@ -618,8 +634,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       let expandRulesErrorLink = await find.allByCssSelector('[data-test-subj="expandRulesError"]');
       expect(expandRulesErrorLink).toHaveLength(0);
 
-      const failedRule = await createRule({
-        supertest,
+      const failedRule = await alertingApi.helpers.createAnomalyRule({
+        roleAuthc,
       });
 
       ruleIdList = [rule1.id, failedRule.id];
@@ -645,12 +661,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('should filter rules by the rule type', async () => {
-      const rule1 = await createRule({
-        supertest,
+      const rule1 = await alertingApi.helpers.createAnomalyRule({
+        roleAuthc,
       });
 
-      const rule2 = await createLatencyThresholdRule({
-        supertest,
+      const rule2 = await alertingApi.helpers.createLatencyThresholdRule({
+        roleAuthc,
       });
 
       ruleIdList = [rule1.id, rule2.id];
@@ -690,37 +706,55 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('should filter rules by the rule status', async () => {
+      const setRuleStatus = async (testSubj: string, checked: boolean) => {
+        const readAriaChecked = async (): Promise<boolean> => {
+          const statusItem = await testSubjects.find(testSubj);
+          return statusItem
+            ? JSON.parse((await statusItem.getAttribute('aria-checked')) || 'null')
+            : null;
+        };
+
+        await retry.try(async () => {
+          if ((await readAriaChecked()) !== checked) {
+            await testSubjects.click(testSubj);
+            await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+          }
+
+          expect(await readAriaChecked()).toEqual(checked);
+        });
+      };
+
       // Enabled alert
-      const rule1 = await createRule({
-        supertest,
+      const rule1 = await alertingApi.helpers.createAnomalyRule({
+        roleAuthc,
       });
 
-      const disabledRule = await createRule({
-        supertest,
+      const disabledRule = await alertingApi.helpers.createAnomalyRule({
+        roleAuthc,
       });
-      await disableRule({
-        supertest,
+      await alertingApi.helpers.disableRule({
+        roleAuthc,
         ruleId: disabledRule.id,
       });
 
-      const snoozedRule = await createRule({
-        supertest,
+      const snoozedRule = await alertingApi.helpers.createAnomalyRule({
+        roleAuthc,
       });
 
-      await snoozeRule({
-        supertest,
+      await alertingApi.helpers.snoozeRule({
+        roleAuthc,
         ruleId: snoozedRule.id,
       });
 
-      const snoozedAndDisabledRule = await createRule({
-        supertest,
+      const snoozedAndDisabledRule = await alertingApi.helpers.createAnomalyRule({
+        roleAuthc,
       });
-      await snoozeRule({
-        supertest,
+      await alertingApi.helpers.snoozeRule({
+        roleAuthc,
         ruleId: snoozedAndDisabledRule.id,
       });
-      await disableRule({
-        supertest,
+      await alertingApi.helpers.disableRule({
+        roleAuthc,
         ruleId: snoozedAndDisabledRule.id,
       });
 
@@ -729,67 +763,61 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await refreshRulesList();
       await assertRulesLength(4);
 
-      // Select only enabled
+      log.debug('ruleStatusFilterButton: Select only enabled');
       await testSubjects.click('ruleStatusFilterButton');
-      await testSubjects.click('ruleStatusFilterOption-enabled');
-      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      await setRuleStatus('ruleStatusFilterOption-enabled', true);
       await assertRulesLength(2);
 
-      // Select enabled or disabled (e.g. all)
-      await testSubjects.click('ruleStatusFilterOption-disabled');
-      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      log.debug('ruleStatusFilterButton: Select enabled or disabled (e.g. all)');
+      await setRuleStatus('ruleStatusFilterOption-disabled', true);
       await assertRulesLength(4);
 
-      // Select only disabled
-      await testSubjects.click('ruleStatusFilterOption-enabled');
-      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      log.debug('ruleStatusFilterButton: Select only disabled');
+      await setRuleStatus('ruleStatusFilterOption-enabled', false);
       await assertRulesLength(2);
 
-      // Select only snoozed
-      await testSubjects.click('ruleStatusFilterOption-disabled');
-      await testSubjects.click('ruleStatusFilterOption-snoozed');
-      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      log.debug('ruleStatusFilterButton: Select only snoozed');
+      await setRuleStatus('ruleStatusFilterOption-disabled', false);
+      await setRuleStatus('ruleStatusFilterOption-snoozed', true);
       await assertRulesLength(2);
 
-      // Select disabled or snoozed
-      await testSubjects.click('ruleStatusFilterOption-disabled');
-      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      log.debug('ruleStatusFilterButton: Select disabled or snoozed');
+      await setRuleStatus('ruleStatusFilterOption-disabled', true);
       await assertRulesLength(3);
 
-      // Select enabled or disabled or snoozed
-      await testSubjects.click('ruleStatusFilterOption-enabled');
-      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      log.debug('ruleStatusFilterButton: Select enabled or disabled or snoozed');
+      await setRuleStatus('ruleStatusFilterOption-enabled', true);
       await assertRulesLength(4);
 
-      // Clear it again because it is still selected
+      log.debug('ruleStatusFilterButton: Clear it again because it is still selected');
       await testSubjects.click('rules-list-clear-filter');
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
       await assertRulesLength(4);
     });
 
     it('should filter rules by the tag', async () => {
-      const rule1 = await createRule({
-        supertest,
+      const rule1 = await alertingApi.helpers.createAnomalyRule({
+        roleAuthc,
         tags: ['a'],
       });
 
-      const rule2 = await createRule({
-        supertest,
+      const rule2 = await alertingApi.helpers.createAnomalyRule({
+        roleAuthc,
         tags: ['b'],
       });
 
-      const rule3 = await createRule({
-        supertest,
+      const rule3 = await alertingApi.helpers.createAnomalyRule({
+        roleAuthc,
         tags: ['a', 'b'],
       });
 
-      const rule4 = await createRule({
-        supertest,
+      const rule4 = await alertingApi.helpers.createAnomalyRule({
+        roleAuthc,
         tags: ['b', 'c'],
       });
 
-      const rule5 = await createRule({
-        supertest,
+      const rule5 = await alertingApi.helpers.createAnomalyRule({
+        roleAuthc,
         tags: ['c'],
       });
 
@@ -831,15 +859,15 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('should not prevent rules with action execution capabilities from being edited', async () => {
-      const action = await createIndexConnector({
-        supertest,
+      const action = await alertingApi.helpers.createIndexConnector({
+        roleAuthc,
         name: 'Index Connector: Alerting API test',
         indexName: '.alerts-observability.apm.alerts-default',
       });
       expect(action).not.toBe(undefined);
 
-      const rule1 = await createRule({
-        supertest,
+      const rule1 = await alertingApi.helpers.createAnomalyRule({
+        roleAuthc,
         actions: [
           {
             group: 'threshold_met',
@@ -867,8 +895,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('should allow rules to be snoozed using the right side dropdown', async () => {
-      const rule1 = await createRule({
-        supertest,
+      const rule1 = await alertingApi.helpers.createAnomalyRule({
+        roleAuthc,
       });
 
       ruleIdList = [rule1.id];
@@ -887,8 +915,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('should allow rules to be snoozed indefinitely using the right side dropdown', async () => {
-      const rule1 = await createRule({
-        supertest,
+      const rule1 = await alertingApi.helpers.createAnomalyRule({
+        roleAuthc,
       });
 
       ruleIdList = [rule1.id];
@@ -907,14 +935,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('should allow snoozed rules to be unsnoozed using the right side dropdown', async () => {
-      const rule1 = await createRule({
-        supertest,
+      const rule1 = await alertingApi.helpers.createAnomalyRule({
+        roleAuthc,
       });
 
       ruleIdList = [rule1.id];
 
-      await snoozeRule({
-        supertest,
+      await alertingApi.helpers.snoozeRule({
+        roleAuthc,
         ruleId: rule1.id,
       });
 
@@ -929,7 +957,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         '[data-test-subj="rulesListNotifyBadge-snoozed"]:not(.euiButton-isDisabled)'
       );
       await retry.try(async () => {
-        const resultToast = await toasts.getToastElement(1);
+        const resultToast = await toasts.getElementByIndex(1);
         const toastText = await resultToast.getVisibleText();
         expect(toastText).toEqual('Rules notification successfully unsnoozed');
       });

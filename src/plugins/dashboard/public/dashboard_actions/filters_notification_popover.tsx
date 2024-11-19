@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useMemo, useState } from 'react';
@@ -25,8 +26,13 @@ import { css } from '@emotion/react';
 import { AggregateQuery, getAggregateQueryMode, isOfQueryType } from '@kbn/es-query';
 import { getEditPanelAction } from '@kbn/presentation-panel-plugin/public';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
-import { FiltersNotificationActionApi } from './filters_notification_action';
+import {
+  apiCanLockHoverActions,
+  getViewModeSubject,
+  useBatchedOptionalPublishingSubjects,
+} from '@kbn/presentation-publishing';
 import { dashboardFilterNotificationActionStrings } from './_dashboard_actions_strings';
+import { FiltersNotificationActionApi } from './filters_notification_action';
 
 export function FiltersNotificationPopover({ api }: { api: FiltersNotificationActionApi }) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -34,29 +40,32 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
 
   const editPanelAction = getEditPanelAction();
 
-  const filters = useMemo(() => api.localFilters?.value, [api]);
+  const filters = useMemo(() => api.filters$?.value, [api]);
   const displayName = dashboardFilterNotificationActionStrings.getDisplayName();
 
   const { queryString, queryLanguage } = useMemo(() => {
-    const localQuery = api.localQuery?.value;
-    if (!localQuery) return {};
-    if (isOfQueryType(localQuery)) {
-      if (typeof localQuery.query === 'string') {
-        return { queryString: localQuery.query };
+    const query = api.query$?.value;
+    if (!query) return {};
+    if (isOfQueryType(query)) {
+      if (typeof query.query === 'string') {
+        return { queryString: query.query };
       } else {
-        return { queryString: JSON.stringify(localQuery.query, null, 2) };
+        return { queryString: JSON.stringify(query.query, null, 2) };
       }
     } else {
       setDisableEditButton(true);
-      const language: 'sql' | 'esql' | undefined = getAggregateQueryMode(localQuery);
+      const language: 'esql' | undefined = getAggregateQueryMode(query);
       return {
-        queryString: localQuery[language as keyof AggregateQuery],
+        queryString: query[language as keyof AggregateQuery],
         queryLanguage: language,
       };
     }
   }, [api, setDisableEditButton]);
 
-  const dataViews = useMemo(() => api.parentApi?.getAllDataViews(), [api]);
+  const [dataViews, parentViewMode] = useBatchedOptionalPublishingSubjects(
+    api.parentApi?.dataViews,
+    getViewModeSubject(api ?? undefined)
+  );
 
   return (
     <EuiPopover
@@ -64,13 +73,23 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
         <EuiButtonIcon
           color="text"
           iconType={'filter'}
-          onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+          onClick={() => {
+            setIsPopoverOpen(!isPopoverOpen);
+            if (apiCanLockHoverActions(api)) {
+              api?.lockHoverActions(!api.hasLockedHoverActions$.value);
+            }
+          }}
           data-test-subj={`embeddablePanelNotification-${api.uuid}`}
           aria-label={displayName}
         />
       }
       isOpen={isPopoverOpen}
-      closePopover={() => setIsPopoverOpen(false)}
+      closePopover={() => {
+        setIsPopoverOpen(false);
+        if (apiCanLockHoverActions(api)) {
+          api.lockHoverActions(false);
+        }
+      }}
       anchorPosition="upCenter"
     >
       <EuiPopoverTitle>{displayName}</EuiPopoverTitle>
@@ -102,13 +121,13 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
             data-test-subj={'filtersNotificationModal__filterItems'}
           >
             <EuiFlexGroup wrap={true} gutterSize="xs">
-              <FilterItems filters={filters} indexPatterns={dataViews} readOnly={true} />
+              <FilterItems filters={filters} indexPatterns={dataViews ?? []} readOnly={true} />
             </EuiFlexGroup>
           </EuiFormRow>
         )}
       </EuiForm>
-      <EuiPopoverFooter>
-        {!disableEditbutton && (
+      {!disableEditbutton && parentViewMode === 'edit' && (
+        <EuiPopoverFooter>
           <EuiFlexGroup
             gutterSize="s"
             alignItems="center"
@@ -127,8 +146,8 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
-        )}
-      </EuiPopoverFooter>
+        </EuiPopoverFooter>
+      )}
     </EuiPopover>
   );
 }

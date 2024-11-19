@@ -7,7 +7,7 @@
 
 import { get, getOr } from 'lodash/fp';
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/search-types';
 import { firstNonNullValue } from '../../../../../../common/endpoint/models/ecs_safety_helpers';
 import type {
   NetworkHttpBuckets,

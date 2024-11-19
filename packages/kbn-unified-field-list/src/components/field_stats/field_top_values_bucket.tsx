@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -69,6 +70,18 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
   } = { ...fieldTopValuesBucketOverridableProps, ...overrides };
   const fieldLabel = (field?.subType as IFieldSubTypeMulti)?.multi?.parent ?? field.name;
 
+  const filterForLabel = i18n.translate('unifiedFieldList.fieldStats.filterValueButtonAriaLabel', {
+    defaultMessage: 'Filter for {field}: "{value}"',
+    values: { value: formattedFieldValue, field: fieldLabel },
+  });
+  const filterOutLabel = i18n.translate(
+    'unifiedFieldList.fieldStats.filterOutValueButtonAriaLabel',
+    {
+      defaultMessage: 'Filter out {field}: "{value}"',
+      values: { value: formattedFieldValue, field: fieldLabel },
+    }
+  );
+
   return (
     <EuiFlexGroup
       alignItems="stretch"
@@ -112,6 +125,7 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
               </EuiText>
             )}
           </EuiFlexItem>
+
           <EuiFlexItem
             grow={false}
             data-test-subj={`${dataTestSubject}-topValues-formattedPercentage`}
@@ -151,48 +165,40 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
             />
           ) : (
             <div>
-              <EuiButtonIcon
-                iconSize="s"
-                iconType="plusInCircle"
-                onClick={() => onAddFilter(field, fieldValue, '+')}
-                aria-label={i18n.translate(
-                  'unifiedFieldList.fieldStats.filterValueButtonAriaLabel',
-                  {
-                    defaultMessage: 'Filter for {field}: "{value}"',
-                    values: { value: formattedFieldValue, field: fieldLabel },
-                  }
-                )}
-                data-test-subj={`plus-${fieldLabel}-${fieldValue}`}
-                style={{
-                  minHeight: 'auto',
-                  minWidth: 'auto',
-                  paddingRight: 2,
-                  paddingLeft: 2,
-                  paddingTop: 0,
-                  paddingBottom: 0,
-                }}
-              />
-              <EuiButtonIcon
-                iconSize="s"
-                iconType="minusInCircle"
-                onClick={() => onAddFilter(field, fieldValue, '-')}
-                aria-label={i18n.translate(
-                  'unifiedFieldList.fieldStats.filterOutValueButtonAriaLabel',
-                  {
-                    defaultMessage: 'Filter out {field}: "{value}"',
-                    values: { value: formattedFieldValue, field: fieldLabel },
-                  }
-                )}
-                data-test-subj={`minus-${fieldLabel}-${fieldValue}`}
-                style={{
-                  minHeight: 'auto',
-                  minWidth: 'auto',
-                  paddingTop: 0,
-                  paddingBottom: 0,
-                  paddingRight: 2,
-                  paddingLeft: 2,
-                }}
-              />
+              <EuiToolTip content={filterForLabel}>
+                <EuiButtonIcon
+                  iconSize="s"
+                  iconType="plusInCircle"
+                  onClick={() => onAddFilter(field, fieldValue, '+')}
+                  aria-label={filterForLabel}
+                  data-test-subj={`plus-${fieldLabel}-${fieldValue}`}
+                  style={{
+                    minHeight: 'auto',
+                    minWidth: 'auto',
+                    paddingRight: 2,
+                    paddingLeft: 2,
+                    paddingTop: 0,
+                    paddingBottom: 0,
+                  }}
+                />
+              </EuiToolTip>
+              <EuiToolTip content={filterOutLabel}>
+                <EuiButtonIcon
+                  iconSize="s"
+                  iconType="minusInCircle"
+                  onClick={() => onAddFilter(field, fieldValue, '-')}
+                  aria-label={filterOutLabel}
+                  data-test-subj={`minus-${fieldLabel}-${fieldValue}`}
+                  style={{
+                    minHeight: 'auto',
+                    minWidth: 'auto',
+                    paddingTop: 0,
+                    paddingBottom: 0,
+                    paddingRight: 2,
+                    paddingLeft: 2,
+                  }}
+                />
+              </EuiToolTip>
             </div>
           )}
         </EuiFlexItem>

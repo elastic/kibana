@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useState } from 'react';
@@ -11,14 +12,14 @@ import { Observable } from 'rxjs';
 import {
   HttpSetup,
   NotificationsStart,
-  I18nStart,
   CoreTheme,
   DocLinksStart,
   CoreStart,
 } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { EuiWindowEvent } from '@elastic/eui';
 import { ObjectStorageClient } from '../../../../common/types';
 
 import * as localStorageObjectClient from '../../../lib/local_storage_object_client';
@@ -29,13 +30,16 @@ import {
   History,
   Settings,
   Storage,
-  createStorage,
   createHistory,
   createSettings,
-  setStorage,
+  getStorage,
 } from '../../../services';
 import { createUsageTracker } from '../../../services/tracker';
-import { MetricsTracker, EmbeddableConsoleDependencies } from '../../../types';
+import {
+  MetricsTracker,
+  EmbeddableConsoleDependencies,
+  ConsoleStartServices,
+} from '../../../types';
 
 import { createApi, createEsHostService } from '../../lib';
 import { EsHostService } from '../../lib/es_host_service';
@@ -48,8 +52,7 @@ import {
 import { Main } from '../main';
 import { EditorContentSpinner } from '../../components';
 
-interface ConsoleDependencies {
-  I18nContext: I18nStart['Context'];
+interface ConsoleDependencies extends ConsoleStartServices {
   autocompleteInfo: AutocompleteInfo;
   docLinks: DocLinksStart['links'];
   docLinkVersion: string;
@@ -71,20 +74,15 @@ const loadDependencies = async (
   const {
     docLinks: { DOC_LINK_VERSION, links },
     http,
-    i18n: { Context: I18nContext },
     notifications,
-    theme: { theme$ },
+    ...startServices
   } = core;
   const trackUiMetric = createUsageTracker(usageCollection);
-  trackUiMetric.load('opened_remote_app');
+  trackUiMetric.load('opened_embedded_app');
 
   await loadActiveApi(core.http);
   const autocompleteInfo = getAutocompleteInfo();
-  const storage = createStorage({
-    engine: window.localStorage,
-    prefix: 'sense:',
-  });
-  setStorage(storage);
+  const storage = getStorage();
   const history = createHistory({ storage });
   const settings = createSettings({ storage });
   const objectStorageClient = localStorageObjectClient.create(storage);
@@ -93,7 +91,7 @@ const loadDependencies = async (
 
   autocompleteInfo.mapping.setup(http, settings);
   return {
-    I18nContext,
+    ...startServices,
     autocompleteInfo,
     docLinks: links,
     docLinkVersion: DOC_LINK_VERSION,
@@ -104,31 +102,41 @@ const loadDependencies = async (
     objectStorageClient,
     settings,
     storage,
-    theme$,
+    theme$: startServices.theme.theme$,
     trackUiMetric,
   };
 };
 
-type ConsoleWrapperProps = Omit<EmbeddableConsoleDependencies, 'setDispatch'>;
+interface ConsoleWrapperProps
+  extends Omit<
+    EmbeddableConsoleDependencies,
+    'setDispatch' | 'alternateView' | 'setConsoleHeight' | 'getConsoleHeight'
+  > {
+  onKeyDown: (this: Window, ev: WindowEventMap['keydown']) => any;
+  isOpen: boolean;
+}
 
-export const ConsoleWrapper: React.FunctionComponent<ConsoleWrapperProps> = (props) => {
+export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
   const [dependencies, setDependencies] = useState<ConsoleDependencies | null>(null);
+  const { core, usageCollection, onKeyDown, isDevMode, isOpen } = props;
+
   useEffect(() => {
-    loadDependencies(props.core, props.usageCollection).then(setDependencies);
-  }, [setDependencies, props]);
-  useEffect(() => {
-    return () => {
-      if (dependencies) {
-        dependencies.autocompleteInfo.clearSubscriptions();
-      }
-    };
-  }, [dependencies]);
+    if (dependencies === null && isOpen) {
+      loadDependencies(core, usageCollection).then(setDependencies);
+    }
+  }, [dependencies, setDependencies, core, usageCollection, isOpen]);
+
+  if (!dependencies && !isOpen) {
+    // Console has not been opened
+    return null;
+  }
 
   if (!dependencies) {
+    // Console open for the first time, wait for dependencies to load.
     return <EditorContentSpinner />;
   }
+
   const {
-    I18nContext,
     autocompleteInfo,
     docLinkVersion,
     docLinks,
@@ -139,37 +147,45 @@ export const ConsoleWrapper: React.FunctionComponent<ConsoleWrapperProps> = (pro
     objectStorageClient,
     settings,
     storage,
-    theme$,
     trackUiMetric,
+    ...startServices
   } = dependencies;
   return (
-    <I18nContext>
-      <KibanaThemeProvider theme={{ theme$ }}>
-        <ServicesContextProvider
-          value={{
-            docLinkVersion,
-            docLinks,
-            services: {
-              esHostService,
-              storage,
-              history,
-              settings,
-              notifications,
-              trackUiMetric,
-              objectStorageClient,
-              http,
-              autocompleteInfo,
-            },
-            theme$,
-          }}
-        >
-          <RequestContextProvider>
-            <EditorContextProvider settings={settings.toJSON()}>
-              <Main hideWelcome />
-            </EditorContextProvider>
-          </RequestContextProvider>
-        </ServicesContextProvider>
-      </KibanaThemeProvider>
-    </I18nContext>
+    <KibanaRenderContextProvider {...core}>
+      <ServicesContextProvider
+        value={{
+          ...startServices,
+          docLinkVersion,
+          docLinks,
+          services: {
+            esHostService,
+            storage,
+            history,
+            settings,
+            notifications,
+            trackUiMetric,
+            objectStorageClient,
+            http,
+            autocompleteInfo,
+          },
+          config: {
+            isDevMode,
+          },
+        }}
+      >
+        <RequestContextProvider>
+          <EditorContextProvider settings={settings.toJSON()}>
+            {isOpen ? (
+              <div className="embeddableConsole__content" data-test-subj="consoleEmbeddedBody">
+                <EuiWindowEvent event="keydown" handler={onKeyDown} />
+                <Main isEmbeddable={true} />
+              </div>
+            ) : (
+              <span />
+            )}
+          </EditorContextProvider>
+        </RequestContextProvider>
+      </ServicesContextProvider>
+    </KibanaRenderContextProvider>
   );
 };

@@ -6,12 +6,16 @@
  */
 
 import { omit } from 'lodash';
-import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';
 
-export function omitTimestamps(monitor: object) {
+export function omitResponseTimestamps(monitor: object) {
   return omit(monitor, ['created_at', 'updated_at']);
 }
 
-export function omitTimestampsAndSecrets(monitor: object) {
-  return omit(monitor, ['created_at', 'updated_at', ...secretKeys]);
+export function omitEmptyValues(monitor: object) {
+  const { url, ...rest } = omit(monitor, ['created_at', 'updated_at']) as any;
+
+  return {
+    ...rest,
+    ...(url ? { url } : {}),
+  };
 }

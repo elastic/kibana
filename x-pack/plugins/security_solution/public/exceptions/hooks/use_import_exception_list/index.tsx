@@ -34,6 +34,7 @@ export const importExceptionList = async ({
   formData.append('file', file as Blob);
 
   const res = await http.post<ImportExceptionsResponseSchema>(`${EXCEPTION_LIST_URL}/_import`, {
+    version: '2023-10-31',
     body: formData,
     query: { overwrite, overwrite_exceptions: overwriteExceptions, as_new_list: asNewList },
     headers: { 'Content-Type': undefined },

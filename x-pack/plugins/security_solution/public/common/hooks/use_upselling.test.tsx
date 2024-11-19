@@ -6,6 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { SecurityPageName } from '../../../common';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
@@ -29,7 +30,7 @@ jest.mock('../lib/kibana', () => {
 });
 
 const TestComponent = () => <div>{'TEST 1 2 3'}</div>;
-const RenderWrapper: React.FunctionComponent = ({ children }) => {
+const RenderWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
   return <UpsellingProvider upsellingService={mockUpselling}>{children}</UpsellingProvider>;
 };
 
@@ -70,7 +71,7 @@ describe('use_upselling', () => {
     expect(result.all.length).toBe(1); // assert that it should not cause unnecessary re-renders
   });
 
-  test('useUpsellingMessage returns null when upsellingMessageId not found', () => {
+  test('useUpsellingMessage returns undefined when upsellingMessageId not found', () => {
     const emptyMessages = {};
     mockUpselling.setPages(emptyMessages);
 
@@ -80,6 +81,6 @@ describe('use_upselling', () => {
         wrapper: RenderWrapper,
       }
     );
-    expect(result.current).toBe(null);
+    expect(result.current).toBeUndefined();
   });
 });

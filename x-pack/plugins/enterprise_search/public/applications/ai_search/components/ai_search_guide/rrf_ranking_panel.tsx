@@ -7,24 +7,12 @@
 
 import React from 'react';
 
-import { generatePath } from 'react-router-dom';
-
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiSpacer,
-  EuiSteps,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiSteps, EuiText } from '@elastic/eui';
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { DEV_TOOLS_CONSOLE_PATH } from '../../../enterprise_search_content/routes';
 import { docLinks } from '../../../shared/doc_links';
-import { EuiLinkTo } from '../../../shared/react_router_helpers';
 
 const steps: EuiContainedStepProps[] = [
   {
@@ -33,6 +21,7 @@ const steps: EuiContainedStepProps[] = [
     }),
     children: (
       <EuiLink
+        data-test-subj="enterpriseSearchReciprocalRankFusionDocumentationLink"
         data-telemetry-id="entSearch-aiSearch-rankAggregation-rrfRankingPanel-rrfDocsLink"
         href={docLinks.rrf}
         target="_blank"
@@ -47,20 +36,20 @@ const steps: EuiContainedStepProps[] = [
   },
   {
     title: i18n.translate('xpack.enterpriseSearch.aiSearch.rrfRankingPanel.step2.title', {
-      defaultMessage: 'Try it today in Console',
+      defaultMessage: 'Example Python Code',
     }),
     children: (
-      <EuiLinkTo
+      <EuiLink
+        data-test-subj="enterpriseSearchLink"
         data-telemetry-id="entSearch-aiSearch-rankAggregation-rrfRankingPanel-devToolsConsoleButton"
-        to={generatePath(DEV_TOOLS_CONSOLE_PATH)}
-        shouldNotCreateHref
+        href={docLinks.searchLabsRepo + 'blob/main/notebooks/search/02-hybrid-search.ipynb'}
+        target="_blank"
+        external
       >
-        <EuiButton>
-          {i18n.translate('xpack.enterpriseSearch.aiSearch.rrfRankingPanel.step2.buttonLabel', {
-            defaultMessage: 'Open Console',
-          })}
-        </EuiButton>
-      </EuiLinkTo>
+        {i18n.translate('xpack.enterpriseSearch.aiSearch.rrfRankingPanel.step2.buttonLabel', {
+          defaultMessage: 'View Notebook',
+        })}
+      </EuiLink>
     ),
     status: 'incomplete',
   },
@@ -79,7 +68,12 @@ export const RrfRankingPanel: React.FC = () => (
               defaultMessage="Use {rrf} to combine rankings from multiple result sets with different relevance indicators, with no fine tuning required."
               values={{
                 rrf: (
-                  <EuiLink target="_blank" href={docLinks.rrf} external={false}>
+                  <EuiLink
+                    data-test-subj="enterpriseSearchRrfRankingPanelReciprocalRankFusionRrfLink"
+                    target="_blank"
+                    href={docLinks.rrf}
+                    external={false}
+                  >
                     {i18n.translate('xpack.enterpriseSearch.aiSearch.rrfRankingPanel.rrfLinkText', {
                       defaultMessage: 'Reciprocal Rank Fusion (RRF)',
                     })}

@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
-
 export class SettingsPageObject extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
@@ -21,10 +21,6 @@ export class SettingsPageObject extends FtrService {
   private readonly common = this.ctx.getPageObject('common');
   private readonly savedObjects = this.ctx.getPageObject('savedObjects');
   private readonly monacoEditor = this.ctx.getService('monacoEditor');
-
-  async clickNavigation() {
-    await this.find.clickDisplayedByCssSelector('.app-link:nth-child(5) a');
-  }
 
   async clickLinkText(text: string) {
     await this.find.clickByDisplayedLinkText(text);
@@ -127,22 +123,6 @@ export class SettingsPageObject extends FtrService {
     await this.header.waitUntilLoadingHasFinished();
   }
 
-  async setAdvancedSettingsTextArea(propertyName: string, propertyValue: string) {
-    const wrapper = await this.testSubjects.find(`management-settings-editField-${propertyName}`);
-    const textarea = await wrapper.findByTagName('textarea');
-    await textarea.focus();
-    // only way to properly replace the value of the ace editor is via the JS api
-    await this.browser.execute(
-      (editor: string, value: string) => {
-        return (window as any).ace.edit(editor).setValue(value);
-      },
-      `management-settings-editField-${propertyName}-editor`,
-      propertyValue
-    );
-    await this.testSubjects.click(`settings-save-button`);
-    await this.header.waitUntilLoadingHasFinished();
-  }
-
   async setAdvancedSettingsImage(propertyName: string, path: string) {
     const input = await this.testSubjects.find(`management-settings-editField-${propertyName}`);
     await input.type(path);
@@ -151,7 +131,7 @@ export class SettingsPageObject extends FtrService {
   }
 
   async toggleAdvancedSettingCheckbox(propertyName: string, value?: boolean) {
-    let curValue: string | undefined;
+    let curValue: string | null;
     if (value !== undefined) {
       curValue = await this.getAdvancedSettingAriaCheckbox(propertyName);
 
@@ -177,27 +157,28 @@ export class SettingsPageObject extends FtrService {
     return wrapperElement.findByTestSubject('comboBoxSearchInput');
   }
 
-  async selectTimeFieldOption(selection: string) {
-    // open dropdown
-    const timefield = await this.getTimeFieldNameField();
-    const prevValue = await timefield.getAttribute('value');
-    const enabled = await timefield.isEnabled();
+  noTimeFieldOption = "--- I don't want to use the time filter ---";
 
-    if (prevValue === selection || !enabled) {
+  async selectTimeFieldOption(selection: string) {
+    const testSubj = 'timestampField';
+    const timefield = await this.testSubjects.find(testSubj);
+
+    await this.retry.waitFor('loading the timefield options should be finished', async () => {
+      const isLoading = await timefield.getAttribute('data-is-loading');
+      return isLoading === '0';
+    });
+    const isEnabled = await (await timefield.findByTestSubject('comboBoxSearchInput')).isEnabled();
+    if (!isEnabled) {
+      return;
+    }
+    const isSelected = await this.comboBox.isOptionSelected(timefield, selection);
+    if (isSelected) {
       return;
     }
     await this.retry.waitFor('time field dropdown have the right value', async () => {
-      await timefield.click();
-      await timefield.type(this.browser.keys.DELETE, { charByChar: true });
-      await this.browser.pressKeys(selection);
-      await this.browser.pressKeys(this.browser.keys.TAB);
-      const value = await timefield.getAttribute('value');
-      return value === selection;
+      await this.comboBox.set(testSubj, selection);
+      return await this.comboBox.isOptionSelected(timefield, selection);
     });
-  }
-
-  async getTimeFieldOption(selection: string) {
-    return await this.find.displayedByCssSelector('option[value="' + selection + '"]');
   }
 
   async getNameField() {
@@ -215,25 +196,16 @@ export class SettingsPageObject extends FtrService {
   }
 
   async getSaveDataViewButtonActive() {
-    await this.retry.try(async () => {
-      expect(
+    await this.retry.waitFor('active save button', async () => {
+      return (
         (
           await this.find.allByCssSelector(
             '[data-test-subj="saveIndexPatternButton"]:not(.euiButton-isDisabled)'
           )
-        ).length
-      ).to.be(1);
+        ).length === 1
+      );
     });
     return await this.testSubjects.find('saveIndexPatternButton');
-  }
-
-  async getCreateButton() {
-    return await this.find.displayedByCssSelector('[type="submit"]');
-  }
-
-  async clickDefaultIndexButton() {
-    await this.testSubjects.click('setDefaultIndexPatternButton');
-    await this.header.waitUntilLoadingHasFinished();
   }
 
   async clickEditIndexButton() {
@@ -249,10 +221,6 @@ export class SettingsPageObject extends FtrService {
 
   async getIndexPageHeading() {
     return await this.testSubjects.getVisibleText('indexPatternTitle');
-  }
-
-  async getConfigureHeader() {
-    return await this.find.byCssSelector('h1');
   }
 
   async getTableHeader() {
@@ -418,6 +386,11 @@ export class SettingsPageObject extends FtrService {
     const input = await this.testSubjects.find('indexPatternFieldFilter');
     await input.clearValueWithKeyboard();
     await input.type(name);
+    const value = await this.testSubjects.getAttribute('indexPatternFieldFilter', 'value');
+    expect(value).to.eql(
+      name,
+      `Expected new value to be the input: [${name}}], but got: [${value}]`
+    );
   }
 
   async openControlsByName(name: string) {
@@ -450,10 +423,6 @@ export class SettingsPageObject extends FtrService {
   async controlChangeSave() {
     await this.testSubjects.click('fieldSaveButton');
     await this.header.waitUntilLoadingHasFinished();
-  }
-
-  async hasIndexPattern(name: string) {
-    return await this.find.existsByLinkText(name);
   }
 
   async clickIndexPatternByName(name: string) {
@@ -509,7 +478,7 @@ export class SettingsPageObject extends FtrService {
       await this.header.waitUntilLoadingHasFinished();
       if (
         options.ignoreMissing &&
-        (await this.testSubjects.exists(`detail-link-${dataViewName}`)) === false
+        !(await this.testSubjects.exists(`detail-link-${dataViewName}`))
       ) {
         return;
       }
@@ -567,7 +536,6 @@ export class SettingsPageObject extends FtrService {
         await this.setIndexPatternField(indexPatternName);
       });
 
-      await this.common.sleep(2000);
       if (timefield) {
         await this.selectTimeFieldOption(timefield);
       }
@@ -615,7 +583,13 @@ export class SettingsPageObject extends FtrService {
     await this.clickEditIndexButton();
     await this.header.waitUntilLoadingHasFinished();
 
+    let hasSubmittedTheForm = false;
+
     await this.retry.try(async () => {
+      if (hasSubmittedTheForm && !(await this.testSubjects.exists('indexPatternEditorFlyout'))) {
+        // the flyout got closed
+        return;
+      }
       if (dataViewName) {
         await this.setNameField(dataViewName);
       }
@@ -626,6 +600,8 @@ export class SettingsPageObject extends FtrService {
       }
       const indexPatternSaveBtn = await this.getSaveIndexPatternButton();
       await indexPatternSaveBtn.click();
+
+      hasSubmittedTheForm = true;
 
       const form = await this.testSubjects.findAll('indexPatternEditorForm');
       const hasValidationErrors =
@@ -650,18 +626,7 @@ export class SettingsPageObject extends FtrService {
 
   async clickAddNewIndexPatternButton() {
     await this.common.scrollKibanaBodyTop();
-
-    // if showing no data view prompt
-    const noDataView = await this.testSubjects.exists('createDataViewButton');
-    if (noDataView) {
-      await this.testSubjects.click('createDataViewButton');
-      return;
-    }
-
-    const tableView = await this.testSubjects.exists('createIndexPatternButton');
-    if (tableView) {
-      await this.testSubjects.click('createIndexPatternButton');
-    }
+    await this.testSubjects.click('createDataViewButton');
   }
 
   async selectRollupIndexPatternType() {
@@ -698,7 +663,7 @@ export class SettingsPageObject extends FtrService {
       // case where we don't want the * appended so we'll remove it if it was added
       await field.type(indexPatternName, { charByChar: true });
       const tempName = await field.getAttribute('value');
-      if (tempName.length > indexPatternName.length) {
+      if (tempName?.length ?? 0 > indexPatternName.length) {
         await field.type(this.browser.keys.DELETE, { charByChar: true });
       }
     }
@@ -709,10 +674,6 @@ export class SettingsPageObject extends FtrService {
       const isValidating = await field.getAttribute('data-is-validating');
       return isValidating === '0';
     });
-  }
-
-  async getCreateIndexPatternGoToStep2Button() {
-    return await this.testSubjects.find('createIndexPatternGoToStep2Button');
   }
 
   async removeIndexPattern() {
@@ -736,11 +697,6 @@ export class SettingsPageObject extends FtrService {
       }
     });
     return alertText;
-  }
-
-  async clickFieldsTab() {
-    this.log.debug('click Fields tab');
-    await this.testSubjects.click('tab-indexedFields');
   }
 
   async clickScriptedFieldsTab() {
@@ -825,7 +781,7 @@ export class SettingsPageObject extends FtrService {
   ) {
     await this.clickAddField();
     await this.setFieldName(name);
-    await this.setFieldTypeComposite();
+    await this.setFieldType('Composite');
     await this.setCompositeScript(script);
     if (subfieldCount > 0) {
       await this.testSubjects.find(`typeField_${subfieldCount - 1}`);
@@ -895,6 +851,9 @@ export class SettingsPageObject extends FtrService {
   async clickAddField() {
     this.log.debug('click Add Field');
     await this.testSubjects.click('addField');
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail('flyoutTitle');
+    });
   }
 
   async clickSaveField() {
@@ -909,15 +868,13 @@ export class SettingsPageObject extends FtrService {
   }
 
   async setFieldType(type: string) {
+    const typeFieldDataTestSubj = 'typeField';
     this.log.debug('set type = ' + type);
-    await this.testSubjects.setValue('typeField', type);
-    await this.browser.pressKeys(this.browser.keys.ENTER);
-  }
-
-  async setFieldTypeComposite() {
-    this.log.debug('set type = Composite');
-    await this.testSubjects.setValue('typeField', 'Composite');
-    await this.browser.pressKeys(this.browser.keys.RETURN);
+    await this.retry.try(async () => {
+      await this.comboBox.set(typeFieldDataTestSubj, type);
+      const comboBox = await this.testSubjects.find(typeFieldDataTestSubj);
+      expect(await this.comboBox.isOptionSelected(comboBox, type)).to.be(true);
+    });
   }
 
   async setFieldScript(script: string) {
@@ -1096,7 +1053,28 @@ export class SettingsPageObject extends FtrService {
     );
   }
 
-  async clickChangeIndexConfirmButton() {
-    await this.testSubjects.click('changeIndexConfirmButton');
+  async changeAndValidateFieldFormat({
+    name,
+    fieldType,
+    expectedPreviewText,
+  }: {
+    name: string;
+    fieldType: string;
+    expectedPreviewText: string;
+  }) {
+    await this.filterField(name);
+    await this.setFieldTypeFilter(fieldType);
+    await this.testSubjects.click('editFieldFormat');
+
+    expect(await this.testSubjects.getVisibleText('flyoutTitle')).to.eql(`Edit field '${name}'`);
+
+    await this.retry.tryForTime(5000, async () => {
+      const previewText = await this.testSubjects.getVisibleText('fieldPreviewItem > value');
+      expect(previewText).to.eql(
+        expectedPreviewText,
+        `Expected previewText to eql [${expectedPreviewText}], but got: [${previewText}]`
+      );
+    });
+    await this.closeIndexPatternFieldEditor();
   }
 }

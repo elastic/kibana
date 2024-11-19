@@ -26,6 +26,7 @@ import type {
   NonEmptyNestedEntriesArray,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { ShowValueListModal } from '../../../../value_list/components/show_value_list_modal';
 
 import * as i18n from './translations';
 import { ValueWithSpaceWarning } from '../value_with_space_warning';
@@ -36,6 +37,10 @@ const OS_LABELS = Object.freeze({
   macos: i18n.OS_MAC,
   windows: i18n.OS_WINDOWS,
 });
+
+const EntryValueWrap = styled.span`
+  white-space: pre-wrap;
+`;
 
 const OPERATOR_TYPE_LABELS_INCLUDED = Object.freeze({
   [ListOperatorTypeEnum.NESTED]: i18n.CONDITION_OPERATOR_TYPE_NESTED,
@@ -93,9 +98,19 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
 
     const getEntryValue = (type: string, value: string | string[] | undefined) => {
       if (type === 'match_any' && Array.isArray(value)) {
-        return value.map((currentValue) => <EuiBadge color="hollow">{currentValue}</EuiBadge>);
+        return value.map((currentValue) => (
+          <EuiBadge color="hollow">
+            <EntryValueWrap>{currentValue}</EntryValueWrap>
+          </EuiBadge>
+        ));
+      } else if (type === 'list' && value) {
+        return (
+          <ShowValueListModal shouldShowContentIfModalNotAvailable listId={value.toString()}>
+            {value}
+          </ShowValueListModal>
+        );
       }
-      return value ?? '';
+      return <EntryValueWrap>{value}</EntryValueWrap> ?? '';
     };
 
     const getEntryOperator = (type: string, operator: string) => {

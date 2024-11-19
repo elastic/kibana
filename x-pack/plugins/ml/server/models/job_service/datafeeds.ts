@@ -7,10 +7,10 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
-import { Datafeed, DatafeedStats } from '../../../common/types/anomaly_detection_jobs';
+import type { Datafeed, DatafeedStats } from '../../../common/types/anomaly_detection_jobs';
 import type { MlClient } from '../../lib/ml_client';
 
 export interface MlDatafeedsResponse {
@@ -23,7 +23,7 @@ export interface MlDatafeedsStatsResponse {
   count: number;
 }
 
-interface Results {
+export interface Results {
   [id: string]: {
     started?: estypes.MlStartDatafeedResponse['started'];
     stopped?: estypes.MlStopDatafeedResponse['stopped'];
@@ -41,7 +41,7 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
       return acc;
     }, {} as { [id: string]: boolean });
 
-    const results: Results = {};
+    const results: Results = Object.create(null);
 
     async function doStart(datafeedId: string): Promise<{ started: boolean; error?: string }> {
       if (doStartsCalled[datafeedId] === false) {
@@ -114,7 +114,7 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
   }
 
   async function stopDatafeeds(datafeedIds: string[]) {
-    const results: Results = {};
+    const results: Results = Object.create(null);
 
     for (const datafeedId of datafeedIds) {
       try {

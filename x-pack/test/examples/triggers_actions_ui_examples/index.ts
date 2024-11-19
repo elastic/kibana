@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FtrProviderContext } from '../../../../test/functional/ftr_provider_context';
+import { FtrProviderContext } from '@kbn/test-suites-src/functional/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ loadTestFile }: FtrProviderContext) => {
@@ -16,7 +16,6 @@ export default ({ loadTestFile }: FtrProviderContext) => {
     loadTestFile(require.resolve('./rule_event_log_list'));
     loadTestFile(require.resolve('./global_rule_event_log_list'));
     loadTestFile(require.resolve('./rules_list'));
-    loadTestFile(require.resolve('./alerts_table'));
     loadTestFile(require.resolve('./rules_settings_link'));
   });
 };

@@ -16,6 +16,7 @@ import React, {
   useState,
   useCallback,
 } from 'react';
+import type { EuiMarkdownEditorProps, EuiMarkdownParseError } from '@elastic/eui';
 import { EuiMarkdownEditor } from '@elastic/eui';
 import type { ContextShape } from '@elastic/eui/src/components/markdown_editor/markdown_context';
 
@@ -31,6 +32,7 @@ interface MarkdownEditorProps {
   height?: number;
   autoFocusDisabled?: boolean;
   setIsMarkdownInvalid: (value: boolean) => void;
+  includePlugins?: boolean;
 }
 
 type EuiMarkdownEditorRef = ElementRef<typeof EuiMarkdownEditor>;
@@ -52,11 +54,12 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
       height,
       autoFocusDisabled,
       setIsMarkdownInvalid,
+      includePlugins = true,
     },
     ref
   ) => {
-    const [markdownErrorMessages, setMarkdownErrorMessages] = useState([]);
-    const onParse = useCallback(
+    const [markdownErrorMessages, setMarkdownErrorMessages] = useState<EuiMarkdownParseError[]>([]);
+    const onParse = useCallback<NonNullable<EuiMarkdownEditorProps['onParse']>>(
       (err, { messages }) => {
         setMarkdownErrorMessages(err ? [err] : messages);
         setIsMarkdownInvalid(err ? true : false);
@@ -72,9 +75,15 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
     }, [autoFocusDisabled]);
 
     const insightsUpsellingMessage = useUpsellingMessage('investigation_guide');
+    const interactionsUpsellingMessage = useUpsellingMessage('investigation_guide_interactions');
     const uiPluginsWithState = useMemo(() => {
-      return uiPlugins({ insightsUpsellingMessage });
-    }, [insightsUpsellingMessage]);
+      return includePlugins
+        ? uiPlugins({
+            insightsUpsellingMessage,
+            interactionsUpsellingMessage,
+          })
+        : undefined;
+    }, [includePlugins, insightsUpsellingMessage, interactionsUpsellingMessage]);
 
     // @ts-expect-error update types
     useImperativeHandle(ref, () => {

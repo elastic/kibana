@@ -1,34 +1,34 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { putRuntimeField } from './put_runtime_field';
 import { dataViewsService } from '../../../mocks';
 import { getUsageCollection } from '../test_utils';
-import { DataView } from '../../../../common';
+import { DataViewLazy } from '../../../../common';
 
 describe('put runtime field', () => {
-  it('call usageCollection', () => {
+  it('call usageCollection', async () => {
     const usageCollection = getUsageCollection();
 
-    dataViewsService.get.mockImplementation(
+    dataViewsService.getDataViewLazy.mockImplementation(
       async (id: string) =>
         ({
           removeRuntimeField: jest.fn(),
           addRuntimeField: jest.fn(),
-          fields: {
-            getByName: jest.fn().mockReturnValue({
-              runtimeField: {},
-            }),
-          },
-        } as unknown as DataView)
+          getFieldByName: jest.fn().mockReturnValue({
+            runtimeField: {},
+          }),
+          getRuntimeField: jest.fn(),
+        } as unknown as DataViewLazy)
     );
 
-    putRuntimeField({
+    await putRuntimeField({
       dataViewsService,
       counterName: 'PUT /path',
       usageCollection,

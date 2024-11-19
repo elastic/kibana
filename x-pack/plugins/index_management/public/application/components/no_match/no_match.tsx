@@ -8,19 +8,22 @@
 import React from 'react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ExtensionsService } from '../../../services';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { CreateIndexButton } from '../../sections/home/index_list/create_index/create_index_button';
+import { ExtensionsService } from '../../../services/extensions_service';
 
 export const NoMatch = ({
   loadIndices,
   filter,
   resetFilter,
   extensionsService,
+  share,
 }: {
   loadIndices: () => void;
   filter: string;
   resetFilter: () => void;
   extensionsService: ExtensionsService;
+  share?: SharePluginStart;
 }) => {
   if (filter) {
     return (
@@ -62,7 +65,7 @@ export const NoMatch = ({
 
   if (extensionsService.emptyListContent) {
     return extensionsService.emptyListContent.renderContent({
-      createIndexButton: <CreateIndexButton loadIndices={loadIndices} />,
+      createIndexButton: <CreateIndexButton loadIndices={loadIndices} share={share} />,
     });
   }
 
@@ -85,7 +88,7 @@ export const NoMatch = ({
           />
         </p>
       }
-      actions={<CreateIndexButton loadIndices={loadIndices} />}
+      actions={<CreateIndexButton loadIndices={loadIndices} share={share} />}
     />
   );
 };

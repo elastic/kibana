@@ -8,14 +8,19 @@
 import React from 'react';
 import { EuiText } from '@elastic/eui';
 
-import { CombinedField } from './types';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { CombinedField } from './types';
 
 export function CombinedFieldLabel({ combinedField }: { combinedField: CombinedField }) {
   return <EuiText size="s">{getCombinedFieldLabel(combinedField)}</EuiText>;
 }
 
 function getCombinedFieldLabel(combinedField: CombinedField) {
-  return `${combinedField.fieldNames.join(combinedField.delimiter)} => ${
-    combinedField.combinedFieldName
-  } (${combinedField.mappingType})`;
+  if (combinedField.mappingType === ES_FIELD_TYPES.GEO_POINT) {
+    return `${combinedField.fieldNames.join(combinedField.delimiter)} => ${
+      combinedField.combinedFieldName
+    } (${combinedField.mappingType})`;
+  }
+
+  return combinedField.combinedFieldName;
 }

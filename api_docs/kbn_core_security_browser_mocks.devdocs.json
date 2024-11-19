@@ -1,0 +1,226 @@
+{
+  "id": "@kbn/core-security-browser-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-security-browser-mocks",
+        "id": "def-public.securityServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "securityServiceMock",
+        "description": [],
+        "path": "packages/core/security/core-security-browser-mocks/src/security_service.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-browser-mocks",
+            "id": "def-public.securityServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => { setup: jest.Mock<any, any, any>; start: jest.Mock<any, any, any>; stop: jest.Mock<any, any, any>; }"
+            ],
+            "path": "packages/core/security/core-security-browser-mocks/src/security_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-security-browser-mocks",
+            "id": "def-public.securityServiceMock.createSetup",
+            "type": "Function",
+            "tags": [],
+            "label": "createSetup",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-security-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreSecurityBrowserPluginApi",
+                "section": "def-public.SecurityServiceSetup",
+                "text": "SecurityServiceSetup"
+              },
+              ">"
+            ],
+            "path": "packages/core/security/core-security-browser-mocks/src/security_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-security-browser-mocks",
+            "id": "def-public.securityServiceMock.createStart",
+            "type": "Function",
+            "tags": [],
+            "label": "createStart",
+            "description": [],
+            "signature": [
+              "() => jest.MockedObjectDeep<",
+              {
+                "pluginId": "@kbn/core-security-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreSecurityBrowserPluginApi",
+                "section": "def-public.SecurityServiceStart",
+                "text": "SecurityServiceStart"
+              },
+              ">"
+            ],
+            "path": "packages/core/security/core-security-browser-mocks/src/security_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-security-browser-mocks",
+            "id": "def-public.securityServiceMock.createInternalSetup",
+            "type": "Function",
+            "tags": [],
+            "label": "createInternalSetup",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-security-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreSecurityBrowserPluginApi",
+                "section": "def-public.SecurityServiceSetup",
+                "text": "SecurityServiceSetup"
+              },
+              ">"
+            ],
+            "path": "packages/core/security/core-security-browser-mocks/src/security_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-security-browser-mocks",
+            "id": "def-public.securityServiceMock.createInternalStart",
+            "type": "Function",
+            "tags": [],
+            "label": "createInternalStart",
+            "description": [],
+            "signature": [
+              "() => jest.MockedObjectDeep<",
+              {
+                "pluginId": "@kbn/core-security-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreSecurityBrowserPluginApi",
+                "section": "def-public.SecurityServiceStart",
+                "text": "SecurityServiceStart"
+              },
+              ">"
+            ],
+            "path": "packages/core/security/core-security-browser-mocks/src/security_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-security-browser-mocks",
+            "id": "def-public.securityServiceMock.createMockAuthenticatedUser",
+            "type": "Function",
+            "tags": [],
+            "label": "createMockAuthenticatedUser",
+            "description": [],
+            "signature": [
+              "(props?: Partial<Omit<",
+              {
+                "pluginId": "@kbn/core-security-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityCommonPluginApi",
+                "section": "def-common.AuthenticatedUser",
+                "text": "AuthenticatedUser"
+              },
+              ", \"roles\"> & { roles: string[]; }>) => { username: string; enabled: boolean; metadata: { _reserved: boolean; _deprecated?: boolean | undefined; _deprecated_reason?: string | undefined; }; email: string; full_name: string; profile_uid: string; authentication_provider: ",
+              {
+                "pluginId": "@kbn/core-security-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityCommonPluginApi",
+                "section": "def-common.AuthenticationProvider",
+                "text": "AuthenticationProvider"
+              },
+              "; authentication_realm: ",
+              {
+                "pluginId": "@kbn/core-security-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityCommonPluginApi",
+                "section": "def-common.UserRealm",
+                "text": "UserRealm"
+              },
+              "; lookup_realm: ",
+              {
+                "pluginId": "@kbn/core-security-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityCommonPluginApi",
+                "section": "def-common.UserRealm",
+                "text": "UserRealm"
+              },
+              "; authentication_type: string; elastic_cloud_user: boolean; roles: string[]; }"
+            ],
+            "path": "packages/core/security/core-security-browser-mocks/src/security_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-security-browser-mocks",
+                "id": "def-public.securityServiceMock.createMockAuthenticatedUser.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "Partial<Omit<",
+                  {
+                    "pluginId": "@kbn/core-security-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSecurityCommonPluginApi",
+                    "section": "def-common.AuthenticatedUser",
+                    "text": "AuthenticatedUser"
+                  },
+                  ", \"roles\"> & { roles: string[]; }>"
+                ],
+                "path": "packages/core/security/core-security-browser-mocks/src/security_service.mock.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

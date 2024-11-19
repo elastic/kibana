@@ -19,6 +19,7 @@ const createTag = (id: string, name: string = id) => ({
   name,
   description: `desc ${id}`,
   color: '#FFCC00',
+  managed: false,
 });
 
 const ref = (type: string, id: string): SavedObjectReference => ({

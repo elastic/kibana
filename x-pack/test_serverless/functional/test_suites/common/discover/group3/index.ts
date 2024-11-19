@@ -12,6 +12,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
 
   describe('discover/group3', function () {
+    this.tags(['esGate']);
+
     before(async function () {
       await browser.setWindowSize(1300, 800);
     });
@@ -20,8 +22,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
-    loadTestFile(require.resolve('./_sidebar'));
     loadTestFile(require.resolve('./_request_counts'));
-    loadTestFile(require.resolve('./_unsaved_changes_badge'));
   });
 }

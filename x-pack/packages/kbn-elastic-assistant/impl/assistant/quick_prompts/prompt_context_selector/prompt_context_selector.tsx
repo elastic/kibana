@@ -88,6 +88,7 @@ export const PromptContextSelector: React.FC<Props> = React.memo(
       <EuiComboBox
         aria-label={i18n.PROMPT_CONTEXT_SELECTOR}
         compressed
+        data-test-subj={'promptContextSelector'}
         fullWidth
         isDisabled={isDisabled}
         placeholder={i18n.PROMPT_CONTEXT_SELECTOR_PLACEHOLDER}

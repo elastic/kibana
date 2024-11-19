@@ -17,6 +17,7 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
+  const esClient = getService('es');
 
   const uninstallPackage = async () => {
     await supertest
@@ -25,12 +26,12 @@ export default function (providerContext: FtrProviderContext) {
       .send({ force: true });
   };
 
-  describe('Installing custom integrations', async () => {
+  describe('Installing custom integrations', () => {
     afterEach(async () => {
       await uninstallPackage();
     });
 
-    it("Correcty installs a custom integration and all of it's assets", async () => {
+    it('Correctly installs a custom integration and all of its assets', async () => {
       const response = await supertest
         .post(`/api/fleet/epm/custom_integrations`)
         .set('kbn-xsrf', 'xxxx')
@@ -97,6 +98,73 @@ export default function (providerContext: FtrProviderContext) {
       expect(installation.attributes.version).to.be(INTEGRATION_VERSION);
       expect(installation.attributes.install_source).to.be('custom');
       expect(installation.attributes.install_status).to.be('installed');
+
+      for (const indexTemplate of actualIndexTemplates) {
+        const templateResponse = await esClient.indices.getIndexTemplate({ name: indexTemplate });
+
+        expect(templateResponse.index_templates[0].index_template.composed_of).to.contain(
+          'ecs@mappings'
+        );
+      }
+    });
+
+    it('Includes custom integration metadata', async () => {
+      await supertest
+        .post(`/api/fleet/epm/custom_integrations`)
+        .set('kbn-xsrf', 'xxxx')
+        .type('application/json')
+        .send({
+          force: true,
+          integrationName: INTEGRATION_NAME,
+          datasets: [{ name: `${INTEGRATION_NAME}.access`, type: 'logs' }],
+        })
+        .expect(200);
+
+      const indexName = `logs-${INTEGRATION_NAME}.access-000001`;
+
+      // Actually index data to see if the mapping comes out as expected based on the component template stack
+      await esClient.index({
+        index: indexName,
+        document: {
+          foo: 'bar',
+        },
+      });
+
+      const response = await esClient.indices.getMapping({ index: indexName });
+
+      expect(Object.values(response)[0].mappings._meta).to.eql({
+        managed_by: 'fleet',
+        managed: true,
+        package: { name: INTEGRATION_NAME },
+      });
+    });
+
+    it('Works correctly when there is an existing datastream with the same name', async () => {
+      const INTEGRATION_NAME_1 = 'myintegration';
+      const DATASET_NAME = 'test';
+      await esClient.transport.request({
+        method: 'POST',
+        path: `logs-${INTEGRATION_NAME_1}.${DATASET_NAME}-default/_doc`,
+        body: {
+          '@timestamp': '2015-01-01',
+          logs_test_name: `${DATASET_NAME}`,
+          data_stream: {
+            dataset: `${INTEGRATION_NAME_1}.${DATASET_NAME}_logs`,
+            namespace: 'default',
+            type: 'logs',
+          },
+        },
+      });
+      await supertest
+        .post(`/api/fleet/epm/custom_integrations`)
+        .set('kbn-xsrf', 'xxxx')
+        .type('application/json')
+        .send({
+          force: true,
+          integrationName: INTEGRATION_NAME_1,
+          datasets: [{ name: `${INTEGRATION_NAME_1}.${DATASET_NAME}`, type: 'logs' }],
+        })
+        .expect(200);
     });
 
     it('Throws an error when there is a naming collision with a current package installation', async () => {

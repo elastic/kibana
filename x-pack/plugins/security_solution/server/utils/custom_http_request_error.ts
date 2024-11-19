@@ -13,5 +13,9 @@ export class CustomHttpRequestError extends Error {
     super(message);
     // For debugging - capture name of subclasses
     this.name = this.constructor.name;
+
+    if (meta instanceof Error) {
+      this.stack += `\n----- original error -----\n${meta.stack}`;
+    }
   }
 }

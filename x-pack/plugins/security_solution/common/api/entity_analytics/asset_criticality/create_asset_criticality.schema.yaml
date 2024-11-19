@@ -1,25 +1,32 @@
+# ⚠️ Updating this file? Also update the public API docs at https://github.com/elastic/security-docs/tree/main/docs/advanced-entity-analytics/api
 openapi: 3.0.0
 info:
-  version: 1.0.0
+  version: '2023-10-31'
   title: Asset Criticality Create Record Schema
-servers:
-  - url: 'http://{kibana_host}:{port}'
-    variables:
-      kibana_host:
-        default: localhost
-      port:
-        default: '5601'
 paths:
-  /internal/asset_criticality:
+  /api/asset_criticality:
     post:
-      operationId: AssetCriticalityCreateRecord
-      summary: Create Criticality Record
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: CreateAssetCriticalityRecord
+      summary: Upsert an asset criticality record
+      description: |
+        Create or update an asset criticality record for a specific entity.
+
+        If a record already exists for the specified entity, that record is overwritten with the specified value. If a record doesn't exist for the specified entity, a new record is created.
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: './common.schema.yaml#/components/schemas/CreateAssetCriticalityRecord'
+              allOf:
+                - $ref: './common.schema.yaml#/components/schemas/CreateAssetCriticalityRecord'
+                - type: object
+                  properties:
+                    refresh:
+                      type: string
+                      enum: [wait_for]
+                      description: If 'wait_for' the request will wait for the index refresh.
       responses:
         '200':
           description: Successful response

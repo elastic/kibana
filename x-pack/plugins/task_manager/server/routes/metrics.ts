@@ -7,6 +7,7 @@
 
 import {
   IRouter,
+  Logger,
   RequestHandlerContext,
   KibanaRequest,
   IKibanaResponse,
@@ -25,6 +26,7 @@ export interface NodeMetrics {
 
 export interface MetricsRouteParams {
   router: IRouter;
+  logger: Logger;
   metrics$: Observable<Metrics>;
   resetMetrics$: Subject<boolean>;
   taskManagerId: string;

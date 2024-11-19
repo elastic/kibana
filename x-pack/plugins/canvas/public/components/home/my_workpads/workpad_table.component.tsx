@@ -21,7 +21,7 @@ import {
 import moment from 'moment';
 
 import { RoutingLink } from '../../routing';
-import { FoundWorkpad } from '../../../services/workpad';
+import { FoundWorkpad } from '../../../services/canvas_workpad_service';
 import { WorkpadTableTools } from './workpad_table_tools';
 import { WorkpadImport } from './workpad_import';
 
@@ -164,7 +164,7 @@ const strings = {
     }),
   getLoadWorkpadArialLabel: (workpadName: string) =>
     i18n.translate('xpack.canvas.workpadTable.loadWorkpadArialLabel', {
-      defaultMessage: `Load workpad '{workpadName}'`,
+      defaultMessage: `Load workpad ''{workpadName}''`,
       values: {
         workpadName,
       },

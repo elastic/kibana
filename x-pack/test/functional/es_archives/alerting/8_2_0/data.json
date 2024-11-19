@@ -75,7 +75,7 @@
             {
               "elements": [
                 {
-                  "expression": "filters\n| demodata\n| markdown \"# Title\n## Author Name\n\nMonth Day, Year\"\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 64px !important;\n}\n.canvasMarkdown h2,\n.canvasMarkdown p {\ncolor: #666666;\n}\n.canvasMarkdown p {\nfont-size: 16px;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"# Title\n## Author Name\n\nMonth Day, Year\"\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 64px !important;\n}\n.canvasMarkdown h2,\n.canvasMarkdown p {\ncolor: #666666;\n}\n.canvasMarkdown p {\nfont-size: 16px;\n}\"",
                   "id": "element-ee400dfc-0752-4eeb-86d9-af381f669d25",
                   "position": {
                     "angle": 0,
@@ -111,7 +111,7 @@
             {
               "elements": [
                 {
-                  "expression": "filters\n| demodata\n| markdown \"# Add title here\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"center\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render css=\".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 64px !important;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"# Add title here\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"center\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render css=\".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 64px !important;\n}\"",
                   "id": "element-c23d83a2-a053-4cb4-940b-22c591c89414",
                   "position": {
                     "angle": 0,
@@ -147,7 +147,7 @@
             {
               "elements": [
                 {
-                  "expression": "filters\n| demodata\n| markdown \"# Add title here\n## Add subtitle here\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"center\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 64px !important;\n}\n.canvasMarkdown h2,\n.canvasMarkdown p {\ncolor: #666666;\n}\n.canvasMarkdown p {\nfont-size: 16px;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"# Add title here\n## Add subtitle here\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"center\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 64px !important;\n}\n.canvasMarkdown h2,\n.canvasMarkdown p {\ncolor: #666666;\n}\n.canvasMarkdown p {\nfont-size: 16px;\n}\"",
                   "id": "element-34bddaa0-2228-49af-8b7d-12b7b3115753",
                   "position": {
                     "angle": 0,
@@ -183,7 +183,7 @@
             {
               "elements": [
                 {
-                  "expression": "filters\n| demodata\n| markdown \"# Add title here\"\n| render css=\".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 48px !important;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"# Add title here\"\n| render css=\".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 48px !important;\n}\"",
                   "id": "element-4aece7e9-9b9f-4a8b-8672-7e609c0b4646",
                   "position": {
                     "angle": 0,
@@ -195,7 +195,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"Add slide content here\n- first item\n- second item\n- third item\"\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown p,\n.canvasMarkdown li {\ncolor: #666666;\nfont-size: 24px;\n}\n.canvasMarkdown li {\nmargin-bottom: 16px;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"Add slide content here\n- first item\n- second item\n- third item\"\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown p,\n.canvasMarkdown li {\ncolor: #666666;\nfont-size: 24px;\n}\n.canvasMarkdown li {\nmargin-bottom: 16px;\n}\"",
                   "id": "element-88c815f5-fca9-4cac-a9c2-5cf53cfe5429",
                   "position": {
                     "angle": 0,
@@ -231,7 +231,7 @@
             {
               "elements": [
                 {
-                  "expression": "filters\n| demodata\n| markdown \"# Add title here\"\n| render css=\".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 48px !important;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"# Add title here\"\n| render css=\".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 48px !important;\n}\"",
                   "id": "element-c1fd013a-f95b-4ebe-b6da-b43312672016",
                   "position": {
                     "angle": 0,
@@ -243,7 +243,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"Left column\n- first item\n- second item\n- third item\"\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown p,\n.canvasMarkdown li {\ncolor: #666666;\nfont-size: 24px;\n}\n.canvasMarkdown li {\nmargin-bottom: 16px;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"Left column\n- first item\n- second item\n- third item\"\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown p,\n.canvasMarkdown li {\ncolor: #666666;\nfont-size: 24px;\n}\n.canvasMarkdown li {\nmargin-bottom: 16px;\n}\"",
                   "id": "element-e434ce4d-09a7-42d0-a149-12ed7a115af3",
                   "position": {
                     "angle": 0,
@@ -255,7 +255,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"Right column\n- first item\n- second item\n\"\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown p,\n.canvasMarkdown li {\ncolor: #666666;\nfont-size: 24px;\n}\n.canvasMarkdown li {\nmargin-bottom: 16px;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"Right column\n- first item\n- second item\n\"\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown p,\n.canvasMarkdown li {\ncolor: #666666;\nfont-size: 24px;\n}\n.canvasMarkdown li {\nmargin-bottom: 16px;\n}\"",
                   "id": "element-9005be46-47ea-4478-96b1-a51b1c4d06e9",
                   "position": {
                     "angle": 0,
@@ -303,7 +303,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"# Add title here\"\n| render css=\".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 48px !important;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"# Add title here\"\n| render css=\".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 48px !important;\n}\"",
                   "id": "element-dd72cc53-56fa-490a-a996-9d76f407608f",
                   "position": {
                     "angle": 0,
@@ -315,7 +315,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"Left column\n- first item\n- second item\n- third item\"\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown p,\n.canvasMarkdown li {\ncolor: #666666;\nfont-size: 24px;\n}\n.canvasMarkdown li {\nmargin-bottom: 16px;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"Left column\n- first item\n- second item\n- third item\"\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown p,\n.canvasMarkdown li {\ncolor: #666666;\nfont-size: 24px;\n}\n.canvasMarkdown li {\nmargin-bottom: 16px;\n}\"",
                   "id": "element-eb5a1a58-21b1-491e-bf8b-68c207afaae8",
                   "position": {
                     "angle": 0,
@@ -327,7 +327,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"Right column\n- first item\n- second item\n\"\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown p,\n.canvasMarkdown li {\ncolor: #000000;\nfont-size: 24px;\n}\n.canvasMarkdown li {\nmargin-bottom: 16px;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"Right column\n- first item\n- second item\n\"\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown p,\n.canvasMarkdown li {\ncolor: #000000;\nfont-size: 24px;\n}\n.canvasMarkdown li {\nmargin-bottom: 16px;\n}\"",
                   "id": "element-f52077e5-13db-49e9-842e-a8058b578c79",
                   "position": {
                     "angle": 0,
@@ -363,7 +363,7 @@
             {
               "elements": [
                 {
-                  "expression": "filters\n| demodata\n| markdown \"# Add title here\"\n| render css=\".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 48px !important;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"# Add title here\"\n| render css=\".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 48px !important;\n}\"",
                   "id": "element-f22a65da-6283-4d86-83ae-de753ebbcdc6",
                   "position": {
                     "angle": 0,
@@ -375,7 +375,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| pointseries x=\"time\" y=\"mean(price)\"\n| plot defaultStyle={seriesStyle lines=\"2\" fill=1 bars=\"0\" points=\"1\"} \n  palette={palette \"#1ea593\" \"#2b70f7\" \"#ce0060\" \"#38007e\" \"#fca5d3\" \"#f37020\" \"#e49e29\" \"#b0916f\" \"#7b000b\" \"#34130c\" gradient=false} \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=16 align=\"left\" color=\"#666666\" weight=\"normal\" underline=false italic=false}\n| render containerStyle={containerStyle backgroundColor=\"rgba(255,255,255,0)\"}",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| pointseries x=\"time\" y=\"mean(price)\"\n| plot defaultStyle={seriesStyle lines=\"2\" fill=1 bars=\"0\" points=\"1\"} \n  palette={palette \"#1ea593\" \"#2b70f7\" \"#ce0060\" \"#38007e\" \"#fca5d3\" \"#f37020\" \"#e49e29\" \"#b0916f\" \"#7b000b\" \"#34130c\" gradient=false} \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=16 align=\"left\" color=\"#666666\" weight=\"normal\" underline=false italic=false}\n| render containerStyle={containerStyle backgroundColor=\"rgba(255,255,255,0)\"}",
                   "id": "element-b91303dd-c046-4492-b97d-67517f1920b8",
                   "position": {
                     "angle": 0,
@@ -411,7 +411,7 @@
             {
               "elements": [
                 {
-                  "expression": "filters\n| demodata\n| markdown \"# Add title here\"\n| render css=\".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 48px !important;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"# Add title here\"\n| render css=\".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 48px !important;\n}\"",
                   "id": "element-ff1e55a5-c0d8-410d-99e0-0a08f4640d57",
                   "position": {
                     "angle": 0,
@@ -423,7 +423,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| pointseries color=\"project\" size=\"max(price)\"\n| pie hole=48 labels=true legend=false \n  palette={palette \"#1ea593\" \"#2b70f7\" \"#ce0060\" \"#38007e\" \"#fca5d3\" \"#f37020\" \"#e49e29\" \"#b0916f\" \"#7b000b\" \"#34130c\" gradient=false} \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=16 align=\"center\" color=\"#666666\" weight=\"normal\" underline=false italic=false} labelRadius=100 radius=0.7\n| render css=\".canvasRenderEl {\n\n}\n.pieLabel div {\nline-height: 1.4 !important;\n}\n\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| pointseries color=\"project\" size=\"max(price)\"\n| pie hole=48 labels=true legend=false \n  palette={palette \"#1ea593\" \"#2b70f7\" \"#ce0060\" \"#38007e\" \"#fca5d3\" \"#f37020\" \"#e49e29\" \"#b0916f\" \"#7b000b\" \"#34130c\" gradient=false} \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=16 align=\"center\" color=\"#666666\" weight=\"normal\" underline=false italic=false} labelRadius=100 radius=0.7\n| render css=\".canvasRenderEl {\n\n}\n.pieLabel div {\nline-height: 1.4 !important;\n}\n\"",
                   "id": "element-2fbb0b23-85a0-49b1-8d71-8d1b43fb704d",
                   "position": {
                     "angle": 0,
@@ -435,7 +435,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"- first item\n- second item\n- third item\"\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown p,\n.canvasMarkdown li {\ncolor: #666666;\nfont-size: 24px;\n}\n.canvasMarkdown li {\nmargin-bottom: 16px;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"- first item\n- second item\n- third item\"\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown p,\n.canvasMarkdown li {\ncolor: #666666;\nfont-size: 24px;\n}\n.canvasMarkdown li {\nmargin-bottom: 16px;\n}\"",
                   "id": "element-243de880-9a39-4e05-b66a-5123a90fdbfb",
                   "position": {
                     "angle": 0,
@@ -471,7 +471,7 @@
             {
               "elements": [
                 {
-                  "expression": "filters\n| demodata\n| math \"median(percent_uptime)\"\n| progress shape=\"wheel\" label={formatnumber \"0%\"} \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"center\" color=\"#666666\" weight=\"normal\" underline=false italic=false} valueColor=\"#01b2a4\" barColor=\"rgba(0,0,0,0.1)\"\n| render",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| math \"median(percent_uptime)\"\n| progress shape=\"wheel\" label={formatnumber \"0%\"} \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"center\" color=\"#666666\" weight=\"normal\" underline=false italic=false} valueColor=\"#01b2a4\" barColor=\"rgba(0,0,0,0.1)\"\n| render",
                   "id": "element-853fe6b2-0eba-414a-8c9f-e6930bc53109",
                   "position": {
                     "angle": 0,
@@ -483,7 +483,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"# Add title here\"\n| render css=\".canvasMarkdown h1 {\nfont-size: 48px !important;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"# Add title here\"\n| render css=\".canvasMarkdown h1 {\nfont-size: 48px !important;\n}\"",
                   "id": "element-60fa5d2e-6d06-4e05-b465-29fdaa0c7933",
                   "position": {
                     "angle": 0,
@@ -495,7 +495,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| math \"mean(percent_uptime)\"\n| progress shape=\"wheel\" label={formatnumber \"0%\"} \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"center\" color=\"#666666\" weight=\"normal\" underline=false italic=false} valueColor=\"#01b2a4\" barColor=\"rgba(0,0,0,0.1)\"\n| render",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| math \"mean(percent_uptime)\"\n| progress shape=\"wheel\" label={formatnumber \"0%\"} \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"center\" color=\"#666666\" weight=\"normal\" underline=false italic=false} valueColor=\"#01b2a4\" barColor=\"rgba(0,0,0,0.1)\"\n| render",
                   "id": "element-a20eae11-2cee-4cee-b2f4-f5d4a56576ba",
                   "position": {
                     "angle": 0,
@@ -507,7 +507,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| math \"median(percent_uptime)\"\n| progress shape=\"wheel\" label={formatnumber \"0%\"} \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"center\" color=\"#666666\" weight=\"normal\" underline=false italic=false} valueColor=\"#01b2a4\" barColor=\"rgba(0,0,0,0.1)\" max=1\n| render",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| math \"median(percent_uptime)\"\n| progress shape=\"wheel\" label={formatnumber \"0%\"} \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"center\" color=\"#666666\" weight=\"normal\" underline=false italic=false} valueColor=\"#01b2a4\" barColor=\"rgba(0,0,0,0.1)\" max=1\n| render",
                   "id": "element-71d07e0f-5d99-471a-9864-99cb04839ef0",
                   "position": {
                     "angle": 0,
@@ -543,7 +543,7 @@
             {
               "elements": [
                 {
-                  "expression": "filters\n| demodata\n| pointseries x=\"time\" y=\"mean(price)\"\n| plot defaultStyle={seriesStyle lines=\"1\" fill=1 bars=\"0\" points=\"1\"} \n  palette={palette \"#1ea593\" \"#2b70f7\" \"#ce0060\" \"#38007e\" \"#fca5d3\" \"#f37020\" \"#e49e29\" \"#b0916f\" \"#7b000b\" \"#34130c\" gradient=false} \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=16 align=\"left\" color=\"#666666\" weight=\"normal\" underline=false italic=false}\n| render containerStyle={containerStyle backgroundColor=\"rgba(255,255,255,0)\"}",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| pointseries x=\"time\" y=\"mean(price)\"\n| plot defaultStyle={seriesStyle lines=\"1\" fill=1 bars=\"0\" points=\"1\"} \n  palette={palette \"#1ea593\" \"#2b70f7\" \"#ce0060\" \"#38007e\" \"#fca5d3\" \"#f37020\" \"#e49e29\" \"#b0916f\" \"#7b000b\" \"#34130c\" gradient=false} \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=16 align=\"left\" color=\"#666666\" weight=\"normal\" underline=false italic=false}\n| render containerStyle={containerStyle backgroundColor=\"rgba(255,255,255,0)\"}",
                   "id": "element-799537e1-7456-4ff0-80fa-d52f0de9a6fe",
                   "position": {
                     "angle": 0,
@@ -555,7 +555,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| pointseries x=\"time\" y=\"mean(price)\"\n| plot defaultStyle={seriesStyle lines=\"1\"} \n  palette={palette \"#1ea593\" \"#2b70f7\" \"#ce0060\" \"#38007e\" \"#fca5d3\" \"#f37020\" \"#e49e29\" \"#b0916f\" \"#7b000b\" \"#34130c\" gradient=false} \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=16 align=\"left\" color=\"#666666\" weight=\"normal\" underline=false italic=false}\n| render",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| pointseries x=\"time\" y=\"mean(price)\"\n| plot defaultStyle={seriesStyle lines=\"1\"} \n  palette={palette \"#1ea593\" \"#2b70f7\" \"#ce0060\" \"#38007e\" \"#fca5d3\" \"#f37020\" \"#e49e29\" \"#b0916f\" \"#7b000b\" \"#34130c\" gradient=false} \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=16 align=\"left\" color=\"#666666\" weight=\"normal\" underline=false italic=false}\n| render",
                   "id": "element-eece5bd6-d25b-4ffb-91ba-49a6c5d9f21b",
                   "position": {
                     "angle": 0,
@@ -567,7 +567,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| math \"median(percent_uptime)\"\n| progress shape=\"semicircle\" label={formatnumber \"0%\"} \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"center\" color=\"#666666\" weight=\"normal\" underline=false italic=false} valueColor=\"#01b2a4\" barColor=\"rgba(0,0,0,0.1)\"\n| render",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| math \"median(percent_uptime)\"\n| progress shape=\"semicircle\" label={formatnumber \"0%\"} \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"center\" color=\"#666666\" weight=\"normal\" underline=false italic=false} valueColor=\"#01b2a4\" barColor=\"rgba(0,0,0,0.1)\"\n| render",
                   "id": "element-7d5b43e6-c90f-4b02-b363-421ab4debd1f",
                   "position": {
                     "angle": 0,
@@ -579,7 +579,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| math \"mean(percent_uptime)\"\n| progress shape=\"semicircle\" label={formatnumber \"0%\"} \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"center\" color=\"#666666\" weight=\"normal\" underline=false italic=false} valueColor=\"#01b2a4\" barColor=\"rgba(0,0,0,0.1)\"\n| render",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| math \"mean(percent_uptime)\"\n| progress shape=\"semicircle\" label={formatnumber \"0%\"} \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"center\" color=\"#666666\" weight=\"normal\" underline=false italic=false} valueColor=\"#01b2a4\" barColor=\"rgba(0,0,0,0.1)\"\n| render",
                   "id": "element-561c433a-cbae-47dd-8082-9ddf627875ac",
                   "position": {
                     "angle": 0,
@@ -591,7 +591,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| math \"mean(percent_uptime)\"\n| progress shape=\"semicircle\" label={formatnumber \"0%\"} \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"center\" color=\"#666666\" weight=\"normal\" underline=false italic=false} valueColor=\"#01b2a4\" barColor=\"rgba(0,0,0,0.1)\"\n| render",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| math \"mean(percent_uptime)\"\n| progress shape=\"semicircle\" label={formatnumber \"0%\"} \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"center\" color=\"#666666\" weight=\"normal\" underline=false italic=false} valueColor=\"#01b2a4\" barColor=\"rgba(0,0,0,0.1)\"\n| render",
                   "id": "element-9f574a47-64cd-4c76-a07e-6a9d8a1a0e93",
                   "position": {
                     "angle": 0,
@@ -761,7 +761,7 @@
             {
               "elements": [
                 {
-                  "expression": "filters\n| demodata\n| markdown \"# Title\n## Author Name\n\nMonth Day, Year\"\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 64px !important;\ncolor: white !important;\n}\n.canvasMarkdown h2,\n.canvasMarkdown p {\ncolor: #C4C4C4;\n}\n.canvasMarkdown p {\nfont-size: 16px;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"# Title\n## Author Name\n\nMonth Day, Year\"\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 64px !important;\ncolor: white !important;\n}\n.canvasMarkdown h2,\n.canvasMarkdown p {\ncolor: #C4C4C4;\n}\n.canvasMarkdown p {\nfont-size: 16px;\n}\"",
                   "id": "element-ee400dfc-0752-4eeb-86d9-af381f669d25",
                   "position": {
                     "angle": 0,
@@ -797,7 +797,7 @@
             {
               "elements": [
                 {
-                  "expression": "filters\n| demodata\n| markdown \"# Add title here\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"center\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 64px !important;\ncolor: white !important;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"# Add title here\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"center\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 64px !important;\ncolor: white !important;\n}\"",
                   "id": "element-c23d83a2-a053-4cb4-940b-22c591c89414",
                   "position": {
                     "angle": 0,
@@ -833,7 +833,7 @@
             {
               "elements": [
                 {
-                  "expression": "filters\n| demodata\n| markdown \"# Add title here\n## Add subtitle here\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"center\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 64px !important;\ncolor: white !important;\n}\n.canvasMarkdown h2,\n.canvasMarkdown p {\ncolor: #C4C4C4;\n}\n.canvasMarkdown p {\nfont-size: 16px;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"# Add title here\n## Add subtitle here\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"center\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 64px !important;\ncolor: white !important;\n}\n.canvasMarkdown h2,\n.canvasMarkdown p {\ncolor: #C4C4C4;\n}\n.canvasMarkdown p {\nfont-size: 16px;\n}\"",
                   "id": "element-34bddaa0-2228-49af-8b7d-12b7b3115753",
                   "position": {
                     "angle": 0,
@@ -869,7 +869,7 @@
             {
               "elements": [
                 {
-                  "expression": "filters\n| demodata\n| markdown \"# Add title here\"\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 48px !important;\ncolor: white !important;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"# Add title here\"\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 48px !important;\ncolor: white !important;\n}\"",
                   "id": "element-4aece7e9-9b9f-4a8b-8672-7e609c0b4646",
                   "position": {
                     "angle": 0,
@@ -893,7 +893,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"Add slide content here\n- first item\n- second item\n- third item\"\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown p,\n.canvasMarkdown li {\ncolor: #C4C4C4;\nfont-size: 24px;\n}\n.canvasMarkdown li {\nmargin-bottom: 16px;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"Add slide content here\n- first item\n- second item\n- third item\"\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown p,\n.canvasMarkdown li {\ncolor: #C4C4C4;\nfont-size: 24px;\n}\n.canvasMarkdown li {\nmargin-bottom: 16px;\n}\"",
                   "id": "element-88c815f5-fca9-4cac-a9c2-5cf53cfe5429",
                   "position": {
                     "angle": 0,
@@ -917,7 +917,7 @@
             {
               "elements": [
                 {
-                  "expression": "filters\n| demodata\n| markdown \"# Add title here\"\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 48px !important;\ncolor: white !important;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"# Add title here\"\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 48px !important;\ncolor: white !important;\n}\"",
                   "id": "element-c1fd013a-f95b-4ebe-b6da-b43312672016",
                   "position": {
                     "angle": 0,
@@ -941,7 +941,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"Left column\n- first item\n- second item\n- third item\"\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown p,\n.canvasMarkdown li {\ncolor: #C4C4C4;\nfont-size: 24px;\n}\n.canvasMarkdown li {\nmargin-bottom: 16px;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"Left column\n- first item\n- second item\n- third item\"\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown p,\n.canvasMarkdown li {\ncolor: #C4C4C4;\nfont-size: 24px;\n}\n.canvasMarkdown li {\nmargin-bottom: 16px;\n}\"",
                   "id": "element-e434ce4d-09a7-42d0-a149-12ed7a115af3",
                   "position": {
                     "angle": 0,
@@ -953,7 +953,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"Right column\n- first item\n- second item\n\"\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown p,\n.canvasMarkdown li {\ncolor: #C4C4C4;\nfont-size: 24px;\n}\n.canvasMarkdown li {\nmargin-bottom: 16px;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"Right column\n- first item\n- second item\n\"\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown p,\n.canvasMarkdown li {\ncolor: #C4C4C4;\nfont-size: 24px;\n}\n.canvasMarkdown li {\nmargin-bottom: 16px;\n}\"",
                   "id": "element-9005be46-47ea-4478-96b1-a51b1c4d06e9",
                   "position": {
                     "angle": 0,
@@ -989,7 +989,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"# Add title here\"\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 48px !important;\ncolor: white !important;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"# Add title here\"\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 48px !important;\ncolor: white !important;\n}\"",
                   "id": "element-dd72cc53-56fa-490a-a996-9d76f407608f",
                   "position": {
                     "angle": 0,
@@ -1013,7 +1013,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"Left column\n- first item\n- second item\n- third item\"\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown p,\n.canvasMarkdown li {\ncolor: #C4C4C4;\nfont-size: 24px;\n}\n.canvasMarkdown li {\nmargin-bottom: 16px;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"Left column\n- first item\n- second item\n- third item\"\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown p,\n.canvasMarkdown li {\ncolor: #C4C4C4;\nfont-size: 24px;\n}\n.canvasMarkdown li {\nmargin-bottom: 16px;\n}\"",
                   "id": "element-eb5a1a58-21b1-491e-bf8b-68c207afaae8",
                   "position": {
                     "angle": 0,
@@ -1025,7 +1025,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"Right column\n- first item\n- second item\n\"\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown p,\n.canvasMarkdown li {\ncolor: #000000;\nfont-size: 24px;\n}\n.canvasMarkdown li {\nmargin-bottom: 16px;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"Right column\n- first item\n- second item\n\"\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown p,\n.canvasMarkdown li {\ncolor: #000000;\nfont-size: 24px;\n}\n.canvasMarkdown li {\nmargin-bottom: 16px;\n}\"",
                   "id": "element-f52077e5-13db-49e9-842e-a8058b578c79",
                   "position": {
                     "angle": 0,
@@ -1049,7 +1049,7 @@
             {
               "elements": [
                 {
-                  "expression": "filters\n| demodata\n| markdown \"# Add title here\"\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 48px !important;\ncolor: white !important;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"# Add title here\"\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 48px !important;\ncolor: white !important;\n}\"",
                   "id": "element-f22a65da-6283-4d86-83ae-de753ebbcdc6",
                   "position": {
                     "angle": 0,
@@ -1073,7 +1073,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| pointseries x=\"time\" y=\"mean(price)\"\n| plot defaultStyle={seriesStyle lines=\"2\" fill=1 bars=\"0\" points=\"1\"} \n  palette={palette \"#1ea593\" \"#2b70f7\" \"#ce0060\" \"#38007e\" \"#fca5d3\" \"#f37020\" \"#e49e29\" \"#b0916f\" \"#7b000b\" \"#34130c\" gradient=false} \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=16 align=\"left\" color=\"#FFFFFF\" weight=\"normal\" underline=false italic=false}\n| render containerStyle={containerStyle backgroundColor=\"rgba(255,255,255,0)\"}",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| pointseries x=\"time\" y=\"mean(price)\"\n| plot defaultStyle={seriesStyle lines=\"2\" fill=1 bars=\"0\" points=\"1\"} \n  palette={palette \"#1ea593\" \"#2b70f7\" \"#ce0060\" \"#38007e\" \"#fca5d3\" \"#f37020\" \"#e49e29\" \"#b0916f\" \"#7b000b\" \"#34130c\" gradient=false} \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=16 align=\"left\" color=\"#FFFFFF\" weight=\"normal\" underline=false italic=false}\n| render containerStyle={containerStyle backgroundColor=\"rgba(255,255,255,0)\"}",
                   "id": "element-b91303dd-c046-4492-b97d-67517f1920b8",
                   "position": {
                     "angle": 0,
@@ -1097,7 +1097,7 @@
             {
               "elements": [
                 {
-                  "expression": "filters\n| demodata\n| markdown \"# Add title here\"\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 48px !important;\ncolor: white !important;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"# Add title here\"\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 48px !important;\ncolor: white !important;\n}\"",
                   "id": "element-ff1e55a5-c0d8-410d-99e0-0a08f4640d57",
                   "position": {
                     "angle": 0,
@@ -1121,7 +1121,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| pointseries color=\"project\" size=\"max(price)\"\n| pie hole=48 labels=true legend=false \n  palette={palette \"#1ea593\" \"#2b70f7\" \"#ce0060\" \"#38007e\" \"#fca5d3\" \"#f37020\" \"#e49e29\" \"#b0916f\" \"#7b000b\" \"#34130c\" gradient=false} \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=16 align=\"center\" color=\"#FFFFFF\" weight=\"normal\" underline=false italic=false} labelRadius=100 radius=0.7\n| render css=\".canvasRenderEl {\n\n}\n.pieLabel div {\nline-height: 1.4 !important;\n}\n\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| pointseries color=\"project\" size=\"max(price)\"\n| pie hole=48 labels=true legend=false \n  palette={palette \"#1ea593\" \"#2b70f7\" \"#ce0060\" \"#38007e\" \"#fca5d3\" \"#f37020\" \"#e49e29\" \"#b0916f\" \"#7b000b\" \"#34130c\" gradient=false} \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=16 align=\"center\" color=\"#FFFFFF\" weight=\"normal\" underline=false italic=false} labelRadius=100 radius=0.7\n| render css=\".canvasRenderEl {\n\n}\n.pieLabel div {\nline-height: 1.4 !important;\n}\n\"",
                   "id": "element-2fbb0b23-85a0-49b1-8d71-8d1b43fb704d",
                   "position": {
                     "angle": 0,
@@ -1133,7 +1133,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"- first item\n- second item\n- third item\"\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown p,\n.canvasMarkdown li {\ncolor: #C4C4C4;\nfont-size: 24px;\n}\n.canvasMarkdown li {\nmargin-bottom: 16px;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"- first item\n- second item\n- third item\"\n| render \n  css=\".canvasRenderEl {\n\n}\n.canvasMarkdown p,\n.canvasMarkdown li {\ncolor: #C4C4C4;\nfont-size: 24px;\n}\n.canvasMarkdown li {\nmargin-bottom: 16px;\n}\"",
                   "id": "element-243de880-9a39-4e05-b66a-5123a90fdbfb",
                   "position": {
                     "angle": 0,
@@ -1169,7 +1169,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| math \"median(percent_uptime)\"\n| progress shape=\"wheel\" label={formatnumber \"0%\"} \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"center\" color=\"#FFFFFF\" weight=\"normal\" underline=false italic=false} valueColor=\"#01b2a4\" barColor=\"rgba(255,255,255,0.25)\"\n| render",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| math \"median(percent_uptime)\"\n| progress shape=\"wheel\" label={formatnumber \"0%\"} \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"center\" color=\"#FFFFFF\" weight=\"normal\" underline=false italic=false} valueColor=\"#01b2a4\" barColor=\"rgba(255,255,255,0.25)\"\n| render",
                   "id": "element-853fe6b2-0eba-414a-8c9f-e6930bc53109",
                   "position": {
                     "angle": 0,
@@ -1181,7 +1181,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"# Add title here\"\n| render \n  css=\".canvasMarkdown h1 {\nfont-size: 48px !important;\ncolor: white !important;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"# Add title here\"\n| render \n  css=\".canvasMarkdown h1 {\nfont-size: 48px !important;\ncolor: white !important;\n}\"",
                   "id": "element-60fa5d2e-6d06-4e05-b465-29fdaa0c7933",
                   "position": {
                     "angle": 0,
@@ -1193,7 +1193,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| math \"mean(percent_uptime)\"\n| progress shape=\"wheel\" label={formatnumber \"0%\"} \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"center\" color=\"#FFFFFF\" weight=\"normal\" underline=false italic=false} valueColor=\"#01b2a4\" barColor=\"rgba(255,255,255,0.25)\"\n| render",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| math \"mean(percent_uptime)\"\n| progress shape=\"wheel\" label={formatnumber \"0%\"} \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"center\" color=\"#FFFFFF\" weight=\"normal\" underline=false italic=false} valueColor=\"#01b2a4\" barColor=\"rgba(255,255,255,0.25)\"\n| render",
                   "id": "element-a20eae11-2cee-4cee-b2f4-f5d4a56576ba",
                   "position": {
                     "angle": 0,
@@ -1205,7 +1205,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| math \"median(percent_uptime)\"\n| progress shape=\"wheel\" label={formatnumber \"0%\"} \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"center\" color=\"#FFFFFF\" weight=\"normal\" underline=false italic=false} valueColor=\"#01b2a4\" barColor=\"rgba(255,255,255,0.25)\" max=1\n| render",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| math \"median(percent_uptime)\"\n| progress shape=\"wheel\" label={formatnumber \"0%\"} \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"center\" color=\"#FFFFFF\" weight=\"normal\" underline=false italic=false} valueColor=\"#01b2a4\" barColor=\"rgba(255,255,255,0.25)\" max=1\n| render",
                   "id": "element-71d07e0f-5d99-471a-9864-99cb04839ef0",
                   "position": {
                     "angle": 0,
@@ -1241,7 +1241,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| pointseries x=\"time\" y=\"mean(price)\"\n| plot defaultStyle={seriesStyle lines=\"1\" fill=1 bars=\"0\" points=\"1\"} \n  palette={palette \"#1ea593\" \"#2b70f7\" \"#ce0060\" \"#38007e\" \"#fca5d3\" \"#f37020\" \"#e49e29\" \"#b0916f\" \"#7b000b\" \"#34130c\" gradient=false} \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=16 align=\"left\" color=\"#FFFFFF\" weight=\"normal\" underline=false italic=false}\n| render containerStyle={containerStyle backgroundColor=\"rgba(255,255,255,0)\"}",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| pointseries x=\"time\" y=\"mean(price)\"\n| plot defaultStyle={seriesStyle lines=\"1\" fill=1 bars=\"0\" points=\"1\"} \n  palette={palette \"#1ea593\" \"#2b70f7\" \"#ce0060\" \"#38007e\" \"#fca5d3\" \"#f37020\" \"#e49e29\" \"#b0916f\" \"#7b000b\" \"#34130c\" gradient=false} \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=16 align=\"left\" color=\"#FFFFFF\" weight=\"normal\" underline=false italic=false}\n| render containerStyle={containerStyle backgroundColor=\"rgba(255,255,255,0)\"}",
                   "id": "element-799537e1-7456-4ff0-80fa-d52f0de9a6fe",
                   "position": {
                     "angle": 0,
@@ -1253,7 +1253,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| pointseries x=\"time\" y=\"mean(price)\"\n| plot defaultStyle={seriesStyle lines=\"1\"} \n  palette={palette \"#1ea593\" \"#2b70f7\" \"#ce0060\" \"#38007e\" \"#fca5d3\" \"#f37020\" \"#e49e29\" \"#b0916f\" \"#7b000b\" \"#34130c\" gradient=false} \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=16 align=\"left\" color=\"#FFFFFF\" weight=\"normal\" underline=false italic=false}\n| render",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| pointseries x=\"time\" y=\"mean(price)\"\n| plot defaultStyle={seriesStyle lines=\"1\"} \n  palette={palette \"#1ea593\" \"#2b70f7\" \"#ce0060\" \"#38007e\" \"#fca5d3\" \"#f37020\" \"#e49e29\" \"#b0916f\" \"#7b000b\" \"#34130c\" gradient=false} \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=16 align=\"left\" color=\"#FFFFFF\" weight=\"normal\" underline=false italic=false}\n| render",
                   "id": "element-eece5bd6-d25b-4ffb-91ba-49a6c5d9f21b",
                   "position": {
                     "angle": 0,
@@ -1265,7 +1265,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| math \"median(percent_uptime)\"\n| progress shape=\"semicircle\" label={formatnumber \"0%\"} \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"center\" color=\"#FFFFFF\" weight=\"normal\" underline=false italic=false} valueColor=\"#01b2a4\" barColor=\"rgba(255,255,255,0.25)\"\n| render",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| math \"median(percent_uptime)\"\n| progress shape=\"semicircle\" label={formatnumber \"0%\"} \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"center\" color=\"#FFFFFF\" weight=\"normal\" underline=false italic=false} valueColor=\"#01b2a4\" barColor=\"rgba(255,255,255,0.25)\"\n| render",
                   "id": "element-7d5b43e6-c90f-4b02-b363-421ab4debd1f",
                   "position": {
                     "angle": 0,
@@ -1277,7 +1277,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| math \"mean(percent_uptime)\"\n| progress shape=\"semicircle\" label={formatnumber \"0%\"} \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"center\" color=\"#FFFFFF\" weight=\"normal\" underline=false italic=false} valueColor=\"#01b2a4\" barColor=\"rgba(255,255,255,0.25)\"\n| render",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| math \"mean(percent_uptime)\"\n| progress shape=\"semicircle\" label={formatnumber \"0%\"} \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"center\" color=\"#FFFFFF\" weight=\"normal\" underline=false italic=false} valueColor=\"#01b2a4\" barColor=\"rgba(255,255,255,0.25)\"\n| render",
                   "id": "element-561c433a-cbae-47dd-8082-9ddf627875ac",
                   "position": {
                     "angle": 0,
@@ -1289,7 +1289,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| math \"mean(percent_uptime)\"\n| progress shape=\"semicircle\" label={formatnumber \"0%\"} \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"center\" color=\"#FFFFFF\" weight=\"normal\" underline=false italic=false} valueColor=\"#01b2a4\" barColor=\"rgba(255,255,255,0.25)\"\n| render",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| math \"mean(percent_uptime)\"\n| progress shape=\"semicircle\" label={formatnumber \"0%\"} \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"center\" color=\"#FFFFFF\" weight=\"normal\" underline=false italic=false} valueColor=\"#01b2a4\" barColor=\"rgba(255,255,255,0.25)\"\n| render",
                   "id": "element-9f574a47-64cd-4c76-a07e-6a9d8a1a0e93",
                   "position": {
                     "angle": 0,
@@ -1557,7 +1557,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"### Total cost by project type\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render css=\"\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"### Total cost by project type\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render css=\"\"",
                   "id": "element-9f76c74a-28d9-4ceb-bd7d-b1b34999a11e",
                   "position": {
                     "angle": 0,
@@ -1569,7 +1569,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| pointseries x=\"size(project)\" y=\"project\" color=\"project\"\n| plot defaultStyle={seriesStyle bars=0.75 horizontalBars=true} legend=false seriesStyle={seriesStyle label=\"elasticsearch\" color=\"#882e72\"}\n  seriesStyle={seriesStyle label=\"machine-learning\" color=\"#d6c1de\"}\n  seriesStyle={seriesStyle label=\"apm\" color=\"#5289c7\"}\n  seriesStyle={seriesStyle label=\"kibana\" color=\"#7bafde\"}\n  seriesStyle={seriesStyle label=\"beats\" color=\"#b178a6\"}\n  seriesStyle={seriesStyle label=\"logstash\" color=\"#1965b0\"}\n  seriesStyle={seriesStyle label=\"x-pack\" color=\"#4eb265\"}\n  seriesStyle={seriesStyle label=\"swiftype\" color=\"#90c987\"}\n| render \n  css=\".flot-y-axis {\n left: 14px !important;\n}\n\n.flot-x-axis>div {\n top: 380px !important;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| pointseries x=\"size(project)\" y=\"project\" color=\"project\"\n| plot defaultStyle={seriesStyle bars=0.75 horizontalBars=true} legend=false seriesStyle={seriesStyle label=\"elasticsearch\" color=\"#882e72\"}\n  seriesStyle={seriesStyle label=\"machine-learning\" color=\"#d6c1de\"}\n  seriesStyle={seriesStyle label=\"apm\" color=\"#5289c7\"}\n  seriesStyle={seriesStyle label=\"kibana\" color=\"#7bafde\"}\n  seriesStyle={seriesStyle label=\"beats\" color=\"#b178a6\"}\n  seriesStyle={seriesStyle label=\"logstash\" color=\"#1965b0\"}\n  seriesStyle={seriesStyle label=\"x-pack\" color=\"#4eb265\"}\n  seriesStyle={seriesStyle label=\"swiftype\" color=\"#90c987\"}\n| render \n  css=\".flot-y-axis {\n left: 14px !important;\n}\n\n.flot-x-axis>div {\n top: 380px !important;\n}\"",
                   "id": "element-3b6345a5-16ea-4828-beec-425458e758a7",
                   "position": {
                     "angle": 0,
@@ -1581,7 +1581,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"### Number of projects by project type\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render css=\"\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"### Number of projects by project type\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render css=\"\"",
                   "id": "element-bdfb3910-5f65-4c24-9bbe-e62feb9e5e11",
                   "position": {
                     "angle": 0,
@@ -1593,7 +1593,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"##### Global cost distribution\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render css=\"\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"##### Global cost distribution\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render css=\"\"",
                   "id": "element-161aafca-ba71-43e1-b2a2-dab96a78d717",
                   "position": {
                     "angle": 0,
@@ -1605,7 +1605,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"##### Project type distribution\n\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render css=\"\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"##### Project type distribution\n\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render css=\"\"",
                   "id": "element-d0c43968-cdcd-4a25-980f-83d6f0adf68e",
                   "position": {
                     "angle": 0,
@@ -1617,7 +1617,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| pointseries x=\"project\" y=\"mean(percent_uptime)\" color=\"project\"\n| plot defaultStyle={seriesStyle bars=0.75} legend=false seriesStyle={seriesStyle label=\"elasticsearch\" color=\"#882e72\"}\n  seriesStyle={seriesStyle label=\"machine-learning\" color=\"#d6c1de\"}\n  seriesStyle={seriesStyle label=\"apm\" color=\"#5289c7\"}\n  seriesStyle={seriesStyle label=\"logstash\" color=\"#1965b0\"}\n  seriesStyle={seriesStyle label=\"x-pack\" color=\"#4eb265\"}\n  seriesStyle={seriesStyle label=\"kibana\" color=\"#7bafde\"}\n  seriesStyle={seriesStyle label=\"swiftype\" color=\"#90c987\"}\n  seriesStyle={seriesStyle label=\"beats\" color=\"#b178a6\"}\n| render css=\".flot-x-axis>div {\n top: 258px !important;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| pointseries x=\"project\" y=\"mean(percent_uptime)\" color=\"project\"\n| plot defaultStyle={seriesStyle bars=0.75} legend=false seriesStyle={seriesStyle label=\"elasticsearch\" color=\"#882e72\"}\n  seriesStyle={seriesStyle label=\"machine-learning\" color=\"#d6c1de\"}\n  seriesStyle={seriesStyle label=\"apm\" color=\"#5289c7\"}\n  seriesStyle={seriesStyle label=\"logstash\" color=\"#1965b0\"}\n  seriesStyle={seriesStyle label=\"x-pack\" color=\"#4eb265\"}\n  seriesStyle={seriesStyle label=\"kibana\" color=\"#7bafde\"}\n  seriesStyle={seriesStyle label=\"swiftype\" color=\"#90c987\"}\n  seriesStyle={seriesStyle label=\"beats\" color=\"#b178a6\"}\n| render css=\".flot-x-axis>div {\n top: 258px !important;\n}\"",
                   "id": "element-ea1f3942-066f-4032-a9d0-125072d353d9",
                   "position": {
                     "angle": 0,
@@ -1629,7 +1629,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"### Average uptime\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render css=\"\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"### Average uptime\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render css=\"\"",
                   "id": "element-5a891ee6-5cb8-4b8a-9c01-302ed42e6a8f",
                   "position": {
                     "angle": 0,
@@ -1641,7 +1641,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"##### Global average uptime\n\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render css=\"\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"##### Global average uptime\n\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render css=\"\"",
                   "id": "element-09713339-044e-4084-b4e4-553dbc939d8a",
                   "position": {
                     "angle": 0,
@@ -1653,7 +1653,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| math \"mean(percent_uptime)\"\n| progress shape=\"wheel\" label={formatnumber \"0%\"} \n  font={font size=24 family=\"'Open Sans', Helvetica, Arial, sans-serif\" color=\"#000000\" align=\"center\"} valueColor=\"#4eb265\"\n| render containerStyle={containerStyle}",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| math \"mean(percent_uptime)\"\n| progress shape=\"wheel\" label={formatnumber \"0%\"} \n  font={font size=24 family=\"'Open Sans', Helvetica, Arial, sans-serif\" color=\"#000000\" align=\"center\"} valueColor=\"#4eb265\"\n| render containerStyle={containerStyle}",
                   "id": "element-bd806eff-400b-4816-b728-b28a0390352d",
                   "position": {
                     "angle": 0,
@@ -1665,7 +1665,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"### Average price by project type\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render css=\"\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"### Average price by project type\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render css=\"\"",
                   "id": "element-ccd76ddc-2c03-458d-a0eb-09fcd1e2455f",
                   "position": {
                     "angle": 0,
@@ -1677,7 +1677,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"### Raw data\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render css=\"\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"### Raw data\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render css=\"\"",
                   "id": "element-ef88de44-1629-4a66-abc5-3764b03342e5",
                   "position": {
                     "angle": 0,
@@ -1689,7 +1689,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| pointseries color=\"project\" size=\"sum(cost)\"\n| pie hole=50 labels=false legend=\"ne\"\n| render \n  css=\"table {\n  right: -16px !important;\n}\n\n\ntr {\n height: 36px;\n}\n\n.legendColorBox div {\n margin-right: 7px;\n}\n\n.legendColorBox div div {\n width: 24px !important;\n height: 24px !important;\nborder-width: 4px !important;\n}\n\ntd {\n vertical-align: middle;\n}\" containerStyle={containerStyle overflow=\"visible\"}",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| pointseries color=\"project\" size=\"sum(cost)\"\n| pie hole=50 labels=false legend=\"ne\"\n| render \n  css=\"table {\n  right: -16px !important;\n}\n\n\ntr {\n height: 36px;\n}\n\n.legendColorBox div {\n margin-right: 7px;\n}\n\n.legendColorBox div div {\n width: 24px !important;\n height: 24px !important;\nborder-width: 4px !important;\n}\n\ntd {\n vertical-align: middle;\n}\" containerStyle={containerStyle overflow=\"visible\"}",
                   "id": "element-1dbb5050-7b7c-4dd2-ab83-95913d15cc91",
                   "position": {
                     "angle": 0,
@@ -1701,7 +1701,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| table\n| render containerStyle={containerStyle overflow=\"hidden\"}",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| table\n| render containerStyle={containerStyle overflow=\"hidden\"}",
                   "id": "element-8ca58ae7-2091-491f-996f-4256dfd5f4e1",
                   "position": {
                     "angle": 0,
@@ -1713,7 +1713,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| pointseries x=\"time\" y=\"mean(price)\" color=\"project\"\n| plot defaultStyle={seriesStyle lines=3} \n  palette={palette \"#882E72\" \"#B178A6\" \"#D6C1DE\" \"#1965B0\" \"#5289C7\" \"#7BAFDE\" \"#4EB265\" \"#90C987\" \"#CAE0AB\" \"#F7EE55\" \"#F6C141\" \"#F1932D\" \"#E8601C\" \"#DC050C\" gradient=false} legend=\"ne\" seriesStyle={seriesStyle label=\"elasticsearch\" color=\"#882e72\"}\n  seriesStyle={seriesStyle color=\"#b178a6\" label=\"beats\"}\n  seriesStyle={seriesStyle label=\"machine-learning\" color=\"#d6c1de\"}\n  seriesStyle={seriesStyle label=\"logstash\" color=\"#1965b0\"}\n  seriesStyle={seriesStyle label=\"apm\" color=\"#5289c7\"}\n  seriesStyle={seriesStyle label=\"kibana\" color=\"#7bafde\"}\n  seriesStyle={seriesStyle label=\"x-pack\" color=\"#4eb265\"}\n  seriesStyle={seriesStyle label=\"swiftype\" color=\"#90c987\"}\n| render containerStyle={containerStyle overflow=\"visible\"} \n  css=\".legend table {\n top: 266px !important;\n width: 100%;\n left: 80px;\n}\n\n.legend td {\nvertical-align: middle;\n}\n\ntr {\n padding-left: 14px;\n}\n\n.legendLabel {\n padding-left: 4px;\n}\n\ntbody {\n display: flex;\n}\n\n.flot-x-axis {\n top: 16px !important;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| pointseries x=\"time\" y=\"mean(price)\" color=\"project\"\n| plot defaultStyle={seriesStyle lines=3} \n  palette={palette \"#882E72\" \"#B178A6\" \"#D6C1DE\" \"#1965B0\" \"#5289C7\" \"#7BAFDE\" \"#4EB265\" \"#90C987\" \"#CAE0AB\" \"#F7EE55\" \"#F6C141\" \"#F1932D\" \"#E8601C\" \"#DC050C\" gradient=false} legend=\"ne\" seriesStyle={seriesStyle label=\"elasticsearch\" color=\"#882e72\"}\n  seriesStyle={seriesStyle color=\"#b178a6\" label=\"beats\"}\n  seriesStyle={seriesStyle label=\"machine-learning\" color=\"#d6c1de\"}\n  seriesStyle={seriesStyle label=\"logstash\" color=\"#1965b0\"}\n  seriesStyle={seriesStyle label=\"apm\" color=\"#5289c7\"}\n  seriesStyle={seriesStyle label=\"kibana\" color=\"#7bafde\"}\n  seriesStyle={seriesStyle label=\"x-pack\" color=\"#4eb265\"}\n  seriesStyle={seriesStyle label=\"swiftype\" color=\"#90c987\"}\n| render containerStyle={containerStyle overflow=\"visible\"} \n  css=\".legend table {\n top: 266px !important;\n width: 100%;\n left: 80px;\n}\n\n.legend td {\nvertical-align: middle;\n}\n\ntr {\n padding-left: 14px;\n}\n\n.legendLabel {\n padding-left: 4px;\n}\n\ntbody {\n display: flex;\n}\n\n.flot-x-axis {\n top: 16px !important;\n}\"",
                   "id": "element-64db6690-dd39-4591-973d-d880e068de74",
                   "position": {
                     "angle": 0,
@@ -1738,7 +1738,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"#### Time period\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#FFFFFF\" weight=\"normal\" underline=false italic=false}\n| render css=\"h4 {\n font-weight: 400;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"#### Time period\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#FFFFFF\" weight=\"normal\" underline=false italic=false}\n| render css=\"h4 {\n font-weight: 400;\n}\"",
                   "id": "element-bf025bbc-7109-45a1-b954-bab851bc80df",
                   "position": {
                     "angle": 0,
@@ -1750,7 +1750,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"##### Average uptime by project type\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render css=\"\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"##### Average uptime by project type\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render css=\"\"",
                   "id": "element-120f58cd-3ef0-40b6-99fd-32cc1480b9aa",
                   "position": {
                     "angle": 0,
@@ -1762,7 +1762,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"### Total cost by project type\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render css=\"\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"### Total cost by project type\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render css=\"\"",
                   "id": "element-c30023e3-5df6-4b54-8286-544811ce7b6a",
                   "position": {
                     "angle": 0,
@@ -1774,7 +1774,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"### Average price over time\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render css=\"\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"### Average price over time\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render css=\"\"",
                   "id": "element-137409de-6f24-4234-9c5a-024054d0632a",
                   "position": {
                     "angle": 0,
@@ -1786,7 +1786,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"##### Price trend over time\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render css=\"\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"##### Price trend over time\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render css=\"\"",
                   "id": "element-b90b71f0-139b-419f-b43b-b2057abf777b",
                   "position": {
                     "angle": 0,
@@ -1798,7 +1798,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"##### State distribution\n\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render css=\"\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"##### State distribution\n\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render css=\"\"",
                   "id": "element-a9b94f64-5336-4e39-ac69-5c9dacfbe129",
                   "position": {
                     "angle": 0,
@@ -1810,7 +1810,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"## Monitoring Elastic projects\" \"\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#FFFFFF\" weight=\"bold\" underline=false italic=false}\n| render css=\".canvasRenderEl {\n\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"## Monitoring Elastic projects\" \"\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#FFFFFF\" weight=\"bold\" underline=false italic=false}\n| render css=\".canvasRenderEl {\n\n}\"",
                   "id": "element-8777dd63-fbe7-446f-a23a-74cf55dc0a7c",
                   "position": {
                     "angle": 0,
@@ -1834,7 +1834,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| pointseries x=\"sum(cost)\" y=\"project\" color=\"state\"\n| plot defaultStyle={seriesStyle bars=0.75 horizontalBars=true} legend=\"ne\"\n| render containerStyle={containerStyle overflow=\"visible\"} \n  css=\".legend table {\n top: 100px !important;\n right: -46px !important;\n}\n\n.legendColorBox>div{\nmargin-right: 3px !important;\n}\n\n.legend td {\n\nvertical-align: middle;\n}\n\n.legend tr {\n height: 20px;\n}\n\n.flot-x-axis {\n top: -15px !important;\n}\n\n.flot-y-axis {\n left: 10px !important;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| pointseries x=\"sum(cost)\" y=\"project\" color=\"state\"\n| plot defaultStyle={seriesStyle bars=0.75 horizontalBars=true} legend=\"ne\"\n| render containerStyle={containerStyle overflow=\"visible\"} \n  css=\".legend table {\n top: 100px !important;\n right: -46px !important;\n}\n\n.legendColorBox>div{\nmargin-right: 3px !important;\n}\n\n.legend td {\n\nvertical-align: middle;\n}\n\n.legend tr {\n height: 20px;\n}\n\n.flot-x-axis {\n top: -15px !important;\n}\n\n.flot-y-axis {\n left: 10px !important;\n}\"",
                   "id": "element-896f3043-4036-45f4-9e84-8aa6d870f215",
                   "position": {
                     "angle": 0,
@@ -1846,7 +1846,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| pointseries x=\"time\" y=\"mean(price)\"\n| plot defaultStyle={seriesStyle bars=0.75} legend=false \n  palette={palette \"#882E72\" \"#B178A6\" \"#D6C1DE\" \"#1965B0\" \"#5289C7\" \"#7BAFDE\" \"#4EB265\" \"#90C987\" \"#CAE0AB\" \"#F7EE55\" \"#F6C141\" \"#F1932D\" \"#E8601C\" \"#DC050C\" gradient=false}\n| render \n  css=\".flot-x-axis {\n top: -15px !important;\n}\n\n.flot-y-axis {\n left: 10px !important;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| pointseries x=\"time\" y=\"mean(price)\"\n| plot defaultStyle={seriesStyle bars=0.75} legend=false \n  palette={palette \"#882E72\" \"#B178A6\" \"#D6C1DE\" \"#1965B0\" \"#5289C7\" \"#7BAFDE\" \"#4EB265\" \"#90C987\" \"#CAE0AB\" \"#F7EE55\" \"#F6C141\" \"#F1932D\" \"#E8601C\" \"#DC050C\" gradient=false}\n| render \n  css=\".flot-x-axis {\n top: -15px !important;\n}\n\n.flot-y-axis {\n left: 10px !important;\n}\"",
                   "id": "element-13888369-9dac-4948-90b1-0ae42fa8fa53",
                   "position": {
                     "angle": 0,
@@ -2034,7 +2034,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \n  \"# Cover Title Goes Here\n\nShort description or intro text about document/report for the cover. \nEdit the Markdown content in the side panel.\n\n##### Firstname Lastname\" \n  font={font family=\"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" size=24 align=\"left\" color=\"#FFFFFF\" weight=\"normal\" underline=false italic=false}\n| render \n  css=\".canvasMarkdown h1, .canvasMarkdown p {\ncolor: #EFEFEF;\n}\n\n.canvasMarkdown h5 {\ncolor: #FFFFFF;\nfont-weight: 300;\nfont-size: .75em;\nmargin-top: 2em;\nfont-style: italic;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \n  \"# Cover Title Goes Here\n\nShort description or intro text about document/report for the cover. \nEdit the Markdown content in the side panel.\n\n##### Firstname Lastname\" \n  font={font family=\"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" size=24 align=\"left\" color=\"#FFFFFF\" weight=\"normal\" underline=false italic=false}\n| render \n  css=\".canvasMarkdown h1, .canvasMarkdown p {\ncolor: #EFEFEF;\n}\n\n.canvasMarkdown h5 {\ncolor: #FFFFFF;\nfont-weight: 300;\nfont-size: .75em;\nmargin-top: 2em;\nfont-style: italic;\n}\"",
                   "id": "element-5f3133dd-f8a9-4eec-9811-4ebb6085b1b6",
                   "position": {
                     "angle": 0,
@@ -2129,7 +2129,7 @@
             {
               "elements": [
                 {
-                  "expression": "filters\n| demodata\n| markdown \"## Table of contents\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#1785b0\" weight=\"normal\" underline=false italic=false}\n| render",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"## Table of contents\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#1785b0\" weight=\"normal\" underline=false italic=false}\n| render",
                   "id": "element-96c0d28d-18ed-4b9f-80cd-3d277e722e88",
                   "position": {
                     "angle": 0,
@@ -2141,7 +2141,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \n  \"- Section with Markdown Text Formatting\n- Section with Live Charts\n- Section with Tabular Data\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=18 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render \n  css=\".canvasRenderEl ul {\npadding-left: 0;\n}\n.canvasRenderEl li {\nlist-style: none;\nline-height: 2em;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \n  \"- Section with Markdown Text Formatting\n- Section with Live Charts\n- Section with Tabular Data\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=18 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render \n  css=\".canvasRenderEl ul {\npadding-left: 0;\n}\n.canvasRenderEl li {\nlist-style: none;\nline-height: 2em;\n}\"",
                   "id": "element-41019499-8469-4432-aa0a-00975d592781",
                   "position": {
                     "angle": 0,
@@ -2153,7 +2153,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"- 3\n- 5\n- 8\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=18 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render \n  css=\".canvasRenderEl ul {\npadding-left: 0;\n}\n.canvasRenderEl li {\nlist-style: none;\nline-height: 2em;\ntext-align: right;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"- 3\n- 5\n- 8\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=18 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render \n  css=\".canvasRenderEl ul {\npadding-left: 0;\n}\n.canvasRenderEl li {\nlist-style: none;\nline-height: 2em;\ntext-align: right;\n}\"",
                   "id": "element-6418df11-35dc-4402-8153-4d15097b256a",
                   "position": {
                     "angle": 0,
@@ -2165,7 +2165,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"- 2\n- yoursite.com\n- © 2019 Company Name Here. All Rights Reserved.     \"\n| render \n  css=\".canvasMarkdown ul {\npadding-left: 0;\n}\n\n.canvasMarkdown li {\nfont-size: 12px;\ncolor: #A4A4A4;\nlist-style: none;\ndisplay: inline-block;\nmargin-right: 1em;\npadding-right: 1em;\nborder-right: 1px solid #A4A4A4;\n}\n\n.canvasMarkdown li:last-child {\nborder-right: none;\npadding-right: 0;\nmargin-right: 0;\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"- 2\n- yoursite.com\n- © 2019 Company Name Here. All Rights Reserved.     \"\n| render \n  css=\".canvasMarkdown ul {\npadding-left: 0;\n}\n\n.canvasMarkdown li {\nfont-size: 12px;\ncolor: #A4A4A4;\nlist-style: none;\ndisplay: inline-block;\nmargin-right: 1em;\npadding-right: 1em;\nborder-right: 1px solid #A4A4A4;\n}\n\n.canvasMarkdown li:last-child {\nborder-right: none;\npadding-right: 0;\nmargin-right: 0;\"",
                   "id": "element-06f152f7-e9b2-4535-8d3f-9b5c170a5bbc",
                   "position": {
                     "angle": 0,
@@ -2201,7 +2201,7 @@
             {
               "elements": [
                 {
-                  "expression": "filters\n| demodata\n| markdown \"## Section 1\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#1785b0\" weight=\"normal\" underline=false italic=false}\n| render",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"## Section 1\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#1785b0\" weight=\"normal\" underline=false italic=false}\n| render",
                   "id": "element-3cc13dcb-b7b3-4315-9cbb-76ceb9efe435",
                   "position": {
                     "angle": 0,
@@ -2213,7 +2213,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"# Section with Markdown Text Formatting\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=18 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render \n  css=\".canvasRenderEl ul {\npadding-left: 0;\n}\n.canvasRenderEl li {\nlist-style: none;\nline-height: 2em;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"# Section with Markdown Text Formatting\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=18 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render \n  css=\".canvasRenderEl ul {\npadding-left: 0;\n}\n.canvasRenderEl li {\nlist-style: none;\nline-height: 2em;\n}\"",
                   "id": "element-b85c5632-e18d-49eb-9f63-85344630f3cc",
                   "position": {
                     "angle": 0,
@@ -2225,7 +2225,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"- 3\n- yoursite.com\n- © 2019 Company Name Here. All Rights Reserved.     \"\n| render \n  css=\".canvasMarkdown ul {\npadding-left: 0;\n}\n\n.canvasMarkdown li {\nfont-size: 12px;\ncolor: #A4A4A4;\nlist-style: none;\ndisplay: inline-block;\nmargin-right: 1em;\npadding-right: 1em;\nborder-right: 1px solid #A4A4A4;\n}\n\n.canvasMarkdown li:last-child {\nborder-right: none;\npadding-right: 0;\nmargin-right: 0;\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"- 3\n- yoursite.com\n- © 2019 Company Name Here. All Rights Reserved.     \"\n| render \n  css=\".canvasMarkdown ul {\npadding-left: 0;\n}\n\n.canvasMarkdown li {\nfont-size: 12px;\ncolor: #A4A4A4;\nlist-style: none;\ndisplay: inline-block;\nmargin-right: 1em;\npadding-right: 1em;\nborder-right: 1px solid #A4A4A4;\n}\n\n.canvasMarkdown li:last-child {\nborder-right: none;\npadding-right: 0;\nmargin-right: 0;\"",
                   "id": "element-e29deafe-f72a-4b23-ae62-5e78688f2f82",
                   "position": {
                     "angle": 0,
@@ -2261,7 +2261,7 @@
             {
               "elements": [
                 {
-                  "expression": "filters\n| demodata\n| markdown \n  \"### Subsection heading 3 on one line\n\nLorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. \n\n1. Duis autem vel eum iriure dolor in\n2. Hendrerit in vulputate velit esse\n3. Consequat, vel illum dolore\n\n### Subsection heading 3 wraps to a second line when it is long\n\nOlypian quarrels et gorilla congolium sic ad nauseum. Souvlaki ignitus carborundum e pluribus unum. Defacto lingo est igpay atinlay. Marquee selectus non provisio incongruous feline nolo contendre. Gratuitous octopus niacin.\n\nParagraph with a link to [elastic.co](https://www.elastic.co).\"\n| render",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \n  \"### Subsection heading 3 on one line\n\nLorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. \n\n1. Duis autem vel eum iriure dolor in\n2. Hendrerit in vulputate velit esse\n3. Consequat, vel illum dolore\n\n### Subsection heading 3 wraps to a second line when it is long\n\nOlypian quarrels et gorilla congolium sic ad nauseum. Souvlaki ignitus carborundum e pluribus unum. Defacto lingo est igpay atinlay. Marquee selectus non provisio incongruous feline nolo contendre. Gratuitous octopus niacin.\n\nParagraph with a link to [elastic.co](https://www.elastic.co).\"\n| render",
                   "id": "element-87858893-f5a3-4bf2-91b9-e06fd58ab52d",
                   "position": {
                     "angle": 0,
@@ -2273,7 +2273,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"- 4\n- yoursite.com\n- © 2019 Company Name Here. All Rights Reserved.     \"\n| render \n  css=\".canvasMarkdown ul {\npadding-left: 0;\n}\n\n.canvasMarkdown li {\nfont-size: 12px;\ncolor: #A4A4A4;\nlist-style: none;\ndisplay: inline-block;\nmargin-right: 1em;\npadding-right: 1em;\nborder-right: 1px solid #A4A4A4;\n}\n\n.canvasMarkdown li:last-child {\nborder-right: none;\npadding-right: 0;\nmargin-right: 0;\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"- 4\n- yoursite.com\n- © 2019 Company Name Here. All Rights Reserved.     \"\n| render \n  css=\".canvasMarkdown ul {\npadding-left: 0;\n}\n\n.canvasMarkdown li {\nfont-size: 12px;\ncolor: #A4A4A4;\nlist-style: none;\ndisplay: inline-block;\nmargin-right: 1em;\npadding-right: 1em;\nborder-right: 1px solid #A4A4A4;\n}\n\n.canvasMarkdown li:last-child {\nborder-right: none;\npadding-right: 0;\nmargin-right: 0;\"",
                   "id": "element-86ae0363-0a32-4403-8ddb-5bb26762ef0c",
                   "position": {
                     "angle": 0,
@@ -2309,7 +2309,7 @@
             {
               "elements": [
                 {
-                  "expression": "filters\n| demodata\n| markdown \"## Section II\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#1785b0\" weight=\"normal\" underline=false italic=false}\n| render",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"## Section II\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#1785b0\" weight=\"normal\" underline=false italic=false}\n| render",
                   "id": "element-102de257-de30-4192-9c16-84a373ed50f2",
                   "position": {
                     "angle": 0,
@@ -2321,7 +2321,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"# Section with Live Data Elements\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=18 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render \n  css=\".canvasRenderEl ul {\npadding-left: 0;\n}\n.canvasRenderEl li {\nlist-style: none;\nline-height: 2em;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"# Section with Live Data Elements\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=18 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render \n  css=\".canvasRenderEl ul {\npadding-left: 0;\n}\n.canvasRenderEl li {\nlist-style: none;\nline-height: 2em;\n}\"",
                   "id": "element-01195269-250f-468d-82bf-958187aed0d9",
                   "position": {
                     "angle": 0,
@@ -2333,7 +2333,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"- 5\n- yoursite.com\n- © 2019 Company Name Here. All Rights Reserved.     \"\n| render \n  css=\".canvasMarkdown ul {\npadding-left: 0;\n}\n\n.canvasMarkdown li {\nfont-size: 12px;\ncolor: #A4A4A4;\nlist-style: none;\ndisplay: inline-block;\nmargin-right: 1em;\npadding-right: 1em;\nborder-right: 1px solid #A4A4A4;\n}\n\n.canvasMarkdown li:last-child {\nborder-right: none;\npadding-right: 0;\nmargin-right: 0;\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"- 5\n- yoursite.com\n- © 2019 Company Name Here. All Rights Reserved.     \"\n| render \n  css=\".canvasMarkdown ul {\npadding-left: 0;\n}\n\n.canvasMarkdown li {\nfont-size: 12px;\ncolor: #A4A4A4;\nlist-style: none;\ndisplay: inline-block;\nmargin-right: 1em;\npadding-right: 1em;\nborder-right: 1px solid #A4A4A4;\n}\n\n.canvasMarkdown li:last-child {\nborder-right: none;\npadding-right: 0;\nmargin-right: 0;\"",
                   "id": "element-03b1e0ca-2359-412b-9ae8-2ae809f812a9",
                   "position": {
                     "angle": 0,
@@ -2369,7 +2369,7 @@
             {
               "elements": [
                 {
-                  "expression": "filters\n| demodata\n| markdown \n  \"### Subsection with live data elements\n\nLorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#1785b0\" weight=\"normal\" underline=false italic=false}\n| render",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \n  \"### Subsection with live data elements\n\nLorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#1785b0\" weight=\"normal\" underline=false italic=false}\n| render",
                   "id": "element-9de125f7-08d1-4f16-90ba-3e0c47880902",
                   "position": {
                     "angle": 0,
@@ -2381,7 +2381,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"- 6\n- yoursite.com\n- © 2019 Company Name Here. All Rights Reserved.     \"\n| render \n  css=\".canvasMarkdown ul {\npadding-left: 0;\n}\n\n.canvasMarkdown li {\nfont-size: 12px;\ncolor: #A4A4A4;\nlist-style: none;\ndisplay: inline-block;\nmargin-right: 1em;\npadding-right: 1em;\nborder-right: 1px solid #A4A4A4;\n}\n\n.canvasMarkdown li:last-child {\nborder-right: none;\npadding-right: 0;\nmargin-right: 0;\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"- 6\n- yoursite.com\n- © 2019 Company Name Here. All Rights Reserved.     \"\n| render \n  css=\".canvasMarkdown ul {\npadding-left: 0;\n}\n\n.canvasMarkdown li {\nfont-size: 12px;\ncolor: #A4A4A4;\nlist-style: none;\ndisplay: inline-block;\nmargin-right: 1em;\npadding-right: 1em;\nborder-right: 1px solid #A4A4A4;\n}\n\n.canvasMarkdown li:last-child {\nborder-right: none;\npadding-right: 0;\nmargin-right: 0;\"",
                   "id": "element-827e63a5-2f89-4eb1-95e1-9ac492bce7d9",
                   "position": {
                     "angle": 0,
@@ -2405,7 +2405,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| pointseries x=\"size(cost)\" y=\"project\" color=\"project\"\n| plot defaultStyle={seriesStyle bars=0.75 horizontalBars=true} legend=false palette={palette \"#7ECAE3\" \"#003A4D\" gradient=true} \n  font={font family=\"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" size=16 align=\"left\" color=\"#444444\" weight=\"normal\" underline=false italic=false}\n| render",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| pointseries x=\"size(cost)\" y=\"project\" color=\"project\"\n| plot defaultStyle={seriesStyle bars=0.75 horizontalBars=true} legend=false palette={palette \"#7ECAE3\" \"#003A4D\" gradient=true} \n  font={font family=\"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" size=16 align=\"left\" color=\"#444444\" weight=\"normal\" underline=false italic=false}\n| render",
                   "id": "element-1063e298-6ee6-43cd-b145-36976aa277c8",
                   "position": {
                     "angle": 0,
@@ -2417,7 +2417,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"#### Chart title goes here\"\n| render css=\".canvasMarkdown h4 {\ntext-align: center;\ncolor: #1785b0;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"#### Chart title goes here\"\n| render css=\".canvasMarkdown h4 {\ntext-align: center;\ncolor: #1785b0;\n}\"",
                   "id": "element-5e2cde8c-a8c5-40bb-b894-2f006add7b87",
                   "position": {
                     "angle": 0,
@@ -2441,7 +2441,7 @@
             {
               "elements": [
                 {
-                  "expression": "filters\n| demodata\n| markdown \n  \"### Subsection with live data elements\n\nLorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#1785b0\" weight=\"normal\" underline=false italic=false}\n| render",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \n  \"### Subsection with live data elements\n\nLorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#1785b0\" weight=\"normal\" underline=false italic=false}\n| render",
                   "id": "element-5170c96f-7a48-4c93-a0a0-3d4fd197011c",
                   "position": {
                     "angle": 0,
@@ -2453,7 +2453,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"- 7\n- yoursite.com\n- © 2019 Company Name Here. All Rights Reserved.     \"\n| render \n  css=\".canvasMarkdown ul {\npadding-left: 0;\n}\n\n.canvasMarkdown li {\nfont-size: 12px;\ncolor: #A4A4A4;\nlist-style: none;\ndisplay: inline-block;\nmargin-right: 1em;\npadding-right: 1em;\nborder-right: 1px solid #A4A4A4;\n}\n\n.canvasMarkdown li:last-child {\nborder-right: none;\npadding-right: 0;\nmargin-right: 0;\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"- 7\n- yoursite.com\n- © 2019 Company Name Here. All Rights Reserved.     \"\n| render \n  css=\".canvasMarkdown ul {\npadding-left: 0;\n}\n\n.canvasMarkdown li {\nfont-size: 12px;\ncolor: #A4A4A4;\nlist-style: none;\ndisplay: inline-block;\nmargin-right: 1em;\npadding-right: 1em;\nborder-right: 1px solid #A4A4A4;\n}\n\n.canvasMarkdown li:last-child {\nborder-right: none;\npadding-right: 0;\nmargin-right: 0;\"",
                   "id": "element-34f5d4a0-d94d-4fe7-a0a3-586e3db8fbba",
                   "position": {
                     "angle": 0,
@@ -2477,7 +2477,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"#### Chart title goes here\"\n| render css=\".canvasMarkdown h4 {\ntext-align: center;\ncolor: #1785b0;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"#### Chart title goes here\"\n| render css=\".canvasMarkdown h4 {\ntext-align: center;\ncolor: #1785b0;\n}\"",
                   "id": "element-c872b242-86d9-4783-ad82-6b6479398f0e",
                   "position": {
                     "angle": 0,
@@ -2489,7 +2489,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| pointseries color=\"project\" size=\"price\"\n| pie hole=60 labels=true legend=false palette={palette \"#7ECAE3\" \"#003A4D\" gradient=true} \n  font={font family=\"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" size=16 align=\"center\" color=\"#444444\" weight=\"normal\" underline=false italic=false}\n| render",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| pointseries color=\"project\" size=\"price\"\n| pie hole=60 labels=true legend=false palette={palette \"#7ECAE3\" \"#003A4D\" gradient=true} \n  font={font family=\"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" size=16 align=\"center\" color=\"#444444\" weight=\"normal\" underline=false italic=false}\n| render",
                   "id": "element-19220eff-ba36-4d45-948f-70fd8fbd9334",
                   "position": {
                     "angle": 0,
@@ -2513,7 +2513,7 @@
             {
               "elements": [
                 {
-                  "expression": "filters\n| demodata\n| markdown \"## Section III\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#1785b0\" weight=\"normal\" underline=false italic=false}\n| render",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"## Section III\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#1785b0\" weight=\"normal\" underline=false italic=false}\n| render",
                   "id": "element-29145513-b7f7-4e9f-a5af-bd9fad4bc7a1",
                   "position": {
                     "angle": 0,
@@ -2525,7 +2525,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"# Section with Tabular Data\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=18 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render \n  css=\".canvasRenderEl ul {\npadding-left: 0;\n}\n.canvasRenderEl li {\nlist-style: none;\nline-height: 2em;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"# Section with Tabular Data\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=18 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render \n  css=\".canvasRenderEl ul {\npadding-left: 0;\n}\n.canvasRenderEl li {\nlist-style: none;\nline-height: 2em;\n}\"",
                   "id": "element-08fd0534-acbb-4727-9e35-f9ac85cc0092",
                   "position": {
                     "angle": 0,
@@ -2537,7 +2537,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"- 8\n- yoursite.com\n- © 2019 Company Name Here. All Rights Reserved.     \"\n| render \n  css=\".canvasMarkdown ul {\npadding-left: 0;\n}\n\n.canvasMarkdown li {\nfont-size: 12px;\ncolor: #A4A4A4;\nlist-style: none;\ndisplay: inline-block;\nmargin-right: 1em;\npadding-right: 1em;\nborder-right: 1px solid #A4A4A4;\n}\n\n.canvasMarkdown li:last-child {\nborder-right: none;\npadding-right: 0;\nmargin-right: 0;\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"- 8\n- yoursite.com\n- © 2019 Company Name Here. All Rights Reserved.     \"\n| render \n  css=\".canvasMarkdown ul {\npadding-left: 0;\n}\n\n.canvasMarkdown li {\nfont-size: 12px;\ncolor: #A4A4A4;\nlist-style: none;\ndisplay: inline-block;\nmargin-right: 1em;\npadding-right: 1em;\nborder-right: 1px solid #A4A4A4;\n}\n\n.canvasMarkdown li:last-child {\nborder-right: none;\npadding-right: 0;\nmargin-right: 0;\"",
                   "id": "element-4d285ac4-9c49-4fdf-adae-e7953ac1c804",
                   "position": {
                     "angle": 0,
@@ -2573,7 +2573,7 @@
             {
               "elements": [
                 {
-                  "expression": "filters\n| demodata\n| tail 1\n| markdown \n  \"### Table with live data\n\nSelect a project above to change the scope of this data.\n\n| User        | Created           | Age  |\n| ------------- |:-------------| -------------:|\n| \" {getCell \"username\"} \"      | \" {getCell \"time\" | formatDate \"MMMM DD YYYY\"}\n  \" | \" {getCell \"age\"}\n  \"|\n\n\n### Table with static data\n\nLorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.\n\n| Heading 1        | Heading 2           |\n| ------------- |:-------------| -------------:|\n| First item name      | Cell with text |\n| Second item name      | Another cell with text      \"\n| render css=\".canvasMarkdown table {\ndisplay: table;\nwidth: 100%;\n}\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| tail 1\n| markdown \n  \"### Table with live data\n\nSelect a project above to change the scope of this data.\n\n| User        | Created           | Age  |\n| ------------- |:-------------| -------------:|\n| \" {getCell \"username\"} \"      | \" {getCell \"time\" | formatDate \"MMMM DD YYYY\"}\n  \" | \" {getCell \"age\"}\n  \"|\n\n\n### Table with static data\n\nLorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.\n\n| Heading 1        | Heading 2           |\n| ------------- |:-------------| -------------:|\n| First item name      | Cell with text |\n| Second item name      | Another cell with text      \"\n| render css=\".canvasMarkdown table {\ndisplay: table;\nwidth: 100%;\n}\"",
                   "id": "element-94f720f7-a8e9-499a-9bf9-5b91c5b03e90",
                   "position": {
                     "angle": 0,
@@ -2585,7 +2585,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"- 9\n- yoursite.com\n- © 2019 Company Name Here. All Rights Reserved.     \"\n| render \n  css=\".canvasMarkdown ul {\npadding-left: 0;\n}\n\n.canvasMarkdown li {\nfont-size: 12px;\ncolor: #A4A4A4;\nlist-style: none;\ndisplay: inline-block;\nmargin-right: 1em;\npadding-right: 1em;\nborder-right: 1px solid #A4A4A4;\n}\n\n.canvasMarkdown li:last-child {\nborder-right: none;\npadding-right: 0;\nmargin-right: 0;\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"- 9\n- yoursite.com\n- © 2019 Company Name Here. All Rights Reserved.     \"\n| render \n  css=\".canvasMarkdown ul {\npadding-left: 0;\n}\n\n.canvasMarkdown li {\nfont-size: 12px;\ncolor: #A4A4A4;\nlist-style: none;\ndisplay: inline-block;\nmargin-right: 1em;\npadding-right: 1em;\nborder-right: 1px solid #A4A4A4;\n}\n\n.canvasMarkdown li:last-child {\nborder-right: none;\npadding-right: 0;\nmargin-right: 0;\"",
                   "id": "element-66599442-7b94-4573-b196-367896a0c551",
                   "position": {
                     "angle": 0,
@@ -2646,7 +2646,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \n  \"### Conclusion\n\nLorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. \n\n- Duis autem vel eum iriure dolor in\n- Hendrerit in vulputate velit esse\n- Consequat, vel illum dolore\"\n| render",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \n  \"### Conclusion\n\nLorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. \n\n- Duis autem vel eum iriure dolor in\n- Hendrerit in vulputate velit esse\n- Consequat, vel illum dolore\"\n| render",
                   "id": "element-ddd00da5-0cb7-4426-9d91-7e95bdb1b01b",
                   "position": {
                     "angle": 0,
@@ -2658,7 +2658,7 @@
                   }
                 },
                 {
-                  "expression": "filters\n| demodata\n| markdown \"- 10\n- yoursite.com\n- © 2019 Company Name Here. All Rights Reserved.     \"\n| render \n  css=\".canvasMarkdown ul {\npadding-left: 0;\n}\n\n.canvasMarkdown li {\nfont-size: 12px;\ncolor: #EFEFEF;\nlist-style: none;\ndisplay: inline-block;\nmargin-right: 1em;\npadding-right: 1em;\nborder-right: 1px solid #EFEFEF;\n}\n\n.canvasMarkdown li:last-child {\nborder-right: none;\npadding-right: 0;\nmargin-right: 0;\"",
+                  "expression": "kibana\n| selectFilter\n| demodata\n| markdown \"- 10\n- yoursite.com\n- © 2019 Company Name Here. All Rights Reserved.     \"\n| render \n  css=\".canvasMarkdown ul {\npadding-left: 0;\n}\n\n.canvasMarkdown li {\nfont-size: 12px;\ncolor: #EFEFEF;\nlist-style: none;\ndisplay: inline-block;\nmargin-right: 1em;\npadding-right: 1em;\nborder-right: 1px solid #EFEFEF;\n}\n\n.canvasMarkdown li:last-child {\nborder-right: none;\npadding-right: 0;\nmargin-right: 0;\"",
                   "id": "element-1a1ee637-5d44-48bd-aba7-741c3e2d358e",
                   "position": {
                     "angle": 0,

@@ -124,7 +124,10 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
       .should('exist');
     cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
       cy.contains('Pack is a required field');
-      cy.getBySel('comboBoxInput').type(`${packName}{downArrow}{enter}`);
+      cy.getBySel('comboBoxInput').click();
+      cy.getBySel('comboBoxInput').type(`${packName}`);
+      cy.contains(`doesn't match any options`).should('not.exist');
+      cy.getBySel('comboBoxInput').type('{downArrow}{enter}');
     });
 
     cy.getBySel(OSQUERY_RESPONSE_ACTION_ADD_BUTTON).click();
@@ -135,7 +138,7 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
         inputQuery('select * from uptime');
         cy.contains('Query is a required field').should('not.exist');
         cy.contains('Advanced').click();
-        typeInECSFieldInput('{downArrow}{enter}');
+        typeInECSFieldInput('label{downArrow}{enter}');
         cy.getBySel('osqueryColumnValueSelect').type('days{downArrow}{enter}');
       })
       .clickOutside();
@@ -182,7 +185,7 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
     cy.intercept('PUT', '/api/detection_engine/rules').as('saveRuleSingleQuery');
 
     cy.getBySel('ruleEditSubmitButton').click();
-    cy.wait('@saveRuleSingleQuery').should(({ request }) => {
+    cy.wait('@saveRuleSingleQuery', { timeout: 15000 }).should(({ request }) => {
       const oneQuery = [
         {
           interval: 3600,
@@ -222,7 +225,7 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
     cy.intercept('PUT', '/api/detection_engine/rules').as('saveRuleMultiQuery');
 
     cy.contains('Save changes').click();
-    cy.wait('@saveRuleMultiQuery').should(({ request }) => {
+    cy.wait('@saveRuleMultiQuery', { timeout: 15000 }).should(({ request }) => {
       const threeQueries = [
         {
           interval: 3600,

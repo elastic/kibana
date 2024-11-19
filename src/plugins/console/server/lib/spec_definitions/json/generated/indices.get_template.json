@@ -20,7 +20,7 @@
       "_template",
       "_template/{name}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-templates.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-get-template-v1.html",
     "availability": {
       "stack": true,
       "serverless": false

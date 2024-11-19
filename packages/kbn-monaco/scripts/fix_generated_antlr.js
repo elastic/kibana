@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 const { join } = require('path');
@@ -32,7 +33,9 @@ function execute(folder) {
           .toString()
           .split('\n');
 
-        fileContentRows.unshift('// @ts-nocheck');
+        if (!/\@ts-nocheck/.test(fileContentRows[0])) {
+          fileContentRows.unshift('// @ts-nocheck');
+        }
 
         const filePath = join(generatedAntlrFolder, file);
         const fileContent = fileContentRows.join('\n');
@@ -44,7 +47,7 @@ function execute(folder) {
     });
 
   // Rename generated parserListener file to snakecase to satisfy file casing check
-  // There doesn't appear to be a way to fix this OOTB with antlr4ts-cli
+  // There doesn't appear to be a way to fix this OOTB with antlr4
   try {
     renameSync(
       join(generatedAntlrFolder, `${folder}_parserListener.ts`),

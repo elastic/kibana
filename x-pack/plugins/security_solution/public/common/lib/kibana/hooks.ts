@@ -71,7 +71,7 @@ export const convertArrayToCamelCase = (arrayOfSnakes: unknown[]): unknown[] =>
   }, []);
 
 export const convertToCamelCase = <T, U extends {}>(snakeCase: T): U =>
-  Object.entries(snakeCase).reduce((acc, [key, value]) => {
+  Object.entries(snakeCase as never).reduce((acc, [key, value]) => {
     if (isArray(value)) {
       set(acc, camelCase(key), convertArrayToCamelCase(value));
     } else if (isObject(value)) {

@@ -14,7 +14,7 @@ const FINDINGS_INDEX = 'logs-cloud_security_posture.findings-default';
 const FINDINGS_LATEST_INDEX = 'logs-cloud_security_posture.findings_latest-default';
 export const VULNERABILITIES_INDEX_DEFAULT_NS =
   'logs-cloud_security_posture.vulnerabilities-default';
-export const LATEST_VULNERABILITIES_INDEX_DEFAULT_NS =
+export const CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN =
   'logs-cloud_security_posture.vulnerabilities_latest-default';
 
 export function FindingsPageProvider({ getService, getPageObjects }: FtrProviderContext) {
@@ -72,14 +72,14 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     remove: () =>
       Promise.all([
         deleteByQuery(VULNERABILITIES_INDEX_DEFAULT_NS),
-        deleteByQuery(LATEST_VULNERABILITIES_INDEX_DEFAULT_NS),
+        deleteByQuery(CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN),
       ]),
     add: async (findingsMock: Array<Record<string, unknown>>) => {
       await es.bulk({
         refresh: true,
         operations: [
           ...insertOperation(VULNERABILITIES_INDEX_DEFAULT_NS, findingsMock),
-          ...insertOperation(LATEST_VULNERABILITIES_INDEX_DEFAULT_NS, findingsMock),
+          ...insertOperation(CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN, findingsMock),
         ],
       });
     },
@@ -106,13 +106,14 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
 
   const createNotInstalledObject = (notInstalledSubject: string) => ({
     getElement() {
-      return testSubjects.find(notInstalledSubject);
+      return testSubjects.find(notInstalledSubject, 15 * 1000);
     },
 
     async navigateToAction(actionTestSubject: string) {
       return await retry.try(async () => {
         await testSubjects.click(actionTestSubject);
         await PageObjects.header.waitUntilLoadingHasFinished();
+
         const result = await testSubjects.exists('createPackagePolicy_pageTitle');
 
         if (!result) {
@@ -134,9 +135,11 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async getColumnIndex(columnName: string) {
       const element = await this.getElement();
-      const columnIndex = await (
+      const columnIndexAttr = await (
         await element.findByCssSelector(`[data-gridcell-column-id="${columnName}"]`)
       ).getAttribute('data-gridcell-column-index');
+      expect(columnIndexAttr).to.not.be(null);
+      const columnIndex = parseInt(columnIndexAttr ?? '-1', 10);
       expect(columnIndex).to.be.greaterThan(-1);
       return columnIndex;
     },
@@ -233,27 +236,53 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     },
   });
 
-  const navigateToLatestFindingsPage = async () => {
+  const navigateToLatestFindingsPage = async (space?: string) => {
+    const options = space
+      ? {
+          basePath: `/s/${space}`,
+          shouldUseHashForSubUrl: false,
+        }
+      : {
+          shouldUseHashForSubUrl: false,
+        };
+
     await PageObjects.common.navigateToUrl(
       'securitySolution', // Defined in Security Solution plugin
       'cloud_security_posture/findings/configurations',
-      { shouldUseHashForSubUrl: false }
+      options
     );
   };
 
-  const navigateToLatestVulnerabilitiesPage = async () => {
+  const navigateToLatestVulnerabilitiesPage = async (space?: string) => {
+    const options = space
+      ? {
+          basePath: `/s/${space}`,
+          shouldUseHashForSubUrl: false,
+        }
+      : {
+          shouldUseHashForSubUrl: false,
+        };
     await PageObjects.common.navigateToUrl(
       'securitySolution', // Defined in Security Solution plugin
       'cloud_security_posture/findings/vulnerabilities',
-      { shouldUseHashForSubUrl: false }
+      options
     );
   };
 
-  const navigateToMisconfigurations = async () => {
+  const navigateToMisconfigurations = async (space?: string) => {
+    const options = space
+      ? {
+          basePath: `/s/${space}`,
+          shouldUseHashForSubUrl: false,
+        }
+      : {
+          shouldUseHashForSubUrl: false,
+        };
+
     await PageObjects.common.navigateToUrl(
       'securitySolution', // Defined in Security Solution plugin
       'cloud_security_posture/findings/configurations',
-      { shouldUseHashForSubUrl: false }
+      options
     );
   };
 
@@ -262,6 +291,12 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
 
   const notInstalledVulnerabilities = createNotInstalledObject('cnvm-integration-not-installed');
   const notInstalledCSP = createNotInstalledObject('cloud_posture_page_package_not_installed');
+  const thirdPartyIntegrationsNoVulnerabilitiesFindingsPrompt = createNotInstalledObject(
+    '3p-integrations-no-vulnerabilities-findings-prompt'
+  );
+  const thirdPartyIntegrationsNoMisconfigurationsFindingsPrompt = createNotInstalledObject(
+    '3p-integrations-no-misconfigurations-findings-prompt'
+  );
 
   const vulnerabilityDataGrid = {
     getVulnerabilityTable: async () => testSubjects.find('euiDataGrid'),
@@ -290,17 +325,6 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
   });
 
   const misconfigurationsFlyout = createFlyoutObject('findings_flyout');
-
-  const toastMessage = async (testSubj = 'csp:toast-success') => ({
-    async getElement() {
-      return await testSubjects.find(testSubj);
-    },
-    async clickToastMessageLink(linkTestSubj = 'csp:toast-success-link') {
-      const element = await this.getElement();
-      const link = await element.findByTestSubject(linkTestSubj);
-      await link.click();
-    },
-  });
 
   const groupSelector = (testSubj = 'group-selector-dropdown') => ({
     async getElement() {
@@ -342,8 +366,11 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
   });
   const isLatestFindingsTableThere = async () => {
     const table = await testSubjects.findAll('docTable');
-    const trueOrFalse = table.length > 0 ? true : false;
-    return trueOrFalse;
+    return table.length > 0;
+  };
+
+  const getUnprivilegedPrompt = async () => {
+    return await testSubjects.find('status-api-unprivileged');
   };
 
   return {
@@ -354,17 +381,19 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     latestVulnerabilitiesTable,
     notInstalledVulnerabilities,
     notInstalledCSP,
+    thirdPartyIntegrationsNoMisconfigurationsFindingsPrompt,
+    thirdPartyIntegrationsNoVulnerabilitiesFindingsPrompt,
     index,
     vulnerabilitiesIndex,
     waitForPluginInitialized,
     distributionBar,
     vulnerabilityDataGrid,
     misconfigurationsFlyout,
-    toastMessage,
     detectionRuleApi,
     groupSelector,
     findingsGrouping,
     createDataTableObject,
     isLatestFindingsTableThere,
+    getUnprivilegedPrompt,
   };
 }

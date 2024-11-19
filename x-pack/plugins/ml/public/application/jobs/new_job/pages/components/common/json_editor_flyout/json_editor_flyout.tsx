@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useState, useContext, useEffect, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { Fragment, useState, useContext, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { memoize } from 'lodash';
 import {
   EuiFlyout,
   EuiFlyoutFooter,
@@ -22,8 +22,10 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
-import { useMlApiContext } from '../../../../../../contexts/kibana';
-import { CombinedJob, Datafeed } from '../../../../../../../../common/types/anomaly_detection_jobs';
+import type {
+  CombinedJob,
+  Datafeed,
+} from '../../../../../../../../common/types/anomaly_detection_jobs';
 import { ML_EDITOR_MODE, MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor';
 import { isValidJson } from '../../../../../../../../common/util/validation_utils';
 import { JobCreatorContext } from '../../job_creator_context';
@@ -45,22 +47,11 @@ interface Props {
   datafeedEditorMode: EDITOR_MODE;
 }
 
-const fetchSchemas = memoize(
-  async (jsonSchemaApi, path: string, method: string) =>
-    jsonSchemaApi.getSchemaDefinition({
-      path,
-      method,
-    }),
-  (jsonSchemaApi, path, method) => path + method
-);
-
 export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafeedEditorMode }) => {
   const { jobCreator, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const { displayErrorToast } = useToastNotificationService();
   const [showJsonFlyout, setShowJsonFlyout] = useState(false);
   const [showChangedIndicesWarning, setShowChangedIndicesWarning] = useState(false);
-
-  const { jsonSchema: jsonSchemaApi } = useMlApiContext();
 
   const [jobConfigString, setJobConfigString] = useState(jobCreator.formattedJobJson);
   const [datafeedConfigString, setDatafeedConfigString] = useState(
@@ -94,28 +85,18 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showJsonFlyout]);
 
-  useEffect(
-    function fetchSchemasOnMount() {
-      fetchSchemas(jsonSchemaApi, '/_ml/anomaly_detectors/{job_id}', 'put')
-        .then((result) => {
-          setJobSchema(result);
-        })
-        .catch((e) => {
-          // eslint-disable-next-line no-console
-          console.error(e);
-        });
+  useEffect(function fetchSchemasOnMount() {
+    // async import json schema
+    import('@kbn/json-schemas/src/put___ml_anomaly_detectors__job_id__schema.json').then(
+      (result) => {
+        setJobSchema(result);
+      }
+    );
 
-      fetchSchemas(jsonSchemaApi, '/_ml/datafeeds/{datafeed_id}', 'put')
-        .then((result) => {
-          setDatafeedSchema(result);
-        })
-        .catch((e) => {
-          // eslint-disable-next-line no-console
-          console.error(e);
-        });
-    },
-    [jsonSchemaApi]
-  );
+    import('@kbn/json-schemas/src/put___ml_datafeeds__datafeed_id__schema.json').then((result) => {
+      setDatafeedSchema(result);
+    });
+  }, []);
 
   const editJsonMode =
     jobEditorMode === EDITOR_MODE.EDITABLE || datafeedEditorMode === EDITOR_MODE.EDITABLE;
@@ -317,7 +298,7 @@ const Contents: FC<{
   heightOffset?: number;
   schema?: object;
 }> = ({ title, value, editJson, onChange, heightOffset = 0, schema }) => {
-  // the ace editor requires a fixed height
+  // the editor requires a fixed height
   const editorHeight = useMemo(
     () => `${window.innerHeight - 230 - heightOffset}px`,
     [heightOffset]

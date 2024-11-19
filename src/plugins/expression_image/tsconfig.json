@@ -16,7 +16,8 @@
     "@kbn/expressions-plugin",
     "@kbn/expect",
     "@kbn/i18n",
-    "@kbn/kibana-react-plugin",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/shared-ux-error-boundary",
   ],
   "exclude": [
     "target/**/*",

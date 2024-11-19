@@ -30,7 +30,7 @@ export const createIndexPipelineDefinitions = async (
   let result: Record<string, IngestPipeline | undefined> = {};
   try {
     const mlPipeline = {
-      description: `Enterprise Search Machine Learning Inference pipeline for the '${indexName}' index`,
+      description: `Machine Learning Inference pipeline for the '${indexName}' index`,
       id: getInferencePipelineNameFromIndexName(indexName),
       processors: [],
       version: 1,
@@ -38,7 +38,7 @@ export const createIndexPipelineDefinitions = async (
     await esClient.ingest.putPipeline(mlPipeline);
     result = { ...result, [mlPipeline.id]: mlPipeline };
     const customPipeline = {
-      description: `Enterprise Search customizable ingest pipeline for the '${indexName}' index`,
+      description: `Customizable ingest pipeline for the '${indexName}' index`,
       id: `${indexName}@custom`,
       processors: [],
       version: 1,
@@ -48,9 +48,9 @@ export const createIndexPipelineDefinitions = async (
     const ingestPipeline = {
       _meta: {
         managed: true,
-        managed_by: 'Enterprise Search',
+        managed_by: 'Search',
       },
-      description: `Enterprise Search ingest pipeline for the '${indexName}' index`,
+      description: `Ingest pipeline for the '${indexName}' index`,
       id: `${indexName}`,
       processors: [
         {

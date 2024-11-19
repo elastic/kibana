@@ -21,10 +21,14 @@ jest.mock('../../../common/store/selectors', () => ({
   inputsSelectors: { timelineFullScreenSelector: () => mockIsFullScreen() },
 }));
 
+const mockRef = {
+  current: null,
+};
+
 const renderTimelineModal = () =>
   render(
     <TestProviders>
-      <TimelineModal timelineId={TimelineId.test} />
+      <TimelineModal timelineId={TimelineId.test} openToggleRef={mockRef} />
     </TestProviders>
   );
 

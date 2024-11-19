@@ -70,6 +70,7 @@ describe('getAlertsForNotification', () => {
         Object {
           "activeCount": 2,
           "event": Object {
+            "kibana.alert.consecutive_matches": 2,
             "kibana.alert.status": "active",
           },
           "flappingHistory": Array [],
@@ -78,6 +79,7 @@ describe('getAlertsForNotification', () => {
         Object {
           "activeCount": 1,
           "event": Object {
+            "kibana.alert.consecutive_matches": 1,
             "kibana.alert.status": "active",
           },
           "flappingHistory": Array [
@@ -99,6 +101,7 @@ describe('getAlertsForNotification', () => {
         Object {
           "activeCount": 0,
           "event": Object {
+            "kibana.alert.consecutive_matches": 0,
             "kibana.alert.status": "recovered",
           },
           "flapping": true,
@@ -107,6 +110,7 @@ describe('getAlertsForNotification', () => {
         Object {
           "activeCount": 0,
           "event": Object {
+            "kibana.alert.consecutive_matches": 0,
             "kibana.alert.status": "recovered",
           },
           "flapping": false,
@@ -115,6 +119,7 @@ describe('getAlertsForNotification', () => {
           "activeCount": 0,
           "event": Object {
             "event.action": "active",
+            "kibana.alert.consecutive_matches": 0,
             "kibana.alert.status": "active",
           },
           "flapping": true,
@@ -133,6 +138,7 @@ describe('getAlertsForNotification', () => {
         Object {
           "activeCount": 0,
           "event": Object {
+            "kibana.alert.consecutive_matches": 0,
             "kibana.alert.status": "recovered",
           },
           "flapping": true,
@@ -141,6 +147,7 @@ describe('getAlertsForNotification', () => {
         Object {
           "activeCount": 0,
           "event": Object {
+            "kibana.alert.consecutive_matches": 0,
             "kibana.alert.status": "recovered",
           },
           "flapping": false,
@@ -149,6 +156,7 @@ describe('getAlertsForNotification', () => {
         Object {
           "activeCount": 0,
           "event": Object {
+            "kibana.alert.consecutive_matches": 0,
             "kibana.alert.status": "recovered",
           },
           "flapping": true,
@@ -174,6 +182,7 @@ describe('getAlertsForNotification', () => {
         Object {
           "activeCount": 2,
           "event": Object {
+            "kibana.alert.consecutive_matches": 2,
             "kibana.alert.status": "active",
           },
           "flappingHistory": Array [],
@@ -182,6 +191,7 @@ describe('getAlertsForNotification', () => {
         Object {
           "activeCount": 1,
           "event": Object {
+            "kibana.alert.consecutive_matches": 1,
             "kibana.alert.status": "active",
           },
           "flappingHistory": Array [
@@ -203,6 +213,7 @@ describe('getAlertsForNotification', () => {
         Object {
           "activeCount": 0,
           "event": Object {
+            "kibana.alert.consecutive_matches": 0,
             "kibana.alert.status": "recovered",
           },
           "flapping": true,
@@ -211,6 +222,7 @@ describe('getAlertsForNotification', () => {
         Object {
           "activeCount": 0,
           "event": Object {
+            "kibana.alert.consecutive_matches": 0,
             "kibana.alert.status": "recovered",
           },
           "flapping": false,
@@ -233,6 +245,13 @@ describe('getAlertsForNotification', () => {
     ).toMatchInlineSnapshot(`Array []`);
   });
 
+  test('should not return recovered alerts if the activeCount is less than the rule alertDelay', () => {
+    const trackedEvents = cloneDeep([alert1]);
+    expect(
+      getAlertsForNotification(DEFAULT_FLAPPING_SETTINGS, 5, trackedEvents, [], newEventParams)
+    ).toMatchInlineSnapshot(`Array []`);
+  });
+
   test('should update active alert to look like a new alert if the activeCount is equal to the rule alertDelay', () => {
     const trackedEvents = cloneDeep([alert5]);
     expect(
@@ -243,6 +262,7 @@ describe('getAlertsForNotification', () => {
           "activeCount": 2,
           "event": Object {
             "event.action": "open",
+            "kibana.alert.consecutive_matches": 2,
             "kibana.alert.duration.us": 0,
             "kibana.alert.maintenance_window_ids": Array [
               "maintenance-window-id",

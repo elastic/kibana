@@ -27,11 +27,12 @@ jest.mock('uuid', () => ({
     .mockReturnValueOnce('mockTopValuesOfBreakdownFieldColumnId'),
 }));
 
-jest.mock('../../../../../containers/sourcerer', () => ({
+jest.mock('../../../../../../sourcerer/containers', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({
     dataViewId: 'security-solution-my-test',
     indicesExist: true,
     selectedPatterns: ['signal-index'],
+    sourcererDataView: {},
   }),
 }));
 

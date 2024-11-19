@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,9 +21,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { LogRateHistogramItem } from '@kbn/aiops-utils';
+import type { LogRateHistogramItem } from '@kbn/aiops-log-rate-analysis';
+import type { RandomSamplerOption } from '../../../index_data_visualizer/constants/random_sampler';
 import {
-  RandomSamplerOption,
   RANDOM_SAMPLER_SELECT_OPTIONS,
   RANDOM_SAMPLER_OPTION,
 } from '../../../index_data_visualizer/constants/random_sampler';

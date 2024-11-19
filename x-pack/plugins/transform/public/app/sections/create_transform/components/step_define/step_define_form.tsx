@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, FC } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { merge } from 'rxjs';
 
 import {
@@ -34,9 +35,12 @@ import {
 } from '@kbn/ml-date-picker';
 import { useStorage } from '@kbn/ml-local-storage';
 import { useUrlState } from '@kbn/ml-url-state';
+import { useFieldStatsFlyoutContext } from '@kbn/ml-field-stats-flyout';
 
-import { PivotAggDict } from '../../../../../../common/types/pivot_aggs';
-import { PivotGroupByDict } from '../../../../../../common/types/pivot_group_by';
+import { MAX_ROW_COUNT } from '@kbn/ml-data-grid/lib/common';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { PivotAggDict } from '../../../../../../common/types/pivot_aggs';
+import type { PivotGroupByDict } from '../../../../../../common/types/pivot_group_by';
 import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
 import {
   TRANSFORM_FROZEN_TIER_PREFERENCE,
@@ -48,18 +52,18 @@ import {
   getIndexDevConsoleStatement,
   getTransformPreviewDevConsoleStatement,
 } from '../../../../common/data_grid';
-import {
-  getPreviewTransformRequestBody,
+import type {
   PivotAggsConfigDict,
   PivotGroupByConfigDict,
   PivotSupportedGroupByAggs,
   PivotAggsConfig,
 } from '../../../../common';
+import { getPreviewTransformRequestBody } from '../../../../common';
 import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
 import { useIndexData } from '../../../../hooks/use_index_data';
 import { useTransformConfigData } from '../../../../hooks/use_transform_config_data';
-import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
-import { SearchItems } from '../../../../hooks/use_search_items';
+import { useToastNotifications } from '../../../../app_dependencies';
+import type { SearchItems } from '../../../../hooks/use_search_items';
 import { getAggConfigFromEsAgg } from '../../../../common/pivot_aggs';
 
 import { AdvancedQueryEditorSwitch } from '../advanced_query_editor_switch';
@@ -68,7 +72,7 @@ import { DatePickerApplySwitch } from '../date_picker_apply_switch';
 import { SourceSearchBar } from '../source_search_bar';
 import { AdvancedRuntimeMappingsSettings } from '../advanced_runtime_mappings_settings';
 
-import { StepDefineExposedState } from './common';
+import type { StepDefineExposedState } from './common';
 import { useStepDefineForm } from './hooks/use_step_define_form';
 import { TransformFunctionSelector } from './transform_function_selector';
 import { LatestFunctionForm } from './latest_function_form';
@@ -123,22 +127,24 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
   const { transformConfigQuery } = stepDefineForm.searchBar.state;
   const { runtimeMappings } = stepDefineForm.runtimeMappingsEditor.state;
 
-  const appDependencies = useAppDependencies();
-  const {
-    ml: { useFieldStatsFlyoutContext },
-  } = appDependencies;
-
   const fieldStatsContext = useFieldStatsFlyoutContext();
-  const indexPreviewProps = {
-    ...useIndexData(
-      dataView,
-      transformConfigQuery,
-      runtimeMappings,
-      timeRangeMs,
+
+  const populatedFields = useMemo(
+    () =>
       isPopulatedFields(fieldStatsContext?.populatedFields)
         ? [...fieldStatsContext.populatedFields]
-        : []
-    ),
+        : [],
+    [fieldStatsContext?.populatedFields]
+  );
+
+  const indexPreviewProps = {
+    ...useIndexData({
+      dataView,
+      query: transformConfigQuery,
+      populatedFields,
+      combinedRuntimeMappings: runtimeMappings,
+      timeRangeMs,
+    }),
     dataTestSubj: 'transformIndexPreview',
     toastNotifications,
   };
@@ -283,6 +289,14 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
       timeUpdateSubscription.unsubscribe();
     };
   });
+
+  const rowCountInfoLabel = (
+    <FormattedMessage
+      id="xpack.transform.stepDefineForm.rowCountInfoLabel"
+      defaultMessage="Results are limited to a maximum of {maxRowCount} for preview purposes"
+      values={{ maxRowCount: MAX_ROW_COUNT }}
+    />
+  );
 
   return (
     <div data-test-subj="transformStepDefineForm">
@@ -463,6 +477,11 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
               label={i18n.translate('xpack.transform.stepDefineForm.dataGridLabel', {
                 defaultMessage: 'Source documents',
               })}
+              labelAppend={
+                indexPreviewProps.rowCount === MAX_ROW_COUNT && (
+                  <EuiText size="xs">{rowCountInfoLabel}</EuiText>
+                )
+              }
             >
               <DataGrid {...indexPreviewProps} />
             </EuiFormRow>
@@ -499,6 +518,11 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
           label={i18n.translate('xpack.transform.stepDefineForm.previewLabel', {
             defaultMessage: 'Preview',
           })}
+          labelAppend={
+            previewProps.rowCount === MAX_ROW_COUNT && (
+              <EuiText size="xs">{rowCountInfoLabel}</EuiText>
+            )
+          }
         >
           <>
             <DataGrid {...previewProps} />

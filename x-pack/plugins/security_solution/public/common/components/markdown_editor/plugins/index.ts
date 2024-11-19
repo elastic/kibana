@@ -22,16 +22,24 @@ export const platinumOnlyPluginTokens = [insightMarkdownPlugin.insightPrefix];
 
 export const uiPlugins = ({
   insightsUpsellingMessage,
+  interactionsUpsellingMessage,
 }: {
-  insightsUpsellingMessage: string | null;
+  insightsUpsellingMessage?: string;
+  interactionsUpsellingMessage?: string;
 }) => {
   const currentPlugins = nonStatefulUiPlugins.map((plugin) => plugin.name);
   const insightPluginWithLicense = insightMarkdownPlugin.plugin({
     insightsUpsellingMessage,
   });
+  const timelinePluginWithLicense = timelineMarkdownPlugin.plugin({
+    interactionsUpsellingMessage,
+  });
+  const osqueryPluginWithLicense = osqueryMarkdownPlugin.plugin({
+    interactionsUpsellingMessage,
+  });
   if (currentPlugins.includes(insightPluginWithLicense.name) === false) {
-    nonStatefulUiPlugins.push(timelineMarkdownPlugin.plugin);
-    nonStatefulUiPlugins.push(osqueryMarkdownPlugin.plugin);
+    nonStatefulUiPlugins.push(timelinePluginWithLicense);
+    nonStatefulUiPlugins.push(osqueryPluginWithLicense);
     nonStatefulUiPlugins.push(insightPluginWithLicense);
   } else {
     // When called for the second time we need to update insightMarkdownPlugin

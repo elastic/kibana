@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -11,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 import { CoreStart } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { EmbeddableFactoryDefinition } from '../../../embeddables';
 import { Container } from '../../../containers';
 import { ContactCardEmbeddableInput } from './contact_card_embeddable';
@@ -27,7 +28,7 @@ export class ContactCardExportableEmbeddableFactory
 
   constructor(
     private readonly execTrigger: UiActionsStart['executeTriggerActions'],
-    private readonly overlays: CoreStart['overlays']
+    private readonly core: CoreStart
   ) {}
 
   public async isEditable() {
@@ -46,7 +47,7 @@ export class ContactCardExportableEmbeddableFactory
 
   public getExplicitInput = (): Promise<Partial<ContactCardEmbeddableInput>> => {
     return new Promise((resolve) => {
-      const modalSession = this.overlays.openModal(
+      const modalSession = this.core.overlays.openModal(
         toMountPoint(
           <ContactCardInitializer
             onCancel={() => {
@@ -58,7 +59,8 @@ export class ContactCardExportableEmbeddableFactory
               modalSession.close();
               resolve(input);
             }}
-          />
+          />,
+          this.core
         ),
         {
           'data-test-subj': 'createContactCardEmbeddable',

@@ -1,14 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subject, of } from 'rxjs';
+import { of } from 'rxjs';
+import { _setDarkMode } from '@kbn/ui-theme';
+import type { InjectedMetadataTheme } from '@kbn/core-injected-metadata-common-internal';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import type { CoreTheme, ThemeServiceSetup, ThemeServiceStart } from '@kbn/core-theme-browser';
+import { systemThemeIsDark, browsersSupportsSystemTheme } from './system_theme';
+import { createStyleSheet } from './utils';
 
 /** @internal */
 export interface ThemeServiceSetupDeps {
@@ -18,15 +23,31 @@ export interface ThemeServiceSetupDeps {
 /** @internal */
 export class ThemeService {
   private contract?: ThemeServiceSetup;
-  private stop$ = new Subject<void>();
+  private themeMetadata?: InjectedMetadataTheme;
+  private stylesheets: HTMLLinkElement[] = [];
 
   public setup({ injectedMetadata }: ThemeServiceSetupDeps): ThemeServiceSetup {
-    const themeMeta = injectedMetadata.getTheme();
-    const theme: CoreTheme = { darkMode: themeMeta.darkMode };
+    const themeMetadata = injectedMetadata.getTheme();
+
+    this.themeMetadata = themeMetadata;
+
+    let darkMode: boolean;
+    if (themeMetadata.darkMode === 'system' && browsersSupportsSystemTheme()) {
+      darkMode = systemThemeIsDark();
+    } else {
+      darkMode = themeMetadata.darkMode === 'system' ? false : themeMetadata.darkMode;
+    }
+
+    const theme: CoreTheme = {
+      darkMode,
+      name: themeMetadata.name,
+    };
+
+    this.applyTheme(theme);
 
     this.contract = {
-      theme$: of(theme),
       getTheme: () => theme,
+      theme$: of(theme),
     };
 
     return this.contract;
@@ -40,7 +61,30 @@ export class ThemeService {
     return this.contract;
   }
 
-  public stop() {
-    this.stop$.next();
+  public stop() {}
+
+  private applyTheme(theme: CoreTheme) {
+    const { darkMode } = theme;
+    this.stylesheets.forEach((stylesheet) => {
+      stylesheet.remove();
+    });
+    this.stylesheets = [];
+    const newStylesheets = darkMode
+      ? this.themeMetadata!.stylesheetPaths.dark
+      : this.themeMetadata!.stylesheetPaths.default;
+
+    newStylesheets.forEach((stylesheet) => {
+      this.stylesheets.push(createStyleSheet({ href: stylesheet }));
+    });
+
+    _setDarkMode(darkMode);
+    updateKbnThemeTag(theme);
   }
 }
+
+const updateKbnThemeTag = (theme: CoreTheme) => {
+  const name = theme.name === 'amsterdam' ? 'v8' : theme.name;
+
+  const globals: any = typeof window === 'undefined' ? {} : window;
+  globals.__kbnThemeTag__ = `${name}${theme.darkMode ? 'dark' : 'light'}`;
+};

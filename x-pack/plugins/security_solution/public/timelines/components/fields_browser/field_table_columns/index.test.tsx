@@ -21,7 +21,7 @@ const mockOpenDeleteFieldModal = jest.fn();
 
 // helper function to render the hook
 const renderUseFieldTableColumns = (props: Partial<UseFieldTableColumnsProps> = {}) =>
-  renderHook<UseFieldTableColumnsProps, ReturnType<UseFieldTableColumns>>(
+  renderHook<React.PropsWithChildren<UseFieldTableColumnsProps>, ReturnType<UseFieldTableColumns>>(
     () =>
       useFieldTableColumns({
         hasFieldEditPermission: true,

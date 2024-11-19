@@ -96,26 +96,32 @@ const getInstalledPackagePolicies = (
   packagePolicies: PackagePolicy[],
   agentPolicies: AgentPolicy[]
 ) => {
-  const installationStats = packagePolicies.map(
-    (packagePolicy: PackagePolicy): CloudSecurityInstallationStats => {
-      const agentCounts =
-        agentPolicies?.find((agentPolicy) => agentPolicy?.id === packagePolicy.policy_id)?.agents ??
-        0;
-      const isSetupAutomatic = getEnabledIsSetupAutomatic(packagePolicy);
+  const installationStats = packagePolicies.flatMap(
+    (packagePolicy: PackagePolicy): CloudSecurityInstallationStats[] =>
+      packagePolicy.policy_ids.map((agentPolicyId) => {
+        const matchedAgentPolicy = agentPolicies?.find(
+          (agentPolicy) => agentPolicy?.id === agentPolicyId
+        );
 
-      return {
-        package_policy_id: packagePolicy.id,
-        feature: packagePolicy.vars?.posture?.value as string,
-        deployment_mode: packagePolicy.vars?.deployment?.value as string,
-        package_version: packagePolicy.package?.version as string,
-        created_at: packagePolicy.created_at,
-        agent_policy_id: packagePolicy.policy_id,
-        agent_count: agentCounts,
-        account_type: getAccountTypeField(packagePolicy),
-        is_setup_automatic: isSetupAutomatic,
-        setup_access_option: isSetupAutomatic ? null : getSetupAccessOption(packagePolicy),
-      };
-    }
+        const agentCounts = matchedAgentPolicy?.agents || 0;
+        const isAgentless = !!matchedAgentPolicy?.supports_agentless;
+
+        const isSetupAutomatic = getEnabledIsSetupAutomatic(packagePolicy);
+
+        return {
+          package_policy_id: packagePolicy.id,
+          feature: packagePolicy.vars?.posture?.value as string,
+          deployment_mode: packagePolicy.vars?.deployment?.value as string,
+          package_version: packagePolicy.package?.version as string,
+          created_at: packagePolicy.created_at,
+          agent_policy_id: agentPolicyId,
+          agent_count: agentCounts,
+          is_agentless: isAgentless,
+          account_type: getAccountTypeField(packagePolicy),
+          is_setup_automatic: isSetupAutomatic,
+          setup_access_option: isSetupAutomatic ? null : getSetupAccessOption(packagePolicy),
+        };
+      })
   );
 
   return installationStats;

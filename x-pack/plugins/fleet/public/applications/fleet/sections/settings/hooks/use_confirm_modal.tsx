@@ -56,19 +56,22 @@ export function useConfirmModal() {
 export function withConfirmModalProvider<T>(WrappedComponent: React.FunctionComponent<T>) {
   return (props: T) => (
     <ConfirmModalProvider>
+      {/* @ts-expect-error upgrade typescript v4.9.5*/}
       <WrappedComponent {...props} />
     </ConfirmModalProvider>
   );
 }
 
-export const ConfirmModalProvider: React.FunctionComponent = ({ children }) => {
+export const ConfirmModalProvider: React.FunctionComponent<{ children?: React.ReactNode }> = ({
+  children,
+}) => {
   const [isVisible, setIsVisible] = useState(false);
   const [modal, setModal] = useState<ModalState>({
     onCancel: () => {},
     onConfirm: () => {},
   });
 
-  const showModal = useCallback(({ title, description, onConfirm, onCancel, options }) => {
+  const showModal = useCallback(({ title, description, onConfirm, onCancel, options }: any) => {
     setIsVisible(true);
     setModal({
       title,

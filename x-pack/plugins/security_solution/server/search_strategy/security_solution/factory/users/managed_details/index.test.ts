@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { IEsSearchResponse } from '@kbn/search-types';
 import * as buildQuery from './query.managed_user_details.dsl';
 import { managedUserDetails } from '.';
 import type { ManagedUserFields } from '../../../../../../common/search_strategy/security_solution/users/managed_details';
-import type { IEsSearchResponse } from '@kbn/data-plugin/public';
 import type { ManagedUserDetailsRequestOptionsInput } from '../../../../../../common/api/search_strategy';
 import { UsersQueries } from '../../../../../../common/api/search_strategy';
 

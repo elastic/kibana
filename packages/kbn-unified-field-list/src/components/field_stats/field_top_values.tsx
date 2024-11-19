@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { Fragment } from 'react';
@@ -14,8 +15,8 @@ import FieldTopValuesBucket from './field_top_values_bucket';
 import type { OverrideFieldTopValueBarCallback } from './field_top_values_bucket';
 
 export interface FieldTopValuesProps {
-  areExamples: boolean; // real top values or only examples
-  buckets: BucketedAggregation<number | string>['buckets'];
+  areExamples: boolean | undefined; // real top values or only examples distributed in buckets
+  buckets: BucketedAggregation<number | string | boolean>['buckets'];
   dataView: DataView;
   field: DataViewField;
   sampledValuesCount: number;
@@ -58,7 +59,7 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
           const formatted = formatter.convert(fieldValue);
 
           return (
-            <Fragment key={fieldValue}>
+            <Fragment key={String(fieldValue)}>
               {index > 0 && <EuiSpacer size="s" />}
               <FieldTopValuesBucket
                 field={field}
@@ -122,7 +123,7 @@ export const getProgressValue = (currentValue: number, totalCount: number): numb
 };
 
 export const getBucketsValuesCount = (
-  buckets?: BucketedAggregation<number | string>['buckets']
+  buckets?: BucketedAggregation<number | string | boolean>['buckets']
 ): number => {
   return buckets?.reduce((prev, bucket) => bucket.count + prev, 0) || 0;
 };

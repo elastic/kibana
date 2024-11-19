@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart, OverlayStart } from '@kbn/core/public';
-import { TagWithRelations } from '../../../common';
+import { TagWithRelations } from '../../../common/types';
 import { ITagInternalClient } from '../../services/tags';
 import { TagAction } from './types';
 
@@ -39,6 +39,7 @@ export const getDeleteAction = ({
     ),
     type: 'icon',
     icon: 'trash',
+    available: (tag) => !tag.managed,
     onClick: async (tag: TagWithRelations) => {
       const confirmed = await overlays.openConfirm(
         i18n.translate('xpack.savedObjectsTagging.modals.confirmDelete.text', {

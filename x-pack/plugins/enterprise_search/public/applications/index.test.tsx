@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { searchConnectorsMock } from '@kbn/search-connectors-plugin/public/plugin.mock';
+
 import React from 'react';
 
 import { act } from '@testing-library/react';
@@ -21,6 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { mlPluginMock } from '@kbn/ml-plugin/public/mocks';
+import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
@@ -39,13 +42,19 @@ describe('renderApp', () => {
       charts: chartPluginMock.createStartContract(),
       data: dataPluginMock.createStartContract(),
       guidedOnboarding: guidedOnboardingMock.createStart(),
+      indexManagement: {
+        getIndexMappingComponent: jest.fn(),
+      },
       lens: lensPluginMock.createStartContract(),
       licensing: licensingMock.createStart(),
+      navigation: navigationPluginMock.createStartContract(),
+      searchConnectors: searchConnectorsMock.createStart(),
       security: securityMock.createStart(),
       share: sharePluginMock.createStartContract(),
       ml: mlPluginMock.createStartContract(),
       user: {},
     },
+    updateSideNavDefinition: jest.fn(),
   } as any;
   const pluginData = {
     config: {},

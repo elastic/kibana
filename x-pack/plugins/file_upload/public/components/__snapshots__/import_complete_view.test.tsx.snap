@@ -342,20 +342,18 @@ exports[`Should render success 1`] = `
   />
   <EuiText>
     <p>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="To modify the index, go to "
         id="xpack.fileUpload.importComplete.indexModsMsg"
-        values={Object {}}
       />
       <a
         data-test-subj="indexManagementNewIndexLink"
-        href="abc/app/management/kibana/dataViews"
+        href="abc/app/management/data/index_management/indices"
         target="_blank"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Index Management."
           id="xpack.fileUpload.importComplete.indexMgmtLink"
-          values={Object {}}
         />
       </a>
     </p>
@@ -521,20 +519,18 @@ exports[`Should render warning when some features failed import 1`] = `
   />
   <EuiText>
     <p>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="To modify the index, go to "
         id="xpack.fileUpload.importComplete.indexModsMsg"
-        values={Object {}}
       />
       <a
         data-test-subj="indexManagementNewIndexLink"
-        href="abc/app/management/kibana/dataViews"
+        href="abc/app/management/data/index_management/indices"
         target="_blank"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Index Management."
           id="xpack.fileUpload.importComplete.indexMgmtLink"
-          values={Object {}}
         />
       </a>
     </p>

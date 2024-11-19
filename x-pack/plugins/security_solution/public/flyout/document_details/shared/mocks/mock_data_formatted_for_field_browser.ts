@@ -7,10 +7,29 @@
 
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 
-/**
- * Mock an array of fields for an alert
- */
-export const mockDataFormattedForFieldBrowser: TimelineEventsDetailsItem[] = [
+export const ruleTypeField: TimelineEventsDetailsItem = {
+  category: 'kibana',
+  field: 'kibana.alert.rule.type',
+  values: ['query'],
+  originalValue: ['query'],
+  isObjectArray: false,
+};
+
+export const baseFields: TimelineEventsDetailsItem[] = [
+  {
+    category: 'agent',
+    field: 'agent.id',
+    values: ['agent.id'],
+    originalValue: ['agent.id'],
+    isObjectArray: false,
+  },
+  {
+    category: '_id',
+    field: '_id',
+    values: ['_id'],
+    originalValue: ['_id'],
+    isObjectArray: false,
+  },
   {
     category: 'base',
     field: '@timestamp',
@@ -62,9 +81,9 @@ export const mockDataFormattedForFieldBrowser: TimelineEventsDetailsItem[] = [
   },
   {
     category: 'kibana',
-    field: 'kibana.alert.rule.type',
-    values: ['query'],
-    originalValue: ['query'],
+    field: 'kibana.alert.url',
+    values: ['alert-url'],
+    originalValue: ['alert-url'],
     isObjectArray: false,
   },
   {
@@ -88,4 +107,50 @@ export const mockDataFormattedForFieldBrowser: TimelineEventsDetailsItem[] = [
     originalValue: ['process-entity_id'],
     isObjectArray: false,
   },
+  {
+    category: 'host',
+    field: 'host.name',
+    values: ['host-name'],
+    originalValue: ['host-name'],
+    isObjectArray: false,
+  },
+  {
+    category: 'user',
+    field: 'user.name',
+    values: ['user-name'],
+    originalValue: ['user-name'],
+    isObjectArray: false,
+  },
+  {
+    category: '_index',
+    field: '_index',
+    values: ['index'],
+    originalValue: ['index'],
+    isObjectArray: false,
+  },
+];
+
+/**
+ * Mock an array of fields for an alert
+ */
+export const mockDataFormattedForFieldBrowser: TimelineEventsDetailsItem[] = [
+  ruleTypeField,
+  ...baseFields,
+];
+
+export const mockDataFormattedForFieldBrowserWithOverridenField = [
+  { ...ruleTypeField, values: ['threshold'], originalValue: ['threshold'] },
+  {
+    category: 'base',
+    field: 'kibana.alert.threshold_result.terms.field',
+    values: ['original value'],
+    isObjectArray: false,
+  },
+  {
+    category: 'base',
+    field: 'kibana.alert.threshold_result.terms.value',
+    values: ['overriden value'],
+    isObjectArray: false,
+  },
+  ...baseFields,
 ];

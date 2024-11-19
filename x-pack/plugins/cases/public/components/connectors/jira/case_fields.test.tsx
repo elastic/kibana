@@ -13,6 +13,7 @@ import userEvent from '@testing-library/user-event';
 import { connector, issues } from '../mock';
 import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
+import { useGetIssue } from './use_get_issue';
 import Fields from './case_fields';
 import { useGetIssues } from './use_get_issues';
 import type { AppMockRenderer } from '../../../common/mock';
@@ -22,11 +23,13 @@ import { MockFormWrapperComponent } from '../test_utils';
 jest.mock('./use_get_issue_types');
 jest.mock('./use_get_fields_by_issue_type');
 jest.mock('./use_get_issues');
+jest.mock('./use_get_issue');
 jest.mock('../../../common/lib/kibana');
 
 const useGetIssueTypesMock = useGetIssueTypes as jest.Mock;
 const useGetFieldsByIssueTypeMock = useGetFieldsByIssueType as jest.Mock;
 const useGetIssuesMock = useGetIssues as jest.Mock;
+const useGetIssueMock = useGetIssue as jest.Mock;
 
 describe('Jira Fields', () => {
   const useGetIssueTypesResponse = {
@@ -84,6 +87,12 @@ describe('Jira Fields', () => {
     data: { data: issues },
   };
 
+  const useGetIssueResponse = {
+    isLoading: false,
+    isFetching: false,
+    data: { data: issues[0] },
+  };
+
   let appMockRenderer: AppMockRenderer;
 
   beforeEach(() => {
@@ -91,6 +100,7 @@ describe('Jira Fields', () => {
     useGetIssueTypesMock.mockReturnValue(useGetIssueTypesResponse);
     useGetFieldsByIssueTypeMock.mockReturnValue(useGetFieldsByIssueTypeResponse);
     useGetIssuesMock.mockReturnValue(useGetIssuesResponse);
+    useGetIssueMock.mockReturnValue(useGetIssueResponse);
     jest.clearAllMocks();
   });
 
@@ -221,7 +231,7 @@ describe('Jira Fields', () => {
       </MockFormWrapperComponent>
     );
 
-    userEvent.selectOptions(await screen.findByTestId('issueTypeSelect'), '10007');
+    await userEvent.selectOptions(await screen.findByTestId('issueTypeSelect'), '10007');
     expect(await screen.findByTestId('issueTypeSelect')).toHaveValue('10007');
   });
 
@@ -232,9 +242,41 @@ describe('Jira Fields', () => {
       </MockFormWrapperComponent>
     );
 
-    userEvent.selectOptions(await screen.findByTestId('prioritySelect'), 'Low');
+    await userEvent.selectOptions(await screen.findByTestId('prioritySelect'), 'Low');
 
     expect(await screen.findByTestId('prioritySelect')).toHaveValue('Low');
+  });
+
+  it('sets existing parent correctly', async () => {
+    const newFields = { ...fields, parent: 'personKey' };
+
+    appMockRenderer.render(
+      <MockFormWrapperComponent fields={newFields}>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
+    );
+
+    expect(await screen.findByText('Person Task')).toBeInTheDocument();
+  });
+
+  it('resets existing parent correctly', async () => {
+    const newFields = { ...fields, parent: 'personKey' };
+
+    appMockRenderer.render(
+      <MockFormWrapperComponent fields={newFields}>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
+    );
+
+    const checkbox = within(await screen.findByTestId('search-parent-issues')).getByTestId(
+      'comboBoxSearchInput'
+    );
+
+    expect(await screen.findByText('Person Task')).toBeInTheDocument();
+
+    await userEvent.click(await screen.findByTestId('comboBoxClearButton'));
+
+    expect(checkbox).toHaveValue('');
   });
 
   it('should submit Jira connector', async () => {
@@ -247,7 +289,7 @@ describe('Jira Fields', () => {
     const issueTypeSelect = await screen.findByTestId('issueTypeSelect');
     expect(issueTypeSelect).toBeInTheDocument();
 
-    userEvent.selectOptions(issueTypeSelect, 'Bug');
+    await userEvent.selectOptions(issueTypeSelect, 'Bug');
 
     expect(await screen.findByTestId('prioritySelect')).toBeInTheDocument();
     expect(await screen.findByTestId('search-parent-issues')).toBeInTheDocument();
@@ -259,7 +301,7 @@ describe('Jira Fields', () => {
     fireEvent.change(checkbox, {
       target: { value: 'Person Task' },
     });
-    userEvent.selectOptions(await screen.findByTestId('prioritySelect'), ['Low']);
+    await userEvent.selectOptions(await screen.findByTestId('prioritySelect'), ['Low']);
 
     expect(await screen.findByTestId('issueTypeSelect')).toHaveValue('10007');
     expect(await screen.findByTestId('prioritySelect')).toHaveValue('Low');
@@ -280,7 +322,7 @@ describe('Jira Fields', () => {
       expect(screen.queryByTestId('search-parent-issues')).toBeInTheDocument();
     });
 
-    userEvent.click(await screen.findByTestId('submit-form'));
+    await userEvent.click(await screen.findByTestId('submit-form'));
 
     expect(await screen.findByText('Issue type is required')).toBeInTheDocument();
   });

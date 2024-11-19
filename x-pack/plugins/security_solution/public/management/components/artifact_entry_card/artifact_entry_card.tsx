@@ -37,6 +37,12 @@ export interface CommonArtifactEntryCardProps extends CommonProps {
    */
   policies?: MenuItemPropsByPolicyId;
   loadingPoliciesList?: boolean;
+  /**
+   * Artifact specific decorator component that receives the current artifact as a prop, and
+   * is displayed inside the card on the top of the card section,
+   * above the selected OS and the condition entries.
+   */
+  Decorator?: React.ComponentType<ArtifactEntryCardDecoratorProps>;
 }
 
 export interface ArtifactEntryCardProps extends CommonArtifactEntryCardProps {
@@ -44,6 +50,10 @@ export interface ArtifactEntryCardProps extends CommonArtifactEntryCardProps {
   hideDescription?: boolean;
   // A flag to hide comments section, false by default
   hideComments?: boolean;
+}
+
+export interface ArtifactEntryCardDecoratorProps extends CommonProps {
+  item: MaybeImmutable<AnyArtifact>;
 }
 
 /**
@@ -58,6 +68,7 @@ export const ArtifactEntryCard = memo<ArtifactEntryCardProps>(
     actions,
     hideDescription = false,
     hideComments = false,
+    Decorator,
     'data-test-subj': dataTestSubj,
     ...commonProps
   }) => {
@@ -103,6 +114,8 @@ export const ArtifactEntryCard = memo<ArtifactEntryCardProps>(
         <EuiHorizontalRule margin="none" />
 
         <CardSectionPanel className="bottom-section">
+          {Decorator && <Decorator item={item} data-test-subj={getTestId('decorator')} />}
+
           <CriteriaConditions
             os={artifact.os as CriteriaConditionsProps['os']}
             entries={artifact.entries}

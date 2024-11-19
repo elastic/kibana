@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -143,10 +144,6 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       if (args.bucket) {
         throw new Error(errors.splitByBucketAndColorFullBackgroundSpecifiedError());
       }
-
-      if (args.metric.length > 1 || input.rows.length > 1) {
-        throw new Error(errors.severalMetricsAndColorFullBackgroundSpecifiedError());
-      }
     }
 
     args.metric.forEach((metric) => validateAccessor(metric, input.columns));
@@ -197,7 +194,8 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
                 ...args.labelFont,
               },
             },
-            colorFullBackground: args.colorFullBackground,
+            colorFullBackground:
+              args.metric.length > 1 || input.rows.length > 1 ? false : args.colorFullBackground,
             style: {
               bgColor: args.colorMode === ColorMode.Background,
               labelColor: args.colorMode === ColorMode.Labels,

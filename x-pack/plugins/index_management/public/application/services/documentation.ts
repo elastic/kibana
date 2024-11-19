@@ -56,6 +56,7 @@ class DocumentationService {
   private mappingSourceFields: string = '';
   private mappingSourceFieldsDisable: string = '';
   private mappingStore: string = '';
+  private mappingSubobjects: string = '';
   private mappingTermVector: string = '';
   private mappingTypesRemoval: string = '';
   private percolate: string = '';
@@ -65,6 +66,7 @@ class DocumentationService {
   private indexStats: string = '';
   private bulkApi: string = '';
   private updateExistingDS: string = '';
+  private enrichIngestData: string = '';
 
   public setup(docLinks: DocLinksStart): void {
     const { links } = docLinks;
@@ -114,6 +116,7 @@ class DocumentationService {
     this.mappingSourceFields = links.elasticsearch.mappingSourceFields;
     this.mappingSourceFieldsDisable = links.elasticsearch.mappingSourceFieldsDisable;
     this.mappingStore = links.elasticsearch.mappingStore;
+    this.mappingSubobjects = links.elasticsearch.mappingSubobjects;
     this.mappingTermVector = links.elasticsearch.mappingTermVector;
     this.mappingTypesRemoval = links.elasticsearch.mappingTypesRemoval;
     this.percolate = links.query.percolate;
@@ -123,6 +126,7 @@ class DocumentationService {
     this.indexStats = links.apis.indexStats;
     this.bulkApi = links.enterpriseSearch.bulkApi;
     this.updateExistingDS = links.elasticsearch.tutorialUpdateExistingDataStream;
+    this.enrichIngestData = links.ingest.enrich;
   }
 
   public getEsDocsBase() {
@@ -327,6 +331,10 @@ class DocumentationService {
     return this.mappingEnabled;
   }
 
+  public getSubobjectsLink() {
+    return this.mappingSubobjects;
+  }
+
   public getRuntimeFields() {
     return this.runtimeFields;
   }
@@ -345,6 +353,10 @@ class DocumentationService {
 
   public getUpdateExistingDS() {
     return this.updateExistingDS;
+  }
+
+  public getEnrichIngestDataLink() {
+    return this.enrichIngestData;
   }
 
   public getWellKnownTextLink() {

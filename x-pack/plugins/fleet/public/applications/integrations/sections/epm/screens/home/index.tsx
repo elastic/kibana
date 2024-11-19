@@ -43,7 +43,7 @@ export const categoryExists = (category: string, categories: CategoryFacet[]) =>
 
 export const EPMHomePage: React.FC = () => {
   const authz = useAuthz();
-  const isAuthorizedToFetchSettings = authz.fleet.all;
+  const isAuthorizedToFetchSettings = authz.fleet.readSettings;
   const { data: settings, isFetchedAfterMount: isSettingsFetched } = useGetSettingsQuery({
     enabled: isAuthorizedToFetchSettings,
   });

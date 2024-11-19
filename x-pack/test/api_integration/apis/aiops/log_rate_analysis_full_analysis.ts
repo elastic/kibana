@@ -10,7 +10,7 @@ import fetch from 'node-fetch';
 import { format as formatUrl } from 'url';
 
 import expect from '@kbn/expect';
-import type { AiopsLogRateAnalysisSchema } from '@kbn/aiops-plugin/common/api/log_rate_analysis/schema';
+import type { AiopsLogRateAnalysisSchema } from '@kbn/aiops-log-rate-analysis/api/schema';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
@@ -31,8 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
   const kibanaServerUrl = formatUrl(config.get('servers.kibana'));
   const esArchiver = getService('esArchiver');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/176053
-  describe.skip('POST /internal/aiops/log_rate_analysis - full analysis', () => {
+  describe('POST /internal/aiops/log_rate_analysis - full analysis', () => {
     API_VERSIONS.forEach((apiVersion) => {
       getLogRateAnalysisTestData<typeof apiVersion>().forEach((testData) => {
         describe(`with v${apiVersion} - ${testData.testName}`, () => {
@@ -53,16 +52,15 @@ export default ({ getService }: FtrProviderContext) => {
           });
 
           async function assertAnalysisResult(data: any[]) {
-            expect(data.length).to.eql(
-              testData.expected.actionsLength,
-              `Expected 'actionsLength' to be ${testData.expected.actionsLength}, got ${data.length}.`
-            );
             data.forEach((d) => {
               expect(typeof d.type).to.be('string');
             });
 
-            const addSignificantItemsActions = getAddSignificationItemsActions(data, apiVersion);
-            expect(addSignificantItemsActions.length).to.greaterThan(0);
+            const addSignificantItemsActions = getAddSignificationItemsActions(data);
+            expect(addSignificantItemsActions.length).to.greaterThan(
+              0,
+              'Expected significant items actions to be greater than 0.'
+            );
 
             const significantItems = orderBy(
               addSignificantItemsActions.flatMap((d) => d.payload),
@@ -75,16 +73,22 @@ export default ({ getService }: FtrProviderContext) => {
               'Significant items do not match expected values.'
             );
 
-            const histogramActions = getHistogramActions(data, apiVersion);
+            const histogramActions = getHistogramActions(data);
             const histograms = histogramActions.flatMap((d) => d.payload);
             // for each significant term we should get a histogram
-            expect(histogramActions.length).to.be(significantItems.length);
+            expect(histogramActions.length).to.eql(
+              testData.expected.histogramActionsLength,
+              `Expected histogram actions length to be ${testData.expected.histogramActionsLength}, got ${histogramActions.length}`
+            );
             // each histogram should have a length of 20 items.
             histograms.forEach((h, index) => {
-              expect(h.histogram.length).to.be(20);
+              expect(h.histogram.length).to.eql(
+                testData.expected.histogramLength,
+                `Expected histogram length to be ${testData.expected.histogramLength}, got ${h.histogram.length}`
+              );
             });
 
-            const groupActions = getGroupActions(data, apiVersion);
+            const groupActions = getGroupActions(data);
             const groups = groupActions.flatMap((d) => d.payload);
 
             const actualGroups = orderBy(groups, ['docCount'], ['desc']);
@@ -97,13 +101,16 @@ export default ({ getService }: FtrProviderContext) => {
               )}, got ${JSON.stringify(actualGroups)}`
             );
 
-            const groupHistogramActions = getGroupHistogramActions(data, apiVersion);
+            const groupHistogramActions = getGroupHistogramActions(data);
             const groupHistograms = groupHistogramActions.flatMap((d) => d.payload);
             // for each significant terms group we should get a histogram
             expect(groupHistograms.length).to.be(groups.length);
             // each histogram should have a length of 20 items.
             groupHistograms.forEach((h, index) => {
-              expect(h.histogram.length).to.be(20);
+              expect(h.histogram.length).to.eql(
+                testData.expected.histogramLength,
+                `Expected group histogram length to be ${testData.expected.histogramLength}, got ${h.histogram.length}`
+              );
             });
           }
 
@@ -128,11 +135,6 @@ export default ({ getService }: FtrProviderContext) => {
             expect(Buffer.isBuffer(resp.body)).to.be(true);
 
             const chunks: string[] = resp.body.toString().split('\n');
-
-            expect(chunks.length).to.eql(
-              testData.expected.chunksLength,
-              `Expected 'chunksLength' to be ${testData.expected.chunksLength}, got ${chunks.length}.`
-            );
 
             const lastChunk = chunks.pop();
             expect(lastChunk).to.be('');

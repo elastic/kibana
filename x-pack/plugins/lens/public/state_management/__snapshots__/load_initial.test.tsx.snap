@@ -90,8 +90,8 @@ Object {
       "query": "",
     },
     "resolvedDateRange": Object {
-      "fromDate": "2021-01-10T04:00:00.000Z",
-      "toDate": "2021-01-10T08:00:00.000Z",
+      "fromDate": "now-7d",
+      "toDate": "now",
     },
     "searchSessionId": "sessionId-1",
     "sharingSavedObjectProps": Object {
@@ -100,9 +100,7 @@ Object {
     },
     "visualization": Object {
       "activeId": "testVis",
-      "state": Object {
-        "newState": "newState",
-      },
+      "state": "testVis initial state",
     },
   },
 }

@@ -12,6 +12,7 @@ const startMock = (): ServerlessPluginStart => ({
   setBreadcrumbs: jest.fn(),
   setProjectHome: jest.fn(),
   setSideNavComponentDeprecated: jest.fn(),
+  getNavigationCards: jest.fn(),
 });
 
 export const serverlessMock = {

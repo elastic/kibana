@@ -8,9 +8,10 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiCheckbox, EuiConfirmModal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { RequestDiagnosticsAdditionalMetrics } from '../../../../../../../common/types';
 import type { Agent } from '../../../../types';
 import {
   sendPostRequestDiagnostics,
@@ -35,15 +36,20 @@ export const AgentRequestDiagnosticsModal: React.FunctionComponent<Props> = ({
   const isSingleAgent = Array.isArray(agents) && agents.length === 1;
   const { getPath } = useLink();
   const history = useHistory();
+  const [cpuMetricsEnabled, setCPUMetricsEnabled] = useState(false);
 
   async function onSubmit() {
     try {
       setIsSubmitting(true);
+      const additionalMetrics = cpuMetricsEnabled ? [RequestDiagnosticsAdditionalMetrics.CPU] : [];
 
       const { error } = isSingleAgent
-        ? await sendPostRequestDiagnostics((agents[0] as Agent).id)
+        ? await sendPostRequestDiagnostics((agents[0] as Agent).id, {
+            additional_metrics: additionalMetrics,
+          })
         : await sendPostBulkRequestDiagnostics({
             agents: typeof agents === 'string' ? agents : agents.map((agent) => agent.id),
+            additional_metrics: additionalMetrics,
           });
       if (error) {
         throw error;
@@ -119,7 +125,16 @@ export const AgentRequestDiagnosticsModal: React.FunctionComponent<Props> = ({
       <p>
         <FormattedMessage
           id="xpack.fleet.requestDiagnostics.description"
-          defaultMessage="Diagnostics files are stored in Elasticsearch, and as such can incur storage costs."
+          defaultMessage="Consider changing the log level to debug before requesting a diagnostic. Diagnostics files are stored in Elasticsearch, and as such can incur storage costs. By default, files are deleted periodically through an ILM policy."
+        />
+      </p>
+      <p>
+        <EuiCheckbox
+          id="cpuMetricsCheckbox"
+          data-test-subj="cpuMetricsCheckbox"
+          label="Collect additional CPU metrics"
+          checked={cpuMetricsEnabled}
+          onChange={() => setCPUMetricsEnabled(!cpuMetricsEnabled)}
         />
       </p>
     </EuiConfirmModal>

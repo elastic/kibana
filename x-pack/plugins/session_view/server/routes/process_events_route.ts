@@ -21,6 +21,10 @@ import {
   ENTRY_SESSION_ENTITY_ID_PROPERTY,
   TIMESTAMP_PROPERTY,
   PROCESS_EVENT_FIELDS,
+  EVENT_ACTION_EXECUTED,
+  EVENT_ACTION_END,
+  EVENT_ACTION_EXEC,
+  EVENT_ACTION_FORK,
 } from '../../common/constants';
 import { ProcessEvent } from '../../common';
 import { searchAlerts } from './alerts_route';
@@ -39,6 +43,12 @@ export const registerProcessEventsRoute = (
     .addVersion(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason: `This route delegates authorization to Elasticsearch and it's not tied to a Kibana privilege.`,
+          },
+        },
         validate: {
           request: {
             query: schema.object({
@@ -111,9 +121,10 @@ export const fetchEventsAndScopedAlerts = async (
             {
               bool: {
                 should: [
-                  { term: { [EVENT_ACTION]: 'fork' } },
-                  { term: { [EVENT_ACTION]: 'exec' } },
-                  { term: { [EVENT_ACTION]: 'end' } },
+                  { term: { [EVENT_ACTION]: EVENT_ACTION_FORK } },
+                  { term: { [EVENT_ACTION]: EVENT_ACTION_EXEC } },
+                  { term: { [EVENT_ACTION]: EVENT_ACTION_EXECUTED } },
+                  { term: { [EVENT_ACTION]: EVENT_ACTION_END } },
                 ],
               },
             },

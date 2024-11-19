@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
 import { BehaviorSubject } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { trainedModelsApiProvider } from '../../../../services/ml_api_service/trained_models';
-import { InferenceBase, INPUT_TYPE, type InferResponse } from '../inference_base';
+import { map } from 'rxjs';
+import type { trainedModelsApiProvider } from '../../../../services/ml_api_service/trained_models';
+import type { INPUT_TYPE } from '../inference_base';
+import { InferenceBase, type InferResponse } from '../inference_base';
 import { getTextExpansionOutputComponent } from './text_expansion_output';
 import { getTextExpansionInput } from './text_expansion_input';
 

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -16,7 +17,7 @@ import type { Rule } from '@kbn/alerting-plugin/common';
 import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { ISearchSource, SerializedSearchSourceFields, getTime } from '@kbn/data-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { MarkdownSimple } from '@kbn/kibana-react-plugin/public';
+import { Markdown } from '@kbn/shared-ux-markdown';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Filter } from '@kbn/es-query';
 import { DiscoverAppLocatorParams } from '../../../common/app_locator';
@@ -84,10 +85,7 @@ export const getAlertUtils = (
       });
       toastNotifications.addDanger({
         title: errorTitle,
-        text: toMountPoint(<MarkdownSimple>{error.message}</MarkdownSimple>, {
-          theme: core.theme,
-          i18n: core.i18n,
-        }),
+        text: toMountPoint(<Markdown readOnly>{error.message}</Markdown>, core),
       });
       throw new Error(errorTitle);
     }
@@ -107,10 +105,7 @@ export const getAlertUtils = (
       });
       toastNotifications.addDanger({
         title: errorTitle,
-        text: toMountPoint(<MarkdownSimple>{error.message}</MarkdownSimple>, {
-          theme: core.theme,
-          i18n: core.i18n,
-        }),
+        text: toMountPoint(<Markdown markdownContent={error.message} readOnly />, core),
       });
       throw new Error(errorTitle);
     }

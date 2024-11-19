@@ -10,6 +10,7 @@ import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import {
   ActionTypeRegistryContract as ConnectorTypeRegistryContract,
   InMemoryConnector,
+  UNALLOWED_FOR_UNSECURE_EXECUTION_CONNECTOR_TYPE_IDS,
 } from './types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 import { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
@@ -18,9 +19,6 @@ import { ExecutionResponseItem, ExecutionResponseType } from './create_execute_f
 import { ActionsConfigurationUtilities } from './actions_config';
 import { hasReachedTheQueuedActionsLimit } from './lib/has_reached_queued_actions_limit';
 
-// This allowlist should only contain connector types that don't require API keys for
-// execution.
-const ALLOWED_CONNECTOR_TYPE_IDS = ['.email'];
 interface CreateBulkUnsecuredExecuteFunctionOptions {
   taskManager: TaskManagerStartContract;
   connectorTypeRegistry: ConnectorTypeRegistryContract;
@@ -98,7 +96,7 @@ export function createBulkUnsecuredExecutionEnqueuerFunction({
         connectorTypeRegistry.ensureActionTypeEnabled(actionTypeId);
       }
 
-      if (!ALLOWED_CONNECTOR_TYPE_IDS.includes(actionTypeId)) {
+      if (UNALLOWED_FOR_UNSECURE_EXECUTION_CONNECTOR_TYPE_IDS.includes(actionTypeId)) {
         throw new Error(
           `${actionTypeId} actions cannot be scheduled for unsecured actions execution`
         );

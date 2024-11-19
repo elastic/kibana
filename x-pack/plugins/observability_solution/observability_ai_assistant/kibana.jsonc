@@ -1,0 +1,38 @@
+{
+  "type": "plugin",
+  "id": "@kbn/observability-ai-assistant-plugin",
+  "owner": [
+    "@elastic/obs-ai-assistant"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "observabilityAIAssistant",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "observabilityAIAssistant"
+    ],
+    "requiredPlugins": [
+      "actions",
+      "features",
+      "licensing",
+      "security",
+      "taskManager",
+      "dataViews"
+    ],
+    "optionalPlugins": [
+      "cloud",
+      "serverless"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "kibanaUtils"
+    ],
+    "runtimePluginDependencies": [
+      "ml"
+    ],
+    "extraPublicDirs": []
+  }
+}

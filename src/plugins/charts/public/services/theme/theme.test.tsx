@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { from } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { take } from 'rxjs';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { render, act as renderAct } from '@testing-library/react';
 
@@ -18,7 +19,7 @@ import { ThemeService } from './theme';
 import { coreMock } from '@kbn/core/public/mocks';
 
 const createTheme$Mock = (mode: boolean) => {
-  return from([{ darkMode: mode }]);
+  return from([{ darkMode: mode, name: 'amsterdam' }]);
 };
 
 const { theme: setUpMockTheme } = coreMock.createSetup();
@@ -36,6 +37,7 @@ describe('ThemeService', () => {
 
       expect(await themeService.darkModeEnabled$.pipe(take(1)).toPromise()).toStrictEqual({
         darkMode: false,
+        name: 'amsterdam',
       });
     });
 
@@ -46,6 +48,7 @@ describe('ThemeService', () => {
 
       expect(await themeService.darkModeEnabled$.pipe(take(1)).toPromise()).toStrictEqual({
         darkMode: true,
+        name: 'amsterdam',
       });
     });
   });

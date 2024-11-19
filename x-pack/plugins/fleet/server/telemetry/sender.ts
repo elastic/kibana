@@ -12,7 +12,11 @@ import { cloneDeep } from 'lodash';
 
 import axios from 'axios';
 
-import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { InfoResponse, LicenseGetResponse } from '@elastic/elasticsearch/lib/api/types';
+
+import { appContextService } from '../services';
+
+import { exhaustMap, Subject, takeUntil, timer } from 'rxjs';
 
 import { TelemetryQueue } from './queue';
 
@@ -26,15 +30,16 @@ export class TelemetryEventsSender {
   private readonly initialCheckDelayMs = 10 * 1000;
   private readonly checkIntervalMs = 30 * 1000;
   private readonly logger: Logger;
+  private readonly stop$ = new Subject<void>();
 
   private telemetryStart?: TelemetryPluginStart;
   private telemetrySetup?: TelemetryPluginSetup;
-  private intervalId?: NodeJS.Timeout;
   private isSending = false;
   private queuesPerChannel: { [channel: string]: TelemetryQueue<any> } = {};
   private isOptedIn?: boolean = true; // Assume true until the first check
   private esClient?: ElasticsearchClient;
   private clusterInfo?: InfoResponse;
+  private licenseInfo?: LicenseGetResponse;
 
   constructor(logger: Logger) {
     this.logger = logger;
@@ -48,18 +53,19 @@ export class TelemetryEventsSender {
     this.telemetryStart = telemetryStart;
     this.esClient = core?.elasticsearch.client.asInternalUser;
     this.clusterInfo = await this.fetchClusterInfo();
+    this.licenseInfo = await this.fetchLicenseInfo();
 
     this.logger.debug(`Starting local task`);
-    setTimeout(() => {
-      this.sendIfDue();
-      this.intervalId = setInterval(() => this.sendIfDue(), this.checkIntervalMs);
-    }, this.initialCheckDelayMs);
+    timer(this.initialCheckDelayMs, this.checkIntervalMs)
+      .pipe(
+        takeUntil(this.stop$),
+        exhaustMap(() => this.sendIfDue())
+      )
+      .subscribe();
   }
 
   public stop() {
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-    }
+    this.stop$.next();
   }
 
   public queueTelemetryEvents<T extends FleetTelemetryChannel>(
@@ -116,6 +122,17 @@ export class TelemetryEventsSender {
     }
   }
 
+  private async fetchLicenseInfo() {
+    try {
+      if (this.esClient === undefined || this.esClient === null) {
+        throw Error('elasticsearch client is unavailable: cannot retrieve license infomation');
+      }
+      return await this.esClient.license.get();
+    } catch (e) {
+      this.logger.debug(`Error fetching license information: ${e}`);
+    }
+  }
+
   public async sendEvents(
     telemetryUrl: string,
     clusterInfo: InfoResponse | undefined,
@@ -131,10 +148,16 @@ export class TelemetryEventsSender {
 
       queue.clearEvents();
 
-      this.logger.debug(JSON.stringify(events));
+      const toSend = events.map((event) => ({
+        ...event,
+        license_issued_to: this.licenseInfo?.license.issued_to,
+        deployment_id: appContextService.getCloud()?.deploymentId,
+      }));
+
+      this.logger.debug(() => JSON.stringify(toSend));
 
       await this.send(
-        events,
+        toSend,
         telemetryUrl,
         clusterInfo?.cluster_uuid,
         clusterInfo?.version?.number
@@ -176,10 +199,12 @@ export class TelemetryEventsSender {
         },
         timeout: 5000,
       });
-      this.logger.debug(`Events sent!. Response: ${resp.status} ${JSON.stringify(resp.data)}`);
+      this.logger.debug(
+        () => `Events sent!. Response: ${resp.status} ${JSON.stringify(resp.data)}`
+      );
     } catch (err) {
       this.logger.debug(
-        `Error sending events: ${err?.response?.status} ${JSON.stringify(err.response.data)}`
+        () => `Error sending events: ${err?.response?.status} ${JSON.stringify(err.response.data)}`
       );
     }
   }

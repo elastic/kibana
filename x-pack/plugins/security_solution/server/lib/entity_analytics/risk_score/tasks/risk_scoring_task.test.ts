@@ -10,8 +10,6 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
-
-import type { ExperimentalFeatures } from '../../../../../common';
 import type { RiskScoreService } from '../risk_score_service';
 import { riskScoreServiceMock } from '../risk_score_service.mock';
 import { riskScoringTaskMock } from './risk_scoring_task.mock';
@@ -21,9 +19,19 @@ import {
   startRiskScoringTask,
   removeRiskScoringTask,
   runTask,
+  getRiskScoringTaskStatus,
+  scheduleNow,
 } from './risk_scoring_task';
+import type { ConfigType } from '../../../../config';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
 
 const ISO_8601_PATTERN = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+
+const entityAnalyticsConfig = {
+  riskEngine: {
+    alertSampleSizePerShard: 10_000,
+  },
+} as unknown as ConfigType['entityAnalytics'];
 
 describe('Risk Scoring Task', () => {
   let mockRiskEngineDataClient: ReturnType<typeof riskEngineDataClientMock.create>;
@@ -48,12 +56,13 @@ describe('Risk Scoring Task', () => {
     it('registers the task with TaskManager', () => {
       expect(mockTaskManagerSetup.registerTaskDefinitions).not.toHaveBeenCalled();
       registerRiskScoringTask({
-        experimentalFeatures: {} as ExperimentalFeatures,
         getStartServices: mockCore.getStartServices,
         kibanaVersion: '8.10.0',
         taskManager: mockTaskManagerSetup,
         logger: mockLogger,
         telemetry: mockTelemetry,
+        entityAnalyticsConfig,
+        auditLogger: undefined,
       });
       expect(mockTaskManagerSetup.registerTaskDefinitions).toHaveBeenCalled();
     });
@@ -61,12 +70,13 @@ describe('Risk Scoring Task', () => {
     it('does nothing if TaskManager is not available', () => {
       expect(mockTaskManagerSetup.registerTaskDefinitions).not.toHaveBeenCalled();
       registerRiskScoringTask({
-        experimentalFeatures: {} as ExperimentalFeatures,
         getStartServices: mockCore.getStartServices,
         kibanaVersion: '8.10.0',
         taskManager: undefined,
         logger: mockLogger,
         telemetry: mockTelemetry,
+        entityAnalyticsConfig,
+        auditLogger: undefined,
       });
       expect(mockTaskManagerSetup.registerTaskDefinitions).not.toHaveBeenCalled();
     });
@@ -190,7 +200,7 @@ describe('Risk Scoring Task', () => {
         index: 'index',
         runtimeMappings: {},
       });
-      mockRiskScoreService.getConfiguration.mockResolvedValue({
+      mockRiskScoreService.getConfigurationWithDefaults.mockResolvedValue({
         dataViewId: 'data_view_id',
         enabled: true,
         filter: {},
@@ -198,6 +208,7 @@ describe('Risk Scoring Task', () => {
         interval: '1h',
         pageSize: 10_000,
         range: { start: 'now-30d', end: 'now' },
+        alertSampleSizePerShard: 10_000,
       });
       mockIsCancelled = jest.fn().mockReturnValue(false);
 
@@ -220,6 +231,7 @@ describe('Risk Scoring Task', () => {
           taskInstance: riskScoringTaskInstanceMock,
           isCancelled: mockIsCancelled,
           telemetry: mockTelemetry,
+          entityAnalyticsConfig,
         });
         expect(mockRiskScoreService.calculateAndPersistScores).toHaveBeenCalledTimes(1);
       });
@@ -247,9 +259,10 @@ describe('Risk Scoring Task', () => {
           taskInstance: riskScoringTaskInstanceMock,
           isCancelled: mockIsCancelled,
           telemetry: mockTelemetry,
+          entityAnalyticsConfig,
         });
 
-        expect(mockRiskScoreService.getConfiguration).toHaveBeenCalledTimes(1);
+        expect(mockRiskScoreService.getConfigurationWithDefaults).toHaveBeenCalledTimes(1);
       });
 
       it('invokes the risk score service once for each page of scores', async () => {
@@ -259,12 +272,13 @@ describe('Risk Scoring Task', () => {
           taskInstance: riskScoringTaskInstanceMock,
           isCancelled: mockIsCancelled,
           telemetry: mockTelemetry,
+          entityAnalyticsConfig,
         });
         expect(mockRiskScoreService.calculateAndPersistScores).toHaveBeenCalledTimes(2);
       });
 
       it('invokes the risk score service with the persisted configuration', async () => {
-        mockRiskScoreService.getConfiguration.mockResolvedValueOnce({
+        mockRiskScoreService.getConfigurationWithDefaults.mockResolvedValueOnce({
           dataViewId: 'data_view_id',
           enabled: true,
           filter: {
@@ -274,6 +288,7 @@ describe('Risk Scoring Task', () => {
           interval: '2h',
           pageSize: 11_111,
           range: { start: 'now-30d', end: 'now' },
+          alertSampleSizePerShard: 10_000,
         });
         await runTask({
           getRiskScoreService,
@@ -281,6 +296,7 @@ describe('Risk Scoring Task', () => {
           taskInstance: riskScoringTaskInstanceMock,
           isCancelled: mockIsCancelled,
           telemetry: mockTelemetry,
+          entityAnalyticsConfig,
         });
 
         expect(mockRiskScoreService.calculateAndPersistScores).toHaveBeenCalledWith(
@@ -300,7 +316,7 @@ describe('Risk Scoring Task', () => {
 
       describe('when no identifier type is configured', () => {
         beforeEach(() => {
-          mockRiskScoreService.getConfiguration.mockResolvedValue({
+          mockRiskScoreService.getConfigurationWithDefaults.mockResolvedValue({
             dataViewId: 'data_view_id',
             enabled: true,
             filter: {},
@@ -308,6 +324,7 @@ describe('Risk Scoring Task', () => {
             interval: '1h',
             pageSize: 10_000,
             range: { start: 'now-30d', end: 'now' },
+            alertSampleSizePerShard: 10_000,
           });
           // add additional mock responses for the additional identifier calls
           mockRiskScoreService.calculateAndPersistScores
@@ -330,6 +347,7 @@ describe('Risk Scoring Task', () => {
             taskInstance: riskScoringTaskInstanceMock,
             isCancelled: mockIsCancelled,
             telemetry: mockTelemetry,
+            entityAnalyticsConfig,
           });
           expect(mockRiskScoreService.calculateAndPersistScores).toHaveBeenCalledTimes(4);
 
@@ -354,6 +372,7 @@ describe('Risk Scoring Task', () => {
           taskInstance: riskScoringTaskInstanceMock,
           isCancelled: mockIsCancelled,
           telemetry: mockTelemetry,
+          entityAnalyticsConfig,
         });
 
         expect(initialState).not.toEqual(nextState);
@@ -367,7 +386,7 @@ describe('Risk Scoring Task', () => {
 
       describe('short-circuiting', () => {
         it('does not execute if the risk engine is not enabled', async () => {
-          mockRiskScoreService.getConfiguration.mockResolvedValueOnce({
+          mockRiskScoreService.getConfigurationWithDefaults.mockResolvedValueOnce({
             dataViewId: 'data_view_id',
             enabled: false,
             filter: {
@@ -377,6 +396,7 @@ describe('Risk Scoring Task', () => {
             interval: '2h',
             pageSize: 11_111,
             range: { start: 'now-30d', end: 'now' },
+            alertSampleSizePerShard: 10_000,
           });
           await runTask({
             getRiskScoreService,
@@ -384,6 +404,7 @@ describe('Risk Scoring Task', () => {
             taskInstance: riskScoringTaskInstanceMock,
             isCancelled: mockIsCancelled,
             telemetry: mockTelemetry,
+            entityAnalyticsConfig,
           });
 
           expect(mockRiskScoreService.calculateAndPersistScores).not.toHaveBeenCalled();
@@ -391,13 +412,14 @@ describe('Risk Scoring Task', () => {
         });
 
         it('does not execute if the configuration is not found', async () => {
-          mockRiskScoreService.getConfiguration.mockResolvedValueOnce(null);
+          mockRiskScoreService.getConfigurationWithDefaults.mockResolvedValueOnce(null);
           await runTask({
             getRiskScoreService,
             logger: mockLogger,
             taskInstance: riskScoringTaskInstanceMock,
             isCancelled: mockIsCancelled,
             telemetry: mockTelemetry,
+            entityAnalyticsConfig,
           });
 
           expect(mockRiskScoreService.calculateAndPersistScores).not.toHaveBeenCalled();
@@ -413,6 +435,7 @@ describe('Risk Scoring Task', () => {
             taskInstance: riskScoringTaskInstanceMock,
             isCancelled: mockIsCancelled,
             telemetry: mockTelemetry,
+            entityAnalyticsConfig,
           });
 
           expect(mockRiskScoreService.calculateAndPersistScores).not.toHaveBeenCalled();
@@ -434,6 +457,7 @@ describe('Risk Scoring Task', () => {
             logger: mockLogger,
             taskInstance: riskScoringTaskInstanceMock,
             telemetry: mockTelemetry,
+            entityAnalyticsConfig,
           });
 
           expect(mockRiskScoreService.calculateAndPersistScores).not.toHaveBeenCalled();
@@ -446,23 +470,12 @@ describe('Risk Scoring Task', () => {
             logger: mockLogger,
             taskInstance: riskScoringTaskInstanceMock,
             telemetry: mockTelemetry,
+            entityAnalyticsConfig,
           });
 
           expect(mockLogger.info).toHaveBeenCalledWith(
             expect.stringContaining('task was cancelled')
           );
-        });
-
-        it('schedules the transform to run now', async () => {
-          await runTask({
-            getRiskScoreService,
-            isCancelled: mockIsCancelled,
-            logger: mockLogger,
-            taskInstance: riskScoringTaskInstanceMock,
-            telemetry: mockTelemetry,
-          });
-
-          expect(mockRiskScoreService.scheduleLatestTransformNow).toHaveBeenCalledTimes(1);
         });
       });
 
@@ -474,12 +487,14 @@ describe('Risk Scoring Task', () => {
             logger: mockLogger,
             taskInstance: riskScoringTaskInstanceMock,
             telemetry: mockTelemetry,
+            entityAnalyticsConfig,
           });
 
           expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('risk_score_execution_success', {
             interval: '1h',
             scoresWritten: 10,
             taskDurationInSeconds: 0,
+            alertSampleSizePerShard: 10000,
           });
         });
 
@@ -490,9 +505,23 @@ describe('Risk Scoring Task', () => {
             logger: mockLogger,
             taskInstance: riskScoringTaskInstanceMock,
             telemetry: mockTelemetry,
+            entityAnalyticsConfig,
           });
 
           expect(mockRiskScoreService.scheduleLatestTransformNow).toHaveBeenCalledTimes(1);
+        });
+
+        it('refreshes the risk score index', async () => {
+          await runTask({
+            getRiskScoreService,
+            isCancelled: mockIsCancelled,
+            logger: mockLogger,
+            taskInstance: riskScoringTaskInstanceMock,
+            telemetry: mockTelemetry,
+            entityAnalyticsConfig,
+          });
+
+          expect(mockRiskScoreService.refreshRiskScoreIndex).toHaveBeenCalledTimes(1);
         });
       });
 
@@ -512,6 +541,7 @@ describe('Risk Scoring Task', () => {
               logger: mockLogger,
               taskInstance: riskScoringTaskInstanceMock,
               telemetry: mockTelemetry,
+              entityAnalyticsConfig,
             });
           } catch (err) {
             expect(mockTelemetry.reportEvent).toHaveBeenCalledTimes(1);
@@ -530,6 +560,7 @@ describe('Risk Scoring Task', () => {
               logger: mockLogger,
               taskInstance: riskScoringTaskInstanceMock,
               telemetry: mockTelemetry,
+              entityAnalyticsConfig,
             })
           ).rejects.toThrow();
 
@@ -545,6 +576,7 @@ describe('Risk Scoring Task', () => {
             logger: mockLogger,
             taskInstance: riskScoringTaskInstanceMock,
             telemetry: mockTelemetry,
+            entityAnalyticsConfig,
           });
 
           expect(mockTelemetry.reportEvent).toHaveBeenCalledWith(
@@ -553,10 +585,70 @@ describe('Risk Scoring Task', () => {
               interval: '1h',
               scoresWritten: 0,
               taskDurationInSeconds: 0,
+              alertSampleSizePerShard: 10000,
             }
           );
         });
       });
+    });
+  });
+
+  describe('getRiskScoringTaskStatus()', () => {
+    it('returns the task status', async () => {
+      const runAt = new Date();
+      const startedAt = new Date();
+      mockTaskManagerStart.get.mockResolvedValueOnce(
+        Promise.resolve({
+          id: '123',
+          scheduledAt: new Date(),
+          attempts: 0,
+          status: TaskStatus.Idle,
+          startedAt,
+          runAt,
+          retryAt: new Date(),
+          ownerId: null,
+          taskType: 'test',
+          params: {},
+          state: {},
+        })
+      );
+
+      const status = await getRiskScoringTaskStatus({
+        taskManager: mockTaskManagerStart,
+        namespace: 'default',
+      });
+
+      expect(status).toEqual({
+        runAt: runAt.toISOString(),
+        status: 'idle',
+        startedAt: startedAt.toISOString(),
+      });
+    });
+  });
+
+  describe('scheduleNow()', () => {
+    it('schedules the task to run now', async () => {
+      await scheduleNow({
+        taskManager: mockTaskManagerStart,
+        logger: mockLogger,
+        namespace: 'default',
+      });
+
+      expect(mockTaskManagerStart.runSoon).toHaveBeenCalledWith(
+        'risk_engine:risk_scoring:default:0.0.1'
+      );
+    });
+
+    it('logs an error if the task could not be scheduled', async () => {
+      mockTaskManagerStart.runSoon.mockRejectedValueOnce(new Error('whoops'));
+
+      await expect(
+        scheduleNow({
+          taskManager: mockTaskManagerStart,
+          logger: mockLogger,
+          namespace: 'default',
+        })
+      ).rejects.toThrowError('whoops');
     });
   });
 });

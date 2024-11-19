@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { FunctionComponent, createElement } from 'react';
-
 import { EUI_STYLES_GLOBAL, EUI_STYLES_UTILS } from '@kbn/core-base-common';
+import { i18n } from '@kbn/i18n';
 import { RenderingMetadata } from '../types';
 import { Fonts } from './fonts';
-import { Styles } from './styles';
 import { Logo } from './logo';
+import { Styles } from './styles';
 
 interface Props {
   metadata: RenderingMetadata;
@@ -24,8 +25,8 @@ export const Template: FunctionComponent<Props> = ({
     locale,
     darkMode,
     stylesheetPaths,
+    scriptPaths,
     injectedMetadata,
-    i18n,
     bootstrapScriptUrl,
     strictCsp,
     customBranding,
@@ -56,6 +57,9 @@ export const Template: FunctionComponent<Props> = ({
         <meta name={EUI_STYLES_GLOBAL} />
         <meta name="emotion" />
         <Styles darkMode={darkMode} stylesheetPaths={stylesheetPaths} />
+        {scriptPaths.map((path) => (
+          <script key={path} src={path} />
+        ))}
         {/* Inject stylesheets into the <head> before scripts so that KP plugins with bundled styles will override them */}
         <meta name="add-styles-here" />
         <meta name="add-scripts-here" />
@@ -77,12 +81,18 @@ export const Template: FunctionComponent<Props> = ({
             {logo}
             <div
               className="kbnWelcomeText"
-              data-error-message={i18n('core.ui.welcomeErrorMessage', {
+              data-error-message-title={i18n.translate('core.ui.welcomeErrorMessageTitle', {
+                defaultMessage: 'Elastic did not load properly',
+              })}
+              data-error-message-text={i18n.translate('core.ui.welcomeErrorMessageText', {
                 defaultMessage:
-                  'Elastic did not load properly. Check the server output for more information.',
+                  'Please reload this page. If the issue persists, check the browser console and server logs.',
+              })}
+              data-error-message-reload={i18n.translate('core.ui.welcomeErrorReloadButton', {
+                defaultMessage: 'Reload',
               })}
             >
-              {i18n('core.ui.welcomeMessage', {
+              {i18n.translate('core.ui.welcomeMessage', {
                 defaultMessage: 'Loading Elastic',
               })}
             </div>
@@ -94,12 +104,12 @@ export const Template: FunctionComponent<Props> = ({
           {logo}
 
           <h2 className="kbnWelcomeTitle">
-            {i18n('core.ui.legacyBrowserTitle', {
+            {i18n.translate('core.ui.legacyBrowserTitle', {
               defaultMessage: 'Please upgrade your browser',
             })}
           </h2>
           <div className="kbnWelcomeText">
-            {i18n('core.ui.legacyBrowserMessage', {
+            {i18n.translate('core.ui.legacyBrowserMessage', {
               defaultMessage:
                 'This Elastic installation has strict security requirements enabled that your current browser does not meet.',
             })}
@@ -107,7 +117,8 @@ export const Template: FunctionComponent<Props> = ({
         </div>
 
         <script>
-          {`
+          {`// kbnUnsafeInlineTest do not remove this comment:
+            //   it is used for filtering out expected CSP failures, and must be the first piece of content in this script block.
             // Since this is an unsafe inline script, this code will not run
             // in browsers that support content security policy(CSP). This is
             // intentional as we check for the existence of __kbnCspNotEnforced__ in

@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, useContext } from 'react';
+import React, { FC, PropsWithChildren, useContext } from 'react';
 
 import {
   FieldCategoryKibanaProvider,
@@ -41,7 +42,10 @@ export const FormProvider = ({ children, ...services }: FormProviderProps) => {
 /**
  * Kibana-specific Provider that maps Kibana plugins and services to a {@link FormProvider}.
  */
-export const FormKibanaProvider: FC<FormKibanaDependencies> = ({ children, ...deps }) => {
+export const FormKibanaProvider: FC<PropsWithChildren<FormKibanaDependencies>> = ({
+  children,
+  ...deps
+}) => {
   const { settings, notifications, docLinks, theme, i18n } = deps;
 
   const services: Services = {

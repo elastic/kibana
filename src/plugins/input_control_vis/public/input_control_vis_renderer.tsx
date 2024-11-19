@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
@@ -19,12 +20,13 @@ export const getInputControlVisRenderer: (
   name: 'input_control_vis',
   reuseDomNode: true,
   render: async (domNode, { visConfig }, handlers) => {
+    const [coreStart] = await deps.core.getStartServices();
     let registeredController = inputControlVisRegistry.get(domNode);
 
     if (!registeredController) {
       const { createInputControlVisController } = await import('./vis_controller');
 
-      registeredController = createInputControlVisController(deps, handlers, domNode);
+      registeredController = createInputControlVisController(coreStart, deps, handlers, domNode);
       inputControlVisRegistry.set(domNode, registeredController);
 
       handlers.onDestroy(() => {

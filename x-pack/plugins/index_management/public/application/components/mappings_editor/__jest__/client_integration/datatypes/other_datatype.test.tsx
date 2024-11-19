@@ -11,6 +11,15 @@ import { componentHelpers, MappingsEditorTestBed } from '../helpers';
 
 const { setup, getMappingsEditorDataFactory } = componentHelpers.mappingsEditor;
 
+jest.mock('../../../../component_templates/component_templates_context', () => ({
+  useComponentTemplatesContext: jest.fn().mockReturnValue({
+    toasts: {
+      addError: jest.fn(),
+      addSuccess: jest.fn(),
+    },
+  }),
+}));
+
 describe('Mappings editor: other datatype', () => {
   /**
    * Variable to store the mappings data forwarded to the consumer component

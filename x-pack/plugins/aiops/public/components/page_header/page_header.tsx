@@ -6,9 +6,10 @@
  */
 
 import { css } from '@emotion/react';
-import React, { FC, useCallback, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiPageHeader } from '@elastic/eui';
+import { EuiPageHeader } from '@elastic/eui';
 
 import { useUrlState } from '@kbn/ml-url-state';
 import { useStorage } from '@kbn/ml-local-storage';
@@ -50,7 +51,7 @@ export const PageHeader: FC = () => {
     autoRefreshSelector: true,
   });
 
-  const updateTimeState: FullTimeRangeSelectorProps['callback'] = useCallback(
+  const updateTimeState = useCallback<NonNullable<FullTimeRangeSelectorProps['callback']>>(
     (update) => {
       setGlobalState({
         time: {
@@ -70,29 +71,29 @@ export const PageHeader: FC = () => {
   return (
     <EuiPageHeader
       pageTitle={<div css={dataViewTitleHeader}>{dataView.getName()}</div>}
+      rightSideGroupProps={{
+        gutterSize: 's',
+        'data-test-subj': 'aiopsTimeRangeSelectorSection',
+      }}
       rightSideItems={[
-        <EuiFlexGroup gutterSize="s" data-test-subj="aiopsTimeRangeSelectorSection">
-          {hasValidTimeField ? (
-            <EuiFlexItem grow={false}>
-              <FullTimeRangeSelector
-                frozenDataPreference={frozenDataPreference}
-                setFrozenDataPreference={setFrozenDataPreference}
-                dataView={dataView}
-                query={undefined}
-                disabled={false}
-                timefilter={timefilter}
-                callback={updateTimeState}
-              />
-            </EuiFlexItem>
-          ) : null}
-          <DatePickerWrapper
-            isAutoRefreshOnly={!hasValidTimeField}
-            showRefresh={!hasValidTimeField}
-            width="full"
-            flexGroup={false}
+        <DatePickerWrapper
+          isAutoRefreshOnly={!hasValidTimeField}
+          showRefresh={!hasValidTimeField}
+          width="full"
+          flexGroup={!hasValidTimeField}
+        />,
+        hasValidTimeField && (
+          <FullTimeRangeSelector
+            frozenDataPreference={frozenDataPreference}
+            setFrozenDataPreference={setFrozenDataPreference}
+            dataView={dataView}
+            query={undefined}
+            disabled={false}
+            timefilter={timefilter}
+            callback={updateTimeState}
           />
-        </EuiFlexGroup>,
-      ]}
+        ),
+      ].filter(Boolean)}
     />
   );
 };

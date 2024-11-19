@@ -1,24 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { errors } from '@elastic/elasticsearch';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { Duration } from 'moment';
 import type { Observable } from 'rxjs';
-import { firstValueFrom, from, of, timer } from 'rxjs';
 import {
   catchError,
   distinctUntilChanged,
   exhaustMap,
+  firstValueFrom,
+  from,
   map,
+  of,
   shareReplay,
   takeWhile,
-} from 'rxjs/operators';
+  timer,
+} from 'rxjs';
 import tls from 'tls';
 
 import type {
@@ -393,7 +397,7 @@ export class ElasticsearchService {
         log: this.logger,
         kibanaVersion: this.kibanaVersion,
         ignoreVersionMismatch: false,
-        esVersionCheckInterval: -1, // Passing a negative number here will result in immediate completion after the first value is emitted
+        healthCheckInterval: -1, // Passing a negative number here will result in immediate completion after the first value is emitted
       })
     );
   }

@@ -8,23 +8,22 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { EuiTabs, EuiTab, EuiSpacer } from '@elastic/eui';
-
 import { noop } from 'lodash/fp';
-import type { TimelineTypeLiteralWithNull } from '../../../../common/api/timeline';
-import { TimelineType } from '../../../../common/api/timeline';
+import { type TimelineType, TimelineTypeEnum } from '../../../../common/api/timeline';
 import { SecurityPageName } from '../../../app/types';
 import { getTimelineTabsUrl, useFormatUrl } from '../../../common/components/link_to';
 import * as i18n from './translations';
 import type { TimelineTab } from './types';
 import { TimelineTabsStyle } from './types';
 import { useKibana } from '../../../common/lib/kibana';
+
 export interface UseTimelineTypesArgs {
   defaultTimelineCount?: number | null;
   templateTimelineCount?: number | null;
 }
 
 export interface UseTimelineTypesResult {
-  timelineType: TimelineTypeLiteralWithNull;
+  timelineType: TimelineType | null;
   timelineTabs: JSX.Element;
   timelineFilters: JSX.Element;
 }
@@ -36,17 +35,21 @@ export const useTimelineTypes = ({
   const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.timelines);
   const { navigateToUrl } = useKibana().services.application;
   const { tabName } = useParams<{ pageName: SecurityPageName; tabName: string }>();
-  const [timelineType, setTimelineTypes] = useState<TimelineTypeLiteralWithNull>(
-    tabName === TimelineType.default || tabName === TimelineType.template
+  const [timelineType, setTimelineTypes] = useState<TimelineType | null>(
+    tabName === TimelineTypeEnum.default || tabName === TimelineTypeEnum.template
       ? tabName
-      : TimelineType.default
+      : TimelineTypeEnum.default
   );
 
-  const timelineUrl = formatUrl(getTimelineTabsUrl(TimelineType.default, urlSearch));
-  const templateUrl = formatUrl(getTimelineTabsUrl(TimelineType.template, urlSearch));
+  const timelineUrl = useMemo(() => {
+    return formatUrl(getTimelineTabsUrl(TimelineTypeEnum.default, urlSearch));
+  }, [formatUrl, urlSearch]);
+  const templateUrl = useMemo(() => {
+    return formatUrl(getTimelineTabsUrl(TimelineTypeEnum.template, urlSearch));
+  }, [formatUrl, urlSearch]);
 
   const goToTimeline = useCallback(
-    (ev) => {
+    (ev: React.SyntheticEvent) => {
       ev.preventDefault();
       navigateToUrl(timelineUrl);
     },
@@ -54,16 +57,17 @@ export const useTimelineTypes = ({
   );
 
   const goToTemplateTimeline = useCallback(
-    (ev) => {
+    (ev: React.SyntheticEvent) => {
       ev.preventDefault();
       navigateToUrl(templateUrl);
     },
     [navigateToUrl, templateUrl]
   );
+
   const getFilterOrTabs: (timelineTabsStyle: TimelineTabsStyle) => TimelineTab[] = useCallback(
     (timelineTabsStyle: TimelineTabsStyle) => [
       {
-        id: TimelineType.default,
+        id: TimelineTypeEnum.default,
         name: i18n.TAB_TIMELINES,
         href: timelineUrl,
         disabled: false,
@@ -71,7 +75,7 @@ export const useTimelineTypes = ({
         onClick: timelineTabsStyle === TimelineTabsStyle.tab ? goToTimeline : noop,
       },
       {
-        id: TimelineType.template,
+        id: TimelineTypeEnum.template,
         name: i18n.TAB_TEMPLATES,
         href: templateUrl,
         disabled: false,
@@ -83,7 +87,7 @@ export const useTimelineTypes = ({
   );
 
   const onFilterClicked = useCallback(
-    (tabId, tabStyle: TimelineTabsStyle) => {
+    (tabId: TimelineType, tabStyle: TimelineTabsStyle) => {
       setTimelineTypes((prevTimelineTypes) => {
         if (prevTimelineTypes !== tabId) {
           setTimelineTypes(tabId);
@@ -128,7 +132,7 @@ export const useTimelineTypes = ({
             data-test-subj={`open-timeline-modal-body-${TimelineTabsStyle.filter}-${tab.id}`}
             isSelected={tab.id === timelineType}
             key={`timeline-${TimelineTabsStyle.filter}-${tab.id}`}
-            onClick={(ev: { preventDefault: () => void }) => {
+            onClick={(ev: React.SyntheticEvent<Element, Event>) => {
               tab.onClick(ev);
               onFilterClicked(tab.id, TimelineTabsStyle.filter);
             }}

@@ -1,23 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import type { ThemeServiceStart } from '@kbn/core/public';
-import type { I18nStart } from '@kbn/core-i18n-browser';
-import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import type { Start as InspectorStart, RequestAdapter } from '@kbn/inspector-plugin/public';
 import { handleWarnings } from './handle_warnings';
 
 describe('handleWarnings', () => {
-  const notifications = notificationServiceMock.createStartContract();
+  const coreStart = coreMock.createStart();
+  const addWarningSpy = jest.spyOn(coreStart.notifications.toasts, 'addWarning');
 
   beforeEach(() => {
-    notifications.toasts.addWarning.mockClear();
+    addWarningSpy.mockClear();
   });
 
   it('should not show notifications when there are no warnings', () => {
@@ -34,14 +34,12 @@ describe('handleWarnings', () => {
         },
       } as estypes.SearchResponse,
       services: {
-        i18n: {} as unknown as I18nStart,
         inspector: {} as unknown as InspectorStart,
-        notifications,
-        theme: {} as unknown as ThemeServiceStart,
+        ...coreStart,
       },
     });
 
-    expect(notifications.toasts.addWarning).toBeCalledTimes(0);
+    expect(addWarningSpy).toBeCalledTimes(0);
   });
 
   it('should show notifications for warnings when there is no callback', () => {
@@ -57,14 +55,12 @@ describe('handleWarnings', () => {
         hits: { hits: [] },
       } as estypes.SearchResponse,
       services: {
-        i18n: {} as unknown as I18nStart,
         inspector: {} as unknown as InspectorStart,
-        notifications,
-        theme: {} as unknown as ThemeServiceStart,
+        ...coreStart,
       },
     });
 
-    expect(notifications.toasts.addWarning).toBeCalledTimes(1);
+    expect(addWarningSpy).toBeCalledTimes(1);
   });
 
   it('should show notifications for warnings not handled by callback', () => {
@@ -82,15 +78,13 @@ describe('handleWarnings', () => {
         hits: { hits: [] },
       } as estypes.SearchResponse,
       services: {
-        i18n: {} as unknown as I18nStart,
         inspector: {} as unknown as InspectorStart,
-        notifications,
-        theme: {} as unknown as ThemeServiceStart,
+        ...coreStart,
       },
     });
 
     expect(callbackMock).toBeCalledTimes(1);
-    expect(notifications.toasts.addWarning).toBeCalledTimes(1);
+    expect(addWarningSpy).toBeCalledTimes(1);
   });
 
   it('should not show notifications for warnings handled by callback', () => {
@@ -108,14 +102,12 @@ describe('handleWarnings', () => {
         hits: { hits: [] },
       } as estypes.SearchResponse,
       services: {
-        i18n: {} as unknown as I18nStart,
         inspector: {} as unknown as InspectorStart,
-        notifications,
-        theme: {} as unknown as ThemeServiceStart,
+        ...coreStart,
       },
     });
 
     expect(callbackMock).toBeCalledTimes(1);
-    expect(notifications.toasts.addWarning).toBeCalledTimes(0);
+    expect(addWarningSpy).toBeCalledTimes(0);
   });
 });

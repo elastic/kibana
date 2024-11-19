@@ -85,7 +85,7 @@ jest.mock('../../timelines/components/open_timeline/helpers', () => {
   const original = jest.requireActual('../../timelines/components/open_timeline/helpers');
   return {
     ...original,
-    queryTimelineById: (params: unknown) => mockQueryTimelineById(params),
+    useQueryTimelineById: () => mockQueryTimelineById,
   };
 });
 

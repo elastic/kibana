@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -163,9 +164,9 @@ export const incrementCounterInternal = async <T>(
     ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
     ...(originId && { originId }),
     updated_at: time,
-    references: body.get?._source.references ?? [],
+    references: body.get?._source?.references ?? [],
     version: encodeHitVersion(body),
-    attributes: body.get?._source[type],
+    attributes: body.get?._source?.[type],
     ...(managed && { managed }),
   };
 };

@@ -213,7 +213,6 @@ export function FilterListsTable({
             pagination={true}
             sorting={sorting}
             selection={tableSelection}
-            isSelectable={true}
             data-test-subj="mlFilterListsTable"
             rowProps={(item) => ({
               'data-test-subj': `mlFilterListRow row-${item.filter_id}`,

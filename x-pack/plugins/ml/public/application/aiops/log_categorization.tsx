@@ -5,16 +5,20 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { pick } from 'lodash';
+
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LogCategorization } from '@kbn/aiops-plugin/public';
+import { AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
+
 import { useDataSource } from '../contexts/ml/data_source_context';
 import { useMlKibana } from '../contexts/kibana';
 import { useEnabledFeatures } from '../contexts/ml';
 import { HelpMenu } from '../components/help_menu';
-import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 import { MlPageHeader } from '../components/page_header';
 
 export const LogCategorizationPage: FC = () => {
@@ -33,9 +37,6 @@ export const LogCategorizationPage: FC = () => {
               defaultMessage="Log pattern analysis"
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <TechnicalPreviewBadge />
-          </EuiFlexItem>
         </EuiFlexGroup>
       </MlPageHeader>
       {dataView && (
@@ -43,23 +44,29 @@ export const LogCategorizationPage: FC = () => {
           dataView={dataView}
           savedSearch={savedSearch}
           showFrozenDataTierChoice={showNodeInfo}
-          appDependencies={pick(services, [
-            'application',
-            'charts',
-            'data',
-            'executionContext',
-            'fieldFormats',
-            'http',
-            'i18n',
-            'lens',
-            'notifications',
-            'share',
-            'storage',
-            'theme',
-            'uiActions',
-            'uiSettings',
-            'unifiedSearch',
-          ])}
+          appContextValue={{
+            embeddingOrigin: AIOPS_EMBEDDABLE_ORIGIN.ML_AIOPS_LABS,
+            ...pick(services, [
+              'analytics',
+              'application',
+              'charts',
+              'data',
+              'executionContext',
+              'fieldFormats',
+              'http',
+              'i18n',
+              'lens',
+              'notifications',
+              'share',
+              'storage',
+              'theme',
+              'uiActions',
+              'uiSettings',
+              'unifiedSearch',
+              'embeddable',
+              'cases',
+            ]),
+          }}
         />
       )}
       <HelpMenu docLink={services.docLinks.links.ml.guide} />

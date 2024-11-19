@@ -8,6 +8,7 @@
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { type ElasticModels } from './application/services/elastic_models_service';
 import type { MlPluginSetup, MlPluginStart } from './plugin';
+import type { AnomalySwimLane } from './shared_components';
 
 const createElasticModelsMock = (): jest.Mocked<ElasticModels> => {
   return {
@@ -36,6 +37,9 @@ const createStartContract = (): jest.Mocked<MlPluginStart> => {
   return {
     locator: sharePluginMock.createLocator(),
     elasticModels: createElasticModelsMock(),
+    components: {
+      AnomalySwimLane: jest.fn() as unknown as jest.Mocked<typeof AnomalySwimLane>,
+    },
   };
 };
 

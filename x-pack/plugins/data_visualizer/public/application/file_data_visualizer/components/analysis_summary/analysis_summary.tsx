@@ -6,10 +6,12 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 
 import { EuiTitle, EuiSpacer, EuiDescriptionList } from '@elastic/eui';
 import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import { getTikaDisplayType } from '../../../../../common/utils/tika_utils';
 import { FILE_FORMATS } from '../../../../../common/constants';
 
 export const AnalysisSummary: FC<{ results: FindFileStructureResponse }> = ({ results }) => {
@@ -63,7 +65,7 @@ function createDisplayItems(results: FindFileStructureResponse) {
           defaultMessage="Format"
         />
       ),
-      description: results.format,
+      description: getFormatLabel(results),
     });
 
     if (results.format === FILE_FORMATS.DELIMITED) {
@@ -129,4 +131,10 @@ function createDisplayItems(results: FindFileStructureResponse) {
   }
 
   return items;
+}
+
+function getFormatLabel(results: FindFileStructureResponse) {
+  return results.format === FILE_FORMATS.TIKA && results.document_type !== undefined
+    ? getTikaDisplayType(results.document_type).label
+    : results.format;
 }

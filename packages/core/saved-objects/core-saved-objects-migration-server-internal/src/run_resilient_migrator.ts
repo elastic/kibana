@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Logger } from '@kbn/logging';
@@ -42,15 +43,16 @@ import type { AliasAction } from './actions';
  * retries. This way we get exponential back-off and logging for failed
  * actions.
  */
-export const MIGRATION_CLIENT_OPTIONS = { maxRetries: 0, requestTimeout: 120_000 };
 
 export interface RunResilientMigratorParams {
   client: ElasticsearchClient;
   kibanaVersion: string;
   waitForMigrationCompletion: boolean;
   mustRelocateDocuments: boolean;
+  indexTypes: string[];
   indexTypesMap: IndexTypesMap;
-  targetMappings: IndexMapping;
+  targetIndexMappings: IndexMapping;
+  hashToVersionMap: Record<string, string>;
   preMigrationScript?: string;
   readyToReindex: WaitGroup<void>;
   doneReindexing: WaitGroup<void>;
@@ -76,8 +78,10 @@ export async function runResilientMigrator({
   kibanaVersion,
   waitForMigrationCompletion,
   mustRelocateDocuments,
+  indexTypes,
   indexTypesMap,
-  targetMappings,
+  targetIndexMappings,
+  hashToVersionMap,
   logger,
   preMigrationScript,
   readyToReindex,
@@ -96,8 +100,10 @@ export async function runResilientMigrator({
     kibanaVersion,
     waitForMigrationCompletion,
     mustRelocateDocuments,
+    indexTypes,
     indexTypesMap,
-    targetMappings,
+    hashToVersionMap,
+    targetIndexMappings,
     preMigrationScript,
     coreMigrationVersionPerType,
     migrationVersionPerType,
@@ -108,17 +114,11 @@ export async function runResilientMigrator({
     logger,
     esCapabilities,
   });
-  const migrationClient = client.child(MIGRATION_CLIENT_OPTIONS);
+
   return migrationStateActionMachine({
     initialState,
     logger,
-    next: next(
-      migrationClient,
-      transformRawDocs,
-      readyToReindex,
-      doneReindexing,
-      updateRelocationAliases
-    ),
+    next: next(client, transformRawDocs, readyToReindex, doneReindexing, updateRelocationAliases),
     model,
     abort: async (state?: State) => {
       // At this point, we could reject this migrator's defers and unblock other migrators

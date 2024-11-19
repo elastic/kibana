@@ -40,7 +40,9 @@ import { cleanupPack, cleanupAgentPolicy } from '../../tasks/api_fixtures';
 import { request } from '../../tasks/common';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/171279
+// Failing: See https://github.com/elastic/kibana/issues/180424
+describe.skip('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
   const integration = 'Osquery Manager';
 
   describe(
@@ -161,10 +163,13 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
       it('should be able to run live prebuilt pack', () => {
         navigateTo('/app/osquery/live_queries');
         cy.contains('New live query').click();
+        cy.getBySel('globalLoadingIndicator').should('not.exist');
         cy.contains('Run a set of queries in a pack.').click();
         cy.getBySel(LIVE_QUERY_EDITOR).should('not.exist');
-        cy.getBySel('select-live-pack').click().type('osquery-monitoring{downArrow}{enter}');
+        cy.getBySel('globalLoadingIndicator').should('not.exist');
         selectAllAgents();
+        cy.getBySel('select-live-pack').click();
+        cy.getBySel('select-live-pack').type('osquery-monitoring{downArrow}{enter}');
         submitQuery();
         cy.getBySel('toggleIcon-events').click();
         checkResults();

@@ -186,7 +186,7 @@ describe('SecurityNavControl', () => {
   });
 
   it('should render additional user menu links registered by other plugins and should render the default Edit Profile link as the first link when no custom profile link is provided', async () => {
-    const DummyComponent = () => <div>Dummy Component</div>;
+    const DummyComponent = <div>Dummy Component</div>;
 
     const wrapper = shallow(
       <SecurityNavControl
@@ -223,10 +223,9 @@ describe('SecurityNavControl', () => {
                     size="m"
                     type="user"
                   />,
-                  "name": <FormattedMessage
+                  "name": <Memo(MemoizedFormattedMessage)
                     defaultMessage="Edit profile"
                     id="xpack.security.navControlComponent.editProfileLinkText"
-                    values={Object {}}
                   />,
                   "onClick": [Function],
                 },
@@ -261,7 +260,9 @@ describe('SecurityNavControl', () => {
                   "name": "link3",
                 },
                 Object {
-                  "content": [Function],
+                  "content": <div>
+                    Dummy Component
+                  </div>,
                   "data-test-subj": "userMenuLink__dummyComponent",
                   "href": "",
                   "icon": <EuiIcon
@@ -277,10 +278,9 @@ describe('SecurityNavControl', () => {
                     size="m"
                     type="exit"
                   />,
-                  "name": <FormattedMessage
+                  "name": <Memo(MemoizedFormattedMessage)
                     defaultMessage="Log out"
                     id="xpack.security.navControlComponent.logoutLinkText"
-                    values={Object {}}
                   />,
                 },
               ]
@@ -358,10 +358,9 @@ describe('SecurityNavControl', () => {
                     size="m"
                     type="exit"
                   />,
-                  "name": <FormattedMessage
+                  "name": <Memo(MemoizedFormattedMessage)
                     defaultMessage="Log out"
                     id="xpack.security.navControlComponent.logoutLinkText"
-                    values={Object {}}
                   />,
                 },
               ]
@@ -401,10 +400,9 @@ describe('SecurityNavControl', () => {
                     size="m"
                     type="user"
                   />,
-                  "name": <FormattedMessage
+                  "name": <Memo(MemoizedFormattedMessage)
                     defaultMessage="Edit profile"
                     id="xpack.security.navControlComponent.editProfileLinkText"
-                    values={Object {}}
                   />,
                   "onClick": [Function],
                 },
@@ -425,10 +423,9 @@ describe('SecurityNavControl', () => {
                     size="m"
                     type="exit"
                   />,
-                  "name": <FormattedMessage
+                  "name": <Memo(MemoizedFormattedMessage)
                     defaultMessage="Close project"
                     id="xpack.security.navControlComponent.closeProjectLinkText"
-                    values={Object {}}
                   />,
                 },
               ]
@@ -477,10 +474,9 @@ describe('SecurityNavControl', () => {
                     size="m"
                     type="exit"
                   />,
-                  "name": <FormattedMessage
+                  "name": <Memo(MemoizedFormattedMessage)
                     defaultMessage="Log in"
                     id="xpack.security.navControlComponent.loginLinkText"
-                    values={Object {}}
                   />,
                 },
               ]

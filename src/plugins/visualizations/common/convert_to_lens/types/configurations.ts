@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { HorizontalAlignment, LayoutDirection, Position, VerticalAlignment } from '@elastic/charts';
 import { $Values } from '@kbn/utility-types';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { KibanaQueryOutput } from '@kbn/data-plugin/common';
-import { LegendSize } from '../../constants';
+import { LegendSize, type XYLegendValue, type PartitionLegendValue } from '../../constants';
 import {
   CategoryDisplayTypes,
   PartitionChartTypes,
@@ -32,7 +33,7 @@ import { ExpressionValueVisDimension } from '../../expression_functions';
 
 export type ChartShapes = 'heatmap';
 
-export type CollapseFunction = typeof CollapseFunctions[number];
+export type CollapseFunction = (typeof CollapseFunctions)[number];
 
 export type FillType = $Values<typeof FillTypes>;
 export type SeriesType = $Values<typeof SeriesTypes>;
@@ -142,6 +143,7 @@ export interface LegendConfig {
   maxLines?: number;
   shouldTruncate?: boolean;
   legendSize?: LegendSize;
+  legendStats?: XYLegendValue[];
 }
 
 export interface XYConfiguration {
@@ -168,7 +170,6 @@ export interface XYConfiguration {
   fillOpacity?: number;
   minBarHeight?: number;
   hideEndzones?: boolean;
-  valuesInLegend?: boolean;
   showCurrentTimeMarker?: boolean;
 }
 
@@ -190,13 +191,19 @@ export interface ColumnState {
   palette?: PaletteOutput<CustomPaletteParams>;
 }
 
+enum RowHeightMode {
+  auto = 'auto',
+  single = 'single',
+  custom = 'custom',
+}
+
 export interface TableVisConfiguration {
   columns: ColumnState[];
   layerId: string;
   layerType: 'data';
   sorting?: SortingState;
-  rowHeight?: 'auto' | 'single' | 'custom';
-  headerRowHeight?: 'auto' | 'single' | 'custom';
+  rowHeight?: RowHeightMode;
+  headerRowHeight?: RowHeightMode;
   rowHeightLines?: number;
   headerRowHeightLines?: number;
   paging?: PagingState;
@@ -232,7 +239,7 @@ export interface PartitionLayerState {
   categoryDisplay: CategoryDisplayType;
   legendDisplay: LegendDisplayType;
   legendPosition?: Position;
-  showValuesInLegend?: boolean;
+  legendStats?: PartitionLegendValue[];
   nestedLegend?: boolean;
   percentDecimals?: number;
   emptySizeRatio?: number;

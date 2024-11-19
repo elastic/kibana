@@ -7,7 +7,6 @@
 
 import React from 'react';
 
-import '../../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock';
 
 import { UsersTable } from '.';
@@ -51,7 +50,7 @@ describe('Users Table Component', () => {
       );
 
       expect(getByTestId('table-allUsers-loading-false')).toBeInTheDocument();
-      expect(getAllByRole('columnheader').length).toBe(3);
+      expect(getAllByRole('columnheader').length).toBe(4);
       expect(getByText(userName)).toBeInTheDocument();
     });
 
@@ -90,7 +89,41 @@ describe('Users Table Component', () => {
                 name: 'testUser',
                 lastSeen: '2019-04-08T18:35:45.064Z',
                 domain: 'test domain',
-                risk: RiskSeverity.critical,
+                risk: RiskSeverity.Critical,
+              },
+            ]}
+            fakeTotalCount={50}
+            id="users"
+            loading={false}
+            loadPage={loadPage}
+            showMorePagesIndicator={false}
+            totalCount={0}
+            type={usersModel.UsersType.page}
+            sort={{
+              field: UsersFields.name,
+              direction: Direction.asc,
+            }}
+            setQuerySkip={() => {}}
+          />
+        </TestProviders>
+      );
+
+      expect(getAllByRole('columnheader').length).toBe(5);
+      expect(getByText('Critical')).toBeInTheDocument();
+    });
+
+    test("it doesn't renders 'Host Risk classfication' column when 'isPlatinumOrTrialLicense' is falsy", () => {
+      mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: false });
+
+      const { getAllByRole, queryByText } = render(
+        <TestProviders>
+          <UsersTable
+            users={[
+              {
+                name: 'testUser',
+                lastSeen: '2019-04-08T18:35:45.064Z',
+                domain: 'test domain',
+                risk: RiskSeverity.Critical,
               },
             ]}
             fakeTotalCount={50}
@@ -110,40 +143,6 @@ describe('Users Table Component', () => {
       );
 
       expect(getAllByRole('columnheader').length).toBe(4);
-      expect(getByText('Critical')).toBeInTheDocument();
-    });
-
-    test("it doesn't renders 'Host Risk classfication' column when 'isPlatinumOrTrialLicense' is falsy", () => {
-      mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: false });
-
-      const { getAllByRole, queryByText } = render(
-        <TestProviders>
-          <UsersTable
-            users={[
-              {
-                name: 'testUser',
-                lastSeen: '2019-04-08T18:35:45.064Z',
-                domain: 'test domain',
-                risk: RiskSeverity.critical,
-              },
-            ]}
-            fakeTotalCount={50}
-            id="users"
-            loading={false}
-            loadPage={loadPage}
-            showMorePagesIndicator={false}
-            totalCount={0}
-            type={usersModel.UsersType.page}
-            sort={{
-              field: UsersFields.name,
-              direction: Direction.asc,
-            }}
-            setQuerySkip={() => {}}
-          />
-        </TestProviders>
-      );
-
-      expect(getAllByRole('columnheader').length).toBe(3);
       expect(queryByText('Critical')).not.toBeInTheDocument();
     });
   });

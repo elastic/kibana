@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
-  const pageObjects = getPageObjects(['svlCommonPage', 'common']);
+  const pageObjects = getPageObjects(['svlCommonPage', 'common', 'svlManagementPage']);
   const browser = getService('browser');
   const retry = getService('retry');
 
@@ -18,6 +18,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     this.tags('smoke');
     before(async () => {
       await pageObjects.svlCommonPage.loginAsAdmin();
+    });
+
+    beforeEach(async () => {
       await pageObjects.common.navigateToApp('management');
     });
 
@@ -35,6 +38,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await retry.waitFor('Index Management title to be visible', async () => {
         return await testSubjects.exists('indexManagementHeaderContent');
       });
+    });
+
+    it('navigates to API keys management by clicking the card', async () => {
+      await testSubjects.click('app-card-api_keys');
+      expect(async () => {
+        await pageObjects.common.waitUntilUrlIncludes('/app/management/security/api_keys');
+      }).not.to.throwError();
     });
   });
 };

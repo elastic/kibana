@@ -46,6 +46,7 @@ describe('getColumns', () => {
   const rawData: Record<string, string[]> = {
     'field.name': ['value1', 'value2'],
   };
+  const hasUpdateAIAssistantAnonymization = true;
 
   const row: ContextEditorRow = {
     allowed: true,
@@ -59,6 +60,7 @@ describe('getColumns', () => {
     const columns: Array<EuiBasicTableColumn<ContextEditorRow> & { field?: string }> = getColumns({
       onListUpdated,
       rawData,
+      hasUpdateAIAssistantAnonymization,
     });
 
     expect(columns.some(({ field }) => field === 'rawValues')).toBe(true);
@@ -68,6 +70,7 @@ describe('getColumns', () => {
     const columns: Array<EuiBasicTableColumn<ContextEditorRow> & { field?: string }> = getColumns({
       onListUpdated,
       rawData: null,
+      hasUpdateAIAssistantAnonymization,
     });
 
     expect(columns.some(({ field }) => field === 'rawValues')).toBe(false);
@@ -75,7 +78,7 @@ describe('getColumns', () => {
 
   describe('allowed column render()', () => {
     it('calls onListUpdated with a `remove` operation when the toggle is clicked on field that is allowed', () => {
-      const columns = getColumns({ onListUpdated, rawData });
+      const columns = getColumns({ onListUpdated, rawData, hasUpdateAIAssistantAnonymization });
       const anonymizedColumn: ColumnWithRender = columns[0] as ColumnWithRender;
       const allowedRow = {
         ...row,
@@ -96,7 +99,7 @@ describe('getColumns', () => {
     });
 
     it('calls onListUpdated with an `add` operation when the toggle is clicked on a field that is NOT allowed', () => {
-      const columns = getColumns({ onListUpdated, rawData });
+      const columns = getColumns({ onListUpdated, rawData, hasUpdateAIAssistantAnonymization });
       const anonymizedColumn: ColumnWithRender = columns[0] as ColumnWithRender;
       const notAllowedRow = {
         ...row,
@@ -117,7 +120,11 @@ describe('getColumns', () => {
     });
 
     it('calls onListUpdated with a `remove` operation to update the `defaultAllowReplacement` list when the toggle is clicked on a default field that is allowed', () => {
-      const columns = getColumns({ onListUpdated, rawData: null }); // null raw data means the field is a default field
+      const columns = getColumns({
+        onListUpdated,
+        rawData: null,
+        hasUpdateAIAssistantAnonymization,
+      }); // null raw data means the field is a default field
       const anonymizedColumn: ColumnWithRender = columns[0] as ColumnWithRender;
       const allowedRow = {
         ...row,
@@ -133,14 +140,14 @@ describe('getColumns', () => {
       fireEvent.click(getByTestId('allowed'));
 
       expect(onListUpdated).toBeCalledWith([
-        { field: 'event.category', operation: 'remove', update: 'defaultAllowReplacement' },
+        { field: 'event.category', operation: 'remove', update: 'allow' },
       ]);
     });
   });
 
   describe('anonymized column render()', () => {
     it('disables the button when the field is not allowed', () => {
-      const columns = getColumns({ onListUpdated, rawData });
+      const columns = getColumns({ onListUpdated, rawData, hasUpdateAIAssistantAnonymization });
       const anonymizedColumn: ColumnWithRender = columns[1] as ColumnWithRender;
 
       const { getByTestId } = render(
@@ -153,7 +160,7 @@ describe('getColumns', () => {
     });
 
     it('enables the button when the field is allowed', () => {
-      const columns = getColumns({ onListUpdated, rawData });
+      const columns = getColumns({ onListUpdated, rawData, hasUpdateAIAssistantAnonymization });
       const anonymizedColumn: ColumnWithRender = columns[1] as ColumnWithRender;
 
       const { getByTestId } = render(
@@ -166,7 +173,7 @@ describe('getColumns', () => {
     });
 
     it('calls onListUpdated with an `add` operation when an unanonymized field is toggled', () => {
-      const columns = getColumns({ onListUpdated, rawData });
+      const columns = getColumns({ onListUpdated, rawData, hasUpdateAIAssistantAnonymization });
       const anonymizedColumn: ColumnWithRender = columns[1] as ColumnWithRender;
 
       const { getByTestId } = render(
@@ -183,7 +190,7 @@ describe('getColumns', () => {
     });
 
     it('calls onListUpdated with a `remove` operation when an anonymized field is toggled', () => {
-      const columns = getColumns({ onListUpdated, rawData });
+      const columns = getColumns({ onListUpdated, rawData, hasUpdateAIAssistantAnonymization });
       const anonymizedColumn: ColumnWithRender = columns[1] as ColumnWithRender;
 
       const anonymizedRow = {
@@ -205,7 +212,11 @@ describe('getColumns', () => {
     });
 
     it('calls onListUpdated with an update to the `defaultAllowReplacement` list when rawData is null, because the field is a default', () => {
-      const columns = getColumns({ onListUpdated, rawData: null }); // null raw data means the field is a default field
+      const columns = getColumns({
+        onListUpdated,
+        rawData: null,
+        hasUpdateAIAssistantAnonymization,
+      }); // null raw data means the field is a default field
       const anonymizedColumn: ColumnWithRender = columns[1] as ColumnWithRender;
 
       const { getByTestId } = render(
@@ -222,7 +233,7 @@ describe('getColumns', () => {
     });
 
     it('displays a closed eye icon when the field is anonymized', () => {
-      const columns = getColumns({ onListUpdated, rawData });
+      const columns = getColumns({ onListUpdated, rawData, hasUpdateAIAssistantAnonymization });
       const anonymizedColumn: ColumnWithRender = columns[1] as ColumnWithRender;
 
       const { container } = render(
@@ -236,7 +247,7 @@ describe('getColumns', () => {
     });
 
     it('displays a open eye icon when the field is NOT anonymized', () => {
-      const columns = getColumns({ onListUpdated, rawData });
+      const columns = getColumns({ onListUpdated, rawData, hasUpdateAIAssistantAnonymization });
       const anonymizedColumn: ColumnWithRender = columns[1] as ColumnWithRender;
 
       const { container } = render(
@@ -250,7 +261,7 @@ describe('getColumns', () => {
     });
 
     it('displays Yes when the field is anonymized', () => {
-      const columns = getColumns({ onListUpdated, rawData });
+      const columns = getColumns({ onListUpdated, rawData, hasUpdateAIAssistantAnonymization });
       const anonymizedColumn: ColumnWithRender = columns[1] as ColumnWithRender;
 
       const { getByTestId } = render(
@@ -263,7 +274,7 @@ describe('getColumns', () => {
     });
 
     it('displays No when the field is NOT anonymized', () => {
-      const columns = getColumns({ onListUpdated, rawData });
+      const columns = getColumns({ onListUpdated, rawData, hasUpdateAIAssistantAnonymization });
       const anonymizedColumn: ColumnWithRender = columns[1] as ColumnWithRender;
 
       const { getByTestId } = render(
@@ -278,7 +289,7 @@ describe('getColumns', () => {
 
   describe('values column render()', () => {
     it('joins values with a comma', () => {
-      const columns = getColumns({ onListUpdated, rawData });
+      const columns = getColumns({ onListUpdated, rawData, hasUpdateAIAssistantAnonymization });
       const valuesColumn: ColumnWithRender = columns[3] as ColumnWithRender;
 
       const rowWithMultipleValues = {
@@ -299,7 +310,7 @@ describe('getColumns', () => {
 
   describe('actions column render()', () => {
     it('renders the bulk actions', () => {
-      const columns = getColumns({ onListUpdated, rawData });
+      const columns = getColumns({ onListUpdated, rawData, hasUpdateAIAssistantAnonymization });
       const actionsColumn: ColumnWithRender = columns[4] as ColumnWithRender;
 
       render(

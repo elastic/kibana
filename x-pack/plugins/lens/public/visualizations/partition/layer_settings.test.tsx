@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
 import { PieLayerState, PieVisualizationState } from '../..';
 import { LayerSettings } from './layer_settings';
 import { FramePublicAPI, VisualizationLayerSettingsProps } from '../../types';
-import { EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
+import { render, screen, cleanup } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 describe('layer settings', () => {
   describe('multiple metrics switch', () => {
@@ -36,23 +36,19 @@ describe('layer settings', () => {
       section: 'data',
     };
 
-    it('toggles multiple metrics', () => {
-      const toggleOn = () =>
-        shallow(<LayerSettings {...props} />)
-          .find(EuiSwitch)
-          .props()
-          .onChange({} as EuiSwitchEvent);
+    const renderLayerSettings = (
+      propsOverrides?: Partial<
+        VisualizationLayerSettingsProps<PieVisualizationState> & {
+          section: 'data' | 'appearance';
+        }
+      >
+    ) => render(<LayerSettings {...props} {...propsOverrides} />);
 
-      const toggleOff = () =>
-        shallow(<LayerSettings {...props} state={getState(true)} />)
-          .find(EuiSwitch)
-          .props()
-          .onChange({} as EuiSwitchEvent);
-
+    it('toggles multiple metrics', async () => {
+      renderLayerSettings();
       expect(props.setState).not.toHaveBeenCalled();
-
-      toggleOn();
-
+      const toggle = screen.getByRole('switch');
+      await userEvent.click(toggle);
       expect(props.setState).toHaveBeenLastCalledWith({
         ...props.state,
         layers: [
@@ -62,9 +58,10 @@ describe('layer settings', () => {
           },
         ],
       });
+      cleanup();
 
-      toggleOff();
-
+      renderLayerSettings({ state: getState(true) });
+      await userEvent.click(screen.getByRole('switch'));
       expect(props.setState).toHaveBeenLastCalledWith({
         ...props.state,
         layers: [
@@ -77,25 +74,21 @@ describe('layer settings', () => {
     });
 
     test('switch reflects state', () => {
-      const isChecked = (state: PieVisualizationState) =>
-        shallow(<LayerSettings {...props} state={state} />)
-          .find(EuiSwitch)
-          .props().checked;
-
-      expect(isChecked(getState(false))).toBeFalsy();
-      expect(isChecked(getState(true))).toBeTruthy();
+      renderLayerSettings({ state: getState(false) });
+      expect(screen.getByRole('switch')).not.toBeChecked();
+      cleanup();
+      renderLayerSettings({ state: getState(true) });
+      expect(screen.getByRole('switch')).toBeChecked();
     });
 
-    test('hides option for mosaic', () => {
-      expect(
-        shallow(
-          <LayerSettings {...props} state={{ ...getState(false), shape: 'mosaic' }} />
-        ).isEmptyRender()
-      ).toBeTruthy();
+    test('should not render anything for mosaic', () => {
+      const { container } = renderLayerSettings({ state: { ...getState(false), shape: 'mosaic' } });
+      expect(container).toBeEmptyDOMElement();
     });
 
     test('should not render anything for the appearance section', () => {
-      expect(shallow(<LayerSettings {...props} section="appearance" />).isEmptyRender());
+      const { container } = renderLayerSettings({ section: 'appearance' });
+      expect(container).toBeEmptyDOMElement();
     });
   });
 });

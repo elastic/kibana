@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment-timezone';
-import { MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
+import type { MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
 import { formatValue } from './format_value';
 
 describe('ML - formatValue formatter', () => {

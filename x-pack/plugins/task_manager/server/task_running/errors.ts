@@ -12,7 +12,6 @@ export { TaskErrorSource };
 // Unrecoverable
 const CODE_UNRECOVERABLE = 'TaskManager/unrecoverable';
 const CODE_RETRYABLE = 'TaskManager/retryable';
-const CODE_SKIP = 'TaskManager/skip';
 
 const code = Symbol('TaskManagerErrorCode');
 const retry = Symbol('TaskManagerErrorRetry');
@@ -57,22 +56,14 @@ export function isRetryableError(error: Error | DecoratedError) {
   return null;
 }
 
-export function throwRetryableError(error: Error, shouldRetry: Date | boolean) {
+export function createRetryableError(error: Error, shouldRetry: Date | boolean): DecoratedError {
   (error as DecoratedError)[code] = CODE_RETRYABLE;
   (error as DecoratedError)[retry] = shouldRetry;
-  throw error;
-}
-
-export function isSkipError(error: Error | DecoratedError) {
-  if (isTaskManagerError(error) && error[code] === CODE_SKIP) {
-    return true;
-  }
-  return false;
-}
-
-export function createSkipError(error: Error): DecoratedError {
-  (error as DecoratedError)[code] = CODE_SKIP;
   return error;
+}
+
+export function throwRetryableError(error: Error, shouldRetry: Date | boolean) {
+  throw createRetryableError(error, shouldRetry);
 }
 
 export function createTaskRunError(

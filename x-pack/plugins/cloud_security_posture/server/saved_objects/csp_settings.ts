@@ -7,7 +7,7 @@
 
 import { SavedObjectsType } from '@kbn/core/server';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { cspSettingsSchema } from '../../common/types/rules/v4';
+import { cspSettingsSchema } from '@kbn/cloud-security-posture-common/schema/rules/v4';
 import { cspSettingsSavedObjectMapping } from './mappings';
 import { INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE } from '../../common/constants';
 
@@ -16,8 +16,15 @@ export const cspSettings: SavedObjectsType = {
   indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   hidden: true,
   namespaceType: 'agnostic',
-  schemas: {
-    '8.12.0': cspSettingsSchema,
+  modelVersions: {
+    1: {
+      changes: [],
+      schemas: {
+        forwardCompatibility: cspSettingsSchema.extends({}, { unknowns: 'ignore' }),
+        create: cspSettingsSchema,
+      },
+    },
   },
+  schemas: {},
   mappings: cspSettingsSavedObjectMapping,
 };

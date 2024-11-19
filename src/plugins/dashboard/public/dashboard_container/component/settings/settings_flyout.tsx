@@ -1,34 +1,40 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
-import { i18n } from '@kbn/i18n';
+
 import {
-  EuiFormRow,
-  EuiFieldText,
-  EuiTextArea,
-  EuiForm,
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiTitle,
-  EuiCallOut,
+  EuiForm,
+  EuiFormRow,
+  EuiIconTip,
   EuiSwitch,
+  EuiText,
+  EuiTextArea,
+  EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+
 import { DashboardContainerInput } from '../../../../common';
-import { pluginServices } from '../../../services/plugin_services';
-import { useDashboardContainer } from '../../embeddable/dashboard_container';
+import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
+import { getDashboardContentManagementService } from '../../../services/dashboard_content_management_service';
+import { savedObjectsTaggingService } from '../../../services/kibana_services';
 
 interface DashboardSettingsProps {
   onClose: () => void;
@@ -37,23 +43,13 @@ interface DashboardSettingsProps {
 const DUPLICATE_TITLE_CALLOUT_ID = 'duplicateTitleCallout';
 
 export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
-  const {
-    savedObjectsTagging: { components },
-    dashboardContentManagement: { checkForDuplicateDashboardTitle },
-  } = pluginServices.getServices();
+  const dashboardApi = useDashboardApi();
 
-  const dashboard = useDashboardContainer();
-
-  const [dashboardSettingsState, setDashboardSettingsState] = useState({
-    ...dashboard.getInput(),
-  });
+  const [localSettings, setLocalSettings] = useState(dashboardApi.getSettings());
 
   const [isTitleDuplicate, setIsTitleDuplicate] = useState(false);
   const [isTitleDuplicateConfirmed, setIsTitleDuplicateConfirmed] = useState(false);
   const [isApplying, setIsApplying] = useState(false);
-
-  const lastSavedId = dashboard.select((state) => state.componentState.lastSavedId);
-  const lastSavedTitle = dashboard.select((state) => state.explicitInput.title);
 
   const isMounted = useMountedState();
 
@@ -65,28 +61,30 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
 
   const onApply = async () => {
     setIsApplying(true);
-    const validTitle = await checkForDuplicateDashboardTitle({
-      title: dashboardSettingsState.title,
-      copyOnSave: false,
-      lastSavedTitle,
-      onTitleDuplicate,
-      isTitleDuplicateConfirmed,
-    });
+    const validTitle = await getDashboardContentManagementService().checkForDuplicateDashboardTitle(
+      {
+        title: localSettings.title,
+        copyOnSave: false,
+        lastSavedTitle: dashboardApi.panelTitle.value ?? '',
+        onTitleDuplicate,
+        isTitleDuplicateConfirmed,
+      }
+    );
 
     if (!isMounted()) return;
 
     setIsApplying(false);
 
     if (validTitle) {
-      dashboard.dispatch.setStateFromSettingsFlyout({ lastSavedId, ...dashboardSettingsState });
+      dashboardApi.setSettings(localSettings);
       onClose();
     }
   };
 
   const updateDashboardSetting = useCallback((newSettings: Partial<DashboardContainerInput>) => {
-    setDashboardSettingsState((prevDashboardSettingsState) => {
+    setLocalSettings((prevSettings) => {
       return {
-        ...prevDashboardSettingsState,
+        ...prevSettings,
         ...newSettings,
       };
     });
@@ -112,9 +110,9 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
         <p>
           <FormattedMessage
             id="dashboard.embeddableApi.showSettings.flyout.form.duplicateTitleDescription"
-            defaultMessage="Saving '{title}' creates a duplicate title."
+            defaultMessage="Saving ''{title}'' creates a duplicate title."
             values={{
-              title: dashboardSettingsState.title,
+              title: localSettings.title,
             }}
           />
         </p>
@@ -123,7 +121,9 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
   };
 
   const renderTagSelector = () => {
-    if (!components) return;
+    const savedObjectsTaggingApi = savedObjectsTaggingService?.getTaggingApi();
+    if (!savedObjectsTaggingApi) return;
+
     return (
       <EuiFormRow
         label={
@@ -133,8 +133,8 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
           />
         }
       >
-        <components.TagSelector
-          selected={dashboardSettingsState.tags}
+        <savedObjectsTaggingApi.ui.components.TagSelector
+          selected={localSettings.tags}
           onTagsSelected={(selectedTags) => updateDashboardSetting({ tags: selectedTags })}
         />
       </EuiFormRow>
@@ -170,7 +170,7 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
               data-test-subj="dashboardTitleInput"
               name="title"
               type="text"
-              value={dashboardSettingsState.title}
+              value={localSettings.title}
               onChange={(event) => {
                 setIsTitleDuplicate(false);
                 setIsTitleDuplicateConfirmed(false);
@@ -198,7 +198,7 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
               className="dashboardDescriptionInputText"
               data-test-subj="dashboardDescriptionInput"
               name="description"
-              value={dashboardSettingsState.description ?? ''}
+              value={localSettings.description ?? ''}
               onChange={(event) => updateDashboardSetting({ description: event.target.value })}
               aria-label={i18n.translate(
                 'dashboard.embeddableApi.showSettings.flyout.form.panelDescriptionAriaLabel',
@@ -219,7 +219,7 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
           >
             <EuiSwitch
               data-test-subj="storeTimeWithDashboard"
-              checked={dashboardSettingsState.timeRestore}
+              checked={localSettings.timeRestore}
               onChange={(event) => updateDashboardSetting({ timeRestore: event.target.checked })}
               label={
                 <FormattedMessage
@@ -237,7 +237,7 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
                   defaultMessage: 'Use margins between panels',
                 }
               )}
-              checked={dashboardSettingsState.useMargins}
+              checked={localSettings.useMargins}
               onChange={(event) => updateDashboardSetting({ useMargins: event.target.checked })}
               data-test-subj="dashboardMarginsCheckbox"
             />
@@ -251,24 +251,66 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
                   defaultMessage: 'Show panel titles',
                 }
               )}
-              checked={!dashboardSettingsState.hidePanelTitles}
+              checked={!localSettings.hidePanelTitles}
               onChange={(event) =>
                 updateDashboardSetting({ hidePanelTitles: !event.target.checked })
               }
               data-test-subj="dashboardPanelTitlesCheckbox"
             />
           </EuiFormRow>
-          <EuiFormRow label="Sync across panels">
+          <EuiFormRow
+            label={i18n.translate(
+              'dashboard.embeddableApi.showSettings.flyout.formRow.syncAcrossPanelsLabel',
+              {
+                defaultMessage: 'Sync across panels',
+              }
+            )}
+          >
             <>
               <EuiFormRow>
                 <EuiSwitch
-                  label={i18n.translate(
-                    'dashboard.embeddableApi.showSettings.flyout.form.syncColorsBetweenPanelsSwitchLabel',
-                    {
-                      defaultMessage: 'Sync color palettes across panels',
-                    }
-                  )}
-                  checked={dashboardSettingsState.syncColors}
+                  label={
+                    <EuiText size="s">
+                      {i18n.translate(
+                        'dashboard.embeddableApi.showSettings.flyout.form.syncColorsBetweenPanelsSwitchLabel',
+                        {
+                          defaultMessage: 'Sync color palettes across panels',
+                        }
+                      )}{' '}
+                      <EuiIconTip
+                        color="subdued"
+                        content={
+                          <FormattedMessage
+                            id="dashboard.embeddableApi.showSettings.flyout.form.syncColorsBetweenPanelsSwitchHelp"
+                            defaultMessage="Only valid for {default} and {compatibility} palettes"
+                            values={{
+                              default: (
+                                <strong>
+                                  {i18n.translate('dashboard.palettes.defaultPaletteLabel', {
+                                    defaultMessage: 'Default',
+                                  })}
+                                </strong>
+                              ),
+                              compatibility: (
+                                <strong>
+                                  {i18n.translate('dashboard.palettes.kibanaPaletteLabel', {
+                                    defaultMessage: 'Compatibility',
+                                  })}
+                                </strong>
+                              ),
+                            }}
+                          />
+                        }
+                        iconProps={{
+                          className: 'eui-alignTop',
+                        }}
+                        position="top"
+                        size="s"
+                        type="questionInCircle"
+                      />
+                    </EuiText>
+                  }
+                  checked={localSettings.syncColors}
                   onChange={(event) => updateDashboardSetting({ syncColors: event.target.checked })}
                   data-test-subj="dashboardSyncColorsCheckbox"
                 />
@@ -281,10 +323,10 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
                       defaultMessage: 'Sync cursor across panels',
                     }
                   )}
-                  checked={dashboardSettingsState.syncCursor}
+                  checked={localSettings.syncCursor}
                   onChange={(event) => {
                     const syncCursor = event.target.checked;
-                    if (!syncCursor && dashboardSettingsState.syncTooltips) {
+                    if (!syncCursor && localSettings.syncTooltips) {
                       updateDashboardSetting({ syncCursor, syncTooltips: false });
                     } else {
                       updateDashboardSetting({ syncCursor });
@@ -301,8 +343,8 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
                       defaultMessage: 'Sync tooltips across panels',
                     }
                   )}
-                  checked={dashboardSettingsState.syncTooltips}
-                  disabled={!Boolean(dashboardSettingsState.syncCursor)}
+                  checked={localSettings.syncTooltips}
+                  disabled={!Boolean(localSettings.syncCursor)}
                   onChange={(event) =>
                     updateDashboardSetting({ syncTooltips: event.target.checked })
                   }
@@ -316,7 +358,11 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty data-test-subj="cancelCustomizeDashboardButton" onClick={onClose}>
+            <EuiButtonEmpty
+              flush="left"
+              data-test-subj="cancelCustomizeDashboardButton"
+              onClick={onClose}
+            >
               <FormattedMessage
                 id="dashboard.embeddableApi.showSettings.flyout.cancelButtonTitle"
                 defaultMessage="Cancel"

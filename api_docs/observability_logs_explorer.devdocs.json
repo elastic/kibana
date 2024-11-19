@@ -51,7 +51,7 @@
           },
           ">"
         ],
-        "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/all_datasets/all_datasets_locator.ts",
+        "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/all_datasets_locator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -65,7 +65,7 @@
             "signature": [
               "\"ALL_DATASETS_LOCATOR\""
             ],
-            "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/all_datasets/all_datasets_locator.ts",
+            "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/all_datasets_locator.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -79,7 +79,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/all_datasets/all_datasets_locator.ts",
+            "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/all_datasets_locator.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -91,9 +91,9 @@
                 "label": "deps",
                 "description": [],
                 "signature": [
-                  "DatasetLocatorDependencies"
+                  "ObsLogsExplorerLocatorDependencies"
                 ],
-                "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/all_datasets/all_datasets_locator.ts",
+                "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/all_datasets_locator.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -119,7 +119,7 @@
               },
               ") => Promise<{ app: string; path: string; state: { origin?: { id: \"application-log-onboarding\"; } | undefined; }; }>"
             ],
-            "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/all_datasets/all_datasets_locator.ts",
+            "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/all_datasets_locator.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -139,7 +139,7 @@
                     "text": "DatasetLocatorParams"
                   }
                 ],
-                "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/all_datasets/all_datasets_locator.ts",
+                "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/all_datasets_locator.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -183,7 +183,7 @@
           },
           ">"
         ],
-        "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/single_dataset/single_dataset_locator.ts",
+        "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/single_dataset_locator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -197,7 +197,7 @@
             "signature": [
               "\"SINGLE_DATASET_LOCATOR\""
             ],
-            "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/single_dataset/single_dataset_locator.ts",
+            "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/single_dataset_locator.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -211,7 +211,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/single_dataset/single_dataset_locator.ts",
+            "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/single_dataset_locator.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -223,9 +223,9 @@
                 "label": "deps",
                 "description": [],
                 "signature": [
-                  "DatasetLocatorDependencies"
+                  "ObsLogsExplorerLocatorDependencies"
                 ],
-                "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/single_dataset/single_dataset_locator.ts",
+                "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/single_dataset_locator.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -251,7 +251,7 @@
               },
               ") => Promise<{ app: string; path: string; state: { origin?: { id: \"application-log-onboarding\"; } | undefined; }; }>"
             ],
-            "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/single_dataset/single_dataset_locator.ts",
+            "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/single_dataset_locator.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -271,7 +271,7 @@
                     "text": "SingleDatasetLocatorParams"
                   }
                 ],
-                "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/single_dataset/single_dataset_locator.ts",
+                "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/single_dataset_locator.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -361,6 +361,35 @@
           },
           {
             "parentPluginId": "observabilityLogsExplorer",
+            "id": "def-common.ObservabilityLogsExplorerLocators.dataViewLocator",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViewLocator",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "share",
+                "scope": "common",
+                "docId": "kibSharePluginApi",
+                "section": "def-common.LocatorPublic",
+                "text": "LocatorPublic"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/deeplinks-observability",
+                "scope": "common",
+                "docId": "kibKbnDeeplinksObservabilityPluginApi",
+                "section": "def-common.ObsLogsExplorerDataViewLocatorParams",
+                "text": "ObsLogsExplorerDataViewLocatorParams"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityLogsExplorer",
             "id": "def-common.ObservabilityLogsExplorerLocators.singleDatasetLocator",
             "type": "Object",
             "tags": [],
@@ -394,21 +423,6 @@
     ],
     "enums": [],
     "misc": [
-      {
-        "parentPluginId": "observabilityLogsExplorer",
-        "id": "def-common.OBSERVABILITY_DATASET_QUALITY_URL_STATE_KEY",
-        "type": "string",
-        "tags": [],
-        "label": "OBSERVABILITY_DATASET_QUALITY_URL_STATE_KEY",
-        "description": [],
-        "signature": [
-          "\"pageState\""
-        ],
-        "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/url_schema/common.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "observabilityLogsExplorer",
         "id": "def-common.OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY",

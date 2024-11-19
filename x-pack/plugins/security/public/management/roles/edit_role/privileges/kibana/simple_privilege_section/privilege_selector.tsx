@@ -9,7 +9,7 @@ import { EuiSelect } from '@elastic/eui';
 import type { ChangeEvent } from 'react';
 import React, { Component } from 'react';
 
-import { NO_PRIVILEGE_VALUE } from '../constants';
+import { constants } from '@kbn/security-ui-components';
 
 interface Props {
   ['data-test-subj']: string;
@@ -27,10 +27,10 @@ export class PrivilegeSelector extends Component<Props, {}> {
   public render() {
     const { availablePrivileges, value, disabled, allowNone, compressed } = this.props;
 
-    const options = [];
+    const options: Array<{ value: string; text: string }> = [];
 
     if (allowNone) {
-      options.push({ value: NO_PRIVILEGE_VALUE, text: 'none' });
+      options.push({ value: constants.NO_PRIVILEGE_VALUE, text: 'none' });
     }
 
     options.push(

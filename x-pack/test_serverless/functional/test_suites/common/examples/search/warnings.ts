@@ -8,13 +8,11 @@
 import type { estypes } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import assert from 'assert';
-import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'timePicker', 'svlCommonPage']);
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
   const retry = getService('retry');
   const es = getService('es');
   const log = getService('log');
@@ -23,6 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const monacoEditor = getService('monacoEditor');
+  const toasts = getService('toasts');
 
   describe('handling warnings with search source fetch', function () {
     const dataViewTitle = 'sample-01,sample-01-rollup';
@@ -32,7 +31,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const testIndex = 'sample-01';
     const testRollupIndex = 'sample-01-rollup';
     const testRollupField = 'kubernetes.container.memory.usage.bytes';
-    const toastsSelector = '[data-test-subj=globalToastList] [data-test-subj=euiToastHeader]';
     const shardFailureType = 'unsupported_aggregation_on_downsampled_index';
     const shardFailureReason = `Field [${testRollupField}] of type [aggregate_metric_double] is not supported for aggregation [percentiles]`;
 
@@ -96,15 +94,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     afterEach(async () => {
-      await PageObjects.common.clearAllToasts();
+      await toasts.dismissAll();
     });
 
     it('should show search warnings as toasts', async () => {
       await testSubjects.click('searchSourceWithOther');
 
       await retry.try(async () => {
-        const toasts = await find.allByCssSelector(toastsSelector);
-        expect(toasts.length).to.be(2);
+        expect(await toasts.getCount()).to.be(2);
         await testSubjects.click('viewWarningBtn');
       });
 
@@ -151,10 +148,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('searchSourceWithoutOther');
 
       // wait for toasts - toasts appear after the response is rendered
-      let toasts: WebElementWrapper[] = [];
       await retry.try(async () => {
-        toasts = await find.allByCssSelector(toastsSelector);
-        expect(toasts.length).to.be(2);
+        expect(await toasts.getCount()).to.be(2);
       });
 
       // warnings tab

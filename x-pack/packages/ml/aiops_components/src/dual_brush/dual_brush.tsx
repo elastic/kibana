@@ -6,15 +6,17 @@
  */
 
 import { isEqual } from 'lodash';
-import React, { useEffect, useRef, type FC } from 'react';
+import React, { useEffect, useMemo, useRef, type FC } from 'react';
+
+import { htmlIdGenerator } from '@elastic/eui';
 
 import * as d3Brush from 'd3-brush';
 import * as d3Scale from 'd3-scale';
 import * as d3Selection from 'd3-selection';
 import * as d3Transition from 'd3-transition';
 
-import { getSnappedWindowParameters } from '@kbn/aiops-utils';
-import type { WindowParameters } from '@kbn/aiops-utils';
+import { getSnappedWindowParameters } from '@kbn/aiops-log-rate-analysis';
+import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
 
 import './dual_brush.scss';
 
@@ -100,6 +102,10 @@ export const DualBrush: FC<DualBrushProps> = (props) => {
   const d3BrushContainer = useRef(null);
   const brushes = useRef<DualBrush[]>([]);
 
+  // id to prefix html ids for the brushes since this component can be used
+  // multiple times within dashboard and embedded charts.
+  const htmlId = useMemo(() => htmlIdGenerator()(), []);
+
   // We need to pass props to refs here because the d3-brush code doesn't consider
   // native React prop changes. The brush code does its own check whether these props changed then.
   // The initialized brushes might otherwise act on stale data.
@@ -135,10 +141,10 @@ export const DualBrush: FC<DualBrushProps> = (props) => {
           const xMax = x(maxRef.current) ?? 0;
           const minExtentPx = Math.round((xMax - xMin) / 100);
 
-          const baselineBrush = d3.select('#aiops-brush-baseline');
+          const baselineBrush = d3.select(`#aiops-brush-baseline-${htmlId}`);
           const baselineSelection = d3.brushSelection(baselineBrush.node() as SVGGElement);
 
-          const deviationBrush = d3.select('#aiops-brush-deviation');
+          const deviationBrush = d3.select(`#aiops-brush-deviation-${htmlId}`);
           const deviationSelection = d3.brushSelection(deviationBrush.node() as SVGGElement);
 
           if (!isBrushXSelection(deviationSelection) || !isBrushXSelection(baselineSelection)) {
@@ -233,10 +239,14 @@ export const DualBrush: FC<DualBrushProps> = (props) => {
               ]);
           }
 
-          brushes.current[0].start = snappedWindowParameters.baselineMin;
-          brushes.current[0].end = snappedWindowParameters.baselineMax;
-          brushes.current[1].start = snappedWindowParameters.deviationMin;
-          brushes.current[1].end = snappedWindowParameters.deviationMax;
+          if (id === 'baseline') {
+            brushes.current[0].start = snappedWindowParameters.baselineMin;
+            brushes.current[0].end = snappedWindowParameters.baselineMax;
+          }
+          if (id === 'deviation') {
+            brushes.current[1].start = snappedWindowParameters.deviationMin;
+            brushes.current[1].end = snappedWindowParameters.deviationMax;
+          }
 
           if (onChange) {
             onChange(snappedWindowParameters, newBrushPx);
@@ -256,14 +266,17 @@ export const DualBrush: FC<DualBrushProps> = (props) => {
           .insert('g', '.brush')
           .attr('class', 'brush')
           .attr('id', (b: DualBrush) => {
-            return 'aiops-brush-' + b.id;
+            return `aiops-brush-${b.id}-${htmlId}`;
           })
           .attr('data-test-subj', (b: DualBrush) => {
             // Uppercase the first character of the `id` so we get aiopsBrushBaseline/aiopsBrushDeviation.
             return 'aiopsBrush' + b.id.charAt(0).toUpperCase() + b.id.slice(1);
           })
           .each((brushObject: DualBrush, i, n) => {
-            const x = d3.scaleLinear().domain([min, max]).rangeRound([0, widthRef.current]);
+            const x = d3
+              .scaleLinear()
+              .domain([minRef.current, maxRef.current])
+              .rangeRound([0, widthRef.current]);
             // Ensure brush style is applied
             brushObject.brush.extent([
               [0, BRUSH_MARGIN],
@@ -332,6 +345,7 @@ export const DualBrush: FC<DualBrushProps> = (props) => {
       drawBrushes();
     }
   }, [
+    htmlId,
     min,
     max,
     width,

@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { HttpSetup, NotificationsStart, ThemeServiceStart } from '@kbn/core/public';
+
+import type { HttpSetup } from '@kbn/core/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { StartRenderServices } from '../../../types';
 import { RiskScoreEntity } from '../../../../common/search_strategy';
 import * as utils from '../../../../common/utils/risk_score_modules';
 import type { inputsModel } from '../../../common/store';
@@ -29,17 +31,16 @@ import {
 interface InstallRiskScoreModule {
   dashboard?: DashboardStart;
   http: HttpSetup;
-  notifications?: NotificationsStart;
   refetch?: inputsModel.Refetch;
   renderDashboardLink?: (message: string, dashboardUrl: string) => React.ReactNode;
   renderDocLink?: (message: string) => React.ReactNode;
   riskScoreEntity: RiskScoreEntity;
   spaceId?: string;
-  theme?: ThemeServiceStart;
   timerange: {
     from: string;
     to: string;
   };
+  startServices: StartRenderServices;
 }
 
 type UpgradeRiskScoreModule = InstallRiskScoreModule;
@@ -47,34 +48,32 @@ type UpgradeRiskScoreModule = InstallRiskScoreModule;
 const installHostRiskScoreModule = async ({
   dashboard,
   http,
-  notifications,
   refetch,
   renderDashboardLink,
   renderDocLink,
-  theme,
   timerange,
+  startServices,
 }: InstallRiskScoreModule) => {
   await installRiskScore({
     http,
     renderDocLink,
-    notifications,
     options: {
       riskScoreEntity: RiskScoreEntity.host,
     },
+    startServices,
   });
 
   // Install dashboards and relevant saved objects
   await bulkCreatePrebuiltSavedObjects({
     http,
-    theme,
     dashboard,
     renderDashboardLink,
     renderDocLink,
     ...timerange,
-    notifications,
     options: {
       templateName: `${RiskScoreEntity.host}RiskScoreDashboards`,
     },
+    startServices,
   });
 
   if (refetch) {
@@ -85,35 +84,33 @@ const installHostRiskScoreModule = async ({
 const installUserRiskScoreModule = async ({
   dashboard,
   http,
-  notifications,
   refetch,
   renderDashboardLink,
   renderDocLink,
   spaceId = 'default',
-  theme,
   timerange,
+  startServices,
 }: InstallRiskScoreModule) => {
   await installRiskScore({
     http,
     renderDocLink,
-    notifications,
     options: {
       riskScoreEntity: RiskScoreEntity.user,
     },
+    startServices,
   });
 
   // Install dashboards and relevant saved objects
   await bulkCreatePrebuiltSavedObjects({
     dashboard,
     http,
-    notifications,
     options: {
       templateName: `${RiskScoreEntity.user}RiskScoreDashboards`,
     },
     renderDashboardLink,
     renderDocLink,
+    startServices,
     ...timerange,
-    theme,
   });
 
   if (refetch) {
@@ -131,21 +128,19 @@ export const installRiskScoreModule = async (settings: InstallRiskScoreModule) =
 
 export const uninstallRiskScoreModule = async ({
   http,
-  notifications,
   refetch,
   renderDocLink,
   riskScoreEntity,
   spaceId = 'default',
-  theme,
+  startServices,
 }: {
   http: HttpSetup;
-  notifications?: NotificationsStart;
   refetch?: inputsModel.Refetch;
   renderDocLink?: (message: string) => React.ReactNode;
   riskScoreEntity: RiskScoreEntity;
   spaceId?: string;
-  theme?: ThemeServiceStart;
   deleteAll?: boolean;
+  startServices: StartRenderServices;
 }) => {
   const legacyTransformIds = [
     // transform Ids never changed since 8.3
@@ -196,12 +191,11 @@ export const uninstallRiskScoreModule = async ({
       options: {
         templateName: `${riskScoreEntity}RiskScoreDashboards`,
       },
+      startServices,
     }),
     deleteTransforms({
       http,
-      theme,
       renderDocLink,
-      notifications,
       errorMessage: `${UNINSTALLATION_ERROR} - ${TRANSFORM_DELETION_ERROR_MESSAGE(
         legacyTransformIds.length
       )}`,
@@ -211,6 +205,7 @@ export const uninstallRiskScoreModule = async ({
         deleteDestDataView: true,
         forceDelete: false,
       },
+      startServices,
     }),
     /**
      * Intended not to pass notification to deleteIngestPipelines.
@@ -226,6 +221,7 @@ export const uninstallRiskScoreModule = async ({
         legacyIngestPipelineNames.length
       )}`,
       names: legacyIngestPipelineNames.join(','),
+      startServices,
     }),
     /**
      * Intended not to pass notification to deleteStoredScripts.
@@ -241,6 +237,7 @@ export const uninstallRiskScoreModule = async ({
         riskScoreEntity === RiskScoreEntity.user
           ? legacyRiskScoreUsersScriptIds
           : legacyRiskScoreHostsScriptIds,
+      startServices,
     }),
   ]);
 
@@ -252,83 +249,77 @@ export const uninstallRiskScoreModule = async ({
 export const upgradeHostRiskScoreModule = async ({
   dashboard,
   http,
-  notifications,
   refetch,
   renderDashboardLink,
   renderDocLink,
   spaceId = 'default',
-  theme,
   timerange,
+  startServices,
 }: UpgradeRiskScoreModule) => {
   await uninstallRiskScoreModule({
     http,
-    notifications,
     renderDocLink,
     riskScoreEntity: RiskScoreEntity.host,
     spaceId,
-    theme,
+    startServices,
   });
   await installRiskScoreModule({
     dashboard,
     http,
-    notifications,
     refetch,
     renderDashboardLink,
     renderDocLink,
     riskScoreEntity: RiskScoreEntity.host,
     spaceId,
-    theme,
     timerange,
+    startServices,
   });
 };
 
 export const upgradeUserRiskScoreModule = async ({
   dashboard,
   http,
-  notifications,
   refetch,
   renderDashboardLink,
   renderDocLink,
   spaceId = 'default',
-  theme,
   timerange,
+  startServices,
 }: UpgradeRiskScoreModule) => {
   await uninstallRiskScoreModule({
     http,
-    notifications,
     renderDocLink,
     riskScoreEntity: RiskScoreEntity.user,
     spaceId,
-    theme,
+    startServices,
   });
   await installRiskScoreModule({
     dashboard,
     http,
-    notifications,
     refetch,
     renderDashboardLink,
     renderDocLink,
     riskScoreEntity: RiskScoreEntity.user,
     spaceId,
-    theme,
     timerange,
+    startServices,
   });
 };
 
 export const restartRiskScoreTransforms = async ({
   http,
-  notifications,
   refetch,
   renderDocLink,
   riskScoreEntity,
   spaceId,
+  startServices,
 }: {
   http: HttpSetup;
-  notifications?: NotificationsStart;
   refetch?: inputsModel.Refetch;
   renderDocLink?: (message: string) => React.ReactNode;
   riskScoreEntity: RiskScoreEntity;
   spaceId?: string;
+  startServices: StartRenderServices;
 }) => {
   const transformIds = [
     utils.getRiskScorePivotTransformId(riskScoreEntity, spaceId),
@@ -337,16 +328,16 @@ export const restartRiskScoreTransforms = async ({
 
   await stopTransforms({
     http,
-    notifications,
     renderDocLink,
     transformIds,
+    startServices,
   });
 
   const res = await startTransforms({
     http,
-    notifications,
     renderDocLink,
     transformIds,
+    startServices,
   });
 
   if (refetch) {

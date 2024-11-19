@@ -13,6 +13,9 @@ import {
   ADJUST_THROUGHPUT_INTERVAL,
 } from './create_managed_configuration';
 import { mockLogger } from '../test_utils';
+import { CLAIM_STRATEGY_UPDATE_BY_QUERY, CLAIM_STRATEGY_MGET, TaskManagerConfig } from '../config';
+import { MsearchError } from './msearch_error';
+import { BulkUpdateError } from './bulk_update_error';
 
 describe('createManagedConfiguration()', () => {
   let clock: sinon.SinonFakeTimers;
@@ -26,51 +29,141 @@ describe('createManagedConfiguration()', () => {
   afterEach(() => clock.restore());
 
   test('returns observables with initialized values', async () => {
-    const maxWorkersSubscription = jest.fn();
+    const capacitySubscription = jest.fn();
     const pollIntervalSubscription = jest.fn();
-    const { maxWorkersConfiguration$, pollIntervalConfiguration$ } = createManagedConfiguration({
+    const { capacityConfiguration$, pollIntervalConfiguration$ } = createManagedConfiguration({
       logger,
       errors$: new Subject<Error>(),
-      startingMaxWorkers: 1,
-      startingPollInterval: 2,
+      config: {
+        capacity: 20,
+        poll_interval: 2,
+      } as TaskManagerConfig,
     });
-    maxWorkersConfiguration$.subscribe(maxWorkersSubscription);
+    capacityConfiguration$.subscribe(capacitySubscription);
     pollIntervalConfiguration$.subscribe(pollIntervalSubscription);
-    expect(maxWorkersSubscription).toHaveBeenCalledTimes(1);
-    expect(maxWorkersSubscription).toHaveBeenNthCalledWith(1, 1);
+    expect(capacitySubscription).toHaveBeenCalledTimes(1);
+    expect(capacitySubscription).toHaveBeenNthCalledWith(1, 20);
     expect(pollIntervalSubscription).toHaveBeenCalledTimes(1);
     expect(pollIntervalSubscription).toHaveBeenNthCalledWith(1, 2);
   });
 
+  test('uses max_workers config as capacity if only max workers is defined', async () => {
+    const capacitySubscription = jest.fn();
+    const pollIntervalSubscription = jest.fn();
+    const { capacityConfiguration$, pollIntervalConfiguration$ } = createManagedConfiguration({
+      logger,
+      errors$: new Subject<Error>(),
+      config: {
+        max_workers: 10,
+        poll_interval: 2,
+      } as TaskManagerConfig,
+    });
+    capacityConfiguration$.subscribe(capacitySubscription);
+    pollIntervalConfiguration$.subscribe(pollIntervalSubscription);
+    expect(capacitySubscription).toHaveBeenCalledTimes(1);
+    expect(capacitySubscription).toHaveBeenNthCalledWith(1, 10);
+    expect(pollIntervalSubscription).toHaveBeenCalledTimes(1);
+    expect(pollIntervalSubscription).toHaveBeenNthCalledWith(1, 2);
+  });
+
+  test('uses max_workers config as capacity but does not exceed MAX_CAPACITY', async () => {
+    const capacitySubscription = jest.fn();
+    const pollIntervalSubscription = jest.fn();
+    const { capacityConfiguration$, pollIntervalConfiguration$ } = createManagedConfiguration({
+      logger,
+      errors$: new Subject<Error>(),
+      config: {
+        max_workers: 1000,
+        poll_interval: 2,
+      } as TaskManagerConfig,
+    });
+    capacityConfiguration$.subscribe(capacitySubscription);
+    pollIntervalConfiguration$.subscribe(pollIntervalSubscription);
+    expect(capacitySubscription).toHaveBeenCalledTimes(1);
+    expect(capacitySubscription).toHaveBeenNthCalledWith(1, 50);
+    expect(pollIntervalSubscription).toHaveBeenCalledTimes(1);
+    expect(pollIntervalSubscription).toHaveBeenNthCalledWith(1, 2);
+  });
+
+  test('uses provided defaultCapacity if neither capacity nor max_workers is defined', async () => {
+    const capacitySubscription = jest.fn();
+    const pollIntervalSubscription = jest.fn();
+    const { capacityConfiguration$, pollIntervalConfiguration$ } = createManagedConfiguration({
+      defaultCapacity: 500,
+      logger,
+      errors$: new Subject<Error>(),
+      config: {
+        poll_interval: 2,
+      } as TaskManagerConfig,
+    });
+    capacityConfiguration$.subscribe(capacitySubscription);
+    pollIntervalConfiguration$.subscribe(pollIntervalSubscription);
+    expect(capacitySubscription).toHaveBeenCalledTimes(1);
+    expect(capacitySubscription).toHaveBeenNthCalledWith(1, 500);
+    expect(pollIntervalSubscription).toHaveBeenCalledTimes(1);
+    expect(pollIntervalSubscription).toHaveBeenNthCalledWith(1, 2);
+  });
+
+  test('logs warning and uses capacity config if both capacity and max_workers is defined', async () => {
+    const capacitySubscription = jest.fn();
+    const pollIntervalSubscription = jest.fn();
+    const { capacityConfiguration$, pollIntervalConfiguration$ } = createManagedConfiguration({
+      logger,
+      errors$: new Subject<Error>(),
+      config: {
+        capacity: 30,
+        max_workers: 10,
+        poll_interval: 2,
+      } as TaskManagerConfig,
+    });
+    capacityConfiguration$.subscribe(capacitySubscription);
+    pollIntervalConfiguration$.subscribe(pollIntervalSubscription);
+    expect(capacitySubscription).toHaveBeenCalledTimes(1);
+    expect(capacitySubscription).toHaveBeenNthCalledWith(1, 30);
+    expect(pollIntervalSubscription).toHaveBeenCalledTimes(1);
+    expect(pollIntervalSubscription).toHaveBeenNthCalledWith(1, 2);
+    expect(logger.warn).toHaveBeenCalledWith(
+      `Both \"xpack.task_manager.capacity\" and \"xpack.task_manager.max_workers\" configs are set, max_workers will be ignored in favor of capacity and the setting should be removed.`
+    );
+  });
+
   test(`skips errors that aren't about too many requests`, async () => {
-    const maxWorkersSubscription = jest.fn();
+    const capacitySubscription = jest.fn();
     const pollIntervalSubscription = jest.fn();
     const errors$ = new Subject<Error>();
-    const { maxWorkersConfiguration$, pollIntervalConfiguration$ } = createManagedConfiguration({
+    const { capacityConfiguration$, pollIntervalConfiguration$ } = createManagedConfiguration({
       errors$,
       logger,
-      startingMaxWorkers: 100,
-      startingPollInterval: 100,
+      config: {
+        capacity: 10,
+        poll_interval: 100,
+      } as TaskManagerConfig,
     });
-    maxWorkersConfiguration$.subscribe(maxWorkersSubscription);
+    capacityConfiguration$.subscribe(capacitySubscription);
     pollIntervalConfiguration$.subscribe(pollIntervalSubscription);
     errors$.next(new Error('foo'));
     clock.tick(ADJUST_THROUGHPUT_INTERVAL);
-    expect(maxWorkersSubscription).toHaveBeenCalledTimes(1);
+    expect(capacitySubscription).toHaveBeenCalledTimes(1);
     expect(pollIntervalSubscription).toHaveBeenCalledTimes(1);
   });
 
-  describe('maxWorker configuration', () => {
-    function setupScenario(startingMaxWorkers: number) {
+  describe('capacity configuration', () => {
+    function setupScenario(
+      startingCapacity: number,
+      claimStrategy: string = CLAIM_STRATEGY_UPDATE_BY_QUERY
+    ) {
       const errors$ = new Subject<Error>();
       const subscription = jest.fn();
-      const { maxWorkersConfiguration$ } = createManagedConfiguration({
+      const { capacityConfiguration$ } = createManagedConfiguration({
         errors$,
-        startingMaxWorkers,
         logger,
-        startingPollInterval: 1,
+        config: {
+          capacity: startingCapacity,
+          poll_interval: 1,
+          claim_strategy: claimStrategy,
+        } as TaskManagerConfig,
       });
-      maxWorkersConfiguration$.subscribe(subscription);
+      capacityConfiguration$.subscribe(subscription);
       return { subscription, errors$ };
     }
 
@@ -81,66 +174,196 @@ describe('createManagedConfiguration()', () => {
 
     afterEach(() => clock.restore());
 
-    test('should decrease configuration at the next interval when an error is emitted', async () => {
-      const { subscription, errors$ } = setupScenario(100);
-      errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
-      clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
-      expect(subscription).toHaveBeenCalledTimes(1);
-      clock.tick(1);
-      expect(subscription).toHaveBeenCalledTimes(2);
-      expect(subscription).toHaveBeenNthCalledWith(2, 80);
-    });
+    describe('default claim strategy', () => {
+      test('should decrease configuration at the next interval when an error is emitted', async () => {
+        const { subscription, errors$ } = setupScenario(10);
+        errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
+        clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
+        expect(subscription).toHaveBeenCalledTimes(1);
+        expect(subscription).toHaveBeenNthCalledWith(1, 10);
+        clock.tick(1);
+        expect(subscription).toHaveBeenCalledTimes(2);
+        expect(subscription).toHaveBeenNthCalledWith(2, 8);
+      });
 
-    test('should log a warning when the configuration changes from the starting value', async () => {
-      const { errors$ } = setupScenario(100);
-      errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
-      clock.tick(ADJUST_THROUGHPUT_INTERVAL);
-      expect(logger.warn).toHaveBeenCalledWith(
-        'Max workers configuration is temporarily reduced after Elasticsearch returned 1 "too many request" and/or "execute [inline] script" error(s).'
-      );
-    });
+      test('should decrease configuration at the next interval when a 500 error is emitted', async () => {
+        const { subscription, errors$ } = setupScenario(10);
+        errors$.next(SavedObjectsErrorHelpers.decorateGeneralError(new Error('a'), 'b'));
+        clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
+        expect(subscription).toHaveBeenCalledTimes(1);
+        expect(subscription).toHaveBeenNthCalledWith(1, 10);
+        clock.tick(1);
+        expect(subscription).toHaveBeenCalledTimes(2);
+        expect(subscription).toHaveBeenNthCalledWith(2, 8);
+      });
 
-    test('should increase configuration back to normal incrementally after an error is emitted', async () => {
-      const { subscription, errors$ } = setupScenario(100);
-      errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
-      clock.tick(ADJUST_THROUGHPUT_INTERVAL * 10);
-      expect(subscription).toHaveBeenNthCalledWith(2, 80);
-      expect(subscription).toHaveBeenNthCalledWith(3, 84);
-      // 88.2- > 89 from Math.ceil
-      expect(subscription).toHaveBeenNthCalledWith(4, 89);
-      expect(subscription).toHaveBeenNthCalledWith(5, 94);
-      expect(subscription).toHaveBeenNthCalledWith(6, 99);
-      // 103.95 -> 100 from Math.min with starting value
-      expect(subscription).toHaveBeenNthCalledWith(7, 100);
-      // No new calls due to value not changing and usage of distinctUntilChanged()
-      expect(subscription).toHaveBeenCalledTimes(7);
-    });
+      test('should decrease configuration at the next interval when a 503 error is emitted', async () => {
+        const { subscription, errors$ } = setupScenario(10);
+        errors$.next(SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError('a', 'b'));
+        clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
+        expect(subscription).toHaveBeenCalledTimes(1);
+        expect(subscription).toHaveBeenNthCalledWith(1, 10);
+        clock.tick(1);
+        expect(subscription).toHaveBeenCalledTimes(2);
+        expect(subscription).toHaveBeenNthCalledWith(2, 8);
+      });
 
-    test('should keep reducing configuration when errors keep emitting', async () => {
-      const { subscription, errors$ } = setupScenario(100);
-      for (let i = 0; i < 20; i++) {
+      test('should log a warning when the configuration changes from the starting value', async () => {
+        const { errors$ } = setupScenario(10);
         errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
         clock.tick(ADJUST_THROUGHPUT_INTERVAL);
-      }
-      expect(subscription).toHaveBeenNthCalledWith(2, 80);
-      expect(subscription).toHaveBeenNthCalledWith(3, 64);
-      // 51.2 -> 51 from Math.floor
-      expect(subscription).toHaveBeenNthCalledWith(4, 51);
-      expect(subscription).toHaveBeenNthCalledWith(5, 40);
-      expect(subscription).toHaveBeenNthCalledWith(6, 32);
-      expect(subscription).toHaveBeenNthCalledWith(7, 25);
-      expect(subscription).toHaveBeenNthCalledWith(8, 20);
-      expect(subscription).toHaveBeenNthCalledWith(9, 16);
-      expect(subscription).toHaveBeenNthCalledWith(10, 12);
-      expect(subscription).toHaveBeenNthCalledWith(11, 9);
-      expect(subscription).toHaveBeenNthCalledWith(12, 7);
-      expect(subscription).toHaveBeenNthCalledWith(13, 5);
-      expect(subscription).toHaveBeenNthCalledWith(14, 4);
-      expect(subscription).toHaveBeenNthCalledWith(15, 3);
-      expect(subscription).toHaveBeenNthCalledWith(16, 2);
-      expect(subscription).toHaveBeenNthCalledWith(17, 1);
-      // No new calls due to value not changing and usage of distinctUntilChanged()
-      expect(subscription).toHaveBeenCalledTimes(17);
+        expect(logger.warn).toHaveBeenCalledWith(
+          'Capacity configuration is temporarily reduced after Elasticsearch returned 1 "too many request" and/or "execute [inline] script" error(s).'
+        );
+      });
+
+      test('should increase configuration back to normal incrementally after an error is emitted', async () => {
+        const { subscription, errors$ } = setupScenario(10);
+        errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
+        clock.tick(ADJUST_THROUGHPUT_INTERVAL * 10);
+        expect(subscription).toHaveBeenNthCalledWith(1, 10);
+        expect(subscription).toHaveBeenNthCalledWith(2, 8);
+        expect(subscription).toHaveBeenNthCalledWith(3, 9);
+        expect(subscription).toHaveBeenNthCalledWith(4, 10);
+        // No new calls due to value not changing and usage of distinctUntilChanged()
+        expect(subscription).toHaveBeenCalledTimes(4);
+      });
+
+      test('should keep reducing configuration when errors keep emitting until it reaches minimum', async () => {
+        const { subscription, errors$ } = setupScenario(10);
+        for (let i = 0; i < 20; i++) {
+          errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
+          clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+        }
+        expect(subscription).toHaveBeenNthCalledWith(1, 10);
+        expect(subscription).toHaveBeenNthCalledWith(2, 8);
+        expect(subscription).toHaveBeenNthCalledWith(3, 6);
+        expect(subscription).toHaveBeenNthCalledWith(4, 4);
+        expect(subscription).toHaveBeenNthCalledWith(5, 3);
+        expect(subscription).toHaveBeenNthCalledWith(6, 2);
+        expect(subscription).toHaveBeenNthCalledWith(7, 1);
+        // No new calls due to value not changing and usage of distinctUntilChanged()
+        expect(subscription).toHaveBeenCalledTimes(7);
+      });
+    });
+
+    describe('mget claim strategy', () => {
+      test('should decrease configuration at the next interval when an msearch 429 error is emitted', async () => {
+        const { subscription, errors$ } = setupScenario(10);
+        errors$.next(new MsearchError(429));
+        clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
+        expect(subscription).toHaveBeenCalledTimes(1);
+        expect(subscription).toHaveBeenNthCalledWith(1, 10);
+        clock.tick(1);
+        expect(subscription).toHaveBeenCalledTimes(2);
+        expect(subscription).toHaveBeenNthCalledWith(2, 8);
+      });
+
+      test('should decrease configuration at the next interval when an msearch 500 error is emitted', async () => {
+        const { subscription, errors$ } = setupScenario(10);
+        errors$.next(new MsearchError(500));
+        clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
+        expect(subscription).toHaveBeenCalledTimes(1);
+        expect(subscription).toHaveBeenNthCalledWith(1, 10);
+        clock.tick(1);
+        expect(subscription).toHaveBeenCalledTimes(2);
+        expect(subscription).toHaveBeenNthCalledWith(2, 8);
+      });
+
+      test('should decrease configuration at the next interval when an msearch 503 error is emitted', async () => {
+        const { subscription, errors$ } = setupScenario(10);
+        errors$.next(new MsearchError(503));
+        clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
+        expect(subscription).toHaveBeenCalledTimes(1);
+        expect(subscription).toHaveBeenNthCalledWith(1, 10);
+        clock.tick(1);
+        expect(subscription).toHaveBeenCalledTimes(2);
+        expect(subscription).toHaveBeenNthCalledWith(2, 8);
+      });
+
+      test('should decrease configuration at the next interval when a bulkPartialUpdate 429 error is emitted', async () => {
+        const { subscription, errors$ } = setupScenario(10);
+        errors$.next(
+          new BulkUpdateError({ statusCode: 429, message: 'test', type: 'too_many_requests' })
+        );
+        clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
+        expect(subscription).toHaveBeenCalledTimes(1);
+        expect(subscription).toHaveBeenNthCalledWith(1, 10);
+        clock.tick(1);
+        expect(subscription).toHaveBeenCalledTimes(2);
+        expect(subscription).toHaveBeenNthCalledWith(2, 8);
+      });
+
+      test('should decrease configuration at the next interval when a bulkPartialUpdate 500 error is emitted', async () => {
+        const { subscription, errors$ } = setupScenario(10);
+        errors$.next(
+          new BulkUpdateError({ statusCode: 500, message: 'test', type: 'server_error' })
+        );
+        clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
+        expect(subscription).toHaveBeenCalledTimes(1);
+        expect(subscription).toHaveBeenNthCalledWith(1, 10);
+        clock.tick(1);
+        expect(subscription).toHaveBeenCalledTimes(2);
+        expect(subscription).toHaveBeenNthCalledWith(2, 8);
+      });
+
+      test('should decrease configuration at the next interval when a bulkPartialUpdate 503 error is emitted', async () => {
+        const { subscription, errors$ } = setupScenario(10);
+        errors$.next(
+          new BulkUpdateError({ statusCode: 503, message: 'test', type: 'unavailable' })
+        );
+        clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
+        expect(subscription).toHaveBeenCalledTimes(1);
+        expect(subscription).toHaveBeenNthCalledWith(1, 10);
+        clock.tick(1);
+        expect(subscription).toHaveBeenCalledTimes(2);
+        expect(subscription).toHaveBeenNthCalledWith(2, 8);
+      });
+
+      test('should not change configuration at the next interval when other msearch error is emitted', async () => {
+        const { subscription, errors$ } = setupScenario(10);
+        errors$.next(new MsearchError(404));
+        clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
+        expect(subscription).toHaveBeenCalledTimes(1);
+        expect(subscription).toHaveBeenNthCalledWith(1, 10);
+        clock.tick(1);
+        expect(subscription).toHaveBeenCalledTimes(1);
+      });
+
+      test('should log a warning when the configuration changes from the starting value', async () => {
+        const { errors$ } = setupScenario(10, CLAIM_STRATEGY_MGET);
+        errors$.next(new MsearchError(429));
+        clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+        expect(logger.warn).toHaveBeenCalledWith(
+          'Capacity configuration is temporarily reduced after Elasticsearch returned 1 "too many request" and/or "execute [inline] script" error(s).'
+        );
+      });
+
+      test('should increase configuration back to normal incrementally after an error is emitted', async () => {
+        const { subscription, errors$ } = setupScenario(10, CLAIM_STRATEGY_MGET);
+        errors$.next(new MsearchError(429));
+        clock.tick(ADJUST_THROUGHPUT_INTERVAL * 10);
+        expect(subscription).toHaveBeenNthCalledWith(1, 10);
+        expect(subscription).toHaveBeenNthCalledWith(2, 8);
+        expect(subscription).toHaveBeenNthCalledWith(3, 9);
+        expect(subscription).toHaveBeenNthCalledWith(4, 10);
+        // No new calls due to value not changing and usage of distinctUntilChanged()
+        expect(subscription).toHaveBeenCalledTimes(4);
+      });
+
+      test('should keep reducing configuration when errors keep emitting until it reaches minimum', async () => {
+        const { subscription, errors$ } = setupScenario(10, CLAIM_STRATEGY_MGET);
+        for (let i = 0; i < 20; i++) {
+          errors$.next(new MsearchError(429));
+          clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+        }
+        expect(subscription).toHaveBeenNthCalledWith(1, 10);
+        expect(subscription).toHaveBeenNthCalledWith(2, 8);
+        expect(subscription).toHaveBeenNthCalledWith(3, 6);
+        expect(subscription).toHaveBeenNthCalledWith(4, 5);
+        // No new calls due to value not changing and usage of distinctUntilChanged()
+        expect(subscription).toHaveBeenCalledTimes(4);
+      });
     });
   });
 
@@ -151,8 +374,10 @@ describe('createManagedConfiguration()', () => {
       const { pollIntervalConfiguration$ } = createManagedConfiguration({
         logger,
         errors$,
-        startingPollInterval,
-        startingMaxWorkers: 1,
+        config: {
+          poll_interval: startingPollInterval,
+          capacity: 20,
+        } as TaskManagerConfig,
       });
       pollIntervalConfiguration$.subscribe(subscription);
       return { subscription, errors$ };
@@ -168,6 +393,26 @@ describe('createManagedConfiguration()', () => {
     test('should increase configuration at the next interval when an error is emitted', async () => {
       const { subscription, errors$ } = setupScenario(100);
       errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
+      clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
+      expect(subscription).toHaveBeenCalledTimes(1);
+      clock.tick(1);
+      expect(subscription).toHaveBeenCalledTimes(2);
+      expect(subscription).toHaveBeenNthCalledWith(2, 120);
+    });
+
+    test('should increase configuration at the next interval when a 500 error is emitted', async () => {
+      const { subscription, errors$ } = setupScenario(100);
+      errors$.next(SavedObjectsErrorHelpers.decorateGeneralError(new Error('a'), 'b'));
+      clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
+      expect(subscription).toHaveBeenCalledTimes(1);
+      clock.tick(1);
+      expect(subscription).toHaveBeenCalledTimes(2);
+      expect(subscription).toHaveBeenNthCalledWith(2, 120);
+    });
+
+    test('should increase configuration at the next interval when a 503 error is emitted', async () => {
+      const { subscription, errors$ } = setupScenario(100);
+      errors$.next(SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError('a', 'b'));
       clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
       expect(subscription).toHaveBeenCalledTimes(1);
       clock.tick(1);

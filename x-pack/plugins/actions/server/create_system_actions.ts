@@ -14,7 +14,7 @@ export const createSystemConnectors = (actionTypes: ActionType[]): InMemoryConne
   const systemConnectors: InMemoryConnector[] = systemActionTypes.map((systemActionType) => ({
     id: `system-connector-${systemActionType.id}`,
     actionTypeId: systemActionType.id,
-    name: `System action: ${systemActionType.id}`,
+    name: systemActionType.name,
     isMissingSecrets: false,
     config: {},
     secrets: {},

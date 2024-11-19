@@ -8,6 +8,7 @@
 import { DETECTION_ENGINE_ALERT_ASSIGNEES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
+import { setAlertAssignees } from '../../../../utils';
 import {
   createAlertsIndex,
   createRule,
@@ -15,10 +16,9 @@ import {
   deleteAllRules,
   getAlertsByIds,
   getRuleForAlertTesting,
-  setAlertAssignees,
   waitForAlertsToBePresent,
   waitForRuleSuccess,
-} from '../../../../utils';
+} from '../../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 
@@ -33,7 +33,9 @@ export default ({ getService }: FtrProviderContext) => {
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const path = dataPathBuilder.getPath('auditbeat/hosts');
 
-  describe('@serverless Alert User Assignment - Serverless', () => {
+  // See https://github.com/elastic/kibana/issues/182878 for
+  // background on @skipInSrverlessMKI - action needed
+  describe('@serverless @skipInServerlessMKI Alert User Assignment - Serverless', () => {
     before(async () => {
       await esArchiver.load(path);
     });
@@ -61,7 +63,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccess({ supertest, log, id });
         await waitForAlertsToBePresent(supertest, log, 10, [id]);
         const alerts = await getAlertsByIds(supertest, log, [id]);
-        const alertIds = alerts.hits.hits.map((alert) => alert._id);
+        const alertIds = alerts.hits.hits.map((alert) => alert._id!);
 
         // Try to set all of the alerts to the state of closed.
         // This should not be possible with the given user.

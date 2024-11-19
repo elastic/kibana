@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 import {
   InjectedMetadata,
   InjectedMetadataClusterInfo,
   InjectedMetadataExternalUrlPolicy,
   InjectedMetadataPlugin,
+  InjectedMetadataTheme,
 } from '@kbn/core-injected-metadata-common-internal';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 
@@ -39,10 +40,7 @@ export interface InternalInjectedMetadataSetup {
   getExternalUrlConfig: () => {
     policy: InjectedMetadataExternalUrlPolicy[];
   };
-  getTheme: () => {
-    darkMode: boolean;
-    version: ThemeVersion;
-  };
+  getTheme: () => InjectedMetadataTheme;
   getElasticsearchInfo: () => InjectedMetadataClusterInfo;
   /**
    * An array of frontend plugins in topological order.
@@ -59,11 +57,12 @@ export interface InternalInjectedMetadataSetup {
       user?: Record<string, any> | undefined;
     };
   };
-  getInjectedVar: (name: string, defaultValue?: any) => unknown;
-  getInjectedVars: () => {
-    [key: string]: unknown;
-  };
   getCustomBranding: () => CustomBranding;
+  getFeatureFlags: () =>
+    | {
+        overrides: Record<string, unknown>;
+      }
+    | undefined;
 }
 
 /** @internal */

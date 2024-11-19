@@ -5,48 +5,53 @@
  * 2.0.
  */
 
+import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
-  const supertest = getService('supertest');
+  const roleScopedSupertest = getService('roleScopedSupertest');
+  let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
 
   describe('security/role_mappings', function () {
+    before(async () => {
+      supertestAdminWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
+        'admin',
+        {
+          useCookieHeader: true,
+          withInternalHeaders: true,
+        }
+      );
+    });
+
     describe('route access', () => {
       describe('disabled', () => {
-        it('create/update role mapping', async () => {
-          const { body, status } = await supertest
-            .post('/internal/security/role_mapping/test')
-            .set(svlCommonApi.getInternalRequestHeader());
+        it('create/update roleAuthc mapping', async () => {
+          const { body, status } = await supertestAdminWithCookieCredentials.post(
+            '/internal/security/role_mapping/test'
+          );
           svlCommonApi.assertApiNotFound(body, status);
         });
 
-        it('get role mapping', async () => {
-          const { body, status } = await supertest
-            .get('/internal/security/role_mapping/test')
-            .set(svlCommonApi.getInternalRequestHeader());
+        it('get roleAuthc mapping', async () => {
+          const { body, status } = await supertestAdminWithCookieCredentials.get(
+            '/internal/security/role_mapping/test'
+          );
           svlCommonApi.assertApiNotFound(body, status);
         });
 
-        it('get all role mappings', async () => {
-          const { body, status } = await supertest
-            .get('/internal/security/role_mapping')
-            .set(svlCommonApi.getInternalRequestHeader());
+        it('get all roleAuthc mappings', async () => {
+          const { body, status } = await supertestAdminWithCookieCredentials.get(
+            '/internal/security/role_mapping'
+          );
           svlCommonApi.assertApiNotFound(body, status);
         });
 
-        it('delete role mapping', async () => {
-          // this test works because the message for a missing endpoint is different from a missing role mapping
-          const { body, status } = await supertest
-            .delete('/internal/security/role_mapping/test')
-            .set(svlCommonApi.getInternalRequestHeader());
-          svlCommonApi.assertApiNotFound(body, status);
-        });
-
-        it('role mapping feature check', async () => {
-          const { body, status } = await supertest
-            .get('/internal/security/_check_role_mapping_features')
-            .set(svlCommonApi.getInternalRequestHeader());
+        it('delete roleAuthc mapping', async () => {
+          // this test works because the message for a missing endpoint is different from a missing roleAuthc mapping
+          const { body, status } = await supertestAdminWithCookieCredentials.delete(
+            '/internal/security/role_mapping/test'
+          );
           svlCommonApi.assertApiNotFound(body, status);
         });
       });

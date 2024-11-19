@@ -7,7 +7,6 @@
 
 import React from 'react';
 
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { LogStream, LogStreamProps } from '@kbn/logs-shared-plugin/public';
 
 /*
@@ -16,7 +15,7 @@ import { LogStream, LogStreamProps } from '@kbn/logs-shared-plugin/public';
  * default for timestamps. All other props get passed as-is to the underlying LogStream.
  *
  * Documentation links for reference:
- * - https://github.com/elastic/kibana/blob/main/x-pack/plugins/logs_shared/public/components/log_stream/log_stream.stories.mdx
+ * - https://github.com/elastic/kibana/blob/main/x-pack/plugins/observability_solution/logs_shared/public/components/log_stream/log_stream.stories.mdx
  * - Run `yarn storybook logsShared` for live docs
  */
 
@@ -35,9 +34,5 @@ export const EntSearchLogStream: React.FC<Props> = ({
   if (!endTimestamp) endTimestamp = Date.now();
   if (!startTimestamp) startTimestamp = endTimestamp - hoursAgo * 60 * 60 * 1000;
 
-  return (
-    <EuiThemeProvider>
-      <LogStream startTimestamp={startTimestamp} endTimestamp={endTimestamp} {...props} />
-    </EuiThemeProvider>
-  );
+  return <LogStream startTimestamp={startTimestamp} endTimestamp={endTimestamp} {...props} />;
 };

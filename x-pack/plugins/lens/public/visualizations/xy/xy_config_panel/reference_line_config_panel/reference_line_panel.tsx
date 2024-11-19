@@ -11,12 +11,13 @@ import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { FillStyle } from '@kbn/expression-xy-plugin/common';
 import {
-  useDebouncedValue,
   IconSelectSetting,
   ColorPicker,
   LineStyleSettings,
   TextDecorationSetting,
 } from '@kbn/visualization-ui-components';
+import { useDebouncedValue } from '@kbn/visualization-utils';
+import { referenceLineIconsSet } from '../../../../shared_components/icon_set';
 import type { VisualizationDimensionEditorProps } from '../../../../types';
 import { State, XYState, XYReferenceLineLayerConfig, YConfig } from '../../types';
 import { FormatFactory } from '../../../../../common/types';
@@ -25,7 +26,6 @@ import { updateLayer } from '..';
 import { idPrefix } from '../dimension_editor';
 import { isHorizontalChart } from '../../state_helpers';
 import { MarkerDecorationPosition } from '../shared/marker_decoration_settings';
-import { referenceLineIconsSet } from './icon_set';
 import { defaultReferenceLineColor } from '../../color_assignment';
 
 export const ReferenceLinePanel = (
@@ -172,7 +172,6 @@ export const FillSetting = ({
           defaultMessage: 'Fill',
         })}
         data-test-subj="lnsXY_fill"
-        name="fill"
         buttonSize="compressed"
         options={getFillPositionOptions({ isHorizontal, axisMode: currentConfig?.axisMode })}
         idSelected={`${idPrefix}${currentConfig?.fill || 'none'}`}

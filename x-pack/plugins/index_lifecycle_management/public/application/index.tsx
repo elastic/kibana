@@ -7,14 +7,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Observable } from 'rxjs';
-import {
-  I18nStart,
-  ScopedHistory,
-  ApplicationStart,
-  UnmountCallback,
-  CoreTheme,
-} from '@kbn/core/public';
+import { ScopedHistory, ApplicationStart, UnmountCallback, CoreStart } from '@kbn/core/public';
 import { DocLinksStart, ExecutionContextStart } from '@kbn/core/public';
 
 import {
@@ -22,50 +15,54 @@ import {
   ILicense,
   KibanaContextProvider,
   APP_WRAPPER_CLASS,
+  KibanaRenderContextProvider,
   RedirectAppLinks,
-  KibanaThemeProvider,
 } from '../shared_imports';
 import { App } from './app';
 import { BreadcrumbService } from './services/breadcrumbs';
 
 export const renderApp = (
+  startServices: CoreStart,
   element: Element,
-  I18nContext: I18nStart['Context'],
   history: ScopedHistory,
   application: ApplicationStart,
   breadcrumbService: BreadcrumbService,
   license: ILicense,
-  theme$: Observable<CoreTheme>,
   docLinks: DocLinksStart,
   executionContext: ExecutionContextStart,
   cloud?: CloudSetup
 ): UnmountCallback => {
-  const { getUrlForApp } = application;
+  const { navigateToUrl, getUrlForApp, capabilities } = application;
+  const { overlays, http } = startServices;
+
   render(
-    <div className={APP_WRAPPER_CLASS}>
-      <RedirectAppLinks
-        coreStart={{
-          application,
-        }}
-      >
-        <I18nContext>
-          <KibanaThemeProvider theme$={theme$}>
-            <KibanaContextProvider
-              services={{
-                cloud,
-                breadcrumbService,
-                license,
-                getUrlForApp,
-                docLinks,
-                executionContext,
-              }}
-            >
-              <App history={history} />
-            </KibanaContextProvider>
-          </KibanaThemeProvider>
-        </I18nContext>
-      </RedirectAppLinks>
-    </div>,
+    <KibanaRenderContextProvider {...startServices}>
+      <div className={APP_WRAPPER_CLASS}>
+        <RedirectAppLinks
+          coreStart={{
+            application,
+          }}
+        >
+          <KibanaContextProvider
+            services={{
+              cloud,
+              breadcrumbService,
+              license,
+              getUrlForApp,
+              docLinks,
+              executionContext,
+              navigateToUrl,
+              overlays,
+              http,
+              history,
+              capabilities,
+            }}
+          >
+            <App history={history} />
+          </KibanaContextProvider>
+        </RedirectAppLinks>
+      </div>
+    </KibanaRenderContextProvider>,
     element
   );
 

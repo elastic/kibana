@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
-import type { IKibanaSearchResponse } from '@kbn/data-plugin/common';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
 
 import { order } from '../model/order';
 import { requestBasicOptionsSchema } from '../model/request_basic_options';

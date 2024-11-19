@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { useTransformCapabilities } from '../../../../hooks';
-import { TransformListAction, TransformListRow } from '../../../../common';
+import type { TransformListAction, TransformListRow } from '../../../../common';
 import {
   crateAlertRuleActionNameText,
   CreateAlertRuleActionName,

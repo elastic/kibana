@@ -11,28 +11,22 @@ import type { IUiSettingsClient } from '@kbn/core/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { firstValueFrom } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { DashboardLocatorParams, DashboardStart } from '@kbn/dashboard-plugin/public';
+import type {
+  DashboardApi,
+  DashboardLocatorParams,
+  DashboardStart,
+} from '@kbn/dashboard-plugin/public';
+import { getPanelTitle } from '@kbn/presentation-publishing';
 import type { Filter, Query, DataViewBase } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
-import type { Embeddable } from '@kbn/lens-plugin/public';
-import type { MapEmbeddable } from '@kbn/maps-plugin/public';
 import type { ErrorType } from '@kbn/ml-error-utils';
-import type { MlApiServices } from '../../../services/ml_api_service';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { MlApi } from '../../../services/ml_api_service';
 import type { Job, Datafeed } from '../../../../../common/types/anomaly_detection_jobs';
 import { getFiltersForDSLQuery } from '../../../../../common/util/job_utils';
-import { CREATED_BY_LABEL } from '../../../../../common/constants/new_job';
+import type { CREATED_BY_LABEL } from '../../../../../common/constants/new_job';
 import { createQueries } from '../utils/new_job_utils';
 import { createDatafeedId } from '../../../../../common/util/job_utils';
-
-export function isLensEmbeddable(arg: any): arg is Embeddable {
-  return arg.hasOwnProperty('type') && arg.type === 'lens';
-}
-
-export function isMapEmbeddable(arg: any): arg is MapEmbeddable {
-  return arg.hasOwnProperty('type') && arg.type === 'map';
-}
-
-export type Dashboard = Embeddable['parent'];
 
 interface CreationState {
   success: boolean;
@@ -58,10 +52,11 @@ function mergeQueriesCheck(
 
 export class QuickJobCreatorBase {
   constructor(
+    protected readonly dataViews: DataViewsContract,
     protected readonly kibanaConfig: IUiSettingsClient,
     protected readonly timeFilter: TimefilterContract,
     protected readonly dashboardService: DashboardStart,
-    protected readonly mlApiServices: MlApiServices
+    protected readonly mlApi: MlApi
   ) {}
 
   protected async putJobAndDataFeed({
@@ -83,7 +78,7 @@ export class QuickJobCreatorBase {
     end: number | undefined;
     startJob: boolean;
     runInRealTime: boolean;
-    dashboard?: Dashboard;
+    dashboard?: DashboardApi;
   }) {
     const datafeedId = createDatafeedId(jobId);
     const datafeed = { ...datafeedConfig, job_id: jobId, datafeed_id: datafeedId };
@@ -113,7 +108,7 @@ export class QuickJobCreatorBase {
         datafeedConfig.indices.length > 0
       ) {
         const { modelMemoryLimit } = await firstValueFrom(
-          this.mlApiServices.calculateModelMemoryLimit$({
+          this.mlApi.calculateModelMemoryLimit$({
             datafeedConfig: datafeed,
             analysisConfig: job.analysis_config,
             indexPattern: datafeedConfig.indices[0],
@@ -136,7 +131,7 @@ export class QuickJobCreatorBase {
 
     // put job
     try {
-      await this.mlApiServices.addJob({ jobId: job.job_id, job });
+      await this.mlApi.addJob({ jobId: job.job_id, job });
     } catch (error) {
       result.jobCreated.error = error;
       return result;
@@ -145,7 +140,7 @@ export class QuickJobCreatorBase {
 
     // put datafeed
     try {
-      await this.mlApiServices.addDatafeed({ datafeedId, datafeedConfig: datafeed });
+      await this.mlApi.addDatafeed({ datafeedId, datafeedConfig: datafeed });
     } catch (error) {
       result.datafeedCreated.error = error;
       return result;
@@ -155,7 +150,7 @@ export class QuickJobCreatorBase {
     if (startJob) {
       // open job, ignore error if already open
       try {
-        await this.mlApiServices.openJob({ jobId });
+        await this.mlApi.openJob({ jobId });
       } catch (error) {
         // job may already be open, so ignore 409 error.
         if (error.body.statusCode !== 409) {
@@ -167,7 +162,7 @@ export class QuickJobCreatorBase {
 
       // start datafeed
       try {
-        await this.mlApiServices.startDatafeed({
+        await this.mlApi.startDatafeed({
           datafeedId,
           start,
           ...(runInRealTime ? {} : { end }),
@@ -230,23 +225,14 @@ export class QuickJobCreatorBase {
     return mergedQueries;
   }
 
-  private async createDashboardLink(dashboard: Dashboard, datafeedConfig: estypes.MlDatafeed) {
-    const dashboardTitle = dashboard?.getTitle();
-    if (dashboardTitle === undefined || dashboardTitle === '') {
-      // embeddable may have not been in a dashboard
-      // and my not have been given a title as it is unsaved.
-      return null;
-    }
-
-    const findDashboardsService = await this.dashboardService.findDashboardsService();
-    // find the dashboard from the dashboard service as the dashboard passed in may not have the correct id
-    const foundDashboard = await findDashboardsService.findByTitle(dashboardTitle);
-    if (foundDashboard === undefined) {
+  private async createDashboardLink(dashboard: DashboardApi, datafeedConfig: estypes.MlDatafeed) {
+    const savedObjectId = dashboard.savedObjectId?.value;
+    if (!savedObjectId) {
       return null;
     }
 
     const params: DashboardLocatorParams = {
-      dashboardId: foundDashboard.id,
+      dashboardId: savedObjectId,
       timeRange: {
         from: '$earliest$',
         to: '$latest$',
@@ -268,13 +254,13 @@ export class QuickJobCreatorBase {
     const url = `${location.app}${location.path}`;
     const urlName = i18n.translate('xpack.ml.newJob.fromLens.createJob.namedUrlDashboard', {
       defaultMessage: 'Open {dashboardTitle}',
-      values: { dashboardTitle },
+      values: { dashboardTitle: getPanelTitle(dashboard) ?? 'dashboard' },
     });
 
     return { url_name: urlName, url_value: url, time_range: 'auto' };
   }
 
-  private async getCustomUrls(dashboard: Dashboard, datafeedConfig: estypes.MlDatafeed) {
+  private async getCustomUrls(dashboard: DashboardApi, datafeedConfig: estypes.MlDatafeed) {
     const customUrls = await this.createDashboardLink(dashboard, datafeedConfig);
     return dashboard !== undefined && customUrls !== null ? { custom_urls: [customUrls] } : {};
   }

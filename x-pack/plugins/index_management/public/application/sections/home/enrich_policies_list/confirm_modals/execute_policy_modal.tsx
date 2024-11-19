@@ -53,7 +53,7 @@ export const ExecutePolicyModal = ({
           const errorMessage = i18n.translate(
             'xpack.idxMgmt.enrichPolicies.executeModal.errorExecuteNotificationMessage',
             {
-              defaultMessage: "Error executing enrich policy: '{error}'",
+              defaultMessage: "Error executing enrich policy: ''{error}''",
               values: { error: error.message },
             }
           );

@@ -7,7 +7,7 @@
 
 import { LensPlugin } from './plugin';
 
-export { apiHasLensConfig } from './embeddable/interfaces/has_lens_config';
+export { isLensApi } from './embeddable/interfaces/lens_api';
 export type {
   EmbeddableComponentProps,
   EmbeddableComponent,
@@ -33,6 +33,7 @@ export type {
   Visualization,
   VisualizationSuggestion,
   Suggestion,
+  UserMessage,
 } from './types';
 export type {
   LegacyMetricState as MetricState,
@@ -110,7 +111,7 @@ export type {
 export type { InlineEditLensEmbeddableContext } from './trigger_actions/open_lens_config/in_app_embeddable_edit/types';
 
 export type {
-  HasLensConfig,
+  LensApi,
   LensEmbeddableInput,
   LensSavedObjectAttributes,
   Embeddable,

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -88,6 +89,9 @@ export class SavedQueryManagementComponentService extends FtrService {
     await this.testSubjects.click(`~load-saved-query-${title}-button`);
     await this.testSubjects.click('saved-query-management-apply-changes-button');
     await this.retry.try(async () => {
+      await this.testSubjects.missingOrFail('queryBarMenuPanel');
+    });
+    await this.retry.try(async () => {
       await this.openSavedQueryManagementComponent();
       const selectedSavedQueryText = await this.testSubjects.getVisibleText('savedQueryTitle');
       expect(selectedSavedQueryText).to.eql(title);
@@ -105,7 +109,7 @@ export class SavedQueryManagementComponentService extends FtrService {
     }
     await this.testSubjects.click(`~load-saved-query-${title}-button`);
     await this.retry.waitFor('delete saved query', async () => {
-      await this.testSubjects.click(`delete-saved-query-${title}-button`);
+      await this.testSubjects.click(`delete-saved-query-button`);
       const exists = await this.testSubjects.exists('confirmModalTitleText');
       return exists === true;
     });
@@ -149,6 +153,9 @@ export class SavedQueryManagementComponentService extends FtrService {
     }
 
     await this.testSubjects.click('savedQueryFormSaveButton');
+    await this.retry.try(async () => {
+      await this.testSubjects.missingOrFail('saveQueryForm');
+    });
   }
 
   async savedQueryExist(title: string) {
@@ -160,8 +167,8 @@ export class SavedQueryManagementComponentService extends FtrService {
   }
 
   async savedQueryExistOrFail(title: string) {
-    await this.openSavedQueryManagementComponent();
     await this.retry.waitFor('load saved query', async () => {
+      await this.openSavedQueryManagementComponent();
       const shouldClickLoadMenu = await this.testSubjects.exists(
         'saved-query-management-load-button'
       );

@@ -55,12 +55,9 @@ export interface UpdateAlertStatusActionProps {
 export interface SendAlertToTimelineActionProps {
   createTimeline: CreateTimeline;
   ecsData: Ecs | Ecs[];
-  updateTimelineIsLoading: UpdateTimelineLoading;
   searchStrategyClient: ISearchStart;
   getExceptionFilter: GetExceptionFilter;
 }
-
-export type UpdateTimelineLoading = ({ id, isLoading }: { id: string; isLoading: boolean }) => void;
 
 export interface CreateTimelineProps {
   from: string;
@@ -71,7 +68,7 @@ export interface CreateTimelineProps {
   ruleAuthor?: string | string[];
 }
 
-export type CreateTimeline = ({ from, timeline, to }: CreateTimelineProps) => void;
+export type CreateTimeline = ({ from, timeline, to }: CreateTimelineProps) => Promise<void>;
 export type GetExceptionFilter = (ecsData: Ecs) => Promise<Filter | undefined>;
 
 export interface ThresholdAggregationData {

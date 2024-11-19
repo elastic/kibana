@@ -11,34 +11,16 @@ import type { UsersKpiProps } from './types';
 import { UsersKpiAuthentications } from './authentications';
 import { TotalUsersKpi } from './total_users';
 
-export const UsersKpiComponent = React.memo<UsersKpiProps>(
-  ({ filterQuery, from, indexNames, to, setQuery, skip, updateDateRange }) => (
-    <EuiFlexGroup wrap>
-      <EuiFlexItem grow={1}>
-        <TotalUsersKpi
-          filterQuery={filterQuery}
-          from={from}
-          indexNames={indexNames}
-          to={to}
-          updateDateRange={updateDateRange}
-          setQuery={setQuery}
-          skip={skip}
-        />
-      </EuiFlexItem>
+export const UsersKpiComponent = React.memo<UsersKpiProps>(({ from, to }) => (
+  <EuiFlexGroup wrap>
+    <EuiFlexItem grow={1}>
+      <TotalUsersKpi from={from} to={to} />
+    </EuiFlexItem>
 
-      <EuiFlexItem grow={2}>
-        <UsersKpiAuthentications
-          filterQuery={filterQuery}
-          from={from}
-          indexNames={indexNames}
-          to={to}
-          updateDateRange={updateDateRange}
-          setQuery={setQuery}
-          skip={skip}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  )
-);
+    <EuiFlexItem grow={2}>
+      <UsersKpiAuthentications from={from} to={to} />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+));
 
 UsersKpiComponent.displayName = 'UsersKpiComponent';

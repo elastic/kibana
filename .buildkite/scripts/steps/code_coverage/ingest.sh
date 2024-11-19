@@ -3,15 +3,16 @@
 set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
+source .buildkite/scripts/common/vault_fns.sh
 source .buildkite/scripts/steps/code_coverage/util.sh
 
 export CODE_COVERAGE=1
-echo "--- Reading Kibana stats cluster creds from vault"
-USER_FROM_VAULT="$(retry 5 5 vault read -field=username secret/kibana-issues/prod/coverage/elasticsearch)"
+echo "--- Reading Kibana coverage creds from vault"
+USER_FROM_VAULT="$(vault_get coverage/elasticsearch username)"
 export USER_FROM_VAULT
-PASS_FROM_VAULT="$(retry 5 5 vault read -field=password secret/kibana-issues/prod/coverage/elasticsearch)"
+PASS_FROM_VAULT="$(vault_get coverage/elasticsearch password)"
 export PASS_FROM_VAULT
-HOST_FROM_VAULT="$(retry 5 5 vault read -field=host secret/kibana-issues/prod/coverage/elasticsearch)"
+HOST_FROM_VAULT="$(vault_get coverage/elasticsearch host)"
 export HOST_FROM_VAULT
 TIME_STAMP=$(date +"%Y-%m-%dT%H:%M:00Z")
 export TIME_STAMP

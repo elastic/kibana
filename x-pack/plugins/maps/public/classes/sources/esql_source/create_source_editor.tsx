@@ -56,7 +56,10 @@ export function CreateSourceEditor(props: Props) {
     getDataView()
       .then(async (dataView) => {
         const adhocDataView = dataView
-          ? await getESQLAdHocDataview(dataView.getIndexPattern(), getIndexPatternService())
+          ? await getESQLAdHocDataview(
+              `from ${dataView.getIndexPattern()}`,
+              getIndexPatternService()
+            )
           : undefined;
         if (ignore) {
           return;
@@ -213,7 +216,7 @@ export function CreateSourceEditor(props: Props) {
             <EuiFormRow>
               <EuiSwitch
                 label={i18n.translate('xpack.maps.esqlSource.narrowByGlobalSearchLabel', {
-                  defaultMessage: `Narrow ES|QL statement by global search`,
+                  defaultMessage: `Apply global search to ES|QL statement`,
                 })}
                 checked={narrowByGlobalSearch}
                 onChange={(event: EuiSwitchEvent) => {

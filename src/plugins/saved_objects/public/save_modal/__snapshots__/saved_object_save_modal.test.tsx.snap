@@ -8,7 +8,7 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
 >
   <EuiModalHeader>
     <EuiModalHeaderTitle>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Save {objectType}"
         id="savedObjects.saveModal.saveTitle"
         values={
@@ -26,42 +26,35 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
       onSubmit={[Function]}
     >
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
         error="A title is required"
         fullWidth={true}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         isInvalid={false}
         label={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Title"
             id="savedObjects.saveModal.titleLabel"
-            values={Object {}}
           />
         }
-        labelType="label"
       >
         <EuiFieldText
-          autoFocus={true}
           data-test-subj="savedObjectTitle"
           fullWidth={true}
+          inputRef={
+            Object {
+              "current": null,
+            }
+          }
           isInvalid={false}
           onChange={[Function]}
           value="Saved Object title"
         />
       </EuiFormRow>
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
         fullWidth={true}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         label={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Description"
             id="savedObjects.saveModal.descriptionLabel"
-            values={Object {}}
           />
         }
         labelAppend={
@@ -69,17 +62,15 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
             color="subdued"
             size="xs"
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Optional"
               id="savedObjects.saveModal.optional"
-              values={Object {}}
             />
           </EuiText>
         }
-        labelType="label"
       >
         <EuiTextArea
-          data-test-subj="viewDescription"
+          data-test-subj="savedObjectDescription"
           fullWidth={true}
           onChange={[Function]}
           value=""
@@ -99,10 +90,9 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
           data-test-subj="saveCancelButton"
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Cancel"
             id="savedObjects.saveModal.cancelButtonLabel"
-            values={Object {}}
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -132,7 +122,7 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
 >
   <EuiModalHeader>
     <EuiModalHeaderTitle>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Save {objectType}"
         id="savedObjects.saveModal.saveTitle"
         values={
@@ -150,42 +140,35 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
       onSubmit={[Function]}
     >
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
         error="A title is required"
         fullWidth={true}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         isInvalid={false}
         label={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Title"
             id="savedObjects.saveModal.titleLabel"
-            values={Object {}}
           />
         }
-        labelType="label"
       >
         <EuiFieldText
-          autoFocus={true}
           data-test-subj="savedObjectTitle"
           fullWidth={true}
+          inputRef={
+            Object {
+              "current": null,
+            }
+          }
           isInvalid={false}
           onChange={[Function]}
           value="Saved Object title"
         />
       </EuiFormRow>
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
         fullWidth={true}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         label={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Description"
             id="savedObjects.saveModal.descriptionLabel"
-            values={Object {}}
           />
         }
         labelAppend={
@@ -193,17 +176,15 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
             color="subdued"
             size="xs"
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Optional"
               id="savedObjects.saveModal.optional"
-              values={Object {}}
             />
           </EuiText>
         }
-        labelType="label"
       >
         <EuiTextArea
-          data-test-subj="viewDescription"
+          data-test-subj="savedObjectDescription"
           fullWidth={true}
           onChange={[Function]}
           value=""
@@ -223,10 +204,9 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
           data-test-subj="saveCancelButton"
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Cancel"
             id="savedObjects.saveModal.cancelButtonLabel"
-            values={Object {}}
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -256,7 +236,7 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
 >
   <EuiModalHeader>
     <EuiModalHeaderTitle>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Save {objectType}"
         id="savedObjects.saveModal.saveTitle"
         values={
@@ -274,42 +254,35 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
       onSubmit={[Function]}
     >
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
         error="A title is required"
         fullWidth={true}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         isInvalid={false}
         label={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Title"
             id="savedObjects.saveModal.titleLabel"
-            values={Object {}}
           />
         }
-        labelType="label"
       >
         <EuiFieldText
-          autoFocus={true}
           data-test-subj="savedObjectTitle"
           fullWidth={true}
+          inputRef={
+            Object {
+              "current": null,
+            }
+          }
           isInvalid={false}
           onChange={[Function]}
           value="Saved Object title"
         />
       </EuiFormRow>
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
         fullWidth={true}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         label={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Description"
             id="savedObjects.saveModal.descriptionLabel"
-            values={Object {}}
           />
         }
         labelAppend={
@@ -317,17 +290,15 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
             color="subdued"
             size="xs"
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Optional"
               id="savedObjects.saveModal.optional"
-              values={Object {}}
             />
           </EuiText>
         }
-        labelType="label"
       >
         <EuiTextArea
-          data-test-subj="viewDescription"
+          data-test-subj="savedObjectDescription"
           fullWidth={true}
           onChange={[Function]}
           value=""
@@ -347,10 +318,9 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
           data-test-subj="saveCancelButton"
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Cancel"
             id="savedObjects.saveModal.cancelButtonLabel"
-            values={Object {}}
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -380,7 +350,7 @@ exports[`SavedObjectSaveModal should render matching snapshot when given options
 >
   <EuiModalHeader>
     <EuiModalHeaderTitle>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Save {objectType}"
         id="savedObjects.saveModal.saveTitle"
         values={
@@ -402,42 +372,35 @@ exports[`SavedObjectSaveModal should render matching snapshot when given options
       >
         <EuiFlexItem>
           <EuiFormRow
-            describedByIds={Array []}
-            display="row"
             error="A title is required"
             fullWidth={true}
-            hasChildLabel={true}
-            hasEmptyLabelSpace={false}
             isInvalid={false}
             label={
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Title"
                 id="savedObjects.saveModal.titleLabel"
-                values={Object {}}
               />
             }
-            labelType="label"
           >
             <EuiFieldText
-              autoFocus={true}
               data-test-subj="savedObjectTitle"
               fullWidth={true}
+              inputRef={
+                Object {
+                  "current": null,
+                }
+              }
               isInvalid={false}
               onChange={[Function]}
               value="Saved Object title"
             />
           </EuiFormRow>
           <EuiFormRow
-            describedByIds={Array []}
-            display="row"
             fullWidth={true}
-            hasChildLabel={true}
-            hasEmptyLabelSpace={false}
             label={
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Description"
                 id="savedObjects.saveModal.descriptionLabel"
-                values={Object {}}
               />
             }
             labelAppend={
@@ -445,17 +408,15 @@ exports[`SavedObjectSaveModal should render matching snapshot when given options
                 color="subdued"
                 size="xs"
               >
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="Optional"
                   id="savedObjects.saveModal.optional"
-                  values={Object {}}
                 />
               </EuiText>
             }
-            labelType="label"
           >
             <EuiTextArea
-              data-test-subj="viewDescription"
+              data-test-subj="savedObjectDescription"
               fullWidth={true}
               onChange={[Function]}
               value=""
@@ -485,10 +446,9 @@ exports[`SavedObjectSaveModal should render matching snapshot when given options
           data-test-subj="saveCancelButton"
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Cancel"
             id="savedObjects.saveModal.cancelButtonLabel"
-            values={Object {}}
           />
         </EuiButtonEmpty>
       </EuiFlexItem>

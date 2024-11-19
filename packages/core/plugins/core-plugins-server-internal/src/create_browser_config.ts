@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ExposedToBrowserDescriptor, PluginConfigDescriptor } from '@kbn/core-plugins-server';
@@ -61,7 +62,6 @@ function checkIsPathExposed<T = unknown>(
     // Traverse the path to see if it is exposed or not
     const exposedConfig = descriptor[key as keyof ExposedToBrowserDescriptor<T>];
     if (exposedConfig && typeof exposedConfig === 'object') {
-      // @ts-expect-error Type 'undefined' is not assignable to type 'ExposedToBrowserDescriptor<T>'
       descriptor = exposedConfig;
       continue;
     }

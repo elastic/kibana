@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -21,8 +22,11 @@ export const timeRange = buildContextVariableDocumentationDefinition({
     defaultMessage: `
 The specified time range, in milliseconds (ms).
 
-Example: How long is the current time range?
+Example: How long is the current time range in (ms)?
 \`time_range()\`
+
+Example: A static average per minute computed with the current time range:
+\`(sum(bytes) / time_range()) * 1000 * 60\`
 `,
   }),
 });

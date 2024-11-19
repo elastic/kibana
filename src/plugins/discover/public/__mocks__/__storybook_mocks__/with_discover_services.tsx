@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, ReactNode } from 'react';
 import { action } from '@storybook/addon-actions';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { identity } from 'lodash';
-import { CoreStart, IUiSettingsClient, PluginInitializerContext } from '@kbn/core/public';
+import { IUiSettingsClient } from '@kbn/core/public';
 import {
   DEFAULT_COLUMNS_SETTING,
   DOC_TABLE_LEGACY,
@@ -24,11 +25,11 @@ import {
 import { LocalStorageMock } from '../local_storage_mock';
 import { DiscoverServices } from '../../build_services';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { Plugin as NavigationPublicPlugin } from '@kbn/navigation-plugin/public';
-import { SearchBar, UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { SavedQuery } from '@kbn/data-plugin/public';
 
-const NavigationPlugin = new NavigationPublicPlugin({} as PluginInitializerContext);
+interface DiscoverServicesProviderProps {
+  children: ReactNode;
+}
 
 export const uiSettingsMock = {
   get: (key: string) => {
@@ -68,7 +69,7 @@ const theme = {
 export const services = {
   core: {
     http: { basePath: { prepend: () => void 0 } },
-    notifications: { toasts: {} },
+    notifications: { toasts: {}, showErrorDialog: action('showErrorDialog') },
     docLinks: { links: { discover: {} } },
     theme,
   },
@@ -141,11 +142,6 @@ export const services = {
       editIndexPattern: () => void 0,
     },
   },
-  navigation: NavigationPlugin.start({} as CoreStart, {
-    unifiedSearch: {
-      ui: { SearchBar, AggregateQuerySearchBar: SearchBar },
-    } as unknown as UnifiedSearchPublicPluginStart,
-  }),
   theme,
   capabilities: {
     visualize: {
@@ -188,4 +184,10 @@ export const withDiscoverServices = (Component: FunctionComponent) => {
       <Component {...props} />
     </KibanaContextProvider>
   );
+};
+
+export const DiscoverServicesProvider: FunctionComponent<DiscoverServicesProviderProps> = ({
+  children,
+}) => {
+  return <KibanaContextProvider services={services}>{children}</KibanaContextProvider>;
 };

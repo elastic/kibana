@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { pick } from 'lodash';
@@ -106,7 +107,7 @@ const STATUS_LEVEL_LEGACY_ATTRS = deepFreeze<Record<string, LegacyStateAttr>>({
   [ServiceStatusLevels.critical.toString()]: {
     id: 'red',
     state: 'red',
-    title: i18n.translate('core.status.redTitle', {
+    title: i18n.translate('core.status.critical.redTitle', {
       defaultMessage: 'Red',
     }),
     icon: 'danger',
@@ -116,7 +117,7 @@ const STATUS_LEVEL_LEGACY_ATTRS = deepFreeze<Record<string, LegacyStateAttr>>({
   [ServiceStatusLevels.unavailable.toString()]: {
     id: 'red',
     state: 'red',
-    title: i18n.translate('core.status.redTitle', {
+    title: i18n.translate('core.status.unavailable.redTitle', {
       defaultMessage: 'Red',
     }),
     icon: 'danger',
@@ -126,7 +127,7 @@ const STATUS_LEVEL_LEGACY_ATTRS = deepFreeze<Record<string, LegacyStateAttr>>({
   [ServiceStatusLevels.degraded.toString()]: {
     id: 'yellow',
     state: 'yellow',
-    title: i18n.translate('core.status.yellowTitle', {
+    title: i18n.translate('core.status.degraded.yellowTitle', {
       defaultMessage: 'Yellow',
     }),
     icon: 'warning',
@@ -136,7 +137,7 @@ const STATUS_LEVEL_LEGACY_ATTRS = deepFreeze<Record<string, LegacyStateAttr>>({
   [ServiceStatusLevels.available.toString()]: {
     id: 'green',
     state: 'green',
-    title: i18n.translate('core.status.greenTitle', {
+    title: i18n.translate('core.status.available.greenTitle', {
       defaultMessage: 'Green',
     }),
     icon: 'success',

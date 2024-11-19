@@ -392,11 +392,7 @@ exports[`should render 1`] = `
     size="m"
   />
   <EuiFormRow
-    describedByIds={Array []}
-    display="columnCompressedSwitch"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    labelType="label"
+    display="columnCompressed"
   >
     <EuiSwitch
       checked={true}
@@ -745,11 +741,7 @@ exports[`should render with no style fields 1`] = `
     size="m"
   />
   <EuiFormRow
-    describedByIds={Array []}
-    display="columnCompressedSwitch"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    labelType="label"
+    display="columnCompressed"
   >
     <EuiSwitch
       checked={true}

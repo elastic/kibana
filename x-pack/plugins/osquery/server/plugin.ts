@@ -80,15 +80,20 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
     this.createActionService = createActionService(osqueryContext);
 
-    core.getStartServices().then(([{ elasticsearch }, depsStart]) => {
-      const osquerySearchStrategy = osquerySearchStrategyProvider(
-        depsStart.data,
-        elasticsearch.client
-      );
+    core
+      .getStartServices()
+      .then(([{ elasticsearch }, depsStart]) => {
+        const osquerySearchStrategy = osquerySearchStrategyProvider(
+          depsStart.data,
+          elasticsearch.client
+        );
 
-      plugins.data.search.registerSearchStrategy('osquerySearchStrategy', osquerySearchStrategy);
-      defineRoutes(router, osqueryContext);
-    });
+        plugins.data.search.registerSearchStrategy('osquerySearchStrategy', osquerySearchStrategy);
+        defineRoutes(router, osqueryContext);
+      })
+      .catch(() => {
+        // it shouldn't reject, but just in case
+      });
 
     this.telemetryEventsSender.setup(this.telemetryReceiver, plugins.taskManager, core.analytics);
 
@@ -117,64 +122,71 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
     this.telemetryEventsSender.start(plugins.taskManager, this.telemetryReceiver);
 
-    plugins.fleet?.fleetSetupCompleted().then(async () => {
-      const packageInfo = await plugins.fleet?.packageService.asInternalUser.getInstallation(
-        OSQUERY_INTEGRATION_NAME
-      );
-      const client = new SavedObjectsClient(core.savedObjects.createInternalRepository());
+    plugins.fleet
+      ?.fleetSetupCompleted()
+      .then(async () => {
+        const packageInfo = await plugins.fleet?.packageService.asInternalUser.getInstallation(
+          OSQUERY_INTEGRATION_NAME
+        );
+        const client = new SavedObjectsClient(core.savedObjects.createInternalRepository());
 
-      const esClient = core.elasticsearch.client.asInternalUser;
-      const dataViewsService = await plugins.dataViews.dataViewsServiceFactory(
-        client,
-        esClient,
-        undefined,
-        true
-      );
-
-      // If package is installed we want to make sure all needed assets are installed
-      if (packageInfo) {
-        await this.initialize(core, dataViewsService);
-      }
-
-      // Upgrade integration into 1.6.0 and rollover if found 'generic' dataset - we do not want to wait for it
-      upgradeIntegration({ packageInfo, client, esClient, logger: this.logger });
-
-      if (registerIngestCallback) {
-        registerIngestCallback(
-          'packagePolicyCreate',
-          async (newPackagePolicy: NewPackagePolicy): Promise<UpdatePackagePolicy> => {
-            if (newPackagePolicy.package?.name === OSQUERY_INTEGRATION_NAME) {
-              await this.initialize(core, dataViewsService);
-
-              const allPacks = await client
-                .find<PackSavedObject>({
-                  type: packSavedObjectType,
-                })
-                .then((data) => ({
-                  ...data,
-                  saved_objects: data.saved_objects.map((pack) => ({
-                    ...pack.attributes,
-                    saved_object_id: pack.id,
-                  })),
-                }));
-
-              if (allPacks.saved_objects) {
-                return updateGlobalPacksCreateCallback(
-                  newPackagePolicy,
-                  client,
-                  allPacks.saved_objects,
-                  this.osqueryAppContextService
-                );
-              }
-            }
-
-            return newPackagePolicy;
-          }
+        const esClient = core.elasticsearch.client.asInternalUser;
+        const dataViewsService = await plugins.dataViews.dataViewsServiceFactory(
+          client,
+          esClient,
+          undefined,
+          true
         );
 
-        registerIngestCallback('packagePolicyPostDelete', getPackagePolicyDeleteCallback(client));
-      }
-    });
+        // If package is installed we want to make sure all needed assets are installed
+        if (packageInfo) {
+          await this.initialize(core, dataViewsService);
+        }
+
+        // Upgrade integration into 1.6.0 and rollover if found 'generic' dataset - we do not want to wait for it
+        upgradeIntegration({ packageInfo, client, esClient, logger: this.logger }).catch(() => {
+          // we do not want to wait for it
+        });
+
+        if (registerIngestCallback) {
+          registerIngestCallback(
+            'packagePolicyCreate',
+            async (newPackagePolicy: NewPackagePolicy): Promise<UpdatePackagePolicy> => {
+              if (newPackagePolicy.package?.name === OSQUERY_INTEGRATION_NAME) {
+                await this.initialize(core, dataViewsService);
+
+                const allPacks = await client
+                  .find<PackSavedObject>({
+                    type: packSavedObjectType,
+                  })
+                  .then((data) => ({
+                    ...data,
+                    saved_objects: data.saved_objects.map((pack) => ({
+                      ...pack.attributes,
+                      saved_object_id: pack.id,
+                    })),
+                  }));
+
+                if (allPacks.saved_objects) {
+                  return updateGlobalPacksCreateCallback(
+                    newPackagePolicy,
+                    client,
+                    allPacks.saved_objects,
+                    this.osqueryAppContextService
+                  );
+                }
+              }
+
+              return newPackagePolicy;
+            }
+          );
+
+          registerIngestCallback('packagePolicyPostDelete', getPackagePolicyDeleteCallback(client));
+        }
+      })
+      .catch(() => {
+        // it shouldn't reject, but just in case
+      });
 
     return {};
   }

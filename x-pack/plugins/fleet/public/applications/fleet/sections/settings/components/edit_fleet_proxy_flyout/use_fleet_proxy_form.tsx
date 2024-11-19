@@ -8,11 +8,12 @@ import React, { useCallback, useState, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { safeDump, safeLoad } from 'js-yaml';
+import { dump, load } from 'js-yaml';
 
 import {
   sendPostFleetProxy,
   sendPutFleetProxy,
+  useAuthz,
   useInput,
   useStartServices,
   validateInputs,
@@ -32,7 +33,7 @@ const ConfirmTitle = () => (
 const ConfirmDescription: React.FunctionComponent = ({}) => (
   <FormattedMessage
     id="xpack.fleet.settings.fleetProxyFlyout.confirmModalText"
-    defaultMessage="This action will update agent policies using that proxies. This action can not be undone. Are you sure you wish to continue?"
+    defaultMessage="This action will update agent policies using this proxy. This action can not be undone. Are you sure you wish to continue?"
   />
 );
 
@@ -56,7 +57,7 @@ function validateUrl(value: string) {
 
 function validateProxyHeaders(value: string) {
   if (value && value !== '') {
-    const res = safeLoad(value);
+    const res = load(value);
     if (
       typeof res !== 'object' ||
       Object.values(res).some((val) => {
@@ -85,31 +86,28 @@ export function validateName(value: string) {
 
 export function useFleetProxyForm(fleetProxy: FleetProxy | undefined, onSuccess: () => void) {
   const [isLoading, setIsLoading] = useState(false);
+  const authz = useAuthz();
   const { notifications } = useStartServices();
   const { confirm } = useConfirmModal();
-  const isPreconfigured = fleetProxy?.is_preconfigured ?? false;
+  const isEditDisabled = (!authz.fleet.allSettings || fleetProxy?.is_preconfigured) ?? false;
 
-  const nameInput = useInput(fleetProxy?.name ?? '', validateName, isPreconfigured);
-  const urlInput = useInput(fleetProxy?.url ?? '', validateUrl, isPreconfigured);
+  const nameInput = useInput(fleetProxy?.name ?? '', validateName, isEditDisabled);
+  const urlInput = useInput(fleetProxy?.url ?? '', validateUrl, isEditDisabled);
   const proxyHeadersInput = useInput(
-    fleetProxy?.proxy_headers ? safeDump(fleetProxy.proxy_headers) : '',
+    fleetProxy?.proxy_headers ? dump(fleetProxy.proxy_headers) : '',
     validateProxyHeaders,
-    isPreconfigured
+    isEditDisabled
   );
   const certificateAuthoritiesInput = useInput(
     fleetProxy?.certificate_authorities ?? '',
     () => undefined,
-    isPreconfigured
+    isEditDisabled
   );
-  const certificateInput = useInput(
-    fleetProxy?.certificate ?? '',
-    () => undefined,
-    isPreconfigured
-  );
+  const certificateInput = useInput(fleetProxy?.certificate ?? '', () => undefined, isEditDisabled);
   const certificateKeyInput = useInput(
     fleetProxy?.certificate_key ?? '',
     () => undefined,
-    isPreconfigured
+    isEditDisabled
   );
 
   const inputs = useMemo(
@@ -145,8 +143,7 @@ export function useFleetProxyForm(fleetProxy: FleetProxy | undefined, onSuccess:
       const data = {
         name: nameInput.value,
         url: urlInput.value,
-        proxy_headers:
-          proxyHeadersInput.value === '' ? undefined : safeLoad(proxyHeadersInput.value),
+        proxy_headers: proxyHeadersInput.value === '' ? undefined : load(proxyHeadersInput.value),
         certificate_authorities: certificateAuthoritiesInput.value,
         certificate: certificateInput.value,
         certificate_key: certificateKeyInput.value,

@@ -1,0 +1,7 @@
+{{package_name}}-{{data_stream_name}}-gcs:
+    image: fsouza/fake-gcs-server:latest
+    command: -host=0.0.0.0 -public-host=elastic-package-service_{{package_name}}-{{data_stream_name}}-gcs_1 -port=4443 -scheme=http
+    volumes:
+      - ./sample_logs:/data
+    ports:
+      - 4443/tcp

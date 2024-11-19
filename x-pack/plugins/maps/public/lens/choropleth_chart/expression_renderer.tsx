@@ -8,15 +8,15 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { CoreSetup, CoreStart } from '@kbn/core/public';
 import type { FileLayer } from '@elastic/ems-client';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { ChartSizeEvent } from '@kbn/chart-expressions-common';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { MapsPluginStartDependencies } from '../../plugin';
+import { getAnalytics, getCoreI18n, getTheme } from '../../kibana_services';
 import type { ChoroplethChartProps } from './types';
-import type { MapEmbeddableInput, MapEmbeddableOutput } from '../../embeddable';
 
 export const RENDERER_ID = 'lens_choropleth_chart_renderer';
 
@@ -65,13 +65,6 @@ export function getExpressionRenderer(coreSetup: CoreSetup<MapsPluginStartDepend
       const { ChoroplethChart } = await import('./choropleth_chart');
       const { getEmsFileLayers } = await import('../../util');
 
-      const mapEmbeddableFactory = plugins.embeddable.getEmbeddableFactory(
-        'map'
-      ) as EmbeddableFactory<MapEmbeddableInput, MapEmbeddableOutput>;
-      if (!mapEmbeddableFactory) {
-        return;
-      }
-
       let emsFileLayers: FileLayer[] = [];
       try {
         emsFileLayers = await getEmsFileLayers();
@@ -106,14 +99,19 @@ export function getExpressionRenderer(coreSetup: CoreSetup<MapsPluginStartDepend
       handlers.event(chartSizeEvent);
 
       ReactDOM.render(
-        <ChoroplethChart
-          {...config}
-          formatFactory={plugins.fieldFormats.deserialize}
-          uiSettings={coreStart.uiSettings}
-          emsFileLayers={emsFileLayers}
-          mapEmbeddableFactory={mapEmbeddableFactory}
-          onRenderComplete={renderComplete}
-        />,
+        <KibanaRenderContextProvider
+          analytics={getAnalytics()}
+          i18n={getCoreI18n()}
+          theme={getTheme()}
+        >
+          <ChoroplethChart
+            {...config}
+            formatFactory={plugins.fieldFormats.deserialize}
+            uiSettings={coreStart.uiSettings}
+            emsFileLayers={emsFileLayers}
+            onRenderComplete={renderComplete}
+          />
+        </KibanaRenderContextProvider>,
         domNode
       );
       handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));

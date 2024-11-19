@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import supertest from 'supertest';
@@ -20,7 +21,7 @@ import {
 } from '@kbn/core-saved-objects-server-internal';
 import { createHiddenTypeVariants, setupServer } from '@kbn/core-test-helpers-test-utils';
 import { loggerMock } from '@kbn/logging-mocks';
-import { setupConfig } from './routes_test_utils';
+import { deprecationMock, setupConfig } from './routes_test_utils';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -36,6 +37,7 @@ describe('POST /api/saved_objects/_bulk_create', () => {
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   let coreUsageStatsClient: jest.Mocked<ICoreUsageStatsClient>;
   let loggerWarnSpy: jest.SpyInstance;
+  let registrationSpy: jest.SpyInstance;
 
   beforeEach(async () => {
     ({ server, httpSetup, handlerContext } = await setupServer());
@@ -56,10 +58,18 @@ describe('POST /api/saved_objects/_bulk_create', () => {
 
     const logger = loggerMock.create();
     loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
+    registrationSpy = jest.spyOn(router, 'post');
 
     const config = setupConfig();
+    const access = 'public';
 
-    registerBulkCreateRoute(router, { config, coreUsageData, logger });
+    registerBulkCreateRoute(router, {
+      config,
+      coreUsageData,
+      logger,
+      access,
+      deprecationInfo: deprecationMock,
+    });
 
     await server.start();
   });
@@ -85,6 +95,7 @@ describe('POST /api/saved_objects/_bulk_create', () => {
 
     const result = await supertest(httpSetup.server.listener)
       .post('/api/saved_objects/_bulk_create')
+      .set('x-elastic-internal-origin', 'kibana')
       .send([
         {
           id: 'abc123',
@@ -99,6 +110,7 @@ describe('POST /api/saved_objects/_bulk_create', () => {
     expect(result.body).toEqual(clientResponse);
     expect(coreUsageStatsClient.incrementSavedObjectsBulkCreate).toHaveBeenCalledWith({
       request: expect.anything(),
+      types: ['index-pattern'],
     });
   });
 
@@ -124,6 +136,7 @@ describe('POST /api/saved_objects/_bulk_create', () => {
 
     await supertest(httpSetup.server.listener)
       .post('/api/saved_objects/_bulk_create')
+      .set('x-elastic-internal-origin', 'kibana')
       .send(docs)
       .expect(200);
 
@@ -155,6 +168,7 @@ describe('POST /api/saved_objects/_bulk_create', () => {
   it('returns with status 400 when a type is hidden from the HTTP APIs', async () => {
     const result = await supertest(httpSetup.server.listener)
       .post('/api/saved_objects/_bulk_create')
+      .set('x-elastic-internal-origin', 'kibana')
       .send([
         {
           id: 'hiddenID',
@@ -174,6 +188,7 @@ describe('POST /api/saved_objects/_bulk_create', () => {
   it('logs a warning message when called', async () => {
     await supertest(httpSetup.server.listener)
       .post('/api/saved_objects/_bulk_create')
+      .set('x-elastic-internal-origin', 'kibana')
       .send([
         {
           id: 'abc1234',
@@ -186,5 +201,25 @@ describe('POST /api/saved_objects/_bulk_create', () => {
       ])
       .expect(200);
     expect(loggerWarnSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('passes deprecation config to the router arguments', async () => {
+    await supertest(httpSetup.server.listener)
+      .post('/api/saved_objects/_bulk_create')
+      .set('x-elastic-internal-origin', 'kibana')
+      .send([
+        {
+          id: 'abc1234',
+          type: 'index-pattern',
+          attributes: {
+            title: 'foo',
+          },
+          references: [],
+        },
+      ])
+      .expect(200);
+    expect(registrationSpy.mock.calls[0][0]).toMatchObject({
+      options: { deprecated: deprecationMock },
+    });
   });
 });

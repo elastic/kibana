@@ -32,7 +32,7 @@
         "signature": [
           "string[]"
         ],
-        "path": "x-pack/plugins/uptime/common/constants/uptime_alerts.ts",
+        "path": "x-pack/plugins/observability_solution/uptime/common/constants/uptime_alerts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

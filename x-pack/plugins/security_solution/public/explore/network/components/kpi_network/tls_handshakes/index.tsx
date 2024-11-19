@@ -5,26 +5,22 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 import type { StatItems } from '../../../../components/stat_items';
 import { kpiTlsHandshakesLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/network/kpi_tls_handshakes';
-import { useNetworkKpiTlsHandshakes, ID } from '../../../containers/kpi_network/tls_handshakes';
-import { KpiBaseComponentManage } from '../../../../hosts/components/kpi_hosts/common';
+import { KpiBaseComponent } from '../../../../components/kpi';
 import type { NetworkKpiProps } from '../types';
 import * as i18n from './translations';
-import { useQueryToggle } from '../../../../../common/containers/query_toggle';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { InputsModelId } from '../../../../../common/store/inputs/constants';
-import { useRefetchByRestartingSession } from '../../../../../common/components/page/use_refetch_by_session';
 
-export const fieldsMapping: Readonly<StatItems[]> = [
+export const ID = 'networkKpiTlsHandshakesQuery';
+
+export const tlsStatItems: Readonly<StatItems[]> = [
   {
     key: 'tlsHandshakes',
     fields: [
       {
         key: 'tlsHandshakes',
-        value: null,
         lensAttributes: kpiTlsHandshakesLensAttributes,
       },
     ],
@@ -32,52 +28,8 @@ export const fieldsMapping: Readonly<StatItems[]> = [
   },
 ];
 
-const NetworkKpiTlsHandshakesComponent: React.FC<NetworkKpiProps> = ({
-  filterQuery,
-  from,
-  indexNames,
-  to,
-  updateDateRange,
-  setQuery,
-  skip,
-}) => {
-  const { toggleStatus } = useQueryToggle(ID);
-  const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
-  const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
-
-  useEffect(() => {
-    setQuerySkip(skip || !toggleStatus);
-  }, [skip, toggleStatus]);
-
-  const [loading, { refetch, id, inspect, ...data }] = useNetworkKpiTlsHandshakes({
-    filterQuery,
-    endDate: to,
-    indexNames,
-    startDate: from,
-    skip: querySkip || isChartEmbeddablesEnabled,
-  });
-
-  const { session, refetchByRestartingSession } = useRefetchByRestartingSession({
-    inputId: InputsModelId.global,
-    queryId: id,
-  });
-
-  return (
-    <KpiBaseComponentManage
-      data={data}
-      id={id}
-      inspect={inspect}
-      loading={loading}
-      fieldsMapping={fieldsMapping}
-      from={from}
-      to={to}
-      updateDateRange={updateDateRange}
-      refetch={isChartEmbeddablesEnabled ? refetchByRestartingSession : refetch}
-      setQuery={setQuery}
-      setQuerySkip={setQuerySkip}
-      session={isChartEmbeddablesEnabled ? session : undefined}
-    />
-  );
+const NetworkKpiTlsHandshakesComponent: React.FC<NetworkKpiProps> = ({ from, to }) => {
+  return <KpiBaseComponent id={ID} statItems={tlsStatItems} from={from} to={to} />;
 };
 
 export const NetworkKpiTlsHandshakes = React.memo(NetworkKpiTlsHandshakesComponent);

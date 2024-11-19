@@ -27,7 +27,9 @@
     "@kbn/usage-collection-plugin",
     "@kbn/data-views-plugin",
     "@kbn/panel-loader",
-    "@kbn/search-errors"
+    "@kbn/search-errors",
+    "@kbn/shared-ux-markdown",
+    "@kbn/react-hooks"
   ],
   "exclude": ["target/**/*"]
 }

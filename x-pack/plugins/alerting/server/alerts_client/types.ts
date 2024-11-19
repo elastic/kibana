@@ -74,20 +74,17 @@ export interface IAlertsClient<
   initializeExecution(opts: InitializeExecutionOpts): Promise<void>;
   hasReachedAlertLimit(): boolean;
   checkLimitUsage(): void;
-  processAndLogAlerts(opts: ProcessAndLogAlertsOpts): void;
   processAlerts(opts: ProcessAlertsOpts): void;
   logAlerts(opts: LogAlertsOpts): void;
   getProcessedAlerts(
-    type: 'new' | 'active' | 'activeCurrent' | 'recovered' | 'recoveredCurrent'
-  ): Record<string, LegacyAlert<State, Context, ActionGroupIds | RecoveryActionGroupId>>;
-  persistAlerts(): Promise<void>;
+    type: 'new' | 'active' | 'activeCurrent'
+  ): Record<string, LegacyAlert<State, Context, ActionGroupIds>> | {};
+  getProcessedAlerts(
+    type: 'recovered' | 'recoveredCurrent'
+  ): Record<string, LegacyAlert<State, Context, RecoveryActionGroupId>> | {};
+  persistAlerts(): Promise<{ alertIds: string[]; maintenanceWindowIds: string[] } | null>;
+  isTrackedAlert(id: string): boolean;
   getSummarizedAlerts?(params: GetSummarizedAlertsParams): Promise<SummarizedAlerts>;
-  updateAlertsMaintenanceWindowIdByScopedQuery?(
-    params: UpdateAlertsMaintenanceWindowIdByScopedQueryParams
-  ): Promise<{
-    alertIds: string[];
-    maintenanceWindowIds: string[];
-  }>;
   getAlertsToSerialize(): {
     alertsToReturn: Record<string, RawAlertInstance>;
     recoveredAlertsToReturn: Record<string, RawAlertInstance>;
@@ -110,20 +107,17 @@ export interface ProcessAndLogAlertsOpts {
   shouldLogAlerts: boolean;
   ruleRunMetricsStore: RuleRunMetricsStore;
   flappingSettings: RulesSettingsFlappingProperties;
-  notifyOnActionGroupChange: boolean;
   maintenanceWindowIds: string[];
   alertDelay: number;
 }
 
 export interface ProcessAlertsOpts {
   flappingSettings: RulesSettingsFlappingProperties;
-  notifyOnActionGroupChange: boolean;
-  maintenanceWindowIds: string[];
   alertDelay: number;
+  ruleRunMetricsStore: RuleRunMetricsStore;
 }
 
 export interface LogAlertsOpts {
-  eventLogger: AlertingEventLogger;
   shouldLogAlerts: boolean;
   ruleRunMetricsStore: RuleRunMetricsStore;
 }
@@ -131,6 +125,7 @@ export interface LogAlertsOpts {
 export interface InitializeExecutionOpts {
   maxAlerts: number;
   ruleLabel: string;
+  runTimestamp?: Date;
   startedAt: Date | null;
   flappingSettings: RulesSettingsFlappingProperties;
   activeAlertsFromState: Record<string, RawAlertInstance>;
@@ -154,6 +149,7 @@ export interface PublicAlertsClient<
   report(
     alert: ReportedAlert<AlertData, State, Context, ActionGroupIds>
   ): ReportedAlertData<AlertData>;
+  isTrackedAlert(id: string): boolean;
   setAlertData(alert: UpdateableAlert<AlertData, State, Context, ActionGroupIds>): void;
   getAlertLimitValue: () => number;
   setAlertLimitReached: (reached: boolean) => void;

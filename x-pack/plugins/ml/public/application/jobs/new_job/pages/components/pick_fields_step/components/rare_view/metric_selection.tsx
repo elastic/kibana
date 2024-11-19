@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, useContext, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { EuiHorizontalRule, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { RareFieldSelector } from '../rare_field';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { RareJobCreator } from '../../../../../common/job_creator';
+import type { RareJobCreator } from '../../../../../common/job_creator';
 import { RareDetector } from '../rare_detector';
 import { PopulationFieldSelector } from '../population_field';
 import { DetectorDescription } from './detector_description';

@@ -8733,7 +8733,7 @@
             "label": "renderingMode",
             "description": [],
             "signature": [
-              "\"2d\" | \"3d\" | undefined"
+              "\"3d\" | \"2d\" | undefined"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
@@ -9592,7 +9592,7 @@
         "label": "MapEvent",
         "description": [],
         "signature": [
-          "\"error\" | \"remove\" | \"data\" | \"render\" | \"rotate\" | \"resize\" | \"idle\" | \"zoom\" | \"load\" | \"move\" | \"mousedown\" | \"mouseup\" | \"mouseover\" | \"mousemove\" | \"click\" | \"dblclick\" | \"mouseenter\" | \"mouseleave\" | \"mouseout\" | \"contextmenu\" | \"wheel\" | \"touchstart\" | \"touchend\" | \"touchmove\" | \"touchcancel\" | \"movestart\" | \"moveend\" | \"dragstart\" | \"drag\" | \"dragend\" | \"zoomstart\" | \"zoomend\" | \"rotatestart\" | \"rotateend\" | \"pitchstart\" | \"pitch\" | \"pitchend\" | \"boxzoomstart\" | \"boxzoomend\" | \"boxzoomcancel\" | \"webglcontextlost\" | \"webglcontextrestored\" | \"styledata\" | \"sourcedata\" | \"dataloading\" | \"styledataloading\" | \"sourcedataloading\" | \"styleimagemissing\" | \"style.load\" | \"terrain\" | \"dataabort\" | \"sourcedataabort\""
+          "\"error\" | \"data\" | \"move\" | \"render\" | \"remove\" | \"rotate\" | \"resize\" | \"idle\" | \"zoom\" | \"load\" | \"mousedown\" | \"mouseup\" | \"mouseover\" | \"mousemove\" | \"click\" | \"dblclick\" | \"mouseenter\" | \"mouseleave\" | \"mouseout\" | \"contextmenu\" | \"wheel\" | \"touchstart\" | \"touchend\" | \"touchmove\" | \"touchcancel\" | \"movestart\" | \"moveend\" | \"dragstart\" | \"drag\" | \"dragend\" | \"zoomstart\" | \"zoomend\" | \"rotatestart\" | \"rotateend\" | \"pitchstart\" | \"pitch\" | \"pitchend\" | \"boxzoomstart\" | \"boxzoomend\" | \"boxzoomcancel\" | \"webglcontextlost\" | \"webglcontextrestored\" | \"styledata\" | \"sourcedata\" | \"dataloading\" | \"styledataloading\" | \"sourcedataloading\" | \"styleimagemissing\" | \"style.load\" | \"terrain\" | \"dataabort\" | \"sourcedataabort\""
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "deprecated": false,

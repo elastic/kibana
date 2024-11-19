@@ -18,7 +18,7 @@ import {
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { LogsSharedPluginSetup } from '@kbn/logs-shared-plugin/server';
 
-import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { DEPRECATION_LOGS_SOURCE_ID, DEPRECATION_LOGS_INDEX } from '../common/constants';
@@ -147,7 +147,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     registerRoutes(dependencies, this.getWorker.bind(this));
 
     if (usageCollection) {
-      getStartServices().then(([{ elasticsearch }]) => {
+      void getStartServices().then(([{ elasticsearch }]) => {
         registerUpgradeAssistantUsageCollector({
           elasticsearch,
           usageCollection,

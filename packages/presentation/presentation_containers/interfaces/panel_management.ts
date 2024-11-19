@@ -1,15 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  PublishingSubject,
-  useStateFromPublishingSubject,
-} from '@kbn/presentation-publishing/publishing_subject';
+import { PublishingSubject } from '@kbn/presentation-publishing/publishing_subject';
 
 export interface CanDuplicatePanels {
   duplicatePanel: (panelId: string) => void;
@@ -22,16 +20,10 @@ export const apiCanDuplicatePanels = (
 };
 
 export interface CanExpandPanels {
-  expandPanel: (panelId?: string) => void;
+  expandPanel: (panelId: string) => void;
   expandedPanelId: PublishingSubject<string | undefined>;
 }
 
 export const apiCanExpandPanels = (unknownApi: unknown | null): unknownApi is CanExpandPanels => {
   return Boolean((unknownApi as CanExpandPanels)?.expandPanel !== undefined);
 };
-
-/**
- * Gets this API's expanded panel state as a reactive variable which will cause re-renders on change.
- */
-export const useExpandedPanelId = (api: Partial<CanExpandPanels> | undefined) =>
-  useStateFromPublishingSubject(apiCanExpandPanels(api) ? api.expandedPanelId : undefined);

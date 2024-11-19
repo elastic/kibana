@@ -126,54 +126,7 @@ export const getInProgressJobsCountQuery = (isCrawler?: boolean) => {
   };
 };
 
-export const getIdleJobsCountQuery = (isCrawler?: boolean) => {
-  if (isCrawler === undefined) {
-    return {
-      bool: {
-        filter: [
-          {
-            term: {
-              status: SyncStatus.IN_PROGRESS,
-            },
-          },
-          {
-            range: {
-              last_seen: {
-                lt: moment().subtract(1, 'minute').toISOString(),
-              },
-            },
-          },
-        ],
-      },
-    };
-  }
-
-  if (isCrawler) {
-    return {
-      bool: {
-        filter: [
-          {
-            term: {
-              status: SyncStatus.IN_PROGRESS,
-            },
-          },
-          {
-            term: {
-              'connector.service_type': CRAWLER_SERVICE_TYPE,
-            },
-          },
-          {
-            range: {
-              last_seen: {
-                lt: moment().subtract(1, 'minute').toISOString(),
-              },
-            },
-          },
-        ],
-      },
-    };
-  }
-
+export const getIdleJobsCountQuery = () => {
   return {
     bool: {
       filter: [
@@ -194,7 +147,7 @@ export const getIdleJobsCountQuery = (isCrawler?: boolean) => {
         {
           range: {
             last_seen: {
-              lt: moment().subtract(1, 'minute').toISOString(),
+              lt: moment().subtract(5, 'minute').toISOString(),
             },
           },
         },
@@ -378,24 +331,18 @@ export const getIncompleteCountQuery = (isCrawler?: boolean) => {
   }
   return {
     bool: {
-      should: [
-        {
-          bool: {
-            must_not: {
-              terms: {
-                status: [ConnectorStatus.CONNECTED, ConnectorStatus.ERROR],
-              },
-            },
+      must_not: {
+        terms: {
+          status: [ConnectorStatus.CONNECTED, ConnectorStatus.ERROR],
+        },
+      },
+      must: {
+        range: {
+          last_seen: {
+            lt: moment().subtract(30, 'minutes').toISOString(),
           },
         },
-        {
-          range: {
-            last_seen: {
-              lt: moment().subtract(30, 'minutes').toISOString(),
-            },
-          },
-        },
-      ],
+      },
       filter: [
         {
           bool: {

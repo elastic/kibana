@@ -1,24 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { join } from 'path';
-import {
-  accessMock,
-  readdirMock,
-  renameMock,
-  unlinkMock,
-  clearAllMocks,
-} from './rolling_tasks.test.mocks';
+import { accessMock, readdirMock, renameMock, clearAllMocks } from './rolling_tasks.test.mocks';
 import {
   shouldSkipRollout,
   rollCurrentFile,
   rollPreviousFilesInOrder,
-  deleteFiles,
   getOrderedRolledFiles,
 } from './rolling_tasks';
 
@@ -94,26 +88,6 @@ describe('NumericRollingStrategy tasks', () => {
         join('log-folder', 'file-1'),
         join('log-folder', 'file-2')
       );
-    });
-  });
-
-  describe('deleteFiles', () => {
-    it('calls `unlink` once for each file', async () => {
-      await deleteFiles({
-        logFileFolder: 'log-folder',
-        filesToDelete: ['file-a', 'file-b', 'file-c'],
-      });
-
-      expect(unlinkMock).toHaveBeenCalledTimes(3);
-    });
-    it('calls `unlink` with the correct parameters', async () => {
-      await deleteFiles({
-        logFileFolder: 'log-folder',
-        filesToDelete: ['file-a', 'file-b'],
-      });
-
-      expect(unlinkMock).toHaveBeenNthCalledWith(1, join('log-folder', 'file-a'));
-      expect(unlinkMock).toHaveBeenNthCalledWith(2, join('log-folder', 'file-b'));
     });
   });
 

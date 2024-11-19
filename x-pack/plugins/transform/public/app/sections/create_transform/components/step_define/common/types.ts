@@ -5,29 +5,30 @@
  * 2.0.
  */
 
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import type { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
-import { TIME_SERIES_METRIC_TYPES } from '@kbn/ml-agg-utils';
+import type { TIME_SERIES_METRIC_TYPES } from '@kbn/ml-agg-utils';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
+import type { SavedSearchQuery } from '@kbn/ml-query-utils';
 
-import { EsFieldName } from '../../../../../../../common/types/fields';
+import type { LatestFunctionConfig } from '../../../../../../../server/routes/api_schemas/transforms';
+import type { EsFieldName } from '../../../../../../../common/types/fields';
 
-import {
+import type {
   PivotAggsConfigDict,
   PivotGroupByConfigDict,
   PivotGroupByConfigWithUiSupportDict,
 } from '../../../../../common';
-import { SavedSearchQuery } from '../../../../../hooks/use_search_items';
 
-import { QUERY_LANGUAGE } from './constants';
-import { TransformFunction } from '../../../../../../../common/constants';
-import {
+import type { TransformFunction } from '../../../../../../../common/constants';
+import type {
   LatestFunctionConfigUI,
   PivotConfigDefinition,
 } from '../../../../../../../common/types/transform';
-import { LatestFunctionConfig } from '../../../../../../../common/api_schemas/transforms';
+
+import type { QUERY_LANGUAGE } from './constants';
 
 export interface Field {
   name: EsFieldName;

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { importFileMock, resolveImportErrorsMock } from './flyout.test.mocks';
@@ -11,7 +12,7 @@ import { importFileMock, resolveImportErrorsMock } from './flyout.test.mocks';
 import React from 'react';
 import { shallowWithI18nProvider } from '@kbn/test-jest-helpers';
 import { coreMock, httpServiceMock } from '@kbn/core/public/mocks';
-import { Flyout, FlyoutProps, FlyoutState } from './flyout';
+import { FlyoutClass as Flyout, FlyoutProps, FlyoutState } from './flyout';
 import { ShallowWrapper } from 'enzyme';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
@@ -20,15 +21,21 @@ const mockFile = {
   path: '/home/foo.ndjson',
 } as unknown as File;
 
+const baseProps = {
+  euiTablePersist: {
+    pageSize: 5,
+    onTableChange: () => {},
+    sorting: { sort: { direction: 'asc' as const, field: 'foo' as const } },
+  },
+};
+
 describe('Flyout', () => {
   let defaultProps: FlyoutProps;
 
   const shallowRender = (props: FlyoutProps) => {
-    return shallowWithI18nProvider(<Flyout {...props} />) as unknown as ShallowWrapper<
-      FlyoutProps,
-      FlyoutState,
-      Flyout
-    >;
+    return shallowWithI18nProvider(
+      <Flyout {...baseProps} {...props} />
+    ) as unknown as ShallowWrapper<FlyoutProps, FlyoutState, Flyout>;
   };
 
   beforeEach(() => {
@@ -73,7 +80,7 @@ describe('Flyout', () => {
     component.update();
 
     expect(component.state('file')).toBe(undefined);
-    component.find('EuiFilePicker').simulate('change', [mockFile]);
+    component.find('EuiFilePickerClass').simulate('change', [mockFile]);
     expect(component.state('file')).toBe(mockFile);
   });
 
@@ -86,9 +93,9 @@ describe('Flyout', () => {
     component.update();
 
     expect(component.state('file')).toBe(undefined);
-    component.find('EuiFilePicker').simulate('change', [mockFile]);
+    component.find('EuiFilePickerClass').simulate('change', [mockFile]);
     expect(component.state('file')).toBe(mockFile);
-    component.find('EuiFilePicker').simulate('change', []);
+    component.find('EuiFilePickerClass').simulate('change', []);
     expect(component.state('file')).toBe(undefined);
   });
 
@@ -105,7 +112,7 @@ describe('Flyout', () => {
       'EuiButton[data-test-subj="importSavedObjectsImportBtn"]'
     );
     expect(importButton.prop('isDisabled')).toBe(true);
-    component.find('EuiFilePicker').simulate('change', [mockFile]);
+    component.find('EuiFilePickerClass').simulate('change', [mockFile]);
 
     // Ensure state changes are reflected
     component.update();

@@ -6,7 +6,8 @@
  */
 
 import { EuiLink } from '@elastic/eui';
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { useMlLink } from '../contexts/kibana';
 import { ML_PAGES } from '../../../common/constants/locator';
 
@@ -21,7 +22,7 @@ export const TrainedModelLink: FC<TrainedModelLinkProps> = ({ id }) => {
   });
 
   return (
-    <EuiLink href={href} css={{ overflow: 'hidden', 'text-overflow': 'ellipsis' }} title={id}>
+    <EuiLink href={href} css={{ overflow: 'hidden', textOverflow: 'ellipsis' }} title={id}>
       {id}
     </EuiLink>
   );

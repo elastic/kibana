@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { PluginInitializerContext } from '@kbn/core/public';
@@ -41,6 +42,7 @@ export {
   panelBadgeTrigger,
   panelHoverTrigger,
   PanelNotFoundError,
+  PanelIncompatibleError,
   panelNotificationTrigger,
   PANEL_BADGE_TRIGGER,
   PANEL_HOVER_TRIGGER,
@@ -60,7 +62,6 @@ export type {
   ChartActionContext,
   ContainerInput,
   ContainerOutput,
-  EmbeddableAppContext,
   EmbeddableContainerSettings,
   EmbeddableContext,
   EmbeddableEditorState,
@@ -79,6 +80,7 @@ export type {
   PanelState,
   PropertySpec,
   RangeSelectContext,
+  ReactEmbeddableSavedObject,
   ReferenceOrValueEmbeddable,
   SavedObjectEmbeddableInput,
   SelfStyledEmbeddable,
@@ -95,26 +97,17 @@ export type { EnhancementRegistryDefinition } from './types';
 
 export {
   ReactEmbeddableRenderer,
-  reactEmbeddableRegistryHasKey,
-  RegisterReactEmbeddable,
-  registerReactEmbeddableFactory,
-  useReactEmbeddableApiHandle,
   type DefaultEmbeddableApi,
-  type ReactEmbeddable,
   type ReactEmbeddableFactory,
-  type ReactEmbeddableRegistration,
-  type ReactEmbeddableTitlesApi,
-  type SerializedReactEmbeddableTitles,
-  ReactEmbeddableParentContext,
-  useReactEmbeddableParentApi,
-  useReactEmbeddableUnsavedChanges,
-  initializeReactEmbeddableUuid,
-  initializeReactEmbeddableTitles,
-  serializeReactEmbeddableTitles,
 } from './react_embeddable_system';
-
-export { registerSavedObjectToPanelMethod } from './registry/saved_object_to_panel_methods';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new EmbeddablePublicPlugin(initializerContext);
 }
+
+export {
+  embeddableInputToSubject,
+  embeddableOutputToSubject,
+} from './lib/embeddables/compatibility/embeddable_compatibility_utils';
+
+export { COMMON_EMBEDDABLE_GROUPING } from './lib/embeddables/common/constants';

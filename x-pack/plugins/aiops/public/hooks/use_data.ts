@@ -9,20 +9,19 @@ import { useEffect, useMemo, useState } from 'react';
 import { merge } from 'rxjs';
 import type { Moment } from 'moment';
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
-
 import type { Dictionary } from '@kbn/ml-url-state';
 import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-
-import { PLUGIN_ID } from '../../common';
+import { useTimeBuckets } from '@kbn/ml-time-buckets';
+import { AIOPS_PLUGIN_ID } from '@kbn/aiops-common/constants';
+import type { GroupTableItem } from '@kbn/aiops-log-rate-analysis/state';
 
 import type { DocumentStatsSearchStrategyParams } from '../get_document_stats';
-import type { GroupTableItem } from '../components/log_rate_analysis_results_table/types';
 
-import { useTimeBuckets } from './use_time_buckets';
 import { useAiopsAppContext } from './use_aiops_app_context';
 
 import { useDocumentCountStats } from './use_document_count_stats';
@@ -37,19 +36,20 @@ export const useData = (
   selectedSignificantItem?: SignificantItem,
   selectedGroup: GroupTableItem | null = null,
   barTarget: number = DEFAULT_BAR_TARGET,
+  changePointsByDefault = true,
   timeRange?: { min: Moment; max: Moment }
 ) => {
-  const { executionContext } = useAiopsAppContext();
+  const { executionContext, uiSettings } = useAiopsAppContext();
 
   useExecutionContext(executionContext, {
-    name: PLUGIN_ID,
+    name: AIOPS_PLUGIN_ID,
     type: 'application',
     id: contextId,
   });
 
   const [lastRefresh, setLastRefresh] = useState(0);
 
-  const _timeBuckets = useTimeBuckets();
+  const _timeBuckets = useTimeBuckets(uiSettings);
   const timefilter = useTimefilter({
     timeRangeSelector: selectedDataView?.timeFieldName !== undefined,
     autoRefreshSelector: true,
@@ -104,7 +104,8 @@ export const useData = (
   const documentStats = useDocumentCountStats(
     overallStatsRequest,
     selectedSignificantItemStatsRequest,
-    lastRefresh
+    lastRefresh,
+    changePointsByDefault
   );
 
   useEffect(() => {
@@ -112,14 +113,17 @@ export const useData = (
       timefilter.getAutoRefreshFetch$(),
       timefilter.getTimeUpdate$(),
       mlTimefilterRefresh$
-    ).subscribe(() => {
+    ).subscribe((done) => {
       if (onUpdate) {
         onUpdate({
           time: timefilter.getTime(),
           refreshInterval: timefilter.getRefreshInterval(),
         });
-        setLastRefresh(Date.now());
+        if (typeof done === 'function') {
+          done();
+        }
       }
+      setLastRefresh(Date.now());
     });
 
     // This listens just for an initial update of the timefilter to be switched on.

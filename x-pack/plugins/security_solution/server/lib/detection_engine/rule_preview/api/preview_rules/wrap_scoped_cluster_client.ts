@@ -31,18 +31,47 @@ type WrapEsClientOpts = Omit<WrapScopedClusterClientOpts, 'scopedClusterClient'>
   esClient: ElasticsearchClient;
 };
 
+class WrappedScopedClusterClient implements IScopedClusterClient {
+  #asInternalUser?: ElasticsearchClient;
+  #asCurrentUser?: ElasticsearchClient;
+  #asSecondaryAuthUser?: ElasticsearchClient;
+
+  constructor(private readonly opts: WrapScopedClusterClientOpts) {}
+
+  public get asInternalUser() {
+    if (this.#asInternalUser === undefined) {
+      const { scopedClusterClient, ...rest } = this.opts;
+      this.#asInternalUser = wrapEsClient({
+        ...rest,
+        esClient: scopedClusterClient.asInternalUser,
+      });
+    }
+    return this.#asInternalUser;
+  }
+  public get asCurrentUser() {
+    if (this.#asCurrentUser === undefined) {
+      const { scopedClusterClient, ...rest } = this.opts;
+      this.#asCurrentUser = wrapEsClient({
+        ...rest,
+        esClient: scopedClusterClient.asCurrentUser,
+      });
+    }
+    return this.#asCurrentUser;
+  }
+  public get asSecondaryAuthUser() {
+    if (this.#asSecondaryAuthUser === undefined) {
+      const { scopedClusterClient, ...rest } = this.opts;
+      this.#asSecondaryAuthUser = wrapEsClient({
+        ...rest,
+        esClient: scopedClusterClient.asSecondaryAuthUser,
+      });
+    }
+    return this.#asSecondaryAuthUser;
+  }
+}
+
 export function wrapScopedClusterClient(opts: WrapScopedClusterClientOpts): IScopedClusterClient {
-  const { scopedClusterClient, ...rest } = opts;
-  return {
-    asInternalUser: wrapEsClient({
-      ...rest,
-      esClient: scopedClusterClient.asInternalUser,
-    }),
-    asCurrentUser: wrapEsClient({
-      ...rest,
-      esClient: scopedClusterClient.asCurrentUser,
-    }),
-  };
+  return new WrappedScopedClusterClient(opts);
 }
 
 function wrapEsClient(opts: WrapEsClientOpts): ElasticsearchClient {

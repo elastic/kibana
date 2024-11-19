@@ -20,6 +20,13 @@ export const findCommentsRoute = createCasesRoute({
       case_id: schema.string(),
     }),
   },
+  routerOptions: {
+    access: 'public',
+    summary: `Find case comments and alerts`,
+    tags: ['oas-tag:cases'],
+    description: 'Retrieves a paginated list of comments and alerts for a case.',
+    // You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases with the comments you're seeking.
+  },
   handler: async ({ context, request, response }) => {
     try {
       const caseContext = await context.cases;

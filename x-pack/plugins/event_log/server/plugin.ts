@@ -111,11 +111,18 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
     // of this do not bother logging when success is false, as they are in
     // paths that would cause log spamming.  So we do it once, here, just to
     // ensure an unsucccess initialization is logged when it occurs.
-    this.esContext.waitTillReady().then((success) => {
-      if (!success) {
-        this.systemLogger.error(`initialization failed, events will not be indexed`);
-      }
-    });
+    this.esContext
+      .waitTillReady()
+      .then((success) => {
+        if (!success) {
+          this.systemLogger.error(`initialization failed, events will not be indexed`);
+        }
+      })
+      .catch((error) => {
+        this.systemLogger.error(
+          `initialization failed with error: ${error}. Events will not be indexed`
+        );
+      });
 
     // will log the event after initialization
     this.eventLogger.logEvent({

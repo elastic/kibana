@@ -22,7 +22,7 @@ export default function emailNotificationTest({ getService }: FtrProviderContext
 
   describe('email using html', () => {
     afterEach(async () => {
-      objectRemover.removeAll();
+      await objectRemover.removeAll();
     });
 
     it('succeeds as notification', async () => {

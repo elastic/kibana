@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import React, { FC, useEffect } from 'react';
+import type { FC } from 'react';
+import React, { useEffect } from 'react';
 import d3 from 'd3';
 import { scaleTime } from 'd3-scale';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { useCurrentThemeVars } from '../contexts/kibana';
 import type { Annotation, AnnotationsTable } from '../../../common/types/annotations';
-import { ChartTooltipService } from '../components/chart_tooltip';
+import type { ChartTooltipService } from '../components/chart_tooltip';
+import { Y_AXIS_LABEL_PADDING, Y_AXIS_LABEL_WIDTH } from './constants';
+import { getAnnotationStyles } from '../timeseriesexplorer/styles';
 
-export const Y_AXIS_LABEL_WIDTH = 170;
-export const Y_AXIS_LABEL_PADDING = 8;
 const ANNOTATION_CONTAINER_HEIGHT = 12;
 const ANNOTATION_MIN_WIDTH = 8;
 
@@ -28,6 +29,8 @@ interface SwimlaneAnnotationContainerProps {
   annotationsData?: AnnotationsTable['annotationsData'];
   tooltipService: ChartTooltipService;
 }
+
+const annotationStyles = getAnnotationStyles();
 
 export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> = ({
   chartWidth,
@@ -135,7 +138,7 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
         const xPos = d.start >= domain.min ? (xScale(d.start) as number) : startingXPos;
         svg
           .append('rect')
-          .classed('mlAnnotationRect', true)
+          .classed('ml-annotation__rect', true)
           // If annotation is at the end, prevent overflow by shifting it back
           .attr('x', xPos + annotationWidth >= endingXPos ? endingXPos - annotationWidth : xPos)
           .attr('y', 0)
@@ -221,5 +224,5 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chartWidth, domain, annotationsData, tooltipService]);
 
-  return <div ref={canvasRef} />;
+  return <div css={annotationStyles} ref={canvasRef} />;
 };

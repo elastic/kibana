@@ -33,7 +33,6 @@ import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/res
 import { useFetchIndexPatterns } from '../../logic/use_exception_flyout_data';
 import { useCreateOrUpdateException } from '../../logic/use_create_update_exception';
 import { useFindExceptionListReferences } from '../../logic/use_find_references';
-import * as i18n from './translations';
 import { MAX_COMMENT_LENGTH } from '../../../../../common/constants';
 
 const mockTheme = getMockTheme({
@@ -260,15 +259,6 @@ describe('When the edit exception modal is opened', () => {
         );
       });
 
-      it('displays proper flyout and button text', () => {
-        expect(wrapper.find('[data-test-subj="exceptionFlyoutTitle"]').at(1).text()).toEqual(
-          i18n.EDIT_ENDPOINT_EXCEPTION_TITLE
-        );
-        expect(wrapper.find('[data-test-subj="editExceptionConfirmButton"]').at(1).text()).toEqual(
-          i18n.EDIT_ENDPOINT_EXCEPTION_TITLE
-        );
-      });
-
       it('should render item name input', () => {
         expect(wrapper.find('[data-test-subj="exceptionFlyoutNameInput"]').exists()).toBeTruthy();
       });
@@ -296,6 +286,84 @@ describe('When the edit exception modal is opened', () => {
 
       it('should NOT display the eql sequence callout', () => {
         expect(wrapper.find('[data-test-subj="eqlSequenceCallout"]').exists()).not.toBeTruthy();
+      });
+
+      it('should show a warning callout if wildcard is used', async () => {
+        const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
+        await waitFor(() =>
+          callProps.onChange({
+            exceptionItems: [
+              {
+                ...getExceptionListItemSchemaMock(),
+                entries: [
+                  {
+                    field: 'event.category',
+                    operator: 'included',
+                    type: 'match',
+                    value: 'wildcardvalue?',
+                  },
+                ],
+              },
+            ],
+          })
+        );
+
+        wrapper.update();
+        expect(
+          wrapper.find('[data-test-subj="wildcardWithWrongOperatorCallout"]').exists()
+        ).toBeTruthy();
+      });
+
+      it('should show a warning callout if there is a partial code signature entry with only subject_name', async () => {
+        const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
+        await waitFor(() =>
+          callProps.onChange({
+            exceptionItems: [
+              {
+                ...getExceptionListItemSchemaMock(),
+                entries: [
+                  {
+                    field: 'process.code_signature.subject_name',
+                    operator: 'included',
+                    type: 'match',
+                    value: 'asdf',
+                  },
+                ],
+              },
+            ],
+          })
+        );
+
+        wrapper.update();
+        expect(
+          wrapper.find('[data-test-subj="partialCodeSignatureCallout"]').exists()
+        ).toBeTruthy();
+      });
+
+      it('should show a warning callout if there is a partial code signature entry with only trusted field', async () => {
+        const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
+        await waitFor(() =>
+          callProps.onChange({
+            exceptionItems: [
+              {
+                ...getExceptionListItemSchemaMock(),
+                entries: [
+                  {
+                    field: 'process.code_signature.trusted',
+                    operator: 'included',
+                    type: 'match',
+                    value: 'true',
+                  },
+                ],
+              },
+            ],
+          })
+        );
+
+        wrapper.update();
+        expect(
+          wrapper.find('[data-test-subj="partialCodeSignatureCallout"]').exists()
+        ).toBeTruthy();
       });
     });
 
@@ -440,15 +508,6 @@ describe('When the edit exception modal is opened', () => {
       );
     });
 
-    it('displays proper flyout and button text', () => {
-      expect(wrapper.find('[data-test-subj="exceptionFlyoutTitle"]').at(1).text()).toEqual(
-        i18n.EDIT_EXCEPTION_TITLE
-      );
-      expect(wrapper.find('[data-test-subj="editExceptionConfirmButton"]').at(1).text()).toEqual(
-        i18n.EDIT_EXCEPTION_TITLE
-      );
-    });
-
     it('should render item name input', () => {
       expect(wrapper.find('[data-test-subj="exceptionFlyoutNameInput"]').exists()).toBeTruthy();
     });
@@ -552,15 +611,6 @@ describe('When the edit exception modal is opened', () => {
       const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
       await waitFor(() =>
         callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] })
-      );
-    });
-
-    it('displays proper flyout and button text', () => {
-      expect(wrapper.find('[data-test-subj="exceptionFlyoutTitle"]').at(1).text()).toEqual(
-        i18n.EDIT_EXCEPTION_TITLE
-      );
-      expect(wrapper.find('[data-test-subj="editExceptionConfirmButton"]').at(1).text()).toEqual(
-        i18n.EDIT_EXCEPTION_TITLE
       );
     });
 

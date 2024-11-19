@@ -14,23 +14,25 @@ import type {
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
 } from '@kbn/timelines-plugin/common';
+import type {
+  IsolationRouteRequestBody,
+  UnisolationRouteRequestBody,
+} from '../../../../../common/api/endpoint';
 import {
   ENDPOINT_FIELDS_SEARCH_STRATEGY,
   HOST_METADATA_LIST_ROUTE,
-  METADATA_TRANSFORMS_STATUS_ROUTE,
+  METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE,
   METADATA_UNITED_INDEX,
   metadataCurrentIndexPattern,
 } from '../../../../../common/endpoint/constants';
 import type {
-  HostIsolationRequestBody,
   HostResultList,
   Immutable,
   ImmutableObject,
   MetadataListResponse,
   ResponseActionApiResponse,
 } from '../../../../../common/endpoint/types';
-import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint_isolation';
-import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint_pending_actions';
+import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint/endpoint_isolation';
 import type { ImmutableMiddlewareAPI, ImmutableMiddlewareFactory } from '../../../../common/store';
 import type { AppAction } from '../../../../common/store/actions';
 import { sendGetEndpointSpecificPackagePolicies } from '../../../services/policies/policies';
@@ -46,9 +48,8 @@ import {
 } from '../../../services/policies/ingest';
 import type { GetPolicyListResponse } from '../../policy/types';
 import type {
-  AgentIdsPendingActions,
   EndpointState,
-  PolicyIds,
+  NonExistingPolicies,
   TransformStats,
   TransformStatsResponse,
 } from '../types';
@@ -62,7 +63,6 @@ import {
   getMetadataTransformStats,
   isMetadataTransformStatsLoading,
   isOnEndpointPage,
-  listData,
   nonExistingPolicies,
   patterns,
   searchBarQuery,
@@ -135,69 +135,50 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
   };
 };
 
-const getAgentAndPoliciesForEndpointsList = async (
+const getNonExistingPoliciesForEndpointList = async (
   http: HttpStart,
   hosts: HostResultList['hosts'],
-  currentNonExistingPolicies: EndpointState['nonExistingPolicies']
-): Promise<PolicyIds | undefined> => {
+  currentNonExistingPolicies: Immutable<NonExistingPolicies>
+): Promise<NonExistingPolicies | undefined> => {
   if (hosts.length === 0) {
     return;
   }
 
   // Create an array of unique policy IDs that are not yet known to be non-existing.
   const policyIdsToCheck = [
-    ...new Set(
-      hosts.reduce((acc: string[], host) => {
-        const appliedPolicyId = host.metadata.Endpoint.policy.applied.id;
-        if (!currentNonExistingPolicies[appliedPolicyId]) {
-          acc.push(appliedPolicyId);
-        }
-        return acc;
-      }, [])
-    ),
+    ...hosts.reduce<Set<string>>((acc, host) => {
+      const appliedPolicyId = host.metadata.Endpoint.policy.applied.id;
+      if (!currentNonExistingPolicies.has(appliedPolicyId)) {
+        acc.add(appliedPolicyId);
+      }
+      return acc;
+    }, new Set()),
   ];
 
   if (policyIdsToCheck.length === 0) {
     return;
   }
 
-  // We use the Agent Policy API here, instead of the Package Policy, because we can't use
-  // filter by ID of the Saved Object. Agent Policy, however, keeps a reference (array) of
-  // Package Ids that it uses, thus if a reference exists there, then the package policy (policy)
-  // exists.
   const policiesFound = (
     await sendBulkGetPackagePolicies(http, policyIdsToCheck)
-  ).items.reduce<PolicyIds>(
-    (list, packagePolicy) => {
-      list.packagePolicy[packagePolicy.id as string] = true;
-      list.agentPolicy[packagePolicy.id as string] = packagePolicy.policy_id;
+  ).items.reduce<NonExistingPolicies>((set, packagePolicy) => set.add(packagePolicy.id), new Set());
 
-      return list;
-    },
-    { packagePolicy: {}, agentPolicy: {} }
-  );
-
-  // packagePolicy contains non-existing packagePolicy ids whereas agentPolicy contains existing agentPolicy ids
-  const nonExistingPackagePoliciesAndExistingAgentPolicies = policyIdsToCheck.reduce<PolicyIds>(
-    (list, policyId: string) => {
-      if (policiesFound.packagePolicy[policyId as string]) {
-        list.agentPolicy[policyId as string] = policiesFound.agentPolicy[policyId];
-        return list;
+  const nonExistingPackagePolicies = policyIdsToCheck.reduce<NonExistingPolicies>(
+    (set, policyId) => {
+      if (!policiesFound.has(policyId)) {
+        set.add(policyId);
       }
-      list.packagePolicy[policyId as string] = true;
-      return list;
+
+      return set;
     },
-    { packagePolicy: {}, agentPolicy: {} }
+    new Set()
   );
 
-  if (
-    Object.keys(nonExistingPackagePoliciesAndExistingAgentPolicies.packagePolicy).length === 0 &&
-    Object.keys(nonExistingPackagePoliciesAndExistingAgentPolicies.agentPolicy).length === 0
-  ) {
+  if (!nonExistingPackagePolicies.size) {
     return;
   }
 
-  return nonExistingPackagePoliciesAndExistingAgentPolicies;
+  return nonExistingPackagePolicies;
 };
 
 const endpointsTotal = async (http: HttpStart): Promise<number> => {
@@ -254,9 +235,9 @@ const handleIsolateEndpointHost = async (
     let response: ResponseActionApiResponse;
 
     if (action.payload.type === 'unisolate') {
-      response = await unIsolateHost(action.payload.data as HostIsolationRequestBody);
+      response = await unIsolateHost(action.payload.data as UnisolationRouteRequestBody);
     } else {
-      response = await isolateHost(action.payload.data as HostIsolationRequestBody);
+      response = await isolateHost(action.payload.data as IsolationRouteRequestBody);
     }
 
     dispatch({
@@ -301,47 +282,6 @@ async function getEndpointPackageInfo(
   }
 }
 
-/**
- * retrieves the Endpoint pending actions for all the existing endpoints being displayed on the list
- * or the details tab.
- *
- * @param store
- */
-const loadEndpointsPendingActions = async ({
-  getState,
-  dispatch,
-}: EndpointPageStore): Promise<void> => {
-  const state = getState();
-  const listEndpoints = listData(state);
-  const agentsIds = new Set<string>();
-
-  for (const endpointInfo of listEndpoints) {
-    agentsIds.add(endpointInfo.metadata.elastic.agent.id);
-  }
-
-  if (agentsIds.size === 0) {
-    return;
-  }
-
-  try {
-    const { data: pendingActions } = await fetchPendingActionsByAgentId(Array.from(agentsIds));
-    const agentIdToPendingActions: AgentIdsPendingActions = new Map();
-
-    for (const pendingAction of pendingActions) {
-      agentIdToPendingActions.set(pendingAction.agent_id, pendingAction.pending_actions);
-    }
-
-    dispatch({
-      type: 'endpointPendingActionsStateChanged',
-      payload: createLoadedResourceState(agentIdToPendingActions),
-    });
-  } catch (error) {
-    // TODO should handle the error instead of logging it to the browser
-    // Also this is an anti-pattern we shouldn't use
-    logError(error);
-  }
-};
-
 async function endpointListMiddleware({
   store,
   coreStart,
@@ -380,9 +320,7 @@ async function endpointListMiddleware({
       payload: endpointResponse,
     });
 
-    loadEndpointsPendingActions(store);
-
-    dispatchIngestPolicies({ http: coreStart.http, hosts: endpointResponse.data, store });
+    fetchNonExistingPolicies({ http: coreStart.http, hosts: endpointResponse.data, store });
   } catch (error) {
     dispatch({
       type: 'serverFailedToReturnEndpointList',
@@ -416,6 +354,10 @@ async function endpointListMiddleware({
     // so we check first if endpoints actually do exist before pulling in data for the onboarding
     // messages.
     if (await doEndpointsExist(http)) {
+      dispatch({
+        type: 'serverFinishedInitialization',
+        payload: true,
+      });
       return;
     }
 
@@ -455,6 +397,11 @@ async function endpointListMiddleware({
       payload: true,
     });
   }
+
+  dispatch({
+    type: 'serverFinishedInitialization',
+    payload: true,
+  });
 }
 
 export async function handleLoadMetadataTransformStats(http: HttpStart, store: EndpointPageStore) {
@@ -474,8 +421,8 @@ export async function handleLoadMetadataTransformStats(http: HttpStart, store: E
 
   try {
     const transformStatsResponse: TransformStatsResponse = await http.get(
-      METADATA_TRANSFORMS_STATUS_ROUTE,
-      { version: '2023-10-31' }
+      METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE,
+      { version: '1' }
     );
 
     dispatch({
@@ -490,7 +437,7 @@ export async function handleLoadMetadataTransformStats(http: HttpStart, store: E
   }
 }
 
-async function dispatchIngestPolicies({
+async function fetchNonExistingPolicies({
   store,
   hosts,
   http,
@@ -501,21 +448,15 @@ async function dispatchIngestPolicies({
 }) {
   const { getState, dispatch } = store;
   try {
-    const ingestPolicies = await getAgentAndPoliciesForEndpointsList(
+    const missingPolicies = await getNonExistingPoliciesForEndpointList(
       http,
       hosts,
       nonExistingPolicies(getState())
     );
-    if (ingestPolicies?.packagePolicy !== undefined) {
+    if (missingPolicies !== undefined) {
       dispatch({
         type: 'serverReturnedEndpointNonExistingPolicies',
-        payload: ingestPolicies.packagePolicy,
-      });
-    }
-    if (ingestPolicies?.agentPolicy !== undefined) {
-      dispatch({
-        type: 'serverReturnedEndpointAgentPolicies',
-        payload: ingestPolicies.agentPolicy,
+        payload: missingPolicies,
       });
     }
   } catch (error) {

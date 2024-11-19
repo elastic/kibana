@@ -11,6 +11,12 @@ import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import type { SanitizedRule, ResolvedSanitizedRule } from '@kbn/alerting-plugin/common';
 
+import type {
+  SetAlertsStatusByIds,
+  SetAlertsStatusByQuery,
+  SetAlertsStatusRequestBodyInput,
+  SearchAlertsRequestBody,
+} from '../../../../../common/api/detection_engine/signals';
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
@@ -27,19 +33,17 @@ import {
 import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../../common/api/detection_engine/rule_management/urls';
 
 import {
+  BOOTSTRAP_PREBUILT_RULES_URL,
   PREBUILT_RULES_STATUS_URL,
   PREBUILT_RULES_URL,
 } from '../../../../../common/api/detection_engine/prebuilt_rules';
 import {
-  getPerformBulkActionSchemaMock,
+  getBulkDisableRuleActionSchemaMock,
   getPerformBulkActionEditSchemaMock,
 } from '../../../../../common/api/detection_engine/rule_management/mocks';
 
 import { getCreateRulesSchemaMock } from '../../../../../common/api/detection_engine/model/rule_schema/mocks';
-import type {
-  QuerySignalsSchemaDecoded,
-  SetSignalsStatusSchemaDecoded,
-} from '../../../../../common/api/detection_engine/signals';
+
 import {
   getFinalizeSignalsMigrationSchemaMock,
   getSignalsMigrationStatusSchemaMock,
@@ -53,26 +57,28 @@ import { getQueryRuleParams } from '../../rule_schema/mocks';
 import { requestMock } from './request';
 import type { HapiReadableStream } from '../../../../types';
 
-export const typicalSetStatusSignalByIdsPayload = (): SetSignalsStatusSchemaDecoded => ({
+export const typicalSetStatusSignalByIdsPayload = (): SetAlertsStatusByIds => ({
   signal_ids: ['somefakeid1', 'somefakeid2'],
   status: 'closed',
 });
 
-export const typicalSetStatusSignalByQueryPayload = (): SetSignalsStatusSchemaDecoded => ({
+export const typicalSetStatusSignalByQueryPayload = (): SetAlertsStatusByQuery => ({
   query: { bool: { filter: { range: { '@timestamp': { gte: 'now-2M', lte: 'now/M' } } } } },
   status: 'closed',
+  conflicts: 'abort',
 });
 
-export const typicalSignalsQuery = (): QuerySignalsSchemaDecoded => ({
+export const typicalSignalsQuery = (): SearchAlertsRequestBody => ({
   aggs: {},
   query: { match_all: {} },
 });
 
-export const typicalSignalsQueryAggs = (): QuerySignalsSchemaDecoded => ({
+export const typicalSignalsQueryAggs = (): SearchAlertsRequestBody => ({
   aggs: { statuses: { terms: { field: ALERT_WORKFLOW_STATUS, size: 10 } } },
 });
 
-export const setStatusSignalMissingIdsAndQueryPayload = (): SetSignalsStatusSchemaDecoded => ({
+// @ts-expect-error data with missing required fields
+export const setStatusSignalMissingIdsAndQueryPayload = (): SetAlertsStatusRequestBodyInput => ({
   status: 'closed',
 });
 
@@ -131,11 +137,11 @@ export const getPatchBulkRequest = () =>
     body: [getCreateRulesSchemaMock()],
   });
 
-export const getBulkActionRequest = () =>
+export const getBulkDisableRuleActionRequest = () =>
   requestMock.create({
     method: 'patch',
     path: DETECTION_ENGINE_RULES_BULK_ACTION,
-    body: getPerformBulkActionSchemaMock(),
+    body: getBulkDisableRuleActionSchemaMock(),
   });
 
 export const getBulkActionEditRequest = () =>
@@ -196,6 +202,12 @@ export const getRuleManagementFiltersRequest = () =>
   requestMock.create({
     method: 'get',
     path: RULE_MANAGEMENT_FILTERS_URL,
+  });
+
+export const getBootstrapRulesRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: BOOTSTRAP_PREBUILT_RULES_URL,
   });
 
 export interface FindHit<T = RuleAlertType> {
@@ -393,38 +405,23 @@ export const getMockPrivilegesResult = () => ({
   has_all_requested: false,
   cluster: {
     monitor_ml: true,
-    manage_ccr: false,
     manage_index_templates: true,
-    monitor_watcher: true,
     monitor_transform: true,
-    read_ilm: true,
     manage_api_key: false,
     manage_security: false,
     manage_own_api_key: false,
-    manage_saml: false,
     all: false,
-    manage_ilm: true,
-    manage_ingest_pipelines: true,
-    read_ccr: false,
-    manage_rollup: true,
     monitor: true,
-    manage_watcher: true,
     manage: true,
     manage_transform: true,
-    manage_token: false,
     manage_ml: true,
     manage_pipeline: true,
-    monitor_rollup: true,
-    transport_client: true,
-    create_snapshot: true,
   },
   index: {
     '.siem-signals-test-space': {
       all: false,
-      manage_ilm: true,
       read: false,
       create_index: true,
-      read_cross_cluster: false,
       index: false,
       monitor: true,
       delete: false,
@@ -433,8 +430,6 @@ export const getMockPrivilegesResult = () => ({
       create_doc: false,
       view_index_metadata: true,
       create: false,
-      manage_follow_index: true,
-      manage_leader_index: true,
       write: false,
     },
   },

@@ -9,10 +9,9 @@ exports[`LabelOptions component should init with the default set of props 1`] = 
     size="xxs"
   >
     <h3>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Labels"
         id="visTypeXy.controls.pointSeries.categoryAxis.labelsTitle"
-        values={Object {}}
       />
     </h3>
   </EuiTitle>

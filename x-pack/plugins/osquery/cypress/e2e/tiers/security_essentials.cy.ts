@@ -7,13 +7,17 @@
 
 import { checkOsqueryResponseActionsPermissions } from '../../tasks/response_actions';
 
-// FLAKY: https://github.com/elastic/kibana/issues/170536
-describe.skip(
+describe(
   'App Features for Security Essentials PLI',
   {
     tags: ['@serverless'],
     env: {
-      ftrConfig: { productTypes: [{ product_line: 'security', product_tier: 'essentials' }] },
+      ftrConfig: {
+        productTypes: [
+          { product_line: 'security', product_tier: 'essentials' },
+          { product_line: 'endpoint', product_tier: 'essentials' },
+        ],
+      },
     },
   },
   () => checkOsqueryResponseActionsPermissions(false)

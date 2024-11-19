@@ -1,19 +1,23 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:base"
+    "config:recommended",
+    "helpers:pinGitHubActionDigests",
+    "helpers:pinGitHubActionDigestsToSemver"
   ],
   "ignorePaths": [
     "**/__fixtures__/**",
     "**/fixtures/**"
   ],
   "enabledManagers": [
-    "npm"
+    "npm",
+    "github-actions",
+    "custom.regex",
+    "devcontainer"
   ],
   "baseBranches": [
     "main",
-    "7.16",
-    "7.15"
+    "7.17"
   ],
   "prConcurrentLimit": 0,
   "prHourlyLimit": 0,
@@ -28,16 +32,110 @@
   },
   "packageRules": [
     {
-      "matchPackagePatterns": [
+      "matchDepPatterns": [
         ".*"
       ],
-      "enabled": false,
-      "prCreation": "not-pending",
-      "stabilityDays": 7
+      "enabled": false
+    },
+    {
+      "groupName": "devcontainer",
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Operations",
+        "release_note:skip",
+        "backport:current-major"
+      ],
+      "enabled": true,
+      "matchManagers": [
+        "devcontainer"
+      ]
+    },
+    {
+      "groupName": "chainguard",
+      "matchPackageNames": [
+        "docker.elastic.co/wolfi/chainguard-base"
+      ],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Operations",
+        "release_note:skip"
+      ],
+      "enabled": true
+    },
+    {
+      "groupName": "operations actions",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchPackageNames": [
+        "actions/checkout",
+        "actions/github-script",
+        "elastic/github-actions/project-assigner",
+        "hmarr/auto-approve-action",
+        "octokit/graphql-action",
+        "sergeysova/jq-action",
+        "sourenlouv/backport"
+      ],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Operations",
+        "backport:all-open",
+        "release_note:skip"
+      ],
+      "enabled": true
+    },
+    {
+      "groupName": "@elastic/appex-ai-infra",
+      "matchDepNames": [
+        "@aws-crypto/sha256-js",
+        "@aws-crypto/util",
+        "@langtrase/trace-attributes",
+        "@opentelemetry/sdk-trace-base",
+        "@smithy/eventstream-serde-node",
+        "@smithy/protocol-http",
+        "@smithy/signature-v4",
+        "@smithy/types",
+        "ajv",
+        "aws4",
+        "eventsource-parser",
+        "fast-glob",
+        "gpt-tokenizer",
+        "langsmith",
+        "openai",
+        "@types/json-schema",
+        "table"
+      ],
+      "reviewers": [
+        "team:appex-ai-infra"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:AI Infra",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true
     },
     {
       "groupName": "@elastic/charts",
-      "matchPackageNames": [
+      "matchDepNames": [
         "@elastic/charts"
       ],
       "reviewers": [
@@ -50,17 +148,14 @@
       ],
       "labels": [
         "release_note:skip",
-        "backport:skip",
+        "backport:prev-minor",
         "Team:Visualizations"
       ],
-      "draftPR": true,
-      "enabled": true,
-      "assignAutomerge": true,
-      "prCreation": "immediate"
+      "enabled": true
     },
     {
       "groupName": "@elastic/elasticsearch",
-      "matchPackageNames": [
+      "matchDepNames": [
         "@elastic/elasticsearch"
       ],
       "reviewers": [
@@ -80,27 +175,7 @@
     },
     {
       "groupName": "@elastic/elasticsearch",
-      "matchPackageNames": [
-        "@elastic/elasticsearch"
-      ],
-      "reviewers": [
-        "team:kibana-operations",
-        "team:kibana-core"
-      ],
-      "matchBaseBranches": [
-        "8.1"
-      ],
-      "labels": [
-        "release_note:skip",
-        "Team:Operations",
-        "Team:Core",
-        "backport:skip"
-      ],
-      "enabled": true
-    },
-    {
-      "groupName": "@elastic/elasticsearch",
-      "matchPackageNames": [
+      "matchDepNames": [
         "@elastic/elasticsearch"
       ],
       "reviewers": [
@@ -120,9 +195,12 @@
     },
     {
       "groupName": "LaunchDarkly",
-      "matchPackageNames": [
+      "matchDepNames": [
         "launchdarkly-js-client-sdk",
-        "launchdarkly-node-server-sdk"
+        "@openfeature/launchdarkly-client-provider",
+        "@launchdarkly/node-server-sdk",
+        "@launchdarkly/openfeature-node-server",
+        "launchdarkly/find-code-references"
       ],
       "reviewers": [
         "team:kibana-security",
@@ -137,14 +215,39 @@
         "Team:Core",
         "backport:prev-minor"
       ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "OpenFeature",
+      "matchDepNames": [
+        "@openfeature/core",
+        "@openfeature/server-sdk",
+        "@openfeature/web-sdk"
+      ],
+      "reviewers": [
+        "team:kibana-security",
+        "team:kibana-core"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "Team:Security",
+        "Team:Core",
+        "backport:prev-minor"
+      ],
+      "minimumReleaseAge": "7 days",
       "enabled": true
     },
     {
       "groupName": "APM",
-      "matchPackageNames": [
+      "matchDepNames": [
         "elastic-apm-node",
         "@elastic/apm-rum",
-        "@elastic/apm-rum-react"
+        "@elastic/apm-rum-react",
+        "@elastic/apm-rum-core"
       ],
       "reviewers": [
         "team:kibana-core"
@@ -157,12 +260,85 @@
         "Team:Core",
         "backport:skip"
       ],
-      "enabled": true,
-      "prCreation": "immediate"
+      "enabled": true
+    },
+    {
+      "groupName": "RxJS",
+      "matchDepNames": [
+        "rxjs"
+      ],
+      "reviewers": [
+        "team:kibana-core"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "Team:Core",
+        "backport:skip"
+      ],
+      "enabled": true
+    },
+    {
+      "groupName": "stack traces",
+      "matchDepNames": [
+        "trace",
+        "clarify"
+      ],
+      "reviewers": [
+        "team:kibana-core"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "Team:Core",
+        "backport:skip"
+      ],
+      "enabled": true
+    },
+    {
+      "groupName": "@elastic/ebt",
+      "matchDepNames": [
+        "@elastic/ebt"
+      ],
+      "reviewers": [
+        "team:kibana-core"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "Team:Core",
+        "backport:skip"
+      ],
+      "enabled": true
+    },
+    {
+      "groupName": "lodash",
+      "matchDepNames": [
+        "lodash",
+        "@types/lodash"
+      ],
+      "reviewers": [
+        "team:kibana-core"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "Team:Core",
+        "backport:skip"
+      ],
+      "enabled": true
     },
     {
       "groupName": "ansi-regex",
-      "matchPackageNames": [
+      "matchDepNames": [
         "ansi-regex"
       ],
       "reviewers": [
@@ -176,14 +352,55 @@
         "Team:Core",
         "backport:skip"
       ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "OpenAPI Spec",
+      "matchDepNames": [
+        "@redocly/cli"
+      ],
+      "reviewers": [
+        "team:kibana-core"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "Team:Core",
+        "backport:skip"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "HAPI ecosystem",
+      "matchDepNames": [
+        "@hapi/**",
+        "brok",
+        "joi"
+      ],
+      "reviewers": [
+        "team:kibana-core"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "Team:Core",
+        "backport:prev-minor"
+      ],
+      "minimumReleaseAge": "7 days",
       "enabled": true
     },
     {
       "groupName": "babel",
-      "matchPackageNames": [
+      "matchDepNames": [
         "@types/babel__core"
       ],
-      "matchPackagePatterns": [
+      "matchDepPatterns": [
         "^@babel",
         "^babel-plugin"
       ],
@@ -197,13 +414,13 @@
         "Team:Operations",
         "release_note:skip"
       ],
+      "minimumReleaseAge": "7 days",
       "enabled": true
     },
     {
       "groupName": "typescript",
-      "matchPackageNames": [
+      "matchDepNames": [
         "typescript",
-        "prettier",
         "@types/jsdom"
       ],
       "reviewers": [
@@ -216,11 +433,33 @@
         "Team:Operations",
         "release_note:skip"
       ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "prettier",
+      "matchDepNames": [
+        "prettier",
+        "eslint-plugin-prettier",
+        "eslint-config-prettier"
+      ],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Operations",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "7 days",
+      "allowedVersions": "<3.0",
       "enabled": true
     },
     {
       "groupName": "typescript-eslint",
-      "matchPackagePatterns": [
+      "matchDepPatterns": [
         "^@typescript-eslint"
       ],
       "reviewers": [
@@ -233,14 +472,33 @@
         "Team:Operations",
         "release_note:skip"
       ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "eslint-plugin-depend",
+      "matchDepPatterns": [
+        "eslint-plugin-depend"
+      ],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Operations",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "7 days",
       "enabled": true
     },
     {
       "groupName": "polyfills",
-      "matchPackageNames": [
+      "matchDepNames": [
         "core-js"
       ],
-      "matchPackagePatterns": [
+      "matchDepPatterns": [
         "polyfill"
       ],
       "reviewers": [
@@ -253,11 +511,31 @@
         "Team:Operations",
         "release_note:skip"
       ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "CLI tooling",
+      "matchDepNames": [
+        "listr2"
+      ],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Operations",
+        "backport:all-open",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "7 days",
       "enabled": true
     },
     {
       "groupName": "vega related modules",
-      "matchPackageNames": [
+      "matchDepNames": [
         "vega",
         "vega-lite",
         "vega-schema-url-parser",
@@ -273,11 +551,12 @@
         "Feature:Vega",
         "Team:Visualizations"
       ],
+      "minimumReleaseAge": "7 days",
       "enabled": true
     },
     {
       "groupName": "cypress",
-      "matchPackagePatterns": [
+      "matchDepPatterns": [
         "cypress"
       ],
       "reviewers": [
@@ -291,11 +570,12 @@
         "buildkite-ci",
         "ci:all-cypress-suites"
       ],
+      "minimumReleaseAge": "7 days",
       "enabled": true
     },
     {
       "groupName": "security solution modules",
-      "matchPackageNames": [
+      "matchDepNames": [
         "zod",
         "langchain"
       ],
@@ -308,11 +588,12 @@
       "labels": [
         "Team: SecuritySolution"
       ],
+      "minimumReleaseAge": "7 days",
       "enabled": true
     },
     {
       "groupName": "platform security modules",
-      "matchPackageNames": [
+      "matchDepNames": [
         "css.escape",
         "node-forge",
         "formik",
@@ -335,11 +616,32 @@
         "release_note:skip",
         "backport:all-open"
       ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "CodeQL",
+      "matchDepNames": [
+        "github/codeql-action/analyze",
+        "github/codeql-action/init"
+      ],
+      "reviewers": [
+        "team:kibana-security"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Security",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "7 days",
       "enabled": true
     },
     {
       "groupName": "ftr",
-      "packageNames": [
+      "matchDepNames": [
         "@types/chromedriver",
         "@types/selenium-webdriver",
         "chromedriver",
@@ -357,11 +659,12 @@
         "Team:Operations",
         "release_note:skip"
       ],
+      "minimumReleaseAge": "7 days",
       "enabled": true
     },
     {
       "groupName": "scss",
-      "packageNames": [
+      "matchDepNames": [
         "sass-embedded"
       ],
       "reviewers": [
@@ -375,11 +678,12 @@
         "release_note:skip",
         "backport:all-open"
       ],
+      "minimumReleaseAge": "7 days",
       "enabled": true
     },
     {
       "groupName": "minify",
-      "packageNames": [
+      "matchDepNames": [
         "gulp-terser",
         "terser"
       ],
@@ -393,17 +697,17 @@
         "Team:Operations",
         "release_note:skip"
       ],
+      "minimumReleaseAge": "7 days",
       "enabled": true
     },
     {
       "groupName": "@testing-library",
-      "packageNames": [
+      "matchDepNames": [
         "@testing-library/dom",
         "@testing-library/jest-dom",
         "@testing-library/react",
         "@testing-library/react-hooks",
-        "@testing-library/user-event",
-        "@types/testing-library__jest-dom"
+        "@testing-library/user-event"
       ],
       "reviewers": [
         "team:kibana-operations"
@@ -415,11 +719,12 @@
         "Team:Operations",
         "release_note:skip"
       ],
+      "minimumReleaseAge": "7 days",
       "enabled": true
     },
     {
       "groupName": "jest",
-      "packageNames": [
+      "matchDepNames": [
         "@jest/console",
         "@jest/reporters",
         "@jest/types",
@@ -445,6 +750,7 @@
         "Team:Operations",
         "release_note:skip"
       ],
+      "minimumReleaseAge": "7 days",
       "enabled": true
     },
     {
@@ -455,10 +761,10 @@
       "matchBaseBranches": [
         "main"
       ],
-      "matchPackagePatterns": [
+      "matchDepPatterns": [
         "^@storybook"
       ],
-      "excludePackageNames": [
+      "excludeDepNames": [
         "@storybook/testing-react"
       ],
       "labels": [
@@ -467,8 +773,9 @@
         "ci:build-storybooks",
         "backport:skip"
       ],
-      "enabled": true,
-      "allowedVersions": "<7.0"
+      "minimumReleaseAge": "7 days",
+      "allowedVersions": "<7.0",
+      "enabled": true
     },
     {
       "groupName": "@storybook/testing-react",
@@ -478,7 +785,7 @@
       "matchBaseBranches": [
         "main"
       ],
-      "matchPackageNames": [
+      "matchDepNames": [
         "@storybook/testing-react"
       ],
       "labels": [
@@ -487,12 +794,13 @@
         "ci:build-storybooks",
         "backport:skip"
       ],
-      "enabled": true,
-      "allowedVersions": "<2.0"
+      "minimumReleaseAge": "7 days",
+      "allowedVersions": "<2.0",
+      "enabled": true
     },
     {
       "groupName": "react-query",
-      "packageNames": [
+      "matchDepNames": [
         "@tanstack/react-query",
         "@tanstack/react-query-devtools"
       ],
@@ -512,11 +820,12 @@
         "backport:skip",
         "ci:all-cypress-suites"
       ],
+      "minimumReleaseAge": "7 days",
       "enabled": true
     },
     {
       "groupName": "react-hook-form",
-      "packageNames": [
+      "matchDepNames": [
         "react-hook-form"
       ],
       "reviewers": [
@@ -531,20 +840,20 @@
         "backport:skip",
         "ci:all-cypress-suites"
       ],
+      "minimumReleaseAge": "7 days",
       "enabled": true
     },
     {
       "groupName": "redux",
-      "packageNames": [
+      "matchDepNames": [
         "redux",
         "react-redux"
       ],
       "reviewers": [
-        "team:enterprise-search-frontend",
+        "team:search-kibana",
         "team:kibana-presentation",
         "team:kibana-data-discovery",
-        "team:platform-deployment-management",
-        "team:kibana-gis",
+        "team:kibana-management",
         "team:security-solution"
       ],
       "matchBaseBranches": [
@@ -555,16 +864,17 @@
         "backport:skip",
         "ci:all-cypress-suites"
       ],
+      "minimumReleaseAge": "7 days",
       "enabled": true
     },
     {
       "groupName": "Profiling",
-      "matchPackageNames": [
+      "matchDepNames": [
         "peggy",
         "@types/dagre"
       ],
       "reviewers": [
-        "team:profiling-ui"
+        "team:obs-ux-infra_services-team"
       ],
       "matchBaseBranches": [
         "main"
@@ -573,12 +883,12 @@
         "release_note:skip",
         "backport:skip"
       ],
-      "enabled": true,
-      "prCreation": "immediate"
+      "minimumReleaseAge": "7 days",
+      "enabled": true
     },
     {
       "groupName": "TTY Output",
-      "matchPackageNames": [
+      "matchDepNames": [
         "xterm",
         "byte-size",
         "@types/byte-size"
@@ -594,12 +904,12 @@
         "release_note:skip",
         "backport:skip"
       ],
-      "enabled": true,
-      "prCreation": "immediate"
+      "minimumReleaseAge": "7 days",
+      "enabled": true
     },
     {
       "groupName": "Cloud Defend",
-      "matchPackageNames": [
+      "matchDepNames": [
         "monaco-yaml"
       ],
       "reviewers": [
@@ -613,12 +923,12 @@
         "release_note:skip",
         "backport:skip"
       ],
-      "enabled": true,
-      "prCreation": "immediate"
+      "minimumReleaseAge": "7 days",
+      "enabled": true
     },
     {
       "groupName": "JSON Web Token",
-      "matchPackageNames": [
+      "matchDepNames": [
         "jsonwebtoken"
       ],
       "reviewers": [
@@ -632,18 +942,19 @@
         "release_note:skip",
         "backport:all-open"
       ],
+      "minimumReleaseAge": "7 days",
       "enabled": true
     },
     {
       "groupName": "XState",
-      "matchPackageNames": [
+      "matchDepNames": [
         "xstate"
       ],
-      "matchPackagePrefixes": [
+      "matchDepPrefixes": [
         "@xstate/"
       ],
       "reviewers": [
-        "team:obs-ux-logs"
+        "team:obs-ux-logs-team"
       ],
       "matchBaseBranches": [
         "main"
@@ -652,16 +963,16 @@
         "Team:Obs UX Logs",
         "release_note:skip"
       ],
-      "enabled": true,
-      "prCreation": "immediate"
+      "minimumReleaseAge": "7 days",
+      "enabled": true
     },
     {
       "groupName": "OpenTelemetry modules",
-      "matchPackagePrefixes": [
+      "matchDepPrefixes": [
         "@opentelemetry/"
       ],
       "reviewers": [
-        "team:monitoring"
+        "team:stack-monitoring"
       ],
       "matchBaseBranches": [
         "main"
@@ -669,7 +980,224 @@
       "labels": [
         "Team:Monitoring"
       ],
+      "minimumReleaseAge": "7 days",
       "enabled": true
+    },
+    {
+      "groupName": "csp",
+      "matchDepNames": [
+        "content-security-policy-parser"
+      ],
+      "reviewers": [
+        "team:kibana-security",
+        "team:kibana-core"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:skip",
+        "ci:serverless-test-all"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "AlertingEmails",
+      "matchDepNames": [
+        "nodemailer"
+      ],
+      "reviewers": [
+        "team:response-ops"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:prev-minor"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "Kibana ES|QL Team",
+      "matchDepNames": [
+        "recast"
+      ],
+      "reviewers": [
+        "team:kibana-esql"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:ESQL",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "MSW",
+      "matchPackageNames": [
+        "msw"
+      ],
+      "reviewers": [
+        "team:kibana-cloud-security-posture"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Cloud Security",
+        "release_note:skip",
+        "backport:skip"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "re2js",
+      "matchDepNames": [
+        "re2js"
+      ],
+      "reviewers": [
+        "team:visualizations",
+        "dej611"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:all-open",
+        "Team:Visualizations"
+      ],
+      "enabled": true
+    },
+    {
+      "groupName": "Serve swagger docs",
+      "matchDepNames": [
+        "express",
+        "swagger-jsdoc",
+        "swagger-ui-express"
+      ],
+      "reviewers": [
+        "team:obs-entities"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "team:obs-entities"
+      ],
+      "enabled": true
+    },
+    {
+      "groupName": "Security Engineering Productivity",
+      "matchDepNames": [
+        "dotenv",
+        "playwright-chromium",
+        "@playwright/test"
+      ],
+      "reviewers": [
+        "team:security-engineering-productivity"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team: Sec Eng Productivity",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "@mswjs/http-middleware",
+      "matchPackageNames": [
+        "@mswjs/http-middleware"
+      ],
+      "reviewers": [
+        "team:kibana-cloud-security-posture"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Cloud Security",
+        "release_note:skip",
+        "backport:skip"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "@xyflow/react",
+      "matchPackageNames": [
+        "@xyflow/react"
+      ],
+      "reviewers": [
+        "team:kibana-cloud-security-posture"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Cloud Security",
+        "release_note:skip",
+        "backport:skip"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "@dagrejs/dagre",
+      "matchPackageNames": [
+        "@dagrejs/dagre"
+      ],
+      "reviewers": [
+        "team:kibana-cloud-security-posture"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Cloud Security",
+        "release_note:skip",
+        "backport:skip"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    }
+  ],
+  "customManagers": [
+    {
+      "description": "Update Wolfi base image",
+      "customType": "regex",
+      "fileMatch": [
+        "^src/dev/build/tasks/os_packages/docker_generator/run\\.ts$"
+      ],
+      "matchStrings": [
+        "(?<depName>docker\\.elastic\\.co/wolfi/chainguard-base):(?<currentValue>[-a-zA-Z0-9.]+)?(?:@(?<currentDigest>sha256:[a-fA-F0-9]+))?"
+      ],
+      "datasourceTemplate": "docker"
+    },
+    {
+      "description": "Update pipelib image",
+      "customType": "regex",
+      "fileMatch": [
+        "^\\.buildkite/pipeline-resource-definitions/scripts/validate-pipeline-definition\\.sh$",
+        "^\\.buildkite/scripts/steps/checks/renovate\\.sh$"
+      ],
+      "matchStrings": [
+        "(?<depName>docker\\.elastic\\.co/ci-agent-images/pipelib):(?<currentValue>[-a-zA-Z0-9.]+)?(?:@(?<currentDigest>sha256:[a-fA-F0-9]+))?"
+      ],
+      "datasourceTemplate": "docker"
     }
   ]
 }

@@ -128,7 +128,7 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
       ? {
           data: {
             error: i18n.translate('xpack.snapshotRestore.snapshotDetails.errorSnapshotNotFound', {
-              defaultMessage: `Either the snapshot '{snapshotId}' doesn't exist in the repository '{repositoryName}' or the repository doesn't exist.`,
+              defaultMessage: `Either the snapshot ''{snapshotId}'' doesn't exist in the repository ''{repositoryName}'' or the repository doesn't exist.`,
               values: {
                 snapshotId,
                 repositoryName,
@@ -268,7 +268,7 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
               >
                 <FormattedMessage
                   id="xpack.snapshotRestore.snapshotDetails.repositoryTitle"
-                  defaultMessage="'{repositoryName}' repository"
+                  defaultMessage="''{repositoryName}'' repository"
                   values={{ repositoryName }}
                 />
               </EuiLink>

@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, {
+  memo,
   useCallback,
   useState,
   forwardRef,
@@ -104,260 +106,274 @@ export type UnifiedFieldListSidebarContainerProps = Omit<
  * Desktop: Sidebar view, all elements are visible
  * Mobile: A button to trigger a flyout with all elements
  */
-const UnifiedFieldListSidebarContainer = forwardRef<
-  UnifiedFieldListSidebarContainerApi,
-  UnifiedFieldListSidebarContainerProps
->(function UnifiedFieldListSidebarContainer(props, componentRef) {
-  const {
-    getCreationOptions,
-    services,
-    dataView,
-    workspaceSelectedFieldNames,
-    prependInFlyout,
-    variant = 'responsive',
-    onFieldEdited,
-  } = props;
-  const [stateService] = useState<UnifiedFieldListSidebarContainerStateService>(
-    createStateService({ options: getCreationOptions() })
-  );
-  const { data, dataViewFieldEditor } = services;
-  const [isFieldListFlyoutVisible, setIsFieldListFlyoutVisible] = useState<boolean>(false);
-  const [sidebarVisibility] = useState(() =>
-    getSidebarVisibility({
-      localStorageKey: stateService.creationOptions.localStorageKeyPrefix
-        ? `${stateService.creationOptions.localStorageKeyPrefix}:sidebarClosed`
-        : undefined,
-    })
-  );
-  const isSidebarCollapsed = useObservable(sidebarVisibility.isCollapsed$, false);
+const UnifiedFieldListSidebarContainer = memo(
+  forwardRef<UnifiedFieldListSidebarContainerApi, UnifiedFieldListSidebarContainerProps>(
+    function UnifiedFieldListSidebarContainer(props, componentRef) {
+      const {
+        getCreationOptions,
+        services,
+        dataView,
+        workspaceSelectedFieldNames,
+        prependInFlyout,
+        variant = 'responsive',
+        onFieldEdited,
+        additionalFilters,
+      } = props;
+      const [stateService] = useState<UnifiedFieldListSidebarContainerStateService>(
+        createStateService({ options: getCreationOptions() })
+      );
+      const { data, dataViewFieldEditor } = services;
+      const [isFieldListFlyoutVisible, setIsFieldListFlyoutVisible] = useState<boolean>(false);
+      const [sidebarVisibility] = useState(() =>
+        getSidebarVisibility({
+          localStorageKey: stateService.creationOptions.localStorageKeyPrefix
+            ? `${stateService.creationOptions.localStorageKeyPrefix}:sidebarClosed`
+            : undefined,
+        })
+      );
+      const isSidebarCollapsed = useObservable(sidebarVisibility.isCollapsed$, false);
 
-  const canEditDataView =
-    Boolean(dataViewFieldEditor?.userPermissions.editIndexPattern()) ||
-    Boolean(dataView && !dataView.isPersisted());
-  const closeFieldEditor = useRef<() => void | undefined>();
-  const setFieldEditorRef = useCallback((ref: () => void | undefined) => {
-    closeFieldEditor.current = ref;
-  }, []);
+      const canEditDataView =
+        Boolean(dataViewFieldEditor?.userPermissions.editIndexPattern()) ||
+        Boolean(dataView && !dataView.isPersisted());
+      const closeFieldEditor = useRef<() => void | undefined>();
+      const setFieldEditorRef = useCallback((ref: () => void | undefined) => {
+        closeFieldEditor.current = ref;
+      }, []);
 
-  const closeFieldListFlyout = useCallback(() => {
-    setIsFieldListFlyoutVisible(false);
-  }, []);
+      const closeFieldListFlyout = useCallback(() => {
+        setIsFieldListFlyoutVisible(false);
+      }, []);
 
-  const querySubscriberResult = useQuerySubscriber({
-    data,
-    timeRangeUpdatesType: stateService.creationOptions.timeRangeUpdatesType,
-  });
-  const searchMode: SearchMode | undefined = querySubscriberResult.searchMode;
-  const isAffectedByGlobalFilter = Boolean(querySubscriberResult.filters?.length);
+      const querySubscriberResult = useQuerySubscriber({
+        data,
+        timeRangeUpdatesType: stateService.creationOptions.timeRangeUpdatesType,
+      });
+      const searchMode: SearchMode | undefined = querySubscriberResult.searchMode;
+      const isAffectedByGlobalFilter = Boolean(querySubscriberResult.filters?.length);
 
-  const { isProcessing, refetchFieldsExistenceInfo } = useExistingFieldsFetcher({
-    disableAutoFetching: stateService.creationOptions.disableFieldsExistenceAutoFetching,
-    dataViews: searchMode === 'documents' && dataView ? [dataView] : [],
-    query: querySubscriberResult.query,
-    filters: querySubscriberResult.filters,
-    fromDate: querySubscriberResult.fromDate,
-    toDate: querySubscriberResult.toDate,
-    services,
-  });
+      const filters = useMemo(
+        () => [...(querySubscriberResult.filters ?? []), ...(additionalFilters ?? [])],
+        [querySubscriberResult.filters, additionalFilters]
+      );
 
-  const editField = useMemo(
-    () =>
-      dataView && dataViewFieldEditor && searchMode === 'documents' && canEditDataView
-        ? (fieldName?: string) => {
-            const ref = dataViewFieldEditor.openEditor({
-              ctx: {
-                dataView,
-              },
-              fieldName,
-              onSave: async () => {
-                if (onFieldEdited) {
-                  await onFieldEdited({ editedFieldName: fieldName });
-                }
-              },
-            });
-            setFieldEditorRef(ref);
-            closeFieldListFlyout();
+      const { isProcessing, refetchFieldsExistenceInfo } = useExistingFieldsFetcher({
+        disableAutoFetching: stateService.creationOptions.disableFieldsExistenceAutoFetching,
+        dataViews: searchMode === 'documents' && dataView ? [dataView] : [],
+        query: querySubscriberResult.query,
+        filters,
+        fromDate: querySubscriberResult.fromDate,
+        toDate: querySubscriberResult.toDate,
+        services,
+      });
+
+      const editField = useMemo(
+        () =>
+          dataView && dataViewFieldEditor && searchMode === 'documents' && canEditDataView
+            ? async (fieldName?: string) => {
+                const ref = await dataViewFieldEditor.openEditor({
+                  ctx: {
+                    dataView,
+                  },
+                  fieldName,
+                  onSave: async () => {
+                    if (onFieldEdited) {
+                      await onFieldEdited({ editedFieldName: fieldName });
+                    }
+                  },
+                });
+                setFieldEditorRef(ref);
+                closeFieldListFlyout();
+              }
+            : undefined,
+        [
+          searchMode,
+          canEditDataView,
+          dataViewFieldEditor,
+          dataView,
+          setFieldEditorRef,
+          closeFieldListFlyout,
+          onFieldEdited,
+        ]
+      );
+
+      const deleteField = useMemo(
+        () =>
+          dataView && dataViewFieldEditor && editField
+            ? async (fieldName: string) => {
+                const ref = await dataViewFieldEditor.openDeleteModal({
+                  ctx: {
+                    dataView,
+                  },
+                  fieldName,
+                  onDelete: async () => {
+                    if (onFieldEdited) {
+                      await onFieldEdited({ removedFieldName: fieldName });
+                    }
+                  },
+                });
+                setFieldEditorRef(ref);
+                closeFieldListFlyout();
+              }
+            : undefined,
+        [
+          dataView,
+          setFieldEditorRef,
+          editField,
+          closeFieldListFlyout,
+          dataViewFieldEditor,
+          onFieldEdited,
+        ]
+      );
+
+      useEffect(() => {
+        const cleanup = () => {
+          if (closeFieldEditor?.current) {
+            closeFieldEditor?.current();
           }
-        : undefined,
-    [
-      searchMode,
-      canEditDataView,
-      dataViewFieldEditor,
-      dataView,
-      setFieldEditorRef,
-      closeFieldListFlyout,
-      onFieldEdited,
-    ]
-  );
+        };
+        return () => {
+          // Make sure to close the editor when unmounting
+          cleanup();
+        };
+      }, []);
 
-  const deleteField = useMemo(
-    () =>
-      dataView && dataViewFieldEditor && editField
-        ? (fieldName: string) => {
-            const ref = dataViewFieldEditor.openDeleteModal({
-              ctx: {
-                dataView,
-              },
-              fieldName,
-              onDelete: async () => {
-                if (onFieldEdited) {
-                  await onFieldEdited({ removedFieldName: fieldName });
-                }
-              },
-            });
-            setFieldEditorRef(ref);
-            closeFieldListFlyout();
-          }
-        : undefined,
-    [
-      dataView,
-      setFieldEditorRef,
-      editField,
-      closeFieldListFlyout,
-      dataViewFieldEditor,
-      onFieldEdited,
-    ]
-  );
+      useImperativeHandle(
+        componentRef,
+        () => ({
+          sidebarVisibility,
+          refetchFieldsExistenceInfo,
+          closeFieldListFlyout,
+          createField: editField,
+          editField,
+          deleteField,
+        }),
+        [
+          sidebarVisibility,
+          refetchFieldsExistenceInfo,
+          closeFieldListFlyout,
+          editField,
+          deleteField,
+        ]
+      );
 
-  useEffect(() => {
-    const cleanup = () => {
-      if (closeFieldEditor?.current) {
-        closeFieldEditor?.current();
+      if (!dataView) {
+        return null;
       }
-    };
-    return () => {
-      // Make sure to close the editor when unmounting
-      cleanup();
-    };
-  }, []);
 
-  useImperativeHandle(
-    componentRef,
-    () => ({
-      sidebarVisibility,
-      refetchFieldsExistenceInfo,
-      closeFieldListFlyout,
-      createField: editField,
-      editField,
-      deleteField,
-    }),
-    [sidebarVisibility, refetchFieldsExistenceInfo, closeFieldListFlyout, editField, deleteField]
-  );
+      const commonSidebarProps: UnifiedFieldListSidebarProps = {
+        ...props,
+        searchMode,
+        stateService,
+        isProcessing,
+        isAffectedByGlobalFilter,
+        onEditField: editField,
+        onDeleteField: deleteField,
+        compressed: stateService.creationOptions.compressed ?? false,
+        buttonAddFieldVariant: stateService.creationOptions.buttonAddFieldVariant ?? 'primary',
+      };
 
-  if (!dataView) {
-    return null;
-  }
+      if (stateService.creationOptions.showSidebarToggleButton) {
+        commonSidebarProps.isSidebarCollapsed = isSidebarCollapsed;
+        commonSidebarProps.onToggleSidebar = sidebarVisibility.toggle;
+      }
 
-  const commonSidebarProps: UnifiedFieldListSidebarProps = {
-    ...props,
-    searchMode,
-    stateService,
-    isProcessing,
-    isAffectedByGlobalFilter,
-    onEditField: editField,
-    onDeleteField: deleteField,
-    compressed: stateService.creationOptions.compressed ?? false,
-    buttonAddFieldVariant: stateService.creationOptions.buttonAddFieldVariant ?? 'primary',
-  };
+      const buttonPropsToTriggerFlyout = stateService.creationOptions.buttonPropsToTriggerFlyout;
 
-  if (stateService.creationOptions.showSidebarToggleButton) {
-    commonSidebarProps.isSidebarCollapsed = isSidebarCollapsed;
-    commonSidebarProps.onToggleSidebar = sidebarVisibility.toggle;
-  }
+      const renderListVariant = () => {
+        return <UnifiedFieldListSidebar {...commonSidebarProps} />;
+      };
 
-  const buttonPropsToTriggerFlyout = stateService.creationOptions.buttonPropsToTriggerFlyout;
+      const renderButtonVariant = () => {
+        return (
+          <>
+            <div className="unifiedFieldListSidebar__mobile">
+              <EuiButton
+                {...buttonPropsToTriggerFlyout}
+                contentProps={{
+                  ...buttonPropsToTriggerFlyout?.contentProps,
+                  className: 'unifiedFieldListSidebar__mobileButton',
+                }}
+                fullWidth
+                onClick={() => setIsFieldListFlyoutVisible(true)}
+              >
+                <FormattedMessage
+                  id="unifiedFieldList.fieldListSidebar.fieldsMobileButtonLabel"
+                  defaultMessage="Fields"
+                />
+                <EuiBadge
+                  className="unifiedFieldListSidebar__mobileBadge"
+                  color={workspaceSelectedFieldNames?.[0] === '_source' ? 'default' : 'accent'}
+                >
+                  {!workspaceSelectedFieldNames?.length ||
+                  workspaceSelectedFieldNames[0] === '_source'
+                    ? 0
+                    : workspaceSelectedFieldNames.length}
+                </EuiBadge>
+              </EuiButton>
+            </div>
+            {isFieldListFlyoutVisible && (
+              <EuiPortal>
+                <EuiFlyout
+                  size="s"
+                  onClose={() => setIsFieldListFlyoutVisible(false)}
+                  aria-labelledby="flyoutTitle"
+                  ownFocus
+                >
+                  <EuiFlyoutHeader hasBorder>
+                    <EuiTitle size="s">
+                      <h2 id="flyoutTitle">
+                        <EuiLink color="text" onClick={() => setIsFieldListFlyoutVisible(false)}>
+                          <EuiIcon
+                            className="eui-alignBaseline"
+                            aria-label={i18n.translate(
+                              'unifiedFieldList.fieldListSidebar.flyoutBackIcon',
+                              {
+                                defaultMessage: 'Back',
+                              }
+                            )}
+                            type="arrowLeft"
+                          />{' '}
+                          <strong>
+                            {i18n.translate('unifiedFieldList.fieldListSidebar.flyoutHeading', {
+                              defaultMessage: 'Field list',
+                            })}
+                          </strong>
+                        </EuiLink>
+                      </h2>
+                    </EuiTitle>
+                  </EuiFlyoutHeader>
+                  <UnifiedFieldListSidebar
+                    {...commonSidebarProps}
+                    alwaysShowActionButton={true}
+                    buttonAddFieldVariant="primary" // always for the flyout
+                    isSidebarCollapsed={undefined}
+                    prepend={prependInFlyout?.()}
+                  />
+                </EuiFlyout>
+              </EuiPortal>
+            )}
+          </>
+        );
+      };
 
-  const renderListVariant = () => {
-    return <UnifiedFieldListSidebar {...commonSidebarProps} />;
-  };
+      if (variant === 'button-and-flyout-always') {
+        return renderButtonVariant();
+      }
 
-  const renderButtonVariant = () => {
-    return (
-      <>
-        <div className="unifiedFieldListSidebar__mobile">
-          <EuiButton
-            {...buttonPropsToTriggerFlyout}
-            contentProps={{
-              ...buttonPropsToTriggerFlyout?.contentProps,
-              className: 'unifiedFieldListSidebar__mobileButton',
-            }}
-            fullWidth
-            onClick={() => setIsFieldListFlyoutVisible(true)}
-          >
-            <FormattedMessage
-              id="unifiedFieldList.fieldListSidebar.fieldsMobileButtonLabel"
-              defaultMessage="Fields"
-            />
-            <EuiBadge
-              className="unifiedFieldListSidebar__mobileBadge"
-              color={workspaceSelectedFieldNames?.[0] === '_source' ? 'default' : 'accent'}
-            >
-              {!workspaceSelectedFieldNames?.length || workspaceSelectedFieldNames[0] === '_source'
-                ? 0
-                : workspaceSelectedFieldNames.length}
-            </EuiBadge>
-          </EuiButton>
-        </div>
-        {isFieldListFlyoutVisible && (
-          <EuiPortal>
-            <EuiFlyout
-              size="s"
-              onClose={() => setIsFieldListFlyoutVisible(false)}
-              aria-labelledby="flyoutTitle"
-              ownFocus
-            >
-              <EuiFlyoutHeader hasBorder>
-                <EuiTitle size="s">
-                  <h2 id="flyoutTitle">
-                    <EuiLink color="text" onClick={() => setIsFieldListFlyoutVisible(false)}>
-                      <EuiIcon
-                        className="eui-alignBaseline"
-                        aria-label={i18n.translate(
-                          'unifiedFieldList.fieldListSidebar.flyoutBackIcon',
-                          {
-                            defaultMessage: 'Back',
-                          }
-                        )}
-                        type="arrowLeft"
-                      />{' '}
-                      <strong>
-                        {i18n.translate('unifiedFieldList.fieldListSidebar.flyoutHeading', {
-                          defaultMessage: 'Field list',
-                        })}
-                      </strong>
-                    </EuiLink>
-                  </h2>
-                </EuiTitle>
-              </EuiFlyoutHeader>
-              <UnifiedFieldListSidebar
-                {...commonSidebarProps}
-                alwaysShowActionButton={true}
-                buttonAddFieldVariant="primary" // always for the flyout
-                isSidebarCollapsed={undefined}
-                prepend={prependInFlyout?.()}
-              />
-            </EuiFlyout>
-          </EuiPortal>
-        )}
-      </>
-    );
-  };
+      if (variant === 'list-always') {
+        return renderListVariant();
+      }
 
-  if (variant === 'button-and-flyout-always') {
-    return renderButtonVariant();
-  }
-
-  if (variant === 'list-always') {
-    return renderListVariant();
-  }
-
-  return (
-    <>
-      <EuiHideFor sizes={['xs', 's']}>{renderListVariant()}</EuiHideFor>
-      <EuiShowFor sizes={['xs', 's']}>{renderButtonVariant()}</EuiShowFor>
-    </>
-  );
-});
+      return (
+        <>
+          <EuiHideFor sizes={['xs', 's']}>{renderListVariant()}</EuiHideFor>
+          <EuiShowFor sizes={['xs', 's']}>{renderButtonVariant()}</EuiShowFor>
+        </>
+      );
+    }
+  )
+);
 
 // Necessary for React.lazy
 // eslint-disable-next-line import/no-default-export

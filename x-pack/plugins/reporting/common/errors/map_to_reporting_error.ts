@@ -65,7 +65,8 @@ export function mapToReportingError(error: ExecutionError | unknown): ReportingE
     case error instanceof errors.PdfWorkerOutOfMemoryError ||
       errorName === 'PdfWorkerOutOfMemoryError':
       return new PdfWorkerOutOfMemoryError();
-    case error instanceof errors.InsufficientMemoryAvailableOnCloudError:
+    case error instanceof errors.InsufficientMemoryAvailableOnCloudError ||
+      errorName === 'InsufficientMemoryAvailableOnCloudError':
       return new VisualReportingSoftDisabledError();
   }
   return new UnknownError((error as Error)?.message);

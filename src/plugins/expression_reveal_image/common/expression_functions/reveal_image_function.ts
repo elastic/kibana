@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -58,7 +59,7 @@ export const errors = {
   invalidPercent: (percent: number) =>
     new Error(
       i18n.translate('expressionRevealImage.functions.revealImage.invalidPercentErrorMessage', {
-        defaultMessage: "Invalid value: '{percent}'. Percentage must be between 0 and 1",
+        defaultMessage: "Invalid value: ''{percent}''. Percentage must be between 0 and 1",
         values: {
           percent,
         },
@@ -67,7 +68,7 @@ export const errors = {
   invalidImageUrl: (imageUrl: string) =>
     new Error(
       i18n.translate('expressionRevealImage.functions.revealImage.invalidImageUrl', {
-        defaultMessage: "Invalid image url: '{imageUrl}'.",
+        defaultMessage: "Invalid image url: ''{imageUrl}''.",
         values: {
           imageUrl,
         },

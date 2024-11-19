@@ -243,7 +243,6 @@ export const ExtractionRulesTable: React.FC = () => {
       )}
       <EuiBasicTable
         columns={columns}
-        isExpandable
         itemId="id"
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         items={extractionRules}

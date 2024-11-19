@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { isEmpty } from 'lodash';
 
 import type {
   NewPackagePolicyInput,
@@ -40,7 +41,9 @@ export type SimplifiedInputs = Record<
 
 export interface SimplifiedPackagePolicy {
   id?: string;
-  policy_id: string;
+  policy_id?: string | null;
+  policy_ids: string[];
+  output_id?: string;
   namespace: string;
   name: string;
   description?: string;
@@ -48,8 +51,9 @@ export interface SimplifiedPackagePolicy {
   inputs?: SimplifiedInputs;
 }
 
-export interface FormattedPackagePolicy extends Omit<PackagePolicy, 'inputs'> {
+export interface FormattedPackagePolicy extends Omit<PackagePolicy, 'inputs' | 'vars'> {
   inputs?: SimplifiedInputs;
+  vars?: SimplifiedVars;
 }
 
 export interface FormattedCreatePackagePolicyResponse {
@@ -59,6 +63,10 @@ export interface FormattedCreatePackagePolicyResponse {
 export function packagePolicyToSimplifiedPackagePolicy(packagePolicy: PackagePolicy) {
   const formattedPackagePolicy = packagePolicy as unknown as FormattedPackagePolicy;
   formattedPackagePolicy.inputs = formatInputs(packagePolicy.inputs);
+  if (packagePolicy.vars) {
+    formattedPackagePolicy.vars = formatVars(packagePolicy.vars);
+  }
+
   return formattedPackagePolicy;
 }
 
@@ -139,13 +147,26 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
 ): NewPackagePolicy {
   const {
     policy_id: policyId,
+    policy_ids: policyIds,
+    output_id: outputId,
     namespace,
     name,
     description,
     inputs = {},
     vars: packageLevelVars,
   } = data;
-  const packagePolicy = packageToPackagePolicy(packageInfo, policyId, namespace, name, description);
+  const packagePolicy = packageToPackagePolicy(
+    packageInfo,
+    policyId && isEmpty(policyIds) ? policyId : policyIds,
+    namespace,
+    name,
+    description
+  );
+
+  if (outputId) {
+    packagePolicy.output_id = outputId;
+  }
+
   if (packagePolicy.package && options?.experimental_data_stream_features) {
     packagePolicy.package.experimental_data_stream_features =
       options.experimental_data_stream_features;

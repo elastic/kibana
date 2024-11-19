@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -15,6 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
       await supertest
         .post('/api/spaces/space')
         .set('kbn-xsrf', 'xxx')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send({
           id: 'api-test-space',
           name: 'api test space',
@@ -33,6 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
       await supertest
         .post('/api/spaces/space')
         .set('kbn-xsrf', 'xxx')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send({
           id: 'api-test-space2',
           name: 'Space with image',
@@ -55,6 +58,7 @@ export default function ({ getService }: FtrProviderContext) {
       await supertest
         .post('/api/spaces/space')
         .set('kbn-xsrf', 'xxx')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send({
           id: 'api-test-space3',
           name: 'Space with invalid image',

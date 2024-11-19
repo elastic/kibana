@@ -1,0 +1,732 @@
+{
+  "id": "investigate",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "investigate",
+        "id": "def-public.getEsFilterFromGlobalParameters",
+        "type": "Function",
+        "tags": [],
+        "label": "getEsFilterFromGlobalParameters",
+        "description": [],
+        "signature": [
+          "({ timeRange }: Partial<",
+          "GlobalWidgetParameters",
+          ">) => { bool: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.BoolQuery",
+            "text": "BoolQuery"
+          },
+          "; }"
+        ],
+        "path": "x-pack/plugins/observability_solution/investigate/public/util/get_es_filters_from_global_parameters.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "investigate",
+            "id": "def-public.getEsFilterFromGlobalParameters.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ timeRange }",
+            "description": [],
+            "signature": [
+              "Partial<",
+              "GlobalWidgetParameters",
+              ">"
+            ],
+            "path": "x-pack/plugins/observability_solution/investigate/public/util/get_es_filters_from_global_parameters.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "investigate",
+        "id": "def-public.mergePlainObjects",
+        "type": "Function",
+        "tags": [],
+        "label": "mergePlainObjects",
+        "description": [],
+        "signature": [
+          "(t1: T1) => T1"
+        ],
+        "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "investigate",
+            "id": "def-public.mergePlainObjects.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "t1",
+            "description": [],
+            "signature": [
+              "T1"
+            ],
+            "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "investigate",
+        "id": "def-public.mergePlainObjects",
+        "type": "Function",
+        "tags": [],
+        "label": "mergePlainObjects",
+        "description": [],
+        "signature": [
+          "(t1: T1, t2: T2) => [T2] extends Mergable[] ? DeepOverwrite<T1, T2> : T1"
+        ],
+        "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "investigate",
+            "id": "def-public.mergePlainObjects.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "t1",
+            "description": [],
+            "signature": [
+              "T1"
+            ],
+            "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "investigate",
+            "id": "def-public.mergePlainObjects.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "t2",
+            "description": [],
+            "signature": [
+              "T2"
+            ],
+            "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "investigate",
+        "id": "def-public.mergePlainObjects",
+        "type": "Function",
+        "tags": [],
+        "label": "mergePlainObjects",
+        "description": [],
+        "signature": [
+          "(t1: T1, t2: T2, t3: T3) => [T2, T3] extends Mergable[] ? DeepOverwrite<T1, T2> | DeepOverwrite<T1, T3> : T1"
+        ],
+        "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "investigate",
+            "id": "def-public.mergePlainObjects.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "t1",
+            "description": [],
+            "signature": [
+              "T1"
+            ],
+            "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "investigate",
+            "id": "def-public.mergePlainObjects.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "t2",
+            "description": [],
+            "signature": [
+              "T2"
+            ],
+            "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "investigate",
+            "id": "def-public.mergePlainObjects.$3",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "t3",
+            "description": [],
+            "signature": [
+              "T3"
+            ],
+            "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "investigate",
+        "id": "def-public.mergePlainObjects",
+        "type": "Function",
+        "tags": [],
+        "label": "mergePlainObjects",
+        "description": [],
+        "signature": [
+          "(t1: T1, t2: T2, t3: T4) => [T2, T3, T4] extends Mergable[] ? DeepOverwrite<T1, T2> | DeepOverwrite<T1, T3> | DeepOverwrite<T1, T4> : T1"
+        ],
+        "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "investigate",
+            "id": "def-public.mergePlainObjects.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "t1",
+            "description": [],
+            "signature": [
+              "T1"
+            ],
+            "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "investigate",
+            "id": "def-public.mergePlainObjects.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "t2",
+            "description": [],
+            "signature": [
+              "T2"
+            ],
+            "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "investigate",
+            "id": "def-public.mergePlainObjects.$3",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "t3",
+            "description": [],
+            "signature": [
+              "T4"
+            ],
+            "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "investigate",
+        "id": "def-public.mergePlainObjects",
+        "type": "Function",
+        "tags": [],
+        "label": "mergePlainObjects",
+        "description": [],
+        "signature": [
+          "(sources: Record<string, any>[]) => any"
+        ],
+        "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "investigate",
+            "id": "def-public.mergePlainObjects.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "sources",
+            "description": [],
+            "signature": [
+              "Record<string, any>[]"
+            ],
+            "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "investigate",
+        "id": "def-public.GlobalWidgetParameters",
+        "type": "Interface",
+        "tags": [],
+        "label": "GlobalWidgetParameters",
+        "description": [],
+        "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "investigate",
+            "id": "def-public.GlobalWidgetParameters.timeRange",
+            "type": "Object",
+            "tags": [],
+            "label": "timeRange",
+            "description": [],
+            "signature": [
+              "{ from: string; to: string; }"
+            ],
+            "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "investigate",
+      "id": "def-public.InvestigatePublicSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "InvestigatePublicSetup",
+      "description": [],
+      "path": "x-pack/plugins/observability_solution/investigate/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "investigate",
+          "id": "def-public.InvestigatePublicSetup.registerItemDefinition",
+          "type": "Function",
+          "tags": [],
+          "label": "registerItemDefinition",
+          "description": [],
+          "signature": [
+            "<Params extends ",
+            "ItemDefinitionParams",
+            " = {}, Data extends ",
+            "ItemDefinitionData",
+            " = {}>(itemDefinition: ",
+            "ItemDefinition",
+            "<Params, Data>) => void"
+          ],
+          "path": "x-pack/plugins/observability_solution/investigate/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "investigate",
+              "id": "def-public.InvestigatePublicSetup.registerItemDefinition.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "itemDefinition",
+              "description": [],
+              "signature": [
+                "ItemDefinition",
+                "<Params, Data>"
+              ],
+              "path": "x-pack/plugins/observability_solution/investigate/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "investigate",
+      "id": "def-public.InvestigatePublicStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "InvestigatePublicStart",
+      "description": [],
+      "path": "x-pack/plugins/observability_solution/investigate/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "investigate",
+          "id": "def-public.InvestigatePublicStart.getItemDefinitions",
+          "type": "Function",
+          "tags": [],
+          "label": "getItemDefinitions",
+          "description": [],
+          "signature": [
+            "() => ",
+            "ItemDefinition",
+            "<{}, {}>[]"
+          ],
+          "path": "x-pack/plugins/observability_solution/investigate/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "investigate",
+          "id": "def-public.InvestigatePublicStart.getItemDefinitionByType",
+          "type": "Function",
+          "tags": [],
+          "label": "getItemDefinitionByType",
+          "description": [],
+          "signature": [
+            "(type: string) => ",
+            "ItemDefinition",
+            "<{}, {}> | undefined"
+          ],
+          "path": "x-pack/plugins/observability_solution/investigate/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "investigate",
+              "id": "def-public.InvestigatePublicStart.getItemDefinitionByType.$1",
+              "type": "string",
+              "tags": [],
+              "label": "type",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "path": "x-pack/plugins/observability_solution/investigate/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "investigate",
+      "id": "def-server.InvestigateServerSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "InvestigateServerSetup",
+      "description": [],
+      "path": "x-pack/plugins/observability_solution/investigate/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "investigate",
+      "id": "def-server.InvestigateServerStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "InvestigateServerStart",
+      "description": [],
+      "path": "x-pack/plugins/observability_solution/investigate/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "investigate",
+        "id": "def-common.mergePlainObjects",
+        "type": "Function",
+        "tags": [],
+        "label": "mergePlainObjects",
+        "description": [],
+        "signature": [
+          "(t1: T1) => T1"
+        ],
+        "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "investigate",
+            "id": "def-common.mergePlainObjects.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "t1",
+            "description": [],
+            "signature": [
+              "T1"
+            ],
+            "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "investigate",
+        "id": "def-common.mergePlainObjects",
+        "type": "Function",
+        "tags": [],
+        "label": "mergePlainObjects",
+        "description": [],
+        "signature": [
+          "(t1: T1, t2: T2) => [T2] extends Mergable[] ? DeepOverwrite<T1, T2> : T1"
+        ],
+        "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "investigate",
+            "id": "def-common.mergePlainObjects.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "t1",
+            "description": [],
+            "signature": [
+              "T1"
+            ],
+            "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "investigate",
+            "id": "def-common.mergePlainObjects.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "t2",
+            "description": [],
+            "signature": [
+              "T2"
+            ],
+            "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "investigate",
+        "id": "def-common.mergePlainObjects",
+        "type": "Function",
+        "tags": [],
+        "label": "mergePlainObjects",
+        "description": [],
+        "signature": [
+          "(t1: T1, t2: T2, t3: T3) => [T2, T3] extends Mergable[] ? DeepOverwrite<T1, T2> | DeepOverwrite<T1, T3> : T1"
+        ],
+        "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "investigate",
+            "id": "def-common.mergePlainObjects.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "t1",
+            "description": [],
+            "signature": [
+              "T1"
+            ],
+            "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "investigate",
+            "id": "def-common.mergePlainObjects.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "t2",
+            "description": [],
+            "signature": [
+              "T2"
+            ],
+            "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "investigate",
+            "id": "def-common.mergePlainObjects.$3",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "t3",
+            "description": [],
+            "signature": [
+              "T3"
+            ],
+            "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "investigate",
+        "id": "def-common.mergePlainObjects",
+        "type": "Function",
+        "tags": [],
+        "label": "mergePlainObjects",
+        "description": [],
+        "signature": [
+          "(t1: T1, t2: T2, t3: T4) => [T2, T3, T4] extends Mergable[] ? DeepOverwrite<T1, T2> | DeepOverwrite<T1, T3> | DeepOverwrite<T1, T4> : T1"
+        ],
+        "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "investigate",
+            "id": "def-common.mergePlainObjects.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "t1",
+            "description": [],
+            "signature": [
+              "T1"
+            ],
+            "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "investigate",
+            "id": "def-common.mergePlainObjects.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "t2",
+            "description": [],
+            "signature": [
+              "T2"
+            ],
+            "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "investigate",
+            "id": "def-common.mergePlainObjects.$3",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "t3",
+            "description": [],
+            "signature": [
+              "T4"
+            ],
+            "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "investigate",
+        "id": "def-common.mergePlainObjects",
+        "type": "Function",
+        "tags": [],
+        "label": "mergePlainObjects",
+        "description": [],
+        "signature": [
+          "(sources: Record<string, any>[]) => any"
+        ],
+        "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "investigate",
+            "id": "def-common.mergePlainObjects.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "sources",
+            "description": [],
+            "signature": [
+              "Record<string, any>[]"
+            ],
+            "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

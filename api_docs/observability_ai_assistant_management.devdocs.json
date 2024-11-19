@@ -1,0 +1,55 @@
+{
+  "id": "observabilityAiAssistantManagement",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "observabilityAiAssistantManagement",
+      "id": "def-public.AiAssistantManagementObservabilityPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "AiAssistantManagementObservabilityPluginSetup",
+      "description": [],
+      "path": "x-pack/plugins/observability_solution/observability_ai_assistant_management/public/plugin.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "observabilityAiAssistantManagement",
+      "id": "def-public.AiAssistantManagementObservabilityPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "AiAssistantManagementObservabilityPluginStart",
+      "description": [],
+      "path": "x-pack/plugins/observability_solution/observability_ai_assistant_management/public/plugin.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

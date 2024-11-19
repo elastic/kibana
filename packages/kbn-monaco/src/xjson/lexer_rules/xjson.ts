@@ -1,23 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { monaco } from '../../monaco_imports';
 
-import { globals } from './shared';
+import { globals } from '../../common/lexer_rules';
 
-export const lexerRules: monaco.languages.IMonarchLanguage = {
-  ...(globals as any),
-
-  defaultToken: 'invalid',
-  tokenPostfix: '',
-
-  tokenizer: {
-    root: [
+export const buildXjsonRules = (root: string = 'root') => {
+  return {
+    [root]: [
       [
         /("(?:[^"]*_)?script"|"inline"|"source")(\s*?)(:)(\s*?)(""")/,
         [
@@ -106,7 +102,15 @@ export const lexerRules: monaco.languages.IMonarchLanguage = {
       [/\\""""/, { token: 'punctuation.end_triple_quote', next: '@pop' }],
       [/./, { token: 'multi_string' }],
     ],
-  },
+  };
+};
+export const lexerRules: monaco.languages.IMonarchLanguage = {
+  ...(globals as any),
+
+  defaultToken: 'invalid',
+  tokenPostfix: '',
+
+  tokenizer: { ...buildXjsonRules() },
 };
 
 export const languageConfiguration: monaco.languages.LanguageConfiguration = {

@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import React, { FC, ReactNode, useMemo } from 'react';
-import {
-  EuiBasicTable,
-  EuiFlexItem,
-  EuiText,
-  HorizontalAlignment,
-  LEFT_ALIGNMENT,
-  RIGHT_ALIGNMENT,
-} from '@elastic/eui';
+import type { FC, ReactNode } from 'react';
+import React, { useMemo } from 'react';
+import type { HorizontalAlignment } from '@elastic/eui';
+import { EuiBasicTable, EuiFlexItem, EuiText, LEFT_ALIGNMENT, RIGHT_ALIGNMENT } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';

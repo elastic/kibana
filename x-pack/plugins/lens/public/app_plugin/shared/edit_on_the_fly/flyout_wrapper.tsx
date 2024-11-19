@@ -18,6 +18,7 @@ import {
   EuiButton,
   EuiLink,
   EuiBetaBadge,
+  EuiText,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
@@ -52,48 +53,54 @@ export const FlyoutWrapper = ({
             <EuiFlexItem grow={false}>
               <EuiTitle size="xs" data-test-subj="inlineEditingFlyoutLabel">
                 <h2>
-                  {isNewPanel
-                    ? i18n.translate('xpack.lens.config.createVisualizationLabel', {
-                        defaultMessage: 'Create {lang} visualization',
-                        values: { lang: language },
-                      })
-                    : i18n.translate('xpack.lens.config.editVisualizationLabel', {
-                        defaultMessage: 'Edit {lang} visualization',
-                        values: { lang: language },
-                      })}
-                  <EuiToolTip
-                    content={
-                      language
-                        ? i18n.translate('xpack.lens.config.experimentalLabelTextBased', {
-                            defaultMessage:
-                              'Technical preview, {lang} currently offers limited configuration options',
+                  <EuiFlexGroup alignItems="center" responsive={false} gutterSize="xs">
+                    <EuiFlexItem grow={false}>
+                      {isNewPanel
+                        ? i18n.translate('xpack.lens.config.createVisualizationLabel', {
+                            defaultMessage: 'Create {lang} visualization',
                             values: { lang: language },
                           })
-                        : i18n.translate('xpack.lens.config.experimentalLabelDataview', {
+                        : i18n.translate('xpack.lens.config.editVisualizationLabel', {
+                            defaultMessage: 'Edit {lang} visualization',
+                            values: { lang: language },
+                          })}
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiToolTip
+                        title={i18n.translate('xpack.lens.config.experimentalLabelDataview.title', {
+                          defaultMessage: 'Technical preview',
+                        })}
+                        content={i18n.translate(
+                          'xpack.lens.config.experimentalLabelDataview.content',
+                          {
                             defaultMessage:
-                              'Technical preview, inline editing currently offers limited configuration options',
-                          })
-                    }
-                  >
-                    <EuiBetaBadge
-                      label="Lab"
-                      iconType="beaker"
-                      size="s"
-                      css={css`
-                        margin-left: ${euiThemeVars.euiSizeXS};
-                      `}
-                    />
-                  </EuiToolTip>
+                              'Inline editing currently offers limited configuration options.',
+                          }
+                        )}
+                      >
+                        <EuiBetaBadge
+                          label=""
+                          iconType="beaker"
+                          size="s"
+                          css={css`
+                            vertical-align: middle;
+                          `}
+                        />
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </h2>
               </EuiTitle>
             </EuiFlexItem>
             {navigateToLensEditor && (
               <EuiFlexItem grow={false}>
-                <EuiLink onClick={navigateToLensEditor} data-test-subj="navigateToLensEditorLink">
-                  {i18n.translate('xpack.lens.config.editLinkLabel', {
-                    defaultMessage: 'Edit in Lens',
-                  })}
-                </EuiLink>
+                <EuiText size="xs">
+                  <EuiLink onClick={navigateToLensEditor} data-test-subj="navigateToLensEditorLink">
+                    {i18n.translate('xpack.lens.config.editLinkLabel', {
+                      defaultMessage: 'Edit in Lens',
+                    })}
+                  </EuiLink>
+                </EuiText>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -133,6 +140,7 @@ export const FlyoutWrapper = ({
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
+                id="lnsCancelEditOnFlyFlyout"
                 onClick={onCancel}
                 flush="left"
                 aria-label={i18n.translate('xpack.lens.config.cancelFlyoutAriaLabel', {

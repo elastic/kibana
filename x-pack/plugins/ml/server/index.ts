@@ -33,7 +33,11 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
     ad: true,
     dfa: true,
-    nlp: true,
+    nlp: {
+      enabled: true,
+      modelDeployment: true,
+    },
+    experimental: true,
   },
 };
 

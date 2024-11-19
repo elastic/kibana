@@ -15,7 +15,7 @@ const { setup } = pageHelpers.componentTemplateDetails;
 
 const COMPONENT_TEMPLATE: ComponentTemplateDeserialized = {
   name: 'comp-1',
-  isDeprecated: true,
+  deprecated: true,
   template: {
     mappings: { properties: { ip_address: { type: 'ip' } } },
     aliases: { mydata: {} },
@@ -31,6 +31,10 @@ const COMPONENT_TEMPLATE_ONLY_REQUIRED_FIELDS: ComponentTemplateDeserialized = {
   name: 'comp-base',
   template: {},
   _kbnMeta: { usedBy: [], isManaged: false },
+};
+
+const CUSTOM_COMPONENT_TEMPLATE = {
+  name: 'test@custom',
 };
 
 describe('<ComponentTemplateDetails />', () => {
@@ -201,6 +205,35 @@ describe('<ComponentTemplateDetails />', () => {
 
       expect(exists('manageComponentTemplateContextMenu')).toBe(true);
       expect(find('manageComponentTemplateContextMenu.action').length).toEqual(1);
+    });
+  });
+
+  describe('Error handling for @custom templates', () => {
+    const error = {
+      statusCode: 404,
+      error: 'Not Found',
+      message: 'Not Found',
+    };
+
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadComponentTemplateResponse(
+        encodeURIComponent(CUSTOM_COMPONENT_TEMPLATE.name),
+        undefined,
+        error
+      );
+
+      await act(async () => {
+        testBed = setup(httpSetup, {
+          componentTemplateName: CUSTOM_COMPONENT_TEMPLATE.name,
+          onClose: () => {},
+        });
+      });
+
+      testBed.component.update();
+    });
+
+    test('shows custom callout to create missing @custom template', () => {
+      expect(testBed.exists('missingCustomComponentTemplate')).toBe(true);
     });
   });
 

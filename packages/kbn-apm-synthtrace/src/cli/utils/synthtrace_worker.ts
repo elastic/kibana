@@ -1,20 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { parentPort, workerData } from 'worker_threads';
-import pidusage from 'pidusage';
-import { castArray } from 'lodash';
-import { memoryUsage } from 'process';
+
 import { timerange } from '@kbn/apm-synthtrace-client';
+import { castArray } from 'lodash';
+import pidusage from 'pidusage';
+import { memoryUsage } from 'process';
+import { parentPort, workerData } from 'worker_threads';
 import { getApmEsClient } from './get_apm_es_client';
+import { getEntitiesKibanaClient } from './get_entites_kibana_client';
+import { getEntitiesEsClient } from './get_entities_es_client';
+import { getInfraEsClient } from './get_infra_es_client';
+import { getLogsEsClient } from './get_logs_es_client';
+import { getOtelSynthtraceEsClient } from './get_otel_es_client';
 import { getScenario } from './get_scenario';
+import { getSyntheticsEsClient } from './get_synthetics_es_client';
 import { loggerProxy } from './logger_proxy';
 import { RunOptions } from './parse_run_cli_flags';
-import { getLogsEsClient } from './get_logs_es_client';
 
 export interface WorkerData {
   bucketFrom: Date;
@@ -23,12 +30,24 @@ export interface WorkerData {
   workerId: string;
   esUrl: string;
   version: string;
+  kibanaUrl: string;
 }
 
-const { bucketFrom, bucketTo, runOptions, esUrl, version } = workerData as WorkerData;
+const { bucketFrom, bucketTo, runOptions, esUrl, version, kibanaUrl } = workerData as WorkerData;
 
 async function start() {
   const logger = loggerProxy;
+  const entitiesEsClient = getEntitiesEsClient({
+    concurrency: runOptions.concurrency,
+    target: esUrl,
+    logger,
+  });
+
+  const entitiesKibanaClient = getEntitiesKibanaClient({
+    target: kibanaUrl,
+    logger,
+  });
+
   const apmEsClient = getApmEsClient({
     concurrency: runOptions.concurrency,
     target: esUrl,
@@ -37,6 +56,24 @@ async function start() {
   });
 
   const logsEsClient = getLogsEsClient({
+    concurrency: runOptions.concurrency,
+    target: esUrl,
+    logger,
+  });
+
+  const infraEsClient = getInfraEsClient({
+    concurrency: runOptions.concurrency,
+    target: esUrl,
+    logger,
+  });
+
+  const syntheticsEsClient = getSyntheticsEsClient({
+    concurrency: runOptions.concurrency,
+    target: esUrl,
+    logger,
+  });
+
+  const otelEsClient = getOtelSynthtraceEsClient({
     concurrency: runOptions.concurrency,
     target: esUrl,
     logger,
@@ -51,13 +88,31 @@ async function start() {
   const { generate, bootstrap } = await scenario({ ...runOptions, logger });
 
   if (bootstrap) {
-    await bootstrap({ apmEsClient, logsEsClient });
+    await bootstrap({
+      apmEsClient,
+      logsEsClient,
+      infraEsClient,
+      syntheticsEsClient,
+      otelEsClient,
+      entitiesEsClient,
+      entitiesKibanaClient,
+    });
   }
 
   logger.debug('Generating scenario');
 
   const generatorsAndClients = logger.perf('generate_scenario', () =>
-    generate({ range: timerange(bucketFrom, bucketTo), clients: { logsEsClient, apmEsClient } })
+    generate({
+      range: timerange(bucketFrom, bucketTo),
+      clients: {
+        logsEsClient,
+        apmEsClient,
+        infraEsClient,
+        entitiesEsClient,
+        syntheticsEsClient,
+        otelEsClient,
+      },
+    })
   );
 
   const generatorsAndClientsArray = castArray(generatorsAndClients);

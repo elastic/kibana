@@ -44,16 +44,16 @@ import {
   getConfigurationRequest,
 } from '../../../../common/lib/api';
 import {
-  createSignalsIndex,
+  createAlertsIndex,
   deleteAllAlerts,
   deleteAllRules,
-  getRuleForSignalTesting,
+  getRuleForAlertTesting,
   waitForRuleSuccess,
-  waitForSignalsToBePresent,
-  getSignalsByIds,
+  waitForAlertsToBePresent,
+  getAlertsByIds,
   createRule,
-  getQuerySignalIds,
-} from '../../../../../detection_engine_api_integration/utils';
+  getQueryAlertIds,
+} from '../../../../../common/utils/security_solution';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -334,6 +334,13 @@ export default ({ getService }: FtrProviderContext): void => {
                   defaultValue: false,
                   required: true,
                 },
+                {
+                  key: 'test_custom_field_3',
+                  label: 'toggle',
+                  type: CustomFieldTypes.NUMBER,
+                  defaultValue: 1,
+                  required: true,
+                },
               ],
             },
           })
@@ -367,6 +374,11 @@ export default ({ getService }: FtrProviderContext): void => {
                     type: CustomFieldTypes.TOGGLE,
                     value: true,
                   },
+                  {
+                    key: 'test_custom_field_3',
+                    type: CustomFieldTypes.NUMBER,
+                    value: 2,
+                  },
                 ],
               },
             ],
@@ -383,6 +395,11 @@ export default ({ getService }: FtrProviderContext): void => {
             key: 'test_custom_field_2',
             type: CustomFieldTypes.TOGGLE,
             value: true,
+          },
+          {
+            key: 'test_custom_field_3',
+            type: CustomFieldTypes.NUMBER,
+            value: 2,
           },
         ]);
       });
@@ -405,6 +422,12 @@ export default ({ getService }: FtrProviderContext): void => {
                   type: CustomFieldTypes.TOGGLE,
                   defaultValue: false,
                   required: true,
+                },
+                {
+                  key: 'test_custom_field_3',
+                  label: 'number',
+                  type: CustomFieldTypes.NUMBER,
+                  required: false,
                 },
               ],
             },
@@ -444,6 +467,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(patchedCases[0].customFields).to.eql([
           { key: 'test_custom_field_2', type: 'toggle', value: true },
           { key: 'test_custom_field_1', type: 'text', value: null },
+          { key: 'test_custom_field_3', type: 'number', value: null },
         ]);
       });
 
@@ -799,7 +823,6 @@ export default ({ getService }: FtrProviderContext): void => {
                 connector: {
                   id: 'jira',
                   name: 'Jira',
-                  // @ts-expect-error
                   type: ConnectorTypes.jira,
                   // @ts-expect-error
                   fields: { unsupported: 'value' },
@@ -849,7 +872,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe('title', async () => {
+      describe('title', () => {
         it('400s if the title is too long', async () => {
           const longTitle = 'a'.repeat(161);
 
@@ -904,7 +927,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe('description', async () => {
+      describe('description', () => {
         it('400s if the description is too long', async () => {
           const longDescription = 'a'.repeat(30001);
 
@@ -959,7 +982,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe('categories', async () => {
+      describe('categories', () => {
         it('400s when a too long category value is passed', async () => {
           const postedCase = await createCase(supertest, postCaseReq);
           await updateCase({
@@ -1012,7 +1035,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe('tags', async () => {
+      describe('tags', () => {
         it('400s when tags array is too long', async () => {
           const tags = Array(201).fill('foo');
 
@@ -1086,7 +1109,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe('customFields', async () => {
+      describe('customFields', () => {
         it('patches a case with missing required custom fields to their default values', async () => {
           await createConfiguration(
             supertest,
@@ -1107,6 +1130,13 @@ export default ({ getService }: FtrProviderContext): void => {
                     defaultValue: false,
                     required: true,
                   },
+                  {
+                    key: 'number_custom_field',
+                    label: 'number',
+                    type: CustomFieldTypes.NUMBER,
+                    defaultValue: 3,
+                    required: true,
+                  },
                 ],
               },
             })
@@ -1122,6 +1152,11 @@ export default ({ getService }: FtrProviderContext): void => {
               key: 'toggle_custom_field',
               type: CustomFieldTypes.TOGGLE,
               value: true,
+            },
+            {
+              key: 'number_custom_field',
+              type: CustomFieldTypes.NUMBER,
+              value: 4,
             },
           ] as CaseCustomFields;
 
@@ -1146,6 +1181,7 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(patchedCases[0].customFields).to.eql([
             { ...originalValues[0], value: 'default value' },
             { ...originalValues[1], value: false },
+            { ...originalValues[2], value: 3 },
           ]);
         });
 
@@ -1169,6 +1205,13 @@ export default ({ getService }: FtrProviderContext): void => {
                     defaultValue: false,
                     required: false,
                   },
+                  {
+                    key: 'number_custom_field',
+                    label: 'number',
+                    type: CustomFieldTypes.NUMBER,
+                    defaultValue: 5,
+                    required: false,
+                  },
                 ],
               },
             })
@@ -1184,6 +1227,11 @@ export default ({ getService }: FtrProviderContext): void => {
               key: 'toggle_custom_field',
               type: CustomFieldTypes.TOGGLE,
               value: true,
+            },
+            {
+              key: 'number_custom_field',
+              type: CustomFieldTypes.NUMBER,
+              value: 6,
             },
           ] as CaseCustomFields;
 
@@ -1214,6 +1262,7 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(patchedCases[0].customFields).to.eql([
             { ...originalValues[1], value: false },
             { ...originalValues[0], value: 'default value' },
+            { ...originalValues[2], value: 5 },
           ]);
         });
 
@@ -1235,6 +1284,12 @@ export default ({ getService }: FtrProviderContext): void => {
                     type: CustomFieldTypes.TOGGLE,
                     required: true,
                   },
+                  {
+                    key: 'number_custom_field',
+                    label: 'number',
+                    type: CustomFieldTypes.NUMBER,
+                    required: true,
+                  },
                 ],
               },
             })
@@ -1252,6 +1307,11 @@ export default ({ getService }: FtrProviderContext): void => {
                 key: 'toggle_custom_field',
                 type: CustomFieldTypes.TOGGLE,
                 value: true,
+              },
+              {
+                key: 'number_custom_field',
+                type: CustomFieldTypes.NUMBER,
+                value: 7,
               },
             ],
           });
@@ -1359,6 +1419,13 @@ export default ({ getService }: FtrProviderContext): void => {
                     required: true,
                     defaultValue: false,
                   },
+                  {
+                    key: 'number_custom_field',
+                    label: 'number',
+                    type: CustomFieldTypes.NUMBER,
+                    required: true,
+                    defaultValue: 8,
+                  },
                 ],
               },
             })
@@ -1377,6 +1444,11 @@ export default ({ getService }: FtrProviderContext): void => {
                 type: CustomFieldTypes.TOGGLE,
                 value: true,
               },
+              {
+                key: 'number_custom_field',
+                type: CustomFieldTypes.NUMBER,
+                value: 9,
+              },
             ],
           });
 
@@ -1389,6 +1461,11 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               key: 'toggle_custom_field',
               type: CustomFieldTypes.TOGGLE,
+              value: null,
+            },
+            {
+              key: 'number_custom_field',
+              type: CustomFieldTypes.NUMBER,
               value: null,
             },
           ];
@@ -1450,7 +1527,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('alerts', () => {
-      describe('esArchiver', () => {
+      describe('Update', () => {
         const defaultSignalsIndex = '.siem-signals-default-000001';
 
         beforeEach(async () => {
@@ -1584,7 +1661,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe('esArchiver', () => {
+      describe('No update', () => {
         const defaultSignalsIndex = '.siem-signals-default-000001';
 
         beforeEach(async () => {
@@ -1714,7 +1791,7 @@ export default ({ getService }: FtrProviderContext): void => {
       describe('detections rule', () => {
         beforeEach(async () => {
           await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
-          await createSignalsIndex(supertest, log);
+          await createAlertsIndex(supertest, log);
         });
 
         afterEach(async () => {
@@ -1725,15 +1802,15 @@ export default ({ getService }: FtrProviderContext): void => {
 
         it('updates alert status when the status is updated and syncAlerts=true', async () => {
           const rule = {
-            ...getRuleForSignalTesting(['auditbeat-*']),
+            ...getRuleForAlertTesting(['auditbeat-*']),
             query: 'process.executable: "/usr/bin/sudo"',
           };
           const postedCase = await createCase(supertest, postCaseReq);
 
           const { id } = await createRule(supertest, log, rule);
           await waitForRuleSuccess({ supertest, log, id });
-          await waitForSignalsToBePresent(supertest, log, 1, [id]);
-          const signals = await getSignalsByIds(supertest, log, [id]);
+          await waitForAlertsToBePresent(supertest, log, 1, [id]);
+          const signals = await getAlertsByIds(supertest, log, [id]);
 
           const alert = signals.hits.hits[0];
           expect(alert._source?.[ALERT_WORKFLOW_STATUS]).eql('open');
@@ -1742,7 +1819,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest,
             caseId: postedCase.id,
             params: {
-              alertId: alert._id,
+              alertId: alert._id!,
               index: alert._index,
               rule: {
                 id: 'id',
@@ -1774,7 +1851,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body: updatedAlert } = await supertest
             .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
             .set('kbn-xsrf', 'true')
-            .send(getQuerySignalIds([alert._id]))
+            .send(getQueryAlertIds([alert._id!]))
             .expect(200);
 
           expect(updatedAlert.hits.hits[0]._source?.['kibana.alert.workflow_status']).eql(
@@ -1784,7 +1861,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         it('does NOT updates alert status when the status is updated and syncAlerts=false', async () => {
           const rule = {
-            ...getRuleForSignalTesting(['auditbeat-*']),
+            ...getRuleForAlertTesting(['auditbeat-*']),
             query: 'process.executable: "/usr/bin/sudo"',
           };
 
@@ -1795,8 +1872,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const { id } = await createRule(supertest, log, rule);
           await waitForRuleSuccess({ supertest, log, id });
-          await waitForSignalsToBePresent(supertest, log, 1, [id]);
-          const signals = await getSignalsByIds(supertest, log, [id]);
+          await waitForAlertsToBePresent(supertest, log, 1, [id]);
+          const signals = await getAlertsByIds(supertest, log, [id]);
 
           const alert = signals.hits.hits[0];
           expect(alert._source?.[ALERT_WORKFLOW_STATUS]).eql('open');
@@ -1805,7 +1882,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest,
             caseId: postedCase.id,
             params: {
-              alertId: alert._id,
+              alertId: alert._id!,
               index: alert._index,
               type: AttachmentType.alert,
               rule: {
@@ -1832,7 +1909,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body: updatedAlert } = await supertest
             .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
             .set('kbn-xsrf', 'true')
-            .send(getQuerySignalIds([alert._id]))
+            .send(getQueryAlertIds([alert._id!]))
             .expect(200);
 
           expect(updatedAlert.hits.hits[0]._source?.['kibana.alert.workflow_status']).eql('open');
@@ -1840,7 +1917,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         it('it updates alert status when syncAlerts is turned on', async () => {
           const rule = {
-            ...getRuleForSignalTesting(['auditbeat-*']),
+            ...getRuleForAlertTesting(['auditbeat-*']),
             query: 'process.executable: "/usr/bin/sudo"',
           };
 
@@ -1851,8 +1928,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const { id } = await createRule(supertest, log, rule);
           await waitForRuleSuccess({ supertest, log, id });
-          await waitForSignalsToBePresent(supertest, log, 1, [id]);
-          const signals = await getSignalsByIds(supertest, log, [id]);
+          await waitForAlertsToBePresent(supertest, log, 1, [id]);
+          const signals = await getAlertsByIds(supertest, log, [id]);
 
           const alert = signals.hits.hits[0];
           expect(alert._source?.[ALERT_WORKFLOW_STATUS]).eql('open');
@@ -1861,7 +1938,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest,
             caseId: postedCase.id,
             params: {
-              alertId: alert._id,
+              alertId: alert._id!,
               index: alert._index,
               rule: {
                 id: 'id',
@@ -1906,7 +1983,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body: updatedAlert } = await supertest
             .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
             .set('kbn-xsrf', 'true')
-            .send(getQuerySignalIds([alert._id]))
+            .send(getQueryAlertIds([alert._id!]))
             .expect(200);
 
           expect(updatedAlert.hits.hits[0]._source?.['kibana.alert.workflow_status']).eql(
@@ -1916,15 +1993,15 @@ export default ({ getService }: FtrProviderContext): void => {
 
         it('it does NOT updates alert status when syncAlerts is turned off', async () => {
           const rule = {
-            ...getRuleForSignalTesting(['auditbeat-*']),
+            ...getRuleForAlertTesting(['auditbeat-*']),
             query: 'process.executable: "/usr/bin/sudo"',
           };
 
           const postedCase = await createCase(supertest, postCaseReq);
           const { id } = await createRule(supertest, log, rule);
           await waitForRuleSuccess({ supertest, log, id });
-          await waitForSignalsToBePresent(supertest, log, 1, [id]);
-          const signals = await getSignalsByIds(supertest, log, [id]);
+          await waitForAlertsToBePresent(supertest, log, 1, [id]);
+          const signals = await getAlertsByIds(supertest, log, [id]);
 
           const alert = signals.hits.hits[0];
           expect(alert._source?.[ALERT_WORKFLOW_STATUS]).eql('open');
@@ -1933,7 +2010,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest,
             caseId: postedCase.id,
             params: {
-              alertId: alert._id,
+              alertId: alert._id!,
               index: alert._index,
               type: AttachmentType.alert,
               rule: {
@@ -1975,7 +2052,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body: updatedAlert } = await supertest
             .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
             .set('kbn-xsrf', 'true')
-            .send(getQuerySignalIds([alert._id]))
+            .send(getQueryAlertIds([alert._id!]))
             .expect(200);
 
           expect(updatedAlert.hits.hits[0]._source['kibana.alert.workflow_status']).eql('open');

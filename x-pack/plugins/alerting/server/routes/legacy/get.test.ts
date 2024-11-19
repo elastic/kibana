@@ -12,7 +12,7 @@ import { licenseStateMock } from '../../lib/license_state.mock';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { mockHandlerArguments } from '../_mock_handler_arguments';
 import { rulesClientMock } from '../../rules_client.mock';
-import { Rule } from '../../../common';
+import { Rule, RuleSystemAction } from '../../../common';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
 const rulesClient = rulesClientMock.create();
@@ -69,6 +69,15 @@ describe('getAlertRoute', () => {
     revision: 0,
   };
 
+  const systemAction: RuleSystemAction = {
+    actionTypeId: 'test-2',
+    id: 'system_action-id',
+    params: {
+      foo: true,
+    },
+    uuid: '123-456',
+  };
+
   it('gets an alert with proper parameters', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
@@ -77,6 +86,7 @@ describe('getAlertRoute', () => {
     const [config, handler] = router.get.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}"`);
+    expect(config.options?.access).toBe('public');
 
     rulesClient.get.mockResolvedValueOnce(mockedAlert);
 
@@ -95,6 +105,17 @@ describe('getAlertRoute', () => {
     expect(res.ok).toHaveBeenCalledWith({
       body: mockedAlert,
     });
+  });
+
+  it('should have internal access for serverless', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    getAlertRoute(router, licenseState, undefined, true);
+    const [config] = router.get.mock.calls[0];
+
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}"`);
+    expect(config.options?.access).toBe('internal');
   });
 
   it('ensures the license allows getting alerts', async () => {
@@ -142,7 +163,7 @@ describe('getAlertRoute', () => {
       ['ok']
     );
 
-    expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
+    await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
   });
@@ -155,10 +176,41 @@ describe('getAlertRoute', () => {
 
     getAlertRoute(router, licenseState, mockUsageCounter);
     const [, handler] = router.get.mock.calls[0];
+
+    rulesClient.get.mockResolvedValueOnce(mockedAlert);
+
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: { id: '1' } }, [
       'ok',
     ]);
     await handler(context, req, res);
     expect(trackLegacyRouteUsage).toHaveBeenCalledWith('get', mockUsageCounter);
+  });
+
+  it('does not return system actions', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    getAlertRoute(router, licenseState);
+    const [config, handler] = router.get.mock.calls[0];
+
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}"`);
+
+    rulesClient.get.mockResolvedValueOnce({ ...mockedAlert, systemActions: [systemAction] });
+
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      {
+        params: { id: '1' },
+      },
+      ['ok']
+    );
+    await handler(context, req, res);
+
+    expect(rulesClient.get).toHaveBeenCalledTimes(1);
+    expect(rulesClient.get.mock.calls[0][0].id).toEqual('1');
+
+    expect(res.ok).toHaveBeenCalledWith({
+      body: mockedAlert,
+    });
   });
 });

@@ -12,10 +12,11 @@ import { Query } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ChromeBreadcrumb, CoreStart } from '@kbn/core/public';
 import { EuiSpacer } from '@elastic/eui';
-import { TagWithRelations, TagsCapabilities } from '../../common';
+import { TagsCapabilities } from '../../common';
+import type { TagWithRelations } from '../../common/types';
 import { getCreateModalOpener } from '../components/edition_modal';
 import { ITagInternalClient, ITagAssignmentService, ITagsCache } from '../services';
-import { TagBulkAction } from './types';
+import type { TagBulkAction } from './types';
 import { Header, TagTable, ActionBar } from './components';
 import { getTableActions } from './actions';
 import { getBulkActions } from './bulk_actions';
@@ -40,7 +41,7 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
   capabilities,
   assignableTypes,
 }) => {
-  const { overlays, notifications, application, http, theme } = core;
+  const { application, http, ...startServices } = core;
   const [loading, setLoading] = useState<boolean>(false);
   const [allTags, setAllTags] = useState<TagWithRelations[]>([]);
   const [selectedTags, setSelectedTags] = useState<TagWithRelations[]>([]);
@@ -75,13 +76,13 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
   });
 
   const createModalOpener = useMemo(
-    () => getCreateModalOpener({ overlays, theme, tagClient, notifications }),
-    [overlays, theme, tagClient, notifications]
+    () => getCreateModalOpener({ ...startServices, tagClient }),
+    [startServices, tagClient]
   );
 
   const tableActions = useMemo(() => {
     return getTableActions({
-      core,
+      startServices,
       capabilities,
       tagClient,
       tagCache,
@@ -92,7 +93,7 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
       canceled$: unmount$,
     });
   }, [
-    core,
+    startServices,
     capabilities,
     tagClient,
     tagCache,
@@ -105,7 +106,7 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
 
   const bulkActions = useMemo(() => {
     return getBulkActions({
-      core,
+      startServices,
       capabilities,
       tagClient,
       tagCache,
@@ -114,7 +115,7 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
       assignableTypes,
       clearSelection: () => setSelectedTags([]),
     });
-  }, [core, capabilities, tagClient, tagCache, assignmentService, assignableTypes]);
+  }, [startServices, capabilities, tagClient, tagCache, assignmentService, assignableTypes]);
 
   useEffect(() => {
     setBreadcrumbs([
@@ -125,6 +126,8 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
       },
     ]);
   }, [setBreadcrumbs]);
+
+  const { notifications } = startServices;
 
   const openCreateModal = useCallback(() => {
     createModalOpener({

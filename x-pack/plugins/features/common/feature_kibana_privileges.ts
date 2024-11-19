@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { FeatureKibanaPrivilegesReference } from './feature_kibana_privileges_reference';
+
 /**
  * Feature privilege definition
  */
@@ -263,4 +265,24 @@ export interface FeatureKibanaPrivileges {
    * @see UICapabilities
    */
   ui: readonly string[];
+
+  /**
+   * An optional list of other registered feature or sub-feature privileges that this privilege is composed of. When
+   * privilege is registered with Elasticsearch, it will be expanded to grant everything that referenced privileges
+   * grant. This property can only be set in the feature configuration overrides.
+   */
+  composedOf?: readonly FeatureKibanaPrivilegesReference[];
+
+  /**
+   * An optional list of other registered feature or sub-feature privileges that, when combined, grant equivalent access
+   * if the feature this privilege belongs to becomes deprecated. The extended definition allows separate lists of
+   * privileges to be defined for the default and minimal (excludes any automatically granted sub-feature privileges)
+   * sets. This property can only be set if the feature is marked as deprecated.
+   */
+  replacedBy?:
+    | readonly FeatureKibanaPrivilegesReference[]
+    | {
+        default: readonly FeatureKibanaPrivilegesReference[];
+        minimal: readonly FeatureKibanaPrivilegesReference[];
+      };
 }

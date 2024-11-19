@@ -7,8 +7,10 @@
 
 import React from 'react';
 
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+
 import { API_BASE_PATH } from '../../common';
-import { AuthorizationProvider, KibanaThemeProvider } from '../shared_imports';
+import { AuthorizationProvider } from '../shared_imports';
 import { AppContextProvider, AppDependencies } from './app_context';
 
 interface Props {
@@ -17,19 +19,14 @@ interface Props {
 }
 
 export const AppProviders = ({ appDependencies, children }: Props) => {
-  const { core, theme$ } = appDependencies;
-  const {
-    i18n: { Context: I18nContext },
-    http,
-  } = core;
+  const { core } = appDependencies;
+  const { http, ...startServices } = core;
 
   return (
-    <AuthorizationProvider httpClient={http} privilegesEndpoint={`${API_BASE_PATH}privileges`}>
-      <I18nContext>
-        <KibanaThemeProvider theme$={theme$}>
-          <AppContextProvider value={appDependencies}>{children}</AppContextProvider>
-        </KibanaThemeProvider>
-      </I18nContext>
-    </AuthorizationProvider>
+    <KibanaRenderContextProvider {...startServices}>
+      <AuthorizationProvider httpClient={http} privilegesEndpoint={`${API_BASE_PATH}privileges`}>
+        <AppContextProvider value={appDependencies}>{children}</AppContextProvider>
+      </AuthorizationProvider>
+    </KibanaRenderContextProvider>
   );
 };

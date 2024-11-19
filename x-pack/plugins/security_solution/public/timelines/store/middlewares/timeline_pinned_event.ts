@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { get, omit } from 'lodash/fp';
+import { omit } from 'lodash/fp';
 import type { Action, Middleware } from 'redux';
 import type { CoreStart } from '@kbn/core/public';
 
 import type { State } from '../../../common/store/types';
 import { selectTimelineById } from '../selectors';
 import * as i18n from '../../pages/translations';
-import type { PinnedEventResponse } from '../../../../common/api/timeline';
 import {
   pinEvent,
   endTimelineSaving,
@@ -22,7 +21,7 @@ import {
   showCallOutUnauthorizedMsg,
 } from '../actions';
 import { persistPinnedEvent } from '../../containers/pinned_event/api';
-import { refreshTimelines } from './helpers';
+import { ensureTimelineIsSaved, refreshTimelines } from './helpers';
 
 type PinnedEventAction = ReturnType<typeof pinEvent | typeof unPinEvent>;
 
@@ -39,55 +38,70 @@ export const addPinnedEventToTimelineMiddleware: (kibana: CoreStart) => Middlewa
 
     if (isPinnedEventAction(action)) {
       const { id: localTimelineId, eventId } = action.payload;
-      const timeline = selectTimelineById(store.getState(), localTimelineId);
 
       store.dispatch(startTimelineSaving({ id: localTimelineId }));
 
       try {
+        // In case an event is pinned on an unsaved timeline, we need to make sure
+        // the timeline has been saved or is in draft state. Otherwise, `timelineId` will be `null`
+        // and we're creating orphaned pinned events.
+        const timeline = await ensureTimelineIsSaved({
+          localTimelineId,
+          timeline: selectTimelineById(store.getState(), localTimelineId),
+          store,
+        });
+
+        if (!timeline.savedObjectId) {
+          throw new Error('Cannot create a pinned event without a timelineId');
+        }
+
         const result = await persistPinnedEvent({
           pinnedEventId:
             timeline.pinnedEventsSaveObject[eventId] != null
               ? timeline.pinnedEventsSaveObject[eventId].pinnedEventId
               : null,
           eventId,
-          timelineId: timeline.id,
+          timelineId: timeline.savedObjectId,
         });
 
-        const response: PinnedEventResponse = get('data.persistPinnedEventOnTimeline', result);
-        if (response && response.code === 403) {
+        const response = result.data.persistPinnedEventOnTimeline;
+        if (response && 'code' in response && response.code === 403) {
           store.dispatch(showCallOutUnauthorizedMsg());
         }
 
         refreshTimelines(store.getState());
 
-        // The response is null in case we unpinned an event.
+        const currentTimeline = selectTimelineById(store.getState(), action.payload.id);
+        // The response is null or empty in case we unpinned an event.
         // In that case we want to remove the locally pinned event.
-        if (!response) {
-          store.dispatch(
+        if (!response || !('eventId' in response)) {
+          return store.dispatch(
             updateTimeline({
               id: action.payload.id,
               timeline: {
-                ...timeline,
-                pinnedEventIds: omit(eventId, timeline.pinnedEventIds),
-                pinnedEventsSaveObject: omit(eventId, timeline.pinnedEventsSaveObject),
+                ...currentTimeline,
+                pinnedEventIds: omit(eventId, currentTimeline.pinnedEventIds),
+                pinnedEventsSaveObject: omit(eventId, currentTimeline.pinnedEventsSaveObject),
               },
             })
           );
         } else {
-          store.dispatch(
+          const updatedTimeline = {
+            ...currentTimeline,
+            pinnedEventIds: {
+              ...currentTimeline.pinnedEventIds,
+              [eventId]: true,
+            },
+            pinnedEventsSaveObject: {
+              ...currentTimeline.pinnedEventsSaveObject,
+              [eventId]: response,
+            },
+          };
+
+          await store.dispatch(
             updateTimeline({
               id: action.payload.id,
-              timeline: {
-                ...timeline,
-                pinnedEventIds: {
-                  ...timeline.pinnedEventIds,
-                  [eventId]: true,
-                },
-                pinnedEventsSaveObject: {
-                  ...timeline.pinnedEventsSaveObject,
-                  [eventId]: response,
-                },
-              },
+              timeline: updatedTimeline,
             })
           );
         }

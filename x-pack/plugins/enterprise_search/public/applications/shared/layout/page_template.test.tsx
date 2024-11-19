@@ -231,38 +231,38 @@ describe('EnterpriseSearchPageTemplateWrapper', () => {
 
   describe('Embedded Console', () => {
     it('renders embedded console if available', () => {
-      const renderMock = jest.fn();
-      renderMock.mockReturnValue(null);
+      const FakeEmbeddedConsole: React.FC = () => <div className="embedded_console">foo</div>;
+      const consolePlugin = { EmbeddableConsole: FakeEmbeddedConsole };
 
       setMockValues({
         readOnlyMode: false,
-        consolePlugin: { renderEmbeddableConsole: renderMock },
+        consolePlugin,
       });
 
-      shallow(
+      const wrapper = shallow(
         <EnterpriseSearchPageTemplateWrapper>
           <div className="hello">world</div>
         </EnterpriseSearchPageTemplateWrapper>
       );
 
-      expect(renderMock).toHaveBeenCalled();
+      expect(wrapper.find(consolePlugin.EmbeddableConsole).exists()).toBe(true);
     });
     it('Hides embedded console if available but page template prop set to hide', () => {
-      const renderMock = jest.fn();
-      renderMock.mockReturnValue(null);
+      const FakeEmbeddedConsole: React.FC = () => <div className="embedded_console">foo</div>;
+      const consolePlugin = { EmbeddableConsole: FakeEmbeddedConsole };
 
       setMockValues({
         readOnlyMode: false,
-        consolePlugin: { renderEmbeddableConsole: renderMock },
+        consolePlugin,
       });
 
-      shallow(
+      const wrapper = shallow(
         <EnterpriseSearchPageTemplateWrapper hideEmbeddedConsole>
           <div className="hello">world</div>
         </EnterpriseSearchPageTemplateWrapper>
       );
 
-      expect(renderMock).not.toHaveBeenCalled();
+      expect(wrapper.find(consolePlugin.EmbeddableConsole).exists()).toBe(false);
     });
   });
 });

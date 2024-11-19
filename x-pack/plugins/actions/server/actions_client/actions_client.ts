@@ -5,53 +5,46 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import Boom from '@hapi/boom';
 import url from 'url';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { i18n } from '@kbn/i18n';
-import { omitBy, isUndefined, compact, uniq } from 'lodash';
+import { uniq } from 'lodash';
 import {
   IScopedClusterClient,
   SavedObjectsClientContract,
-  SavedObjectAttributes,
   KibanaRequest,
-  SavedObjectsUtils,
   Logger,
 } from '@kbn/core/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
 import { RunNowResult } from '@kbn/task-manager-plugin/server';
 import { IEventLogClient } from '@kbn/event-log-plugin/server';
 import { KueryNode } from '@kbn/es-query';
-import { ConnectorWithExtraFindData } from '../application/connector/types';
+import { Connector, ConnectorWithExtraFindData } from '../application/connector/types';
 import { ConnectorType } from '../application/connector/types';
 import { get } from '../application/connector/methods/get';
-import { getAll } from '../application/connector/methods/get_all';
+import { getAll, getAllSystemConnectors } from '../application/connector/methods/get_all';
+import { update } from '../application/connector/methods/update';
 import { listTypes } from '../application/connector/methods/list_types';
+import { create } from '../application/connector/methods/create';
+import { execute } from '../application/connector/methods/execute';
 import {
   GetGlobalExecutionKPIParams,
   GetGlobalExecutionLogParams,
   IExecutionLogResult,
 } from '../../common';
 import { ActionTypeRegistry } from '../action_type_registry';
-import {
-  validateConfig,
-  validateSecrets,
-  ActionExecutorContract,
-  validateConnector,
-  ActionExecutionSource,
-  parseDate,
-} from '../lib';
+import { ActionExecutorContract, parseDate } from '../lib';
 import {
   ActionResult,
   RawAction,
   InMemoryConnector,
   ActionTypeExecutorResult,
   ConnectorTokenClientContract,
+  HookServices,
 } from '../types';
 import { PreconfiguredActionDisabledModificationError } from '../lib/errors/preconfigured_action_disabled_modification';
-import { ExecuteOptions } from '../lib/action_executor';
 import {
   ExecutionEnqueuer,
   ExecuteOptions as EnqueueExecutionOptions,
@@ -59,13 +52,7 @@ import {
   ExecutionResponse,
 } from '../create_execute_function';
 import { ActionsAuthorization } from '../authorization/actions_authorization';
-import {
-  getAuthorizationModeBySource,
-  bulkGetAuthorizationModeBySource,
-  AuthorizationMode,
-} from '../authorization/get_authorization_mode_by_source';
 import { connectorAuditEvent, ConnectorAuditAction } from '../lib/audit_events';
-import { trackLegacyRBACExemption } from '../lib/track_legacy_rbac_exemption';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import {
   OAuthClientCredentialsParams,
@@ -91,21 +78,11 @@ import {
 } from '../lib/get_execution_log_aggregation';
 import { connectorFromSavedObject, isConnectorDeprecated } from '../application/connector/lib';
 import { ListTypesParams } from '../application/connector/methods/list_types/types';
-
-interface ActionUpdate {
-  name: string;
-  config: SavedObjectAttributes;
-  secrets: SavedObjectAttributes;
-}
-
-interface Action extends ActionUpdate {
-  actionTypeId: string;
-}
-
-export interface CreateOptions {
-  action: Action;
-  options?: { id?: string };
-}
+import { ConnectorUpdateParams } from '../application/connector/methods/update/types';
+import { ConnectorCreateParams } from '../application/connector/methods/create/types';
+import { isPreconfigured } from '../lib/is_preconfigured';
+import { isSystemAction } from '../lib/is_system_action';
+import { ConnectorExecuteParams } from '../application/connector/methods/execute/types';
 
 export interface ConstructorOptions {
   logger: Logger;
@@ -123,11 +100,6 @@ export interface ConstructorOptions {
   usageCounter?: UsageCounter;
   connectorTokenClient: ConnectorTokenClientContract;
   getEventLogClient: () => Promise<IEventLogClient>;
-}
-
-export interface UpdateOptions {
-  id: string;
-  action: ActionUpdate;
 }
 
 export interface ActionsClientContext {
@@ -191,209 +163,20 @@ export class ActionsClient {
    * Create an action
    */
   public async create({
-    action: { actionTypeId, name, config, secrets },
+    action,
     options,
-  }: CreateOptions): Promise<ActionResult> {
-    const id = options?.id || SavedObjectsUtils.generateId();
-
-    try {
-      await this.context.authorization.ensureAuthorized({
-        operation: 'create',
-        actionTypeId,
-      });
-    } catch (error) {
-      this.context.auditLogger?.log(
-        connectorAuditEvent({
-          action: ConnectorAuditAction.CREATE,
-          savedObject: { type: 'action', id },
-          error,
-        })
-      );
-      throw error;
-    }
-
-    const foundInMemoryConnector = this.context.inMemoryConnectors.find(
-      (connector) => connector.id === id
-    );
-
-    if (
-      this.context.actionTypeRegistry.isSystemActionType(actionTypeId) ||
-      foundInMemoryConnector?.isSystemAction
-    ) {
-      throw Boom.badRequest(
-        i18n.translate('xpack.actions.serverSideErrors.systemActionCreationForbidden', {
-          defaultMessage: 'System action creation is forbidden. Action type: {actionTypeId}.',
-          values: {
-            actionTypeId,
-          },
-        })
-      );
-    }
-
-    if (foundInMemoryConnector?.isPreconfigured) {
-      throw Boom.badRequest(
-        i18n.translate('xpack.actions.serverSideErrors.predefinedIdConnectorAlreadyExists', {
-          defaultMessage: 'This {id} already exists in a preconfigured action.',
-          values: {
-            id,
-          },
-        })
-      );
-    }
-
-    const actionType = this.context.actionTypeRegistry.get(actionTypeId);
-    const configurationUtilities = this.context.actionTypeRegistry.getUtils();
-    const validatedActionTypeConfig = validateConfig(actionType, config, {
-      configurationUtilities,
-    });
-    const validatedActionTypeSecrets = validateSecrets(actionType, secrets, {
-      configurationUtilities,
-    });
-    if (actionType.validate?.connector) {
-      validateConnector(actionType, { config, secrets });
-    }
-    this.context.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
-
-    this.context.auditLogger?.log(
-      connectorAuditEvent({
-        action: ConnectorAuditAction.CREATE,
-        savedObject: { type: 'action', id },
-        outcome: 'unknown',
-      })
-    );
-
-    const result = await this.context.unsecuredSavedObjectsClient.create(
-      'action',
-      {
-        actionTypeId,
-        name,
-        isMissingSecrets: false,
-        config: validatedActionTypeConfig as SavedObjectAttributes,
-        secrets: validatedActionTypeSecrets as SavedObjectAttributes,
-      },
-      { id }
-    );
-
-    return {
-      id: result.id,
-      actionTypeId: result.attributes.actionTypeId,
-      isMissingSecrets: result.attributes.isMissingSecrets,
-      name: result.attributes.name,
-      config: result.attributes.config,
-      isPreconfigured: false,
-      isSystemAction: false,
-      isDeprecated: isConnectorDeprecated(result.attributes),
-    };
+  }: Omit<ConnectorCreateParams, 'context'>): Promise<ActionResult> {
+    return create({ context: this.context, action, options });
   }
 
   /**
-   * Update action
+   * Update connector
    */
-  public async update({ id, action }: UpdateOptions): Promise<ActionResult> {
-    try {
-      await this.context.authorization.ensureAuthorized({ operation: 'update' });
-
-      const foundInMemoryConnector = this.context.inMemoryConnectors.find(
-        (connector) => connector.id === id
-      );
-
-      if (foundInMemoryConnector?.isSystemAction) {
-        throw Boom.badRequest(
-          i18n.translate('xpack.actions.serverSideErrors.systemActionUpdateForbidden', {
-            defaultMessage: 'System action {id} can not be updated.',
-            values: {
-              id,
-            },
-          })
-        );
-      }
-
-      if (foundInMemoryConnector?.isPreconfigured) {
-        throw new PreconfiguredActionDisabledModificationError(
-          i18n.translate('xpack.actions.serverSideErrors.predefinedActionUpdateDisabled', {
-            defaultMessage: 'Preconfigured action {id} can not be updated.',
-            values: {
-              id,
-            },
-          }),
-          'update'
-        );
-      }
-    } catch (error) {
-      this.context.auditLogger?.log(
-        connectorAuditEvent({
-          action: ConnectorAuditAction.UPDATE,
-          savedObject: { type: 'action', id },
-          error,
-        })
-      );
-      throw error;
-    }
-    const { attributes, references, version } =
-      await this.context.unsecuredSavedObjectsClient.get<RawAction>('action', id);
-    const { actionTypeId } = attributes;
-    const { name, config, secrets } = action;
-    const actionType = this.context.actionTypeRegistry.get(actionTypeId);
-    const configurationUtilities = this.context.actionTypeRegistry.getUtils();
-    const validatedActionTypeConfig = validateConfig(actionType, config, {
-      configurationUtilities,
-    });
-    const validatedActionTypeSecrets = validateSecrets(actionType, secrets, {
-      configurationUtilities,
-    });
-    if (actionType.validate?.connector) {
-      validateConnector(actionType, { config, secrets });
-    }
-
-    this.context.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
-
-    this.context.auditLogger?.log(
-      connectorAuditEvent({
-        action: ConnectorAuditAction.UPDATE,
-        savedObject: { type: 'action', id },
-        outcome: 'unknown',
-      })
-    );
-
-    const result = await this.context.unsecuredSavedObjectsClient.create<RawAction>(
-      'action',
-      {
-        ...attributes,
-        actionTypeId,
-        name,
-        isMissingSecrets: false,
-        config: validatedActionTypeConfig as SavedObjectAttributes,
-        secrets: validatedActionTypeSecrets as SavedObjectAttributes,
-      },
-      omitBy(
-        {
-          id,
-          overwrite: true,
-          references,
-          version,
-        },
-        isUndefined
-      )
-    );
-
-    try {
-      await this.context.connectorTokenClient.deleteConnectorTokens({ connectorId: id });
-    } catch (e) {
-      this.context.logger.error(
-        `Failed to delete auth tokens for connector "${id}" after update: ${e.message}`
-      );
-    }
-
-    return {
-      id,
-      actionTypeId: result.attributes.actionTypeId as string,
-      isMissingSecrets: result.attributes.isMissingSecrets as boolean,
-      name: result.attributes.name as string,
-      config: result.attributes.config as Record<string, unknown>,
-      isPreconfigured: false,
-      isSystemAction: false,
-      isDeprecated: isConnectorDeprecated(result.attributes),
-    };
+  public async update({
+    id,
+    action,
+  }: Pick<ConnectorUpdateParams, 'id' | 'action'>): Promise<Connector> {
+    return update({ context: this.context, id, action });
   }
 
   /**
@@ -416,6 +199,13 @@ export class ActionsClient {
     ConnectorWithExtraFindData[]
   > {
     return getAll({ context: this.context, includeSystemActions });
+  }
+
+  /**
+   * Get all system connectors
+   */
+  public async getAllSystemConnectors(): Promise<ConnectorWithExtraFindData[]> {
+    return getAllSystemConnectors({ context: this.context });
   }
 
   /**
@@ -549,15 +339,17 @@ export class ActionsClient {
         });
 
         this.context.logger.debug(
-          `Successfully retrieved access token using JWT OAuth with tokenUrl ${
-            tokenOpts.tokenUrl
-          } and config ${JSON.stringify(tokenOpts.config)}`
+          () =>
+            `Successfully retrieved access token using JWT OAuth with tokenUrl ${
+              tokenOpts.tokenUrl
+            } and config ${JSON.stringify(tokenOpts.config)}`
         );
       } catch (err) {
         this.context.logger.debug(
-          `Failed to retrieve access token using JWT OAuth with tokenUrl ${
-            tokenOpts.tokenUrl
-          } and config ${JSON.stringify(tokenOpts.config)} - ${err.message}`
+          () =>
+            `Failed to retrieve access token using JWT OAuth with tokenUrl ${
+              tokenOpts.tokenUrl
+            } and config ${JSON.stringify(tokenOpts.config)} - ${err.message}`
         );
         throw Boom.badRequest(`Failed to retrieve access token`);
       }
@@ -576,17 +368,19 @@ export class ActionsClient {
         });
 
         this.context.logger.debug(
-          `Successfully retrieved access token using Client Credentials OAuth with tokenUrl ${
-            tokenOpts.tokenUrl
-          }, scope ${tokenOpts.scope} and config ${JSON.stringify(tokenOpts.config)}`
+          () =>
+            `Successfully retrieved access token using Client Credentials OAuth with tokenUrl ${
+              tokenOpts.tokenUrl
+            }, scope ${tokenOpts.scope} and config ${JSON.stringify(tokenOpts.config)}`
         );
       } catch (err) {
         this.context.logger.debug(
-          `Failed to retrieved access token using Client Credentials OAuth with tokenUrl ${
-            tokenOpts.tokenUrl
-          }, scope ${tokenOpts.scope} and config ${JSON.stringify(tokenOpts.config)} - ${
-            err.message
-          }`
+          () =>
+            `Failed to retrieved access token using Client Credentials OAuth with tokenUrl ${
+              tokenOpts.tokenUrl
+            }, scope ${tokenOpts.scope} and config ${JSON.stringify(tokenOpts.config)} - ${
+              err.message
+            }`
         );
         throw Boom.badRequest(`Failed to retrieve access token`);
       }
@@ -655,128 +449,67 @@ export class ActionsClient {
       );
     }
 
-    return await this.context.unsecuredSavedObjectsClient.delete('action', id);
-  }
+    const rawAction = await this.context.unsecuredSavedObjectsClient.get<RawAction>('action', id);
+    const {
+      attributes: { actionTypeId, config },
+    } = rawAction;
 
-  private getSystemActionKibanaPrivileges(connectorId: string, params?: ExecuteOptions['params']) {
-    const inMemoryConnector = this.context.inMemoryConnectors.find(
-      (connector) => connector.id === connectorId
-    );
+    const actionType = this.context.actionTypeRegistry.get(actionTypeId);
+    const result = await this.context.unsecuredSavedObjectsClient.delete('action', id);
 
-    const additionalPrivileges = inMemoryConnector?.isSystemAction
-      ? this.context.actionTypeRegistry.getSystemActionKibanaPrivileges(
-          inMemoryConnector.actionTypeId,
-          params
-        )
-      : [];
+    const hookServices: HookServices = {
+      scopedClusterClient: this.context.scopedClusterClient,
+    };
 
-    return additionalPrivileges;
-  }
-
-  public async execute({
-    actionId,
-    params,
-    source,
-    relatedSavedObjects,
-  }: Omit<ExecuteOptions, 'request' | 'actionExecutionId'>): Promise<
-    ActionTypeExecutorResult<unknown>
-  > {
-    const log = this.context.logger;
-
-    if (
-      (await getAuthorizationModeBySource(this.context.unsecuredSavedObjectsClient, source)) ===
-      AuthorizationMode.RBAC
-    ) {
-      const additionalPrivileges = this.getSystemActionKibanaPrivileges(actionId, params);
-      let actionTypeId: string | undefined;
-
+    if (actionType.postDeleteHook) {
       try {
-        if (this.isPreconfigured(actionId)) {
-          const connector = this.context.inMemoryConnectors.find(
-            (inMemoryConnector) => inMemoryConnector.id === actionId
-          );
-
-          actionTypeId = connector?.actionTypeId;
-        } else {
-          // TODO: Optimize so we don't do another get on top of getAuthorizationModeBySource and within the actionExecutor.execute
-          const { attributes } = await this.context.unsecuredSavedObjectsClient.get<RawAction>(
-            'action',
-            actionId
-          );
-
-          actionTypeId = attributes.actionTypeId;
-        }
-      } catch (err) {
-        log.debug(`Failed to retrieve actionTypeId for action [${actionId}]`, err);
+        await actionType.postDeleteHook({
+          connectorId: id,
+          config,
+          logger: this.context.logger,
+          request: this.context.request,
+          services: hookServices,
+        });
+      } catch (error) {
+        const tags = ['post-delete-hook', id];
+        this.context.logger.error(
+          `The post delete hook failed for for connector "${id}": ${error.message}`,
+          { tags }
+        );
       }
-
-      await this.context.authorization.ensureAuthorized({
-        operation: 'execute',
-        additionalPrivileges,
-        actionTypeId,
-      });
-    } else {
-      trackLegacyRBACExemption('execute', this.context.usageCounter);
     }
+    return result;
+  }
 
-    return this.context.actionExecutor.execute({
-      actionId,
-      params,
-      source,
-      request: this.context.request,
-      relatedSavedObjects,
-      actionExecutionId: uuidv4(),
-    });
+  public async execute(
+    connectorExecuteParams: ConnectorExecuteParams
+  ): Promise<ActionTypeExecutorResult<unknown>> {
+    return execute(this.context, connectorExecuteParams);
   }
 
   public async bulkEnqueueExecution(
     options: EnqueueExecutionOptions[]
   ): Promise<ExecutionResponse> {
-    const sources: Array<ActionExecutionSource<unknown>> = compact(
-      (options ?? []).map((option) => option.source)
+    /**
+     * For scheduled executions the additional authorization check
+     * for system actions (kibana privileges) will be performed
+     * inside the ActionExecutor at execution time
+     */
+    await this.context.authorization.ensureAuthorized({ operation: 'execute' });
+    await Promise.all(
+      uniq(options.map((o) => o.actionTypeId)).map((actionTypeId) =>
+        this.context.authorization.ensureAuthorized({ operation: 'execute', actionTypeId })
+      )
     );
-
-    const authModes = await bulkGetAuthorizationModeBySource(
-      this.context.logger,
-      this.context.unsecuredSavedObjectsClient,
-      sources
-    );
-    if (authModes[AuthorizationMode.RBAC] > 0) {
-      /**
-       * For scheduled executions the additional authorization check
-       * for system actions (kibana privileges) will be performed
-       * inside the ActionExecutor at execution time
-       */
-      await this.context.authorization.ensureAuthorized({ operation: 'execute' });
-      await Promise.all(
-        uniq(options.map((o) => o.actionTypeId)).map((actionTypeId) =>
-          this.context.authorization.ensureAuthorized({ operation: 'execute', actionTypeId })
-        )
-      );
-    }
-    if (authModes[AuthorizationMode.Legacy] > 0) {
-      trackLegacyRBACExemption(
-        'bulkEnqueueExecution',
-        this.context.usageCounter,
-        authModes[AuthorizationMode.Legacy]
-      );
-    }
     return this.context.bulkExecutionEnqueuer(this.context.unsecuredSavedObjectsClient, options);
   }
 
   public async ephemeralEnqueuedExecution(options: EnqueueExecutionOptions): Promise<RunNowResult> {
-    const { source } = options;
-    if (
-      (await getAuthorizationModeBySource(this.context.unsecuredSavedObjectsClient, source)) ===
-      AuthorizationMode.RBAC
-    ) {
-      await this.context.authorization.ensureAuthorized({
-        operation: 'execute',
-        actionTypeId: options.actionTypeId,
-      });
-    } else {
-      trackLegacyRBACExemption('ephemeralEnqueuedExecution', this.context.usageCounter);
-    }
+    await this.context.authorization.ensureAuthorized({
+      operation: 'execute',
+      actionTypeId: options.actionTypeId,
+    });
+
     return this.context.ephemeralExecutionEnqueuer(
       this.context.unsecuredSavedObjectsClient,
       options
@@ -798,15 +531,11 @@ export class ActionsClient {
   }
 
   public isPreconfigured(connectorId: string): boolean {
-    return !!this.context.inMemoryConnectors.find(
-      (connector) => connector.isPreconfigured && connector.id === connectorId
-    );
+    return isPreconfigured(this.context, connectorId);
   }
 
   public isSystemAction(connectorId: string): boolean {
-    return !!this.context.inMemoryConnectors.find(
-      (connector) => connector.isSystemAction && connector.id === connectorId
-    );
+    return isSystemAction(this.context, connectorId);
   }
 
   public async getGlobalExecutionLogWithAuth({

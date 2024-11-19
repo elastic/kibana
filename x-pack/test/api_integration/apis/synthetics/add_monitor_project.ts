@@ -46,7 +46,6 @@ export default function ({ getService }: FtrProviderContext) {
     let icmpProjectMonitors: ProjectMonitorsRequest;
 
     let testPolicyId = '';
-
     const setUniqueIds = (request: ProjectMonitorsRequest) => {
       return {
         ...request,
@@ -67,15 +66,10 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .set('kbn-xsrf', 'true')
           .expect(200);
+
         const { monitors } = response.body;
         if (monitors[0]?.config_id) {
-          await supertest
-            .delete(
-              `/s/${space}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${monitors[0].config_id}`
-            )
-            .set('kbn-xsrf', 'true')
-            .send(projectMonitors)
-            .expect(200);
+          await monitorTestService.deleteMonitor(monitors[0].config_id, 200, space);
         }
       } catch (e) {
         // eslint-disable-next-line no-console
@@ -84,16 +78,15 @@ export default function ({ getService }: FtrProviderContext) {
     };
 
     before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
       await supertest
         .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
         .set('kbn-xsrf', 'true')
         .expect(200);
       await testPrivateLocations.installSyntheticsPackage();
 
-      const testPolicyName = 'Fleet test server policy' + Date.now();
-      const apiResponse = await testPrivateLocations.addFleetPolicy(testPolicyName);
-      testPolicyId = apiResponse.body.item.id;
-      await testPrivateLocations.setTestLocations([testPolicyId]);
+      const loc = await testPrivateLocations.addPrivateLocation();
+      testPolicyId = loc.id;
       await supertest
         .post(SYNTHETICS_API_URLS.PARAMS)
         .set('kbn-xsrf', 'true')
@@ -174,17 +167,20 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(200);
 
           const decryptedCreatedMonitor = await monitorTestService.getMonitor(
-            createdMonitorsResponse.body.monitors[0].config_id
+            createdMonitorsResponse.body.monitors[0].config_id,
+            {
+              internal: true,
+            }
           );
 
-          expect(decryptedCreatedMonitor.body).to.eql({
+          expect(decryptedCreatedMonitor.rawBody).to.eql({
             __ui: {
               script_source: {
                 file_name: '',
                 is_generated_script: false,
               },
             },
-            config_id: decryptedCreatedMonitor.body.config_id,
+            config_id: decryptedCreatedMonitor.rawBody.config_id,
             custom_heartbeat_id: `${journeyId}-${project}-default`,
             enabled: true,
             alert: {
@@ -245,6 +241,9 @@ export default function ({ getService }: FtrProviderContext) {
             id: `${journeyId}-${project}-default`,
             hash: 'ekrjelkjrelkjre',
             max_attempts: 2,
+            updated_at: decryptedCreatedMonitor.rawBody.updated_at,
+            created_at: decryptedCreatedMonitor.rawBody.created_at,
+            labels: {},
           });
         }
       } finally {
@@ -344,17 +343,20 @@ export default function ({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'true')
             .expect(200);
 
-          const decryptedCreatedMonitor = await monitorTestService.getMonitor(
-            createdMonitorsResponse.body.monitors[0].config_id
+          const { rawBody: decryptedCreatedMonitor } = await monitorTestService.getMonitor(
+            createdMonitorsResponse.body.monitors[0].config_id,
+            {
+              internal: true,
+            }
           );
 
-          expect(decryptedCreatedMonitor.body).to.eql({
+          expect(decryptedCreatedMonitor).to.eql({
             __ui: {
               is_tls_enabled: isTLSEnabled,
             },
             'check.request.method': 'POST',
             'check.response.status': ['200'],
-            config_id: decryptedCreatedMonitor.body.config_id,
+            config_id: decryptedCreatedMonitor.config_id,
             custom_heartbeat_id: `${journeyId}-${project}-default`,
             'check.response.body.negative': [],
             'check.response.body.positive': ['${testLocal1}', 'saved'],
@@ -367,8 +369,10 @@ export default function ({ getService }: FtrProviderContext) {
               type: 'text',
               value: '',
             },
-            params:
-              '{"testLocal1":"testLocalParamsValue","testGlobalParam2":"testGlobalParamOverwrite"}',
+            params: JSON.stringify({
+              testLocal1: 'testLocalParamsValue',
+              testGlobalParam2: 'testGlobalParamOverwrite',
+            }),
             'check.request.headers': {
               'Content-Type': 'application/x-www-form-urlencoded',
             },
@@ -429,6 +433,9 @@ export default function ({ getService }: FtrProviderContext) {
             ipv6: true,
             ipv4: true,
             max_attempts: 2,
+            labels: {},
+            updated_at: decryptedCreatedMonitor.updated_at,
+            created_at: decryptedCreatedMonitor.created_at,
           });
         }
       } finally {
@@ -480,15 +487,18 @@ export default function ({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'true')
             .expect(200);
 
-          const decryptedCreatedMonitor = await monitorTestService.getMonitor(
-            createdMonitorsResponse.body.monitors[0].config_id
+          const { rawBody: decryptedCreatedMonitor } = await monitorTestService.getMonitor(
+            createdMonitorsResponse.body.monitors[0].config_id,
+            {
+              internal: true,
+            }
           );
 
-          expect(decryptedCreatedMonitor.body).to.eql({
+          expect(decryptedCreatedMonitor).to.eql({
             __ui: {
               is_tls_enabled: isTLSEnabled,
             },
-            config_id: decryptedCreatedMonitor.body.config_id,
+            config_id: decryptedCreatedMonitor.config_id,
             custom_heartbeat_id: `${journeyId}-${project}-default`,
             'check.receive': '',
             'check.send': '',
@@ -546,6 +556,9 @@ export default function ({ getService }: FtrProviderContext) {
             ipv4: true,
             params: '',
             max_attempts: 2,
+            labels: {},
+            updated_at: decryptedCreatedMonitor.updated_at,
+            created_at: decryptedCreatedMonitor.created_at,
           });
         }
       } finally {
@@ -595,12 +608,15 @@ export default function ({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'true')
             .expect(200);
 
-          const decryptedCreatedMonitor = await monitorTestService.getMonitor(
-            createdMonitorsResponse.body.monitors[0].config_id
+          const { rawBody: decryptedCreatedMonitor } = await monitorTestService.getMonitor(
+            createdMonitorsResponse.body.monitors[0].config_id,
+            {
+              internal: true,
+            }
           );
 
-          expect(decryptedCreatedMonitor.body).to.eql({
-            config_id: decryptedCreatedMonitor.body.config_id,
+          expect(decryptedCreatedMonitor).to.eql({
+            config_id: decryptedCreatedMonitor.config_id,
             custom_heartbeat_id: `${journeyId}-${project}-default`,
             enabled: true,
             alert: {
@@ -625,10 +641,11 @@ export default function ({ getService }: FtrProviderContext) {
               },
               {
                 geo: {
-                  lat: '',
-                  lon: '',
+                  lat: 0,
+                  lon: 0,
                 },
                 id: testPolicyId,
+                agentPolicyId: testPolicyId,
                 isServiceManaged: false,
                 label: 'Test private location 0',
               },
@@ -659,6 +676,9 @@ export default function ({ getService }: FtrProviderContext) {
             ipv6: true,
             params: '',
             max_attempts: 2,
+            updated_at: decryptedCreatedMonitor.updated_at,
+            created_at: decryptedCreatedMonitor.created_at,
+            labels: {},
           });
         }
       } finally {
@@ -1105,8 +1125,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const decryptedCreatedMonitor = await monitorTestService.getMonitor(
           getResponse.body.monitors[0].config_id,
-          true,
-          SPACE_ID
+          { internal: true, space: SPACE_ID }
         );
         const { monitors } = getResponse.body;
         expect(monitors.length).eql(1);
@@ -1143,8 +1162,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const decryptedUpdatedMonitor = await monitorTestService.getMonitor(
           monitorsUpdated[0].config_id,
-          true,
-          SPACE_ID
+          { internal: true, space: SPACE_ID }
         );
         expect(decryptedUpdatedMonitor.body[ConfigKey.SOURCE_PROJECT_CONTENT]).eql(updatedSource);
       } finally {
@@ -1229,20 +1247,6 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         const { monitors } = response.body;
-
-        // add urls and ports to mimic hydration
-        const updates = {
-          [ConfigKey.URLS]: 'https://modified-host.com',
-          [ConfigKey.PORT]: 443,
-        };
-
-        const modifiedMonitor = { ...monitors[0], ...updates };
-
-        await supertest
-          .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitors[0]?.config_id)
-          .set('kbn-xsrf', 'true')
-          .send(modifiedMonitor)
-          .expect(200);
 
         // update project monitor via push api
         const { body } = await supertest
@@ -1747,6 +1751,7 @@ export default function ({ getService }: FtrProviderContext) {
             monitors: [
               {
                 ...projectMonitors.monitors[0],
+                namespace: 'custom_namespace',
                 privateLocations: ['Test private location 0'],
                 enabled: false,
               },
@@ -1775,6 +1780,7 @@ export default function ({ getService }: FtrProviderContext) {
             projectId: project,
             locationId: testPolicyId,
             locationName: 'Test private location 0',
+            namespace: 'custom_namespace',
           })
         );
       } finally {
@@ -1805,7 +1811,10 @@ export default function ({ getService }: FtrProviderContext) {
           projectMonitors.monitors.map((monitor) => {
             return supertest
               .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
-              .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${monitor.id}` })
+              .query({
+                filter: `${syntheticsMonitorType}.attributes.journey_id: ${monitor.id}`,
+                internal: true,
+              })
               .set('kbn-xsrf', 'true')
               .expect(200);
           })
@@ -1822,10 +1831,11 @@ export default function ({ getService }: FtrProviderContext) {
             {
               label: 'Test private location 0',
               isServiceManaged: false,
+              agentPolicyId: testPolicyId,
               id: testPolicyId,
               geo: {
-                lat: '',
-                lon: '',
+                lat: 0,
+                lon: 0,
               },
             },
           ]);
@@ -2026,7 +2036,7 @@ export default function ({ getService }: FtrProviderContext) {
           failedMonitors: [
             {
               details:
-                'Invalid location: "does not exist". Remove it or replace it with a valid location.',
+                "Invalid locations specified. Elastic managed Location(s) 'does not exist' not found. Available locations are 'dev|dev2'",
               id: httpProjectMonitors.monitors[1].id,
               payload: {
                 'check.request': {
@@ -2104,8 +2114,7 @@ export default function ({ getService }: FtrProviderContext) {
           createdMonitors: [],
           failedMonitors: [
             {
-              details:
-                'Invalid private location: "does not exist". Remove it or replace it with a valid private location.',
+              details: `Invalid locations specified. Private Location(s) 'does not exist' not found. Available private locations are 'Test private location 0'`,
               id: httpProjectMonitors.monitors[1].id,
               payload: {
                 'check.request': {

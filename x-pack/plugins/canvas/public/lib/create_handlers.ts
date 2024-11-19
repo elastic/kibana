@@ -12,8 +12,10 @@ import {
 } from '@kbn/expressions-plugin/public';
 import { updateEmbeddableExpression, fetchEmbeddableRenderable } from '../state/actions/embeddable';
 import { RendererHandlers, CanvasElement } from '../../types';
-import { pluginServices } from '../services';
+import { getCanvasFiltersService } from '../services/canvas_filters_service';
 import { clearValue } from '../state/actions/resolved_args';
+// @ts-expect-error unconverted file
+import { fetchAllRenderables } from '../state/actions/elements';
 
 // This class creates stub handlers to ensure every element and renderer fulfills the contract.
 // TODO: consider warning if these methods are invoked but not implemented by the renderer...?
@@ -29,7 +31,6 @@ export const createBaseHandlers = (): IInterpreterRenderHandlers => ({
   isSyncColorsEnabled: () => false,
   isSyncTooltipsEnabled: () => false,
   isSyncCursorEnabled: () => true,
-  shouldUseSizeTransitionVeil: () => false,
   isInteractive: () => true,
   getExecutionContext: () => undefined,
 });
@@ -81,7 +82,7 @@ export const createDispatchedHandlerFactory = (
       oldElement = element;
     }
 
-    const { filters } = pluginServices.getServices();
+    const filters = getCanvasFiltersService();
 
     const handlers: RendererHandlers & {
       event: IInterpreterRenderHandlers['event'];
@@ -95,6 +96,7 @@ export const createDispatchedHandlerFactory = (
             break;
           case 'applyFilterAction':
             filters.updateFilter(element.id, event.data);
+            dispatch(fetchAllRenderables());
             break;
           case 'onComplete':
             this.onComplete(event.data);

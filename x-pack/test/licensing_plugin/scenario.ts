@@ -17,6 +17,7 @@ export function createScenario({ getService, getPageObjects }: FtrProviderContex
   const esSupertestWithoutAuth = getService('esSupertestWithoutAuth');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'security']);
+  const retry = getService('retry');
 
   const scenario = {
     async setup() {
@@ -69,30 +70,9 @@ export function createScenario({ getService, getPageObjects }: FtrProviderContex
       expect(response.body.trial_was_started).to.be(true);
     },
 
-    async startEnterprise() {
-      const response = await esSupertestWithoutAuth
-        .post('/_license/?acknowledge=true')
-        .send({
-          license: {
-            uid: '504430e6-503c-4316-85cb-b402c730ca08',
-            type: 'enterprise',
-            issue_date_in_millis: 1669680000000,
-            start_date_in_millis: 1669680000000,
-            // expires 2024-12-31
-            expiry_date_in_millis: 1735689599999,
-            max_resource_units: 250,
-            max_nodes: null,
-            issued_to: 'Elastic - INTERNAL (development environments)',
-            issuer: 'API',
-            signature:
-              'AAAABQAAAA2h1vBafHuRhjOHREKYAAAAIAo5/x6hrsGh1GqqrJmy4qgmEC7gK0U4zQ6q5ZEMhm4jAAABAByGz9MmRW/L7vQriISa6u8Oov7zykA+Cv55BToWEthSn0c5KQUxcWG+K5Cm4/OkFsXA8TE4zFnlSgYxmQi2Eqq7IAKGdcxI/xhQfMsq5RWlSEwtfyV0M2RKJxgam8o2lvKC9EbrU76ISYr7jTkgoBl6GFSjdfXMHmxNXBSKDDm03ZeXkWkvuNNFrHJuYivf2Se9OeeB/eu4jqUI0UuNfPYF07ZcYvtKfj3KX+aysCSV2FW8wgyAjndOPEinfYcwAJ09zcl+MTig2K0DQTsYkLykXmzZnLz6qeuVVFjCTowxizDFW+5MrpzUnwkjqv8CFhLfvxG7waWQWslv8fXLUn8=',
-          },
-        })
-        .auth('license_manager_user', 'license_manager_user-password')
-        .expect(200);
-
-      expect(response.body.license_status).to.be('valid');
-    },
+    // FIXME: enterprise license is not available for tests
+    // https://github.com/elastic/kibana/issues/53575
+    async startEnterprise() {},
 
     async deleteLicense() {
       const response = await esSupertestWithoutAuth
@@ -109,9 +89,27 @@ export function createScenario({ getService, getPageObjects }: FtrProviderContex
     },
 
     async waitForPluginToDetectLicenseUpdate() {
+      const {
+        body: { license: esLicense },
+      } = await esSupertestWithoutAuth
+        .get('/_license')
+        .auth('license_manager_user', 'license_manager_user-password')
+        .expect(200);
       // > --xpack.licensing.api_polling_frequency set in test config
       // to wait for Kibana server to re-fetch the license from Elasticsearch
-      await delay(500);
+      const pollingFrequency = 500;
+
+      await retry.waitForWithTimeout(
+        'waiting for the license.uid to match ES',
+        4 * pollingFrequency,
+        async () => {
+          const {
+            body: { license: kbLicense },
+          } = await supertest.get('/api/licensing/info').expect(200);
+          return kbLicense?.uid === esLicense?.uid;
+        },
+        () => delay(pollingFrequency)
+      );
     },
   };
   return scenario;

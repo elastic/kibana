@@ -13,7 +13,7 @@ describe('checkRuleExceptionReferences', () => {
   it('returns empty array if rule has no exception list references', () => {
     const result = checkRuleExceptionReferences({
       existingLists: {},
-      rule: { ...getImportRulesSchemaMock(), exceptions_list: [] },
+      rule: getImportRulesSchemaMock({ exceptions_list: [] }),
     });
 
     expect(result).toEqual([[], []]);
@@ -29,12 +29,11 @@ describe('checkRuleExceptionReferences', () => {
           type: 'detection',
         },
       },
-      rule: {
-        ...getImportRulesSchemaMock(),
+      rule: getImportRulesSchemaMock({
         exceptions_list: [
           { id: '123', list_id: 'my-list', namespace_type: 'single', type: 'detection' },
         ],
-      },
+      }),
     });
 
     expect(result).toEqual([
@@ -53,23 +52,22 @@ describe('checkRuleExceptionReferences', () => {
   it('removes an exception reference if list not found to exist', () => {
     const result = checkRuleExceptionReferences({
       existingLists: {},
-      rule: {
-        ...getImportRulesSchemaMock(),
+      rule: getImportRulesSchemaMock({
         exceptions_list: [
           { id: '123', list_id: 'my-list', namespace_type: 'single', type: 'detection' },
         ],
-      },
+      }),
     });
 
     expect(result).toEqual([
       [
         {
           error: {
+            ruleId: 'rule-1',
             message:
               'Rule with rule_id: "rule-1" references a non existent exception list of list_id: "my-list". Reference has been removed.',
-            status_code: 400,
+            type: 'unknown',
           },
-          rule_id: 'rule-1',
         },
       ],
       [],
@@ -86,22 +84,21 @@ describe('checkRuleExceptionReferences', () => {
           type: 'detection',
         },
       },
-      rule: {
-        ...getImportRulesSchemaMock(),
+      rule: getImportRulesSchemaMock({
         exceptions_list: [
           { id: '123', list_id: 'my-list', namespace_type: 'single', type: 'detection' },
         ],
-      },
+      }),
     });
     expect(result).toEqual([
       [
         {
           error: {
+            ruleId: 'rule-1',
             message:
               'Rule with rule_id: "rule-1" references a non existent exception list of list_id: "my-list". Reference has been removed.',
-            status_code: 400,
+            type: 'unknown',
           },
-          rule_id: 'rule-1',
         },
       ],
       [],
@@ -118,12 +115,11 @@ describe('checkRuleExceptionReferences', () => {
           type: 'endpoint',
         },
       },
-      rule: {
-        ...getImportRulesSchemaMock(),
+      rule: getImportRulesSchemaMock({
         exceptions_list: [
           { id: '123', list_id: 'my-list', namespace_type: 'single', type: 'detection' },
         ],
-      },
+      }),
     });
     expect(result).toEqual([
       [
@@ -131,9 +127,9 @@ describe('checkRuleExceptionReferences', () => {
           error: {
             message:
               'Rule with rule_id: "rule-1" references a non existent exception list of list_id: "my-list". Reference has been removed.',
-            status_code: 400,
+            ruleId: 'rule-1',
+            type: 'unknown',
           },
-          rule_id: 'rule-1',
         },
       ],
       [],

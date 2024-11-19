@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -14,7 +15,7 @@ import {
 } from '@kbn/data-plugin/common';
 import { search } from '@kbn/data-plugin/public';
 import { Vis, VisToExpressionAstParams } from './types';
-import { SchemaConfig } from '../common/types';
+import { SchemaConfig, VisParams } from '../common/types';
 import { convertToSchemaConfig } from '../common';
 
 const { isDateHistogramBucketAggConfig } = search.aggs;
@@ -25,7 +26,7 @@ const SUPPORTED_AGGREGATIONS = [
   SHARD_DELAY_AGG_NAME,
 ];
 
-type SupportedAggregation = typeof SUPPORTED_AGGREGATIONS[number];
+type SupportedAggregation = (typeof SUPPORTED_AGGREGATIONS)[number];
 
 function isSupportedAggType(name: string): name is SupportedAggregation {
   return SUPPORTED_AGGREGATIONS.includes(name as SupportedAggregation);
@@ -76,7 +77,7 @@ const createSchemaConfig = (
   return { ...convertToSchemaConfig(updatedAgg), accessor };
 };
 
-export const getVisSchemas = <TVisParams>(
+export const getVisSchemas = <TVisParams extends VisParams>(
   vis: Vis<TVisParams>,
   params: VisToExpressionAstParams
 ): Schemas => {

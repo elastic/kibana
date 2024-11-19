@@ -181,7 +181,7 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
       itemId={itemId}
       columns={columns}
       sorting={sorting}
-      {...(!isReadOnly ? { selection, isSelectable: true } : {})}
+      selection={isReadOnly ? undefined : selection}
     />
   );
 };

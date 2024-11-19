@@ -26,6 +26,7 @@
     "@kbn/core-base-server-mocks",
     "@kbn/core-logging-server-mocks",
     "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/core-http-server",
   ],
   "exclude": [
     "target/**/*",

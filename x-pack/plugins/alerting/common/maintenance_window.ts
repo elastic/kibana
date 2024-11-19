@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { IUiSettingsClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import { FilterStateStore } from '@kbn/es-query';
 import { RRuleParams } from './rrule_type';
 
 export enum MaintenanceWindowStatus {
@@ -13,14 +14,6 @@ export enum MaintenanceWindowStatus {
   Finished = 'finished',
   Archived = 'archived',
 }
-
-export const filterStateStore = {
-  APP_STATE: 'appState',
-  GLOBAL_STATE: 'globalState',
-} as const;
-
-export type FilterStateStore = typeof filterStateStore[keyof typeof filterStateStore];
-
 export interface MaintenanceWindowModificationMetadata {
   createdBy: string | null;
   updatedBy: string | null;
@@ -83,6 +76,7 @@ export type MaintenanceWindowCreateBody = Omit<
 >;
 
 export interface MaintenanceWindowClientContext {
+  readonly uiSettings: IUiSettingsClient;
   getModificationMetadata: () => Promise<MaintenanceWindowModificationMetadata>;
   savedObjectsClient: SavedObjectsClientContract;
   logger: Logger;
@@ -113,6 +107,6 @@ export const MAINTENANCE_WINDOW_DEEP_LINK_IDS = {
 };
 
 export type MaintenanceWindowDeepLinkIds =
-  typeof MAINTENANCE_WINDOW_DEEP_LINK_IDS[keyof typeof MAINTENANCE_WINDOW_DEEP_LINK_IDS];
+  (typeof MAINTENANCE_WINDOW_DEEP_LINK_IDS)[keyof typeof MAINTENANCE_WINDOW_DEEP_LINK_IDS];
 
 export const MAINTENANCE_WINDOW_DATE_FORMAT = 'MM/DD/YY hh:mm A';

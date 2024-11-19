@@ -11,7 +11,7 @@ import type {
   AggregationsTermsAggregateBase,
   AggregationsStringTermsBucketKeys,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { ElasticsearchClient, Logger, ISavedObjectsRepository } from '@kbn/core/server';
 
 import {
   ConnectorsByConsumersBucket,
@@ -22,11 +22,20 @@ import { groupRulesByStatus } from './group_rules_by_status';
 import { AlertingUsage } from '../types';
 import { NUM_ALERTING_RULE_TYPES } from '../alerting_usage_collector';
 import { parseSimpleRuleTypeBucket } from './parse_simple_rule_type_bucket';
+import { groupRulesBySearchType } from './group_rules_by_search_type';
+import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../../common';
+import { MaintenanceWindowAttributes } from '../../data/maintenance_window/types';
 
 interface Opts {
   esClient: ElasticsearchClient;
   alertIndex: string;
   logger: Logger;
+}
+
+interface MWOpts {
+  savedObjectsClient: ISavedObjectsRepository;
+  logger: Logger;
+  maxDocuments?: number;
 }
 
 type GetTotalCountsResults = Pick<
@@ -47,6 +56,14 @@ type GetTotalCountsResults = Pick<
   | 'connectors_per_alert'
 > & { errorMessage?: string; hasErrors: boolean };
 
+type GetMWTelemetryResults = Pick<
+  AlertingUsage,
+  'count_mw_total' | 'count_mw_with_repeat_toggle_on' | 'count_mw_with_filter_alert_toggle_on'
+> & {
+  errorMessage?: string;
+  hasErrors: boolean;
+};
+
 interface GetTotalCountInUseResults {
   countTotal: number;
   countByType: Record<string, number>;
@@ -54,6 +71,8 @@ interface GetTotalCountInUseResults {
   errorMessage?: string;
   hasErrors: boolean;
 }
+
+const TELEMETRY_MW_COUNT_LIMIT = 10000;
 
 export async function getTotalCountAggregations({
   esClient,
@@ -258,6 +277,11 @@ export async function getTotalCountAggregations({
               },
             },
           },
+          by_search_type: {
+            terms: {
+              field: 'alert.params.searchType',
+            },
+          },
           sum_rules_with_tags: { sum: { field: 'rule_with_tags' } },
           sum_rules_snoozed: { sum: { field: 'rule_snoozed' } },
           sum_rules_muted: { sum: { field: 'rule_muted' } },
@@ -266,10 +290,10 @@ export async function getTotalCountAggregations({
       },
     };
 
-    logger.debug(`query for getTotalCountAggregations - ${JSON.stringify(query)}`);
+    logger.debug(() => `query for getTotalCountAggregations - ${JSON.stringify(query)}`);
     const results = await esClient.search(query);
 
-    logger.debug(`results for getTotalCountAggregations query - ${JSON.stringify(results)}`);
+    logger.debug(() => `results for getTotalCountAggregations query - ${JSON.stringify(results)}`);
 
     const aggregations = results.aggregations as {
       by_rule_type_id: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
@@ -285,6 +309,7 @@ export async function getTotalCountAggregations({
       by_execution_status: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
       by_notify_when: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
       connector_types_by_consumers: AggregationsTermsAggregateBase<ConnectorsByConsumersBucket>;
+      by_search_type: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
       sum_rules_with_tags: AggregationsSingleMetricAggregateBase;
       sum_rules_snoozed: AggregationsSingleMetricAggregateBase;
       sum_rules_muted: AggregationsSingleMetricAggregateBase;
@@ -306,10 +331,17 @@ export async function getTotalCountAggregations({
       aggregations.connector_types_by_consumers.buckets
     );
 
+    const countRulesBySearchType = groupRulesBySearchType(
+      parseSimpleRuleTypeBucket(aggregations.by_search_type.buckets)
+    );
+
     return {
       hasErrors: false,
       count_total: totalRulesCount ?? 0,
-      count_by_type: parseSimpleRuleTypeBucket(aggregations.by_rule_type_id.buckets),
+      count_by_type: {
+        ...parseSimpleRuleTypeBucket(aggregations.by_rule_type_id.buckets),
+        ...countRulesBySearchType,
+      },
       count_rules_by_execution_status: countRulesByExecutionStatus,
       count_rules_with_tags: aggregations.sum_rules_with_tags.value ?? 0,
       count_rules_by_notify_when: countRulesByNotifyWhen,
@@ -422,27 +454,40 @@ export async function getTotalCountInUse({
               size: NUM_ALERTING_RULE_TYPES,
             },
           },
+          by_search_type: {
+            terms: {
+              field: 'alert.params.searchType',
+            },
+          },
         },
       },
     };
 
-    logger.debug(`query for getTotalCountInUse - ${JSON.stringify(query)}`);
+    logger.debug(() => `query for getTotalCountInUse - ${JSON.stringify(query)}`);
     const results = await esClient.search(query);
 
-    logger.debug(`results for getTotalCountInUse query - ${JSON.stringify(results)}`);
+    logger.debug(() => `results for getTotalCountInUse query - ${JSON.stringify(results)}`);
 
     const aggregations = results.aggregations as {
       by_rule_type_id: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
       namespaces_count: AggregationsCardinalityAggregate;
+      by_search_type: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
     };
 
     const totalEnabledRulesCount =
       typeof results.hits.total === 'number' ? results.hits.total : results.hits.total?.value;
 
+    const countRulesBySearchType = groupRulesBySearchType(
+      parseSimpleRuleTypeBucket(aggregations.by_search_type.buckets)
+    );
+
     return {
       hasErrors: false,
       countTotal: totalEnabledRulesCount ?? 0,
-      countByType: parseSimpleRuleTypeBucket(aggregations.by_rule_type_id.buckets),
+      countByType: {
+        ...parseSimpleRuleTypeBucket(aggregations.by_rule_type_id.buckets),
+        ...countRulesBySearchType,
+      },
       countNamespaces: aggregations.namespaces_count.value ?? 0,
     };
   } catch (err) {
@@ -460,6 +505,63 @@ export async function getTotalCountInUse({
       countTotal: 0,
       countByType: {},
       countNamespaces: 0,
+    };
+  }
+}
+
+export async function getMWTelemetry({
+  savedObjectsClient,
+  logger,
+  maxDocuments = TELEMETRY_MW_COUNT_LIMIT,
+}: MWOpts): Promise<GetMWTelemetryResults> {
+  try {
+    const mwFinder = savedObjectsClient.createPointInTimeFinder<MaintenanceWindowAttributes>({
+      type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+      namespaces: ['*'],
+      perPage: 100,
+      fields: ['rRule', 'scopedQuery'],
+    });
+
+    let countMWTotal = 0;
+    let countMWWithRepeatToggleON = 0;
+    let countMWWithFilterAlertToggleON = 0;
+    mwLoop: for await (const response of mwFinder.find()) {
+      for (const mwSavedObject of response.saved_objects) {
+        if (countMWTotal > maxDocuments) break mwLoop;
+        countMWTotal = countMWTotal + 1;
+        // scopedQuery property will be null if "Filter alerts" toggle will be off
+        if (mwSavedObject.attributes.scopedQuery) {
+          countMWWithFilterAlertToggleON = countMWWithFilterAlertToggleON + 1;
+        }
+        // interval property will be not in place if "Repeat" toggle will be off
+        if (Object.hasOwn(mwSavedObject.attributes.rRule, 'interval')) {
+          countMWWithRepeatToggleON = countMWWithRepeatToggleON + 1;
+        }
+      }
+    }
+    await mwFinder.close();
+
+    return {
+      hasErrors: false,
+      count_mw_total: countMWTotal,
+      count_mw_with_repeat_toggle_on: countMWWithRepeatToggleON,
+      count_mw_with_filter_alert_toggle_on: countMWWithFilterAlertToggleON,
+    };
+  } catch (err) {
+    const errorMessage = err?.message ? err.message : err.toString();
+    logger.warn(
+      `Error executing alerting telemetry task: getTotalMWCount - ${JSON.stringify(err)}`,
+      {
+        tags: ['alerting', 'telemetry-failed'],
+        error: { stack_trace: err?.stack },
+      }
+    );
+    return {
+      hasErrors: true,
+      errorMessage,
+      count_mw_total: 0,
+      count_mw_with_repeat_toggle_on: 0,
+      count_mw_with_filter_alert_toggle_on: 0,
     };
   }
 }

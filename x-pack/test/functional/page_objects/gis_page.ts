@@ -310,9 +310,9 @@ export class GisPageObject extends FtrService {
 
     await this.setViewPopoverToggle.close();
     return {
-      lat: parseFloat(lat),
-      lon: parseFloat(lon),
-      zoom: parseFloat(zoom),
+      lat: parseFloat(lat ?? ''),
+      lon: parseFloat(lon ?? ''),
+      zoom: parseFloat(zoom ?? ''),
     };
   }
 
@@ -630,7 +630,7 @@ export class GisPageObject extends FtrService {
     return mapboxStyle;
   }
 
-  async getResponse(requestName: string) {
+  async getResponse(requestName?: string) {
     await this.inspector.open();
     const response = await this._getResponse(requestName);
     await this.inspector.close();

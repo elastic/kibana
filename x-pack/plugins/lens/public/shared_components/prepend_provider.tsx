@@ -9,9 +9,9 @@ import {
   type EuiResizeObserverProps,
   useEuiTheme,
   EuiFormLabel,
-  EuiResizeObserver,
+  useResizeObserver,
 } from '@elastic/eui';
-import React, { createContext, useState, useContext, ReactChild, ReactChildren } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 
 export const PrependWidthContext = createContext<{
   minWidth: number;
@@ -21,7 +21,7 @@ export const PrependWidthContext = createContext<{
   onResize: () => {},
 });
 
-export const PrependWidthProvider = ({ children }: { children: ReactChild | ReactChildren }) => {
+export const PrependWidthProvider = ({ children }: { children: React.ReactNode }) => {
   const [minPrependWidth, setMinPrependWidth] = useState(0);
 
   const prependResizeObserver = ({ width }: { width: number }) => {
@@ -39,17 +39,24 @@ export const PrependWidthProvider = ({ children }: { children: ReactChild | Reac
   );
 };
 
-export const Prepend = ({ children }: { children: ReactChild | ReactChildren }) => {
+export const Prepend = ({ children }: { children: React.ReactNode }) => {
   const { minWidth, onResize } = useContext(PrependWidthContext);
+
+  const [resizeRef, setResizeRef] = useState<Element | null>(null);
+  const width = useResizeObserver(resizeRef, 'width').width;
 
   const { euiTheme } = useEuiTheme();
   const paddingAffordance = parseInt(euiTheme.size.m, 10) * 2;
 
+  useEffect(() => {
+    onResize({ width, height: 0 });
+  }, [width, onResize]);
+
   return (
     <EuiFormLabel css={{ minWidth: Math.round(minWidth) + paddingAffordance }}>
-      <EuiResizeObserver onResize={onResize}>
-        {(resizeRef) => <span ref={resizeRef}>{children}</span>}
-      </EuiResizeObserver>
+      <span style={{ display: 'inline-block' }} ref={setResizeRef}>
+        {children}
+      </span>
     </EuiFormLabel>
   );
 };

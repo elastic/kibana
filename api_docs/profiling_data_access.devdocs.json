@@ -22,9 +22,9 @@
         "label": "ProfilingConfig",
         "description": [],
         "signature": [
-          "{ readonly elasticsearch?: Readonly<{} & { username: string; hosts: string; password: string; }> | undefined; }"
+          "{ readonly elasticsearch?: Readonly<{} & { username: string; password: string; hosts: string; }> | undefined; }"
         ],
-        "path": "x-pack/plugins/profiling_data_access/server/index.ts",
+        "path": "x-pack/plugins/observability_solution/profiling_data_access/server/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -37,7 +37,7 @@
         "label": "ProfilingDataAccessPluginStart",
         "description": [],
         "signature": [
-          "{ services: { fetchFlamechartData: ({ core, esClient, rangeFromMs, rangeToMs, kuery }: ",
+          "{ services: { fetchFlamechartData: ({ core, esClient, indices, stacktraceIdsField, query, totalSeconds, }: ",
           "FetchFlamechartParams",
           ") => Promise<{ TotalSeconds: number; Size: number; Edges: number[][]; FileID: string[]; FrameType: number[]; Inline: boolean[]; ExeFilename: string[]; AddressOrLine: number[]; FunctionName: string[]; FunctionOffset: number[]; SourceFilename: string[]; SourceLine: number[]; CountInclusive: number[]; CountExclusive: number[]; SamplingRate: number; TotalSamples: number; TotalCPU: number; SelfCPU: number; AnnualCO2TonsExclusive: number[]; AnnualCO2TonsInclusive: number[]; AnnualCostsUSDInclusive: number[]; AnnualCostsUSDExclusive: number[]; }>; getStatus: ({ esClient, soClient, spaceId }: ",
           "HasSetupParams",
@@ -55,7 +55,17 @@
           "CloudSetupStateType",
           " | ",
           "SetupStateType",
-          ">; fetchFunction: ({ core, esClient, rangeFromMs, rangeToMs, kuery, startIndex, endIndex, }: ",
+          ">; fetchFunctions: ({ core, esClient, startIndex, endIndex, indices, stacktraceIdsField, query, totalSeconds, }: ",
+          "FetchFunctionsParams",
+          ") => Promise<",
+          {
+            "pluginId": "@kbn/profiling-utils",
+            "scope": "common",
+            "docId": "kibKbnProfilingUtilsPluginApi",
+            "section": "def-common.TopNFunctions",
+            "text": "TopNFunctions"
+          },
+          ">; fetchESFunctions: ({ core, esClient, indices, stacktraceIdsField, query, aggregationField, limit, totalSeconds, }: ",
           "FetchFunctionsParams",
           ") => Promise<",
           {
@@ -67,7 +77,7 @@
           },
           ">; }; }"
         ],
-        "path": "x-pack/plugins/profiling_data_access/server/plugin.ts",
+        "path": "x-pack/plugins/observability_solution/profiling_data_access/server/plugin.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -84,7 +94,7 @@
       "signature": [
         "void"
       ],
-      "path": "x-pack/plugins/profiling_data_access/server/plugin.ts",
+      "path": "x-pack/plugins/observability_solution/profiling_data_access/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -113,9 +123,9 @@
           "; soClient: ",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-common.SavedObjectsClientContract",
+            "section": "def-server.SavedObjectsClientContract",
             "text": "SavedObjectsClientContract"
           },
           "; }) => Promise<",
@@ -128,7 +138,7 @@
           },
           " | null>"
         ],
-        "path": "x-pack/plugins/profiling_data_access/common/get_apm_policy.ts",
+        "path": "x-pack/plugins/observability_solution/profiling_data_access/common/get_apm_policy.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -139,7 +149,7 @@
             "tags": [],
             "label": "{\n  packagePolicyClient,\n  soClient,\n}",
             "description": [],
-            "path": "x-pack/plugins/profiling_data_access/common/get_apm_policy.ts",
+            "path": "x-pack/plugins/observability_solution/profiling_data_access/common/get_apm_policy.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -159,7 +169,7 @@
                     "text": "PackagePolicyClient"
                   }
                 ],
-                "path": "x-pack/plugins/profiling_data_access/common/get_apm_policy.ts",
+                "path": "x-pack/plugins/observability_solution/profiling_data_access/common/get_apm_policy.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -173,13 +183,13 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-common.SavedObjectsClientContract",
+                    "section": "def-server.SavedObjectsClientContract",
                     "text": "SavedObjectsClientContract"
                   }
                 ],
-                "path": "x-pack/plugins/profiling_data_access/common/get_apm_policy.ts",
+                "path": "x-pack/plugins/observability_solution/profiling_data_access/common/get_apm_policy.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -208,9 +218,9 @@
           "; soClient: ",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-common.SavedObjectsClientContract",
+            "section": "def-server.SavedObjectsClientContract",
             "text": "SavedObjectsClientContract"
           },
           "; }) => Promise<",
@@ -223,7 +233,7 @@
           },
           " | undefined>"
         ],
-        "path": "x-pack/plugins/profiling_data_access/common/fleet_policies.ts",
+        "path": "x-pack/plugins/observability_solution/profiling_data_access/common/fleet_policies.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -234,7 +244,7 @@
             "tags": [],
             "label": "{\n  soClient,\n  packagePolicyClient,\n}",
             "description": [],
-            "path": "x-pack/plugins/profiling_data_access/common/fleet_policies.ts",
+            "path": "x-pack/plugins/observability_solution/profiling_data_access/common/fleet_policies.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -254,7 +264,7 @@
                     "text": "PackagePolicyClient"
                   }
                 ],
-                "path": "x-pack/plugins/profiling_data_access/common/fleet_policies.ts",
+                "path": "x-pack/plugins/observability_solution/profiling_data_access/common/fleet_policies.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -268,13 +278,13 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-common.SavedObjectsClientContract",
+                    "section": "def-server.SavedObjectsClientContract",
                     "text": "SavedObjectsClientContract"
                   }
                 ],
-                "path": "x-pack/plugins/profiling_data_access/common/fleet_policies.ts",
+                "path": "x-pack/plugins/observability_solution/profiling_data_access/common/fleet_policies.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -303,9 +313,9 @@
           "; soClient: ",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-common.SavedObjectsClientContract",
+            "section": "def-server.SavedObjectsClientContract",
             "text": "SavedObjectsClientContract"
           },
           "; }) => Promise<",
@@ -318,7 +328,7 @@
           },
           " | undefined>"
         ],
-        "path": "x-pack/plugins/profiling_data_access/common/fleet_policies.ts",
+        "path": "x-pack/plugins/observability_solution/profiling_data_access/common/fleet_policies.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -329,7 +339,7 @@
             "tags": [],
             "label": "{\n  soClient,\n  packagePolicyClient,\n}",
             "description": [],
-            "path": "x-pack/plugins/profiling_data_access/common/fleet_policies.ts",
+            "path": "x-pack/plugins/observability_solution/profiling_data_access/common/fleet_policies.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -349,7 +359,7 @@
                     "text": "PackagePolicyClient"
                   }
                 ],
-                "path": "x-pack/plugins/profiling_data_access/common/fleet_policies.ts",
+                "path": "x-pack/plugins/observability_solution/profiling_data_access/common/fleet_policies.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -363,13 +373,13 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-common.SavedObjectsClientContract",
+                    "section": "def-server.SavedObjectsClientContract",
                     "text": "SavedObjectsClientContract"
                   }
                 ],
-                "path": "x-pack/plugins/profiling_data_access/common/fleet_policies.ts",
+                "path": "x-pack/plugins/observability_solution/profiling_data_access/common/fleet_policies.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -399,7 +409,7 @@
           " extends ",
           "ProfilingSetupOptions"
         ],
-        "path": "x-pack/plugins/profiling_data_access/common/cloud_setup.ts",
+        "path": "x-pack/plugins/observability_solution/profiling_data_access/common/cloud_setup.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -419,7 +429,7 @@
                 "text": "PackagePolicyClient"
               }
             ],
-            "path": "x-pack/plugins/profiling_data_access/common/cloud_setup.ts",
+            "path": "x-pack/plugins/observability_solution/profiling_data_access/common/cloud_setup.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -430,7 +440,7 @@
             "tags": [],
             "label": "isCloudEnabled",
             "description": [],
-            "path": "x-pack/plugins/profiling_data_access/common/cloud_setup.ts",
+            "path": "x-pack/plugins/observability_solution/profiling_data_access/common/cloud_setup.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -450,7 +460,7 @@
         "signature": [
           "\"elastic-universal-profiling-collector\""
         ],
-        "path": "x-pack/plugins/profiling_data_access/common/fleet_policies.ts",
+        "path": "x-pack/plugins/observability_solution/profiling_data_access/common/fleet_policies.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -465,7 +475,7 @@
         "signature": [
           "\"elastic-cloud-apm\""
         ],
-        "path": "x-pack/plugins/profiling_data_access/common/get_apm_policy.ts",
+        "path": "x-pack/plugins/observability_solution/profiling_data_access/common/get_apm_policy.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -480,7 +490,7 @@
         "signature": [
           "150000"
         ],
-        "path": "x-pack/plugins/profiling_data_access/common/cluster_settings.ts",
+        "path": "x-pack/plugins/observability_solution/profiling_data_access/common/cluster_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -495,7 +505,7 @@
         "signature": [
           "\"elastic-universal-profiling-symbolizer\""
         ],
-        "path": "x-pack/plugins/profiling_data_access/common/fleet_policies.ts",
+        "path": "x-pack/plugins/observability_solution/profiling_data_access/common/fleet_policies.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

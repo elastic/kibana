@@ -9,26 +9,28 @@ import expect from 'expect';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   deleteAllPrebuiltRuleAssets,
-  deleteAllRules,
   getPrebuiltRulesStatus,
-  createRule,
   getSimpleRule,
   createRuleAssetSavedObject,
   createPrebuiltRuleAssetSavedObjects,
   installPrebuiltRules,
-  deleteRule,
-  upgradePrebuiltRules,
+  performUpgradePrebuiltRules,
   createHistoricalPrebuiltRuleAssetSavedObjects,
   getPrebuiltRulesAndTimelinesStatus,
   installPrebuiltRulesAndTimelines,
 } from '../../../../utils';
+import {
+  deleteAllRules,
+  createRule,
+  deleteRule,
+} from '../../../../../../../common/utils/security_solution';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
   const log = getService('log');
 
-  describe('@ess @serverless @skipInQA Prebuilt Rules status', () => {
+  describe('@ess @serverless @skipInServerlessMKI Prebuilt Rules status', () => {
     describe('get_prebuilt_rules_status', () => {
       beforeEach(async () => {
         await deleteAllPrebuiltRuleAssets(es, log);
@@ -134,8 +136,11 @@ export default ({ getService }: FtrProviderContext): void => {
           // Increment the version of one of the installed rules and create the new rule assets
           ruleAssetSavedObjects[0]['security-rule'].version += 1;
           await createPrebuiltRuleAssetSavedObjects(es, ruleAssetSavedObjects);
-          // Upgrade all rules
-          await upgradePrebuiltRules(es, supertest);
+          // Upgrade all rules to target version
+          await performUpgradePrebuiltRules(es, supertest, {
+            mode: 'ALL_RULES',
+            pick_version: 'TARGET',
+          });
 
           const { stats } = await getPrebuiltRulesStatus(es, supertest);
           expect(stats).toMatchObject({
@@ -268,8 +273,11 @@ export default ({ getService }: FtrProviderContext): void => {
             createRuleAssetSavedObject({ rule_id: 'rule-1', version: 3 }),
           ]);
 
-          // Upgrade the rule
-          await upgradePrebuiltRules(es, supertest);
+          // Upgrade the rule to target version
+          await performUpgradePrebuiltRules(es, supertest, {
+            mode: 'ALL_RULES',
+            pick_version: 'TARGET',
+          });
 
           const { stats } = await getPrebuiltRulesStatus(es, supertest);
           expect(stats).toMatchObject({

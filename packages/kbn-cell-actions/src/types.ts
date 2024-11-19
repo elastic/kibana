@@ -1,26 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import type { PropsWithChildren } from 'react';
 import type {
   Action,
   ActionExecutionContext,
   UiActionsService,
 } from '@kbn/ui-actions-plugin/public';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
-import { Serializable } from '@kbn/utility-types';
+import type { Serializable } from '@kbn/utility-types';
 import type { CellActionsMode } from './constants';
 
-export interface CellActionsProviderProps {
+export * from './actions/types';
+
+export type CellActionsProviderProps = PropsWithChildren<{
   /**
    * Please assign `uiActions.getTriggerCompatibleActions` function.
    * This function should return a list of actions for a triggerId that are compatible with the provided context.
    */
   getTriggerCompatibleActions: UiActionsService['getTriggerCompatibleActions'];
-}
+}>;
 
 type Metadata = Record<string, unknown>;
 
@@ -46,7 +51,7 @@ export interface CellActionsData {
   value: CellActionFieldValue;
 }
 
-export interface CellActionsProps {
+export type CellActionsProps = PropsWithChildren<{
   data: CellActionsData | CellActionsData[];
 
   /**
@@ -82,7 +87,7 @@ export interface CellActionsProps {
   metadata?: Metadata;
 
   className?: string;
-}
+}>;
 
 export interface CellActionExecutionContext extends ActionExecutionContext {
   data: CellActionsData[];
@@ -130,21 +135,4 @@ export type GetActions = (context: CellActionCompatibilityContext) => Promise<Ce
 export interface PartitionedActions {
   extraActions: CellAction[];
   visibleActions: CellAction[];
-}
-
-/**
- * Cell action factory template with optional `id`.
- * The id override is required when using the action factory so it
- * can be omitted in the original action creator
- */
-export type CellActionTemplate<C extends CellAction = CellAction> = Omit<C, 'id'>;
-/**
- * Action factory extend parameter type,
- */
-export type CellActionExtend<C extends CellAction = CellAction> = Partial<C> & { id: string };
-export interface CellActionFactory<C extends CellAction = CellAction> {
-  <A extends C = C>(extend: CellActionExtend<A>): A;
-  combine: <A extends C = C>(
-    partialActionTemplate: Partial<CellActionTemplate<A>>
-  ) => CellActionFactory<A>;
 }

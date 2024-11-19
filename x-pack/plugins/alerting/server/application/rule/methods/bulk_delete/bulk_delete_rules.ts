@@ -31,7 +31,6 @@ import type {
   BulkDeleteRulesRequestBody,
 } from './types';
 import { validateBulkDeleteRulesBody } from './validation';
-import type { RuleAttributes } from '../../../../data/rule/types';
 import { bulkDeleteRulesSo } from '../../../../data/rule';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
 import { ruleDomainSchema } from '../../schemas';
@@ -50,6 +49,7 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
   }
 
   const { ids, filter } = options;
+  const actionsClient = await context.getActionsClient();
 
   const kueryNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : buildKueryNodeFilter(filter);
   const authorizationFilter = await getAuthorizationFilter(context, { action: 'DELETE' });
@@ -84,6 +84,11 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
       logger: context.logger,
       taskManager: context.taskManager,
     }),
+    context.backfillClient.deleteBackfillForRules({
+      ruleIds: rules.map(({ id }) => id),
+      namespace: context.namespace,
+      unsecuredSavedObjectsClient: context.unsecuredSavedObjectsClient,
+    }),
     bulkMarkApiKeysForInvalidation(
       { apiKeys: apiKeysToInvalidate },
       context.logger,
@@ -96,13 +101,17 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
     // fix the type cast from SavedObjectsBulkUpdateObject to SavedObjectsBulkUpdateObject
     // when we are doing the bulk delete and this should fix itself
     const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
-    const ruleDomain = transformRuleAttributesToRuleDomain<Params>(attributes as RuleAttributes, {
-      id,
-      logger: context.logger,
-      ruleType,
-      references,
-      omitGeneratedValues: false,
-    });
+    const ruleDomain = transformRuleAttributesToRuleDomain<Params>(
+      attributes as RawRule,
+      {
+        id,
+        logger: context.logger,
+        ruleType,
+        references,
+        omitGeneratedValues: false,
+      },
+      (connectorId: string) => actionsClient.isSystemAction(connectorId)
+    );
 
     try {
       ruleDomainSchema.validate(ruleDomain);
@@ -134,17 +143,15 @@ const bulkDeleteWithOCC = async (
       type: 'rules',
     },
     () =>
-      context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RuleAttributes>(
-        {
-          filter,
-          type: RULE_SAVED_OBJECT_TYPE,
-          perPage: 100,
-          ...(context.namespace ? { namespaces: [context.namespace] } : undefined),
-        }
-      )
+      context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>({
+        filter,
+        type: RULE_SAVED_OBJECT_TYPE,
+        perPage: 100,
+        ...(context.namespace ? { namespaces: [context.namespace] } : undefined),
+      })
   );
 
-  const rulesToDelete: Array<SavedObjectsBulkUpdateObject<RuleAttributes>> = [];
+  const rulesToDelete: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
   const apiKeyToRuleIdMapping: Record<string, string> = {};
   const taskIdToRuleIdMapping: Record<string, string> = {};
   const ruleNameToRuleIdMapping: Record<string, string> = {};
@@ -157,8 +164,9 @@ const bulkDeleteWithOCC = async (
           if (rule.attributes.apiKey && !rule.attributes.apiKeyCreatedByUser) {
             apiKeyToRuleIdMapping[rule.id] = rule.attributes.apiKey;
           }
-          if (rule.attributes.name) {
-            ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
+          const ruleName = rule.attributes.name;
+          if (ruleName) {
+            ruleNameToRuleIdMapping[rule.id] = ruleName;
           }
           if (rule.attributes.scheduledTaskId) {
             taskIdToRuleIdMapping[rule.id] = rule.attributes.scheduledTaskId;
@@ -169,7 +177,11 @@ const bulkDeleteWithOCC = async (
             ruleAuditEvent({
               action: RuleAuditAction.DELETE,
               outcome: 'unknown',
-              savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: rule.id },
+              savedObject: {
+                type: RULE_SAVED_OBJECT_TYPE,
+                id: rule.id,
+                name: ruleName,
+              },
             })
           );
         }
@@ -179,7 +191,7 @@ const bulkDeleteWithOCC = async (
   );
 
   for (const { id, attributes } of rulesToDelete) {
-    await untrackRuleAlerts(context, id, attributes as RuleAttributes);
+    await untrackRuleAlerts(context, id, attributes as RawRule);
   }
 
   const result = await withSpan(

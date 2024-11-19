@@ -83,6 +83,7 @@ describe('requestOAuthClientCredentialsToken', () => {
             "scheduling": "lifo",
             "sockets": Object {},
             "totalSocketCount": 0,
+            Symbol(shapeMode): false,
             Symbol(kCapture): false,
           },
           "maxContentLength": 1000000,

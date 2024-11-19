@@ -1,18 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { v4 as uuidv4 } from 'uuid';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common/src/server_types';
-import type {
-  DataViewSpec,
-  DataView,
-  DataViewsPublicPluginStart,
-} from '@kbn/data-views-plugin/public';
+import type { DataViewSpec, DataView } from '@kbn/data-views-plugin/public';
 import type {
   FormBasedPersistedState,
   GenericIndexPatternColumn,
@@ -24,6 +21,7 @@ import type {
 } from '@kbn/lens-plugin/public/datasources/text_based/types';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { DataViewsCommon } from './config_builder';
 import {
   FormulaValueConfig,
   LensAnnotationLayer,
@@ -88,7 +86,7 @@ export function buildReferences(dataviews: Record<string, DataView>) {
 const getAdhocDataView = (dataView: DataView): Record<string, DataViewSpec> => {
   return {
     [dataView.id ?? uuidv4()]: {
-      ...dataView.toSpec(),
+      ...dataView.toSpec(false),
     },
   };
 };
@@ -126,7 +124,7 @@ export function isFormulaDataset(dataset?: LensDataset) {
  */
 export async function getDataView(
   index: string,
-  dataViewsAPI: DataViewsPublicPluginStart,
+  dataViewsAPI: DataViewsCommon,
   timeField?: string
 ) {
   let dataView: DataView;
@@ -203,6 +201,7 @@ function buildDatasourceStatesLayer(
     const newLayer = {
       index: dataView!.id!,
       query: { esql: (dataset as LensESQLDataset).esql } as AggregateQuery,
+      timeField: dataView!.timeFieldName,
       columns,
       allColumns: columns,
     };
@@ -226,7 +225,7 @@ export const buildDatasourceStates = async (
     dataView: DataView
   ) => PersistedIndexPatternLayer | FormBasedPersistedState['layers'] | undefined,
   getValueColumns: (config: any, i: number) => TextBasedLayerColumn[],
-  dataViewsAPI: DataViewsPublicPluginStart
+  dataViewsAPI: DataViewsCommon
 ) => {
   let layers: Partial<LensAttributes['state']['datasourceStates']> = {};
 

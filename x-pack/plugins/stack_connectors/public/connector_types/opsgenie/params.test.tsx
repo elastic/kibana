@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, screen, render, fireEvent } from '@testing-library/react';
+import { screen, render, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import OpsgenieParamFields from './params';
 import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
@@ -218,6 +218,7 @@ describe('OpsgenieParamFields', () => {
     expect(screen.getByDisplayValue('123')).toBeInTheDocument();
 
     rerender(
+      // @ts-expect-error upgrade typescript v4.9.5
       <OpsgenieParamFields
         {...{
           ...defaultCloseAlertProps,
@@ -253,6 +254,7 @@ describe('OpsgenieParamFields', () => {
     expect(screen.getByDisplayValue('456')).toBeInTheDocument();
 
     rerender(
+      // @ts-expect-error upgrade typescript v4.9.5
       <OpsgenieParamFields
         {...{
           ...defaultCreateAlertProps,
@@ -292,6 +294,7 @@ describe('OpsgenieParamFields', () => {
     expect(editAction).toBeCalledTimes(1);
 
     rerender(
+      // @ts-expect-error upgrade typescript v4.9.5
       <OpsgenieParamFields
         {...{
           ...defaultCloseAlertProps,
@@ -324,11 +327,9 @@ describe('OpsgenieParamFields', () => {
   it('calls editAction when changing the subAction', async () => {
     render(<OpsgenieParamFields {...defaultCreateAlertProps} />);
 
-    act(() =>
-      userEvent.selectOptions(
-        screen.getByTestId('opsgenie-subActionSelect'),
-        screen.getByText('Close alert')
-      )
+    await userEvent.selectOptions(
+      screen.getByTestId('opsgenie-subActionSelect'),
+      screen.getByText('Close alert')
     );
 
     expect(editAction).toBeCalledTimes(1);

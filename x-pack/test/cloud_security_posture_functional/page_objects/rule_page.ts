@@ -51,7 +51,11 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
   const rulePage = {
     toggleBulkActionButton: async () => {
       const bulkActionButtonToBeClicked = await testSubjects.find(RULES_BULK_ACTION_BUTTON);
-      await bulkActionButtonToBeClicked.click();
+      await retry.waitFor('bulk action options to be displayed', async () => {
+        await bulkActionButtonToBeClicked.click();
+        const bulkActionOptions = await testSubjects.findAll(RULES_BULK_ACTION_OPTION_DISABLE);
+        return bulkActionOptions.length > 0;
+      });
     },
 
     clickBulkActionOption: async (optionTestId: string) => {
@@ -187,11 +191,24 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
     },
   };
 
-  const navigateToRulePage = async (benchmarkCisId: string, benchmarkCisVersion: string) => {
+  const navigateToRulePage = async (
+    benchmarkCisId: string,
+    benchmarkCisVersion: string,
+    space?: string
+  ) => {
+    const options = space
+      ? {
+          basePath: `/s/${space}`,
+          shouldUseHashForSubUrl: false,
+        }
+      : {
+          shouldUseHashForSubUrl: false,
+        };
+
     await PageObjects.common.navigateToUrl(
       'securitySolution', // Defined in Security Solution plugin
       `cloud_security_posture/benchmarks/${benchmarkCisId}/${benchmarkCisVersion}/rules`,
-      { shouldUseHashForSubUrl: false }
+      options
     );
     await PageObjects.header.waitUntilLoadingHasFinished();
   };

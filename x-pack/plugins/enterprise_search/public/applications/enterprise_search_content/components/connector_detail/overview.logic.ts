@@ -8,18 +8,8 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { Status } from '../../../../../common/types/api';
-import { KibanaLogic } from '../../../shared/kibana';
 
-import {
-  CachedFetchIndexApiLogic,
-  CachedFetchIndexApiLogicActions,
-} from '../../api/index/cached_fetch_index_api_logic';
-
-import { CONNECTORS_PATH } from '../../routes';
-
-interface OverviewLogicActions {
-  apiError: CachedFetchIndexApiLogicActions['apiError'];
-}
+import { CachedFetchIndexApiLogic } from '../../api/index/cached_fetch_index_api_logic';
 
 interface OverviewLogicValues {
   apiKey: string;
@@ -30,18 +20,10 @@ interface OverviewLogicValues {
   status: typeof CachedFetchIndexApiLogic.values.status;
 }
 
-export const OverviewLogic = kea<MakeLogicType<OverviewLogicValues, OverviewLogicActions>>({
+export const OverviewLogic = kea<MakeLogicType<OverviewLogicValues, {}>>({
   connect: {
-    actions: [CachedFetchIndexApiLogic, ['apiError']],
     values: [CachedFetchIndexApiLogic, ['indexData', 'status']],
   },
-  listeners: () => ({
-    apiError: async (_, breakpoint) => {
-      // show error for a second before navigating away
-      await breakpoint(1000);
-      KibanaLogic.values.navigateToUrl(CONNECTORS_PATH);
-    },
-  }),
   path: ['enterprise_search', 'connector_detail', 'overview'],
   selectors: ({ selectors }) => ({
     isError: [() => [selectors.status], (status) => status === Status.ERROR],

@@ -15,7 +15,11 @@ import { getSignalsQueryMapFromThreatIndex } from './get_signals_map_from_threat
 import { searchAfterAndBulkCreateSuppressedAlerts } from '../../utils/search_after_bulk_create_suppressed_alerts';
 
 import { threatEnrichmentFactory } from './threat_enrichment_factory';
-import { getSignalValueMap } from './utils';
+import {
+  FAILED_CREATE_QUERY_MAX_CLAUSE,
+  getSignalValueMap,
+  MANY_NESTED_CLAUSES_ERR,
+} from './utils';
 
 export const createEventSignal = async ({
   bulkCreate,
@@ -56,6 +60,7 @@ export const createEventSignal = async ({
   completeRule,
   sortOrder = 'desc',
   isAlertSuppressionActive,
+  experimentalFeatures,
 }: CreateEventSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatFiltersFromEvents = buildThreatMappingFilter({
     threatMapping,
@@ -91,12 +96,32 @@ export const createEventSignal = async ({
       indexFields: threatIndexFields,
     };
 
-    const signalsQueryMap = await getSignalsQueryMapFromThreatIndex({
-      threatSearchParams,
-      eventsCount: currentEventList.length,
-      signalValueMap: getSignalValueMap({ eventList: currentEventList, threatMatchedFields }),
-      termsQueryAllowed: true,
-    });
+    let signalsQueryMap;
+    try {
+      signalsQueryMap = await getSignalsQueryMapFromThreatIndex({
+        threatSearchParams,
+        eventsCount: currentEventList.length,
+        signalValueMap: getSignalValueMap({
+          eventList: currentEventList,
+          threatMatchedFields,
+        }),
+        termsQueryAllowed: true,
+      });
+    } catch (exc) {
+      // we receive an error if the event list count < threat list count
+      // which puts us into the create_event_signal which differs from create threat signal
+      // in that we call getSignalsQueryMapFromThreatIndex which can *throw* an error
+      // rather than *return* one.
+      if (
+        exc.message.includes(MANY_NESTED_CLAUSES_ERR) ||
+        exc.message.includes(FAILED_CREATE_QUERY_MAX_CLAUSE)
+      ) {
+        currentResult.errors.push(exc.message);
+        return currentResult;
+      } else {
+        throw exc;
+      }
+    }
 
     const ids = Array.from(signalsQueryMap.keys());
     const indexFilter = {
@@ -119,6 +144,7 @@ export const createEventSignal = async ({
       index: inputIndex,
       exceptionFilter,
       fields: inputIndexFields,
+      loadFields: true,
     });
 
     ruleExecutionLogger.debug(`${ids?.length} matched signals found`);
@@ -159,6 +185,7 @@ export const createEventSignal = async ({
         alertTimestampOverride: runOpts.alertTimestampOverride,
         alertWithSuppression: runOpts.alertWithSuppression,
         alertSuppression: completeRule.ruleParams.alertSuppression,
+        experimentalFeatures,
       });
     } else {
       createResult = await searchAfterAndBulkCreate(searchAfterBulkCreateParams);

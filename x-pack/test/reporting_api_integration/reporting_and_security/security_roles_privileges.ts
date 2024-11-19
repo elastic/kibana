@@ -23,42 +23,6 @@ export default function ({ getService }: FtrProviderContext) {
       await reportingAPI.deleteAllReports();
     });
 
-    describe('Dashboard: CSV download file', () => {
-      it('does not allow user that does not have the role-based privilege', async () => {
-        const res = await reportingAPI.downloadCsv(
-          reportingAPI.DATA_ANALYST_USERNAME,
-          reportingAPI.DATA_ANALYST_PASSWORD,
-          {
-            searchSource: {
-              query: { query: '', language: 'kuery' },
-              index: '5193f870-d861-11e9-a311-0fa548c5f953',
-              filter: [],
-            } as unknown as SerializedSearchSourceFields,
-            browserTimezone: 'UTC',
-            title: 'testfooyu78yt90-',
-          }
-        );
-        expect(res.status).to.eql(403);
-      });
-
-      it('does allow user with the role privilege', async () => {
-        const res = await reportingAPI.downloadCsv(
-          reportingAPI.REPORTING_USER_USERNAME,
-          reportingAPI.REPORTING_USER_PASSWORD,
-          {
-            searchSource: {
-              query: { query: '', language: 'kuery' },
-              index: '5193f870-d861-11e9-a311-0fa548c5f953',
-              filter: [],
-            } as unknown as SerializedSearchSourceFields,
-            browserTimezone: 'UTC',
-            title: 'testfooyu78yt90-',
-          }
-        );
-        expect(res.status).to.eql(200);
-      });
-    });
-
     describe('Dashboard: Generate PDF report', () => {
       it('does not allow user that does not have the role-based privilege', async () => {
         const res = await reportingAPI.generatePdf(
@@ -68,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
             browserTimezone: 'UTC',
             title: 'test PDF disallowed',
             layout: { id: 'preserve_layout' },
-            relativeUrls: ['/fooyou'],
+            locatorParams: [{ id: 'canvas', version: '7.14.0', params: {} }],
             objectType: 'dashboard',
             version: '7.14.0',
           }
@@ -84,7 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
             browserTimezone: 'UTC',
             title: 'test PDF allowed',
             layout: { id: 'preserve_layout' },
-            relativeUrls: ['/fooyou'],
+            locatorParams: [{ id: 'canvas', version: '7.14.0', params: {} }],
             objectType: 'dashboard',
             version: '7.14.0',
           }
@@ -102,7 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
             browserTimezone: 'UTC',
             title: 'test PDF disallowed',
             layout: { id: 'preserve_layout' },
-            relativeUrls: ['/fooyou'],
+            locatorParams: [{ id: 'canvas', version: '7.14.0', params: {} }],
             objectType: 'visualization',
             version: '7.14.0',
           }
@@ -118,7 +82,7 @@ export default function ({ getService }: FtrProviderContext) {
             browserTimezone: 'UTC',
             title: 'test PDF allowed',
             layout: { id: 'preserve_layout' },
-            relativeUrls: ['/fooyou'],
+            locatorParams: [{ id: 'canvas', version: '7.14.0', params: {} }],
             objectType: 'visualization',
             version: '7.14.0',
           }
@@ -136,7 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
             browserTimezone: 'UTC',
             title: 'test PDF disallowed',
             layout: { id: 'preserve_layout' },
-            relativeUrls: ['/fooyou'],
+            locatorParams: [{ id: 'canvas', version: '7.14.0', params: {} }],
             objectType: 'canvas',
             version: '7.14.0',
           }
@@ -152,7 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
             browserTimezone: 'UTC',
             title: 'test PDF allowed',
             layout: { id: 'preserve_layout' },
-            relativeUrls: ['/fooyou'],
+            locatorParams: [{ id: 'canvas', version: '7.14.0', params: {} }],
             objectType: 'canvas',
             version: '7.14.0',
           }
@@ -185,7 +149,7 @@ export default function ({ getService }: FtrProviderContext) {
             objectType: 'search',
             searchSource: {
               version: true,
-              fields: [{ field: '*', include_unmapped: 'true' }],
+              fields: [{ field: '*', include_unmapped: true }],
               index: '5193f870-d861-11e9-a311-0fa548c5f953',
             } as unknown as SerializedSearchSourceFields,
             columns: [],

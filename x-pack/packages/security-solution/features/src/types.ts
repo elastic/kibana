@@ -12,48 +12,54 @@ import type {
 } from '@kbn/features-plugin/common';
 import type { RecursivePartial } from '@kbn/utility-types';
 import type {
-  AppFeatureAssistantKey,
-  AppFeatureCasesKey,
-  AppFeatureKeyType,
-  AppFeatureSecurityKey,
+  ProductFeatureAssistantKey,
+  ProductFeatureAttackDiscoveryKey,
+  ProductFeatureCasesKey,
+  ProductFeatureKeyType,
+  ProductFeatureSecurityKey,
   AssistantSubFeatureId,
   CasesSubFeatureId,
   SecuritySubFeatureId,
-} from './app_features_keys';
+} from './product_features_keys';
 
-export type { AppFeatureKeyType };
-export type AppFeatureKeys = AppFeatureKeyType[];
+export type { ProductFeatureKeyType };
+export type ProductFeatureKeys = ProductFeatureKeyType[];
 
 // Features types
 export type BaseKibanaFeatureConfig = Omit<KibanaFeatureConfig, 'subFeatures'>;
 export type SubFeaturesPrivileges = RecursivePartial<SubFeaturePrivilegeConfig>;
-export type AppFeatureKibanaConfig<T extends string = string> =
+export type ProductFeatureKibanaConfig<T extends string = string> =
   RecursivePartial<BaseKibanaFeatureConfig> & {
     subFeatureIds?: T[];
     subFeaturesPrivileges?: SubFeaturesPrivileges[];
   };
-export type AppFeaturesConfig<T extends string = string> = Map<
-  AppFeatureKeyType,
-  AppFeatureKibanaConfig<T>
+export type ProductFeaturesConfig<T extends string = string> = Map<
+  ProductFeatureKeyType,
+  ProductFeatureKibanaConfig<T>
 >;
 
-export type AppFeaturesSecurityConfig = Map<
-  AppFeatureSecurityKey,
-  AppFeatureKibanaConfig<SecuritySubFeatureId>
+export type ProductFeaturesSecurityConfig = Map<
+  ProductFeatureSecurityKey,
+  ProductFeatureKibanaConfig<SecuritySubFeatureId>
 >;
-export type AppFeaturesCasesConfig = Map<
-  AppFeatureCasesKey,
-  AppFeatureKibanaConfig<CasesSubFeatureId>
+export type ProductFeaturesCasesConfig = Map<
+  ProductFeatureCasesKey,
+  ProductFeatureKibanaConfig<CasesSubFeatureId>
 >;
 
-export type AppFeaturesAssistantConfig = Map<
-  AppFeatureAssistantKey,
-  AppFeatureKibanaConfig<AssistantSubFeatureId>
+export type ProductFeaturesAssistantConfig = Map<
+  ProductFeatureAssistantKey,
+  ProductFeatureKibanaConfig<AssistantSubFeatureId>
+>;
+
+export type ProductFeaturesAttackDiscoveryConfig = Map<
+  ProductFeatureAttackDiscoveryKey,
+  ProductFeatureKibanaConfig
 >;
 
 export type AppSubFeaturesMap<T extends string = string> = Map<T, SubFeatureConfig>;
 
-export interface AppFeatureParams<T extends string = string> {
+export interface ProductFeatureParams<T extends string = string> {
   baseKibanaFeature: BaseKibanaFeatureConfig;
   baseKibanaSubFeatureIds: T[];
   subFeaturesMap: AppSubFeaturesMap<T>;

@@ -1,0 +1,34 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "index.ts",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "../../../typings/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/dataset-quality-plugin",
+    "@kbn/i18n",
+    "@kbn/io-ts-utils",
+    "@kbn/kibana-react-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/management-plugin",
+    "@kbn/react-kibana-context-render",
+    "@kbn/shared-ux-router",
+    "@kbn/core-notifications-browser",
+    "@kbn/i18n-react",
+    "@kbn/core-chrome-browser",
+    "@kbn/features-plugin",
+    "@kbn/share-plugin",
+    "@kbn/deeplinks-management",
+    "@kbn/deeplinks-observability",
+    "@kbn/ebt-tools",
+    "@kbn/core-application-common",
+  ],
+  "exclude": ["target/**/*"]
+}

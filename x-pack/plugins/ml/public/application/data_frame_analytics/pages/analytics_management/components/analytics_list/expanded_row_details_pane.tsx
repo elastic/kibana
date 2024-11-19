@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import './expanded_row_details_pane.scss';
-
-import React, { FC, ReactElement } from 'react';
+import type { FC, ReactElement } from 'react';
+import React from 'react';
+import { i18n } from '@kbn/i18n';
 
 import {
   EuiBasicTable,
@@ -20,6 +20,7 @@ import {
   EuiText,
   EuiTitle,
   EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
 
 export interface SectionItem {
@@ -41,16 +42,17 @@ export const OverallDetails: FC<{
 }> = ({ overallDetails }) => (
   <EuiFlexGroup alignItems="center" wrap data-test-subj={overallDetails.dataTestSubj}>
     {overallDetails.items.map((item) => {
+      const key = item.title;
       if (item.title === 'badge') {
         return (
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} key={key}>
             <EuiBetaBadge label={item.description} color="subdued" title={item.title} />
           </EuiFlexItem>
         );
       }
 
       return (
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} key={key}>
           <EuiFlexGroup gutterSize="xs">
             <EuiFlexItem grow={false}>
               <EuiDescriptionListDescription className="descriptionListTitle">
@@ -81,7 +83,7 @@ export const Stats = ({ section }: { section: SectionConfig }) => (
     <EuiFlexItem grow={false}>
       <EuiFlexGroup>
         {section.items.map((item) => (
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} key={item.title}>
             <EuiDescriptionListDescription className="descriptionListTitle">
               <EuiText size="xs">{item.title}</EuiText>
             </EuiDescriptionListDescription>
@@ -105,11 +107,21 @@ export const Section: FC<SectionProps> = ({ section }) => {
   const columns = [
     {
       field: 'title',
-      name: '',
+      name: i18n.translate(
+        'xpack.ml.dataframe.analytics.expandedRowDetails.analysisStatsHeaderField',
+        {
+          defaultMessage: 'Field',
+        }
+      ),
     },
     {
       field: 'description',
-      name: '',
+      name: i18n.translate(
+        'xpack.ml.dataframe.analytics.expandedRowDetails.analysisStatsHeaderValue',
+        {
+          defaultMessage: 'Value',
+        }
+      ),
       render: (v: SectionItem['description']) => <>{v}</>,
     },
   ];
@@ -125,7 +137,6 @@ export const Section: FC<SectionProps> = ({ section }) => {
         columns={columns}
         tableCaption={section.title}
         tableLayout="auto"
-        className="mlExpandedRowDetailsSection"
         data-test-subj={`${section.dataTestSubj}-table`}
       />
     </div>
@@ -149,12 +160,16 @@ export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({
   progress,
   dataTestSubj,
 }) => {
+  const {
+    euiTheme: { size },
+  } = useEuiTheme();
+
   return (
     <>
       <EuiSpacer />
       <EuiFlexGroup
         direction="column"
-        className="mlExpandedRowDetails"
+        css={{ padding: `${size.s} ${size.base} ${size.base}` }}
         data-test-subj={dataTestSubj}
         gutterSize="s"
       >
@@ -186,10 +201,10 @@ export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({
               </EuiTitle>
               <EuiSpacer size="xs" />
               {progress.items.map((item) => (
-                <>
+                <span key={item.title}>
                   {item.description}
                   <EuiSpacer size="s" />
-                </>
+                </span>
               ))}
             </EuiFlexItem>
             <EuiFlexItem grow={3}>

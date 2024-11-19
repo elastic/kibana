@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
 import {
-  CONTROL_GROUP_TYPE,
-  rawControlGroupAttributesToSerializable,
-  serializableToRawControlGroupAttributes,
-} from '@kbn/controls-plugin/common';
-import { Serializable } from '@kbn/utility-types';
+  controlGroupSavedObjectStateToSerializableRuntimeState,
+  serializableRuntimeStateToControlGroupSavedObjectState,
+} from '@kbn/controls-plugin/server';
+import { Serializable, SerializableRecord } from '@kbn/utility-types';
 import { SavedObjectMigrationFn } from '@kbn/core/server';
 import { MigrateFunction } from '@kbn/kibana-utils-plugin/common';
 import { SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
@@ -19,8 +20,8 @@ import { SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
 import {
   convertPanelStateToSavedDashboardPanel,
   convertSavedDashboardPanelToPanelState,
-} from '../../../common';
-import { SavedDashboardPanel } from '../../../common/content_management';
+} from './utils';
+import type { SavedDashboardPanel } from '..';
 
 type ValueOrReferenceInput = SavedObjectEmbeddableInput & {
   attributes?: Serializable;
@@ -34,15 +35,15 @@ export const migrateByValueDashboardPanels =
     const { attributes } = doc;
 
     if (attributes?.controlGroupInput) {
-      const controlGroupInput = rawControlGroupAttributesToSerializable(
+      const controlGroupState = controlGroupSavedObjectStateToSerializableRuntimeState(
         attributes.controlGroupInput
       );
       const migratedControlGroupInput = migrate({
-        ...controlGroupInput,
+        ...controlGroupState,
         type: CONTROL_GROUP_TYPE,
-      });
+      } as SerializableRecord);
       attributes.controlGroupInput =
-        serializableToRawControlGroupAttributes(migratedControlGroupInput);
+        serializableRuntimeStateToControlGroupSavedObjectState(migratedControlGroupInput);
     }
 
     // Skip if panelsJSON is missing otherwise this will cause saved object import to fail when

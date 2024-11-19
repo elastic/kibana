@@ -5,7 +5,8 @@
       "filter_path": [],
       "human": "__flag__",
       "pretty": "__flag__",
-      "defer_definition_decompression": "__flag__"
+      "defer_definition_decompression": "__flag__",
+      "wait_for_completion": "__flag__"
     },
     "methods": [
       "PUT"

@@ -20,7 +20,8 @@ import {
   ConvertConnectorApiLogicArgs,
   ConvertConnectorApiLogicResponse,
 } from '../../../../api/connector/convert_connector_api_logic';
-import { IndexViewActions, IndexViewLogic } from '../../index_view_logic';
+import { ConnectorViewLogic } from '../../../connector_detail/connector_view_logic';
+import { IndexViewLogic } from '../../index_view_logic';
 
 interface ConvertConnectorValues {
   connectorId: typeof IndexViewLogic.values.connectorId;
@@ -34,7 +35,6 @@ type ConvertConnectorActions = Pick<
   'apiError' | 'apiSuccess' | 'makeRequest'
 > & {
   convertConnector(): void;
-  fetchIndex(): IndexViewActions['fetchIndex'];
   hideModal(): void;
   showModal(): void;
 };
@@ -49,15 +49,13 @@ export const ConvertConnectorLogic = kea<
     showModal: () => true,
   },
   connect: {
-    actions: [
-      ConvertConnectorApiLogic,
-      ['apiError', 'apiSuccess', 'makeRequest'],
-      IndexViewLogic,
-      ['fetchIndex'],
-    ],
-    values: [ConvertConnectorApiLogic, ['status'], IndexViewLogic, ['connectorId']],
+    actions: [ConvertConnectorApiLogic, ['apiError', 'apiSuccess', 'makeRequest']],
+    values: [ConvertConnectorApiLogic, ['status'], ConnectorViewLogic, ['connectorId']],
   },
   listeners: ({ actions, values }) => ({
+    apiSuccess: () => {
+      actions.hideModal();
+    },
     convertConnector: () => {
       if (values.connectorId) {
         actions.makeRequest({ connectorId: values.connectorId });

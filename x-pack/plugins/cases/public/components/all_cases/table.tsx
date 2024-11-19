@@ -7,10 +7,10 @@
 
 import type { FunctionComponent, MutableRefObject } from 'react';
 import React, { useCallback } from 'react';
+import { css } from '@emotion/react';
 import type { EuiTableSelectionType, EuiBasicTableProps, Pagination } from '@elastic/eui';
-import { EuiEmptyPrompt, EuiSkeletonText, EuiBasicTable } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiSkeletonText, EuiBasicTable, useEuiTheme } from '@elastic/eui';
 import classnames from 'classnames';
-import styled from 'styled-components';
 
 import { LinkButton } from '../links';
 
@@ -35,11 +35,8 @@ interface CasesTableProps {
   tableRef?: MutableRefObject<EuiBasicTable | null>;
   tableRowProps: EuiBasicTableProps<CaseUI>['rowProps'];
   isLoadingColumns: boolean;
+  rowHeader?: string;
 }
-
-const Div = styled.div`
-  margin-top: ${({ theme }) => theme.eui.euiSizeM};
-`;
 
 export const CasesTable: FunctionComponent<CasesTableProps> = ({
   columns,
@@ -56,11 +53,13 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
   tableRef,
   tableRowProps,
   isLoadingColumns,
+  rowHeader,
 }) => {
   const { permissions } = useCasesContext();
   const { getCreateCaseUrl, navigateToCreateCase } = useCreateCaseNavigation();
+  const { euiTheme } = useEuiTheme();
   const navigateToCreateCaseClick = useCallback(
-    (ev) => {
+    (ev: React.SyntheticEvent) => {
       ev.preventDefault();
       if (goToCreateCase != null) {
         goToCreateCase();
@@ -72,16 +71,20 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
   );
 
   return (isCasesLoading && isDataEmpty) || isLoadingColumns ? (
-    <Div>
+    <div
+      css={css`
+        margin-top: ${euiTheme.size.m};
+      `}
+    >
       <EuiSkeletonText data-test-subj="initialLoadingPanelAllCases" lines={10} />
-    </Div>
+    </div>
   ) : (
     <>
       <EuiBasicTable
         className={classnames({ isSelectorView })}
         columns={columns}
+        rowHeader={rowHeader}
         data-test-subj="cases-table"
-        isSelectable={!isSelectorView}
         itemId="id"
         items={data.cases}
         loading={isCommentUpdating}
@@ -113,7 +116,6 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
         rowProps={tableRowProps}
         selection={!isSelectorView ? selection : undefined}
         sorting={sorting}
-        hasActions={false}
       />
     </>
   );

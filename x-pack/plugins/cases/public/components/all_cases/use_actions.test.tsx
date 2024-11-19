@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import userEvent from '@testing-library/user-event';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { waitFor } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks/dom';
 import {
@@ -29,11 +29,26 @@ jest.mock('../../containers/api');
 jest.mock('../../containers/user_profiles/api');
 
 describe('useActions', () => {
+  let user: UserEvent;
   let appMockRender: AppMockRenderer;
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   beforeEach(() => {
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
+  });
+
+  afterEach(async () => {
+    await appMockRender.clearQueryCache();
   });
 
   it('renders column actions', async () => {
@@ -72,7 +87,7 @@ describe('useActions', () => {
     const comp = result.current.actions!.render(basicCase) as React.ReactElement;
     const res = appMockRender.render(comp);
 
-    userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
+    await user.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
     await waitForEuiPopoverOpen();
 
     expect(res.getByText('Actions')).toBeInTheDocument();
@@ -91,17 +106,17 @@ describe('useActions', () => {
     const comp = result.current.actions!.render(basicCase) as React.ReactElement;
     const res = appMockRender.render(comp);
 
-    userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
+    await user.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
     await waitForEuiPopoverOpen();
 
-    userEvent.click(res.getByTestId(`case-action-status-panel-${basicCase.id}`));
+    await user.click(res.getByTestId(`case-action-status-panel-${basicCase.id}`));
     await waitForEuiContextMenuPanelTransition();
 
     expect(res.getByTestId('cases-bulk-action-status-open')).toBeInTheDocument();
     expect(res.getByTestId('cases-bulk-action-status-in-progress')).toBeInTheDocument();
     expect(res.getByTestId('cases-bulk-action-status-closed')).toBeInTheDocument();
 
-    userEvent.click(res.getByTestId('cases-bulk-action-status-in-progress'));
+    await user.click(res.getByTestId('cases-bulk-action-status-in-progress'));
 
     await waitFor(() => {
       expect(updateCasesSpy).toHaveBeenCalled();
@@ -118,10 +133,10 @@ describe('useActions', () => {
     const comp = result.current.actions!.render(basicCase) as React.ReactElement;
     const res = appMockRender.render(comp);
 
-    userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
+    await user.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
     await waitForEuiPopoverOpen();
 
-    userEvent.click(res.getByTestId(`case-action-severity-panel-${basicCase.id}`));
+    await user.click(res.getByTestId(`case-action-severity-panel-${basicCase.id}`));
     await waitForEuiContextMenuPanelTransition();
 
     expect(res.getByTestId('cases-bulk-action-severity-low')).toBeInTheDocument();
@@ -129,7 +144,7 @@ describe('useActions', () => {
     expect(res.getByTestId('cases-bulk-action-severity-high')).toBeInTheDocument();
     expect(res.getByTestId('cases-bulk-action-severity-critical')).toBeInTheDocument();
 
-    userEvent.click(res.getByTestId('cases-bulk-action-severity-medium'));
+    await user.click(res.getByTestId('cases-bulk-action-severity-medium'));
 
     await waitFor(() => {
       expect(updateCasesSpy).toHaveBeenCalled();
@@ -153,10 +168,10 @@ describe('useActions', () => {
     const comp = result.current.actions!.render(basicCase) as React.ReactElement;
     const res = appMockRender.render(comp);
 
-    userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
+    await user.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
     await waitForEuiPopoverOpen();
 
-    userEvent.click(res.getByTestId('cases-action-copy-id'));
+    await user.click(res.getByTestId('cases-action-copy-id'));
 
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(basicCase.id);
 
@@ -176,16 +191,16 @@ describe('useActions', () => {
       const comp = result.current.actions!.render(basicCase) as React.ReactElement;
       const res = appMockRender.render(comp);
 
-      userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
+      await user.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
       await waitForEuiPopoverOpen();
 
-      userEvent.click(res.getByTestId('cases-bulk-action-delete'));
+      await user.click(res.getByTestId('cases-bulk-action-delete'));
 
       await waitFor(() => {
         expect(res.getByTestId('confirm-delete-case-modal')).toBeInTheDocument();
       });
 
-      userEvent.click(res.getByTestId('confirmModalConfirmButton'));
+      await user.click(res.getByTestId('confirmModalConfirmButton'));
 
       await waitFor(() => {
         expect(deleteSpy).toHaveBeenCalled();
@@ -200,16 +215,16 @@ describe('useActions', () => {
       const comp = result.current.actions!.render(basicCase) as React.ReactElement;
       const res = appMockRender.render(comp);
 
-      userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
+      await user.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
       await waitForEuiPopoverOpen();
 
-      userEvent.click(res.getByTestId('cases-bulk-action-delete'));
+      await user.click(res.getByTestId('cases-bulk-action-delete'));
 
       await waitFor(() => {
         expect(res.getByTestId('confirm-delete-case-modal')).toBeInTheDocument();
       });
 
-      userEvent.click(res.getByTestId('confirmModalCancelButton'));
+      await user.click(res.getByTestId('confirmModalCancelButton'));
 
       expect(res.queryByTestId('confirm-delete-case-modal')).toBeFalsy();
     });
@@ -226,10 +241,10 @@ describe('useActions', () => {
       const comp = result.current.actions!.render(basicCase) as React.ReactElement;
       const res = appMockRender.render(comp);
 
-      userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
+      await user.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
       await waitForEuiPopoverOpen();
 
-      userEvent.click(res.getByTestId('cases-bulk-action-tags'));
+      await user.click(res.getByTestId('cases-bulk-action-tags'));
 
       await waitFor(() => {
         expect(res.getByTestId('cases-edit-tags-flyout')).toBeInTheDocument();
@@ -239,8 +254,8 @@ describe('useActions', () => {
         expect(res.getByText('coke')).toBeInTheDocument();
       });
 
-      userEvent.click(res.getByText('coke'));
-      userEvent.click(res.getByTestId('cases-edit-tags-flyout-submit'));
+      await user.click(res.getByText('coke'));
+      await user.click(res.getByTestId('cases-edit-tags-flyout-submit'));
 
       await waitFor(() => {
         expect(updateCasesSpy).toHaveBeenCalled();
@@ -261,10 +276,10 @@ describe('useActions', () => {
       const comp = result.current.actions!.render(basicCase) as React.ReactElement;
       const res = appMockRender.render(comp);
 
-      userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
+      await user.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
       await waitForEuiPopoverOpen();
 
-      userEvent.click(res.getByTestId('cases-bulk-action-assignees'));
+      await user.click(res.getByTestId('cases-bulk-action-assignees'));
 
       await waitFor(() => {
         expect(res.getByTestId('cases-edit-assignees-flyout')).toBeInTheDocument();
@@ -274,8 +289,8 @@ describe('useActions', () => {
         expect(res.getByText('Damaged Raccoon')).toBeInTheDocument();
       });
 
-      userEvent.click(res.getByText('Damaged Raccoon'));
-      userEvent.click(res.getByTestId('cases-edit-assignees-flyout-submit'));
+      await user.click(res.getByText('Damaged Raccoon'));
+      await user.click(res.getByTestId('cases-edit-assignees-flyout-submit'));
 
       await waitFor(() => {
         expect(updateCasesSpy).toHaveBeenCalled();
@@ -297,7 +312,7 @@ describe('useActions', () => {
       const comp = result.current.actions!.render(basicCase) as React.ReactElement;
       const res = appMockRender.render(comp);
 
-      userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
+      await user.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
       await waitForEuiPopoverOpen();
 
       expect(res.getByTestId(`case-action-status-panel-${basicCase.id}`)).toBeInTheDocument();
@@ -316,7 +331,7 @@ describe('useActions', () => {
       const comp = result.current.actions!.render(basicCase) as React.ReactElement;
       const res = appMockRender.render(comp);
 
-      userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
+      await user.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
       await waitForEuiPopoverOpen();
 
       expect(res.getByTestId(`case-action-status-panel-${basicCase.id}`)).toBeInTheDocument();
@@ -335,7 +350,7 @@ describe('useActions', () => {
       const comp = result.current.actions!.render(basicCase) as React.ReactElement;
       const res = appMockRender.render(comp);
 
-      userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
+      await user.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
       await waitForEuiPopoverOpen();
 
       expect(res.queryByTestId(`case-action-status-panel-${basicCase.id}`)).toBeFalsy();

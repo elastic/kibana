@@ -37,6 +37,7 @@ export type InstallType = 'reinstall' | 'reupdate' | 'rollback' | 'update' | 'in
 export type InstallSource = 'registry' | 'upload' | 'bundled' | 'custom';
 
 export type EpmPackageInstallStatus = 'installed' | 'installing' | 'install_failed';
+export type InstallResultStatus = 'installed' | 'already_installed';
 
 export type ServiceName = 'kibana' | 'elasticsearch';
 export type AgentAssetType = typeof agentAssetTypes;
@@ -52,17 +53,17 @@ export type AssetType =
 */
 export enum KibanaAssetType {
   dashboard = 'dashboard',
+  lens = 'lens',
   visualization = 'visualization',
   search = 'search',
   indexPattern = 'index_pattern',
   map = 'map',
-  lens = 'lens',
+  mlModule = 'ml_module',
   securityRule = 'security_rule',
   cloudSecurityPostureRuleTemplate = 'csp_rule_template',
-  mlModule = 'ml_module',
-  tag = 'tag',
   osqueryPackAsset = 'osquery_pack_asset',
   osquerySavedQuery = 'osquery_saved_query',
+  tag = 'tag',
 }
 
 /*
@@ -70,27 +71,27 @@ export enum KibanaAssetType {
 */
 export enum KibanaSavedObjectType {
   dashboard = 'dashboard',
+  lens = 'lens',
   visualization = 'visualization',
   search = 'search',
   indexPattern = 'index-pattern',
   map = 'map',
-  lens = 'lens',
   mlModule = 'ml-module',
   securityRule = 'security-rule',
   cloudSecurityPostureRuleTemplate = 'csp-rule-template',
-  tag = 'tag',
   osqueryPackAsset = 'osquery-pack-asset',
   osquerySavedQuery = 'osquery-saved-query',
+  tag = 'tag',
 }
 
 export enum ElasticsearchAssetType {
   index = 'index',
+  indexTemplate = 'index_template',
   componentTemplate = 'component_template',
   ingestPipeline = 'ingest_pipeline',
-  indexTemplate = 'index_template',
   ilmPolicy = 'ilm_policy',
-  transform = 'transform',
   dataStreamIlmPolicy = 'data_stream_ilm_policy',
+  transform = 'transform',
   mlModel = 'ml_model',
 }
 export type FleetElasticsearchAssetType = Exclude<
@@ -98,12 +99,7 @@ export type FleetElasticsearchAssetType = Exclude<
   ElasticsearchAssetType.index
 >;
 
-export type AllowedAssetTypes = [
-  KibanaAssetType.dashboard,
-  KibanaAssetType.search,
-  KibanaAssetType.visualization,
-  ElasticsearchAssetType.transform
-];
+export type DisplayedAssetTypes = Array<`${KibanaSavedObjectType | ElasticsearchAssetType}`>;
 
 // Defined as part of the removing public references to saved object schemas
 export interface SimpleSOAssetType {
@@ -111,6 +107,7 @@ export interface SimpleSOAssetType {
   type: ElasticsearchAssetType | KibanaSavedObjectType;
   updatedAt?: string;
   attributes: {
+    service?: string;
     title?: string;
     description?: string;
   };
@@ -127,10 +124,25 @@ export type InstallablePackage = RegistryPackage | ArchivePackage;
 
 export type AssetsMap = Map<string, Buffer | undefined>;
 
+export interface ArchiveEntry {
+  path: string;
+  buffer?: Buffer;
+}
+
+export interface ArchiveIterator {
+  traverseEntries: (onEntry: (entry: ArchiveEntry) => Promise<void>) => Promise<void>;
+  getPaths: () => Promise<string[]>;
+}
+
 export interface PackageInstallContext {
   packageInfo: InstallablePackage;
+  /**
+   * @deprecated Use `archiveIterator` to access the package archive entries
+   * without loading them all into memory at once.
+   */
   assetsMap: AssetsMap;
   paths: string[];
+  archiveIterator: ArchiveIterator;
 }
 
 export type ArchivePackage = PackageSpecManifest &
@@ -159,9 +171,9 @@ type RegistryOverridesToOptional = Pick<PackageSpecManifest, 'title' | 'release'
 // and confirm with Registry if they are really optional. Can update types and ~4 places in code later if neccessary
 interface RegistryAdditionalProperties {
   assets?: string[];
-  download: string;
+  download?: string;
   signature_path?: string;
-  path: string;
+  path?: string;
   readme?: string;
   internal?: boolean; // Registry addition[0] and EPM uses it[1] [0]: https://github.com/elastic/package-registry/blob/dd7b021893aa8d66a5a5fde963d8ff2792a9b8fa/util/package.go#L63 [1]
   data_streams?: RegistryDataStream[]; // Registry addition [0] [0]: https://github.com/elastic/package-registry/blob/dd7b021893aa8d66a5a5fde963d8ff2792a9b8fa/util/package.go#L65
@@ -181,6 +193,20 @@ export interface RegistryImage extends PackageSpecIcon {
   path: string;
 }
 
+export interface DeploymentsModesDefault {
+  enabled: boolean;
+}
+
+export interface DeploymentsModesAgentless extends DeploymentsModesDefault {
+  organization?: string;
+  division?: string;
+  team?: string;
+}
+export interface DeploymentsModes {
+  agentless: DeploymentsModesAgentless;
+  default?: DeploymentsModesDefault;
+}
+
 export enum RegistryPolicyTemplateKeys {
   categories = 'categories',
   data_streams = 'data_streams',
@@ -196,6 +222,7 @@ export enum RegistryPolicyTemplateKeys {
   description = 'description',
   icons = 'icons',
   screenshots = 'screenshots',
+  deployment_modes = 'deployment_modes',
 }
 interface BaseTemplate {
   [RegistryPolicyTemplateKeys.name]: string;
@@ -204,6 +231,7 @@ interface BaseTemplate {
   [RegistryPolicyTemplateKeys.icons]?: RegistryImage[];
   [RegistryPolicyTemplateKeys.screenshots]?: RegistryImage[];
   [RegistryPolicyTemplateKeys.multiple]?: boolean;
+  [RegistryPolicyTemplateKeys.deployment_modes]?: DeploymentsModes;
 }
 export interface RegistryPolicyIntegrationTemplate extends BaseTemplate {
   [RegistryPolicyTemplateKeys.categories]?: Array<PackageSpecCategory | undefined>;
@@ -283,6 +311,7 @@ export type RegistrySearchResult = Pick<
   | 'icons'
   | 'internal'
   | 'data_streams'
+  | 'policy_templates_behavior'
   | 'policy_templates'
   | 'categories'
 >;
@@ -310,9 +339,9 @@ export interface AssetParts {
 export type AssetTypeToParts = KibanaAssetTypeToParts & ElasticsearchAssetTypeToParts;
 export type AssetsGroupedByServiceByType = Record<
   Extract<ServiceName, 'kibana'>,
-  KibanaAssetTypeToParts
+  KibanaAssetTypeToParts | undefined
 > &
-  Record<Extract<ServiceName, 'elasticsearch'>, ElasticsearchAssetTypeToParts>;
+  Record<Extract<ServiceName, 'elasticsearch'>, ElasticsearchAssetTypeToParts | undefined>;
 
 export type KibanaAssetParts = AssetParts & {
   service: Extract<ServiceName, 'kibana'>;
@@ -427,6 +456,8 @@ export enum RegistryVarsEntryKeys {
   default = 'default',
   os = 'os',
   secret = 'secret',
+  hide_in_deployment_modes = 'hide_in_deployment_modes',
+  full_width = 'full_width',
 }
 
 // EPR types this as `[]map[string]interface{}`
@@ -448,6 +479,8 @@ export interface RegistryVarsEntry {
       default: string | string[];
     };
   };
+  [RegistryVarsEntryKeys.hide_in_deployment_modes]?: string[];
+  [RegistryVarsEntryKeys.full_width]?: boolean;
 }
 
 // Deprecated as part of the removing public references to saved object schemas
@@ -514,13 +547,17 @@ export type PackageList = PackageListItem[];
 export type PackageListItem = Installable<RegistrySearchResult> & {
   id: string;
   integration?: string;
-  installationInfo?: InstallationInfo;
   savedObject?: InstallableSavedObject;
+  installationInfo?: InstallationInfo;
 };
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
 export type PackageInfo =
   | Installable<Merge<RegistryPackage, EpmPackageAdditions>>
   | Installable<Merge<ArchivePackage, EpmPackageAdditions>>;
+
+export interface PackageMetadata {
+  has_policies: boolean;
+}
 
 export type IntegrationCardReleaseLabel = 'beta' | 'preview' | 'ga' | 'rc';
 
@@ -548,8 +585,39 @@ export interface InstallFailedAttempt {
   };
 }
 
+export enum INSTALL_STATES {
+  CREATE_RESTART_INSTALLATION = 'create_restart_installation',
+  INSTALL_KIBANA_ASSETS = 'install_kibana_assets',
+  INSTALL_ILM_POLICIES = 'install_ilm_policies',
+  INSTALL_ML_MODEL = 'install_ml_model',
+  INSTALL_INDEX_TEMPLATE_PIPELINES = 'install_index_template_pipelines',
+  REMOVE_LEGACY_TEMPLATES = 'remove_legacy_templates',
+  UPDATE_CURRENT_WRITE_INDICES = 'update_current_write_indices',
+  INSTALL_TRANSFORMS = 'install_transforms',
+  DELETE_PREVIOUS_PIPELINES = 'delete_previous_pipelines',
+  SAVE_ARCHIVE_ENTRIES = 'save_archive_entries_from_assets_map',
+  RESOLVE_KIBANA_PROMISE = 'resolve_kibana_promise',
+  UPDATE_SO = 'update_so',
+}
+type StatesKeys = keyof typeof INSTALL_STATES;
+export type StateNames = (typeof INSTALL_STATES)[StatesKeys];
+
+export interface LatestExecutedState<T> {
+  name: T;
+  started_at: string;
+  error?: string;
+}
+
+export type InstallLatestExecutedState = LatestExecutedState<StateNames>;
+
+export interface StateContext<T> {
+  [key: string]: any;
+  latestExecutedState?: LatestExecutedState<T>;
+}
+
 export interface Installation {
   installed_kibana: KibanaAssetReference[];
+  additional_spaces_installed_kibana?: Record<string, KibanaAssetReference[]>;
   installed_es: EsAssetReference[];
   package_assets?: PackageAssetReference[];
   es_index_patterns: Record<string, string>;
@@ -568,6 +636,7 @@ export interface Installation {
   internal?: boolean;
   removable?: boolean;
   latest_install_failed_attempts?: InstallFailedAttempt[];
+  latest_executed_state?: InstallLatestExecutedState;
 }
 
 export interface PackageUsageStats {
@@ -609,6 +678,7 @@ export type AssetReference = KibanaAssetReference | EsAssetReference;
 
 export interface KibanaAssetReference {
   id: string;
+  originId?: string;
   type: KibanaSavedObjectType;
 }
 export interface EsAssetReference {

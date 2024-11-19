@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import React, { FC, ReactNode } from 'react';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -18,7 +19,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { useCurrentThemeVars } from '../../../../contexts/kibana';
-import { EuiThemeType } from '../../../../components/color_range_legend/use_color_range';
+import type { EuiThemeType } from '../../../../components/color_range_legend/use_color_range';
 import type { NerInference, NerResponse } from './ner_inference';
 import { INPUT_TYPE } from '../inference_base';
 
@@ -139,10 +140,9 @@ const Lines: FC<{ result: NerResponse }> = ({ result }) => {
 const EntityBadge = ({
   entity,
   children,
-}: {
+}: PropsWithChildren<{
   entity: estypes.MlTrainedModelEntities;
-  children: ReactNode;
-}) => {
+}>) => {
   const { euiTheme } = useCurrentThemeVars();
   return (
     <EuiBadge

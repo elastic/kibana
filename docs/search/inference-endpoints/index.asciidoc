@@ -1,0 +1,5 @@
+[role="xpack"]
+[[inference-endpoints]]
+== Inference endpoints UI
+
+(coming in 8.16.0)

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -51,7 +52,7 @@ function getPropsForDropType(type: 'swap' | 'duplicate' | 'combine') {
   }
 }
 
-const getExtraDrop = ({
+const getExtraTarget = ({
   type,
   isIncompatible,
 }: {
@@ -64,8 +65,8 @@ const getExtraDrop = ({
       gutterSize="s"
       justifyContent="spaceBetween"
       alignItems="center"
-      className={classNames('domDragDrop__extraDrop', {
-        'domDragDrop-incompatibleExtraDrop': isIncompatible,
+      className={classNames('domDroppable__extraTarget', {
+        'domDroppable--incompatibleExtraTarget': isIncompatible,
       })}
     >
       <EuiFlexItem grow={false}>
@@ -88,15 +89,15 @@ const getExtraDrop = ({
 };
 
 const customDropTargetsMap: Partial<{ [dropType in DropType]: React.ReactElement }> = {
-  replace_duplicate_incompatible: getExtraDrop({ type: 'duplicate', isIncompatible: true }),
-  duplicate_incompatible: getExtraDrop({ type: 'duplicate', isIncompatible: true }),
-  swap_incompatible: getExtraDrop({ type: 'swap', isIncompatible: true }),
-  replace_duplicate_compatible: getExtraDrop({ type: 'duplicate' }),
-  duplicate_compatible: getExtraDrop({ type: 'duplicate' }),
-  swap_compatible: getExtraDrop({ type: 'swap' }),
-  field_combine: getExtraDrop({ type: 'combine' }),
-  combine_compatible: getExtraDrop({ type: 'combine' }),
-  combine_incompatible: getExtraDrop({ type: 'combine', isIncompatible: true }),
+  replace_duplicate_incompatible: getExtraTarget({ type: 'duplicate', isIncompatible: true }),
+  duplicate_incompatible: getExtraTarget({ type: 'duplicate', isIncompatible: true }),
+  swap_incompatible: getExtraTarget({ type: 'swap', isIncompatible: true }),
+  replace_duplicate_compatible: getExtraTarget({ type: 'duplicate' }),
+  duplicate_compatible: getExtraTarget({ type: 'duplicate' }),
+  swap_compatible: getExtraTarget({ type: 'swap' }),
+  field_combine: getExtraTarget({ type: 'combine' }),
+  combine_compatible: getExtraTarget({ type: 'combine' }),
+  combine_incompatible: getExtraTarget({ type: 'combine', isIncompatible: true }),
 };
 
 export const getCustomDropTarget = (dropType: DropType) => customDropTargetsMap?.[dropType] || null;
@@ -112,7 +113,7 @@ export const getAdditionalClassesOnEnter = (dropType?: string) => {
       'replace_duplicate_incompatible',
     ].includes(dropType)
   ) {
-    return 'domDragDrop-isReplacing';
+    return 'domDroppable--replacing';
   }
 };
 
@@ -128,6 +129,6 @@ export const getAdditionalClassesOnDroppable = (dropType?: string) => {
       'combine_incompatible',
     ].includes(dropType)
   ) {
-    return 'domDragDrop-notCompatible';
+    return 'domDroppable--incompatible';
   }
 };

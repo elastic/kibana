@@ -22,9 +22,8 @@ import { hostsUrl } from '../../../urls/navigation';
 import { kqlSearch } from '../../../tasks/security_header';
 import { mockRiskEngineEnabled } from '../../../tasks/entity_analytics';
 
-describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
-  // FLAKY: https://github.com/elastic/kibana/issues/174859
-  describe.skip('with legacy risk score', () => {
+describe('risk tab', { tags: ['@ess'] }, () => {
+  describe('with legacy risk score', () => {
     before(() => {
       cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
     });
@@ -36,27 +35,22 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
       // this fix wait until we fave host in all host table, and then we go to risk tab
       cy.contains('siem-kibana');
 
-      // Sometimes it doesn't navigate to the risk tab an causes flakiness
-      // Curiously the "renders the table" test doesn't fail
-      // https://github.com/elastic/kibana/issues/174860
-      // https://github.com/elastic/kibana/issues/174859
       navigateToHostRiskDetailTab();
     });
 
     after(() => {
-      cy.task('esArchiverUnload', 'risk_hosts');
+      cy.task('esArchiverUnload', { archiveName: 'risk_hosts' });
     });
 
     it('renders the table', () => {
       kqlSearch('host.name: "siem-kibana" {enter}');
       cy.get(HOST_BY_RISK_TABLE_CELL).eq(4).should('have.text', 'siem-kibana');
       cy.get(HOST_BY_RISK_TABLE_CELL).eq(5).should('have.text', 'Mar 10, 2021 @ 14:51:05.766');
-      cy.get(HOST_BY_RISK_TABLE_CELL).eq(6).should('have.text', '21');
+      cy.get(HOST_BY_RISK_TABLE_CELL).eq(6).should('have.text', '21.00');
       cy.get(HOST_BY_RISK_TABLE_CELL).eq(7).should('have.text', 'Low');
     });
 
-    // Flaky
-    it.skip('filters the table', () => {
+    it('filters the table', () => {
       openRiskTableFilterAndSelectTheCriticalOption();
 
       cy.get(HOST_BY_RISK_TABLE_CELL).eq(3).should('not.have.text', 'siem-kibana');
@@ -64,8 +58,7 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
       removeCriticalFilterAndCloseRiskTableFilter();
     });
 
-    // Flaky
-    it.skip('should be able to change items count per page', () => {
+    it('should be able to change items count per page', () => {
       selectFiveItemsPerPageOption();
 
       cy.get(HOST_BY_RISK_TABLE_HOSTNAME_CELL).should('have.length', 5);
@@ -77,7 +70,7 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  describe('with new risk score', () => {
+  describe('with new risk score', { tags: ['@serverless'] }, () => {
     before(() => {
       cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
     });
@@ -93,19 +86,18 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     after(() => {
-      cy.task('esArchiverUnload', 'risk_scores_new');
+      cy.task('esArchiverUnload', { archiveName: 'risk_scores_new' });
     });
 
     it('renders the table', () => {
       kqlSearch('host.name: "siem-kibana" {enter}');
       cy.get(HOST_BY_RISK_TABLE_CELL).eq(4).should('have.text', 'siem-kibana');
       cy.get(HOST_BY_RISK_TABLE_CELL).eq(5).should('have.text', 'Mar 10, 2021 @ 14:51:05.766');
-      cy.get(HOST_BY_RISK_TABLE_CELL).eq(6).should('have.text', '90');
+      cy.get(HOST_BY_RISK_TABLE_CELL).eq(6).should('have.text', '90.00');
       cy.get(HOST_BY_RISK_TABLE_CELL).eq(7).should('have.text', 'Critical');
     });
 
-    // Flaky
-    it.skip('filters the table', () => {
+    it('filters the table', () => {
       openRiskTableFilterAndSelectTheCriticalOption();
 
       cy.get(HOST_BY_RISK_TABLE_CELL).eq(3).should('not.have.text', 'siem-kibana');
@@ -113,8 +105,7 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
       removeCriticalFilterAndCloseRiskTableFilter();
     });
 
-    // Flaky
-    it.skip('should be able to change items count per page', () => {
+    it('should be able to change items count per page', () => {
       selectFiveItemsPerPageOption();
 
       cy.get(HOST_BY_RISK_TABLE_HOSTNAME_CELL).should('have.length', 5);

@@ -16,7 +16,7 @@ import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import type { AppFeatureKeys } from '@kbn/security-solution-features';
+import type { ProductFeatureKeys } from '@kbn/security-solution-features';
 import {
   createPackagePolicyWithInitialManifestMock,
   createPackagePolicyWithManifestMock,
@@ -28,8 +28,8 @@ import { createEndpointArtifactClientMock, getManifestClientMock } from '../mock
 import type { ManifestManagerContext } from './manifest_manager';
 import { ManifestManager } from './manifest_manager';
 import { parseExperimentalConfigValue } from '../../../../../common/experimental_features';
-import { createAppFeaturesServiceMock } from '../../../../lib/app_features_service/mocks';
-import type { AppFeaturesService } from '../../../../lib/app_features_service/app_features_service';
+import { createProductFeaturesServiceMock } from '../../../../lib/product_features_service/mocks';
+import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
 
 export const createExceptionListResponse = (data: ExceptionListItemSchema[], total?: number) => ({
   data,
@@ -71,34 +71,36 @@ export interface ManifestManagerMockOptions {
   exceptionListClient: ExceptionListClient;
   packagePolicyService: jest.Mocked<PackagePolicyClient>;
   savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
-  appFeaturesService: AppFeaturesService;
+  productFeaturesService: ProductFeaturesService;
+  experimentalFeatures?: string[];
 }
 
 export const buildManifestManagerMockOptions = (
   opts: Partial<ManifestManagerMockOptions>,
-  customAppFeatures?: AppFeatureKeys
+  customProductFeatures?: ProductFeatureKeys
 ): ManifestManagerMockOptions => {
   const savedObjectMock = savedObjectsClientMock.create();
   return {
     exceptionListClient: listMock.getExceptionListClient(savedObjectMock),
     packagePolicyService: createPackagePolicyServiceMock(),
     savedObjectsClient: savedObjectMock,
-    appFeaturesService: createAppFeaturesServiceMock(customAppFeatures),
+    productFeaturesService: createProductFeaturesServiceMock(customProductFeatures),
     ...opts,
   };
 };
 
 export const buildManifestManagerContextMock = (
   opts: Partial<ManifestManagerMockOptions>,
-  customAppFeatures?: AppFeatureKeys
+  customProductFeatures?: ProductFeatureKeys
 ): ManifestManagerContext => {
-  const fullOpts = buildManifestManagerMockOptions(opts, customAppFeatures);
+  const fullOpts = buildManifestManagerMockOptions(opts, customProductFeatures);
 
   return {
     ...fullOpts,
     artifactClient: createEndpointArtifactClientMock(),
     logger: loggingSystemMock.create().get() as jest.Mocked<Logger>,
-    experimentalFeatures: parseExperimentalConfigValue([]).features,
+    experimentalFeatures: parseExperimentalConfigValue([...(opts.experimentalFeatures ?? [])])
+      .features,
     packagerTaskPackagePolicyUpdateBatchSize: 10,
     esClient: elasticsearchServiceMock.createElasticsearchClient(),
   };

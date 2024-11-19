@@ -12,7 +12,6 @@ import {
   SUPPRESS_FOR_DETAILS,
   SUPPRESS_BY_DETAILS,
   SUPPRESS_MISSING_FIELD,
-  DETAILS_TITLE,
 } from '../../../../screens/rule_details';
 
 import {
@@ -40,16 +39,6 @@ describe(
   'Detection rules, Indicator Match, Alert Suppression',
   {
     tags: ['@ess', '@serverless'],
-    // alertSuppressionForIndicatorMatchRuleEnabled feature flag is also enabled in a global config
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'alertSuppressionForIndicatorMatchRuleEnabled',
-          ])}`,
-        ],
-      },
-    },
   },
   () => {
     const rule = getNewThreatIndicatorRule();
@@ -77,9 +66,6 @@ describe(
           'have.text',
           'Suppress and group alerts for events with missing fields'
         );
-
-        // suppression functionality should be under Tech Preview
-        cy.contains(DETAILS_TITLE, SUPPRESS_FOR_DETAILS).contains('Technical Preview');
       });
 
       fillAboutRuleMinimumAndContinue(rule);

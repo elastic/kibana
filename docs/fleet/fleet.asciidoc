@@ -18,6 +18,27 @@ It is recommended for advanced users only.
 [role="screenshot"]
 image::fleet/images/fleet-start.png[{fleet} app in {kib}]
 
+Most integration content installed by {fleet} isn’t editable. This content is tagged with a **Managed** badge in the {kib} UI. Managed content itself cannot be edited or deleted, however managed visualizations, dashboards, and saved searches can be cloned.   
+
+[role="screenshot"]
+image::fleet/images/system-managed.png[An image of the new managed badge.]
+
+When a managed dashboard is cloned, any linked or referenced panels become part of the clone without relying on external sources. The panels are integrated into the cloned dashboard as stand alone components. For example, with a cloned dashboard, the cloned panels become entirely self-contained copy without any dependencies on the original configuration. Clones can be customized and modified without accidentally affecting the original.
+
+NOTE: The cloned managed content retains the managed badge, but is independent from the original. 
+
+You can make a complete clone of a whole managed dashboard. If you clone a panel within a managed dashboard, you're prompted to save the changes as a new dashboard, which is unlinked from the original managed content. 
+
+To clone a dashboard:
+
+. Go to *Dashboards*.
+. Click on the name of the managed dashboard to view the dashboard.
+. Click *Clone* in the toolbar.
+. Click *Save and return* after editing the dashboard.
+. Click *Save*.
+
+To clone managed content relating to specific visualization editors, such as Lens, TSVB, and Maps, view the visualization in the editor then begin to make edits. Unlike cloning dashboards, and dashboard panels, the cloned content retains the original configurations. Once finished you are prompted to save the edits as a new visualization. The same applies for altering any saved searches in a managed visualization. 
+
 [float]
 == Get started
 

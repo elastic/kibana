@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -17,6 +18,7 @@ import {
 import { CoreStart } from '@kbn/core/public';
 import { get } from 'lodash';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 
 import {
   SavedObjectRelation,
@@ -138,12 +140,20 @@ export const RelationshipsTable = ({
     ] as SearchFilterConfig[],
   };
 
+  const { pageSize, onTableChange } = useEuiTablePersist<SavedObjectRelation>({
+    tableId: 'dataViewMgmtRelationships',
+    initialPageSize: 10,
+  });
+
   return (
     <RedirectAppLinks currentAppId={IPM_APP_ID} navigateToUrl={navigateToUrl}>
       <EuiInMemoryTable<SavedObjectRelation>
         items={relationships}
         columns={columns}
-        pagination={true}
+        pagination={{
+          pageSize,
+        }}
+        onTableChange={onTableChange}
         search={search}
         rowProps={() => ({
           'data-test-subj': `relationshipsTableRow`,

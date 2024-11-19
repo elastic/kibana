@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -11,7 +12,7 @@ import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
 import type { DataViewBase } from '@kbn/es-query';
-import { cloneDeep, each, mapValues, omit, pickBy, reject } from 'lodash';
+import { each, mapValues, pick, pickBy, reject } from 'lodash';
 import type { DataViewField, IIndexPatternFieldList } from '../fields';
 import { fieldList } from '../fields';
 import type {
@@ -79,6 +80,18 @@ export class DataView extends AbstractDataView implements DataViewBase {
     this.fields.replaceAll(Object.values(spec.fields || {}));
   }
 
+  getScriptedFieldsForQuery() {
+    return this.getScriptedFields().reduce((scriptFields, field) => {
+      scriptFields[field.name] = {
+        script: {
+          source: field.script as string,
+          lang: field.lang,
+        },
+      };
+      return scriptFields;
+    }, {} as Record<string, estypes.ScriptField>);
+  }
+
   getEtag = () => this.etag;
 
   setEtag = (etag: string | undefined) => (this.etag = etag);
@@ -119,12 +132,10 @@ export class DataView extends AbstractDataView implements DataViewBase {
       };
     });
 
-    const runtimeFields = this.getRuntimeMappings();
-
     return {
-      scriptFields,
+      scriptFields: this.getScriptedFieldsForQuery(),
       docvalueFields,
-      runtimeFields,
+      runtimeFields: this.getRuntimeMappings(),
     };
   }
 
@@ -134,57 +145,40 @@ export class DataView extends AbstractDataView implements DataViewBase {
    * will be fetched from Elasticsearch when instantiating a new Data View with this spec.
    */
   public toSpec(includeFields = true): DataViewSpec {
+    const spec = this.toSpecShared(includeFields);
     const fields =
       includeFields && this.fields
         ? this.fields.toSpec({ getFormatterForField: this.getFormatterForField.bind(this) })
         : undefined;
 
-    // if fields aren't included, don't include count
-    const fieldAttrs = cloneDeep(this.fieldAttrs);
-    if (!includeFields) {
-      Object.keys(fieldAttrs).forEach((key) => {
-        delete fieldAttrs[key].count;
-        if (Object.keys(fieldAttrs[key]).length === 0) {
-          delete fieldAttrs[key];
-        }
-      });
+    if (fields) {
+      spec.fields = fields;
     }
 
-    const spec: DataViewSpec = {
-      id: this.id,
-      version: this.version,
-      title: this.getIndexPattern(),
-      timeFieldName: this.timeFieldName,
-      sourceFilters: [...(this.sourceFilters || [])],
-      fields,
-      typeMeta: this.typeMeta,
-      type: this.type,
-      fieldFormats: { ...this.fieldFormatMap },
-      runtimeFieldMap: cloneDeep(this.runtimeFieldMap),
-      fieldAttrs,
-      allowNoIndex: this.allowNoIndex,
-      name: this.name,
-      allowHidden: this.getAllowHidden(),
-    };
-
-    // Filter undefined values from the spec
-    return Object.fromEntries(Object.entries(spec).filter(([, v]) => typeof v !== 'undefined'));
+    return spec;
   }
 
   /**
    * Creates a minimal static representation of the data view. Fields and popularity scores will be omitted.
    */
-  public toMinimalSpec(): Omit<DataViewSpec, 'fields'> {
+  public toMinimalSpec(params?: {
+    keepFieldAttrs?: Array<'customLabel' | 'customDescription'>;
+  }): Omit<DataViewSpec, 'fields'> {
+    const fieldAttrsToKeep = params?.keepFieldAttrs ?? ['customLabel', 'customDescription'];
+
     // removes `fields`
     const dataViewSpec = this.toSpec(false);
 
+    // removes `fieldAttrs` attributes that are not in `fieldAttrsToKeep`
     if (dataViewSpec.fieldAttrs) {
-      // removes `count` props (popularity scores) from `fieldAttrs`
       dataViewSpec.fieldAttrs = pickBy(
-        mapValues(dataViewSpec.fieldAttrs, (fieldAttrs) => omit(fieldAttrs, 'count')),
+        // removes unnecessary attributes
+        mapValues(dataViewSpec.fieldAttrs, (fieldAttrs) => pick(fieldAttrs, fieldAttrsToKeep)),
+        // removes empty objects if all attributes have been removed
         (trimmedFieldAttrs) => Object.keys(trimmedFieldAttrs).length > 0
       );
 
+      // removes `fieldAttrs` if it's empty
       if (Object.keys(dataViewSpec.fieldAttrs).length === 0) {
         dataViewSpec.fieldAttrs = undefined;
       }
@@ -278,7 +272,7 @@ export class DataView extends AbstractDataView implements DataViewBase {
       throw new CharacterNotAllowedInField('*', name);
     }
 
-    const { type, script, customLabel, format, popularity } = runtimeField;
+    const { type, script, customLabel, customDescription, format, popularity } = runtimeField;
 
     if (type === 'composite') {
       return this.addCompositeRuntimeField(name, runtimeField);
@@ -291,6 +285,7 @@ export class DataView extends AbstractDataView implements DataViewBase {
       { type, script },
       {
         customLabel,
+        customDescription,
         format,
         popularity,
       }
@@ -335,21 +330,6 @@ export class DataView extends AbstractDataView implements DataViewBase {
   }
 
   /**
-   * Replaces all existing runtime fields with new fields.
-   * @param newFields Map of runtime field definitions by field name
-   */
-  replaceAllRuntimeFields(newFields: Record<string, RuntimeField>) {
-    const oldRuntimeFieldNames = Object.keys(this.runtimeFieldMap);
-    oldRuntimeFieldNames.forEach((name) => {
-      this.removeRuntimeField(name);
-    });
-
-    Object.entries(newFields).forEach(([name, field]) => {
-      this.addRuntimeField(name, field);
-    });
-  }
-
-  /**
    * Remove a runtime field - removed from mapped field or removed unmapped
    * field as appropriate. Doesn't clear associated field attributes.
    * @param name - Field name to remove
@@ -372,11 +352,11 @@ export class DataView extends AbstractDataView implements DataViewBase {
    * Return the "runtime_mappings" section of the ES search query.
    */
   getRuntimeMappings(): estypes.MappingRuntimeFields {
-    const mappedFields = this.getMappedFieldNames();
     const records = Object.keys(this.runtimeFieldMap).reduce<Record<string, RuntimeFieldSpec>>(
       (acc, fieldName) => {
         // do not include fields that are mapped
-        if (!mappedFields.includes(fieldName)) {
+        const field = this.fields.getByName(fieldName);
+        if (!field?.isMapped) {
           acc[fieldName] = this.runtimeFieldMap[fieldName];
         }
 
@@ -405,6 +385,27 @@ export class DataView extends AbstractDataView implements DataViewBase {
   }
 
   /**
+   * Set field custom description
+   * @param fieldName name of field to set custom label on
+   * @param customDescription custom description value. If undefined, custom description is removed
+   */
+
+  public setFieldCustomDescription(
+    fieldName: string,
+    customDescription: string | undefined | null
+  ) {
+    const fieldObject = this.fields.getByName(fieldName);
+    const newCustomDescription: string | undefined =
+      customDescription === null ? undefined : customDescription;
+
+    if (fieldObject) {
+      fieldObject.customDescription = newCustomDescription;
+    }
+
+    this.setFieldCustomDescriptionInternal(fieldName, customDescription);
+  }
+
+  /**
    * Set field count
    * @param fieldName name of field to set count on
    * @param count count value. If undefined, count is removed
@@ -418,16 +419,7 @@ export class DataView extends AbstractDataView implements DataViewBase {
       if (!newCount) fieldObject.deleteCount();
       else fieldObject.count = newCount;
     }
-    this.setFieldAttrs(fieldName, 'count', newCount);
-  }
-
-  private getMappedFieldNames() {
-    return this.fields.getAll().reduce<string[]>((acc, dataViewField) => {
-      if (dataViewField.isMapped) {
-        acc.push(dataViewField.name);
-      }
-      return acc;
-    }, []);
+    this.setFieldCountInternal(fieldName, newCount);
   }
 
   /**
@@ -465,6 +457,7 @@ export class DataView extends AbstractDataView implements DataViewBase {
       // Every child field gets the complete runtime field script for consumption by searchSource
       this.updateOrAddRuntimeField(`${name}.${subFieldName}`, subField.type, runtimeFieldSpec, {
         customLabel: subField.customLabel,
+        customDescription: subField.customDescription,
         format: subField.format,
         popularity: subField.popularity,
       })
@@ -507,6 +500,7 @@ export class DataView extends AbstractDataView implements DataViewBase {
 
     // Apply configuration to the field
     this.setFieldCustomLabel(fieldName, config.customLabel);
+    this.setFieldCustomDescription(fieldName, config.customDescription);
 
     if (config.popularity || config.popularity === null) {
       this.setFieldCount(fieldName, config.popularity);

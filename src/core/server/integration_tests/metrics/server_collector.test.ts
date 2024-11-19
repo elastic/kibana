@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { BehaviorSubject, Subject } from 'rxjs';
-import { take, filter } from 'rxjs/operators';
+import { take, filter } from 'rxjs';
 import supertest from 'supertest';
 import { Server as HapiServer } from '@hapi/hapi';
-import { createHttpServer } from '@kbn/core-http-server-mocks';
+import { createHttpService } from '@kbn/core-http-server-mocks';
 import type { IRouter } from '@kbn/core-http-server';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import type { HttpService } from '@kbn/core-http-server-internal';
@@ -28,7 +29,7 @@ describe('ServerMetricsCollector', () => {
   const sendGet = (path: string) => supertest(hapiServer.listener).get(path);
 
   beforeEach(async () => {
-    server = createHttpServer();
+    server = createHttpService();
     await server.preboot({ context: contextServiceMock.createPrebootContract() });
     const contextSetup = contextServiceMock.createSetupContract();
     const httpSetup = await server.setup({
@@ -116,7 +117,7 @@ describe('ServerMetricsCollector', () => {
     // Subscribe to the aborted$ event
     const waitFor1stAbort = disconnectAborted$.pipe(take(1)).toPromise();
 
-    discoReq1.abort();
+    void discoReq1.abort();
 
     // Wait for the aborted$ event
     await waitFor1stAbort;
@@ -132,7 +133,7 @@ describe('ServerMetricsCollector', () => {
     // Subscribe to the aborted$ event
     const waitFor2ndAbort = disconnectAborted$.pipe(take(1)).toPromise();
 
-    discoReq2.abort();
+    void discoReq2.abort();
 
     // Wait for the aborted$ event
     await waitFor2ndAbort;

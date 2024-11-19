@@ -6,7 +6,7 @@
  */
 
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
-import { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import {

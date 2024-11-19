@@ -1,0 +1,78 @@
+  - name: ssl_supported_protocols
+    type: text
+    title: SSL Supported Protocols
+    multi: true
+    required: false
+    show_user: false
+    default:
+      - 'TLSv1.1'
+      - 'TLSv1.2'
+      - 'TLSv1.3'
+    description: List of allowed SSL/TLS versions. If SSL/TLS server decides for protocol versions not configure.
+  - name: ssl_cipher_suites
+    type: text
+    title: SSL Cipher Suites
+    multi: true
+    required: false
+    show_user: false
+    description: The list of cipher suites to use. If not specified, the default cipher suites will be used.
+  - name: ssl_curve_types
+    type: text
+    title: SSL Curve Types
+    multi: true
+    required: false
+    show_user: false
+    description: The list of curve types for ECDHE (Elliptic Curve Diffie-Hellman ephemeral key exchange).
+  - name: ssl_ca_sha256
+    type: text
+    title: SSL SHA256 Pin
+    multi: true
+    required: false
+    show_user: false
+    description: Configure a pin that can be used to do extra validation of the verified certificate chain.
+  - name: ssl_certificate_authorities
+    type: text
+    title: SSL Certificate Authorities
+    multi: true
+    required: false
+    show_user: false
+    description: |
+      The list of root certificates for verifications is required. If certificate_authorities is empty or not set, the system keystore is used. Example: /etc/pki/root/ca.pem
+  - name: ssl_certificate
+    type: text
+    title: SSL Certificate
+    multi: false
+    required: false
+    show_user: false
+    description: |
+      Path to the SSL certificate file to be used. Example: /etc/pki/client/cert.pem
+  - name: ssl_certificate_key
+    type: text
+    title: SSL Certificate Key
+    multi: false
+    required: false
+    show_user: false
+    description: |
+      Path to the SSL certificate key file to be used. Example: /etc/pki/client/cert.key
+  - name: ssl_certificate_key_passphrase
+    type: text
+    title: SSL Certificate Key Passphrase
+    multi: false
+    required: false
+    show_user: false
+    description: The passphrase used to decrypt an encrypted key stored in the configured key file.
+  - name: ssl_verification_mode
+    type: text
+    title: SSL Certificate Key Passphrase
+    multi: false
+    required: false
+    show_user: false
+    default: 'full'
+    description: The passphrase used to decrypt an encrypted key stored in the configured key file.
+  - name: ssl_certificate_authority_trusted_fingerprint
+    type: text
+    title: SSL Certificate Authority Trusted Fingerprint
+    multi: false
+    required: false
+    show_user: false
+    description: A HEX encoded SHA-256 of a CA certificate. If this certificate is present in the chain during the handshake, it will be added to the certificate_authorities list and the handshake will continue normaly.

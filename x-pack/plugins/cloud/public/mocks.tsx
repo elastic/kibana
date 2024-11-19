@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 
 import type { CloudSetup, CloudStart } from './types';
 
@@ -19,13 +19,16 @@ function createSetupMock(): jest.Mocked<CloudSetup> {
     deploymentUrl: 'deployment-url',
     profileUrl: 'profile-url',
     organizationUrl: 'organization-url',
-    elasticsearchUrl: 'elasticsearch-url',
+    fetchElasticsearchConfig: jest
+      .fn()
+      .mockResolvedValue({ elasticsearchUrl: 'elasticsearch-url' }),
     kibanaUrl: 'kibana-url',
     cloudHost: 'cloud-host',
     cloudDefaultPort: '443',
     isElasticStaffOwned: true,
     trialEndDate: new Date('2020-10-01T14:13:12Z'),
     registerCloudService: jest.fn(),
+    onboarding: {},
     isServerlessEnabled: false,
     serverless: {
       projectId: undefined,
@@ -35,7 +38,7 @@ function createSetupMock(): jest.Mocked<CloudSetup> {
   };
 }
 
-const getContextProvider: () => React.FC =
+const getContextProvider: () => FC<PropsWithChildren<unknown>> =
   () =>
   ({ children }) =>
     <>{children}</>;
@@ -52,6 +55,7 @@ const createStartMock = (): jest.Mocked<CloudStart> => ({
   serverless: {
     projectId: undefined,
   },
+  fetchElasticsearchConfig: jest.fn().mockResolvedValue({ elasticsearchUrl: 'elasticsearch-url' }),
 });
 
 export const cloudMock = {

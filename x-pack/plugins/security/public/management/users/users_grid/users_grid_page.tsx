@@ -236,6 +236,7 @@ export class UsersGridPage extends Component<Props, State> {
               defaultMessage="Users"
             />
           }
+          data-test-subj="securityUsersPageHeader"
           rightSideItems={
             this.props.readOnly
               ? undefined
@@ -282,7 +283,6 @@ export class UsersGridPage extends Component<Props, State> {
             search={search}
             sorting={sorting}
             rowProps={rowProps}
-            isSelectable
           />
         }
       </>

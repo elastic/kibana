@@ -6,8 +6,7 @@
  */
 
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-
-import type { ExperimentalFeatures } from '../../../../common';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
 import type { AssetCriticalityDataClient } from './asset_criticality_data_client';
 import { assetCriticalityDataClientMock } from './asset_criticality_data_client.mock';
@@ -25,7 +24,16 @@ const buildMockCriticalityHit = (
     '@timestamp': '2021-09-16T15:00:00.000Z',
     id_field: 'host.name',
     id_value: 'hostname',
-    criticality_level: 'normal',
+    criticality_level: 'medium_impact',
+    asset: {
+      criticality: 'medium_impact',
+    },
+    host: {
+      name: 'hostname',
+      asset: {
+        criticality: 'medium_impact',
+      },
+    },
     ...overrides,
   },
 });
@@ -45,7 +53,7 @@ describe('AssetCriticalityService', () => {
       });
       service = assetCriticalityServiceFactory({
         assetCriticalityDataClient: mockAssetCriticalityDataClient,
-        experimentalFeatures: {} as ExperimentalFeatures,
+        uiSettingsClient: {} as IUiSettingsClient,
       });
     });
 
@@ -140,7 +148,7 @@ describe('AssetCriticalityService', () => {
           buildMockCriticalityHit({
             id_field: 'user.name',
             id_value: 'username',
-            criticality_level: 'very_important',
+            criticality_level: 'extreme_impact',
           }),
         ];
 

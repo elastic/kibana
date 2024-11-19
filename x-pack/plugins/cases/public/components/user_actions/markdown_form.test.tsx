@@ -21,7 +21,7 @@ const onChangeEditable = jest.fn();
 const onSaveContent = jest.fn();
 
 const hyperlink = `[hyperlink](http://elastic.co)`;
-const draftStorageKey = `cases.testAppId.caseId.markdown-id.markdownEditor`;
+const draftStorageKey = `cases.securitySolution.caseId.markdown-id.markdownEditor`;
 const defaultProps = {
   content: `A link to a timeline ${hyperlink}`,
   id: 'markdown-id',
@@ -63,9 +63,7 @@ describe('UserActionMarkdown ', () => {
     it('Shows error message and save button disabled if current text is empty', async () => {
       appMockRenderer.render(<UserActionMarkdown {...{ ...defaultProps, isEditable: true }} />);
 
-      userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
-
-      userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), '');
+      await userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
 
       await waitFor(() => {
         expect(screen.getByText('Empty comments are not allowed.')).toBeInTheDocument();
@@ -76,9 +74,9 @@ describe('UserActionMarkdown ', () => {
     it('Shows error message and save button disabled if current text is of empty characters', async () => {
       appMockRenderer.render(<UserActionMarkdown {...{ ...defaultProps, isEditable: true }} />);
 
-      userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
+      await userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
 
-      userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), '  ');
+      await userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), '  ');
 
       await waitFor(() => {
         expect(screen.getByText('Empty comments are not allowed.')).toBeInTheDocument();
@@ -93,7 +91,8 @@ describe('UserActionMarkdown ', () => {
 
       const markdown = screen.getByTestId('euiMarkdownEditorTextArea');
 
-      userEvent.paste(markdown, longComment);
+      await userEvent.click(markdown);
+      await userEvent.paste(longComment);
 
       await waitFor(() => {
         expect(
@@ -139,8 +138,8 @@ describe('UserActionMarkdown ', () => {
       expect(result.getByTestId('editable-markdown-form')).toBeTruthy();
 
       // append content and save
-      userEvent.type(result.container.querySelector('textarea')!, appendContent);
-      userEvent.click(result.getByTestId('editable-save-markdown'));
+      await userEvent.type(result.container.querySelector('textarea')!, appendContent);
+      await userEvent.click(result.getByTestId('editable-save-markdown'));
 
       // wait for the state to update
       await waitFor(() => {
@@ -148,11 +147,11 @@ describe('UserActionMarkdown ', () => {
       });
 
       // toggle to non-edit state
-      userEvent.click(result.getByTestId('test-button'));
+      await userEvent.click(result.getByTestId('test-button'));
       expect(result.getByTestId('scrollable-markdown')).toBeTruthy();
 
       // toggle to edit state again
-      userEvent.click(result.getByTestId('test-button'));
+      await userEvent.click(result.getByTestId('test-button'));
 
       // this is the correct behaviour. The textarea holds the new content
       expect(result.container.querySelector('textarea')!.value).toEqual(newContent);

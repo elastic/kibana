@@ -8,8 +8,8 @@ import { createMockExecutionContext } from '@kbn/expressions-plugin/common/mocks
 import type { DatatableProps } from '../../../common/expressions';
 import type { FormatFactory } from '../../../common/types';
 import { getDatatable } from '../../../common/expressions';
-import { getColumnCellValueActions } from './expression';
-import type { Datatable } from '@kbn/expressions-plugin/common';
+import { getColumnCellValueActions, getColumnsFilterable } from './expression';
+import type { Datatable, IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { LensCellValueAction } from '../../types';
 
 const cellValueAction: LensCellValueAction = {
@@ -18,7 +18,7 @@ const cellValueAction: LensCellValueAction = {
   iconType: 'test-icon',
   execute: () => {},
 };
-function sampleArgs() {
+function sampleArgs(): DatatableProps {
   const indexPatternId = 'indexPatternId';
   const data: Datatable = {
     type: 'datatable',
@@ -80,13 +80,13 @@ function sampleArgs() {
     sortingDirection: 'none',
   };
 
-  return { data, args };
+  return { data, args, syncColors: false };
 }
 
 describe('datatable_expression', () => {
   describe('datatable renders', () => {
     test('it renders with the specified data and args', async () => {
-      const { data, args } = sampleArgs();
+      const { data, args, ...rest } = sampleArgs();
       const result = await getDatatable(() => Promise.resolve((() => {}) as FormatFactory)).fn(
         data,
         args,
@@ -96,7 +96,7 @@ describe('datatable_expression', () => {
       expect(result).toEqual({
         type: 'render',
         as: 'lens_datatable_renderer',
-        value: { data, args },
+        value: { data, args, ...rest },
       });
     });
   });
@@ -120,6 +120,57 @@ describe('datatable_expression', () => {
       const config = sampleArgs();
       const result = await getColumnCellValueActions(config, undefined);
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('getColumnsFilterable', () => {
+    it('should return no data if an empty table is passed', async () => {
+      const { data } = sampleArgs();
+      data.rows = [];
+      const hasCompatibleActions = jest.fn();
+      expect(
+        await getColumnsFilterable(data, {
+          hasCompatibleActions,
+        } as unknown as IInterpreterRenderHandlers)
+      ).toBeUndefined();
+      expect(hasCompatibleActions).not.toHaveBeenCalled();
+    });
+
+    it('should call the handler for each column', async () => {
+      const { data } = sampleArgs();
+      const hasCompatibleActions = jest.fn().mockResolvedValue(true);
+      expect(
+        await getColumnsFilterable(data, {
+          hasCompatibleActions,
+        } as unknown as IInterpreterRenderHandlers)
+      ).toEqual([true, true, true]);
+      expect(hasCompatibleActions).toHaveBeenCalledTimes(data.columns.length);
+    });
+
+    it('should call the handler for each column with table coords of data values', async () => {
+      const { data } = sampleArgs();
+      data.rows = [
+        { a: null, b: null, c: null },
+        { a: 'shoes', b: 1588024800000, c: 3 },
+      ];
+      const hasCompatibleActions = jest.fn().mockResolvedValue(true);
+      expect(
+        await getColumnsFilterable(data, {
+          hasCompatibleActions,
+        } as unknown as IInterpreterRenderHandlers)
+      ).toEqual([true, true, true]);
+      expect(hasCompatibleActions).toHaveBeenCalledTimes(data.columns.length);
+      for (const id of data.columns.map((_, i) => i + 1)) {
+        expect(hasCompatibleActions).toHaveBeenNthCalledWith(
+          id,
+          expect.objectContaining({
+            name: 'filter',
+            data: expect.objectContaining({
+              data: [expect.objectContaining({ row: 1 })],
+            }),
+          })
+        );
+      }
     });
   });
 });

@@ -7,7 +7,7 @@
 
 import PropTypes from 'prop-types';
 import { connectAdvanced } from 'react-redux';
-import { compose, withPropsOnChange, mapProps } from 'recompose';
+import { compose, withPropsOnChange, mapProps } from 'react-recompose';
 import isEqual from 'react-fast-compare';
 import { getResolvedArgs, getSelectedPage } from '../../state/selectors/workpad';
 import { getState, getValue } from '../../lib/resolved_arg';
@@ -71,7 +71,7 @@ export const ElementWrapper = compose(
     // remove element and createHandlers from props passed to component
     // eslint-disable-next-line no-unused-vars
     const { element, createHandlers, selectedPage, ...restProps } = props;
-    return restProps;
+    return { ...restProps, id: element.id };
   })
 )(Component);
 

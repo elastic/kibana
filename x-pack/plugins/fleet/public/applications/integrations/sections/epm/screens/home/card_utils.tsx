@@ -27,6 +27,7 @@ import { getPackageReleaseLabel } from '../../../../../../../common/services';
 
 import { installationStatuses } from '../../../../../../../common/constants';
 import type {
+  EpmPackageInstallStatus,
   InstallFailedAttempt,
   IntegrationCardReleaseLabel,
   PackageSpecIcon,
@@ -38,22 +39,33 @@ import { isPackageUnverified, isPackageUpdatable } from '../../../../services';
 import type { PackageListItem } from '../../../../types';
 
 export interface IntegrationCardItem {
-  url: string;
-  release?: IntegrationCardReleaseLabel;
-  description: string;
-  name: string;
-  title: string;
-  version: string;
-  icons: Array<PackageSpecIcon | CustomIntegrationIcon>;
-  integration: string;
-  id: string;
   categories: string[];
+  description: string;
+  // Security Solution uses this prop to determine how many lines the card description should be truncated
+  descriptionLineClamp?: number;
+  extraLabelsBadges?: React.ReactNode[];
   fromIntegrations?: string;
+  icons: Array<PackageSpecIcon | CustomIntegrationIcon>;
+  id: string;
+  installStatus?: EpmPackageInstallStatus;
+  integration: string;
+  isCollectionCard?: boolean;
+  isQuickstart?: boolean;
   isReauthorizationRequired?: boolean;
   isUnverified?: boolean;
   isUpdateAvailable?: boolean;
+  maxCardHeight?: number;
+  name: string;
+  onCardClick?: () => void;
+  release?: IntegrationCardReleaseLabel;
+  showInstallationStatus?: boolean;
   showLabels?: boolean;
-  extraLabelsBadges?: React.ReactNode[];
+  title: string;
+  // Security Solution uses this prop to determine how many lines the card title should be truncated
+  titleLineClamp?: number;
+  url: string;
+  version: string;
+  type?: string;
 }
 
 export const mapToCard = ({
@@ -103,13 +115,13 @@ export const mapToCard = ({
   const release: IntegrationCardReleaseLabel = getPackageReleaseLabel(version);
 
   let extraLabelsBadges: React.ReactNode[] | undefined;
-  if (item.type === 'integration') {
+  if (item.type === 'integration' || item.type === 'content') {
     extraLabelsBadges = getIntegrationLabels(item);
   }
 
-  return {
+  const cardResult: IntegrationCardItem = {
     id: `${item.type === 'ui_link' ? 'ui_link' : 'epr'}:${item.id}`,
-    description: item.description,
+    description: item.description || '',
     icons: !item.icons || !item.icons.length ? [] : item.icons,
     title: item.title,
     url: uiInternalPathUrl,
@@ -117,6 +129,7 @@ export const mapToCard = ({
     integration: 'integration' in item ? item.integration || '' : '',
     name: 'name' in item ? item.name : item.id,
     version,
+    type: item.type,
     release,
     categories: ((item.categories || []) as string[]).filter((c: string) => !!c),
     isReauthorizationRequired,
@@ -124,6 +137,12 @@ export const mapToCard = ({
     isUpdateAvailable,
     extraLabelsBadges,
   };
+
+  if (item.type === 'integration') {
+    cardResult.installStatus = item.installationInfo?.install_status;
+  }
+
+  return cardResult;
 };
 
 export function getIntegrationLabels(item: PackageListItem): React.ReactNode[] {

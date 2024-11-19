@@ -5,21 +5,28 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import React, { memo } from 'react';
+import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import isEmpty from 'lodash/isEmpty';
-import { EnrichmentRangePicker } from '../../../../common/components/event_details/cti_details/enrichment_range_picker';
-import { ThreatDetailsView } from '../../../../common/components/event_details/cti_details/threat_details_view';
+import { groupBy } from 'lodash';
+import { EnrichmentSection } from './threat_details_view_enrichment_section';
+import { ENRICHMENT_TYPES } from '../../../../../common/cti/constants';
+import { EnrichmentRangePicker } from './threat_intelligence_view_enrichment_range_picker';
 import { useThreatIntelligenceDetails } from '../hooks/use_threat_intelligence_details';
-import { THREAT_INTELLIGENCE_DETAILS_LOADING_TEST_ID } from './test_ids';
+import {
+  THREAT_INTELLIGENCE_DETAILS_ENRICHMENTS_TEST_ID,
+  THREAT_INTELLIGENCE_DETAILS_LOADING_TEST_ID,
+  THREAT_INTELLIGENCE_ENRICHMENTS_TEST_ID,
+  THREAT_INTELLIGENCE_MATCHES_TEST_ID,
+} from './test_ids';
 import { FlyoutLoading } from '../../../shared/components/flyout_loading';
 
-export const THREAT_INTELLIGENCE_TAB_ID = 'threat-intelligence-details';
+export const THREAT_INTELLIGENCE_TAB_ID = 'threatIntelligence';
 
 /**
  * Threat intelligence displayed in the document details expandable flyout left section under the Insights tab
  */
-export const ThreatIntelligenceDetails: React.FC = () => {
+export const ThreatIntelligenceDetails = memo(() => {
   const {
     enrichments,
     eventFields,
@@ -30,21 +37,54 @@ export const ThreatIntelligenceDetails: React.FC = () => {
     setRange,
   } = useThreatIntelligenceDetails();
 
+  const showInvestigationTimeEnrichments = !isEmpty(eventFields);
+  const {
+    [ENRICHMENT_TYPES.IndicatorMatchRule]: indicatorMatches,
+    [ENRICHMENT_TYPES.InvestigationTime]: threatIntelEnrichments,
+    undefined: matchesWithNoType,
+  } = groupBy(enrichments, 'matched.type');
+
   return isEventDataLoading ? (
     <FlyoutLoading data-test-subj={THREAT_INTELLIGENCE_DETAILS_LOADING_TEST_ID} />
   ) : (
-    <ThreatDetailsView
-      before={null}
-      loading={isLoading}
-      enrichments={enrichments}
-      showInvestigationTimeEnrichments={!isEmpty(eventFields)}
-    >
-      <>
-        <EnrichmentRangePicker setRange={setRange} loading={isEnrichmentsLoading} range={range} />
-        <EuiSpacer size="m" />
-      </>
-    </ThreatDetailsView>
+    <>
+      <EnrichmentSection
+        dataTestSubj={THREAT_INTELLIGENCE_DETAILS_ENRICHMENTS_TEST_ID}
+        enrichments={indicatorMatches}
+        type={ENRICHMENT_TYPES.IndicatorMatchRule}
+      />
+
+      {showInvestigationTimeEnrichments ? (
+        <>
+          <EuiHorizontalRule />
+          <EnrichmentSection
+            dataTestSubj={THREAT_INTELLIGENCE_ENRICHMENTS_TEST_ID}
+            enrichments={threatIntelEnrichments}
+            type={ENRICHMENT_TYPES.InvestigationTime}
+            loading={isLoading}
+          >
+            <EnrichmentRangePicker
+              setRange={setRange}
+              loading={isEnrichmentsLoading}
+              range={range}
+            />
+            <EuiSpacer size="m" />
+          </EnrichmentSection>
+        </>
+      ) : null}
+
+      {matchesWithNoType ? (
+        <>
+          <EuiHorizontalRule />
+          {indicatorMatches && <EuiSpacer size="l" />}
+          <EnrichmentSection
+            enrichments={matchesWithNoType}
+            dataTestSubj={THREAT_INTELLIGENCE_MATCHES_TEST_ID}
+          />
+        </>
+      ) : null}
+    </>
   );
-};
+});
 
 ThreatIntelligenceDetails.displayName = 'ThreatIntelligenceDetails';

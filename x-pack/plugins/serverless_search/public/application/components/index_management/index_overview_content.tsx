@@ -12,7 +12,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { EuiLoadingSpinner } from '@elastic/eui';
 
-import { IndexContent } from '@kbn/index-management-plugin/public/services';
+import { IndexContent } from '@kbn/index-management-shared-types';
 
 import { ServerlessSearchPluginStartDependencies } from '../../../types';
 

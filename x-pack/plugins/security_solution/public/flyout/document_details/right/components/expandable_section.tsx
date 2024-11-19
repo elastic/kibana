@@ -6,6 +6,7 @@
  */
 
 import { EuiAccordion, EuiFlexGroup, EuiSpacer, EuiTitle, useGeneratedHtmlId } from '@elastic/eui';
+import type { EuiFlexGroupProps } from '@elastic/eui';
 import type { ReactElement } from 'react';
 import React, { type VFC } from 'react';
 import { useAccordionState } from '../hooks/use_accordion_state';
@@ -13,7 +14,7 @@ import { useAccordionState } from '../hooks/use_accordion_state';
 export const HEADER_TEST_ID = 'Header';
 export const CONTENT_TEST_ID = 'Content';
 
-export interface DescriptionSectionProps {
+export interface ExpandableSectionProps {
   /**
    * Boolean to allow the component to be expanded or collapsed on first render
    */
@@ -23,9 +24,17 @@ export interface DescriptionSectionProps {
    */
   title: ReactElement;
   /**
+   * Gutter size between contents in expandable section
+   */
+  gutterSize?: EuiFlexGroupProps['gutterSize'];
+  /**
    * React component to render in the expandable section of the accordion
    */
   children: React.ReactNode;
+  /**
+   * Optional string, if provided it will be used as the key to store the expanded/collapsed state boolean in local storage
+   */
+  localStorageKey?: string;
   /**
    * Prefix data-test-subj to use for the header and expandable section of the accordion
    */
@@ -33,21 +42,20 @@ export interface DescriptionSectionProps {
 }
 
 /**
- * Component used to render multiple sections in the Overview tab
- * - About
- * - Investigation
- * - Visualizations
- * - Insights
+ * Component used to render multiple sections in the Overview tab.
+ * The state (expanded vs collapsed) can be saved in local storage if the localStorageKey is provided.
+ * This allows the state to be preserved when opening new flyouts or when refreshing the page.
  */
-export const ExpandableSection: VFC<DescriptionSectionProps> = ({
+export const ExpandableSection: VFC<ExpandableSectionProps> = ({
   expanded,
   title,
   children,
+  gutterSize = 'none',
+  localStorageKey,
   'data-test-subj': dataTestSub,
 }) => {
   const accordionId = useGeneratedHtmlId({ prefix: 'accordion' });
-
-  const { renderContent, toggle, state } = useAccordionState(expanded);
+  const { renderContent, state, toggle } = useAccordionState(expanded);
 
   const headerDataTestSub = dataTestSub + HEADER_TEST_ID;
   const contentDataTestSub = dataTestSub + CONTENT_TEST_ID;
@@ -59,9 +67,14 @@ export const ExpandableSection: VFC<DescriptionSectionProps> = ({
   );
 
   return (
-    <EuiAccordion forceState={state} onToggle={toggle} id={accordionId} buttonContent={header}>
+    <EuiAccordion
+      forceState={state}
+      onToggle={() => toggle(localStorageKey)}
+      id={accordionId}
+      buttonContent={header}
+    >
       <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="none" direction="column" data-test-subj={contentDataTestSub}>
+      <EuiFlexGroup gutterSize={gutterSize} direction="column" data-test-subj={contentDataTestSub}>
         {renderContent && children}
       </EuiFlexGroup>
     </EuiAccordion>

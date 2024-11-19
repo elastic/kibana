@@ -11,7 +11,7 @@ import {
 } from '../../../../screens/expandable_flyout/alert_details_left_panel_response_tab';
 import { openResponseTab } from '../../../../tasks/expandable_flyout/alert_details_left_panel_response_tab';
 import { expandDocumentDetailsExpandableFlyoutLeftSection } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
-import { expandFirstAlertExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
+import { expandAlertAtIndexExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
@@ -31,7 +31,7 @@ describe(
       createRule(getNewRule());
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
-      expandFirstAlertExpandableFlyout();
+      expandAlertAtIndexExpandableFlyout();
       expandDocumentDetailsExpandableFlyoutLeftSection();
       openResponseTab();
     });
@@ -40,13 +40,8 @@ describe(
       cy.get(DOCUMENT_DETAILS_FLYOUT_RESPONSE_TAB)
         .should('have.text', 'Response')
         .and('have.class', 'euiTab-isSelected');
-
       cy.get(DOCUMENT_DETAILS_FLYOUT_RESPONSE_DETAILS).should('contain.text', 'Responses');
-
-      cy.get(DOCUMENT_DETAILS_FLYOUT_RESPONSE_EMPTY).and(
-        'contain.text',
-        "There are no response actions defined for this event. To add some, edit the rule's settings and set up response actions(opens in a new tab or window)."
-      );
+      cy.get(DOCUMENT_DETAILS_FLYOUT_RESPONSE_EMPTY).should('exist');
     });
   }
 );

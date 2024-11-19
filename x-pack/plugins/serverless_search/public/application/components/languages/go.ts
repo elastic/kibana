@@ -46,8 +46,8 @@ func main() {
   },
   iconType: 'go.svg',
   id: Languages.GO,
-  ingestData: `ingestResult, err := es.Bulk().
-  Index("books").
+  ingestData: ({ ingestPipeline }) => `ingestResult, err := es.Bulk().
+  Index("books").${ingestPipeline ? `\n  Pipeline("${ingestPipeline}").` : ''}
   Raw(strings.NewReader(\`
 {"index":{"_id":"9780553351927"}}
 {"name":"Snow Crash","author":"Neal Stephenson","release_date":"1992-06-01","page_count": 470}
@@ -64,7 +64,7 @@ func main() {
   Do(context.Background())
 
 fmt.Println(ingestResult, err)`,
-  ingestDataIndex: ({ apiKey, url, indexName }) => `import (
+  ingestDataIndex: ({ apiKey, url, indexName, ingestPipeline }) => `import (
   "context"
   "fmt"
   "log"
@@ -83,7 +83,7 @@ func main() {
     log.Fatalf("Error creating the client: %s", err)
   }
   res, err := es.Bulk().
-    Index("${indexName}").
+    Index("${indexName}").${ingestPipeline ? `\n    Pipeline("${ingestPipeline}").` : ''}
     Raw(strings.NewReader(\`
 { "index": { "_id": "1"}}
 {"name": "foo", "title": "bar"}\n\`)).

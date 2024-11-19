@@ -22,15 +22,14 @@ import React, { Component } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { FeaturesPrivileges, Role } from '@kbn/security-plugin-types-common';
+import { isGlobalPrivilegeDefinition } from '@kbn/security-role-management-model';
+import { constants, type PrivilegeFormCalculator } from '@kbn/security-ui-components';
 import type { Space } from '@kbn/spaces-plugin/public';
 import { getSpaceColor } from '@kbn/spaces-plugin/public';
 
 import { PrivilegeDisplay } from './privilege_display';
-import type { FeaturesPrivileges, Role } from '../../../../../../../common';
 import { copyRole } from '../../../../../../../common/model';
-import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
-import { CUSTOM_PRIVILEGE_VALUE } from '../constants';
-import type { PrivilegeFormCalculator } from '../privilege_form_calculator';
 
 const SPACES_DISPLAY_COUNT = 4;
 
@@ -120,7 +119,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
           const isExpanded = this.state.expandedSpacesGroups.includes(record.privilegeIndex);
           const displayedSpaces = isExpanded ? spaces : spaces.slice(0, SPACES_DISPLAY_COUNT);
 
-          let button = null;
+          let button: React.ReactElement | null = null;
           if (spaces.length > displayedSpaces.length) {
             button = (
               <EuiButtonEmpty
@@ -180,6 +179,14 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
             );
           }
 
+          const basePrivilege =
+            privilegeCalculator.getBasePrivilege(record.privilegeIndex)?.id ??
+            constants.CUSTOM_PRIVILEGE_VALUE;
+
+          const privilege = privilegeCalculator.isWildcardBasePrivilege(record.privilegeIndex)
+            ? '*'
+            : basePrivilege;
+
           let icon = <EuiIcon type="empty" size="s" />;
           if (privilegeCalculator.hasSupersededInheritedPrivileges(record.privilegeIndex)) {
             icon = (
@@ -202,13 +209,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
             <EuiFlexGroup gutterSize="xs" alignItems="center">
               <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
               <EuiFlexItem>
-                <PrivilegeDisplay
-                  privilege={
-                    privilegeCalculator.getBasePrivilege(record.privilegeIndex)?.id ??
-                    CUSTOM_PRIVILEGE_VALUE
-                  }
-                  data-test-subj={`privilegeColumn`}
-                />
+                <PrivilegeDisplay privilege={privilege} data-test-subj={`privilegeColumn`} />
               </EuiFlexItem>
             </EuiFlexGroup>
           );
@@ -234,6 +235,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
                   color={'primary'}
                   iconType={'pencil'}
                   onClick={() => this.props.onEdit(record.privilegeIndex)}
+                  data-test-subj={`privilegeEditAction-${record.privilegeIndex}`}
                 />
               );
             },
@@ -252,6 +254,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
                   color={'danger'}
                   iconType={'trash'}
                   onClick={() => this.onDeleteSpacePrivilege(record)}
+                  data-test-subj={`privilegeDeleteAction-${record.privilegeIndex}`}
                 />
               );
             },
@@ -264,7 +267,6 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
       <EuiInMemoryTable
         columns={columns}
         items={rows}
-        hasActions
         rowProps={(item: TableRow) => {
           return {
             className: isGlobalPrivilegeDefinition(item.privileges)

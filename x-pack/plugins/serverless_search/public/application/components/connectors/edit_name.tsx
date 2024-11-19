@@ -26,10 +26,11 @@ import { useKibanaServices } from '../../hooks/use_kibana';
 import { useConnector } from '../../hooks/api/use_connector';
 
 interface EditNameProps {
+  isDisabled?: boolean;
   connector: Connector;
 }
 
-export const EditName: React.FC<EditNameProps> = ({ connector }) => {
+export const EditName: React.FC<EditNameProps> = ({ connector, isDisabled }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [newName, setNewName] = useState(connector.name || CONNECTOR_LABEL);
   const { http } = useKibanaServices();
@@ -48,7 +49,7 @@ export const EditName: React.FC<EditNameProps> = ({ connector }) => {
     },
     onSuccess: (successData) => {
       queryClient.setQueryData(queryKey, {
-        connector: { ...connector, service_type: successData },
+        connector: { ...connector, name: successData },
       });
       queryClient.invalidateQueries(queryKey);
       setIsEditing(false);
@@ -61,7 +62,12 @@ export const EditName: React.FC<EditNameProps> = ({ connector }) => {
         <>
           <EuiFlexItem grow={false}>
             <EuiTitle data-test-subj="serverlessSearchConnectorName">
-              <h1>{connector.name || CONNECTOR_LABEL}</h1>
+              <h1>
+                {connector.name ||
+                  i18n.translate('xpack.serverlessSearch.connector.chooseName', {
+                    defaultMessage: 'Choose a name for your connector',
+                  })}
+              </h1>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem
@@ -72,6 +78,7 @@ export const EditName: React.FC<EditNameProps> = ({ connector }) => {
           >
             <EuiButtonIcon
               data-test-subj="serverlessSearchEditNameButton"
+              isDisabled={isDisabled}
               color="text"
               iconType="pencil"
               aria-label={i18n.translate('xpack.serverlessSearch.connectors.editNameLabel', {

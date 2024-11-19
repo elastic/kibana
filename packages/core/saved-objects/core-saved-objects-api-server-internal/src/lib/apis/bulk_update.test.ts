@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /* eslint-disable @typescript-eslint/no-shadow */
@@ -132,6 +133,22 @@ describe('#bulkUpdate', () => {
     const originId = 'some-origin-id';
     const namespace = 'foo-namespace';
 
+    const getBulkIndexEntry = (
+      method: string,
+      { type, id }: TypeIdTuple,
+      _index = expect.any(String),
+      getId: (type: string, id: string) => string = () => expect.any(String),
+      overrides: Record<string, unknown> = {}
+    ) => {
+      return {
+        [method]: {
+          _index,
+          _id: getId(type, id),
+          ...overrides,
+        },
+      };
+    };
+
     // bulk index calls have two objects for each source -- the action, and the source
     const expectClientCallArgsAction = (
       objects: TypeIdTuple[],
@@ -148,14 +165,8 @@ describe('#bulkUpdate', () => {
       }
     ) => {
       const body = [];
-      for (const { type, id } of objects) {
-        body.push({
-          [method]: {
-            _index,
-            _id: getId(type, id),
-            ...overrides,
-          },
-        });
+      for (const object of objects) {
+        body.push(getBulkIndexEntry(method, object, _index, getId, overrides));
         body.push(expect.any(Object));
       }
       expect(client.bulk).toHaveBeenCalledWith(
@@ -218,6 +229,55 @@ describe('#bulkUpdate', () => {
         const _obj2 = { ...obj2, type: MULTI_NAMESPACE_ISOLATED_TYPE };
         await bulkUpdateSuccess(client, repository, registry, [obj1, _obj2]);
         expectClientCallArgsAction([obj1, _obj2], { method: 'index' });
+      });
+
+      it('should use the ES bulk action with the merged attributes when mergeAttributes is not false', async () => {
+        const _obj1 = { ...obj1, attributes: { foo: 'bar' } };
+        const _obj2 = { ...obj2, attributes: { hello: 'dolly' }, mergeAttributes: true };
+        await bulkUpdateSuccess(client, repository, registry, [_obj1, _obj2]);
+
+        expect(client.bulk).toHaveBeenCalledTimes(1);
+        expect(client.bulk).toHaveBeenCalledWith(
+          expect.objectContaining({
+            body: [
+              getBulkIndexEntry('index', _obj1),
+              expect.objectContaining({
+                [obj1.type]: {
+                  title: 'Testing',
+                  foo: 'bar',
+                },
+              }),
+              getBulkIndexEntry('index', _obj2),
+              expect.objectContaining({
+                [obj2.type]: {
+                  title: 'Testing',
+                  hello: 'dolly',
+                },
+              }),
+            ],
+          }),
+          expect.any(Object)
+        );
+      });
+
+      it('should use the ES bulk action only with the provided attributes when mergeAttributes is false', async () => {
+        const _obj1 = { ...obj1, attributes: { hello: 'dolly' }, mergeAttributes: false };
+        await bulkUpdateSuccess(client, repository, registry, [_obj1]);
+
+        expect(client.bulk).toHaveBeenCalledTimes(1);
+        expect(client.bulk).toHaveBeenCalledWith(
+          expect.objectContaining({
+            body: [
+              getBulkIndexEntry('index', _obj1),
+              expect.objectContaining({
+                [obj1.type]: {
+                  hello: 'dolly',
+                },
+              }),
+            ],
+          }),
+          expect.any(Object)
+        );
       });
 
       it(`doesnt call Elasticsearch if there are no valid objects to update`, async () => {
@@ -507,6 +567,7 @@ describe('#bulkUpdate', () => {
         await bulkUpdateError(obj, true, expectedErrorResult);
       });
     });
+
     describe('migration', () => {
       it('migrates the fetched documents from Mget', async () => {
         const modifiedObj2 = { ...obj2, coreMigrationVersion: '8.0.0' };

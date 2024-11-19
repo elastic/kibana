@@ -15,7 +15,12 @@ import {
   CustomRequestHandlerContext,
   SavedObjectReference,
   Logger,
+  ISavedObjectsRepository,
+  IScopedClusterClient,
 } from '@kbn/core/server';
+import { AnySchema } from 'joi';
+import { SubActionConnector } from './sub_action_framework/sub_action_connector';
+import { ServiceParams } from './sub_action_framework/types';
 import { ActionTypeRegistry } from './action_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { ActionsClient } from './actions_client';
@@ -27,6 +32,7 @@ import { ActionsConfigurationUtilities } from './actions_config';
 export type { ActionTypeExecutorResult, ActionTypeExecutorRawResult } from '../common';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: KibanaRequest) => Services;
+export type GetUnsecuredServicesFunction = () => UnsecuredServices;
 export type ActionTypeRegistryContract = PublicMethodsOf<ActionTypeRegistry>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 export type ActionTypeConfig = Record<string, unknown>;
@@ -34,16 +40,26 @@ export type ActionTypeSecrets = Record<string, unknown>;
 export type ActionTypeParams = Record<string, unknown>;
 export type ConnectorTokenClientContract = PublicMethodsOf<ConnectorTokenClient>;
 
-import type { ActionExecutionSource } from './lib';
 import { Connector, ConnectorWithExtraFindData } from './application/connector/types';
-export type { ActionExecutionSource } from './lib';
-
+import type { ActionExecutionSource } from './lib';
 export { ActionExecutionSourceType } from './lib';
+import { ConnectorUsageCollector } from './usage';
+export { ConnectorUsageCollector } from './usage';
 
 export interface Services {
   savedObjectsClient: SavedObjectsClientContract;
   scopedClusterClient: ElasticsearchClient;
   connectorTokenClient: ConnectorTokenClient;
+}
+
+export interface UnsecuredServices {
+  savedObjectsClient: ISavedObjectsRepository;
+  scopedClusterClient: ElasticsearchClient;
+  connectorTokenClient: ConnectorTokenClient;
+}
+
+export interface HookServices {
+  scopedClusterClient: IScopedClusterClient;
 }
 
 export interface ActionsApiRequestHandlerContext {
@@ -67,7 +83,7 @@ export interface ActionTypeExecutorOptions<
   Params
 > {
   actionId: string;
-  services: Services;
+  services: Services | UnsecuredServices;
   config: Config;
   secrets: Secrets;
   params: Params;
@@ -77,6 +93,7 @@ export interface ActionTypeExecutorOptions<
   configurationUtilities: ActionsConfigurationUtilities;
   source?: ActionExecutionSource<unknown>;
   request?: KibanaRequest;
+  connectorUsageCollector: ConnectorUsageCollector;
 }
 
 export type ActionResult = Connector;
@@ -101,11 +118,12 @@ export type ExecutorType<
   options: ActionTypeExecutorOptions<Config, Secrets, Params>
 ) => Promise<ActionTypeExecutorResult<ResultData>>;
 
-export interface ValidatorType<Type> {
+export interface ValidatorType<T> {
   schema: {
-    validate(value: unknown): Type;
+    validate(value: unknown): T;
+    getSchema?: () => AnySchema;
   };
-  customValidator?: (value: Type, validatorServices: ValidatorServices) => void;
+  customValidator?: (value: T, validatorServices: ValidatorServices) => void;
 }
 
 export interface ValidatorServices {
@@ -124,6 +142,44 @@ export type RenderParameterTemplates<Params extends ActionTypeParams> = (
   variables: Record<string, unknown>,
   actionId?: string
 ) => Params;
+
+export interface PreSaveConnectorHookParams<
+  Config extends ActionTypeConfig = ActionTypeConfig,
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets
+> {
+  connectorId: string;
+  config: Config;
+  secrets: Secrets;
+  logger: Logger;
+  request: KibanaRequest;
+  services: HookServices;
+  isUpdate: boolean;
+}
+
+export interface PostSaveConnectorHookParams<
+  Config extends ActionTypeConfig = ActionTypeConfig,
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets
+> {
+  connectorId: string;
+  config: Config;
+  secrets: Secrets;
+  logger: Logger;
+  request: KibanaRequest;
+  services: HookServices;
+  isUpdate: boolean;
+  wasSuccessful: boolean;
+}
+
+export interface PostDeleteConnectorHookParams<
+  Config extends ActionTypeConfig = ActionTypeConfig,
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets
+> {
+  connectorId: string;
+  config: Config;
+  logger: Logger;
+  request: KibanaRequest;
+  services: HookServices;
+}
 
 export interface ActionType<
   Config extends ActionTypeConfig = ActionTypeConfig,
@@ -157,6 +213,10 @@ export interface ActionType<
   getKibanaPrivileges?: (args?: { params?: Params }) => string[];
   renderParameterTemplates?: RenderParameterTemplates<Params>;
   executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
+  getService?: (params: ServiceParams<Config, Secrets>) => SubActionConnector<Config, Secrets>;
+  preSaveHook?: (params: PreSaveConnectorHookParams<Config, Secrets>) => Promise<void>;
+  postSaveHook?: (params: PostSaveConnectorHookParams<Config, Secrets>) => Promise<void>;
+  postDeleteHook?: (params: PostDeleteConnectorHookParams<Config, Secrets>) => Promise<void>;
 }
 
 export interface RawAction extends Record<string, unknown> {
@@ -229,3 +289,7 @@ export interface ConnectorToken extends SavedObjectAttributes {
   createdAt: string;
   updatedAt?: string;
 }
+
+// This unallowlist should only contain connector types that require a request or API key for
+// execution.
+export const UNALLOWED_FOR_UNSECURE_EXECUTION_CONNECTOR_TYPE_IDS = ['.index'];

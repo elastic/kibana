@@ -8,11 +8,9 @@
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiToolTip } from '@elastic/eui';
 import type { SyntheticEvent, MouseEvent } from 'react';
-import React, { useMemo, useCallback, useEffect } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { isArray, isNil } from 'lodash/fp';
-import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
-import { AlertsCasesTourSteps, SecurityStepId } from '../guided_onboarding_tour/tour_config';
-import { useTourContext } from '../guided_onboarding_tour';
+import type { NavigateToAppOptions } from '@kbn/core-application-browser';
 import { IP_REPUTATION_LINKS_SETTING, APP_UI_ID } from '../../../../common/constants';
 import { encodeIpv6 } from '../../lib/helpers';
 import {
@@ -31,7 +29,7 @@ import { isUrlInvalid } from '../../utils/validators';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../app/types';
 import { getTabsOnUsersDetailsUrl, getUsersDetailsUrl } from '../link_to/redirect_to_users';
-import type { ReputationLinkSetting } from './helpers';
+import type { ReputationLinkSetting, ReputationLinkOverflowProps } from './helpers';
 import {
   LinkAnchor,
   GenericLinkButton,
@@ -43,6 +41,7 @@ import {
 import type { HostsTableType } from '../../../explore/hosts/store/model';
 import type { UsersTableType } from '../../../explore/users/store/model';
 import { useGetSecuritySolutionLinkProps, withSecuritySolutionLink } from './link_props';
+import { EntityEventTypes } from '../../lib/telemetry';
 
 export { useSecuritySolutionLinkProps, type GetSecuritySolutionLinkProps } from './link_props';
 export { LinkButton, LinkAnchor } from './helpers';
@@ -72,7 +71,7 @@ const UserDetailsLinkComponent: React.FC<{
     telemetry,
   } = useKibana().services;
   const goToUsersDetails = useCallback(
-    (ev) => {
+    (ev: SyntheticEvent) => {
       ev.preventDefault();
       navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.users,
@@ -96,7 +95,7 @@ const UserDetailsLinkComponent: React.FC<{
 
   const onClick = useCallback(
     (e: SyntheticEvent) => {
-      telemetry.reportEntityDetailsClicked({ entity: 'user' });
+      telemetry.reportEvent(EntityEventTypes.EntityDetailsClicked, { entity: 'user' });
       const callback = onClickParam ?? goToUsersDetails;
       callback(e);
     },
@@ -122,7 +121,7 @@ const UserDetailsLinkComponent: React.FC<{
 
 export const UserDetailsLink = React.memo(UserDetailsLinkComponent);
 
-const HostDetailsLinkComponent: React.FC<{
+export interface HostDetailsLinkProps {
   children?: React.ReactNode;
   /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
@@ -131,7 +130,16 @@ const HostDetailsLinkComponent: React.FC<{
   onClick?: (e: SyntheticEvent) => void;
   hostTab?: HostsTableType;
   title?: string;
-}> = ({ children, Component, hostName, isButton, onClick: onClickParam, title, hostTab }) => {
+}
+const HostDetailsLinkComponent: React.FC<HostDetailsLinkProps> = ({
+  children,
+  Component,
+  hostName,
+  isButton,
+  onClick: onClickParam,
+  title,
+  hostTab,
+}) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.hosts);
   const {
     application: { navigateToApp },
@@ -141,7 +149,7 @@ const HostDetailsLinkComponent: React.FC<{
   const encodedHostName = encodeURIComponent(hostName);
 
   const goToHostDetails = useCallback(
-    (ev) => {
+    (ev: SyntheticEvent) => {
       ev.preventDefault();
       navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.hosts,
@@ -164,7 +172,7 @@ const HostDetailsLinkComponent: React.FC<{
 
   const onClick = useCallback(
     (e: SyntheticEvent) => {
-      telemetry.reportEntityDetailsClicked({ entity: 'host' });
+      telemetry.reportEvent(EntityEventTypes.EntityDetailsClicked, { entity: 'host' });
 
       const callback = onClickParam ?? goToHostDetails;
       callback(e);
@@ -226,7 +234,7 @@ export const ExternalLink = React.memo<{
 
 ExternalLink.displayName = 'ExternalLink';
 
-const NetworkDetailsLinkComponent: React.FC<{
+export interface NetworkDetailsLinkProps {
   children?: React.ReactNode;
   /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
@@ -235,7 +243,17 @@ const NetworkDetailsLinkComponent: React.FC<{
   isButton?: boolean;
   onClick?: (e: SyntheticEvent) => void | undefined;
   title?: string;
-}> = ({ Component, children, ip, flowTarget = FlowTarget.source, isButton, onClick, title }) => {
+}
+
+const NetworkDetailsLinkComponent: React.FC<NetworkDetailsLinkProps> = ({
+  Component,
+  children,
+  ip,
+  flowTarget = FlowTarget.source,
+  isButton,
+  onClick,
+  title,
+}) => {
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
 
   const getLink = useCallback(
@@ -287,60 +305,41 @@ export interface CaseDetailsLinkComponentProps {
    */
   title?: string;
   /**
-   * Link index
+   * If true, will open the app in new tab, will share session information via window.open if base
    */
-  index?: number;
+  openInNewTab?: NavigateToAppOptions['openInNewTab'];
 }
 
 const CaseDetailsLinkComponent: React.FC<CaseDetailsLinkComponentProps> = ({
-  index,
   children,
   detailName,
   title,
+  openInNewTab = false,
 }) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
   const { navigateToApp } = useKibana().services.application;
-  const { activeStep, isTourShown } = useTourContext();
-  const isTourStepActive = useMemo(
-    () =>
-      activeStep === AlertsCasesTourSteps.viewCase &&
-      isTourShown(SecurityStepId.alertsCases) &&
-      index === 0,
-    [activeStep, index, isTourShown]
-  );
 
   const goToCaseDetails = useCallback(
-    async (ev?) => {
+    async (ev?: SyntheticEvent) => {
       if (ev) ev.preventDefault();
       return navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.case,
         path: getCaseDetailsUrl({ id: detailName, search }),
+        openInNewTab,
       });
     },
-    [detailName, navigateToApp, search]
+    [detailName, navigateToApp, openInNewTab, search]
   );
 
-  useEffect(() => {
-    if (isTourStepActive)
-      document.querySelector(`[tour-step="RelatedCases-accordion"]`)?.scrollIntoView();
-  }, [isTourStepActive]);
-
   return (
-    <GuidedOnboardingTourStep
+    <LinkAnchor
       onClick={goToCaseDetails}
-      isTourAnchor={isTourStepActive}
-      step={AlertsCasesTourSteps.viewCase}
-      tourId={SecurityStepId.alertsCases}
+      href={formatUrl(getCaseDetailsUrl({ id: detailName }))}
+      data-test-subj="case-details-link"
+      aria-label={i18n.CASE_DETAILS_LINK_ARIA(title ?? detailName)}
     >
-      <LinkAnchor
-        onClick={goToCaseDetails}
-        href={formatUrl(getCaseDetailsUrl({ id: detailName }))}
-        data-test-subj="case-details-link"
-        aria-label={i18n.CASE_DETAILS_LINK_ARIA(title ?? detailName)}
-      >
-        {children ? children : detailName}
-      </LinkAnchor>
-    </GuidedOnboardingTourStep>
+      {children ? children : detailName}
+    </LinkAnchor>
   );
 };
 export const CaseDetailsLink = React.memo(CaseDetailsLinkComponent);
@@ -350,7 +349,7 @@ export const CreateCaseLink = React.memo<{ children: React.ReactNode }>(({ child
   const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
   const { navigateToApp } = useKibana().services.application;
   const goToCreateCase = useCallback(
-    async (ev) => {
+    async (ev: SyntheticEvent) => {
       ev.preventDefault();
       return navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.case,
@@ -508,7 +507,7 @@ const ReputationLinkComponent: React.FC<{
     [ipReputationLinksSetting, domain, defaultNameMapping, allItemsLimit]
   );
 
-  const renderCallback = useCallback(
+  const renderCallback: NonNullable<ReputationLinkOverflowProps['render']> = useCallback(
     (rowItem) =>
       isReputationLink(rowItem) && (
         <ExternalLink

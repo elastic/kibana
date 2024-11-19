@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
+import { mount, type ComponentType as EnzymeComponentType } from 'enzyme';
 import React from 'react';
 import { AGENT_API_ROUTES, PACKAGE_POLICY_API_ROOT } from '@kbn/fleet-plugin/common';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
@@ -30,12 +30,15 @@ import { PolicyDetails } from './policy_details';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { createLicenseServiceMock } from '../../../../../common/license/mocks';
 import { licenseService as licenseServiceMocked } from '../../../../common/hooks/__mocks__/use_license';
+import { useHostIsolationExceptionsAccess } from '../../../hooks/artifacts/use_host_isolation_exceptions_access';
 
 jest.mock('../../../../common/components/user_privileges');
 jest.mock('../../../../common/hooks/use_license');
+jest.mock('../../../hooks/artifacts/use_host_isolation_exceptions_access');
 
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
 const useLicenseMock = _useLicense as jest.Mock;
+const useHostIsolationExceptionsAccessMock = useHostIsolationExceptionsAccess as jest.Mock;
 
 describe('Policy Details', () => {
   const policyDetailsPathUrl = getPolicyDetailPath('1');
@@ -57,7 +60,8 @@ describe('Policy Details', () => {
     const AppWrapper = appContextMockRenderer.AppWrapper;
 
     ({ history, coreStart, middlewareSpy } = appContextMockRenderer);
-    render = () => mount(<PolicyDetails />, { wrappingComponent: AppWrapper });
+    render = () =>
+      mount(<PolicyDetails />, { wrappingComponent: AppWrapper as EnzymeComponentType<{}> });
     http = coreStart.http;
   });
 
@@ -96,13 +100,18 @@ describe('Policy Details', () => {
     beforeEach(() => {
       policyPackagePolicy = generator.generatePolicyPackagePolicy();
       policyPackagePolicy.id = '1';
+      policyPackagePolicy.policy_id = policyPackagePolicy.policy_ids[0];
 
       const policyListApiHandlers = policyListApiPathHandlers();
+      useHostIsolationExceptionsAccessMock.mockReturnValue({
+        hasAccessToHostIsolationExceptions: true,
+        isHostIsolationExceptionsAccessLoading: false,
+      });
 
       http.get.mockImplementation((...args) => {
         const [path] = args;
         if (typeof path === 'string') {
-          // GET datasouce
+          // GET datasource
           if (path === `${PACKAGE_POLICY_API_ROOT}/1`) {
             asyncActions = asyncActions.then<unknown>(async (): Promise<unknown> => sleep());
             return Promise.resolve({
@@ -115,7 +124,7 @@ describe('Policy Details', () => {
           if (path === `${AGENT_API_ROUTES.STATUS_PATTERN}`) {
             asyncActions = asyncActions.then(async () => sleep());
             return Promise.resolve({
-              results: { events: 0, total: 5, online: 3, error: 1, offline: 1 },
+              results: { events: 0, active: 5, online: 3, error: 1, offline: 1 },
               success: true,
             });
           }
@@ -131,6 +140,34 @@ describe('Policy Details', () => {
         return Promise.reject(new Error(`unknown API call (not MOCKED): ${path}`));
       });
       history.push(policyDetailsPathUrl);
+    });
+
+    it('should NOT display tabs when Host Isolation Exceptions access is loading', async () => {
+      useHostIsolationExceptionsAccessMock.mockReturnValue({
+        hasAccessToHostIsolationExceptions: false,
+        isHostIsolationExceptionsAccessLoading: true,
+      });
+      policyView = render();
+      await asyncActions;
+      policyView.update();
+      const tab = policyView.find('[data-test-subj="policyTabs"]');
+      expect(tab).toHaveLength(0);
+      const loader = policyView.find('span[data-test-subj="privilegesLoading"]');
+      expect(loader).toHaveLength(1);
+    });
+
+    it('should display tabs when Host Isolation Exceptions access is not loading', async () => {
+      useHostIsolationExceptionsAccessMock.mockReturnValue({
+        hasAccessToHostIsolationExceptions: true,
+        isHostIsolationExceptionsAccessLoading: false,
+      });
+      policyView = render();
+      await asyncActions;
+      policyView.update();
+      const tab = policyView.find('div[data-test-subj="policyTabs"]');
+      expect(tab).toHaveLength(1);
+      const loader = policyView.find('div[data-test-subj="privilegesLoading"]');
+      expect(loader).toHaveLength(0);
     });
 
     it('should NOT display timeline', async () => {
@@ -208,13 +245,24 @@ describe('Policy Details', () => {
       expect(eventFiltersTab.text()).toBe('Event filters');
     });
 
-    it('should display the host isolation exceptions tab', async () => {
+    it('should display the host isolation exceptions tab if user have access', async () => {
       policyView = render();
       await asyncActions;
       policyView.update();
-      const tab = policyView.find('button#hostIsolationExceptions');
+      const tab = policyView.find('button[data-test-subj="policyHostIsolationExceptionsTab"]');
       expect(tab).toHaveLength(1);
-      expect(tab.text()).toBe('Host isolation exceptions');
+    });
+
+    it("shouldn't display the host isolation exceptions tab when user doesn't have access", async () => {
+      useHostIsolationExceptionsAccessMock.mockReturnValue({
+        hasAccessToHostIsolationExceptions: false,
+        isHostIsolationExceptionsAccessLoading: false,
+      });
+      policyView = render();
+      await asyncActions;
+      policyView.update();
+      const tab = policyView.find('button[data-test-subj="policyHostIsolationExceptionsTab"]');
+      expect(tab).toHaveLength(0);
     });
 
     it('should display the protection updates tab', async () => {
@@ -232,6 +280,10 @@ describe('Policy Details', () => {
         licenseServiceMock.isEnterprise.mockReturnValue(false);
 
         useLicenseMock.mockReturnValue(licenseServiceMock);
+        useHostIsolationExceptionsAccessMock.mockReturnValue({
+          hasAccessToHostIsolationExceptions: false,
+          isHostIsolationExceptionsAccessLoading: false,
+        });
       });
 
       afterEach(() => {
@@ -245,55 +297,55 @@ describe('Policy Details', () => {
         const tab = policyView.find('button#protectionUpdates');
         expect(tab).toHaveLength(0);
       });
-    });
 
-    describe('without required permissions', () => {
-      const renderWithPrivilege = async (privilege: string) => {
-        useUserPrivilegesMock.mockReturnValue({
-          endpointPrivileges: {
-            loading: false,
-            [privilege]: false,
-          },
-        });
-        policyView = render();
-        await asyncActions;
-        policyView.update();
-      };
+      describe('without required permissions', () => {
+        const renderWithoutPrivilege = async (privilege: string) => {
+          useUserPrivilegesMock.mockReturnValue({
+            endpointPrivileges: {
+              loading: false,
+              [privilege]: false,
+            },
+          });
+          policyView = render();
+          await asyncActions;
+          policyView.update();
+        };
 
-      it.each([
-        ['trusted apps', 'canReadTrustedApplications', 'trustedApps'],
-        ['event filters', 'canReadEventFilters', 'eventFilters'],
-        ['host isolation exeptions', 'canReadHostIsolationExceptions', 'hostIsolationExceptions'],
-        ['blocklist', 'canReadBlocklist', 'blocklists'],
-      ])(
-        'should not display the %s tab with no privileges',
-        async (_: string, privilege: string, selector: string) => {
-          await renderWithPrivilege(privilege);
-          expect(policyView.find(`button#${selector}`)).toHaveLength(0);
-        }
-      );
+        it.each([
+          ['trusted apps', 'canReadTrustedApplications', 'trustedApps'],
+          ['event filters', 'canReadEventFilters', 'eventFilters'],
+          ['host isolation exeptions', 'canReadHostIsolationExceptions', 'hostIsolationExceptions'],
+          ['blocklist', 'canReadBlocklist', 'blocklists'],
+        ])(
+          'should not display the %s tab with no privileges',
+          async (_: string, privilege: string, selector: string) => {
+            await renderWithoutPrivilege(privilege);
+            expect(policyView.find(`button#${selector}`)).toHaveLength(0);
+          }
+        );
 
-      it.each([
-        ['trusted apps', 'canReadTrustedApplications', getPolicyTrustedAppsPath('1')],
-        ['event filters', 'canReadEventFilters', getPolicyEventFiltersPath('1')],
-        [
-          'host isolation exeptions',
-          'canReadHostIsolationExceptions',
-          getPolicyHostIsolationExceptionsPath('1'),
-        ],
-        ['blocklist', 'canReadBlocklist', getPolicyBlocklistsPath('1')],
-      ])(
-        'should redirect to policy details when no %s required privileges',
-        async (_: string, privilege: string, path: string) => {
-          history.push(path);
-          await renderWithPrivilege(privilege);
-          expect(history.location.pathname).toBe(policyDetailsPathUrl);
-          expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
-          expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith(
-            'You do not have the required Kibana permissions to use the given artifact.'
-          );
-        }
-      );
+        it.each([
+          ['trusted apps', 'canReadTrustedApplications', getPolicyTrustedAppsPath('1')],
+          ['event filters', 'canReadEventFilters', getPolicyEventFiltersPath('1')],
+          [
+            'host isolation exeptions',
+            'canReadHostIsolationExceptions',
+            getPolicyHostIsolationExceptionsPath('1'),
+          ],
+          ['blocklist', 'canReadBlocklist', getPolicyBlocklistsPath('1')],
+        ])(
+          'should redirect to policy details when no %s required privileges',
+          async (_: string, privilege: string, path: string) => {
+            history.push(path);
+            await renderWithoutPrivilege(privilege);
+            expect(history.location.pathname).toBe(policyDetailsPathUrl);
+            expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
+            expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith(
+              'You do not have the required Kibana permissions to use the given artifact.'
+            );
+          }
+        );
+      });
     });
   });
 });

@@ -23,7 +23,7 @@ import type { Dispatch } from 'redux';
 import deepEqual from 'fast-deep-equal';
 
 import { isQueryInput } from '../../store/inputs/helpers';
-import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../common/constants';
+import { DEFAULT_DATE_FORMAT, DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../common/constants';
 import { timelineActions } from '../../../timelines/store';
 import { useUiSetting$ } from '../../lib/kibana';
 import type { inputsModel, State } from '../../store';
@@ -86,6 +86,10 @@ interface OwnProps {
 }
 
 export type SuperDatePickerProps = OwnProps & PropsFromRedux;
+
+const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
+  newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
+};
 
 export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
   ({
@@ -161,10 +165,6 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
       [fromStr, toStr, duration, policy, setDuration, id, stopAutoReload, startAutoReload, queries]
     );
 
-    const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
-      newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
-    };
-
     const onTimeChange = useCallback(
       ({ start: newStart, end: newEnd, isInvalid }: OnTimeChangeProps) => {
         const isQuickSelection = newStart.includes('now') || newEnd.includes('now');
@@ -200,6 +200,8 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
     const startDate = fromStr != null ? fromStr : new Date(start).toISOString();
 
     const [quickRanges] = useUiSetting$<Range[]>(DEFAULT_TIMEPICKER_QUICK_RANGES);
+    const [dateFormat] = useUiSetting$<string>(DEFAULT_DATE_FORMAT);
+
     const commonlyUsedRanges = isEmpty(quickRanges)
       ? []
       : quickRanges.map(({ from, to, display }) => ({
@@ -225,6 +227,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
         width={width}
         compressed={compressed}
         updateButtonProps={refreshButtonProps}
+        dateFormat={dateFormat}
       />
     );
   },

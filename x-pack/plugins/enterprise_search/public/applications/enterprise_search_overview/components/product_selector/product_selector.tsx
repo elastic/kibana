@@ -62,11 +62,11 @@ export const ProductSelector: React.FC = () => {
           <ApiKeyPanel />
           <EuiSpacer size="xl" />
           <EuiTitle>
-            <h4>
+            <h2>
               {i18n.translate('xpack.enterpriseSearch.productSelector.overview.title', {
                 defaultMessage: 'Ingest your content',
               })}
-            </h4>
+            </h2>
           </EuiTitle>
           <EuiSpacer size="l" />
           <EuiText>

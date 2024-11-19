@@ -6,8 +6,9 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiButtonEmpty, EuiBadge, EuiText, EuiLoadingSpinner, EuiLink } from '@elastic/eui';
+import { EuiBadge, EuiText, EuiLink } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import { RulesTableEmptyColumnName } from '../rules_table_empty_column_name';
 import { SHOW_RELATED_INTEGRATIONS_SETTING } from '../../../../../../common/constants';
 import { PopoverItems } from '../../../../../common/components/popover_items';
 import { useUiSetting$ } from '../../../../../common/lib/kibana';
@@ -24,6 +25,7 @@ import type {
   RuleResponse,
 } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { getNormalizedSeverity } from '../helpers';
+import { PrebuiltRulesInstallButton } from './add_prebuilt_rules_install_button';
 
 export type TableColumn = EuiBasicTableColumn<RuleResponse>;
 
@@ -63,7 +65,7 @@ export const RULE_NAME_COLUMN: TableColumn = {
 
 const TAGS_COLUMN: TableColumn = {
   field: 'tags',
-  name: null,
+  name: <RulesTableEmptyColumnName name={i18n.COLUMN_TAGS} />,
   align: 'center',
   render: (tags: RuleResponse['tags']) => {
     if (tags == null || tags.length === 0) {
@@ -92,7 +94,7 @@ const TAGS_COLUMN: TableColumn = {
 
 const INTEGRATIONS_COLUMN: TableColumn = {
   field: 'related_integrations',
-  name: null,
+  name: <RulesTableEmptyColumnName name={i18n.COLUMN_INTEGRATIONS} />,
   align: 'center',
   render: (integrations: RuleResponse['related_integrations']) => {
     if (integrations == null || integrations.length === 0) {
@@ -111,28 +113,16 @@ const createInstallButtonColumn = (
   isDisabled: boolean
 ): TableColumn => ({
   field: 'rule_id',
-  name: '',
-  render: (ruleId: RuleSignatureId) => {
-    const isRuleInstalling = loadingRules.includes(ruleId);
-    const isInstallButtonDisabled = isRuleInstalling || isDisabled;
-    return (
-      <EuiButtonEmpty
-        size="s"
-        disabled={isInstallButtonDisabled}
-        onClick={() => installOneRule(ruleId)}
-        data-test-subj={`installSinglePrebuiltRuleButton-${ruleId}`}
-      >
-        {isRuleInstalling ? (
-          <EuiLoadingSpinner
-            size="s"
-            data-test-subj={`installSinglePrebuiltRuleButton-loadingSpinner-${ruleId}`}
-          />
-        ) : (
-          i18n.INSTALL_RULE_BUTTON
-        )}
-      </EuiButtonEmpty>
-    );
-  },
+  name: <RulesTableEmptyColumnName name={i18n.INSTALL_RULE_BUTTON} />,
+  render: (ruleId: RuleSignatureId, record: Rule) => (
+    <PrebuiltRulesInstallButton
+      ruleId={ruleId}
+      record={record}
+      installOneRule={installOneRule}
+      loadingRules={loadingRules}
+      isDisabled={isDisabled}
+    />
+  ),
   width: '10%',
   align: 'center',
 });

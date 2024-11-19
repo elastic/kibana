@@ -22,6 +22,12 @@ export function defineHasApiKeysRoutes({
   router.get(
     {
       path: '/internal/security/api_key/_has_active',
+      security: {
+        authz: {
+          enabled: false,
+          reason: `This route delegates authorization to the scoped ES cluster client of the internal authentication service, and to Core's ES client`,
+        },
+      },
       validate: false,
       options: {
         access: 'internal',
@@ -44,7 +50,6 @@ export function defineHasApiKeysRoutes({
 
       const { api_keys: apiKeys } = await esClient.asCurrentUser.security.getApiKey({
         owner: true,
-        // @ts-expect-error @elastic/elasticsearch SecurityGetApiKeyRequest.active_only: boolean | undefined
         active_only: true,
       });
 

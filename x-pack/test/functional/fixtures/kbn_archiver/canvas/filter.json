@@ -57,7 +57,7 @@
             }
           },
           {
-            "expression": "filters\n| render as=debug",
+            "expression": "kibana\n| selectFilter\n| render as=debug",
             "id": "element-d5687399-fd3e-4923-9280-ba1e8af578d1",
             "position": {
               "angle": 0,

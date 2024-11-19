@@ -6,7 +6,6 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { getOr } from 'lodash/fp';
 
 import { NetworkTopNFlowTable } from '../../components/network_top_n_flow_table';
 import { ID, useNetworkTopNFlow } from '../../containers/network_top_n_flow';
@@ -34,25 +33,23 @@ export const IPsQueryTabBody = ({
   useEffect(() => {
     setQuerySkip(skip || !toggleStatus);
   }, [skip, toggleStatus]);
-  const [
-    loading,
-    { id, inspect, isInspected, loadPage, networkTopNFlow, pageInfo, refetch, totalCount },
-  ] = useNetworkTopNFlow({
-    endDate,
-    flowTarget,
-    filterQuery,
-    id: queryId,
-    indexNames,
-    ip,
-    skip: querySkip,
-    startDate,
-    type,
-  });
+
+  const [loading, { id, inspect, isInspected, loadPage, networkTopNFlow, refetch, totalCount }] =
+    useNetworkTopNFlow({
+      endDate,
+      flowTarget,
+      filterQuery,
+      id: queryId,
+      indexNames,
+      ip,
+      skip: querySkip,
+      startDate,
+      type,
+    });
 
   return (
     <NetworkTopNFlowTableManage
       data={networkTopNFlow}
-      fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
       flowTargeted={flowTarget}
       id={id}
       inspect={inspect}
@@ -62,7 +59,6 @@ export const IPsQueryTabBody = ({
       refetch={refetch}
       setQuery={setQuery}
       setQuerySkip={setQuerySkip}
-      showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
       totalCount={totalCount}
       type={type}
     />

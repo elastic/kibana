@@ -1,41 +1,41 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import './_dashboard_app.scss';
 
-import React from 'react';
-import { parse, ParsedQuery } from 'query-string';
-import { render, unmountComponentAtNode } from 'react-dom';
-import { HashRouter, RouteComponentProps, Redirect } from 'react-router-dom';
-import { Routes, Route } from '@kbn/shared-ux-router';
-import { I18nProvider } from '@kbn/i18n-react';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { AppMountParameters, CoreSetup } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { Route, Routes } from '@kbn/shared-ux-router';
+import { parse, ParsedQuery } from 'query-string';
+import React from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
+import { HashRouter, Redirect, RouteComponentProps } from 'react-router-dom';
 
 import {
-  createDashboardListingFilterUrl,
   CREATE_NEW_DASHBOARD_URL,
+  createDashboardEditUrl,
+  createDashboardListingFilterUrl,
   DASHBOARD_APP_ID,
   LANDING_PAGE_PATH,
   VIEW_DASHBOARD_URL,
 } from '../dashboard_constants';
-import { DashboardApp } from './dashboard_app';
-import { pluginServices } from '../services/plugin_services';
 import { RedirectToProps } from '../dashboard_container/types';
-import { createDashboardEditUrl } from '../dashboard_constants';
-import { DashboardNoMatch } from './listing_page/dashboard_no_match';
-import { DashboardStart, DashboardStartDependencies } from '../plugin';
-import { DashboardMountContext } from './hooks/dashboard_mount_context';
-import { DashboardEmbedSettings, DashboardMountContextProps } from './types';
-import { DashboardListingPage } from './listing_page/dashboard_listing_page';
+import { coreServices, dataService, embeddableService } from '../services/kibana_services';
+import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { dashboardReadonlyBadge, getDashboardPageTitle } from './_dashboard_app_strings';
+import { DashboardApp } from './dashboard_app';
+import { DashboardMountContext } from './hooks/dashboard_mount_context';
+import { DashboardListingPage } from './listing_page/dashboard_listing_page';
+import { DashboardNoMatch } from './listing_page/dashboard_no_match';
+import { DashboardEmbedSettings, DashboardMountContextProps } from './types';
 
 export const dashboardUrlParams = {
   showTopMenu: 'show-top-menu',
@@ -47,29 +47,23 @@ export const dashboardUrlParams = {
 export interface DashboardMountProps {
   appUnMounted: () => void;
   element: AppMountParameters['element'];
-  core: CoreSetup<DashboardStartDependencies, DashboardStart>;
+  coreStart: CoreStart;
   mountContext: DashboardMountContextProps;
 }
 
-export async function mountApp({ core, element, appUnMounted, mountContext }: DashboardMountProps) {
-  const {
-    chrome: { setBadge, docTitle, setHelpExtension },
-    dashboardCapabilities: { showWriteControls },
-    documentationLinks: { dashboardDocLink },
-    application: { navigateToApp },
-    settings: { uiSettings },
-    data: dataStart,
-    notifications,
-    embeddable,
-  } = pluginServices.getServices();
-
+export async function mountApp({
+  coreStart,
+  element,
+  appUnMounted,
+  mountContext,
+}: DashboardMountProps) {
   let globalEmbedSettings: DashboardEmbedSettings | undefined;
 
   const getUrlStateStorage = (history: RouteComponentProps['history']) =>
     createKbnUrlStateStorage({
       history,
-      useHash: uiSettings.get('state:storeInSessionStorage'),
-      ...withNotifyOnErrors(notifications.toasts),
+      useHash: coreServices.uiSettings.get('state:storeInSessionStorage'),
+      ...withNotifyOnErrors(coreServices.notifications.toasts),
     });
 
   const redirect = (redirectTo: RedirectToProps) => {
@@ -83,7 +77,11 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
     } else {
       path = createDashboardListingFilterUrl(redirectTo.filter);
     }
-    navigateToApp(DASHBOARD_APP_ID, { path: `#/${path}`, state, replace: redirectTo.useReplace });
+    coreServices.application.navigateToApp(DASHBOARD_APP_ID, {
+      path: `#/${path}`,
+      state,
+      replace: redirectTo.useReplace,
+    });
   };
 
   const getDashboardEmbedSettings = (
@@ -97,7 +95,9 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
     };
   };
 
-  const renderDashboard = (routeProps: RouteComponentProps<{ id?: string }>) => {
+  const renderDashboard = (
+    routeProps: RouteComponentProps<{ id?: string; expandedPanelId?: string }>
+  ) => {
     const routeParams = parse(routeProps.history.location.search);
     if (routeParams.embed === 'true' && !globalEmbedSettings) {
       globalEmbedSettings = getDashboardEmbedSettings(routeParams);
@@ -108,12 +108,13 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
         embedSettings={globalEmbedSettings}
         savedDashboardId={routeProps.match.params.id}
         redirectTo={redirect}
+        expandedPanelId={routeProps.match.params.expandedPanelId}
       />
     );
   };
 
   const renderListingPage = (routeProps: RouteComponentProps) => {
-    docTitle.change(getDashboardPageTitle());
+    coreServices.chrome.docTitle.change(getDashboardPageTitle());
     const routeParams = parse(routeProps.history.location.search);
     const title = (routeParams.title as string) || undefined;
     const filter = (routeParams.filter as string) || undefined;
@@ -132,10 +133,10 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
   };
 
   const hasEmbeddableIncoming = Boolean(
-    embeddable.getStateTransfer().getIncomingEmbeddablePackage(DASHBOARD_APP_ID, false)
+    embeddableService.getStateTransfer().getIncomingEmbeddablePackage(DASHBOARD_APP_ID, false)
   );
   if (!hasEmbeddableIncoming) {
-    dataStart.dataViews.clearCache();
+    dataService.dataViews.clearCache();
   }
 
   // dispatch synthetic hash change event to update hash history objects
@@ -145,39 +146,41 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
   });
 
   const app = (
-    <I18nProvider>
+    <KibanaRenderContextProvider {...coreStart}>
       <DashboardMountContext.Provider value={mountContext}>
-        <KibanaThemeProvider theme$={core.theme.theme$}>
-          <HashRouter>
-            <Routes>
-              <Route
-                path={[CREATE_NEW_DASHBOARD_URL, `${VIEW_DASHBOARD_URL}/:id`]}
-                render={renderDashboard}
-              />
-              <Route exact path={LANDING_PAGE_PATH} render={renderListingPage} />
-              <Route exact path="/">
-                <Redirect to={LANDING_PAGE_PATH} />
-              </Route>
-              <Route render={renderNoMatch} />
-            </Routes>
-          </HashRouter>
-        </KibanaThemeProvider>
+        <HashRouter>
+          <Routes>
+            <Route
+              path={[
+                CREATE_NEW_DASHBOARD_URL,
+                `${VIEW_DASHBOARD_URL}/:id/:expandedPanelId`,
+                `${VIEW_DASHBOARD_URL}/:id`,
+              ]}
+              render={renderDashboard}
+            />
+            <Route exact path={LANDING_PAGE_PATH} render={renderListingPage} />
+            <Route exact path="/">
+              <Redirect to={LANDING_PAGE_PATH} />
+            </Route>
+            <Route render={renderNoMatch} />
+          </Routes>
+        </HashRouter>
       </DashboardMountContext.Provider>
-    </I18nProvider>
+    </KibanaRenderContextProvider>
   );
 
-  setHelpExtension({
+  coreServices.chrome.setHelpExtension({
     appName: getDashboardPageTitle(),
     links: [
       {
         linkType: 'documentation',
-        href: `${dashboardDocLink}`,
+        href: `${coreServices.docLinks.links.dashboard.guide}`,
       },
     ],
   });
 
-  if (!showWriteControls) {
-    setBadge({
+  if (!getDashboardCapabilities().showWriteControls) {
+    coreServices.chrome.setBadge({
       text: dashboardReadonlyBadge.getText(),
       tooltip: dashboardReadonlyBadge.getTooltip(),
       iconType: 'glasses',
@@ -185,7 +188,7 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
   }
   render(app, element);
   return () => {
-    dataStart.search.session.clear();
+    dataService.search.session.clear();
     unlistenParentHistory();
     unmountComponentAtNode(element);
     appUnMounted();

@@ -81,8 +81,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe('all component templates', () => {
         it('should return an array of component templates', async () => {
-          const { body: componentTemplates } = await getAllComponentTemplates().expect(200);
-
+          const { status, body: componentTemplates } = await getAllComponentTemplates();
+          expect(status).to.eql(200);
           const testComponentTemplate = componentTemplates.find(
             ({ name }: { name: string }) => name === COMPONENT_NAME
           );
@@ -101,10 +101,9 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe('one component template', () => {
         it('should return a single component template', async () => {
-          const { body } = await getOneComponentTemplate(COMPONENT_NAME).expect(200);
-
+          const { status, body } = await getOneComponentTemplate(COMPONENT_NAME);
+          expect(status).to.eql(200);
           expect(body).to.eql({
-            isDeprecated: false,
             name: COMPONENT_NAME,
             ...COMPONENT,
             _kbnMeta: {
@@ -131,7 +130,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should create a component template', async () => {
-        const { body } = await createComponentTemplate(COMPONENT_NAME, {
+        const { status, body } = await createComponentTemplate(COMPONENT_NAME, {
           version: 1,
           template: {
             settings: {
@@ -164,22 +163,23 @@ export default function ({ getService }: FtrProviderContext) {
             usedBy: [],
             isManaged: false,
           },
-        }).expect(200);
-
+        });
+        expect(status).to.eql(200);
         expect(body).to.eql({
           acknowledged: true,
         });
       });
 
       it('should create a component template with only required fields', async () => {
-        const { body } = await createComponentTemplate(REQUIRED_FIELDS_COMPONENT_NAME, {
+        const { status, body } = await createComponentTemplate(REQUIRED_FIELDS_COMPONENT_NAME, {
           // Excludes version and _meta fields
           template: {},
           _kbnMeta: {
             usedBy: [],
             isManaged: false,
           },
-        }).expect(200);
+        });
+        expect(status).to.eql(200);
 
         expect(body).to.eql({
           acknowledged: true,
@@ -187,13 +187,14 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should not allow creation of a component template with the same name of an existing one', async () => {
-        const { body } = await createComponentTemplate(COMPONENT_NAME, {
+        const { status, body } = await createComponentTemplate(COMPONENT_NAME, {
           template: {},
           _kbnMeta: {
             usedBy: [],
             isManaged: false,
           },
-        }).expect(409);
+        });
+        expect(status).to.eql(409);
 
         expect(body).to.eql({
           statusCode: 409,
@@ -240,29 +241,30 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should allow an existing component template to be updated', async () => {
-        const { body } = await updateComponentTemplate(COMPONENT_NAME, {
+        const { status, body } = await updateComponentTemplate(COMPONENT_NAME, {
           ...COMPONENT,
           version: 1,
           _kbnMeta: {
             usedBy: [],
             isManaged: false,
           },
-        }).expect(200);
-
+        });
+        expect(status).to.eql(200);
         expect(body).to.eql({
           acknowledged: true,
         });
       });
 
       it('should not allow a non-existing component template to be updated', async () => {
-        const { body } = await updateComponentTemplate('component_does_not_exist', {
+        const { status, body } = await updateComponentTemplate('component_does_not_exist', {
           ...COMPONENT,
           version: 1,
           _kbnMeta: {
             usedBy: [],
             isManaged: false,
           },
-        }).expect(404);
+        });
+        expect(status).to.eql(404);
 
         expect(body).to.eql({
           statusCode: 404,
@@ -281,6 +283,34 @@ export default function ({ getService }: FtrProviderContext) {
             },
           },
         });
+      });
+
+      it('should allow a deprecated component template to be updated', async () => {
+        const deprecatedTemplateName = 'deprecated_component_template';
+        const deprecatedTemplate = {
+          template: {},
+          deprecated: true,
+        };
+        try {
+          await addComponentTemplate(
+            { body: deprecatedTemplate, name: deprecatedTemplateName },
+            CACHE_TEMPLATES
+          );
+        } catch (err) {
+          log.debug('[Setup error] Error creating component template');
+          throw err;
+        }
+        const { status, body } = await updateComponentTemplate(deprecatedTemplateName, {
+          ...deprecatedTemplate,
+          version: 1,
+          _kbnMeta: {
+            usedBy: [],
+            isManaged: false,
+          },
+        });
+        expect(status).to.eql(200);
+
+        expect(body).to.eql({ acknowledged: true });
       });
     });
 
@@ -314,7 +344,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should delete a component template', async () => {
         const { name } = componentTemplateA;
-        const { body } = await deleteComponentTemplate(name).expect(200);
+        const { status, body } = await deleteComponentTemplate(name);
+        expect(status).to.eql(200);
 
         expect(body).to.eql({
           itemsDeleted: [name],
@@ -327,10 +358,10 @@ export default function ({ getService }: FtrProviderContext) {
         const { name: componentTemplate2Name } = componentTemplateC;
 
         const {
+          status,
           body: { itemsDeleted, errors },
-        } = await deleteComponentTemplate(
-          `${componentTemplate1Name},${componentTemplate2Name}`
-        ).expect(200);
+        } = await deleteComponentTemplate(`${componentTemplate1Name},${componentTemplate2Name}`);
+        expect(status).to.eql(200);
 
         expect(errors).to.eql([]);
 
@@ -344,9 +375,10 @@ export default function ({ getService }: FtrProviderContext) {
         const COMPONENT_DOES_NOT_EXIST = 'component_does_not_exist';
         const { name: componentTemplateName } = componentTemplateD;
 
-        const { body } = await deleteComponentTemplate(
+        const { status, body } = await deleteComponentTemplate(
           `${componentTemplateName},${COMPONENT_DOES_NOT_EXIST}`
-        ).expect(200);
+        );
+        expect(status).to.eql(200);
         expect(body.itemsDeleted).to.eql([componentTemplateName]);
         expect(body.errors[0].name).to.eql(COMPONENT_DOES_NOT_EXIST);
 
@@ -424,7 +456,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe('without datastreams', () => {
         it('should return no datastreams', async () => {
-          const { body } = await getComponentTemplateDatastreams(COMPONENT_NAME).expect(200);
+          const { status, body } = await getComponentTemplateDatastreams(COMPONENT_NAME);
+          expect(status).to.eql(200);
 
           expect(body).to.eql({ data_streams: [] });
         });
@@ -435,7 +468,8 @@ export default function ({ getService }: FtrProviderContext) {
           await addDatastream(DATASTREAM_NAME, CACHE_TEMPLATES);
         });
         it('should return datastreams', async () => {
-          const { body } = await getComponentTemplateDatastreams(COMPONENT_NAME).expect(200);
+          const { status, body } = await getComponentTemplateDatastreams(COMPONENT_NAME);
+          expect(status).to.eql(200);
 
           expect(body).to.eql({ data_streams: ['logs-test-component-template-default'] });
         });

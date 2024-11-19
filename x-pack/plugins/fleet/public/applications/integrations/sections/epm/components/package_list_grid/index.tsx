@@ -48,9 +48,10 @@ const StickySidebar = styled(EuiFlexItem)`
   top: 120px;
 `;
 
-export interface Props {
+export interface PackageListGridProps {
   isLoading?: boolean;
   controls?: ReactNode | ReactNode[];
+  emptyStateStyles?: Record<string, string>;
   list: IntegrationCardItem[];
   searchTerm: string;
   setSearchTerm: (search: string) => void;
@@ -60,6 +61,8 @@ export interface Props {
   setUrlandReplaceHistory: (params: IntegrationsURLParameters) => void;
   setUrlandPushHistory: (params: IntegrationsURLParameters) => void;
   callout?: JSX.Element | null;
+  // Props to decide the size of the spacer above callout. Security Solution uses this prop to customize the size of the spacer
+  calloutTopSpacerSize?: 's' | 'm' | 'xs' | 'l' | 'xl' | 'xxl';
   // Props used only in AvailablePackages component:
   showCardLabels?: boolean;
   title?: string;
@@ -67,11 +70,19 @@ export interface Props {
   selectedSubCategory?: string;
   setSelectedSubCategory?: (c: string | undefined) => void;
   showMissingIntegrationMessage?: boolean;
+  showControls?: boolean;
+  showSearchTools?: boolean;
+  // Customizing whether to sort by the default featured integrations' categories. Security Solution has custom sorting logic
+  sortByFeaturedIntegrations?: boolean;
+  spacer?: boolean;
+  // Security Solution sends the id to determine which element to scroll when the user interacting with the package list
+  scrollElementId?: string;
 }
 
-export const PackageListGrid: FunctionComponent<Props> = ({
+export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
   isLoading,
   controls,
+  emptyStateStyles,
   title,
   list,
   searchTerm,
@@ -85,8 +96,14 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   setUrlandReplaceHistory,
   setUrlandPushHistory,
   showMissingIntegrationMessage = false,
+  sortByFeaturedIntegrations = true,
   callout,
+  calloutTopSpacerSize = 'l', // Default EUI spacer size
   showCardLabels = true,
+  showControls = true,
+  showSearchTools = true,
+  spacer = true,
+  scrollElementId,
 }) => {
   const localSearchRef = useLocalSearch(list, !!isLoading);
 
@@ -130,9 +147,10 @@ export const PackageListGrid: FunctionComponent<Props> = ({
         )
       : list;
 
-    return promoteFeaturedIntegrations(filteredList, selectedCategory);
-  }, [isLoading, list, localSearchRef, searchTerm, selectedCategory]);
-
+    return sortByFeaturedIntegrations
+      ? promoteFeaturedIntegrations(filteredList, selectedCategory)
+      : filteredList;
+  }, [isLoading, list, localSearchRef, searchTerm, selectedCategory, sortByFeaturedIntegrations]);
   const splitSubcategories = (
     subcategories: CategoryFacet[] | undefined
   ): { visibleSubCategories?: CategoryFacet[]; hiddenSubCategories?: CategoryFacet[] } => {
@@ -174,23 +192,29 @@ export const PackageListGrid: FunctionComponent<Props> = ({
       gutterSize="xl"
       data-test-subj="epmList.integrationCards"
     >
-      <StickySidebar data-test-subj="epmList.controlsSideColumn" grow={1}>
-        <ControlsColumn controls={controls} title={title} />
-      </StickySidebar>
+      {showControls && (
+        <StickySidebar data-test-subj="epmList.controlsSideColumn" grow={1}>
+          <ControlsColumn controls={controls} title={title} />
+        </StickySidebar>
+      )}
+
       <EuiFlexItem grow={5} data-test-subj="epmList.mainColumn" style={{ alignSelf: 'stretch' }}>
-        <EuiFlexItem grow={false}>
-          <SearchBox
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            selectedCategory={selectedCategory}
-            setCategory={setCategory}
-            categories={categories}
-            availableSubCategories={availableSubCategories}
-            setSelectedSubCategory={setSelectedSubCategory}
-            selectedSubCategory={selectedSubCategory}
-            setUrlandReplaceHistory={setUrlandReplaceHistory}
-          />
-        </EuiFlexItem>
+        {showSearchTools && (
+          <EuiFlexItem grow={false}>
+            <SearchBox
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              selectedCategory={selectedCategory}
+              setCategory={setCategory}
+              categories={categories}
+              availableSubCategories={availableSubCategories}
+              setSelectedSubCategory={setSelectedSubCategory}
+              selectedSubCategory={selectedSubCategory}
+              setUrlandReplaceHistory={setUrlandReplaceHistory}
+            />
+          </EuiFlexItem>
+        )}
+
         {showIntegrationsSubcategories && availableSubCategories?.length ? <EuiSpacer /> : null}
         {showIntegrationsSubcategories ? (
           <EuiFlexItem grow={false}>
@@ -253,17 +277,19 @@ export const PackageListGrid: FunctionComponent<Props> = ({
         ) : null}
         {callout ? (
           <>
-            <EuiSpacer />
+            <EuiSpacer size={calloutTopSpacerSize} />
             {callout}
           </>
         ) : null}
-        <EuiSpacer />
+        {spacer && <EuiSpacer size="s" />}
         <EuiFlexItem>
           <GridColumn
+            emptyStateStyles={emptyStateStyles}
             isLoading={!!isLoading}
             list={filteredPromotedList}
             showMissingIntegrationMessage={showMissingIntegrationMessage}
             showCardLabels={showCardLabels}
+            scrollElementId={scrollElementId}
           />
         </EuiFlexItem>
         {showMissingIntegrationMessage && (

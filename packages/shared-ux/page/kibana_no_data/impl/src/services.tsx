@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, useContext } from 'react';
+import React, { FC, PropsWithChildren, useContext } from 'react';
 import {
   NoDataViewsPromptProvider,
   NoDataViewsPromptKibanaProvider,
@@ -25,7 +26,7 @@ const KibanaNoDataPageContext = React.createContext<Services | null>(null);
 /**
  * A Context Provider that provides services to the component.
  */
-export const KibanaNoDataPageProvider: FC<KibanaNoDataPageServices> = ({
+export const KibanaNoDataPageProvider: FC<PropsWithChildren<KibanaNoDataPageServices>> = ({
   children,
   ...services
 }) => {
@@ -43,10 +44,9 @@ export const KibanaNoDataPageProvider: FC<KibanaNoDataPageServices> = ({
 /**
  * Kibana-specific Provider that maps dependencies to services.
  */
-export const KibanaNoDataPageKibanaProvider: FC<KibanaNoDataPageKibanaDependencies> = ({
-  children,
-  ...dependencies
-}) => {
+export const KibanaNoDataPageKibanaProvider: FC<
+  PropsWithChildren<KibanaNoDataPageKibanaDependencies>
+> = ({ children, ...dependencies }) => {
   const { dataViews } = dependencies;
   const value: Services = {
     hasESData: dataViews.hasData.hasESData,

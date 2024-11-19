@@ -7,6 +7,7 @@
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { addSeverityAndEventTypeInBody } from './helpers';
 import {
   D3SecurityRunActionParamsSchema,
@@ -57,22 +58,24 @@ export class D3SecurityConnector extends SubActionConnector<D3SecurityConfig, D3
     return `API Error: ${error.response?.status} - ${error.response?.statusText}`;
   }
 
-  public async runApi({
-    body,
-    severity,
-    eventType,
-  }: D3SecurityRunActionParams): Promise<D3SecurityRunActionResponse> {
-    const response = await this.request({
-      url: this.url,
-      method: 'post',
-      responseSchema: D3SecurityRunActionResponseSchema,
-      data: addSeverityAndEventTypeInBody(
-        body ?? '',
-        severity ?? D3SecuritySeverity.EMPTY,
-        eventType ?? ''
-      ),
-      headers: { d3key: this.token || '' },
-    });
+  public async runApi(
+    { body, severity, eventType }: D3SecurityRunActionParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<D3SecurityRunActionResponse> {
+    const response = await this.request(
+      {
+        url: this.url,
+        method: 'post',
+        responseSchema: D3SecurityRunActionResponseSchema,
+        data: addSeverityAndEventTypeInBody(
+          body ?? '',
+          severity ?? D3SecuritySeverity.EMPTY,
+          eventType ?? ''
+        ),
+        headers: { d3key: this.token || '' },
+      },
+      connectorUsageCollector
+    );
     return response.data;
   }
 }

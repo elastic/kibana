@@ -21,19 +21,21 @@ import {
   getInitialSingleEventMetric,
 } from '@kbn/security-solution-plugin/server/usage/detections/rules/get_initial_usage';
 import {
+  getEqlRuleForAlertTesting,
+  getSimpleThreatMatch,
+  getStats,
+  getThresholdRuleForAlertTesting,
+  deleteAllEventLogExecutionEvents,
+} from '../../../utils';
+import {
   createRule,
   createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
-  getEqlRuleForAlertTesting,
   getRuleForAlertTesting,
-  getSimpleThreatMatch,
-  getStats,
-  getThresholdRuleForAlertTesting,
   waitForRuleSuccess,
   waitForAlertsToBePresent,
-  deleteAllEventLogExecutionEvents,
-} from '../../../utils';
+} from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -46,7 +48,7 @@ export default ({ getService }: FtrProviderContext) => {
   // Note: We don't actually find signals well with ML tests at the moment so there are not tests for ML rule type for telemetry
   // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/132856
   // FLAKY: https://github.com/elastic/kibana/issues/171442
-  describe.skip('@ess @serverless Detection rule status telemetry', async () => {
+  describe.skip('@ess @serverless Detection rule status telemetry', () => {
     before(async () => {
       // Just in case other tests do not clean up the event logs, let us clear them now and here only once.
       await deleteAllEventLogExecutionEvents(es, log);
@@ -121,7 +123,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(stats?.detection_rules.detection_rule_usage).to.eql(expectedRuleUsage);
       });
 
-      it('@skipInQA should have zero values for "detection_rule_status.all_rules" rules that are not query based', () => {
+      it('@skipInServerlessMKI should have zero values for "detection_rule_status.all_rules" rules that are not query based', () => {
         expect(stats?.detection_rules.detection_rule_status.all_rules.eql).to.eql(
           getInitialSingleEventMetric()
         );
@@ -173,7 +175,7 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
 
-      it('@skipInQA should have non zero values for "index_duration"', () => {
+      it('@skipInServerlessMKI should have non zero values for "index_duration"', () => {
         expect(
           stats?.detection_rules.detection_rule_status.custom_rules.query.index_duration.max
         ).to.be.above(1);
@@ -206,11 +208,11 @@ export default ({ getService }: FtrProviderContext) => {
         ).to.be.above(1);
       });
 
-      it('@skipInQA should have non zero values for "succeeded"', () => {
+      it('@skipInServerlessMKI should have non zero values for "succeeded"', () => {
         expect(stats?.detection_rules.detection_rule_status.custom_rules.query.succeeded).to.eql(1);
       });
 
-      it('@skipInQA should have non zero values for "succeeded", "index_duration", "search_duration" and "enrichment_duration"', () => {
+      it('@skipInServerlessMKI should have non zero values for "succeeded", "index_duration", "search_duration" and "enrichment_duration"', () => {
         expect(
           stats?.detection_rules.detection_rule_status.custom_rules.query.index_duration.max
         ).to.be.above(1);

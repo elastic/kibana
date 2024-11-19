@@ -5,5 +5,6 @@
  * 2.0.
  */
 
+export type { MapEmbeddablePersistableState } from './types';
 export { extract } from './extract';
 export { inject } from './inject';

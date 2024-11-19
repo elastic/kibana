@@ -5,17 +5,22 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useContext, useEffect, useState, useMemo } from 'react';
-import type { AggFieldPair } from '@kbn/ml-anomaly-utils';
+import type { FC } from 'react';
+import React, { Fragment, useContext, useEffect, useState, useMemo } from 'react';
+import type { AggFieldPair, Aggregation, Field } from '@kbn/ml-anomaly-utils';
+
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { useUiSettings } from '../../../../../../../contexts/kibana';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { SingleMetricJobCreator } from '../../../../../common/job_creator';
-import { LineChartData } from '../../../../../common/chart_loader';
-import { AggSelect, DropDownLabel, DropDownProps, createLabel } from '../agg_select';
-import { newJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
+import type { SingleMetricJobCreator } from '../../../../../common/job_creator';
+import type { LineChartData } from '../../../../../common/chart_loader';
+import type { DropDownLabel, DropDownProps } from '../agg_select';
+import { AggSelect, createLabel } from '../agg_select';
+import { useNewJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { sortFields } from '../../../../../../../../../common/util/fields_utils';
 import { AnomalyChart, CHART_TYPE } from '../../../charts/anomaly_chart';
 import { getChartSettings } from '../../../charts/common/settings';
-import { getToastNotificationService } from '../../../../../../../services/toast_notification_service';
+import { useToastNotificationService } from '../../../../../../../services/toast_notification_service';
 
 interface Props {
   setIsValid: (na: boolean) => void;
@@ -24,6 +29,7 @@ interface Props {
 const DTR_IDX = 0;
 
 export const SingleMetricDetectors: FC<Props> = ({ setIsValid }) => {
+  const uiSettings = useUiSettings();
   const {
     jobCreator: jc,
     jobCreatorUpdate,
@@ -32,6 +38,8 @@ export const SingleMetricDetectors: FC<Props> = ({ setIsValid }) => {
     chartInterval,
   } = useContext(JobCreatorContext);
   const jobCreator = jc as SingleMetricJobCreator;
+  const toastNotificationService = useToastNotificationService();
+  const newJobCapsService = useNewJobCapsService();
 
   const fields = useMemo(
     () => sortFields([...newJobCapsService.fields, ...jobCreator.runtimeFields]),
@@ -51,9 +59,13 @@ export const SingleMetricDetectors: FC<Props> = ({ setIsValid }) => {
   function detectorChangeHandler(selectedOptionsIn: DropDownLabel[]) {
     setSelectedOptions(selectedOptionsIn);
     if (selectedOptionsIn.length) {
-      const option = selectedOptionsIn[0];
-      if (typeof option !== 'undefined') {
-        setAggFieldPair({ agg: option.agg, field: option.field });
+      const option = selectedOptionsIn[0] as DropDownLabel<Aggregation>;
+      if (typeof option !== 'undefined' && isPopulatedObject(option, ['agg', 'field'])) {
+        setAggFieldPair({
+          agg: option.agg as Aggregation,
+          field: option.field as Field,
+          by: { field: null, value: null },
+        });
       } else {
         setAggFieldPair(null);
       }
@@ -88,7 +100,7 @@ export const SingleMetricDetectors: FC<Props> = ({ setIsValid }) => {
     if (aggFieldPair !== null) {
       setLoadingData(true);
       try {
-        const cs = getChartSettings(jobCreator, chartInterval);
+        const cs = getChartSettings(uiSettings, jobCreator, chartInterval);
         const resp: LineChartData = await chartLoader.loadLineCharts(
           jobCreator.start,
           jobCreator.end,
@@ -103,7 +115,7 @@ export const SingleMetricDetectors: FC<Props> = ({ setIsValid }) => {
           setLineChartData(resp);
         }
       } catch (error) {
-        getToastNotificationService().displayErrorToast(error);
+        toastNotificationService.displayErrorToast(error);
         setLineChartData({});
       }
       setLoadingData(false);

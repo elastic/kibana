@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { parseInterval } from '../../../common/util/parse_interval';
-import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
+import { parseInterval } from '@kbn/ml-parse-interval';
+
+import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import { validateJobObject } from './validate_job_object';
 
 interface ValidateTimeRangeMessage {

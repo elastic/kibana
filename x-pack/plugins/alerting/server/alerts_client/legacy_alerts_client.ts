@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Logger } from '@kbn/core/server';
+import { KibanaRequest, Logger } from '@kbn/core/server';
 import { cloneDeep, keys, merge } from 'lodash';
 import { Alert } from '../alert/alert';
 import {
@@ -28,17 +28,22 @@ import {
 import {
   IAlertsClient,
   InitializeExecutionOpts,
-  ProcessAndLogAlertsOpts,
   ProcessAlertsOpts,
   LogAlertsOpts,
   TrackedAlerts,
 } from './types';
 import { DEFAULT_MAX_ALERTS } from '../config';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
+import { MaintenanceWindowsService } from '../task_runner/maintenance_windows';
+import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 
 export interface LegacyAlertsClientParams {
+  alertingEventLogger: AlertingEventLogger;
   logger: Logger;
+  maintenanceWindowsService?: MaintenanceWindowsService;
+  request: KibanaRequest;
   ruleType: UntypedNormalizedRuleType;
+  spaceId: string;
 }
 
 export class LegacyAlertsClient<
@@ -136,11 +141,14 @@ export class LegacyAlertsClient<
     return this.alertFactory?.get(id);
   }
 
-  public processAlerts({
-    notifyOnActionGroupChange,
+  public isTrackedAlert(id: string) {
+    return !!this.trackedAlerts.active[id];
+  }
+
+  public async processAlerts({
     flappingSettings,
-    maintenanceWindowIds,
     alertDelay,
+    ruleRunMetricsStore,
   }: ProcessAlertsOpts) {
     const {
       newAlerts: processedAlertsNew,
@@ -155,9 +163,33 @@ export class LegacyAlertsClient<
       alertLimit: this.maxAlerts,
       autoRecoverAlerts: this.options.ruleType.autoRecoverAlerts ?? true,
       flappingSettings,
-      maintenanceWindowIds,
       startedAt: this.startedAtString,
     });
+
+    if (this.options.maintenanceWindowsService) {
+      // load maintenance windows if there are any any alerts (new, active, recovered)
+      // this is because we need the MW IDs for any active or recovered alerts that may
+      // have started during the MW period.
+      if (
+        keys(processedAlertsNew).length > 0 ||
+        keys(processedAlertsActive).length > 0 ||
+        keys(processedAlertsRecovered).length > 0
+      ) {
+        const { maintenanceWindowsWithoutScopedQueryIds } =
+          await this.options.maintenanceWindowsService.getMaintenanceWindows({
+            eventLogger: this.options.alertingEventLogger,
+            request: this.options.request,
+            ruleTypeCategory: this.options.ruleType.category,
+            spaceId: this.options.spaceId,
+          });
+
+        for (const id in processedAlertsNew) {
+          if (Object.hasOwn(processedAlertsNew, id)) {
+            processedAlertsNew[id].setMaintenanceWindowIds(maintenanceWindowsWithoutScopedQueryIds);
+          }
+        }
+      }
+    }
 
     const { trimmedAlertsRecovered, earlyRecoveredAlerts } = trimRecoveredAlerts(
       this.options.logger,
@@ -167,7 +199,6 @@ export class LegacyAlertsClient<
 
     const alerts = getAlertsForNotification<State, Context, ActionGroupIds, RecoveryActionGroupId>(
       flappingSettings,
-      notifyOnActionGroupChange,
       this.options.ruleType.defaultActionGroupId,
       alertDelay,
       processedAlertsNew,
@@ -176,6 +207,7 @@ export class LegacyAlertsClient<
       processedAlertsRecoveredCurrent,
       this.startedAtString
     );
+    ruleRunMetricsStore.setNumberOfDelayedAlerts(alerts.delayedAlertsCount);
     alerts.currentRecoveredAlerts = merge(alerts.currentRecoveredAlerts, earlyRecoveredAlerts);
 
     this.processedAlerts.new = alerts.newAlerts;
@@ -185,10 +217,10 @@ export class LegacyAlertsClient<
     this.processedAlerts.recoveredCurrent = alerts.currentRecoveredAlerts;
   }
 
-  public logAlerts({ eventLogger, ruleRunMetricsStore, shouldLogAlerts }: LogAlertsOpts) {
+  public logAlerts({ ruleRunMetricsStore, shouldLogAlerts }: LogAlertsOpts) {
     logAlerts({
       logger: this.options.logger,
-      alertingEventLogger: eventLogger,
+      alertingEventLogger: this.options.alertingEventLogger,
       newAlerts: this.processedAlerts.new,
       activeAlerts: this.processedAlerts.activeCurrent,
       recoveredAlerts: this.processedAlerts.recoveredCurrent,
@@ -199,41 +231,18 @@ export class LegacyAlertsClient<
     });
   }
 
-  public processAndLogAlerts({
-    eventLogger,
-    ruleRunMetricsStore,
-    shouldLogAlerts,
-    flappingSettings,
-    notifyOnActionGroupChange,
-    maintenanceWindowIds,
-    alertDelay,
-  }: ProcessAndLogAlertsOpts) {
-    this.processAlerts({
-      notifyOnActionGroupChange,
-      flappingSettings,
-      maintenanceWindowIds,
-      alertDelay,
-    });
-
-    this.logAlerts({
-      eventLogger,
-      ruleRunMetricsStore,
-      shouldLogAlerts,
-    });
-  }
-
   public getProcessedAlerts(
     type: 'new' | 'active' | 'activeCurrent' | 'recovered' | 'recoveredCurrent'
   ) {
-    if (this.processedAlerts.hasOwnProperty(type)) {
+    if (Object.hasOwn(this.processedAlerts, type)) {
       return this.processedAlerts[type];
     }
 
     return {};
   }
 
-  public getAlertsToSerialize(shouldSetFlapping: boolean = true) {
-    if (shouldSetFlapping) {
+  public getAlertsToSerialize(shouldSetFlappingAndOptimize: boolean = true) {
+    if (shouldSetFlappingAndOptimize) {
       setFlapping<State, Context, ActionGroupIds, RecoveryActionGroupId>(
         this.flappingSettings,
         this.processedAlerts.active,
@@ -242,7 +251,8 @@ export class LegacyAlertsClient<
     }
     return determineAlertsToReturn<State, Context, ActionGroupIds, RecoveryActionGroupId>(
       this.processedAlerts.active,
-      this.processedAlerts.recovered
+      this.processedAlerts.recovered,
+      shouldSetFlappingAndOptimize
     );
   }
 
@@ -262,7 +272,9 @@ export class LegacyAlertsClient<
     return null;
   }
 
-  public async persistAlerts() {}
+  public async persistAlerts() {
+    return null;
+  }
 
   public async setAlertStatusToUntracked() {
     return;

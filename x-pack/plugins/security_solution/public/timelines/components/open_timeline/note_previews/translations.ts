@@ -32,10 +32,10 @@ export const AN_UNKNOWN_USER = i18n.translate(
   }
 );
 
-export const DELETE_NOTE_ERROR = (error: string) =>
+export const DELETE_NOTE_ERROR = (error: string | Error) =>
   i18n.translate('xpack.securitySolution.timeline.deleteNoteError', {
     defaultMessage: 'An error occurred deleting note {error}',
-    values: { error },
+    values: { error: typeof error === 'string' ? error : error?.message },
   });
 
 export const DELETE_NOTE = i18n.translate('xpack.securitySolution.timeline.deleteNoteLabel', {

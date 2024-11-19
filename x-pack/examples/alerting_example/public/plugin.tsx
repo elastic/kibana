@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup, AppMountParameters, AppNavLinkStatus } from '@kbn/core/public';
+import { Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
 import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import {
@@ -42,7 +42,7 @@ export class AlertingExamplePlugin implements Plugin<Setup, Start, AlertingExamp
     core.application.register({
       id: 'AlertingExample',
       title: 'Alerting Example',
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       async mount(params: AppMountParameters) {
         const [coreStart, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./application');

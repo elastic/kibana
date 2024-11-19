@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { getCreateNewTermsRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
 
-import { deleteAllRules } from '../../../utils';
+import { deleteAllRules } from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -20,7 +20,7 @@ export default ({ getService }: FtrProviderContext) => {
   /**
    * Specific api integration tests for new terms rule type
    */
-  describe('@serverless @ess create_new_terms', () => {
+  describe('@serverless @ess @serverlessQA create_new_terms', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
     });

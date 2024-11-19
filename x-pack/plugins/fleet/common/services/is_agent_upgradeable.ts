@@ -8,12 +8,14 @@
 import semverCoerce from 'semver/functions/coerce';
 import semverLt from 'semver/functions/lt';
 import semverGt from 'semver/functions/gt';
+import semverGte from 'semver/functions/gte';
 import semverEq from 'semver/functions/eq';
 import moment from 'moment';
 
 import type { Agent } from '../types';
 
 export const AGENT_UPGRADE_COOLDOWN_IN_MIN = 10;
+export const AGENT_UPGARDE_DETAILS_SUPPORTED_VERSION = '8.12.0';
 
 // Error messages for agent not upgradeable
 export const VERSION_MISSING_ERROR = `agent version is missing.`;
@@ -46,6 +48,9 @@ export function isAgentUpgradeable(agent: Agent): boolean {
     return false;
   }
   if (isAgentUpgrading(agent)) {
+    return false;
+  }
+  if (isAgentInWatchingState(agent)) {
     return false;
   }
   if (getRecentUpgradeInfoForAgent(agent).hasBeenUpgradedRecently) {
@@ -136,10 +141,18 @@ export const getNotUpgradeableMessage = (
 };
 
 const isNotDowngrade = (agentVersion: string, versionToUpgrade: string): boolean => {
-  const agentVersionNumber = semverCoerce(agentVersion);
+  const agentVersionNumber = semverCoerce(agentVersion, { includePrerelease: true });
   if (!agentVersionNumber) throw new Error(`${INVALID_VERSION_ERROR}`);
-  const versionToUpgradeNumber = semverCoerce(versionToUpgrade);
+
+  const versionToUpgradeNumber = semverCoerce(versionToUpgrade, { includePrerelease: true });
   if (!versionToUpgradeNumber) return true;
+
+  // If the versions are equal, allow upgrading to newer build versions
+  if (semverEq(agentVersionNumber, versionToUpgradeNumber)) {
+    const isUpgradeToBuildVersion = versionToUpgradeNumber.compareBuild(agentVersionNumber) === 1;
+
+    return isUpgradeToBuildVersion;
+  }
 
   return semverGt(versionToUpgradeNumber, agentVersionNumber);
 };
@@ -150,7 +163,12 @@ export function getRecentUpgradeInfoForAgent(agent: Agent): {
   elapsedMinsSinceUpgrade: number;
   timeToWaitMins: number;
 } {
-  if (!agent.upgraded_at) {
+  // no need for 10m wait if agent has upgrade details watching state
+  const agentHasUpgradeDetailsSupport = semverGte(
+    agent.local_metadata.elastic.agent.version,
+    AGENT_UPGARDE_DETAILS_SUPPORTED_VERSION
+  );
+  if (!agent.upgraded_at || agentHasUpgradeDetailsSupport) {
     return {
       hasBeenUpgradedRecently: false,
       timeToWaitMs: 0,
@@ -168,6 +186,10 @@ export function getRecentUpgradeInfoForAgent(agent: Agent): {
   const timeToWait = moment.duration(timeToWaitMs, 'milliseconds').asMinutes();
   const timeToWaitMins = Math.ceil(timeToWait);
   return { hasBeenUpgradedRecently, timeToWaitMs, elapsedMinsSinceUpgrade, timeToWaitMins };
+}
+
+export function isAgentInWatchingState(agent: Agent) {
+  return agent.upgrade_details?.state === 'UPG_WATCHING';
 }
 
 export function isAgentUpgrading(agent: Agent) {

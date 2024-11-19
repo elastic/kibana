@@ -86,7 +86,7 @@ describe('When showing the Empty State in ArtifactListPage', () => {
       render();
       const addButton = await renderResult.findByTestId('testPage-emptyState-addButton');
 
-      userEvent.click(addButton);
+      await userEvent.click(addButton);
 
       expect(renderResult.getByTestId('testPage-flyout')).toBeTruthy();
       expect(history.location.search).toMatch(/show=create/);
@@ -97,7 +97,7 @@ describe('When showing the Empty State in ArtifactListPage', () => {
         render();
         const addButton = await renderResult.findByTestId('testPage-emptyState-addButton');
 
-        userEvent.click(addButton);
+        await userEvent.click(addButton);
 
         await waitFor(async () => {
           expect(renderResult.getByTestId('testPage-flyout'));
@@ -114,7 +114,7 @@ describe('When showing the Empty State in ArtifactListPage', () => {
         );
 
         // Submit form
-        userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
+        await userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
 
         // wait for the list to show up
         await waitFor(() => {

@@ -8,7 +8,14 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header', 'discover']);
+  const { visualize, lens, common, header, discover, unifiedFieldList } = getPageObjects([
+    'visualize',
+    'lens',
+    'common',
+    'header',
+    'discover',
+    'unifiedFieldList',
+  ]);
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
   const listingTable = getService('listingTable');
@@ -18,20 +25,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('show underlying data', () => {
     it('should show the open button for a compatible saved visualization', async () => {
-      await PageObjects.visualize.gotoVisualizationLandingPage();
+      await visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
-      await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
-      await PageObjects.lens.goToTimeRange();
+      await lens.clickVisualizeListItemTitle('lnsXYvis');
 
-      await PageObjects.lens.waitForVisualization('xyVisChart');
+      await lens.waitForVisualization('xyVisChart');
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_splitDimensionPanel > lns-dimensionTrigger',
         operation: 'terms',
         field: 'extension.raw',
       });
 
-      await PageObjects.lens.waitForVisualization('xyVisChart');
+      await lens.waitForVisualization('xyVisChart');
 
       // expect the button is shown and enabled
 
@@ -40,84 +46,83 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.existOrFail('unifiedHistogramChart');
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
+      await testSubjects.existOrFail('unifiedDataTableToolbar');
       // check the table columns
-      const columns = await PageObjects.discover.getColumnHeaders();
+      const columns = await discover.getColumnHeaders();
       expect(columns).to.eql(['@timestamp', 'extension.raw', 'bytes']);
       await browser.closeCurrentWindow();
       await browser.switchToWindow(lensWindowHandler);
     });
 
     it('should show the open button if visualization has an annotation layer', async () => {
-      await PageObjects.lens.createLayer('annotations');
+      await lens.createLayer('annotations');
       await testSubjects.clickWhenNotDisabledWithoutRetry(`lnsApp_openInDiscover`);
       const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('unifiedHistogramChart');
-      const columns = await PageObjects.discover.getColumnHeaders();
+      const columns = await discover.getColumnHeaders();
       expect(columns).to.eql(['@timestamp', 'extension.raw', 'bytes']);
       await browser.closeCurrentWindow();
       await browser.switchToWindow(lensWindowHandler);
     });
 
     it('should show the open button if visualization has a reference line layer', async () => {
-      await PageObjects.lens.createLayer('referenceLine');
+      await lens.createLayer('referenceLine');
       await testSubjects.clickWhenNotDisabledWithoutRetry(`lnsApp_openInDiscover`);
       const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('unifiedHistogramChart');
-      const columns = await PageObjects.discover.getColumnHeaders();
+      const columns = await discover.getColumnHeaders();
       expect(columns).to.eql(['@timestamp', 'extension.raw', 'bytes']);
       await browser.closeCurrentWindow();
       await browser.switchToWindow(lensWindowHandler);
     });
 
     it('should not show the open button if visualization has multiple data layers', async () => {
-      await PageObjects.lens.createLayer();
-      await PageObjects.lens.configureDimension({
+      await lens.createLayer();
+      await lens.configureDimension({
         dimension: 'lns-layerPanel-3 > lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
         field: '@timestamp',
       });
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lns-layerPanel-3 > lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'median',
         field: 'bytes',
       });
 
-      await PageObjects.lens.waitForVisualization('xyVisChart');
+      await lens.waitForVisualization('xyVisChart');
 
       expect(await testSubjects.isEnabled(`lnsApp_openInDiscover`)).to.be(false);
 
       for (const index of [3, 2, 1]) {
-        await PageObjects.lens.removeLayer(index);
+        await lens.removeLayer(index);
       }
     });
 
     it('should ignore the top values column if other category is enabled', async () => {
       // Make the breakdown dimention be ignored
-      await PageObjects.lens.openDimensionEditor(
-        'lnsXY_splitDimensionPanel > lns-dimensionTrigger'
-      );
+      await lens.openDimensionEditor('lnsXY_splitDimensionPanel > lns-dimensionTrigger');
       await testSubjects.click('indexPattern-terms-advanced');
       await testSubjects.click('indexPattern-terms-other-bucket');
 
-      await PageObjects.lens.closeDimensionEditor();
+      await lens.closeDimensionEditor();
 
-      await PageObjects.lens.waitForVisualization('xyVisChart');
+      await lens.waitForVisualization('xyVisChart');
       // expect the button is shown and enabled
 
       await testSubjects.clickWhenNotDisabledWithoutRetry(`lnsApp_openInDiscover`);
 
       const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('unifiedHistogramChart');
       expect(await queryBar.getQueryString()).be.eql('');
       await browser.closeCurrentWindow();
@@ -125,35 +130,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show the open button for a compatible saved visualization with a lucene query', async () => {
-      // Make the breakdown dimention contribute to filters again
-      await PageObjects.lens.openDimensionEditor(
-        'lnsXY_splitDimensionPanel > lns-dimensionTrigger'
-      );
+      // Make the breakdown dimension contribute to filters again
+      await lens.openDimensionEditor('lnsXY_splitDimensionPanel > lns-dimensionTrigger');
       await testSubjects.click('indexPattern-terms-advanced');
       await testSubjects.click('indexPattern-terms-other-bucket');
-      await PageObjects.lens.closeDimensionEditor();
+      await lens.closeDimensionEditor();
 
       // add a lucene query to the yDimension
-      await PageObjects.lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
-      await PageObjects.lens.enableFilter();
+      await lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
+      await lens.enableFilter();
       // turn off the KQL switch to change the language to lucene
       await testSubjects.click('indexPattern-filter-by-input > switchQueryLanguageButton');
       await testSubjects.click('luceneLanguageMenuItem');
       await testSubjects.click('indexPattern-filter-by-input > switchQueryLanguageButton');
       // apparently setting a filter requires some time before and after typing to work properly
-      await PageObjects.common.sleep(1000);
-      await PageObjects.lens.setFilterBy('machine.ram:*');
-      await PageObjects.common.sleep(1000);
+      await common.sleep(1000);
+      await lens.setFilterBy('machine.ram:*');
+      await common.sleep(1000);
 
-      await PageObjects.lens.closeDimensionEditor();
+      await lens.closeDimensionEditor();
 
-      await PageObjects.lens.waitForVisualization('xyVisChart');
+      await lens.waitForVisualization('xyVisChart');
 
       await testSubjects.clickWhenNotDisabledWithoutRetry(`lnsApp_openInDiscover`);
 
       const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
+      await unifiedFieldList.waitUntilSidebarHasLoaded();
       await testSubjects.existOrFail('unifiedHistogramChart');
       // check the query
       expect(await queryBar.getQueryString()).be.eql(
@@ -167,9 +171,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show the underlying data extracting all filters and columns from a formula', async () => {
-      await PageObjects.lens.removeDimension('lnsXY_yDimensionPanel');
+      await lens.removeDimension('lnsXY_yDimensionPanel');
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'formula',
         formula: `average(memory, kql=`,
@@ -181,18 +185,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // the tooltip seems to be there as long as the focus is in the query string
       await input.pressKeys(browser.keys.RIGHT);
 
-      await PageObjects.lens.closeDimensionEditor();
+      await lens.closeDimensionEditor();
 
-      await PageObjects.lens.waitForVisualization('xyVisChart');
+      await lens.waitForVisualization('xyVisChart');
       // expect the button is shown and enabled
       await testSubjects.clickWhenNotDisabledWithoutRetry(`lnsApp_openInDiscover`);
 
       const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('unifiedHistogramChart');
       // check the columns
-      const columns = await PageObjects.discover.getColumnHeaders();
+      const columns = await discover.getColumnHeaders();
       expect(columns).to.eql(['@timestamp', 'extension.raw', 'memory']);
       // check the query
       expect(await queryBar.getQueryString()).be.eql(
@@ -203,28 +207,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should extract a filter from a formula global filter', async () => {
-      await PageObjects.lens.removeDimension('lnsXY_yDimensionPanel');
+      await lens.removeDimension('lnsXY_yDimensionPanel');
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'formula',
         formula: `count()`,
         keepOpen: true,
       });
 
-      await PageObjects.lens.enableFilter();
+      await lens.enableFilter();
       // apparently setting a filter requires some time before and after typing to work properly
-      await PageObjects.common.sleep(1000);
-      await PageObjects.lens.setFilterBy('bytes > 4000');
-      await PageObjects.common.sleep(1000);
+      await common.sleep(1000);
+      await lens.setFilterBy('bytes > 4000');
+      await common.sleep(1000);
 
-      await PageObjects.lens.waitForVisualization('xyVisChart');
+      await lens.waitForVisualization('xyVisChart');
       // expect the button is shown and enabled
       await testSubjects.clickWhenNotDisabledWithoutRetry(`lnsApp_openInDiscover`);
 
       const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('unifiedHistogramChart');
       // check the query
       expect(await queryBar.getQueryString()).be.eql(

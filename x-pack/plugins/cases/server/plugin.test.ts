@@ -11,17 +11,17 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
-import { createFilesSetupMock } from '@kbn/files-plugin/server/mocks';
+import { createFileServiceFactoryMock, createFilesSetupMock } from '@kbn/files-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { notificationsMock } from '@kbn/notifications-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import type { PluginsSetup, PluginsStart } from './plugin';
 import { CasePlugin } from './plugin';
 import type { ConfigType } from './config';
 import { ALLOWED_MIME_TYPES } from '../common/constants/mime_types';
+import type { CasesServerSetupDependencies, CasesServerStartDependencies } from './types';
 
 function getConfig(overrides = {}) {
   return {
@@ -37,8 +37,8 @@ describe('Cases Plugin', () => {
   let plugin: CasePlugin;
   let coreSetup: ReturnType<typeof coreMock.createSetup>;
   let coreStart: ReturnType<typeof coreMock.createStart>;
-  let pluginsSetup: jest.Mocked<PluginsSetup>;
-  let pluginsStart: jest.Mocked<PluginsStart>;
+  let pluginsSetup: jest.Mocked<CasesServerSetupDependencies>;
+  let pluginsStart: jest.Mocked<CasesServerStartDependencies>;
 
   beforeEach(() => {
     context = coreMock.createPluginInitializerContext<ConfigType>(getConfig());
@@ -48,6 +48,7 @@ describe('Cases Plugin', () => {
     coreStart = coreMock.createStart();
 
     pluginsSetup = {
+      alerting: alertsMock.createSetup(),
       taskManager: taskManagerMock.createSetup(),
       actions: actionsMock.createSetup(),
       files: createFilesSetupMock(),
@@ -68,7 +69,7 @@ describe('Cases Plugin', () => {
     pluginsStart = {
       licensing: licensingMock.createStart(),
       actions: actionsMock.createStart(),
-      files: { fileServiceFactory: { asScoped: jest.fn(), asInternal: jest.fn() } },
+      files: { fileServiceFactory: createFileServiceFactoryMock() },
       features: featuresPluginMock.createStart(),
       security: securityMock.createStart(),
       notifications: notificationsMock.createStart(),

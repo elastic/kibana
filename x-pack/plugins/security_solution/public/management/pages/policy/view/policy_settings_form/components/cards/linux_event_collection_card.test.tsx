@@ -12,7 +12,7 @@ import { FleetPackagePolicyGenerator } from '../../../../../../../../common/endp
 import React from 'react';
 import type { LinuxEventCollectionCardProps } from './linux_event_collection_card';
 import { LinuxEventCollectionCard } from './linux_event_collection_card';
-import { set } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 
 describe('Policy Linux Event Collection Card', () => {
   const testSubj = getPolicySettingsFormTestSubjects('test').linuxEvents;
@@ -70,7 +70,11 @@ describe('Policy Linux Event Collection Card', () => {
             'Events' +
             'File' +
             'Network' +
-            'Process'
+            'Process' +
+            'Session data' +
+            'Collect session data' +
+            'Capture terminal output' +
+            'Info'
         )
       );
     });
@@ -92,6 +96,7 @@ describe('Policy Linux Event Collection Card', () => {
             'Linux ' +
             '2 / 3 event collections enabled' +
             'Events' +
+            'File' +
             'Network' +
             'Process' +
             'Session data' +

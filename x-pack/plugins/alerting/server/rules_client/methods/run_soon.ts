@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { Rule } from '../../types';
-import { ReadOperations, AlertingAuthorizationEntity } from '../../authorization';
+import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RulesClientContext } from '../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
@@ -22,7 +22,7 @@ export async function runSoon(context: RulesClientContext, { id }: { id: string 
     await context.authorization.ensureAuthorized({
       ruleTypeId: attributes.alertTypeId,
       consumer: attributes.consumer,
-      operation: ReadOperations.RunSoon,
+      operation: WriteOperations.RunSoon,
       entity: AlertingAuthorizationEntity.Rule,
     });
 
@@ -33,7 +33,7 @@ export async function runSoon(context: RulesClientContext, { id }: { id: string 
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.RUN_SOON,
-        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: attributes.name },
         error,
       })
     );
@@ -44,7 +44,7 @@ export async function runSoon(context: RulesClientContext, { id }: { id: string 
     ruleAuditEvent({
       action: RuleAuditAction.RUN_SOON,
       outcome: 'unknown',
-      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: attributes.name },
     })
   );
 

@@ -1,29 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import React, { FC, PropsWithChildren, useEffect, useMemo } from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
-
 import { useHistory } from 'react-router-dom';
-import { State } from './state';
+import { ExpandableFlyoutContextProvider, useExpandableFlyoutContext } from './context';
+import { FlyoutPanels } from './store/state';
 import { useExpandableFlyoutState } from './hooks/use_expandable_flyout_state';
-import { EXPANDABLE_FLYOUT_URL_KEY } from './constants';
-import { Context, store, useDispatch } from './redux';
-import { urlChangedAction } from './actions';
-
-export type ExpandableFlyoutStorageMode = 'memory' | 'url';
+import { Context, selectNeedsSync, store, useDispatch, useSelector } from './store/redux';
+import { urlChangedAction } from './store/actions';
 
 /**
  * Dispatches actions when url state changes and initializes the state when the app is loaded with flyout url parameters
  */
-const UrlSynchronizer = () => {
-  const state = useExpandableFlyoutState();
+export const UrlSynchronizer = () => {
+  const { urlKey } = useExpandableFlyoutContext();
+  const panels = useExpandableFlyoutState();
+  const needsSync = useSelector(selectNeedsSync());
   const dispatch = useDispatch();
 
   const history = useHistory();
@@ -39,56 +39,64 @@ const UrlSynchronizer = () => {
   );
 
   useEffect(() => {
-    const currentValue = urlStorage.get<State>(EXPANDABLE_FLYOUT_URL_KEY);
+    if (!urlKey) {
+      return;
+    }
+
+    const currentValue = urlStorage.get<FlyoutPanels>(urlKey);
 
     // Dispatch current value to redux store as it does not happen automatically
     if (currentValue) {
-      dispatch(urlChangedAction({ ...currentValue, preview: currentValue?.preview[0] }));
+      dispatch(
+        urlChangedAction({
+          ...currentValue,
+          preview: currentValue?.preview?.at(-1),
+          id: urlKey,
+        })
+      );
     }
 
-    const subscription = urlStorage.change$<State>(EXPANDABLE_FLYOUT_URL_KEY).subscribe((value) => {
-      dispatch(urlChangedAction({ ...value, preview: value?.preview?.[0] }));
+    const subscription = urlStorage.change$<FlyoutPanels>(urlKey).subscribe((value) => {
+      dispatch(urlChangedAction({ ...value, preview: value?.preview?.at(-1), id: urlKey }));
     });
 
     return () => subscription.unsubscribe();
-  }, [dispatch, urlStorage]);
+  }, [dispatch, urlKey, urlStorage]);
 
   useEffect(() => {
-    const { needsSync, ...stateToSync } = state;
-
-    if (needsSync) {
-      urlStorage.set(EXPANDABLE_FLYOUT_URL_KEY, stateToSync);
+    if (!needsSync || !panels || !urlKey) {
+      return;
     }
-  }, [urlStorage, state]);
+
+    const { left, right, preview } = panels;
+    urlStorage.set(urlKey, { left, right, preview: [preview?.at(-1)] });
+  }, [needsSync, panels, urlKey, urlStorage]);
 
   return null;
 };
 
 interface ExpandableFlyoutProviderProps {
   /**
-   * This allows the user to choose how the flyout storage is handled.
-   * Url storage syncs current values straight to the browser query string.
+   * Unique key to be used as url parameter to store the state of the flyout.
+   * Providing this will save the state of the flyout in the url.
+   * The word `memory` is reserved, do NOT use it!
    */
-  storage?: ExpandableFlyoutStorageMode;
+  urlKey?: string;
 }
 
 /**
  * Wrap your plugin with this context for the ExpandableFlyout React component.
- * Storage property allows you to specify how the flyout state works internally.
- * With "url", it will be persisted into url and thus allow for deep linking & will survive webpage reloads.
- * "memory" is based on an isolated redux context. The state is saved internally to the package, which means it will not be
- * persisted when sharing url or reloading browser pages.
  */
 export const ExpandableFlyoutProvider: FC<PropsWithChildren<ExpandableFlyoutProviderProps>> = ({
   children,
-  storage = 'url',
+  urlKey,
 }) => {
   return (
-    <ReduxProvider context={Context} store={store}>
-      <>
-        {storage === 'url' ? <UrlSynchronizer /> : null}
+    <ExpandableFlyoutContextProvider urlKey={urlKey}>
+      <ReduxProvider context={Context} store={store}>
+        {urlKey ? <UrlSynchronizer /> : null}
         {children}
-      </>
-    </ReduxProvider>
+      </ReduxProvider>
+    </ExpandableFlyoutContextProvider>
   );
 };

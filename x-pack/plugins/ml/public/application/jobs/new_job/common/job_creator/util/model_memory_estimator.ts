@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { combineLatest, Observable, of, Subject, Subscription } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { combineLatest, of, Subject, Subscription } from 'rxjs';
 import { isEqual, cloneDeep } from 'lodash';
 import {
   catchError,
@@ -18,25 +19,27 @@ import {
   pairwise,
   filter,
   skipWhile,
-} from 'rxjs/operators';
+} from 'rxjs';
 import { useEffect, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { type MLHttpFetchError, extractErrorMessage } from '@kbn/ml-error-utils';
 
 import { DEFAULT_MODEL_MEMORY_LIMIT } from '../../../../../../../common/constants/new_job';
-import { ml } from '../../../../../services/ml_api_service';
-import { JobValidator, VALIDATION_DELAY_MS } from '../../job_validator/job_validator';
+import type { JobValidator } from '../../job_validator/job_validator';
+import { VALIDATION_DELAY_MS } from '../../job_validator/job_validator';
 import { useMlKibana } from '../../../../../contexts/kibana';
-import { JobCreator } from '../job_creator';
+import type { JobCreator } from '../job_creator';
+import type { MlApi } from '../../../../../services/ml_api_service';
 
-export type CalculatePayload = Parameters<typeof ml.calculateModelMemoryLimit$>[0];
+export type CalculatePayload = Parameters<MlApi['calculateModelMemoryLimit$']>[0];
 
 type ModelMemoryEstimator = ReturnType<typeof modelMemoryEstimatorProvider>;
 
 export const modelMemoryEstimatorProvider = (
   jobCreator: JobCreator,
-  jobValidator: JobValidator
+  jobValidator: JobValidator,
+  mlApi: MlApi
 ) => {
   const modelMemoryCheck$ = new Subject<CalculatePayload>();
   const error$ = new Subject<MLHttpFetchError>();
@@ -62,7 +65,7 @@ export const modelMemoryEstimatorProvider = (
         // don't call the endpoint with invalid payload
         filter(() => jobValidator.isModelMemoryEstimationPayloadValid),
         switchMap((payload) => {
-          return ml.calculateModelMemoryLimit$(payload).pipe(
+          return mlApi.calculateModelMemoryLimit$(payload).pipe(
             pluck('modelMemoryLimit'),
             catchError((error) => {
               // eslint-disable-next-line no-console
@@ -88,13 +91,16 @@ export const useModelMemoryEstimator = (
   jobCreatorUpdated: number
 ) => {
   const {
-    services: { notifications },
+    services: {
+      notifications,
+      mlServices: { mlApi },
+    },
   } = useMlKibana();
 
   // Initialize model memory estimator only once
   const modelMemoryEstimator = useMemo<ModelMemoryEstimator>(
-    () => modelMemoryEstimatorProvider(jobCreator, jobValidator),
-    [jobCreator, jobValidator]
+    () => modelMemoryEstimatorProvider(jobCreator, jobValidator, mlApi),
+    [jobCreator, jobValidator, mlApi]
   );
 
   // Listen for estimation results and errors

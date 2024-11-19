@@ -1,0 +1,11 @@
+{
+  "description": "Security Solution Lists common package",
+  "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
+  "name": "@kbn/securitysolution-lists-common",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "openapi:generate": "node scripts/openapi_generate",
+    "openapi:bundle": "node scripts/openapi_bundle"
+  }
+}

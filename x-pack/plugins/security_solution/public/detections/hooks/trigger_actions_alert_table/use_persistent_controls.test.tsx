@@ -11,7 +11,7 @@ import { TableId } from '@kbn/securitysolution-data-table';
 import { renderHook } from '@testing-library/react-hooks';
 import { render, fireEvent } from '@testing-library/react';
 import { createMockStore, mockGlobalState, TestProviders } from '../../../common/mock';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
@@ -26,7 +26,7 @@ jest.mock('react-redux', () => {
     useDispatch: () => mockDispatch,
   };
 });
-jest.mock('../../../common/containers/sourcerer');
+jest.mock('../../../sourcerer/containers');
 jest.mock('../../../common/hooks/use_selector');
 jest.mock('../../../common/lib/kibana', () => {
   const original = jest.requireActual('../../../common/lib/kibana');
@@ -74,6 +74,7 @@ describe('usePersistentControls', () => {
     (useSourcererDataView as jest.Mock).mockReturnValue({
       ...sourcererDataView,
       selectedPatterns: ['myFakebeat-*'],
+      sourcererDataView: {},
     });
   });
 
@@ -88,7 +89,9 @@ describe('usePersistentControls', () => {
     });
     const usePersistentControls = getPersistentControlsHook(tableId);
     const { result } = renderHook(() => usePersistentControls(), {
-      wrapper: ({ children }) => <TestProviders store={store}>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders store={store}>{children}</TestProviders>
+      ),
     });
 
     const groupSelector = result.current.right.props.additionalMenuOptions[0];

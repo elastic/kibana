@@ -29,7 +29,8 @@
           "\n\ngetRouterLinkProps is an util that enable HTML elements, such buttons, to\nbehave as links."
         ],
         "signature": [
-          "({ href, onClick }: GetRouterLinkPropsDeps) => { href: string | undefined; onClick: (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void; }"
+          "({ href, onClick }: GetRouterLinkPropsDeps) => ",
+          "RouterLinkProps"
         ],
         "path": "packages/kbn-router-utils/src/get_router_link_props/index.ts",
         "deprecated": false,

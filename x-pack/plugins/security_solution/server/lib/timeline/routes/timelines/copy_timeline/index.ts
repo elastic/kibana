@@ -5,23 +5,21 @@
  * 2.0.
  */
 
+import type { IKibanaResponse } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
-import type { ConfigType } from '../../../../..';
-import { copyTimelineSchema } from '../../../../../../common/api/timeline';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import {
+  CopyTimelineRequestBody,
+  type CopyTimelineResponse,
+} from '../../../../../../common/api/timeline';
 import { copyTimeline } from '../../../saved_object/timelines';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import type { SetupPlugins } from '../../../../../plugin';
 import { TIMELINE_COPY_URL } from '../../../../../../common/constants';
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../../utils/common';
 
-export const copyTimelineRoute = async (
-  router: SecuritySolutionPluginRouter,
-  _: ConfigType,
-  security: SetupPlugins['security']
-) => {
+export const copyTimelineRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .post({
       path: TIMELINE_COPY_URL,
@@ -34,17 +32,16 @@ export const copyTimelineRoute = async (
       {
         version: '1',
         validate: {
-          request: { body: buildRouteValidationWithExcess(copyTimelineSchema) },
+          request: { body: buildRouteValidationWithZod(CopyTimelineRequestBody) },
         },
       },
-      async (context, request, response) => {
+      async (context, request, response): Promise<IKibanaResponse<CopyTimelineResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
         try {
-          const frameworkRequest = await buildFrameworkRequest(context, security, request);
+          const frameworkRequest = await buildFrameworkRequest(context, request);
           const { timeline, timelineIdToCopy } = request.body;
           const copiedTimeline = await copyTimeline(frameworkRequest, timeline, timelineIdToCopy);
-
           return response.ok({
             body: { data: { persistTimeline: copiedTimeline } },
           });

@@ -21,10 +21,11 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-
 import styled from 'styled-components';
 
-import { useStartServices, useFlyoutContext } from '../../hooks';
+import { MAX_FLYOUT_WIDTH } from '../../constants';
+import { useStartServices, useFlyoutContext, useCheckPermissions } from '../../hooks';
+import { FleetServerMissingESPrivileges } from '../../sections/agents/components';
 
 import { QuickStartTab } from './quick_start_tab';
 import { AdvancedTab } from './advanced_tab';
@@ -121,8 +122,19 @@ const Header: React.FunctionComponent<{
 export const FleetServerFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
   const { tabs, currentTab, setCurrentTab, currentTabContent } = useFleetServerTabs(onClose);
 
+  const { permissionsError, isPermissionsLoading } = useCheckPermissions();
+
+  let errorContent: React.ReactNode | undefined;
+  if (permissionsError === 'MISSING_FLEET_SERVER_SETUP_PRIVILEGES') {
+    errorContent = (
+      <ContentWrapper gutterSize="none" justifyContent="center" direction="column">
+        <FleetServerMissingESPrivileges />
+      </ContentWrapper>
+    );
+  }
+
   return (
-    <EuiFlyout data-test-subj="fleetServerFlyout" onClose={onClose} size="m">
+    <EuiFlyout data-test-subj="fleetServerFlyout" onClose={onClose} maxWidth={MAX_FLYOUT_WIDTH}>
       <EuiFlyoutHeader hasBorder aria-labelledby="FleetAddFleetServerFlyoutTitle">
         <Header
           tabs={tabs}
@@ -132,7 +144,9 @@ export const FleetServerFlyout: React.FunctionComponent<Props> = ({ onClose }) =
         />
       </EuiFlyoutHeader>
 
-      <EuiFlyoutBody>{currentTabContent}</EuiFlyoutBody>
+      <EuiFlyoutBody>
+        {isPermissionsLoading ? null : errorContent ? errorContent : currentTabContent}
+      </EuiFlyoutBody>
     </EuiFlyout>
   );
 };

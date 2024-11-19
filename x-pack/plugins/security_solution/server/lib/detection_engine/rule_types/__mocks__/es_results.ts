@@ -121,7 +121,10 @@ export const sampleDocWithSortId = (
 export const sampleDocNoSortId = (
   someUuid: string = sampleIdGuid,
   ip?: string
-): SignalSourceHit & { _source: Required<SignalSourceHit>['_source'] } => ({
+): SignalSourceHit & {
+  _source: Required<SignalSourceHit>['_source'];
+  _id: Required<SignalSourceHit>['_id'];
+} => ({
   _index: 'myFakeSignalIndex',
   _score: 100,
   _version: 1,
@@ -144,7 +147,10 @@ export const sampleDocNoSortId = (
 export const sampleAlertDocNoSortId = (
   someUuid: string = sampleIdGuid,
   ip?: string
-): SignalSourceHit & { _source: Required<SignalSourceHit>['_source'] } => ({
+): SignalSourceHit & {
+  _id: Required<SignalSourceHit>['_id'];
+  _source: Required<SignalSourceHit>['_source'];
+} => ({
   ...sampleDocNoSortId(someUuid, ip),
   _source: {
     event: {
@@ -173,7 +179,10 @@ export const sampleAlertDocNoSortId = (
 export const sampleAlertDocAADNoSortId = (
   someUuid: string = sampleIdGuid,
   ip?: string
-): AlertSourceHit & { _source: Required<AlertSourceHit>['_source'] } => ({
+): AlertSourceHit & {
+  _id: Required<AlertSourceHit>['_id'];
+  _source: Required<AlertSourceHit>['_source'];
+} => ({
   _index: 'myFakeSignalIndex',
   _score: 100,
   _version: 1,
@@ -337,6 +346,7 @@ export const sampleDocNoSortIdWithTimestamp = (
   someUuid: string = sampleIdGuid,
   ip?: string
 ): SignalSourceHit & {
+  _id: Required<SignalSourceHit>['_id'];
   _source: Required<SignalSourceHit>['_source'] & { '@timestamp': string };
 } => {
   const doc = sampleDocNoSortId(someUuid, ip);
@@ -349,10 +359,29 @@ export const sampleDocNoSortIdWithTimestamp = (
   };
 };
 
+export const sampleDocWithNonEcsCompliantFields = (
+  someUuid: string = sampleIdGuid,
+  nonEcsFields: Record<string, string>
+): SignalSourceHit & {
+  _id: Required<SignalSourceHit>['_id'];
+  _source: Required<SignalSourceHit>['_source'] & { '@timestamp': string };
+} => {
+  const doc = sampleDocNoSortId(someUuid);
+  return {
+    ...doc,
+    _source: {
+      ...doc._source,
+      ...nonEcsFields,
+      '@timestamp': new Date().toISOString(),
+    },
+  };
+};
+
 export const sampleAlertDocNoSortIdWithTimestamp = (
   someUuid: string = sampleIdGuid,
   ip?: string
 ): SignalSourceHit & {
+  _id: Required<SignalSourceHit>['_id'];
   _source: Required<SignalSourceHit>['_source'] & { '@timestamp': string };
 } => {
   const doc = sampleAlertDocNoSortId(someUuid, ip);
@@ -369,6 +398,7 @@ export const sampleAlertDocAADNoSortIdWithTimestamp = (
   someUuid: string = sampleIdGuid,
   ip?: string
 ): AlertSourceHit & {
+  _id: Required<AlertSourceHit>['_id'];
   _source: Required<AlertSourceHit>['_source'] & { '@timestamp': string };
 } => {
   const doc = sampleAlertDocAADNoSortId(someUuid, ip);
@@ -526,6 +556,7 @@ export const sampleSignalHit = (): SignalHit => ({
       saved_id: undefined,
       alert_suppression: undefined,
       investigation_fields: undefined,
+      rule_source: { type: 'internal' },
     },
     depth: 1,
   },

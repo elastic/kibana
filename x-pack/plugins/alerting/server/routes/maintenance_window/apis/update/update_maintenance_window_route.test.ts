@@ -65,7 +65,14 @@ describe('updateMaintenanceWindowRoute', () => {
     );
 
     expect(config.path).toEqual('/internal/alerting/rules/maintenance_window/{id}');
-    expect(config.options?.tags?.[0]).toEqual('access:write-maintenance-window');
+    expect(config.options).toMatchInlineSnapshot(`
+      Object {
+        "access": "internal",
+        "tags": Array [
+          "access:write-maintenance-window",
+        ],
+      }
+    `);
 
     await handler(context, req, res);
 
@@ -115,7 +122,7 @@ describe('updateMaintenanceWindowRoute', () => {
         body: updateParams,
       }
     );
-    expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
+    await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
   });
 
   test('ensures only platinum license can access API', async () => {
@@ -129,6 +136,6 @@ describe('updateMaintenanceWindowRoute', () => {
     });
     const [, handler] = router.post.mock.calls[0];
     const [context, req, res] = mockHandlerArguments({ maintenanceWindowClient }, { body: {} });
-    expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
+    await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
   });
 });

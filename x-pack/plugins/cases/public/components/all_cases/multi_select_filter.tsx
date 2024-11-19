@@ -144,7 +144,6 @@ export const MultiSelectFilter = <T extends string, K extends string = string>({
             numFilters={showActiveOptionsNumber ? options.length : undefined}
             hasActiveFilters={showActiveOptionsNumber ? selectedOptionKeys.length > 0 : undefined}
             numActiveFilters={showActiveOptionsNumber ? selectedOptionKeys.length : undefined}
-            aria-label={buttonLabel}
           >
             <EuiText size="s" className="eui-textTruncate">
               {buttonLabel}
@@ -155,6 +154,10 @@ export const MultiSelectFilter = <T extends string, K extends string = string>({
         closePopover={() => setIsPopoverOpen(false)}
         panelPaddingSize="none"
         repositionOnScroll
+        panelProps={{
+          'data-test-subj': `options-filter-popover-panel-${id}`,
+        }}
+        data-test-subj={`options-filter-popover-${id}`}
       >
         {isInvalid && (
           <>

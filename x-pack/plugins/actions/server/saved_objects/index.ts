@@ -25,6 +25,11 @@ import {
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
 } from '../constants/saved_objects';
+import {
+  actionTaskParamsModelVersions,
+  connectorModelVersions,
+  connectorTokenModelVersions,
+} from './model_versions';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
@@ -60,6 +65,7 @@ export function setupSavedObjects(
         };
       },
     },
+    modelVersions: connectorModelVersions,
   });
 
   // Encrypted attributes
@@ -69,7 +75,7 @@ export function setupSavedObjects(
   encryptedSavedObjects.registerType({
     type: ACTION_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['secrets']),
-    attributesToExcludeFromAAD: new Set(['name']),
+    attributesToIncludeInAAD: new Set(['actionTypeId', 'isMissingSecrets', 'config']),
   });
 
   savedObjects.registerType({
@@ -94,10 +100,19 @@ export function setupSavedObjects(
         },
       };
     },
+    modelVersions: actionTaskParamsModelVersions,
   });
   encryptedSavedObjects.registerType({
     type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['apiKey']),
+    attributesToIncludeInAAD: new Set([
+      'actionId',
+      'consumer',
+      'params',
+      'executionId',
+      'relatedSavedObjects',
+      'source',
+    ]),
   });
 
   savedObjects.registerType({
@@ -109,10 +124,18 @@ export function setupSavedObjects(
     management: {
       importableAndExportable: false,
     },
+    modelVersions: connectorTokenModelVersions,
   });
 
   encryptedSavedObjects.registerType({
     type: CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['token']),
+    attributesToIncludeInAAD: new Set([
+      'connectorId',
+      'tokenType',
+      'expiresAt',
+      'createdAt',
+      'updatedAt',
+    ]),
   });
 }

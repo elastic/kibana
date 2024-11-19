@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useState } from 'react';
 import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
 import { EuiFlexGroup, EuiFlexItem, EuiTabs, EuiTab } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -49,16 +50,18 @@ export const MemoryUsagePage: FC = () => {
 
       {showNodeInfo ? (
         <>
-          <EuiTabs>
+          <EuiTabs data-test-subj="mlMemoryUsageTabs">
             <EuiTab
               isSelected={selectedTab === TAB.NODES}
               onClick={() => setSelectedTab(TAB.NODES)}
+              data-test-subj="mlMemoryUsageTab-nodes"
             >
               <FormattedMessage id="xpack.ml.memoryUsage.nodesTab" defaultMessage="Nodes" />
             </EuiTab>
             <EuiTab
               isSelected={selectedTab === TAB.MEMORY_USAGE}
               onClick={() => setSelectedTab(TAB.MEMORY_USAGE)}
+              data-test-subj="mlMemoryUsageTab-memory-usage"
             >
               <FormattedMessage id="xpack.ml.memoryUsage.memoryTab" defaultMessage="Memory usage" />
             </EuiTab>

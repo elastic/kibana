@@ -7,7 +7,8 @@
 
 import {
   AppMountParameters,
-  AppNavLinkStatus,
+  AppStatus,
+  AppUpdater,
   CoreSetup,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
@@ -15,12 +16,15 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
+import { BehaviorSubject } from 'rxjs';
 import {
   AllDatasetsLocatorDefinition,
   ObservabilityLogsExplorerLocators,
   SingleDatasetLocatorDefinition,
 } from '../common/locators';
+import { DataViewLocatorDefinition } from '../common/locators/data_view_locator';
 import { type ObservabilityLogsExplorerConfig } from '../common/plugin_config';
+import { DATA_RECEIVED_TELEMETRY_EVENT } from '../common/telemetry_events';
 import { logsExplorerAppTitle } from '../common/translations';
 import type {
   ObservabilityLogsExplorerAppMountParameters,
@@ -34,6 +38,7 @@ export class ObservabilityLogsExplorerPlugin
 {
   private config: ObservabilityLogsExplorerConfig;
   private locators?: ObservabilityLogsExplorerLocators;
+  private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
 
   constructor(context: PluginInitializerContext<ObservabilityLogsExplorerConfig>) {
     this.config = context.config.get();
@@ -43,7 +48,7 @@ export class ObservabilityLogsExplorerPlugin
     core: CoreSetup<ObservabilityLogsExplorerStartDeps, ObservabilityLogsExplorerPluginStart>,
     _pluginsSetup: ObservabilityLogsExplorerSetupDeps
   ) {
-    const { share, serverless, discover } = _pluginsSetup;
+    const { discover, share } = _pluginsSetup;
     const useHash = core.uiSettings.get('state:storeInSessionStorage');
 
     core.application.register({
@@ -51,11 +56,11 @@ export class ObservabilityLogsExplorerPlugin
       title: logsExplorerAppTitle,
       category: DEFAULT_APP_CATEGORIES.observability,
       euiIconType: 'logoLogging',
-      navLinkStatus: this.config.navigation.showAppLink
-        ? AppNavLinkStatus.visible
-        : AppNavLinkStatus.hidden,
-      searchable: true,
+      visibleIn: this.config.navigation.showAppLink
+        ? ['globalSearch', 'sideNav']
+        : ['globalSearch'],
       keywords: ['logs', 'log', 'explorer', 'logs explorer'],
+      updater$: this.appStateUpdater,
       mount: async (appMountParams: ObservabilityLogsExplorerAppMountParameters) => {
         const [coreStart, pluginsStart, ownPluginStart] = await core.getStartServices();
         const { renderObservabilityLogsExplorer } = await import(
@@ -71,11 +76,17 @@ export class ObservabilityLogsExplorerPlugin
       },
     });
 
+    // ensure the tabs are shown when in the observability nav mode
+    discover.configureInlineTopNav('oblt', {
+      enabled: true,
+      showLogsExplorerTabs: true,
+    });
+
     // App used solely to redirect from "/app/observability-log-explorer" to "/app/observability-logs-explorer"
     core.application.register({
       id: 'observability-log-explorer',
       title: logsExplorerAppTitle,
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       mount: async (appMountParams: AppMountParameters) => {
         const [coreStart] = await core.getStartServices();
         const { renderObservabilityLogsExplorerRedirect } = await import(
@@ -86,25 +97,46 @@ export class ObservabilityLogsExplorerPlugin
       },
     });
 
-    if (serverless) {
-      discover.showLogsExplorerTabs();
-    }
+    // App used solely to redirect to either "/app/observability-logs-explorer" or "/app/discover"
+    // based on the last used app value in localStorage
+    core.application.register({
+      id: 'last-used-logs-viewer',
+      title: logsExplorerAppTitle,
+      visibleIn: [],
+      mount: async (appMountParams: AppMountParameters) => {
+        const [coreStart] = await core.getStartServices();
+        const { renderLastUsedLogsViewerRedirect } = await import(
+          './applications/last_used_logs_viewer'
+        );
+
+        return renderLastUsedLogsViewerRedirect(coreStart, appMountParams);
+      },
+    });
+
+    core.analytics.registerEventType(DATA_RECEIVED_TELEMETRY_EVENT);
 
     // Register Locators
-    const singleDatasetLocator = share.url.locators.create(
-      new SingleDatasetLocatorDefinition({
-        useHash,
-      })
-    );
     const allDatasetsLocator = share.url.locators.create(
       new AllDatasetsLocatorDefinition({
         useHash,
       })
     );
 
+    const dataViewLocator = share.url.locators.create(
+      new DataViewLocatorDefinition({
+        useHash,
+      })
+    );
+    const singleDatasetLocator = share.url.locators.create(
+      new SingleDatasetLocatorDefinition({
+        useHash,
+      })
+    );
+
     this.locators = {
-      singleDatasetLocator,
       allDatasetsLocator,
+      dataViewLocator,
+      singleDatasetLocator,
     };
 
     return {
@@ -112,7 +144,16 @@ export class ObservabilityLogsExplorerPlugin
     };
   }
 
-  public start(_core: CoreStart, _pluginsStart: ObservabilityLogsExplorerStartDeps) {
+  public start(core: CoreStart, _pluginsStart: ObservabilityLogsExplorerStartDeps) {
+    const { discover, fleet, logs } = core.application.capabilities;
+
+    if (!(discover?.show && fleet?.read && logs?.show)) {
+      this.appStateUpdater.next(() => ({
+        status: AppStatus.inaccessible,
+        visibleIn: [],
+      }));
+    }
+
     return {};
   }
 }

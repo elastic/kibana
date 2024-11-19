@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import moment from 'moment-timezone';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { AggTypesDependencies } from '..';
-import type { IKibanaSearchResponse } from './types';
 
 // TODO - investigate if this check is still needed
 // There are no documented work flows where response or rawResponse is not returned
@@ -16,8 +17,10 @@ import type { IKibanaSearchResponse } from './types';
 /**
  * @returns true if response is abort
  */
-export const isAbortResponse = (response?: IKibanaSearchResponse) => {
-  return !response || !response.rawResponse;
+export const isAbortResponse = (
+  response?: IKibanaSearchResponse | { response: IKibanaSearchResponse }
+) => {
+  return !response || !('rawResponse' in response || 'response' in response);
 };
 
 /**

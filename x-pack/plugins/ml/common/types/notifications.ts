@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ML_NOTIFICATIONS_MESSAGE_LEVEL } from '../constants/notifications';
+import type { ML_NOTIFICATIONS_MESSAGE_LEVEL } from '../constants/notifications';
 
 export type MlNotificationMessageLevel =
-  typeof ML_NOTIFICATIONS_MESSAGE_LEVEL[keyof typeof ML_NOTIFICATIONS_MESSAGE_LEVEL];
+  (typeof ML_NOTIFICATIONS_MESSAGE_LEVEL)[keyof typeof ML_NOTIFICATIONS_MESSAGE_LEVEL];
 
 export interface NotificationsQueryParams {
   level?: MlNotificationMessageLevel;

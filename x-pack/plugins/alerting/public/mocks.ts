@@ -17,6 +17,7 @@ const createSetupContract = (): Setup => ({
 
 const createStartContract = (): Start => ({
   getNavigation: jest.fn(),
+  getMaxAlertsPerRun: jest.fn(),
 });
 
 export const alertingPluginMock = {

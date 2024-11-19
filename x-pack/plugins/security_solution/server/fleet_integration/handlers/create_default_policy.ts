@@ -7,7 +7,7 @@
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
-import { AppFeatureSecurityKey } from '@kbn/security-solution-features/keys';
+import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import {
   policyFactory as policyConfigFactory,
   policyFactoryWithoutPaidFeatures as policyConfigFactoryWithoutPaidFeatures,
@@ -24,8 +24,9 @@ import {
 import {
   disableProtections,
   ensureOnlyEventCollectionIsAllowed,
+  isBillablePolicy,
 } from '../../../common/endpoint/models/policy_config_helpers';
-import type { AppFeaturesService } from '../../lib/app_features_service/app_features_service';
+import type { ProductFeaturesService } from '../../lib/product_features_service/product_features_service';
 
 /**
  * Create the default endpoint policy based on the current license and configuration type
@@ -35,7 +36,7 @@ export const createDefaultPolicy = (
   config: AnyPolicyCreateConfig | undefined,
   cloud: CloudSetup,
   esClientInfo: InfoResponse,
-  appFeatures: AppFeaturesService
+  productFeatures: ProductFeaturesService
 ): PolicyConfig => {
   // Pass license and cloud information to use in Policy creation
   const factoryPolicy = policyConfigFactory(
@@ -57,9 +58,11 @@ export const createDefaultPolicy = (
   }
 
   // If no Policy Protection allowed (ex. serverless)
-  if (!appFeatures.isEnabled(AppFeatureSecurityKey.endpointPolicyProtections)) {
+  if (!productFeatures.isEnabled(ProductFeatureSecurityKey.endpointPolicyProtections)) {
     defaultPolicyPerType = ensureOnlyEventCollectionIsAllowed(defaultPolicyPerType);
   }
+
+  defaultPolicyPerType.meta.billable = isBillablePolicy(defaultPolicyPerType);
 
   return defaultPolicyPerType;
 };

@@ -68,6 +68,7 @@ Object {
   "longMessage": "",
   "severity": "warning",
   "shortMessage": "This may be approximate depending on how the data is indexed. For more precise results, sort by rarity.",
+  "uniqueId": "precision_error_asc_count_precision",
 }
 `;
 
@@ -86,6 +87,7 @@ Object {
   "longMessage": "",
   "severity": "warning",
   "shortMessage": "This might be an approximation. For more precise results, use Filters or increase the number of Top Values.",
+  "uniqueId": "layer_settings_accuracy_mode_enabled",
 }
 `;
 
@@ -104,5 +106,6 @@ Object {
   "longMessage": "",
   "severity": "warning",
   "shortMessage": "This might be an approximation. For more precise results, you can enable accuracy mode, but it increases the load on the Elasticsearch cluster.",
+  "uniqueId": "layer_settings_accuracy_mode_disabled",
 }
 `;

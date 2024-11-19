@@ -181,3 +181,10 @@ export const BUILDING_BLOCK_DESCRIPTION = i18n.translate(
     defaultMessage: 'All generated alerts will be marked as "building block" alerts',
   }
 );
+
+export const ALERT_SUPPRESSION_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.alertSuppressionFieldsLabel',
+  {
+    defaultMessage: 'Suppress alerts by',
+  }
+);

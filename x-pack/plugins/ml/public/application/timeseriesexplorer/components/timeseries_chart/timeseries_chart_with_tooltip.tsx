@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState, useCallback, useContext } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useState, useCallback, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import type { MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
 import { MlTooltipComponent } from '../../../components/chart_tooltip';
 import { TimeseriesChart } from './timeseries_chart';
-import { CombinedJob } from '../../../../../common/types/anomaly_detection_jobs';
+import type { CombinedJob } from '../../../../../common/types/anomaly_detection_jobs';
 import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '../../../../../common/constants/search';
-import { Annotation } from '../../../../../common/types/annotations';
+import type { Annotation } from '../../../../../common/types/annotations';
 import { useMlKibana, useNotifications } from '../../../contexts/kibana';
 import { useTimeBucketsService } from '../../../util/time_buckets_service';
 import { getControlsForDetector } from '../../get_controls_for_detector';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
-import { SourceIndicesWithGeoFields } from '../../../explorer/explorer_utils';
-
+import type { SourceIndicesWithGeoFields } from '../../../explorer/explorer_utils';
 interface TimeSeriesChartWithTooltipsProps {
   bounds: any;
   detectorIndex: number;
@@ -61,7 +61,7 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
   const { toasts: toastNotifications } = useNotifications();
   const {
     services: {
-      mlServices: { mlApiServices },
+      mlServices: { mlApi },
     },
   } = useMlKibana();
 
@@ -86,7 +86,7 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
 
   useEffect(() => {
     let unmounted = false;
-    const entities = getControlsForDetector(detectorIndex, selectedEntities, selectedJob.job_id);
+    const entities = getControlsForDetector(detectorIndex, selectedEntities, selectedJob);
     const nonBlankEntities = Array.isArray(entities)
       ? entities.filter((entity) => entity.fieldValue !== null)
       : undefined;
@@ -103,7 +103,7 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
      */
     const loadAnnotations = async (jobId: string) => {
       try {
-        const resp = await mlApiServices.annotations.getAnnotations({
+        const resp = await mlApi.annotations.getAnnotations({
           jobIds: [jobId],
           earliestMs: searchBounds.min.valueOf(),
           latestMs: searchBounds.max.valueOf(),
@@ -135,6 +135,11 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
     bounds,
     contextAggregationInterval,
   ]);
+
+  if (chartProps.svgHeight) {
+    // 32 accounts for the height of the chart title
+    chartProps.svgHeight -= 32;
+  }
 
   return (
     <div className="ml-timeseries-chart" data-test-subj="mlSingleMetricViewerChart">

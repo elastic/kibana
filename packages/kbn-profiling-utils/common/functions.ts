@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import * as t from 'io-ts';
 import { sumBy } from 'lodash';
 import type {
@@ -24,6 +26,7 @@ import {
   emptyStackFrame,
   emptyStackTrace,
 } from '..';
+import { isErrorFrame } from './profiling';
 
 interface TopNFunctionAndFrameGroup {
   Frame: StackFrameMetadata;
@@ -48,6 +51,7 @@ type TopNFunction = Pick<
 > & {
   Id: string;
   Rank: number;
+  subGroups: Record<string, number>;
 };
 
 export interface TopNFunctions {
@@ -68,6 +72,7 @@ export function createTopNFunctions({
   stackFrames,
   stackTraces,
   startIndex,
+  showErrorFrames,
 }: {
   endIndex: number;
   events: Map<StackTraceID, number>;
@@ -76,6 +81,7 @@ export function createTopNFunctions({
   stackFrames: Map<StackFrameID, StackFrame>;
   stackTraces: Map<StackTraceID, StackTrace>;
   startIndex: number;
+  showErrorFrames: boolean;
 }): TopNFunctions {
   // The `count` associated with a frame provides the total number of
   // traces in which that node has appeared at least once. However, a
@@ -101,7 +107,11 @@ export function createTopNFunctions({
 
     const lenStackTrace = stackTrace.FrameIDs.length;
 
-    for (let i = 0; i < lenStackTrace; i++) {
+    // Error frames only appear as first frame in a stacktrace.
+    const start =
+      !showErrorFrames && lenStackTrace > 0 && isErrorFrame(stackTrace.Types[0]) ? 1 : 0;
+
+    for (let i = start; i < lenStackTrace; i++) {
       const frameID = stackTrace.FrameIDs[i];
       const fileID = stackTrace.FileIDs[i];
       const addressOrLine = stackTrace.AddressOrLines[i];
@@ -200,6 +210,7 @@ export function createTopNFunctions({
         selfAnnualCostUSD: frameAndCount.selfAnnualCostUSD,
         totalAnnualCO2kgs: frameAndCount.totalAnnualCO2kgs,
         totalAnnualCostUSD: frameAndCount.totalAnnualCostUSD,
+        subGroups: {},
       };
     });
 

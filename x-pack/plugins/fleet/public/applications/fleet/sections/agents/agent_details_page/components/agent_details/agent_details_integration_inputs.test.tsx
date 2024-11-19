@@ -49,15 +49,15 @@ describe('AgentDetailsIntegrationInputs', () => {
     );
   };
 
-  it('renders a default health icon when the agent has no components at all', () => {
+  it('renders a default health icon when the agent has no components at all', async () => {
     const component = renderComponent();
-    userEvent.click(component.getByTestId('agentIntegrationsInputsTitle'));
+    await userEvent.click(component.getByTestId('agentIntegrationsInputsTitle'));
     expect(
       component.getByTestId('agentDetailsIntegrationsInputStatusHealthDefault')
     ).toBeInTheDocument();
   });
 
-  it('renders a default health icon when the package input has no match in the agent component units', () => {
+  it('renders a default health icon when the package input has no match in the agent component units', async () => {
     agent.components = [
       {
         id: 'endpoint-default',
@@ -76,13 +76,13 @@ describe('AgentDetailsIntegrationInputs', () => {
     ];
 
     const component = renderComponent();
-    userEvent.click(component.getByTestId('agentIntegrationsInputsTitle'));
+    await userEvent.click(component.getByTestId('agentIntegrationsInputsTitle'));
     expect(
       component.getByTestId('agentDetailsIntegrationsInputStatusHealthDefault')
     ).toBeInTheDocument();
   });
 
-  it('renders a success health icon when the package input has a match in the agent component units', () => {
+  it('renders a success health icon when the package input has a match in the agent component units', async () => {
     agent.components = [
       {
         id: 'endpoint-default',
@@ -101,13 +101,13 @@ describe('AgentDetailsIntegrationInputs', () => {
     ];
 
     const component = renderComponent();
-    userEvent.click(component.getByTestId('agentIntegrationsInputsTitle'));
+    await userEvent.click(component.getByTestId('agentIntegrationsInputsTitle'));
     expect(
       component.getByTestId('agentDetailsIntegrationsInputStatusHealthSuccess')
     ).toBeInTheDocument();
   });
 
-  it('does not render when there is no units array', () => {
+  it('does not render when there is no units array', async () => {
     agent.components = [
       {
         id: 'endpoint-default',
@@ -118,18 +118,18 @@ describe('AgentDetailsIntegrationInputs', () => {
     ];
 
     const component = renderComponent();
-    userEvent.click(component.getByTestId('agentIntegrationsInputsTitle'));
+    await userEvent.click(component.getByTestId('agentIntegrationsInputsTitle'));
     expect(
       component.queryByTestId('agentDetailsIntegrationsInputStatusHealthSuccess')
     ).not.toBeInTheDocument();
   });
 
-  it('should not throw error when there is no components', () => {
+  it('should not throw error when there is no components', async () => {
     agent.components = undefined;
 
     const component = renderComponent();
-    userEvent.click(component.container.querySelector('#agentIntegrationsInputs')!);
-    userEvent.click(component.container.querySelector('#endpoint')!);
+    await userEvent.click(component.container.querySelector('#agentIntegrationsInputs')!);
+    await userEvent.click(component.container.querySelector('#endpoint')!);
     expect(component.getByText('Endpoint')).toBeInTheDocument();
   });
 });

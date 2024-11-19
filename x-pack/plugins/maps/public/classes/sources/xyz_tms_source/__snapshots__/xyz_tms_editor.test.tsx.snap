@@ -3,12 +3,7 @@
 exports[`should render 1`] = `
 <EuiPanel>
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     label="Url"
-    labelType="label"
   >
     <EuiFieldText
       onChange={[Function]}

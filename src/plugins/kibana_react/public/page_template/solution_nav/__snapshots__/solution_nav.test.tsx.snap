@@ -2,7 +2,7 @@
 
 exports[`KibanaPageTemplateSolutionNav accepts EuiSideNavProps 1`] = `
 <Fragment>
-  <EuiSideNav
+  <EuiSideNavClass
     aria-hidden={true}
     className="kbnPageTemplateSolutionNav kbnPageTemplateSolutionNav--hidden"
     data-test-subj="DTS"
@@ -68,15 +68,9 @@ exports[`KibanaPageTemplateSolutionNav accepts EuiSideNavProps 1`] = `
         },
       ]
     }
-    mobileBreakpoints={
-      Array [
-        "xs",
-        "s",
-      ]
-    }
     mobileTitle={
       <React.Fragment>
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="{solutionName} Menu"
           id="kibana-react.solutionNav.mobileTitleText"
           values={
@@ -97,7 +91,7 @@ exports[`KibanaPageTemplateSolutionNav accepts EuiSideNavProps 1`] = `
 
 exports[`KibanaPageTemplateSolutionNav renders 1`] = `
 <Fragment>
-  <EuiSideNav
+  <EuiSideNavClass
     aria-hidden={true}
     className="kbnPageTemplateSolutionNav kbnPageTemplateSolutionNav--hidden"
     heading={
@@ -162,15 +156,9 @@ exports[`KibanaPageTemplateSolutionNav renders 1`] = `
         },
       ]
     }
-    mobileBreakpoints={
-      Array [
-        "xs",
-        "s",
-      ]
-    }
     mobileTitle={
       <React.Fragment>
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="{solutionName} Menu"
           id="kibana-react.solutionNav.mobileTitleText"
           values={
@@ -191,7 +179,7 @@ exports[`KibanaPageTemplateSolutionNav renders 1`] = `
 
 exports[`KibanaPageTemplateSolutionNav renders with icon 1`] = `
 <Fragment>
-  <EuiSideNav
+  <EuiSideNavClass
     aria-hidden={true}
     className="kbnPageTemplateSolutionNav kbnPageTemplateSolutionNav--hidden"
     heading={
@@ -260,19 +248,13 @@ exports[`KibanaPageTemplateSolutionNav renders with icon 1`] = `
         },
       ]
     }
-    mobileBreakpoints={
-      Array [
-        "xs",
-        "s",
-      ]
-    }
     mobileTitle={
       <React.Fragment>
         <KibanaPageTemplateSolutionNavAvatar
           iconType="logoElastic"
           name="Solution"
         />
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="{solutionName} Menu"
           id="kibana-react.solutionNav.mobileTitleText"
           values={

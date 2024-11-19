@@ -5,15 +5,25 @@
  * 2.0.
  */
 
-import { take, toArray } from 'rxjs/operators';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import moment from 'moment';
+import { BehaviorSubject, firstValueFrom, take, toArray } from 'rxjs';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  ClusterClientMock,
+  coreMock,
+  elasticsearchServiceMock,
+  loggingSystemMock,
+  statusServiceMock,
+} from '@kbn/core/server/mocks';
+import {
+  CoreStatus,
+  IClusterClient,
+  ServiceStatusLevel,
+  ServiceStatusLevels,
+} from '@kbn/core/server';
 import { LicenseType } from '../common/types';
 import { ElasticsearchError } from './types';
 import { LicensingPlugin } from './plugin';
-import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { IClusterClient } from '@kbn/core/server';
-import { firstValueFrom } from 'rxjs';
 
 function buildRawLicense(
   options: Partial<estypes.XpackInfoMinimalLicenseInformation> = {}
@@ -239,6 +249,38 @@ describe('licensing plugin', () => {
       });
     });
 
+    describe('#getLicense', () => {
+      it('awaits for the license and returns it', async () => {
+        plugin = new LicensingPlugin(
+          coreMock.createPluginInitializerContext({
+            // disable polling mechanism
+            api_polling_frequency: moment.duration(50000),
+            license_cache_duration: moment.duration(1000),
+          })
+        );
+        const esClient = createEsClient({
+          license: buildRawLicense(),
+          features: {},
+        });
+
+        const coreSetup = createCoreSetupWith(esClient);
+        plugin.setup(coreSetup);
+        const { license$, getLicense } = plugin.start();
+
+        expect(esClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(0);
+
+        const firstLicense = await getLicense();
+        let fromObservable;
+        license$.subscribe((license) => (fromObservable = license));
+        expect(firstLicense).toStrictEqual(fromObservable);
+        expect(esClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(1); // the initial resolution
+
+        const secondLicense = await getLicense();
+        expect(secondLicense).toStrictEqual(fromObservable);
+        expect(esClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(1); // still only one call
+      });
+    });
+
     describe('#refresh', () => {
       it('forces refresh immediately', async () => {
         plugin = new LicensingPlugin(
@@ -297,6 +339,11 @@ describe('licensing plugin', () => {
         );
         expect(customClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(0);
 
+        // We make the request when the timer ticks
+        await flushPromises(customPollingFrequency);
+        expect(customClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(1);
+
+        // And we have the license without making any extra requests
         const customLicense = await firstValueFrom(customLicense$);
         expect(customClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(1);
 
@@ -326,6 +373,104 @@ describe('licensing plugin', () => {
         expect(customClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(1);
         const license = await firstValueFrom(license$);
         expect(license.type).toBe('gold');
+      });
+
+      describe('only fetch the license if ES is available', () => {
+        let customClient: ClusterClientMock;
+        let coreStatus$: BehaviorSubject<CoreStatus>;
+        let coreStatus: CoreStatus;
+        const customPollingFrequency = 100;
+
+        async function setElasticsearchStatus(esStatus: ServiceStatusLevel) {
+          coreStatus$.next({
+            ...coreStatus,
+            elasticsearch: {
+              ...coreStatus.elasticsearch,
+              level: esStatus,
+            },
+          });
+          await flushPromises(1); // need to wait for async operations
+        }
+
+        beforeEach(async () => {
+          plugin = new LicensingPlugin(
+            coreMock.createPluginInitializerContext({
+              api_polling_frequency: moment.duration(50000),
+              license_cache_duration: moment.duration(1000),
+            })
+          );
+
+          const esClient = createEsClient({
+            license: buildRawLicense(),
+            features: {},
+          });
+          const coreSetup = createCoreSetupWith(esClient);
+          coreStatus = await firstValueFrom(statusServiceMock.createSetupContract().core$);
+          coreStatus$ = new BehaviorSubject<CoreStatus>({
+            ...coreStatus,
+            elasticsearch: {
+              ...coreStatus.elasticsearch,
+              level: ServiceStatusLevels.unavailable,
+            },
+          });
+          coreSetup.status.core$ = coreStatus$;
+          plugin.setup(coreSetup);
+          const { createLicensePoller } = plugin.start();
+
+          customClient = createEsClient({
+            license: buildRawLicense({ type: 'gold' }),
+            features: {},
+          });
+
+          createLicensePoller(customClient, customPollingFrequency);
+        });
+
+        it(`only fetch the license if ES is available`, async () => {
+          expect(customClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(0);
+
+          // Despite waiting for the timer, it still doesn't call the API
+          await flushPromises(customPollingFrequency * 1.8);
+          expect(customClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(0);
+
+          // When ES becomes available, we perform the request
+          await setElasticsearchStatus(ServiceStatusLevels.available);
+          expect(customClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(1);
+
+          // While ES is still available, we retrieve the license on every timer tick
+          await flushPromises(customPollingFrequency);
+          expect(customClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(2);
+        });
+
+        it(`stop fetching the license when ES becomes not available`, async () => {
+          expect(customClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(0);
+
+          // When ES becomes available, we perform the request
+          await setElasticsearchStatus(ServiceStatusLevels.available);
+          expect(customClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(1);
+
+          // When ES becomes unavailable, we stop performing the requests
+          await setElasticsearchStatus(ServiceStatusLevels.unavailable);
+          await flushPromises(customPollingFrequency * 3);
+          expect(customClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(1);
+        });
+
+        it(`avoid fetching the license too often if ES status comes and goes`, async () => {
+          expect(customClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(0);
+
+          // When ES becomes available, we perform the request
+          await setElasticsearchStatus(ServiceStatusLevels.available);
+          expect(customClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(1);
+
+          // When ES becomes unavailable, and immediately after, it becomes available
+          await setElasticsearchStatus(ServiceStatusLevels.unavailable);
+          expect(customClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(1); // Still previous number of requests
+          await setElasticsearchStatus(ServiceStatusLevels.available);
+          expect(customClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(1); // Still previous number of requests
+
+          // After polling frequency, we retrieve it again
+          await flushPromises(customPollingFrequency);
+          expect(customClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(2);
+        });
       });
     });
 

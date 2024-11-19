@@ -5,16 +5,28 @@
  * 2.0.
  */
 
-import type { TransportRequestOptionsWithMeta } from '@elastic/elasticsearch';
+import type {
+  TransportRequestOptionsWithMeta,
+  TransportRequestOptions,
+} from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { searchProvider } from './search';
+import type { searchProvider } from './search';
 
 type OrigMlClient = ElasticsearchClient['ml'];
-export interface UpdateTrainedModelDeploymentRequest {
+
+export interface AdaptiveAllocations {
+  adaptive_allocations?: {
+    enabled: boolean;
+    min_number_of_allocations?: number;
+    max_number_of_allocations?: number;
+  };
+}
+
+export interface UpdateTrainedModelDeploymentRequest extends AdaptiveAllocations {
   model_id: string;
   deployment_id?: string;
-  number_of_allocations: number;
+  number_of_allocations?: number;
 }
 export interface UpdateTrainedModelDeploymentResponse {
   acknowledge: boolean;
@@ -36,6 +48,10 @@ export interface MlClient
   updateTrainedModelDeployment: (
     payload: UpdateTrainedModelDeploymentRequest
   ) => Promise<UpdateTrainedModelDeploymentResponse>;
+  startTrainedModelDeployment: (
+    payload: estypes.MlStartTrainedModelDeploymentRequest & AdaptiveAllocations,
+    options?: TransportRequestOptions
+  ) => Promise<estypes.MlStartTrainedModelDeploymentResponse>;
   stopTrainedModelDeployment: (
     p: MlStopTrainedModelDeploymentRequest,
     options?: TransportRequestOptionsWithMeta
@@ -85,7 +101,6 @@ export type MlClientParams =
   | Parameters<MlClient['info']>
   | Parameters<MlClient['openJob']>
   | Parameters<MlClient['postCalendarEvents']>
-  | Parameters<MlClient['postData']>
   | Parameters<MlClient['previewDatafeed']>
   | Parameters<MlClient['putCalendar']>
   | Parameters<MlClient['putCalendarJob']>
@@ -105,8 +120,7 @@ export type MlClientParams =
   | Parameters<MlClient['updateFilter']>
   | Parameters<MlClient['updateJob']>
   | Parameters<MlClient['updateModelSnapshot']>
-  | Parameters<MlClient['validate']>
-  | Parameters<MlClient['validateDetector']>;
+  | Parameters<MlClient['validate']>;
 
 export type MlGetADParams = Parameters<MlClient['getJobStats']> | Parameters<MlClient['getJobs']>;
 

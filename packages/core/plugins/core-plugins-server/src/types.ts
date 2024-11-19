@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Observable } from 'rxjs';
@@ -106,7 +107,7 @@ export interface PluginConfigDescriptor<T = any> {
    */
   exposeToBrowser?: ExposedToBrowserDescriptor<T>;
   /**
-   * List of configuration properties that can be dynamically changed via the PUT /_settings API.
+   * List of configuration properties that can be dynamically changed via the PUT /internal/core/_settings API.
    */
   dynamicConfig?: DynamicConfigDescriptor<T>;
   /**
@@ -301,32 +302,15 @@ export interface Plugin<
 }
 
 /**
- * A plugin with asynchronous lifecycle methods.
- *
- * @deprecated Asynchronous lifecycles are deprecated, and should be migrated to sync {@link Plugin | plugin}
- * @removeBy 8.8.0
- * @public
- */
-export interface AsyncPlugin<
-  TSetup = void,
-  TStart = void,
-  TPluginsSetup extends object = object,
-  TPluginsStart extends object = object
-> {
-  setup(core: CoreSetup, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
-
-  start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
-
-  stop?(): MaybePromise<void>;
-}
-
-/**
  * @public
  */
 export type SharedGlobalConfig = RecursiveReadonly<{
-  elasticsearch: Pick<ElasticsearchConfigType, typeof SharedGlobalConfigKeys.elasticsearch[number]>;
-  path: Pick<PathConfigType, typeof SharedGlobalConfigKeys.path[number]>;
-  savedObjects: Pick<SavedObjectsConfigType, typeof SharedGlobalConfigKeys.savedObjects[number]>;
+  elasticsearch: Pick<
+    ElasticsearchConfigType,
+    (typeof SharedGlobalConfigKeys.elasticsearch)[number]
+  >;
+  path: Pick<PathConfigType, (typeof SharedGlobalConfigKeys.path)[number]>;
+  savedObjects: Pick<SavedObjectsConfigType, (typeof SharedGlobalConfigKeys.savedObjects)[number]>;
 }>;
 
 /**
@@ -474,7 +458,5 @@ export type PluginInitializer<
 > = (
   core: PluginInitializerContext
 ) => Promise<
-  | Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
-  | PrebootPlugin<TSetup, TPluginsSetup>
-  | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
+  Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart> | PrebootPlugin<TSetup, TPluginsSetup>
 >;

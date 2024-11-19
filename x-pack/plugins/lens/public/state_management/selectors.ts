@@ -237,6 +237,7 @@ export const selectFramePublicAPI = createSelector(
       activeData,
       dataViews,
       ...context,
+      absDateRange: context.dateRange,
     };
   }
 );

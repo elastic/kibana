@@ -18,7 +18,7 @@ describe('initializeEs', () => {
     esContext.esAdapter.getExistingIndexAliases.mockResolvedValue({});
   });
 
-  test(`should update existing index templates if any exist and are not hidden`, async () => {
+  test(`should update existing index templates to hidden if any exist and are not hidden`, async () => {
     const testTemplate = {
       order: 0,
       index_patterns: ['foo-bar-*'],
@@ -45,6 +45,24 @@ describe('initializeEs', () => {
       'foo-bar-template',
       testTemplate
     );
+  });
+
+  test(`should handle null response from getExistingLegacyIndexTemplates`, async () => {
+    // @ts-expect-error
+    esContext.esAdapter.getExistingLegacyIndexTemplates.mockResolvedValue(null);
+
+    await initializeEs(esContext);
+    expect(esContext.esAdapter.getExistingLegacyIndexTemplates).toHaveBeenCalled();
+    expect(esContext.esAdapter.setLegacyIndexTemplateToHidden).not.toHaveBeenCalled();
+  });
+
+  test(`should handle undefined response from getExistingLegacyIndexTemplates`, async () => {
+    // @ts-expect-error
+    esContext.esAdapter.getExistingLegacyIndexTemplates.mockResolvedValue(undefined);
+
+    await initializeEs(esContext);
+    expect(esContext.esAdapter.getExistingLegacyIndexTemplates).toHaveBeenCalled();
+    expect(esContext.esAdapter.setLegacyIndexTemplateToHidden).not.toHaveBeenCalled();
   });
 
   test(`should not update existing index templates if any exist and are already hidden`, async () => {
@@ -204,6 +222,24 @@ describe('initializeEs', () => {
     expect(esContext.esAdapter.setIndexToHidden).not.toHaveBeenCalled();
   });
 
+  test(`should handle null response from getExistingIndices`, async () => {
+    // @ts-expect-error
+    esContext.esAdapter.getExistingIndices.mockResolvedValue(null);
+
+    await initializeEs(esContext);
+    expect(esContext.esAdapter.getExistingIndices).toHaveBeenCalled();
+    expect(esContext.esAdapter.setIndexToHidden).not.toHaveBeenCalled();
+  });
+
+  test(`should handle undefined response from getExistingIndices`, async () => {
+    // @ts-expect-error
+    esContext.esAdapter.getExistingIndices.mockResolvedValue(undefined);
+
+    await initializeEs(esContext);
+    expect(esContext.esAdapter.getExistingIndices).toHaveBeenCalled();
+    expect(esContext.esAdapter.setIndexToHidden).not.toHaveBeenCalled();
+  });
+
   test(`should not read or update existing index settings when specifying shouldSetExistingAssetsToHidden=false`, async () => {
     await initializeEs({ ...esContext, shouldSetExistingAssetsToHidden: false });
     expect(esContext.esAdapter.getExistingIndices).not.toHaveBeenCalled();
@@ -357,14 +393,16 @@ describe('initializeEs', () => {
     await initializeEs(esContext);
     expect(esContext.esAdapter.doesIndexTemplateExist).toHaveBeenCalled();
     expect(esContext.esAdapter.createIndexTemplate).toHaveBeenCalled();
+    expect(esContext.esAdapter.updateIndexTemplate).not.toHaveBeenCalled();
   });
 
-  test(`shouldn't create index template if it already exists`, async () => {
+  test(`should update index template if it already exists`, async () => {
     esContext.esAdapter.doesIndexTemplateExist.mockResolvedValue(true);
 
     await initializeEs(esContext);
     expect(esContext.esAdapter.doesIndexTemplateExist).toHaveBeenCalled();
     expect(esContext.esAdapter.createIndexTemplate).not.toHaveBeenCalled();
+    expect(esContext.esAdapter.updateIndexTemplate).toHaveBeenCalled();
   });
 
   test(`should create data stream if it doesn't exist`, async () => {
@@ -373,14 +411,16 @@ describe('initializeEs', () => {
     await initializeEs(esContext);
     expect(esContext.esAdapter.doesDataStreamExist).toHaveBeenCalled();
     expect(esContext.esAdapter.createDataStream).toHaveBeenCalled();
+    expect(esContext.esAdapter.updateConcreteIndices).not.toHaveBeenCalled();
   });
 
-  test(`shouldn't create data stream if it already exists`, async () => {
+  test(`should update indices of data stream if it already exists`, async () => {
     esContext.esAdapter.doesDataStreamExist.mockResolvedValue(true);
 
     await initializeEs(esContext);
     expect(esContext.esAdapter.doesDataStreamExist).toHaveBeenCalled();
     expect(esContext.esAdapter.createDataStream).not.toHaveBeenCalled();
+    expect(esContext.esAdapter.updateConcreteIndices).toHaveBeenCalled();
   });
 });
 
@@ -448,6 +488,29 @@ describe('parseIndexAliases', () => {
         is_write_index: true,
       },
     ]);
+  });
+
+  test('should handle null or undefined input', () => {
+    // @ts-expect-error
+    expect(parseIndexAliases(null)).toEqual([]);
+
+    // @ts-expect-error
+    expect(parseIndexAliases(undefined)).toEqual([]);
+
+    expect(
+      parseIndexAliases({
+        '.kibana-event-log-7.15.2-000003': {
+          // @ts-expect-error
+          aliases: null,
+        },
+        '.kibana-event-log-7.15.2-000002': {
+          // @ts-expect-error
+          aliases: undefined,
+        },
+        // @ts-expect-error
+        '.kibana-event-log-7.15.2-000001': {},
+      })
+    ).toEqual([]);
   });
 });
 

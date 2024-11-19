@@ -8,7 +8,6 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import '../../../../common/mock/match_media';
 import { TestProviders, createMockStore } from '../../../../common/mock';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { hostsModel } from '../../store';
@@ -46,6 +45,16 @@ const mockUseHasSecurityCapability = jest.fn().mockReturnValue(false);
 jest.mock('../../../../helper_hooks', () => ({
   useHasSecurityCapability: () => mockUseHasSecurityCapability(),
 }));
+
+const mockUseUiSetting = jest.fn().mockReturnValue([false]);
+
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...original,
+    useUiSetting$: () => mockUseUiSetting(),
+  };
+});
 
 describe('Hosts Table', () => {
   const loadPage = jest.fn();
@@ -144,6 +153,31 @@ describe('Hosts Table', () => {
       );
 
       expect(queryByTestId('tableHeaderCell_node.riskScore_4')).not.toBeInTheDocument();
+    });
+
+    test('it renders "Asset Criticality" column when "isPlatinumOrTrialLicense" is truthy, user has risk-entity capability and Asset Criticality is enabled in Kibana settings', () => {
+      mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: true });
+      mockUseHasSecurityCapability.mockReturnValue(true);
+      mockUseUiSetting.mockReturnValue([true]);
+
+      const { queryByTestId } = render(
+        <TestProviders store={store}>
+          <HostsTable
+            id="hostsQuery"
+            isInspect={false}
+            loading={false}
+            data={mockData}
+            totalCount={0}
+            fakeTotalCount={-1}
+            setQuerySkip={jest.fn()}
+            showMorePagesIndicator={false}
+            loadPage={loadPage}
+            type={hostsModel.HostsType.page}
+          />
+        </TestProviders>
+      );
+
+      expect(queryByTestId('tableHeaderCell_node.criticality_5')).toBeInTheDocument();
     });
 
     describe('Sorting on Table', () => {

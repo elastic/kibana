@@ -16,14 +16,16 @@ import {
 } from './rule_errors';
 import { Rule, RuleTypeModel } from '../../../types';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
+import { ActionTypeModel } from '../../..';
 
+const actionTypeRegistry = actionTypeRegistryMock.create();
 const config = { isUsingSecurity: true, minimumScheduleInterval: { value: '1m', enforce: false } };
 describe('rule_errors', () => {
   describe('validateBaseProperties()', () => {
     it('should validate the name', () => {
       const rule = mockRule();
       rule.name = '';
-      const result = validateBaseProperties(rule, config);
+      const result = validateBaseProperties(rule, config, actionTypeRegistry);
       expect(result.errors).toStrictEqual({
         name: ['Name is required.'],
         'schedule.interval': [],
@@ -36,7 +38,7 @@ describe('rule_errors', () => {
     it('should validate the interval', () => {
       const rule = mockRule();
       rule.schedule.interval = '';
-      const result = validateBaseProperties(rule, config);
+      const result = validateBaseProperties(rule, config, actionTypeRegistry);
       expect(result.errors).toStrictEqual({
         name: [],
         'schedule.interval': ['Check interval is required.'],
@@ -49,7 +51,7 @@ describe('rule_errors', () => {
     it('should validate the minimumScheduleInterval if enforce = false', () => {
       const rule = mockRule();
       rule.schedule.interval = '2s';
-      const result = validateBaseProperties(rule, config);
+      const result = validateBaseProperties(rule, config, actionTypeRegistry);
       expect(result.errors).toStrictEqual({
         name: [],
         'schedule.interval': [],
@@ -62,10 +64,14 @@ describe('rule_errors', () => {
     it('should validate the minimumScheduleInterval if enforce = true', () => {
       const rule = mockRule();
       rule.schedule.interval = '2s';
-      const result = validateBaseProperties(rule, {
-        isUsingSecurity: true,
-        minimumScheduleInterval: { value: '1m', enforce: true },
-      });
+      const result = validateBaseProperties(
+        rule,
+        {
+          isUsingSecurity: true,
+          minimumScheduleInterval: { value: '1m', enforce: true },
+        },
+        actionTypeRegistry
+      );
       expect(result.errors).toStrictEqual({
         name: [],
         'schedule.interval': ['Interval must be at least 1 minute.'],
@@ -78,7 +84,7 @@ describe('rule_errors', () => {
     it('should validate the ruleTypeId', () => {
       const rule = mockRule();
       rule.ruleTypeId = '';
-      const result = validateBaseProperties(rule, config);
+      const result = validateBaseProperties(rule, config, actionTypeRegistry);
       expect(result.errors).toStrictEqual({
         name: [],
         'schedule.interval': [],
@@ -91,7 +97,7 @@ describe('rule_errors', () => {
     it('should get an error when consumer is null', () => {
       const rule = mockRule();
       rule.consumer = null as unknown as string;
-      const result = validateBaseProperties(rule, config);
+      const result = validateBaseProperties(rule, config, actionTypeRegistry);
       expect(result.errors).toStrictEqual({
         name: [],
         'schedule.interval': [],
@@ -104,7 +110,7 @@ describe('rule_errors', () => {
     it('should not get an error when consumer is undefined', () => {
       const rule = mockRule();
       rule.consumer = undefined as unknown as string;
-      const result = validateBaseProperties(rule, config);
+      const result = validateBaseProperties(rule, config, actionTypeRegistry);
       expect(result.errors).toStrictEqual({
         name: [],
         'schedule.interval': [],
@@ -126,12 +132,47 @@ describe('rule_errors', () => {
           },
         },
       ];
-      const result = validateBaseProperties(rule, config);
+      const actionType = {
+        id: 'test',
+        name: 'Test',
+        isSystemActionType: false,
+      } as unknown as ActionTypeModel;
+      actionTypeRegistry.get.mockReturnValue(actionType);
+      const result = validateBaseProperties(rule, config, actionTypeRegistry);
       expect(result.errors).toStrictEqual({
         name: [],
         'schedule.interval': [],
         ruleTypeId: [],
         actionConnectors: ['Action for myActionType connector is required.'],
+        consumer: [],
+      });
+    });
+
+    it('should not throw an error for system actions', () => {
+      const rule = mockRule();
+
+      rule.actions = [
+        {
+          id: '1234',
+          actionTypeId: '.test-system-action',
+          params: {},
+        },
+      ];
+
+      const actionType = {
+        id: '.test-system-action',
+        name: 'Test',
+        isSystemActionType: true,
+      } as unknown as ActionTypeModel;
+
+      actionTypeRegistry.get.mockReturnValue(actionType);
+      const result = validateBaseProperties(rule, config, actionTypeRegistry);
+
+      expect(result.errors).toStrictEqual({
+        name: [],
+        'schedule.interval': [],
+        ruleTypeId: [],
+        actionConnectors: [],
         consumer: [],
       });
     });
@@ -150,7 +191,8 @@ describe('rule_errors', () => {
             },
           }),
         }),
-        config
+        config,
+        actionTypeRegistry
       );
       expect(result).toStrictEqual({
         ruleParamsErrors: { field: ['This is wrong'] },
@@ -175,7 +217,6 @@ describe('rule_errors', () => {
 
   describe('getRuleActionErrors()', () => {
     it('should return an array of errors', async () => {
-      const actionTypeRegistry = actionTypeRegistryMock.create();
       actionTypeRegistry.get.mockImplementation((actionTypeId: string) => ({
         ...actionTypeRegistryMock.createMockActionTypeModel(),
         validateParams: jest.fn().mockImplementation(() => ({

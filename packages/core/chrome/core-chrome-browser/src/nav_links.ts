@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Observable } from 'rxjs';
 import type { AppCategory } from '@kbn/core-application-common';
+import type { AppDeepLinkLocations } from '@kbn/core-application-browser';
 
 /**
  * @public
@@ -66,18 +68,18 @@ export interface ChromeNavLink {
   readonly href: string;
 
   /**
-   * Disables a link from being clickable.
+   * List of locations where the nav link should be visible.
    *
-   * @internalRemarks
-   * This is only used by the ML and Graph plugins currently. They use this field
-   * to disable the nav link when the license is expired.
+   * Accepts the following values:
+   * - "globalSearch": the link will appear in the global search bar
+   * - "home": the link will appear on the Kibana home page
+   * - "kibanaOverview": the link will appear in the Kibana overview page
+   * - "sideNav": the link will appear in the side navigation.
+   *   Note: "sideNav" will be deprecated when we change the navigation to "solutions" style.
+   *
+   * @default ['globalSearch']
    */
-  readonly disabled?: boolean;
-
-  /**
-   * Hides a link from the navigation.
-   */
-  readonly hidden?: boolean;
+  readonly visibleIn: AppDeepLinkLocations[];
 }
 
 /**

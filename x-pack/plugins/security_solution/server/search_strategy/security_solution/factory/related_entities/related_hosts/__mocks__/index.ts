@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/search-types';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { EndpointAppContextService } from '../../../../../../endpoint/endpoint_app_context_services';
 import type { EndpointAppContext } from '../../../../../../endpoint/types';

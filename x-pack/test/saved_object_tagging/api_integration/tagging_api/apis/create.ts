@@ -43,6 +43,7 @@ export default function ({ getService }: FtrProviderContext) {
           name: 'my new tag',
           description: 'some desc',
           color: '#772299',
+          managed: false,
         },
       });
 
@@ -56,6 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
               name: 'my new tag',
               description: 'some desc',
               color: '#772299',
+              managed: false,
             },
           });
         });

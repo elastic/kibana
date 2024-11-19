@@ -9,7 +9,8 @@ import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_RULES_PREVIEW } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { deleteAllRules, getSimplePreviewRule, getSimpleRulePreviewOutput } from '../../../utils';
+import { getSimplePreviewRule, getSimpleRulePreviewOutput } from '../../../utils';
+import { deleteAllRules } from '../../../../../../common/utils/security_solution';
 
 import {
   createUserAndRole,
@@ -30,7 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const path = dataPathBuilder.getPath('auditbeat/hosts');
 
-  describe('@serverless @ess preview_rules', () => {
+  describe('@serverless @ess @serverlessQA preview_rules', () => {
     describe('previewing rules', () => {
       before(async () => {
         await esArchiver.load(path);
@@ -94,7 +95,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('@brokenInServerless t1_analyst', () => {
+      describe('@skipInServerless t1_analyst', () => {
         const role = ROLES.t1_analyst;
 
         beforeEach(async () => {
@@ -115,7 +116,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('@brokenInServerless hunter', () => {
+      describe('@skipInServerless hunter', () => {
         const role = ROLES.hunter;
 
         beforeEach(async () => {

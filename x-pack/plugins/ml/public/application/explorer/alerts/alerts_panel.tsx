@@ -33,7 +33,9 @@ export const AlertsPanel: FC = () => {
 
   const [isOpen, setIsOpen] = useState(true);
   const [toggleSelected, setToggleSelected] = useState(`alertsSummary`);
-
+  const {
+    services: { fieldFormats },
+  } = useMlKibana();
   const { anomalyDetectionAlertsStateService } = useAnomalyExplorerContext();
 
   const countByStatus = useObservable(anomalyDetectionAlertsStateService.countByStatus$);
@@ -48,6 +50,9 @@ export const AlertsPanel: FC = () => {
     query: alertsQuery,
     showExpandToDetails: true,
     showAlertStatusWithFlapping: true,
+    cellContext: {
+      fieldFormats,
+    },
   };
   const alertsStateTable = triggersActionsUi!.getAlertsStateTable(alertStateProps);
 
@@ -95,6 +100,9 @@ export const AlertsPanel: FC = () => {
               </EuiNotificationBadge>
             </>
           );
+        })}
+        ariaLabel={i18n.translate('xpack.ml.explorer.alertsPanel.ariaLabel', {
+          defaultMessage: 'alerts panel',
         })}
       >
         <AnomalyDetectionAlertsOverviewChart />

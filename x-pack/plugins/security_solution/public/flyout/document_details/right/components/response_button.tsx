@@ -8,8 +8,9 @@ import React, { useCallback } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useRightPanelContext } from '../context';
-import { DocumentDetailsLeftPanelKey, LeftPanelResponseTab } from '../../left';
+import { useDocumentDetailsContext } from '../../shared/context';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { LeftPanelResponseTab } from '../../left';
 import { RESPONSE_BUTTON_TEST_ID } from './test_ids';
 
 /**
@@ -17,7 +18,7 @@ import { RESPONSE_BUTTON_TEST_ID } from './test_ids';
  */
 export const ResponseButton: React.FC = () => {
   const { openLeftPanel } = useExpandableFlyoutApi();
-  const { eventId, indexName, scopeId } = useRightPanelContext();
+  const { eventId, indexName, scopeId } = useDocumentDetailsContext();
 
   const goToResponseTab = useCallback(() => {
     openLeftPanel({
@@ -37,6 +38,7 @@ export const ResponseButton: React.FC = () => {
         onClick={goToResponseTab}
         iconType="documentation"
         data-test-subj={RESPONSE_BUTTON_TEST_ID}
+        size="s"
       >
         <FormattedMessage
           id="xpack.securitySolution.flyout.right.response.responseButtonLabel"

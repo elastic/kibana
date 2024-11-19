@@ -35,3 +35,32 @@ export enum NAV_SEARCH_INPUT_OSQUERY_RESULTS {
   LOGS = '/app/integrations/detail/osquery/overview',
   MANAGER = '/app/integrations/detail/osquery_manager/overview',
 }
+
+/**
+ * Local storage keys we use to store the state of our new features tours we currently show in the app.
+ *
+ * NOTE: As soon as we want to show tours for new features in the upcoming release,
+ * we will need to update these constants with the corresponding version.
+ */
+export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
+  RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.13',
+  TIMELINES: 'securitySolution.security.timelineFlyoutHeader.saveTimelineTour',
+  KNOWLEDGE_BASE: 'elasticAssistant.knowledgeBase.newFeaturesTour.v8.16',
+};
+
+/**
+ * For all the new features tours we show in the app, this method disables them
+ * by setting their configs in the local storage. It prevents the tours from appearing
+ * on the page during test runs and covering other UI elements.
+ * @param window - browser's window object
+ */
+export const disableNewFeaturesTours = (window: Window) => {
+  const tourStorageKeys = Object.values(NEW_FEATURES_TOUR_STORAGE_KEYS);
+  const tourConfig = {
+    isTourActive: false,
+  };
+
+  tourStorageKeys.forEach((key) => {
+    window.localStorage.setItem(key, JSON.stringify(tourConfig));
+  });
+};

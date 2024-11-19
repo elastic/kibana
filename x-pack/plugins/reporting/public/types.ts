@@ -5,11 +5,29 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart } from '@kbn/core/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
 import { JOB_STATUS } from '@kbn/reporting-common';
 import type { JobId, ReportOutput, ReportSource, TaskRunResult } from '@kbn/reporting-common/types';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { ReportingPublicPluginStartDependencies } from './plugin';
+
+/*
+ * Required services for mounting React components
+ */
+export type StartServices = [
+  Pick<
+    CoreStart,
+    // required for modules that render React
+    | 'analytics'
+    | 'i18n'
+    | 'theme'
+    // used extensively in Reporting plugin
+    | 'application'
+    | 'notifications'
+    | 'uiSettings'
+  >,
+  ReportingPublicPluginStartDependencies,
+  unknown
+];
 
 /*
  * Notifier Toasts
@@ -30,18 +48,6 @@ export interface JobSummary {
  * @internal
  */
 export interface JobSummarySet {
-  completed: JobSummary[];
-  failed: JobSummary[];
-}
-
-/* Services received through useKibana context
- * @internal
- */
-export interface KibanaContext {
-  http: CoreSetup['http'];
-  application: CoreStart['application'];
-  uiSettings: CoreStart['uiSettings'];
-  docLinks: CoreStart['docLinks'];
-  data: DataPublicPluginStart;
-  share: SharePluginStart;
+  completed?: JobSummary[];
+  failed?: JobSummary[];
 }

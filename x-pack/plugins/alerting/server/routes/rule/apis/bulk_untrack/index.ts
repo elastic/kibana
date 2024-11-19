@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { bulkUntrackAlertRoute } from './bulk_untrack_alert_route';
+export { bulkUntrackAlertsRoute } from './bulk_untrack_alerts_route';

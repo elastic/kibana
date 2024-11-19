@@ -1,0 +1,69 @@
+{
+  "type": "plugin",
+  "id": "@kbn/synthetics-plugin",
+  "owner": [
+    "@elastic/obs-ux-management-team"
+  ],
+  "group": "observability",
+  "visibility": "private",
+  "description": "This plugin visualizes data from Synthetics and Heartbeat, and integrates with other Observability solutions.",
+  "plugin": {
+    "id": "synthetics",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "uptime"
+    ],
+    "requiredPlugins": [
+      "actions",
+      "alerting",
+      "cases",
+      "data",
+      "fleet",
+      "embeddable",
+      "discover",
+      "dataViews",
+      "dashboard",
+      "encryptedSavedObjects",
+      "exploratoryView",
+      "features",
+      "inspector",
+      "licensing",
+      "observability",
+      "observabilityShared",
+      "ruleRegistry",
+      "security",
+      "share",
+      "taskManager",
+      "triggersActionsUi",
+      "usageCollection",
+      "bfetch",
+      "uiActions",
+      "unifiedSearch",
+      "presentationUtil"
+    ],
+    "optionalPlugins": [
+      "cloud",
+      "data",
+      "fleet",
+      "slo",
+      "home",
+      "ml",
+      "serverless",
+      "spaces",
+      "telemetry",
+      "licenseManagement",
+      "observabilityAIAssistant"
+    ],
+    "requiredBundles": [
+      "data",
+      "fleet",
+      "kibanaReact",
+      "kibanaUtils",
+      "observability",
+      "spaces",
+      "unifiedDocViewer"
+    ]
+  }
+}

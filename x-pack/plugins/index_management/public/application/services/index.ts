@@ -28,6 +28,7 @@ export {
   loadIndexStatistics,
   useLoadIndexSettings,
   createIndex,
+  useLoadInferenceEndpoints,
 } from './api';
 
 export { sortTable } from './sort_table';

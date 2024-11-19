@@ -16,17 +16,18 @@ import {
   type SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
 import { isDefined } from '@kbn/ml-is-defined';
+import type { MlAnomaliesTableRecordExtended } from '@kbn/ml-anomaly-utils';
 import {
   getEntityFieldName,
   getEntityFieldValue,
   type MlAnomalyRecordDoc,
   type MlAnomalyResultType,
   ML_ANOMALY_RESULT_TYPE,
-  MlAnomaliesTableRecordExtended,
 } from '@kbn/ml-anomaly-utils';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
-import { MlJob } from '@elastic/elasticsearch/lib/api/types';
+import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { getAnomalyDescription } from '../../../common/util/anomaly_description';
 import { getMetricChangeDescription } from '../../../common/util/metric_change_description';
 import type { MlClient } from '../ml_client';
@@ -52,7 +53,6 @@ import { resolveMaxTimeInterval } from '../../../common/util/job_utils';
 import { getTopNBuckets, resolveLookbackInterval } from '../../../common/util/alerts';
 import type { DatafeedsService } from '../../models/job_service/datafeeds';
 import type { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
-import type { AwaitReturnType } from '../../../common/types/common';
 import { getTypicalAndActualValues } from '../../models/results_service/results_service';
 import type { GetDataViewsService } from '../data_views_utils';
 
@@ -175,6 +175,15 @@ const resultTypeScoreMapping = {
   [ML_ANOMALY_RESULT_TYPE.INFLUENCER]: 'influencer_score',
 };
 
+export interface AnomalyDetectionAlertFieldFormatters {
+  numberFormatter: IFieldFormat['convert'];
+  fieldFormatters: Record<string, IFieldFormat['convert']>;
+}
+
+export interface AnomalyDetectionRuleState {
+  contextFieldFormatters?: AnomalyDetectionAlertFieldFormatters;
+}
+
 /**
  * Alerting related server-side methods
  * @param mlClient
@@ -186,9 +195,9 @@ export function alertingServiceProvider(
   getFieldsFormatRegistry: FieldFormatsRegistryProvider,
   getDataViewsService: GetDataViewsService
 ) {
-  type FieldFormatters = AwaitReturnType<ReturnType<typeof getFormatters>>;
-
   let jobs: MlJob[] = [];
+
+  let contextFieldFormatters: AnomalyDetectionAlertFieldFormatters | undefined;
 
   /**
    * Provides formatters based on the data view of the datafeed index pattern
@@ -208,10 +217,13 @@ export function alertingServiceProvider(
         }, {} as Record<string, IFieldFormat['convert']>)
       : {};
 
-    return {
+    // store formatters to pass to the executor state update
+    contextFieldFormatters = {
       numberFormatter: numberFormatter.convert.bind(numberFormatter),
       fieldFormatters,
     };
+
+    return contextFieldFormatters;
   });
 
   /**
@@ -222,8 +234,8 @@ export function alertingServiceProvider(
       try {
         const dataViewsService = await getDataViewsService();
 
-        const dataViews = await dataViewsService.find(indexPattern);
-        const dataView = dataViews.find(({ title }) => title === indexPattern);
+        const dataViews = await dataViewsService.findLazy(indexPattern);
+        const dataView = dataViews.find((dView) => dView.getIndexPattern() === indexPattern);
 
         if (!dataView) return;
 
@@ -550,7 +562,7 @@ export function alertingServiceProvider(
   const getResultsToContextFormatter = (
     resultType: MlAnomalyResultType,
     useInitialScore: boolean = false,
-    formatters: FieldFormatters
+    formatters: AnomalyDetectionAlertFieldFormatters
   ) => {
     const resultsLabel = getAggResultsLabel(resultType);
     return (v: AggResultsResponse): AlertExecutionResult | undefined => {
@@ -719,7 +731,8 @@ export function alertingServiceProvider(
 
     const resultsLabel = getAggResultsLabel(params.resultType);
 
-    const fieldsFormatters = await getFormatters(datafeeds![0]!.indices[0]);
+    const fieldsFormatters =
+      contextFieldFormatters ?? (await getFormatters(datafeeds![0]!.indices[0]));
 
     const formatter = getResultsToContextFormatter(
       params.resultType,
@@ -926,7 +939,7 @@ export function alertingServiceProvider(
     | { payload: AnomalyDetectionAlertPayload; context: AnomalyDetectionAlertContext; name: string }
     | undefined
   > => {
-    const formatters = await getFormatters(indexPattern);
+    const formatters = contextFieldFormatters ?? (await getFormatters(indexPattern));
 
     const context = getResultsToContextFormatter(resultType, false, formatters)(value);
     const payload = getResultsToPayloadFormatter(resultType, false)(value);
@@ -963,13 +976,15 @@ export function alertingServiceProvider(
      */
     execute: async (
       params: MlAnomalyDetectionAlertParams,
-      spaceId: string
+      spaceId: string,
+      state?: AnomalyDetectionRuleState
     ): Promise<
       | {
           payload: AnomalyDetectionAlertPayload;
           context: AnomalyDetectionAlertContext;
           name: string;
           isHealthy: boolean;
+          stateUpdate: AnomalyDetectionRuleState;
         }
       | undefined
     > => {
@@ -981,9 +996,17 @@ export function alertingServiceProvider(
 
       const result = await fetchResult(queryParams);
 
+      if (state && isPopulatedObject(state?.contextFieldFormatters)) {
+        contextFieldFormatters = state.contextFieldFormatters;
+      }
+
       const formattedResult = result
         ? await getFormatted(queryParams.indexPattern, queryParams.resultType, spaceId, result)
         : undefined;
+
+      const stateUpdate: AnomalyDetectionRuleState = {
+        contextFieldFormatters,
+      };
 
       if (!formattedResult) {
         // If no anomalies found, report as recovered.
@@ -1032,6 +1055,7 @@ export function alertingServiceProvider(
             jobIds: queryParams.jobIds,
             message: contextMessage,
           } as AnomalyDetectionAlertContext,
+          stateUpdate,
         };
       }
 
@@ -1040,6 +1064,7 @@ export function alertingServiceProvider(
         payload: formattedResult.payload,
         name: formattedResult.name,
         isHealthy: false,
+        stateUpdate,
       };
     },
     /**

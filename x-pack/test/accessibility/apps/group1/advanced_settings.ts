@@ -20,42 +20,42 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         shouldUseHashForSubUrl: false,
       });
       await testSubjects.click('settings');
-      await toasts.dismissAllToasts();
+      await toasts.dismissAll();
       await a11y.testAppSnapshot();
     });
 
     // clicking on the top search bar
     it('adv settings - search ', async () => {
       await testSubjects.click('settingsSearchBar');
-      await toasts.dismissAllToasts();
+      await toasts.dismissAll();
       await a11y.testAppSnapshot();
     });
 
     // clicking on the category dropdown
     it('adv settings - category -dropdown ', async () => {
       await testSubjects.click('settingsSearchBar');
-      await toasts.dismissAllToasts();
+      await toasts.dismissAll();
       await a11y.testAppSnapshot();
     });
 
     // clicking on the toggle button
     it('adv settings - toggle ', async () => {
       await testSubjects.click('management-settings-editField-csv:quoteValues');
-      await toasts.dismissAllToasts();
+      await toasts.dismissAll();
       await a11y.testAppSnapshot();
     });
 
     // clicking on editor panel
     it('adv settings - edit ', async () => {
       await testSubjects.click('management-settings-editField-csv:separator');
-      await toasts.dismissAllToasts();
+      await toasts.dismissAll();
       await a11y.testAppSnapshot();
     });
 
     // clicking on save button
     it('adv settings - save', async () => {
       await testSubjects.click('settings-save-button');
-      await toasts.dismissAllToasts();
+      await toasts.dismissAll();
       await a11y.testAppSnapshot();
     });
   });

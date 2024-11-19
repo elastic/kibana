@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { BasePath } from '../base_path_service';
@@ -16,6 +17,11 @@ import {
 
 export interface InternalStaticAssets {
   getHrefBase(): string;
+  /**
+   * Returns true if a CDN has been configured and should be used to serve static assets.
+   * Should only be used in scenarios where different behavior has to be used when CDN is enabled or not.
+   */
+  isUsingCdn(): boolean;
   /**
    * Intended for use by server code rendering UI or generating links to static assets
    * that will ultimately be called from the browser and must respect settings like
@@ -65,6 +71,10 @@ export class StaticAssets implements InternalStaticAssets {
       this.assetsHrefBase = suffixPathnameToPathname(basePath.serverBasePath, shaDigest);
     }
     this.assetsServerPathBase = `/${shaDigest}`;
+  }
+
+  public isUsingCdn() {
+    return this.hasCdnHost;
   }
 
   /**

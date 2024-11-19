@@ -8,27 +8,28 @@
 import { mapValues } from 'lodash';
 import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { withSpan } from '@kbn/apm-utils';
-import { SanitizedRule, RawAlertInstance as RawAlert } from '../../types';
+import { SanitizedRule, RawAlertInstance as RawAlert, RawRule } from '../../types';
 import { taskInstanceToAlertTaskInstance } from '../../task_runner/alert_task_instance';
 import { Alert } from '../../alert';
 import { EVENT_LOG_ACTIONS } from '../../plugin';
 import { createAlertEventLogRecordObject } from '../../lib/create_alert_event_log_record_object';
 import { RulesClientContext } from '../types';
-import { RuleAttributes } from '../../data/rule/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 export const untrackRuleAlerts = async (
   context: RulesClientContext,
   id: string,
-  attributes: RuleAttributes
+  attributes: RawRule
 ) => {
   return withSpan({ name: 'untrackRuleAlerts', type: 'rules' }, async () => {
     if (!context.eventLogger || !attributes.scheduledTaskId) return;
+
     try {
       const taskInstance = taskInstanceToAlertTaskInstance(
         await context.taskManager.get(attributes.scheduledTaskId),
         attributes as unknown as SanitizedRule
       );
+
       const { state } = taskInstance;
 
       const untrackedAlerts = mapValues<Record<string, RawAlert>, Alert>(
@@ -87,7 +88,7 @@ export const untrackRuleAlerts = async (
     } catch (error) {
       // this should not block the rest of the disable process
       context.logger.warn(
-        `rulesClient.disable('${id}') - Could not write untrack events - ${error.message}`
+        `rulesClient.disableRule('${id}') - Could not write untrack events - ${error.message}`
       );
     }
   });

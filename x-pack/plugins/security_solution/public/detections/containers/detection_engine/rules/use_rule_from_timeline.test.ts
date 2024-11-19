@@ -10,17 +10,19 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { useRuleFromTimeline } from './use_rule_from_timeline';
 import { useGetInitialUrlParamValue } from '../../../../common/utils/global_query_string/helpers';
 import { resolveTimeline } from '../../../../timelines/containers/api';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
+import { mockSourcererScope } from '../../../../sourcerer/containers/mocks';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 import { mockTimeline } from '../../../../../server/lib/timeline/__mocks__/create_timelines';
 import type { TimelineModel } from '../../../..';
 
+jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock('../../../../common/utils/global_query_string/helpers');
 jest.mock('../../../../timelines/containers/api');
 jest.mock('../../../../common/hooks/use_app_toasts');
-jest.mock('../../../../common/containers/sourcerer');
+jest.mock('../../../../sourcerer/containers');
+jest.mock('../../../../common/components/discover_in_timeline/use_discover_in_timeline_context');
 jest.mock('../../../../common/components/link_to', () => {
   const originalModule = jest.requireActual('../../../../common/components/link_to');
   return {
@@ -110,6 +112,7 @@ describe('useRuleFromTimeline', () => {
         ...mockSourcererScope,
         dataViewId: 'custom-data-view-id',
         selectedPatterns: ['awesome-*'],
+        sourcererDataView: {},
       });
     });
 
@@ -118,7 +121,6 @@ describe('useRuleFromTimeline', () => {
       expect(result.current.loading).toEqual(true);
       await waitForNextUpdate();
       expect(setRuleQuery).toHaveBeenCalled();
-      expect(mockDispatch).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -150,28 +152,13 @@ describe('useRuleFromTimeline', () => {
       await waitForNextUpdate();
       expect(setRuleQuery).toHaveBeenCalled();
 
-      expect(mockDispatch).toHaveBeenCalledTimes(4);
+      expect(mockDispatch).toHaveBeenCalledTimes(2);
       expect(mockDispatch).toHaveBeenNthCalledWith(1, {
-        type: 'x-pack/security_solution/local/timeline/UPDATE_LOADING',
-        payload: {
-          id: 'timeline-1',
-          isLoading: true,
-        },
-      });
-
-      expect(mockDispatch).toHaveBeenNthCalledWith(2, {
         type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_DATA_VIEW',
         payload: {
           id: 'timeline',
           selectedDataViewId: selectedTimeline.data.timeline.dataViewId,
           selectedPatterns: selectedTimeline.data.timeline.indexNames,
-        },
-      });
-      expect(mockDispatch).toHaveBeenNthCalledWith(3, {
-        type: 'x-pack/security_solution/local/timeline/UPDATE_LOADING',
-        payload: {
-          id: 'timeline-1',
-          isLoading: false,
         },
       });
     });
@@ -344,7 +331,7 @@ describe('useRuleFromTimeline', () => {
       const { waitForNextUpdate } = renderHook(() => useRuleFromTimeline(setRuleQuery));
       await waitForNextUpdate();
       expect(setRuleQuery).toHaveBeenCalled();
-      expect(mockDispatch).toHaveBeenNthCalledWith(4, {
+      expect(mockDispatch).toHaveBeenNthCalledWith(2, {
         type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_DATA_VIEW',
         payload: {
           id: 'timeline',

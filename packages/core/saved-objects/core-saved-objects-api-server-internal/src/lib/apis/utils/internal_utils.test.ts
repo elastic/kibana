@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { omit } from 'lodash';
@@ -100,6 +101,10 @@ describe('#getSavedObjectFromSource', () => {
   const originId = 'originId';
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const updated_at = 'updatedAt';
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const created_by = 'createdBy';
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const updated_by = 'updatedBy';
   const managed = false;
 
   function createRawDoc(
@@ -120,6 +125,8 @@ describe('#getSavedObjectFromSource', () => {
         managed,
         originId,
         updated_at,
+        created_by,
+        updated_by,
         ...namespaceAttrs,
       },
     };
@@ -142,6 +149,8 @@ describe('#getSavedObjectFromSource', () => {
       references,
       type,
       updated_at,
+      updated_by,
+      created_by,
       version: encodeHitVersion(doc),
     });
   });

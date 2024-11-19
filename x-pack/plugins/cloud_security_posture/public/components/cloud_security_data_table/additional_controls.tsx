@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { EuiButtonEmpty, EuiFlexItem } from '@elastic/eui';
 import { type DataView } from '@kbn/data-views-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
 import { FieldsSelectorModal, useFieldsModal } from './fields_selector';
 import { useStyles } from './use_styles';
-import { getAbbreviatedNumber } from '../../common/utils/get_abbreviated_number';
 import { CSP_FIELDS_SELECTOR_OPEN_BUTTON } from '../test_subjects';
 
-const GroupSelectorWrapper: React.FC = ({ children }) => {
+const GroupSelectorWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const styles = useStyles();
 
   return (

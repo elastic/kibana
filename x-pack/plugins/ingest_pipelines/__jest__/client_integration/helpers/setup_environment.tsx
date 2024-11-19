@@ -19,7 +19,9 @@ import {
   scopedHistoryMock,
   uiSettingsServiceMock,
   applicationServiceMock,
+  overlayServiceMock,
 } from '@kbn/core/public/mocks';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 
@@ -65,6 +67,11 @@ const appServices = {
   application: applicationMock,
   share: {
     url: new MockUrlService(),
+  },
+  overlays: overlayServiceMock.createStartContract(),
+  http: httpServiceMock.createStartContract({ basePath: '/mock' }),
+  config: {
+    enableManageProcessors: true,
   },
 };
 

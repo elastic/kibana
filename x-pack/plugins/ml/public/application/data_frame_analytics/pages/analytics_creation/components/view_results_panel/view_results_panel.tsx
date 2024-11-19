@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { FC, Fragment } from 'react';
-import { EuiCard, EuiIcon } from '@elastic/eui';
+import type { FC } from 'react';
+import React, { Fragment } from 'react';
+import { EuiCard, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataFrameAnalysisConfigType } from '@kbn/ml-data-frame-analytics-utils';
 import { useMlLink } from '../../../../../contexts/kibana';
@@ -25,10 +26,14 @@ export const ViewResultsPanel: FC<Props> = ({ jobId, analysisType }) => {
     },
   });
 
+  const {
+    euiTheme: { size },
+  } = useEuiTheme();
+
   return (
     <Fragment>
       <EuiCard
-        className="dfAnalyticsCreationWizard__card"
+        css={{ width: `calc(${size.xxl} * 7.5)` }}
         icon={<EuiIcon size="xxl" type="visTable" />}
         title={i18n.translate('xpack.ml.dataframe.analytics.create.viewResultsCardTitle', {
           defaultMessage: 'View Results',

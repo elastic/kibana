@@ -1,5 +1,5 @@
 {
-  "type": "shared-common",
+  "type": "core",
   "id": "@kbn/core",
   "owner": "@elastic/kibana-core",
   "description": "The core plugin has core functionality",

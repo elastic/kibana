@@ -10,6 +10,7 @@ Object {
   "cloudDefaultPort": undefined,
   "cloudHost": undefined,
   "cloudId": "cloudId",
+  "csp": "aws",
   "deploymentId": "deployment-id",
   "elasticsearchUrl": undefined,
   "instanceSizeMb": undefined,
@@ -17,8 +18,13 @@ Object {
   "isElasticStaffOwned": undefined,
   "isServerlessEnabled": false,
   "kibanaUrl": undefined,
+  "onboarding": Object {
+    "defaultSolution": undefined,
+  },
+  "organizationId": undefined,
   "projectsUrl": "https://cloud.elastic.co/projects/",
   "serverless": Object {
+    "orchestratorTarget": undefined,
     "projectId": undefined,
     "projectName": undefined,
     "projectType": undefined,

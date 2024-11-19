@@ -30,6 +30,7 @@ export function registerFieldsRoute(
   router.post(
     {
       path: '/internal/rules/saved_objects/fields',
+      options: { access: 'internal' },
       validate: {
         body: schema.nullable(
           schema.object({
@@ -53,10 +54,11 @@ export function registerFieldsRoute(
           });
         }
         const indices = [ALERTING_CASES_SAVED_OBJECT_INDEX];
-        const { elasticsearch } = await context.core;
+        const { elasticsearch, uiSettings } = await context.core;
 
         const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(
-          elasticsearch.client.asInternalUser
+          elasticsearch.client.asInternalUser,
+          { uiSettingsClient: uiSettings.client }
         );
         const { fields } = await indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
           pattern: indices,

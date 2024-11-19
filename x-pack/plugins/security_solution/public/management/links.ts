@@ -16,6 +16,7 @@ import {
 import {
   BLOCKLIST_PATH,
   ENDPOINTS_PATH,
+  ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
   ENTITY_ANALYTICS_MANAGEMENT_PATH,
   EVENT_FILTERS_PATH,
   HOST_ISOLATION_EXCEPTIONS_PATH,
@@ -36,11 +37,13 @@ import {
   RESPONSE_ACTIONS_HISTORY,
   TRUSTED_APPLICATIONS,
   ENTITY_ANALYTICS_RISK_SCORE,
+  ENTITY_STORE,
 } from '../app/translations';
 import { licenseService } from '../common/hooks/use_license';
 import type { LinkItem } from '../common/links/types';
 import type { StartPlugins } from '../types';
 import { cloudDefendLink } from '../cloud_defend/links';
+import { links as notesLink } from '../notes/links';
 import { IconConsole } from '../common/icons/console';
 import { IconShield } from '../common/icons/shield';
 import { IconEndpoints } from '../common/icons/endpoints';
@@ -50,13 +53,17 @@ import { IconSavedObject } from '../common/icons/saved_object';
 import { IconDashboards } from '../common/icons/dashboards';
 import { IconEntityAnalytics } from '../common/icons/entity_analytics';
 import { HostIsolationExceptionsApiClient } from './pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
+import { IconAssetCriticality } from '../common/icons/asset_criticality';
 
 const categories = [
   {
     label: i18n.translate('xpack.securitySolution.appLinks.category.entityAnalytics', {
       defaultMessage: 'Entity Analytics',
     }),
-    linkIds: [SecurityPageName.entityAnalyticsManagement],
+    linkIds: [
+      SecurityPageName.entityAnalyticsManagement,
+      SecurityPageName.entityAnalyticsEntityStoreManagement,
+    ],
   },
   {
     label: i18n.translate('xpack.securitySolution.appLinks.category.endpoints', {
@@ -78,6 +85,12 @@ const categories = [
     }),
     linkIds: [SecurityPageName.cloudDefendPolicies],
   },
+  {
+    label: i18n.translate('xpack.securitySolution.appLinks.category.investigations', {
+      defaultMessage: 'Investigations',
+    }),
+    linkIds: [SecurityPageName.notes],
+  },
 ];
 
 export const links: LinkItem = {
@@ -86,7 +99,7 @@ export const links: LinkItem = {
   path: MANAGE_PATH,
   skipUrlState: true,
   hideTimeline: true,
-  globalNavPosition: 9,
+  globalNavPosition: 10,
   capabilities: [`${SERVER_APP_ID}.show`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.manage', {
@@ -181,6 +194,18 @@ export const links: LinkItem = {
       licenseType: 'platinum',
     },
     {
+      id: SecurityPageName.entityAnalyticsEntityStoreManagement,
+      title: ENTITY_STORE,
+      description: i18n.translate('xpack.securitySolution.appLinks.entityStoreDescription', {
+        defaultMessage: 'Store host and user entities observed in events.',
+      }),
+      landingIcon: IconAssetCriticality,
+      path: ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
+      skipUrlState: true,
+      hideTimeline: true,
+      capabilities: [`${SERVER_APP_ID}.entity-analytics`],
+    },
+    {
       id: SecurityPageName.responseActionsHistory,
       title: RESPONSE_ACTIONS_HISTORY,
       description: i18n.translate('xpack.securitySolution.appLinks.actionHistoryDescription', {
@@ -192,6 +217,7 @@ export const links: LinkItem = {
       hideTimeline: true,
     },
     cloudDefendLink,
+    notesLink,
   ],
 };
 

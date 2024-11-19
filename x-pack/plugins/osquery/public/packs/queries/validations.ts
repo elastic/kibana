@@ -9,7 +9,9 @@ import { i18n } from '@kbn/i18n';
 import type { FormData, ValidationFunc } from '../../shared_imports';
 
 export const MAX_QUERY_LENGTH = 2000;
-const idPattern = /^[a-zA-Z0-9-_]+$/;
+
+// Has to be a string, can't be just numbers, and cannot contain dot '.'
+const idPattern = /^(?![0-9]+$)[a-zA-Z0-9-_]+$/;
 // still used in Packs
 export const idSchemaValidation: ValidationFunc<FormData, string, string> = ({ value }) => {
   const valueIsValid = idPattern.test(value);

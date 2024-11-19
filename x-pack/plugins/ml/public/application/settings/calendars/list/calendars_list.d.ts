@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { FC } from 'react';
+import type { FC } from 'react';
 
 declare const CalendarsList: FC<{
   canCreateCalendar: boolean;
   canDeleteCalendar: boolean;
+  isDst: boolean;
 }>;

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { SetupPlugins } from '../../../plugin';
+import type { StartServicesAccessor } from '@kbn/core-lifecycle-server';
+import type { StartPlugins } from '../../../plugin_contract';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import type { ConfigType } from '../../..';
 import {
@@ -24,32 +25,34 @@ import { getDraftTimelinesRoute } from './draft_timelines/get_draft_timelines';
 import { cleanDraftTimelinesRoute } from './draft_timelines/clean_draft_timelines';
 import { installPrepackedTimelinesRoute } from './prepackaged_timelines/install_prepackaged_timelines';
 
-import { persistNoteRoute, deleteNoteRoute } from './notes';
+import { persistNoteRoute, deleteNoteRoute, getNotesRoute } from './notes';
 
 import { persistPinnedEventRoute } from './pinned_events';
 
 export function registerTimelineRoutes(
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
-  security: SetupPlugins['security']
+  startServices: StartServicesAccessor<StartPlugins>
 ) {
-  createTimelinesRoute(router, config, security);
-  patchTimelinesRoute(router, config, security);
+  createTimelinesRoute(router);
+  patchTimelinesRoute(router);
 
-  importTimelinesRoute(router, config, security);
-  exportTimelinesRoute(router, config, security);
-  getDraftTimelinesRoute(router, config, security);
-  getTimelineRoute(router, config, security);
-  resolveTimelineRoute(router, config, security);
-  getTimelinesRoute(router, config, security);
-  cleanDraftTimelinesRoute(router, config, security);
-  deleteTimelinesRoute(router, config, security);
-  persistFavoriteRoute(router, config, security);
-  copyTimelineRoute(router, config, security);
+  importTimelinesRoute(router, config);
+  exportTimelinesRoute(router, config);
+  getDraftTimelinesRoute(router);
+  getTimelineRoute(router);
+  resolveTimelineRoute(router);
+  getTimelinesRoute(router);
+  cleanDraftTimelinesRoute(router);
+  deleteTimelinesRoute(router);
+  persistFavoriteRoute(router);
+  copyTimelineRoute(router);
 
-  installPrepackedTimelinesRoute(router, config, security);
+  installPrepackedTimelinesRoute(router, config);
 
-  persistNoteRoute(router, config, security);
-  deleteNoteRoute(router, config, security);
-  persistPinnedEventRoute(router, config, security);
+  persistNoteRoute(router);
+  deleteNoteRoute(router);
+  getNotesRoute(router, startServices);
+
+  persistPinnedEventRoute(router);
 }

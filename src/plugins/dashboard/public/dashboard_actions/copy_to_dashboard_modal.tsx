@@ -1,12 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { omit } from 'lodash';
-import React, { useCallback, useState } from 'react';
 
 import {
   EuiButton,
@@ -20,12 +19,15 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { EmbeddablePackageState, PanelNotFoundError } from '@kbn/embeddable-plugin/public';
+import { apiHasSnapshottableState } from '@kbn/presentation-containers/interfaces/serialized_state';
 import { LazyDashboardPicker, withSuspense } from '@kbn/presentation-util-plugin/public';
-
-import { createDashboardEditUrl, CREATE_NEW_DASHBOARD_URL } from '../dashboard_constants';
-import { pluginServices } from '../services/plugin_services';
-import { CopyToDashboardAPI } from './copy_to_dashboard_action';
+import { omit } from 'lodash';
+import React, { useCallback, useMemo, useState } from 'react';
+import { CREATE_NEW_DASHBOARD_URL, createDashboardEditUrl } from '../dashboard_constants';
+import { embeddableService } from '../services/kibana_services';
+import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { dashboardCopyToDashboardActionStrings } from './_dashboard_actions_strings';
+import { CopyToDashboardAPI } from './copy_to_dashboard_action';
 
 interface CopyToDashboardModalProps {
   api: CopyToDashboardAPI;
@@ -35,11 +37,11 @@ interface CopyToDashboardModalProps {
 const DashboardPicker = withSuspense(LazyDashboardPicker);
 
 export function CopyToDashboardModal({ api, closeModal }: CopyToDashboardModalProps) {
-  const {
-    embeddable: { getStateTransfer },
-    dashboardCapabilities: { createNew: canCreateNew, showWriteControls: canEditExisting },
-  } = pluginServices.getServices();
-  const stateTransfer = getStateTransfer();
+  const stateTransfer = useMemo(() => embeddableService.getStateTransfer(), []);
+  const { createNew: canCreateNew, showWriteControls: canEditExisting } = useMemo(
+    () => getDashboardCapabilities(),
+    []
+  );
 
   const [dashboardOption, setDashboardOption] = useState<'new' | 'existing'>('existing');
   const [selectedDashboard, setSelectedDashboard] = useState<{ id: string; name: string } | null>(
@@ -51,14 +53,15 @@ export function CopyToDashboardModal({ api, closeModal }: CopyToDashboardModalPr
   const onSubmit = useCallback(async () => {
     const dashboard = api.parentApi;
     const panelToCopy = await dashboard.getDashboardPanelFromId(api.uuid);
+    const runtimeSnapshot = apiHasSnapshottableState(api) ? api.snapshotRuntimeState() : undefined;
 
-    if (!panelToCopy) {
+    if (!panelToCopy && !runtimeSnapshot) {
       throw new PanelNotFoundError();
     }
 
     const state: EmbeddablePackageState = {
       type: panelToCopy.type,
-      input: {
+      input: runtimeSnapshot ?? {
         ...omit(panelToCopy.explicitInput, 'id'),
       },
       size: {

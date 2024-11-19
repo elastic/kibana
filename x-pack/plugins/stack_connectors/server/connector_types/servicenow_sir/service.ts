@@ -28,6 +28,7 @@ export const createExternalService: ServiceFactory<ExternalServiceSIR> = ({
   configurationUtilities,
   serviceConfig,
   axiosInstance,
+  connectorUsageCollector,
 }): ExternalServiceSIR => {
   const snService = createExternalServiceCommon({
     credentials,
@@ -35,10 +36,11 @@ export const createExternalService: ServiceFactory<ExternalServiceSIR> = ({
     configurationUtilities,
     serviceConfig,
     axiosInstance,
+    connectorUsageCollector,
   });
 
   const _addObservable = async (data: Observable | Observable[], url: string) => {
-    snService.checkIfApplicationIsInstalled();
+    await snService.checkIfApplicationIsInstalled();
 
     const res = await request({
       axios: axiosInstance,
@@ -47,6 +49,7 @@ export const createExternalService: ServiceFactory<ExternalServiceSIR> = ({
       method: 'post',
       data,
       configurationUtilities,
+      connectorUsageCollector,
     });
 
     snService.checkInstance(res);

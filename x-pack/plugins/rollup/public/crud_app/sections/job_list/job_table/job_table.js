@@ -305,7 +305,6 @@ export class JobTable extends Component {
         <EuiTableRow key={`${id}-row`} data-test-subj="jobTableRow">
           <EuiTableRowCellCheckbox key={`checkbox-${id}`}>
             <EuiCheckbox
-              type="inList"
               id={`checkboxSelectIndex-${id}`}
               checked={this.isItemSelected(id)}
               onChange={() => {
@@ -393,7 +392,6 @@ export class JobTable extends Component {
                   id="selectAllJobsCheckbox"
                   checked={this.areAllItemsSelected()}
                   onChange={this.toggleAll}
-                  type="inList"
                   aria-label={i18n.translate('xpack.rollupJobs.jobTable.selectAllRows', {
                     defaultMessage: 'Select all rows',
                   })}

@@ -90,8 +90,13 @@ export const permissionsPolicyViolationReportSchema = schema.object(
       {
         /**
          * The string identifying the policy-controlled feature whose policy has been violated. This string can be used for grouping and counting related reports.
+         * Spec mentions featureId, however the report that is sent from Chrome has policyId. This is to handle both cases.
          */
-        featureId: schema.string(),
+        policyId: schema.maybe(schema.string()),
+        /**
+         * The string identifying the policy-controlled feature whose policy has been violated. This string can be used for grouping and counting related reports.
+         */
+        featureId: schema.maybe(schema.string()),
         /**
          * If known, the file where the violation occured, or null otherwise.
          */
@@ -130,6 +135,13 @@ export function defineRecordViolations({ router, analyticsService }: RouteDefini
   router.post(
     {
       path: '/internal/security/analytics/_record_violations',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is used by browsers to report CSP and Permission Policy violations. These requests are sent without authentication per the browser spec.',
+        },
+      },
       validate: {
         /**
          * Chrome supports CSP3 spec and sends an array of reports. Safari only sends a single
@@ -140,6 +152,7 @@ export function defineRecordViolations({ router, analyticsService }: RouteDefini
             schema.oneOf([cspViolationReportSchema, permissionsPolicyViolationReportSchema])
           ),
           cspViolationReportSchema,
+          permissionsPolicyViolationReportSchema,
         ]),
       },
       options: {
@@ -155,7 +168,7 @@ export function defineRecordViolations({ router, analyticsService }: RouteDefini
          * This endpoint is called by the browser in the background so `kbn-xsrf` header is not sent.
          */
         xsrfRequired: false,
-        access: 'internal',
+        access: 'public',
         body: {
           /**
            * Both `application/reports+json` (CSP3 spec) and `application/csp-report` (Safari) are

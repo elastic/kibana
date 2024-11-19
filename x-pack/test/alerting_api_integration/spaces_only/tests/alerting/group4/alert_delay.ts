@@ -22,7 +22,8 @@ export default function createAlertDelayTests({ getService }: FtrProviderContext
   const ACTIVE_PATH = 'alertInstances.instance.meta.activeCount';
   const RECOVERED_PATH = 'alertRecoveredInstances.instance.meta.activeCount';
 
-  describe('Alert Delay', () => {
+  describe('Alert Delay', function () {
+    this.tags('skipFIPS');
     let actionId: string;
     const objectRemover = new ObjectRemover(supertestWithoutAuth);
 
@@ -43,7 +44,7 @@ export default function createAlertDelayTests({ getService }: FtrProviderContext
         instance: [true, true, true, false, true],
       };
 
-      const ruleId = await createRule(actionId, pattern, 20);
+      const ruleId = await createRule(actionId, pattern, 1);
       objectRemover.add(space.id, ruleId, 'rule', 'alerting');
 
       let state = await getAlertState(start, ruleId);

@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import apm from 'elastic-apm-node';
 import { Observable, fromEventPattern, lastValueFrom, of, throwError } from 'rxjs';
-import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
+import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs';
 import { Writable } from 'stream';
 
 import type { LicenseType } from '@kbn/licensing-plugin/server';
@@ -19,7 +20,6 @@ import {
   LICENSE_TYPE_GOLD,
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_TRIAL,
-  REPORTING_TRANSACTION_TYPE,
 } from '@kbn/reporting-common';
 import { TaskInstanceFields, TaskRunResult } from '@kbn/reporting-common/types';
 import {
@@ -27,7 +27,7 @@ import {
   PDF_JOB_TYPE,
   TaskPayloadPDF,
 } from '@kbn/reporting-export-types-pdf-common';
-import { ExportType, decryptJobHeaders } from '@kbn/reporting-server';
+import { ExportType, REPORTING_TRANSACTION_TYPE, decryptJobHeaders } from '@kbn/reporting-server';
 
 import { getCustomLogo } from './get_custom_logo';
 import { getFullUrls } from './get_full_urls';

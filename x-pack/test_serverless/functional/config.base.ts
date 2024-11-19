@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { resolve } from 'path';
-
 import { FtrConfigProviderContext } from '@kbn/test';
-
+import { resolve } from 'path';
 import { pageObjects } from './page_objects';
 import { services } from './services';
 import type { CreateTestConfigOptions } from '../shared/types';
@@ -26,6 +24,10 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         ...svlSharedConfig.get('esTestCluster'),
         serverArgs: [
           ...svlSharedConfig.get('esTestCluster.serverArgs'),
+          // custom native roles are enabled only for search and security projects
+          ...(options.serverlessProject !== 'oblt'
+            ? ['xpack.security.authc.native_roles.enabled=true']
+            : []),
           ...(options.esServerArgs ?? []),
         ],
       },
@@ -34,11 +36,15 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         serverArgs: [
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           `--serverless=${options.serverlessProject}`,
+          // Ensures the existing E2E tests are backwards compatible with the old rule create flyout
+          // Remove this experiment once all of the migration has been completed
+          `--xpack.trigger_actions_ui.enableExperimental=${JSON.stringify([
+            'isUsingRuleCreateFlyout',
+          ])}`,
           ...(options.kbnServerArgs ?? []),
         ],
       },
       testFiles: options.testFiles,
-
       uiSettings: {
         defaults: {
           'accessibility:disableAnimations': true,
@@ -62,6 +68,9 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         },
         observabilityLogsExplorer: {
           pathname: '/app/observability-logs-explorer',
+        },
+        observabilityOnboarding: {
+          pathname: '/app/observabilityOnboarding',
         },
         management: {
           pathname: '/app/management',
@@ -110,10 +119,20 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         maintenanceWindows: {
           pathname: '/app/management/insightsAndAlerting/maintenanceWindows',
         },
+        fleet: {
+          pathname: '/app/fleet',
+        },
+        integrations: {
+          pathname: '/app/integrations',
+        },
+        ...(options.apps ?? {}),
       },
       // choose where screenshots should be saved
       screenshots: {
         directory: resolve(__dirname, 'screenshots'),
+      },
+      failureDebugging: {
+        htmlDirectory: resolve(__dirname, 'failure_debug', 'html'),
       },
       junit: options.junit,
       suiteTags: options.suiteTags,

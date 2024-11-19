@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import { IUiSettingsClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { createMaintenanceWindow } from '../application/maintenance_window/methods/create/create_maintenance_window';
 import type { CreateMaintenanceWindowParams } from '../application/maintenance_window/methods/create/types';
@@ -13,7 +13,10 @@ import type { GetMaintenanceWindowParams } from '../application/maintenance_wind
 import { updateMaintenanceWindow } from '../application/maintenance_window/methods/update/update_maintenance_window';
 import type { UpdateMaintenanceWindowParams } from '../application/maintenance_window/methods/update/types';
 import { findMaintenanceWindows } from '../application/maintenance_window/methods/find/find_maintenance_windows';
-import type { FindMaintenanceWindowsResult } from '../application/maintenance_window/methods/find/types';
+import type {
+  FindMaintenanceWindowsResult,
+  FindMaintenanceWindowsParams,
+} from '../application/maintenance_window/methods/find/types';
 import { deleteMaintenanceWindow } from '../application/maintenance_window/methods/delete/delete_maintenance_window';
 import type { DeleteMaintenanceWindowParams } from '../application/maintenance_window/methods/delete/types';
 import { archiveMaintenanceWindow } from '../application/maintenance_window/methods/archive/archive_maintenance_window';
@@ -33,6 +36,7 @@ import {
 import type { MaintenanceWindow } from '../application/maintenance_window/types';
 
 export interface MaintenanceWindowClientConstructorOptions {
+  readonly uiSettings: IUiSettingsClient;
   readonly logger: Logger;
   readonly savedObjectsClient: SavedObjectsClientContract;
   readonly getUserName: () => Promise<string | null>;
@@ -52,6 +56,7 @@ export class MaintenanceWindowClient {
       logger: this.logger,
       savedObjectsClient: this.savedObjectsClient,
       getModificationMetadata: this.getModificationMetadata.bind(this),
+      uiSettings: options.uiSettings,
     };
   }
 
@@ -73,7 +78,8 @@ export class MaintenanceWindowClient {
     getMaintenanceWindow(this.context, params);
   public update = (params: UpdateMaintenanceWindowParams): Promise<MaintenanceWindow> =>
     updateMaintenanceWindow(this.context, params);
-  public find = (): Promise<FindMaintenanceWindowsResult> => findMaintenanceWindows(this.context);
+  public find = (params?: FindMaintenanceWindowsParams): Promise<FindMaintenanceWindowsResult> =>
+    findMaintenanceWindows(this.context, params);
   public delete = (params: DeleteMaintenanceWindowParams): Promise<{}> =>
     deleteMaintenanceWindow(this.context, params);
   public archive = (params: ArchiveMaintenanceWindowParams): Promise<MaintenanceWindow> =>
@@ -83,6 +89,6 @@ export class MaintenanceWindowClient {
   public bulkGet = (
     params: BulkGetMaintenanceWindowsParams
   ): Promise<BulkGetMaintenanceWindowsResult> => bulkGetMaintenanceWindows(this.context, params);
-  public getActiveMaintenanceWindows = (): Promise<MaintenanceWindow[]> =>
-    getActiveMaintenanceWindows(this.context);
+  public getActiveMaintenanceWindows = (cacheIntervalMs?: number): Promise<MaintenanceWindow[]> =>
+    getActiveMaintenanceWindows(this.context, cacheIntervalMs);
 }

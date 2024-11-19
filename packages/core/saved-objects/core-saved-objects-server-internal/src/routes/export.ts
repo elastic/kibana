@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { schema } from '@kbn/config-schema';
@@ -143,6 +144,13 @@ export const registerExportRoute = (
   router.post(
     {
       path: '/_export',
+      options: {
+        summary: `Export saved objects`,
+        tags: ['oas-tag:saved objects'],
+        access: 'public',
+        description:
+          'Retrieve sets of saved objects that you want to import into Kibana. You must include `type` or `objects` in the request body.  \nExported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.  \nNOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.',
+      },
       validate: {
         body: schema.object({
           type: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
@@ -164,20 +172,20 @@ export const registerExportRoute = (
         }),
       },
     },
-    catchAndReturnBoomErrors(async (context, req, res) => {
-      const cleaned = cleanOptions(req.body);
+    catchAndReturnBoomErrors(async (context, request, response) => {
+      const cleaned = cleanOptions(request.body);
       const { typeRegistry, getExporter, getClient } = (await context.core).savedObjects;
       const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((t) => t.name);
 
       let options: EitherExportOptions;
       try {
         options = validateOptions(cleaned, {
-          request: req,
+          request,
           exportSizeLimit: maxImportExportSize,
           supportedTypes,
         });
       } catch (e) {
-        return res.badRequest({
+        return response.badRequest({
           body: e,
         });
       }
@@ -191,7 +199,11 @@ export const registerExportRoute = (
 
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient
-        .incrementSavedObjectsExport({ request: req, types: cleaned.types, supportedTypes })
+        .incrementSavedObjectsExport({
+          request,
+          types: cleaned.types ?? [],
+          supportedTypes,
+        })
         .catch(() => {});
 
       try {
@@ -207,7 +219,7 @@ export const registerExportRoute = (
           createConcatStream([]),
         ]);
 
-        return res.ok({
+        return response.ok({
           body: docsToExport.join('\n'),
           headers: {
             'Content-Disposition': `attachment; filename="export.ndjson"`,
@@ -216,7 +228,7 @@ export const registerExportRoute = (
         });
       } catch (e) {
         if (e instanceof SavedObjectsExportError) {
-          return res.badRequest({
+          return response.badRequest({
             body: {
               message: e.message,
               attributes: e.attributes,

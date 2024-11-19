@@ -9,13 +9,13 @@ import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { TimelineModalHeader } from '.';
 import { render } from '@testing-library/react';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useCreateTimeline } from '../../../hooks/use_create_timeline';
 import { useInspect } from '../../../../common/components/inspect/use_inspect';
 import { useKibana } from '../../../../common/lib/kibana';
 import { timelineActions } from '../../../store';
 
-jest.mock('../../../../common/containers/sourcerer');
+jest.mock('../../../../sourcerer/containers');
 jest.mock('../../../hooks/use_create_timeline');
 jest.mock('../../../../common/components/inspect/use_inspect');
 jest.mock('../../../../common/lib/kibana');
@@ -41,10 +41,13 @@ jest.mock('react-redux', () => {
 });
 
 const timelineId = 'timeline-1';
+const mockRef = {
+  current: null,
+};
 const renderTimelineModalHeader = () =>
   render(
     <TestProviders>
-      <TimelineModalHeader timelineId={timelineId} />
+      <TimelineModalHeader timelineId={timelineId} openToggleRef={mockRef} />
     </TestProviders>
   );
 
@@ -56,6 +59,7 @@ describe('TimelineModalHeader', () => {
     (useSourcererDataView as jest.Mock).mockReturnValue({
       browserFields: {},
       indexPattern: { fields: [], title: '' },
+      sourcererDataView: {},
     });
 
     const { getByTestId, getByText } = renderTimelineModalHeader();
@@ -75,6 +79,7 @@ describe('TimelineModalHeader', () => {
     (useSourcererDataView as jest.Mock).mockReturnValue({
       browserFields: {},
       indexPattern: { fields: [], title: '' },
+      sourcererDataView: {},
     });
     (useKibana as jest.Mock).mockReturnValue({
       services: {
@@ -104,6 +109,7 @@ describe('TimelineModalHeader', () => {
     (useSourcererDataView as jest.Mock).mockReturnValue({
       browserFields: {},
       indexPattern: { fields: [], title: '' },
+      sourcererDataView: {},
     });
 
     const spy = jest.spyOn(timelineActions, 'showTimeline');

@@ -15,6 +15,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./stats'));
     loadTestFile(require.resolve('./data_streams'));
     loadTestFile(require.resolve('./templates'));
+    loadTestFile(require.resolve('./inference_endpoints'));
     loadTestFile(require.resolve('./component_templates'));
     loadTestFile(require.resolve('./cluster_nodes'));
     loadTestFile(require.resolve('./index_details'));

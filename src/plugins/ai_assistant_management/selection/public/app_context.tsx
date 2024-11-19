@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { createContext, useContext } from 'react';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import type { CoreStart } from '@kbn/core/public';
+import type { BuildFlavor } from '@kbn/config';
 import type { StartDependencies } from './plugin';
 
 interface ContextValue extends StartDependencies {
@@ -16,6 +18,8 @@ interface ContextValue extends StartDependencies {
 
   capabilities: CoreStart['application']['capabilities'];
   navigateToApp: CoreStart['application']['navigateToApp'];
+  kibanaBranch: string;
+  buildFlavor: BuildFlavor;
 }
 
 const AppContext = createContext<ContextValue>(null as any);

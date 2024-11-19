@@ -7,10 +7,10 @@
 import { AggregationType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import expect from '@kbn/expect';
+import { waitForActiveApmAlert } from '../../alerts/helpers/wait_for_active_apm_alerts';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { createApmRule } from '../../alerts/helpers/alerting_api_helper';
 import { cleanupRuleAndAlertState } from '../../alerts/helpers/cleanup_rule_and_alert_state';
-import { waitForActiveApmAlert } from '../../alerts/helpers/wait_for_active_apm_alerts';
 import {
   createServiceGroupApi,
   deleteAllServiceGroups,
@@ -22,7 +22,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
   const supertest = getService('supertest');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
   const es = getService('es');
   const log = getService('log');
   const start = Date.now() - 24 * 60 * 60 * 1000;
@@ -45,13 +45,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   }
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177655
   registry.when('Service group counts', { config: 'basic', archives: [] }, () => {
     let synthbeansServiceGroupId: string;
     let opbeansServiceGroupId: string;
     before(async () => {
       const [, { body: synthbeansServiceGroup }, { body: opbeansServiceGroup }] = await Promise.all(
         [
-          generateData({ start, end, synthtraceEsClient }),
+          generateData({ start, end, apmSynthtraceEsClient }),
           createServiceGroupApi({
             apmApiClient,
             groupName: 'synthbeans',
@@ -70,15 +71,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     after(async () => {
       await deleteAllServiceGroups(apmApiClient);
-      await synthtraceEsClient.clean();
-    });
-
-    it('returns the correct number of services', async () => {
-      const response = await getServiceGroupCounts(apmApiClient);
-      expect(response.status).to.be(200);
-      expect(Object.keys(response.body).length).to.be(2);
-      expect(response.body[synthbeansServiceGroupId]).to.have.property('services', 2);
-      expect(response.body[opbeansServiceGroupId]).to.have.property('services', 1);
+      await apmSynthtraceEsClient.clean();
     });
 
     describe('with alerts', () => {

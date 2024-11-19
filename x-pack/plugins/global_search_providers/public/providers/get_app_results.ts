@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import levenshtein from 'js-levenshtein';
 import { PublicAppInfo, PublicAppDeepLinkInfo, AppCategory } from '@kbn/core/public';
+import { distance } from 'fastest-levenshtein';
 import { GlobalSearchProviderResult } from '@kbn/global-search-plugin/public';
 
 /** Type used internally to represent an application unrolled into its separate deepLinks */
@@ -33,7 +33,7 @@ export const getAppResults = (
       .flatMap((app) =>
         term.length > 0
           ? flattenDeepLinks(app)
-          : app.searchable
+          : app.visibleIn.includes('globalSearch')
           ? [
               {
                 id: app.id,
@@ -80,10 +80,10 @@ const scoreAppByTerms = (term: string, title: string): number => {
     return 75;
   }
   const length = Math.max(term.length, title.length);
-  const distance = levenshtein(term, title);
+  const dist = distance(term, title);
 
   // maximum lev distance is length, we compute the match ratio (lower distance is better)
-  const ratio = Math.floor((1 - distance / length) * 100);
+  const ratio = Math.floor((1 - dist / length) * 100);
   if (ratio >= 60) {
     return ratio;
   }
@@ -122,7 +122,7 @@ export const appToResult = (appLink: AppLink, score: number): GlobalSearchProvid
 const flattenDeepLinks = (app: PublicAppInfo, deepLink?: PublicAppDeepLinkInfo): AppLink[] => {
   if (!deepLink) {
     return [
-      ...(app.searchable
+      ...(app.visibleIn.includes('globalSearch')
         ? [
             {
               id: app.id,
@@ -137,7 +137,7 @@ const flattenDeepLinks = (app: PublicAppInfo, deepLink?: PublicAppDeepLinkInfo):
     ];
   }
   return [
-    ...(deepLink.path && deepLink.searchable
+    ...(deepLink.path && deepLink.visibleIn.includes('globalSearch')
       ? [
           {
             ...deepLink,

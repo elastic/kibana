@@ -7,7 +7,7 @@
 
 import type { UserActionFindResponse } from '../../../common/types/api';
 import { UserActionFindRequestRt, UserActionFindResponseRt } from '../../../common/types/api';
-import { decodeWithExcessOrThrow } from '../../../common/api';
+import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 import type { CasesClientArgs } from '../types';
 import type { UserActionFind } from './types';
 import { Operations } from '../../authorization';
@@ -15,7 +15,6 @@ import { formatSavedObjects } from './utils';
 import { createCaseError } from '../../common/error';
 import { asArray } from '../../common/utils';
 import type { CasesClient } from '../client';
-import { decodeOrThrow } from '../../../common/api/runtime_types';
 
 export const find = async (
   { caseId, params }: UserActionFind,

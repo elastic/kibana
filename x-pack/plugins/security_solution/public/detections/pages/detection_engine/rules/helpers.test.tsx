@@ -36,6 +36,15 @@ import type {
   ActionsStepRule,
 } from './types';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
+import {
+  ALERT_SUPPRESSION_DURATION_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_UNIT_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_VALUE_FIELD_NAME,
+  ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
+  ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
+} from '../../../../detection_engine/rule_creation/components/alert_suppression_edit';
+import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../../detection_engine/rule_creation/components/threshold_alert_suppression_edit';
 
 describe('rule helpers', () => {
   moment.suppressDeprecationWarnings = true;
@@ -116,16 +125,16 @@ describe('rule helpers', () => {
           eventCategoryField: undefined,
           tiebreakerField: undefined,
         },
-        groupByFields: ['host.name'],
-        groupByDuration: {
-          value: 5,
-          unit: 'm',
+        [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: ['host.name'],
+        [ALERT_SUPPRESSION_DURATION_FIELD_NAME]: {
+          [ALERT_SUPPRESSION_DURATION_VALUE_FIELD_NAME]: 5,
+          [ALERT_SUPPRESSION_DURATION_UNIT_FIELD_NAME]: 'm',
         },
-        groupByRadioSelection: 'per-rule-execution',
+        [ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME]: 'per-rule-execution',
         newTermsFields: ['host.name'],
         historyWindowSize: '7d',
-        suppressionMissingFields: expect.any(String),
-        enableThresholdSuppression: false,
+        [ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME]: expect.any(String),
+        [THRESHOLD_ALERT_SUPPRESSION_ENABLED]: false,
       };
 
       const aboutRuleStepData: AboutStepRule = {
@@ -146,6 +155,8 @@ describe('rule helpers', () => {
         timestampOverride: 'event.ingested',
         timestampOverrideFallbackDisabled: false,
         investigationFields: [],
+        maxSignals: 100,
+        setup: '# this is some setup documentation',
       };
       const scheduleRuleStepData = { from: '0s', interval: '5m' };
       const ruleActionsStepData = {
@@ -156,7 +167,7 @@ describe('rule helpers', () => {
       const aboutRuleDataDetailsData = {
         note: '# this is some markdown documentation',
         description: '24/7',
-        setup: '',
+        setup: '# this is some setup documentation',
       };
 
       expect(defineRuleData).toEqual(defineRuleStepData);
@@ -195,18 +206,18 @@ describe('rule helpers', () => {
 
   describe('determineDetailsValue', () => {
     test('returns name, description, and note as empty string if detailsView is true', () => {
-      const result: Pick<Rule, 'name' | 'description' | 'note'> = determineDetailsValue(
+      const result: Pick<Rule, 'name' | 'description' | 'note' | 'setup'> = determineDetailsValue(
         mockRuleWithEverything('test-id'),
         true
       );
-      const expected = { name: '', description: '', note: '' };
+      const expected = { name: '', description: '', note: '', setup: '' };
 
       expect(result).toEqual(expected);
     });
 
     test('returns name, description, and note values if detailsView is false', () => {
       const mockedRule = mockRuleWithEverything('test-id');
-      const result: Pick<Rule, 'name' | 'description' | 'note'> = determineDetailsValue(
+      const result: Pick<Rule, 'name' | 'description' | 'note' | 'setup'> = determineDetailsValue(
         mockedRule,
         false
       );
@@ -214,6 +225,7 @@ describe('rule helpers', () => {
         name: mockedRule.name,
         description: mockedRule.description,
         note: mockedRule.note,
+        setup: mockedRule.setup,
       };
 
       expect(result).toEqual(expected);
@@ -222,11 +234,16 @@ describe('rule helpers', () => {
     test('returns note as empty string if property does not exist on rule', () => {
       const mockedRule = mockRuleWithEverything('test-id');
       delete mockedRule.note;
-      const result: Pick<Rule, 'name' | 'description' | 'note'> = determineDetailsValue(
+      const result: Pick<Rule, 'name' | 'description' | 'note' | 'setup'> = determineDetailsValue(
         mockedRule,
         false
       );
-      const expected = { name: mockedRule.name, description: mockedRule.description, note: '' };
+      const expected = {
+        name: mockedRule.name,
+        description: mockedRule.description,
+        note: '',
+        setup: mockedRule.setup,
+      };
 
       expect(result).toEqual(expected);
     });
@@ -286,7 +303,8 @@ describe('rule helpers', () => {
       test('returns default suppress value in suppress strategy is missing', () => {
         const result: DefineStepRule = getDefineStepsData(mockRule('test-id'));
         const expected = expect.objectContaining({
-          suppressionMissingFields: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+          [ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME]:
+            AlertSuppressionMissingFieldsStrategyEnum.suppress,
         });
 
         expect(result).toEqual(expected);
@@ -301,7 +319,8 @@ describe('rule helpers', () => {
           },
         });
         const expected = expect.objectContaining({
-          suppressionMissingFields: AlertSuppressionMissingFieldsStrategyEnum.doNotSuppress,
+          [ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME]:
+            AlertSuppressionMissingFieldsStrategyEnum.doNotSuppress,
         });
 
         expect(result).toEqual(expected);
@@ -418,7 +437,7 @@ describe('rule helpers', () => {
       const aboutRuleDataDetailsData = {
         note: '# this is some markdown documentation',
         description: '24/7',
-        setup: '',
+        setup: '# this is some setup documentation',
       };
 
       expect(result).toEqual(aboutRuleDataDetailsData);
@@ -431,7 +450,7 @@ describe('rule helpers', () => {
       const aboutRuleDetailsData = {
         note: '',
         description: mockRuleWithoutNote.description,
-        setup: '',
+        setup: '# this is some setup documentation',
       };
 
       expect(result).toEqual(aboutRuleDetailsData);

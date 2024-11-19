@@ -6,13 +6,15 @@
  */
 
 import { TermsAggForm } from './terms_form_component';
-import {
-  isPivotAggsConfigWithUiBase,
+import type {
   PivotAggsConfigBase,
   PivotAggsConfigWithUiBase,
+} from '../../../../../../common/pivot_aggs';
+import {
+  isPivotAggsConfigWithUiBase,
   TERMS_AGG_DEFAULT_SIZE,
 } from '../../../../../../common/pivot_aggs';
-import { IPivotAggsConfigTerms } from './types';
+import type { IPivotAggsConfigTerms } from './types';
 
 export function getTermsAggConfig(
   commonConfig: PivotAggsConfigWithUiBase | PivotAggsConfigBase

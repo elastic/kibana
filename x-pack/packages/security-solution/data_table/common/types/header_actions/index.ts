@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { EuiDataGridCellValueElementProps, EuiDataGridColumn } from '@elastic/eui';
+import type { EuiDataGridColumn, EuiDataGridProps } from '@elastic/eui';
 import type { IFieldSubType } from '@kbn/es-query';
 import type { FieldBrowserOptions } from '@kbn/triggers-actions-ui-plugin/public';
-import type { ComponentType, JSXElementConstructor } from 'react';
+import type { ComponentType } from 'react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { BrowserFields } from '@kbn/rule-registry-plugin/common';
-import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
+import { TimelineNonEcsData, BrowserFields } from '@kbn/timelines-plugin/common';
+import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { OnRowSelected } from '../../../components/data_table/types';
 import type { SortColumnTable } from '../data_table';
 import { SetEventsDeleted, SetEventsLoading } from '..';
@@ -42,7 +42,7 @@ export type ColumnHeaderOptions = Pick<
   description?: string | null;
   esTypes?: string[];
   example?: string | number | null;
-  format?: string;
+  format?: SerializedFieldFormat;
   linkField?: string;
   placeholder?: string;
   subType?: IFieldSubType;
@@ -66,16 +66,7 @@ export interface HeaderActionProps {
 
 export type HeaderCellRender = ComponentType | ComponentType<HeaderActionProps>;
 
-type GenericActionRowCellRenderProps = Pick<
-  EuiDataGridCellValueElementProps,
-  'rowIndex' | 'columnId'
->;
-
-export type RowCellRender =
-  | JSXElementConstructor<GenericActionRowCellRenderProps>
-  | ((props: GenericActionRowCellRenderProps) => JSX.Element)
-  | JSXElementConstructor<ActionProps>
-  | ((props: ActionProps) => JSX.Element);
+export type RowCellRender = EuiDataGridProps['renderCellValue'];
 
 export interface ActionProps {
   action?: RowCellRender;

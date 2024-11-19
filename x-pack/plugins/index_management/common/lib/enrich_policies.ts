@@ -6,7 +6,7 @@
  */
 
 import type { EnrichSummary, EnrichPolicyType } from '@elastic/elasticsearch/lib/api/types';
-import type { SerializedEnrichPolicy } from '../types';
+import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types';
 
 export const getPolicyType = (policy: EnrichSummary): EnrichPolicyType => {
   if (policy.config.match) {

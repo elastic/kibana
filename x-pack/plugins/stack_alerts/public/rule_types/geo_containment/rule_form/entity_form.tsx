@@ -113,7 +113,7 @@ export const EntityForm = (props: Props) => {
 
     if (dataViewNotFound) {
       return i18n.translate('xpack.stackAlerts.geoContainment.dataViewNotFound', {
-        defaultMessage: `Unable to find data view '{id}'`,
+        defaultMessage: `Unable to find data view ''{id}''`,
         values: { id: props.ruleParams.indexId },
       });
     }
@@ -146,6 +146,7 @@ export const EntityForm = (props: Props) => {
           label={i18n.translate('xpack.stackAlerts.geoContainment.dataViewLabel', {
             defaultMessage: 'Data view',
           })}
+          data-test-subj="entitiesDataView"
         >
           <DataViewSelect
             dataViewId={props.ruleParams.indexId}

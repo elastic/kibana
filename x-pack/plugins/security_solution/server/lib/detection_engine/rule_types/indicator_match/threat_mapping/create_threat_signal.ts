@@ -54,6 +54,7 @@ export const createThreatSignal = async ({
   threatIndexFields,
   sortOrder = 'desc',
   isAlertSuppressionActive,
+  experimentalFeatures,
 }: CreateThreatSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatFilter = buildThreatMappingFilter({
     threatMapping,
@@ -80,6 +81,7 @@ export const createThreatSignal = async ({
       index: inputIndex,
       exceptionFilter,
       fields: inputIndexFields,
+      loadFields: true,
     });
 
     ruleExecutionLogger.debug(
@@ -132,6 +134,7 @@ export const createThreatSignal = async ({
         alertTimestampOverride: runOpts.alertTimestampOverride,
         alertWithSuppression: runOpts.alertWithSuppression,
         alertSuppression: completeRule.ruleParams.alertSuppression,
+        experimentalFeatures,
       });
     } else {
       result = await searchAfterAndBulkCreate(searchAfterBulkCreateParams);

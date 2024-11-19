@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -117,6 +118,7 @@ export const guideCards: GuideCardConstants[] = [
     }),
     navigateTo: {
       appId: 'observabilityOnboarding',
+      path: '/?category=logs',
     },
     telemetryId: 'onboarding--observability--logs',
     order: 2,
@@ -147,8 +149,8 @@ export const guideCards: GuideCardConstants[] = [
       defaultMessage: 'Monitor my host metrics',
     }),
     navigateTo: {
-      appId: 'integrations',
-      path: '/browse/os_system',
+      appId: 'observabilityOnboarding',
+      path: '/?category=infra',
     },
     telemetryId: 'onboarding--observability--hosts',
     order: 8,
@@ -162,7 +164,10 @@ export const guideCards: GuideCardConstants[] = [
         defaultMessage: 'Monitor Kubernetes clusters',
       }
     ),
-    guideId: 'kubernetes',
+    navigateTo: {
+      appId: 'observabilityOnboarding',
+      path: '/kubernetes',
+    },
     telemetryId: 'onboarding--observability--kubernetes',
     order: 11,
   },

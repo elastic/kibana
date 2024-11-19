@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -119,7 +120,7 @@ describe('AppRouter', () => {
 
     expect(app1.mounter.mount).toHaveBeenCalled();
     expect(dom?.html()).toMatchInlineSnapshot(`
-      "<span class=\\"euiLoadingElastic appContainer__loading css-1gqpwx6-euiLoadingElastic\\" role=\\"progressbar\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span><div class=\\"kbnAppWrapper\\" aria-busy=\\"false\\"><div>
+      "<span class=\\"euiLoadingElastic appContainer__loading css-dq711w-euiLoadingElastic\\" role=\\"progressbar\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span><div class=\\"kbnAppWrapper\\" aria-busy=\\"false\\"><div>
       basename: /app/app1
       html: <span>App 1</span>
       </div></div>"
@@ -131,7 +132,7 @@ describe('AppRouter', () => {
     expect(app1Unmount).toHaveBeenCalled();
     expect(app2.mounter.mount).toHaveBeenCalled();
     expect(dom?.html()).toMatchInlineSnapshot(`
-      "<span class=\\"euiLoadingElastic appContainer__loading css-1gqpwx6-euiLoadingElastic\\" role=\\"progressbar\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span><div class=\\"kbnAppWrapper\\" aria-busy=\\"false\\"><div>
+      "<span class=\\"euiLoadingElastic appContainer__loading css-dq711w-euiLoadingElastic\\" role=\\"progressbar\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span><div class=\\"kbnAppWrapper\\" aria-busy=\\"false\\"><div>
       basename: /app/app2
       html: <div>App 2</div>
       </div></div>"
@@ -145,7 +146,7 @@ describe('AppRouter', () => {
 
     expect(standardApp.mounter.mount).toHaveBeenCalled();
     expect(dom?.html()).toMatchInlineSnapshot(`
-      "<span class=\\"euiLoadingElastic appContainer__loading css-1gqpwx6-euiLoadingElastic\\" role=\\"progressbar\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span><div class=\\"kbnAppWrapper\\" aria-busy=\\"false\\"><div>
+      "<span class=\\"euiLoadingElastic appContainer__loading css-dq711w-euiLoadingElastic\\" role=\\"progressbar\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span><div class=\\"kbnAppWrapper\\" aria-busy=\\"false\\"><div>
       basename: /app/app1
       html: <span>App 1</span>
       </div></div>"
@@ -157,7 +158,7 @@ describe('AppRouter', () => {
     expect(standardAppUnmount).toHaveBeenCalled();
     expect(chromelessApp.mounter.mount).toHaveBeenCalled();
     expect(dom?.html()).toMatchInlineSnapshot(`
-      "<span class=\\"euiLoadingElastic appContainer__loading css-1gqpwx6-euiLoadingElastic\\" role=\\"progressbar\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span><div class=\\"kbnAppWrapper\\" aria-busy=\\"false\\"><div>
+      "<span class=\\"euiLoadingElastic appContainer__loading css-dq711w-euiLoadingElastic\\" role=\\"progressbar\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span><div class=\\"kbnAppWrapper\\" aria-busy=\\"false\\"><div>
       basename: /chromeless-a/path
       html: <div>Chromeless A</div>
       </div></div>"
@@ -169,7 +170,7 @@ describe('AppRouter', () => {
     expect(chromelessAppUnmount).toHaveBeenCalled();
     expect(standardApp.mounter.mount).toHaveBeenCalledTimes(2);
     expect(dom?.html()).toMatchInlineSnapshot(`
-      "<span class=\\"euiLoadingElastic appContainer__loading css-1gqpwx6-euiLoadingElastic\\" role=\\"progressbar\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span><div class=\\"kbnAppWrapper\\" aria-busy=\\"false\\"><div>
+      "<span class=\\"euiLoadingElastic appContainer__loading css-dq711w-euiLoadingElastic\\" role=\\"progressbar\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span><div class=\\"kbnAppWrapper\\" aria-busy=\\"false\\"><div>
       basename: /app/app1
       html: <span>App 1</span>
       </div></div>"
@@ -183,7 +184,7 @@ describe('AppRouter', () => {
 
     expect(chromelessAppA.mounter.mount).toHaveBeenCalled();
     expect(dom?.html()).toMatchInlineSnapshot(`
-      "<span class=\\"euiLoadingElastic appContainer__loading css-1gqpwx6-euiLoadingElastic\\" role=\\"progressbar\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span><div class=\\"kbnAppWrapper\\" aria-busy=\\"false\\"><div>
+      "<span class=\\"euiLoadingElastic appContainer__loading css-dq711w-euiLoadingElastic\\" role=\\"progressbar\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span><div class=\\"kbnAppWrapper\\" aria-busy=\\"false\\"><div>
       basename: /chromeless-a/path
       html: <div>Chromeless A</div>
       </div></div>"
@@ -195,7 +196,7 @@ describe('AppRouter', () => {
     expect(chromelessAppAUnmount).toHaveBeenCalled();
     expect(chromelessAppB.mounter.mount).toHaveBeenCalled();
     expect(dom?.html()).toMatchInlineSnapshot(`
-      "<span class=\\"euiLoadingElastic appContainer__loading css-1gqpwx6-euiLoadingElastic\\" role=\\"progressbar\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span><div class=\\"kbnAppWrapper\\" aria-busy=\\"false\\"><div>
+      "<span class=\\"euiLoadingElastic appContainer__loading css-dq711w-euiLoadingElastic\\" role=\\"progressbar\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span><div class=\\"kbnAppWrapper\\" aria-busy=\\"false\\"><div>
       basename: /chromeless-b/path
       html: <div>Chromeless B</div>
       </div></div>"
@@ -207,7 +208,7 @@ describe('AppRouter', () => {
     expect(chromelessAppBUnmount).toHaveBeenCalled();
     expect(chromelessAppA.mounter.mount).toHaveBeenCalledTimes(2);
     expect(dom?.html()).toMatchInlineSnapshot(`
-      "<span class=\\"euiLoadingElastic appContainer__loading css-1gqpwx6-euiLoadingElastic\\" role=\\"progressbar\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span><div class=\\"kbnAppWrapper\\" aria-busy=\\"false\\"><div>
+      "<span class=\\"euiLoadingElastic appContainer__loading css-dq711w-euiLoadingElastic\\" role=\\"progressbar\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span><div class=\\"kbnAppWrapper\\" aria-busy=\\"false\\"><div>
       basename: /chromeless-a/path
       html: <div>Chromeless A</div>
       </div></div>"

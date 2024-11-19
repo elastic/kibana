@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { format } from 'url';
 
-import { buildKibanaPath, getRedirectAppPath } from '@kbn/reporting-common';
+import { buildKibanaPath, REPORTING_REDIRECT_APP } from '@kbn/reporting-common';
 import type { ReportingServerInfo } from '@kbn/reporting-common/types';
 import type { ReportingConfigType } from '.';
 
@@ -24,7 +25,7 @@ export function getFullRedirectAppUrl(
   const path = buildKibanaPath({
     basePath: serverInfo.basePath,
     spaceId,
-    appPath: getRedirectAppPath(),
+    appPath: REPORTING_REDIRECT_APP,
   });
 
   return format({

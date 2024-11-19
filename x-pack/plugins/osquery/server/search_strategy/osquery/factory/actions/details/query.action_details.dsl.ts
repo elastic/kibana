@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ISearchRequestParams } from '@kbn/data-plugin/common';
+import type { ISearchRequestParams } from '@kbn/search-types';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import { isEmpty } from 'lodash';
 import { getQueryFilter } from '../../../../../utils/build_query';

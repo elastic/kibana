@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -14,8 +15,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const monacoEditor = getService('monacoEditor');
-  const PageObjects = getPageObjects([
-    'settings',
+  const dataViews = getService('dataViews');
+  const { common, discover, header, timePicker, unifiedFieldList } = getPageObjects([
     'common',
     'discover',
     'header',
@@ -52,20 +53,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       isChartAvailable: boolean;
       totalHits: string;
     }) {
-      expect(await PageObjects.discover.getHitCount()).to.be(totalHits);
+      expect(await discover.getHitCount()).to.be(totalHits);
 
       if (shouldSidebarBeOpen) {
-        expect(await PageObjects.discover.isSidebarPanelOpen()).to.be(true);
+        expect(await discover.isSidebarPanelOpen()).to.be(true);
         await testSubjects.existOrFail('unifiedFieldListSidebar__toggle-collapse');
         await testSubjects.missingOrFail('dscShowSidebarButton');
       } else {
-        expect(await PageObjects.discover.isSidebarPanelOpen()).to.be(false);
+        expect(await discover.isSidebarPanelOpen()).to.be(false);
         await testSubjects.missingOrFail('unifiedFieldListSidebar__toggle-collapse');
         await testSubjects.existOrFail('dscShowSidebarButton');
       }
 
       if (isChartAvailable) {
-        expect(await PageObjects.discover.isChartVisible()).to.be(shouldHistogramBeOpen);
+        expect(await discover.isChartVisible()).to.be(shouldHistogramBeOpen);
         if (shouldHistogramBeOpen) {
           await testSubjects.existOrFail('dscPanelsToggleInHistogram');
           await testSubjects.existOrFail('dscHideHistogramButton');
@@ -80,7 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.missingOrFail('dscHideHistogramButton');
         }
       } else {
-        expect(await PageObjects.discover.isChartVisible()).to.be(false);
+        expect(await discover.isChartVisible()).to.be(false);
         await testSubjects.missingOrFail('dscPanelsToggleInHistogram');
         await testSubjects.missingOrFail('dscHideHistogramButton');
         await testSubjects.missingOrFail('dscShowHistogramButton');
@@ -108,7 +109,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           totalHits,
         });
 
-        await PageObjects.discover.closeSidebar();
+        await discover.closeSidebar();
 
         await checkSidebarAndHistogram({
           shouldSidebarBeOpen: false,
@@ -117,7 +118,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           totalHits,
         });
 
-        await PageObjects.discover.openSidebar();
+        await discover.openSidebar();
 
         await checkSidebarAndHistogram({
           shouldSidebarBeOpen: true,
@@ -136,7 +137,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             totalHits,
           });
 
-          await PageObjects.discover.closeHistogramPanel();
+          await discover.closeHistogramPanel();
 
           await checkSidebarAndHistogram({
             shouldSidebarBeOpen: true,
@@ -145,7 +146,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             totalHits,
           });
 
-          await PageObjects.discover.openHistogramPanel();
+          await discover.openHistogramPanel();
 
           await checkSidebarAndHistogram({
             shouldSidebarBeOpen: true,
@@ -163,8 +164,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             totalHits,
           });
 
-          await PageObjects.discover.closeSidebar();
-          await PageObjects.discover.closeHistogramPanel();
+          await discover.closeSidebar();
+          await discover.closeHistogramPanel();
 
           await checkSidebarAndHistogram({
             shouldSidebarBeOpen: false,
@@ -173,8 +174,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             totalHits,
           });
 
-          await PageObjects.discover.openSidebar();
-          await PageObjects.discover.openHistogramPanel();
+          await discover.openSidebar();
+          await discover.openHistogramPanel();
 
           await checkSidebarAndHistogram({
             shouldSidebarBeOpen: true,
@@ -188,12 +189,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('time based data view', function () {
       before(async function () {
-        await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+        await timePicker.setDefaultAbsoluteRangeViaUiSettings();
         await kibanaServer.uiSettings.update(defaultSettings);
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
-        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+        await common.navigateToApp('discover');
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
       });
 
       checkPanelsToggle({ isChartAvailable: true, totalHits: '14,004' });
@@ -201,58 +202,67 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('non-time based data view', function () {
       before(async function () {
-        await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+        await timePicker.setDefaultAbsoluteRangeViaUiSettings();
         await kibanaServer.uiSettings.update(defaultSettings);
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.createAdHocDataView('log*', false);
-        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+        await common.navigateToApp('discover');
+        await header.waitUntilLoadingHasFinished();
+        await dataViews.createFromSearchBar({
+          name: 'log*',
+          adHoc: true,
+          hasTimeField: false,
+        });
+        await discover.waitUntilSearchingHasFinished();
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
       });
 
       checkPanelsToggle({ isChartAvailable: false, totalHits: '14,004' });
     });
 
-    describe('text-based with histogram chart', function () {
+    describe('ES|QL with histogram chart', function () {
       before(async function () {
-        await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+        await timePicker.setDefaultAbsoluteRangeViaUiSettings();
         await kibanaServer.uiSettings.update(defaultSettings);
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.selectTextBaseLang();
-        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+        await common.navigateToApp('discover');
+        await header.waitUntilLoadingHasFinished();
+        await discover.selectTextBaseLang();
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
       });
 
       checkPanelsToggle({ isChartAvailable: true, totalHits: '10' });
     });
 
-    describe('text-based with aggs chart', function () {
+    describe('ES|QL with aggs chart', function () {
       before(async function () {
-        await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+        await timePicker.setDefaultAbsoluteRangeViaUiSettings();
         await kibanaServer.uiSettings.update(defaultSettings);
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.selectTextBaseLang();
+        await common.navigateToApp('discover');
+        await header.waitUntilLoadingHasFinished();
+        await discover.selectTextBaseLang();
         await monacoEditor.setCodeEditorValue(
           'from logstash-* | stats avg(bytes) by extension | limit 100'
         );
         await testSubjects.click('querySubmitButton');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+        await header.waitUntilLoadingHasFinished();
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
       });
 
       checkPanelsToggle({ isChartAvailable: true, totalHits: '5' });
     });
 
-    describe('text-based without a time field', function () {
+    describe('ES|QL without a time field', function () {
       before(async function () {
-        await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+        await timePicker.setDefaultAbsoluteRangeViaUiSettings();
         await kibanaServer.uiSettings.update(defaultSettings);
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.createAdHocDataView('log*', false);
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.selectTextBaseLang();
-        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+        await common.navigateToApp('discover');
+        await header.waitUntilLoadingHasFinished();
+        await dataViews.createFromSearchBar({
+          name: 'log*',
+          adHoc: true,
+          hasTimeField: false,
+        });
+        await discover.waitUntilSearchingHasFinished();
+        await discover.selectTextBaseLang();
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
       });
 
       checkPanelsToggle({ isChartAvailable: false, totalHits: '10' });

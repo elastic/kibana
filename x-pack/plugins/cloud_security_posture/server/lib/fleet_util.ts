@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { map, uniq } from 'lodash';
+import { flatMap, uniq } from 'lodash';
+import { KSPM_POLICY_TEMPLATE, CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import type { SavedObjectsClientContract, Logger } from '@kbn/core/server';
 import type {
   AgentPolicyServiceInterface,
@@ -23,8 +24,6 @@ import { CloudSecurityPolicyTemplate, PostureTypes } from '../../common/types_ol
 import {
   SUPPORTED_POLICY_TEMPLATES,
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-  KSPM_POLICY_TEMPLATE,
-  CSPM_POLICY_TEMPLATE,
 } from '../../common/constants';
 import { CSP_FLEET_PACKAGE_KUERY } from '../../common/utils/helpers';
 import {
@@ -82,7 +81,7 @@ export const getCspAgentPolicies = async (
   packagePolicies: PackagePolicy[],
   agentPolicyService: AgentPolicyServiceInterface
 ): Promise<AgentPolicy[]> =>
-  agentPolicyService.getByIds(soClient, uniq(map(packagePolicies, 'policy_id')), {
+  agentPolicyService.getByIds(soClient, uniq(flatMap(packagePolicies, 'policy_ids')), {
     withPackagePolicies: true,
     ignoreMissing: true,
   });

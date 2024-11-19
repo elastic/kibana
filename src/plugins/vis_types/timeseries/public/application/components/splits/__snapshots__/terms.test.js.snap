@@ -5,19 +5,13 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
   <EuiFlexGroup>
     <EuiFlexItem>
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         id="42"
         label={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Group by"
             id="visTypeTimeseries.splits.terms.groupByLabel"
-            values={Object {}}
           />
         }
-        labelType="label"
       >
         <GroupBySelect
           onChange={[Function]}
@@ -46,11 +40,10 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
         }
         indexPattern="kibana_sample_data_flights"
         label={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="By"
             description="This labels a field selector allowing the user to chose 'by' which field to group."
             id="visTypeTimeseries.splits.terms.byLabel"
-            values={Object {}}
           />
         }
         onChange={[Function]}
@@ -71,19 +64,13 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
   <EuiFlexGroup>
     <EuiFlexItem>
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         id="42"
         label={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Include"
             id="visTypeTimeseries.splits.terms.includeLabel"
-            values={Object {}}
           />
         }
-        labelType="label"
       >
         <EuiFieldText
           data-test-subj="groupByInclude"
@@ -94,19 +81,13 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
     </EuiFlexItem>
     <EuiFlexItem>
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         id="42"
         label={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Exclude"
             id="visTypeTimeseries.splits.terms.excludeLabel"
-            values={Object {}}
           />
         }
-        labelType="label"
       >
         <EuiFieldText
           data-test-subj="groupByExclude"
@@ -119,19 +100,13 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
   <EuiFlexGroup>
     <EuiFlexItem>
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         id="42"
         label={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Top"
             id="visTypeTimeseries.splits.terms.topLabel"
-            values={Object {}}
           />
         }
-        labelType="label"
       >
         <EuiFieldNumber
           onChange={[Function]}
@@ -141,19 +116,13 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
     </EuiFlexItem>
     <EuiFlexItem>
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         id="42"
         label={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Order by"
             id="visTypeTimeseries.splits.terms.orderByLabel"
-            values={Object {}}
           />
         }
-        labelType="label"
       >
         <MetricSelect
           additionalOptions={
@@ -194,19 +163,13 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
     </EuiFlexItem>
     <EuiFlexItem>
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         id="42"
         label={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Direction"
             id="visTypeTimeseries.splits.terms.directionLabel"
-            values={Object {}}
           />
         }
-        labelType="label"
       >
         <EuiComboBox
           async={false}
@@ -214,6 +177,7 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
           fullWidth={false}
           isClearable={false}
           onChange={[Function]}
+          optionMatcher={[Function]}
           options={
             Array [
               Object {

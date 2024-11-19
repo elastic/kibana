@@ -17,13 +17,11 @@ import type {
 } from './types';
 import { registerUpsellings } from './upselling';
 import { createServices } from './common/services/create_services';
-import { setupNavigation, startNavigation } from './navigation';
-import { setRoutes } from './pages/routes';
+import { startNavigation } from './navigation';
 import {
   parseExperimentalConfigValue,
   type ExperimentalFeatures,
 } from '../common/experimental_features';
-import { getCloudUrl, getProjectFeaturesUrl } from './navigation/links/util';
 import { setOnboardingSettings } from './onboarding';
 
 export class SecuritySolutionServerlessPlugin
@@ -54,7 +52,8 @@ export class SecuritySolutionServerlessPlugin
       securitySolution.experimentalFeatures
     ).features;
 
-    setupNavigation(core, setupDeps);
+    setupDeps.discover.showInlineTopNav();
+
     return {};
   }
 
@@ -64,24 +63,16 @@ export class SecuritySolutionServerlessPlugin
   ): SecuritySolutionServerlessPluginStart {
     const { securitySolution } = startDeps;
     const { productTypes } = this.config;
-
     const services = createServices(core, startDeps, this.experimentalFeatures);
 
-    registerUpsellings(securitySolution.getUpselling(), productTypes, services);
+    registerUpsellings(productTypes, services);
 
     securitySolution.setComponents({
       DashboardsLandingCallout: getDashboardsLandingCallout(services),
     });
-    securitySolution.setOnboardingPageSettings.setProductTypes(productTypes);
-    securitySolution.setOnboardingPageSettings.setProjectFeaturesUrl(
-      getProjectFeaturesUrl(services.cloud)
-    );
-    securitySolution.setOnboardingPageSettings.setProjectsUrl(
-      getCloudUrl('projects', services.cloud)
-    );
+
     setOnboardingSettings(services);
     startNavigation(services);
-    setRoutes(services);
 
     return {};
   }

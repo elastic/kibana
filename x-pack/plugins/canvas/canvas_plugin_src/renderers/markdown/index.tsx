@@ -7,10 +7,8 @@
 
 import React, { CSSProperties } from 'react';
 import ReactDOM from 'react-dom';
-import { CoreTheme } from '@kbn/core/public';
-import { Observable } from 'rxjs';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import { defaultTheme$ } from '@kbn/presentation-util-plugin/common';
+import { CoreStart } from '@kbn/core/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Markdown } from '@kbn/kibana-react-plugin/public';
 import { StartInitializer } from '../../plugin';
 import { RendererStrings } from '../../../i18n';
@@ -20,7 +18,7 @@ import { RendererFactory } from '../../../types';
 const { markdown: strings } = RendererStrings;
 
 export const getMarkdownRenderer =
-  (theme$: Observable<CoreTheme> = defaultTheme$): RendererFactory<Config> =>
+  (core: CoreStart): RendererFactory<Config> =>
   () => ({
     name: 'markdown',
     displayName: strings.getDisplayName(),
@@ -30,14 +28,14 @@ export const getMarkdownRenderer =
       const fontStyle = config.font ? config.font.spec : {};
 
       ReactDOM.render(
-        <KibanaThemeProvider theme={{ theme$ }}>
+        <KibanaRenderContextProvider {...core}>
           <Markdown
             className="canvasMarkdown"
             style={fontStyle as CSSProperties}
             markdown={config.content}
             openLinksInNewTab={config.openLinksInNewTab}
           />
-        </KibanaThemeProvider>,
+        </KibanaRenderContextProvider>,
         domNode,
         () => handlers.done()
       );
@@ -46,5 +44,5 @@ export const getMarkdownRenderer =
     },
   });
 
-export const markdownFactory: StartInitializer<RendererFactory<Config>> = (core, plugins) =>
-  getMarkdownRenderer(core.theme.theme$);
+export const markdownFactory: StartInitializer<RendererFactory<Config>> = (core, _plugins) =>
+  getMarkdownRenderer(core);

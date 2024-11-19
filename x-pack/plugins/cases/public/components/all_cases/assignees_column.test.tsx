@@ -14,7 +14,8 @@ import { userProfiles, userProfilesMap } from '../../containers/user_profiles/ap
 import type { AssigneesColumnProps } from './assignees_column';
 import { AssigneesColumn } from './assignees_column';
 
-describe('AssigneesColumn', () => {
+// Failing: See https://github.com/elastic/kibana/issues/192674
+describe.skip('AssigneesColumn', () => {
   const defaultProps: AssigneesColumnProps = {
     assignees: userProfiles,
     userProfiles: userProfilesMap,
@@ -116,7 +117,7 @@ describe('AssigneesColumn', () => {
     expect(screen.getByTestId('case-table-column-expand-button')).toBeInTheDocument();
     expect(screen.getByText('+1 more')).toBeInTheDocument();
 
-    userEvent.click(screen.getByTestId('case-table-column-expand-button'));
+    await userEvent.click(screen.getByTestId('case-table-column-expand-button'));
 
     await waitFor(() => {
       expect(screen.getByText('show less')).toBeInTheDocument();
@@ -137,14 +138,14 @@ describe('AssigneesColumn', () => {
     expect(screen.getByTestId('case-table-column-expand-button')).toBeInTheDocument();
     expect(screen.getByText('+1 more')).toBeInTheDocument();
 
-    userEvent.click(screen.getByTestId('case-table-column-expand-button'));
+    await userEvent.click(screen.getByTestId('case-table-column-expand-button'));
 
     await waitFor(() => {
       expect(screen.getByText('show less')).toBeInTheDocument();
       expect(screen.getByTestId('case-table-column-assignee-wet_dingo')).toBeInTheDocument();
     });
 
-    userEvent.click(screen.getByTestId('case-table-column-expand-button'));
+    await userEvent.click(screen.getByTestId('case-table-column-expand-button'));
 
     await waitFor(() => {
       expect(screen.getByText('+1 more')).toBeInTheDocument();

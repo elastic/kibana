@@ -11,9 +11,9 @@
         "label": "DataViewSelectPopover",
         "description": [],
         "signature": [
-          "({ dependencies: { dataViews, dataViewEditor }, metadata, dataView, onSelectDataView, onChangeMetaData, }: React.PropsWithChildren<",
+          "({ dependencies: { dataViews, dataViewEditor }, metadata, dataView, onSelectDataView, onChangeMetaData, }: ",
           "DataViewSelectPopoverProps",
-          ">) => JSX.Element | null"
+          ") => React.JSX.Element | null"
         ],
         "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx",
         "deprecated": false,
@@ -22,14 +22,12 @@
           {
             "parentPluginId": "stackAlerts",
             "id": "def-public.DataViewSelectPopover.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{\n  dependencies: { dataViews, dataViewEditor },\n  metadata = { adHocDataViewList: [], isManagementPage: true },\n  dataView,\n  onSelectDataView,\n  onChangeMetaData,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
-              "DataViewSelectPopoverProps",
-              ">"
+              "DataViewSelectPopoverProps"
             ],
             "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx",
             "deprecated": false,
@@ -406,7 +404,38 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "stackAlerts",
+        "id": "def-common.ES_QUERY_MAX_HITS_PER_EXECUTION",
+        "type": "number",
+        "tags": [],
+        "label": "ES_QUERY_MAX_HITS_PER_EXECUTION",
+        "description": [],
+        "signature": [
+          "10000"
+        ],
+        "path": "x-pack/plugins/stack_alerts/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "stackAlerts",
+        "id": "def-common.ES_QUERY_MAX_HITS_PER_EXECUTION_SERVERLESS",
+        "type": "number",
+        "tags": [],
+        "label": "ES_QUERY_MAX_HITS_PER_EXECUTION_SERVERLESS",
+        "description": [],
+        "signature": [
+          "100"
+        ],
+        "path": "x-pack/plugins/stack_alerts/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [
       {
         "parentPluginId": "stackAlerts",

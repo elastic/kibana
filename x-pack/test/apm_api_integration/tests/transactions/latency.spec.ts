@@ -6,6 +6,7 @@
  */
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
+import { buildQueryFromFilters } from '@kbn/es-query';
 import moment from 'moment';
 import {
   APIClientRequestParamsOf,
@@ -24,7 +25,7 @@ type LatencyChartReturnType =
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const serviceName = 'synth-go';
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
@@ -72,6 +73,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177596
   registry.when(
     'Latency with a basic license when data is loaded',
     { config: 'basic', archives: [] },
@@ -88,7 +90,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .service({ name: serviceName, environment: 'development', agentName: 'go' })
           .instance('instance-b');
 
-        await synthtraceEsClient.index([
+        await apmSynthtraceEsClient.index([
           timerange(start, end)
             .ratePerMinute(GO_PROD_RATE)
             .generator((timestamp) =>
@@ -108,12 +110,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ]);
       });
 
-      after(() => synthtraceEsClient.clean());
+      after(() => apmSynthtraceEsClient.clean());
 
       const expectedLatencyAvgValueMs =
         ((GO_PROD_RATE * GO_PROD_DURATION + GO_DEV_RATE * GO_DEV_DURATION) /
           (GO_PROD_RATE + GO_DEV_RATE)) *
         1000;
+      const expectedLatencyAvgValueProdMs =
+        ((GO_PROD_RATE * GO_PROD_DURATION) / GO_PROD_RATE) * 1000;
+      const expectedLatencyAvgValueDevMs = ((GO_DEV_RATE * GO_DEV_DURATION) / GO_DEV_RATE) * 1000;
 
       describe('average latency type', () => {
         it('returns average duration and timeseries', async () => {
@@ -316,6 +321,122 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             expect(response.currentPeriod.overallAvgDuration).to.be(GO_PROD_DURATION * 1000);
             expect(response.currentPeriod.latencyTimeseries.length).to.be.eql(15);
           });
+        });
+      });
+
+      describe('handles kuery', () => {
+        it('should return the appropriate latency values when a kuery is applied', async () => {
+          const response = await fetchLatencyCharts({
+            query: {
+              latencyAggregationType: LatencyAggregationType.p95,
+              useDurationSummary: false,
+              kuery: 'transaction.name : "GET /api/product/list"',
+            },
+          });
+
+          expect(response.status).to.be(200);
+          const latencyChartReturn = response.body as LatencyChartReturnType;
+
+          expect(latencyChartReturn.currentPeriod.overallAvgDuration).to.be(
+            expectedLatencyAvgValueProdMs
+          );
+          expect(latencyChartReturn.currentPeriod.latencyTimeseries.length).to.be.eql(15);
+        });
+      });
+
+      describe('handles filters', () => {
+        it('should return the appropriate latency values when filters are applied', async () => {
+          const filters = [
+            {
+              meta: {
+                disabled: false,
+                negate: false,
+                alias: null,
+                key: 'transaction.name',
+                params: ['GET /api/product/list'],
+                type: 'phrases',
+              },
+              query: {
+                bool: {
+                  minimum_should_match: 1,
+                  should: {
+                    match_phrase: {
+                      'transaction.name': 'GET /api/product/list',
+                    },
+                  },
+                },
+              },
+            },
+          ];
+          const serializedFilters = JSON.stringify(buildQueryFromFilters(filters, undefined));
+          const response = await fetchLatencyCharts({
+            query: {
+              latencyAggregationType: LatencyAggregationType.p95,
+              useDurationSummary: false,
+              filters: serializedFilters,
+            },
+          });
+
+          expect(response.status).to.be(200);
+          const latencyChartReturn = response.body as LatencyChartReturnType;
+
+          expect(latencyChartReturn.currentPeriod.overallAvgDuration).to.be(
+            expectedLatencyAvgValueProdMs
+          );
+          expect(latencyChartReturn.currentPeriod.latencyTimeseries.length).to.be.eql(15);
+        });
+
+        it('should return the appropriate latency values when negate filters are applied', async () => {
+          const filters = [
+            {
+              meta: {
+                disabled: false,
+                negate: true,
+                alias: null,
+                key: 'transaction.name',
+                params: ['GET /api/product/list'],
+                type: 'phrases',
+              },
+              query: {
+                bool: {
+                  minimum_should_match: 1,
+                  should: {
+                    match_phrase: {
+                      'transaction.name': 'GET /api/product/list',
+                    },
+                  },
+                },
+              },
+            },
+          ];
+          const serializedFilters = JSON.stringify(buildQueryFromFilters(filters, undefined));
+          const response = await fetchLatencyCharts({
+            query: {
+              latencyAggregationType: LatencyAggregationType.p95,
+              useDurationSummary: false,
+              filters: serializedFilters,
+            },
+          });
+
+          expect(response.status).to.be(200);
+          const latencyChartReturn = response.body as LatencyChartReturnType;
+
+          expect(latencyChartReturn.currentPeriod.overallAvgDuration).to.be(
+            expectedLatencyAvgValueDevMs
+          );
+          expect(latencyChartReturn.currentPeriod.latencyTimeseries.length).to.be.eql(15);
+        });
+      });
+
+      describe('handles bad filters request', () => {
+        it('throws bad request error', async () => {
+          try {
+            await fetchLatencyCharts({
+              query: { environment: 'production', filters: '{}}' },
+            });
+          } catch (error) {
+            expect(error.res.status).to.be(400);
+          }
         });
       });
     }

@@ -11,19 +11,23 @@ import { mount } from 'enzyme';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { useHistory, useParams } from 'react-router-dom';
 
-import '../../../common/mock/match_media';
 import '../../../common/mock/formatted_relative';
 import { SecurityPageName } from '../../../app/types';
-import { TimelineType } from '../../../../common/api/timeline';
-
-import { TestProviders, mockOpenTimelineQueryResults } from '../../../common/mock';
+import { TimelineTypeEnum } from '../../../../common/api/timeline';
+import { TimelineId } from '../../../../common/types';
+import {
+  TestProviders,
+  mockOpenTimelineQueryResults,
+  createMockStore,
+  mockGlobalState,
+} from '../../../common/mock';
 
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../pages/timelines_page';
 import { useGetAllTimeline, getAllTimeline } from '../../containers/all';
 
 import { useTimelineStatus } from './use_timeline_status';
 import { NotePreviews } from './note_previews';
-import { OPEN_TIMELINE_CLASS_NAME, queryTimelineById } from './helpers';
+import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
 import { StatefulOpenTimeline } from '.';
 import { TimelineTabsStyle } from './types';
 import type { UseTimelineTypesArgs, UseTimelineTypesResult } from './use_timeline_types';
@@ -45,11 +49,13 @@ jest.mock('react-router-dom', () => {
   };
 });
 
+const mockQueryTimelineById = jest.fn();
+
 jest.mock('./helpers', () => {
   const originalModule = jest.requireActual('./helpers');
   return {
     ...originalModule,
-    queryTimelineById: jest.fn(),
+    useQueryTimelineById: () => mockQueryTimelineById,
   };
 });
 
@@ -101,7 +107,7 @@ describe('StatefulOpenTimeline', () => {
 
   beforeEach(() => {
     (useParams as jest.Mock).mockReturnValue({
-      tabName: TimelineType.default,
+      tabName: TimelineTypeEnum.default,
       pageName: SecurityPageName.timelines,
     });
     useUserPrivilegesMock.mockReturnValue({
@@ -159,35 +165,35 @@ describe('StatefulOpenTimeline', () => {
 
   describe("Template timelines' tab", () => {
     test("should land on correct timelines' tab with url timelines/default", () => {
-      const { result } = renderHook<UseTimelineTypesArgs, UseTimelineTypesResult>(
-        () => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 0 }),
-        {
-          wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
-        }
-      );
+      const { result } = renderHook<
+        React.PropsWithChildren<UseTimelineTypesArgs>,
+        UseTimelineTypesResult
+      >(() => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 0 }), {
+        wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+      });
 
-      expect(result.current.timelineType).toBe(TimelineType.default);
+      expect(result.current.timelineType).toBe(TimelineTypeEnum.default);
     });
 
     test("should land on correct timelines' tab with url timelines/template", () => {
       (useParams as jest.Mock).mockReturnValue({
-        tabName: TimelineType.template,
+        tabName: TimelineTypeEnum.template,
         pageName: SecurityPageName.timelines,
       });
 
-      const { result } = renderHook<UseTimelineTypesArgs, UseTimelineTypesResult>(
-        () => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 0 }),
-        {
-          wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
-        }
-      );
+      const { result } = renderHook<
+        React.PropsWithChildren<UseTimelineTypesArgs>,
+        UseTimelineTypesResult
+      >(() => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 0 }), {
+        wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+      });
 
-      expect(result.current.timelineType).toBe(TimelineType.template);
+      expect(result.current.timelineType).toBe(TimelineTypeEnum.template);
     });
 
     test("should land on correct templates' tab after switching tab", async () => {
       (useParams as jest.Mock).mockReturnValue({
-        tabName: TimelineType.template,
+        tabName: TimelineTypeEnum.template,
         pageName: SecurityPageName.timelines,
       });
 
@@ -203,7 +209,7 @@ describe('StatefulOpenTimeline', () => {
       );
       await waitFor(() => {
         wrapper
-          .find(`[data-test-subj="timeline-${TimelineTabsStyle.tab}-${TimelineType.template}"]`)
+          .find(`[data-test-subj="timeline-${TimelineTabsStyle.tab}-${TimelineTypeEnum.template}"]`)
           .first()
           .simulate('click');
 
@@ -217,14 +223,14 @@ describe('StatefulOpenTimeline', () => {
         pageName: SecurityPageName.case,
       });
 
-      const { result } = renderHook<UseTimelineTypesArgs, UseTimelineTypesResult>(
-        () => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 0 }),
-        {
-          wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
-        }
-      );
+      const { result } = renderHook<
+        React.PropsWithChildren<UseTimelineTypesArgs>,
+        UseTimelineTypesResult
+      >(() => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 0 }), {
+        wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+      });
 
-      expect(result.current.timelineType).toBe(TimelineType.default);
+      expect(result.current.timelineType).toBe(TimelineTypeEnum.default);
     });
 
     test('should not change url after switching filter', async () => {
@@ -246,7 +252,7 @@ describe('StatefulOpenTimeline', () => {
       await waitFor(() => {
         wrapper
           .find(
-            `[data-test-subj="open-timeline-modal-body-${TimelineTabsStyle.filter}-${TimelineType.template}"]`
+            `[data-test-subj="open-timeline-modal-body-${TimelineTabsStyle.filter}-${TimelineTypeEnum.template}"]`
           )
           .first()
           .simulate('click');
@@ -357,7 +363,7 @@ describe('StatefulOpenTimeline', () => {
 
       await waitFor(() => {
         wrapper
-          .find('.euiCheckbox__input')
+          .find('input.euiCheckbox__input')
           .first()
           .simulate('change', { target: { checked: true } });
 
@@ -419,7 +425,7 @@ describe('StatefulOpenTimeline', () => {
 
       await waitFor(() => {
         wrapper
-          .find('.euiCheckbox__input')
+          .find('input.euiCheckbox__input')
           .first()
           .simulate('change', { target: { checked: true } });
 
@@ -485,8 +491,22 @@ describe('StatefulOpenTimeline', () => {
 
   describe('#onToggleShowNotes', () => {
     test('it updates the itemIdToExpandedNotesRowMap state when the user clicks the expand notes button', async () => {
+      const mockStateWithTimeline = {
+        ...mockGlobalState,
+        timeline: {
+          ...mockGlobalState.timeline,
+          timelineById: {
+            ...mockGlobalState.timeline.timelineById,
+            [TimelineId.active]: {
+              ...mockGlobalState.timeline.timelineById[TimelineId.test],
+              noteIds: ['noteId1'],
+              createdBy: 'thisisclearlyagapinourtypes',
+            },
+          },
+        },
+      };
       const wrapper = mount(
-        <TestProviders>
+        <TestProviders store={createMockStore(mockStateWithTimeline)}>
           <StatefulOpenTimeline
             data-test-subj="stateful-timeline"
             isModal={false}
@@ -521,6 +541,7 @@ describe('StatefulOpenTimeline', () => {
                     }))
                   : []
               }
+              timelineId={TimelineId.active}
             />
           ),
         });
@@ -528,8 +549,22 @@ describe('StatefulOpenTimeline', () => {
     });
 
     test('it renders the expanded notes when the expand button is clicked', async () => {
+      const mockStateWithTimeline = {
+        ...mockGlobalState,
+        timeline: {
+          ...mockGlobalState.timeline,
+          timelineById: {
+            ...mockGlobalState.timeline.timelineById,
+            [TimelineId.active]: {
+              ...mockGlobalState.timeline.timelineById[TimelineId.test],
+              noteIds: ['noteId1'],
+              createdBy: 'thisisclearlyagapinourtypes',
+            },
+          },
+        },
+      };
       const wrapper = mount(
-        <TestProviders>
+        <TestProviders store={createMockStore(mockStateWithTimeline)}>
           <StatefulOpenTimeline
             data-test-subj="stateful-timeline"
             isModal={false}
@@ -578,7 +613,7 @@ describe('StatefulOpenTimeline', () => {
       expect(
         wrapper
           .find(
-            `[data-test-subj="open-timeline-modal-body-${TimelineTabsStyle.filter}-${TimelineType.default}"]`
+            `[data-test-subj="open-timeline-modal-body-${TimelineTabsStyle.filter}-${TimelineTypeEnum.default}"]`
           )
           .exists()
       ).toEqual(true);
@@ -602,7 +637,7 @@ describe('StatefulOpenTimeline', () => {
       await waitFor(() => {
         expect(getSelectedItem().length).toEqual(0);
         wrapper
-          .find('.euiCheckbox__input')
+          .find('input.euiCheckbox__input')
           .first()
           .simulate('change', { target: { checked: true } });
         expect(getSelectedItem().length).toEqual(13);
@@ -651,10 +686,10 @@ describe('StatefulOpenTimeline', () => {
         .last()
         .simulate('click');
 
-      expect((queryTimelineById as jest.Mock).mock.calls[0][0].timelineId).toEqual(
+      expect((mockQueryTimelineById as jest.Mock).mock.calls[0][0].timelineId).toEqual(
         mockOpenTimelineQueryResults.timeline[0].savedObjectId
       );
-      expect((queryTimelineById as jest.Mock).mock.calls[0][0].duplicate).toEqual(false);
+      expect((mockQueryTimelineById as jest.Mock).mock.calls[0][0].duplicate).toEqual(false);
     });
   });
 
@@ -675,10 +710,10 @@ describe('StatefulOpenTimeline', () => {
       .simulate('click');
     wrapper.find('button[data-test-subj="open-duplicate"]').first().simulate('click');
 
-    expect((queryTimelineById as jest.Mock).mock.calls[0][0].timelineId).toEqual(
+    expect((mockQueryTimelineById as jest.Mock).mock.calls[0][0].timelineId).toEqual(
       mockOpenTimelineQueryResults.timeline[0].savedObjectId
     );
-    expect((queryTimelineById as jest.Mock).mock.calls[0][0].duplicate).toEqual(true);
+    expect((mockQueryTimelineById as jest.Mock).mock.calls[0][0].duplicate).toEqual(true);
   });
 
   describe('Create rule from timeline', () => {

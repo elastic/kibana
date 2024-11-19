@@ -24,15 +24,15 @@ export {
   FLEET_ENDPOINT_PACKAGE,
   // Saved object type
   AGENT_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE as PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   OUTPUT_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   ASSETS_SAVED_OBJECT_TYPE,
   MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
   UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
   // Fleet server index
-  FLEET_SERVER_SERVERS_INDEX,
   FLEET_SERVER_ARTIFACTS_INDEX,
   AGENTS_INDEX,
   AGENT_POLICY_INDEX,
@@ -73,9 +73,12 @@ export {
   fleetSetupRouteService,
   // Package policy helpers
   isValidNamespace,
+  isValidDataset,
   INVALID_NAMESPACE_CHARACTERS,
   getFileMetadataIndexName,
   getFileDataIndexName,
+  removeSOAttributes,
+  getSortConfig,
 } from './services';
 
 export type { FleetAuthz } from './authz';
@@ -129,6 +132,7 @@ export type {
   FullAgentPolicyOutput,
   FullAgentPolicyOutputPermissions,
   FullAgentPolicyInputStream,
+  TemplateAgentPolicyInput,
   DryRunPackagePolicy,
   AgentPolicy,
   Installation,
@@ -195,7 +199,7 @@ export type {
   FleetServerAgentComponentStatus,
   AssetSOObject,
   SimpleSOAssetType,
-  AllowedAssetTypes,
+  DisplayedAssetTypes,
 } from './types';
 
 export { ElasticsearchAssetType } from './types';

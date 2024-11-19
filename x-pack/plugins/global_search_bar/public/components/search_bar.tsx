@@ -12,13 +12,16 @@ import {
   EuiFormLabel,
   EuiHeaderSectionItemButton,
   EuiIcon,
+  EuiText,
   EuiLoadingSpinner,
   EuiSelectableTemplateSitewide,
   EuiSelectableTemplateSitewideOption,
   euiSelectableTemplateSitewideRenderOptions,
   useEuiTheme,
 } from '@elastic/eui';
+import { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/selectable/selectable';
 import { css } from '@emotion/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { GlobalSearchFindParams, GlobalSearchResult } from '@kbn/global-search-plugin/public';
 import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
@@ -36,8 +39,29 @@ import { PopoverPlaceholder } from './popover_placeholder';
 import './search_bar.scss';
 import { SearchBarProps } from './types';
 
-const NoMatchesMessage = (props: { basePathUrl: string }) => {
-  return <PopoverPlaceholder basePath={props.basePathUrl} />;
+const SearchCharLimitExceededMessage = (props: { basePathUrl: string }) => {
+  const charLimitMessage = (
+    <>
+      <EuiText size="m">
+        <p data-test-subj="searchCharLimitExceededMessageHeading">
+          <FormattedMessage
+            id="xpack.globalSearchBar.searchBar.searchCharLimitExceededHeading"
+            defaultMessage="Search character limit exceeded"
+          />
+        </p>
+      </EuiText>
+      <p>
+        <FormattedMessage
+          id="xpack.globalSearchBar.searchBar.searchCharLimitExceeded"
+          defaultMessage="Try searching for applications, dashboards, visualizations, and more."
+        />
+      </p>
+    </>
+  );
+
+  return (
+    <PopoverPlaceholder basePath={props.basePathUrl} customPlaceholderMessage={charLimitMessage} />
+  );
 };
 
 const EmptyMessage = () => (
@@ -62,15 +86,17 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
   // General hooks
   const [initialLoad, setInitialLoad] = useState(false);
   const [searchValue, setSearchValue] = useState<string>('');
-  const [searchTerm, setSearchTerm] = useState<string>('');
   const [searchRef, setSearchRef] = useState<HTMLInputElement | null>(null);
   const [buttonRef, setButtonRef] = useState<HTMLDivElement | null>(null);
   const searchSubscription = useRef<Subscription | null>(null);
-  const [options, _setOptions] = useState<EuiSelectableTemplateSitewideOption[]>([]);
+  const [options, setOptions] = useState<EuiSelectableTemplateSitewideOption[]>([]);
   const [searchableTypes, setSearchableTypes] = useState<string[]>([]);
   const [showAppend, setShowAppend] = useState<boolean>(true);
   const UNKNOWN_TAG_ID = '__unknown__';
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [searchCharLimitExceeded, setSearchCharLimitExceeded] = useState(false);
 
+  // Initialize searchableTypes data
   useEffect(() => {
     if (initialLoad) {
       const fetch = async () => {
@@ -80,6 +106,11 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
       fetch();
     }
   }, [globalSearch, initialLoad]);
+
+  // Whenever searchValue changes, isLoading = true
+  useEffect(() => {
+    setIsLoading(true);
+  }, [searchValue]);
 
   const loadSuggestions = useCallback(
     (term: string) => {
@@ -92,28 +123,24 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
     [taggingApi, searchableTypes]
   );
 
-  const setOptions = useCallback(
+  const setDecoratedOptions = useCallback(
     (
       _options: GlobalSearchResult[],
       suggestions: SearchSuggestion[],
       searchTagIds: string[] = []
     ) => {
-      if (!isMounted()) {
-        return;
-      }
-
-      _setOptions([
+      setOptions([
         ...suggestions.map(suggestionToOption),
         ..._options.map((option) =>
           resultToOption(
             option,
             searchTagIds?.filter((id) => id !== UNKNOWN_TAG_ID) ?? [],
-            taggingApi?.ui.getTag
+            taggingApi?.ui.getTagList
           )
         ),
       ]);
     },
-    [isMounted, _setOptions, taggingApi]
+    [setOptions, taggingApi]
   );
 
   useDebounce(
@@ -125,52 +152,63 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
           searchSubscription.current = null;
         }
 
-        const suggestions = loadSuggestions(searchValue);
+        if (searchValue.length > globalSearch.searchCharLimit) {
+          // setting this will display an error message to the user
+          setSearchCharLimitExceeded(true);
+          return;
+        } else {
+          setSearchCharLimitExceeded(false);
+        }
+
+        const suggestions = loadSuggestions(searchValue.toLowerCase());
 
         let aggregatedResults: GlobalSearchResult[] = [];
+
         if (searchValue.length !== 0) {
           reportEvent.searchRequest();
         }
 
-        const rawParams = parseSearchParams(searchValue);
-        const tagIds =
-          taggingApi && rawParams.filters.tags
-            ? rawParams.filters.tags.map(
-                (tagName) => taggingApi.ui.getTagIdFromName(tagName) ?? UNKNOWN_TAG_ID
-              )
-            : undefined;
+        const rawParams = parseSearchParams(searchValue.toLowerCase(), searchableTypes);
+        let tagIds: string[] | undefined;
+        if (taggingApi && rawParams.filters.tags) {
+          tagIds = rawParams.filters.tags.map(
+            (tagName) => taggingApi.ui.getTagIdFromName(tagName) ?? UNKNOWN_TAG_ID
+          );
+        } else {
+          tagIds = undefined;
+        }
         const searchParams: GlobalSearchFindParams = {
           term: rawParams.term,
           types: rawParams.filters.types,
           tags: tagIds,
         };
-        // TODO technically a subtle bug here
-        // this term won't be set until the next time the debounce is fired
-        // so the SearchOption won't highlight anything if only one call is fired
-        // in practice, this is hard to spot, unlikely to happen, and is a negligible issue
-        setSearchTerm(rawParams.term ?? '');
 
         searchSubscription.current = globalSearch.find(searchParams, {}).subscribe({
           next: ({ results }) => {
+            if (!isMounted()) {
+              return;
+            }
+
             if (searchValue.length > 0) {
               aggregatedResults = [...results, ...aggregatedResults].sort(sort.byScore);
-              setOptions(aggregatedResults, suggestions, searchParams.tags);
+              setDecoratedOptions(aggregatedResults, suggestions, searchParams.tags);
               return;
             }
 
             // if searchbar is empty, filter to only applications and sort alphabetically
             results = results.filter(({ type }: GlobalSearchResult) => type === 'application');
-
             aggregatedResults = [...results, ...aggregatedResults].sort(sort.byTitle);
-
-            setOptions(aggregatedResults, suggestions, searchParams.tags);
+            setDecoratedOptions(aggregatedResults, suggestions, searchParams.tags);
           },
           error: (err) => {
+            setIsLoading(false);
             // Not doing anything on error right now because it'll either just show the previous
             // results or empty results which is basically what we want anyways
             reportEvent.error({ message: err, searchValue });
           },
-          complete: () => {},
+          complete: () => {
+            setIsLoading(false);
+          },
         });
       }
     },
@@ -196,7 +234,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
   );
 
   const onChange = useCallback(
-    (selection: EuiSelectableTemplateSitewideOption[]) => {
+    (selection: EuiSelectableTemplateSitewideOption[], event: EuiSelectableOnChangeEvent) => {
       let selectedRank: number | null = null;
       const selected = selection.find(({ checked }, rank) => {
         const isChecked = checked === 'on';
@@ -247,7 +285,13 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         console.log('Error trying to track searchbar metrics', err);
       }
 
-      navigateToUrl(url);
+      if (event.shiftKey) {
+        window.open(url);
+      } else if (event.ctrlKey || event.metaKey) {
+        window.open(url, '_blank');
+      } else {
+        navigateToUrl(url);
+      }
 
       (document.activeElement as HTMLElement).blur();
       if (searchRef) {
@@ -273,11 +317,12 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         buttonRef={visibilityButtonRef}
         color="text"
         data-test-subj="nav-search-reveal"
-        iconType="search"
         onClick={() => {
           setIsVisible(true);
         }}
-      />
+      >
+        <EuiIcon type="search" size="m" />
+      </EuiHeaderSectionItemButton>
     );
   }
 
@@ -311,13 +356,14 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
 
   return (
     <EuiSelectableTemplateSitewide
+      isLoading={isLoading}
       isPreFiltered
       onChange={onChange}
       options={options}
       className="kbnSearchBar"
       popoverButtonBreakpoints={['xs', 's']}
       singleSelection={true}
-      renderOption={(option) => euiSelectableTemplateSitewideRenderOptions(option, searchTerm)}
+      renderOption={(option) => euiSelectableTemplateSitewideRenderOptions(option, searchValue)}
       listProps={{
         className: 'eui-yScroll',
         css: css`
@@ -345,8 +391,9 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         fullWidth: true,
         append: getAppendForChromeStyle(),
       }}
+      errorMessage={searchCharLimitExceeded ? <SearchCharLimitExceededMessage {...props} /> : null}
       emptyMessage={<EmptyMessage />}
-      noMatchesMessage={<NoMatchesMessage {...props} />}
+      noMatchesMessage={<PopoverPlaceholder basePath={props.basePathUrl} />}
       popoverProps={{
         'data-test-subj': 'nav-search-popover',
         panelClassName: 'navSearch__panel',

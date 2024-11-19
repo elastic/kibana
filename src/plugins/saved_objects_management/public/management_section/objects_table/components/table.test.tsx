@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -112,11 +113,11 @@ describe('Table', () => {
     expect(component.state().isSearchTextValid).toBe(true);
   });
 
-  it(`prevents saved objects from being deleted`, () => {
+  it(`prevents hidden saved objects from being deleted`, () => {
     const selectedSavedObjects = [
-      { type: 'visualization', meta: { hiddenType: false } },
-      { type: 'search', meta: { hiddenType: false } },
-      { type: 'index-pattern', meta: { hiddenType: false } },
+      { type: 'visualization', meta: { hiddenType: true } },
+      { type: 'search', meta: { hiddenType: true } },
+      { type: 'index-pattern', meta: { hiddenType: true } },
     ] as any;
     const customizedProps = {
       ...defaultProps,
@@ -147,7 +148,7 @@ describe('Table', () => {
 
     const table = component.find('EuiBasicTable');
     const columns = table.prop('columns') as any[];
-    const actionColumn = columns.find((x) => x.hasOwnProperty('actions')) as { actions: any[] };
+    const actionColumn = columns.find((x) => Object.hasOwn(x, 'actions')) as { actions: any[] };
     const someAction = actionColumn.actions.find(
       (x) => x['data-test-subj'] === 'savedObjectsTableAction-someAction'
     );
@@ -157,32 +158,15 @@ describe('Table', () => {
     expect(onActionRefresh).toHaveBeenCalled();
   });
 
-  describe('managed content', () => {
-    it('keeps the delete button disabled when the selection only contains managed and hidden SOs', async () => {
-      const managedSavedObjects = [
-        { type: 'visualization', managed: true, meta: { hiddenType: false } },
-        { type: 'search', managed: true, meta: { hiddenType: false } },
-        { type: 'index-pattern', managed: true, meta: { hiddenType: false } },
-      ] as any;
-
+  describe('hidden SOs', () => {
+    it('keeps the delete button disabled for hidden SOs', async () => {
       const hiddenSavedObjects = [
         { type: 'visualization', managed: false, meta: { hiddenType: true } },
         { type: 'search', managed: false, meta: { hiddenType: true } },
         { type: 'index-pattern', managed: false, meta: { hiddenType: true } },
       ] as any;
 
-      const { rerender } = render(
-        <I18nProvider>
-          <Table {...defaultProps} selectedSavedObjects={managedSavedObjects} />
-        </I18nProvider>
-      );
-
-      await waitFor(() => {
-        expect(screen.getByTestId('savedObjectsManagementDelete')).toBeDisabled();
-        expect(screen.getByRole('button', { name: 'Export' })).toBeEnabled();
-      });
-
-      rerender(
+      render(
         <I18nProvider>
           <Table {...defaultProps} selectedSavedObjects={hiddenSavedObjects} />
         </I18nProvider>
@@ -192,28 +176,14 @@ describe('Table', () => {
         expect(screen.getByTestId('savedObjectsManagementDelete')).toBeDisabled();
         expect(screen.getByRole('button', { name: 'Export' })).toBeEnabled();
       });
-
-      rerender(
-        <I18nProvider>
-          <Table
-            {...defaultProps}
-            selectedSavedObjects={[...managedSavedObjects, ...hiddenSavedObjects]}
-          />
-        </I18nProvider>
-      );
-
-      await waitFor(() => {
-        expect(screen.getByTestId('savedObjectsManagementDelete')).toBeDisabled();
-        expect(screen.getByRole('button', { name: 'Export' })).toBeEnabled();
-      });
     });
 
-    it('enables the delete button when the selection contains at least one unmanaged, non-hidden SO', async () => {
+    it('enables the delete button when the selection contains at least one non-hidden SO', async () => {
       const selectedSavedObjects = [
-        { type: 'visualization', managed: true, meta: { hiddenType: false } },
-        { type: 'search', managed: true, meta: { hiddenType: false } },
-        { type: 'index-pattern', managed: false, meta: { hiddenType: true } },
-        { type: 'lens', managed: false, meta: { hiddenType: false } }, // deletable!
+        { type: 'visualization', meta: { hiddenType: true } },
+        { type: 'search', meta: { hiddenType: true } },
+        { type: 'index-pattern', meta: { hiddenType: true } },
+        { type: 'lens', meta: { hiddenType: false } }, // deletable!
       ] as any;
 
       render(

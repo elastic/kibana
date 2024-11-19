@@ -42,7 +42,7 @@ import {
 } from '../data_views_service/service';
 import { replaceIndexpattern } from '../state_management/lens_slice';
 import { useApplicationUserMessages } from './get_application_user_messages';
-import { trackUiCounterEvents } from '../lens_ui_telemetry';
+import { trackSaveUiCounterEvents } from '../lens_ui_telemetry';
 
 export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
   returnToOrigin: boolean;
@@ -67,9 +67,7 @@ export function App({
   contextOriginatingApp,
   topNavMenuEntryGenerators,
   initialContext,
-  theme$,
   coreStart,
-  savedObjectStore,
 }: LensAppProps) {
   const lensAppServices = useKibana<LensAppServices>().services;
 
@@ -87,8 +85,6 @@ export function App({
     http,
     notifications,
     executionContext,
-    // Temporarily required until the 'by value' paradigm is default.
-    dashboardFeatureFlag,
     locator,
     share,
     serverless,
@@ -167,12 +163,8 @@ export function App({
   }, [setIndicateNoData, indicateNoData, searchSessionId]);
 
   const getIsByValueMode = useCallback(
-    () =>
-      Boolean(
-        // Temporarily required until the 'by value' paradigm is default.
-        dashboardFeatureFlag.allowByValueEmbeddables && isLinkedToOriginatingApp && !savedObjectId
-      ),
-    [dashboardFeatureFlag.allowByValueEmbeddables, isLinkedToOriginatingApp, savedObjectId]
+    () => Boolean(isLinkedToOriginatingApp && !savedObjectId),
+    [isLinkedToOriginatingApp, savedObjectId]
   );
 
   useEffect(() => {
@@ -304,7 +296,6 @@ export function App({
       chrome.setBreadcrumbs(breadcrumbs);
     }
   }, [
-    dashboardFeatureFlag.allowByValueEmbeddables,
     getOriginatingAppName,
     redirectToOrigin,
     getIsByValueMode,
@@ -334,7 +325,7 @@ export function App({
         prevVisState
       );
       if (telemetryEvents && telemetryEvents.length) {
-        trackUiCounterEvents(telemetryEvents);
+        trackSaveUiCounterEvents(telemetryEvents);
       }
       return runSaveLensVisualization(
         {
@@ -480,14 +471,6 @@ export function App({
     [dataViews, uiActions, http, notifications, uiSettings, initialContext, dispatch]
   );
 
-  const onTextBasedSavedAndExit = useCallback(async ({ onSave, onCancel }) => {
-    setIsSaveModalVisible(true);
-    setShouldCloseAndSaveTextBasedQuery(true);
-    saveAndExit.current = () => {
-      onSave();
-    };
-  }, []);
-
   // remember latest URL based on the configuration
   // url_panel_content has a similar logic
   const shareURLCache = useRef({ params: '', url: '' });
@@ -579,11 +562,10 @@ export function App({
           initialContextIsEmbedded={initialContextIsEmbedded}
           topNavMenuEntryGenerators={topNavMenuEntryGenerators}
           initialContext={initialContext}
-          theme$={theme$}
           indexPatternService={indexPatternService}
-          onTextBasedSavedAndExit={onTextBasedSavedAndExit}
           getUserMessages={getUserMessages}
           shortUrlService={shortUrlService}
+          startServices={coreStart}
         />
         {getLegacyUrlConflictCallout()}
         {(!isLoading || persistedDoc) && (

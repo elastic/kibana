@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { CoreRouteHandlerContext } from './core_route_handler_context';
@@ -190,6 +191,74 @@ describe('#deprecations', () => {
       const mockResult = coreStart.deprecations.asScopedToClient.mock.results[0].value;
       expect(client1).toBe(mockResult);
       expect(client2).toBe(mockResult);
+    });
+  });
+});
+
+describe('#security', () => {
+  describe('#authc', () => {
+    test('only creates one instance', () => {
+      const request = httpServerMock.createKibanaRequest();
+      const coreStart = createCoreRouteHandlerContextParamsMock();
+      const context = new CoreRouteHandlerContext(coreStart, request);
+
+      const authc1 = context.security.authc;
+      const authc2 = context.security.authc;
+
+      expect(authc1).toBe(authc2);
+    });
+
+    describe('getCurrentUser', () => {
+      test('calls coreStart.security.authc.getCurrentUser with the correct parameters', () => {
+        const request = httpServerMock.createKibanaRequest();
+        const coreStart = createCoreRouteHandlerContextParamsMock();
+        const context = new CoreRouteHandlerContext(coreStart, request);
+
+        context.security.authc.getCurrentUser();
+        expect(coreStart.security.authc.getCurrentUser).toHaveBeenCalledTimes(1);
+        expect(coreStart.security.authc.getCurrentUser).toHaveBeenCalledWith(request);
+      });
+
+      test('returns the result of coreStart.security.authc.getCurrentUser', () => {
+        const request = httpServerMock.createKibanaRequest();
+        const coreStart = createCoreRouteHandlerContextParamsMock();
+        const context = new CoreRouteHandlerContext(coreStart, request);
+
+        const stubUser: any = Symbol.for('stubUser');
+        coreStart.security.authc.getCurrentUser.mockReturnValue(stubUser);
+
+        const user = context.security.authc.getCurrentUser();
+        expect(user).toBe(stubUser);
+      });
+    });
+  });
+});
+
+describe('#userProfile', () => {
+  describe('getCurrent', () => {
+    test('calls coreStart.userProfile.getCurrent with the correct parameters', () => {
+      const request = httpServerMock.createKibanaRequest();
+      const coreStart = createCoreRouteHandlerContextParamsMock();
+      const context = new CoreRouteHandlerContext(coreStart, request);
+
+      context.userProfile?.getCurrent({ dataPath: '/data-path' });
+      expect(coreStart.userProfile.getCurrent).toHaveBeenCalledTimes(1);
+      expect(coreStart.userProfile.getCurrent).toHaveBeenCalledWith({
+        request,
+        dataPath: '/data-path',
+      });
+    });
+
+    test('returns the result of coreStart.userProfile.getCurrent', () => {
+      const request = httpServerMock.createKibanaRequest();
+      const coreStart = createCoreRouteHandlerContextParamsMock();
+      const context = new CoreRouteHandlerContext(coreStart, request);
+
+      const stubProfile: any = Symbol.for('stubProfile');
+      coreStart.userProfile.getCurrent.mockReturnValue(stubProfile);
+
+      const profile = context.userProfile?.getCurrent();
+      expect(profile).toBe(stubProfile);
     });
   });
 });

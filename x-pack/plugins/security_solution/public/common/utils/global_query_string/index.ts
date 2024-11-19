@@ -24,24 +24,27 @@ import { getLinkInfo } from '../../links';
  *
  * @param urlParamKey Must not change.
  * @param onInitialize Called once when initializing. It must not change.
+ * @param newUrlParamKey If we want to register the value under a new key.
  */
 export const useInitializeUrlParam = <State extends {}>(
   urlParamKey: string,
   /**
    * @param state Decoded URL param value.
    */
-  onInitialize: (state: State | null) => void
+  onInitialize: (state: State | null) => void,
+  newUrlParamKey?: string
 ) => {
   const dispatch = useDispatch();
 
   const getInitialUrlParamValue = useGetInitialUrlParamValue(urlParamKey);
 
   useEffect(() => {
+    const key = newUrlParamKey && newUrlParamKey !== '' ? newUrlParamKey : urlParamKey;
     const value = getInitialUrlParamValue();
 
     dispatch(
       globalUrlParamActions.registerUrlParam({
-        key: urlParamKey,
+        key,
         initialValue: value,
       })
     );
@@ -50,7 +53,7 @@ export const useInitializeUrlParam = <State extends {}>(
     onInitialize(value as State);
 
     return () => {
-      dispatch(globalUrlParamActions.deregisterUrlParam({ key: urlParamKey }));
+      dispatch(globalUrlParamActions.deregisterUrlParam({ key }));
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- It must run only once when the application is initializing.
   }, []);

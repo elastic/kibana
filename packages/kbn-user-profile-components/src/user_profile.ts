@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { VISUALIZATION_COLORS } from '@elastic/eui';
+
 import type { UserProfileAvatarData, UserProfileData } from './types';
 
 /**
@@ -135,4 +137,17 @@ export interface GetUserDisplayNameParams {
  */
 export function getUserDisplayName(params: GetUserDisplayNameParams) {
   return params.full_name || params.email || params.username;
+}
+
+/**
+ * Determines the display label for the provided user information.
+ * Includes the email if it is different from the display name.
+ * @param params Set of available user's name-related fields.
+ */
+export function getUserDisplayLabel(user: GetUserDisplayNameParams): string {
+  const displayName = getUserDisplayName(user);
+  if (user.email && user.email !== displayName) {
+    return `${displayName} (${user.email})`;
+  }
+  return displayName;
 }

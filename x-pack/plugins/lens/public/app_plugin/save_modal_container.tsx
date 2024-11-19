@@ -41,11 +41,13 @@ export type SaveModalContainerProps = {
     | 'attributeService'
     | 'savedObjectsTagging'
     | 'application'
-    | 'dashboardFeatureFlag'
     | 'notifications'
     | 'http'
     | 'chrome'
     | 'overlays'
+    | 'analytics'
+    | 'i18n'
+    | 'theme'
     | 'stateTransfer'
     | 'savedObjectStore'
   >;
@@ -97,7 +99,7 @@ export function SaveModalContainer({
     });
   }
 
-  const { attributeService, savedObjectsTagging, application, dashboardFeatureFlag } = lensServices;
+  const { attributeService, savedObjectsTagging, application } = lensServices;
 
   useEffect(() => {
     setLastKnownDoc(initLastKnownDoc);
@@ -141,14 +143,13 @@ export function SaveModalContainer({
           ...lensServices,
           lastKnownDoc,
           initialInput,
-          attributeService,
           redirectTo,
           redirectToOrigin,
           originatingApp,
           getOriginatingPath,
           getIsByValueMode: () => false,
           onAppLeave: () => {},
-          savedObjectStore: lensServices.savedObjectStore,
+          ...lensServices,
         },
         saveProps,
         options
@@ -170,7 +171,6 @@ export function SaveModalContainer({
       originatingApp={originatingApp}
       getOriginatingPath={getOriginatingPath}
       savingToLibraryPermitted={savingToLibraryPermitted}
-      allowByValueEmbeddables={dashboardFeatureFlag?.allowByValueEmbeddables}
       savedObjectsTagging={savedObjectsTagging}
       tagsIds={tagsIds}
       onSave={(saveProps, options) => {
@@ -225,9 +225,11 @@ export const runSaveLensVisualization = async (
       | 'application'
       | 'chrome'
       | 'overlays'
+      | 'analytics'
+      | 'i18n'
+      | 'theme'
       | 'notifications'
       | 'stateTransfer'
-      | 'dashboardFeatureFlag'
       | 'attributeService'
       | 'savedObjectsTagging'
     >,
@@ -239,7 +241,6 @@ export const runSaveLensVisualization = async (
     initialInput,
     lastKnownDoc,
     persistedDoc,
-    overlays,
     notifications,
     stateTransfer,
     attributeService,
@@ -248,11 +249,13 @@ export const runSaveLensVisualization = async (
     redirectToOrigin,
     onAppLeave,
     redirectTo,
-    dashboardFeatureFlag,
     textBasedLanguageSave,
     switchDatasource,
     application,
     savedObjectStore,
+    getOriginatingPath,
+    originatingApp,
+    ...startServices
   } = props;
 
   if (!lastKnownDoc) {
@@ -302,7 +305,7 @@ export const runSaveLensVisualization = async (
         saveProps.onTitleDuplicate,
         {
           client: savedObjectStore,
-          overlays,
+          ...startServices,
         }
       );
     } catch (e) {
@@ -338,7 +341,6 @@ export const runSaveLensVisualization = async (
         embeddableInput: newInput,
         dashboardId: saveProps.dashboardId,
         stateTransfer,
-        dashboardFeatureFlag,
         originatingApp: props.originatingApp,
         getOriginatingPath: props.getOriginatingPath,
       });
@@ -347,7 +349,7 @@ export const runSaveLensVisualization = async (
 
     notifications.toasts.addSuccess(
       i18n.translate('xpack.lens.app.saveVisualization.successNotificationText', {
-        defaultMessage: `Saved '{visTitle}'`,
+        defaultMessage: `Saved ''{visTitle}''`,
         values: {
           visTitle: docToSave.title,
         },

@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import { filterQuery } from '../model/filter_query';
 import { runtimeMappings } from '../model/runtime_mappings';
 import { timerange } from '../model/timerange';
 
 export const timelineRequestBasicOptionsSchema = z.object({
   indexType: z.string().optional(),
+  id: z.string().optional(),
   timerange: timerange.optional(),
   filterQuery,
   defaultIndex: z.array(z.string()).optional(),

@@ -1,0 +1,188 @@
+{
+  "id": "@kbn/react-hooks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/react-hooks",
+        "id": "def-common.useBoolean",
+        "type": "Function",
+        "tags": [],
+        "label": "useBoolean",
+        "description": [],
+        "signature": [
+          "(initialValue?: boolean) => ",
+          {
+            "pluginId": "@kbn/react-hooks",
+            "scope": "common",
+            "docId": "kibKbnReactHooksPluginApi",
+            "section": "def-common.UseBooleanResult",
+            "text": "UseBooleanResult"
+          }
+        ],
+        "path": "packages/kbn-react-hooks/src/use_boolean/use_boolean.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-hooks",
+            "id": "def-common.useBoolean.$1",
+            "type": "boolean",
+            "tags": [],
+            "label": "initialValue",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "packages/kbn-react-hooks/src/use_boolean/use_boolean.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-hooks",
+        "id": "def-common.useErrorTextStyle",
+        "type": "Function",
+        "tags": [],
+        "label": "useErrorTextStyle",
+        "description": [],
+        "signature": [
+          "() => ",
+          "SerializedStyles"
+        ],
+        "path": "packages/kbn-react-hooks/src/use_error_text_style/use_error_text_style.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/react-hooks",
+        "id": "def-common.UseBooleanHandlers",
+        "type": "Interface",
+        "tags": [],
+        "label": "UseBooleanHandlers",
+        "description": [],
+        "path": "packages/kbn-react-hooks/src/use_boolean/use_boolean.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-hooks",
+            "id": "def-common.UseBooleanHandlers.on",
+            "type": "Function",
+            "tags": [],
+            "label": "on",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/kbn-react-hooks/src/use_boolean/use_boolean.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/react-hooks",
+            "id": "def-common.UseBooleanHandlers.off",
+            "type": "Function",
+            "tags": [],
+            "label": "off",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/kbn-react-hooks/src/use_boolean/use_boolean.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/react-hooks",
+            "id": "def-common.UseBooleanHandlers.toggle",
+            "type": "Function",
+            "tags": [],
+            "label": "toggle",
+            "description": [],
+            "signature": [
+              "(nextValue?: any) => void"
+            ],
+            "path": "packages/kbn-react-hooks/src/use_boolean/use_boolean.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/react-hooks",
+                "id": "def-common.UseBooleanHandlers.toggle.$1",
+                "type": "Any",
+                "tags": [],
+                "label": "nextValue",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "node_modules/react-use/lib/useToggle.d.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/react-hooks",
+        "id": "def-common.UseBooleanResult",
+        "type": "Type",
+        "tags": [],
+        "label": "UseBooleanResult",
+        "description": [],
+        "signature": [
+          "[boolean, ",
+          {
+            "pluginId": "@kbn/react-hooks",
+            "scope": "common",
+            "docId": "kibKbnReactHooksPluginApi",
+            "section": "def-common.UseBooleanHandlers",
+            "text": "UseBooleanHandlers"
+          },
+          "]"
+        ],
+        "path": "packages/kbn-react-hooks/src/use_boolean/use_boolean.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

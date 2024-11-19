@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { Ast } from '@kbn/interpreter';
 import { textBasedQueryStateToExpressionAst } from '@kbn/data-plugin/common';
 import type { OriginalColumn } from '../../../common/types';
@@ -44,6 +45,13 @@ function getExpressionForLayer(
     const textBasedQueryToAst = textBasedQueryStateToExpressionAst({
       query: layer.query,
       timeFieldName,
+      titleForInspector: i18n.translate('xpack.lens.inspectorTextBasedRequestDataTitle', {
+        defaultMessage: 'Visualization',
+      }),
+      descriptionForInspector: i18n.translate('xpack.lens.inspectorTextBasedRequestDescription', {
+        defaultMessage:
+          'This request queries Elasticsearch to fetch the data for the visualization.',
+      }),
     });
 
     textBasedQueryToAst.chain.push({
@@ -51,6 +59,7 @@ function getExpressionForLayer(
       function: 'lens_map_to_columns',
       arguments: {
         idMap: [JSON.stringify(idMapper)],
+        isTextBased: [true],
       },
     });
     return textBasedQueryToAst;

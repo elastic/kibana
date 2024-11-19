@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Aggs, SamplingOption } from '../../../../../common/types/field_stats';
 import {
-  Aggs,
-  SamplingOption,
   isNormalSamplingOption,
   isRandomSamplingOption,
 } from '../../../../../common/types/field_stats';

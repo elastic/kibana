@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
 import { TagsCapabilities } from '../../../common';
 import { ITagInternalClient, ITagAssignmentService, ITagsCache } from '../../services';
+import { StartServices } from '../../types';
 import { TagBulkAction } from '../types';
 import { getBulkDeleteAction } from './bulk_delete';
 import { getBulkAssignAction } from './bulk_assign';
 import { getClearSelectionAction } from './clear_selection';
 
 interface GetBulkActionOptions {
-  core: CoreStart;
+  startServices: StartServices;
   capabilities: TagsCapabilities;
   tagClient: ITagInternalClient;
   tagCache: ITagsCache;
@@ -25,7 +25,7 @@ interface GetBulkActionOptions {
 }
 
 export const getBulkActions = ({
-  core: { notifications, overlays, theme },
+  startServices,
   capabilities,
   tagClient,
   tagCache,
@@ -39,9 +39,7 @@ export const getBulkActions = ({
   if (capabilities.assign && assignableTypes.length > 0) {
     actions.push(
       getBulkAssignAction({
-        notifications,
-        overlays,
-        theme,
+        ...startServices,
         tagCache,
         assignmentService,
         assignableTypes,
@@ -50,7 +48,7 @@ export const getBulkActions = ({
     );
   }
   if (capabilities.delete) {
-    actions.push(getBulkDeleteAction({ notifications, overlays, tagClient, setLoading }));
+    actions.push(getBulkDeleteAction({ ...startServices, tagClient, setLoading }));
   }
 
   // only add clear selection if user has permission to perform any other action

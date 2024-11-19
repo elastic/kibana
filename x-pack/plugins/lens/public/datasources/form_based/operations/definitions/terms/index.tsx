@@ -206,12 +206,11 @@ export const termsOperation: OperationDefinition<
     }
   },
   getErrorMessage: (layer, columnId, indexPattern) => {
-    const messages = [
-      ...(getInvalidFieldMessage(layer, columnId, indexPattern) || []),
-      getDisallowedTermsMessage(layer, columnId, indexPattern) || '',
-      getMultiTermsScriptedFieldErrorMessage(layer, columnId, indexPattern) || '',
-    ].filter(Boolean);
-    return messages.length ? messages : undefined;
+    return [
+      ...getInvalidFieldMessage(layer, columnId, indexPattern),
+      ...getDisallowedTermsMessage(layer, columnId, indexPattern),
+      ...getMultiTermsScriptedFieldErrorMessage(layer, columnId, indexPattern),
+    ];
   },
   getNonTransferableFields: (column, newIndexPattern) => {
     return getFieldsByValidationState(newIndexPattern, column).invalidFields;
@@ -574,9 +573,8 @@ export const termsOperation: OperationDefinition<
       return <FieldInputBase {...props} />;
     }
 
-    const showScriptedFieldError = Boolean(
-      getMultiTermsScriptedFieldErrorMessage(layer, columnId, indexPattern)
-    );
+    const showScriptedFieldError =
+      getMultiTermsScriptedFieldErrorMessage(layer, columnId, indexPattern).length > 0;
     const { invalidFields } = getFieldsByValidationState(indexPattern, selectedColumn);
 
     return (
@@ -960,7 +958,6 @@ The top values of a specified field ranked by the chosen metric.
               defaultMessage: 'Rank direction',
             })}
             data-test-subj="indexPattern-terms-orderDirection-groups"
-            name="orderDirection"
             buttonSize="compressed"
             aria-label={i18n.translate('xpack.lens.indexPattern.terms.orderDirection', {
               defaultMessage: 'Rank direction',

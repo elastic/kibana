@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { EuiPopover, EuiButtonIcon } from '@elastic/eui';
+import React, { useState, useCallback } from 'react';
+import type { EuiIconProps, IconColor } from '@elastic/eui';
+import { EuiIcon, EuiPopover, keys } from '@elastic/eui';
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 
 interface PopoverTooltipProps {
   columnName: string;
   children: React.ReactNode;
+  anchorColor?: IconColor;
 }
 
 /**
@@ -19,8 +21,31 @@ interface PopoverTooltipProps {
  * @param columnName string Name of column to use as aria-label of button
  * @param children React.ReactNode of content to display in popover tooltip
  */
-const PopoverTooltipComponent = ({ columnName, children }: PopoverTooltipProps) => {
+const PopoverTooltipComponent = ({
+  columnName,
+  children,
+  anchorColor = 'primary',
+}: PopoverTooltipProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const onClick = useCallback<NonNullable<EuiIconProps['onClick']>>(
+    (event) => {
+      setIsPopoverOpen(!isPopoverOpen);
+      event.stopPropagation();
+    },
+    [isPopoverOpen]
+  );
+
+  const onKeyDown = useCallback<NonNullable<EuiIconProps['onKeyDown']>>(
+    (event) => {
+      if (keys.ENTER === event.key) {
+        setIsPopoverOpen(!isPopoverOpen);
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    },
+    [isPopoverOpen]
+  );
 
   return (
     <EuiPopover
@@ -28,16 +53,13 @@ const PopoverTooltipComponent = ({ columnName, children }: PopoverTooltipProps) 
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
       button={
-        <EuiButtonIcon
+        <EuiIcon
           aria-label={i18n.POPOVER_TOOLTIP_ARIA_LABEL(columnName)}
-          onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
-            setIsPopoverOpen(!isPopoverOpen);
-            event.stopPropagation();
-          }}
-          size="xs"
-          color="primary"
-          iconType="questionInCircle"
-          style={{ height: 'auto' }}
+          tabIndex={0}
+          onClick={onClick}
+          onKeyDown={onKeyDown}
+          color={anchorColor}
+          type="questionInCircle"
         />
       }
     >

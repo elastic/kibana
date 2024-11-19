@@ -47,7 +47,14 @@
             "label": "attributes",
             "description": [],
             "signature": [
-              "IEsErrorAttributes | undefined"
+              {
+                "pluginId": "@kbn/search-types",
+                "scope": "common",
+                "docId": "kibKbnSearchTypesPluginApi",
+                "section": "def-common.IEsErrorAttributes",
+                "text": "IEsErrorAttributes"
+              },
+              " | undefined"
             ],
             "path": "packages/kbn-search-errors/src/es_error.tsx",
             "deprecated": false,
@@ -129,7 +136,7 @@
             "label": "getErrorMessage",
             "description": [],
             "signature": [
-              "() => JSX.Element"
+              "() => React.JSX.Element"
             ],
             "path": "packages/kbn-search-errors/src/es_error.tsx",
             "deprecated": false,
@@ -145,7 +152,7 @@
             "label": "getActions",
             "description": [],
             "signature": [
-              "() => JSX.Element[]"
+              "() => React.JSX.Element[]"
             ],
             "path": "packages/kbn-search-errors/src/es_error.tsx",
             "deprecated": false,
@@ -181,8 +188,8 @@
             "pluginId": "dataViews",
             "scope": "common",
             "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataView",
-            "text": "DataView"
+            "section": "def-common.AbstractDataView",
+            "text": "AbstractDataView"
           },
           " | undefined) => ",
           {
@@ -260,8 +267,8 @@
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
+                "section": "def-common.AbstractDataView",
+                "text": "AbstractDataView"
               },
               " | undefined"
             ],
@@ -361,7 +368,15 @@
             "section": "def-common.KibanaServerError",
             "text": "KibanaServerError"
           },
-          "<IEsErrorAttributes>"
+          "<",
+          {
+            "pluginId": "@kbn/search-types",
+            "scope": "common",
+            "docId": "kibKbnSearchTypesPluginApi",
+            "section": "def-common.IEsErrorAttributes",
+            "text": "IEsErrorAttributes"
+          },
+          ">"
         ],
         "path": "packages/kbn-search-errors/src/types.ts",
         "deprecated": false,

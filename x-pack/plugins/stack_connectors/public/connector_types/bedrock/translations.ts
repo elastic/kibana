@@ -20,18 +20,10 @@ export const ACCESS_KEY_LABEL = i18n.translate(
     defaultMessage: 'Access Key',
   }
 );
-
 export const DEFAULT_MODEL_LABEL = i18n.translate(
   'xpack.stackConnectors.components.bedrock.defaultModelTextFieldLabel',
   {
     defaultMessage: 'Default model',
-  }
-);
-
-export const REGION_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.bedrock.defaultRegionTextFieldLabel',
-  {
-    defaultMessage: 'AWS Region',
   }
 );
 

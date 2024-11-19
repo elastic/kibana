@@ -7,14 +7,13 @@
 
 import { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
-import type { SuperTest, Test } from 'supertest';
+import type { Agent as SuperTestAgent } from 'supertest';
 import {
-  clearKibanaApmEventLog,
-  deleteApmRules,
-  deleteApmAlerts,
   deleteActionConnectorIndex,
-  deleteAllActionConnectors,
+  clearKibanaApmEventLog,
+  deleteApmAlerts,
 } from './alerting_api_helper';
+import { deleteApmRules, deleteAllActionConnectors } from './alerting_api_helper';
 
 export async function cleanupRuleAndAlertState({
   es,
@@ -22,7 +21,7 @@ export async function cleanupRuleAndAlertState({
   logger,
 }: {
   es: Client;
-  supertest: SuperTest<Test>;
+  supertest: SuperTestAgent;
   logger: ToolingLog;
 }) {
   try {

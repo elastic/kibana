@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { fetchActiveSpace } from '../common/spaces';
+import { dump } from '../common/utils';
 import { generateVmName } from '../common/vm_services';
 import { createAndEnrollEndpointHost } from '../common/endpoint_host_services';
 import {
@@ -12,7 +14,6 @@ import {
   getOrCreateDefaultAgentPolicy,
 } from '../common/fleet_services';
 import { getRuntimeServices } from './runtime';
-import { dump } from './utils';
 
 export const enrollEndpointHost = async (): Promise<string | undefined> => {
   let vmName;
@@ -37,7 +38,9 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
       throw new Error(`No 'version' specified`);
     }
 
-    vmName = generateVmName('dev');
+    const activeSpaceId = (await fetchActiveSpace(kbnClient)).id;
+
+    vmName = generateVmName(`dev-${activeSpaceId}`);
 
     log.info(`Creating VM named: ${vmName}`);
 

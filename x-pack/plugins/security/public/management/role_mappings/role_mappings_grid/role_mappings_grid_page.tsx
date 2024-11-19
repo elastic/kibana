@@ -7,7 +7,6 @@
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,7 +15,6 @@ import {
   EuiPageHeader,
   EuiPageSection,
   EuiSpacer,
-  EuiToolTip,
 } from '@elastic/eui';
 import React, { Component } from 'react';
 
@@ -41,7 +39,7 @@ import {
 } from '../../management_urls';
 import { RoleTableDisplay } from '../../role_table_display';
 import type { RolesAPIClient } from '../../roles';
-import { ActionsEuiTableFormatting } from '../../table_utils';
+import type { SecurityFeaturesAPIClient } from '../../security_features';
 import {
   DeleteProvider,
   NoCompatibleRealms,
@@ -53,6 +51,7 @@ import type { RoleMappingsAPIClient } from '../role_mappings_api_client';
 interface Props {
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
   roleMappingsAPI: PublicMethodsOf<RoleMappingsAPIClient>;
+  securityFeaturesAPI: PublicMethodsOf<SecurityFeaturesAPIClient>;
   notifications: NotificationsStart;
   docLinks: DocLinksStart;
   history: ScopedHistory;
@@ -278,26 +277,22 @@ export class RoleMappingsGridPage extends Component<Props, State> {
       >
         {(deleteRoleMappingPrompt) => {
           return (
-            <ActionsEuiTableFormatting>
-              <EuiInMemoryTable
-                items={roleMappings!}
-                itemId="name"
-                columns={this.getColumnConfig(deleteRoleMappingPrompt)}
-                hasActions={true}
-                search={search}
-                sorting={sorting}
-                selection={this.props.readOnly ? undefined : selection}
-                pagination={pagination}
-                loading={loadState === 'loadingTable'}
-                message={message}
-                isSelectable={true}
-                rowProps={() => {
-                  return {
-                    'data-test-subj': 'roleMappingRow',
-                  };
-                }}
-              />
-            </ActionsEuiTableFormatting>
+            <EuiInMemoryTable
+              items={roleMappings!}
+              itemId="name"
+              columns={this.getColumnConfig(deleteRoleMappingPrompt)}
+              search={search}
+              sorting={sorting}
+              selection={this.props.readOnly ? undefined : selection}
+              pagination={pagination}
+              loading={loadState === 'loadingTable'}
+              message={message}
+              rowProps={() => {
+                return {
+                  'data-test-subj': 'roleMappingRow',
+                };
+              }}
+            />
           );
         }}
       </DeleteProvider>
@@ -382,102 +377,63 @@ export class RoleMappingsGridPage extends Component<Props, State> {
         name: i18n.translate('xpack.security.management.roleMappings.actionsColumnName', {
           defaultMessage: 'Actions',
         }),
-        width: '80px',
+        width: '108px',
         actions: [
           {
             isPrimary: true,
-            render: (record: RoleMapping) => {
-              const title = i18n.translate(
-                'xpack.security.management.roleMappings.actionCloneTooltip',
-                { defaultMessage: 'Clone' }
-              );
-              const label = i18n.translate(
-                'xpack.security.management.roleMappings.actionCloneAriaLabel',
-                {
-                  defaultMessage: `Clone '{name}'`,
-                  values: { name: record.name },
-                }
-              );
-              return (
-                <EuiToolTip content={title}>
-                  <EuiButtonEmpty
-                    aria-label={label}
-                    iconType="copy"
-                    color="primary"
-                    data-test-subj={`cloneRoleMappingButton-${record.name}`}
-                    disabled={this.state.selectedItems.length >= 1}
-                    {...reactRouterNavigate(
-                      this.props.history,
-                      getCloneRoleMappingHref(record.name)
-                    )}
-                  >
-                    {title}
-                  </EuiButtonEmpty>
-                </EuiToolTip>
-              );
-            },
+            type: 'icon',
+            icon: 'copy',
+            name: i18n.translate('xpack.security.management.roleMappings.actionCloneTooltip', {
+              defaultMessage: 'Clone',
+            }),
+            description: (record: RoleMapping) =>
+              i18n.translate('xpack.security.management.roleMappings.actionCloneAriaLabel', {
+                defaultMessage: `Clone ''{name}''`,
+                values: { name: record.name },
+              }),
+            href: (record: RoleMapping) =>
+              reactRouterNavigate(this.props.history, getCloneRoleMappingHref(record.name)).href,
+            onClick: (record: RoleMapping, event: React.MouseEvent) =>
+              reactRouterNavigate(this.props.history, getCloneRoleMappingHref(record.name)).onClick(
+                event
+              ),
+            'data-test-subj': (record: RoleMapping) => `cloneRoleMappingButton-${record.name}`,
           },
           {
-            render: (record: RoleMapping) => {
-              const title = i18n.translate(
-                'xpack.security.management.roleMappings.actionDeleteTooltip',
-                { defaultMessage: 'Delete' }
-              );
-              const label = i18n.translate(
-                'xpack.security.management.roleMappings.actionDeleteAriaLabel',
-                {
-                  defaultMessage: `Delete '{name}'`,
-                  values: { name: record.name },
-                }
-              );
-              return (
-                <EuiToolTip content={title}>
-                  <EuiButtonEmpty
-                    aria-label={label}
-                    iconType="trash"
-                    color="danger"
-                    data-test-subj={`deleteRoleMappingButton-${record.name}`}
-                    disabled={this.state.selectedItems.length >= 1}
-                    onClick={() => deleteRoleMappingPrompt([record], this.onRoleMappingsDeleted)}
-                  >
-                    {title}
-                  </EuiButtonEmpty>
-                </EuiToolTip>
-              );
-            },
+            type: 'icon',
+            icon: 'trash',
+            color: 'danger',
+            name: i18n.translate('xpack.security.management.roleMappings.actionDeleteTooltip', {
+              defaultMessage: 'Delete',
+            }),
+            description: (record: RoleMapping) =>
+              i18n.translate('xpack.security.management.roleMappings.actionDeleteAriaLabel', {
+                defaultMessage: `Delete ''{name}''`,
+                values: { name: record.name },
+              }),
+            'data-test-subj': (record: RoleMapping) => `deleteRoleMappingButton-${record.name}`,
+            onClick: (record: RoleMapping) =>
+              deleteRoleMappingPrompt([record], this.onRoleMappingsDeleted),
           },
           {
             isPrimary: true,
-            render: (record: RoleMapping) => {
-              const label = i18n.translate(
-                'xpack.security.management.roleMappings.actionEditAriaLabel',
-                {
-                  defaultMessage: `Edit '{name}'`,
-                  values: { name: record.name },
-                }
-              );
-              const title = i18n.translate(
-                'xpack.security.management.roleMappings.actionEditTooltip',
-                { defaultMessage: 'Edit' }
-              );
-              return (
-                <EuiToolTip content={title}>
-                  <EuiButtonEmpty
-                    aria-label={label}
-                    iconType="pencil"
-                    color="primary"
-                    data-test-subj={`editRoleMappingButton-${record.name}`}
-                    disabled={this.state.selectedItems.length >= 1}
-                    {...reactRouterNavigate(
-                      this.props.history,
-                      getEditRoleMappingHref(record.name)
-                    )}
-                  >
-                    {title}
-                  </EuiButtonEmpty>
-                </EuiToolTip>
-              );
-            },
+            type: 'icon',
+            icon: 'pencil',
+            name: i18n.translate('xpack.security.management.roleMappings.actionEditTooltip', {
+              defaultMessage: 'Edit',
+            }),
+            description: (record: RoleMapping) =>
+              i18n.translate('xpack.security.management.roleMappings.actionEditAriaLabel', {
+                defaultMessage: `Edit ''{name}''`,
+                values: { name: record.name },
+              }),
+            'data-test-subj': (record: RoleMapping) => `editRoleMappingButton-${record.name}`,
+            href: (record: RoleMapping) =>
+              reactRouterNavigate(this.props.history, getEditRoleMappingHref(record.name)).href,
+            onClick: (record: RoleMapping, event: React.MouseEvent) =>
+              reactRouterNavigate(this.props.history, getEditRoleMappingHref(record.name)).onClick(
+                event
+              ),
           },
         ],
       });
@@ -493,17 +449,15 @@ export class RoleMappingsGridPage extends Component<Props, State> {
 
   private async checkPrivileges() {
     try {
-      const { canManageRoleMappings, hasCompatibleRealms } =
-        await this.props.roleMappingsAPI.checkRoleMappingFeatures();
-
-      const canLoad = canManageRoleMappings || this.props.readOnly;
+      const { canReadSecurity, hasCompatibleRealms } =
+        await this.props.securityFeaturesAPI.checkFeatures();
 
       this.setState({
-        loadState: canLoad ? this.state.loadState : 'permissionDenied',
+        loadState: canReadSecurity ? this.state.loadState : 'permissionDenied',
         hasCompatibleRealms,
       });
 
-      if (canLoad) {
+      if (canReadSecurity) {
         this.performInitialLoad();
       }
     } catch (e) {

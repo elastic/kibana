@@ -8,6 +8,8 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
+import { DocumentDetailsContext } from '../../shared/context';
+import { mockContextValue } from '../../shared/mocks/mock_context';
 import {
   CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID,
   CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TABLE_TEST_ID,
@@ -41,11 +43,13 @@ const TITLE_TEXT = EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(
 const renderRelatedAlertsBySameSourceEvent = () =>
   render(
     <TestProviders>
-      <RelatedAlertsBySameSourceEvent
-        originalEventId={originalEventId}
-        scopeId={scopeId}
-        eventId={eventId}
-      />
+      <DocumentDetailsContext.Provider value={mockContextValue}>
+        <RelatedAlertsBySameSourceEvent
+          originalEventId={originalEventId}
+          scopeId={scopeId}
+          eventId={eventId}
+        />
+      </DocumentDetailsContext.Provider>
     </TestProviders>
   );
 
@@ -94,14 +98,21 @@ describe('<RelatedAlertsBySameSourceEvent />', () => {
     expect(getByTestId(CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TABLE_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should render null if error', () => {
+  it('should render no data message if error', () => {
     (useFetchRelatedAlertsBySameSourceEvent as jest.Mock).mockReturnValue({
       loading: false,
       error: true,
+      data: [],
+      dataCount: 0,
+    });
+    (usePaginatedAlerts as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [],
     });
 
-    const { container } = renderRelatedAlertsBySameSourceEvent();
-    expect(container).toBeEmptyDOMElement();
+    const { getByText } = renderRelatedAlertsBySameSourceEvent();
+    expect(getByText('No related source events.')).toBeInTheDocument();
   });
 
   it('should render no data message', () => {

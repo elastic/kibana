@@ -1,0 +1,86 @@
+{
+  "id": "observabilityAIAssistantApp",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "observabilityAIAssistantApp",
+        "id": "def-server.CHANGES_FUNCTION_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "CHANGES_FUNCTION_NAME",
+        "description": [],
+        "signature": [
+          "\"changes\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant_app/server/functions/changes/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistantApp",
+        "id": "def-server.QUERY_FUNCTION_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "QUERY_FUNCTION_NAME",
+        "description": [],
+        "signature": [
+          "\"query\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant_app/server/functions/query/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "start": {
+      "parentPluginId": "observabilityAIAssistantApp",
+      "id": "def-server.ObservabilityAIAssistantAppServerStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "ObservabilityAIAssistantAppServerStart",
+      "description": [],
+      "path": "x-pack/plugins/observability_solution/observability_ai_assistant_app/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    },
+    "setup": {
+      "parentPluginId": "observabilityAIAssistantApp",
+      "id": "def-server.ObservabilityAIAssistantAppServerSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "ObservabilityAIAssistantAppServerSetup",
+      "description": [],
+      "path": "x-pack/plugins/observability_solution/observability_ai_assistant_app/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

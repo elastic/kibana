@@ -6,8 +6,15 @@
  */
 
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, combineLatest } from 'rxjs';
-import { distinctUntilChanged, filter, map, shareReplay, tap } from 'rxjs/operators';
+import {
+  BehaviorSubject,
+  combineLatest,
+  distinctUntilChanged,
+  filter,
+  map,
+  shareReplay,
+  tap,
+} from 'rxjs';
 
 import type { Logger, StatusServiceSetup } from '@kbn/core/server';
 import { ServiceStatusLevels } from '@kbn/core/server';

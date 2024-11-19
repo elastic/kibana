@@ -17,7 +17,17 @@ export const FilterOut = false;
  * @param negate Set to true when we create a negated filter (e.g. NOT threat.indicator.type: url)
  * @returns The new {@link Filter}
  */
-const createFilter = (key: string, value: string, negate: boolean): Filter => ({
+const createFilter = ({
+  key,
+  value,
+  negate,
+  index,
+}: {
+  key: string;
+  value: string;
+  negate: boolean;
+  index?: string;
+}): Filter => ({
   meta: {
     alias: null,
     negate,
@@ -25,6 +35,7 @@ const createFilter = (key: string, value: string, negate: boolean): Filter => ({
     type: 'phrase',
     key,
     params: { query: value },
+    index,
   },
   query: { match_phrase: { [key]: value } },
 });
@@ -71,9 +82,10 @@ export const updateFiltersArray = (
   existingFilters: Filter[],
   key: string,
   value: string | null,
-  filterType: boolean
+  filterType: boolean,
+  index?: string
 ): Filter[] => {
-  const newFilter = createFilter(key, value as string, !filterType);
+  const newFilter = createFilter({ key, value: value as string, negate: !filterType, index });
 
   const filter: Filter | undefined = filterExistsInFiltersArray(
     existingFilters,

@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './is_enhanced_embeddable';
-export * from './embeddable_action_storage';
+export * from './dynamic_action_storage';

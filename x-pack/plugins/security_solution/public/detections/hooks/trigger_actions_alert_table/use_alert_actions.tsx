@@ -6,11 +6,11 @@
  */
 
 import type { BulkActionsConfig } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import type { TableId } from '@kbn/securitysolution-data-table';
-import type { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import type { SourcererScopeName } from '../../../sourcerer/store/model';
 import { APM_USER_INTERACTIONS } from '../../../common/lib/apm/constants';
 import { updateAlertStatus } from '../../../common/components/toolbar/bulk_actions/update_alerts';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
@@ -100,21 +100,21 @@ export const useBulkAlertActionItems = ({
         clearSelection,
         refresh
       ) => {
-        let ids: string[] | undefined = items.map((item) => item._id);
-        let query: Record<string, unknown> | undefined;
-
-        if (isSelectAllChecked) {
-          const timeFilter = buildTimeRangeFilter(from, to);
-          query = buildEsQuery(undefined, [], [...timeFilter, ...filters], undefined);
-          ids = undefined;
-          startTransaction({ name: APM_USER_INTERACTIONS.BULK_QUERY_STATUS_UPDATE });
-        } else if (items.length > 1) {
-          startTransaction({ name: APM_USER_INTERACTIONS.BULK_STATUS_UPDATE });
-        } else {
-          startTransaction({ name: APM_USER_INTERACTIONS.STATUS_UPDATE });
-        }
-
         try {
+          let ids: string[] | undefined = items.map((item) => item._id);
+          let query: Record<string, unknown> | undefined;
+
+          if (isSelectAllChecked) {
+            const timeFilter = buildTimeRangeFilter(from, to);
+            query = buildEsQuery(undefined, [], [...timeFilter, ...filters], undefined);
+            ids = undefined;
+            startTransaction({ name: APM_USER_INTERACTIONS.BULK_QUERY_STATUS_UPDATE });
+          } else if (items.length > 1) {
+            startTransaction({ name: APM_USER_INTERACTIONS.BULK_STATUS_UPDATE });
+          } else {
+            startTransaction({ name: APM_USER_INTERACTIONS.STATUS_UPDATE });
+          }
+
           setAlertLoading(true);
           const response = await updateAlertStatus({
             status,
@@ -174,9 +174,11 @@ export const useBulkAlertActionItems = ({
     [getOnAction]
   );
 
-  return hasIndexWrite
-    ? [FILTER_OPEN, FILTER_CLOSED, FILTER_ACKNOWLEDGED].map((status) =>
-        getUpdateAlertStatusAction(status as AlertWorkflowStatus)
-      )
-    : [];
+  return useMemo(() => {
+    return hasIndexWrite
+      ? [FILTER_OPEN, FILTER_CLOSED, FILTER_ACKNOWLEDGED].map((status) => {
+          return getUpdateAlertStatusAction(status as AlertWorkflowStatus);
+        })
+      : [];
+  }, [getUpdateAlertStatusAction, hasIndexWrite]);
 };

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Observable } from 'rxjs';
@@ -25,31 +26,6 @@ export enum AppStatus {
    * Application is not accessible.
    */
   inaccessible = 1,
-}
-
-/**
- * Status of the application's navLink.
- *
- * @public
- */
-export enum AppNavLinkStatus {
-  /**
-   * The application navLink will be `visible` if the application's {@link AppStatus} is set to `accessible`
-   * and `hidden` if the application status is set to `inaccessible`.
-   */
-  default = 0,
-  /**
-   * The application navLink is visible and clickable in the navigation bar.
-   */
-  visible = 1,
-  /**
-   * The application navLink is visible but inactive and not clickable in the navigation bar.
-   */
-  disabled = 2,
-  /**
-   * The application navLink does not appear in the navigation bar.
-   */
-  hidden = 3,
 }
 
 /**
@@ -93,7 +69,7 @@ export type AppUpdater = (app: App) => Partial<AppUpdatableFields> | undefined;
  */
 export type AppUpdatableFields = Pick<
   App,
-  'status' | 'navLinkStatus' | 'searchable' | 'tooltip' | 'defaultPath' | 'deepLinks'
+  'status' | 'visibleIn' | 'tooltip' | 'defaultPath' | 'deepLinks'
 >;
 
 /**
@@ -126,17 +102,20 @@ export interface App<HistoryLocationState = unknown> extends AppNavOptions {
   status?: AppStatus;
 
   /**
-   * The initial status of the application's navLink.
-   * Defaulting to `visible` if `status` is `accessible` and `hidden` if status is `inaccessible`
-   * See {@link AppNavLinkStatus}
+   * Optional list of locations where the app is visible.
+   *
+   * Accepts the following values:
+   * - "globalSearch": the link will appear in the global search bar
+   * - "home": the link will appear on the Kibana home page
+   * - "kibanaOverview": the link will appear in the Kibana overview page
+   * - "sideNav": the link will appear in the side navigation.
+   *   Note: "sideNav" will be deprecated when we change the navigation to "solutions" style.
+   *
+   * @default ['globalSearch', 'sideNav']
+   * unless the status is marked as `inaccessible`.
+   * @note Set to `[]` (empty array) to hide this link
    */
-  navLinkStatus?: AppNavLinkStatus;
-
-  /**
-   * The initial flag to determine if the application is searchable in the global search.
-   * Defaulting to `true` if `navLinkStatus` is `visible` or omitted.
-   */
-  searchable?: boolean;
+  visibleIn?: AppDeepLinkLocations[];
 
   /**
    * Allow to define the default path a user should be directed to when navigating to the app.
@@ -172,7 +151,7 @@ export interface App<HistoryLocationState = unknown> extends AppNavOptions {
    *   start() {
    *      // later, when the navlink needs to be updated
    *      appUpdater.next(() => {
-   *        navLinkStatus: AppNavLinkStatus.disabled,
+   *        visibleIn: ['globalSearch'],
    *      })
    *   }
    * ```
@@ -268,15 +247,14 @@ export interface App<HistoryLocationState = unknown> extends AppNavOptions {
  *
  * @public
  */
-export type PublicAppDeepLinkInfo = Omit<
-  AppDeepLink,
-  'deepLinks' | 'keywords' | 'navLinkStatus' | 'searchable'
-> & {
+export type PublicAppDeepLinkInfo = Omit<AppDeepLink, 'deepLinks' | 'keywords' | 'visibleIn'> & {
   deepLinks: PublicAppDeepLinkInfo[];
   keywords: string[];
-  navLinkStatus: AppNavLinkStatus;
-  searchable: boolean;
+  visibleIn: AppDeepLinkLocations[];
 };
+
+/** The places in the UI where a deepLink can be shown */
+export type AppDeepLinkLocations = 'globalSearch' | 'sideNav' | 'home' | 'kibanaOverview';
 
 /**
  * Input type for registering secondary in-app locations for an application.
@@ -293,10 +271,10 @@ export type AppDeepLink<Id extends string = string> = {
   title: string;
   /** Optional keywords to match with in deep links search. Omit if this part of the hierarchy does not have a page URL. */
   keywords?: string[];
-  /** Optional status of the chrome navigation, defaults to `hidden` */
-  navLinkStatus?: AppNavLinkStatus;
-  /** Optional flag to determine if the link is searchable in the global search. Defaulting to `true` if `navLinkStatus` is `visible` or omitted */
-  searchable?: boolean;
+  /**
+   * Optional list of locations where the deepLink is visible. By default the deepLink is visible in "globalSearch".
+   */
+  visibleIn?: AppDeepLinkLocations[];
   /**
    * Optional category to use instead of the parent app category.
    * This property is added to customize the way a deep link is rendered in the global search.
@@ -326,13 +304,12 @@ export type AppDeepLink<Id extends string = string> = {
  */
 export type PublicAppInfo = Omit<
   App,
-  'mount' | 'updater$' | 'keywords' | 'deepLinks' | 'searchable'
+  'mount' | 'updater$' | 'keywords' | 'deepLinks' | 'visibleIn'
 > & {
   // remove optional on fields populated with default values
   status: AppStatus;
-  navLinkStatus: AppNavLinkStatus;
   appRoute: string;
   keywords: string[];
   deepLinks: PublicAppDeepLinkInfo[];
-  searchable: boolean;
+  visibleIn: AppDeepLinkLocations[];
 };

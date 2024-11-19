@@ -53,7 +53,9 @@ const createEmptyErrors = (): Errors => ({
   other: {},
 });
 
-export const FormErrorsProvider: FunctionComponent = ({ children }) => {
+export const FormErrorsProvider: FunctionComponent<{ children?: React.ReactNode }> = ({
+  children,
+}) => {
   const [errors, setErrors] = useState<Errors>(createEmptyErrors);
   const form = useFormContext<FormInternal>();
 
@@ -86,6 +88,7 @@ export const FormErrorsProvider: FunctionComponent = ({ children }) => {
           const nextHasErrors =
             Object.keys(restOfPhaseErrors).length > 0 ||
             Object.values(otherPhases).some((phaseErrors) => {
+              // @ts-expect-error upgrade typescript v4.9.5
               return Object.keys(phaseErrors).length > 0;
             });
 

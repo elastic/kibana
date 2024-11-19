@@ -8,13 +8,14 @@
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useRef } from 'react';
+import { type DataView } from '@kbn/data-plugin/common';
 import { useMlKibana } from '../../contexts/kibana';
 
 export const CreateDataViewButton = ({
   onDataViewCreated,
   allowAdHocDataView = false,
 }: {
-  onDataViewCreated: (id: string, type: string, name?: string) => void;
+  onDataViewCreated: (dataView: DataView) => void;
   allowAdHocDataView?: boolean;
 }) => {
   const { dataViewEditor } = useMlKibana().services;
@@ -25,10 +26,9 @@ export const CreateDataViewButton = ({
     closeDataViewEditorRef.current = dataViewEditor?.openEditor({
       onSave: async (dataView) => {
         if (dataView.id && onDataViewCreated) {
-          onDataViewCreated(dataView.id, 'index-pattern', dataView.name);
+          onDataViewCreated(dataView);
         }
       },
-
       allowAdHocDataView,
     });
   }, [onDataViewCreated, dataViewEditor, allowAdHocDataView]);

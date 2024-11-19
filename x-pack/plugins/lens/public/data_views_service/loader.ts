@@ -97,6 +97,7 @@ export function buildIndexPatternField(
     scripted: field.scripted,
     isMapped: field.isMapped,
     customLabel: field.customLabel,
+    customDescription: field.customDescription,
     runtimeField: field.runtimeField,
     runtime: Boolean(field.runtimeField),
     timeSeriesDimension: field.timeSeriesDimension,

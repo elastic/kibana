@@ -1,24 +1,26 @@
 {
   "type": "plugin",
   "id": "@kbn/banners-plugin",
-  "owner": "@elastic/appex-sharedux",
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "banners",
-    "server": true,
     "browser": true,
+    "server": true,
     "configPath": [
       "xpack",
       "banners"
     ],
-    "enabledOnAnonymousPages": true,
     "requiredPlugins": [
       "licensing"
     ],
     "optionalPlugins": [
       "screenshotMode"
     ],
-    "requiredBundles": [
-      "kibanaReact"
-    ]
+    "requiredBundles": [],
+    "enabledOnAnonymousPages": true
   }
 }

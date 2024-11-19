@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { ES_CLIENT_TOTAL_HITS_RELATION } from '@kbn/ml-query-utils';
 
 import type { MlClient } from '../../lib/ml_client';
 import type { AuthorizationHeader } from '../../lib/request_authorization';
 
-import { validateJob, ValidateJobPayload } from './job_validation';
+import type { ValidateJobPayload } from './job_validation';
+import { validateJob } from './job_validation';
 
 const callAs = elasticsearchServiceMock.createElasticsearchClient();
 // @ts-expect-error incorrect types
@@ -22,7 +23,7 @@ callAs.search.mockResponse({
   hits: { total: { value: 1, relation: ES_CLIENT_TOTAL_HITS_RELATION.EQ } },
 });
 
-const authHeader: AuthorizationHeader = {};
+const authHeader: AuthorizationHeader = Object.create(null);
 
 const mlClusterClient = {
   asCurrentUser: callAs,

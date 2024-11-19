@@ -1,15 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import chalk from 'chalk';
 import dedent from 'dedent';
 import getopts from 'getopts';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
+import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
 
 import { basename } from 'path';
 import { SERVERLESS_RESOURCES_PATHS } from '../paths';
@@ -38,13 +41,14 @@ export const serverless: Command = {
       --tag               Image tag of ES serverless to run from ${ES_SERVERLESS_REPO_ELASTICSEARCH}
       --image             Full path of ES serverless image to run, has precedence over tag. [default: ${ES_SERVERLESS_DEFAULT_IMAGE}]
       --background        Start ES serverless without attaching to the first node's logs
-      --basePath          Path to the directory where the ES cluster will store data
+      --basePath          Full path where the ES cluster will store data [default: <REPO>/.es]
+      --dataPath          Directory in basePath where the ES cluster will store data [default: stateless]
       --clean             Remove existing file system object store before running
       --kill              Kill running ES serverless nodes if detected on startup
       --host              Publish ES docker container on additional host IP
       --port              The port to bind to on 127.0.0.1 [default: ${DEFAULT_PORT}]
-      --ssl               Enable HTTP SSL on the ES cluster
-      --kibanaUrl         Fully qualified URL where Kibana is hosted (including base path). [default: https://localhost:5601/]
+      --ssl               Enable HTTP SSL on the ES cluster [default: true]
+      --kibanaUrl         Fully qualified URL where Kibana is hosted (including base path). [default: http://localhost:5601/]
       --skipTeardown      If this process exits, leave the ES cluster running in the background
       --waitForReady      Wait for the ES cluster to be ready to serve requests
       --resources         Overrides resources under ES 'config/' directory, which are by default
@@ -87,12 +91,27 @@ export const serverless: Command = {
         esArgs: 'E',
         files: 'F',
         projectType: 'project-type',
+        dataPath: 'data-path',
       },
 
-      string: ['projectType', 'tag', 'image', 'basePath', 'resources', 'host', 'kibanaUrl'],
+      string: [
+        'projectType',
+        'tag',
+        'image',
+        'basePath',
+        'resources',
+        'host',
+        'kibanaUrl',
+        'dataPath',
+      ],
       boolean: ['clean', 'ssl', 'kill', 'background', 'skipTeardown', 'waitForReady'],
 
-      default: defaults,
+      default: {
+        ...defaults,
+        kibanaUrl: 'http://localhost:5601/',
+        dataPath: 'stateless',
+        ssl: true,
+      },
     }) as unknown as ServerlessOptions;
 
     if (!options.projectType) {
@@ -103,7 +122,16 @@ export const serverless: Command = {
 
     if (!isServerlessProjectType(options.projectType)) {
       throw createCliError(
-        `Invalid projectPype '${options.projectType}', supported values: ${supportedProjectTypesStr}`
+        `Invalid projectType '${options.projectType}', supported values: ${supportedProjectTypesStr}`
+      );
+    }
+
+    // In case `--no-ssl` CLI argument is provided.
+    if (!options.ssl) {
+      log.warning(
+        `Serverless ES cluster cannot configure ${chalk.bold.cyan(
+          MOCK_IDP_REALM_NAME
+        )} realm since TLS is disabled.`
       );
     }
 

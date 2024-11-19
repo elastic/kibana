@@ -6,7 +6,7 @@
  */
 
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
-import React, { useMemo } from 'react';
+import React, { useMemo, FC, PropsWithChildren } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -21,27 +21,13 @@ import '@kbn/code-editor-mock/jest_helper';
 // @ts-ignore-next
 window.Worker = Worker;
 
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: jest.fn().mockImplementation((query) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: jest.fn(), // Deprecated
-    removeListener: jest.fn(), // Deprecated
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn(),
-  })),
-});
-
 interface CloudDefendAppDeps {
   core: CoreStart;
   deps: CloudDefendPluginStartDeps;
   params: AppMountParameters;
 }
 
-export const TestProvider: React.FC<Partial<CloudDefendAppDeps>> = ({
+export const TestProvider: FC<PropsWithChildren<Partial<CloudDefendAppDeps>>> = ({
   core = coreMock.createStart(),
   deps = {
     data: dataPluginMock.createStartContract(),

@@ -1,0 +1,50 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "../../../../typings/**/*",
+    "public/**/*.json",
+    "server/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/observability-plugin",
+    "@kbn/i18n",
+    "@kbn/core-http-browser",
+    "@kbn/server-route-repository",
+    "@kbn/config-schema",
+    "@kbn/shared-ux-router",
+    "@kbn/i18n-react",
+    "@kbn/cloud-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/observability-shared-plugin",
+    "@kbn/core-http-server",
+    "@kbn/security-plugin",
+    "@kbn/std",
+    "@kbn/use-tracked-promise",
+    "@kbn/custom-integrations",
+    "@kbn/share-plugin",
+    "@kbn/deeplinks-observability",
+    "@kbn/fleet-plugin",
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/home-sample-data-tab",
+    "@kbn/react-kibana-context-render",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/discover-plugin",
+    "@kbn/utility-types",
+    "@kbn/spaces-plugin",
+    "@kbn/deeplinks-analytics",
+    "@kbn/custom-integrations-plugin",
+    "@kbn/server-route-repository-utils",
+    "@kbn/core-application-browser"
+  ],
+  "exclude": [
+    "target/**/*"
+  ]
+}

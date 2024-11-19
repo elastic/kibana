@@ -76,10 +76,9 @@ export function VisLabel({
           data-test-subj={`${dataTestSubj}-select`}
           aria-label="Label"
           onChange={({ target }) => {
-            const title =
-              target.value === 'custom' ? '' : target.value === 'auto' ? undefined : label;
             handleChange({
-              label: title,
+              // reset title to undefined when switching mode
+              label: undefined,
               mode: target.value as LabelMode,
             });
           }}

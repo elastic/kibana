@@ -12,7 +12,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const spacesService = getService('spaces');
   const PageObjects = getPageObjects(['common', 'infraHome', 'security', 'spaceSelector']);
-  const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
 
   describe('logs spaces', () => {
@@ -40,18 +39,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).to.contain('Logs');
-      });
-
-      describe('logs landing page without data', () => {
-        it(`shows 'No data' page`, async () => {
-          await PageObjects.common.navigateToUrlWithBrowserHistory('infraLogs', '', undefined, {
-            basePath: '/s/custom_space',
-            ensureCurrentUrl: true,
-            shouldLoginIfPrompted: false,
-          });
-          await testSubjects.existOrFail('~infraLogsPage');
-          await testSubjects.existOrFail('~noDataPage');
-        });
       });
     });
 

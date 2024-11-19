@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
-import { JobAction } from '../../../common/constants/job_actions';
+import type { JobAction } from '../../../common/constants/job_actions';
 
 const REQUEST_TIMEOUT_NAME = 'RequestTimeout';
 type ACTION_STATE = DATAFEED_STATE | JOB_STATE | JobAction;
@@ -47,7 +47,7 @@ export function fillResultsWithTimeouts(
             reason: i18n.translate(
               'xpack.ml.models.jobService.requestToActionTimedOutErrorMessage',
               {
-                defaultMessage: `Request to {action} '{id}' timed out.{extra}`,
+                defaultMessage: `Request to {action} ''{id}'' timed out.{extra}`,
                 values: {
                   id,
                   action,

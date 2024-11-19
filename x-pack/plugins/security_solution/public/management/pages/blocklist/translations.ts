@@ -69,6 +69,13 @@ export const VALUE_LABEL_HELPER = i18n.translate(
   }
 );
 
+export const SINGLE_VALUE_LABEL_HELPER = i18n.translate(
+  'xpack.securitySolution.blocklist.single_value.label.helper',
+  {
+    defaultMessage: 'Type or copy & paste a value',
+  }
+);
+
 export const CONDITION_FIELD_TITLE: { [K in BlocklistConditionEntryField]: string } = {
   'file.hash.*': i18n.translate('xpack.securitySolution.blocklist.entry.field.hash', {
     defaultMessage: 'Hash',

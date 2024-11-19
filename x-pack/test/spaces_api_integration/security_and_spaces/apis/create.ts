@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import type { SuperTest } from 'supertest';
+
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import { AUTHENTICATION } from '../../common/lib/authentication';
 import { SPACES } from '../../common/lib/spaces';
 import { createTestSuiteFactory } from '../../common/suites/create';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createSpacesOnlySuite({ getService }: FtrProviderContext) {
@@ -21,7 +23,8 @@ export default function createSpacesOnlySuite({ getService }: FtrProviderContext
     expectReservedSpecifiedResult,
     expectConflictResponse,
     expectRbacForbiddenResponse,
-  } = createTestSuiteFactory(esArchiver, supertestWithoutAuth);
+    expectSolutionSpecifiedResult,
+  } = createTestSuiteFactory(esArchiver, supertestWithoutAuth as unknown as SuperTest<any>);
 
   describe('create', () => {
     [
@@ -68,6 +71,10 @@ export default function createSpacesOnlySuite({ getService }: FtrProviderContext
             statusCode: 403,
             response: expectRbacForbiddenResponse,
           },
+          solutionSpecified: {
+            statusCode: 403,
+            response: expectRbacForbiddenResponse,
+          },
         },
       });
 
@@ -86,6 +93,10 @@ export default function createSpacesOnlySuite({ getService }: FtrProviderContext
           reservedSpecified: {
             statusCode: 200,
             response: expectReservedSpecifiedResult,
+          },
+          solutionSpecified: {
+            statusCode: 200,
+            response: expectSolutionSpecifiedResult,
           },
         },
       });
@@ -106,6 +117,10 @@ export default function createSpacesOnlySuite({ getService }: FtrProviderContext
             statusCode: 200,
             response: expectReservedSpecifiedResult,
           },
+          solutionSpecified: {
+            statusCode: 200,
+            response: expectSolutionSpecifiedResult,
+          },
         },
       });
 
@@ -125,6 +140,10 @@ export default function createSpacesOnlySuite({ getService }: FtrProviderContext
             statusCode: 200,
             response: expectReservedSpecifiedResult,
           },
+          solutionSpecified: {
+            statusCode: 200,
+            response: expectSolutionSpecifiedResult,
+          },
         },
       });
 
@@ -141,6 +160,10 @@ export default function createSpacesOnlySuite({ getService }: FtrProviderContext
             response: expectRbacForbiddenResponse,
           },
           reservedSpecified: {
+            statusCode: 403,
+            response: expectRbacForbiddenResponse,
+          },
+          solutionSpecified: {
             statusCode: 403,
             response: expectRbacForbiddenResponse,
           },
@@ -163,6 +186,10 @@ export default function createSpacesOnlySuite({ getService }: FtrProviderContext
             statusCode: 403,
             response: expectRbacForbiddenResponse,
           },
+          solutionSpecified: {
+            statusCode: 403,
+            response: expectRbacForbiddenResponse,
+          },
         },
       });
 
@@ -182,6 +209,10 @@ export default function createSpacesOnlySuite({ getService }: FtrProviderContext
             statusCode: 403,
             response: expectRbacForbiddenResponse,
           },
+          solutionSpecified: {
+            statusCode: 403,
+            response: expectRbacForbiddenResponse,
+          },
         },
       });
 
@@ -198,6 +229,10 @@ export default function createSpacesOnlySuite({ getService }: FtrProviderContext
             response: expectRbacForbiddenResponse,
           },
           reservedSpecified: {
+            statusCode: 403,
+            response: expectRbacForbiddenResponse,
+          },
+          solutionSpecified: {
             statusCode: 403,
             response: expectRbacForbiddenResponse,
           },

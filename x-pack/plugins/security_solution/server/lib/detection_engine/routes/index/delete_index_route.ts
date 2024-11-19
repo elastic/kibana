@@ -14,10 +14,10 @@ import {
 } from '@kbn/securitysolution-es-utils';
 
 import type { IKibanaResponse } from '@kbn/core/server';
+import type { DeleteAlertsIndexResponse } from '../../../../../common/api/detection_engine/index_management';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
-import type { DeleteIndexResponse } from '../../../../../common/api/detection_engine';
 
 /**
  * Deletes all of the indexes, template, ilm policies, and aliases. You can check
@@ -35,8 +35,10 @@ export const deleteIndexRoute = (router: SecuritySolutionPluginRouter) => {
     .delete({
       path: DETECTION_ENGINE_INDEX_URL,
       access: 'public',
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(
@@ -44,7 +46,7 @@ export const deleteIndexRoute = (router: SecuritySolutionPluginRouter) => {
         version: '2023-10-31',
         validate: false,
       },
-      async (context, _, response): Promise<IKibanaResponse<DeleteIndexResponse>> => {
+      async (context, _, response): Promise<IKibanaResponse<DeleteAlertsIndexResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
         try {

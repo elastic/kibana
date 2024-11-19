@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataStatsFetchProgress } from '../../../common/types/field_stats';
+import type { DataStatsFetchProgress } from '../../../common/types/field_stats';
 
 export const getInitialProgress = (): DataStatsFetchProgress => ({
   isRunning: false,

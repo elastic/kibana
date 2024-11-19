@@ -14,10 +14,10 @@ export const SETTINGS = i18n.translate(
   }
 );
 
-export const SETTINGS_TOOLTIP = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.settingsTooltip',
+export const SECURITY_AI_SETTINGS = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.securityAiSettingsTitle',
   {
-    defaultMessage: 'Settings',
+    defaultMessage: 'Security AI settings',
   }
 );
 
@@ -25,6 +25,13 @@ export const SETTINGS_UPDATED_TOAST_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.settingsUpdatedToastTitle',
   {
     defaultMessage: 'Settings updated',
+  }
+);
+
+export const CONNECTORS_MENU_ITEM = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.settingsConnectorsMenuItemTitle',
+  {
+    defaultMessage: 'Connectors',
   }
 );
 
@@ -70,13 +77,6 @@ export const EVALUATION_MENU_ITEM = i18n.translate(
   }
 );
 
-export const ADD_SYSTEM_PROMPT_MODAL_TITLE = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.modalTitle',
-  {
-    defaultMessage: 'System Prompts',
-  }
-);
-
 export const CANCEL = i18n.translate(
   'xpack.elasticAssistant.assistant.promptEditor.systemPrompt.slCancelButtonTitle',
   {
@@ -88,5 +88,12 @@ export const SAVE = i18n.translate(
   'xpack.elasticAssistant.assistant.promptEditor.systemPrompt.slSaveButtonTitle',
   {
     defaultMessage: 'Save',
+  }
+);
+
+export const DELETE = i18n.translate(
+  'xpack.elasticAssistant.assistant.promptEditor.systemPrompt.slDeleteButtonTitle',
+  {
+    defaultMessage: 'Delete',
   }
 );

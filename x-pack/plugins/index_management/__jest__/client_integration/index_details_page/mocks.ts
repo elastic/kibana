@@ -42,6 +42,22 @@ export const testIndexMappings = {
   },
 };
 
+export const testIndexMappingsWithSemanticText = {
+  mappings: {
+    dynamic: 'false',
+    dynamic_templates: [],
+    properties: {
+      '@timestamp': {
+        type: 'date',
+      },
+      semantic_text: {
+        type: 'semantic_text',
+        inference_id: 'inference_id',
+      },
+    },
+  },
+};
+
 // Mocking partial index settings response
 export const testIndexSettings = {
   settings: {

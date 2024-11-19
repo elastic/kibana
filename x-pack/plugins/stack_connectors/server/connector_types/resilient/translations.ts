@@ -18,3 +18,14 @@ export const ALLOWED_HOSTS_ERROR = (message: string) =>
       message,
     },
   });
+
+export const UNKNOWN_API_ERROR = i18n.translate('xpack.stackConnectors.resilient.unknownError', {
+  defaultMessage: 'Unknown API Error',
+});
+
+export const UNAUTHORIZED_API_ERROR = i18n.translate(
+  'xpack.stackConnectors.resilient.unauthorizedError',
+  {
+    defaultMessage: 'Unauthorized API Error',
+  }
+);

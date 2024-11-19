@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ClassDeclaration, Project } from 'ts-morph';
@@ -19,28 +20,28 @@ import {
 } from './const';
 
 /** An enumeration of plugin classes within a single plugin.  */
-export type PluginLayer = typeof PLUGIN_LAYERS[number];
+export type PluginLayer = (typeof PLUGIN_LAYERS)[number];
 
 /** An enumeration of dependency requirements for a plugin. */
-export type PluginRequirement = typeof PLUGIN_REQUIREMENTS[number];
+export type PluginRequirement = (typeof PLUGIN_REQUIREMENTS)[number];
 
 /** An enumeration of lifecycles a plugin should implement. */
-export type PluginLifecycle = typeof PLUGIN_LIFECYCLES[number];
+export type PluginLifecycle = (typeof PLUGIN_LIFECYCLES)[number];
 
 /** An enumeration of manifest requirement states for a plugin dependency. */
-export type ManifestRequirement = typeof MANIFEST_REQUIREMENTS[number];
+export type ManifestRequirement = (typeof MANIFEST_REQUIREMENTS)[number];
 
 /** An enumeration of derived manifest states for a plugin dependency. */
-export type ManifestState = typeof MANIFEST_STATES[number];
+export type ManifestState = (typeof MANIFEST_STATES)[number];
 
 /** An enumeration of derived plugin states for a dependency. */
-export type PluginState = typeof PLUGIN_STATES[number];
+export type PluginState = (typeof PLUGIN_STATES)[number];
 
 /** An enumeration of derived dependency states. */
-export type DependencyState = typeof DEPENDENCY_STATES[number];
+export type DependencyState = (typeof DEPENDENCY_STATES)[number];
 
 /** An enumeration of where a type could be derived from a plugin class. */
-export type SourceOfType = typeof SOURCE_OF_TYPE[number];
+export type SourceOfType = (typeof SOURCE_OF_TYPE)[number];
 
 /** Information about a given plugin. */
 export interface PluginInfo {

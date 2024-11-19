@@ -1,0 +1,1214 @@
+{
+  "id": "@kbn/ai-assistant",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ai-assistant",
+        "id": "def-public.ChatBody",
+        "type": "Function",
+        "tags": [],
+        "label": "ChatBody",
+        "description": [],
+        "signature": [
+          "({\n  connectors,\n  currentUser,\n  flyoutPositionMode,\n  initialConversationId,\n  initialMessages,\n  initialTitle,\n  knowledgeBase,\n  showLinkToConversationsApp,\n  onConversationUpdate,\n  onToggleFlyoutPositionMode,\n  navigateToConversation,\n}: { connectors: ",
+          "UseGenAIConnectorsResult",
+          "; currentUser?: Pick<",
+          {
+            "pluginId": "@kbn/core-security-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSecurityCommonPluginApi",
+            "section": "def-common.AuthenticatedUser",
+            "text": "AuthenticatedUser"
+          },
+          ", \"username\" | \"full_name\"> | undefined; flyoutPositionMode?: ",
+          {
+            "pluginId": "@kbn/ai-assistant",
+            "scope": "public",
+            "docId": "kibKbnAiAssistantPluginApi",
+            "section": "def-public.FlyoutPositionMode",
+            "text": "FlyoutPositionMode"
+          },
+          " | undefined; initialTitle?: string | undefined; initialMessages?: ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.Message",
+            "text": "Message"
+          },
+          "[] | undefined; initialConversationId?: string | undefined; knowledgeBase: ",
+          {
+            "pluginId": "@kbn/ai-assistant",
+            "scope": "public",
+            "docId": "kibKbnAiAssistantPluginApi",
+            "section": "def-public.UseKnowledgeBaseResult",
+            "text": "UseKnowledgeBaseResult"
+          },
+          "; showLinkToConversationsApp: boolean; onConversationUpdate: (conversation: { conversation: { id: string; title: string; last_updated: string; token_count?: ",
+          "TokenCount",
+          " | undefined; }; }) => void; onToggleFlyoutPositionMode?: ((flyoutPositionMode: ",
+          {
+            "pluginId": "@kbn/ai-assistant",
+            "scope": "public",
+            "docId": "kibKbnAiAssistantPluginApi",
+            "section": "def-public.FlyoutPositionMode",
+            "text": "FlyoutPositionMode"
+          },
+          ") => void) | undefined; navigateToConversation?: ((conversationId?: string | undefined) => void) | undefined; }) => React.JSX.Element"
+        ],
+        "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_body.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.ChatBody.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  connectors,\n  currentUser,\n  flyoutPositionMode,\n  initialConversationId,\n  initialMessages,\n  initialTitle,\n  knowledgeBase,\n  showLinkToConversationsApp,\n  onConversationUpdate,\n  onToggleFlyoutPositionMode,\n  navigateToConversation,\n}",
+            "description": [],
+            "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_body.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ChatBody.$1.connectors",
+                "type": "Object",
+                "tags": [],
+                "label": "connectors",
+                "description": [],
+                "signature": [
+                  "UseGenAIConnectorsResult"
+                ],
+                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ChatBody.$1.currentUser",
+                "type": "Object",
+                "tags": [],
+                "label": "currentUser",
+                "description": [],
+                "signature": [
+                  "Pick<",
+                  {
+                    "pluginId": "@kbn/core-security-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSecurityCommonPluginApi",
+                    "section": "def-common.AuthenticatedUser",
+                    "text": "AuthenticatedUser"
+                  },
+                  ", \"username\" | \"full_name\"> | undefined"
+                ],
+                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ChatBody.$1.flyoutPositionMode",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "flyoutPositionMode",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/ai-assistant",
+                    "scope": "public",
+                    "docId": "kibKbnAiAssistantPluginApi",
+                    "section": "def-public.FlyoutPositionMode",
+                    "text": "FlyoutPositionMode"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ChatBody.$1.initialTitle",
+                "type": "string",
+                "tags": [],
+                "label": "initialTitle",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ChatBody.$1.initialMessages",
+                "type": "Array",
+                "tags": [],
+                "label": "initialMessages",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "observabilityAIAssistant",
+                    "scope": "common",
+                    "docId": "kibObservabilityAIAssistantPluginApi",
+                    "section": "def-common.Message",
+                    "text": "Message"
+                  },
+                  "[] | undefined"
+                ],
+                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ChatBody.$1.initialConversationId",
+                "type": "string",
+                "tags": [],
+                "label": "initialConversationId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ChatBody.$1.knowledgeBase",
+                "type": "Object",
+                "tags": [],
+                "label": "knowledgeBase",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/ai-assistant",
+                    "scope": "public",
+                    "docId": "kibKbnAiAssistantPluginApi",
+                    "section": "def-public.UseKnowledgeBaseResult",
+                    "text": "UseKnowledgeBaseResult"
+                  }
+                ],
+                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ChatBody.$1.showLinkToConversationsApp",
+                "type": "boolean",
+                "tags": [],
+                "label": "showLinkToConversationsApp",
+                "description": [],
+                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ChatBody.$1.onConversationUpdate",
+                "type": "Function",
+                "tags": [],
+                "label": "onConversationUpdate",
+                "description": [],
+                "signature": [
+                  "(conversation: { conversation: { id: string; title: string; last_updated: string; token_count?: ",
+                  "TokenCount",
+                  " | undefined; }; }) => void"
+                ],
+                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/ai-assistant",
+                    "id": "def-public.ChatBody.$1.onConversationUpdate.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "conversation",
+                    "description": [],
+                    "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_body.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/ai-assistant",
+                        "id": "def-public.ChatBody.$1.onConversationUpdate.$1.conversation",
+                        "type": "Object",
+                        "tags": [],
+                        "label": "conversation",
+                        "description": [],
+                        "signature": [
+                          "{ id: string; title: string; last_updated: string; token_count?: ",
+                          "TokenCount",
+                          " | undefined; }"
+                        ],
+                        "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_body.tsx",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ChatBody.$1.onToggleFlyoutPositionMode",
+                "type": "Function",
+                "tags": [],
+                "label": "onToggleFlyoutPositionMode",
+                "description": [],
+                "signature": [
+                  "((flyoutPositionMode: ",
+                  {
+                    "pluginId": "@kbn/ai-assistant",
+                    "scope": "public",
+                    "docId": "kibKbnAiAssistantPluginApi",
+                    "section": "def-public.FlyoutPositionMode",
+                    "text": "FlyoutPositionMode"
+                  },
+                  ") => void) | undefined"
+                ],
+                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/ai-assistant",
+                    "id": "def-public.ChatBody.$1.onToggleFlyoutPositionMode.$1",
+                    "type": "Enum",
+                    "tags": [],
+                    "label": "flyoutPositionMode",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/ai-assistant",
+                        "scope": "public",
+                        "docId": "kibKbnAiAssistantPluginApi",
+                        "section": "def-public.FlyoutPositionMode",
+                        "text": "FlyoutPositionMode"
+                      }
+                    ],
+                    "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_body.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ChatBody.$1.navigateToConversation",
+                "type": "Function",
+                "tags": [],
+                "label": "navigateToConversation",
+                "description": [],
+                "signature": [
+                  "((conversationId?: string | undefined) => void) | undefined"
+                ],
+                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/ai-assistant",
+                    "id": "def-public.ChatBody.$1.navigateToConversation.$1",
+                    "type": "string",
+                    "tags": [],
+                    "label": "conversationId",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_body.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": false
+                  }
+                ],
+                "returnComment": []
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-assistant",
+        "id": "def-public.ChatFlyout",
+        "type": "Function",
+        "tags": [],
+        "label": "ChatFlyout",
+        "description": [],
+        "signature": [
+          "({\n  initialTitle,\n  initialMessages,\n  initialFlyoutPositionMode,\n  isOpen,\n  onClose,\n  navigateToConversation,\n  hideConversationList,\n}: { initialTitle: string; initialMessages: ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.Message",
+            "text": "Message"
+          },
+          "[]; initialFlyoutPositionMode?: ",
+          {
+            "pluginId": "@kbn/ai-assistant",
+            "scope": "public",
+            "docId": "kibKbnAiAssistantPluginApi",
+            "section": "def-public.FlyoutPositionMode",
+            "text": "FlyoutPositionMode"
+          },
+          " | undefined; isOpen: boolean; onClose: () => void; navigateToConversation?: ((conversationId?: string | undefined) => void) | undefined; hideConversationList?: boolean | undefined; }) => React.JSX.Element | null"
+        ],
+        "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_flyout.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.ChatFlyout.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  initialTitle,\n  initialMessages,\n  initialFlyoutPositionMode,\n  isOpen,\n  onClose,\n  navigateToConversation,\n  hideConversationList,\n}",
+            "description": [],
+            "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_flyout.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ChatFlyout.$1.initialTitle",
+                "type": "string",
+                "tags": [],
+                "label": "initialTitle",
+                "description": [],
+                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_flyout.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ChatFlyout.$1.initialMessages",
+                "type": "Array",
+                "tags": [],
+                "label": "initialMessages",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "observabilityAIAssistant",
+                    "scope": "common",
+                    "docId": "kibObservabilityAIAssistantPluginApi",
+                    "section": "def-common.Message",
+                    "text": "Message"
+                  },
+                  "[]"
+                ],
+                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_flyout.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ChatFlyout.$1.initialFlyoutPositionMode",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "initialFlyoutPositionMode",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/ai-assistant",
+                    "scope": "public",
+                    "docId": "kibKbnAiAssistantPluginApi",
+                    "section": "def-public.FlyoutPositionMode",
+                    "text": "FlyoutPositionMode"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_flyout.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ChatFlyout.$1.isOpen",
+                "type": "boolean",
+                "tags": [],
+                "label": "isOpen",
+                "description": [],
+                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_flyout.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ChatFlyout.$1.onClose",
+                "type": "Function",
+                "tags": [],
+                "label": "onClose",
+                "description": [],
+                "signature": [
+                  "() => void"
+                ],
+                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_flyout.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ChatFlyout.$1.navigateToConversation",
+                "type": "Function",
+                "tags": [],
+                "label": "navigateToConversation",
+                "description": [],
+                "signature": [
+                  "((conversationId?: string | undefined) => void) | undefined"
+                ],
+                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_flyout.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/ai-assistant",
+                    "id": "def-public.ChatFlyout.$1.navigateToConversation.$1",
+                    "type": "string",
+                    "tags": [],
+                    "label": "conversationId",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_flyout.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": false
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ChatFlyout.$1.hideConversationList",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "hideConversationList",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_flyout.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-assistant",
+        "id": "def-public.ChatInlineEditingContent",
+        "type": "Function",
+        "tags": [],
+        "label": "ChatInlineEditingContent",
+        "description": [],
+        "signature": [
+          "({\n  visible,\n  setContainer,\n  style,\n}: { visible?: boolean | undefined; setContainer?: ((element: HTMLDivElement | null) => void) | undefined; style: React.CSSProperties; }) => React.JSX.Element"
+        ],
+        "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_inline_edit.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.ChatInlineEditingContent.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  visible,\n  setContainer,\n  style,\n}",
+            "description": [],
+            "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_inline_edit.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ChatInlineEditingContent.$1.visible",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "visible",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_inline_edit.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ChatInlineEditingContent.$1.setContainer",
+                "type": "Function",
+                "tags": [],
+                "label": "setContainer",
+                "description": [],
+                "signature": [
+                  "((element: HTMLDivElement | null) => void) | undefined"
+                ],
+                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_inline_edit.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/ai-assistant",
+                    "id": "def-public.ChatInlineEditingContent.$1.setContainer.$1",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "element",
+                    "description": [],
+                    "signature": [
+                      "HTMLDivElement | null"
+                    ],
+                    "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_inline_edit.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": false
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ChatInlineEditingContent.$1.style",
+                "type": "Object",
+                "tags": [],
+                "label": "style",
+                "description": [],
+                "signature": [
+                  "React.CSSProperties"
+                ],
+                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_inline_edit.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-assistant",
+        "id": "def-public.ConversationList",
+        "type": "Function",
+        "tags": [],
+        "label": "ConversationList",
+        "description": [],
+        "signature": [
+          "({\n  conversations,\n  isLoading,\n  selectedConversationId,\n  onConversationSelect,\n  onConversationDeleteClick,\n  newConversationHref,\n  getConversationHref,\n}: { conversations: ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "public",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-public.AbortableAsyncState",
+            "text": "AbortableAsyncState"
+          },
+          "<{ conversations: ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.Conversation",
+            "text": "Conversation"
+          },
+          "[]; }>; isLoading: boolean; selectedConversationId?: string | undefined; onConversationSelect?: ((conversationId?: string | undefined) => void) | undefined; onConversationDeleteClick: (conversationId: string) => void; newConversationHref?: string | undefined; getConversationHref?: ((conversationId: string) => string) | undefined; }) => React.JSX.Element"
+        ],
+        "path": "x-pack/packages/kbn-ai-assistant/src/chat/conversation_list.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.ConversationList.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  conversations,\n  isLoading,\n  selectedConversationId,\n  onConversationSelect,\n  onConversationDeleteClick,\n  newConversationHref,\n  getConversationHref,\n}",
+            "description": [],
+            "path": "x-pack/packages/kbn-ai-assistant/src/chat/conversation_list.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ConversationList.$1.conversations",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "conversations",
+                "description": [],
+                "signature": [
+                  "State<{ conversations: ",
+                  {
+                    "pluginId": "observabilityAIAssistant",
+                    "scope": "common",
+                    "docId": "kibObservabilityAIAssistantPluginApi",
+                    "section": "def-common.Conversation",
+                    "text": "Conversation"
+                  },
+                  "[]; }> & { refresh: () => void; }"
+                ],
+                "path": "x-pack/packages/kbn-ai-assistant/src/chat/conversation_list.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ConversationList.$1.isLoading",
+                "type": "boolean",
+                "tags": [],
+                "label": "isLoading",
+                "description": [],
+                "path": "x-pack/packages/kbn-ai-assistant/src/chat/conversation_list.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ConversationList.$1.selectedConversationId",
+                "type": "string",
+                "tags": [],
+                "label": "selectedConversationId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/packages/kbn-ai-assistant/src/chat/conversation_list.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ConversationList.$1.onConversationSelect",
+                "type": "Function",
+                "tags": [],
+                "label": "onConversationSelect",
+                "description": [],
+                "signature": [
+                  "((conversationId?: string | undefined) => void) | undefined"
+                ],
+                "path": "x-pack/packages/kbn-ai-assistant/src/chat/conversation_list.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/ai-assistant",
+                    "id": "def-public.ConversationList.$1.onConversationSelect.$1",
+                    "type": "string",
+                    "tags": [],
+                    "label": "conversationId",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "x-pack/packages/kbn-ai-assistant/src/chat/conversation_list.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": false
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ConversationList.$1.onConversationDeleteClick",
+                "type": "Function",
+                "tags": [],
+                "label": "onConversationDeleteClick",
+                "description": [],
+                "signature": [
+                  "(conversationId: string) => void"
+                ],
+                "path": "x-pack/packages/kbn-ai-assistant/src/chat/conversation_list.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/ai-assistant",
+                    "id": "def-public.ConversationList.$1.onConversationDeleteClick.$1",
+                    "type": "string",
+                    "tags": [],
+                    "label": "conversationId",
+                    "description": [],
+                    "signature": [
+                      "string"
+                    ],
+                    "path": "x-pack/packages/kbn-ai-assistant/src/chat/conversation_list.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ConversationList.$1.newConversationHref",
+                "type": "string",
+                "tags": [],
+                "label": "newConversationHref",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/packages/kbn-ai-assistant/src/chat/conversation_list.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ConversationList.$1.getConversationHref",
+                "type": "Function",
+                "tags": [],
+                "label": "getConversationHref",
+                "description": [],
+                "signature": [
+                  "((conversationId: string) => string) | undefined"
+                ],
+                "path": "x-pack/packages/kbn-ai-assistant/src/chat/conversation_list.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/ai-assistant",
+                    "id": "def-public.ConversationList.$1.getConversationHref.$1",
+                    "type": "string",
+                    "tags": [],
+                    "label": "conversationId",
+                    "description": [],
+                    "signature": [
+                      "string"
+                    ],
+                    "path": "x-pack/packages/kbn-ai-assistant/src/chat/conversation_list.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-assistant",
+        "id": "def-public.ConversationView",
+        "type": "Function",
+        "tags": [],
+        "label": "ConversationView",
+        "description": [],
+        "signature": [
+          "({ conversationId, navigateToConversation, getConversationHref, newConversationHref, scopes, }: ConversationViewProps) => React.JSX.Element"
+        ],
+        "path": "x-pack/packages/kbn-ai-assistant/src/conversation/conversation_view.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.ConversationView.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  conversationId,\n  navigateToConversation,\n  getConversationHref,\n  newConversationHref,\n  scopes,\n}",
+            "description": [],
+            "signature": [
+              "ConversationViewProps"
+            ],
+            "path": "x-pack/packages/kbn-ai-assistant/src/conversation/conversation_view.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-assistant",
+        "id": "def-public.createAppService",
+        "type": "Function",
+        "tags": [],
+        "label": "createAppService",
+        "description": [],
+        "signature": [
+          "({\n  pluginsStart,\n}: { pluginsStart: ",
+          "AIAssistantPluginStartDependencies",
+          "; }) => ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "public",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-public.ObservabilityAIAssistantService",
+            "text": "ObservabilityAIAssistantService"
+          }
+        ],
+        "path": "x-pack/packages/kbn-ai-assistant/src/service/create_app_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.createAppService.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  pluginsStart,\n}",
+            "description": [],
+            "path": "x-pack/packages/kbn-ai-assistant/src/service/create_app_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.createAppService.$1.pluginsStart",
+                "type": "Object",
+                "tags": [],
+                "label": "pluginsStart",
+                "description": [],
+                "signature": [
+                  "AIAssistantPluginStartDependencies"
+                ],
+                "path": "x-pack/packages/kbn-ai-assistant/src/service/create_app_service.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-assistant",
+        "id": "def-public.reverseToLastUserMessage",
+        "type": "Function",
+        "tags": [],
+        "label": "reverseToLastUserMessage",
+        "description": [],
+        "signature": [
+          "(messages: ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.Message",
+            "text": "Message"
+          },
+          "[], message: ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.Message",
+            "text": "Message"
+          },
+          ") => ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.Message",
+            "text": "Message"
+          },
+          "[]"
+        ],
+        "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_body.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.reverseToLastUserMessage.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "messages",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "common",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-common.Message",
+                "text": "Message"
+              },
+              "[]"
+            ],
+            "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_body.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.reverseToLastUserMessage.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "message",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "common",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-common.Message",
+                "text": "Message"
+              }
+            ],
+            "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_body.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-assistant",
+        "id": "def-public.useAIAssistantAppService",
+        "type": "Function",
+        "tags": [],
+        "label": "useAIAssistantAppService",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "public",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-public.ObservabilityAIAssistantService",
+            "text": "ObservabilityAIAssistantService"
+          }
+        ],
+        "path": "x-pack/packages/kbn-ai-assistant/src/hooks/use_ai_assistant_app_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-assistant",
+        "id": "def-public.useAIAssistantChatService",
+        "type": "Function",
+        "tags": [],
+        "label": "useAIAssistantChatService",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "public",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-public.ObservabilityAIAssistantChatService",
+            "text": "ObservabilityAIAssistantChatService"
+          }
+        ],
+        "path": "x-pack/packages/kbn-ai-assistant/src/hooks/use_ai_assistant_chat_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-assistant",
+        "id": "def-public.useKnowledgeBase",
+        "type": "Function",
+        "tags": [],
+        "label": "useKnowledgeBase",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/ai-assistant",
+            "scope": "public",
+            "docId": "kibKbnAiAssistantPluginApi",
+            "section": "def-public.UseKnowledgeBaseResult",
+            "text": "UseKnowledgeBaseResult"
+          }
+        ],
+        "path": "x-pack/packages/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-assistant",
+        "id": "def-public.useScopes",
+        "type": "Function",
+        "tags": [],
+        "label": "useScopes",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/ai-assistant-common",
+            "scope": "common",
+            "docId": "kibKbnAiAssistantCommonPluginApi",
+            "section": "def-common.AssistantScope",
+            "text": "AssistantScope"
+          },
+          "[]"
+        ],
+        "path": "x-pack/packages/kbn-ai-assistant/src/hooks/use_scopes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/ai-assistant",
+        "id": "def-public.UseKnowledgeBaseResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "UseKnowledgeBaseResult",
+        "description": [],
+        "path": "x-pack/packages/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.UseKnowledgeBaseResult.status",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              "State<{ errorMessage?: string | undefined; ready: boolean; enabled: boolean; endpoint?: Partial<",
+              "InferenceInferenceEndpointInfo",
+              "> | undefined; model_stats?: { deployment_state: ",
+              "MlDeploymentState",
+              " | undefined; allocation_state: ",
+              "MlDeploymentAllocationState",
+              " | undefined; } | undefined; }> & { refresh: () => void; }"
+            ],
+            "path": "x-pack/packages/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.UseKnowledgeBaseResult.isInstalling",
+            "type": "boolean",
+            "tags": [],
+            "label": "isInstalling",
+            "description": [],
+            "path": "x-pack/packages/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.UseKnowledgeBaseResult.installError",
+            "type": "Object",
+            "tags": [],
+            "label": "installError",
+            "description": [],
+            "signature": [
+              "Error | undefined"
+            ],
+            "path": "x-pack/packages/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.UseKnowledgeBaseResult.install",
+            "type": "Function",
+            "tags": [],
+            "label": "install",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "x-pack/packages/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/ai-assistant",
+        "id": "def-public.FlyoutPositionMode",
+        "type": "Enum",
+        "tags": [],
+        "label": "FlyoutPositionMode",
+        "description": [],
+        "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_flyout.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/ai-assistant",
+        "id": "def-public.AIAssistantAppService",
+        "type": "Type",
+        "tags": [],
+        "label": "AIAssistantAppService",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "public",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-public.ObservabilityAIAssistantService",
+            "text": "ObservabilityAIAssistantService"
+          }
+        ],
+        "path": "x-pack/packages/kbn-ai-assistant/src/service/create_app_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

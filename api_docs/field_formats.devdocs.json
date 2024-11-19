@@ -827,9 +827,9 @@
             "(uiSettings: ",
             {
               "pluginId": "@kbn/core-ui-settings-server",
-              "scope": "common",
+              "scope": "server",
               "docId": "kibKbnCoreUiSettingsServerPluginApi",
-              "section": "def-common.IUiSettingsClient",
+              "section": "def-server.IUiSettingsClient",
               "text": "IUiSettingsClient"
             },
             ") => Promise<",
@@ -858,9 +858,9 @@
               "signature": [
                 {
                   "pluginId": "@kbn/core-ui-settings-server",
-                  "scope": "common",
+                  "scope": "server",
                   "docId": "kibKbnCoreUiSettingsServerPluginApi",
-                  "section": "def-common.IUiSettingsClient",
+                  "section": "def-server.IUiSettingsClient",
                   "text": "IUiSettingsClient"
                 }
               ],
@@ -5538,16 +5538,16 @@
             "pluginId": "fieldFormats",
             "scope": "common",
             "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.TextContextTypeConvert",
-            "text": "TextContextTypeConvert"
+            "section": "def-common.HtmlContextTypeConvert",
+            "text": "HtmlContextTypeConvert"
           },
           " | ",
           {
             "pluginId": "fieldFormats",
             "scope": "common",
             "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.HtmlContextTypeConvert",
-            "text": "HtmlContextTypeConvert"
+            "section": "def-common.TextContextTypeConvert",
+            "text": "TextContextTypeConvert"
           }
         ],
         "path": "src/plugins/field_formats/common/types.ts",

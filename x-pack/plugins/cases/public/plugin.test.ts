@@ -18,7 +18,7 @@ import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { mockStorage } from '@kbn/kibana-utils-plugin/public/storage/hashed_item_store/mock';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
-import type { CasesPluginSetup, CasesPluginStart } from './types';
+import type { CasesPublicStartDependencies, CasesPublicSetupDependencies } from './types';
 import { CasesUiPlugin } from './plugin';
 import { ALLOWED_MIME_TYPES } from '../common/constants/mime_types';
 
@@ -36,8 +36,8 @@ describe('Cases Ui Plugin', () => {
   let plugin: CasesUiPlugin;
   let coreSetup: ReturnType<typeof coreMock.createSetup>;
   let coreStart: ReturnType<typeof coreMock.createStart>;
-  let pluginsSetup: jest.Mocked<CasesPluginSetup>;
-  let pluginsStart: jest.Mocked<CasesPluginStart>;
+  let pluginsSetup: jest.Mocked<CasesPublicSetupDependencies>;
+  let pluginsStart: jest.Mocked<CasesPublicStartDependencies>;
 
   beforeEach(() => {
     context = coreMock.createPluginInitializerContext(getConfig());
@@ -52,6 +52,7 @@ describe('Cases Ui Plugin', () => {
       },
       security: securityMock.createSetup(),
       management: managementPluginMock.createSetupContract(),
+      triggersActionsUi: triggersActionsUiMock.createStart(),
     };
 
     pluginsStart = {
@@ -141,6 +142,7 @@ describe('Cases Ui Plugin', () => {
         hooks: {
           useCasesAddToExistingCaseModal: expect.any(Function),
           useCasesAddToNewCaseFlyout: expect.any(Function),
+          useIsAddToCaseOpen: expect.any(Function),
         },
         ui: {
           getAllCasesSelectorModal: expect.any(Function),

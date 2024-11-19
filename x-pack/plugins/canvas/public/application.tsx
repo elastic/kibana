@@ -8,18 +8,17 @@
 import React from 'react';
 import { Store } from 'redux';
 import ReactDOM from 'react-dom';
-import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
 import { BehaviorSubject } from 'rxjs';
 
+import '@kbn/flot-charts';
 import { includes, remove } from 'lodash';
 
 import { AppMountParameters, CoreStart, CoreSetup, AppUpdater } from '@kbn/core/public';
 
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { PluginServices } from '@kbn/presentation-util-plugin/public';
 
 import { CanvasStartDeps, CanvasSetupDeps } from './plugin';
 import { App } from './components/app';
@@ -32,12 +31,7 @@ import { init as initStatsReporter } from './lib/ui_metric';
 
 import { CapabilitiesStrings } from '../i18n';
 
-import {
-  startLegacyServices,
-  services,
-  LegacyServicesProvider,
-  CanvasPluginServices,
-} from './services';
+import { startLegacyServices, services, LegacyServicesProvider } from './services';
 import { initFunctions } from './functions';
 // @ts-expect-error untyped local
 import { appUnload } from './state/actions/app';
@@ -56,36 +50,28 @@ export const renderApp = ({
   startPlugins,
   params,
   canvasStore,
-  pluginServices,
+  appUpdater,
 }: {
   coreStart: CoreStart;
   startPlugins: CanvasStartDeps;
   params: AppMountParameters;
   canvasStore: Store;
-  pluginServices: PluginServices<CanvasPluginServices>;
+  appUpdater: BehaviorSubject<AppUpdater>;
 }) => {
-  const { presentationUtil } = startPlugins;
   const { element } = params;
   element.classList.add('canvas');
   element.classList.add('canvasContainerWrapper');
-  const ServicesContextProvider = pluginServices.getContextProvider();
 
   ReactDOM.render(
-    <KibanaContextProvider services={{ ...startPlugins, ...coreStart }}>
-      <ServicesContextProvider>
+    <KibanaRenderContextProvider {...coreStart}>
+      <KibanaContextProvider services={{ ...startPlugins, ...coreStart }}>
         <LegacyServicesProvider providers={services}>
-          <presentationUtil.ContextProvider>
-            <I18nProvider>
-              <KibanaThemeProvider theme={{ theme$: coreStart.theme.theme$ }}>
-                <Provider store={canvasStore}>
-                  <App history={params.history} />
-                </Provider>
-              </KibanaThemeProvider>
-            </I18nProvider>
-          </presentationUtil.ContextProvider>
+          <Provider store={canvasStore}>
+            <App history={params.history} appUpdater={appUpdater} />
+          </Provider>
         </LegacyServicesProvider>
-      </ServicesContextProvider>
-    </KibanaContextProvider>,
+      </KibanaContextProvider>
+    </KibanaRenderContextProvider>,
     element
   );
   return () => {
@@ -109,8 +95,8 @@ export const initializeCanvas = async (
   // Some of these functions have deep dependencies into Canvas, which was bulking up the size
   // of our bundle entry point. Moving them here pushes that load to when canvas is actually loaded.
   const canvasFunctions = initFunctions({
+    http: coreSetup.http,
     timefilter: setupPlugins.data.query.timefilter.timefilter,
-    prependBasePath: coreStart.http.basePath.prepend,
     types: setupPlugins.expressions.getTypes(),
     paletteService: await setupPlugins.charts.palettes.getPalettes(),
   });
@@ -152,11 +138,11 @@ export const initializeCanvas = async (
     ],
     content: (domNode, { hideHelpMenu }) => {
       ReactDOM.render(
-        <KibanaThemeProvider theme={{ theme$: coreStart.theme.theme$ }}>
+        <KibanaRenderContextProvider {...coreStart}>
           <Provider store={canvasStore}>
             <HelpMenu hideHelpMenu={hideHelpMenu} />
           </Provider>
-        </KibanaThemeProvider>,
+        </KibanaRenderContextProvider>,
         domNode
       );
       return () => ReactDOM.unmountComponentAtNode(domNode);

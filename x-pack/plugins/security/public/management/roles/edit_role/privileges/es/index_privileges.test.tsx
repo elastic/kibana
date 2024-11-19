@@ -38,6 +38,7 @@ test('it renders without crashing', async () => {
           kibana: [],
           elasticsearch: {
             cluster: [],
+            remote_cluster: [],
             indices: [],
             run_as: [],
           },
@@ -75,6 +76,7 @@ test('it renders an IndexPrivilegeForm for each index privilege on the role', as
           kibana: [],
           elasticsearch: {
             cluster: [],
+            remote_cluster: [],
             indices: [
               {
                 names: ['foo*'],
@@ -129,6 +131,7 @@ test('it renders an IndexPrivilegeForm for each remote index privilege on the ro
           kibana: [],
           elasticsearch: {
             cluster: [],
+            remote_cluster: [],
             indices: [],
             remote_indices: [
               {
@@ -183,6 +186,7 @@ test('it renders fields as disabled when not editable', async () => {
       kibana: [],
       elasticsearch: {
         cluster: [],
+        remote_cluster: [],
         indices: [
           {
             names: ['foo*'],

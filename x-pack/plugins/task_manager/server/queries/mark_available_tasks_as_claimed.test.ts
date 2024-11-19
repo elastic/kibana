@@ -14,7 +14,14 @@ import {
   RunningOrClaimingTaskWithExpiredRetryAt,
   SortByRunAtAndRetryAt,
   EnabledTask,
+  InactiveTasks,
+  RecognizedTask,
+  OneOfTaskTypes,
+  tasksWithPartitions,
+  claimSort,
 } from './mark_available_tasks_as_claimed';
+
+import { TaskStatus, TaskPriority, ConcreteTaskInstance } from '../task';
 
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { mockLogger } from '../test_utils';
@@ -63,7 +70,6 @@ describe('mark_available_tasks_as_claimed', () => {
         fieldUpdates,
         claimableTaskTypes: definitions.getAllTypes(),
         skippedTaskTypes: [],
-        unusedTaskTypes: [],
         taskMaxAttempts: Array.from(definitions).reduce((accumulator, [type, { maxAttempts }]) => {
           return { ...accumulator, [type]: maxAttempts || defaultMaxAttempts };
         }, {}),
@@ -146,8 +152,6 @@ if (doc['task.runAt'].size()!=0) {
     ctx._source.task.status = "claiming"; ${Object.keys(fieldUpdates)
       .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
       .join(' ')}
-    } else if (params.unusedTaskTypes.contains(ctx._source.task.taskType)) {
-      ctx._source.task.status = "unrecognized";
     } else {
       ctx.op = "noop";
     }`,
@@ -160,7 +164,6 @@ if (doc['task.runAt'].size()!=0) {
           },
           claimableTaskTypes: ['sampleTask', 'otherTask'],
           skippedTaskTypes: [],
-          unusedTaskTypes: [],
           taskMaxAttempts: {
             sampleTask: 5,
             otherTask: 1,
@@ -168,6 +171,57 @@ if (doc['task.runAt'].size()!=0) {
         },
       },
     });
+  });
+
+  test('generates InactiveTasks clause as expected', () => {
+    expect(InactiveTasks).toMatchInlineSnapshot(`
+      Object {
+        "bool": Object {
+          "must_not": Array [
+            Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "must": Object {
+                  "range": Object {
+                    "task.retryAt": Object {
+                      "gt": "now",
+                    },
+                  },
+                },
+                "should": Array [
+                  Object {
+                    "term": Object {
+                      "task.status": "running",
+                    },
+                  },
+                  Object {
+                    "term": Object {
+                      "task.status": "claiming",
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      }
+    `);
+  });
+
+  test('generates RecognizedTask clause as expected', () => {
+    expect(RecognizedTask).toMatchInlineSnapshot(`
+      Object {
+        "bool": Object {
+          "must_not": Array [
+            Object {
+              "term": Object {
+                "task.status": "unrecognized",
+              },
+            },
+          ],
+        },
+      }
+    `);
   });
 
   describe(`script`, () => {
@@ -184,7 +238,6 @@ if (doc['task.runAt'].size()!=0) {
           fieldUpdates,
           claimableTaskTypes: ['foo', 'bar'],
           skippedTaskTypes: [],
-          unusedTaskTypes: [],
           taskMaxAttempts: {
             foo: 5,
             bar: 2,
@@ -193,4 +246,185 @@ if (doc['task.runAt'].size()!=0) {
       ).toMatch(/ctx.op = "noop"/);
     });
   });
+
+  test('generates OneOfTaskTypes clause as expected', () => {
+    expect(OneOfTaskTypes('field-name', ['type-a', 'type-b'])).toMatchInlineSnapshot(`
+      Object {
+        "bool": Object {
+          "must": Array [
+            Object {
+              "terms": Object {
+                "field-name": Array [
+                  "type-a",
+                  "type-b",
+                ],
+              },
+            },
+          ],
+        },
+      }
+    `);
+  });
+
+  test('generates tasksWithPartitions clause as expected', () => {
+    expect(tasksWithPartitions([1, 2, 3])).toMatchInlineSnapshot(`
+      Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "bool": Object {
+                "should": Array [
+                  Object {
+                    "terms": Object {
+                      "task.partition": Array [
+                        1,
+                        2,
+                        3,
+                      ],
+                    },
+                  },
+                  Object {
+                    "bool": Object {
+                      "must_not": Array [
+                        Object {
+                          "exists": Object {
+                            "field": "task.partition",
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      }
+    `);
+  });
+
+  // Tests sorting 3 tasks with different priorities, runAt/retryAt values
+  // running the sort over all permutations of them.
+  describe('claimSort', () => {
+    const definitions = new TaskTypeDictionary(mockLogger());
+    definitions.registerTaskDefinitions({
+      normalPriorityTask: {
+        title: 'normal priority',
+        createTaskRunner: () => ({ run: () => Promise.resolve() }),
+        priority: TaskPriority.Normal, // 50
+      },
+      noPriorityTask: {
+        title: 'no priority',
+        createTaskRunner: () => ({ run: () => Promise.resolve() }),
+        priority: undefined, // 50
+      },
+      lowPriorityTask: {
+        title: 'low priority',
+        createTaskRunner: () => ({ run: () => Promise.resolve() }),
+        priority: TaskPriority.Low, // 1
+      },
+    });
+
+    // possible ordering of tasks before sort
+    const permutations = [
+      [0, 1, 2],
+      [0, 2, 1],
+      [1, 0, 2],
+      [1, 2, 0],
+      [2, 0, 1],
+      [2, 1, 0],
+    ];
+
+    test('works correctly with same dates, different priorities', () => {
+      const date = new Date();
+      const baseTasks: ConcreteTaskInstance[] = [];
+
+      // push in reverse order
+      baseTasks.push(buildTaskInstance({ taskType: 'lowPriorityTask', runAt: date }));
+      baseTasks.push(buildTaskInstance({ taskType: 'noPriorityTask', runAt: date }));
+      baseTasks.push(buildTaskInstance({ taskType: 'normalPriorityTask', runAt: date }));
+
+      for (const perm of permutations) {
+        const tasks = [baseTasks[perm[0]], baseTasks[perm[1]], baseTasks[perm[2]]];
+        const sorted = claimSort(definitions, tasks);
+        // all we know is low should be last
+        expect(sorted[2]).toBe(baseTasks[0]);
+      }
+    });
+
+    test('works correctly with same priorities, different dates', () => {
+      const baseDate = new Date('2024-07-29T00:00:00Z').valueOf();
+      const baseTasks: ConcreteTaskInstance[] = [];
+
+      // push in reverse order
+      baseTasks.push(
+        buildTaskInstance({ taskType: 'noPriorityTask', runAt: new Date(baseDate + 1000) })
+      );
+      baseTasks.push(buildTaskInstance({ taskType: 'noPriorityTask', runAt: new Date(baseDate) }));
+      baseTasks.push(
+        buildTaskInstance({ taskType: 'noPriorityTask', runAt: new Date(baseDate - 1000) })
+      );
+
+      for (const perm of permutations) {
+        const tasks = [baseTasks[perm[0]], baseTasks[perm[1]], baseTasks[perm[2]]];
+        const sorted = claimSort(definitions, tasks);
+        expect(sorted[0]).toBe(baseTasks[2]);
+        expect(sorted[1]).toBe(baseTasks[1]);
+        expect(sorted[2]).toBe(baseTasks[0]);
+      }
+    });
+
+    test('works correctly with mixed of runAt and retryAt values', () => {
+      const baseDate = new Date('2024-07-29T00:00:00Z').valueOf();
+      const baseTasks: ConcreteTaskInstance[] = [];
+
+      // push in reverse order
+      baseTasks.push(
+        buildTaskInstance({ taskType: 'noPriorityTask', runAt: new Date(baseDate + 1000) })
+      );
+      baseTasks.push(
+        buildTaskInstance({
+          taskType: 'noPriorityTask',
+          runAt: new Date(baseDate - 2000),
+          retryAt: new Date(baseDate), // should use this value
+        })
+      );
+      baseTasks.push(
+        buildTaskInstance({ taskType: 'noPriorityTask', runAt: new Date(baseDate - 1000) })
+      );
+
+      for (const perm of permutations) {
+        const tasks = [baseTasks[perm[0]], baseTasks[perm[1]], baseTasks[perm[2]]];
+        const sorted = claimSort(definitions, tasks);
+        expect(sorted[0]).toBe(baseTasks[2]);
+        expect(sorted[1]).toBe(baseTasks[1]);
+        expect(sorted[2]).toBe(baseTasks[0]);
+      }
+    });
+  });
 });
+
+interface BuildTaskOpts {
+  taskType: string;
+  runAt: Date;
+  retryAt?: Date;
+}
+
+let id = 1;
+
+function buildTaskInstance(opts: BuildTaskOpts): ConcreteTaskInstance {
+  const { taskType, runAt, retryAt } = opts;
+  return {
+    taskType,
+    id: `${id++}`,
+    runAt,
+    retryAt: retryAt || null,
+    scheduledAt: runAt,
+    attempts: 0,
+    status: TaskStatus.Idle,
+    startedAt: null,
+    state: {},
+    params: {},
+    ownerId: null,
+  };
+}

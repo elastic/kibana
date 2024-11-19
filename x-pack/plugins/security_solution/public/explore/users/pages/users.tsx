@@ -9,7 +9,6 @@ import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import styled from 'styled-components';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef } from 'react';
-import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import type { Filter } from '@kbn/es-query';
 import { isTab } from '@kbn/timelines-plugin/public';
@@ -29,7 +28,6 @@ import { useKibana } from '../../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../../common/lib/kuery';
 import type { State } from '../../../common/store';
 import { inputsSelectors } from '../../../common/store';
-import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { UsersTabs } from './users_tabs';
@@ -40,19 +38,17 @@ import {
   onTimelineTabKeyPressed,
   resetKeyboardFocus,
 } from '../../../timelines/components/timeline/helpers';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { UsersKpiComponent } from '../components/kpi_users';
-import type { UpdateDateRange } from '../../../common/components/charts/common';
 import { LastEventIndexKey, RiskScoreEntity } from '../../../../common/search_strategy';
 import { generateSeverityFilter } from '../../hosts/store/helpers';
 import { UsersTableType } from '../store/model';
 import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
-import { LandingPageComponent } from '../../../common/components/landing_page';
+import { EmptyPrompt } from '../../../common/components/empty_prompt';
 import { userNameExistsFilter } from './details/helpers';
-import { useHasSecurityCapability } from '../../../helper_hooks';
 
 const ID = 'UsersQueryId';
 
@@ -66,7 +62,6 @@ const StyledFullHeightContainer = styled.div`
 `;
 
 const UsersComponent = () => {
-  const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
 
   const getGlobalFiltersQuerySelector = useMemo(
@@ -103,27 +98,26 @@ const UsersComponent = () => {
     return globalFilters;
   }, [severitySelection, tabName, globalFilters]);
 
-  const { indicesExist, indexPattern, selectedPatterns, sourcererDataView } =
-    useSourcererDataView();
+  const { indicesExist, selectedPatterns, sourcererDataView } = useSourcererDataView();
   const [globalFiltersQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
-        indexPattern,
+        dataViewSpec: sourcererDataView,
         queries: [query],
         filters: globalFilters,
       }),
-    [globalFilters, indexPattern, uiSettings, query]
+    [globalFilters, sourcererDataView, uiSettings, query]
   );
   const [tabsFilterQuery] = useMemo(
     () =>
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
-        indexPattern,
+        dataViewSpec: sourcererDataView,
         queries: [query],
         filters: tabsFilters,
       }),
-    [indexPattern, query, tabsFilters, uiSettings]
+    [sourcererDataView, query, tabsFilters, uiSettings]
   );
 
   useInvalidFilterQuery({
@@ -159,29 +153,8 @@ const UsersComponent = () => {
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
   );
 
-  const updateDateRange = useCallback<UpdateDateRange>(
-    ({ x }) => {
-      if (!x) {
-        return;
-      }
-      const [min, max] = x;
-      dispatch(
-        setAbsoluteRangeDatePicker({
-          id: InputsModelId.global,
-          from: new Date(min).toISOString(),
-          to: new Date(max).toISOString(),
-        })
-      );
-    },
-    [dispatch]
-  );
-
   const capabilities = useMlCapabilities();
-  const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
-  const navTabs = useMemo(
-    () => navTabsUsers(hasMlUserPermissions(capabilities), hasEntityAnalyticsCapability),
-    [capabilities, hasEntityAnalyticsCapability]
-  );
+  const navTabs = useMemo(() => navTabsUsers(hasMlUserPermissions(capabilities)), [capabilities]);
 
   return (
     <>
@@ -201,15 +174,7 @@ const UsersComponent = () => {
               title={i18n.PAGE_TITLE}
             />
 
-            <UsersKpiComponent
-              filterQuery={globalFiltersQuery}
-              indexNames={selectedPatterns}
-              from={from}
-              setQuery={setQuery}
-              to={to}
-              skip={isInitializing || !!kqlError}
-              updateDateRange={updateDateRange}
-            />
+            <UsersKpiComponent from={from} to={to} />
 
             <EuiSpacer />
 
@@ -230,7 +195,7 @@ const UsersComponent = () => {
           </SecuritySolutionPageWrapper>
         </StyledFullHeightContainer>
       ) : (
-        <LandingPageComponent />
+        <EmptyPrompt />
       )}
 
       <SpyRoute pageName={SecurityPageName.users} />

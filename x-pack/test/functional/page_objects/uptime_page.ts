@@ -92,7 +92,7 @@ export class UptimePageObject extends FtrService {
 
   public async selectFilterItems(filters: Record<string, string[]>) {
     for (const key in filters) {
-      if (filters.hasOwnProperty(key)) {
+      if (Object.hasOwn(filters, key)) {
         const values = filters[key];
         for (let i = 0; i < values.length; i++) {
           await this.commonService.selectFilterItem(key, values[i]);

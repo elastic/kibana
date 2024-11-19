@@ -25,7 +25,6 @@ export interface ComponentTemplateSerialized {
 
 export interface ComponentTemplateDeserialized extends ComponentTemplateSerialized {
   name: string;
-  isDeprecated?: boolean;
   _kbnMeta: {
     usedBy: string[];
     isManaged: boolean;
@@ -49,4 +48,12 @@ export interface ComponentTemplateListItem {
 
 export interface ComponentTemplateDatastreams {
   data_streams: string[];
+}
+
+export interface ComponentTemplateMeta {
+  managed: boolean;
+  managed_by: string;
+  package: {
+    name: string;
+  };
 }

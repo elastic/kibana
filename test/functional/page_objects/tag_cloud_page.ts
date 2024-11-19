@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
@@ -36,7 +37,7 @@ export class TagCloudPageObject extends FtrService {
     const tags = await this.find.allByCssSelector('text');
     async function returnTagSize(tag: WebElementWrapper) {
       const style = await tag.getAttribute('style');
-      const fontSize = style.match(/font-size: ([^;]*);/);
+      const fontSize = style?.match(/font-size: ([^;]*);/);
       return fontSize ? fontSize[1] : '';
     }
     return await Promise.all(tags.map(returnTagSize));

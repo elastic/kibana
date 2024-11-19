@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
-import { DashboardAttributes } from '@kbn/dashboard-plugin/common';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { DashboardSavedObjectAttributes } from '@kbn/dashboard-plugin/server';
 import { Logger } from '@kbn/logging';
 import { getDashboard } from './gen_ai_dashboard';
 
@@ -24,13 +24,13 @@ export const initDashboard = async ({
   logger: Logger;
   savedObjectsClient: SavedObjectsClientContract;
   dashboardId: string;
-  genAIProvider: 'OpenAI' | 'Bedrock';
+  genAIProvider: 'OpenAI' | 'Bedrock' | 'Gemini' | 'Inference';
 }): Promise<{
   success: boolean;
   error?: OutputError;
 }> => {
   try {
-    await savedObjectsClient.get<DashboardAttributes>('dashboard', dashboardId);
+    await savedObjectsClient.get<DashboardSavedObjectAttributes>('dashboard', dashboardId);
     return {
       success: true,
     };
@@ -50,7 +50,7 @@ export const initDashboard = async ({
   }
 
   try {
-    await savedObjectsClient.create<DashboardAttributes>(
+    await savedObjectsClient.create<DashboardSavedObjectAttributes>(
       'dashboard',
       getDashboard(genAIProvider, dashboardId).attributes,
       {

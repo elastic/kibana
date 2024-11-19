@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { LoggingConfig, config } from './logging_config';
@@ -12,6 +13,12 @@ test('`schema` creates correct schema with defaults.', () => {
   expect(config.schema.validate({})).toMatchInlineSnapshot(`
     Object {
       "appenders": Map {},
+      "browser": Object {
+        "loggers": Array [],
+        "root": Object {
+          "level": "info",
+        },
+      },
       "loggers": Array [],
       "root": Object {
         "appenders": Array [
@@ -158,6 +165,36 @@ test('correctly fills in custom `loggers` config.', () => {
     name: 'http',
     level: 'error',
   });
+});
+
+test('correctly fills in custom browser-side `loggers` config.', () => {
+  const configValue = config.schema.validate({
+    browser: {
+      loggers: [
+        {
+          name: 'plugins',
+          level: 'warn',
+        },
+        {
+          name: 'http',
+          level: 'error',
+        },
+      ],
+    },
+  });
+
+  expect(configValue.browser.loggers).toMatchInlineSnapshot(`
+    Array [
+      Object {
+        "level": "warn",
+        "name": "plugins",
+      },
+      Object {
+        "level": "error",
+        "name": "http",
+      },
+    ]
+  `);
 });
 
 test('fails if loggers use unknown appenders.', () => {

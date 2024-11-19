@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { StartTransformsRequestSchema } from '../../../../common/api_schemas/start_transforms';
-import { reauthorizeTransformsRequestSchema } from '../../../../common/api_schemas/reauthorize_transforms';
+import type { StartTransformsRequestSchema } from '../../api_schemas/start_transforms';
+import { reauthorizeTransformsRequestSchema } from '../../api_schemas/reauthorize_transforms';
 import { addInternalBasePath } from '../../../../common/constants';
 
 import type { RouteDependencies } from '../../../types';
@@ -14,7 +14,7 @@ import type { RouteDependencies } from '../../../types';
 import { routeHandlerFactory } from './route_handler_factory';
 
 export function registerRoute(routeDependencies: RouteDependencies) {
-  const { router, license } = routeDependencies;
+  const { router, getLicense } = routeDependencies;
   /**
    * @apiGroup Reauthorize transforms with API key generated from currently logged in user
    * @api {post} /internal/transform/reauthorize_transforms Post reauthorize transforms
@@ -32,14 +32,24 @@ export function registerRoute(routeDependencies: RouteDependencies) {
     .addVersion<undefined, undefined, StartTransformsRequestSchema>(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'This route is opted out from authorization because permissions will be checked by elasticsearch',
+          },
+        },
         validate: {
           request: {
             body: reauthorizeTransformsRequestSchema,
           },
         },
       },
-      license.guardApiRoute<undefined, undefined, StartTransformsRequestSchema>(
-        routeHandlerFactory(routeDependencies)
-      )
+      async (ctx, request, response) => {
+        const license = await getLicense();
+        return license.guardApiRoute<undefined, undefined, StartTransformsRequestSchema>(
+          routeHandlerFactory(routeDependencies)
+        )(ctx, request, response);
+      }
     );
 }

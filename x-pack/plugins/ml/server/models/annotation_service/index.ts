@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import { annotationProvider } from './annotation';
 
 export function annotationServiceProvider(client: IScopedClusterClient) {

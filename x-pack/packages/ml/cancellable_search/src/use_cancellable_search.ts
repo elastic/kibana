@@ -6,8 +6,9 @@
  */
 
 import { useCallback, useRef, useState } from 'react';
-import { type IKibanaSearchResponse, isRunningResponse } from '@kbn/data-plugin/common';
-import { tap } from 'rxjs/operators';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
+import { isRunningResponse } from '@kbn/data-plugin/common';
+import { tap } from 'rxjs';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 export interface UseCancellableSearch {
@@ -31,6 +32,7 @@ export function useCancellableSearch(data: DataPublicPluginStart) {
     ): Promise<ResponseType | null> => {
       return new Promise((resolve, reject) => {
         data.search
+          // @ts-expect-error upgrade typescript v4.9.5
           .search<RequestBody, ResponseType>(requestBody, {
             abortSignal: abortController.current.signal,
             ...options,

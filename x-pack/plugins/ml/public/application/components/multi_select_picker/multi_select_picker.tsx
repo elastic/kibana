@@ -16,7 +16,8 @@ import {
   EuiPopoverTitle,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { FC, ReactNode, useEffect, useState } from 'react';
+import type { FC, ReactNode } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export interface Option {

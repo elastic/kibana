@@ -1,0 +1,6 @@
+  - grok:
+      field: message
+      patterns:
+      {% for grokPattern in grokPatterns %}
+        - '{{ grokPattern }}'{% endfor %}
+      tag: 'grok_header_pattern'

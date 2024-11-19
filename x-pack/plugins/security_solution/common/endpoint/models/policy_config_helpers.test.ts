@@ -6,14 +6,19 @@
  */
 
 import type { PolicyConfig } from '../types';
-import { PolicyOperatingSystem, ProtectionModes } from '../types';
-import { policyFactory } from './policy_config';
+import { PolicyOperatingSystem, ProtectionModes, AntivirusRegistrationModes } from '../types';
+import { DefaultPolicyNotificationMessage, policyFactory } from './policy_config';
 import {
   disableProtections,
   isPolicySetToEventCollectionOnly,
   ensureOnlyEventCollectionIsAllowed,
+  isBillablePolicy,
+  getPolicyProtectionsReference,
+  checkIfPopupMessagesContainCustomNotifications,
+  resetCustomNotifications,
 } from './policy_config_helpers';
-import { set } from 'lodash';
+import { get, merge } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 
 describe('Policy Config helpers', () => {
   describe('disableProtections', () => {
@@ -128,7 +133,12 @@ describe('Policy Config helpers', () => {
 
   describe('setPolicyToEventCollectionOnly()', () => {
     it('should set the policy to event collection only', () => {
-      expect(ensureOnlyEventCollectionIsAllowed(policyFactory())).toEqual(eventsOnlyPolicy());
+      const policyConfig = policyFactory();
+      policyConfig.windows.antivirus_registration = {
+        enabled: true,
+        mode: AntivirusRegistrationModes.enabled,
+      };
+      expect(ensureOnlyEventCollectionIsAllowed(policyConfig)).toEqual(eventsOnlyPolicy());
     });
   });
 
@@ -187,6 +197,136 @@ describe('Policy Config helpers', () => {
       }
     );
   });
+
+  describe('isBillablePolicy', () => {
+    it('doesnt bill if serverless false', () => {
+      const policy = policyFactory();
+      const isBillable = isBillablePolicy(policy);
+      expect(policy.meta.serverless).toBe(false);
+      expect(isBillable).toBe(false);
+    });
+
+    it('doesnt bill if event collection only', () => {
+      const policy = ensureOnlyEventCollectionIsAllowed(policyFactory());
+      policy.meta.serverless = true;
+      const isBillable = isBillablePolicy(policy);
+      expect(isBillable).toBe(false);
+    });
+
+    it.each(getPolicyProtectionsReference())(
+      'correctly bills if $keyPath is enabled',
+      (feature) => {
+        for (const os of feature.osList) {
+          const policy = ensureOnlyEventCollectionIsAllowed(policyFactory());
+          policy.meta.serverless = true;
+          set(policy, `${os}.${feature.keyPath}`, feature.enableValue);
+          const isBillable = isBillablePolicy(policy);
+          expect(isBillable).toBe(true);
+        }
+      }
+    );
+  });
+
+  describe('checkIfPopupMessagesContainCustomNotifications', () => {
+    let policy: PolicyConfig;
+
+    beforeEach(() => {
+      policy = policyFactory();
+    });
+
+    it('returns false when all popup messages are default', () => {
+      expect(checkIfPopupMessagesContainCustomNotifications(policy)).toBe(false);
+    });
+
+    it('returns true when any popup message is custom', () => {
+      set(policy, 'windows.popup.malware.message', 'Custom message');
+      expect(checkIfPopupMessagesContainCustomNotifications(policy)).toBe(true);
+    });
+
+    it('returns false when all popup messages are empty', () => {
+      set(policy, 'windows.popup.malware.message', '');
+      set(policy, 'mac.popup.memory_protection.message', '');
+      expect(checkIfPopupMessagesContainCustomNotifications(policy)).toBe(false);
+    });
+
+    it('returns true when any popup message is not empty or default', () => {
+      set(policy, 'linux.popup.behavior_protection.message', 'Another custom message');
+      expect(checkIfPopupMessagesContainCustomNotifications(policy)).toBe(true);
+    });
+
+    it('returns false when all popup messages are default across all OS', () => {
+      set(policy, 'windows.popup.malware.message', DefaultPolicyNotificationMessage);
+      set(policy, 'mac.popup.memory_protection.message', DefaultPolicyNotificationMessage);
+      set(policy, 'linux.popup.behavior_protection.message', DefaultPolicyNotificationMessage);
+      set(policy, 'windows.popup.ransomware.message', '');
+      expect(checkIfPopupMessagesContainCustomNotifications(policy)).toBe(false);
+    });
+  });
+
+  describe('resetCustomNotifications', () => {
+    let policy: PolicyConfig;
+
+    beforeEach(() => {
+      policy = policyFactory();
+    });
+
+    it.each([
+      'windows.popup.malware.message',
+      'windows.popup.behavior_protection.message',
+      'windows.popup.memory_protection.message',
+      'windows.popup.ransomware.message',
+      'linux.popup.malware.message',
+      'linux.popup.behavior_protection.message',
+      'linux.popup.memory_protection.message',
+      'mac.popup.malware.message',
+      'mac.popup.behavior_protection.message',
+      'mac.popup.memory_protection.message',
+    ])('resets %s to default message', (keyPath) => {
+      set(policy, keyPath, `Custom message`);
+      const defaultNotifications = resetCustomNotifications();
+
+      const updatedPolicy = merge({}, policy, defaultNotifications);
+      expect(get(updatedPolicy, keyPath)).toBe(DefaultPolicyNotificationMessage);
+    });
+
+    it('does not change default messages', () => {
+      set(policy, 'windows.popup.malware.message', DefaultPolicyNotificationMessage);
+      const defaultNotifications = resetCustomNotifications();
+
+      const updatedPolicy = merge({}, policy, defaultNotifications);
+      expect(get(updatedPolicy, 'windows.popup.malware.message')).toBe(
+        DefaultPolicyNotificationMessage
+      );
+    });
+
+    it('resets empty messages to default messages', () => {
+      set(policy, 'windows.popup.malware.message', '');
+      const defaultNotifications = resetCustomNotifications();
+
+      const updatedPolicy = merge({}, policy, defaultNotifications);
+      expect(get(updatedPolicy, 'windows.popup.malware.message')).toBe(
+        DefaultPolicyNotificationMessage
+      );
+    });
+
+    it('resets messages for all operating systems', () => {
+      set(policy, 'windows.popup.malware.message', 'Custom message');
+      set(policy, 'mac.popup.memory_protection.message', 'Another custom message');
+      set(policy, 'linux.popup.behavior_protection.message', 'Yet another custom message');
+      const defaultNotifications = resetCustomNotifications();
+
+      const updatedPolicy = merge({}, policy, defaultNotifications);
+      expect(get(updatedPolicy, 'windows.popup.malware.message')).toBe(
+        DefaultPolicyNotificationMessage
+      );
+      expect(get(updatedPolicy, 'mac.popup.memory_protection.message')).toBe(
+        DefaultPolicyNotificationMessage
+      );
+      expect(get(updatedPolicy, 'linux.popup.behavior_protection.message')).toBe(
+        DefaultPolicyNotificationMessage
+      );
+    });
+  });
 });
 
 // This constant makes sure that if the type `PolicyConfig` is ever modified,
@@ -200,6 +340,7 @@ export const eventsOnlyPolicy = (): PolicyConfig => ({
     cluster_name: '',
     cluster_uuid: '',
     serverless: false,
+    billable: false,
   },
   windows: {
     events: {
@@ -212,7 +353,7 @@ export const eventsOnlyPolicy = (): PolicyConfig => ({
       registry: true,
       security: true,
     },
-    malware: { mode: ProtectionModes.off, blocklist: false },
+    malware: { mode: ProtectionModes.off, blocklist: false, on_write_scan: false },
     ransomware: { mode: ProtectionModes.off, supported: true },
     memory_protection: { mode: ProtectionModes.off, supported: true },
     behavior_protection: { mode: ProtectionModes.off, supported: true, reputation_service: false },
@@ -223,12 +364,12 @@ export const eventsOnlyPolicy = (): PolicyConfig => ({
       behavior_protection: { message: '', enabled: false },
     },
     logging: { file: 'info' },
-    antivirus_registration: { enabled: false },
+    antivirus_registration: { enabled: false, mode: AntivirusRegistrationModes.disabled },
     attack_surface_reduction: { credential_hardening: { enabled: false } },
   },
   mac: {
     events: { process: true, file: true, network: true },
-    malware: { mode: ProtectionModes.off, blocklist: false },
+    malware: { mode: ProtectionModes.off, blocklist: false, on_write_scan: false },
     behavior_protection: { mode: ProtectionModes.off, supported: true, reputation_service: false },
     memory_protection: { mode: ProtectionModes.off, supported: true },
     popup: {
@@ -249,7 +390,7 @@ export const eventsOnlyPolicy = (): PolicyConfig => ({
       session_data: false,
       tty_io: false,
     },
-    malware: { mode: ProtectionModes.off, blocklist: false },
+    malware: { mode: ProtectionModes.off, blocklist: false, on_write_scan: false },
     behavior_protection: { mode: ProtectionModes.off, supported: true, reputation_service: false },
     memory_protection: { mode: ProtectionModes.off, supported: true },
     popup: {

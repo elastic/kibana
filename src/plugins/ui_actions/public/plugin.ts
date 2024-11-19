@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
@@ -12,9 +13,10 @@ import {
   rowClickTrigger,
   visualizeFieldTrigger,
   visualizeGeoFieldTrigger,
+  addPanelMenuTrigger,
 } from '@kbn/ui-actions-browser/src/triggers';
 import { UiActionsService } from './service';
-import { setTheme } from './services';
+import { setAnalytics, setI18n, setNotifications, setTheme } from './services';
 
 export type UiActionsPublicSetup = Pick<
   UiActionsService,
@@ -47,15 +49,19 @@ export class UiActionsPlugin
 
   constructor(_initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup): UiActionsPublicSetup {
-    setTheme(core.theme);
+  public setup(_core: CoreSetup): UiActionsPublicSetup {
+    this.service.registerTrigger(addPanelMenuTrigger);
     this.service.registerTrigger(rowClickTrigger);
     this.service.registerTrigger(visualizeFieldTrigger);
     this.service.registerTrigger(visualizeGeoFieldTrigger);
     return this.service;
   }
 
-  public start(_core: CoreStart): UiActionsPublicStart {
+  public start(core: CoreStart): UiActionsPublicStart {
+    setAnalytics(core.analytics);
+    setI18n(core.i18n);
+    setNotifications(core.notifications);
+    setTheme(core.theme);
     return this.service;
   }
 

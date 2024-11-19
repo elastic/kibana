@@ -1,7 +1,8 @@
 post:
-  summary: Create sets of Kibana saved objects from a file created by the export API.
-  operationId: importSavedObjects
+  summary: Import saved objects
+  operationId: importSavedObjectsDefault
   description: |
+    Create sets of Kibana saved objects from a file created by the export API.
     Saved objects can be imported only into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
 
     This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
@@ -83,3 +84,11 @@ post:
         application/json:
           schema:
             $ref: '../components/schemas/400_response.yaml'
+  x-codeSamples:
+  - lang: cURL
+    label: Import with createNewCopies
+    source: |
+      curl \
+        -X POST api/saved_objects/_import?createNewCopies=true
+        -H "kbn-xsrf: true"
+        --form file=@file.ndjson

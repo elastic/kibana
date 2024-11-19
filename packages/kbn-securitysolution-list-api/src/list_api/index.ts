@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { chain, fromEither, map, tryCatch } from 'fp-ts/lib/TaskEither';
@@ -20,8 +21,10 @@ import {
   ImportListItemSchemaEncoded,
   ListItemIndexExistSchema,
   ListSchema,
+  ReadListSchema,
   acknowledgeSchema,
   deleteListSchema,
+  readListSchema,
   exportListItemQuerySchema,
   findListSchema,
   foundListSchema,
@@ -47,7 +50,8 @@ import {
   ExportListParams,
   FindListsParams,
   ImportListParams,
-} from './types';
+  GetListByIdParams,
+} from '../types';
 
 export type {
   ApiParams,
@@ -55,7 +59,7 @@ export type {
   ExportListParams,
   FindListsParams,
   ImportListParams,
-} from './types';
+} from '../types';
 
 const version = '2023-10-31';
 
@@ -158,6 +162,7 @@ const importList = async ({
   list_id,
   type,
   signal,
+  refresh,
 }: ApiParams &
   ImportListItemSchemaEncoded &
   ImportListItemQuerySchemaEncoded): Promise<ListSchema> => {
@@ -168,7 +173,7 @@ const importList = async ({
     body: formData,
     headers: { 'Content-Type': undefined },
     method: 'POST',
-    query: { list_id, type },
+    query: { list_id, type, refresh },
     signal,
     version,
   });
@@ -180,11 +185,13 @@ const importListWithValidation = async ({
   listId,
   type,
   signal,
+  refresh,
 }: ImportListParams): Promise<ListSchema> =>
   pipe(
     {
       list_id: listId,
       type,
+      refresh,
     },
     (query) => fromEither(validateEither(importListItemQuerySchema, query)),
     chain((query) =>
@@ -303,3 +310,35 @@ const createListIndexWithValidation = async ({
   )();
 
 export { createListIndexWithValidation as createListIndex };
+
+const getListById = async ({
+  http,
+  signal,
+  id,
+}: ApiParams & ReadListSchema): Promise<ListSchema> => {
+  return http.fetch(`${LIST_URL}`, {
+    method: 'GET',
+    query: {
+      id,
+    },
+    signal,
+    version,
+  });
+};
+
+const getListByIdWithValidation = async ({
+  http,
+  signal,
+  id,
+}: GetListByIdParams): Promise<ListSchema> =>
+  pipe(
+    {
+      id,
+    },
+    (payload) => fromEither(validateEither(readListSchema, payload)),
+    chain((payload) => tryCatch(() => getListById({ http, signal, ...payload }), toError)),
+    chain((response) => fromEither(validateEither(listSchema, response))),
+    flow(toPromise)
+  );
+
+export { getListByIdWithValidation as getListById };

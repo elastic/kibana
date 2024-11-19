@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiTitle, EuiText, EuiSpacer, EuiButtonEmpty, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useLink, useStartServices } from '../../../../hooks';
+import { useAuthz, useLink, useStartServices } from '../../../../hooks';
 import type { Output } from '../../../../types';
 import { OutputsTable } from '../outputs_table';
 
@@ -22,6 +22,7 @@ export const OutputSection: React.FunctionComponent<OutputSectionProps> = ({
   outputs,
   deleteOutput,
 }) => {
+  const authz = useAuthz();
   const { getHref } = useLink();
   const { docLinks } = useStartServices();
 
@@ -43,17 +44,21 @@ export const OutputSection: React.FunctionComponent<OutputSectionProps> = ({
       </EuiText>
       <EuiSpacer size="m" />
       <OutputsTable outputs={outputs} deleteOutput={deleteOutput} />
-      <EuiSpacer size="s" />
-      <EuiButtonEmpty
-        iconType="plusInCircle"
-        href={getHref('settings_create_outputs')}
-        data-test-subj="addOutputBtn"
-      >
-        <FormattedMessage
-          id="xpack.fleet.settings.outputCreateButtonLabel"
-          defaultMessage="Add output"
-        />
-      </EuiButtonEmpty>
+      {authz.fleet.allSettings && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiButtonEmpty
+            iconType="plusInCircle"
+            href={getHref('settings_create_outputs')}
+            data-test-subj="addOutputBtn"
+          >
+            <FormattedMessage
+              id="xpack.fleet.settings.outputCreateButtonLabel"
+              defaultMessage="Add output"
+            />
+          </EuiButtonEmpty>
+        </>
+      )}
     </>
   );
 };

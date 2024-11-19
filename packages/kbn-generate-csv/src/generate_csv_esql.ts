@@ -1,26 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { lastValueFrom } from 'rxjs';
 import type { Writable } from 'stream';
-
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
-import {
-  ESQL_SEARCH_STRATEGY,
-  type IKibanaSearchRequest,
-  type IKibanaSearchResponse,
-  cellHasFormulas,
-  getEsQueryConfig,
-} from '@kbn/data-plugin/common';
+import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
+import { ESQL_SEARCH_STRATEGY, cellHasFormulas, getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { type Filter, buildEsQuery } from '@kbn/es-query';
-import type { ESQLSearchParams, ESQLSearchReponse } from '@kbn/es-types';
+import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
 import {
   AuthenticationExpiredError,
@@ -109,7 +104,7 @@ export class CsvESQLGenerator {
       const { rawResponse, warning } = await lastValueFrom(
         this.clients.data.search<
           IKibanaSearchRequest<ESQLSearchParams>,
-          IKibanaSearchResponse<ESQLSearchReponse>
+          IKibanaSearchResponse<ESQLSearchResponse>
         >(searchParams, {
           strategy: ESQL_SEARCH_STRATEGY,
           abortSignal: abortController.signal,

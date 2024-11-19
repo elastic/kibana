@@ -3,20 +3,15 @@
 exports[`DateFormatEditor should render normally 1`] = `
 <Fragment>
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     helpText={
       <span>
         <EuiLink
           href="https://momentjs.com/"
           target="_blank"
         >
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Documentation"
             id="indexPatternFieldEditor.date.documentationLabel"
-            values={Object {}}
           />
            
           <EuiIcon
@@ -27,7 +22,7 @@ exports[`DateFormatEditor should render normally 1`] = `
     }
     isInvalid={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Moment.js format pattern (Default: {defaultPattern})"
         id="indexPatternFieldEditor.date.momentLabel"
         values={
@@ -39,7 +34,6 @@ exports[`DateFormatEditor should render normally 1`] = `
         }
       />
     }
-    labelType="label"
   >
     <EuiFieldText
       data-test-subj="dateEditorPattern"

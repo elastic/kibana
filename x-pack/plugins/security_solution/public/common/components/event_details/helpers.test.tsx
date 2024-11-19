@@ -5,29 +5,18 @@
  * 2.0.
  */
 
-import { mockDetailItemData } from '../../mock/mock_detail_item';
-
 import { getExampleText, getIconFromType } from './helpers';
-import { mockBrowserFields } from '../../containers/source/mock';
-
-const aField = {
-  ...mockDetailItemData[4],
-  ...mockBrowserFields.base.fields?.['@timestamp'],
-};
 
 describe('helpers', () => {
   describe('getExampleText', () => {
     test('it returns the expected example text when the field contains an example', () => {
-      expect(getExampleText(aField.example)).toEqual('Example: 2016-05-23T08:05:34.853Z');
+      expect(getExampleText('2016-05-23T08:05:34.853Z')).toEqual(
+        'Example: 2016-05-23T08:05:34.853Z'
+      );
     });
 
     test(`it returns an empty string when the field's example is an empty string`, () => {
-      const fieldWithEmptyExample = {
-        ...aField,
-        example: '',
-      };
-
-      expect(getExampleText(fieldWithEmptyExample.example)).toEqual('');
+      expect(getExampleText('')).toEqual('');
     });
   });
 

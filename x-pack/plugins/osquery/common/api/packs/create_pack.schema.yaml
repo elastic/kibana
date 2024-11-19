@@ -20,7 +20,4 @@ components:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Shards'
         queries:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ObjectQueries'
-    SuccessResponse:
-      type: object
-      properties: {}
-      # Define properties for the success response if needed
+

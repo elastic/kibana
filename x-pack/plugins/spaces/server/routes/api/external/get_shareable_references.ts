@@ -12,11 +12,24 @@ import { wrapError } from '../../../lib/errors';
 import { createLicensedRouteHandler } from '../../lib';
 
 export function initGetShareableReferencesApi(deps: ExternalRouteDeps) {
-  const { router, getStartServices } = deps;
+  const { router, getStartServices, isServerless } = deps;
 
   router.post(
     {
       path: '/api/spaces/_get_shareable_references',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route delegates authorization to the spaces service via a scoped spaces client',
+        },
+      },
+      options: {
+        access: isServerless ? 'internal' : 'public',
+        summary: `Get shareable references`,
+        tags: ['oas-tag:spaces'],
+        description: 'Collect references and space contexts for saved objects.',
+      },
       validate: {
         body: schema.object({
           objects: schema.arrayOf(schema.object({ type: schema.string(), id: schema.string() })),

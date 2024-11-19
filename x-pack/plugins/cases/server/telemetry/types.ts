@@ -5,15 +5,20 @@
  * 2.0.
  */
 
-import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 import type { Owner } from '../../common/constants/types';
+import type { TelemetrySavedObjectsClient } from './telemetry_saved_objects_client';
 
 export type BucketKeyString = Omit<Bucket, 'key'> & { key: string };
 
 export interface Bucket<T extends string | number = string | number> {
   doc_count: number;
   key: T;
+}
+
+export interface AlertBuckets {
+  buckets: Array<{ topAlertsPerBucket: { value: number } }>;
 }
 
 export interface Buckets<T extends string | number = string | number> {
@@ -35,7 +40,7 @@ export interface ReferencesAggregation {
 }
 
 export interface CollectTelemetryDataParams {
-  savedObjectsClient: ISavedObjectsRepository;
+  savedObjectsClient: TelemetrySavedObjectsClient;
   logger: Logger;
 }
 
@@ -212,6 +217,10 @@ export interface CasesTelemetry {
     sec: CustomFieldsSolutionTelemetry;
     obs: CustomFieldsSolutionTelemetry;
     main: CustomFieldsSolutionTelemetry;
+  };
+  casesSystemAction: {
+    totalCasesCreated: number;
+    totalRules: number;
   };
 }
 

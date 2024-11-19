@@ -140,9 +140,9 @@ describe('ElasticsearchVersionMismatchAlert', () => {
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'abc123',
         context: {
-          action: `[View nodes](UNIT_TEST_URL/app/monitoring#/elasticsearch/nodes?_g=(cluster_uuid:${clusterUuid}))`,
+          action: `[View nodes](UNIT_TEST_URL/app/monitoring#/elasticsearch/nodes?_g=(cluster_uuid:'${clusterUuid}'))`,
           actionPlain: 'Verify you have the same version across all nodes.',
-          internalFullMessage: `Elasticsearch version mismatch alert is firing for testCluster. Elasticsearch is running 8.0.0, 7.2.1. [View nodes](UNIT_TEST_URL/app/monitoring#/elasticsearch/nodes?_g=(cluster_uuid:${clusterUuid}))`,
+          internalFullMessage: `Elasticsearch version mismatch alert is firing for testCluster. Elasticsearch is running 8.0.0, 7.2.1. [View nodes](UNIT_TEST_URL/app/monitoring#/elasticsearch/nodes?_g=(cluster_uuid:'${clusterUuid}'))`,
           internalShortMessage:
             'Elasticsearch version mismatch alert is firing for testCluster. Verify you have the same version across all nodes.',
           versionList: ['8.0.0', '7.2.1'],

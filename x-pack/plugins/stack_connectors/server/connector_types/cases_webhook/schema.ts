@@ -6,33 +6,40 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { CasesWebhookMethods } from './types';
-import { nullableType } from '../lib/nullable';
+import { WebhookMethods } from '../../../common/auth/constants';
+import { AuthConfiguration, SecretConfigurationSchema } from '../../../common/auth/schema';
 
 const HeadersSchema = schema.recordOf(schema.string(), schema.string());
 
 export const ExternalIncidentServiceConfiguration = {
   createIncidentUrl: schema.string(),
   createIncidentMethod: schema.oneOf(
-    [schema.literal(CasesWebhookMethods.POST), schema.literal(CasesWebhookMethods.PUT)],
+    [schema.literal(WebhookMethods.POST), schema.literal(WebhookMethods.PUT)],
     {
-      defaultValue: CasesWebhookMethods.POST,
+      defaultValue: WebhookMethods.POST,
     }
   ),
   createIncidentJson: schema.string(), // stringified object
   createIncidentResponseKey: schema.string(),
+  getIncidentMethod: schema.oneOf(
+    [schema.literal(WebhookMethods.GET), schema.literal(WebhookMethods.POST)],
+    {
+      defaultValue: WebhookMethods.GET,
+    }
+  ),
   getIncidentUrl: schema.string(),
+  getIncidentJson: schema.nullable(schema.string()),
   getIncidentResponseExternalTitleKey: schema.string(),
   viewIncidentUrl: schema.string(),
   updateIncidentUrl: schema.string(),
   updateIncidentMethod: schema.oneOf(
     [
-      schema.literal(CasesWebhookMethods.POST),
-      schema.literal(CasesWebhookMethods.PATCH),
-      schema.literal(CasesWebhookMethods.PUT),
+      schema.literal(WebhookMethods.POST),
+      schema.literal(WebhookMethods.PATCH),
+      schema.literal(WebhookMethods.PUT),
     ],
     {
-      defaultValue: CasesWebhookMethods.PUT,
+      defaultValue: WebhookMethods.PUT,
     }
   ),
   updateIncidentJson: schema.string(),
@@ -40,31 +47,26 @@ export const ExternalIncidentServiceConfiguration = {
   createCommentMethod: schema.nullable(
     schema.oneOf(
       [
-        schema.literal(CasesWebhookMethods.POST),
-        schema.literal(CasesWebhookMethods.PUT),
-        schema.literal(CasesWebhookMethods.PATCH),
+        schema.literal(WebhookMethods.POST),
+        schema.literal(WebhookMethods.PUT),
+        schema.literal(WebhookMethods.PATCH),
       ],
       {
-        defaultValue: CasesWebhookMethods.PUT,
+        defaultValue: WebhookMethods.PUT,
       }
     )
   ),
   createCommentJson: schema.nullable(schema.string()),
-  headers: nullableType(HeadersSchema),
-  hasAuth: schema.boolean({ defaultValue: true }),
+  headers: schema.nullable(HeadersSchema),
+  hasAuth: AuthConfiguration.hasAuth,
+  authType: AuthConfiguration.authType,
+  certType: AuthConfiguration.certType,
+  ca: AuthConfiguration.ca,
+  verificationMode: AuthConfiguration.verificationMode,
 };
 
 export const ExternalIncidentServiceConfigurationSchema = schema.object(
   ExternalIncidentServiceConfiguration
-);
-
-export const ExternalIncidentServiceSecretConfiguration = {
-  user: schema.nullable(schema.string()),
-  password: schema.nullable(schema.string()),
-};
-
-export const ExternalIncidentServiceSecretConfigurationSchema = schema.object(
-  ExternalIncidentServiceSecretConfiguration
 );
 
 export const ExecutorSubActionPushParamsSchema = schema.object({
@@ -93,3 +95,5 @@ export const ExecutorParamsSchema = schema.oneOf([
     subActionParams: ExecutorSubActionPushParamsSchema,
   }),
 ]);
+
+export const ExternalIncidentServiceSecretConfigurationSchema = SecretConfigurationSchema;

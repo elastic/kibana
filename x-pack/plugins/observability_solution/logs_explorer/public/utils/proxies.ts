@@ -21,7 +21,7 @@ export const createPropertyGetProxy = <Target extends object, Key extends keyof 
 ) =>
   new Proxy(target, {
     get(accessedTarget, accessedKey, ...rest) {
-      const value = Reflect.get(accessedTarget, accessedKey, ...rest);
+      const value = Reflect.get(accessedTarget, accessedKey, ...rest) as Target[Key];
       if (hasKey(replacements, accessedKey)) {
         return replacements[accessedKey](value);
       } else {
@@ -33,4 +33,4 @@ export const createPropertyGetProxy = <Target extends object, Key extends keyof 
 const hasKey = <T extends object, K extends keyof T>(
   obj: T,
   key: string | number | symbol
-): key is K => obj.hasOwnProperty(key);
+): key is K => Object.hasOwn(obj, key);

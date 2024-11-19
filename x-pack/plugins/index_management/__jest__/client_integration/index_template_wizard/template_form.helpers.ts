@@ -148,6 +148,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     enableDataStream,
     lifecycle,
     allowAutoCreate,
+    indexMode,
   }: Partial<TemplateDeserialized> & { enableDataStream?: boolean } = {}) => {
     const { component, form, find } = testBed;
 
@@ -192,7 +193,21 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
       }
 
       if (allowAutoCreate) {
-        form.toggleEuiSwitch('allowAutoCreateField.input');
+        let optionIndex = 0;
+        if (allowAutoCreate === 'TRUE') {
+          optionIndex = 1;
+        }
+        if (allowAutoCreate === 'FALSE') {
+          optionIndex = 2;
+        }
+        const radioGroup = find('allowAutoCreateField.input');
+        const radioOption = radioGroup.childAt(optionIndex).find('input');
+        radioOption.simulate('change', { target: { checked: true } });
+        component.update();
+      }
+
+      if (indexMode) {
+        form.setSelectValue('indexModeField', indexMode);
       }
     });
     component.update();
@@ -346,6 +361,7 @@ export type TestSubjects =
   | 'mappingsEditorFieldEdit'
   | 'mockCodeEditor'
   | 'mockComboBox'
+  | 'mockSuperSelect'
   | 'nameField'
   | 'nameField.input'
   | 'nameParameterInput'
@@ -354,6 +370,8 @@ export type TestSubjects =
   | 'orderField.input'
   | 'priorityField.input'
   | 'dataStreamField.input'
+  | 'indexModeField'
+  | 'indexModeCallout'
   | 'dataRetentionToggle.input'
   | 'allowAutoCreateField.input'
   | 'pageTitle'

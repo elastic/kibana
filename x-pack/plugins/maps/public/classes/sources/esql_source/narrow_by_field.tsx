@@ -15,7 +15,7 @@ export function NarrowByMapBounds(props: Omit<NarrowByFieldProps, 'switchLabel' 
   return (
     <NarrowByField
       switchLabel={i18n.translate('xpack.maps.esqlSource.narrowByMapExtentLabel', {
-        defaultMessage: 'Narrow ES|QL statement by visible map area',
+        defaultMessage: 'Dynamically filter for data in the visible map area',
       })}
       fieldTypes={[ES_GEO_FIELD_TYPE.GEO_POINT, ES_GEO_FIELD_TYPE.GEO_SHAPE]}
       {...props}
@@ -27,7 +27,7 @@ export function NarrowByTime(props: Omit<NarrowByFieldProps, 'switchLabel' | 'fi
   return (
     <NarrowByField
       switchLabel={i18n.translate('xpack.maps.esqlSource.narrowByGlobalTimeLabel', {
-        defaultMessage: `Narrow ES|QL statement by global time`,
+        defaultMessage: `Apply global time range to ES|QL statement`,
       })}
       fieldTypes={['date']}
       {...props}
@@ -96,7 +96,7 @@ function NarrowByField(props: NarrowByFieldProps) {
       {props.narrowByField && (
         <EuiFormRow
           label={i18n.translate('xpack.maps.source.esql.narrowByFieldLabel', {
-            defaultMessage: 'Narrow by',
+            defaultMessage: 'Filter by',
           })}
           display="columnCompressed"
         >

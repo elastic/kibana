@@ -55,9 +55,11 @@ describe(
     beforeEach(() => {
       login();
       // Create and enroll a new Endpoint host
-      return createEndpointHost(policyWithAgentTamperProtectionEnabled.policy_id).then((host) => {
-        createdHost = host as CreateAndEnrollEndpointHostResponse;
-      });
+      return createEndpointHost(policyWithAgentTamperProtectionEnabled.policy_ids[0]).then(
+        (host) => {
+          createdHost = host as CreateAndEnrollEndpointHostResponse;
+        }
+      );
     });
 
     after(() => {
@@ -80,7 +82,7 @@ describe(
     it('should uninstall from host without issues', () => {
       waitForEndpointListPageToBeLoaded(createdHost.hostname);
 
-      reAssignFleetAgentToPolicy(createdHost.agentId, policy.policy_id).then((hasChanged) => {
+      reAssignFleetAgentToPolicy(createdHost.agentId, policy.policy_ids[0]).then((hasChanged) => {
         expect(hasChanged).to.eql(true);
         uninstallAgentFromHost(createdHost.hostname).then((responseWithoutToken) => {
           expect(responseWithoutToken).to.not.match(/(.*)Invalid uninstall token(.*)/);

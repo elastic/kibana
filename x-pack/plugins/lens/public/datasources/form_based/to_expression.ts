@@ -22,6 +22,7 @@ import {
   ExpressionAstExpressionBuilder,
   ExpressionAstFunction,
 } from '@kbn/expressions-plugin/public';
+import { convertToAbsoluteDateRange } from '../../utils';
 import type { DateRange } from '../../../common/types';
 import { GenericIndexPatternColumn } from './form_based';
 import { operationDefinitionMap } from './operations';
@@ -162,6 +163,8 @@ function getExpressionForLayer(
 
     const orderedColumnIds = esAggEntries.map(([colId]) => colId);
     let esAggsIdMap: Record<string, OriginalColumn[]> = {};
+
+    const absDateRange = convertToAbsoluteDateRange(dateRange, nowInstant);
     const aggExpressionToEsAggsIdMap: Map<ExpressionAstExpressionBuilder, string> = new Map();
     esAggEntries.forEach(([colId, col], index) => {
       const def = operationDefinitionMap[col.operationType];
@@ -179,7 +182,7 @@ function getExpressionForLayer(
             ...col,
             timeShift: resolveTimeShift(
               col.timeShift,
-              dateRange,
+              absDateRange,
               histogramBarsTarget,
               hasDateHistogram
             ),
@@ -207,7 +210,7 @@ function getExpressionForLayer(
                   timeWindow: wrapInTimeFilter ? col.reducedTimeRange : undefined,
                   timeShift: resolveTimeShift(
                     col.timeShift,
-                    dateRange,
+                    absDateRange,
                     histogramBarsTarget,
                     hasDateHistogram
                   ),
@@ -216,7 +219,7 @@ function getExpressionForLayer(
               customMetric: buildExpression({ type: 'expression', chain: [aggAst] }),
               timeShift: resolveTimeShift(
                 col.timeShift,
-                dateRange,
+                absDateRange,
                 histogramBarsTarget,
                 hasDateHistogram
               ),

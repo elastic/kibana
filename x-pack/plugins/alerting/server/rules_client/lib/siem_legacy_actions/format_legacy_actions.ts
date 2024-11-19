@@ -99,7 +99,9 @@ export const legacyGetBulkRuleActionsSavedObject = async ({
           legacyRawActions,
           savedObject.references
         ) // remove uuid from action, as this uuid is not persistent
-          .map(({ uuid, ...action }) => action),
+          .map(({ uuid, ...action }) => ({
+            ...action,
+          })) as RuleAction[],
       };
     } else {
       logger.error(

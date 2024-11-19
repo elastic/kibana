@@ -12,7 +12,7 @@ import { BenchmarkData } from '../../common/types_old';
 import { TestProvider } from '../test/test_provider';
 
 const mockNavToFindings = jest.fn();
-jest.mock('../common/hooks/use_navigate_findings', () => ({
+jest.mock('@kbn/cloud-security-posture/src/hooks/use_navigate_findings', () => ({
   useNavigateFindings: () => mockNavToFindings,
 }));
 
@@ -45,6 +45,7 @@ describe('AccountsEvaluatedWidget', () => {
     expect(mockNavToFindings).toHaveBeenCalledWith(
       {
         'cloud.provider': 'aws',
+        'rule.benchmark.posture_type': 'cspm',
       },
       ['cloud.account.name']
     );

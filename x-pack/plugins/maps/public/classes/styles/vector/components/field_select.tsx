@@ -10,6 +10,7 @@ import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count'
 import { EuiComboBox, EuiComboBoxProps, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
+import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
 import {
   FIELD_ORIGIN,
   MIDDLE_TRUNCATION_PROPS,
@@ -35,6 +36,7 @@ function groupFieldsByOrigin(fields: StyleField[]) {
       .map((field) => {
         return {
           value: field,
+          name: field.name,
           label: field.label,
           disabled: field.isUnsupported,
           title: field.unsupportedMsg,
@@ -80,7 +82,7 @@ function groupFieldsByOrigin(fields: StyleField[]) {
 
 type Props = {
   fields: StyleField[];
-  selectedFieldName: string;
+  selectedFieldName?: string;
   onChange: ({ field }: { field: StyleField | null }) => void;
   styleName: VECTOR_STYLES;
 } & Omit<
@@ -132,6 +134,7 @@ export function FieldSelect({ fields, selectedFieldName, onChange, styleName, ..
       singleSelection={SINGLE_SELECTION_AS_TEXT_PROPS}
       truncationProps={MIDDLE_TRUNCATION_PROPS}
       inputPopoverProps={{ panelMinWidth }}
+      optionMatcher={comboBoxFieldOptionMatcher}
       {...rest}
     />
   );
