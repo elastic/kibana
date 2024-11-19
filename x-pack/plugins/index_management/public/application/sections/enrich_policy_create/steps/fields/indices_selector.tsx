@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { uniq, isEmpty } from 'lodash';
 import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import type { EuiComboBoxProps } from '@elastic/eui';
-import { getMatchingIndices } from '../../../../services/api';
+import { getMatchingDataStreams, getMatchingIndices } from '../../../../services/api';
 import type { FieldHook } from '../../../../../shared_imports';
 import { getFieldValidityAndErrorMessage } from '../../../../../shared_imports';
 
@@ -25,22 +25,63 @@ interface Props {
   [key: string]: any;
 }
 
+interface GetMatchingOptionsParams {
+  matches: string[];
+  optionsLabel: string;
+  optionsDefaultMessage: string;
+  noMatchingOption: string;
+  noMatchingDefaultMessage: string;
+}
+
 const getIndexOptions = async (patternString: string) => {
-  const options: IOption[] = [];
-
   if (!patternString) {
-    return options;
+    return [];
   }
+  const indices = await getIndices(patternString);
+  const dataStreams = await getDataStreams(patternString);
 
+  return [...indices, ...dataStreams];
+};
+
+const getIndices = async (patternString: string) => {
   const { data } = await getMatchingIndices(patternString);
-  const matchingIndices = data.indices;
 
-  if (matchingIndices.length) {
-    const matchingOptions = uniq([...matchingIndices]);
+  return getMatchingOptions({
+    matches: data.indices,
+    optionsLabel: 'xpack.idxMgmt.enrichPolicyCreate.indicesSelector.optionsLabel',
+    optionsDefaultMessage: 'Based on your indices',
+    noMatchingOption: 'xpack.idxMgmt.enrichPolicyCreate.indicesSelector.noMatchingOption',
+    noMatchingDefaultMessage: 'No indices match your search criteria.',
+  });
+};
+
+const getDataStreams = async (patternString: string) => {
+  const { data } = await getMatchingDataStreams(patternString);
+
+  return getMatchingOptions({
+    matches: data.dataStreams,
+    optionsLabel: 'xpack.idxMgmt.enrichPolicyCreate.indicesSelector.dataStream.optionsLabel',
+    optionsDefaultMessage: 'Based on your data streams',
+    noMatchingOption:
+      'xpack.idxMgmt.enrichPolicyCreate.indicesSelector.dataStream.noMatchingOption',
+    noMatchingDefaultMessage: 'No data stream match your search criteria.',
+  });
+};
+
+const getMatchingOptions = ({
+  matches,
+  optionsLabel,
+  optionsDefaultMessage,
+  noMatchingOption,
+  noMatchingDefaultMessage,
+}: GetMatchingOptionsParams) => {
+  const options: IOption[] = [];
+  if (matches.length) {
+    const matchingOptions = uniq([...matches]);
 
     options.push({
-      label: i18n.translate('xpack.idxMgmt.enrichPolicyCreate.indicesSelector.optionsLabel', {
-        defaultMessage: 'Based on your indices',
+      label: i18n.translate(optionsLabel, {
+        defaultMessage: optionsDefaultMessage,
       }),
       options: matchingOptions
         .map((match) => {
@@ -53,13 +94,12 @@ const getIndexOptions = async (patternString: string) => {
     });
   } else {
     options.push({
-      label: i18n.translate('xpack.idxMgmt.enrichPolicyCreate.indicesSelector.noMatchingOption', {
-        defaultMessage: 'No indices match your search criteria.',
+      label: i18n.translate(noMatchingOption, {
+        defaultMessage: noMatchingDefaultMessage,
       }),
       options: [],
     });
   }
-
   return options;
 };
 
@@ -71,7 +111,6 @@ export const IndicesSelector = ({ field, euiFieldProps, ...rest }: Props) => {
   const onSearchChange = useCallback(
     async (search: string) => {
       const indexPattern = isEmpty(search) ? '*' : search;
-
       setIsIndiciesLoading(true);
       setIndexOptions(await getIndexOptions(indexPattern));
       setIsIndiciesLoading(false);
