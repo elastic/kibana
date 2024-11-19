@@ -31,7 +31,7 @@ export const performUpgradePrebuiltRules = async (
     .set('kbn-xsrf', 'true')
     .set('elastic-api-version', '1')
     .set('x-elastic-internal-origin', 'foo')
-    // .set('x-elastic-product-origin', 'kibana')
+    .set('x-elastic-product-origin', 'kibana')
     .send(requestBody)
     .expect(200);
 
