@@ -26,6 +26,7 @@ import { getValueForField } from './get_value_for_field';
 interface CreateModifiedPrebuiltRuleAssetsProps {
   upgradeableRules: RuleTriad[];
   requestBody: PerformRuleUpgradeRequestBody;
+  prebuiltRulesCustomizationEnabled: boolean;
 }
 
 interface ProcessedRules {
@@ -36,9 +37,13 @@ interface ProcessedRules {
 export const createModifiedPrebuiltRuleAssets = ({
   upgradeableRules,
   requestBody,
+  prebuiltRulesCustomizationEnabled,
 }: CreateModifiedPrebuiltRuleAssetsProps) => {
   return withSecuritySpanSync(createModifiedPrebuiltRuleAssets.name, () => {
-    const { pick_version: globalPickVersion = PickVersionValuesEnum.MERGED, mode } = requestBody;
+    const defaultPickVersion = prebuiltRulesCustomizationEnabled
+      ? PickVersionValuesEnum.MERGED
+      : PickVersionValuesEnum.TARGET;
+    const { pick_version: globalPickVersion = defaultPickVersion, mode } = requestBody;
 
     const { modifiedPrebuiltRuleAssets, processingErrors } =
       upgradeableRules.reduce<ProcessedRules>(
