@@ -15,12 +15,12 @@ import expect from '@kbn/expect/expect';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import type { CopyResponse } from '@kbn/spaces-plugin/server/lib/copy_to_spaces';
 
+import { getSupertest, maybeDestroySupertest } from './common';
 import { getTestDataLoader, SPACE_1, SPACE_2 } from '../../../common/lib/test_data_loader';
 import type {
   DeploymentAgnosticFtrProviderContext,
   SupertestWithRoleScopeType,
 } from '../../deployment_agnostic/ftr_provider_context';
-import { getRoleDefinitionForUser, isBuiltInRole } from '../lib/authentication';
 import { getAggregatedSpaceData, getUrlPrefix } from '../lib/space_test_utils';
 import type { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
@@ -106,9 +106,6 @@ interface Aggs extends estypes.AggregationsMultiBucketAggregateBase {
 export function copyToSpaceTestSuiteFactory(context: DeploymentAgnosticFtrProviderContext) {
   const testDataLoader = getTestDataLoader(context);
   const es = context.getService('es');
-  const roleScopedSupertest = context.getService('roleScopedSupertest');
-  const samlAuth = context.getService('samlAuth');
-  const supertestWithoutAuth = context.getService('supertestWithoutAuth');
 
   const collectSpaceContents = async () => {
     const response = await getAggregatedSpaceData(es, [
@@ -809,29 +806,12 @@ export function copyToSpaceTestSuiteFactory(context: DeploymentAgnosticFtrProvid
           // test data only allows for the following spaces as the copy origin
           expect(['default', 'space_1']).to.contain(spaceId);
           await testDataLoader.createFtrSpaces();
-
-          if (user) {
-            const isBuiltIn = isBuiltInRole(user.role);
-            if (!isBuiltIn) {
-              await samlAuth.setCustomRole(getRoleDefinitionForUser(user));
-            }
-            supertest = await roleScopedSupertest.getSupertestWithRoleScope(
-              isBuiltIn ? user.role : 'customRole',
-              {
-                useCookieHeader: true,
-                withInternalHeaders: true,
-              }
-            );
-          } else {
-            supertest = supertestWithoutAuth;
-          }
+          supertest = await getSupertest(context, user);
         });
 
         after(async () => {
           await testDataLoader.deleteFtrSpaces();
-          if (user) {
-            await (supertest as SupertestWithRoleScopeType).destroy();
-          }
+          await maybeDestroySupertest(supertest);
         });
 
         describe('single-namespace types', () => {
