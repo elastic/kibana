@@ -18,8 +18,10 @@ export const readTagsRoute = (router: SecuritySolutionPluginRouter) => {
     .get({
       access: 'public',
       path: DETECTION_ENGINE_TAGS_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(

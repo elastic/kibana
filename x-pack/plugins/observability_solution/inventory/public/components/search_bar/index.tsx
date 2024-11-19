@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import type { SearchBarOwnProps } from '@kbn/unified-search-plugin/public/search_bar';
@@ -14,7 +13,6 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search_context';
 import { getKqlFieldsWithFallback } from '../../utils/get_kql_field_names_with_fallback';
 import { ControlGroups } from './control_groups';
-import { DiscoverButton } from './discover_button';
 
 export function SearchBar() {
   const { refreshSubject$, dataView, searchState, onQueryChange } = useUnifiedSearchContext();
@@ -73,30 +71,20 @@ export function SearchBar() {
   );
 
   return (
-    <EuiFlexGroup direction="row" gutterSize="s">
-      <EuiFlexItem grow>
-        <UnifiedSearchBar
-          appName="Inventory"
-          displayStyle="inPage"
-          indexPatterns={dataView ? [dataView] : undefined}
-          renderQueryInputAppend={() => <ControlGroups />}
-          onQuerySubmit={handleQuerySubmit}
-          placeholder={i18n.translate('xpack.inventory.searchBar.placeholder', {
-            defaultMessage:
-              'Search for your entities by name or its metadata (e.g. entity.type : service)',
-          })}
-          showDatePicker={false}
-          showFilterBar
-          showQueryInput
-          showQueryMenu
-        />
-      </EuiFlexItem>
-
-      {dataView ? (
-        <EuiFlexItem grow={false}>
-          <DiscoverButton dataView={dataView} />
-        </EuiFlexItem>
-      ) : null}
-    </EuiFlexGroup>
+    <UnifiedSearchBar
+      appName="Inventory"
+      displayStyle="inPage"
+      indexPatterns={dataView ? [dataView] : undefined}
+      renderQueryInputAppend={() => <ControlGroups />}
+      onQuerySubmit={handleQuerySubmit}
+      placeholder={i18n.translate('xpack.inventory.searchBar.placeholder', {
+        defaultMessage:
+          'Search for your entities by name or its metadata (e.g. entity.type : service)',
+      })}
+      showDatePicker={false}
+      showFilterBar
+      showQueryInput
+      showQueryMenu
+    />
   );
 }
