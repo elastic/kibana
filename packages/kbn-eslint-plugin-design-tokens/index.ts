@@ -8,12 +8,14 @@
  */
 
 import { noCssColor } from './rules/no_css_color';
+import { preferCSSAttributeForEuiComponents } from './rules/prefer_css_attributes_for_eui_components';
 
 /**
- * Custom ESLint rules, add `'@kbn/eslint-plugin-design-tokens'` to your eslint config to use them
+ * Custom ESLint rules, add `'@kbn/eslint_plugin_design_tokens'` to your eslint config to use them
  * @internal
  */
 
 const rules = {
-  'no-css-color': noCssColor,
+  no_css_color: noCssColor,
+  prefer_css_attributes_for_eui_components: preferCSSAttributeForEuiComponents,
 };
