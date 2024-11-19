@@ -70,6 +70,7 @@ const EmbeddableESQLFieldStatsTableWrapper = React.memo(
 
     return (
       <DataVisualizerTable<FieldVisConfig>
+        isEsql={true}
         items={configs}
         pageState={dataVisualizerListState}
         updatePageState={onTableChange}

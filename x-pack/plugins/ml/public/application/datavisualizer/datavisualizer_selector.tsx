@@ -18,6 +18,7 @@ import {
   EuiLink,
   EuiSpacer,
   EuiText,
+  EuiBetaBadge,
   EuiTextAlign,
 } from '@elastic/eui';
 
@@ -64,7 +65,6 @@ export const DatavisualizerSelector: FC = () => {
     },
   } = useMlKibana();
   const isEsqlEnabled = useMemo(() => uiSettings.get(ENABLE_ESQL), [uiSettings]);
-
   const helpLink = docLinks.links.ml.guide;
   const navigateToPath = useNavigateToPath();
 
@@ -172,6 +172,19 @@ export const DatavisualizerSelector: FC = () => {
                       <FormattedMessage
                         id="xpack.ml.datavisualizer.selector.selectESQLTitle"
                         defaultMessage="Visualize data using ES|QL"
+                      />{' '}
+                      <EuiBetaBadge
+                        label=""
+                        iconType="beaker"
+                        size="m"
+                        color="hollow"
+                        tooltipContent={
+                          <FormattedMessage
+                            id="xpack.ml.datavisualizer.selector.esqlTechnicalPreviewBadge.titleMsg"
+                            defaultMessage="ES|QL data visualizer is in technical preview."
+                          />
+                        }
+                        tooltipPosition={'right'}
                       />
                     </>
                   </EuiTextAlign>
