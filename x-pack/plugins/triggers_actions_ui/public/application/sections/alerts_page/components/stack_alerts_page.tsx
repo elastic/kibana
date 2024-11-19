@@ -26,15 +26,23 @@ import {
 import { QueryClientProvider } from '@tanstack/react-query';
 import { BoolQuery, Filter } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { AlertsTable } from '@kbn/response-ops-alerts-table';
+import { alertProducersData } from '@kbn/response-ops-alerts-table/constants';
+import { alertsTableQueryClient } from '@kbn/response-ops-alerts-table/query_client';
+import {
+  defaultAlertsTableColumns,
+  defaultAlertsTableSort,
+} from '@kbn/response-ops-alerts-table/configuration';
+import { AlertActionsCell } from '@kbn/response-ops-alerts-table/components/alert_actions_cell';
+import { renderCellValue } from '@kbn/response-ops-alerts-table/components/render_cell_value';
+import { AlertsTableSupportedConsumers } from '@kbn/response-ops-alerts-table/types';
 import { ALERTS_PAGE_ID } from '../../../../common/constants';
 import { QuickFiltersMenuItem } from '../../alerts_search_bar/quick_filters';
 import { NoPermissionPrompt } from '../../../components/prompts/no_permission_prompt';
 import { useRuleStats } from '../hooks/use_rule_stats';
 import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
-import { alertProducersData } from '../../alerts_table/constants';
 import { UrlSyncedAlertsSearchBar } from '../../alerts_search_bar/url_synced_alerts_search_bar';
 import { useKibana } from '../../../../common/lib/kibana';
-import { alertsTableQueryClient } from '../../alerts_table/query_client';
 import {
   alertSearchBarStateContainer,
   Provider,
@@ -52,15 +60,6 @@ import {
   useRuleTypeIdsByFeatureId,
 } from '../hooks/use_rule_type_ids_by_feature_id';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../../translations';
-import {
-  defaultAlertsTableColumns,
-  defaultAlertsTableSort,
-} from '../../alerts_table/configuration';
-import { DefaultAlertsFlyoutBody } from '../../alerts_table/alerts_flyout/default_alerts_flyout';
-import { AlertActionsCell } from '../../alerts_table/row_actions/alert_actions_cell';
-import { AlertsTable } from '../../alerts_table/alerts_table';
-import { renderCellValue } from '../../alerts_table/cells/render_cell_value';
-import { AlertsTableSupportedConsumers } from '../../alerts_table/types';
 import { NON_SIEM_CONSUMERS } from '../../alerts_search_bar/constants';
 
 /**
@@ -124,6 +123,7 @@ const PageContentComponent: React.FC<PageContentProps> = ({
   authorizedToReadAnyRules,
   ruleTypeIdsByFeatureId,
 }) => {
+  const { data, http, notifications, fieldFormats, application, licensing } = useKibana().services;
   const ruleTypeIdsByFeatureIdEntries = Object.entries(ruleTypeIdsByFeatureId);
 
   const [esQuery, setEsQuery] = useState({ bool: {} } as { bool: BoolQuery });
@@ -274,8 +274,15 @@ const PageContentComponent: React.FC<PageContentProps> = ({
               columns={defaultAlertsTableColumns}
               initialPageSize={20}
               renderCellValue={renderCellValue}
-              renderFlyoutBody={DefaultAlertsFlyoutBody}
               renderActionsCell={AlertActionsCell}
+              services={{
+                data,
+                http,
+                notifications,
+                fieldFormats,
+                application,
+                licensing,
+              }}
             />
           </Suspense>
         </EuiFlexGroup>

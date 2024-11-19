@@ -9,14 +9,15 @@ import React, { useMemo } from 'react';
 
 import { EuiFlexItem, EuiFlexGroup, EuiProgress } from '@elastic/eui';
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
+import { AlertsTable } from '@kbn/response-ops-alerts-table';
 import { SECURITY_SOLUTION_OWNER } from '../../../../common/constants';
 import type { CaseUI } from '../../../../common';
-import { useKibana } from '../../../common/lib/kibana';
 import { getManualAlertIds } from './helpers';
 import { useGetFeatureIds } from '../../../containers/use_get_feature_ids';
 import { CaseViewAlertsEmpty } from './case_view_alerts_empty';
 import { CaseViewTabs } from '../case_view_tabs';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
+import { useKibana } from '../../../common/lib/kibana';
 
 interface CaseViewAlertsProps {
   caseData: CaseUI;
@@ -24,10 +25,7 @@ interface CaseViewAlertsProps {
 }
 
 export const CaseViewAlerts = ({ caseData, onAlertsTableLoaded }: CaseViewAlertsProps) => {
-  const {
-    triggersActionsUi: { getAlertsStateTable: AlertsTable },
-  } = useKibana().services;
-
+  const { data, http, notifications, fieldFormats, application, licensing } = useKibana().services;
   const alertIds = getManualAlertIds(caseData.comments);
   const alertIdsQuery = useMemo(
     () => ({
@@ -74,6 +72,16 @@ export const CaseViewAlerts = ({ caseData, onAlertsTableLoaded }: CaseViewAlerts
         query={alertIdsQuery}
         showAlertStatusWithFlapping={caseData.owner !== SECURITY_SOLUTION_OWNER}
         onLoaded={onAlertsTableLoaded}
+        services={{
+          data,
+          http,
+          notifications,
+          fieldFormats,
+          application,
+          // In the Cases UI the licensing service is defined
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          licensing: licensing!,
+        }}
       />
     </EuiFlexItem>
   );
