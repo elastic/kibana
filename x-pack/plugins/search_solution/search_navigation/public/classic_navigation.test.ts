@@ -76,7 +76,7 @@ describe('classicNavigationFactory', function () {
           onClick: expect.any(Function),
         },
       ],
-      name: 'Search',
+      name: 'Elasticsearch',
     });
   });
 

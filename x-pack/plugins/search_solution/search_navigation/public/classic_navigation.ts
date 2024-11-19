@@ -41,7 +41,7 @@ export const classicNavigationFactory: ClassicNavigationFactoryFn = (
     items,
     icon: 'logoEnterpriseSearch',
     name: i18n.translate('xpack.searchNavigation.classicNav.name', {
-      defaultMessage: 'Search',
+      defaultMessage: 'Elasticsearch',
     }),
   };
 };
