@@ -49,13 +49,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilSearchingHasFinished();
         let messageCell: WebElementWrapper;
         await retry.try(async () => {
-          messageCell = await dataGrid.getCellElementExcludingControlColumns(0, 2);
+          messageCell = await dataGrid.getCellElementByColumnName(0, 'message');
           await (await messageCell.findByTestSubject('exampleDataSourceProfileMessage')).click();
           await testSubjects.existOrFail('exampleRootProfileFlyout');
         });
         let message = await testSubjects.find('exampleRootProfileCurrentMessage');
         expect(await message.getVisibleText()).to.be('This is a debug log');
-        messageCell = await dataGrid.getCellElementExcludingControlColumns(1, 2);
+        messageCell = await dataGrid.getCellElementByColumnName(1, 'message');
         await retry.try(async () => {
           await (await messageCell.findByTestSubject('exampleDataSourceProfileMessage')).click();
           await testSubjects.existOrFail('exampleRootProfileFlyout');
@@ -74,14 +74,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await header.waitUntilLoadingHasFinished();
         await dashboard.waitForRenderComplete();
 
-        messageCell = await dataGrid.getCellElementExcludingControlColumns(0, 2);
+        messageCell = await dataGrid.getCellElementByColumnName(0, 'message');
         await retry.try(async () => {
           await (await messageCell.findByTestSubject('exampleDataSourceProfileMessage')).click();
           await testSubjects.existOrFail('exampleRootProfileFlyout');
         });
         message = await testSubjects.find('exampleRootProfileCurrentMessage');
         expect(await message.getVisibleText()).to.be('This is a debug log');
-        messageCell = await dataGrid.getCellElementExcludingControlColumns(1, 2);
+        messageCell = await dataGrid.getCellElementByColumnName(1, 'message');
         await retry.try(async () => {
           await (await messageCell.findByTestSubject('exampleDataSourceProfileMessage')).click();
           await testSubjects.existOrFail('exampleRootProfileFlyout');
@@ -106,14 +106,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilSearchingHasFinished();
         let messageCell: WebElementWrapper;
         await retry.try(async () => {
-          messageCell = await dataGrid.getCellElementExcludingControlColumns(0, 2);
+          messageCell = await dataGrid.getCellElementByColumnName(0, 'message');
           await (await messageCell.findByTestSubject('exampleDataSourceProfileMessage')).click();
           await testSubjects.existOrFail('exampleRootProfileFlyout');
         });
         let message = await testSubjects.find('exampleRootProfileCurrentMessage');
         expect(await message.getVisibleText()).to.be('This is a debug log');
-        messageCell = await dataGrid.getCellElementExcludingControlColumns(1, 2);
         await retry.try(async () => {
+          messageCell = await dataGrid.getCellElementByColumnName(1, 'message');
           await (await messageCell.findByTestSubject('exampleDataSourceProfileMessage')).click();
           await testSubjects.existOrFail('exampleRootProfileFlyout');
           message = await testSubjects.find('exampleRootProfileCurrentMessage');
@@ -130,15 +130,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.refresh();
         await header.waitUntilLoadingHasFinished();
 
-        messageCell = await dataGrid.getCellElementExcludingControlColumns(0, 2);
         await retry.try(async () => {
+          messageCell = await dataGrid.getCellElementByColumnName(0, 'message');
           await (await messageCell.findByTestSubject('exampleDataSourceProfileMessage')).click();
           await testSubjects.existOrFail('exampleRootProfileFlyout');
         });
         message = await testSubjects.find('exampleRootProfileCurrentMessage');
         expect(await message.getVisibleText()).to.be('This is a debug log');
-        messageCell = await dataGrid.getCellElementExcludingControlColumns(1, 2);
         await retry.try(async () => {
+          messageCell = await dataGrid.getCellElementByColumnName(1, 'message');
           await (await messageCell.findByTestSubject('exampleDataSourceProfileMessage')).click();
           await testSubjects.existOrFail('exampleRootProfileFlyout');
           message = await testSubjects.find('exampleRootProfileCurrentMessage');
@@ -158,15 +158,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await header.waitUntilLoadingHasFinished();
         await dashboard.waitForRenderComplete();
 
-        messageCell = await dataGrid.getCellElementExcludingControlColumns(0, 2);
         await retry.try(async () => {
+          messageCell = await dataGrid.getCellElementByColumnName(0, 'message');
           await (await messageCell.findByTestSubject('exampleDataSourceProfileMessage')).click();
           await testSubjects.existOrFail('exampleRootProfileFlyout');
         });
         message = await testSubjects.find('exampleRootProfileCurrentMessage');
         expect(await message.getVisibleText()).to.be('This is a debug log');
-        messageCell = await dataGrid.getCellElementExcludingControlColumns(1, 2);
         await retry.try(async () => {
+          messageCell = await dataGrid.getCellElementByColumnName(1, 'message');
           await (await messageCell.findByTestSubject('exampleDataSourceProfileMessage')).click();
           await testSubjects.existOrFail('exampleRootProfileFlyout');
           message = await testSubjects.find('exampleRootProfileCurrentMessage');
