@@ -388,6 +388,9 @@ describe('filterPolicyTemplatesTiles', () => {
         name: 'nginx',
         version: '0.0.1',
         status: 'not_installed',
+        description: 'nginx-template-2',
+        download: 'nginx-template-2',
+        path: 'nginx-template-2',
       },
     ]);
   });
