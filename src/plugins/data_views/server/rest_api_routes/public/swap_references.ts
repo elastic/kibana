@@ -72,7 +72,10 @@ export const swapReferencesRoute =
         version: INITIAL_REST_VERSION,
         security: {
           authz: {
-            requiredPrivileges: ['indexPatterns:manage'],
+            enabled: false,
+            // We don't use the indexPatterns:manage privilege for this route because it can be used for saved object
+            // types other than index-pattern
+            reason: 'Authorization provided by saved objects client',
           },
         },
         validate: {

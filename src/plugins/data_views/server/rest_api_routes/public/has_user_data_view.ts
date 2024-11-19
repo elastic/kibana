@@ -48,7 +48,8 @@ const hasUserDataViewRouteFactory =
         version: '1',
         security: {
           authz: {
-            requiredPrivileges: ['indexPatterns:read'],
+            enabled: false,
+            reason: 'Authorization provided by saved objects client',
           },
         },
         validate: {

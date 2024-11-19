@@ -879,7 +879,6 @@ Array [
     "privilege": Object {
       "api": Array [
         "indexPatterns:manage",
-        "indexPatterns:read",
       ],
       "app": Array [
         "kibana",
@@ -906,9 +905,6 @@ Array [
   },
   Object {
     "privilege": Object {
-      "api": Array [
-        "indexPatterns:read",
-      ],
       "app": Array [
         "kibana",
       ],
@@ -1519,7 +1515,6 @@ Array [
     "privilege": Object {
       "api": Array [
         "indexPatterns:manage",
-        "indexPatterns:read",
       ],
       "app": Array [
         "kibana",
@@ -1546,9 +1541,6 @@ Array [
   },
   Object {
     "privilege": Object {
-      "api": Array [
-        "indexPatterns:read",
-      ],
       "app": Array [
         "kibana",
       ],

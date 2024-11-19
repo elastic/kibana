@@ -16,7 +16,8 @@ export function registerPreviewScriptedFieldRoute(router: IRouter): void {
       path: '/internal/index-pattern-management/preview_scripted_field',
       security: {
         authz: {
-          requiredPrivileges: ['indexPatterns:manage'],
+          enabled: false,
+          reason: 'Authorization provided by Elasticsearch',
         },
       },
       validate: {

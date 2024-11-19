@@ -59,7 +59,8 @@ const getDataViewRouteFactory =
         version: INITIAL_REST_VERSION,
         security: {
           authz: {
-            requiredPrivileges: ['indexPatterns:read'],
+            enabled: false,
+            reason: 'Authorization provided by saved objects client',
           },
         },
         validate: {
