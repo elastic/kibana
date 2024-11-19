@@ -222,7 +222,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await filterBar.clickEditFilterById('0');
 
       expect(await filterBar.getFilterEditorPreview()).to.equal(
-        '(NOT clientip: exists OR extension: is one of png, jpeg) AND bytes: 1,000B to 2KB'
+        '(NOT clientip: exists\nOR\nextension: is one of png, jpeg)\nAND\nbytes: 1,000B to 2KB'
       );
     });
 
