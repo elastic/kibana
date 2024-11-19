@@ -173,6 +173,96 @@
       "enabled": true
     },
     {
+      "groupName": "@elastic/appex-sharedux dependencies",
+      "matchDepNames": [
+        "@elastic/filesaver",
+        "@elastic/numeral",
+        "base64-js",
+        "blurhash",
+        "classnames",
+        "deep-freeze-strict",
+        "fflate",
+        "history",
+        "lz-string",
+        "monaco-editor",
+        "rison-node",
+        "styled-components",
+        "@types/base64-js",
+        "@types/classnames",
+        "@types/deep-freeze-strict",
+        "@types/history",
+        "@types/lz-string",
+        "@types/styled-components"
+      ],
+      "reviewers": [
+        "team:appex-sharedux"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:SharedUX",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true
+    },
+    {
+      "groupName": "@elastic/appex-sharedux emotion dependencies",
+      "matchDepNames": [
+        "@emotion/cache",
+        "@emotion/css",
+        "@emotion/react",
+        "@emotion/serialize",
+        "@emotion/server",
+        "@emotion/styled"
+      ],
+      "reviewers": [
+        "team:appex-sharedux"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:SharedUX",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true
+    },
+    {
+      "groupName": "@elastic/appex-sharedux react dependencies",
+      "matchDepNames": [
+        "prop-types",
+        "react",
+        "react-dom",
+        "react-monaco-editor",
+        "react-router",
+        "react-router-config",
+        "react-router-dom",
+        "react-router-dom-v5-compat",
+        "react-use",
+        "@types/prop-types",
+        "@types/react",
+        "@types/react-dom",
+        "@types/react-router",
+        "@types/react-router-config",
+        "@types/react-router-dom"
+      ],
+      "reviewers": [
+        "team:appex-sharedux"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:SharedUX",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true
+    },
+    {
       "groupName": "@elastic/charts",
       "matchDepNames": [
         "@elastic/charts"
