@@ -236,7 +236,7 @@ export interface ActionTaskParams extends SavedObjectAttributes {
   source?: string;
 }
 
-export type ActionTaskExecutorParams = {
+export interface ActionTaskExecutorParams {
   spaceId: string;
   actionTaskParamsId: string;
 }
