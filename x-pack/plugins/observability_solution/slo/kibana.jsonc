@@ -22,6 +22,7 @@
       "dashboard",
       "data",
       "dataViews",
+      "discoverShared",
       "lens",
       "dataViewEditor",
       "dataViewFieldEditor",
@@ -38,14 +39,14 @@
       "presentationUtil",
       "features",
       "licensing",
-      "usageCollection"
+      "usageCollection",
     ],
     "optionalPlugins": [
       "cloud",
-      "spaces",
       "serverless",
       "discover",
-      "observabilityAIAssistant"
+      "observabilityAIAssistant",
+      "spaces",
     ],
     "requiredBundles": [
       "controls",

@@ -34,6 +34,7 @@ import { useUserPrivileges } from '../../../../../common/components/user_privile
 import { timelineActions, timelineSelectors } from '../../../../store';
 import { timelineDefaults } from '../../../../store/defaults';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
+import { DocumentEventTypes } from '../../../../../common/lib/telemetry';
 import { isFullScreen } from '../../helpers';
 
 const FullScreenButtonIcon = styled(EuiButtonIcon)`
@@ -287,7 +288,7 @@ export const useSessionView = ({ scopeId, height }: { scopeId: string; height?: 
           },
         },
       });
-      telemetry.reportDetailsFlyoutOpened({
+      telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
         location: scopeId,
         panel: 'right',
       });

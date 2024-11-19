@@ -18,6 +18,7 @@ import {
   attackDiscoveryDataClientMock,
   conversationsDataClientMock,
   dataClientMock,
+  knowledgeBaseDataClientMock,
 } from './data_clients.mock';
 import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
 import { AIAssistantDataClient } from '../ai_assistant_data_clients';
@@ -27,6 +28,7 @@ import {
 } from '../ai_assistant_data_clients/knowledge_base';
 import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 import { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
+import { authenticatedUser } from './user';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();
@@ -42,7 +44,7 @@ export const createMockClients = () => {
       logger: loggingSystemMock.createLogger(),
       telemetry: coreMock.createSetup().analytics,
       getAIAssistantConversationsDataClient: conversationsDataClientMock.create(),
-      getAIAssistantKnowledgeBaseDataClient: dataClientMock.create(),
+      getAIAssistantKnowledgeBaseDataClient: knowledgeBaseDataClientMock.create(),
       getAIAssistantPromptsDataClient: dataClientMock.create(),
       getAttackDiscoveryDataClient: attackDiscoveryDataClientMock.create(),
       getAIAssistantAnonymizationFieldsDataClient: dataClientMock.create(),
@@ -127,15 +129,15 @@ const createElasticAssistantRequestContextMock = (
       () => clients.elasticAssistant.getAIAssistantKnowledgeBaseDataClient
     ) as unknown as jest.MockInstance<
       Promise<AIAssistantKnowledgeBaseDataClient | null>,
-      [params: GetAIAssistantKnowledgeBaseDataClientParams],
+      [params?: GetAIAssistantKnowledgeBaseDataClientParams],
       unknown
     > &
       ((
-        params: GetAIAssistantKnowledgeBaseDataClientParams
+        params?: GetAIAssistantKnowledgeBaseDataClientParams
       ) => Promise<AIAssistantKnowledgeBaseDataClient | null>),
-    getCurrentUser: jest.fn(),
+    getCurrentUser: jest.fn().mockReturnValue(authenticatedUser),
     getServerBasePath: jest.fn(),
-    getSpaceId: jest.fn(),
+    getSpaceId: jest.fn().mockReturnValue('default'),
     inference: { getClient: jest.fn() },
     core: clients.core,
     telemetry: clients.elasticAssistant.telemetry,

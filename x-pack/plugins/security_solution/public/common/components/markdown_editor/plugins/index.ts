@@ -24,8 +24,8 @@ export const uiPlugins = ({
   insightsUpsellingMessage,
   interactionsUpsellingMessage,
 }: {
-  insightsUpsellingMessage: string | null;
-  interactionsUpsellingMessage: string | null;
+  insightsUpsellingMessage?: string;
+  interactionsUpsellingMessage?: string;
 }) => {
   const currentPlugins = nonStatefulUiPlugins.map((plugin) => plugin.name);
   const insightPluginWithLicense = insightMarkdownPlugin.plugin({

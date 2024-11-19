@@ -110,7 +110,6 @@ export const AnalyticsTable: FC<Props> = ({ items }) => {
   return (
     <EuiInMemoryTable<DataFrameAnalyticsListRow>
       allowNeutralSort={false}
-      className="mlAnalyticsTable"
       columns={columns}
       items={items}
       itemId={DataFrameAnalyticsListColumn.id}

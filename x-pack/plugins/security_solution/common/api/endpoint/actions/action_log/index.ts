@@ -6,4 +6,3 @@
  */
 
 export * from './action_log';
-export * from './deprecated_action_log.gen';
