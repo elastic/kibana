@@ -13,6 +13,7 @@ import { BehaviorSubject, debounceTime, first, map } from 'rxjs';
 import { EuiInputPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
+  PublishingSubject,
   ViewMode,
   apiHasParentApi,
   apiPublishesDataLoading,
@@ -55,6 +56,7 @@ export const getTimesliderControlFactory = (): ControlFactory<
       const { timeRangeMeta$, formatDate, cleanupTimeRangeSubscription } =
         initTimeRangeSubscription(controlGroupApi);
       const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
+      const hasTimeSliceSelection$ = new BehaviorSubject<boolean>(false);
       const isAnchored$ = new BehaviorSubject<boolean | undefined>(initialState.isAnchored);
       const isPopoverOpen$ = new BehaviorSubject(false);
 
@@ -102,6 +104,8 @@ export const getTimesliderControlFactory = (): ControlFactory<
       }
 
       function onChange(timeslice?: Timeslice) {
+        hasTimeSliceSelection$.next(true);
+
         setTimeslice(timeslice);
         const nextSelectedRange = timeslice
           ? timeslice[TO_INDEX] - timeslice[FROM_INDEX]
@@ -223,8 +227,10 @@ export const getTimesliderControlFactory = (): ControlFactory<
             };
           },
           clearSelections: () => {
+            hasTimeSliceSelection$.next(false);
             setTimeslice(undefined);
           },
+          hasSelections$: hasTimeSliceSelection$ as PublishingSubject<boolean | undefined>,
           CustomPrependComponent: () => {
             const [autoApplySelections, viewMode] = useBatchedPublishingSubjects(
               controlGroupApi.autoApplySelections$,
