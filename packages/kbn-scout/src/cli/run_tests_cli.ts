@@ -26,12 +26,12 @@ export function runTestsCli() {
       await runTests(log, options);
     },
     {
-      description: `Run Playwright UI Tests`,
+      description: `Run Scout UI Tests`,
       usage: `
       Usage:
-        node scripts/playwright_test --help
-        node scripts/playwright_test --stateful --config <playwright_config_path>
-        node scripts/playwright_test --serverless=es --headed --config <playwright_config_path>
+        node scripts/scout_test --help
+        node scripts/scout_test --stateful --config <playwright_config_path>
+        node scripts/scout_test --serverless=es --headed --config <playwright_config_path>
       `,
       flags: TEST_FLAG_OPTIONS,
     }

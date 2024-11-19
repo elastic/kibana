@@ -21,7 +21,7 @@ import { getExtraKbnOpts } from '../../servers/run_kibana_server';
 
 export async function runTests(log: ToolingLog, options: RunTestsOptions) {
   const runStartTime = Date.now();
-  const reportTime = getTimeReporter(log, 'scripts/playwright_test');
+  const reportTime = getTimeReporter(log, 'scripts/scout_test');
 
   const config = await loadServersConfig(options.mode, log);
   const playwrightConfigPath = options.configPath;

@@ -3,9 +3,9 @@ First start the servers with
 
 ```bash
 // ESS
-node scripts/playwright_start_servers.js --stateful
+node scripts/scout_start_servers.js --stateful
 // Serverless
-node scripts/playwright_start_servers.js --serverless=es
+node scripts/scout_start_servers.js --serverless=es
 ```
 
 Then you can run the tests multiple times in another terminal with:

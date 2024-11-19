@@ -20,7 +20,7 @@ import { silence } from '../common';
 
 export async function startServers(log: ToolingLog, options: StartServerOptions) {
   const runStartTime = Date.now();
-  const reportTime = getTimeReporter(log, 'scripts/playwright_start_servers');
+  const reportTime = getTimeReporter(log, 'scripts/scout_start_servers');
 
   await withProcRunner(log, async (procs) => {
     const config = await loadServersConfig(options.mode, log);
