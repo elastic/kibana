@@ -125,6 +125,7 @@ export class MlLocatorDefinition implements LocatorDefinition<MlLocatorParams> {
         break;
       case ML_PAGES.CALENDARS_EDIT:
         path = formatEditCalendarUrl('', params.pageState);
+        break;
       case ML_PAGES.CALENDARS_DST_EDIT:
         path = formatEditCalendarDstUrl('', params.pageState);
         break;
