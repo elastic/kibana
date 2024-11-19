@@ -22,7 +22,7 @@ export async function getEntityGroupsBy({
   inventoryEsClient: ObservabilityElasticsearchClient;
   field: string;
   esQuery?: QueryDslQueryContainer;
-}) {
+}): Promise<EntityGroup[]> {
   const from = `FROM ${ENTITIES_LATEST_ALIAS}`;
   const where = [getBuiltinEntityDefinitionIdESQLWhereClause()];
 
@@ -31,8 +31,10 @@ export async function getEntityGroupsBy({
   const limit = `LIMIT ${MAX_NUMBER_OF_ENTITIES}`;
   const query = [from, ...where, group, sort, limit].join(' | ');
 
-  return inventoryEsClient.esql<EntityGroup>('get_entities_groups', {
+  const { hits } = await inventoryEsClient.esql<EntityGroup>('get_entities_groups', {
     query,
     filter: esQuery,
   });
+
+  return hits;
 }

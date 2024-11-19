@@ -7,7 +7,6 @@
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { calculateAuto } from '@kbn/calculate-auto';
 import { i18n } from '@kbn/i18n';
-import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import { StreamDefinition } from '@kbn/streams-plugin/common';
 import moment from 'moment';
@@ -34,8 +33,6 @@ export function StreamDetailOverview({ definition }: { definition?: StreamDefini
     absoluteTimeRange: { start, end },
     setTimeRange,
   } = useDateRange({ data });
-
-  const dataStream = definition?.id;
 
   const indexPatterns = useMemo(() => {
     if (!definition?.id) {
@@ -114,23 +111,6 @@ export function StreamDetailOverview({ definition }: { definition?: StreamDefini
     [indexPatterns, dataViews, streamsRepositoryClient, queries?.histogramQuery, start, end]
   );
 
-  const dataViewsFetch = useAbortableAsync(() => {
-    return dataViews
-      .create(
-        {
-          title: dataStream,
-          timeFieldName: '@timestamp',
-        },
-        false, // skip fetch fields
-        true // display errors
-      )
-      .then((response) => {
-        return [response];
-      });
-  }, [dataViews, dataStream]);
-
-  const fetchedDataViews = useMemo(() => dataViewsFetch.value ?? [], [dataViewsFetch.value]);
-
   return (
     <>
       <EuiFlexGroup direction="column">
@@ -156,7 +136,6 @@ export function StreamDetailOverview({ definition }: { definition?: StreamDefini
                   defaultMessage: 'Filter data by using KQL',
                 }
               )}
-              dataViews={fetchedDataViews}
               dateRangeFrom={timeRange.from}
               dateRangeTo={timeRange.to}
             />

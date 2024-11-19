@@ -48,22 +48,15 @@ export function StreamDetailView() {
     {
       name: 'overview',
       content: <StreamDetailOverview definition={streamEntity} />,
-      label: i18n.translate('app_not_found_in_i18nrc.streamDetailView.overviewTab', {
+      label: i18n.translate('xpack.streams.streamDetailView.overviewTab', {
         defaultMessage: 'Overview',
       }),
     },
     {
-      name: 'routing',
+      name: 'management',
       content: <></>,
-      label: i18n.translate('app_not_found_in_i18nrc.streamDetailView.routingTab', {
-        defaultMessage: 'Routing',
-      }),
-    },
-    {
-      name: 'processing',
-      content: <></>,
-      label: i18n.translate('app_not_found_in_i18nrc.streamDetailView.processingTab', {
-        defaultMessage: 'Processing',
+      label: i18n.translate('xpack.streams.streamDetailView.managementTab', {
+        defaultMessage: 'Management',
       }),
     },
   ];

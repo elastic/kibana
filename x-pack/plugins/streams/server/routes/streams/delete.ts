@@ -75,7 +75,11 @@ export const deleteStreamRoute = createServerRoute({
   },
 });
 
-async function deleteStream(scopedClusterClient: IScopedClusterClient, id: string, logger: Logger) {
+export async function deleteStream(
+  scopedClusterClient: IScopedClusterClient,
+  id: string,
+  logger: Logger
+) {
   try {
     const { definition } = await readStream({ scopedClusterClient, id });
     for (const child of definition.children) {

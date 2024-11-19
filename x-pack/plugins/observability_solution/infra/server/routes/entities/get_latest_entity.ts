@@ -40,8 +40,8 @@ export async function getLatestEntity({
     return undefined;
   }
 
-  const response = await inventoryEsClient.esql<{
-    source_data_stream?: { type?: string | string[] };
+  const { hits } = await inventoryEsClient.esql<{
+    'source_data_stream.type': string | string[];
   }>('get_latest_entities', {
     query: `FROM ${ENTITIES_LATEST_ALIAS}
         | WHERE ${ENTITY_TYPE} == ?
@@ -51,5 +51,5 @@ export async function getLatestEntity({
     params: [entityType, entityId],
   });
 
-  return { sourceDataStreamType: response[0].source_data_stream?.type };
+  return { sourceDataStreamType: hits[0]?.['source_data_stream.type'] };
 }
