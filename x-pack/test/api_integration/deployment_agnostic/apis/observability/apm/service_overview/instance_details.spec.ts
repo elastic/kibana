@@ -6,8 +6,8 @@
  */
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client';
+import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { getServiceNodeIds } from './get_service_node_ids';

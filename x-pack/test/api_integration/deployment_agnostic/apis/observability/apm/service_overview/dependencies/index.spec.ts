@@ -7,13 +7,13 @@
 
 import expect from '@kbn/expect';
 import { last, pick } from 'lodash';
-import { ValuesType } from 'utility-types';
-import { Node, NodeType } from '@kbn/apm-plugin/common/connections';
+import type { ValuesType } from 'utility-types';
+import { type Node, NodeType } from '@kbn/apm-plugin/common/connections';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
 } from '@kbn/apm-plugin/common/environment_filter_values';
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { roundNumber } from '../../utils/common';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import { apmDependenciesMapping, createServiceDependencyDocs } from './es_utils';

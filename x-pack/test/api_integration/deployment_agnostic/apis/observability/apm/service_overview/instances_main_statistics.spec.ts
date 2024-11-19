@@ -11,10 +11,10 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { apm, Instance, timerange } from '@kbn/apm-synthtrace-client';
 import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
-import { InstancesSortField } from '@kbn/apm-plugin/common/instances';
+import type { InstancesSortField } from '@kbn/apm-plugin/common/instances';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client';
 import { sum } from 'lodash';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
@@ -74,7 +74,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/177492
       describe('when data is loaded', () => {
         describe('Return Top 100 instances', () => {
           const serviceName = 'synth-node-1';

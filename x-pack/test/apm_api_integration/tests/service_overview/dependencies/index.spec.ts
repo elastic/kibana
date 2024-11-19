@@ -7,11 +7,11 @@
 
 import expect from '@kbn/expect';
 import { omit, sortBy } from 'lodash';
-import { Node, NodeType } from '@kbn/apm-plugin/common/connections';
+import { type Node, NodeType } from '@kbn/apm-plugin/common/connections';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import archives from '../../../common/fixtures/es_archiver/archives_metadata';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');

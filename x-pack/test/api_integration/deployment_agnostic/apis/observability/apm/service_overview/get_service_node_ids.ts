@@ -6,7 +6,7 @@
  */
 import { take } from 'lodash';
 import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
-import { ApmApiClient } from '../custom_dashboards/api_helper';
+import type { ApmApiClient } from '../custom_dashboards/api_helper';
 
 export async function getServiceNodeIds({
   apmApiClient,
