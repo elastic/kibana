@@ -31,16 +31,29 @@ export interface InferenceServerSetup {}
 /**
  * Options to create an inference client using the {@link InferenceServerStart.getClient} API.
  */
-export interface InferenceClientCreateOptions<T extends BoundChatCompleteOptions | undefined> {
+export interface InferenceUnboundClientCreateOptions {
   /**
    * The request to scope the client to.
    */
   request: KibanaRequest;
-  /**
-   * If specified, will return a client bound to the provided options, instead of an unbound one.
-   */
-  bindTo?: T;
 }
+
+/**
+ * Options to create a bound inference client using the {@link InferenceServerStart.getClient} API.
+ */
+export interface InferenceBoundClientCreateOptions extends InferenceUnboundClientCreateOptions {
+  /**
+   * The parameters to bind the client to.
+   */
+  bindTo: BoundChatCompleteOptions;
+}
+
+/**
+ * Options to create an inference client using the {@link InferenceServerStart.getClient} API.
+ */
+export type InferenceClientCreateOptions =
+  | InferenceUnboundClientCreateOptions
+  | InferenceBoundClientCreateOptions;
 
 /**
  * Start contract of the inference plugin, exposing APIs to interact with LLMs.
@@ -77,7 +90,7 @@ export interface InferenceServerStart {
    * });
    * ```
    */
-  getClient: <T extends BoundChatCompleteOptions | undefined>(
-    options: InferenceClientCreateOptions<T>
-  ) => T extends BoundChatCompleteOptions ? BoundInferenceClient : InferenceClient;
+  getClient: <T extends InferenceClientCreateOptions>(
+    options: T
+  ) => T extends InferenceBoundClientCreateOptions ? BoundInferenceClient : InferenceClient;
 }

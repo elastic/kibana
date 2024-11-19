@@ -6,31 +6,32 @@
  */
 
 import type { Logger } from '@kbn/logging';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { BoundChatCompleteOptions } from '@kbn/inference-common';
-import type { InferenceClientCreateOptions } from '../types';
 import type { BoundInferenceClient, InferenceClient } from './types';
 import { createInferenceClient } from './inference_client';
 import { bindClient } from './bind_client';
 
-export function createClient<T extends BoundChatCompleteOptions | undefined>(
-  options: InferenceClientCreateOptions<T> & {
-    actions: ActionsPluginStart;
-    logger: Logger;
-  }
-): T extends BoundChatCompleteOptions ? BoundInferenceClient : InferenceClient;
-export function createClient<T extends BoundChatCompleteOptions | undefined>({
-  actions,
-  request,
-  logger,
-  bindTo,
-}: InferenceClientCreateOptions<T> & {
+interface UnboundOptions {
+  request: KibanaRequest;
   actions: ActionsPluginStart;
   logger: Logger;
-}): BoundInferenceClient | InferenceClient {
+}
+
+interface BoundOptions extends UnboundOptions {
+  bindTo: BoundChatCompleteOptions;
+}
+
+export function createClient(options: UnboundOptions): InferenceClient;
+export function createClient(options: BoundOptions): BoundInferenceClient;
+export function createClient(
+  options: UnboundOptions | BoundOptions
+): BoundInferenceClient | InferenceClient {
+  const { actions, request, logger } = options;
   const client = createInferenceClient({ request, actions, logger });
-  if (bindTo) {
-    return bindClient(client, bindTo);
+  if ('bindTo' in options) {
+    return bindClient(client, options.bindTo);
   } else {
     return client;
   }

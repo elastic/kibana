@@ -7,10 +7,16 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { createClient as createInferenceClient } from './inference_client';
+import {
+  type BoundInferenceClient,
+  createClient as createInferenceClient,
+  type InferenceClient,
+} from './inference_client';
 import { registerRoutes } from './routes';
 import type { InferenceConfig } from './config';
-import type {
+import {
+  InferenceBoundClientCreateOptions,
+  InferenceClientCreateOptions,
   InferenceServerSetup,
   InferenceServerStart,
   InferenceSetupDependencies,
@@ -48,13 +54,12 @@ export class InferencePlugin
 
   start(core: CoreStart, pluginsStart: InferenceStartDependencies): InferenceServerStart {
     return {
-      getClient: ({ request, bindTo }) => {
+      getClient: <T extends InferenceClientCreateOptions>(options: T) => {
         return createInferenceClient({
-          request,
-          bindTo,
+          ...options,
           actions: pluginsStart.actions,
           logger: this.logger.get('client'),
-        });
+        }) as T extends InferenceBoundClientCreateOptions ? BoundInferenceClient : InferenceClient;
       },
     };
   }
