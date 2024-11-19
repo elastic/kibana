@@ -475,5 +475,6 @@ export function getMissingIndexPattern(
   if (!missingIds.length) {
     return [];
   }
+  console.log('missingIds', { missingIds, currentDatasourceState, indexPatterns });
   return missingIds;
 }

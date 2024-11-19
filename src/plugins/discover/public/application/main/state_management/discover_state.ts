@@ -413,6 +413,7 @@ export function getDiscoverStateContainer({
   };
 
   const onDataViewEdited = async (editedDataView: DataView) => {
+    console.log('onDataViewEdited', editedDataView);
     dataStateContainer.reset();
     if (editedDataView.isPersisted()) {
       // Clear the current data view from the cache and create a new instance

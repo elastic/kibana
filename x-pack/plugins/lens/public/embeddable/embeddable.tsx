@@ -111,6 +111,7 @@ import {
   AddUserMessages,
   UserMessagesGetter,
   UserMessagesDisplayLocationId,
+  IndexPattern,
 } from '../types';
 
 import type {
@@ -475,6 +476,7 @@ export class Embeddable
       },
       parent
     );
+    console.log('new Embeddable');
 
     this.lensInspector = getLensInspectorService(deps.inspector);
     this.expressionRenderer = deps.expressionRenderer;
@@ -632,6 +634,7 @@ export class Embeddable
   };
 
   public getUserMessages: UserMessagesGetter = (locationId, filters) => {
+    console.log('getUserMessages');
     const userMessages: UserMessage[] = [];
     userMessages.push(
       ...getApplicationUserMessages({
@@ -929,6 +932,7 @@ export class Embeddable
   }
 
   async initializeSavedVis(input: LensEmbeddableInput) {
+    console.log('initializeSavedVis');
     const unwrapResult: LensUnwrapResult | false = await this.deps.attributeService
       .unwrapAttributes(input)
       .catch((e: Error) => {
@@ -959,6 +963,7 @@ export class Embeddable
 
       this.expression = ast;
       this.indexPatterns = indexPatterns;
+      console.log('initializeSavedVis', this.indexPatterns);
       this.indexPatternRefs = indexPatternRefs;
       this.activeVisualizationState = activeVisualizationState;
     } catch {
@@ -1039,6 +1044,7 @@ export class Embeddable
   };
 
   private onRender: ExpressionWrapperProps['onRender$'] = () => {
+    console.log('onRender');
     let datasourceEvents: string[] = [];
     let visualizationEvents: string[] = [];
 
@@ -1556,7 +1562,16 @@ export class Embeddable
 
     // making sure to not run into the race condition that the data source has the previous data view id
     // causing to throw an exception that's not necessary
-    this.internalDataViews = uniqBy([...indexPatterns, ...prevInternalDataViews], 'id');
+    const internalDataViews = uniqBy([...indexPatterns, ...prevInternalDataViews], 'id');
+    console.log('Reassign internalDataViews initializeOutput', this.internalDataViews);
+    this.internalDataViews = internalDataViews;
+    // when we don't set this, this.getUserMessages, which is using it can run into a race condition
+    for (const dataView of internalDataViews) {
+      if (dataView.id && !this.indexPatterns[dataView.id]) {
+        // this is to prevent an exception in Discover
+        this.indexPatterns[dataView.id] = dataView as unknown as IndexPattern;
+      }
+    }
 
     // passing edit url and index patterns to the output of this embeddable for
     // the container to pick them up and use them to configure filter bar and
@@ -1568,7 +1583,7 @@ export class Embeddable
     if (
       !Boolean(this.isTextBasedLanguage()) &&
       input.timeRange == null &&
-      indexPatterns.some((indexPattern) => indexPattern.isTimeBased())
+      internalDataViews.some((indexPattern) => indexPattern.isTimeBased())
     ) {
       this.addUserMessages([
         {
@@ -1585,7 +1600,7 @@ export class Embeddable
         },
       ]);
     }
-
+    // here is where the race condition happens
     const blockingErrors = this.getUserMessages(blockingMessageDisplayLocations, {
       severity: 'error',
     });
