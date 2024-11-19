@@ -8,6 +8,7 @@
  */
 
 import { EuiThemeSystem, EuiThemeAmsterdam } from '@elastic/eui';
+import { EuiThemeBorealis } from '@elastic/eui-theme-borealis';
 
 export interface ThemeConfig {
   euiTheme: EuiThemeSystem;
@@ -16,6 +17,9 @@ export interface ThemeConfig {
 const THEMES: Record<string, ThemeConfig> = {
   amsterdam: {
     euiTheme: EuiThemeAmsterdam,
+  },
+  borealis: {
+    euiTheme: EuiThemeBorealis,
   },
 };
 
