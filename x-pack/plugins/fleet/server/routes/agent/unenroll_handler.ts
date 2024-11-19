@@ -14,7 +14,6 @@ import type {
   PostBulkAgentUnenrollRequestSchema,
 } from '../../types';
 import * as AgentService from '../../services/agents';
-import { defaultFleetErrorHandler } from '../../errors';
 
 export const postAgentUnenrollHandler: RequestHandler<
   TypeOf<typeof PostAgentUnenrollRequestSchema.params>,
@@ -24,17 +23,13 @@ export const postAgentUnenrollHandler: RequestHandler<
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  try {
-    await AgentService.unenrollAgent(soClient, esClient, request.params.agentId, {
-      force: request.body?.force,
-      revoke: request.body?.revoke,
-    });
+  await AgentService.unenrollAgent(soClient, esClient, request.params.agentId, {
+    force: request.body?.force,
+    revoke: request.body?.revoke,
+  });
 
-    const body: PostAgentUnenrollResponse = {};
-    return response.ok({ body });
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
-  }
+  const body: PostAgentUnenrollResponse = {};
+  return response.ok({ body });
 };
 
 export const postBulkAgentsUnenrollHandler: RequestHandler<
@@ -49,17 +44,13 @@ export const postBulkAgentsUnenrollHandler: RequestHandler<
     ? { agentIds: request.body.agents }
     : { kuery: request.body.agents };
 
-  try {
-    const results = await AgentService.unenrollAgents(soClient, esClient, {
-      ...agentOptions,
-      revoke: request.body?.revoke,
-      force: request.body?.force,
-      batchSize: request.body?.batchSize,
-      showInactive: request.body?.includeInactive,
-    });
+  const results = await AgentService.unenrollAgents(soClient, esClient, {
+    ...agentOptions,
+    revoke: request.body?.revoke,
+    force: request.body?.force,
+    batchSize: request.body?.batchSize,
+    showInactive: request.body?.includeInactive,
+  });
 
-    return response.ok({ body: { actionId: results.actionId } });
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
-  }
+  return response.ok({ body: { actionId: results.actionId } });
 };

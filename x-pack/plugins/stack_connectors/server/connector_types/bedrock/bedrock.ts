@@ -21,8 +21,9 @@ import {
   StreamingResponseSchema,
   RunActionResponseSchema,
   RunApiLatestResponseSchema,
+  ConverseActionParamsSchema,
 } from '../../../common/bedrock/schema';
-import type {
+import {
   Config,
   Secrets,
   RunActionParams,
@@ -34,6 +35,8 @@ import type {
   RunApiLatestResponse,
   BedrockMessage,
   BedrockToolChoice,
+  ConverseActionParams,
+  ConverseActionResponse,
 } from '../../../common/bedrock/types';
 import {
   SUB_ACTION,
@@ -102,6 +105,18 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
       name: SUB_ACTION.INVOKE_AI_RAW,
       method: 'invokeAIRaw',
       schema: InvokeAIRawActionParamsSchema,
+    });
+
+    this.registerSubAction({
+      name: SUB_ACTION.CONVERSE,
+      method: 'converse',
+      schema: ConverseActionParamsSchema,
+    });
+
+    this.registerSubAction({
+      name: SUB_ACTION.CONVERSE_STREAM,
+      method: 'converseStream',
+      schema: ConverseActionParamsSchema,
     });
   }
 
@@ -222,14 +237,18 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
    * responsible for making a POST request to the external API endpoint and returning the response data
    * @param body The stringified request body to be sent in the POST request.
    * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
+   * @param signal Optional signal to cancel the request.
+   * @param timeout Optional timeout for the request.
+   * @param raw Optional flag to indicate if the response should be returned as raw data.
+   * @param apiType Optional type of API to be called. Defaults to 'invoke', .
    */
   public async runApi(
-    { body, model: reqModel, signal, timeout, raw }: RunActionParams,
+    { body, model: reqModel, signal, timeout, raw, apiType = 'invoke' }: RunActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<RunActionResponse | InvokeAIRawActionResponse> {
     // set model on per request basis
     const currentModel = reqModel ?? this.model;
-    const path = `/model/${currentModel}/invoke`;
+    const path = `/model/${currentModel}/${apiType}`;
     const signed = this.signRequest(body, path, false);
     const requestArgs = {
       ...signed,
@@ -262,18 +281,22 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
 
   /**
    *  NOT INTENDED TO BE CALLED DIRECTLY
-   *  call invokeStream instead
+   *  call invokeStream or converseStream instead
    *  responsible for making a POST request to a specified URL with a given request body.
    *  The response is then processed based on whether it is a streaming response or a regular response.
    * @param body The stringified request body to be sent in the POST request.
    * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
    */
   private async streamApi(
-    { body, model: reqModel, signal, timeout }: RunActionParams,
+    { body, model: reqModel, signal, timeout, apiType = 'invoke' }: RunActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<StreamingResponse> {
+    const streamingApiRoute = {
+      invoke: 'invoke-with-response-stream',
+      converse: 'converse-stream',
+    };
     // set model on per request basis
-    const path = `/model/${reqModel ?? this.model}/invoke-with-response-stream`;
+    const path = `/model/${reqModel ?? this.model}/${streamingApiRoute[apiType]}`;
     const signed = this.signRequest(body, path, true);
 
     const response = await this.request(
@@ -312,7 +335,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       timeout,
       tools,
       toolChoice,
-    }: InvokeAIActionParams | InvokeAIRawActionParams,
+    }: InvokeAIRawActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<IncomingMessage> {
     const res = (await this.streamApi(
@@ -409,6 +432,50 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       },
       connectorUsageCollector
     );
+    return res;
+  }
+
+  /**
+   * Sends a request to the Bedrock API to perform a conversation action.
+   * @param input - The parameters for the conversation action.
+   * @param connectorUsageCollector - The usage collector for the connector.
+   * @returns A promise that resolves to the response of the conversation action.
+   */
+  public async converse(
+    { signal, ...converseApiInput }: ConverseActionParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<ConverseActionResponse> {
+    const res = await this.runApi(
+      {
+        body: JSON.stringify(converseApiInput),
+        raw: true,
+        apiType: 'converse',
+        signal,
+      },
+      connectorUsageCollector
+    );
+    return res;
+  }
+
+  /**
+   * Sends a request to the Bedrock API to perform a streaming conversation action.
+   * @param input - The parameters for the streaming conversation action.
+   * @param connectorUsageCollector - The usage collector for the connector.
+   * @returns A promise that resolves to the streaming response of the conversation action.
+   */
+  public async converseStream(
+    { signal, ...converseApiInput }: ConverseActionParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<IncomingMessage> {
+    const res = await this.streamApi(
+      {
+        body: JSON.stringify(converseApiInput),
+        apiType: 'converse',
+        signal,
+      },
+      connectorUsageCollector
+    );
+
     return res;
   }
 }

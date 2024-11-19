@@ -44,7 +44,7 @@ describe('migrator-only node', () => {
           '--no-optimizer',
           '--no-base-path',
           '--no-watch',
-          isFipsEnabled ? '--xpack.security.experimental.fipsMode.enabled=true' : '--oss',
+          isFipsEnabled ? '--xpack.security.fipsMode.enabled=true' : '--oss',
         ],
         { stdio: ['pipe', 'pipe', 'pipe'] }
       );
