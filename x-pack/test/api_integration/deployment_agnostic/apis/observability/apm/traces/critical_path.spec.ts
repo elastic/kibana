@@ -33,11 +33,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     children: FormattedNode[];
   }
 
-  // format tree in somewhat concise format for easier testing
-
   describe('Aggregated critical path', () => {
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
 
+    // format tree in somewhat concise format for easier testing
     function formatTree(nodes: HydratedNode[]): FormattedNode[] {
       return sortBy(
         nodes.map((node) => {

@@ -45,7 +45,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     describe('when data is loaded', () => {
       let response: any;
       before(async () => {
-        await esArchiver.load(ARCHIVER_ROUTES['8.0.0']);
+        await esArchiver.load(ARCHIVER_ROUTES[archiveName]);
         response = await apmApiClient.readUser({
           endpoint: 'GET /internal/apm/traces',
           params: {
@@ -61,7 +61,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       after(async () => {
-        await esArchiver.unload(ARCHIVER_ROUTES['8.0.0']);
+        await esArchiver.unload(ARCHIVER_ROUTES[archiveName]);
       });
 
       it('returns the correct status code', () => {
