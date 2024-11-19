@@ -158,7 +158,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     },
     learnMoreLink:
       'https://www.elastic.co/guide/en/fleet/current/elastic-agent-standalone-logging-config.html#elastic-agent-standalone-logging-settings',
-    schema: z.number().int(),
+    schema: z.number().int().min(0),
   },
   {
     name: 'agent.logging.files.keepfiles',
@@ -176,7 +176,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     },
     learnMoreLink:
       'https://www.elastic.co/guide/en/fleet/current/elastic-agent-standalone-logging-config.html#elastic-agent-standalone-logging-settings',
-    schema: z.number().int(),
+    schema: z.number().int().min(0),
   },
   {
     name: 'agent.logging.files.interval',
