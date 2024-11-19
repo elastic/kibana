@@ -103,7 +103,7 @@ describe('getDefaultProfileState', () => {
       esqlQueryColumns: undefined,
     });
     expect(appState).toEqual({
-      breakdownField: 'log.level',
+      breakdownField: 'breakdown.field',
     });
   });
 

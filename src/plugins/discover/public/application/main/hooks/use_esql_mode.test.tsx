@@ -587,7 +587,7 @@ describe('useEsqlMode', () => {
       expect(stateContainer.internalState.get().resetDefaultProfileState).toEqual({
         columns: true,
         rowHeight: false,
-        breakdownField: false,
+        breakdownField: true,
       })
     );
   });
