@@ -97,7 +97,7 @@ export class AssetCriticalityDataClient {
     query,
     size = DEFAULT_CRITICALITY_RESPONSE_SIZE,
     from,
-    sort,
+    sort = ['@timestamp'],
   }: {
     query: ESFilter;
     size?: number;
