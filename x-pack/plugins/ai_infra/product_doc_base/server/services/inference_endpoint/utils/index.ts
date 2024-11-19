@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-export const getArtifactName = ({
-  productName,
-  productVersion,
-}: {
-  productName: string;
-  productVersion: string;
-}): string => {
-  return `kibana-kb-${productName}-${productVersion}.zip`.toLowerCase();
-};
+export { waitUntilModelDeployed } from './wait_until_model_deployed';
+export { getModelInstallStatus } from './get_model_install_status';
+export { installElser } from './install_elser';
