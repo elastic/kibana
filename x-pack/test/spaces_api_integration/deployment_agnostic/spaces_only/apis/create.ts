@@ -5,24 +5,18 @@
  * 2.0.
  */
 
-import type { SuperTest } from 'supertest';
+import { SPACES } from '../../../common/lib/spaces';
+import { createTestSuiteFactory } from '../../../common/suites/create.agnostic';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
-import type { FtrProviderContext } from '../../common/ftr_provider_context';
-import { SPACES } from '../../common/lib/spaces';
-import { createTestSuiteFactory } from '../../common/suites/create';
-
-// eslint-disable-next-line import/no-default-export
-export default function createSpacesOnlySuite({ getService }: FtrProviderContext) {
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const esArchiver = getService('esArchiver');
-
+export default function createSpacesOnlySuite(context: DeploymentAgnosticFtrProviderContext) {
   const {
     createTest,
     expectNewSpaceResult,
     expectConflictResponse,
     expectReservedSpecifiedResult,
     expectSolutionSpecifiedResult,
-  } = createTestSuiteFactory(esArchiver, supertestWithoutAuth as unknown as SuperTest<any>);
+  } = createTestSuiteFactory(context);
 
   describe('create', () => {
     [

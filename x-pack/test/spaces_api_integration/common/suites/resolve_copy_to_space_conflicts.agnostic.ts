@@ -5,15 +5,19 @@
  * 2.0.
  */
 
-import type { SuperTest } from 'supertest';
+import type { Agent as SuperTestAgent } from 'supertest';
 
 import type { SavedObject } from '@kbn/core/server';
 import expect from '@kbn/expect';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import type { CopyResponse } from '@kbn/spaces-plugin/server/lib/copy_to_spaces';
 
+import { getSupertest, maybeDestroySupertest } from './common';
 import { getTestDataLoader, SPACE_1, SPACE_2 } from '../../../common/lib/test_data_loader';
-import type { FtrProviderContext } from '../ftr_provider_context';
+import type {
+  DeploymentAgnosticFtrProviderContext,
+  SupertestWithRoleScopeType,
+} from '../../deployment_agnostic/ftr_provider_context';
 import { getUrlPrefix } from '../lib/space_test_utils';
 import type { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
@@ -69,12 +73,9 @@ const getDestinationSpace = (originSpaceId?: string) => {
   return DEFAULT_SPACE_ID;
 };
 
-export function resolveCopyToSpaceConflictsSuite(context: FtrProviderContext) {
+export function resolveCopyToSpaceConflictsSuite(context: DeploymentAgnosticFtrProviderContext) {
   const testDataLoader = getTestDataLoader(context);
   const supertestWithAuth = context.getService('supertest');
-  const supertestWithoutAuth = context.getService(
-    'supertestWithoutAuth'
-  ) as unknown as SuperTest<any>;
 
   const getVisualizationAtSpace = async (spaceId: string): Promise<SavedObject<any>> => {
     return supertestWithAuth
@@ -509,12 +510,18 @@ export function resolveCopyToSpaceConflictsSuite(context: FtrProviderContext) {
     (describeFn: DescribeFn) =>
     (
       description: string,
-      { user = {}, spaceId = DEFAULT_SPACE_ID, tests }: ResolveCopyToSpaceTestDefinition
+      { user, spaceId = DEFAULT_SPACE_ID, tests }: ResolveCopyToSpaceTestDefinition
     ) => {
       describeFn(description, () => {
-        before(() => {
+        let supertest: SupertestWithRoleScopeType | SuperTestAgent;
+        before(async () => {
+          supertest = await getSupertest(context, user);
           // test data only allows for the following spaces as the copy origin
           expect(['default', 'space_1']).to.contain(spaceId);
+        });
+
+        after(async () => {
+          await maybeDestroySupertest(supertest);
         });
 
         describe('single-namespace types', () => {
@@ -530,9 +537,8 @@ export function resolveCopyToSpaceConflictsSuite(context: FtrProviderContext) {
           it(`should return ${tests.withReferencesNotOverwriting.statusCode} when not overwriting, with references`, async () => {
             const destination = getDestinationSpace(spaceId);
 
-            return supertestWithoutAuth
+            return supertest
               .post(`${getUrlPrefix(spaceId)}/api/spaces/_resolve_copy_saved_objects_errors`)
-              .auth(user.username, user.password)
               .send({
                 objects: [dashboardObject],
                 includeReferences: true,
@@ -559,9 +565,8 @@ export function resolveCopyToSpaceConflictsSuite(context: FtrProviderContext) {
           it(`should return ${tests.withReferencesOverwriting.statusCode} when overwriting, with references`, async () => {
             const destination = getDestinationSpace(spaceId);
 
-            return supertestWithoutAuth
+            return supertest
               .post(`${getUrlPrefix(spaceId)}/api/spaces/_resolve_copy_saved_objects_errors`)
-              .auth(user.username, user.password)
               .send({
                 objects: [dashboardObject],
                 includeReferences: true,
@@ -588,9 +593,8 @@ export function resolveCopyToSpaceConflictsSuite(context: FtrProviderContext) {
           it(`should return ${tests.withoutReferencesOverwriting.statusCode} when overwriting, without references`, async () => {
             const destination = getDestinationSpace(spaceId);
 
-            return supertestWithoutAuth
+            return supertest
               .post(`${getUrlPrefix(spaceId)}/api/spaces/_resolve_copy_saved_objects_errors`)
-              .auth(user.username, user.password)
               .send({
                 objects: [dashboardObject],
                 includeReferences: false,
@@ -612,9 +616,8 @@ export function resolveCopyToSpaceConflictsSuite(context: FtrProviderContext) {
           it(`should return ${tests.withoutReferencesNotOverwriting.statusCode} when not overwriting, without references`, async () => {
             const destination = getDestinationSpace(spaceId);
 
-            return supertestWithoutAuth
+            return supertest
               .post(`${getUrlPrefix(spaceId)}/api/spaces/_resolve_copy_saved_objects_errors`)
-              .auth(user.username, user.password)
               .send({
                 objects: [dashboardObject],
                 includeReferences: false,
@@ -636,9 +639,8 @@ export function resolveCopyToSpaceConflictsSuite(context: FtrProviderContext) {
           it(`should return ${tests.nonExistentSpace.statusCode} when resolving within a non-existent space`, async () => {
             const destination = NON_EXISTENT_SPACE_ID;
 
-            return supertestWithoutAuth
+            return supertest
               .post(`${getUrlPrefix(spaceId)}/api/spaces/_resolve_copy_saved_objects_errors`)
-              .auth(user.username, user.password)
               .send({
                 objects: [dashboardObject],
                 includeReferences: false,
@@ -669,9 +671,8 @@ export function resolveCopyToSpaceConflictsSuite(context: FtrProviderContext) {
           const testCases = tests.multiNamespaceTestCases();
           testCases.forEach(({ testTitle, objects, retries, statusCode, response }) => {
             it(`should return ${statusCode} when ${testTitle}`, async () => {
-              return supertestWithoutAuth
+              return supertest
                 .post(`${getUrlPrefix(spaceId)}/api/spaces/_resolve_copy_saved_objects_errors`)
-                .auth(user.username, user.password)
                 .send({ objects, includeReferences, createNewCopies, retries })
                 .expect(statusCode)
                 .then(response);

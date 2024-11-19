@@ -4,11 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
 
-import type { SuperTest } from 'supertest';
+import type { Agent as SuperTestAgent } from 'supertest';
 
 import expect from '@kbn/expect';
 
+import { getSupertest, maybeDestroySupertest } from './common';
+import type {
+  DeploymentAgnosticFtrProviderContext,
+  SupertestWithRoleScopeType,
+} from '../../deployment_agnostic/ftr_provider_context';
 import { getUrlPrefix } from '../lib/space_test_utils';
 import type { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
@@ -29,7 +40,9 @@ interface UpdateTestDefinition {
   tests: UpdateTests;
 }
 
-export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
+export function updateTestSuiteFactory(context: DeploymentAgnosticFtrProviderContext) {
+  const esArchiver = context.getService('esArchiver');
+
   const expectRbacForbidden = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       statusCode: 403,
@@ -69,24 +82,26 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
 
   const makeUpdateTest =
     (describeFn: DescribeFn) =>
-    (description: string, { user = {}, spaceId, tests }: UpdateTestDefinition) => {
+    (description: string, { user, spaceId, tests }: UpdateTestDefinition) => {
       describeFn(description, () => {
-        before(() =>
-          esArchiver.load(
+        let supertest: SupertestWithRoleScopeType | SuperTestAgent;
+        before(async () => {
+          supertest = await getSupertest(context, user);
+          await esArchiver.load(
             'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-          )
-        );
-        after(() =>
-          esArchiver.unload(
+          );
+        });
+        after(async () => {
+          await maybeDestroySupertest(supertest);
+          await esArchiver.unload(
             'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-          )
-        );
+          );
+        });
 
         describe('space_1', () => {
           it(`should return ${tests.alreadyExists.statusCode}`, async () => {
             return supertest
               .put(`${getUrlPrefix(spaceId)}/api/spaces/space/space_1`)
-              .auth(user.username, user.password)
               .send({
                 name: 'space 1',
                 id: 'space_1',
@@ -104,7 +119,6 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
           it(`should return ${tests.defaultSpace.statusCode}`, async () => {
             return supertest
               .put(`${getUrlPrefix(spaceId)}/api/spaces/space/default`)
-              .auth(user.username, user.password)
               .send({
                 name: 'the new default',
                 id: 'default',
@@ -122,7 +136,6 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
           it(`should return ${tests.newSpace.statusCode}`, async () => {
             return supertest
               .put(`${getUrlPrefix(spaceId)}/api/spaces/space/marketing`)
-              .auth(user.username, user.password)
               .send({
                 name: 'marketing',
                 id: 'marketing',

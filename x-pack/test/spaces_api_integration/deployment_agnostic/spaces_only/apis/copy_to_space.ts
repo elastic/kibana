@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../common/ftr_provider_context';
-import { copyToSpaceTestSuiteFactory } from '../../common/suites/copy_to_space';
+import { copyToSpaceTestSuiteFactory } from '../../../common/suites/copy_to_space.agnostic';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function copyToSpacesOnlySuite(context: FtrProviderContext) {
+export default function copyToSpacesOnlySuite(context: DeploymentAgnosticFtrProviderContext) {
   const {
     copyToSpaceTest,
     expectNoConflictsWithoutReferencesResult,

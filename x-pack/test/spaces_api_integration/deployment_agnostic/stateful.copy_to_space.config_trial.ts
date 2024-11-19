@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { createTestConfig } from '../common/config';
+import { createTestConfig } from './stateful.common.config';
 
-// eslint-disable-next-line import/no-default-export
-export default createTestConfig('security_and_spaces', {
+export default createTestConfig({
   license: 'trial',
-  testFiles: [require.resolve('./apis/copy_to_space')],
+  testFiles: [require.resolve('./security_and_spaces/apis/copy_to_space')],
 });

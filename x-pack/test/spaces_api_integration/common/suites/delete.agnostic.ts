@@ -4,13 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { Client } from '@elastic/elasticsearch';
-import type { SuperTest } from 'supertest';
+import type { Agent as SuperTestAgent } from 'supertest';
 
 import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import expect from '@kbn/expect';
 
+import type {
+  DeploymentAgnosticFtrProviderContext,
+  SupertestWithRoleScopeType,
+} from '../../deployment_agnostic/ftr_provider_context';
+import { getRoleDefinitionForUser, isBuiltInRole } from '../lib/authentication';
 import { MULTI_NAMESPACE_SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { getAggregatedSpaceData, getTestScenariosForSpace } from '../lib/space_test_utils';
 import type { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
@@ -32,7 +35,13 @@ interface DeleteTestDefinition {
   tests: DeleteTests;
 }
 
-export function deleteTestSuiteFactory(es: Client, esArchiver: any, supertest: SuperTest<any>) {
+export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const roleScopedSupertest = getService('roleScopedSupertest');
+  const samlAuth = getService('samlAuth');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const esArchiver = getService('esArchiver');
+  const es = getService('es');
+
   const createExpectResult = (expectedResult: any) => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql(expectedResult);
   };
@@ -149,8 +158,33 @@ export function deleteTestSuiteFactory(es: Client, esArchiver: any, supertest: S
 
   const makeDeleteTest =
     (describeFn: DescribeFn) =>
-    (description: string, { user = {}, spaceId, tests }: DeleteTestDefinition) => {
+    (description: string, { user, spaceId, tests }: DeleteTestDefinition) => {
       describeFn(description, () => {
+        let supertest: SupertestWithRoleScopeType | SuperTestAgent;
+
+        before(async () => {
+          if (user) {
+            const isBuiltIn = isBuiltInRole(user.role);
+            if (!isBuiltIn) {
+              await samlAuth.setCustomRole(getRoleDefinitionForUser(user));
+            }
+            supertest = await roleScopedSupertest.getSupertestWithRoleScope(
+              isBuiltIn ? user.role : 'customRole',
+              {
+                useCookieHeader: true,
+                withInternalHeaders: true,
+              }
+            );
+          } else {
+            supertest = supertestWithoutAuth;
+          }
+        });
+        after(async () => {
+          if (user) {
+            await (supertest as SupertestWithRoleScopeType).destroy();
+          }
+        });
+
         beforeEach(async () => {
           await esArchiver.load(
             'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
@@ -166,7 +200,6 @@ export function deleteTestSuiteFactory(es: Client, esArchiver: any, supertest: S
           it(`should return ${tests.exists.statusCode} ${scenario}`, async () => {
             return supertest
               .delete(`${urlPrefix}/api/spaces/space/space_2`)
-              .auth(user.username, user.password)
               .expect(tests.exists.statusCode)
               .then(tests.exists.response);
           });
@@ -175,7 +208,6 @@ export function deleteTestSuiteFactory(es: Client, esArchiver: any, supertest: S
             it(`should return ${tests.reservedSpace.statusCode} ${scenario}`, async () => {
               return supertest
                 .delete(`${urlPrefix}/api/spaces/space/default`)
-                .auth(user.username, user.password)
                 .expect(tests.reservedSpace.statusCode)
                 .then(tests.reservedSpace.response);
             });
@@ -185,7 +217,6 @@ export function deleteTestSuiteFactory(es: Client, esArchiver: any, supertest: S
             it(`should return ${tests.doesntExist.statusCode} ${scenario}`, async () => {
               return supertest
                 .delete(`${urlPrefix}/api/spaces/space/space_7`)
-                .auth(user.username, user.password)
                 .expect(tests.doesntExist.statusCode)
                 .then(tests.doesntExist.response);
             });

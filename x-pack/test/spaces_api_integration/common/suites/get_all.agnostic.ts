@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import type { SuperTest } from 'supertest';
+import type { Agent as SuperTestAgent } from 'supertest';
 
 import expect from '@kbn/expect';
 
+import { getSupertest, maybeDestroySupertest } from './common';
+import type {
+  DeploymentAgnosticFtrProviderContext,
+  SupertestWithRoleScopeType,
+} from '../../deployment_agnostic/ftr_provider_context';
 import { getTestScenariosForSpace } from '../lib/space_test_utils';
 import type { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
@@ -25,7 +30,7 @@ interface GetAllTests {
 }
 
 interface GetAllTestDefinition {
-  user?: Omit<TestDefinitionAuthentication, 'role'>;
+  user?: TestDefinitionAuthentication;
   spaceId: string;
   tests: GetAllTests;
 }
@@ -53,8 +58,8 @@ const ALL_SPACE_RESULTS: Space[] = [
     name: 'Default',
     color: '#00bfb3',
     description: 'This is your default space!',
-    _reserved: true,
     disabledFeatures: [],
+    _reserved: true,
   },
   {
     id: 'space_1',
@@ -72,7 +77,6 @@ const ALL_SPACE_RESULTS: Space[] = [
     id: 'space_3',
     name: 'Space 3',
     description: 'This is the third test space',
-    solution: 'es',
     disabledFeatures: [
       // Disabled features are automatically added to the space when a solution is set
       'apm',
@@ -87,22 +91,25 @@ const ALL_SPACE_RESULTS: Space[] = [
       'slo',
       'uptime',
     ],
+    solution: 'es',
   },
 ];
 
-const sortDisabledFeatures = (space: Space) => {
-  return {
-    ...space,
-    disabledFeatures: [...space.disabledFeatures].sort(),
-  };
-};
+export function getAllTestSuiteFactory(context: DeploymentAgnosticFtrProviderContext) {
+  const esArchiver = context.getService('esArchiver');
 
-export function getAllTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
   const createExpectResults =
     (...spaceIds: string[]) =>
     (resp: { [key: string]: any }) => {
       const expectedBody = ALL_SPACE_RESULTS.filter((entry) => spaceIds.includes(entry.id));
-      expect(resp.body.map(sortDisabledFeatures)).to.eql(expectedBody.map(sortDisabledFeatures));
+      for (const space of resp.body) {
+        const expectedSpace = expectedBody.find((x) => x.id === space.id);
+        expect(space.name).to.eql(expectedSpace?.name);
+        expect(space.description).to.eql(expectedSpace?.description);
+        expect(space.color).to.eql(expectedSpace?.color);
+        expect(space.solution).to.eql(expectedSpace?.solution);
+        expect(space.disabledFeatures.sort()).to.eql(expectedSpace?.disabledFeatures.sort());
+      }
     };
 
   const createExpectAllPurposesResults =
@@ -111,7 +118,16 @@ export function getAllTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       const expectedBody = ALL_SPACE_RESULTS.filter((entry) => spaceIds.includes(entry.id)).map(
         (x) => ({ ...x, authorizedPurposes })
       );
-      expect(resp.body.map(sortDisabledFeatures)).to.eql(expectedBody.map(sortDisabledFeatures));
+
+      for (const space of resp.body) {
+        const expectedSpace = expectedBody.find((x) => x.id === space.id);
+        expect(space.name).to.eql(expectedSpace?.name);
+        expect(space.description).to.eql(expectedSpace?.description);
+        expect(space.color).to.eql(expectedSpace?.color);
+        expect(space.solution).to.eql(expectedSpace?.solution);
+        expect(space.disabledFeatures.sort()).to.eql(expectedSpace?.disabledFeatures.sort());
+        expect(space.authorizedPurposes).to.eql(expectedSpace?.authorizedPurposes);
+      }
     };
 
   const expectEmptyResult = (resp: { [key: string]: any }) => {
@@ -128,25 +144,27 @@ export function getAllTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
 
   const makeGetAllTest =
     (describeFn: DescribeFn) =>
-    (description: string, { user = {}, spaceId, tests }: GetAllTestDefinition) => {
+    (description: string, { user, spaceId, tests }: GetAllTestDefinition) => {
       describeFn(description, () => {
-        before(() =>
-          esArchiver.load(
+        let supertest: SupertestWithRoleScopeType | SuperTestAgent;
+        before(async () => {
+          supertest = await getSupertest(context, user);
+          await esArchiver.load(
             'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-          )
-        );
-        after(() =>
-          esArchiver.unload(
+          );
+        });
+        after(async () => {
+          await esArchiver.unload(
             'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-          )
-        );
+          );
+          await maybeDestroySupertest(supertest);
+        });
 
         getTestScenariosForSpace(spaceId).forEach(({ scenario, urlPrefix }) => {
           describe('undefined purpose', () => {
             it(`should return ${tests.exists.statusCode} ${scenario}`, async () => {
               return supertest
                 .get(`${urlPrefix}/api/spaces/space`)
-                .auth(user.username, user.password)
                 .expect(tests.exists.statusCode)
                 .then(tests.exists.response);
             });
@@ -157,7 +175,6 @@ export function getAllTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
               return supertest
                 .get(`${urlPrefix}/api/spaces/space`)
                 .query({ purpose: 'copySavedObjectsIntoSpace' })
-                .auth(user.username, user.password)
                 .expect(tests.copySavedObjectsPurpose.statusCode)
                 .then(tests.copySavedObjectsPurpose.response);
             });
@@ -168,7 +185,6 @@ export function getAllTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
               return supertest
                 .get(`${urlPrefix}/api/spaces/space`)
                 .query({ purpose: 'shareSavedObjectsIntoSpace' })
-                .auth(user.username, user.password)
                 .expect(tests.copySavedObjectsPurpose.statusCode)
                 .then(tests.copySavedObjectsPurpose.response);
             });
@@ -179,7 +195,6 @@ export function getAllTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
               return supertest
                 .get(`${urlPrefix}/api/spaces/space`)
                 .query({ include_authorized_purposes: true })
-                .auth(user.username, user.password)
                 .expect(tests.includeAuthorizedPurposes.statusCode)
                 .then(tests.includeAuthorizedPurposes.response);
             });
