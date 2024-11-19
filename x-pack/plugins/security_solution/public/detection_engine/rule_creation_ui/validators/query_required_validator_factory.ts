@@ -10,7 +10,7 @@ import { isEmpty } from 'lodash';
 import type { RuleType } from '@kbn/securitysolution-rules';
 import type { FormData, ValidationFunc } from '../../../shared_imports';
 import { isEqlRule, isEsqlRule } from '../../../../common/detection_engine/utils';
-import type { FieldValueQueryBar } from '../components/query_bar';
+import type { FieldValueQueryBar } from '../components/query_field';
 
 export function queryRequiredValidatorFactory(
   ruleType: RuleType

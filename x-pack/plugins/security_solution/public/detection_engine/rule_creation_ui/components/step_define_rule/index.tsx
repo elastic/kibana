@@ -37,8 +37,8 @@ import type {
 } from '../../../../detections/pages/detection_engine/rules/types';
 import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
 import { StepRuleDescription } from '../description_step';
-import type { QueryBarDefineRuleProps } from '../query_bar';
-import { QueryBarDefineRule } from '../query_bar';
+import type { QueryBarDefineRuleProps } from '../query_field';
+import { QueryField } from '../query_field';
 import { SelectRuleType } from '../select_rule_type';
 import { AnomalyThresholdSlider } from '../anomaly_threshold_slider';
 import { MlJobSelect } from '../../../rule_creation/components/ml_job_select';
@@ -546,7 +546,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             </MyLabelButton>
           ),
         }}
-        component={QueryBarDefineRule}
+        component={QueryField}
         componentProps={
           {
             idAria: 'detectionEngineStepDefineRuleQueryBar',

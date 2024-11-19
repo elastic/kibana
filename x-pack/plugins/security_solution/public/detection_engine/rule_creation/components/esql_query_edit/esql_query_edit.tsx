@@ -10,8 +10,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import type { DataViewBase } from '@kbn/es-query';
 import type { FieldConfig } from '../../../../shared_imports';
 import { UseField } from '../../../../shared_imports';
-import type { FieldValueQueryBar } from '../../../rule_creation_ui/components/query_bar';
-import { QueryBarDefineRule } from '../../../rule_creation_ui/components/query_bar';
+import type { FieldValueQueryBar } from '../../../rule_creation_ui/components/query_field';
+import { QueryField } from '../../../rule_creation_ui/components/query_field';
 import { queryRequiredValidatorFactory } from '../../../rule_creation_ui/validators/query_required_validator_factory';
 import { debounceAsync } from '../../../rule_creation_ui/validators/debounce_async';
 import { esqlQueryValidatorFactory } from './validators/esql_query_validator_factory';
@@ -75,7 +75,7 @@ export const EsqlQueryEdit = memo(function EsqlQueryEdit({
   return (
     <UseField
       path={path}
-      component={QueryBarDefineRule}
+      component={QueryField}
       componentProps={componentProps}
       config={fieldConfig}
     />

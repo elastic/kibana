@@ -22,7 +22,7 @@ import {
   DEFAULT_KQL_QUERY_FIELD_VALUE,
   DEFAULT_THREAT_MATCH_KQL_QUERY_FIELD_VALUE,
   type FieldValueQueryBar,
-} from '../query_bar';
+} from '../query_field';
 
 const EQL_QUERY_LANGUAGE = 'eql';
 const ESQL_QUERY_LANGUAGE = 'esql';

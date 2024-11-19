@@ -19,7 +19,7 @@ import {
 } from '../../../../shared_imports';
 import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import { schema } from '../step_define_rule/schema';
-import { QueryBarDefineRule } from '../query_bar';
+import { QueryField } from '../query_field';
 import * as i18n from '../step_define_rule/translations';
 import { MyLabelButton } from '../step_define_rule';
 
@@ -96,7 +96,7 @@ const ThreatMatchInputComponent: React.FC<ThreatMatchInputProps> = ({
               ...schema.threatQueryBar,
               labelAppend: null,
             }}
-            component={QueryBarDefineRule}
+            component={QueryField}
             componentProps={{
               idAria: 'detectionEngineStepDefineThreatRuleQueryBar',
               indexPattern: threatIndexPatterns,

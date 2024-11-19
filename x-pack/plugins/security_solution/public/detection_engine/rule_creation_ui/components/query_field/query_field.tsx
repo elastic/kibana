@@ -65,7 +65,7 @@ const savedQueryToFieldValue = (savedQuery: SavedQuery): FieldValueQueryBar => (
   title: savedQuery.attributes.title,
 });
 
-export const QueryBarDefineRule = ({
+export const QueryField = ({
   defaultSavedQuery,
   dataTestSubj,
   field,

@@ -30,7 +30,7 @@ import type {
   ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
 } from '../../../../detection_engine/rule_creation/components/alert_suppression_edit';
 import type { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../../detection_engine/rule_creation/components/threshold_alert_suppression_edit';
-import type { FieldValueQueryBar } from '../../../../detection_engine/rule_creation_ui/components/query_bar';
+import type { FieldValueQueryBar } from '../../../../detection_engine/rule_creation_ui/components/query_field';
 import type { FieldValueTimeline } from '../../../../detection_engine/rule_creation/components/pick_timeline';
 import type { FieldValueThreshold } from '../../../../detection_engine/rule_creation_ui/components/threshold_input';
 import type {
