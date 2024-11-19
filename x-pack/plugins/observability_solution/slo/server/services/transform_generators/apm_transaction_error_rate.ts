@@ -41,7 +41,7 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
       this.buildDestination(slo),
       this.buildGroupBy(slo, slo.indicator),
       this.buildAggregations(slo),
-      this.buildSettings(slo),
+      this.buildSettings(slo, '@timestamp'),
       slo
     );
   }
