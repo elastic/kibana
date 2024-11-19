@@ -26,7 +26,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       it('Create a timeline just with a title', async () => {
         const titleToSaved = 'hello title';
         const response = await createBasicTimeline(supertest, titleToSaved);
-        const { savedObjectId, title, version } = response.body.data && response.body;
+        const { savedObjectId, title, version } = response.body;
 
         expect(title).to.be(titleToSaved);
         expect(savedObjectId).to.not.be.empty();
