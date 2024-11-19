@@ -92,9 +92,7 @@ describe('clean draft timelines', () => {
       timelineType: req.body.timelineType,
     });
     expect(response.status).toEqual(200);
-    expect(response.body).toEqual({
-      createTimelineWithTimelineId,
-    });
+    expect(response.body).toEqual(createTimelineWithTimelineId);
   });
 
   test('should return clean existing draft if draft available ', async () => {
@@ -117,8 +115,6 @@ describe('clean draft timelines', () => {
 
     expect(mockGetTimeline).toHaveBeenCalled();
     expect(response.status).toEqual(200);
-    expect(response.body).toEqual({
-      mockGetDraftTimelineValue,
-    });
+    expect(response.body).toEqual(mockGetDraftTimelineValue);
   });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { cloneDeep, getOr, omit } from 'lodash/fp';
+import { cloneDeep, omit } from 'lodash/fp';
 import { renderHook } from '@testing-library/react-hooks';
 import { waitFor } from '@testing-library/react';
 
@@ -618,7 +618,9 @@ describe('helpers', () => {
 
     describe('open a timeline 1', () => {
       const selectedTimeline = {
-        ...mockSelectedTimeline,
+        timeline: {
+          ...mockSelectedTimeline,
+        },
       };
 
       const onOpenTimeline = jest.fn();
@@ -663,7 +665,7 @@ describe('helpers', () => {
 
       test('Do not override daterange if TimelineStatus is active', () => {
         const { timeline } = formatTimelineResponseToModel(
-          omitTypenameInTimeline(getOr({}, 'data.timeline', selectedTimeline)),
+          omitTypenameInTimeline(selectedTimeline.timeline),
           args.duplicate,
           args.timelineType
         );
@@ -681,7 +683,7 @@ describe('helpers', () => {
     });
 
     describe('update a timeline', () => {
-      const selectedTimeline = { ...mockSelectedTimeline };
+      const selectedTimeline = { timeline: { ...mockSelectedTimeline } };
       const untitledTimeline = { ...mockSelectedTimeline, title: '' };
       const onOpenTimeline = jest.fn();
       const args: QueryTimelineById = {
@@ -713,7 +715,7 @@ describe('helpers', () => {
 
         // expect(resolveTimeline).toHaveBeenCalled();
         const { timeline } = formatTimelineResponseToModel(
-          omitTypenameInTimeline(getOr({}, 'data.timeline', selectedTimeline)),
+          omitTypenameInTimeline(selectedTimeline.timeline),
           args.duplicate,
           args.timelineType
         );
@@ -836,7 +838,7 @@ describe('helpers', () => {
     });
 
     describe('open an immutable template', () => {
-      const template = { ...mockSelectedTemplate };
+      const template = { timeline: { ...mockSelectedTemplate } };
       const onOpenTimeline = jest.fn();
       const args = {
         duplicate: false,
@@ -873,7 +875,7 @@ describe('helpers', () => {
 
       test('override daterange if TimelineStatus is immutable', () => {
         const { timeline } = formatTimelineResponseToModel(
-          omitTypenameInTimeline(getOr({}, 'data.timeline', template)),
+          omitTypenameInTimeline(template.timeline),
           args.duplicate,
           args.timelineType
         );
