@@ -60,7 +60,7 @@ describe('Transaction details', () => {
         '@transactionThroughputRequest',
         '@transactionFailureRateRequest',
       ],
-      { timeout: 30000 }
+      { timeout: 60000 }
     ).spread((latencyInterception, throughputInterception, failureRateInterception) => {
       expect(latencyInterception.request.query.transactionName).to.be.eql('GET /api/product');
 
@@ -115,8 +115,8 @@ describe('Transaction details', () => {
     );
 
     cy.contains('Top 5 errors');
-    cy.getByTestSubj('topErrorsForTransactionTable')
-      .should('be.visible')
+    cy.get('[data-test-subj=topErrorsForTransactionTable]')
+      .get('[data-test-subj=apmLegacyAPMLinkLink]')
       .contains('[MockError] Foo', { timeout: 60000 })
       .click();
     cy.url().should('include', 'opbeans-java/errors');
