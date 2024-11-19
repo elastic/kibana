@@ -131,7 +131,7 @@ export const AgentlessPackagePoliciesTable = ({
               return (
                 <EuiLink
                   className="eui-textTruncate"
-                  data-test-subj="integrationNameLink"
+                  data-test-subj="agentlessIntegrationNameLink"
                   href={getHref('integration_policy_edit', {
                     packagePolicyId: packagePolicy.id,
                   })}
