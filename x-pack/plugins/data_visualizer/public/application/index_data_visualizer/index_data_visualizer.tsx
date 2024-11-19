@@ -48,8 +48,6 @@ import { DATA_VISUALIZER_INDEX_VIEWER } from './constants/index_data_visualizer_
 import { INDEX_DATA_VISUALIZER_NAME } from '../common/constants';
 import { DV_STORAGE_KEYS } from './types/storage';
 
-const XXL_BREAKPOINT = 1400;
-
 const localStorage = new Storage(window.localStorage);
 
 export interface DataVisualizerStateContextProviderProps {
