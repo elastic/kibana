@@ -2,6 +2,7 @@
   "type": "shared-common",
   "id": "@kbn/observability-alerting-rule-utils",
   "owner": "@elastic/obs-ux-management-team",
-  "group": "observability",
-  "visibility": "private"
+  // TODO refactor and transfer owner / contents to response-ops / alerting
+  "group": "platform",
+  "visibility": "shared"
 }
