@@ -13,7 +13,6 @@ import { DataUsageMetrics } from './data_usage_metrics';
 import { useGetDataUsageMetrics } from '../../hooks/use_get_usage_metrics';
 import { useGetDataUsageDataStreams } from '../../hooks/use_get_data_streams';
 import { coreMock as mockCore } from '@kbn/core/public/mocks';
-import { options } from '@kbn/esql-ast/src/mutate/generic/commands';
 
 jest.mock('../../utils/use_breadcrumbs', () => {
   return {
