@@ -170,6 +170,7 @@ const expectedIndexPatterns = {
     hasRestrictions: false,
     fields: fieldsOne,
     getFieldByName: getFieldByNameFactory(fieldsOne),
+    getFormatterForField: () => ({ convert: (v: unknown) => v }),
     spec: {},
     isPersisted: true,
   },
@@ -180,6 +181,7 @@ const expectedIndexPatterns = {
     hasRestrictions: true,
     fields: fieldsTwo,
     getFieldByName: getFieldByNameFactory(fieldsTwo),
+    getFormatterForField: () => ({ convert: (v: unknown) => v }),
     spec: {},
     isPersisted: true,
   },
@@ -3034,6 +3036,7 @@ describe('IndexPattern Data Source', () => {
         hasRestrictions: false,
         fields: fieldsOne,
         getFieldByName: getFieldByNameFactory(fieldsOne),
+        getFormatterForField: () => ({ convert: (v: unknown) => v }),
         spec: {},
         isPersisted: true,
       };

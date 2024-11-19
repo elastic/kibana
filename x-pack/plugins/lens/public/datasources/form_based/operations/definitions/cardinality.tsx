@@ -77,6 +77,11 @@ export const cardinalityOperation: OperationDefinition<
   displayName: CARDINALITY_NAME,
   allowAsReference: true,
   input: 'field',
+  getSerializedFormat() {
+    return {
+      id: 'number',
+    };
+  },
   getPossibleOperationForField: ({
     aggregationRestrictions,
     aggregatable,

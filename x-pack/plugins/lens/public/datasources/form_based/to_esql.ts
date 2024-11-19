@@ -67,7 +67,10 @@ export function getESQLForLayer(
         ? `bucket_${index + (col.isBucketed ? 0 : 1)}_${aggId}`
         : `bucket_${index}_${aggId}`;
 
-      const format = 'sourceField' in col ? indexPattern.getFormatterForField(col.sourceField) : undefined;
+      const format =
+        operationDefinitionMap[col.operationType].getSerializedFormat?.(col, col, indexPattern) ??
+        ('sourceField' in col ? indexPattern.getFormatterForField(col.sourceField) : undefined);
+
       esAggsIdMap[esAggsId] = [
         {
           ...col,
@@ -151,9 +154,8 @@ export function getESQLForLayer(
       if (!def.toESQL) return undefined;
 
       const format =
-        'sourceField' in col && indexPattern.fieldFormatMap
-          ? indexPattern.fieldFormatMap[col.sourceField]
-          : undefined;
+        operationDefinitionMap[col.operationType].getSerializedFormat?.(col, col, indexPattern) ??
+        ('sourceField' in col ? indexPattern.getFormatterForField(col.sourceField) : undefined);
 
       esAggsIdMap[esAggsId] = [
         {

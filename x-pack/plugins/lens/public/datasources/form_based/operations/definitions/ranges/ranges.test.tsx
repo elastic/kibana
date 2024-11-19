@@ -116,6 +116,7 @@ const defaultOptions = {
         aggregatable: true,
       },
     ]),
+    getFormatterForField: () => ({ convert: (v: unknown) => v }),
     isPersisted: true,
     spec: {},
   },
