@@ -10,8 +10,8 @@ import { lastValueFrom, Observable, of } from 'rxjs';
 
 import { coreMock } from '@kbn/core/server/mocks';
 import type { FakeRawRequest } from '@kbn/core-http-server';
-import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { AuditEvent } from '@kbn/security-plugin-types-server';
 
