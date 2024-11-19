@@ -46,6 +46,8 @@ const InlineStyles: FC<{ darkMode: boolean; themeName: ThemeName }> = ({ darkMod
     };
   };
 
+  const themeStyles = getThemeStyles(themeName);
+
   // must be kept in sync with
   // packages/core/apps/core-apps-server-internal/assets/legacy_theme.js
   /* eslint-disable react/no-danger */
@@ -55,19 +57,19 @@ const InlineStyles: FC<{ darkMode: boolean; themeName: ThemeName }> = ({ darkMod
         __html: `
 
           html {
-            background-color: ${getThemeStyles(themeName).pageBackground}
+            background-color: ${themeStyles.pageBackground}
           }
 
           .kbnWelcomeText {
-            color: ${getThemeStyles(themeName).welcomeText};
+            color: ${themeStyles.welcomeText};
           }
 
           .kbnProgress {
-            background-color: ${getThemeStyles(themeName).progress};
+            background-color: ${themeStyles.progress};
           }
 
           .kbnProgress:before {
-            background-color: ${getThemeStyles(themeName).progressBefore};
+            background-color: ${themeStyles.progressBefore};
           }
 
         `,
