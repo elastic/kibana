@@ -768,6 +768,7 @@ x-pack/examples/triggers_actions_ui_example @elastic/response-ops
 x-pack/examples/ui_actions_enhanced_examples @elastic/appex-sharedux
 x-pack/packages/ai-infra/inference-common @elastic/appex-ai-infra
 x-pack/packages/ai-infra/product-doc-artifact-builder @elastic/appex-ai-infra
+x-pack/packages/ai-infra/product-doc-common @elastic/appex-ai-infra
 x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared @elastic/kibana-management
 x-pack/packages/index-management/index_management_shared_types @elastic/kibana-management
 x-pack/packages/kbn-ai-assistant @elastic/search-kibana
@@ -857,6 +858,8 @@ x-pack/packages/security/role_management_model @elastic/kibana-security
 x-pack/packages/security/ui_components @elastic/kibana-security
 x-pack/performance @elastic/appex-qa
 x-pack/plugins/actions @elastic/response-ops
+x-pack/plugins/ai_infra/llm_tasks @elastic/appex-ai-infra
+x-pack/plugins/ai_infra/product_doc_base @elastic/appex-ai-infra
 x-pack/plugins/aiops @elastic/ml-ui
 x-pack/plugins/alerting @elastic/response-ops
 x-pack/plugins/banners @elastic/appex-sharedux
