@@ -10,3 +10,5 @@ export const RULE_UPGRADE_TABLE_MODIFICATION_FILTER_BUTTON =
 
 export const RULE_UPGRADE_TABLE_MODIFICATION_FILTER_PANEL =
   '[data-test-subj="rule-customization-filter-popover"]';
+
+export const RULE_UPGRADE_CONFLICTS_MODAL = '[data-test-subj="upgradeConflictsModal"]';

@@ -8,22 +8,27 @@
 import { castArray } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
+import { ApiMessageCode } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import type {
+  Color,
   EdgeDataModel,
-  NodeDataModel,
   EntityNodeDataModel,
-  LabelNodeDataModel,
+  GraphRequest,
+  GraphResponse,
   GroupNodeDataModel,
-} from '@kbn/cloud-security-posture-common/types/graph/latest';
+  LabelNodeDataModel,
+  NodeDataModel,
+} from '@kbn/cloud-security-posture-common/types/graph/v1';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
 import type { Writable } from '@kbn/utility-types';
-import type { GraphContextServices, GraphContext } from './types';
+
+type EsQuery = GraphRequest['query']['esQuery'];
 
 interface GraphEdge {
   badge: number;
-  ips: string[];
-  hosts: string[];
-  users: string[];
+  ips?: string[] | string;
+  hosts?: string[] | string;
+  users?: string[] | string;
   actorIds: string[] | string;
   action: string;
   targetIds: string[] | string;
@@ -36,50 +41,75 @@ interface LabelEdges {
   target: string;
 }
 
-export const getGraph = async (
-  services: GraphContextServices,
+interface GraphContextServices {
+  logger: Logger;
+  esClient: IScopedClusterClient;
+}
+
+interface GetGraphParams {
+  services: GraphContextServices;
   query: {
-    actorIds: string[];
     eventIds: string[];
     spaceId?: string;
     start: string | number;
     end: string | number;
-  }
-): Promise<{
-  nodes: NodeDataModel[];
-  edges: EdgeDataModel[];
-}> => {
-  const { esClient, logger } = services;
-  const { actorIds, eventIds, spaceId = 'default', start, end } = query;
+    esQuery?: EsQuery;
+  };
+  showUnknownTarget: boolean;
+  nodesLimit?: number;
+}
 
-  logger.trace(
-    `Fetching graph for [eventIds: ${eventIds.join(', ')}] [actorIds: ${actorIds.join(
-      ', '
-    )}] in [spaceId: ${spaceId}]`
-  );
+export const getGraph = async ({
+  services: { esClient, logger },
+  query: { eventIds, spaceId = 'default', start, end, esQuery },
+  showUnknownTarget,
+  nodesLimit,
+}: GetGraphParams): Promise<Pick<GraphResponse, 'nodes' | 'edges' | 'messages'>> => {
+  logger.trace(`Fetching graph for [eventIds: ${eventIds.join(', ')}] in [spaceId: ${spaceId}]`);
 
-  const results = await fetchGraph({ esClient, logger, start, end, eventIds, actorIds });
+  const results = await fetchGraph({
+    esClient,
+    showUnknownTarget,
+    logger,
+    start,
+    end,
+    eventIds,
+    esQuery,
+  });
 
   // Convert results into set of nodes and edges
-  const graphContext = parseRecords(logger, results.records);
-
-  return { nodes: graphContext.nodes, edges: graphContext.edges };
+  return parseRecords(logger, results.records, nodesLimit);
 };
 
 interface ParseContext {
-  nodesMap: Record<string, NodeDataModel>;
-  edgesMap: Record<string, EdgeDataModel>;
-  edgeLabelsNodes: Record<string, string[]>;
-  labelEdges: Record<string, LabelEdges>;
+  readonly nodesLimit?: number;
+  readonly nodesMap: Record<string, NodeDataModel>;
+  readonly edgesMap: Record<string, EdgeDataModel>;
+  readonly edgeLabelsNodes: Record<string, string[]>;
+  readonly labelEdges: Record<string, LabelEdges>;
+  readonly messages: ApiMessageCode[];
+  readonly logger: Logger;
 }
 
-const parseRecords = (logger: Logger, records: GraphEdge[]): GraphContext => {
-  const ctx: ParseContext = { nodesMap: {}, edgeLabelsNodes: {}, edgesMap: {}, labelEdges: {} };
+const parseRecords = (
+  logger: Logger,
+  records: GraphEdge[],
+  nodesLimit?: number
+): Pick<GraphResponse, 'nodes' | 'edges' | 'messages'> => {
+  const ctx: ParseContext = {
+    nodesLimit,
+    logger,
+    nodesMap: {},
+    edgeLabelsNodes: {},
+    edgesMap: {},
+    labelEdges: {},
+    messages: [],
+  };
 
-  logger.trace(`Parsing records [length: ${records.length}]`);
+  logger.trace(`Parsing records [length: ${records.length}] [nodesLimit: ${nodesLimit ?? 'none'}]`);
 
-  createNodes(logger, records, ctx);
-  createEdgesAndGroups(logger, ctx);
+  createNodes(records, ctx);
+  createEdgesAndGroups(ctx);
 
   logger.trace(
     `Parsed [nodes: ${Object.keys(ctx.nodesMap).length}, edges: ${
@@ -90,7 +120,11 @@ const parseRecords = (logger: Logger, records: GraphEdge[]): GraphContext => {
   // Sort groups to be first (fixes minor layout issue)
   const nodes = sortNodes(ctx.nodesMap);
 
-  return { nodes, edges: Object.values(ctx.edgesMap) };
+  return {
+    nodes,
+    edges: Object.values(ctx.edgesMap),
+    messages: ctx.messages.length > 0 ? ctx.messages : undefined,
+  };
 };
 
 const fetchGraph = async ({
@@ -98,15 +132,17 @@ const fetchGraph = async ({
   logger,
   start,
   end,
-  actorIds,
   eventIds,
+  showUnknownTarget,
+  esQuery,
 }: {
   esClient: IScopedClusterClient;
   logger: Logger;
   start: string | number;
   end: string | number;
-  actorIds: string[];
   eventIds: string[];
+  showUnknownTarget: boolean;
+  esQuery?: EsQuery;
 }): Promise<EsqlToRecords<GraphEdge>> => {
   const query = `from logs-*
 | WHERE event.action IS NOT NULL AND actor.entity.id IS NOT NULL
@@ -124,44 +160,15 @@ const fetchGraph = async ({
       targetIds = target.entity.id,
       eventOutcome = event.outcome,
       isAlert
-| LIMIT 1000`;
+| LIMIT 1000
+| SORT isAlert DESC`;
 
   logger.trace(`Executing query [${query}]`);
 
   return await esClient.asCurrentUser.helpers
     .esql({
       columnar: false,
-      filter: {
-        bool: {
-          must: [
-            {
-              range: {
-                '@timestamp': {
-                  gte: start,
-                  lte: end,
-                },
-              },
-            },
-            {
-              bool: {
-                should: [
-                  {
-                    terms: {
-                      'event.id': eventIds,
-                    },
-                  },
-                  {
-                    terms: {
-                      'actor.entity.id': actorIds,
-                    },
-                  },
-                ],
-                minimum_should_match: 1,
-              },
-            },
-          ],
-        },
-      },
+      filter: buildDslFilter(eventIds, showUnknownTarget, start, end, esQuery),
       query,
       // @ts-ignore - types are not up to date
       params: [...eventIds.map((id, idx) => ({ [`al_id${idx}`]: id }))],
@@ -169,14 +176,68 @@ const fetchGraph = async ({
     .toRecords<GraphEdge>();
 };
 
-const createNodes = (
-  logger: Logger,
-  records: GraphEdge[],
-  context: Omit<ParseContext, 'edgesMap'>
-) => {
+const buildDslFilter = (
+  eventIds: string[],
+  showUnknownTarget: boolean,
+  start: string | number,
+  end: string | number,
+  esQuery?: EsQuery
+) => ({
+  bool: {
+    filter: [
+      {
+        range: {
+          '@timestamp': {
+            gte: start,
+            lte: end,
+          },
+        },
+      },
+      ...(showUnknownTarget
+        ? []
+        : [
+            {
+              exists: {
+                field: 'target.entity.id',
+              },
+            },
+          ]),
+      {
+        bool: {
+          should: [
+            ...(esQuery?.bool.filter?.length ||
+            esQuery?.bool.must?.length ||
+            esQuery?.bool.should?.length ||
+            esQuery?.bool.must_not?.length
+              ? [esQuery]
+              : []),
+            {
+              terms: {
+                'event.id': eventIds,
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      },
+    ],
+  },
+});
+
+const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap'>) => {
   const { nodesMap, edgeLabelsNodes, labelEdges } = context;
 
   for (const record of records) {
+    if (context.nodesLimit !== undefined && Object.keys(nodesMap).length >= context.nodesLimit) {
+      context.logger.debug(
+        `Reached nodes limit [limit: ${context.nodesLimit}] [current: ${
+          Object.keys(nodesMap).length
+        }]`
+      );
+      context.messages.push(ApiMessageCode.ReachedNodesLimit);
+      break;
+    }
+
     const { ips, hosts, users, actorIds, action, targetIds, isAlert, eventOutcome } = record;
     const actorIdsArray = castArray(actorIds);
     const targetIdsArray = castArray(targetIds);
@@ -190,12 +251,6 @@ const createNodes = (
       }
     });
 
-    logger.trace(
-      `Parsing record [actorIds: ${actorIdsArray.join(
-        ', '
-      )}, action: ${action}, targetIds: ${targetIdsArray.join(', ')}]`
-    );
-
     // Create entity nodes
     [...actorIdsArray, ...targetIdsArray].forEach((id) => {
       if (nodesMap[id] === undefined) {
@@ -203,10 +258,13 @@ const createNodes = (
           id,
           label: unknownTargets.includes(id) ? 'Unknown' : undefined,
           color: isAlert ? 'danger' : 'primary',
-          ...determineEntityNodeShape(id, ips ?? [], hosts ?? [], users ?? []),
+          ...determineEntityNodeShape(
+            id,
+            castArray(ips ?? []),
+            castArray(hosts ?? []),
+            castArray(users ?? [])
+          ),
         };
-
-        logger.trace(`Creating entity node [${id}]`);
       }
     });
 
@@ -225,8 +283,6 @@ const createNodes = (
           color: isAlert ? 'danger' : eventOutcome === 'failed' ? 'warning' : 'primary',
           shape: 'label',
         };
-
-        logger.trace(`Creating label node [${labelNode.id}]`);
 
         nodesMap[labelNode.id] = labelNode;
         edgeLabelsNodes[edgeId].push(labelNode.id);
@@ -278,7 +334,7 @@ const sortNodes = (nodesMap: Record<string, NodeDataModel>) => {
   return [...groupNodes, ...otherNodes];
 };
 
-const createEdgesAndGroups = (logger: Logger, context: ParseContext) => {
+const createEdgesAndGroups = (context: ParseContext) => {
   const { edgeLabelsNodes, edgesMap, nodesMap, labelEdges } = context;
 
   Object.entries(edgeLabelsNodes).forEach(([edgeId, edgeLabelsIds]) => {
@@ -287,7 +343,6 @@ const createEdgesAndGroups = (logger: Logger, context: ParseContext) => {
       const edgeLabelId = edgeLabelsIds[0];
 
       connectEntitiesAndLabelNode(
-        logger,
         edgesMap,
         nodesMap,
         labelEdges[edgeLabelId].source,
@@ -300,44 +355,47 @@ const createEdgesAndGroups = (logger: Logger, context: ParseContext) => {
         shape: 'group',
       };
       nodesMap[groupNode.id] = groupNode;
+      let groupEdgesColor: Color = 'primary';
+
+      edgeLabelsIds.forEach((edgeLabelId) => {
+        (nodesMap[edgeLabelId] as Writable<LabelNodeDataModel>).parentId = groupNode.id;
+        connectEntitiesAndLabelNode(edgesMap, nodesMap, groupNode.id, edgeLabelId, groupNode.id);
+
+        if ((nodesMap[edgeLabelId] as LabelNodeDataModel).color === 'danger') {
+          groupEdgesColor = 'danger';
+        } else if (
+          (nodesMap[edgeLabelId] as LabelNodeDataModel).color === 'warning' &&
+          groupEdgesColor !== 'danger'
+        ) {
+          // Use warning only if there's no danger color
+          groupEdgesColor = 'warning';
+        }
+      });
 
       connectEntitiesAndLabelNode(
-        logger,
         edgesMap,
         nodesMap,
         labelEdges[edgeLabelsIds[0]].source,
         groupNode.id,
-        labelEdges[edgeLabelsIds[0]].target
+        labelEdges[edgeLabelsIds[0]].target,
+        groupEdgesColor
       );
-
-      edgeLabelsIds.forEach((edgeLabelId) => {
-        (nodesMap[edgeLabelId] as Writable<LabelNodeDataModel>).parentId = groupNode.id;
-        connectEntitiesAndLabelNode(
-          logger,
-          edgesMap,
-          nodesMap,
-          groupNode.id,
-          edgeLabelId,
-          groupNode.id
-        );
-      });
     }
   });
 };
 
 const connectEntitiesAndLabelNode = (
-  logger: Logger,
   edgesMap: Record<string, EdgeDataModel>,
   nodesMap: Record<string, NodeDataModel>,
   sourceNodeId: string,
   labelNodeId: string,
-  targetNodeId: string
+  targetNodeId: string,
+  colorOverride?: Color
 ) => {
   [
-    connectNodes(nodesMap, sourceNodeId, labelNodeId),
-    connectNodes(nodesMap, labelNodeId, targetNodeId),
+    connectNodes(nodesMap, sourceNodeId, labelNodeId, colorOverride),
+    connectNodes(nodesMap, labelNodeId, targetNodeId, colorOverride),
   ].forEach((edge) => {
-    logger.trace(`Connecting nodes [${edge.source} -> ${edge.target}]`);
     edgesMap[edge.id] = edge;
   });
 };
@@ -345,7 +403,8 @@ const connectEntitiesAndLabelNode = (
 const connectNodes = (
   nodesMap: Record<string, NodeDataModel>,
   sourceNodeId: string,
-  targetNodeId: string
+  targetNodeId: string,
+  colorOverride?: Color
 ): EdgeDataModel => {
   const sourceNode = nodesMap[sourceNodeId];
   const targetNode = nodesMap[targetNodeId];
@@ -360,6 +419,6 @@ const connectNodes = (
     id: `a(${sourceNodeId})-b(${targetNodeId})`,
     source: sourceNodeId,
     target: targetNodeId,
-    color,
+    color: colorOverride ?? color,
   };
 };

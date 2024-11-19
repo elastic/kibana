@@ -21,11 +21,11 @@
     "optionalPlugins": [
       "home",
       "serverless",
-      "enterpriseSearch"
+      "productDocBase"
     ],
     "requiredBundles": [
       "kibanaReact",
-      "logsDataAccess",
+      "logsDataAccess"
     ]
   }
 }
