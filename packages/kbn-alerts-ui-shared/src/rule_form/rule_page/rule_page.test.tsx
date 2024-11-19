@@ -126,7 +126,7 @@ describe('rulePage', () => {
     expect(onCancel).toHaveBeenCalled();
   });
 
-  test('should display discard changes modal only if changes are made in the form', async () => {
+  test('should display discard changes modal only if changes are made in the form', () => {
     useRuleFormState.mockReturnValue({
       plugins: {
         application: {
@@ -153,5 +153,34 @@ describe('rulePage', () => {
 
     fireEvent.click(screen.getByTestId('rulePageFooterCancelButton'));
     expect(screen.getByTestId('ruleFormCancelModal')).toBeInTheDocument();
+  });
+
+  test('should not display discard changes modal id no changes are made in the form', () => {
+    useRuleFormState.mockReturnValue({
+      plugins: {
+        application: {
+          navigateToUrl,
+          capabilities: {
+            actions: {
+              show: true,
+              save: true,
+              execute: true,
+            },
+          },
+        },
+      },
+      baseErrors: {},
+      paramsErrors: {},
+      touched: false,
+      formData: formDataMock,
+      connectors: [],
+      connectorTypes: [],
+      aadTemplateFields: [],
+    });
+
+    render(<RulePage onCancel={onCancel} onSave={onSave} />);
+
+    fireEvent.click(screen.getByTestId('rulePageFooterCancelButton'));
+    expect(screen.queryByTestId('ruleFormCancelModal')).not.toBeInTheDocument();
   });
 });
