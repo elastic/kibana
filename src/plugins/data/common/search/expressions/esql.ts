@@ -353,6 +353,9 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             type: 'datatable',
             meta: {
               type: ESQL_TABLE_TYPE,
+              statistics: {
+                totalCount: body.values.length,
+              },
             },
             columns: allColumns,
             rows,
