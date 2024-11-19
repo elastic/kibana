@@ -45,7 +45,6 @@ import {
 } from '../../../rule_creation/components/related_integrations/test_helpers';
 import { useEsqlAvailability } from '../../../../common/hooks/esql/use_esql_availability';
 import { useMLRuleConfig } from '../../../../common/components/ml/hooks/use_ml_rule_config';
-import { selectRuleType } from '../select_rule_type/test_helpers';
 
 // Set the extended default timeout for all define rule step form test
 jest.setTimeout(10 * 1000);
@@ -873,3 +872,22 @@ function expectQueryLanguage(containerTestId: string, expectedLanguage: string):
     within(screen.getByTestId(containerTestId)).getByTestId(MOCKED_LANGUAGE_INPUT_TEST_ID)
   ).toHaveValue(expectedLanguage);
 }
+
+async function selectRuleType(ruleType: RuleType): Promise<void> {
+  const testId = RULE_TYPE_TEST_ID_MAP[ruleType];
+
+  await act(async () => fireEvent.click(screen.getByTestId(testId)));
+
+  expect(within(screen.getByTestId(testId)).getByRole('switch')).toBeChecked();
+}
+
+const RULE_TYPE_TEST_ID_MAP = {
+  query: 'customRuleType',
+  saved_query: 'customRuleType',
+  eql: 'eqlRuleType',
+  machine_learning: 'machineLearningRuleType',
+  threshold: 'thresholdRuleType',
+  threat_match: 'threatMatchRuleType',
+  new_terms: 'newTermsRuleType',
+  esql: 'esqlRuleType',
+};
