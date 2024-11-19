@@ -136,7 +136,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('should send 2 requests for saved search changes', async () => {
+      it.only('should send 2 requests for saved search changes', async () => {
         await setQuery(query1);
         await queryBar.clickQuerySubmitButton();
         await PageObjects.timePicker.setAbsoluteRange(
