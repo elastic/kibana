@@ -168,9 +168,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   threatIndicesConfig,
   thresholdFields,
 }) => {
-  const [{ ruleType }] = useFormData<DefineStepRule>({
+  const [{ ruleType, queryBar, machineLearningJobId }] = useFormData<DefineStepRule>({
     form,
-    watch: ['ruleType'],
+    watch: ['ruleType', 'queryBar', 'machineLearningJobId'],
   });
 
   const { isSuppressionEnabled: isAlertSuppressionEnabled } = useAlertSuppression(ruleType);
@@ -179,10 +179,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const [threatIndexModified, setThreatIndexModified] = useState(false);
   const license = useLicense();
 
-  const [{ machineLearningJobId }] = useFormData<DefineStepRule>({
-    form,
-    watch: ['machineLearningJobId'],
-  });
   const {
     allJobsStarted,
     hasMlAdminPermissions,
@@ -349,8 +345,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       threatIndexPatternsLoading,
     ]
   );
-
-  const [{ queryBar }] = useFormData<DefineStepRule>({ form, watch: ['queryBar'] });
 
   const { fields: esqlSuppressionFields, isLoading: isEsqlSuppressionLoading } =
     useAllEsqlRuleFields({
