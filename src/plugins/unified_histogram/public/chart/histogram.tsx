@@ -10,12 +10,12 @@
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useState } from 'react';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { DefaultInspectorAdapters, Datatable } from '@kbn/expressions-plugin/common';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { estypes } from '@elastic/elasticsearch';
 import type { TimeRange } from '@kbn/es-query';
-import type {
+import {
   EmbeddableComponentProps,
   LensEmbeddableInput,
   LensEmbeddableOutput,
@@ -58,6 +58,32 @@ export interface HistogramProps {
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
   withDefaultActions: EmbeddableComponentProps['withDefaultActions'];
 }
+
+/**
+ * To prevent flakiness in the chart, we need to ensure that the data view config is valid.
+ * This requires that there are not multiple different data view ids in the given configuration.
+ * @param dataView
+ * @param visContext
+ * @param adHocDataViews
+ */
+const checkValidDataViewConfig = (
+  dataView: DataView,
+  visContext: UnifiedHistogramVisContext,
+  adHocDataViews: { [key: string]: DataViewSpec } | undefined
+) => {
+  if (!dataView.id) {
+    return false;
+  }
+
+  if (!dataView.isPersisted() && !adHocDataViews?.[dataView.id]) {
+    return false;
+  }
+
+  if (dataView.id !== visContext.requestData.dataViewId) {
+    return false;
+  }
+  return true;
+};
 
 const computeTotalHits = (
   hasLensSuggestions: boolean,
@@ -203,20 +229,8 @@ export function Histogram({
       transform: translate(-50%, -50%);
     }
   `;
-  // console.log('histogram', { lensProps, requestData, request, dataView, visContext });
-  if (
-    dataView.id &&
-    (dataView.id !== visContext.requestData.dataViewId ||
-      (!dataView.isPersisted() && !lensProps.attributes.state.adHocDataViews?.[dataView.id]))
-  ) {
-    // to prevent a race condition when the data view changes id
-    // the ids of the data view and the lens props and visContextDataView should be the same
-    // console.log('flakydebugging', {
-    //  dataViewId: dataView.id,
-    //  visContextDataViewId: visContext.requestData.dataViewId,
-    //  lensProps: lensProps.attributes.references.find((r) => r.id === dataView.id),
-    // });
 
+  if (!checkValidDataViewConfig(dataView, visContext, lensProps.attributes.state.adHocDataViews)) {
     return <></>;
   }
 
