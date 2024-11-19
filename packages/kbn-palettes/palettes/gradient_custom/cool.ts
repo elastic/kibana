@@ -13,7 +13,7 @@ import { ThemeMode } from '../../types';
 import { getBackgroundColor } from './getBackgroundColor';
 import { KbnPalette } from '../../constants';
 
-export const getCoolPalette = (mode: ThemeMode) =>
+export const getCoolPalette = (darkMode: boolean) =>
   new KbnGradientPalette({
     id: KbnPalette.Cool,
     name: i18n.translate('palettes.cool.name', {

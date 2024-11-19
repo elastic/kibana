@@ -35,6 +35,10 @@ const categorical = {
    */
   Kibana7: 'eui_amsterdam' as const,
   /**
+   * Kibana behind text legacy theme v7 to v9
+   */
+  Kibana7BehindText: 'behind_text' as const,
+  /**
    * Kibana legacy theme v4 to v7
    */
   Kibana4: 'kibana_v7_legacy' as const,

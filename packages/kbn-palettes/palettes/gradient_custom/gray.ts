@@ -9,15 +9,14 @@
 
 import { i18n } from '@kbn/i18n';
 import { KbnGradientPalette } from '../../classes/gradient_palette';
-import { ThemeMode } from '../../types';
 import { getBackgroundColor } from './getBackgroundColor';
 import { KbnPalette } from '../../constants';
 
-export const getGrayPalette = (mode: ThemeMode) =>
+export const getGrayPalette = (darkMode: boolean) =>
   new KbnGradientPalette({
     id: KbnPalette.Gray,
     name: i18n.translate('palettes.gray.name', {
       defaultMessage: 'Gray',
     }),
-    colors: [getBackgroundColor(mode), '#89A0C4'],
+    colors: [getBackgroundColor(darkMode), '#89A0C4'],
   });

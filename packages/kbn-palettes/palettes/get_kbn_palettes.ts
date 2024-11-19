@@ -11,18 +11,10 @@ import type { CoreTheme } from '@kbn/core-theme-browser';
 import { getPalettes } from '.';
 import { getLegacyPalettes } from './legacy';
 
-export function getKbnPalettes({ version, darkMode }: CoreTheme) {
-  if (version !== 'v8') {
-    if (!darkMode) {
-      return getPalettes('LIGHT');
-    }
-
-    if (version === 'borealis') {
-      return getPalettes('DARKBLUE');
-    }
-
-    return getPalettes('DARK');
+export function getKbnPalettes({ name, darkMode }: CoreTheme) {
+  if (name === 'amsterdam') {
+    return getLegacyPalettes(darkMode);
   }
 
-  return getLegacyPalettes(darkMode ? 'DARK' : 'LIGHT');
+  return getPalettes(darkMode);
 }

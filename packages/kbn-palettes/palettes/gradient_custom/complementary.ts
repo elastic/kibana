@@ -9,16 +9,15 @@
 
 import { i18n } from '@kbn/i18n';
 import { KbnGradientPalette } from '../../classes/gradient_palette';
-import { ThemeMode } from '../../types';
 import { getBackgroundColor } from './getBackgroundColor';
 import { KbnPalette } from '../../constants';
 
-export const getComplementaryPalette = (mode: ThemeMode) => {
+export const getComplementaryPalette = (darkMode: boolean) => {
   return new KbnGradientPalette({
     id: KbnPalette.Complementary,
     name: i18n.translate('palettes.complementary.name', {
       defaultMessage: 'Complementary',
     }),
-    colors: ['#599DFF', getBackgroundColor(mode), '#ED9E00'],
+    colors: ['#599DFF', getBackgroundColor(darkMode), '#ED9E00'],
   });
 };

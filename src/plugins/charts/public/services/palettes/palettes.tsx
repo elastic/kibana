@@ -9,7 +9,7 @@
 
 import chroma from 'chroma-js';
 import { i18n } from '@kbn/i18n';
-import { getKbnPalettes, type IKbnPalette } from '@kbn/palettes';
+import { getKbnPalettes, KbnPalette, type IKbnPalette } from '@kbn/palettes';
 import type { ChartColorConfiguration, PaletteDefinition, SeriesLayer } from '@kbn/coloring';
 import { flatten, zip } from 'lodash';
 import { CoreTheme } from '@kbn/core/public';
@@ -254,15 +254,14 @@ export const buildPalettes = (
   theme: CoreTheme
 ): Record<string, PaletteDefinition> => {
   const kbnPalettes = getKbnPalettes(theme);
-  const defaultPalette = kbnPalettes.get('default');
+  const defaultPalette = kbnPalettes.get(KbnPalette.Default);
   return {
     default: {
       title: defaultPalette.name,
       ...buildRoundRobinCategoricalWithMappedColors(
-        'default',
-        // defaultPalette.id,
+        'default', // needs to match key of palette definition
         defaultPalette.colors(),
-        kbnPalettes.query('behindText')?.colors()
+        kbnPalettes.query(KbnPalette.Kibana7BehindText)?.colors()
       ),
     },
     status: buildGradient('status', kbnPalettes.get('status')),

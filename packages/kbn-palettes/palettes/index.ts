@@ -8,7 +8,6 @@
  */
 
 import { KbnPalettes } from '../classes/palettes';
-import { ThemeMode } from '../types';
 import { elasticPalette, getNeutralPalette } from './categorical';
 import { elasticClassicPalette, kibana4Palette, kibana7Palette } from './legacy/categorical';
 import {
@@ -24,13 +23,13 @@ import {
 export { logLevelPalette } from './semantic';
 import * as overridePalettes from './gradient_custom';
 
-export const getPalettes = (mode: ThemeMode) =>
+export const getPalettes = (darkMode: boolean) =>
   new KbnPalettes(
     [
       elasticPalette,
       kibana7Palette,
       kibana4Palette,
-      getNeutralPalette(mode),
+      getNeutralPalette(darkMode),
       complementaryPalette,
       coolPalette,
       grayPalette,
@@ -44,21 +43,21 @@ export const getPalettes = (mode: ThemeMode) =>
     elasticPalette
   );
 
-export const getOverridePalettes = (mode: ThemeMode) =>
+export const getOverridePalettes = (darkMode: boolean) =>
   new KbnPalettes(
     [
       elasticPalette,
       kibana7Palette,
       kibana4Palette,
-      getNeutralPalette(mode),
-      overridePalettes.getComplementaryPalette(mode),
-      overridePalettes.getCoolPalette(mode),
-      overridePalettes.getGrayPalette(mode),
-      overridePalettes.getGreenPalette(mode),
-      overridePalettes.getRedPalette(mode),
+      getNeutralPalette(darkMode),
+      overridePalettes.getComplementaryPalette(darkMode),
+      overridePalettes.getCoolPalette(darkMode),
+      overridePalettes.getGrayPalette(darkMode),
+      overridePalettes.getGreenPalette(darkMode),
+      overridePalettes.getRedPalette(darkMode),
       overridePalettes.statusPalette,
-      overridePalettes.getTemperaturePalette(mode),
-      overridePalettes.getWarmPalette(mode),
+      overridePalettes.getTemperaturePalette(darkMode),
+      overridePalettes.getWarmPalette(darkMode),
       elasticClassicPalette,
     ],
     elasticPalette

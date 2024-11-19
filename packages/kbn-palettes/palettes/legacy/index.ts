@@ -8,13 +8,13 @@
  */
 
 import { KbnPalettes } from '../../classes/palettes';
-import { ThemeMode } from '../../types';
 
 import {
   kibana7Palette,
   kibana4Palette,
   elasticClassicPalette,
   getNeutralPalette,
+  kibana7BehindText,
 } from './categorical';
 import {
   complementaryPalette,
@@ -27,12 +27,13 @@ import {
   warmPalette,
 } from './gradient';
 
-export const getLegacyPalettes = (mode: ThemeMode) =>
+export const getLegacyPalettes = (darkMode: boolean) =>
   new KbnPalettes(
     [
       kibana7Palette,
       kibana4Palette,
-      getNeutralPalette(mode),
+      kibana7BehindText,
+      getNeutralPalette(darkMode),
       complementaryPalette,
       coolPalette,
       grayPalette,

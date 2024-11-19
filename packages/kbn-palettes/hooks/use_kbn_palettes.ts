@@ -13,22 +13,13 @@ import { getLegacyPalettes } from '../palettes/legacy';
 
 export function useKbnPalettes() {
   const {
-    euiTheme: { themeName, colors },
+    euiTheme: { themeName },
     colorMode,
   } = useEuiTheme();
 
   if (themeName === 'EUI_THEME_BOREALIS') {
-    if (colorMode === 'LIGHT') {
-      return getPalettes('LIGHT');
-    }
-
-    // Temporary as theme name is the same for gray/blue
-    if (colors.backgroundBaseSubdued.toUpperCase() === '#07101F') {
-      return getPalettes('DARKBLUE');
-    }
-
-    return getPalettes('DARK');
+    return getPalettes(colorMode === 'DARK');
   }
 
-  return getLegacyPalettes(colorMode);
+  return getLegacyPalettes(colorMode === 'DARK');
 }
