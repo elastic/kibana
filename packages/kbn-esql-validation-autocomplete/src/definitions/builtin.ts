@@ -645,16 +645,8 @@ const otherDefinitions: FunctionDefinition[] = [
 ];
 
 export const builtinFunctions: FunctionDefinition[] = [
-  ...mathFunctions,
-  ...comparisonFunctions,
-  ...likeFunctions,
-  ...inFunctions,
+  ...operatorsFunctionDefinitions,
   ...logicalOperators,
   ...nullFunctions,
   ...otherDefinitions,
 ];
-
-// @TODO: remove
-console.log(`--@@builtinFunctions`, builtinFunctions);
-// @TODO: remove
-console.log(`--@@operatorsFunctionDefinitions`, operatorsFunctionDefinitions);
