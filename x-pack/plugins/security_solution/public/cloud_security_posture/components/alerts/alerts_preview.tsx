@@ -225,7 +225,7 @@ export const AlertsPreview = ({
           <EuiText
             size="xs"
             css={{
-              fontWeight: euiTheme.font.weight.semiBold,
+              fontWeight: euiTheme.font.weight.bold,
             }}
           >
             <FormattedMessage
