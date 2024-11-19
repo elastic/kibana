@@ -27,5 +27,6 @@ export default function apmApiIntegrationTests({
     loadTestFile(require.resolve('./latency'));
     loadTestFile(require.resolve('./infrastructure'));
     loadTestFile(require.resolve('./service_groups'));
+    loadTestFile(require.resolve('./settings'));
   });
 }
