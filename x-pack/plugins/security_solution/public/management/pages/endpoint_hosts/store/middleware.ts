@@ -14,6 +14,7 @@ import type {
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
 } from '@kbn/timelines-plugin/common';
+import { canFetchAgentPolicies } from '../../../../../common/endpoint/service/authz/authz';
 import type {
   IsolationRouteRequestBody,
   UnisolationRouteRequestBody,
@@ -366,25 +367,31 @@ async function endpointListMiddleware({
       payload: false,
     });
 
-    try {
-      const policyDataResponse: GetPolicyListResponse =
-        await sendGetEndpointSpecificPackagePolicies(http, {
-          query: {
-            perPage: 50, // Since this is an onboarding flow, we'll cap at 50 policies.
-            page: 1,
+    if (canFetchAgentPolicies(coreStart.application.capabilities)) {
+      try {
+        const policyDataResponse: GetPolicyListResponse =
+          await sendGetEndpointSpecificPackagePolicies(http, {
+            query: {
+              perPage: 50, // Since this is an onboarding flow, we'll cap at 50 policies.
+              page: 1,
+            },
+          });
+
+        dispatch({
+          type: 'serverReturnedPoliciesForOnboarding',
+          payload: {
+            policyItems: policyDataResponse.items,
           },
         });
-
+      } catch (error) {
+        dispatch({
+          type: 'serverFailedToReturnPoliciesForOnboarding',
+          payload: error.body ?? error,
+        });
+      }
+    } else {
       dispatch({
-        type: 'serverReturnedPoliciesForOnboarding',
-        payload: {
-          policyItems: policyDataResponse.items,
-        },
-      });
-    } catch (error) {
-      dispatch({
-        type: 'serverFailedToReturnPoliciesForOnboarding',
-        payload: error.body ?? error,
+        type: 'serverCancelledPolicyItemsLoading',
       });
     }
   } else {

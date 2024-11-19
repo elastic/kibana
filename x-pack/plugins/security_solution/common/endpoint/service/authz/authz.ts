@@ -8,6 +8,7 @@
 import type { ENDPOINT_PRIVILEGES, FleetAuthz } from '@kbn/fleet-plugin/common';
 
 import { omit } from 'lodash';
+import type { Capabilities } from '@kbn/core-capabilities-common';
 import type { ProductFeaturesService } from '../../../../server/lib/product_features_service';
 import { RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ } from '../response_actions/constants';
 import type { LicenseService } from '../../../license';
@@ -197,4 +198,25 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
     canReadEndpointExceptions: false,
     canWriteEndpointExceptions: false,
   };
+};
+
+/**
+ * Duplicate logic to calculate if user has privilege to fetch Agent Policies,
+ * working only with Capabilities, in order to be able to use it e.g. in middleware.
+ *
+ * The logic works with Fleet granular privileges (`subfeaturePrivileges`) both enabled and disabled.
+ *
+ * @param capabilities Capabilities from coreStart.application
+ */
+export const canFetchAgentPolicies = (capabilities: Capabilities): boolean => {
+  const canReadPolicyManagement = (capabilities.siem?.readPolicyManagement ?? false) as boolean;
+
+  const fleetv2 = capabilities.fleetv2;
+  const canReadFleetAgentPolicies = (fleetv2?.read &&
+    (fleetv2?.agent_policies_read === true ||
+      fleetv2?.agent_policies_read === undefined)) as boolean;
+
+  const canReadIntegrations = capabilities.fleet?.read as boolean;
+
+  return canReadPolicyManagement || (canReadFleetAgentPolicies && canReadIntegrations);
 };

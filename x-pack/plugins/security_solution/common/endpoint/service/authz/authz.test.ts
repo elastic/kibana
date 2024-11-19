@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { calculateEndpointAuthz, getEndpointAuthzInitialState } from './authz';
+import {
+  calculateEndpointAuthz,
+  canFetchAgentPolicies,
+  getEndpointAuthzInitialState,
+} from './authz';
 import type { FleetAuthz } from '@kbn/fleet-plugin/common';
 import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
 import { createLicenseServiceMock } from '../../../license/mocks';
@@ -15,6 +19,7 @@ import {
   RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL,
   type ResponseConsoleRbacControls,
 } from '../response_actions/constants';
+import type { Capabilities } from '@kbn/core-capabilities-common';
 
 describe('Endpoint Authz service', () => {
   let licenseService: ReturnType<typeof createLicenseServiceMock>;
@@ -334,6 +339,66 @@ describe('Endpoint Authz service', () => {
         canReadEndpointExceptions: false,
         canWriteEndpointExceptions: false,
       });
+    });
+  });
+
+  describe('canFetchAgentPolicies()', () => {
+    describe('without granular Fleet permissions', () => {
+      it.each`
+        readFleet | readIntegrations | readPolicyManagement | result
+        ${false}  | ${false}         | ${false}             | ${false}
+        ${true}   | ${false}         | ${false}             | ${false}
+        ${false}  | ${true}          | ${false}             | ${false}
+        ${true}   | ${true}          | ${false}             | ${true}
+        ${false}  | ${false}         | ${true}              | ${true}
+        ${true}   | ${false}         | ${true}              | ${true}
+        ${false}  | ${true}          | ${true}              | ${true}
+        ${true}   | ${true}          | ${true}              | ${true}
+      `(
+        'should return $result when readFleet is $readFleet, readIntegrations is $readIntegrations and readPolicyManagement is $readPolicyManagement',
+        ({ readFleet, readIntegrations, readPolicyManagement, result }) => {
+          const capabilities: Partial<Capabilities> = {
+            siem: { readPolicyManagement },
+            fleetv2: { read: readFleet },
+            fleet: { read: readIntegrations },
+          };
+
+          expect(canFetchAgentPolicies(capabilities as Capabilities)).toBe(result);
+        }
+      );
+    });
+
+    describe('with granular Fleet permissions', () => {
+      it.each`
+        readFleet | readAgentPolicies | readIntegrations | readPolicyManagement | result
+        ${false}  | ${false}          | ${false}         | ${false}             | ${false}
+        ${false}  | ${false}          | ${true}          | ${false}             | ${false}
+        ${false}  | ${false}          | ${false}         | ${true}              | ${true}
+        ${false}  | ${false}          | ${true}          | ${true}              | ${true}
+        ${false}  | ${true}           | ${false}         | ${false}             | ${false}
+        ${false}  | ${true}           | ${true}          | ${false}             | ${false}
+        ${false}  | ${true}           | ${false}         | ${true}              | ${true}
+        ${false}  | ${true}           | ${true}          | ${true}              | ${true}
+        ${true}   | ${false}          | ${false}         | ${false}             | ${false}
+        ${true}   | ${false}          | ${true}          | ${false}             | ${false}
+        ${true}   | ${false}          | ${false}         | ${true}              | ${true}
+        ${true}   | ${false}          | ${true}          | ${true}              | ${true}
+        ${true}   | ${true}           | ${false}         | ${false}             | ${false}
+        ${true}   | ${true}           | ${true}          | ${false}             | ${true}
+        ${true}   | ${true}           | ${false}         | ${true}              | ${true}
+        ${true}   | ${true}           | ${true}          | ${true}              | ${true}
+      `(
+        'should return $result when readAgentPolicies is $readAgentPolicies, readFleet is $readFleet, readIntegrations is $readIntegrations and readPolicyManagement is $readPolicyManagement',
+        ({ readAgentPolicies, readFleet, readIntegrations, readPolicyManagement, result }) => {
+          const capabilities: Partial<Capabilities> = {
+            siem: { readPolicyManagement },
+            fleetv2: { read: readFleet, agent_policies_read: readAgentPolicies },
+            fleet: { read: readIntegrations },
+          };
+
+          expect(canFetchAgentPolicies(capabilities as Capabilities)).toBe(result);
+        }
+      );
     });
   });
 });
