@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { CreateSLOForm } from '../../../types';
+import { SyncFieldSelector } from './sync_field_selector';
 
 export function AdvancedSettings() {
   const { control, getFieldState } = useFormContext<CreateSLOForm>();
@@ -53,13 +54,17 @@ export function AdvancedSettings() {
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexGrid columns={3} gutterSize="m">
           <EuiFlexItem>
+            <SyncFieldSelector />
+          </EuiFlexItem>
+
+          <EuiFlexItem>
             <EuiFormRow
               isInvalid={getFieldState('settings.syncDelay').invalid}
               label={
                 <span>
                   {i18n.translate('xpack.slo.sloEdit.settings.syncDelay.label', {
                     defaultMessage: 'Sync delay (in minutes)',
-                  })}
+                  })}{' '}
                   <EuiIconTip
                     content={i18n.translate('xpack.slo.sloEdit.settings.syncDelay.tooltip', {
                       defaultMessage:
@@ -74,7 +79,7 @@ export function AdvancedSettings() {
                 name="settings.syncDelay"
                 defaultValue={1}
                 control={control}
-                rules={{ required: false, min: 1, max: 359 }}
+                rules={{ required: true, min: 1, max: 359 }}
                 render={({ field: { ref, onChange, ...field }, fieldState }) => (
                   <EuiFieldNumber
                     {...field}
@@ -99,7 +104,7 @@ export function AdvancedSettings() {
                 <span>
                   {i18n.translate('xpack.slo.sloEdit.settings.frequency.label', {
                     defaultMessage: 'Frequency (in minutes)',
-                  })}
+                  })}{' '}
                   <EuiIconTip
                     content={i18n.translate('xpack.slo.sloEdit.settings.frequency.tooltip', {
                       defaultMessage:
@@ -114,7 +119,7 @@ export function AdvancedSettings() {
                 name="settings.frequency"
                 defaultValue={1}
                 control={control}
-                rules={{ required: false, min: 1, max: 59 }}
+                rules={{ required: true, min: 1, max: 59 }}
                 render={({ field: { ref, onChange, ...field }, fieldState }) => (
                   <EuiFieldNumber
                     {...field}
@@ -144,7 +149,7 @@ export function AdvancedSettings() {
                   <span>
                     {i18n.translate('xpack.slo.sloEdit.settings.preventInitialBackfill.label', {
                       defaultMessage: 'Prevent initial backfill of data',
-                    })}
+                    })}{' '}
                     <EuiIconTip
                       content={i18n.translate(
                         'xpack.slo.sloEdit.settings.preventInitialBackfill.tooltip',

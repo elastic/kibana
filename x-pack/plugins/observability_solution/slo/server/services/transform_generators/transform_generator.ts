@@ -89,8 +89,8 @@ export abstract class TransformGenerator {
     return {
       frequency: slo.settings.frequency.format(),
       sync_delay: slo.settings.syncDelay.format(),
-      // 8.17: use settings.syncField if provided or default to sourceIndexTimestampField which is the indicator timestampField
-      sync_field: slo.settings.syncField ?? sourceIndexTimestampField,
+      // 8.17: use settings.syncField if truthy or default to sourceIndexTimestampField which is the indicator timestampField
+      sync_field: !!slo.settings.syncField ? slo.settings.syncField : sourceIndexTimestampField,
     };
   }
 }

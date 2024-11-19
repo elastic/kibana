@@ -13,13 +13,12 @@ import { CreateSLOForm } from '../../../types';
 import { TimestampFieldSelector } from '../../common/timestamp_field_selector';
 import { IndexSelection } from './index_selection';
 
-export function IndexAndTimestampField({
-  dataView,
-  isLoading,
-}: {
+interface Props {
   dataView?: DataView;
   isLoading: boolean;
-}) {
+}
+
+export function IndexAndTimestampField({ dataView, isLoading }: Props) {
   const { watch } = useFormContext<CreateSLOForm>();
   const index = watch('indicator.params.index');
 

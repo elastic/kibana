@@ -43,10 +43,13 @@ export class UpdateSLO {
 
   public async execute(sloId: string, params: UpdateSLOParams): Promise<UpdateSLOResponse> {
     const originalSlo = await this.repository.findById(sloId);
-    let updatedSlo: SLODefinition = Object.assign({}, originalSlo, params, {
+    let updatedSlo: SLODefinition = Object.assign({}, originalSlo, {
+      ...params,
       groupBy: !!params.groupBy ? params.groupBy : originalSlo.groupBy,
       settings: Object.assign({}, originalSlo.settings, params.settings),
     });
+
+    console.dir(updatedSlo);
 
     if (isEqual(originalSlo, updatedSlo)) {
       return this.toResponse(originalSlo);

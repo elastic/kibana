@@ -59,6 +59,7 @@ export function transformSloResponseToCreateSloForm(
       frequency: values.settings?.frequency
         ? toMinutes(toDuration(values.settings.frequency))
         : SETTINGS_DEFAULT_VALUES.frequency,
+      syncField: values.settings?.syncField ?? null,
     },
   };
 }
@@ -87,9 +88,10 @@ export function transformCreateSLOFormToCreateSLOInput(values: CreateSLOForm): C
     tags: values.tags,
     groupBy: [values.groupBy].flat(),
     settings: {
-      preventInitialBackfill: values.settings?.preventInitialBackfill ?? false,
-      syncDelay: `${values.settings?.syncDelay ?? SETTINGS_DEFAULT_VALUES.syncDelay}m`,
-      frequency: `${values.settings?.frequency ?? SETTINGS_DEFAULT_VALUES.frequency}m`,
+      preventInitialBackfill: values.settings.preventInitialBackfill,
+      syncDelay: `${values.settings.syncDelay ?? SETTINGS_DEFAULT_VALUES.syncDelay}m`,
+      frequency: `${values.settings.frequency ?? SETTINGS_DEFAULT_VALUES.frequency}m`,
+      syncField: values.settings.syncField,
     },
   };
 }
@@ -118,9 +120,10 @@ export function transformValuesToUpdateSLOInput(values: CreateSLOForm): UpdateSL
     tags: values.tags,
     groupBy: [values.groupBy].flat(),
     settings: {
-      preventInitialBackfill: values.settings?.preventInitialBackfill ?? false,
-      syncDelay: `${values.settings?.syncDelay ?? SETTINGS_DEFAULT_VALUES.syncDelay}m`,
-      frequency: `${values.settings?.frequency ?? SETTINGS_DEFAULT_VALUES.frequency}m`,
+      preventInitialBackfill: values.settings.preventInitialBackfill,
+      syncDelay: `${values.settings.syncDelay ?? SETTINGS_DEFAULT_VALUES.syncDelay}m`,
+      frequency: `${values.settings.frequency ?? SETTINGS_DEFAULT_VALUES.frequency}m`,
+      syncField: values.settings.syncField,
     },
   };
 }
@@ -240,6 +243,9 @@ export function transformPartialSLOStateToFormState(
     }
     if (values.settings.frequency) {
       state.settings.frequency = toMinutes(toDuration(values.settings.frequency));
+    }
+    if (values.settings.syncField) {
+      state.settings.syncField = values.settings.syncField;
     }
   }
 

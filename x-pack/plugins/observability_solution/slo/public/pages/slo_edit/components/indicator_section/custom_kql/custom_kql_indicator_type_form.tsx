@@ -9,12 +9,12 @@ import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
-import { IndexAndTimestampField } from '../custom_common/index_and_timestamp_field';
-import { GroupByField } from '../../common/group_by_field';
 import { useCreateDataView } from '../../../../../hooks/use_create_data_view';
 import { CreateSLOForm } from '../../../types';
 import { DataPreviewChart } from '../../common/data_preview_chart';
+import { GroupByField } from '../../common/group_by_field';
 import { QueryBuilder } from '../../common/query_builder';
+import { IndexAndTimestampField } from '../custom_common/index_and_timestamp_field';
 import { DATA_VIEW_FIELD } from '../custom_common/index_selection';
 
 export function CustomKqlIndicatorTypeForm() {

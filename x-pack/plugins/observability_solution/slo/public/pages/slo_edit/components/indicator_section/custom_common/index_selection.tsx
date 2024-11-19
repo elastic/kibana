@@ -24,9 +24,11 @@ const TIMESTAMP_FIELD = 'indicator.params.timestampField';
 
 export function IndexSelection({ selectedDataView }: { selectedDataView?: DataView }) {
   const { control, getFieldState, setValue, watch } = useFormContext<CreateSLOForm>();
-  const { dataViews: dataViewsService, dataViewFieldEditor } = useKibana().services;
-
-  const { dataViewEditor } = useKibana<SLOPublicPluginsStart>().services;
+  const {
+    dataViews: dataViewsService,
+    dataViewFieldEditor,
+    dataViewEditor,
+  } = useKibana<SLOPublicPluginsStart>().services;
 
   const currentIndexPattern = watch(INDEX_FIELD);
   const currentDataViewId = watch(DATA_VIEW_FIELD);
