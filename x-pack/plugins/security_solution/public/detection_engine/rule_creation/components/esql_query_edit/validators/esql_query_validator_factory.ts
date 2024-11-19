@@ -5,43 +5,34 @@
  * 2.0.
  */
 
-import { QueryClient } from '@tanstack/react-query';
-import { isEmpty } from 'lodash';
-import { i18n } from '@kbn/i18n';
+import type { QueryClient } from '@tanstack/react-query';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { ESQLAstQueryExpression, ESQLCommandOption } from '@kbn/esql-ast';
 import { parse } from '@kbn/esql-ast';
 import { isAggregatingQuery } from '@kbn/securitysolution-utils';
 import { isColumnItem, isOptionItem } from '@kbn/esql-validation-autocomplete';
-import { getESQLQueryColumns } from '@kbn/esql-utils';
-import type { FormData, ValidationError, ValidationFunc } from '../../../shared_imports';
-import { KibanaServices } from '../../../common/lib/kibana';
-import type { FieldValueQueryBar } from '../components/query_bar';
+import type { FormData, ValidationError, ValidationFunc } from '../../../../../shared_imports';
+import type { FieldValueQueryBar } from '../../../../rule_creation_ui/components/query_bar';
+import { fetchEsqlQueryColumns } from '../../../logic/esql_query_columns';
+import { ESQL_ERROR_CODES } from './error_codes';
+import * as i18n from './translations';
 
-export enum ESQL_ERROR_CODES {
-  INVALID_ESQL = 'ERR_INVALID_ESQL',
-  INVALID_SYNTAX = 'ERR_INVALID_SYNTAX',
-  ERR_MISSING_ID_FIELD_FROM_RESULT = 'ERR_MISSING_ID_FIELD_FROM_RESULT',
+interface EsqlQueryValidatorFactoryParams {
+  queryClient: QueryClient;
 }
 
-export function esqlQueryValidatorFactory(): ValidationFunc<FormData, string, FieldValueQueryBar> {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        staleTime: 60 * 1000,
-      },
-    },
-  });
-
+export function esqlQueryValidatorFactory({
+  queryClient,
+}: EsqlQueryValidatorFactoryParams): ValidationFunc<FormData, string, FieldValueQueryBar> {
   return async (...args) => {
     const [{ value }] = args;
     const esqlQuery = value.query.query as string;
 
-    if (isEmpty(esqlQuery)) {
+    if (esqlQuery.trim() === '') {
       return;
     }
 
     try {
-      const services = KibanaServices.get();
       const { isEsqlQueryAggregating, hasMetadataOperator, errors } = parseEsqlQuery(esqlQuery);
 
       // Check if there are any syntax errors
@@ -53,30 +44,30 @@ export function esqlQueryValidatorFactory(): ValidationFunc<FormData, string, Fi
       if (!isEsqlQueryAggregating && !hasMetadataOperator) {
         return {
           code: ESQL_ERROR_CODES.ERR_MISSING_ID_FIELD_FROM_RESULT,
-          message: ESQL_VALIDATION_MISSING_METADATA_OPERATOR_IN_QUERY_ERROR,
+          message: i18n.ESQL_VALIDATION_MISSING_METADATA_OPERATOR_IN_QUERY_ERROR,
         };
       }
 
-      const columns = await queryClient.fetchQuery({
-        queryKey: [esqlQuery.trim()],
-        queryFn: () =>
-          getESQLQueryColumns({
-            esqlQuery,
-            search: services.data.search.search,
-          }),
+      const columns = await fetchEsqlQueryColumns({
+        esqlQuery,
+        queryClient,
       });
 
       // for non-aggregating query, we want to disable queries w/o _id property returned in response
-      if (!isEsqlQueryAggregating && !columns.some(({ id }) => '_id' === id)) {
+      if (!isEsqlQueryAggregating && !hasIdColumn(columns)) {
         return {
           code: ESQL_ERROR_CODES.ERR_MISSING_ID_FIELD_FROM_RESULT,
-          message: ESQL_VALIDATION_MISSING_ID_FIELD_IN_QUERY_ERROR,
+          message: i18n.ESQL_VALIDATION_MISSING_ID_FIELD_IN_QUERY_ERROR,
         };
       }
     } catch (error) {
       return constructValidationError(error);
     }
   };
+}
+
+function hasIdColumn(columns: DatatableColumn[]): boolean {
+  return columns.some(({ id }) => '_id' === id);
 }
 
 /**
@@ -136,8 +127,8 @@ function constructSyntaxError(error: Error): ValidationError {
   return {
     code: ESQL_ERROR_CODES.INVALID_SYNTAX,
     message: error?.message
-      ? esqlValidationErrorMessage(error.message)
-      : ESQL_VALIDATION_UNKNOWN_ERROR,
+      ? i18n.esqlValidationErrorMessage(error.message)
+      : i18n.ESQL_VALIDATION_UNKNOWN_ERROR,
     error,
   };
 }
@@ -146,35 +137,8 @@ function constructValidationError(error: Error): ValidationError {
   return {
     code: ESQL_ERROR_CODES.INVALID_ESQL,
     message: error?.message
-      ? esqlValidationErrorMessage(error.message)
-      : ESQL_VALIDATION_UNKNOWN_ERROR,
+      ? i18n.esqlValidationErrorMessage(error.message)
+      : i18n.ESQL_VALIDATION_UNKNOWN_ERROR,
     error,
   };
 }
-
-const ESQL_VALIDATION_UNKNOWN_ERROR = i18n.translate(
-  'xpack.securitySolution.ruleManagement.esqlValidation.unknownError',
-  {
-    defaultMessage: 'Unknown error while validating ES|QL',
-  }
-);
-
-const esqlValidationErrorMessage = (message: string) =>
-  i18n.translate('xpack.securitySolution.ruleManagement.esqlValidation.errorMessage', {
-    values: { message },
-    defaultMessage: 'Error validating ES|QL: "{message}"',
-  });
-
-const ESQL_VALIDATION_MISSING_METADATA_OPERATOR_IN_QUERY_ERROR = i18n.translate(
-  'xpack.securitySolution.ruleManagement.esqlValidation.missingMetadataOperatorInQueryError',
-  {
-    defaultMessage: `Queries that don’t use the STATS...BY function (non-aggregating queries) must include the "metadata _id, _version, _index" operator after the source command. For example: FROM logs* metadata _id, _version, _index.`,
-  }
-);
-
-const ESQL_VALIDATION_MISSING_ID_FIELD_IN_QUERY_ERROR = i18n.translate(
-  'xpack.securitySolution.ruleManagement.esqlValidation.missingIdFieldInQueryError',
-  {
-    defaultMessage: `Queries that don’t use the STATS...BY function (non-aggregating queries) must include the "metadata _id, _version, _index" operator after the source command. For example: FROM logs* metadata _id, _version, _index.  In addition, the metadata properties (_id, _version, and _index)  must be returned in the query response.`,
-  }
-);

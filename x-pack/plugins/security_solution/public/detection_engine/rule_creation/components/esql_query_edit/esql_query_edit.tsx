@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import type { DataViewBase } from '@kbn/es-query';
 import type { FieldConfig } from '../../../../shared_imports';
 import { UseField } from '../../../../shared_imports';
@@ -13,7 +14,7 @@ import type { FieldValueQueryBar } from '../../../rule_creation_ui/components/qu
 import { QueryBarDefineRule } from '../../../rule_creation_ui/components/query_bar';
 import { queryRequiredValidatorFactory } from '../../../rule_creation_ui/validators/query_required_validator_factory';
 import { debounceAsync } from '../../../rule_creation_ui/validators/debounce_async';
-import { esqlQueryValidatorFactory } from '../../../rule_creation_ui/validators/esql_query_validator_factory';
+import { esqlQueryValidatorFactory } from './validators/esql_query_validator_factory';
 import { EsqlInfoIcon } from './esql_info_icon';
 import * as i18n from './translations';
 
@@ -36,6 +37,7 @@ export const EsqlQueryEdit = memo(function EsqlQueryEdit({
   disabled = false,
   onValidityChange,
 }: EsqlQueryEditProps): JSX.Element {
+  const queryClient = useQueryClient();
   const componentProps = useMemo(
     () => ({
       isDisabled: disabled,
@@ -63,11 +65,11 @@ export const EsqlQueryEdit = memo(function EsqlQueryEdit({
             ]
           : []),
         {
-          validator: debounceAsync(esqlQueryValidatorFactory(), 300),
+          validator: debounceAsync(esqlQueryValidatorFactory({ queryClient }), 300),
         },
       ],
     }),
-    [required, path, fieldsToValidateOnChange]
+    [required, path, fieldsToValidateOnChange, queryClient]
   );
 
   return (

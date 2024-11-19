@@ -7,13 +7,7 @@
 import { useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-
-import { useQuery } from '@tanstack/react-query';
-
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-
-import { getEsqlQueryConfig } from '../../../rule_creation/logic/get_esql_query_config';
+import { useEsqlQueryColumns } from '../../../rule_creation/logic/esql_query_columns';
 
 type FieldType = 'string';
 
@@ -48,16 +42,11 @@ type UseEsqlFieldOptions = (
  * fetches ES|QL fields and convert them to Combobox options
  */
 export const useEsqlFieldOptions: UseEsqlFieldOptions = (esqlQuery, fieldType) => {
-  const kibana = useKibana<{ data: DataPublicPluginStart }>();
-
-  const { data: dataService } = kibana.services;
-
-  const queryConfig = getEsqlQueryConfig({ esqlQuery, search: dataService.search.search });
-  const { data, isLoading } = useQuery(queryConfig);
+  const { data: columns, isLoading } = useEsqlQueryColumns(esqlQuery ?? '');
 
   const options = useMemo(() => {
-    return esqlToOptions(data, fieldType);
-  }, [data, fieldType]);
+    return esqlToOptions(columns, fieldType);
+  }, [columns, fieldType]);
 
   return {
     options,

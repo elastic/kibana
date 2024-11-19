@@ -91,7 +91,7 @@ import {
 } from '../../../rule_creation/components/alert_suppression_edit';
 import { ThresholdAlertSuppressionEdit } from '../../../rule_creation/components/threshold_alert_suppression_edit';
 import { usePersistentAlertSuppressionState } from './use_persistent_alert_suppression_state';
-import { EsqlQueryEdit } from '../../../rule_creation/components/esql_query_edit/esql_query_edit';
+import { EsqlQueryEdit } from '../../../rule_creation/components/esql_query_edit';
 import { usePersistentQuery } from './use_persistent_query';
 
 const CommonUseField = getUseField({ component: Field });

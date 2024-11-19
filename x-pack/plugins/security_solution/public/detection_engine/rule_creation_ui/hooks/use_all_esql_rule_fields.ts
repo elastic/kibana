@@ -6,16 +6,10 @@
  */
 import { useMemo, useState } from 'react';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import useDebounce from 'react-use/lib/useDebounce';
-
-import { useQuery } from '@tanstack/react-query';
-
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { computeIsESQLQueryAggregating } from '@kbn/securitysolution-utils';
-
-import { getEsqlQueryConfig } from '../../rule_creation/logic/get_esql_query_config';
+import { useEsqlQueryColumns } from '../../rule_creation/logic/esql_query_columns';
 
 const esqlToFields = (
   columns: { error: unknown } | DatatableColumn[] | undefined | null
@@ -43,12 +37,7 @@ type UseEsqlFields = (esqlQuery: string | undefined) => {
  * fetches ES|QL fields and convert them to DataViewBase fields
  */
 export const useEsqlFields: UseEsqlFields = (esqlQuery) => {
-  const kibana = useKibana<{ data: DataPublicPluginStart }>();
-
-  const { data: dataService } = kibana.services;
-
-  const queryConfig = getEsqlQueryConfig({ esqlQuery, search: dataService?.search?.search });
-  const { data, isLoading } = useQuery(queryConfig);
+  const { data, isLoading } = useEsqlQueryColumns(esqlQuery ?? '');
 
   const fields = useMemo(() => {
     return esqlToFields(data);

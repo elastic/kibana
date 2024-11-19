@@ -7,7 +7,7 @@
 import { renderHook } from '@testing-library/react-hooks';
 
 import type { FormData, FormHook, ValidationError } from '../../../shared_imports';
-import { ESQL_ERROR_CODES } from '../validators/esql_query_validator_factory';
+import { ESQL_ERROR_CODES } from '../../rule_creation/components/esql_query_edit/validators/esql_query_validator_factory';
 import { EQL_ERROR_CODES } from '../../../common/hooks/eql/api';
 import type {
   AboutStepRule,

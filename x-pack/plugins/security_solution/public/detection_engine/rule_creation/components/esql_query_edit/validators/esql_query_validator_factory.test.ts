@@ -5,25 +5,25 @@
  * 2.0.
  */
 
+import { QueryClient } from '@tanstack/react-query';
 import { getESQLQueryColumns } from '@kbn/esql-utils';
-import type { ValidationFuncArg } from '../../../shared_imports';
-import type { FieldValueQueryBar } from '../components/query_bar';
-import { ESQL_ERROR_CODES, esqlQueryValidatorFactory } from './esql_query_validator_factory';
+import type { FormData, ValidationFunc, ValidationFuncArg } from '../../../../../shared_imports';
+import type { FieldValueQueryBar } from '../../../../rule_creation_ui/components/query_bar';
+import { esqlQueryValidatorFactory } from './esql_query_validator_factory';
+import { ESQL_ERROR_CODES } from './error_codes';
 
 jest.mock('@kbn/esql-utils', () => ({
   getESQLQueryColumns: jest.fn().mockResolvedValue([{ id: '_id' }]),
 }));
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../../../../common/lib/kibana');
 
 describe('esqlQueryValidator', () => {
   describe('ES|QL query syntax', () => {
-    const validator = esqlQueryValidatorFactory();
-
     it.each([['incorrect syntax'], ['from test* metadata']])(
       'reports incorrect syntax in "%s"',
       (esqlQuery) =>
         expect(
-          validator({
+          createValidator()({
             value: createEsqlQueryFieldValue(esqlQuery),
           } as EsqlQueryValidatorArgs)
         ).resolves.toMatchObject({
@@ -36,9 +36,16 @@ describe('esqlQueryValidator', () => {
       [
         'FROM kibana_sample_data_logs | STATS total_bytes = SUM(bytes) BY host | WHERE total_bytes > 200000 | SORT total_bytes DESC | LIMIT 10',
       ],
+      [
+        `FROM kibana_sample_data_logs |
+         STATS total_bytes = SUM(bytes) BY host |
+         WHERE total_bytes > 200000 |
+         SORT total_bytes DESC | 
+         LIMIT 10`,
+      ],
     ])('succeeds validation for correct syntax in "%s"', (esqlQuery) =>
       expect(
-        validator({
+        createValidator()({
           value: createEsqlQueryFieldValue(esqlQuery),
         } as EsqlQueryValidatorArgs)
       ).resolves.toBeUndefined()
@@ -46,8 +53,6 @@ describe('esqlQueryValidator', () => {
   });
 
   describe('METADATA operator validation', () => {
-    const validator = esqlQueryValidatorFactory();
-
     it.each([
       ['from test*'],
       ['from metadata*'],
@@ -55,7 +60,7 @@ describe('esqlQueryValidator', () => {
       ['from test* | eval x="metadata _id"'],
     ])('reports when METADATA operator is missing in a NON aggregating query "%s"', (esqlQuery) =>
       expect(
-        validator({
+        createValidator()({
           value: createEsqlQueryFieldValue(esqlQuery),
         } as EsqlQueryValidatorArgs)
       ).resolves.toMatchObject({
@@ -73,31 +78,26 @@ describe('esqlQueryValidator', () => {
       'succeeds validation when METADATA operator EXISTS in a NON aggregating query "%s"',
       (esqlQuery) =>
         expect(
-          validator({
+          createValidator()({
             value: createEsqlQueryFieldValue(esqlQuery),
           } as EsqlQueryValidatorArgs)
         ).resolves.toBeUndefined()
     );
 
-    it.each([['from test* | stats c = count(*) by fieldA']])(
-      'succeeds validation when METADATA operator is missing in an aggregating query "%s"',
-      (esqlQuery) =>
-        expect(
-          validator({
-            value: createEsqlQueryFieldValue(esqlQuery),
-          } as EsqlQueryValidatorArgs)
-        ).resolves.toBeUndefined()
-    );
+    it('succeeds validation when METADATA operator is missing in an aggregating query "from test* | stats c = count(*) by fieldA"', () =>
+      expect(
+        createValidator()({
+          value: createEsqlQueryFieldValue('from test* | stats c = count(*) by fieldA'),
+        } as EsqlQueryValidatorArgs)
+      ).resolves.toBeUndefined());
   });
 
   describe('METADATA _id field validation for NON aggregating queries', () => {
-    const validator = esqlQueryValidatorFactory();
-
     it('reports when METADATA "_id" field is missing', () => {
-      (getESQLQueryColumns as jest.Mock).mockResolvedValue([{ id: 'column1' }, { id: 'column2' }]);
+      getESQLQueryColumnsMock.mockResolvedValue([{ id: 'column1' }, { id: 'column2' }]);
 
       return expect(
-        validator({
+        createValidator()({
           value: createEsqlQueryFieldValue('from test*'),
         } as EsqlQueryValidatorArgs)
       ).resolves.toMatchObject({
@@ -106,20 +106,20 @@ describe('esqlQueryValidator', () => {
     });
 
     it('succeeds validation when METADATA "_id" field EXISTS', async () => {
-      (getESQLQueryColumns as jest.Mock).mockResolvedValue([{ id: '_id' }, { id: 'column1' }]);
+      getESQLQueryColumnsMock.mockResolvedValue([{ id: '_id' }, { id: 'column1' }]);
 
       return expect(
-        validator({
+        createValidator()({
           value: createEsqlQueryFieldValue('from test* metadata _id'),
         } as EsqlQueryValidatorArgs)
       ).resolves.toBeUndefined();
     });
 
     it('succeeds validation when METADATA operator with "_id" field is missing in an aggregating query "%s"', () => {
-      (getESQLQueryColumns as jest.Mock).mockResolvedValue([{ id: 'column1' }, { id: 'column2' }]);
+      getESQLQueryColumnsMock.mockResolvedValue([{ id: 'column1' }, { id: 'column2' }]);
 
       return expect(
-        validator({
+        createValidator()({
           value: createEsqlQueryFieldValue(
             'from test* metadata someField | stats c = count(*) by fieldA'
           ),
@@ -129,16 +129,14 @@ describe('esqlQueryValidator', () => {
   });
 
   describe('when getESQLQueryColumns fails', () => {
-    const validator = esqlQueryValidatorFactory();
-
     it('reports an error message', () => {
       // suppress the expected error messages
       jest.spyOn(console, 'error').mockReturnValue();
 
-      (getESQLQueryColumns as jest.Mock).mockRejectedValue(new Error('some error'));
+      getESQLQueryColumnsMock.mockRejectedValue(new Error('some error'));
 
       return expect(
-        validator({
+        createValidator()({
           value: createEsqlQueryFieldValue('from test* metadata _id'),
         } as EsqlQueryValidatorArgs)
       ).resolves.toMatchObject({
@@ -150,6 +148,20 @@ describe('esqlQueryValidator', () => {
 });
 
 type EsqlQueryValidatorArgs = ValidationFuncArg<FormData, FieldValueQueryBar>;
+
+const getESQLQueryColumnsMock = getESQLQueryColumns as jest.Mock;
+
+function createValidator(): ValidationFunc<FormData, string, FieldValueQueryBar> {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 60 * 1000,
+      },
+    },
+  });
+
+  return esqlQueryValidatorFactory({ queryClient });
+}
 
 function createEsqlQueryFieldValue(esqlQuery: string): Readonly<FieldValueQueryBar> {
   return { query: { query: esqlQuery, language: 'esql' }, filters: [], saved_id: null };
