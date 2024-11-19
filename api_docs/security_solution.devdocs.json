@@ -1624,17 +1624,6 @@
           },
           {
             "parentPluginId": "securitySolution",
-            "id": "def-public.TimelineModel.isLoading",
-            "type": "boolean",
-            "tags": [],
-            "label": "isLoading",
-            "description": [],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "securitySolution",
             "id": "def-public.TimelineModel.selectAll",
             "type": "boolean",
             "tags": [],
