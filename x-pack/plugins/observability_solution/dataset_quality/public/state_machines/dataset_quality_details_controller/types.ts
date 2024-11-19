@@ -22,6 +22,8 @@ import {
 import { TableCriteria, TimeRangeConfig } from '../../../common/types';
 import { Integration } from '../../../common/data_streams_stats/integration';
 
+export type QualityIssue = 'degradedDocs' | 'failedDocs';
+
 export interface DataStream {
   name: string;
   type: string;
@@ -50,6 +52,7 @@ export interface WithDefaultControllerState {
   degradedFields: DegradedFieldsTableConfig;
   timeRange: TimeRangeConfig;
   showCurrentQualityIssues: boolean;
+  qualityIssuesChart: QualityIssue;
   breakdownField?: string;
   isBreakdownFieldEcs?: boolean;
   isIndexNotFoundError?: boolean;
@@ -108,7 +111,11 @@ export interface WithNewFieldLimitResponse {
 
 export type DefaultDatasetQualityDetailsContext = Pick<
   WithDefaultControllerState,
-  'degradedFields' | 'timeRange' | 'isIndexNotFoundError' | 'showCurrentQualityIssues'
+  | 'degradedFields'
+  | 'timeRange'
+  | 'isIndexNotFoundError'
+  | 'showCurrentQualityIssues'
+  | 'qualityIssuesChart'
 >;
 
 export type DatasetQualityDetailsControllerTypeState =
@@ -210,6 +217,10 @@ export type DatasetQualityDetailsControllerEvent =
     }
   | {
       type: 'DEGRADED_FIELDS_LOADED';
+    }
+  | {
+      type: 'QUALITY_ISSUES_CHART_CHANGE';
+      qualityIssuesChart: QualityIssue;
     }
   | {
       type: 'BREAKDOWN_FIELD_CHANGE';

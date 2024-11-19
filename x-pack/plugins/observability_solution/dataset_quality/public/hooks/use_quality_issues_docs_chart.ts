@@ -20,6 +20,7 @@ import { getLensAttributes as getFailedLensAttributes } from '../components/data
 import { useRedirectLink } from './use_redirect_link';
 import { useDatasetDetailsTelemetry } from './use_dataset_details_telemetry';
 import { useDatasetDetailsRedirectLinkTelemetry } from './use_redirect_link_telemetry';
+import { QualityIssue } from '../state_machines/dataset_quality_details_controller';
 
 const exploreDataInLogsExplorerText = i18n.translate(
   'xpack.datasetQuality.details.chartExploreDataInLogsExplorerText',
@@ -43,9 +44,7 @@ const ACTION_EXPLORE_IN_LOGS_EXPLORER = 'ACTION_EXPLORE_IN_LOGS_EXPLORER';
 const ACTION_OPEN_IN_LENS = 'ACTION_OPEN_IN_LENS';
 const DEGRADED_DOCS_KUERY = `_ignored:*`;
 
-export type QualityIssue = 'degradedDocs' | 'failedDocs';
-
-export const useQualityIssuesDocsChart = (qualityIssue: QualityIssue) => {
+export const useQualityIssuesDocsChart = () => {
   const { euiTheme } = useEuiTheme();
   const {
     services: { lens },
@@ -55,6 +54,7 @@ export const useQualityIssuesDocsChart = (qualityIssue: QualityIssue) => {
     dataStream,
     datasetDetails,
     timeRange,
+    docsTrendChart,
     breakdownField,
     integrationDetails,
     isBreakdownFieldAsserted,
@@ -72,7 +72,7 @@ export const useQualityIssuesDocsChart = (qualityIssue: QualityIssue) => {
     ReturnType<typeof getDegradedLensAttributes | typeof getFailedLensAttributes> | undefined
   >(undefined);
 
-  const query = qualityIssue === 'degradedDocs' ? DEGRADED_DOCS_KUERY : '';
+  const query = docsTrendChart === 'degradedDocs' ? DEGRADED_DOCS_KUERY : '';
 
   const { dataView } = useCreateDataView({
     indexPatternString: getDataViewIndexPattern(dataStream),
@@ -97,6 +97,16 @@ export const useQualityIssuesDocsChart = (qualityIssue: QualityIssue) => {
     [service]
   );
 
+  const handleDocsTrendChartChange = useCallback(
+    (qualityIssuesChart: QualityIssue) => {
+      service.send({
+        type: 'QUALITY_ISSUES_CHART_CHANGE',
+        qualityIssuesChart,
+      });
+    },
+    [service]
+  );
+
   useEffect(() => {
     if (isBreakdownFieldAsserted) trackDatasetDetailsBreakdownFieldChanged();
   }, [trackDatasetDetailsBreakdownFieldChanged, isBreakdownFieldAsserted]);
@@ -108,7 +118,7 @@ export const useQualityIssuesDocsChart = (qualityIssue: QualityIssue) => {
       integrationDetails?.integration?.datasets?.[datasetDetails.name] ?? datasetDetails.name;
 
     const lensAttributes =
-      qualityIssue === 'degradedDocs'
+      docsTrendChart === 'degradedDocs'
         ? getDegradedLensAttributes({
             color: euiTheme.colors.danger,
             dataStream: dataStreamName,
@@ -123,11 +133,11 @@ export const useQualityIssuesDocsChart = (qualityIssue: QualityIssue) => {
           });
     setAttributes(lensAttributes);
   }, [
-    qualityIssue,
     breakdownDataViewField?.name,
     euiTheme.colors.danger,
     setAttributes,
     dataStream,
+    docsTrendChart,
     integrationDetails?.integration?.datasets,
     datasetDetails.name,
   ]);
@@ -227,6 +237,7 @@ export const useQualityIssuesDocsChart = (qualityIssue: QualityIssue) => {
     extraActions,
     isChartLoading,
     redirectLinkProps,
+    handleDocsTrendChartChange,
     onChartLoading: handleChartLoading,
     setAttributes,
     setIsChartLoading,

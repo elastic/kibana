@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiAccordion,
@@ -25,6 +25,7 @@ import {
 import { css } from '@emotion/react';
 import { UnifiedBreakdownFieldSelector } from '@kbn/unified-histogram-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { QualityIssue } from '../../../../state_machines/dataset_quality_details_controller';
 import {
   discoverAriaText,
   logsExplorerAriaText,
@@ -33,11 +34,7 @@ import {
   overviewTrendsDocsText,
 } from '../../../../../common/translations';
 import { TrendDocsChart } from './trend_docs_chart';
-import {
-  QualityIssue,
-  useDatasetQualityDetailsState,
-  useQualityIssuesDocsChart,
-} from '../../../../hooks';
+import { useDatasetQualityDetailsState, useQualityIssuesDocsChart } from '../../../../hooks';
 
 const trendDocsTooltip = (
   <FormattedMessage
@@ -49,11 +46,14 @@ const trendDocsTooltip = (
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default function DocumentTrends({ lastReloadTime }: { lastReloadTime: number }) {
-  const [selectedChart, setSelectedChart] = useState<QualityIssue>('degradedDocs');
-
-  const { timeRange, updateTimeRange } = useDatasetQualityDetailsState();
-  const { dataView, breakdown, redirectLinkProps, ...qualityIssuesChartProps } =
-    useQualityIssuesDocsChart(selectedChart);
+  const { timeRange, updateTimeRange, docsTrendChart } = useDatasetQualityDetailsState();
+  const {
+    dataView,
+    breakdown,
+    redirectLinkProps,
+    handleDocsTrendChartChange,
+    ...qualityIssuesChartProps
+  } = useQualityIssuesDocsChart();
 
   const accordionId = useGeneratedHtmlId({
     prefix: overviewTrendsDocsText,
@@ -100,7 +100,7 @@ export default function DocumentTrends({ lastReloadTime }: { lastReloadTime: num
               legend={i18n.translate('xpack.datasetQuality.details.chartTypeLegend', {
                 defaultMessage: 'Quality chart type',
               })}
-              onChange={(id) => setSelectedChart(id as QualityIssue)}
+              onChange={(id) => handleDocsTrendChartChange(id as QualityIssue)}
               options={[
                 {
                   id: 'degradedDocs',
@@ -115,7 +115,7 @@ export default function DocumentTrends({ lastReloadTime }: { lastReloadTime: num
                   }),
                 },
               ]}
-              idSelected={selectedChart}
+              idSelected={docsTrendChart}
             />
           </EuiFlexItem>
           <EuiSkeletonRectangle width={160} height={32} isLoading={!dataView}>

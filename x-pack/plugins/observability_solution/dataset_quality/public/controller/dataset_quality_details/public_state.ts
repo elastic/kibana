@@ -20,6 +20,7 @@ export const getPublicStateFromContext = (
     degradedFields: context.degradedFields,
     timeRange: context.timeRange,
     breakdownField: context.breakdownField,
+    qualityIssuesChart: context.qualityIssuesChart,
     integration: context.integration,
     expandedDegradedField: context.expandedDegradedField,
     showCurrentQualityIssues: context.showCurrentQualityIssues,
@@ -51,6 +52,7 @@ export const getContextFromPublicState = (
     },
   },
   dataStream: publicState.dataStream,
+  qualityIssuesChart: publicState.qualityIssuesChart ?? DEFAULT_CONTEXT.qualityIssuesChart,
   breakdownField: publicState.breakdownField,
   expandedDegradedField: publicState.expandedDegradedField,
   showCurrentQualityIssues:
