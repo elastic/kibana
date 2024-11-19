@@ -176,7 +176,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await filterBar.clickEditFilterById('0');
 
       expect(await filterBar.getFilterEditorPreview()).to.equal(
-        'extension: png OR bytes: 1,000B to 2KB'
+        'extension: png\nOR\nbytes: 1,000B to 2KB'
       );
     });
 
