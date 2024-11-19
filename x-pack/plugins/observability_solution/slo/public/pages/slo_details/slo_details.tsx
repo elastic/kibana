@@ -24,7 +24,7 @@ import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
 import { useLicense } from '../../hooks/use_license';
 import { usePermissions } from '../../hooks/use_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useKibana } from '../../utils/kibana_react';
+import { useKibana } from '../../hooks/use_kibana';
 import PageNotFound from '../404';
 import { HeaderControl } from './components/header_control';
 import { HeaderTitle } from './components/header_title';

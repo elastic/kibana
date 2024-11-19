@@ -126,7 +126,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
   getCurrentUser: () => AuthenticatedUser | null;
   getAIAssistantConversationsDataClient: () => Promise<AIAssistantConversationsDataClient | null>;
   getAIAssistantKnowledgeBaseDataClient: (
-    params: GetAIAssistantKnowledgeBaseDataClientParams
+    params?: GetAIAssistantKnowledgeBaseDataClientParams
   ) => Promise<AIAssistantKnowledgeBaseDataClient | null>;
   getAttackDiscoveryDataClient: () => Promise<AttackDiscoveryDataClient | null>;
   getAIAssistantPromptsDataClient: () => Promise<AIAssistantDataClient | null>;
@@ -150,13 +150,6 @@ export type ElasticAssistantPluginCoreSetupDependencies = CoreSetup<
 >;
 
 export type GetElser = () => Promise<string> | never;
-
-export interface InitAssistantResult {
-  assistantResourcesInstalled: boolean;
-  assistantNamespaceResourcesInstalled: boolean;
-  assistantSettingsCreated: boolean;
-  errors: string[];
-}
 
 export interface AssistantResourceNames {
   componentTemplate: {
@@ -199,18 +192,6 @@ export interface IIndexPatternString {
   basePattern: string;
   validPrefixes?: string[];
   secondaryAlias?: string;
-}
-
-export interface PublicAIAssistantDataClient {
-  getConversationsLimitValue: () => number;
-}
-
-export interface IAIAssistantDataClient {
-  client(): PublicAIAssistantDataClient | null;
-}
-
-export interface AIAssistantPrompts {
-  id: string;
 }
 
 /**
