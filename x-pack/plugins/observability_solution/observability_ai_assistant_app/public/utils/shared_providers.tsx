@@ -5,35 +5,25 @@
  * 2.0.
  */
 import { EuiErrorBoundary } from '@elastic/eui';
-import type { CoreStart, CoreTheme } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import React, { useMemo } from 'react';
-import type { Observable } from 'rxjs';
-import { AIAssistantAppService } from '@kbn/ai-assistant';
+import React from 'react';
 import type { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
 
 export function SharedProviders({
   children,
   coreStart,
   pluginsStart,
-  service,
-  theme$,
 }: {
   children: React.ReactElement;
   coreStart: CoreStart;
   pluginsStart: ObservabilityAIAssistantAppPluginStartDependencies;
-  service: AIAssistantAppService;
-  theme$: Observable<CoreTheme>;
 }) {
-  const theme = useMemo(() => {
-    return { theme$ };
-  }, [theme$]);
-
   return (
     <EuiErrorBoundary>
-      <KibanaThemeProvider theme={theme}>
+      <KibanaThemeProvider {...coreStart}>
         <KibanaContextProvider
           services={{
             ...coreStart,

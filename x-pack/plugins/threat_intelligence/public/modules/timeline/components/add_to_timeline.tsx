@@ -94,8 +94,7 @@ export const AddToTimelineButtonEmpty: VFC<AddToTimelineProps> = ({
 
   const buttonRef = useRef<HTMLButtonElement>(null);
 
-  const { timelines, analytics, i18n: i18nStart, theme } = useKibana().services;
-  const startServices = { analytics, i18n: i18nStart, theme };
+  const { timelines, ...startServices } = useKibana().services;
   const addToTimelineButton = timelines.getHoverActions().getAddToTimelineButton;
 
   const { key, value } =
@@ -155,8 +154,7 @@ export const AddToTimelineContextMenu: VFC<AddToTimelineProps> = ({
 
   const contextMenuRef = useRef<HTMLButtonElement>(null);
 
-  const { timelines, analytics, i18n: i18nStart, theme } = useKibana().services;
-  const startServices = { analytics, i18n: i18nStart, theme };
+  const { timelines, ...startServices } = useKibana().services;
 
   const addToTimelineButton = timelines.getHoverActions().getAddToTimelineButton;
 

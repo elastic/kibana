@@ -54,7 +54,7 @@ export const renderApp = ({
   experimentalFeatures,
   sloClient,
 }: Props) => {
-  const { element, history, theme$ } = appMountParameters;
+  const { element, history } = appMountParameters;
   const isDarkMode = core.theme.getTheme().darkMode;
 
   // ensure all divs are .kbnAppWrappers
@@ -92,7 +92,7 @@ export const renderApp = ({
   ReactDOM.render(
     <KibanaRenderContextProvider {...core}>
       <ApplicationUsageTrackingProvider>
-        <KibanaThemeProvider {...{ theme: { theme$ } }}>
+        <KibanaThemeProvider {...core}>
           <CloudProvider>
             <KibanaContextProvider
               services={{

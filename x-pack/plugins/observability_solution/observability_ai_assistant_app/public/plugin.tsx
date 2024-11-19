@@ -79,7 +79,6 @@ export class ObservabilityAIAssistantAppPlugin
         ReactDOM.render(
           <Application
             {...appMountParameters}
-            service={this.appService!}
             coreStart={coreStart}
             pluginsStart={pluginsStart as ObservabilityAIAssistantAppPluginStartDependencies}
           />,

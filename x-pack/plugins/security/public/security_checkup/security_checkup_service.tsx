@@ -16,6 +16,7 @@ import type {
   NotificationsStart,
   ThemeServiceStart,
   Toast,
+  UserProfileService,
 } from '@kbn/core/public';
 
 import { insecureClusterAlertText, insecureClusterAlertTitle } from './components';
@@ -33,6 +34,7 @@ interface StartDeps {
   analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;
   i18n: I18nStart;
   theme: Pick<ThemeServiceStart, 'theme$'>;
+  userProfile: UserProfileService;
 }
 
 const DEFAULT_SECURITY_CHECKUP_STATE = Object.freeze<SecurityCheckupState>({

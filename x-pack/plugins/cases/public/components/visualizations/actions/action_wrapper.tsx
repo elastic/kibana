@@ -29,7 +29,7 @@ const ActionWrapperWithContext: React.FC<PropsWithChildren<Props>> = ({
   casesActionContextProps,
   currentAppId,
 }) => {
-  const { application, i18n, theme } = useKibana().services;
+  const { application, ...startServices } = useKibana().services;
 
   const owner = getCaseOwnerByAppId(currentAppId);
   const casePermissions = canUseCases(application.capabilities)(owner ? [owner] : undefined);
@@ -37,7 +37,7 @@ const ActionWrapperWithContext: React.FC<PropsWithChildren<Props>> = ({
   const syncAlerts = owner === SECURITY_SOLUTION_OWNER;
 
   return (
-    <KibanaRenderContextProvider i18n={i18n} theme={theme}>
+    <KibanaRenderContextProvider {...startServices}>
       <CasesProvider
         value={{
           ...casesActionContextProps,

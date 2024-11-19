@@ -19,10 +19,9 @@ type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 export function useDeleteAnnotation() {
   const {
-    i18n: i18nStart,
-    theme,
     http,
     notifications: { toasts },
+    ...startServices
   } = useKibana().services;
   const services = useKibana().services;
 
@@ -47,10 +46,7 @@ export function useDeleteAnnotation() {
                 }}
               />
             </RedirectAppLinks>,
-            {
-              i18n: i18nStart,
-              theme,
-            }
+            startServices
           ),
         });
       },

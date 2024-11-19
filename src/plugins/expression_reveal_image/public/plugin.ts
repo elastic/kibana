@@ -33,8 +33,10 @@ export class ExpressionRevealImagePlugin
     >
 {
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionRevealImagePluginSetup {
-    expressions.registerFunction(revealImageFunction);
-    expressions.registerRenderer(revealImageRendererFactory(core));
+    core.getStartServices().then(([start]) => {
+      expressions.registerFunction(revealImageFunction);
+      expressions.registerRenderer(revealImageRendererFactory(start));
+    });
   }
 
   public start(core: CoreStart): ExpressionRevealImagePluginStart {}

@@ -65,7 +65,7 @@ export const renderApp = ({
   kibanaVersion: string;
   isServerless?: boolean;
 }) => {
-  const { element, history, theme$ } = appMountParameters;
+  const { element, history } = appMountParameters;
   const isDarkMode = core.theme.getTheme().darkMode;
 
   core.chrome.setHelpExtension({
@@ -87,7 +87,7 @@ export const renderApp = ({
   ReactDOM.render(
     <KibanaRenderContextProvider {...core}>
       <ApplicationUsageTrackingProvider>
-        <KibanaThemeProvider {...{ theme: { theme$ } }}>
+        <KibanaThemeProvider {...core}>
           <CloudProvider>
             <KibanaContextProvider
               services={{

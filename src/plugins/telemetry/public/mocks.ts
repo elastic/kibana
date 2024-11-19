@@ -15,6 +15,7 @@ import {
   notificationServiceMock,
   themeServiceMock,
 } from '@kbn/core/public/mocks';
+import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import type { TelemetryConstants } from '.';
 import type { TelemetryPluginStart, TelemetryPluginSetup, TelemetryPluginConfig } from './plugin';
 import { TelemetryService, TelemetryNotifications } from './services';
@@ -82,6 +83,7 @@ export function mockTelemetryNotifications({
     analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     i18n: i18nServiceMock.createStartContract(),
     theme: themeServiceMock.createStartContract(),
+    userProfile: userProfileServiceMock.createStart(),
     telemetryService,
     telemetryConstants: mockTelemetryConstants(),
   });

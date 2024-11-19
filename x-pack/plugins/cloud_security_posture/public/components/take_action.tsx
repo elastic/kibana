@@ -64,8 +64,7 @@ export const showCreateDetectionRuleSuccessToast = (
   http: HttpSetup,
   ruleResponse: RuleResponse
 ) => {
-  const { notifications, analytics, i18n, theme } = cloudSecurityStartServices;
-  const startServices = { analytics, i18n, theme };
+  const { notifications, ...startServices } = cloudSecurityStartServices;
 
   return notifications.toasts.addSuccess({
     toastLifeTimeMs: 10000,

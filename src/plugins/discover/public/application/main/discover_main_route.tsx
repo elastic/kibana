@@ -206,7 +206,7 @@ export function DiscoverMainRoute({
             onBeforeRedirect() {
               services.urlTracker.setTrackedUrl('/');
             },
-            theme: core.theme,
+            ...core,
           })(e);
         } else {
           setError(e);
@@ -222,8 +222,7 @@ export function DiscoverMainRoute({
       services,
       chrome.recentlyAccessed,
       history,
-      core.application.navigateToApp,
-      core.theme,
+      core,
       basePath,
       toastNotifications,
     ]

@@ -51,7 +51,7 @@ const Application = (props: SyntheticsAppProps) => {
   return (
     <KibanaRenderContextProvider {...coreStart}>
       <KibanaThemeProvider
-        theme={coreStart.theme}
+        {...coreStart}
         modify={{
           breakpoint: {
             xxl: 1600,

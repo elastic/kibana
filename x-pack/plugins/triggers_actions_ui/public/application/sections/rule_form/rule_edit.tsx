@@ -142,9 +142,8 @@ export const RuleEdit = <
   const {
     http,
     notifications: { toasts },
-    i18n: i18nStart,
-    theme,
     isServerless,
+    ...startServices
   } = useKibana().services;
 
   const setRule = (value: Rule) => {
@@ -240,7 +239,7 @@ export const RuleEdit = <
         ...(message.details && {
           text: toMountPoint(
             <ToastWithCircuitBreakerContent>{message.details}</ToastWithCircuitBreakerContent>,
-            { i18n: i18nStart, theme }
+            startServices
           ),
         }),
       });

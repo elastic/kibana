@@ -29,7 +29,7 @@ export const IntegrationsHeader = ({
   startServices,
 }: {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-  startServices: Pick<FleetStartServices, 'analytics' | 'i18n' | 'theme'>;
+  startServices: Pick<FleetStartServices, 'analytics' | 'i18n' | 'theme' | 'userProfile'>;
 }) => {
   const { euiTheme } = useEuiTheme();
   const readOnlyBtnClass = React.useMemo(() => {

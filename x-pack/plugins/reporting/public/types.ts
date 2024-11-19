@@ -20,6 +20,7 @@ export type StartServices = [
     | 'analytics'
     | 'i18n'
     | 'theme'
+    | 'userProfile'
     // used extensively in Reporting plugin
     | 'application'
     | 'notifications'

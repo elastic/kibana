@@ -12,6 +12,7 @@ import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { UserProfileService } from '@kbn/core-user-profile-browser';
 
 export const [getDataActions, setDataActions] =
   createGetterSetter<DataPublicPluginStart['actions']>('vislib data.actions');
@@ -23,6 +24,9 @@ export const [getAnalytics, setAnalytics] =
   createGetterSetter<AnalyticsServiceStart>('vislib theme service');
 export const [getI18n, setI18n] = createGetterSetter<I18nStart>('vislib theme service');
 export const [getTheme, setTheme] = createGetterSetter<ThemeServiceStart>('vislib theme service');
+export const [getUserProfile, setUserProfile] = createGetterSetter<UserProfileService>(
+  'vislib user profile service'
+);
 
 export const [getUsageCollectionStart, setUsageCollectionStart] =
   createGetterSetter<UsageCollectionStart>('UsageCollection', false);

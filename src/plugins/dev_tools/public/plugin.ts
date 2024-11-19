@@ -66,8 +66,8 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
 
         const [core] = await getStartServices();
         const { application, chrome, executionContext } = core;
-        const { analytics, i18n: i18nStart, theme } = core;
-        const startServices = { analytics, i18n: i18nStart, theme };
+        const { analytics, i18n: i18nStart, theme, userProfile } = core;
+        const startServices = { analytics, i18n: i18nStart, theme, userProfile };
 
         this.docTitleService.setup(chrome.docTitle.change);
         this.breadcrumbService.setup(chrome.setBreadcrumbs);

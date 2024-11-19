@@ -36,6 +36,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 
 import { dataViewSpecToViewBase } from '../../../../../common/lib/kuery';
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
@@ -101,6 +102,7 @@ interface StartServices {
   analytics: AnalyticsServiceStart;
   i18n: I18nStart;
   theme: ThemeServiceStart;
+  userProfile: UserProfileService;
 }
 
 interface ExecutionLogTableProps extends StartServices {

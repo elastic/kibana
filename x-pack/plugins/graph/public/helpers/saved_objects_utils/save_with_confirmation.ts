@@ -34,7 +34,7 @@ export async function saveWithConfirmation(
   options: SavedObjectsCreateOptions,
   services: { contentClient: ContentClient } & Pick<
     CoreStart,
-    'overlays' | 'analytics' | 'i18n' | 'theme'
+    'overlays' | 'analytics' | 'i18n' | 'theme' | 'userProfile'
   >
 ): Promise<{ item: GraphSavedObject }> {
   const { contentClient, ...startServices } = services;

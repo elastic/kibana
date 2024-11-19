@@ -111,15 +111,16 @@ export class ReportingPublicPlugin
     } = setupDeps;
 
     const startServices$: Observable<StartServices> = from(getStartServices()).pipe(
-      map(([services, ...rest]) => {
+      map(([start, ...rest]) => {
         return [
           {
-            application: services.application,
-            analytics: services.analytics,
-            i18n: services.i18n,
-            theme: services.theme,
-            notifications: services.notifications,
-            uiSettings: services.uiSettings,
+            application: start.application,
+            analytics: start.analytics,
+            i18n: start.i18n,
+            theme: start.theme,
+            userProfile: start.userProfile,
+            notifications: start.notifications,
+            uiSettings: start.uiSettings,
           },
           ...rest,
         ];

@@ -116,7 +116,7 @@ export const ManagementApp = ({ dependencies, history, appBasePath }: Management
   };
 
   return (
-    <KibanaRenderContextProvider i18n={coreStart.i18n} theme={coreStart.theme}>
+    <KibanaRenderContextProvider {...coreStart}>
       <RedirectAppLinks coreStart={dependencies.coreStart}>
         <AppContextProvider value={contextDependencies}>
           <KibanaPageTemplate

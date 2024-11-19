@@ -79,7 +79,15 @@ export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProp
   }
 
   const datePickerDeps = {
-    ...pick(appContextValue, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
+    ...pick(appContextValue, [
+      'data',
+      'http',
+      'notifications',
+      'theme',
+      'uiSettings',
+      'userProfile',
+      'i18n',
+    ]),
     uiSettingsKeys: UI_SETTINGS,
     showFrozenDataTierChoice,
   };

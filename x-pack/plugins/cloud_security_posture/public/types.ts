@@ -54,5 +54,5 @@ export interface CspSecuritySolutionContext {
 
 export type CloudSecurityPostureStartServices = Pick<
   CoreStart,
-  'notifications' | 'analytics' | 'i18n' | 'theme'
+  'notifications' | 'analytics' | 'i18n' | 'theme' | 'userProfile'
 >;

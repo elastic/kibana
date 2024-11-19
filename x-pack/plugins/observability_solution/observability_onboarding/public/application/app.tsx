@@ -67,13 +67,13 @@ export function ObservabilityOnboardingAppRoot({
         >
           <KibanaContextProvider services={services}>
             <KibanaThemeProvider
-              theme={{ theme$ }}
               modify={{
                 breakpoint: {
                   xxl: 1600,
                   xxxl: 2000,
                 },
               }}
+              {...core}
             >
               <Router history={history}>
                 <EuiErrorBoundary>

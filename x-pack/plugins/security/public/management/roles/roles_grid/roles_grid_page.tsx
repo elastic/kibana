@@ -76,6 +76,7 @@ export const RolesGridPage: FC<Props> = ({
   buildFlavor,
   cloudOrgUrl,
   analytics,
+  userProfile,
   theme,
   i18n: i18nStart,
 }) => {
@@ -409,6 +410,7 @@ export const RolesGridPage: FC<Props> = ({
             notifications={notifications}
             rolesAPIClient={rolesAPIClient}
             buildFlavor={buildFlavor}
+            userProfile={userProfile}
             theme={theme}
             analytics={analytics}
             i18n={i18nStart}

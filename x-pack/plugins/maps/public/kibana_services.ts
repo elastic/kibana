@@ -91,6 +91,7 @@ export const getNavigateToUrl = () => coreStart.application.navigateToUrl;
 export const getSavedObjectsTagging = () => pluginsStart.savedObjectsTagging;
 export const getSpacesApi = () => pluginsStart.spaces;
 export const getTheme = () => coreStart.theme;
+export const getUserProfile = () => coreStart.userProfile;
 export const getApplication = () => coreStart.application;
 export const getUsageCollection = () => pluginsStart.usageCollection;
 export const getContentManagement = () => pluginsStart.contentManagement;

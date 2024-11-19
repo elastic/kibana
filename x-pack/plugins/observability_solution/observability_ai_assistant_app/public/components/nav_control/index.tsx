@@ -26,18 +26,9 @@ interface NavControlWithProviderDeps {
   pluginsStart: ObservabilityAIAssistantAppPluginStartDependencies;
 }
 
-export const NavControlWithProvider = ({
-  appService,
-  coreStart,
-  pluginsStart,
-}: NavControlWithProviderDeps) => {
+export const NavControlWithProvider = ({ coreStart, pluginsStart }: NavControlWithProviderDeps) => {
   return (
-    <SharedProviders
-      coreStart={coreStart}
-      pluginsStart={pluginsStart}
-      service={appService}
-      theme$={coreStart.theme.theme$}
-    >
+    <SharedProviders coreStart={coreStart} pluginsStart={pluginsStart}>
       <NavControl />
     </SharedProviders>
   );

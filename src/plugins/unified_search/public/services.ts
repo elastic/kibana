@@ -8,6 +8,7 @@
  */
 
 import {
+  UserProfileService,
   ThemeServiceStart,
   OverlayStart,
   AnalyticsServiceStart,
@@ -24,5 +25,8 @@ export const [getAnalytics, setAnalytics] = createGetterSetter<AnalyticsServiceS
 export const [getI18n, setI18n] = createGetterSetter<I18nStart>('I18n');
 
 export const [getTheme, setTheme] = createGetterSetter<ThemeServiceStart>('Theme');
+
+export const [getUserProfile, setUserProfile] =
+  createGetterSetter<UserProfileService>('UserProfile');
 
 export const [getOverlays, setOverlays] = createGetterSetter<OverlayStart>('Overlays');

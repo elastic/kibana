@@ -47,8 +47,9 @@ export const IndexManagementAppContext: React.FC<IndexManagementAppContextProps>
     analytics,
     i18n,
     theme,
+    userProfile,
   } = core;
-  const startServices = { analytics, i18n, overlays, theme };
+  const startServices = { analytics, i18n, overlays, theme, userProfile };
   const { services, setBreadcrumbs, uiSettings, settings, kibanaVersion } = dependencies;
 
   // theme is required by the CodeEditor component used to edit runtime field Painless scripts.
@@ -61,6 +62,7 @@ export const IndexManagementAppContext: React.FC<IndexManagementAppContextProps>
         get: () => kibanaVersion,
       },
       theme,
+      userProfile,
     });
 
   const componentTemplateProviderValues = {
@@ -122,6 +124,7 @@ interface KibanaReactContextServices {
     get: () => SemVer;
   };
   theme: CoreStart['theme'];
+  userProfile: CoreStart['userProfile'];
 }
 
 // We override useKibana() from the react plugin to return a typed version for this app

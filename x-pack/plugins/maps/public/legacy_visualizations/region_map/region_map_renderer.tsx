@@ -12,7 +12,7 @@ import { dynamic } from '@kbn/shared-ux-utility';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { RegionMapVisRenderValue } from './region_map_fn';
 import { REGION_MAP_RENDER } from './types';
-import { getAnalytics, getCoreI18n, getTheme } from '../../kibana_services';
+import { getAnalytics, getCoreI18n, getTheme, getUserProfile } from '../../kibana_services';
 
 const Component = dynamic(async () => {
   const { RegionMapVisualization } = await import('./region_map_visualization');
@@ -44,6 +44,7 @@ export const regionMapRenderer = {
         analytics={getAnalytics()}
         i18n={getCoreI18n()}
         theme={getTheme()}
+        userProfile={getUserProfile()}
       >
         <Component {...props} />
       </KibanaRenderContextProvider>,

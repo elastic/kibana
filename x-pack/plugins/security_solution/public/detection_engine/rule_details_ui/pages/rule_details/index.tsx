@@ -187,6 +187,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     analytics,
     i18n: i18nStart,
     theme,
+    userProfile,
     application: {
       navigateToApp,
       capabilities: { actions },
@@ -794,6 +795,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                       analytics={analytics}
                       i18n={i18nStart}
                       theme={theme}
+                      userProfile={userProfile}
                     />
                     <EuiSpacer size="xl" />
                     <RuleBackfillsInfo ruleId={ruleId} />

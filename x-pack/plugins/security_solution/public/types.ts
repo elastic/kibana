@@ -202,6 +202,7 @@ export type StartRenderServices = Pick<
   | 'analytics'
   | 'i18n'
   | 'theme'
+  | 'userProfile'
 >;
 
 export interface PluginSetup {

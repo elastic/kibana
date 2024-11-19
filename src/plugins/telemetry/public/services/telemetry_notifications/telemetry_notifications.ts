@@ -12,8 +12,9 @@ import type { TelemetryService } from '../telemetry_service';
 import type { TelemetryConstants } from '../..';
 import { renderOptInStatusNoticeBanner } from './render_opt_in_status_notice_banner';
 
-interface TelemetryNotificationsConstructor
-  extends Pick<CoreStart, 'analytics' | 'i18n' | 'theme'> {
+type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme' | 'userProfile'>;
+
+interface TelemetryNotificationsConstructor extends StartServices {
   http: HttpStart;
   overlays: OverlayStart;
   telemetryService: TelemetryService;
@@ -26,7 +27,7 @@ interface TelemetryNotificationsConstructor
 export class TelemetryNotifications {
   private readonly http: HttpStart;
   private readonly overlays: OverlayStart;
-  private readonly startServices: Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
+  private readonly startServices: StartServices;
   private readonly telemetryConstants: TelemetryConstants;
   private readonly telemetryService: TelemetryService;
   private optInStatusNoticeBannerId?: string;

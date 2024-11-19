@@ -15,7 +15,6 @@ import {
   CoreStart,
   I18nStart,
   NotificationsSetup,
-  ThemeServiceSetup,
 } from '@kbn/core/public';
 import { DataPublicPluginStart, SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import {
@@ -59,6 +58,7 @@ type StartServices = [
     | 'analytics'
     | 'i18n'
     | 'theme'
+    | 'userProfile'
     // used extensively in Reporting share panel action
     | 'application'
     | 'uiSettings'
@@ -102,15 +102,13 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
   private readonly i18nStrings: ReturnType<typeof getI18nStrings>;
   private readonly notifications: NotificationsSetup;
   private readonly apiClient: ReportingAPIClient;
-  private readonly theme: ThemeServiceSetup;
-  private readonly startServices$: Params['startServices$'];
+  private readonly startServices$: Observable<StartServices>;
   private readonly usesUiCapabilities: boolean;
 
   constructor({ core, csvConfig, apiClient, startServices$, usesUiCapabilities }: Params) {
     this.isDownloading = false;
     this.apiClient = apiClient;
     this.notifications = core.notifications;
-    this.theme = core.theme;
     this.startServices$ = startServices$;
     this.usesUiCapabilities = usesUiCapabilities;
     this.i18nStrings = getI18nStrings(apiClient);
@@ -154,7 +152,8 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
   };
 
   private executeGenerate = async (params: ExecutionParams) => {
-    const { searchSource, columns, title, analytics, i18nStart } = params;
+    const [startServices] = await firstValueFrom(this.startServices$);
+    const { searchSource, columns, title } = params;
     const csvJobParams = this.apiClient.getDecoratedJobParams<JobAppParamsCSV>({
       searchSource,
       columns,
@@ -168,11 +167,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
         if (job) {
           this.notifications.toasts.addSuccess({
             title: this.i18nStrings.generate.toasts.success.title,
-            text: toMountPoint(this.i18nStrings.generate.toasts.success.body, {
-              analytics,
-              i18n: i18nStart,
-              theme: this.theme,
-            }),
+            text: toMountPoint(this.i18nStrings.generate.toasts.success.body, startServices),
             'data-test-subj': 'csvReportStarted',
           });
         }

@@ -97,6 +97,7 @@ export interface DiscoverServices {
   getScopedHistory: <T>() => ScopedHistory<T | undefined> | undefined;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   theme: CoreStart['theme'];
+  userProfile: CoreStart['userProfile'];
   filterManager: FilterManager;
   fieldFormats: FieldFormatsStart;
   dataViews: DataViewsContract;
@@ -185,6 +186,7 @@ export const buildServices = memoize(
       embeddable: plugins.embeddable,
       i18n: core.i18n,
       theme: core.theme,
+      userProfile: core.userProfile,
       fieldFormats: plugins.fieldFormats,
       filterManager: plugins.data.query.filterManager,
       history,

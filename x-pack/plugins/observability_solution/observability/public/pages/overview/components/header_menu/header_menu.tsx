@@ -18,7 +18,7 @@ import { useKibana } from '../../../../utils/kibana_react';
 import HeaderMenuPortal from './header_menu_portal';
 
 export function HeaderMenu(): React.ReactElement | null {
-  const { share, theme, http } = useKibana().services;
+  const { share, http } = useKibana().services;
 
   const onboardingLocator = share?.url.locators.get<ObservabilityOnboardingLocatorParams>(
     OBSERVABILITY_ONBOARDING_LOCATOR
@@ -28,10 +28,7 @@ export function HeaderMenu(): React.ReactElement | null {
   const { appMountParameters } = usePluginContext();
 
   return (
-    <HeaderMenuPortal
-      setHeaderActionMenu={appMountParameters?.setHeaderActionMenu!}
-      theme$={theme.theme$}
-    >
+    <HeaderMenuPortal setHeaderActionMenu={appMountParameters?.setHeaderActionMenu!}>
       <EuiFlexGroup responsive={false} gutterSize="s">
         <EuiFlexItem>
           <EuiHeaderLinks>

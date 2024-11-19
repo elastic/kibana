@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CoreStart, CoreTheme } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
@@ -12,7 +12,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import type { History } from 'history';
 import React, { useMemo } from 'react';
-import type { Observable } from 'rxjs';
 import { InvestigateAppContextProvider } from './components/investigate_app_context_provider';
 import { InvestigateAppKibanaContext } from './hooks/use_kibana';
 import { getRoutes } from './routes/config';
@@ -25,19 +24,13 @@ function Application({
   coreStart,
   history,
   pluginsStart,
-  theme$,
   services,
 }: {
   coreStart: CoreStart;
   history: History;
   pluginsStart: InvestigateAppStartDependencies;
-  theme$: Observable<CoreTheme>;
   services: InvestigateAppServices;
 }) {
-  const theme = useMemo(() => {
-    return { theme$ };
-  }, [theme$]);
-
   const context: InvestigateAppKibanaContext = useMemo(
     () => ({
       core: coreStart,
@@ -65,7 +58,7 @@ function Application({
   };
 
   return (
-    <KibanaThemeProvider theme={theme}>
+    <KibanaThemeProvider {...coreStart}>
       <InvestigateAppContextProvider context={context}>
         <RedirectAppLinks coreStart={coreStart}>
           <coreStart.i18n.Context>

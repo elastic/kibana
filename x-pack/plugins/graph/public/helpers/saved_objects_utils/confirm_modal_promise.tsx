@@ -15,7 +15,7 @@ export function confirmModalPromise(
   message = '',
   title = '',
   confirmBtnText = '',
-  startServices: Pick<CoreStart, 'overlays' | 'analytics' | 'i18n' | 'theme'>
+  startServices: Pick<CoreStart, 'overlays' | 'analytics' | 'i18n' | 'theme' | 'userProfile'>
 ): Promise<boolean> {
   return new Promise((resolve, reject) => {
     const cancelButtonText = i18n.translate('xpack.graph.confirmModal.cancelButtonLabel', {

@@ -24,7 +24,10 @@ import { isVerificationError } from '../services';
 
 import { useConfirmForceInstall } from '.';
 
-type StartServices = Pick<FleetStartServices, 'notifications' | 'analytics' | 'i18n' | 'theme'>;
+type StartServices = Pick<
+  FleetStartServices,
+  'notifications' | 'analytics' | 'i18n' | 'theme' | 'userProfile'
+>;
 
 interface PackagesInstall {
   [key: string]: PackageInstallItem;

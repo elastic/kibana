@@ -37,7 +37,7 @@ export interface EditRuleFormProps {
 
 export const EditRuleForm = (props: EditRuleFormProps) => {
   const { id, plugins, showMustacheAutocompleteSwitch = false, onCancel, onSubmit } = props;
-  const { http, notifications, docLinks, ruleTypeRegistry, i18n, theme, application } = plugins;
+  const { http, notifications, docLinks, ruleTypeRegistry, application, ...deps } = plugins;
   const { toasts } = notifications;
 
   const { mutate, isLoading: isSaving } = useUpdateRule({
@@ -55,7 +55,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
         ...(message.details && {
           text: toMountPoint(
             <RuleFormCircuitBreakerError>{message.details}</RuleFormCircuitBreakerError>,
-            { i18n, theme }
+            deps
           ),
         }),
       });

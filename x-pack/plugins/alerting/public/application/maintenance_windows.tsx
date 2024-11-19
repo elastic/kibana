@@ -78,12 +78,11 @@ export const renderApp = ({
   kibanaVersion: string;
 }) => {
   const { element, history } = mountParams;
-  const { i18n, theme } = core;
 
   const queryClient = new QueryClient();
 
   ReactDOM.render(
-    <KibanaRenderContextProvider i18n={i18n} theme={theme}>
+    <KibanaRenderContextProvider {...core}>
       <KibanaContextProvider
         services={{
           ...core,

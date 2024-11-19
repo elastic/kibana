@@ -20,7 +20,7 @@ import { PluginContext } from '../context/plugin_context';
 import { routes } from '../routes';
 import { ExploratoryViewPublicPluginsStart } from '../plugin';
 
-export type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
+export type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme' | 'userProfile'>;
 
 function App(props: { startServices: StartServices }) {
   return (

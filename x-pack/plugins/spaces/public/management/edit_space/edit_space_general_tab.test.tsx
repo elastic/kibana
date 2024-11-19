@@ -19,6 +19,7 @@ import {
   themeServiceMock,
 } from '@kbn/core/public/mocks';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
+import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { KibanaFeature } from '@kbn/features-plugin/common';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
@@ -43,6 +44,7 @@ const reloadWindow = jest.fn();
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
 const overlays = overlayServiceMock.createStartContract();
+const userProfile = userProfileServiceMock.createStart();
 const theme = themeServiceMock.createStartContract();
 const i18n = i18nServiceMock.createStartContract();
 const logger = loggingSystemMock.createLogger();
@@ -83,6 +85,7 @@ describe('EditSpaceSettings', () => {
           getIsRoleManagementEnabled={() => Promise.resolve(() => undefined)}
           getPrivilegesAPIClient={getPrivilegeAPIClient}
           getSecurityLicense={getSecurityLicenseMock}
+          userProfile={userProfile}
           theme={theme}
           i18n={i18n}
           logger={logger}

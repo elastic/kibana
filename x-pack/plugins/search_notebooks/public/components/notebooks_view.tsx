@@ -32,7 +32,7 @@ export const SearchNotebooksView = ({
   }, [usageTracker]);
 
   return (
-    <KibanaThemeProvider theme={core.theme}>
+    <KibanaThemeProvider {...core}>
       <KibanaContextProvider services={{ ...core, notebooks: { getNotebookList }, usageTracker }}>
         <QueryClientProvider client={queryClient}>
           <SearchNotebooks />

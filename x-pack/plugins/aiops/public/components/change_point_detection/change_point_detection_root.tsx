@@ -65,7 +65,15 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
   showFrozenDataTierChoice = true,
 }) => {
   const datePickerDeps: DatePickerDependencies = {
-    ...pick(appContextValue, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
+    ...pick(appContextValue, [
+      'data',
+      'http',
+      'notifications',
+      'theme',
+      'uiSettings',
+      'userProfile',
+      'i18n',
+    ]),
     uiSettingsKeys: UI_SETTINGS,
     showFrozenDataTierChoice,
   };
@@ -86,7 +94,7 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
   const casesPermissions = appContextValue.cases?.helpers.canUseCases();
 
   return (
-    <KibanaThemeProvider theme={appContextValue.theme}>
+    <KibanaThemeProvider {...appContextValue}>
       <CasesContext owner={[]} permissions={casesPermissions!}>
         <AiopsAppContext.Provider value={appContextValue}>
           <UrlStateProvider>

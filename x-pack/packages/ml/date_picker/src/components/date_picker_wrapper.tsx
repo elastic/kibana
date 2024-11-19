@@ -134,6 +134,7 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
     notifications: { toasts },
     uiSettings: config,
     uiSettingsKeys,
+    userProfile,
     theme,
     i18n: i18nStart,
   } = useDatePickerContext();
@@ -226,7 +227,7 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
                 }}
               />
             </EuiButton>,
-            { theme, i18n: i18nStart }
+            { theme, i18n: i18nStart, userProfile }
           ),
         },
         { toastLifeTimeMs: 30000 }

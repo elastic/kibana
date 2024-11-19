@@ -40,7 +40,7 @@ export interface GraphState {
 }
 
 export interface GraphStoreDependencies
-  extends Pick<CoreStart, 'overlays' | 'analytics' | 'i18n' | 'theme'> {
+  extends Pick<CoreStart, 'overlays' | 'analytics' | 'i18n' | 'theme' | 'userProfile'> {
   addBasePath: (url: string) => string;
   indexPatternProvider: IndexPatternProvider;
   createWorkspace: (index: string, advancedSettings: AdvancedSettings) => Workspace;

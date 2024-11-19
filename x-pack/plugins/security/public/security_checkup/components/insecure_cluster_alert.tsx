@@ -22,6 +22,7 @@ import type {
   I18nStart,
   MountPoint,
   ThemeServiceStart,
+  UserProfileService,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -37,6 +38,7 @@ interface Deps {
   analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;
   i18n: I18nStart;
   theme: Pick<ThemeServiceStart, 'theme$'>;
+  userProfile: UserProfileService;
 }
 
 export const insecureClusterAlertText = (deps: Deps, onDismiss: (persist: boolean) => void) =>

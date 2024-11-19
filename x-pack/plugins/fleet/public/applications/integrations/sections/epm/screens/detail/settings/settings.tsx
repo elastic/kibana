@@ -113,7 +113,7 @@ const LatestVersionLink = ({ name, version }: { name: string; version: string })
 interface Props {
   packageInfo: PackageInfo;
   packageMetadata?: PackageMetadata;
-  startServices: Pick<FleetStartServices, 'analytics' | 'i18n' | 'theme'>;
+  startServices: Pick<FleetStartServices, 'analytics' | 'i18n' | 'theme' | 'userProfile'>;
 }
 
 export const SettingsPage: React.FC<Props> = memo(

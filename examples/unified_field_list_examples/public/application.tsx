@@ -22,7 +22,7 @@ export const renderApp = (
 ) => {
   ReactDOM.render(
     <I18nProvider>
-      <CoreThemeProvider theme$={theme$}>
+      <CoreThemeProvider theme$={theme$} {...core}>
         <UnifiedFieldListExampleApp
           services={{
             core,

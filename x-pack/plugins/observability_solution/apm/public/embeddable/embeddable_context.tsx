@@ -53,7 +53,7 @@ export function ApmEmbeddableContext({
   return (
     <I18nContext>
       <ApmPluginContext.Provider value={services}>
-        <KibanaThemeProvider theme={deps.coreStart.theme}>
+        <KibanaThemeProvider {...deps.coreStart}>
           <ApmThemeProvider>
             <KibanaContextProvider services={deps.coreStart}>
               <TimeRangeMetadataContextProvider

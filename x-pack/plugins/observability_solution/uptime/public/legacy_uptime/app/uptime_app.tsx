@@ -102,13 +102,13 @@ const Application = (props: UptimeAppProps) => {
   return (
     <KibanaRenderContextProvider {...core}>
       <KibanaThemeProvider
-        theme={core.theme}
         modify={{
           breakpoint: {
             xxl: 1600,
             xxxl: 2000,
           },
         }}
+        {...core}
       >
         <ReduxProvider store={store}>
           <KibanaContextProvider

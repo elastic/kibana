@@ -165,7 +165,7 @@ export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
           <Provider store={store}>
             <Settings observable={settingsObservable} />
           </Provider>,
-          { theme: props.coreStart.theme, i18n: props.coreStart.i18n }
+          props.coreStart
         ),
         {
           size: 'm',

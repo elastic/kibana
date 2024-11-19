@@ -17,6 +17,7 @@ import type {
   AnalyticsServiceStart,
   I18nStart,
   ThemeServiceStart,
+  UserProfileService,
 } from '@kbn/core/public';
 import { LogsSharedClientStartExports } from '@kbn/logs-shared-plugin/public';
 import { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
@@ -72,4 +73,5 @@ export interface ObservabilityLogsExplorerStartServices {
   analytics: AnalyticsServiceStart;
   i18n: I18nStart;
   theme: ThemeServiceStart;
+  userProfile: UserProfileService;
 }

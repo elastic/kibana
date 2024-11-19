@@ -9,9 +9,8 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Observable } from 'rxjs';
 
-import { CoreSetup, CoreTheme } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import {
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
@@ -35,7 +34,7 @@ const strings = {
 };
 
 export const getRepeatImageRenderer =
-  (theme$: Observable<CoreTheme>) => (): ExpressionRenderDefinition<RepeatImageRendererConfig> => ({
+  (core: CoreStart) => (): ExpressionRenderDefinition<RepeatImageRendererConfig> => ({
     name: 'repeatImage',
     displayName: strings.getDisplayName(),
     help: strings.getHelpDescription(),
@@ -60,7 +59,7 @@ export const getRepeatImageRenderer =
       render(
         <KibanaErrorBoundaryProvider analytics={undefined}>
           <KibanaErrorBoundary>
-            <KibanaThemeProvider theme={{ theme$ }}>
+            <KibanaThemeProvider {...core}>
               <I18nProvider>
                 <RepeatImageComponent onLoaded={handlers.done} {...settings} parentNode={domNode} />
               </I18nProvider>
@@ -72,5 +71,4 @@ export const getRepeatImageRenderer =
     },
   });
 
-export const repeatImageRendererFactory = (core: CoreSetup) =>
-  getRepeatImageRenderer(core.theme.theme$);
+export const repeatImageRendererFactory = (core: CoreStart) => getRepeatImageRenderer(core);

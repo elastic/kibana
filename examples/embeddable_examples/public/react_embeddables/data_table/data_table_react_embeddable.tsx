@@ -99,7 +99,7 @@ export const getDataTableFactory = (
                 width: 100%;
               `}
             >
-              <KibanaRenderContextProvider theme={core.theme} i18n={core.i18n}>
+              <KibanaRenderContextProvider {...core}>
                 <KibanaContextProvider services={allServices}>
                   <CellActionsProvider
                     getTriggerCompatibleActions={services.uiActions.getTriggerCompatibleActions}

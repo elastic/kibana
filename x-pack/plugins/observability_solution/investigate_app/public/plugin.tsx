@@ -100,7 +100,6 @@ export class InvestigateAppPlugin
             coreStart={coreStart}
             history={appMountParameters.history}
             pluginsStart={pluginsStart}
-            theme$={appMountParameters.theme$}
             services={services}
           />,
           appMountParameters.element
