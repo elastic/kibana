@@ -8,14 +8,10 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { EntityStoreEnablementModal } from './enablement_modal';
-import { useEntityEnginePrivileges } from '../hooks/use_entity_engine_privileges';
 import { TestProviders } from '../../../../common/mock';
 
 const mockToggle = jest.fn();
 const mockEnableStore = jest.fn(() => jest.fn());
-jest.mock('../hooks/use_entity_engine_privileges', () => ({
-  useEntityEnginePrivileges: jest.fn(),
-}));
 
 const defaultProps = {
   visible: true,
@@ -32,17 +28,6 @@ const renderComponent = (props = defaultProps) => {
 describe('EntityStoreEnablementModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useEntityEnginePrivileges as jest.Mock).mockReturnValue({
-      data: {
-        privileges: {
-          elasticsearch: {
-            index: {},
-          },
-          kibana: {},
-        },
-      },
-      isLoading: false,
-    });
   });
 
   it('should render the modal when visible is true', () => {
