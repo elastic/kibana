@@ -12766,9 +12766,7 @@ paths:
                                     type: array
                                   supports_agentless:
                                     default: false
-                                    description: >-
-                                      Indicates whether the package policy
-                                      belongs to an agentless agent policy.
+                                    description: Indicates whether the package policy belongs to an agentless agent policy.
                                     nullable: true
                                     type: boolean
                                   updated_at:
@@ -13471,9 +13469,7 @@ paths:
                                   type: array
                                 supports_agentless:
                                   default: false
-                                  description: >-
-                                    Indicates whether the package policy belongs
-                                    to an agentless agent policy.
+                                  description: Indicates whether the package policy belongs to an agentless agent policy.
                                   nullable: true
                                   type: boolean
                                 updated_at:
@@ -14021,9 +14017,7 @@ paths:
                                     type: array
                                   supports_agentless:
                                     default: false
-                                    description: >-
-                                      Indicates whether the package policy
-                                      belongs to an agentless agent policy.
+                                    description: Indicates whether the package policy belongs to an agentless agent policy.
                                     nullable: true
                                     type: boolean
                                   updated_at:
@@ -14551,9 +14545,7 @@ paths:
                                   type: array
                                 supports_agentless:
                                   default: false
-                                  description: >-
-                                    Indicates whether the package policy belongs
-                                    to an agentless agent policy.
+                                  description: Indicates whether the package policy belongs to an agentless agent policy.
                                   nullable: true
                                   type: boolean
                                 updated_at:
@@ -15255,9 +15247,7 @@ paths:
                                   type: array
                                 supports_agentless:
                                   default: false
-                                  description: >-
-                                    Indicates whether the package policy belongs
-                                    to an agentless agent policy.
+                                  description: Indicates whether the package policy belongs to an agentless agent policy.
                                   nullable: true
                                   type: boolean
                                 updated_at:
@@ -15805,9 +15795,7 @@ paths:
                                   type: array
                                 supports_agentless:
                                   default: false
-                                  description: >-
-                                    Indicates whether the package policy belongs
-                                    to an agentless agent policy.
+                                  description: Indicates whether the package policy belongs to an agentless agent policy.
                                   nullable: true
                                   type: boolean
                                 updated_at:
@@ -28305,9 +28293,7 @@ paths:
                           type: array
                         supports_agentless:
                           default: false
-                          description: >-
-                            Indicates whether the package policy belongs to an
-                            agentless agent policy.
+                          description: Indicates whether the package policy belongs to an agentless agent policy.
                           nullable: true
                           type: boolean
                         updated_at:
@@ -28639,9 +28625,7 @@ paths:
                       type: array
                     supports_agentless:
                       default: false
-                      description: >-
-                        Indicates whether the package policy belongs to an
-                        agentless agent policy.
+                      description: Indicates whether the package policy belongs to an agentless agent policy.
                       nullable: true
                       type: boolean
                     vars:
@@ -28796,9 +28780,7 @@ paths:
                       type: array
                     supports_agentless:
                       default: false
-                      description: >-
-                        Indicates whether the package policy belongs to an
-                        agentless agent policy.
+                      description: Indicates whether the package policy belongs to an agentless agent policy.
                       nullable: true
                       type: boolean
                     vars:
@@ -29154,9 +29136,7 @@ paths:
                         type: array
                       supports_agentless:
                         default: false
-                        description: >-
-                          Indicates whether the package policy belongs to an
-                          agentless agent policy.
+                        description: Indicates whether the package policy belongs to an agentless agent policy.
                         nullable: true
                         type: boolean
                       updated_at:
@@ -29620,9 +29600,7 @@ paths:
                           type: array
                         supports_agentless:
                           default: false
-                          description: >-
-                            Indicates whether the package policy belongs to an
-                            agentless agent policy.
+                          description: Indicates whether the package policy belongs to an agentless agent policy.
                           nullable: true
                           type: boolean
                         updated_at:
@@ -30124,9 +30102,7 @@ paths:
                         type: array
                       supports_agentless:
                         default: false
-                        description: >-
-                          Indicates whether the package policy belongs to an
-                          agentless agent policy.
+                        description: Indicates whether the package policy belongs to an agentless agent policy.
                         nullable: true
                         type: boolean
                       updated_at:
@@ -30460,9 +30436,7 @@ paths:
                       type: array
                     supports_agentless:
                       default: false
-                      description: >-
-                        Indicates whether the package policy belongs to an
-                        agentless agent policy.
+                      description: Indicates whether the package policy belongs to an agentless agent policy.
                       nullable: true
                       type: boolean
                     vars:
@@ -30616,9 +30590,7 @@ paths:
                       type: array
                     supports_agentless:
                       default: false
-                      description: >-
-                        Indicates whether the package policy belongs to an
-                        agentless agent policy.
+                      description: Indicates whether the package policy belongs to an agentless agent policy.
                       nullable: true
                       type: boolean
                     vars:
@@ -30973,9 +30945,7 @@ paths:
                         type: array
                       supports_agentless:
                         default: false
-                        description: >-
-                          Indicates whether the package policy belongs to an
-                          agentless agent policy.
+                        description: Indicates whether the package policy belongs to an agentless agent policy.
                         nullable: true
                         type: boolean
                       updated_at:
@@ -31754,9 +31724,7 @@ paths:
                                 type: array
                               supports_agentless:
                                 default: false
-                                description: >-
-                                  Indicates whether the package policy belongs
-                                  to an agentless agent policy.
+                                description: Indicates whether the package policy belongs to an agentless agent policy.
                                 nullable: true
                                 type: boolean
                               updated_at:
@@ -32040,9 +32008,7 @@ paths:
                                 type: array
                               supports_agentless:
                                 default: false
-                                description: >-
-                                  Indicates whether the package policy belongs
-                                  to an agentless agent policy.
+                                description: Indicates whether the package policy belongs to an agentless agent policy.
                                 nullable: true
                                 type: boolean
                               vars:
