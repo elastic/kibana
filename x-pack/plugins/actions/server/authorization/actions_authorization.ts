@@ -12,8 +12,6 @@ import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
 } from '../constants/saved_objects';
-import { AuthorizationMode } from './get_authorization_mode_by_source';
-import { isBidirectionalConnectorType } from '../lib/bidirectional_connectors';
 
 export interface ConstructorOptions {
   request: KibanaRequest;
