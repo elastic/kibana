@@ -384,7 +384,7 @@ export const comparisonFunctions: FunctionDefinition[] = [
   },
 ].map((op): FunctionDefinition => createComparisonDefinition(op));
 
-const likeFunctions: FunctionDefinition[] = [
+const notLikeFunctions: FunctionDefinition[] = [
   // Skip the insensitive case equality until it gets restored back
   // new special comparison operator for strings only
   // {
@@ -398,7 +398,7 @@ const likeFunctions: FunctionDefinition[] = [
 ].map(({ name, description }) => {
   const def: FunctionDefinition = {
     type: 'builtin' as const,
-    ignoreAsSuggestion: /not/.test(name),
+    ignoreAsSuggestion: true,
     name,
     description,
     supportedCommands: ['eval', 'where', 'row', 'sort'],
@@ -438,7 +438,7 @@ const likeFunctions: FunctionDefinition[] = [
   return def;
 });
 
-const inFunctions: FunctionDefinition[] = [
+const notInFunctions: FunctionDefinition[] = [
   { name: 'not_in', description: '' },
 ].map<FunctionDefinition>(({ name, description }) => ({
   // set all arrays to type "any" for now
@@ -451,7 +451,7 @@ const inFunctions: FunctionDefinition[] = [
   //
   // we need to revisit with more robust validation
   type: 'builtin',
-  ignoreAsSuggestion: /not/.test(name),
+  ignoreAsSuggestion: true,
   name,
   description,
   supportedCommands: ['eval', 'where', 'row', 'sort'],
@@ -627,8 +627,8 @@ const otherDefinitions: FunctionDefinition[] = [
 
 export const builtinFunctions: FunctionDefinition[] = [
   ...operatorsFunctionDefinitions,
-  ...inFunctions,
-  ...likeFunctions,
+  ...notInFunctions,
+  ...notLikeFunctions,
   ...logicalOperators,
   ...nullFunctions,
   ...otherDefinitions,

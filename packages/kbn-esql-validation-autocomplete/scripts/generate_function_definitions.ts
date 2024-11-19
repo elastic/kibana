@@ -384,18 +384,26 @@ const replaceParamName = (str: string) => {
 };
 
 const enrichOperators = (operatorsFunctionDefinitions: FunctionDefinition[]) => {
-  return operatorsFunctionDefinitions.map((op) => ({
-    ...op,
-    // alias: operatorNames[op.name] ?? op.name,
-    signatures: op.signatures.map((s) => ({
-      ...s,
-      params: s.params.map((param) => ({ ...param, name: replaceParamName(param.name) })),
-    })),
-    ...(!Object.hasOwn(operatorNames, op.name) ? { ignoreAsSuggestion: /not/.test(op.name) } : {}),
-    // @TODO: change to operator type
-    type: 'builtin',
-    validate: validators[op.name],
-  }));
+  return operatorsFunctionDefinitions.map((op) => {
+    const isMathOperator = ['add', 'sub', 'div', 'mod', 'mul'].includes(op.name);
+    return {
+      ...op,
+      signatures: op.signatures.map((s) => ({
+        ...s,
+        // Elasticsearch docs uses lhs and rhs instead of left and right that Kibana code uses
+        params: s.params.map((param) => ({ ...param, name: replaceParamName(param.name) })),
+      })),
+      // Elasticsearch docs does not include the full supported commands for math operators
+      // so we are overriding to add proper support
+      supportedCommands: isMathOperator
+        ? ['eval', 'where', 'row', 'stats', 'metrics', 'sort']
+        : op.supportedCommands,
+      supportedOptions: isMathOperator ? ['by'] : op.supportedOptions,
+      // @TODO: change to operator type
+      type: 'builtin',
+      validate: validators[op.name],
+    };
+  });
 };
 
 function printGeneratedFunctionsFile(
@@ -488,6 +496,12 @@ ${
 import { isLiteralItem } from '../../shared/helpers';`
     : ''
 }
+${
+  functionsType === 'operators'
+    ? `import type { isNumericType } from '../../shared/esql_types';`
+    : ''
+}
+
 
 
 `;
