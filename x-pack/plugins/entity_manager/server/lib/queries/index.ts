@@ -37,10 +37,13 @@ const filterCommands = ({
   end,
 }: {
   source: EntitySource;
-  start?: string;
-  end?: string;
+  start: string;
+  end: string;
 }) => {
-  const commands: string[] = [];
+  const commands = [
+    `WHERE ${source.timestamp_field} >= "${start}"`,
+    `WHERE ${source.timestamp_field} <= "${end}"`,
+  ];
 
   source.identity_fields.forEach((field) => {
     commands.push(`WHERE ${field} IS NOT NULL`);
@@ -49,14 +52,6 @@ const filterCommands = ({
   source.filters.forEach((filter) => {
     commands.push(`WHERE ${filter}`);
   });
-
-  if (start) {
-    commands.push(`WHERE ${source.timestamp_field} >= "${start}"`);
-  }
-
-  if (end) {
-    commands.push(`WHERE ${source.timestamp_field} <= "${end}"`);
-  }
 
   return commands;
 };
@@ -81,8 +76,8 @@ export function getEntityInstancesQuery({
 }: {
   source: EntitySource;
   limit: number;
-  start?: string;
-  end?: string;
+  start: string;
+  end: string;
 }): string {
   const commands = [
     sourceCommand({ source }),

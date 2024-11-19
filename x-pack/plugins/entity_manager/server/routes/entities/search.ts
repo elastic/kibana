@@ -55,25 +55,31 @@ export const searchEntitiesPreviewRoute = createEntityManagerServerRoute({
   endpoint: 'POST /internal/entities/_search/preview',
   params: z.object({
     body: z.object({
-      sources: z.array(
-        entitySourceSchema.transform((source) => ({
-          ...source,
-          filters: [
-            ...source.filters,
-            `${source.timestamp_field} >= "${moment().subtract(5, 'minutes').toISOString()}"`,
-          ],
-        }))
-      ),
+      sources: z.array(entitySourceSchema),
+      start: z
+        .optional(z.string())
+        .default(() => moment().subtract(5, 'minutes').toISOString())
+        .refine((val) => moment(val).isValid(), {
+          message: 'start should be a date in ISO format',
+        }),
+      end: z
+        .optional(z.string())
+        .default(() => moment().toISOString())
+        .refine((val) => moment(val).isValid(), {
+          message: 'start should be a date in ISO format',
+        }),
       limit: z.optional(z.number()).default(10),
     }),
   }),
   handler: async ({ request, response, params, logger, getScopedClient }) => {
     try {
-      const { sources, limit } = params.body;
+      const { sources, start, end, limit } = params.body;
 
       const client = await getScopedClient({ request });
       const entities = await client.searchEntities({
         sources,
+        start,
+        end,
         limit,
       });
 

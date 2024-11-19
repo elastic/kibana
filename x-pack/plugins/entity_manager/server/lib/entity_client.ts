@@ -7,7 +7,6 @@
 
 import { Entity, EntityDefinition, EntityDefinitionUpdate } from '@kbn/entities-schema';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { createObservabilityEsClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 import {
@@ -194,20 +193,14 @@ export class EntityClient {
     limit = 10,
   }: {
     sources: EntitySource[];
-    start?: string;
-    end?: string;
+    start: string;
+    end: string;
     limit?: number;
   }) {
     const entities = await Promise.all(
       sources.map(async (source) => {
-        const esClient = createObservabilityEsClient({
-          client: this.options.esClient,
-          logger: this.options.logger,
-          plugin: `@kbn/entityManager-plugin`,
-        });
-
         const mandatoryFields = [source.timestamp_field, ...source.identity_fields];
-        const { fields } = await esClient.client.fieldCaps({
+        const { fields } = await this.options.esClient.fieldCaps({
           index: source.index_patterns,
           fields: [...mandatoryFields, ...source.metadata_fields],
         });
