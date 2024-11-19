@@ -10,7 +10,7 @@ import {
   APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
 } from '@kbn/apm-data-access-plugin/server/saved_objects/apm_indices';
 import expect from '@kbn/expect';
-import { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function apmIndicesTests({ getService }: DeploymentAgnosticFtrProviderContext) {
   const kibanaServer = getService('kibanaServer');

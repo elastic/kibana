@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
-import { ApmApiError } from '../../../../../services/apm_api';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
+import type { ApmApiError } from '../../../../../services/apm_api';
 
 export default function apiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const apmApiClient = getService('apmApi');

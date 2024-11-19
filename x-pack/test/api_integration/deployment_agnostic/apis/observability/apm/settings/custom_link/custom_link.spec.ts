@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { CustomLink } from '@kbn/apm-plugin/common/custom_link/custom_link_types';
-import { ApmApiError } from '../../../../../services/apm_api';
-import { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
+import type { CustomLink } from '@kbn/apm-plugin/common/custom_link/custom_link_types';
+import type { ApmApiError } from '../../../../../services/apm_api';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import { ARCHIVER_ROUTES } from '../../constants/archiver';
 
 export default function customLinksTests({ getService }: DeploymentAgnosticFtrProviderContext) {
