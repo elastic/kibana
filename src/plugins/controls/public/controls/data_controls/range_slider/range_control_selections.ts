@@ -16,8 +16,15 @@ export function initializeRangeControlSelections(
   onSelectionChange: () => void
 ) {
   const value$ = new BehaviorSubject<RangeValue | undefined>(initialState.value);
+  const hasRangeSelection$ = new BehaviorSubject<boolean>(Boolean(value$.getValue()));
+
   function setValue(next: RangeValue | undefined) {
     if (value$.value !== next) {
+      if (next === undefined) {
+        hasRangeSelection$.next(false);
+      } else {
+        hasRangeSelection$.next(true);
+      }
       value$.next(next);
       onSelectionChange();
     }
@@ -29,6 +36,7 @@ export function initializeRangeControlSelections(
     } as StateComparators<Pick<RangesliderControlState, 'value'>>,
     hasInitialSelections: initialState.value !== undefined,
     value$: value$ as PublishingSubject<RangeValue | undefined>,
+    hasRangeSelection$: hasRangeSelection$ as PublishingSubject<boolean | undefined>,
     setValue,
   };
 }
