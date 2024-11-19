@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import { Duration, DurationUnit, SLODefinition } from '../../domain/models';
-import {
-  createAPMTransactionErrorRateIndicator,
-  createMetricCustomIndicator,
-  createSLO,
-} from '../fixtures/slo';
+import { Duration, DurationUnit } from '../../domain/models';
+import { createAPMTransactionErrorRateIndicator, createSLO } from '../fixtures/slo';
 import { ApmTransactionErrorRateTransformGenerator } from './apm_transaction_error_rate';
 import { dataViewsService } from '@kbn/data-views-plugin/server/mocks';
 
