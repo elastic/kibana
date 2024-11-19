@@ -9,7 +9,6 @@ import { Response } from 'superagent';
 import { EndpointError } from '@kbn/security-solution-plugin/common/endpoint/errors';
 import { TIMELINE_DRAFT_URL, TIMELINE_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
-  DeleteTimelinesResponse,
   GetDraftTimelinesResponse,
   PatchTimelineResponse,
   SavedTimeline,
@@ -135,7 +134,7 @@ export class TimelineTestService extends FtrService {
         savedObjectIds: Array.isArray(id) ? id : [id],
       })
       .then(this.getHttpResponseFailureHandler())
-      .then((response) => response.body as DeleteTimelinesResponse);
+      .then((response) => response.body);
   }
 
   /**
