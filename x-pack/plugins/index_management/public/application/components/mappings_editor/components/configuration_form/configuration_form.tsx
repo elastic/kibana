@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
 import { useAppContext } from '../../../../app_context';
@@ -25,15 +25,19 @@ import { RoutingSection } from './routing_section';
 import { MapperSizePluginSection } from './mapper_size_plugin_section';
 import { SubobjectsSection } from './subobjects_section';
 import { configurationFormSchema } from './configuration_form_schema';
-import { IndexMode } from '../../../../../../common/types/data_streams';
-import { LOGSDB_INDEX_MODE, TIME_SERIES_MODE } from '../../../../../../common/constants';
 
 interface Props {
   value?: MappingsConfiguration;
   /** List of plugins installed in the cluster nodes */
   esNodesPlugins: string[];
-  indexMode?: IndexMode;
 }
+
+interface SerializedSourceField {
+  enabled?: boolean;
+  mode?: string;
+  includes?: string[];
+  excludes?: string[];
+};
 
 const formSerializer = (formData: GenericObject) => {
   const { dynamicMapping, sourceField, metaField, _routing, _size, subobjects } = formData;
@@ -67,7 +71,7 @@ const formSerializer = (formData: GenericObject) => {
     numeric_detection: dynamicMapping?.numeric_detection,
     date_detection: dynamicMapping?.date_detection,
     dynamic_date_formats: dynamicMapping?.dynamic_date_formats,
-    _source,
+    _source: _source as SerializedSourceField,
     _meta: metaField,
     _routing,
     _size,
@@ -85,12 +89,7 @@ const formDeserializer = (formData: GenericObject) => {
     date_detection,
     dynamic_date_formats,
     /* eslint-enable @typescript-eslint/naming-convention */
-    _source: { enabled, mode, includes, excludes } = {} as {
-      enabled?: boolean;
-      mode?: string;
-      includes?: string[];
-      excludes?: string[];
-    },
+    _source: { enabled, mode, includes, excludes } = {} as SerializedSourceField,
     _meta,
     _routing,
     // For the Mapper Size plugin
@@ -195,8 +194,7 @@ export const ConfigurationForm = React.memo(({ value, esNodesPlugins }: Props) =
       <EuiSpacer size="xl" />
       {enableMappingsSourceFieldSection && (
         <>
-          <SourceFieldSection />
-          <EuiSpacer size="xl" />
+          <SourceFieldSection /> <EuiSpacer size="xl" />
         </>
       )}
       <RoutingSection />

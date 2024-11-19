@@ -152,11 +152,6 @@ export const MappingsEditor = React.memo(
             type: 'configuration.save',
             value: { ...state.configuration.defaultValue, _source: { mode: 'synthetic' } } as any,
           });
-        } else {
-          dispatch({
-            type: 'configuration.save',
-            value: { ...state.configuration.defaultValue, _source: { mode: 'stored' } } as any,
-          });
         }
       }
     }, [
