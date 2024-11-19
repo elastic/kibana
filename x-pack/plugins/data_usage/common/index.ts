@@ -12,6 +12,11 @@ export const PLUGIN_NAME = i18n.translate('xpack.dataUsage.name', {
   defaultMessage: 'Data Usage',
 });
 
+export const PAGING_PARAMS = Object.freeze({
+  default: 50,
+  all: 10000,
+});
+
 export const DATA_USAGE_API_ROUTE_PREFIX = '/api/data_usage/';
 export const DATA_USAGE_METRICS_API_ROUTE = `/internal${DATA_USAGE_API_ROUTE_PREFIX}metrics`;
 export const DATA_USAGE_DATA_STREAMS_API_ROUTE = `/internal${DATA_USAGE_API_ROUTE_PREFIX}data_streams`;
