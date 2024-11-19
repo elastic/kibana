@@ -131,7 +131,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     }),
     description: (
       <FormattedMessage
-        id="xpack.fleet.settings.agentPolicyAdvanced.agentLoggingLevelDescription"
+        id="xpack.fleet.settings.agentPolicyAdvanced.agentLoggingToFilesDescription"
         defaultMessage="Enables logging to rotating files."
       />
     ),
