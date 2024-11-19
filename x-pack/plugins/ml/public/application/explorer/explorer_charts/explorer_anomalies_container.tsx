@@ -39,6 +39,7 @@ interface ExplorerAnomaliesContainerProps {
   showSelectedInterval?: boolean;
   chartsService: ChartsPluginStart;
   timeRange: { from: string; to: string } | undefined;
+  showFilterIcons: boolean;
 }
 
 const tooManyBucketsCalloutMsg = i18n.translate(
@@ -63,6 +64,7 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
   showSelectedInterval,
   chartsService,
   timeRange,
+  showFilterIcons,
 }) => {
   return (
     // TODO: Remove data-shared-item and data-rendering-count as part of https://github.com/elastic/kibana/issues/179376
@@ -102,6 +104,7 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
             showSelectedInterval,
             chartsService,
             id,
+            showFilterIcons,
           }}
         />
       )}
