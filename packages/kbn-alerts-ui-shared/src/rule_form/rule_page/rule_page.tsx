@@ -83,10 +83,8 @@ export const RulePage = (props: RulePageProps) => {
 
   const onCancelInternal = useCallback(() => {
     if (touched) {
-      console.log('touched = true');
       setIsCancelModalOpen(true);
     } else {
-      console.log('touched = false');
       onCancel();
     }
   }, [touched, onCancel]);
