@@ -24,7 +24,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'discover',
     'header',
     'timePicker',
-    'home',
   ]);
   const security = getService('security');
   const defaultSettings = {
