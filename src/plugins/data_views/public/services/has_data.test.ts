@@ -10,6 +10,7 @@
 import { coreMock } from '@kbn/core/public/mocks';
 
 import { HasData } from './has_data';
+import { HttpFetchError } from '@kbn/core-http-browser-internal/src/http_fetch_error';
 
 describe('when calling hasData service', () => {
   describe('hasDataView', () => {
@@ -169,6 +170,41 @@ describe('when calling hasData service', () => {
         expect(spy).toHaveBeenCalledTimes(1);
 
         expect(await response).toBe(false);
+      });
+
+      it('should return true and show an error toast when checking for remote cluster data times out', async () => {
+        const coreStart = coreMock.createStart();
+        const http = coreStart.http;
+
+        // Mock getIndices
+        const spy = jest.spyOn(http, 'get').mockImplementation(() =>
+          Promise.reject(
+            new HttpFetchError(
+              'Timeout while checking for Elasticsearch data',
+              'TimeoutError',
+              new Request(''),
+              undefined,
+              {
+                statusCode: 400,
+                message: 'Timeout while checking for Elasticsearch data',
+                attributes: {
+                  failureReason: 'remote_data_timeout',
+                },
+              }
+            )
+          )
+        );
+        const hasData = new HasData();
+        const hasDataService = hasData.start(coreStart, true);
+        const response = hasDataService.hasESData();
+
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(await response).toBe(true);
+        expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
+        expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith({
+          title: 'Remote cluster timeout',
+          text: 'Checking for data on remote clusters timed out. One or more remote clusters may be unavailable.',
+        });
       });
     });
 

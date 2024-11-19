@@ -14,15 +14,15 @@ import { DEFAULT_ASSETS_TO_IGNORE, HasEsDataFailureReason } from '../../../commo
 
 type Handler = Parameters<VersionedRoute<any, RequestHandlerContext>['addVersion']>[1];
 
-const patterns = ['*', '-.*'].concat(
+export const patterns = ['*', '-.*'].concat(
   DEFAULT_ASSETS_TO_IGNORE.DATA_STREAMS_TO_IGNORE.map((ds) => `-${ds}`)
 );
 
-const crossClusterPatterns = patterns.map((ds) => `*:${ds}`);
+export const crossClusterPatterns = patterns.map((ds) => `*:${ds}`);
 
 export const createHandler =
   (parentLogger: Logger, hasEsDataTimeout: number): Handler =>
-  async (ctx: RequestHandlerContext, _, res) => {
+  async (ctx, _, res) => {
     const logger = parentLogger.get('hasEsData');
     const core = await ctx.core;
     const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
@@ -86,7 +86,7 @@ const hasEsData = async ({
       { requestTimeout: hasEsDataTimeout === 0 ? undefined : hasEsDataTimeout }
     );
 
-    const hasData = !!Object.values(response).find((cluster) => cluster.matching_indices);
+    const hasData = Object.values(response).some((cluster) => cluster.matching_indices);
 
     if (hasData) {
       return res.ok({ body: { hasEsData: true } });
