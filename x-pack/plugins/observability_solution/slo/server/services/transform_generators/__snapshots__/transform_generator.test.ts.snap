@@ -63,3 +63,11 @@ Object {
   },
 }
 `;
+
+exports[`Transform Generator settings builds the transform settings 1`] = `
+Object {
+  "frequency": "2m",
+  "sync_delay": "10m",
+  "sync_field": "my_timestamp_sync_field",
+}
+`;
