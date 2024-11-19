@@ -15,7 +15,8 @@ import { DEFAULT_LOGS_DATA_VIEW } from '../../common/constants';
 import { useCreateDataView } from './use_create_dataview';
 import { useKibanaContextForPlugin } from '../utils';
 import { useDatasetQualityDetailsState } from './use_dataset_quality_details_state';
-import { getLensAttributes } from '../components/dataset_quality_details/overview/document_trends/failed_docs/lens_attributes';
+import { getLensAttributes as getDegradedLensAttributes } from '../components/dataset_quality_details/overview/document_trends/degraded_docs/lens_attributes';
+import { getLensAttributes as getFailedLensAttributes } from '../components/dataset_quality_details/overview/document_trends/failed_docs/lens_attributes';
 import { useRedirectLink } from './use_redirect_link';
 import { useDatasetDetailsTelemetry } from './use_dataset_details_telemetry';
 import { useDatasetDetailsRedirectLinkTelemetry } from './use_redirect_link_telemetry';
@@ -40,8 +41,11 @@ const openInLensText = i18n.translate('xpack.datasetQuality.details.chartOpenInL
 
 const ACTION_EXPLORE_IN_LOGS_EXPLORER = 'ACTION_EXPLORE_IN_LOGS_EXPLORER';
 const ACTION_OPEN_IN_LENS = 'ACTION_OPEN_IN_LENS';
+const DEGRADED_DOCS_KUERY = `_ignored:*`;
 
-export const useFailedDocsChart = () => {
+export type QualityIssue = 'degradedDocs' | 'failedDocs';
+
+export const useQualityIssuesDocsChart = (qualityIssue: QualityIssue) => {
   const { euiTheme } = useEuiTheme();
   const {
     services: { lens },
@@ -64,9 +68,11 @@ export const useFailedDocsChart = () => {
   } = useDatasetDetailsTelemetry();
 
   const [isChartLoading, setIsChartLoading] = useState<boolean | undefined>(undefined);
-  const [attributes, setAttributes] = useState<ReturnType<typeof getLensAttributes> | undefined>(
-    undefined
-  );
+  const [attributes, setAttributes] = useState<
+    ReturnType<typeof getDegradedLensAttributes | typeof getFailedLensAttributes> | undefined
+  >(undefined);
+
+  const query = qualityIssue === 'degradedDocs' ? DEGRADED_DOCS_KUERY : '';
 
   const { dataView } = useCreateDataView({
     indexPatternString: getDataViewIndexPattern(dataStream),
@@ -96,18 +102,28 @@ export const useFailedDocsChart = () => {
   }, [trackDatasetDetailsBreakdownFieldChanged, isBreakdownFieldAsserted]);
 
   useEffect(() => {
+    // TODO: Fix dataStreamName for accesing failure store (::failures)
     const dataStreamName = dataStream ?? DEFAULT_LOGS_DATA_VIEW;
     const datasetTitle =
       integrationDetails?.integration?.datasets?.[datasetDetails.name] ?? datasetDetails.name;
 
-    const lensAttributes = getLensAttributes({
-      color: euiTheme.colors.danger,
-      dataStream: dataStreamName,
-      datasetTitle,
-      breakdownFieldName: breakdownDataViewField?.name,
-    });
+    const lensAttributes =
+      qualityIssue === 'degradedDocs'
+        ? getDegradedLensAttributes({
+            color: euiTheme.colors.danger,
+            dataStream: dataStreamName,
+            datasetTitle,
+            breakdownFieldName: breakdownDataViewField?.name,
+          })
+        : getFailedLensAttributes({
+            color: euiTheme.colors.danger,
+            dataStream: dataStreamName,
+            datasetTitle,
+            breakdownFieldName: breakdownDataViewField?.name,
+          });
     setAttributes(lensAttributes);
   }, [
+    qualityIssue,
     breakdownDataViewField?.name,
     euiTheme.colors.danger,
     setAttributes,
@@ -155,13 +171,13 @@ export const useFailedDocsChart = () => {
   }, [openInLensCallback]);
 
   const { sendTelemetry } = useDatasetDetailsRedirectLinkTelemetry({
-    query: { language: 'kuery', query: '_ignored:*' },
+    query: { language: 'kuery', query },
     navigationSource: navigationSources.Chart,
   });
 
   const redirectLinkProps = useRedirectLink({
     dataStreamStat: datasetDetails,
-    query: { language: 'kuery', query: '_ignored:*' },
+    query: { language: 'kuery', query },
     timeRangeConfig: timeRange,
     breakdownField: breakdownDataViewField?.name,
     sendTelemetry,
@@ -210,12 +226,14 @@ export const useFailedDocsChart = () => {
     breakdown,
     extraActions,
     isChartLoading,
+    redirectLinkProps,
     onChartLoading: handleChartLoading,
     setAttributes,
     setIsChartLoading,
   };
 };
 
+// TODO: Fix dataView for accesing failure store (::failures)
 function getDataViewIndexPattern(dataStream: string | undefined) {
   return dataStream ?? DEFAULT_LOGS_DATA_VIEW;
 }

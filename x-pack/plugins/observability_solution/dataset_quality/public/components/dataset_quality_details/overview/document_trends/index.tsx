@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiAccordion,
@@ -22,11 +22,9 @@ import {
   OnTimeChangeProps,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { css } from '@emotion/react';
 import { UnifiedBreakdownFieldSelector } from '@kbn/unified-histogram-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { useFailedDocsChart } from '../../../../hooks/use_failed_docs_chart';
 import {
   discoverAriaText,
   logsExplorerAriaText,
@@ -36,13 +34,10 @@ import {
 } from '../../../../../common/translations';
 import { TrendDocsChart } from './trend_docs_chart';
 import {
-  useDatasetDetailsRedirectLinkTelemetry,
+  QualityIssue,
   useDatasetQualityDetailsState,
-  useDegradedDocsChart,
-  useRedirectLink,
+  useQualityIssuesDocsChart,
 } from '../../../../hooks';
-import { _IGNORED } from '../../../../../common/es_fields';
-import { NavigationSource } from '../../../../services/telemetry';
 
 const trendDocsTooltip = (
   <FormattedMessage
@@ -51,57 +46,18 @@ const trendDocsTooltip = (
   />
 );
 
-const DEGRADED_DOCS_KUERY = `${_IGNORED}: *`;
-
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default function DocumentTrends({ lastReloadTime }: { lastReloadTime: number }) {
-  const { timeRange, updateTimeRange, datasetDetails } = useDatasetQualityDetailsState();
-  const {
-    dataView: degradedDataView,
-    breakdown: degradedBreakdown,
-    ...degradeChartProps
-  } = useDegradedDocsChart();
-  const {
-    dataView: failedDataView,
-    breakdown: failedBreakDown,
-    ...failedChartProps
-  } = useFailedDocsChart();
+  const [selectedChart, setSelectedChart] = useState<QualityIssue>('degradedDocs');
+
+  const { timeRange, updateTimeRange } = useDatasetQualityDetailsState();
+  const { dataView, breakdown, redirectLinkProps, ...qualityIssuesChartProps } =
+    useQualityIssuesDocsChart(selectedChart);
 
   const accordionId = useGeneratedHtmlId({
     prefix: overviewTrendsDocsText,
   });
-
-  const [breakdownDataViewField, setBreakdownDataViewField] = useState<DataViewField | undefined>(
-    undefined
-  );
-
-  const [selectedChart, setSelectedChart] = useState('degradedDocs');
-
-  const query = selectedChart === 'degradedDocs' ? DEGRADED_DOCS_KUERY : '';
-
-  const { sendTelemetry } = useDatasetDetailsRedirectLinkTelemetry({
-    query: { language: 'kuery', query },
-    navigationSource: NavigationSource.Trend,
-  });
-
-  const qualityIssueDocsLinkLogsExplorer = useRedirectLink({
-    dataStreamStat: datasetDetails,
-    timeRangeConfig: timeRange,
-    query: {
-      language: 'kuery',
-      query,
-    },
-    sendTelemetry,
-  });
-
-  useEffect(() => {
-    if (degradedBreakdown.dataViewField && degradedBreakdown.fieldSupportsBreakdown) {
-      setBreakdownDataViewField(degradedBreakdown.dataViewField);
-    } else {
-      setBreakdownDataViewField(undefined);
-    }
-  }, [setBreakdownDataViewField, degradedBreakdown]);
 
   const onTimeRangeChange = useCallback(
     ({ start, end }: Pick<OnTimeChangeProps, 'start' | 'end'>) => {
@@ -144,7 +100,7 @@ export default function DocumentTrends({ lastReloadTime }: { lastReloadTime: num
               legend={i18n.translate('xpack.datasetQuality.details.chartTypeLegend', {
                 defaultMessage: 'Quality chart type',
               })}
-              onChange={setSelectedChart}
+              onChange={(id) => setSelectedChart(id as QualityIssue)}
               options={[
                 {
                   id: 'degradedDocs',
@@ -162,16 +118,21 @@ export default function DocumentTrends({ lastReloadTime }: { lastReloadTime: num
               idSelected={selectedChart}
             />
           </EuiFlexItem>
-          <EuiSkeletonRectangle width={160} height={32} isLoading={!degradedDataView}>
+          <EuiSkeletonRectangle width={160} height={32} isLoading={!dataView}>
             <UnifiedBreakdownFieldSelector
-              dataView={degradedDataView!}
-              breakdown={{ field: breakdownDataViewField }}
-              onBreakdownFieldChange={degradedBreakdown.onChange}
+              dataView={dataView!}
+              breakdown={{
+                field:
+                  breakdown.dataViewField && breakdown.fieldSupportsBreakdown
+                    ? breakdown.dataViewField
+                    : undefined,
+              }}
+              onBreakdownFieldChange={breakdown.onChange}
             />
           </EuiSkeletonRectangle>
           <EuiToolTip
             content={
-              qualityIssueDocsLinkLogsExplorer.isLogsExplorerAvailable
+              redirectLinkProps.isLogsExplorerAvailable
                 ? openInLogsExplorerText
                 : openInDiscoverText
             }
@@ -179,37 +140,24 @@ export default function DocumentTrends({ lastReloadTime }: { lastReloadTime: num
             <EuiButtonIcon
               display="base"
               iconType={
-                qualityIssueDocsLinkLogsExplorer.isLogsExplorerAvailable
-                  ? 'logoObservability'
-                  : 'discoverApp'
+                redirectLinkProps.isLogsExplorerAvailable ? 'logoObservability' : 'discoverApp'
               }
               aria-label={
-                qualityIssueDocsLinkLogsExplorer.isLogsExplorerAvailable
-                  ? logsExplorerAriaText
-                  : discoverAriaText
+                redirectLinkProps.isLogsExplorerAvailable ? logsExplorerAriaText : discoverAriaText
               }
               size="s"
               data-test-subj="datasetQualityDetailsLinkToDiscover"
-              {...qualityIssueDocsLinkLogsExplorer.linkProps}
+              {...redirectLinkProps.linkProps}
             />
           </EuiToolTip>
         </EuiFlexGroup>
         <EuiSpacer size="m" />
-        {selectedChart === 'degradedDocs' ? (
-          <TrendDocsChart
-            {...degradeChartProps}
-            timeRange={timeRange}
-            lastReloadTime={lastReloadTime}
-            onTimeRangeChange={onTimeRangeChange}
-          />
-        ) : (
-          <TrendDocsChart
-            {...failedChartProps}
-            timeRange={timeRange}
-            lastReloadTime={lastReloadTime}
-            onTimeRangeChange={onTimeRangeChange}
-          />
-        )}
+        <TrendDocsChart
+          {...qualityIssuesChartProps}
+          timeRange={timeRange}
+          lastReloadTime={lastReloadTime}
+          onTimeRangeChange={onTimeRangeChange}
+        />
       </EuiAccordion>
     </EuiPanel>
   );

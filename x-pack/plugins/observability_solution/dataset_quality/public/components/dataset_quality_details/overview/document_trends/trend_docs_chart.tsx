@@ -14,7 +14,7 @@ import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import { flyoutDegradedDocsTrendText } from '../../../../../common/translations';
 import { useKibanaContextForPlugin } from '../../../../utils';
 import { TimeRangeConfig } from '../../../../../common/types';
-import { useDegradedDocsChart } from '../../../../hooks';
+import { useQualityIssuesDocsChart } from '../../../../hooks';
 
 const CHART_HEIGHT = 180;
 const DISABLED_ACTIONS = [
@@ -26,7 +26,7 @@ const DISABLED_ACTIONS = [
 
 interface TrendDocsChartProps
   extends Pick<
-    ReturnType<typeof useDegradedDocsChart>,
+    ReturnType<typeof useQualityIssuesDocsChart>,
     'attributes' | 'isChartLoading' | 'onChartLoading' | 'extraActions'
   > {
   timeRange: TimeRangeConfig;
