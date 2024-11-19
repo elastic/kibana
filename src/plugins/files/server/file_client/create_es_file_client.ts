@@ -8,6 +8,7 @@
  */
 
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import { getFips } from 'crypto';
 import { ElasticsearchBlobStorageClient } from '../blob_storage_service';
 import { FileClientImpl } from './file_client';
 import type { FileClient } from './types';
@@ -66,12 +67,18 @@ export function createEsFileClient(arg: CreateEsFileClientArgs): FileClient {
     maxSizeBytes,
     indexIsAlias,
   } = arg;
+
+  let hashes: Array<'sha1' | 'sha256' | 'sha512' | 'md5'> = ['sha1', 'sha256', 'sha512'];
+  if (getFips() !== 1) {
+    hashes = ['md5', ...hashes];
+  }
+
   return new FileClientImpl(
     {
       id: NO_FILE_KIND,
       http: {},
       maxSizeBytes,
-      hashes: ['md5', 'sha1', 'sha256', 'sha512'],
+      hashes,
     },
     new EsIndexFilesMetadataClient(metadataIndex, elasticsearchClient, logger, indexIsAlias),
     new ElasticsearchBlobStorageClient(
