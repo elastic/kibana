@@ -54,26 +54,6 @@ export function generateDatasets(
   const totalDocsMap: Record<DataStreamDocsStat['dataset'], DataStreamDocsStat['count']> =
     Object.fromEntries(totalDocs.map(({ dataset, count }) => [dataset, count]));
 
-  const degradedMap: Record<
-    DataStreamDocsStat['dataset'],
-    {
-      percentage: number;
-      count: DataStreamDocsStat['count'];
-    }
-  > = degradedDocStats.reduce(
-    (degradedMapAcc, { dataset, count }) =>
-      Object.assign(degradedMapAcc, {
-        [dataset]: {
-          count,
-          percentage: calculatePercentage({
-            totalDocs: totalDocsMap[dataset],
-            count,
-          }),
-        },
-      }),
-    {}
-  );
-
   const failedMap: Record<
     DataStreamDocsStat['dataset'],
     {
@@ -87,6 +67,26 @@ export function generateDatasets(
           count,
           percentage: calculatePercentage({
             totalDocs: totalDocsMap[dataset] ? totalDocsMap[dataset] + count : 0,
+            count,
+          }),
+        },
+      }),
+    {}
+  );
+
+  const degradedMap: Record<
+    DataStreamDocsStat['dataset'],
+    {
+      percentage: number;
+      count: DataStreamDocsStat['count'];
+    }
+  > = degradedDocStats.reduce(
+    (degradedMapAcc, { dataset, count }) =>
+      Object.assign(degradedMapAcc, {
+        [dataset]: {
+          count,
+          percentage: calculatePercentage({
+            totalDocs: totalDocsMap[dataset] + (failedMap[dataset]?.count ?? 0),
             count,
           }),
         },

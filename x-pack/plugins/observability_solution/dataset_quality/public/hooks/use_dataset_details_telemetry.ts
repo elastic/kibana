@@ -169,7 +169,7 @@ function getDatasetDetailsEbtProps({
   };
   const degradedDocs = dataStreamDetails?.degradedDocsCount ?? 0;
   const failedDocs = dataStreamDetails?.failedDocsCount ?? 0;
-  const totalDocs = dataStreamDetails?.docsCount ?? 0;
+  const totalDocs = (dataStreamDetails?.docsCount ?? 0) + failedDocs;
   const degradedPercentage = calculatePercentage({ totalDocs, count: degradedDocs });
   const failedPercentage = calculatePercentage({ totalDocs, count: failedDocs });
   const health = mapPercentageToQuality([degradedPercentage, failedPercentage]);
