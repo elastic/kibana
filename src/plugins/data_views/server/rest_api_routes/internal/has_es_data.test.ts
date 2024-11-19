@@ -194,7 +194,7 @@ describe('has_es_data route', () => {
     expect(mockLogger.warn).toBeCalledTimes(1);
     expect(mockLogger.warn).toBeCalledWith(
       'Timeout while checking for Elasticsearch data: local_data_timeout. Current timeout value is 5000ms. ' +
-        'Use "dataViews.hasEsDataTimeout" in kibana.yml to change it, or set to 0 to disable timeouts.'
+        'Use "data_views.hasEsDataTimeout" in kibana.yml to change it, or set to 0 to disable timeouts.'
     );
   });
 
@@ -262,7 +262,7 @@ describe('has_es_data route', () => {
     expect(mockLogger.warn).toBeCalledTimes(1);
     expect(mockLogger.warn).toBeCalledWith(
       'Timeout while checking for Elasticsearch data: remote_data_timeout. Current timeout value is 5000ms. ' +
-        'Use "dataViews.hasEsDataTimeout" in kibana.yml to change it, or set to 0 to disable timeouts.'
+        'Use "data_views.hasEsDataTimeout" in kibana.yml to change it, or set to 0 to disable timeouts.'
     );
   });
 

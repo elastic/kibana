@@ -95,7 +95,7 @@ const hasEsData = async ({
     if (e.name === 'TimeoutError') {
       const warningMessage =
         `${timeoutMessage}: ${timeoutReason}. Current timeout value is ${hasEsDataTimeout}ms. ` +
-        `Use "dataViews.hasEsDataTimeout" in kibana.yml to change it, or set to 0 to disable timeouts.`;
+        `Use "data_views.hasEsDataTimeout" in kibana.yml to change it, or set to 0 to disable timeouts.`;
 
       logger.warn(warningMessage);
 
