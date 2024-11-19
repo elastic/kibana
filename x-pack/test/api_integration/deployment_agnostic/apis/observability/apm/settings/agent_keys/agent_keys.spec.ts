@@ -56,6 +56,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('editor');
     });
 
+    after(async () => {
+      await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+    });
+
     describe('When the user does not have the required cluster privileges', () => {
       it('should return an error when creating an agent key', async () => {
         const error = await expectToReject<ApmApiError>(() =>
