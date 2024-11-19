@@ -14,24 +14,28 @@
  *
  * @returns A debounced async function that resolves on the next invocation
  */
-export const debounceAsync = <Args extends unknown[], Result>(
+export function debounceAsync<Args extends unknown[], Result>(
   fn: (...args: Args) => Result,
-  interval: number
-): ((...args: Args) => Result) => {
-  let handle: ReturnType<typeof setTimeout> | undefined;
-  let resolves: Array<(value?: Result) => void> = [];
+  intervalMs: number
+): (...args: Args) => Promise<Awaited<Result>> {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  let resolve: (value: Awaited<Result>) => void;
+  let promise = new Promise<Awaited<Result>>((_resolve) => {
+    resolve = _resolve;
+  });
 
-  return (...args: Args): Result => {
-    if (handle) {
-      clearTimeout(handle);
+  return (...args) => {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
     }
 
-    handle = setTimeout(() => {
-      const result = fn(...args);
-      resolves.forEach((resolve) => resolve(result));
-      resolves = [];
-    }, interval);
+    timeoutId = setTimeout(async () => {
+      resolve(await fn(...args));
+      promise = new Promise((_resolve) => {
+        resolve = _resolve;
+      });
+    }, intervalMs);
 
-    return new Promise((resolve) => resolves.push(resolve)) as Result;
+    return promise;
   };
-};
+}
