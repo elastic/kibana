@@ -240,7 +240,7 @@ describe('StepDefineRule', () => {
   describe('query', () => {
     it.each([
       ['query', 'eql'],
-      // ['query', 'esql'],
+      ['query', 'esql'],
     ] as RuleType[][])(
       'persists kuery when switching between "%s" and "%s" rule types',
       async (ruleTypeA, ruleTypeB) => {
