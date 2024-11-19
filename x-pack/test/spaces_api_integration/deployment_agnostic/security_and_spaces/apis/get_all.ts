@@ -424,31 +424,31 @@ export default function getAllSpacesTestSuite(context: DeploymentAgnosticFtrProv
         }
       );
 
-      // getAllTest(
-      //   `rbac user with saved objects management all at space_1 space can access space_1 from ${scenario.spaceId}`,
-      //   {
-      //     spaceId: scenario.spaceId,
-      //     user: scenario.users.allSavedObjectsAtSpace_1,
-      //     tests: {
-      //       exists: {
-      //         statusCode: 200,
-      //         response: createExpectResults('space_1'),
-      //       },
-      //       copySavedObjectsPurpose: {
-      //         statusCode: 200,
-      //         response: createExpectResults('space_1'),
-      //       },
-      //       shareSavedObjectsPurpose: {
-      //         statusCode: 200,
-      //         response: createExpectResults('space_1'),
-      //       },
-      //       includeAuthorizedPurposes: {
-      //         statusCode: 200,
-      //         response: createExpectAllPurposesResults(authorizedAll, 'space_1'),
-      //       },
-      //     },
-      //   }
-      // );
+      getAllTest(
+        `rbac user with saved objects management all at space_1 space can access space_1 from ${scenario.spaceId}`,
+        {
+          spaceId: scenario.spaceId,
+          user: scenario.users.allSavedObjectsAtSpace_1,
+          tests: {
+            exists: {
+              statusCode: 200,
+              response: createExpectResults('space_1'),
+            },
+            copySavedObjectsPurpose: {
+              statusCode: 200,
+              response: createExpectResults('space_1'),
+            },
+            shareSavedObjectsPurpose: {
+              statusCode: 200,
+              response: createExpectResults('space_1'),
+            },
+            includeAuthorizedPurposes: {
+              statusCode: 200,
+              response: createExpectAllPurposesResults(authorizedAll, 'space_1'),
+            },
+          },
+        }
+      );
 
       getAllTest(
         `rbac user with saved objects management read at space_1 space can access space_1 from ${scenario.spaceId}`,
