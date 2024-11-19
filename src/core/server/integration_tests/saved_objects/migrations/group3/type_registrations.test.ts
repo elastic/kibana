@@ -115,6 +115,7 @@ const previouslyRegisteredTypes = [
   'osquery-usage-metric',
   'osquery-manager-usage-metric',
   'policy-settings-protection-updates-note',
+  'product-doc-install-status',
   'query',
   'rules-settings',
   'sample-data-telemetry',
