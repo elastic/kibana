@@ -8,11 +8,18 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { BehaviorSubject, combineLatest, debounceTime, map, skip } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  debounceTime,
+  distinctUntilChanged,
+  map,
+  skip,
+} from 'rxjs';
 
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { Filter, RangeFilterParams, buildRangeFilter } from '@kbn/es-query';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { PublishingSubject, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import { isCompressed } from '../../../control_group/utils/is_compressed';
 import { RANGE_SLIDER_CONTROL } from '../../../../common';
@@ -81,6 +88,14 @@ export const getRangesliderControlFactory = (): DataControlFactory<
         initialState,
         dataControl.setters.onSelectionChange
       );
+      const hasRangeSliderSelections$ = new BehaviorSubject<boolean>(
+        Boolean(selections.value$.getValue())
+      );
+      const hasSelectionsSubscription = selections.value$
+        .pipe(distinctUntilChanged())
+        .subscribe((hasSelections) => {
+          hasRangeSliderSelections$.next(Boolean(hasSelections));
+        });
 
       const api = buildApi(
         {
@@ -101,7 +116,7 @@ export const getRangesliderControlFactory = (): DataControlFactory<
           clearSelections: () => {
             selections.setValue(undefined);
           },
-          hasSelections$: selections.hasRangeSelection$,
+          hasSelections$: hasRangeSliderSelections$ as PublishingSubject<boolean | undefined>,
         },
         {
           ...dataControl.comparators,
@@ -236,6 +251,7 @@ export const getRangesliderControlFactory = (): DataControlFactory<
               hasNotResultsSubscription.unsubscribe();
               minMaxSubscription.unsubscribe();
               outputFilterSubscription.unsubscribe();
+              hasSelectionsSubscription.unsubscribe();
             };
           }, []);
 

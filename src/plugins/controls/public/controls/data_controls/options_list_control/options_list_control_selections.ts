@@ -26,17 +26,9 @@ export function initializeOptionsListSelections(
     a: OptionsListSelection[] | undefined,
     b: OptionsListSelection[] | undefined
   ) => deepEqual(a ?? [], b ?? []);
-  const hasSelections$ = new BehaviorSubject<boolean>(
-    Boolean(initialState.selectedOptions?.length || initialState.existsSelected)
-  );
   function setSelectedOptions(next: OptionsListSelection[] | undefined) {
     if (!selectedOptionsComparatorFunction(selectedOptions$.value, next)) {
       selectedOptions$.next(next);
-      if (next?.length) {
-        hasSelections$.next(true);
-      } else {
-        hasSelections$.next(false);
-      }
       onSelectionChange();
     }
   }
@@ -44,11 +36,6 @@ export function initializeOptionsListSelections(
   const existsSelected$ = new BehaviorSubject<boolean | undefined>(initialState.existsSelected);
   function setExistsSelected(next: boolean | undefined) {
     if (existsSelected$.value !== next) {
-      if (next) {
-        hasSelections$.next(true);
-      } else {
-        hasSelections$.next(false);
-      }
       existsSelected$.next(next);
       onSelectionChange();
     }
@@ -77,6 +64,5 @@ export function initializeOptionsListSelections(
     setExistsSelected,
     exclude$: exclude$ as PublishingSubject<boolean | undefined>,
     setExclude,
-    hasSelections$: hasSelections$ as PublishingSubject<boolean | undefined>,
   };
 }
