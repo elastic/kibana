@@ -13,10 +13,10 @@ import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { AggregationType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { ApmRuleType } from '@kbn/rule-data-utils';
+import { waitForAlertsForRule } from '../alerts/helpers/wait_for_alerts_for_rule';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createApmRule, runRuleSoon, ApmAlertFields } from '../alerts/helpers/alerting_api_helper';
 import { waitForActiveRule } from '../alerts/helpers/wait_for_active_rule';
-import { waitForAlertsForRule } from '../alerts/helpers/wait_for_alerts_for_rule';
 import { cleanupRuleAndAlertState } from '../alerts/helpers/cleanup_rule_and_alert_state';
 
 type TransactionsGroupsMainStatistics =
@@ -137,7 +137,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       after(() => apmSynthtraceEsClient.clean());
 
-      describe('Transaction groups with avg transaction duration alerts', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/198866
+      describe.skip('Transaction groups with avg transaction duration alerts', () => {
         let ruleId: string;
         let alerts: ApmAlertFields[];
 

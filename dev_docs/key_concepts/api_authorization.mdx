@@ -313,6 +313,23 @@ Routes without a compelling reason to opt-out of authorization should plan to in
 MIGRATE_DISABLED_AUTHZ=true MIGRATE_ENABLED_AUTHZ=true npx eslint --ext .ts --fix path/to/your/folder
 ```
 
+**How to migrate if you have an utility function for route creation?**
+If you have utility function that creates routes, i.e `createApmServerRoute` or `createObservabilityOnboardingServerRoute`, you can easily modify the eslint rule to handle your case.
+For example, you register the route with `access` tags in your utility function:
+```ts
+createApmServerRoute({
+  endpoint: 'GET /your/route/path',
+  options: { tags: ['access:apm'] },
+  handler: async (resources):  => {
+    // your handler logic
+  },
+})
+```
+You can modify [the rule](https://github.com/elastic/kibana/blob/6a50066e00ae38a64c5365fd66b4dc32857ba1fc/packages/kbn-eslint-plugin-eslint/rules/no_deprecated_authz_config.js#L312-#L315) to handle your case by adding the following code:
+```ts
+callee.type === 'Identifier' && callee.name === 'createApmServerRoute'
+```
+
 ## Questions?
 If you have any questions or need help with API authorization, please reach out to the `@elastic/kibana-security` team.
 

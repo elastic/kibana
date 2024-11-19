@@ -26,7 +26,7 @@ import {
   ElasticsearchClient,
 } from '@kbn/core/server';
 
-import { decodeRequestVersion } from '@kbn/core-saved-objects-base-server-internal';
+import { decodeRequestVersion, encodeVersion } from '@kbn/core-saved-objects-base-server-internal';
 import { RequestTimeoutsConfig } from './config';
 import { asOk, asErr, Result } from './lib/result_type';
 
@@ -48,6 +48,7 @@ import { claimSort } from './queries/mark_available_tasks_as_claimed';
 import { MAX_PARTITIONS } from './lib/task_partitioner';
 import { ErrorOutput } from './lib/bulk_operation_buffer';
 import { MsearchError } from './lib/msearch_error';
+import { BulkUpdateError } from './lib/bulk_update_error';
 
 export interface StoreOpts {
   esClient: ElasticsearchClient;
@@ -386,11 +387,19 @@ export class TaskStore {
     }
 
     return result.items.map((item) => {
+      const malformedResponseType = 'malformed response';
+
       if (!item.update || !item.update._id) {
+        const err = new BulkUpdateError({
+          message: malformedResponseType,
+          type: malformedResponseType,
+          statusCode: 500,
+        });
+        this.errors$.next(err);
         return asErr({
           type: 'task',
           id: 'unknown',
-          error: { type: 'malformed response' },
+          error: { type: malformedResponseType },
         });
       }
 
@@ -399,6 +408,12 @@ export class TaskStore {
         : item.update._id;
 
       if (item.update?.error) {
+        const err = new BulkUpdateError({
+          message: item.update.error.reason,
+          type: item.update.error.type,
+          statusCode: item.update.status,
+        });
+        this.errors$.next(err);
         return asErr({
           type: 'task',
           id: docId,
@@ -412,6 +427,7 @@ export class TaskStore {
       return asOk({
         ...doc,
         id: docId,
+        version: encodeVersion(item.update._seq_no, item.update._primary_term),
       });
     });
   }

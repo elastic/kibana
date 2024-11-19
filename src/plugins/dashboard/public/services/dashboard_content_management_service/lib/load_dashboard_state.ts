@@ -10,19 +10,15 @@
 import { has } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 
-import { injectSearchSourceReferences, parseSearchSourceJSON } from '@kbn/data-plugin/public';
+import { injectSearchSourceReferences } from '@kbn/data-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { Filter, Query } from '@kbn/es-query';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import { cleanFiltersForSerialize } from '@kbn/presentation-util-plugin/public';
 
 import { getDashboardContentManagementCache } from '..';
-import {
-  convertSavedPanelsToPanelMap,
-  injectReferences,
-  type DashboardOptions,
-} from '../../../../common';
-import { DashboardCrudTypes } from '../../../../common/content_management';
+import { convertPanelsArrayToPanelMap, injectReferences } from '../../../../common';
+import type { DashboardGetIn, DashboardGetOut } from '../../../../server/content_management';
 import { DASHBOARD_CONTENT_ID, DEFAULT_DASHBOARD_INPUT } from '../../../dashboard_constants';
 import {
   contentManagementService,
@@ -30,7 +26,11 @@ import {
   embeddableService,
   savedObjectsTaggingService,
 } from '../../kibana_services';
-import type { LoadDashboardFromSavedObjectProps, LoadDashboardReturn } from '../types';
+import type {
+  DashboardSearchSource,
+  LoadDashboardFromSavedObjectProps,
+  LoadDashboardReturn,
+} from '../types';
 import { convertNumberToDashboardVersion } from './dashboard_versioning';
 import { migrateDashboardInput } from './migrate_dashboard_input';
 
@@ -72,8 +72,8 @@ export const loadDashboardState = async ({
   /**
    * Load the saved object from Content Management
    */
-  let rawDashboardContent: DashboardCrudTypes['GetOut']['item'];
-  let resolveMeta: DashboardCrudTypes['GetOut']['meta'];
+  let rawDashboardContent: DashboardGetOut['item'];
+  let resolveMeta: DashboardGetOut['meta'];
 
   const cachedDashboard = dashboardContentManagementCache.fetchDashboard(id);
   if (cachedDashboard) {
@@ -82,7 +82,7 @@ export const loadDashboardState = async ({
   } else {
     /** Otherwise, fetch and load the dashboard from the content management client, and add it to the cache */
     const result = await contentManagementService.client
-      .get<DashboardCrudTypes['GetIn'], DashboardCrudTypes['GetOut']>({
+      .get<DashboardGetIn, DashboardGetOut>({
         contentTypeId: DASHBOARD_CONTENT_ID,
         id,
       })
@@ -127,14 +127,16 @@ export const loadDashboardState = async ({
   /**
    * Create search source and pull filters and query from it.
    */
-  const searchSourceJSON = attributes.kibanaSavedObjectMeta.searchSourceJSON;
+  let searchSourceValues = attributes.kibanaSavedObjectMeta.searchSource;
   const searchSource = await (async () => {
-    if (!searchSourceJSON) {
+    if (!searchSourceValues) {
       return await dataSearchService.searchSource.create();
     }
     try {
-      let searchSourceValues = parseSearchSourceJSON(searchSourceJSON);
-      searchSourceValues = injectSearchSourceReferences(searchSourceValues as any, references);
+      searchSourceValues = injectSearchSourceReferences(
+        searchSourceValues as any,
+        references
+      ) as DashboardSearchSource;
       return await dataSearchService.searchSource.create(searchSourceValues);
     } catch (error: any) {
       return await dataSearchService.searchSource.create();
@@ -151,8 +153,8 @@ export const loadDashboardState = async ({
     refreshInterval,
     description,
     timeRestore,
-    optionsJSON,
-    panelsJSON,
+    options,
+    panels,
     timeFrom,
     version,
     timeTo,
@@ -167,11 +169,7 @@ export const loadDashboardState = async ({
         }
       : undefined;
 
-  /**
-   * Parse panels and options from JSON
-   */
-  const options: DashboardOptions = optionsJSON ? JSON.parse(optionsJSON) : undefined;
-  const panels = convertSavedPanelsToPanelMap(panelsJSON ? JSON.parse(panelsJSON) : []);
+  const panelMap = convertPanelsArrayToPanelMap(panels ?? []);
 
   const { dashboardInput, anyMigrationRun } = migrateDashboardInput({
     ...DEFAULT_DASHBOARD_INPUT,
@@ -183,7 +181,7 @@ export const loadDashboardState = async ({
     description,
     timeRange,
     filters,
-    panels,
+    panels: panelMap,
     query,
     title,
 
@@ -192,7 +190,7 @@ export const loadDashboardState = async ({
 
     controlGroupInput: attributes.controlGroupInput,
 
-    version: convertNumberToDashboardVersion(version),
+    ...(version && { version: convertNumberToDashboardVersion(version) }),
   });
 
   return {

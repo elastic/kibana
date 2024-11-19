@@ -22,6 +22,7 @@ import {
   EuiText,
   EuiTitle,
   useGeneratedHtmlId,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -68,7 +69,8 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   showAboutMappings: boolean;
   jsonData: any;
   refetchMapping: () => void;
-}> = ({ index, data, jsonData, refetchMapping, showAboutMappings }) => {
+  hasUpdateMappingsPrivilege?: boolean;
+}> = ({ index, data, jsonData, refetchMapping, showAboutMappings, hasUpdateMappingsPrivilege }) => {
   const {
     services: { extensionsService },
     core: {
@@ -475,18 +477,32 @@ export const DetailsPageMappingsContent: FunctionComponent<{
             {!index.hidden && (
               <EuiFlexItem grow={false}>
                 {!isAddingFields ? (
-                  <EuiButton
-                    onClick={addFieldButtonOnClick}
-                    iconType="plusInCircle"
-                    color="text"
-                    size="m"
-                    data-test-subj="indexDetailsMappingsAddField"
+                  <EuiToolTip
+                    position="bottom"
+                    data-test-subj="indexDetailsMappingsAddFieldTooltip"
+                    content={
+                      /* for serverless search users hasUpdateMappingsPrivilege flag indicates if user has privilege to update index mappings, for stack hasUpdateMappingsPrivilege would be undefined */
+                      hasUpdateMappingsPrivilege === false
+                        ? i18n.translate('xpack.idxMgmt.indexDetails.mappings.addNewFieldToolTip', {
+                            defaultMessage: 'You do not have permission to add fields in an Index',
+                          })
+                        : undefined
+                    }
                   >
-                    <FormattedMessage
-                      id="xpack.idxMgmt.indexDetails.mappings.addNewField"
-                      defaultMessage="Add field"
-                    />
-                  </EuiButton>
+                    <EuiButton
+                      onClick={addFieldButtonOnClick}
+                      iconType="plusInCircle"
+                      color="text"
+                      size="m"
+                      data-test-subj="indexDetailsMappingsAddField"
+                      isDisabled={hasUpdateMappingsPrivilege === false}
+                    >
+                      <FormattedMessage
+                        id="xpack.idxMgmt.indexDetails.mappings.addNewField"
+                        defaultMessage="Add field"
+                      />
+                    </EuiButton>
+                  </EuiToolTip>
                 ) : (
                   <EuiButton
                     onClick={() => updateMappings()}

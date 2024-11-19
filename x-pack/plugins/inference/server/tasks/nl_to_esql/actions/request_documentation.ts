@@ -6,11 +6,15 @@
  */
 
 import { isEmpty } from 'lodash';
-import { InferenceClient, withoutOutputUpdateEvents } from '../../..';
-import { Message } from '../../../../common';
-import { ToolChoiceType, ToolOptions } from '../../../../common/chat_complete/tools';
+import {
+  ToolChoiceType,
+  ToolOptions,
+  Message,
+  withoutOutputUpdateEvents,
+  FunctionCallingMode,
+} from '@kbn/inference-common';
+import { InferenceClient } from '../../..';
 import { requestDocumentationSchema } from './shared';
-import type { FunctionCallingMode } from '../../../../common/chat_complete';
 
 export const requestDocumentation = ({
   outputApi,
@@ -29,8 +33,10 @@ export const requestDocumentation = ({
 }) => {
   const hasTools = !isEmpty(tools) && toolChoice !== ToolChoiceType.none;
 
-  return outputApi('request_documentation', {
+  return outputApi({
+    id: 'request_documentation',
     connectorId,
+    stream: true,
     functionCalling,
     system,
     previousMessages: messages,

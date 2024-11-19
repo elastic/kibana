@@ -15,7 +15,7 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ConnectorDefinition } from '@kbn/search-connectors-plugin/public';
+import { ConnectorDefinition } from '@kbn/search-connectors';
 
 import {
   CONNECTOR_CLIENTS_TYPE,

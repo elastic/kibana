@@ -14,7 +14,7 @@ import { getUrlPrefix, ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function deleteActionTests({ getService }: FtrProviderContext) {
+export default function deleteConnectorTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
@@ -36,12 +36,12 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
       describe(scenario.id, () => {
-        it('should handle delete action request appropriately', async () => {
-          const { body: createdAction } = await supertest
+        it('should handle delete connector request appropriately', async () => {
+          const { body: createdConnector } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
-              name: 'My action',
+              name: 'My Connector',
               connector_type_id: 'test.index-record',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
@@ -53,7 +53,7 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
             .expect(200);
 
           const response = await supertestWithoutAuth
-            .delete(`${getUrlPrefix(space.id)}/api/actions/connector/${createdAction.id}`)
+            .delete(`${getUrlPrefix(space.id)}/api/actions/connector/${createdConnector.id}`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo');
 
@@ -68,7 +68,7 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
                 error: 'Forbidden',
                 message: 'Unauthorized to delete actions',
               });
-              objectRemover.add(space.id, createdAction.id, 'action', 'actions');
+              objectRemover.add(space.id, createdConnector.id, 'connector', 'actions');
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
@@ -81,12 +81,12 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it(`shouldn't delete action from another space`, async () => {
-          const { body: createdAction } = await supertest
+        it(`shouldn't delete connector from another space`, async () => {
+          const { body: createdConnector } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
-              name: 'My action',
+              name: 'My Connector',
               connector_type_id: 'test.index-record',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
@@ -96,10 +96,10 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
               },
             })
             .expect(200);
-          objectRemover.add(space.id, createdAction.id, 'action', 'actions');
+          objectRemover.add(space.id, createdConnector.id, 'connector', 'actions');
 
           const response = await supertestWithoutAuth
-            .delete(`${getUrlPrefix('other')}/api/actions/connector/${createdAction.id}`)
+            .delete(`${getUrlPrefix('other')}/api/actions/connector/${createdConnector.id}`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo');
 
@@ -122,7 +122,7 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 statusCode: 404,
                 error: 'Not Found',
-                message: `Saved object [action/${createdAction.id}] not found`,
+                message: `Saved object [action/${createdConnector.id}] not found`,
               });
               break;
             default:
@@ -130,7 +130,7 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it(`should handle delete request appropriately when action doesn't exist`, async () => {
+        it(`should handle delete request appropriately when connector doesn't exist`, async () => {
           const response = await supertestWithoutAuth
             .delete(`${getUrlPrefix(space.id)}/api/actions/connector/2`)
             .set('kbn-xsrf', 'foo')
@@ -158,7 +158,7 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it(`shouldn't delete preconfigured action`, async () => {
+        it(`shouldn't delete preconfigured connector`, async () => {
           const response = await supertestWithoutAuth
             .delete(`${getUrlPrefix(space.id)}/api/actions/connector/my-slack1`)
             .auth(user.username, user.password)
@@ -228,7 +228,7 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
         it('should handle delete hooks appropriately', async () => {
           const source = uuidv4();
           const encryptedValue = 'This value should be encrypted';
-          const { body: createdAction } = await supertest
+          const { body: createdConnector } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
@@ -249,7 +249,7 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
           await esTestIndexTool.setup();
 
           const response = await supertestWithoutAuth
-            .delete(`${getUrlPrefix(space.id)}/api/actions/connector/${createdAction.id}`)
+            .delete(`${getUrlPrefix(space.id)}/api/actions/connector/${createdConnector.id}`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo');
 
@@ -262,7 +262,7 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space2':
               expect(response.statusCode).to.eql(403);
               expect(searchResult.body.hits.hits.length).to.eql(0);
-              objectRemover.add(space.id, createdAction.id, 'action', 'actions');
+              objectRemover.add(space.id, createdConnector.id, 'connector', 'actions');
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
@@ -279,7 +279,7 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
 
                 const expected = {
                   state: {
-                    connectorId: createdAction.id,
+                    connectorId: createdConnector.id,
                     config: { index: ES_TEST_INDEX_NAME, source },
                   },
                   source,
@@ -291,7 +291,7 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
               expect(refs).to.eql(['post-delete']);
               break;
             default:
-              objectRemover.add(space.id, createdAction.id, 'action', 'actions');
+              objectRemover.add(space.id, createdConnector.id, 'connector', 'actions');
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
           }
         });

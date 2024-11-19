@@ -178,7 +178,7 @@ export function continueConversation({
   chat,
   signal,
   functionCallsLeft,
-  adHocInstructions,
+  adHocInstructions = [],
   userInstructions,
   logger,
   disableFunctions,
@@ -213,11 +213,14 @@ export function continueConversation({
     disableFunctions,
   });
 
+  const registeredAdhocInstructions = functionClient.getAdhocInstructions();
+  const allAdHocInstructions = adHocInstructions.concat(registeredAdhocInstructions);
+
   const messagesWithUpdatedSystemMessage = replaceSystemMessage(
     getSystemMessageFromInstructions({
       applicationInstructions: functionClient.getInstructions(),
       userInstructions,
-      adHocInstructions,
+      adHocInstructions: allAdHocInstructions,
       availableFunctionNames: definitions.map((def) => def.name),
     }),
     initialMessages

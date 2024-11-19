@@ -697,6 +697,13 @@ export const COLUMN_INTEGRATIONS = i18n.translate(
   }
 );
 
+export const COLUMN_MODIFIED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.columns.modifiedTitle',
+  {
+    defaultMessage: 'MODIFIED',
+  }
+);
+
 export const COLUMN_ENABLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.enabledTitle',
   {
@@ -820,6 +827,34 @@ export const NO_TAGS_AVAILABLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.filters.noTagsAvailableDescription',
   {
     defaultMessage: 'No tags available',
+  }
+);
+
+export const RULE_SOURCE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.filters.ruleSourceLabel',
+  {
+    defaultMessage: 'Modifications',
+  }
+);
+
+export const MODIFIED_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.upgradeRules.modifiedLabel',
+  {
+    defaultMessage: 'Modified',
+  }
+);
+
+export const UNMODIFIED_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.upgradeRules.unmodifiedLabel',
+  {
+    defaultMessage: 'Unmodified',
+  }
+);
+
+export const MODIFIED_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.upgradeRules.modifiedTooltipDescription',
+  {
+    defaultMessage: 'This Elastic rule has been modified.',
   }
 );
 
@@ -1397,6 +1432,13 @@ export const UPDATE_RULE_BUTTON = i18n.translate(
   'xpack.securitySolution.addRules.upgradeRuleButton',
   {
     defaultMessage: 'Update rule',
+  }
+);
+
+export const UPDATE_RULE_BUTTON_TOOLTIP_CONFLICTS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.button.conflicts',
+  {
+    defaultMessage: 'Rule has conflicts. Resolve them manually.',
   }
 );
 
