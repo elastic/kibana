@@ -20,7 +20,7 @@ describe('to_esql', () => {
       return [[]];
     }
     if (key === 'dateFormat:tz') {
-      return 'Browser';
+      return 'UTC';
     }
     if (key === 'histogram:barTarget') {
       return 50;
@@ -43,6 +43,7 @@ describe('to_esql', () => {
       if (field === 'records') return undefined;
       return { name: field };
     },
+    getFormatterForField: () => ({ convert: (v: unknown) => v }),
   } as unknown as IndexPattern;
 
   it('should produce valid esql for date histogram and count', () => {
