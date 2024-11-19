@@ -31,9 +31,21 @@ export interface IndexErrorProps {
 }
 
 interface SemanticTextProperty extends MappingPropertyBase {
-  inference_id: string;
+  inference_id?: string;
   type: 'semantic_text';
 }
+
+/*  
+  Preconfigured endpoints should be used from `search-inference-endpoint` plugin.
+  The plugin is private at this moment and will refactor once a decision is made.
+*/
+const PRECONFIGURED_ENDPOINTS = {
+  E5: '.multilingual-e5-small-elasticsearch',
+  ELSER: '.elser-2-elasticsearch',
+};
+
+const isInferencePreconfigured = (inferenceId: string) =>
+  Object.values(PRECONFIGURED_ENDPOINTS).includes(inferenceId);
 
 const parseMapping = (mappings: MappingTypeMapping) => {
   const fields = mappings.properties;
@@ -49,6 +61,11 @@ const getSemanticTextFields = (
 ): Array<{ path: string; source: SemanticTextProperty }> => {
   return Object.entries(fields).flatMap(([key, value]) => {
     const currentPath: string = path ? `${path}.${key}` : key;
+    if (value.type === 'semantic_text') {
+      value = value.inference_id
+        ? value
+        : { ...value, inference_id: PRECONFIGURED_ENDPOINTS.ELSER };
+    }
     const currentField: Array<{ path: string; source: SemanticTextProperty }> =
       value.type === 'semantic_text' ? [{ path: currentPath, source: value }] : [];
     if (hasProperties(value)) {
@@ -115,7 +132,7 @@ export const IndexError: React.FC<IndexErrorProps> = ({ indexName }) => {
               field,
             };
           }
-          if (isLocalModel(model)) {
+          if (isLocalModel(model) && !isInferencePreconfigured(model.inference_id)) {
             const modelId = model.service_settings.model_id;
             const modelStats = trainedModelStats?.trained_model_stats.find(
               (value) =>
