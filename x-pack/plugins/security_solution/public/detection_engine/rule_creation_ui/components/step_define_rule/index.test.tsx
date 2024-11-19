@@ -217,7 +217,6 @@ const DEFINE_RULE_FORM_STEP = 'defineRuleFormStepQueryEditor';
 
 describe('StepDefineRule', () => {
   beforeEach(() => {
-    // jest.clearAllMocks();
     mockUseRuleFromTimeline.mockReturnValue({ onOpenTimeline, loading: false });
     (useEsqlAvailability as jest.Mock).mockReturnValue({ isEsqlRuleTypeEnabled: true });
     (useMLRuleConfig as jest.Mock).mockReturnValue({
