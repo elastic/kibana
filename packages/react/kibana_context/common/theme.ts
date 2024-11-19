@@ -7,26 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type EuiThemeSystem } from '@elastic/eui';
-import { EuiThemeAmsterdam } from '@elastic/eui';
+import { EuiThemeSystem, EuiThemeAmsterdam } from '@elastic/eui';
 import { EuiThemeBorealis } from '@elastic/eui-theme-borealis';
-import { EuiThemeBorealis as EuiThemeBorealisGrey } from '@elastic/eui-theme-borealis-grey';
-import { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 
-export interface ThemeDescriptor {
+export interface ThemeConfig {
   euiTheme: EuiThemeSystem;
 }
 
-export const KIBANA_THEMES: Record<ThemeVersion, ThemeDescriptor> = {
-  v8: {
+const THEMES: Record<string, ThemeConfig> = {
+  amsterdam: {
     euiTheme: EuiThemeAmsterdam,
   },
   borealis: {
     euiTheme: EuiThemeBorealis,
   },
-  borealisgrey: {
-    euiTheme: EuiThemeBorealisGrey,
-  },
 };
 
-export const getKibanaThemeByVersion = (version: ThemeVersion) => KIBANA_THEMES[version];
+export const getThemeConfigByName = (name: string): ThemeConfig | null => {
+  return THEMES[name as keyof typeof THEMES] || null;
+};
+
+export const DEFAULT_THEME_CONFIG = THEMES.amsterdam;

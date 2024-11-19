@@ -8,19 +8,18 @@
  */
 
 import React, { FC } from 'react';
-import type { DarkModeValue } from '@kbn/core-ui-settings-common';
-import { ThemeVersion } from '@kbn/ui-shared-deps-npm';
+import { type DarkModeValue, ThemeName } from '@kbn/core-ui-settings-common';
 
 interface Props {
   darkMode: DarkModeValue;
-  themeVersion: ThemeVersion;
+  themeName: ThemeName;
   stylesheetPaths: string[];
 }
 
-export const Styles: FC<Props> = ({ darkMode, themeVersion, stylesheetPaths }) => {
+export const Styles: FC<Props> = ({ darkMode, themeName, stylesheetPaths }) => {
   return (
     <>
-      {darkMode !== 'system' && <InlineStyles darkMode={darkMode} themeVersion={themeVersion} />}
+      {darkMode !== 'system' && <InlineStyles darkMode={darkMode} themeName={themeName} />}
       {stylesheetPaths.map((path) => (
         <link key={path} rel="stylesheet" type="text/css" href={path} />
       ))}
@@ -28,30 +27,25 @@ export const Styles: FC<Props> = ({ darkMode, themeVersion, stylesheetPaths }) =
   );
 };
 
-const InlineStyles: FC<{ darkMode: boolean; themeVersion: ThemeVersion }> = ({
-  darkMode,
-  themeVersion,
-}) => {
-  const themeStyles = {
-    v8: {
+const InlineStyles: FC<{ darkMode: boolean; themeName: ThemeName }> = ({ darkMode, themeName }) => {
+  const getThemeStyles = (theme: ThemeName) => {
+    if (theme === 'borealis') {
+      return {
+        pageBackground: darkMode ? '#07101F' : '#F6F9FC', // colors.body
+        welcomeText: darkMode ? '#8E9FBC' : '#5A6D8C', // colors.subduedText
+        progress: darkMode ? '#172336' : '#ECF1F9', // colors.lightestShade
+        progressBefore: darkMode ? '#599DFF' : '#0B64DD', // colors.primary
+      };
+    }
+
+    return {
       pageBackground: darkMode ? '#141519' : '#F8FAFD',
       welcomeText: darkMode ? '#98A2B3' : '#69707D',
       progress: darkMode ? '#25262E' : '#F5F7FA',
       progressBefore: darkMode ? '#1BA9F5' : '#006DE4',
-    },
-    borealis: {
-      pageBackground: darkMode ? '#07101F' : '#F6F9FC',
-      welcomeText: darkMode ? '#5A6D8C' : '#8E9FBC',
-      progress: darkMode ? '#172336' : '#E3E8F2',
-      progressBefore: darkMode ? '#599DFF' : '#0B64DD',
-    },
-    borealisgrey: {
-      pageBackground: darkMode ? '#0E0F12' : '#F6F9FC',
-      welcomeText: darkMode ? '#666D78' : '#989FAA',
-      progress: darkMode ? '#23262C' : '#E3E6EB',
-      progressBefore: darkMode ? '#599DFF' : '#0B64DD',
-    },
+    };
   };
+
   // must be kept in sync with
   // packages/core/apps/core-apps-server-internal/assets/legacy_theme.js
   /* eslint-disable react/no-danger */
@@ -61,19 +55,19 @@ const InlineStyles: FC<{ darkMode: boolean; themeVersion: ThemeVersion }> = ({
         __html: `
 
           html {
-            background-color: ${themeStyles[themeVersion].pageBackground}
+            background-color: ${getThemeStyles(themeName).pageBackground}
           }
 
           .kbnWelcomeText {
-            color: ${themeStyles[themeVersion].welcomeText};
+            color: ${getThemeStyles(themeName).welcomeText};
           }
 
           .kbnProgress {
-            background-color: ${themeStyles[themeVersion].progress};
+            background-color: ${getThemeStyles(themeName).progress};
           }
 
           .kbnProgress:before {
-            background-color: ${themeStyles[themeVersion].progressBefore};
+            background-color: ${getThemeStyles(themeName).progressBefore};
           }
 
         `,

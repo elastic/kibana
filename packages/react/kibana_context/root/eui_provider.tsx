@@ -13,9 +13,13 @@ import createCache from '@emotion/cache';
 
 import { EuiProvider, EuiProviderProps, euiStylisPrefixer } from '@elastic/eui';
 import { EUI_STYLES_GLOBAL, EUI_STYLES_UTILS } from '@kbn/core-base-common';
-import { getColorMode, defaultTheme } from '@kbn/react-kibana-context-common';
+import {
+  getColorMode,
+  defaultTheme,
+  getThemeConfigByName,
+  DEFAULT_THEME_CONFIG,
+} from '@kbn/react-kibana-context-common';
 import { ThemeServiceStart } from '@kbn/react-kibana-context-common';
-import { getKibanaThemeByVersion } from '@kbn/react-kibana-context-common/theme';
 
 /**
  * Props for the KibanaEuiProvider.
@@ -67,14 +71,11 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
 }) => {
   const kibanaTheme = useObservable(theme$, defaultTheme);
   const themeColorMode = useMemo(() => getColorMode(kibanaTheme), [kibanaTheme]);
-  const euiTheme = useMemo(() => {
-    const theme = getKibanaThemeByVersion(kibanaTheme.version);
-    if (!theme) {
-      return undefined;
-    }
 
-    return theme.euiTheme;
-  }, [kibanaTheme]);
+  const theme = useMemo(() => {
+    const config = getThemeConfigByName(kibanaTheme.name) || DEFAULT_THEME_CONFIG;
+    return config.euiTheme;
+  }, [kibanaTheme.name]);
 
   // In some cases-- like in Storybook or testing-- we want to explicitly override the
   // colorMode provided by the `theme`.
@@ -86,12 +87,7 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
 
   return (
     <EuiProvider
-      theme={euiTheme}
-      cache={cache}
-      modify={modify}
-      colorMode={colorMode}
-      globalStyles={globalStyles}
-      utilityClasses={globalStyles}
+      {...{ cache, modify, colorMode, globalStyles, utilityClasses: globalStyles, theme }}
     >
       {children}
     </EuiProvider>

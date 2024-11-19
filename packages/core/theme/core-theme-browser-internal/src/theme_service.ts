@@ -12,7 +12,6 @@ import { _setDarkMode } from '@kbn/ui-theme';
 import type { InjectedMetadataTheme } from '@kbn/core-injected-metadata-common-internal';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import type { CoreTheme, ThemeServiceSetup, ThemeServiceStart } from '@kbn/core-theme-browser';
-import { DEFAULT_THEME_VERSION } from '@kbn/core-ui-settings-common';
 import { systemThemeIsDark, browsersSupportsSystemTheme } from './system_theme';
 import { createStyleSheet } from './utils';
 
@@ -29,6 +28,7 @@ export class ThemeService {
 
   public setup({ injectedMetadata }: ThemeServiceSetupDeps): ThemeServiceSetup {
     const themeMetadata = injectedMetadata.getTheme();
+
     this.themeMetadata = themeMetadata;
 
     let darkMode: boolean;
@@ -40,7 +40,7 @@ export class ThemeService {
 
     const theme: CoreTheme = {
       darkMode,
-      version: themeMetadata.version,
+      name: themeMetadata.name,
     };
 
     this.applyTheme(theme);
@@ -78,13 +78,13 @@ export class ThemeService {
     });
 
     _setDarkMode(darkMode);
-    updateKbnThemeTag(darkMode, this.themeMetadata?.version);
+    updateKbnThemeTag(theme);
   }
 }
 
-const updateKbnThemeTag = (darkMode: boolean, themeVersion?: string) => {
-  const globals: any = typeof window === 'undefined' ? {} : window;
-  const version = themeVersion ?? DEFAULT_THEME_VERSION;
+const updateKbnThemeTag = (theme: CoreTheme) => {
+  const name = theme.name === 'amsterdam' ? 'v8' : theme.name;
 
-  globals.__kbnThemeTag__ = darkMode ? `${version}dark` : `${version}light`;
+  const globals: any = typeof window === 'undefined' ? {} : window;
+  globals.__kbnThemeTag__ = `${name}${theme.darkMode ? 'dark' : 'light'}`;
 };

@@ -296,7 +296,7 @@ export const getTagcloudVisualization = ({
   },
 
   DimensionEditorComponent(props) {
-    const theme = useObservable<CoreTheme>(kibanaTheme.theme$, { darkMode: false, version: 'v8' });
+    const theme = useObservable<CoreTheme>(kibanaTheme.theme$, { darkMode: false, name: 'amsterdam', });
     const palettes = getKbnPalettes(theme);
 
     if (props.groupId === TAG_GROUP_ID) {

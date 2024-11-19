@@ -486,7 +486,7 @@ export const getDatatableVisualization = ({
     };
   },
   DimensionEditorComponent(props) {
-    const theme = useObservable<CoreTheme>(kibanaTheme.theme$, { darkMode: false, version: 'v8' });
+    const theme = useObservable<CoreTheme>(kibanaTheme.theme$, { darkMode: false, name: 'amsterdam', });
     const palettes = getKbnPalettes(theme);
 
     return (

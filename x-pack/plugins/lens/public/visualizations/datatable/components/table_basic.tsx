@@ -82,7 +82,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
 
   const isInteractive = props.interactive;
-  const theme = useObservable<CoreTheme>(props.theme.theme$, { darkMode: false, version: 'v8' });
+  const theme = useObservable<CoreTheme>(props.theme.theme$, { darkMode: false, name: 'amsterdam', });
   const palettes = getKbnPalettes(theme);
 
   const [columnConfig, setColumnConfig] = useState({

@@ -7,52 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, Type } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
+import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 import {
-  AVAILABLE_THEME_TAGS,
-  AVAILABLE_THEME_VERSIONS,
-  DEFAULT_THEME_VERSION,
   type UiSettingsParams,
+  parseThemeTags,
+  SUPPORTED_THEME_NAMES,
 } from '@kbn/core-ui-settings-common';
-
-function parseThemeTags() {
-  if (!process.env.KBN_OPTIMIZER_THEMES || process.env.KBN_OPTIMIZER_THEMES === '*') {
-    return AVAILABLE_THEME_TAGS;
-  }
-
-  return process.env.KBN_OPTIMIZER_THEMES.split(',').map((t) => t.trim());
-}
 
 function getThemeInfo(options: GetThemeSettingsOptions) {
   if (options?.isDist ?? true) {
     return {
       defaultDarkMode: false,
-      defaultVersion: DEFAULT_THEME_VERSION,
-      availableVersions: AVAILABLE_THEME_VERSIONS,
     };
   }
 
-  const themeTags = parseThemeTags();
+  const themeTags = parseThemeTags(process.env.KBN_OPTIMIZER_THEMES);
   return {
     defaultDarkMode: themeTags[0].endsWith('dark'),
-    defaultVersion: themeTags[0].slice(0, 2),
-    availableVersions: AVAILABLE_THEME_VERSIONS.filter((v) =>
-      themeTags.some((t) => t.startsWith(v))
-    ),
   };
 }
 
 interface GetThemeSettingsOptions {
   isDist?: boolean;
+  isThemeSwitcherEnabled?: boolean;
 }
 
 export const getThemeSettings = (
   options: GetThemeSettingsOptions = {}
 ): Record<string, UiSettingsParams> => {
-  const { defaultDarkMode, defaultVersion, availableVersions } = getThemeInfo(options);
-
-  const onlyOneThemeAvailable = !options?.isDist && availableVersions.length === 1;
+  const { defaultDarkMode } = getThemeInfo(options);
 
   return {
     'theme:darkMode': {
@@ -97,27 +82,38 @@ export const getThemeSettings = (
       name: i18n.translate('core.ui_settings.params.themeVersionTitle', {
         defaultMessage: 'Theme version',
       }),
-      value: defaultVersion,
-      // readonly: true,
+      value: 'v8' as ThemeVersion,
+      readonly: true,
+      schema: schema.literal('v8'),
+    },
+    /**
+     * Theme name is the (upcoming) replacement for theme versions.
+     */
+    'theme:name': {
+      name: i18n.translate('core.ui_settings.params.themeName', {
+        defaultMessage: 'Theme',
+      }),
       type: 'select',
-      options: availableVersions,
+      options: SUPPORTED_THEME_NAMES,
+      optionLabels: {
+        amsterdam: i18n.translate('core.ui_settings.params.themeName.options.amsterdam', {
+          defaultMessage: 'Amsterdam',
+        }),
+        borealis: i18n.translate('core.ui_settings.params.themeName.options.borealis', {
+          defaultMessage: 'Borealis',
+        }),
+      },
+      value: 'amsterdam',
+      readonly: Object.hasOwn(options, 'isThemeSwitcherEnabled')
+        ? !options.isThemeSwitcherEnabled
+        : true,
       requiresPageReload: true,
-      schema: schema.oneOf(availableVersions.map((v) => schema.literal(v)) as [Type<string>]),
-      optionLabels: onlyOneThemeAvailable
-        ? {
-            [availableVersions[0]]: `${availableVersions[0]} (only)`,
-          }
-        : {
-            v8: i18n.translate('core.ui_settings.params.themeName.options.amsterdam', {
-              defaultMessage: 'Amsterdam',
-            }),
-            borealis: i18n.translate('core.ui_settings.params.themeName.options.borealis', {
-              defaultMessage: 'Borealis (blueGrey)',
-            }),
-            borealisgrey: i18n.translate('core.ui_settings.params.themeName.options.borealis', {
-              defaultMessage: 'Borealis (mutedGrey)',
-            }),
-          },
+      schema: schema.oneOf([
+        schema.literal('amsterdam'),
+        schema.literal('borealis'),
+        // Allow experimental themes
+        schema.string(),
+      ]),
     },
   };
 };

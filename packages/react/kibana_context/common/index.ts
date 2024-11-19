@@ -8,10 +8,9 @@
  */
 
 export { getColorMode } from './color_mode';
-
+export { getThemeConfigByName, DEFAULT_THEME_CONFIG, type ThemeConfig } from './theme';
 export type { KibanaTheme, ThemeServiceStart } from './types';
 
-import { DEFAULT_THEME_VERSION } from '@kbn/core-ui-settings-common';
 import type { KibanaTheme } from './types';
 
 /**
@@ -20,5 +19,5 @@ import type { KibanaTheme } from './types';
  */
 export const defaultTheme: KibanaTheme = {
   darkMode: false,
-  version: DEFAULT_THEME_VERSION,
+  name: 'amsterdam',
 };

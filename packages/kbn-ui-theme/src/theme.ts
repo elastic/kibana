@@ -13,13 +13,9 @@ import { default as v8Light } from '@elastic/eui/dist/eui_theme_amsterdam_light.
 import { default as v8Dark } from '@elastic/eui/dist/eui_theme_amsterdam_dark.json';
 
 /* eslint-disable-next-line @kbn/eslint/module_migration */
-import { default as borealisLight } from '@elastic/eui-theme-borealis/lib/eui_theme_borealis_light.json';
+import { default as borealisLight } from '@elastic/eui/dist/eui_theme_borealis_light.json';
 /* eslint-disable-next-line @kbn/eslint/module_migration */
-import { default as borealisDark } from '@elastic/eui-theme-borealis/lib/eui_theme_borealis_dark.json';
-
-// TODO: remove secondary theme support once final theme is decided
-import { default as borealisGreyLight } from '@elastic/eui-theme-borealis/lib/eui_theme_borealisgrey_light.json';
-import { default as borealisGreyDark } from '@elastic/eui-theme-borealis/lib/eui_theme_borealisgrey_dark.json';
+import { default as borealisDark } from '@elastic/eui/dist/eui_theme_borealis_dark.json';
 
 const globals: any = typeof window === 'undefined' ? {} : window;
 
@@ -40,13 +36,6 @@ export const _setDarkMode = (mode: boolean) => {
 };
 
 const getThemeVars = (): { light: Theme; dark: Theme } => {
-  if (globals?.__kbnThemeTag__?.includes('borealisgrey')) {
-    return {
-      light: borealisGreyLight,
-      dark: borealisGreyDark,
-    };
-  }
-
   if (globals?.__kbnThemeTag__?.includes('borealis')) {
     return {
       light: borealisLight,

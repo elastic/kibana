@@ -20,5 +20,6 @@
     "@kbn/core-plugins-server",
     "@kbn/config-schema",
     "@kbn/developer-examples-plugin",
+    "@kbn/core-feature-flags-browser",
   ]
 }

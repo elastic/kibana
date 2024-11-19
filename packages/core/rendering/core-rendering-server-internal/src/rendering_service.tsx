@@ -22,6 +22,7 @@ import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import {
   type DarkModeValue,
   parseDarkModeValue,
+  parseThemeNameValue,
   type UiSettingsParams,
   type UserProvidedValues,
 } from '@kbn/core-ui-settings-common';
@@ -56,7 +57,7 @@ type RenderOptions =
       userSettings?: never;
     });
 
-// const themeVersion: ThemeVersion = 'v8';
+const themeVersion: ThemeVersion = 'v8';
 
 /** @internal */
 export class RenderingService {
@@ -211,7 +212,7 @@ export class RenderingService {
       darkMode = getSettingValue<DarkModeValue>('theme:darkMode', settings, parseDarkModeValue);
     }
 
-    const themeVersion = getSettingValue('theme:version', settings, String) as ThemeVersion;
+    const themeName = getSettingValue<string>('theme:name', settings, parseThemeNameValue);
 
     const themeStylesheetPaths = (mode: boolean) =>
       getThemeStylesheetPaths({
@@ -276,6 +277,7 @@ export class RenderingService {
         },
         theme: {
           darkMode,
+          name: themeName,
           version: themeVersion,
           stylesheetPaths: {
             default: themeStylesheetPaths(false),

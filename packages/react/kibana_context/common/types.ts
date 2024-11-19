@@ -8,7 +8,6 @@
  */
 
 import { Observable } from 'rxjs';
-import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 
 // To avoid a circular dependency with the deprecation of `CoreThemeProvider`,
 // we need to define the theme type here.
@@ -21,8 +20,10 @@ import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 export interface KibanaTheme {
   /** is dark mode enabled or not */
   readonly darkMode: boolean;
-
-  readonly version: ThemeVersion;
+  /**
+   * Name of the active theme
+   */
+  readonly name: string;
 }
 
 // To avoid a circular dependency with the deprecation of `CoreThemeProvider`,

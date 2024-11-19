@@ -743,7 +743,7 @@ export const getXyVisualization = ({
       paletteService,
     };
 
-    const theme = useObservable<CoreTheme>(kibanaTheme.theme$, { darkMode: false, version: 'v8' });
+    const theme = useObservable<CoreTheme>(kibanaTheme.theme$, { darkMode: false, name: 'amsterdam' });
     const palettes = getKbnPalettes(theme);
     const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
     const dimensionEditor = isReferenceLayer(layer) ? (

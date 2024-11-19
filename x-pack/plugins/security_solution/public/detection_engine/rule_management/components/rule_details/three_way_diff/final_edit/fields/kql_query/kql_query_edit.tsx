@@ -9,31 +9,23 @@ import React, { useCallback } from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import { css } from '@emotion/css';
 import { EuiButtonEmpty } from '@elastic/eui';
+import type { DataViewBase } from '@kbn/es-query';
 import { schema } from '../../../../../../../rule_creation_ui/components/step_define_rule/schema';
 import { HiddenField, UseField } from '../../../../../../../../shared_imports';
 import { QueryBarDefineRule } from '../../../../../../../rule_creation_ui/components/query_bar';
 import * as stepDefineRuleI18n from '../../../../../../../rule_creation_ui/components/step_define_rule/translations';
-import { useRuleIndexPattern } from '../../../../../../../rule_creation_ui/pages/form';
-import { DataSourceType as DataSourceTypeSnakeCase } from '../../../../../../../../../common/api/detection_engine';
 import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
-import { useDefaultIndexPattern } from '../../../../../../hooks/use_default_index_pattern';
-import { DataSourceType } from '../../../../../../../../detections/pages/detection_engine/rules/types';
 import type { SetRuleQuery } from '../../../../../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
 import { useRuleFromTimeline } from '../../../../../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
 import { useGetSavedQuery } from '../../../../../../../../detections/pages/detection_engine/rules/use_get_saved_query';
 import type { RuleFieldEditComponentProps } from '../rule_field_edit_component_props';
+import { useDiffableRuleDataView } from '../hooks/use_diffable_rule_data_view';
 
 export function KqlQueryEdit({
   finalDiffableRule,
   setFieldValue,
 }: RuleFieldEditComponentProps): JSX.Element {
-  const defaultIndexPattern = useDefaultIndexPattern();
-  const indexPatternParameters = getRuleIndexPatternParameters(
-    finalDiffableRule,
-    defaultIndexPattern
-  );
-  const { indexPattern, isIndexPatternLoading } = useRuleIndexPattern(indexPatternParameters);
-
+  const { dataView, isLoading } = useDiffableRuleDataView(finalDiffableRule);
   const [isTimelineSearchOpen, toggleIsTimelineSearchOpen] = useToggle(false);
 
   const handleSetRuleFromTimeline = useCallback<SetRuleQuery>(
@@ -68,8 +60,8 @@ export function KqlQueryEdit({
         }}
         component={QueryBarDefineRule}
         componentProps={{
-          indexPattern,
-          isLoading: isIndexPatternLoading,
+          indexPattern: dataView ?? DEFAULT_DATA_VIEW,
+          isLoading,
           openTimelineSearch: isTimelineSearchOpen,
           onCloseTimelineSearch: toggleIsTimelineSearchOpen,
           onOpenTimeline,
@@ -81,6 +73,11 @@ export function KqlQueryEdit({
     </>
   );
 }
+
+const DEFAULT_DATA_VIEW: DataViewBase = {
+  fields: [],
+  title: '',
+};
 
 const timelineButtonClassName = css`
   height: 18px;
@@ -97,37 +94,6 @@ function ImportTimelineQueryButton({
       {stepDefineRuleI18n.IMPORT_TIMELINE_QUERY}
     </EuiButtonEmpty>
   );
-}
-
-interface RuleIndexPatternParameters {
-  dataSourceType: DataSourceType;
-  index: string[];
-  dataViewId: string | undefined;
-}
-
-function getRuleIndexPatternParameters(
-  finalDiffableRule: DiffableRule,
-  defaultIndexPattern: string[]
-): RuleIndexPatternParameters {
-  if (!('data_source' in finalDiffableRule) || !finalDiffableRule.data_source) {
-    return {
-      dataSourceType: DataSourceType.IndexPatterns,
-      index: defaultIndexPattern,
-      dataViewId: undefined,
-    };
-  }
-  if (finalDiffableRule.data_source.type === DataSourceTypeSnakeCase.data_view) {
-    return {
-      dataSourceType: DataSourceType.DataView,
-      index: [],
-      dataViewId: finalDiffableRule.data_source.data_view_id,
-    };
-  }
-  return {
-    dataSourceType: DataSourceType.IndexPatterns,
-    index: finalDiffableRule.data_source.index_patterns,
-    dataViewId: undefined,
-  };
 }
 
 function getSavedQueryId(diffableRule: DiffableRule): string | undefined {
