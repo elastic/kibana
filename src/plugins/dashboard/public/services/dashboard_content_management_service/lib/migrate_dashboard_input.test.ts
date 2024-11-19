@@ -24,12 +24,12 @@ jest.mock('@kbn/embeddable-plugin/public', () => {
 
 describe('Migrate dashboard input', () => {
   it('should run factory migrations on all Dashboard content', () => {
-    const dashboardInput: SavedDashboardInput = {
+    const dashboardInput = {
       ...getSampleDashboardState(),
       id: '1',
       viewMode: ViewMode.VIEW,
       executionContext: { type: 'dashboard' },
-    };
+    } as SavedDashboardInput;
     dashboardInput.panels = {
       panel1: getSampleDashboardPanel({ type: 'superLens', explicitInput: { id: 'panel1' } }),
       panel2: getSampleDashboardPanel({ type: 'superLens', explicitInput: { id: 'panel2' } }),

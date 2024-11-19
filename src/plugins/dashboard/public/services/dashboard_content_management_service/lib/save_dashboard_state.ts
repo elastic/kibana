@@ -137,7 +137,7 @@ export const saveDashboardState = async ({
 
   const rawDashboardAttributes: DashboardAttributes = {
     version: convertDashboardVersionToNumber(LATEST_DASHBOARD_CONTAINER_VERSION),
-    controlGroupInput,
+    controlGroupInput: controlGroupInput as DashboardAttributes['controlGroupInput'],
     kibanaSavedObjectMeta: { searchSource },
     description: description ?? '',
     refreshInterval,
