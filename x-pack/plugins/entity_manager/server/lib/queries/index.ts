@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import z from '@kbn/zod';
+import { z } from '@kbn/zod';
 
 export const entitySourceSchema = z.object({
   type: z.string(),

@@ -25,7 +25,7 @@ import { deleteIndices } from './entities/delete_index';
 import { EntityDefinitionWithState } from './entities/types';
 import { EntityDefinitionUpdateConflict } from './entities/errors/entity_definition_update_conflict';
 import { EntitySource, getEntityInstancesQuery } from './queries';
-import { mergeEntitiesList } from './queries/utils';
+import { mergeEntitiesList, runESQLQuery } from './queries/utils';
 
 export class EntityClient {
   constructor(
@@ -172,6 +172,21 @@ export class EntityClient {
     return stopTransforms(this.options.esClient, definition, this.options.logger);
   }
 
+  async getEntitySources({ type }: { type: string }) {
+    const result = await this.options.esClient.search<EntitySource>({
+      index: 'kibana_entity_definitions',
+      query: {
+        bool: {
+          must: {
+            term: { entity_type: type },
+          },
+        },
+      },
+    });
+
+    return result.hits.hits.map((hit) => hit._source) as EntitySource[];
+  }
+
   async searchEntities({ sources, limit = 10 }: { sources: EntitySource[]; limit?: number }) {
     const entities = await Promise.all(
       sources.map(async (source) => {
@@ -203,7 +218,7 @@ export class EntityClient {
         );
         this.options.logger.info(`Entity query: ${query}`);
 
-        const rawEntities = await esClient.esql<Entity>('search_entities', { query });
+        const rawEntities = await runESQLQuery<Entity>({ query, esClient: this.options.esClient });
 
         return rawEntities.map((entity) => {
           entity['entity.id'] = source.identity_fields.map((field) => entity[field]).join(':');

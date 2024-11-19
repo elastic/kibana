@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Entity } from '@kbn/entities-schema';
+import { ESQLSearchResponse } from '@kbn/es-types';
 import { uniq } from 'lodash';
 
 function mergeEntities(entity1: Entity, entity2: Entity): Entity {
@@ -48,4 +50,40 @@ export function mergeEntitiesList(entities: Entity[]): Entity[] {
   }
 
   return Object.values(instances);
+}
+
+export async function runESQLQuery<T>({
+  esClient,
+  query,
+}: {
+  esClient: ElasticsearchClient;
+  query: string;
+}): Promise<T[]> {
+  const esqlResponse = (await esClient.esql.query(
+    {
+      query,
+      format: 'json',
+    },
+    { querystring: { drop_null_columns: true } }
+  )) as unknown as ESQLSearchResponse;
+
+  const documents = esqlResponse.values.map((row) =>
+    row.reduce<Record<string, any>>((acc, value, index) => {
+      const column = esqlResponse.columns[index];
+
+      if (!column) {
+        return acc;
+      }
+
+      // Removes the type suffix from the column name
+      const name = column.name.replace(/\.(text|keyword)$/, '');
+      if (!acc[name]) {
+        acc[name] = value;
+      }
+
+      return acc;
+    }, {})
+  ) as T[];
+
+  return documents;
 }

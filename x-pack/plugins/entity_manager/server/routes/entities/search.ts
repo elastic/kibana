@@ -8,7 +8,7 @@
 import moment from 'moment';
 import { z } from '@kbn/zod';
 import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
-import { EntitySource, entitySourceSchema } from '../../lib/queries';
+import { entitySourceSchema } from '../../lib/queries';
 
 export const searchEntitiesRoute = createEntityManagerServerRoute({
   endpoint: 'POST /internal/entities/_search',
@@ -23,16 +23,11 @@ export const searchEntitiesRoute = createEntityManagerServerRoute({
       const { type, limit } = params.body;
 
       const client = await getScopedClient({ request });
-      const sources = [
-        {
-          type: 'service',
-          timestamp_field: '@timestamp',
-          index_patterns: ['remote_cluster:logs-*'],
-          identity_fields: ['service.name', 'service.environment'],
-          metadata_fields: [],
-          filters: [],
-        },
-      ] as EntitySource[]; // get sources for the type
+
+      const sources = await client.getEntitySources({ type });
+      if (sources.length === 0) {
+        return response.notFound({ body: { message: `No sources found for type [${type}]` } });
+      }
 
       const entities = await client.searchEntities({ sources, limit });
 
