@@ -13,7 +13,6 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { useKibana } from '../../hooks/use_kibana';
 import { useIndicesStatusQuery } from '../../hooks/api/use_indices_status';
-import { useUserPrivilegesQuery } from '../../hooks/api/use_user_permissions';
 
 import { useIndicesRedirect } from './hooks/use_indices_redirect';
 import { ElasticsearchStart } from './elasticsearch_start';
@@ -33,7 +32,7 @@ export const ElasticsearchStartPage = () => {
     isError: hasIndicesStatusFetchError,
     error: indicesFetchError,
   } = useIndicesStatusQuery();
-  const { data: userPrivileges } = useUserPrivilegesQuery();
+
   usePageChrome(PageTitle, [...IndexManagementBreadcrumbs, { text: PageTitle }]);
 
   const embeddableConsole = useMemo(
@@ -53,7 +52,7 @@ export const ElasticsearchStartPage = () => {
         {isInitialLoading && <EuiLoadingLogo />}
         {hasIndicesStatusFetchError && <LoadIndicesStatusError error={indicesFetchError} />}
         {!isInitialLoading && !hasIndicesStatusFetchError && (
-          <ElasticsearchStart indicesData={indicesData} userPrivileges={userPrivileges} />
+          <ElasticsearchStart indicesData={indicesData} />
         )}
       </KibanaPageTemplate.Section>
       {embeddableConsole}
