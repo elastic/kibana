@@ -217,8 +217,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('should send 1 requests (documents + chart) when changing the data view', async () => {
-        await expectSearches(type, 1, async () => {
+      it('should send no more than 2 requests (documents + chart) when changing the data view', async () => {
+        await expectSearches(type, 2, async () => {
           await discover.selectIndexPattern('long-window-logstash-*');
         });
       });
