@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
 import { useAppContext } from '../../../../app_context';
@@ -26,7 +26,6 @@ import { MapperSizePluginSection } from './mapper_size_plugin_section';
 import { SubobjectsSection } from './subobjects_section';
 import { configurationFormSchema } from './configuration_form_schema';
 import { IndexMode } from '../../../../../../common/types/data_streams';
-import { LOGSDB_INDEX_MODE, TIME_SERIES_MODE } from '../../../../../../common/constants';
 
 interface Props {
   value?: MappingsConfiguration;
