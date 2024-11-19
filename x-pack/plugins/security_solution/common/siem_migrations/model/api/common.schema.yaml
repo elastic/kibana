@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: Common SIEM Migrations Attributes
+  title: SIEM Rule Migrations API common components
   version: 'not applicable'
 paths: {}
 components:

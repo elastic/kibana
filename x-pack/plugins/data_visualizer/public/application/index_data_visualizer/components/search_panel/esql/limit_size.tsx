@@ -27,14 +27,6 @@ const options = [
       values: { limit: '10,000' },
     }),
   },
-  {
-    'data-test-subj': 'dvESQLLimitSize-100000',
-    value: '100000',
-    text: i18n.translate('xpack.dataVisualizer.searchPanel.esql.limitSizeOptionLabel', {
-      defaultMessage: '{limit} rows',
-      values: { limit: '100,000' },
-    }),
-  },
 ];
 
 export const ESQLDefaultLimitSizeSelect = ({
