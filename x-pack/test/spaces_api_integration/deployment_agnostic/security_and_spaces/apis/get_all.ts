@@ -51,7 +51,6 @@ export default function getAllSpacesTestSuite(context: DeploymentAgnosticFtrProv
           legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
           dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
           dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
-          apmUser: AUTHENTICATION.APM_USER,
           machineLearningAdmin: AUTHENTICATION.MACHINE_LEARING_ADMIN,
           machineLearningUser: AUTHENTICATION.MACHINE_LEARNING_USER,
           monitoringUser: AUTHENTICATION.MONITORING_USER,
@@ -77,7 +76,6 @@ export default function getAllSpacesTestSuite(context: DeploymentAgnosticFtrProv
           legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
           dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
           dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
-          apmUser: AUTHENTICATION.APM_USER,
           machineLearningAdmin: AUTHENTICATION.MACHINE_LEARING_ADMIN,
           machineLearningUser: AUTHENTICATION.MACHINE_LEARNING_USER,
           monitoringUser: AUTHENTICATION.MONITORING_USER,
@@ -426,31 +424,31 @@ export default function getAllSpacesTestSuite(context: DeploymentAgnosticFtrProv
         }
       );
 
-      // getAllTest(
-      //   `rbac user with saved objects management all at space_1 space can access space_1 from ${scenario.spaceId}`,
-      //   {
-      //     spaceId: scenario.spaceId,
-      //     user: scenario.users.allSavedObjectsAtSpace_1,
-      //     tests: {
-      //       exists: {
-      //         statusCode: 200,
-      //         response: createExpectResults('space_1'),
-      //       },
-      //       copySavedObjectsPurpose: {
-      //         statusCode: 200,
-      //         response: createExpectResults('space_1'),
-      //       },
-      //       shareSavedObjectsPurpose: {
-      //         statusCode: 200,
-      //         response: createExpectResults('space_1'),
-      //       },
-      //       includeAuthorizedPurposes: {
-      //         statusCode: 200,
-      //         response: createExpectAllPurposesResults(authorizedAll, 'space_1'),
-      //       },
-      //     },
-      //   }
-      // );
+      getAllTest(
+        `rbac user with saved objects management all at space_1 space can access space_1 from ${scenario.spaceId}`,
+        {
+          spaceId: scenario.spaceId,
+          user: scenario.users.allSavedObjectsAtSpace_1,
+          tests: {
+            exists: {
+              statusCode: 200,
+              response: createExpectResults('space_1'),
+            },
+            copySavedObjectsPurpose: {
+              statusCode: 200,
+              response: createExpectResults('space_1'),
+            },
+            shareSavedObjectsPurpose: {
+              statusCode: 200,
+              response: createExpectResults('space_1'),
+            },
+            includeAuthorizedPurposes: {
+              statusCode: 200,
+              response: createExpectAllPurposesResults(authorizedAll, 'space_1'),
+            },
+          },
+        }
+      );
 
       getAllTest(
         `rbac user with saved objects management read at space_1 space can access space_1 from ${scenario.spaceId}`,
@@ -477,29 +475,6 @@ export default function getAllSpacesTestSuite(context: DeploymentAgnosticFtrProv
           },
         }
       );
-
-      getAllTest(`apm_user can't access any spaces from ${scenario.spaceId}`, {
-        spaceId: scenario.spaceId,
-        user: scenario.users.apmUser,
-        tests: {
-          exists: {
-            statusCode: 403,
-            response: expectRbacForbidden,
-          },
-          copySavedObjectsPurpose: {
-            statusCode: 403,
-            response: expectRbacForbidden,
-          },
-          shareSavedObjectsPurpose: {
-            statusCode: 403,
-            response: expectRbacForbidden,
-          },
-          includeAuthorizedPurposes: {
-            statusCode: 403,
-            response: expectRbacForbidden,
-          },
-        },
-      });
 
       getAllTest(`machine_learning_admin can't access any spaces from ${scenario.spaceId}`, {
         spaceId: scenario.spaceId,
