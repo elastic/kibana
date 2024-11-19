@@ -470,7 +470,7 @@ export class DashboardContainer
           coreStart={{ chrome: coreServices.chrome, customBranding: coreServices.customBranding }}
         >
           <DashboardContext.Provider value={this as DashboardApi}>
-            <DashboardViewport />
+            <DashboardViewport dashboardContainer={this.domNode} />
           </DashboardContext.Provider>
         </ExitFullScreenButtonKibanaProvider>
       </KibanaRenderContextProvider>,
