@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { v4 as uuidv4 } from 'uuid';
-import { cloneDeep } from 'lodash';
 import deepEqual from 'fast-deep-equal';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
-import { BehaviorSubject, combineLatest, debounceTime } from 'rxjs';
+import { combineLatest, debounceTime } from 'rxjs';
+import { v4 as uuidv4 } from 'uuid';
 
 import {
   EuiBadge,
@@ -27,81 +26,31 @@ import {
 } from '@elastic/eui';
 import { AppMountParameters } from '@kbn/core-application-browser';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { GridLayout, GridLayoutData, isLayoutEqual } from '@kbn/grid-layout';
+import { GridLayout, GridLayoutData } from '@kbn/grid-layout';
 import { i18n } from '@kbn/i18n';
 
+import { getPanelId } from './get_panel_id';
 import {
-  clearSerializedGridLayout,
-  getSerializedGridLayout,
+  clearSerializedDashboardState,
+  getSerializedDashboardState,
   setSerializedGridLayout,
 } from './serialized_grid_layout';
-import {
-  MockSerializedDashboardState,
-  MockedDashboardPanelMap,
-  MockedDashboardRowMap,
-} from './types';
+import { MockSerializedDashboardState } from './types';
+import { useMockDashboardApi } from './use_mock_dashboard_api';
 import { dashboardInputToGridLayout, gridLayoutToDashboardPanelMap } from './utils';
-import { getPanelId } from './get_panel_id';
 
 const DASHBOARD_MARGIN_SIZE = 8;
 const DASHBOARD_GRID_HEIGHT = 20;
 const DASHBOARD_GRID_COLUMN_COUNT = 48;
-const DEFAULT_PANEL_HEIGHT = 15;
-const DEFAULT_PANEL_WIDTH = DASHBOARD_GRID_COLUMN_COUNT / 2;
 
 export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
-  const savedState = useRef<MockSerializedDashboardState>(getSerializedGridLayout());
+  const savedState = useRef<MockSerializedDashboardState>(getSerializedDashboardState());
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
   const [currentLayout, setCurrentLayout] = useState<GridLayoutData>(
     dashboardInputToGridLayout(savedState.current)
   );
 
-  const mockDashboardApi = useMemo(() => {
-    return {
-      viewMode: new BehaviorSubject('edit'),
-      panels$: new BehaviorSubject<MockedDashboardPanelMap>(savedState.current.panels),
-      rows$: new BehaviorSubject<MockedDashboardRowMap>(savedState.current.rows),
-      removePanel: (id: string) => {
-        const panels = { ...mockDashboardApi.panels$.getValue() };
-        delete panels[id]; // the grid layout component will handle collapsing, if necessary
-        mockDashboardApi.panels$.next(panels);
-      },
-      replacePanel: (oldId: string, newId: string) => {
-        const currentPanels = mockDashboardApi.panels$.getValue();
-        const otherPanels = { ...currentPanels };
-        const oldPanel = currentPanels[oldId];
-        delete otherPanels[oldId];
-        otherPanels[newId] = { id: newId, gridData: { ...oldPanel.gridData, i: newId } };
-        mockDashboardApi.panels$.next(otherPanels);
-      },
-      addNewPanel: ({ id: newId }: { id: string }) => {
-        // we are only implementing "place at top" here, for demo purposes
-        const currentPanels = mockDashboardApi.panels$.getValue();
-        const otherPanels = { ...currentPanels };
-        for (const [id, panel] of Object.entries(currentPanels)) {
-          const currentPanel = cloneDeep(panel);
-          currentPanel.gridData.y = currentPanel.gridData.y + DEFAULT_PANEL_HEIGHT;
-          otherPanels[id] = currentPanel;
-        }
-        mockDashboardApi.panels$.next({
-          ...otherPanels,
-          [newId]: {
-            id: newId,
-            gridData: {
-              i: newId,
-              row: 0,
-              x: 0,
-              y: 0,
-              w: DEFAULT_PANEL_WIDTH,
-              h: DEFAULT_PANEL_HEIGHT,
-            },
-          },
-        });
-      },
-      canRemovePanels: () => true,
-    };
-    // only run onMount
-  }, []);
+  const mockDashboardApi = useMockDashboardApi({ savedState: savedState.current });
 
   useEffect(() => {
     combineLatest([mockDashboardApi.panels$, mockDashboardApi.rows$])
@@ -116,7 +65,7 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const renderPanel = useCallback(
+  const renderBasicPanel = useCallback(
     (id: string) => {
       return (
         <>
@@ -169,7 +118,7 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
               color="accent"
               size="s"
               onClick={() => {
-                clearSerializedGridLayout();
+                clearSerializedDashboardState();
                 window.location.reload();
               }}
             >
@@ -247,7 +196,7 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
               rowHeight: DASHBOARD_GRID_HEIGHT,
               columnCount: DASHBOARD_GRID_COLUMN_COUNT,
             }}
-            renderPanelContents={renderPanel}
+            renderPanelContents={renderBasicPanel}
             onLayoutChange={(newLayout) => {
               const { panels, rows } = gridLayoutToDashboardPanelMap(newLayout);
               mockDashboardApi.panels$.next(panels);
