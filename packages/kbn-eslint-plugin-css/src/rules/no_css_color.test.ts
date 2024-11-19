@@ -54,7 +54,7 @@ const invalid: RuleTester.InvalidTestCase[] = [
     errors: [{ messageId: 'noCssColor' }],
   },
   {
-    name: 'Raises an error when a CSS color is used in a JSX css attribute for EuiComponents',
+    name: 'Raises an error when a CSS color for the color property is used in a JSX css attribute for EuiComponents',
     filename: '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
     code: `
     import React from 'react';
@@ -67,7 +67,7 @@ const invalid: RuleTester.InvalidTestCase[] = [
     errors: [{ messageId: 'noCssColor' }],
   },
   {
-    name: 'Raises an error when a CSS color is used in a JSX css attribute for EuiComponents with the css template function',
+    name: 'Raises an error when a CSS color for the color property is used in a JSX css attribute for EuiComponents with the css template function',
     filename: '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
     code: `
     import React from 'react';
@@ -80,7 +80,7 @@ const invalid: RuleTester.InvalidTestCase[] = [
     errors: [{ messageId: 'noCssColor' }],
   },
   {
-    name: 'Raises an error when a CSS color is used in a JSX css attribute for EuiComponents with an arrow function',
+    name: 'Raises an error when a CSS color for the color property is used in a JSX css attribute for EuiComponents with an arrow function',
     filename: '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
     code: `
     import React from 'react';
@@ -93,7 +93,7 @@ const invalid: RuleTester.InvalidTestCase[] = [
     errors: [{ messageId: 'noCssColor' }],
   },
   {
-    name: 'Raises an error when a CSS color is used in a JSX css attribute for EuiComponents with a regular function',
+    name: 'Raises an error when a CSS color for the color property is used in a JSX css attribute for EuiComponents with a regular function',
     filename: '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
     code: `
     import React from 'react';
