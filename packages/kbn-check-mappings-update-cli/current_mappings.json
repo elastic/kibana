@@ -1509,6 +1509,10 @@
       "favoriteIds": {
         "type": "keyword"
       },
+      "favoriteMetadata": {
+        "dynamic": false,
+        "type": "object"
+      },
       "type": {
         "type": "keyword"
       },
