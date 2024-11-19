@@ -40,7 +40,7 @@ interface UsePersistentQueryResult {
 }
 
 /**
- * Persists query when switching between different rule types using different queries (kuery and ES|QL).
+ * Persists query when switching between different rule types using different queries (kuery, EQL and ES|QL).
  *
  * When the user changes rule type to or from "threat_match" this will modify the
  * default "Custom query" string to either:
