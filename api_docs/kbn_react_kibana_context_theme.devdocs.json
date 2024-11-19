@@ -2,10 +2,26 @@
   "id": "@kbn/react-kibana-context-theme",
   "client": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/react-kibana-context-theme",
-        "id": "def-public.KibanaThemeProvider",
+        "id": "def-common.KibanaThemeProvider",
         "type": "Function",
         "tags": [],
         "label": "KibanaThemeProvider",
@@ -16,9 +32,9 @@
           "({ theme, children, ...props }: ",
           {
             "pluginId": "@kbn/react-kibana-context-theme",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnReactKibanaContextThemePluginApi",
-            "section": "def-public.KibanaThemeProviderProps",
+            "section": "def-common.KibanaThemeProviderProps",
             "text": "KibanaThemeProviderProps"
           },
           ") => React.JSX.Element"
@@ -30,7 +46,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/react-kibana-context-theme",
-            "id": "def-public.KibanaThemeProvider.$1",
+            "id": "def-common.KibanaThemeProvider.$1",
             "type": "Object",
             "tags": [],
             "label": "__0",
@@ -38,9 +54,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/react-kibana-context-theme",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibKbnReactKibanaContextThemePluginApi",
-                "section": "def-public.KibanaThemeProviderProps",
+                "section": "def-common.KibanaThemeProviderProps",
                 "text": "KibanaThemeProviderProps"
               }
             ],
@@ -53,7 +69,7 @@
       },
       {
         "parentPluginId": "@kbn/react-kibana-context-theme",
-        "id": "def-public.wrapWithTheme",
+        "id": "def-common.wrapWithTheme",
         "type": "Function",
         "tags": [],
         "label": "wrapWithTheme",
@@ -64,9 +80,9 @@
           "(node: React.ReactNode, theme: ",
           {
             "pluginId": "@kbn/react-kibana-context-common",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnReactKibanaContextCommonPluginApi",
-            "section": "def-public.ThemeServiceStart",
+            "section": "def-common.ThemeServiceStart",
             "text": "ThemeServiceStart"
           },
           ") => React.JSX.Element"
@@ -77,7 +93,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/react-kibana-context-theme",
-            "id": "def-public.wrapWithTheme.$1",
+            "id": "def-common.wrapWithTheme.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "node",
@@ -94,7 +110,7 @@
           },
           {
             "parentPluginId": "@kbn/react-kibana-context-theme",
-            "id": "def-public.wrapWithTheme.$2",
+            "id": "def-common.wrapWithTheme.$2",
             "type": "Object",
             "tags": [],
             "label": "theme",
@@ -104,9 +120,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/react-kibana-context-common",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibKbnReactKibanaContextCommonPluginApi",
-                "section": "def-public.ThemeServiceStart",
+                "section": "def-common.ThemeServiceStart",
                 "text": "ThemeServiceStart"
               }
             ],
@@ -123,7 +139,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/react-kibana-context-theme",
-        "id": "def-public.KibanaTheme",
+        "id": "def-common.KibanaTheme",
         "type": "Interface",
         "tags": [],
         "label": "KibanaTheme",
@@ -136,12 +152,25 @@
         "children": [
           {
             "parentPluginId": "@kbn/react-kibana-context-theme",
-            "id": "def-public.KibanaTheme.darkMode",
+            "id": "def-common.KibanaTheme.darkMode",
             "type": "boolean",
             "tags": [],
             "label": "darkMode",
             "description": [
               "is dark mode enabled or not"
+            ],
+            "path": "packages/react/kibana_context/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/react-kibana-context-theme",
+            "id": "def-common.KibanaTheme.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nName of the active theme"
             ],
             "path": "packages/react/kibana_context/common/types.ts",
             "deprecated": false,
@@ -152,7 +181,7 @@
       },
       {
         "parentPluginId": "@kbn/react-kibana-context-theme",
-        "id": "def-public.KibanaThemeProviderProps",
+        "id": "def-common.KibanaThemeProviderProps",
         "type": "Interface",
         "tags": [],
         "label": "KibanaThemeProviderProps",
@@ -162,9 +191,9 @@
         "signature": [
           {
             "pluginId": "@kbn/react-kibana-context-theme",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnReactKibanaContextThemePluginApi",
-            "section": "def-public.KibanaThemeProviderProps",
+            "section": "def-common.KibanaThemeProviderProps",
             "text": "KibanaThemeProviderProps"
           },
           " extends EuiProps<{}>"
@@ -175,7 +204,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/react-kibana-context-theme",
-            "id": "def-public.KibanaThemeProviderProps.theme",
+            "id": "def-common.KibanaThemeProviderProps.theme",
             "type": "Object",
             "tags": [],
             "label": "theme",
@@ -185,9 +214,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/react-kibana-context-common",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibKbnReactKibanaContextCommonPluginApi",
-                "section": "def-public.ThemeServiceStart",
+                "section": "def-common.ThemeServiceStart",
                 "text": "ThemeServiceStart"
               }
             ],
@@ -204,7 +233,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/react-kibana-context-theme",
-        "id": "def-public.defaultTheme",
+        "id": "def-common.defaultTheme",
         "type": "Object",
         "tags": [],
         "label": "defaultTheme",
@@ -217,7 +246,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/react-kibana-context-theme",
-            "id": "def-public.defaultTheme.darkMode",
+            "id": "def-common.defaultTheme.darkMode",
             "type": "boolean",
             "tags": [],
             "label": "darkMode",
@@ -228,26 +257,21 @@
             "path": "packages/react/kibana_context/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/react-kibana-context-theme",
+            "id": "def-common.defaultTheme.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "packages/react/kibana_context/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       }
     ]
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

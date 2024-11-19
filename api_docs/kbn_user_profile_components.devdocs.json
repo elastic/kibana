@@ -976,9 +976,9 @@
                   ", \"reportEvent\"> | undefined; theme: ",
                   {
                     "pluginId": "@kbn/react-kibana-context-common",
-                    "scope": "public",
+                    "scope": "common",
                     "docId": "kibKbnReactKibanaContextCommonPluginApi",
-                    "section": "def-public.ThemeServiceStart",
+                    "section": "def-common.ThemeServiceStart",
                     "text": "ThemeServiceStart"
                   },
                   "; }"

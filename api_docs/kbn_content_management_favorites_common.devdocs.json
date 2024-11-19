@@ -1,0 +1,43 @@
+{
+  "id": "@kbn/content-management-favorites-common",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/content-management-favorites-common",
+        "id": "def-common.FAVORITES_LIMIT",
+        "type": "number",
+        "tags": [],
+        "label": "FAVORITES_LIMIT",
+        "description": [],
+        "signature": [
+          "100"
+        ],
+        "path": "packages/content-management/favorites/favorites_common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

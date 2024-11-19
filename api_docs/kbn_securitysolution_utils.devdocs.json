@@ -1042,7 +1042,7 @@
         "label": "TrustedAppConditionEntryField",
         "description": [],
         "signature": [
-          "\"process.hash.*\" | \"process.executable.caseless\" | \"process.Ext.code_signature\""
+          "\"process.hash.*\" | \"process.executable.caseless\" | \"process.Ext.code_signature\" | \"process.code_signature\""
         ],
         "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
         "deprecated": false,
