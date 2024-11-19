@@ -21,16 +21,16 @@ import {
   DEFAULT_ESQL_QUERY_FIELD_VALUE,
   DEFAULT_KQL_QUERY_FIELD_VALUE,
   DEFAULT_THREAT_MATCH_KQL_QUERY_FIELD_VALUE,
+  QUERY_FIELD_NAME,
   type FieldValueQueryBar,
 } from '../query_field';
+import { RULE_TYPE_FIELD_NAME } from '../select_rule_type';
 
 const EQL_QUERY_LANGUAGE = 'eql';
 const ESQL_QUERY_LANGUAGE = 'esql';
 
 interface UsePersistentQueryParams {
   form: FormHook<DefineStepRule>;
-  ruleTypePath: string;
-  queryPath: string;
 }
 
 interface UsePersistentQueryResult {
@@ -47,14 +47,10 @@ interface UsePersistentQueryResult {
  *   * from '' to '*:*' if the type is switched to "threat_match"
  *   * from '*:*' back to '' if the type is switched back from "threat_match" to another one
  */
-export function usePersistentQuery({
-  form,
-  ruleTypePath,
-  queryPath,
-}: UsePersistentQueryParams): UsePersistentQueryResult {
-  const [{ [ruleTypePath]: ruleType, [queryPath]: currentQuery }] = useFormData({
+export function usePersistentQuery({ form }: UsePersistentQueryParams): UsePersistentQueryResult {
+  const [{ [RULE_TYPE_FIELD_NAME]: ruleType, [QUERY_FIELD_NAME]: currentQuery }] = useFormData({
     form,
-    watch: [ruleTypePath, queryPath],
+    watch: [RULE_TYPE_FIELD_NAME, QUERY_FIELD_NAME],
   });
   const previousRuleType = usePrevious(ruleType);
   const queryRef = useRef<FieldValueQueryBar>(DEFAULT_KQL_QUERY_FIELD_VALUE);
@@ -92,7 +88,7 @@ export function usePersistentQuery({
       return;
     }
 
-    const queryField = form.getFields()[queryPath] as FieldHook<FieldValueQueryBar>;
+    const queryField = form.getFields()[QUERY_FIELD_NAME] as FieldHook<FieldValueQueryBar>;
 
     if (isEqlRule(ruleType)) {
       queryField.reset({
@@ -131,7 +127,7 @@ export function usePersistentQuery({
         defaultValue: queryRef.current,
       });
     }
-  }, [queryPath, ruleType, previousRuleType, form]);
+  }, [ruleType, previousRuleType, form]);
 
   return useMemo(
     () => ({

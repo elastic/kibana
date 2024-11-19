@@ -38,8 +38,8 @@ import type {
 import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
 import { StepRuleDescription } from '../description_step';
 import type { QueryBarDefineRuleProps } from '../query_field';
-import { QueryField } from '../query_field';
-import { SelectRuleType } from '../select_rule_type';
+import { QUERY_FIELD_NAME, QueryField } from '../query_field';
+import { RULE_TYPE_FIELD_NAME, SelectRuleType } from '../select_rule_type';
 import { AnomalyThresholdSlider } from '../anomaly_threshold_slider';
 import { MlJobSelect } from '../../../rule_creation/components/ml_job_select';
 import { PickTimeline } from '../../../rule_creation/components/pick_timeline';
@@ -168,10 +168,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   threatIndicesConfig,
   thresholdFields,
 }) => {
-  const [{ ruleType, queryBar, machineLearningJobId }] = useFormData<DefineStepRule>({
-    form,
-    watch: ['ruleType', 'queryBar', 'machineLearningJobId'],
-  });
+  const [{ ruleType, [QUERY_FIELD_NAME]: queryBar, machineLearningJobId }] =
+    useFormData<DefineStepRule>({
+      form,
+      watch: [RULE_TYPE_FIELD_NAME, QUERY_FIELD_NAME, 'machineLearningJobId'],
+    });
 
   const { isSuppressionEnabled: isAlertSuppressionEnabled } = useAlertSuppression(ruleType);
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
@@ -197,7 +198,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const { getFields, reset, setFieldValue } = form;
 
   const setRuleTypeCallback = useSetFieldValueWithCallback({
-    field: 'ruleType',
+    field: RULE_TYPE_FIELD_NAME,
     value: ruleType,
     setFieldValue,
   });
@@ -275,8 +276,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
   const { setPersistentEqlQuery } = usePersistentQuery({
     form,
-    ruleTypePath: 'ruleType',
-    queryPath: 'queryBar',
   });
   usePersistentAlertSuppressionState({ form });
 

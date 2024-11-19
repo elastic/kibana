@@ -22,6 +22,7 @@ import {
   AlertSuppressionDurationType,
   type DefineStepRule,
 } from '../../../../detections/pages/detection_engine/rules/types';
+import { RULE_TYPE_FIELD_NAME } from '../select_rule_type';
 
 interface UsePersistentAlertSuppressionStateParams {
   form: FormHook<DefineStepRule>;
@@ -42,7 +43,7 @@ export function usePersistentAlertSuppressionState({
   ] = useFormData({
     form,
     watch: [
-      'ruleType',
+      RULE_TYPE_FIELD_NAME,
       THRESHOLD_ALERT_SUPPRESSION_ENABLED,
       ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
       ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,

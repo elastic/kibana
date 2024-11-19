@@ -26,7 +26,7 @@ import {
 } from '../../../../../common/detection_engine/utils';
 import { MAX_NUMBER_OF_NEW_TERMS_FIELDS } from '../../../../../common/constants';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
-import type { FieldValueQueryBar } from '../query_field';
+import { QUERY_FIELD_NAME, type FieldValueQueryBar } from '../query_field';
 import type { ERROR_CODE, FormSchema, ValidationFunc } from '../../../../shared_imports';
 import { FIELD_TYPES, fieldValidators } from '../../../../shared_imports';
 import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
@@ -51,11 +51,12 @@ import {
 import * as alertSuppressionEditI81n from '../../../rule_creation/components/alert_suppression_edit/components/translations';
 import { queryRequiredValidatorFactory } from '../../validators/query_required_validator_factory';
 import { kueryValidatorFactory } from '../../validators/kuery_validator_factory';
+import { RULE_TYPE_FIELD_NAME } from '../select_rule_type';
 
 export const schema: FormSchema<DefineStepRule> = {
   index: {
     defaultValue: [],
-    fieldsToValidateOnChange: ['index', 'queryBar'],
+    fieldsToValidateOnChange: ['index', QUERY_FIELD_NAME],
     type: FIELD_TYPES.COMBO_BOX,
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fiedIndexPatternsLabel',
@@ -70,8 +71,8 @@ export const schema: FormSchema<DefineStepRule> = {
           const [{ formData }] = args;
 
           if (
-            isMlRule(formData.ruleType) ||
-            isEsqlRule(formData.ruleType) ||
+            isMlRule(formData[RULE_TYPE_FIELD_NAME]) ||
+            isEsqlRule(formData[RULE_TYPE_FIELD_NAME]) ||
             formData.dataSourceType !== DataSourceType.IndexPatterns
           ) {
             return;
@@ -95,7 +96,10 @@ export const schema: FormSchema<DefineStepRule> = {
         validator: (...args) => {
           const [{ formData }] = args;
 
-          if (isMlRule(formData.ruleType) || formData.dataSourceType !== DataSourceType.DataView) {
+          if (
+            isMlRule(formData[RULE_TYPE_FIELD_NAME]) ||
+            formData.dataSourceType !== DataSourceType.DataView
+          ) {
             return;
           }
 
@@ -114,7 +118,7 @@ export const schema: FormSchema<DefineStepRule> = {
     validations: [],
   },
   eqlOptions: {
-    fieldsToValidateOnChange: ['eqlOptions', 'queryBar'],
+    fieldsToValidateOnChange: ['eqlOptions', QUERY_FIELD_NAME],
   },
   queryBar: {
     fieldsToValidateOnChange: ['queryBar', ALERT_SUPPRESSION_FIELDS_FIELD_NAME],
@@ -138,7 +142,7 @@ export const schema: FormSchema<DefineStepRule> = {
       },
     ],
   },
-  ruleType: {
+  [RULE_TYPE_FIELD_NAME]: {
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldRuleTypeLabel',
       {
@@ -169,7 +173,7 @@ export const schema: FormSchema<DefineStepRule> = {
           ...args: Parameters<ValidationFunc>
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ formData }] = args;
-          const needsValidation = isMlRule(formData.ruleType);
+          const needsValidation = isMlRule(formData[RULE_TYPE_FIELD_NAME]);
 
           if (!needsValidation) {
             return;
@@ -251,7 +255,7 @@ export const schema: FormSchema<DefineStepRule> = {
             ...args: Parameters<ValidationFunc>
           ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
             const [{ formData }] = args;
-            const needsValidation = isThresholdRule(formData.ruleType);
+            const needsValidation = isThresholdRule(formData[RULE_TYPE_FIELD_NAME]);
             if (!needsValidation) {
               return;
             }
@@ -282,7 +286,7 @@ export const schema: FormSchema<DefineStepRule> = {
             ...args: Parameters<ValidationFunc>
           ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
             const [{ formData }] = args;
-            const needsValidation = isThresholdRule(formData.ruleType);
+            const needsValidation = isThresholdRule(formData[RULE_TYPE_FIELD_NAME]);
             if (!needsValidation) {
               return;
             }
@@ -317,7 +321,7 @@ export const schema: FormSchema<DefineStepRule> = {
               ...args: Parameters<ValidationFunc>
             ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
               const [{ formData }] = args;
-              const needsValidation = isThresholdRule(formData.ruleType);
+              const needsValidation = isThresholdRule(formData[RULE_TYPE_FIELD_NAME]);
               if (!needsValidation) {
                 return;
               }
@@ -359,7 +363,7 @@ export const schema: FormSchema<DefineStepRule> = {
               ...args: Parameters<ValidationFunc>
             ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
               const [{ formData }] = args;
-              const needsValidation = isThresholdRule(formData.ruleType);
+              const needsValidation = isThresholdRule(formData[RULE_TYPE_FIELD_NAME]);
               if (!needsValidation) {
                 return;
               }
@@ -396,7 +400,7 @@ export const schema: FormSchema<DefineStepRule> = {
           ...args: Parameters<ValidationFunc>
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ formData }] = args;
-          const needsValidation = isThreatMatchRule(formData.ruleType);
+          const needsValidation = isThreatMatchRule(formData[RULE_TYPE_FIELD_NAME]);
           if (!needsValidation) {
             return;
           }
@@ -415,7 +419,7 @@ export const schema: FormSchema<DefineStepRule> = {
           ...args: Parameters<ValidationFunc>
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ formData, value }] = args;
-          const needsValidation = isThreatMatchRule(formData.ruleType);
+          const needsValidation = isThreatMatchRule(formData[RULE_TYPE_FIELD_NAME]);
           if (!needsValidation) {
             return;
           }
@@ -438,7 +442,7 @@ export const schema: FormSchema<DefineStepRule> = {
           ...args: Parameters<ValidationFunc>
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ path, formData }] = args;
-          const needsValidation = isThreatMatchRule(formData.ruleType);
+          const needsValidation = isThreatMatchRule(formData[RULE_TYPE_FIELD_NAME]);
           if (!needsValidation) {
             return;
           }
@@ -504,7 +508,7 @@ export const schema: FormSchema<DefineStepRule> = {
           ...args: Parameters<ValidationFunc>
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ formData }] = args;
-          const needsValidation = isNewTermsRule(formData.ruleType);
+          const needsValidation = isNewTermsRule(formData[RULE_TYPE_FIELD_NAME]);
           if (!needsValidation) {
             return;
           }
@@ -524,7 +528,7 @@ export const schema: FormSchema<DefineStepRule> = {
           ...args: Parameters<ValidationFunc>
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ formData }] = args;
-          const needsValidation = isNewTermsRule(formData.ruleType);
+          const needsValidation = isNewTermsRule(formData[RULE_TYPE_FIELD_NAME]);
           if (!needsValidation) {
             return;
           }
@@ -560,7 +564,7 @@ export const schema: FormSchema<DefineStepRule> = {
           ...args: Parameters<ValidationFunc>
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ path, formData }] = args;
-          const needsValidation = isNewTermsRule(formData.ruleType);
+          const needsValidation = isNewTermsRule(formData[RULE_TYPE_FIELD_NAME]);
 
           if (!needsValidation) {
             return;
@@ -589,7 +593,9 @@ export const schema: FormSchema<DefineStepRule> = {
       {
         validator: (...args: Parameters<ValidationFunc>) => {
           const [{ formData }] = args;
-          const needsValidation = isSuppressionRuleConfiguredWithGroupBy(formData.ruleType);
+          const needsValidation = isSuppressionRuleConfiguredWithGroupBy(
+            formData[RULE_TYPE_FIELD_NAME]
+          );
 
           if (!needsValidation) {
             return;
@@ -604,7 +610,11 @@ export const schema: FormSchema<DefineStepRule> = {
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ formData, value }] = args;
 
-          if (!isEqlRule(formData.ruleType) || !Array.isArray(value) || value.length === 0) {
+          if (
+            !isEqlRule(formData[RULE_TYPE_FIELD_NAME]) ||
+            !Array.isArray(value) ||
+            value.length === 0
+          ) {
             return;
           }
 

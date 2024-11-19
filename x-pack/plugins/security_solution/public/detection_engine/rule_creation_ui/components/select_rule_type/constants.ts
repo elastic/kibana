@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export * from './types';
-export * from './default_queries';
-export * from './constants';
-export * from './query_field';
+export const RULE_TYPE_FIELD_NAME = 'ruleType' as const;

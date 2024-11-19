@@ -12,7 +12,10 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import type { DataViewBase } from '@kbn/es-query';
 import { schema } from '../../../../../../../rule_creation_ui/components/step_define_rule/schema';
 import { HiddenField, UseField } from '../../../../../../../../shared_imports';
-import { QueryField } from '../../../../../../../rule_creation_ui/components/query_field';
+import {
+  QUERY_FIELD_NAME,
+  QueryField,
+} from '../../../../../../../rule_creation_ui/components/query_field';
 import * as stepDefineRuleI18n from '../../../../../../../rule_creation_ui/components/step_define_rule/translations';
 import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import type { SetRuleQuery } from '../../../../../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
@@ -30,7 +33,7 @@ export function KqlQueryEdit({
 
   const handleSetRuleFromTimeline = useCallback<SetRuleQuery>(
     ({ queryBar: timelineQueryBar }) => {
-      setFieldValue('queryBar', timelineQueryBar);
+      setFieldValue(QUERY_FIELD_NAME, timelineQueryBar);
     },
     [setFieldValue]
   );
