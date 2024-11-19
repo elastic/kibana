@@ -50,5 +50,6 @@
     "@kbn/data-plugin",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/observability-utils-server",
+    "@kbn/es-types",
   ]
 }
