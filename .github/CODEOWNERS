@@ -1455,6 +1455,7 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /test/package @elastic/kibana-operations
 /test/package/roles @elastic/kibana-operations
 /test/common/fixtures/plugins/coverage/kibana.json @elastic/kibana-operations
+/x-pack/test/plugin_functional/screenshots @elastic/kibana-operations # Assigned per https://github.com/elastic/kibana/pull/94370/files
 /src/dev/license_checker/config.ts @elastic/kibana-operations
 /src/dev/ @elastic/kibana-operations
 /src/setup_node_env/ @elastic/kibana-operations
