@@ -88,17 +88,9 @@ const timelineData = {
   savedSearchId: null,
 };
 const mockPatchTimelineResponse = {
-  data: {
-    persistTimeline: {
-      code: 200,
-      message: 'success',
-      timeline: {
-        ...timelineData,
-        savedObjectId: '9d5693e0-a42a-11ea-b8f4-c5434162742a',
-        version: 'WzM0NSwxXQ==',
-      },
-    },
-  },
+  ...timelineData,
+  savedObjectId: '9d5693e0-a42a-11ea-b8f4-c5434162742a',
+  version: 'WzM0NSwxXQ==',
 };
 describe('persistTimeline', () => {
   describe('create draft timeline', () => {
@@ -204,13 +196,8 @@ describe('persistTimeline', () => {
         version,
       });
       expect(persist).toEqual({
-        data: {
-          persistTimeline: {
-            code: 403,
-            message: 'you do not have the permission',
-            timeline: { ...initialDraftTimeline, savedObjectId: '', version: '' },
-          },
-        },
+        statusCode: 403,
+        message: 'you do not have the permission',
       });
     });
   });
@@ -219,15 +206,9 @@ describe('persistTimeline', () => {
     const timelineId = null;
     const importTimeline = timelineData;
     const mockPostTimelineResponse = {
-      data: {
-        persistTimeline: {
-          timeline: {
-            ...timelineData,
-            savedObjectId: '9d5693e0-a42a-11ea-b8f4-c5434162742a',
-            version: 'WzMzMiwxXQ==',
-          },
-        },
-      },
+      ...timelineData,
+      savedObjectId: '9d5693e0-a42a-11ea-b8f4-c5434162742a',
+      version: 'WzMzMiwxXQ==',
     };
 
     const version = null;
@@ -266,17 +247,11 @@ describe('persistTimeline', () => {
     const timelineId = '9d5693e0-a42a-11ea-b8f4-c5434162742a';
     const inputTimeline = timelineData;
     const mockPatchTimelineResponseNew = {
-      data: {
-        persistTimeline: {
-          timeline: {
-            ...mockPatchTimelineResponse,
-            version: 'WzMzMiwxXQ==',
-            description: 'x',
-            created: 1591092702804,
-            updated: 1591092705206,
-          },
-        },
-      },
+      ...mockPatchTimelineResponse,
+      version: 'WzMzMiwxXQ==',
+      description: 'x',
+      created: 1591092702804,
+      updated: 1591092705206,
     };
 
     const version = 'initial version';
@@ -447,15 +422,9 @@ describe('cleanDraftTimeline', () => {
 
 describe('copyTimeline', () => {
   const mockPostTimelineResponse = {
-    data: {
-      persistTimeline: {
-        timeline: {
-          ...timelineData,
-          savedObjectId: '9d5693e0-a42a-11ea-b8f4-c5434162742a',
-          version: 'WzMzMiwxXQ==',
-        },
-      },
-    },
+    ...timelineData,
+    savedObjectId: '9d5693e0-a42a-11ea-b8f4-c5434162742a',
+    version: 'WzMzMiwxXQ==',
   };
 
   const saveSavedSearchMock = jest.fn();
