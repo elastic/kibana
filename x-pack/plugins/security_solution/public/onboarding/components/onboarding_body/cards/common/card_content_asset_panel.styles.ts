@@ -8,7 +8,7 @@
 import { css } from '@emotion/css';
 import { useEuiTheme, useEuiShadow, COLOR_MODES_STANDARD } from '@elastic/eui';
 
-export const useCardContentImagePanelStyles = () => {
+export const useCardContentAssetPanelStyles = () => {
   const { euiTheme, colorMode } = useEuiTheme();
   const shadowStyles = useEuiShadow('m');
   const isDarkMode = colorMode === COLOR_MODES_STANDARD.dark;

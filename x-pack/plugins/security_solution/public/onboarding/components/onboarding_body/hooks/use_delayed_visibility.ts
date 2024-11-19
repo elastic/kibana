@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
+import { HEIGHT_ANIMATION_DURATION } from '../onboarding_card_panel.styles';
 
 /**
  * This hook manages a delayed visibility state (`isVisible`) to support smooth animations
@@ -26,13 +27,12 @@ export const useDelayedVisibility = ({ isExpanded }: { isExpanded?: boolean }) =
 
     // Delay visibility toggle off to allow exit animations to complete
     if (!isExpanded) {
-      timeoutId = setTimeout(() => setIsVisible(false), 350);
+      timeoutId = setTimeout(() => setIsVisible(false), HEIGHT_ANIMATION_DURATION);
     } else {
-      // Immediately set visibility on expansion
       setIsVisible(true);
     }
 
-    return () => clearTimeout(timeoutId); // Clean up on component unmount or dependency change
+    return () => clearTimeout(timeoutId);
   }, [isExpanded]);
 
   return isVisible;

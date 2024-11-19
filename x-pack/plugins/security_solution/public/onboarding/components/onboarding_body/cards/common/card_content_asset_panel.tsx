@@ -7,7 +7,7 @@
 import React, { useMemo, type PropsWithChildren } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { OnboardingCardContentPanel } from './card_content_panel';
-import { useCardContentImagePanelStyles } from './card_content_image_panel.styles';
+import { useCardContentAssetPanelStyles } from './card_content_asset_panel.styles';
 import { CardSelectorListItemAssetType } from './card_selector_list';
 
 export const OnboardingCardContentAssetPanel = React.memo<
@@ -15,7 +15,7 @@ export const OnboardingCardContentAssetPanel = React.memo<
     asset: { type: CardSelectorListItemAssetType; source: string; alt: string };
   }>
 >(({ children, asset: { type, source, alt } }) => {
-  const styles = useCardContentImagePanelStyles();
+  const styles = useCardContentAssetPanelStyles();
 
   const renderAssetContent = useMemo(() => {
     if (type === CardSelectorListItemAssetType.video)

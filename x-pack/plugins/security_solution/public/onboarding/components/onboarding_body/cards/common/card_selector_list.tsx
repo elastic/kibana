@@ -5,19 +5,11 @@
  * 2.0.
  */
 import React, { useEffect } from 'react';
-import {
-  EuiPanel,
-  useEuiTheme,
-  EuiFlexGroup,
-  EuiFlexItem,
-  useEuiBackgroundColor,
-  EuiTitle,
-  EuiText,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
 import type { RulesCardItemId } from '../rules/types';
 import type { AlertsCardItemId } from '../alerts/types';
 import type { DashboardsCardItemId } from '../dashboards/types';
+import { useCardSelectorListStyles } from './card_selector_list.styles';
 
 const INITIAL_SCROLL_ANIMATION_DURATION = 500;
 const SCROLL_ANIMATION_DURATION = 300;
@@ -58,18 +50,17 @@ const scrollToSelectedItem = (
 
 export const CardSelectorList = React.memo<CardSelectorListProps>(
   ({ items, onSelect, selectedItem, title }) => {
-    const { euiTheme } = useEuiTheme();
-    const itemBackgroundColor = useEuiBackgroundColor('primary');
+    const styles = useCardSelectorListStyles();
 
     useEffect(() => {
       scrollToSelectedItem(selectedItem.id, INITIAL_SCROLL_ANIMATION_DURATION);
     }, [selectedItem]);
 
     return (
-      <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexGroup direction="column" gutterSize="s" className={styles}>
         {title && (
           <EuiFlexItem>
-            <EuiText data-test-subj="rulesCardDescription" size="xs" style={{ fontWeight: 500 }}>
+            <EuiText data-test-subj="rulesCardDescription" size="xs" className="cardSelectorTitle">
               {title}
             </EuiText>
           </EuiFlexItem>
@@ -77,7 +68,7 @@ export const CardSelectorList = React.memo<CardSelectorListProps>(
         <EuiFlexItem>
           <EuiFlexGroup
             id="scroll-container"
-            style={{ maxHeight: '210px', overflowY: 'auto', padding: '10px 0' }}
+            className="cardSelectorContent"
             direction="column"
             gutterSize="s"
           >
@@ -85,14 +76,7 @@ export const CardSelectorList = React.memo<CardSelectorListProps>(
               <EuiFlexItem id={`${item.id}-selector`} grow={false}>
                 <EuiPanel
                   hasBorder
-                  style={
-                    selectedItem.id === item.id
-                      ? {
-                          border: `1px solid ${euiTheme.colors.primary}`,
-                          backgroundColor: `${itemBackgroundColor}`,
-                        }
-                      : {}
-                  }
+                  className={selectedItem.id === item.id ? 'selectedCardPanelItem' : ''}
                   color={selectedItem.id === item.id ? 'subdued' : 'plain'}
                   element="button"
                   onClick={() => {
