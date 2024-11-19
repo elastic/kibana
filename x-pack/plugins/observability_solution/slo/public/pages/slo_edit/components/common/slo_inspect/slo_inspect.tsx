@@ -27,7 +27,7 @@ import { GetSLOResponse } from '@kbn/slo-schema';
 import React, { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
-import { useKibana } from '../../../../../utils/kibana_react';
+import { useKibana } from '../../../../../hooks/use_kibana';
 import { useFetchSloInspect } from '../../../../../hooks/use_fetch_slo_inspect';
 import { usePluginContext } from '../../../../../hooks/use_plugin_context';
 import { transformCreateSLOFormToCreateSLOInput } from '../../../helpers/process_slo_form_values';

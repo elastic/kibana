@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import type { ProductName } from '@kbn/product-doc-common';
+
 export interface TaskConfig {
-  productNames: string[];
+  productNames: ProductName[];
   stackVersion: string;
   buildFolder: string;
   targetFolder: string;

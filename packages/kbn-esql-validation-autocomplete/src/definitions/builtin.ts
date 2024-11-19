@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { ESQL_NUMBER_TYPES, isNumericType } from '../shared/esql_types';
 import type { FunctionDefinition, FunctionParameterType, FunctionReturnType } from './types';
-
+import { operatorsFunctionDefinitions } from './generated/operators';
 type MathFunctionSignature = [FunctionParameterType, FunctionParameterType, FunctionReturnType];
 
 function createMathDefinition(
@@ -528,7 +528,7 @@ const inFunctions: FunctionDefinition[] = [
   ],
 }));
 
-const logicFunctions: FunctionDefinition[] = [
+export const logicalOperators: FunctionDefinition[] = [
   {
     name: 'and',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.andDoc', {
@@ -649,7 +649,12 @@ export const builtinFunctions: FunctionDefinition[] = [
   ...comparisonFunctions,
   ...likeFunctions,
   ...inFunctions,
-  ...logicFunctions,
+  ...logicalOperators,
   ...nullFunctions,
   ...otherDefinitions,
 ];
+
+// @TODO: remove
+console.log(`--@@builtinFunctions`, builtinFunctions);
+// @TODO: remove
+console.log(`--@@operatorsFunctionDefinitions`, operatorsFunctionDefinitions);

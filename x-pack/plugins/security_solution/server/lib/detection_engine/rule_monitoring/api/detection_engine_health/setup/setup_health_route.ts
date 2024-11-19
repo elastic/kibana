@@ -22,8 +22,10 @@ export const setupHealthRoute = (router: SecuritySolutionPluginRouter) => {
     .post({
       access: 'internal',
       path: SETUP_HEALTH_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(

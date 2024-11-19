@@ -12,6 +12,7 @@ import { EntityIdConflict } from '../../lib/entities/errors/entity_id_conflict_e
 import { EntitySecurityException } from '../../lib/entities/errors/entity_security_exception';
 import { InvalidTransformError } from '../../lib/entities/errors/invalid_transform_error';
 import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
+import { canManageEntityDefinition } from '../../lib/auth';
 
 /**
  * @openapi
@@ -49,12 +50,35 @@ import { createEntityManagerServerRoute } from '../create_entity_manager_server_
  */
 export const createEntityDefinitionRoute = createEntityManagerServerRoute({
   endpoint: 'POST /internal/entities/definition',
+  options: {
+    security: {
+      authz: {
+        enabled: false,
+        reason:
+          'This endpoint mainly manages Elasticsearch resources using the requesting users credentials',
+      },
+    },
+  },
   params: z.object({
     query: createEntityDefinitionQuerySchema,
     body: entityDefinitionSchema,
   }),
-  handler: async ({ request, response, params, logger, getScopedClient }) => {
+  handler: async ({ context, request, response, params, logger, getScopedClient }) => {
     try {
+      const currentUserClient = (await context.core).elasticsearch.client.asCurrentUser;
+      const isAuthorized = await canManageEntityDefinition(
+        currentUserClient,
+        params.body.indexPatterns
+      );
+      if (!isAuthorized) {
+        return response.forbidden({
+          body: {
+            message:
+              'Current Kibana user does not have the required permissions to create the entity definition',
+          },
+        });
+      }
+
       const client = await getScopedClient({ request });
       const definition = await client.createEntityDefinition({
         definition: params.body,

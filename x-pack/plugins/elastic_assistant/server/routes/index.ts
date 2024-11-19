@@ -12,8 +12,12 @@ export { postActionsConnectorExecuteRoute } from './post_actions_connector_execu
 export { postAttackDiscoveryRoute } from './attack_discovery/post/post_attack_discovery';
 export { getAttackDiscoveryRoute } from './attack_discovery/get/get_attack_discovery';
 
+// Defend insights
+export { postDefendInsightsRoute } from './defend_insights/post_defend_insights';
+export { getDefendInsightsRoute } from './defend_insights/get_defend_insights';
+export { getDefendInsightRoute } from './defend_insights/get_defend_insight';
+
 // Knowledge Base
-export { deleteKnowledgeBaseRoute } from './knowledge_base/delete_knowledge_base';
 export { getKnowledgeBaseIndicesRoute } from './knowledge_base/get_knowledge_base_indices';
 export { getKnowledgeBaseStatusRoute } from './knowledge_base/get_knowledge_base_status';
 export { postKnowledgeBaseRoute } from './knowledge_base/post_knowledge_base';
