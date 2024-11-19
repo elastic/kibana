@@ -8,7 +8,7 @@
  */
 
 import { RuleTester } from 'eslint';
-import { noCssColor } from './no_css_color';
+import { NoCssColor } from './no_css_color';
 
 const tsTester = [
   '@typescript-eslint/parser',
@@ -80,7 +80,7 @@ const invalid: RuleTester.InvalidTestCase[] = [
     errors: [{ messageId: 'noCssColor' }],
   },
   {
-    name: 'Raises an error when a CSS color is used in a JSX css attribute for EuiComponents with regular function',
+    name: 'Raises an error when a CSS color is used in a JSX css attribute for EuiComponents with an arrow function',
     filename: '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
     code: `
     import React from 'react';
@@ -92,13 +92,26 @@ const invalid: RuleTester.InvalidTestCase[] = [
     }`,
     errors: [{ messageId: 'noCssColor' }],
   },
+  {
+    name: 'Raises an error when a CSS color is used in a JSX css attribute for EuiComponents with a regular function',
+    filename: '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
+    code: `
+    import React from 'react';
+    
+    function TestComponent() {
+      return (
+        <EuiCode css={function () { return { color: '#dd4040' }; }}>This is a test</EuiCode>
+      )
+    }`,
+    errors: [{ messageId: 'noCssColor' }],
+  },
 ];
 
 const valid: RuleTester.ValidTestCase[] = [];
 
 for (const [name, tester] of [tsTester, babelTester]) {
   describe(name, () => {
-    tester.run('@kbn/no_css_color', noCssColor, {
+    tester.run('@kbn/no_css_color', NoCssColor, {
       valid,
       invalid,
     });

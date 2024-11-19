@@ -8,7 +8,7 @@
  */
 
 import { RuleTester } from 'eslint';
-import { preferCSSAttributeForEuiComponents } from './prefer_css_attributes_for_eui_components';
+import { PreferCSSAttributeForEuiComponents } from './prefer_css_attribute_for_eui_components';
 
 const tsTester = [
   '@typescript-eslint/parser',
@@ -77,13 +77,9 @@ const valid: RuleTester.ValidTestCase[] = [
 
 for (const [name, tester] of [tsTester, babelTester]) {
   describe(name, () => {
-    tester.run(
-      '@kbn/prefer_css_attributes_for_eui_components',
-      preferCSSAttributeForEuiComponents,
-      {
-        valid,
-        invalid,
-      }
-    );
+    tester.run('@kbn/prefer_css_attribute_for_eui_components', PreferCSSAttributeForEuiComponents, {
+      valid,
+      invalid,
+    });
   });
 }

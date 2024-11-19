@@ -11,9 +11,9 @@ import type { Rule } from 'eslint';
 import type { TSESTree } from '@typescript-eslint/typescript-estree';
 import type { Identifier, Node } from 'estree';
 
-export const preferCSSAttributeForEuiComponents: Rule.RuleModule = {
+export const PreferCSSAttributeForEuiComponents: Rule.RuleModule = {
   meta: {
-    type: 'problem',
+    type: 'suggestion',
     docs: {
       description: 'Prefer the JSX css attribute for EUI components',
       category: 'Best Practices',

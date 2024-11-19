@@ -10,5 +10,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-eslint-plugin-design-tokens'],
+  roots: ['<rootDir>/packages/kbn-eslint-plugin-css'],
 };

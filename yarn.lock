@@ -5512,7 +5512,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/eslint-plugin-design-tokens@link:packages/kbn-eslint-plugin-design-tokens":
+"@kbn/eslint-plugin-css@link:packages/kbn-eslint-plugin-css":
   version "0.0.0"
   uid ""
 

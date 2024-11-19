@@ -7,15 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { noCssColor } from './rules/no_css_color';
-import { preferCSSAttributeForEuiComponents } from './rules/prefer_css_attributes_for_eui_components';
+import { NoCssColor } from './src/rules/no_css_color';
+import { PreferCSSAttributeForEuiComponents } from './src/rules/prefer_css_attribute_for_eui_components';
 
 /**
- * Custom ESLint rules, add `'@kbn/eslint_plugin_design_tokens'` to your eslint config to use them
+ * Custom ESLint rules, included as `'@kbn/eslint-plugin-design-tokens'` in the kibana eslint config
  * @internal
  */
-
-const rules = {
-  no_css_color: noCssColor,
-  prefer_css_attributes_for_eui_components: preferCSSAttributeForEuiComponents,
+export const rules = {
+  no_css_color: NoCssColor,
+  prefer_css_attributes_for_eui_components: PreferCSSAttributeForEuiComponents,
 };
