@@ -100,9 +100,4 @@ export type {
   LifecycleResponseFactory,
 } from './response_factory';
 export type { RawRequest, FakeRawRequest } from './raw_request';
-export {
-  kibanaRequestFactory,
-  getRequestValidation,
-  getResponseValidation,
-  isFullValidatorContainer,
-} from './utils';
+export { getRequestValidation, getResponseValidation, isFullValidatorContainer } from './utils';

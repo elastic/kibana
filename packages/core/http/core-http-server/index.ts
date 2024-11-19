@@ -128,7 +128,6 @@ export type {
 export {
   validBodyOutput,
   RouteValidationError,
-  kibanaRequestFactory,
   getRequestValidation,
   getResponseValidation,
   isFullValidatorContainer,
