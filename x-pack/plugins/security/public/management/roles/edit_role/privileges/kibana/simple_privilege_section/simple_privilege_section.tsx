@@ -226,7 +226,7 @@ export class SimplePrivilegeSection extends Component<Props, State> {
                   privilegeIndex={this.props.role.kibana.findIndex((k) =>
                     isGlobalPrivilegeDefinition(k)
                   )}
-                  canAccessRoleManagement={true}
+                  showAdditionalPermissionsMessage={true}
                   canCustomizeSubFeaturePrivileges={this.props.canCustomizeSubFeaturePrivileges}
                   allSpacesSelected
                   disabled={!this.props.editable}

@@ -603,7 +603,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
                         canCustomizeSubFeaturePrivileges={
                           license?.getFeatures().allowSubFeaturePrivileges ?? false
                         }
-                        canAccessRoleManagement={false}
+                        showAdditionalPermissionsMessage={false}
                       />
                     )}
                   </React.Fragment>
