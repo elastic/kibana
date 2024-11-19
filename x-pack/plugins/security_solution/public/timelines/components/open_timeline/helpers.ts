@@ -9,8 +9,6 @@ import { set } from '@kbn/safer-lodash-set/fp';
 import { getOr } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
 import deepMerge from 'deepmerge';
-import { useDispatch } from 'react-redux';
-import { useCallback } from 'react';
 import { useDiscoverInTimelineContext } from '../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
 import type {
@@ -49,7 +47,6 @@ import {
   DEFAULT_TO_MOMENT,
 } from '../../../common/utils/default_date_settings';
 import { resolveTimeline } from '../../containers/api';
-import { timelineActions } from '../../store';
 
 export const OPEN_TIMELINE_CLASS_NAME = 'open-timeline';
 
@@ -314,13 +311,6 @@ export interface QueryTimelineById {
 export const useQueryTimelineById = () => {
   const { resetDiscoverAppState } = useDiscoverInTimelineContext();
   const updateTimeline = useUpdateTimeline();
-  const dispatch = useDispatch();
-
-  const updateIsLoading = useCallback(
-    (status: { id: string; isLoading: boolean }) =>
-      dispatch(timelineActions.updateIsLoading(status)),
-    [dispatch]
-  );
 
   return ({
     activeTimelineTab = TimelineTabs.query,
@@ -333,7 +323,6 @@ export const useQueryTimelineById = () => {
     openTimeline = true,
     savedSearchId,
   }: QueryTimelineById) => {
-    updateIsLoading({ id: TimelineId.active, isLoading: true });
     if (timelineId == null) {
       updateTimeline({
         id: TimelineId.active,
@@ -356,7 +345,6 @@ export const useQueryTimelineById = () => {
         },
       });
       resetDiscoverAppState();
-      updateIsLoading({ id: TimelineId.active, isLoading: false });
     } else {
       return Promise.resolve(resolveTimeline(timelineId))
         .then((result) => {
@@ -409,9 +397,6 @@ export const useQueryTimelineById = () => {
           if (onError != null) {
             onError(error, timelineId);
           }
-        })
-        .finally(() => {
-          updateIsLoading({ id: TimelineId.active, isLoading: false });
         });
     }
   };

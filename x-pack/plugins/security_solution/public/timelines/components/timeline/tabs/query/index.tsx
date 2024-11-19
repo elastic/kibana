@@ -280,15 +280,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     [dataLoadingState]
   );
 
-  useEffect(() => {
-    dispatch(
-      timelineActions.updateIsLoading({
-        id: timelineId,
-        isLoading: isQueryLoading || loadingSourcerer,
-      })
-    );
-  }, [loadingSourcerer, timelineId, isQueryLoading, dispatch]);
-
   // NOTE: The timeline is blank after browser FORWARD navigation (after using back button to navigate to
   // the previous page from the timeline), yet we still see total count. This is because the timeline
   // is not getting refreshed when using browser navigation.
