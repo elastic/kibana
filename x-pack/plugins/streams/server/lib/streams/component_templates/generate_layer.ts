@@ -30,7 +30,7 @@ export function generateLayer(
     template: {
       settings: isRoot(definition.id) ? logsSettings : {},
       mappings: {
-        subobjects: true,
+        subobjects: true, // TODO set to false once this works on Elasticsearch side - right now fields are not properly indexed.
         dynamic: false,
         properties,
       },
