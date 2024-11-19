@@ -7,7 +7,8 @@
 
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import { type FakeRawRequest, type Headers, kibanaRequestFactory } from '@kbn/core-http-server';
+import { type FakeRawRequest, type Headers } from '@kbn/core-http-server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';

@@ -17,12 +17,8 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { createRetryableError, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
-import {
-  type IBasePath,
-  kibanaRequestFactory,
-  type Headers,
-  type FakeRawRequest,
-} from '@kbn/core-http-server';
+import { type IBasePath, type Headers, type FakeRawRequest } from '@kbn/core-http-server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { Logger } from '@kbn/logging';
 import type {
   ISavedObjectsRepository,

@@ -20,8 +20,8 @@ import {
   type KibanaRouteOptions,
   type KibanaRequestState,
   type KibanaResponseFactory,
-  kibanaRequestFactory,
 } from '@kbn/core-http-server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { createVersionedRouterMock, type MockedVersionedRouter } from './versioned_router.mock';
 
 export type RouterMock = jest.Mocked<IRouter<any>> & { versioned: MockedVersionedRouter };

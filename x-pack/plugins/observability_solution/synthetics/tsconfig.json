@@ -105,7 +105,8 @@
     "@kbn/alerting-types",
     "@kbn/core-chrome-browser",
     "@kbn/core-rendering-browser",
-    "@kbn/index-lifecycle-management-common-shared"
+    "@kbn/index-lifecycle-management-common-shared",
+    "@kbn/core-http-server-utils"
   ],
   "exclude": ["target/**/*"]
 }
