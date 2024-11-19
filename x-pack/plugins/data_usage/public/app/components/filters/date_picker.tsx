@@ -15,6 +15,7 @@ import type {
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import moment from 'moment';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 export interface DateRangePickerValues {
@@ -78,6 +79,8 @@ export const UsageMetricsDateRangePicker = memo<UsageMetricsDateRangePickerProps
         start={dateRangePickerState.startDate}
         showUpdateButton={false}
         updateButtonProps={{ iconOnly: false, fill: false }}
+        maxDate={moment()}
+        minDate={moment().subtract(10, 'days')}
         width="auto"
       />
     );
