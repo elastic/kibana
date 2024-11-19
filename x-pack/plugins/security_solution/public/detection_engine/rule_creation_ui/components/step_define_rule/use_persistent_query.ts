@@ -25,7 +25,7 @@ import {
 } from '../query_bar';
 
 const EQL_QUERY_LANGUAGE = 'eql';
-const ESQL_QUERY_LANGIAGE = 'esql';
+const ESQL_QUERY_LANGUAGE = 'esql';
 
 interface UsePersistentQueryParams {
   form: FormHook<DefineStepRule>;
@@ -75,12 +75,12 @@ export function usePersistentQuery({
 
     if (isEsqlRule(ruleType)) {
       esqlQueryRef.current =
-        currentQuery?.query?.language === ESQL_QUERY_LANGIAGE ? currentQuery : esqlQueryRef.current;
+        currentQuery?.query?.language === ESQL_QUERY_LANGUAGE ? currentQuery : esqlQueryRef.current;
 
       return;
     }
 
-    if ([EQL_QUERY_LANGUAGE, ESQL_QUERY_LANGIAGE].includes(currentQuery?.query?.language)) {
+    if ([EQL_QUERY_LANGUAGE, ESQL_QUERY_LANGUAGE].includes(currentQuery?.query?.language)) {
       return;
     }
 
