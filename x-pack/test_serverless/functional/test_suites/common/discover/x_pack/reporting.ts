@@ -97,7 +97,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Generate CSV: new search', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/182603
+    describe.skip('Generate CSV: new search', () => {
       before(async () => {
         await reportingAPI.initEcommerce();
       });
