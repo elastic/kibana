@@ -1,0 +1,5 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/response-ops-alerts-table",
+  "owner": "@elastic/response-ops"
+}

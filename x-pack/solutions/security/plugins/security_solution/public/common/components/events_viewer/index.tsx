@@ -163,11 +163,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     } = defaultModel,
   } = useSelector((state: State) => eventsViewerSelector(state, tableId));
 
-  const {
-    uiSettings,
-    data,
-    triggersActionsUi: { getFieldBrowser },
-  } = useKibana().services;
+  const { uiSettings, data } = useKibana().services;
 
   const [tableView, setTableView] = useState<ViewSelection>(
     getDefaultViewSelection({
@@ -605,7 +601,6 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
                             pagination={pagination}
                             isEventRenderedView={tableView === 'eventRenderedView'}
                             rowHeightsOptions={rowHeightsOptions}
-                            getFieldBrowser={getFieldBrowser}
                             getFieldSpec={getFieldSpec}
                           />
                         </StatefulEventContext.Provider>

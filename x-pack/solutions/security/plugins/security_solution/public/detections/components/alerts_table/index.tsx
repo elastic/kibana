@@ -10,11 +10,10 @@ import type { EuiDataGridRowHeightsOptions, EuiDataGridStyle } from '@elastic/eu
 import { EuiFlexGroup } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import type {
-  Alert,
   AlertsTableImperativeApi,
   AlertsTableProps,
   RenderContext,
-} from '@kbn/triggers-actions-ui-plugin/public/types';
+} from '@kbn/response-ops-alerts-table/types';
 import { ALERT_BUILDING_BLOCK_TYPE, AlertConsumers } from '@kbn/rule-data-utils';
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import styled from 'styled-components';
@@ -28,6 +27,8 @@ import {
 } from '@kbn/securitysolution-data-table';
 import type { SetOptional } from 'type-fest';
 import { noop } from 'lodash';
+import type { Alert } from '@kbn/alerting-types';
+import { AlertsTable } from '@kbn/response-ops-alerts-table';
 import { useAlertsTableFieldsBrowserOptions } from '../../hooks/trigger_actions_alert_table/use_trigger_actions_browser_fields_options';
 import { getBulkActionsByTableType } from '../../hooks/trigger_actions_alert_table/use_bulk_actions';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
@@ -153,7 +154,7 @@ const initialSort: GetSecurityAlertsTableProp<'initialSort'> = [
 const casesConfiguration = { featureId: CASES_FEATURE_ID, owner: [APP_ID], syncAlerts: true };
 const emptyInputFilters: Filter[] = [];
 
-export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
+export const AlertsTableComponent: FC<Omit<DetectionEngineAlertTableProps, 'services'>> = ({
   inputFilters = emptyInputFilters,
   tableType = TableId.alertsOnAlertsPage,
   sourcererScope = SourcererScopeName.detections,
@@ -162,10 +163,8 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
   ...tablePropsOverrides
 }) => {
   const { id } = tablePropsOverrides;
-  const {
-    triggersActionsUi: { getAlertsStateTable: AlertsTable },
-    uiSettings,
-  } = useKibana().services;
+  const { data, http, notifications, fieldFormats, application, licensing, uiSettings } =
+    useKibana().services;
   const [visualizationInFlyoutEnabled] = useUiSetting$<boolean>(
     ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING
   );
@@ -420,7 +419,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       <FullWidthFlexGroupTable $visible={!graphEventId && graphOverlay == null} gutterSize="none">
         <StatefulEventContext.Provider value={activeStatefulEventContext}>
           <EuiDataGridContainer hideLastPage={false}>
-            <AlertsTable
+            <AlertsTable<SecurityAlertsTableContext>
               ref={alertsTableRef}
               // Stores separate configuration based on the view of the table
               id={id ?? `detection-engine-alert-table-${tableType}-${tableView}`}
@@ -459,6 +458,14 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
               }
               cellActionsOptions={cellActionsOptions}
               showInspectButton
+              services={{
+                data,
+                http,
+                notifications,
+                fieldFormats,
+                application,
+                licensing,
+              }}
               {...tablePropsOverrides}
             />
           </EuiDataGridContainer>

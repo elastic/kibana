@@ -17,6 +17,8 @@ import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { getConnectorType as getSystemLogExampleConnectorType } from './connector_types/system_log_example/system_log_example';
 
 export interface TriggersActionsUiExamplePublicSetupDeps {
@@ -33,6 +35,8 @@ export interface TriggersActionsUiExamplePublicStartDeps {
   dataViews: DataViewsPublicPluginStart;
   dataViewsEditor: DataViewEditorStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
+  licensing: LicensingPluginStart;
 }
 
 export class TriggersActionsUiExamplePlugin
