@@ -33,6 +33,7 @@
     "@kbn/server-http-tools",
     "@kbn/utility-types-jest",
     "@kbn/datemath",
+    "@kbn/esql-ast",
   ],
   "exclude": ["target/**/*"]
 }
