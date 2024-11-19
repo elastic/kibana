@@ -4,9 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React from 'react';
-
 import { render, waitFor } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { DataUsageMetrics } from './data_usage_metrics';
@@ -182,7 +180,6 @@ describe('DataUsageMetrics', () => {
   it('should show date filter', () => {
     const { getByTestId } = render(<DataUsageMetrics data-test-subj={testId} />);
     expect(getByTestId(`${testIdFilter}-date-range`)).toBeTruthy();
-    expect(getByTestId(`${testIdFilter}-date-range`).textContent).toContain('Last 24 hours');
     expect(getByTestId(`${testIdFilter}-super-refresh-button`)).toBeTruthy();
   });
 
