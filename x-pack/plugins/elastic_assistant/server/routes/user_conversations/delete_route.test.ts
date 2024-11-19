@@ -10,23 +10,16 @@ import { requestContextMock } from '../../__mocks__/request_context';
 import { serverMock } from '../../__mocks__/server';
 import { deleteConversationRoute } from './delete_route';
 import { getDeleteConversationRequest, requestMock } from '../../__mocks__/request';
-
+import { authenticatedUser } from '../../__mocks__/user';
 import {
   getConversationMock,
   getQueryConversationParams,
 } from '../../__mocks__/conversations_schema.mock';
-import { AuthenticatedUser } from '@kbn/core-security-common';
 
 describe('Delete conversation route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
-  const mockUser1 = {
-    username: 'my_username',
-    authentication_realm: {
-      type: 'my_realm_type',
-      name: 'my_realm_name',
-    },
-  } as AuthenticatedUser;
+  const mockUser1 = authenticatedUser;
 
   beforeEach(() => {
     server = serverMock.create();

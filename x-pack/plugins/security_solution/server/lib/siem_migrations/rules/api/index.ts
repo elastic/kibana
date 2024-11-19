@@ -13,6 +13,9 @@ import { registerSiemRuleMigrationsStartRoute } from './start';
 import { registerSiemRuleMigrationsStatsRoute } from './stats';
 import { registerSiemRuleMigrationsStopRoute } from './stop';
 import { registerSiemRuleMigrationsStatsAllRoute } from './stats_all';
+import { registerSiemRuleMigrationsResourceUpsertRoute } from './resources/upsert';
+import { registerSiemRuleMigrationsResourceGetRoute } from './resources/get';
+import { registerSiemRuleMigrationsRetryRoute } from './retry';
 
 export const registerSiemRuleMigrationsRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -22,6 +25,10 @@ export const registerSiemRuleMigrationsRoutes = (
   registerSiemRuleMigrationsStatsAllRoute(router, logger);
   registerSiemRuleMigrationsGetRoute(router, logger);
   registerSiemRuleMigrationsStartRoute(router, logger);
+  registerSiemRuleMigrationsRetryRoute(router, logger);
   registerSiemRuleMigrationsStatsRoute(router, logger);
   registerSiemRuleMigrationsStopRoute(router, logger);
+
+  registerSiemRuleMigrationsResourceUpsertRoute(router, logger);
+  registerSiemRuleMigrationsResourceGetRoute(router, logger);
 };
