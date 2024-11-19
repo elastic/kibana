@@ -1513,6 +1513,10 @@
       "favoriteIds": {
         "type": "keyword"
       },
+      "favoriteMetadata": {
+        "dynamic": false,
+        "type": "object"
+      },
       "type": {
         "type": "keyword"
       },
@@ -2838,6 +2842,26 @@
       "note": {
         "index": false,
         "type": "text"
+      }
+    }
+  },
+  "product-doc-install-status": {
+    "dynamic": false,
+    "properties": {
+      "index_name": {
+        "type": "keyword"
+      },
+      "installation_status": {
+        "type": "keyword"
+      },
+      "last_installation_date": {
+        "type": "date"
+      },
+      "product_name": {
+        "type": "keyword"
+      },
+      "product_version": {
+        "type": "keyword"
       }
     }
   },
