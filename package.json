@@ -1020,7 +1020,6 @@
     "@kbn/xstate-utils": "link:packages/kbn-xstate-utils",
     "@kbn/zod": "link:packages/kbn-zod",
     "@kbn/zod-helpers": "link:packages/kbn-zod-helpers",
-    "@langchain/anthropic": "^0.3.8",
     "@langchain/aws": "^0.1.2",
     "@langchain/community": "0.3.14",
     "@langchain/core": "^0.3.16",
