@@ -97,6 +97,49 @@ describe('CasesWebhookActionConnectorFields renders', () => {
     expect(await screen.findByTestId('webhookCreateCommentJson')).toBeInTheDocument();
   });
 
+  it('Add comment to case section is rendered only when the toggle button is on', async () => {
+    const incompleteActionConnector = {
+      ...actionConnector,
+      config: {
+        ...actionConnector.config,
+        createCommentUrl: undefined,
+        createCommentJson: undefined,
+      },
+    };
+    render(
+      <ConnectorFormTestProvider connector={incompleteActionConnector}>
+        <CasesWebhookActionConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+        />
+      </ConnectorFormTestProvider>
+    );
+
+    await userEvent.click(await screen.findByTestId('webhookAddCommentToggle'));
+
+    expect(await screen.findByTestId('webhookCreateCommentMethodSelect')).toBeInTheDocument();
+    expect(await screen.findByTestId('createCommentUrlInput')).toBeInTheDocument();
+    expect(await screen.findByTestId('webhookCreateCommentJson')).toBeInTheDocument();
+  });
+
+  it('Toggle button is active when create comment section fields are populated', async () => {
+    render(
+      <ConnectorFormTestProvider connector={actionConnector}>
+        <CasesWebhookActionConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+        />
+      </ConnectorFormTestProvider>
+    );
+
+    expect(await screen.findByTestId('webhookAddCommentToggle')).toHaveAttribute(
+      'aria-checked',
+      'true'
+    );
+  });
+
   it('connector auth toggles work as expected', async () => {
     render(
       <ConnectorFormTestProvider connector={actionConnector}>
