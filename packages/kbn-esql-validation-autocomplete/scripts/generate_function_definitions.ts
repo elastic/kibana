@@ -299,6 +299,109 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
   return ret as FunctionDefinition;
 }
 
+const comparisonOperatorSignatures = (['ip', 'version'] as const).flatMap((type) => [
+  {
+    params: [
+      { name: 'left', type },
+      { name: 'right', type: 'text' as const, constantOnly: true },
+    ],
+    returnType: 'boolean' as const,
+  },
+  {
+    params: [
+      { name: 'left', type: 'text' as const, constantOnly: true },
+      { name: 'right', type },
+    ],
+    returnType: 'boolean' as const,
+  },
+]);
+const operatorsMeta = {
+  add: { name: '+', isMathOperator: true, isComparisonOperator: false },
+  sub: { name: '-', isMathOperator: true, isComparisonOperator: false },
+  div: { name: '/', isMathOperator: true, isComparisonOperator: false },
+  equals: {
+    name: '==',
+    isMathOperator: false,
+    isComparisonOperator: true,
+    extraSignatures: [
+      ...comparisonOperatorSignatures,
+      {
+        params: [
+          { name: 'left', type: 'boolean' as const },
+          { name: 'right', type: 'boolean' as const },
+        ],
+        returnType: 'boolean' as const,
+      },
+      // constant strings okay because of implicit casting
+      {
+        params: [
+          { name: 'left', type: 'boolean' as const },
+          { name: 'right', type: 'keyword' as const, constantOnly: true },
+        ],
+        returnType: 'boolean' as const,
+      },
+      {
+        params: [
+          { name: 'left', type: 'keyword' as const, constantOnly: true },
+          { name: 'right', type: 'boolean' as const },
+        ],
+        returnType: 'boolean' as const,
+      },
+    ],
+  },
+  greater_than: {
+    name: '>',
+    isMathOperator: false,
+    isComparisonOperator: true,
+    extraSignatures: comparisonOperatorSignatures,
+  },
+  greater_than_or_equal: {
+    name: '>=',
+    isMathOperator: false,
+    isComparisonOperator: true,
+    extraSignatures: comparisonOperatorSignatures,
+  },
+  less_than: {
+    name: '<',
+    isMathOperator: false,
+    isComparisonOperator: true,
+    extraSignatures: comparisonOperatorSignatures,
+  },
+  less_than_or_equal: { name: '<=', isMathOperator: false, isComparisonOperator: true },
+  not_equals: {
+    name: '!=',
+    isMathOperator: false,
+    isComparisonOperator: true,
+    extraSignatures: [
+      ...comparisonOperatorSignatures,
+      {
+        params: [
+          { name: 'left', type: 'boolean' as const },
+          { name: 'right', type: 'boolean' as const },
+        ],
+        returnType: 'boolean' as const,
+      },
+      // constant strings okay because of implicit casting
+      {
+        params: [
+          { name: 'left', type: 'boolean' as const },
+          { name: 'right', type: 'keyword' as const, constantOnly: true },
+        ],
+        returnType: 'boolean' as const,
+      },
+      {
+        params: [
+          { name: 'left', type: 'keyword' as const, constantOnly: true },
+          { name: 'right', type: 'boolean' as const },
+        ],
+        returnType: 'boolean' as const,
+      },
+    ],
+  },
+  mod: { name: '%', isMathOperator: true, isComparisonOperator: false },
+  mul: { name: '*', isMathOperator: true, isComparisonOperator: false },
+};
+
 const operatorNames = {
   add: '+',
   sub: '-',
@@ -385,20 +488,38 @@ const replaceParamName = (str: string) => {
 
 const enrichOperators = (operatorsFunctionDefinitions: FunctionDefinition[]) => {
   return operatorsFunctionDefinitions.map((op) => {
-    const isMathOperator = ['add', 'sub', 'div', 'mod', 'mul'].includes(op.name);
+    const isMathOperator = op.name in operatorsMeta && operatorsMeta[op.name]?.isMathOperator;
+    const isComparisonOperator =
+      op.name in operatorsMeta && operatorsMeta[op.name]?.isComparisonOperator;
+
+    const signatures = op.signatures.map((s) => ({
+      ...s,
+      // Elasticsearch docs uses lhs and rhs instead of left and right that Kibana code uses
+      params: s.params.map((param) => ({ ...param, name: replaceParamName(param.name) })),
+    }));
+    let supportedCommands = op.supportedCommands;
+    let supportedOptions = op.supportedOptions;
+    if (isComparisonOperator) {
+      supportedCommands = ['eval', 'where', 'row', 'sort'];
+      supportedOptions = ['by'];
+    }
+    if (isMathOperator) {
+      supportedCommands = ['eval', 'where', 'row', 'stats', 'metrics', 'sort'];
+      supportedOptions = ['by'];
+    }
+    if (operatorsMeta[op.name] && operatorsMeta[op.name]?.extraSignatures) {
+      signatures.push(...operatorsMeta[op.name].extraSignatures);
+    }
+
+    const description = operatorsMeta[op.name]?.description ?? op.description;
     return {
       ...op,
-      signatures: op.signatures.map((s) => ({
-        ...s,
-        // Elasticsearch docs uses lhs and rhs instead of left and right that Kibana code uses
-        params: s.params.map((param) => ({ ...param, name: replaceParamName(param.name) })),
-      })),
+      description,
+      signatures,
       // Elasticsearch docs does not include the full supported commands for math operators
       // so we are overriding to add proper support
-      supportedCommands: isMathOperator
-        ? ['eval', 'where', 'row', 'stats', 'metrics', 'sort']
-        : op.supportedCommands,
-      supportedOptions: isMathOperator ? ['by'] : op.supportedOptions,
+      supportedCommands,
+      supportedOptions,
       // @TODO: change to operator type
       type: 'builtin',
       validate: validators[op.name],
@@ -496,11 +617,7 @@ ${
 import { isLiteralItem } from '../../shared/helpers';`
     : ''
 }
-${
-  functionsType === 'operators'
-    ? `import type { isNumericType } from '../../shared/esql_types';`
-    : ''
-}
+${functionsType === 'operators' ? `import { isNumericType } from '../../shared/esql_types';` : ''}
 
 
 
