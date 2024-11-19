@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
-import { ILicense } from '@kbn/licensing-plugin/common/types';
 import { useAppContext } from '../../../../app_context';
 import { useForm, Form } from '../../shared_imports';
 import { GenericObject, MappingsConfiguration } from '../../types';
@@ -36,7 +35,7 @@ interface Props {
   indexMode?: IndexMode;
 }
 
-const formSerializer = (formData: GenericObject, indexMode?: IndexMode) => {
+const formSerializer = (formData: GenericObject) => {
   const { dynamicMapping, sourceField, metaField, _routing, _size, subobjects } = formData;
 
   const dynamic = dynamicMapping?.enabled
@@ -50,16 +49,14 @@ const formSerializer = (formData: GenericObject, indexMode?: IndexMode) => {
       ? { mode: SYNTHETIC_SOURCE_OPTION }
       : sourceField?.option === DISABLED_SOURCE_OPTION
       ? { enabled: false }
-      : indexMode === LOGSDB_INDEX_MODE ||
-        indexMode === TIME_SERIES_MODE ||
-        sourceField?.includes ||
-        sourceField?.excludes
+      : sourceField?.option === STORED_SOURCE_OPTION
       ? {
-          // Explicitly set stored mode only if index mode is logsdb or time_series
-          mode:
-            indexMode === LOGSDB_INDEX_MODE || indexMode === TIME_SERIES_MODE
-              ? 'stored'
-              : undefined,
+          mode: 'stored',
+          includes: sourceField?.includes,
+          excludes: sourceField?.excludes,
+        }
+      : sourceField?.includes || sourceField?.excludes
+      ? {
           includes: sourceField?.includes,
           excludes: sourceField?.excludes,
         }
@@ -128,28 +125,16 @@ const formDeserializer = (formData: GenericObject) => {
   };
 };
 
-export const ConfigurationForm = React.memo(({ value, esNodesPlugins, indexMode }: Props) => {
+export const ConfigurationForm = React.memo(({ value, esNodesPlugins }: Props) => {
   const {
     config: { enableMappingsSourceFieldSection },
-    plugins: { licensing },
   } = useAppContext();
-
-  const [isLicenseCheckComplete, setIsLicenseCheckComplete] = useState<boolean>(false);
-  const [isEnterpriseLicense, setIsEnterpriseLicense] = useState<boolean>(false);
-  useEffect(() => {
-    const subscription = licensing?.license$.subscribe((license: ILicense) => {
-      setIsEnterpriseLicense(license.isActive && license.hasAtLeast('enterprise'));
-      setIsLicenseCheckComplete(true);
-    });
-
-    return () => subscription?.unsubscribe();
-  }, [licensing]);
 
   const isMounted = useRef(false);
 
   const { form } = useForm({
     schema: configurationFormSchema,
-    serializer: useCallback((formData) => formSerializer(formData, indexMode), [indexMode]),
+    serializer: formSerializer,
     deserializer: formDeserializer,
     defaultValue: value,
     id: 'configurationForm',
@@ -197,11 +182,6 @@ export const ConfigurationForm = React.memo(({ value, esNodesPlugins, indexMode 
     };
   }, [getFormData, dispatch]);
 
-  const defaultSourceFieldOption =
-    isEnterpriseLicense && (indexMode === LOGSDB_INDEX_MODE || indexMode === TIME_SERIES_MODE)
-      ? SYNTHETIC_SOURCE_OPTION
-      : STORED_SOURCE_OPTION;
-
   return (
     <Form
       form={form}
@@ -213,12 +193,9 @@ export const ConfigurationForm = React.memo(({ value, esNodesPlugins, indexMode 
       <EuiSpacer size="xl" />
       <MetaFieldSection />
       <EuiSpacer size="xl" />
-      {enableMappingsSourceFieldSection && isLicenseCheckComplete && (
+      {enableMappingsSourceFieldSection && (
         <>
-          <SourceFieldSection
-            defaultOption={defaultSourceFieldOption}
-            isEnterpriseLicense={isEnterpriseLicense}
-          />
+          <SourceFieldSection />
           <EuiSpacer size="xl" />
         </>
       )}

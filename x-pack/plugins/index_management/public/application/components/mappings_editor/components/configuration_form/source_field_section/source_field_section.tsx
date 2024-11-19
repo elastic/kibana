@@ -11,19 +11,22 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiSpacer, EuiComboBox, EuiFormRow, EuiCallOut, EuiText } from '@elastic/eui';
 
+import { useMappingsState } from '../../../mappings_state_context';
 import { documentationService } from '../../../../../services/documentation';
 import { UseField, FormDataProvider, FormRow, SuperSelectField } from '../../../shared_imports';
 import { ComboBoxOption } from '../../../types';
 import { sourceOptionLabels, sourceOptionDescriptions } from './i18n_texts';
-import { STORED_SOURCE_OPTION, DISABLED_SOURCE_OPTION, SYNTHETIC_SOURCE_OPTION } from './constants';
+import {
+  STORED_SOURCE_OPTION,
+  DISABLED_SOURCE_OPTION,
+  SYNTHETIC_SOURCE_OPTION,
+  SourceOptionKey,
+} from './constants';
 
-interface Props {
-  defaultOption: string;
-  isEnterpriseLicense: boolean;
-}
+export const SourceFieldSection = () => {
+  const state = useMappingsState();
 
-export const SourceFieldSection = ({ defaultOption, isEnterpriseLicense }: Props) => {
-  const renderOptionDropdownDisplay = (option) => (
+  const renderOptionDropdownDisplay = (option: SourceOptionKey) => (
     <Fragment>
       <strong>{sourceOptionLabels[option]}</strong>
       <EuiText size="s" color="subdued">
@@ -41,7 +44,7 @@ export const SourceFieldSection = ({ defaultOption, isEnterpriseLicense }: Props
     },
   ];
 
-  if (isEnterpriseLicense) {
+  if (state.hasEnterpriseLicense) {
     sourceValueOptions.push({
       value: SYNTHETIC_SOURCE_OPTION,
       inputDisplay: sourceOptionLabels[SYNTHETIC_SOURCE_OPTION],
@@ -244,7 +247,6 @@ export const SourceFieldSection = ({ defaultOption, isEnterpriseLicense }: Props
                 options: sourceValueOptions,
               },
             }}
-            defaultValue={defaultOption}
           />
         </>
       }

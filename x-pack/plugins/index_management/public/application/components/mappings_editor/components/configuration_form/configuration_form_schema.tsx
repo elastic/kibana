@@ -77,6 +77,7 @@ export const configurationFormSchema: FormSchema = {
   sourceField: {
     option: {
       type: FIELD_TYPES.SUPER_SELECT,
+      defaultValue: 'stored',
     },
     includes: {
       label: i18n.translate('xpack.idxMgmt.mappingsEditor.configuration.includeSourceFieldsLabel', {

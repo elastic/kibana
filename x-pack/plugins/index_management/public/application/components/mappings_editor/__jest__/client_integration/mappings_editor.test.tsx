@@ -483,6 +483,80 @@ describe('Mappings editor: core', () => {
 
       expect(data).toEqual(updatedMappings);
     });
+
+    describe('props.indexMode sets the correct default value of _source field', () => {
+      it("defaults to 'stored' if index mode prop is 'standard'", async () => {
+        await act(async () => {
+          testBed = setup(
+            {
+              value: { ...defaultMappings, _source: undefined },
+              onChange: onChangeHandler,
+              indexMode: 'standard',
+            },
+            ctx
+          );
+        });
+        testBed.component.update();
+
+        const {
+          actions: { selectTab },
+          find,
+        } = testBed;
+
+        await selectTab('advanced');
+
+        // Check that the stored option is selected
+        expect(find('sourceValueField').prop('value')).toBe('stored');
+      });
+
+      it("defaults to 'synthetic' if index mode prop is 'logsdb'", async () => {
+        await act(async () => {
+          testBed = setup(
+            {
+              value: { ...defaultMappings, _source: undefined },
+              onChange: onChangeHandler,
+              indexMode: 'logsdb',
+            },
+            ctx
+          );
+        });
+        testBed.component.update();
+
+        const {
+          actions: { selectTab },
+          find,
+        } = testBed;
+
+        await selectTab('advanced');
+
+        // Check that the synthetic option is selected
+        expect(find('sourceValueField').prop('value')).toBe('synthetic');
+      });
+
+      it("defaults to 'synthetic' if index mode prop is 'time_series'", async () => {
+        await act(async () => {
+          testBed = setup(
+            {
+              value: { ...defaultMappings, _source: undefined },
+              onChange: onChangeHandler,
+              indexMode: 'time_series',
+            },
+            ctx
+          );
+        });
+        testBed.component.update();
+
+        const {
+          actions: { selectTab },
+          find,
+        } = testBed;
+
+        await selectTab('advanced');
+
+        // Check that the synthetic option is selected
+        expect(find('sourceValueField').prop('value')).toBe('synthetic');
+      });
+    });
   });
 
   describe('multi-fields support', () => {

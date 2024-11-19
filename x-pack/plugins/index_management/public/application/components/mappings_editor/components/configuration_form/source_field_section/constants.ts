@@ -8,3 +8,8 @@
 export const STORED_SOURCE_OPTION = 'stored';
 export const DISABLED_SOURCE_OPTION = 'disabled';
 export const SYNTHETIC_SOURCE_OPTION = 'synthetic';
+
+export type SourceOptionKey =
+  | typeof STORED_SOURCE_OPTION
+  | typeof DISABLED_SOURCE_OPTION
+  | typeof SYNTHETIC_SOURCE_OPTION;

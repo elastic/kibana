@@ -6,9 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { STORED_SOURCE_OPTION, DISABLED_SOURCE_OPTION, SYNTHETIC_SOURCE_OPTION } from './constants';
+import {
+  STORED_SOURCE_OPTION,
+  DISABLED_SOURCE_OPTION,
+  SYNTHETIC_SOURCE_OPTION,
+  SourceOptionKey,
+} from './constants';
 
-export const sourceOptionLabels = {
+export const sourceOptionLabels: Record<SourceOptionKey, string> = {
   [STORED_SOURCE_OPTION]: i18n.translate(
     'xpack.idxMgmt.mappingsEditor.configuration.storedSourceFieldsLabel',
     {
@@ -29,7 +34,7 @@ export const sourceOptionLabels = {
   ),
 };
 
-export const sourceOptionDescriptions = {
+export const sourceOptionDescriptions: Record<SourceOptionKey, string> = {
   [STORED_SOURCE_OPTION]: i18n.translate(
     'xpack.idxMgmt.mappingsEditor.configuration.storedSourceFieldsDescription',
     {
