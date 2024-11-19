@@ -90,6 +90,7 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
         <ExplorerChartsContainer
           {...{
             ...chartsData,
+            isEmbeddable: true,
             severity: severity.val,
             mlLocator,
             tableData,
