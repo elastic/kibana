@@ -332,6 +332,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
 
               <EuiProgress value={combinedProgress} max={100} size="xs" />
               <DataVisualizerTable
+                isEsql={true}
                 items={configs}
                 pageState={dataVisualizerListState}
                 updatePageState={setDataVisualizerListState}
