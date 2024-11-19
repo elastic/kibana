@@ -203,6 +203,22 @@ export function Histogram({
       transform: translate(-50%, -50%);
     }
   `;
+  // console.log('histogram', { lensProps, requestData, request, dataView, visContext });
+  if (
+    dataView.id &&
+    (dataView.id !== visContext.requestData.dataViewId ||
+      (!dataView.isPersisted() && !lensProps.attributes.state.adHocDataViews?.[dataView.id]))
+  ) {
+    // to prevent a race condition when the data view changes id
+    // the ids of the data view and the lens props and visContextDataView should be the same
+    // console.log('flakydebugging', {
+    //  dataViewId: dataView.id,
+    //  visContextDataViewId: visContext.requestData.dataViewId,
+    //  lensProps: lensProps.attributes.references.find((r) => r.id === dataView.id),
+    // });
+
+    return <></>;
+  }
 
   return (
     <>
