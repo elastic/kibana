@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EcsMetadata } from '@kbn/alerts-as-data-utils/src/field_maps/types';
+import { EcsFlat } from '@elastic/ecs';
 import { ActionVariable } from '@kbn/alerting-types';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { useQuery } from '@tanstack/react-query';
@@ -15,7 +15,6 @@ import {
   fetchRuleTypeAadTemplateFields,
   getDescription,
 } from '@kbn/alerts-ui-shared/src/common/apis';
-import { useState } from 'react';
 
 export interface UseLoadRuleTypeAadTemplateFieldProps {
   http: HttpStart;
@@ -25,18 +24,9 @@ export interface UseLoadRuleTypeAadTemplateFieldProps {
 }
 
 export const useLoadRuleTypeAadTemplateField = (props: UseLoadRuleTypeAadTemplateFieldProps) => {
-  // Importing EcsFlat synchronously in this package causes a Webpack issue, and forces it to be inserted
-  // into the plugin bundle for any plugin that imports @kbn/response-ops-rule-form. Load it asynchronously
-  // instead.
-  const [EcsFlat, setEcsFlat] = useState<Record<string, EcsMetadata> | null>(null);
   const { http, ruleTypeId, enabled, cacheTime } = props;
 
   const queryFn = async () => {
-    if (!EcsFlat) {
-      await import('@elastic/ecs').then((pkg) => {
-        setEcsFlat(pkg.EcsFlat);
-      });
-    }
     if (!ruleTypeId) {
       return;
     }
@@ -54,7 +44,7 @@ export const useLoadRuleTypeAadTemplateField = (props: UseLoadRuleTypeAadTemplat
     select: (dataViewFields) => {
       return dataViewFields?.map<ActionVariable>((d) => ({
         name: d.name,
-        description: getDescription(d.name, EcsFlat!),
+        description: getDescription(d.name, EcsFlat),
       }));
     },
     cacheTime,
