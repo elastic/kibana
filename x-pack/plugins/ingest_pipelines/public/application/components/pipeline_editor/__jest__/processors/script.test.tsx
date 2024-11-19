@@ -63,7 +63,7 @@ describe('Processor: Script', () => {
     expect(form.getErrorsMessages()).toEqual(['A value is required.']);
   });
 
-  test('accepts processor definitions that contains escaped characters', async () => {
+  test('accepts params that contains escaped characters', async () => {
     const {
       actions: { saveNewProcessor },
       find,

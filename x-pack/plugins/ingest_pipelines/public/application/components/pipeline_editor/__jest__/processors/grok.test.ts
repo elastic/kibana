@@ -143,7 +143,7 @@ describe('Processor: Grok', () => {
 
     await act(async () => {
       find('patternDefinitionsField').simulate('change', {
-        jsonContent: '{"def_1":"""aaa(bbb"""}',
+        jsonContent: '{"pattern_1":"""aaa(bbb""", "pattern_2":"aaa(bbb"}',
       });
 
       // advance timers to allow the form to validate
@@ -159,7 +159,7 @@ describe('Processor: Grok', () => {
     expect(processors[0][GROK_TYPE]).toEqual({
       field: 'test_grok_processor',
       patterns: ['pattern1'],
-      pattern_definitions: { def_1: 'aaa(bbb' },
+      pattern_definitions: { pattern_1: 'aaa(bbb', pattern_2: 'aaa(bbb' },
     });
   });
 });
