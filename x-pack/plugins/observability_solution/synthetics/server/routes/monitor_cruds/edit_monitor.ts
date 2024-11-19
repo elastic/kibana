@@ -272,7 +272,7 @@ export const syncEditedMonitor = async ({
       server.telemetry,
       formatTelemetryUpdateEvent(
         editedMonitorSavedObject as SavedObjectsUpdateResponse<EncryptedSyntheticsMonitorAttributes>,
-        decryptedPreviousMonitor,
+        decryptedPreviousMonitor.updated_at,
         server.stackVersion,
         Boolean((normalizedMonitor as MonitorFields)[ConfigKey.SOURCE_INLINE]),
         publicSyncErrors
