@@ -112,6 +112,123 @@ const testResponse: GetPackagesResponse['items'] = [
   },
 ];
 
+const testResponseBehaviorField: GetPackagesResponse['items'] = [
+  {
+    description: 'testWithPolicyTemplateBehaviorAll',
+    download: 'testWithPolicyTemplateBehaviorAll',
+    id: 'testWithPolicyTemplateBehaviorAll',
+    name: 'testWithPolicyTemplateBehaviorAll',
+    path: 'testWithPolicyTemplateBehaviorAll',
+    release: 'ga',
+    status: 'not_installed',
+    title: 'testWithPolicyTemplateBehaviorAll',
+    version: 'testWithPolicyTemplateBehaviorAll',
+    policy_templates_behavior: 'all',
+    policy_templates: [
+      {
+        description: 'testPolicyTemplate1BehaviorAll',
+        name: 'testPolicyTemplate1BehaviorAll',
+        icons: [
+          {
+            src: 'testPolicyTemplate1BehaviorAll',
+            path: 'testPolicyTemplate1BehaviorAll',
+          },
+        ],
+        title: 'testPolicyTemplate1BehaviorAll',
+        type: 'testPolicyTemplate1BehaviorAll',
+      },
+      {
+        description: 'testPolicyTemplate2BehaviorAll',
+        name: 'testPolicyTemplate2BehaviorAll',
+        icons: [
+          {
+            src: 'testPolicyTemplate2BehaviorAll',
+            path: 'testPolicyTemplate2BehaviorAll',
+          },
+        ],
+        title: 'testPolicyTemplate2BehaviorAll',
+        type: 'testPolicyTemplate2BehaviorAll',
+      },
+    ],
+  },
+  {
+    description: 'testWithPolicyTemplateBehaviorCombined',
+    download: 'testWithPolicyTemplateBehaviorCombined',
+    id: 'testWithPolicyTemplateBehaviorCombined',
+    name: 'testWithPolicyTemplateBehaviorCombined',
+    path: 'testWithPolicyTemplateBehaviorCombined',
+    release: 'ga',
+    status: 'not_installed',
+    title: 'testWithPolicyTemplateBehaviorCombined',
+    version: 'testWithPolicyTemplateBehaviorCombined',
+    policy_templates_behavior: 'combined_policy',
+    policy_templates: [
+      {
+        description: 'testPolicyTemplate1BehaviorCombined',
+        name: 'testPolicyTemplate1BehaviorCombined',
+        icons: [
+          {
+            src: 'testPolicyTemplate1BehaviorCombined',
+            path: 'testPolicyTemplate1BehaviorCombined',
+          },
+        ],
+        title: 'testPolicyTemplate1BehaviorCombined',
+        type: 'testPolicyTemplate1BehaviorCombined',
+      },
+      {
+        description: 'testPolicyTemplate2BehaviorCombined',
+        name: 'testPolicyTemplate2BehaviorCombined',
+        icons: [
+          {
+            src: 'testPolicyTemplate2BehaviorCombined',
+            path: 'testPolicyTemplate2BehaviorCombined',
+          },
+        ],
+        title: 'testPolicyTemplate2BehaviorCombined',
+        type: 'testPolicyTemplate2BehaviorCombined',
+      },
+    ],
+  },
+  {
+    description: 'testWithPolicyTemplateBehaviorIndividual',
+    download: 'testWithPolicyTemplateBehaviorIndividual',
+    id: 'testWithPolicyTemplateBehaviorIndividual',
+    name: 'testWithPolicyTemplateBehaviorIndividual',
+    path: 'testWithPolicyTemplateBehaviorIndividual',
+    release: 'ga',
+    status: 'not_installed',
+    title: 'testWithPolicyTemplateBehaviorIndividual',
+    version: 'testWithPolicyTemplateBehaviorIndividual',
+    policy_templates_behavior: 'individual_policies',
+    policy_templates: [
+      {
+        description: 'testPolicyTemplate1BehaviorIndividual',
+        name: 'testPolicyTemplate1BehaviorIndividual',
+        icons: [
+          {
+            src: 'testPolicyTemplate1BehaviorIndividual',
+            path: 'testPolicyTemplate1BehaviorIndividual',
+          },
+        ],
+        title: 'testPolicyTemplate1BehaviorIndividual',
+        type: 'testPolicyTemplate1BehaviorIndividual',
+      },
+      {
+        description: 'testPolicyTemplate2BehaviorIndividual',
+        name: 'testPolicyTemplate2BehaviorIndividual',
+        icons: [
+          {
+            src: 'testPolicyTemplate2BehaviorIndividual',
+            path: 'testPolicyTemplate2BehaviorIndividual',
+          },
+        ],
+        title: 'testPolicyTemplate2BehaviorIndividual',
+        type: 'testPolicyTemplate2BehaviorIndividual',
+      },
+    ],
+  },
+];
+
 const getTestScheduler = () => {
   return new TestScheduler((actual, expected) => {
     return expect(actual).toEqual(expected);
@@ -384,6 +501,89 @@ describe('Package search provider', () => {
                 type: 'integration',
                 url: {
                   path: 'undefined/detail/testWithASinglePolicyTemplate/overview',
+                  prependBasePath: false,
+                },
+              },
+            ],
+          });
+        });
+
+        expect(sendGetPackages).toHaveBeenCalledTimes(1);
+      });
+
+      test('with integration tag, with policy_templates_behavior field', () => {
+        getTestScheduler().run(({ hot, expectObservable }) => {
+          mockSendGetPackages.mockReturnValue(
+            hot('--(a|)', { a: { data: { response: testResponseBehaviorField } } })
+          );
+          setupMock.getStartServices.mockReturnValue(
+            hot('--(a|)', { a: [coreMock.createStart()] }) as any
+          );
+          const packageSearchProvider = createPackageSearchProvider(setupMock);
+          expectObservable(
+            packageSearchProvider.find(
+              { types: ['integration'] },
+              { aborted$: NEVER, maxResults: 100, preference: '' }
+            )
+          ).toBe('--(a|)', {
+            a: [
+              {
+                id: 'testWithPolicyTemplateBehaviorAll',
+                score: 80,
+                title: 'testWithPolicyTemplateBehaviorAll',
+                type: 'integration',
+                url: {
+                  path: 'undefined/detail/testWithPolicyTemplateBehaviorAll/overview',
+                  prependBasePath: false,
+                },
+              },
+              {
+                id: 'testPolicyTemplate1BehaviorAll',
+                score: 80,
+                title: 'testPolicyTemplate1BehaviorAll',
+                type: 'integration',
+                url: {
+                  path: 'undefined/detail/testWithPolicyTemplateBehaviorAll/overview?integration=testPolicyTemplate1BehaviorAll',
+                  prependBasePath: false,
+                },
+              },
+              {
+                id: 'testPolicyTemplate2BehaviorAll',
+                score: 80,
+                title: 'testPolicyTemplate2BehaviorAll',
+                type: 'integration',
+                url: {
+                  path: 'undefined/detail/testWithPolicyTemplateBehaviorAll/overview?integration=testPolicyTemplate2BehaviorAll',
+                  prependBasePath: false,
+                },
+              },
+              {
+                id: 'testWithPolicyTemplateBehaviorCombined',
+                score: 80,
+                title: 'testWithPolicyTemplateBehaviorCombined',
+                type: 'integration',
+                url: {
+                  path: 'undefined/detail/testWithPolicyTemplateBehaviorCombined/overview',
+                  prependBasePath: false,
+                },
+              },
+              {
+                id: 'testPolicyTemplate1BehaviorIndividual',
+                score: 80,
+                title: 'testPolicyTemplate1BehaviorIndividual',
+                type: 'integration',
+                url: {
+                  path: 'undefined/detail/testWithPolicyTemplateBehaviorIndividual/overview?integration=testPolicyTemplate1BehaviorIndividual',
+                  prependBasePath: false,
+                },
+              },
+              {
+                id: 'testPolicyTemplate2BehaviorIndividual',
+                score: 80,
+                title: 'testPolicyTemplate2BehaviorIndividual',
+                type: 'integration',
+                url: {
+                  path: 'undefined/detail/testWithPolicyTemplateBehaviorIndividual/overview?integration=testPolicyTemplate2BehaviorIndividual',
                   prependBasePath: false,
                 },
               },
