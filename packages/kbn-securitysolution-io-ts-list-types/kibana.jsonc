@@ -4,6 +4,6 @@
   "owner": [
     "@elastic/security-detection-engine"
   ],
-  "group": "platform",
-  "visibility": "shared"
+  "group": "security",
+  "visibility": "private"
 }
