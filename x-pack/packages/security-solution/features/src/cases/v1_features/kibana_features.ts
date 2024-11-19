@@ -71,7 +71,7 @@ export const getCasesBaseKibanaFeature = ({
           minimal: [
             {
               feature: CASES_FEATURE_ID_V2,
-              privileges: ['minimal_all', 'create_comment', 'case_reopen', 'cases_delete'],
+              privileges: ['minimal_all'],
             },
           ],
         },

@@ -155,7 +155,6 @@ export const getV2 = (): KibanaFeatureConfig => {
                   read: [...filesSavedObjectTypes],
                 },
                 cases: {
-                  create: [APP_ID],
                   createComment: [APP_ID],
                 },
                 ui: capabilities.createComment,

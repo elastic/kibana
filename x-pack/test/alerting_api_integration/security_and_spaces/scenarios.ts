@@ -179,7 +179,7 @@ const CasesAll: User = {
     kibana: [
       {
         feature: {
-          generalCasesV2: ['all'],
+          generalCases: ['all'],
           actions: ['all'],
           alertsFixture: ['all'],
           alertsRestrictedFixture: ['all'],
