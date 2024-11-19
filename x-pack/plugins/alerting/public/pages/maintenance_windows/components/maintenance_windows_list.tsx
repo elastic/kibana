@@ -6,16 +6,15 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import type { EuiBasicTableColumn, EuiSearchBarProps } from '@elastic/eui';
 import {
   formatDate,
   EuiInMemoryTable,
-  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
   useEuiTheme,
   EuiButton,
-  EuiSearchBarProps,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { SortDirection } from '../types';
@@ -23,13 +22,11 @@ import * as i18n from '../translations';
 import { useEditMaintenanceWindowsNavigation } from '../../../hooks/use_navigation';
 import { STATUS_DISPLAY, STATUS_SORT } from '../constants';
 import { UpcomingEventsPopover } from './upcoming_events_popover';
-import {
-  MaintenanceWindowStatus,
-  MAINTENANCE_WINDOW_DATE_FORMAT,
-  MaintenanceWindow,
-} from '../../../../common';
+import type { MaintenanceWindowStatus, MaintenanceWindow } from '../../../../common';
+import { MAINTENANCE_WINDOW_DATE_FORMAT } from '../../../../common';
 import { StatusFilter } from './status_filter';
-import { TableActionsPopover, TableActionsPopoverProps } from './table_actions_popover';
+import type { TableActionsPopoverProps } from './table_actions_popover';
+import { TableActionsPopover } from './table_actions_popover';
 import { useFinishMaintenanceWindow } from '../../../hooks/use_finish_maintenance_window';
 import { useArchiveMaintenanceWindow } from '../../../hooks/use_archive_maintenance_window';
 import { useFinishAndArchiveMaintenanceWindow } from '../../../hooks/use_finish_and_archive_maintenance_window';

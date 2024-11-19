@@ -125,7 +125,7 @@ export const EditConnector = React.memo(
         </EuiFlexGroup>
         <EuiHorizontalRule margin="xs" />
         <EuiFlexGroup data-test-subj="edit-connectors" direction="column" alignItems="stretch">
-          {!isLoading && !isEdit && hasErrorMessages && canUseConnectors && (
+          {!isLoading && !isEdit && hasErrorMessages && canUseConnectors ? (
             <EuiFlexItem data-test-subj="push-callouts">
               <PushCallouts
                 errorsMsg={errorsMsg}
@@ -134,19 +134,19 @@ export const EditConnector = React.memo(
                 onEditClick={onEditClick}
               />
             </EuiFlexItem>
-          )}
+          ) : null}
           {!canUseConnectors && (
             <EuiText data-test-subj="edit-connector-permissions-error-msg" size="s">
               <span>{i18n.READ_ACTIONS_PERMISSIONS_ERROR_MSG}</span>
             </EuiText>
           )}
-          {canUseConnectors && !isEdit && (
+          {canUseConnectors && !isEdit ? (
             <ConnectorFieldsPreviewForm
               connector={caseActionConnector}
               fields={caseConnectorFields}
             />
-          )}
-          {canUseConnectors && isEdit && (
+          ) : null}
+          {canUseConnectors && isEdit ? (
             <ConnectorsForm
               caseData={caseData}
               caseConnectors={caseConnectors}
@@ -155,8 +155,8 @@ export const EditConnector = React.memo(
               onCancel={onCancelConnector}
               onSubmit={onSubmitConnector}
             />
-          )}
-          {!hasErrorMessages && !isLoading && !isEdit && hasPushPermissions && canUseConnectors && (
+          ) : null}
+          {!hasErrorMessages && !isLoading && !isEdit && hasPushPermissions && canUseConnectors ? (
             <EuiFlexItem grow={false}>
               <span>
                 <PushButton
@@ -170,7 +170,7 @@ export const EditConnector = React.memo(
                 />
               </span>
             </EuiFlexItem>
-          )}
+          ) : null}
         </EuiFlexGroup>
       </EuiFlexItem>
     );

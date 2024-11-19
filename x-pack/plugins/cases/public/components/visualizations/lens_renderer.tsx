@@ -26,12 +26,12 @@ const LensRendererComponent: React.FC<LensProps> = ({ attributes, timeRange, met
 
   return (
     <>
-      {metadata && metadata.description && (
+      {metadata && metadata.description ? (
         <>
           {metadata.description}
           <EuiSpacer size="s" />
         </>
-      )}
+      ) : null}
       <div
         css={css`
           min-height: ${LENS_VISUALIZATION_HEIGHT}px;

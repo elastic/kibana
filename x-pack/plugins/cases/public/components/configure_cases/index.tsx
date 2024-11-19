@@ -535,7 +535,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
       />
       <EuiPageBody restrictWidth={true}>
         <div css={getFormWrapperCss(euiTheme)}>
-          {hasMinimumLicensePermissions && (
+          {hasMinimumLicensePermissions ? (
             <>
               {!connectorIsValid && (
                 <>
@@ -586,7 +586,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
               </div>
               <EuiSpacer size="xl" />
             </>
-          )}
+          ) : null}
           <div css={sectionWrapperCss}>
             <EuiFlexItem grow={false}>
               <CustomFields

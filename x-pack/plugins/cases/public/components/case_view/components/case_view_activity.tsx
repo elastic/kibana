@@ -209,9 +209,9 @@ export const CaseViewActivity = ({
           />
         </EuiFlexItem>
         <EuiSpacer size="l" />
-        {(isLoadingUserActionsStats || isLoadingCaseConnectors || isLoadingCaseUsers) && (
+        {isLoadingUserActionsStats || isLoadingCaseConnectors || isLoadingCaseUsers ? (
           <EuiLoadingSpinner data-test-subj="case-view-loading-content" size="l" />
-        )}
+        ) : null}
         {showUserActions ? (
           <EuiFlexGroup direction="column" responsive={false} data-test-subj="case-view-activity">
             <EuiFlexItem>
@@ -231,7 +231,7 @@ export const CaseViewActivity = ({
                     <StatusActionButton
                       status={caseData.status}
                       onStatusChanged={changeStatus}
-                      isLoading={isLoading && loadingKey === 'status'}
+                      isLoading={isLoading ? loadingKey === 'status' : null}
                     />
                   ) : null
                 }
@@ -249,19 +249,17 @@ export const CaseViewActivity = ({
         </EuiScreenReaderOnly>
         <EuiFlexGroup direction="column" responsive={false} gutterSize="xl">
           {caseAssignmentAuthorized ? (
-            <>
-              <AssignUsers
-                caseAssignees={caseData.assignees}
-                currentUserProfile={currentUserProfile}
-                onAssigneesChanged={onUpdateAssignees}
-                isLoading={isLoadingAssigneeData}
-                userProfiles={userProfiles ?? new Map()}
-              />
-            </>
+            <AssignUsers
+              caseAssignees={caseData.assignees}
+              currentUserProfile={currentUserProfile}
+              onAssigneesChanged={onUpdateAssignees}
+              isLoading={isLoadingAssigneeData}
+              userProfiles={userProfiles ?? new Map()}
+            />
           ) : null}
           <SeveritySidebarSelector
             isDisabled={!permissions.update}
-            isLoading={isLoading && loadingKey === 'severity'}
+            isLoading={isLoading ? loadingKey === 'severity' : null}
             selectedSeverity={caseData.severity}
             onSeverityChange={onUpdateSeverity}
           />
@@ -285,12 +283,12 @@ export const CaseViewActivity = ({
           <EditTags
             tags={caseData.tags}
             onSubmit={onSubmitTags}
-            isLoading={isLoading && loadingKey === 'tags'}
+            isLoading={isLoading ? loadingKey === 'tags' : null}
           />
           <EditCategory
             category={caseData.category}
             onSubmit={onSubmitCategory}
-            isLoading={isLoading && loadingKey === 'category'}
+            isLoading={isLoading ? loadingKey === 'category' : null}
           />
           {showConnectorSidebar ? (
             <EditConnector

@@ -95,13 +95,13 @@ const ServiceNowITSMFieldsComponent: React.FunctionComponent<ConnectorFieldsProp
 
   return (
     <>
-      {showConnectorWarning && (
+      {showConnectorWarning ? (
         <EuiFlexGroup>
           <EuiFlexItem>
             <DeprecatedCallout />
           </EuiFlexItem>
         </EuiFlexGroup>
-      )}
+      ) : null}
       <EuiFlexGroup data-test-subj="connector-fields-sn-itsm" direction="column" gutterSize="s">
         <EuiFlexGroup>
           <EuiFlexItem>

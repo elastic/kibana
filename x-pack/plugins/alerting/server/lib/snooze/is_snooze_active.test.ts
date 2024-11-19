@@ -8,7 +8,7 @@
 import moment from 'moment';
 import { Frequency } from '@kbn/rrule';
 import sinon from 'sinon';
-import { RRuleRecord } from '../../types';
+import type { RRuleRecord } from '../../types';
 import { isSnoozeActive } from './is_snooze_active';
 
 let fakeTimer: sinon.SinonFakeTimers;

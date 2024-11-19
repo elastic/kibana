@@ -16,10 +16,10 @@ export async function deleteMaintenanceWindow(
   context: MaintenanceWindowClientContext,
   params: DeleteMaintenanceWindowParams
 ): Promise<{}> {
-  return await retryIfConflicts(
+  return retryIfConflicts(
     context.logger,
     `maintenanceWindowClient.delete('${params.id}')`,
-    async () => await deleteWithOCC(context, params)
+    async () => deleteWithOCC(context, params)
   );
 }
 

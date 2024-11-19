@@ -101,7 +101,7 @@ describe('Serverless upgrade and rollback checks', () => {
     test(`detect param changes to review for: ${ruleTypeId}`, async () => {
       const ruleType = ruleTypeRegistry.get(ruleTypeId);
       if (!ruleType?.schemas?.params) {
-        throw new Error('schema.params is required for rule type:' + ruleTypeId);
+        throw new Error(`schema.params is required for rule type:${ruleTypeId}`);
       }
       const schemaType = ruleType.schemas.params.type;
       if (schemaType === 'config-schema') {

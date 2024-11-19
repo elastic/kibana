@@ -6,25 +6,23 @@
  */
 
 import Boom from '@hapi/boom';
-import { RawRule } from '../../../../types';
+import type { RawRule } from '../../../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { createNewAPIKeySet, updateMeta } from '../../../../rules_client/lib';
-import { RulesClientContext } from '../../../../rules_client/types';
+import type { RulesClientContext } from '../../../../rules_client/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { UpdateApiKeyParams } from './types';
+import type { UpdateApiKeyParams } from './types';
 import { updateApiKeyParamsSchema } from './schemas';
 
 export async function updateRuleApiKey(
   context: RulesClientContext,
   { id }: UpdateApiKeyParams
 ): Promise<void> {
-  return await retryIfConflicts(
-    context.logger,
-    `rulesClient.updateRuleApiKey('${id}')`,
-    async () => await updateApiKeyWithOCC(context, { id })
+  return retryIfConflicts(context.logger, `rulesClient.updateRuleApiKey('${id}')`, async () =>
+    updateApiKeyWithOCC(context, { id })
   );
 }
 

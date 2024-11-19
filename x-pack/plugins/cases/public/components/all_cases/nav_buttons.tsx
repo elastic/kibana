@@ -50,7 +50,7 @@ export const NavButtons: FunctionComponent<Props> = ({ actionsErrors }) => {
           }
         `}
       >
-        {permissions.settings && (
+        {permissions.settings ? (
           <EuiFlexItem grow={false}>
             <ConfigureCaseButton
               label={i18n.CONFIGURE_CASES_BUTTON}
@@ -59,8 +59,8 @@ export const NavButtons: FunctionComponent<Props> = ({ actionsErrors }) => {
               titleTooltip={!isEmpty(actionsErrors) ? actionsErrors[0].title : ''}
             />
           </EuiFlexItem>
-        )}
-        {permissions.create && (
+        ) : null}
+        {permissions.create ? (
           <EuiFlexItem>
             <LinkButton
               fill
@@ -72,7 +72,7 @@ export const NavButtons: FunctionComponent<Props> = ({ actionsErrors }) => {
               {i18n.CREATE_CASE_TITLE}
             </LinkButton>
           </EuiFlexItem>
-        )}
+        ) : null}
       </EuiFlexGroup>
     </EuiFlexItem>
   );

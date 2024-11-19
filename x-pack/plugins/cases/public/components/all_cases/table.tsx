@@ -79,45 +79,43 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
       <EuiSkeletonText data-test-subj="initialLoadingPanelAllCases" lines={10} />
     </div>
   ) : (
-    <>
-      <EuiBasicTable
-        className={classnames({ isSelectorView })}
-        columns={columns}
-        rowHeader={rowHeader}
-        data-test-subj="cases-table"
-        itemId="id"
-        items={data.cases}
-        loading={isCommentUpdating}
-        noItemsMessage={
-          <EuiEmptyPrompt
-            title={<h3>{i18n.NO_CASES}</h3>}
-            titleSize="xs"
-            body={permissions.create ? i18n.NO_CASES_BODY : i18n.NO_CASES_BODY_READ_ONLY}
-            actions={
-              permissions.create && (
-                <LinkButton
-                  isDisabled={!permissions.create}
-                  fill
-                  size="s"
-                  onClick={navigateToCreateCaseClick}
-                  href={getCreateCaseUrl()}
-                  iconType="plusInCircle"
-                  data-test-subj="cases-table-add-case"
-                >
-                  {i18n.CREATE_CASE_TITLE}
-                </LinkButton>
-              )
-            }
-          />
-        }
-        onChange={onChange}
-        pagination={pagination}
-        ref={tableRef}
-        rowProps={tableRowProps}
-        selection={!isSelectorView ? selection : undefined}
-        sorting={sorting}
-      />
-    </>
+    <EuiBasicTable
+      className={classnames({ isSelectorView })}
+      columns={columns}
+      rowHeader={rowHeader}
+      data-test-subj="cases-table"
+      itemId="id"
+      items={data.cases}
+      loading={isCommentUpdating}
+      noItemsMessage={
+        <EuiEmptyPrompt
+          title={<h3>{i18n.NO_CASES}</h3>}
+          titleSize="xs"
+          body={permissions.create ? i18n.NO_CASES_BODY : i18n.NO_CASES_BODY_READ_ONLY}
+          actions={
+            permissions.create ? (
+              <LinkButton
+                isDisabled={!permissions.create}
+                fill
+                size="s"
+                onClick={navigateToCreateCaseClick}
+                href={getCreateCaseUrl()}
+                iconType="plusInCircle"
+                data-test-subj="cases-table-add-case"
+              >
+                {i18n.CREATE_CASE_TITLE}
+              </LinkButton>
+            ) : null
+          }
+        />
+      }
+      onChange={onChange}
+      pagination={pagination}
+      ref={tableRef}
+      rowProps={tableRowProps}
+      selection={!isSelectorView ? selection : undefined}
+      sorting={sorting}
+    />
   );
 };
 CasesTable.displayName = 'CasesTable';

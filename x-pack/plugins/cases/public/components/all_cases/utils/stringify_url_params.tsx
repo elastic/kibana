@@ -11,7 +11,7 @@ import type { AllCasesURLQueryParams } from '../types';
 
 export function stringifyUrlParams(
   allCasesUrlParams: AllCasesURLQueryParams,
-  currentSearch: string = ''
+  currentSearch = ''
 ): string {
   const encodedUrlParams = encode({ ...allCasesUrlParams });
 

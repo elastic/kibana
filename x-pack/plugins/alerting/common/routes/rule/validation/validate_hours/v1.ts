@@ -9,5 +9,5 @@ export function validateHours(time: string) {
   if (/^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/.test(time)) {
     return;
   }
-  return 'string is not a valid time in HH:mm format ' + time;
+  return `string is not a valid time in HH:mm format ${time}`;
 }

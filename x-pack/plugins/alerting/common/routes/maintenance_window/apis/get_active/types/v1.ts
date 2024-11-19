@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MaintenanceWindowResponseV1 } from '../../../response';
+import type { MaintenanceWindowResponseV1 } from '../../../response';
 
 export interface GetActiveMaintenanceWindowsResponse {
   body: MaintenanceWindowResponseV1[];

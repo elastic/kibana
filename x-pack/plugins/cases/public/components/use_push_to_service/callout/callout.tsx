@@ -60,7 +60,7 @@ const CallOutComponent = ({
       size="s"
     >
       <EuiDescriptionList data-test-subj={`callout-messages-${id}`} listItems={messages} />
-      {!isCaseClosed && !hasLicenseError && permissions.settings && (
+      {!isCaseClosed && !hasLicenseError && permissions.settings ? (
         <EuiButton
           data-test-subj={`callout-onclick-${id}`}
           color={type === 'success' ? 'success' : type}
@@ -68,7 +68,7 @@ const CallOutComponent = ({
         >
           {i18n.ADD_CONNECTOR}
         </EuiButton>
-      )}
+      ) : null}
     </EuiCallOut>
   ) : null;
 };

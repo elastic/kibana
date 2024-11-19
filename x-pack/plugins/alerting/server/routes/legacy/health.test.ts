@@ -15,7 +15,7 @@ import { rulesClientMock } from '../../rules_client.mock';
 import { RecoveredActionGroup } from '../../types';
 import { alertsMock } from '../../mocks';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
-import { RegistryAlertTypeWithAuth } from '../../authorization';
+import type { RegistryAlertTypeWithAuth } from '../../authorization';
 
 const rulesClient = rulesClientMock.create();
 

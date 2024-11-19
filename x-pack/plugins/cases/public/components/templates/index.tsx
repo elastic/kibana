@@ -86,13 +86,11 @@ const TemplatesComponent: React.FC<Props> = ({
     >
       <EuiPanel paddingSize="s" color="subdued" hasBorder={false} hasShadow={false}>
         {templates.length ? (
-          <>
-            <TemplatesList
-              templates={templates}
-              onEditTemplate={handleEditTemplate}
-              onDeleteTemplate={handleDeleteTemplate}
-            />
-          </>
+          <TemplatesList
+            templates={templates}
+            onEditTemplate={handleEditTemplate}
+            onDeleteTemplate={handleDeleteTemplate}
+          />
         ) : null}
         <EuiSpacer size="s" />
         {!templates.length ? (

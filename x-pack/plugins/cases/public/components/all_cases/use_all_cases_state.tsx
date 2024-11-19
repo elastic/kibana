@@ -33,7 +33,7 @@ interface UseAllCasesStateReturn {
   queryParams: QueryParams;
 }
 
-export function useAllCasesState(isModalView: boolean = false): UseAllCasesStateReturn {
+export function useAllCasesState(isModalView = false): UseAllCasesStateReturn {
   const isStateLoadedFromLocalStorage = useRef(false);
   const isFirstRun = useRef(false);
   const [tableState, setTableState] = useState<AllCasesTableState>(DEFAULT_CASES_TABLE_STATE);

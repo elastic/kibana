@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectsBulkCreateObject } from '@kbn/core/server';
-import { AdHocRunSO } from '../../../data/ad_hoc_run/types';
+import type { SavedObject, SavedObjectsBulkCreateObject } from '@kbn/core/server';
+import type { AdHocRunSO } from '../../../data/ad_hoc_run/types';
 import { createBackfillError } from '../../../backfill_client/lib';
-import { ScheduleBackfillResult } from '../methods/schedule/types';
+import type { ScheduleBackfillResult } from '../methods/schedule/types';
 
 export const transformAdHocRunToBackfillResult = (
   { id, attributes, references, error }: SavedObject<AdHocRunSO>,

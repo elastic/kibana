@@ -24,17 +24,17 @@ const CHECKBOX_OPTIONS = [
   {
     id: DEFAULT_APP_CATEGORIES.observability.id,
     label: i18n.CREATE_FORM_CATEGORY_OBSERVABILITY_RULES,
-    ['data-test-subj']: `option-${DEFAULT_APP_CATEGORIES.observability.id}`,
+    'data-test-subj': `option-${DEFAULT_APP_CATEGORIES.observability.id}`,
   },
   {
     id: DEFAULT_APP_CATEGORIES.security.id,
     label: i18n.CREATE_FORM_CATEGORY_SECURITY_RULES,
-    ['data-test-subj']: `option-${DEFAULT_APP_CATEGORIES.security.id}`,
+    'data-test-subj': `option-${DEFAULT_APP_CATEGORIES.security.id}`,
   },
   {
     id: DEFAULT_APP_CATEGORIES.management.id,
     label: i18n.CREATE_FORM_CATEGORY_STACK_RULES,
-    ['data-test-subj']: `option-${DEFAULT_APP_CATEGORIES.management.id}`,
+    'data-test-subj': `option-${DEFAULT_APP_CATEGORIES.management.id}`,
   },
 ].sort((a, b) => a.id.localeCompare(b.id));
 

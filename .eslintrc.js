@@ -1105,8 +1105,6 @@ module.exports = {
         'x-pack/plugins/security_solution_serverless/common/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/timelines/public/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/timelines/common/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/cases/public/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/cases/common/**/*.{js,mjs,ts,tsx}',
         'packages/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
@@ -1130,7 +1128,6 @@ module.exports = {
       files: [
         'x-pack/plugins/ecs_data_quality_dashboard/**/*.{ts,tsx}',
         'x-pack/plugins/elastic_assistant/**/*.{ts,tsx}',
-        'x-pack/plugins/integration_assistant/**/*.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant/**/*.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant-common/**/*.{ts,tsx}',
         'x-pack/packages/kbn-langchain/**/*.{ts,tsx}',
@@ -1139,13 +1136,11 @@ module.exports = {
         'x-pack/plugins/security_solution_ess/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution_serverless/**/*.{ts,tsx}',
         'x-pack/plugins/timelines/**/*.{ts,tsx}',
-        'x-pack/plugins/cases/**/*.{ts,tsx}',
         'packages/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
       ],
       excludedFiles: [
         'x-pack/plugins/ecs_data_quality_dashboard/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/elastic_assistant/**/*.{test,mock,test_helper}.{ts,tsx}',
-        'x-pack/plugins/integration_assistant/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant-common/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/packages/kbn-langchain/**/*.{test,mock,test_helper}.{ts,tsx}',
@@ -1154,7 +1149,6 @@ module.exports = {
         'x-pack/plugins/security_solution_ess/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/security_solution_serverless/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/timelines/**/*.{test,mock,test_helper}.{ts,tsx}',
-        'x-pack/plugins/cases/**/*.{test,mock,test_helper}.{ts,tsx}',
         'packages/kbn-cell-actions/**/*.{test,mock,test_helper}.{ts,tsx}',
       ],
       rules: {
@@ -1166,7 +1160,6 @@ module.exports = {
       files: [
         'x-pack/plugins/ecs_data_quality_dashboard/**/*.{ts,tsx}',
         'x-pack/plugins/elastic_assistant/**/*.{ts,tsx}',
-        'x-pack/plugins/integration_assistant/**/*.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant/**/*.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant-common/**/*.{ts,tsx}',
         'x-pack/packages/kbn-langchain/**/*.{ts,tsx}',
@@ -1175,7 +1168,6 @@ module.exports = {
         'x-pack/plugins/security_solution_ess/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution_serverless/**/*.{ts,tsx}',
         'x-pack/plugins/timelines/**/*.{ts,tsx}',
-        'x-pack/plugins/cases/**/*.{ts,tsx}',
         'packages/kbn-cell-actions/**/*.{ts,tsx}',
       ],
       rules: {
@@ -1200,7 +1192,6 @@ module.exports = {
       files: [
         'x-pack/plugins/ecs_data_quality_dashboard/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/elastic_assistant/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/integration_assistant/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant-common/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/kbn-langchain/**/*.{js,mjs,ts,tsx}',
@@ -1209,7 +1200,6 @@ module.exports = {
         'x-pack/plugins/security_solution_ess/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/timelines/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}',
         'packages/kbn-data-stream-adapter/**/*.{js,mjs,ts,tsx}',
         'packages/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
       ],
@@ -1308,7 +1298,6 @@ module.exports = {
             'x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
             'x-pack/plugins/security_solution_ess/**/*.{js,mjs,ts,tsx}',
             'x-pack/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}',
-            'x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}',
             'x-pack/plugins/ecs_data_quality_dashboard/**/*.{js,mjs,ts,tsx}',
             'x-pack/packages/kbn-data-stream-adapter/**/*.{js,mjs,ts,tsx}',
             'packages/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
@@ -1318,13 +1307,6 @@ module.exports = {
           },
         },
       ],
-    },
-    {
-      files: ['x-pack/plugins/cases/public/**/*.{js,mjs,ts,tsx}'],
-      excludedFiles: ['x-pack/plugins/cases/**/*.{test,mock,test_helper}.{ts,tsx}'],
-      rules: {
-        'react/display-name': ['error', { ignoreTranspilerName: true }],
-      },
     },
 
     /**
@@ -1533,13 +1515,11 @@ module.exports = {
     },
 
     /**
-     * Alerting Services overrides
+     * ResponseOps overrides
      */
     {
       // typescript for front and back end
-      files: [
-        'x-pack/plugins/{alerting,stack_alerts,actions,task_manager,event_log}/**/*.{ts,tsx}',
-      ],
+      files: ['x-pack/plugins/{stack_alerts,actions,task_manager,event_log}/**/*.{ts,tsx}'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
       },
@@ -1549,6 +1529,184 @@ module.exports = {
       files: ['x-pack/plugins/{stack_connectors,triggers_actions_ui}/server/**/*.ts'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
+      },
+    },
+
+    {
+      // common and public files only
+      files: [
+        'x-pack/plugins/cases/common/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/cases/public/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/alerting/common/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/alerting/public/**/*.{js,mjs,ts,tsx}',
+      ],
+      rules: {
+        'import/no-nodejs-modules': 'error',
+        'no-restricted-imports': [
+          'error',
+          {
+            // prevents UI code from importing server side code and then webpack including it when doing builds
+            patterns: ['**/server/*'],
+          },
+        ],
+      },
+    },
+    {
+      // public files
+      files: [
+        'x-pack/plugins/cases/public/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/alerting/public/**/*.{js,mjs,ts,tsx}',
+      ],
+      extends: [
+        'eslint:recommended',
+        'plugin:react/recommended',
+        'plugin:@typescript-eslint/recommended',
+        'plugin:react-hooks/recommended',
+      ],
+      plugins: ['react', '@typescript-eslint'],
+      rules: {
+        'import/no-nodejs-modules': 'error',
+        'react/boolean-prop-naming': 'error',
+        'react/button-has-type': 'error',
+        'react/display-name': 'error',
+        'react/forbid-dom-props': 'error',
+        'react/no-access-state-in-setstate': 'error',
+        'react/no-children-prop': 'error',
+        'react/no-danger-with-children': 'error',
+        'react/no-deprecated': 'error',
+        'react/no-did-mount-set-state': 'error',
+        'react/no-did-update-set-state': 'error',
+        'react/no-direct-mutation-state': 'error',
+        'react/no-find-dom-node': 'error',
+        'react/no-redundant-should-component-update': 'error',
+        'react/no-render-return-value': 'error',
+        'react/no-typos': 'error',
+        'react/no-string-refs': 'error',
+        'react/no-this-in-sfc': 'error',
+        'react/no-unescaped-entities': 'error',
+        'react/no-unsafe': 'error',
+        'react/no-unused-prop-types': 'error',
+        'react/no-unused-state': 'error',
+        'react/sort-default-props': 'error',
+        'react/void-dom-elements-no-children': 'error',
+        'react/jsx-no-comment-textnodes': 'error',
+        'react/jsx-no-literals': 'error',
+        'react/jsx-no-target-blank': 'error',
+        'react/jsx-fragments': 'error',
+        'react/jsx-no-useless-fragment': 'error',
+        'react/no-danger': 'error',
+        'react/no-array-index-key': 'error',
+      },
+    },
+    {
+      // typescript only for public, but excludes the test files.
+      files: [
+        'x-pack/plugins/cases/public/**/*.{ts,tsx}',
+        'x-pack/plugins/alerting/public/**/*.{ts,tsx}',
+      ],
+      excludedFiles: [
+        'x-pack/plugins/cases/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/plugins/alerting/**/*.{test,mock,test_helper}.{ts,tsx}',
+      ],
+      rules: {
+        '@typescript-eslint/no-non-null-assertion': 'error',
+        'react-perf/jsx-no-new-object-as-prop': 'error',
+        'react-perf/jsx-no-new-array-as-prop': 'error',
+        'react-perf/jsx-no-new-function-as-prop': 'error',
+        'react/jsx-no-bind': 'error',
+        'react/no-unstable-nested-components': 'error',
+        'react/jsx-no-leaked-render': 'error',
+      },
+    },
+    {
+      // front and back end
+      files: ['x-pack/plugins/cases/**/*.{ts,tsx}', 'x-pack/plugins/alerting/**/*.{ts,tsx}'],
+      rules: {
+        '@typescript-eslint/no-this-alias': 'error',
+        '@typescript-eslint/no-explicit-any': 'error',
+        '@typescript-eslint/no-useless-constructor': 'error',
+        '@typescript-eslint/unified-signatures': 'error',
+        'no-restricted-imports': [
+          'error',
+          {
+            paths: [
+              {
+                name: 'react-router-dom',
+                importNames: ['Route'],
+                message: "import { Route } from '@kbn/kibana-react-plugin/public'",
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
+      // common, front and back end
+      files: [
+        'x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/alerting/**/*.{js,mjs,ts,tsx}',
+      ],
+      plugins: ['eslint-plugin-node', 'react'],
+      env: {
+        jest: true,
+      },
+      rules: {
+        'accessor-pairs': 'error',
+        'array-callback-return': 'error',
+        'no-array-constructor': 'error',
+        complexity: 'warn',
+        'node/no-deprecated-api': 'error',
+        'no-bitwise': 'error',
+        'no-continue': 'error',
+        'no-dupe-keys': 'error',
+        'no-duplicate-case': 'error',
+        'no-duplicate-imports': 'off',
+        'no-empty-character-class': 'error',
+        'no-empty-pattern': 'error',
+        'no-ex-assign': 'error',
+        'no-extend-native': 'error',
+        'no-extra-bind': 'error',
+        'no-extra-boolean-cast': 'error',
+        'no-extra-label': 'error',
+        'no-func-assign': 'error',
+        'no-implicit-globals': 'error',
+        'no-implied-eval': 'error',
+        'no-invalid-regexp': 'error',
+        'no-inner-declarations': 'error',
+        'no-lone-blocks': 'error',
+        'no-multi-assign': 'error',
+        'no-misleading-character-class': 'error',
+        'no-new-symbol': 'error',
+        'no-obj-calls': 'error',
+        'no-param-reassign': 'error',
+        'no-process-exit': 'error',
+        'no-prototype-builtins': 'error',
+        'no-return-await': 'error',
+        'no-self-compare': 'error',
+        'no-shadow-restricted-names': 'error',
+        'no-sparse-arrays': 'error',
+        'no-this-before-super': 'error',
+        // rely on typescript
+        'no-undef': 'off',
+        'no-unreachable': 'error',
+        'no-unsafe-finally': 'error',
+        'no-useless-call': 'error',
+        'no-useless-catch': 'error',
+        'no-useless-concat': 'error',
+        'no-useless-computed-key': 'error',
+        'no-useless-rename': 'error',
+        'no-useless-return': 'error',
+        'one-var-declaration-per-line': 'error',
+        'prefer-object-spread': 'error',
+        'prefer-promise-reject-errors': 'error',
+        'prefer-rest-params': 'error',
+        'prefer-spread': 'error',
+        'prefer-template': 'error',
+        'require-atomic-updates': 'error',
+        'symbol-description': 'error',
+        'vars-on-top': 'error',
+        '@typescript-eslint/no-duplicate-imports': ['error'],
+        '@typescript-eslint/consistent-type-imports': 'error',
       },
     },
 

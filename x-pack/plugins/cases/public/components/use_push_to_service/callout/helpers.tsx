@@ -7,5 +7,5 @@
 
 import { sha256 } from 'js-sha256';
 
-export const createCalloutId = (ids: string[], delimiter: string = '|'): string =>
+export const createCalloutId = (ids: string[], delimiter = '|'): string =>
   sha256(ids.join(delimiter));

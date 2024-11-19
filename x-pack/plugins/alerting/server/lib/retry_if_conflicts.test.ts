@@ -71,9 +71,10 @@ async function OperationFailure() {
 }
 
 function getOperationConflictsTimes(times: number) {
+  let _times = times;
   return async function OperationConflictsTimes() {
-    times--;
-    if (times >= 0) {
+    _times--;
+    if (_times >= 0) {
       throw SavedObjectsErrorHelpers.createConflictError(RULE_SAVED_OBJECT_TYPE, MockAlertId);
     }
 

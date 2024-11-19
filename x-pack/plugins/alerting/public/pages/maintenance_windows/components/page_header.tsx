@@ -81,13 +81,13 @@ export const PageHeader = React.memo<PageHeaderProps>(
     return (
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
-          {showBackButton && (
+          {showBackButton ? (
             <div data-test-subj="link-back" css={styles.linkBack}>
               <LinkIcon onClick={navigateToMaintenanceWindowsClick} iconType="arrowLeft">
                 {i18n.MAINTENANCE_WINDOWS_RETURN_LINK}
               </LinkIcon>
             </div>
-          )}
+          ) : null}
           <Title title={title} description={description} />
         </EuiFlexItem>
       </EuiFlexGroup>

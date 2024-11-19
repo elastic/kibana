@@ -89,7 +89,7 @@ const FormWrapperComponent: React.FC<FormWrapper> = ({
         path="value"
         config={formFieldConfig}
         component={TextField}
-        helpText={populatedWithDefault && POPULATED_WITH_DEFAULT}
+        helpText={populatedWithDefault ? POPULATED_WITH_DEFAULT : null}
         componentProps={{
           euiFieldProps: {
             fullWidth: true,
@@ -164,12 +164,12 @@ const EditComponent: CustomFieldType<CaseCustomFieldText>['Edit'] = ({
             <h4>{title}</h4>
           </EuiText>
         </EuiFlexItem>
-        {isLoading && (
+        {isLoading ? (
           <EuiLoadingSpinner
             data-test-subj={`case-text-custom-field-loading-${customFieldConfiguration.key}`}
           />
-        )}
-        {!isLoading && canUpdate && (
+        ) : null}
+        {!isLoading && canUpdate ? (
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
               data-test-subj={`case-text-custom-field-edit-button-${customFieldConfiguration.key}`}
@@ -178,7 +178,7 @@ const EditComponent: CustomFieldType<CaseCustomFieldText>['Edit'] = ({
               onClick={onEdit}
             />
           </EuiFlexItem>
-        )}
+        ) : null}
       </EuiFlexGroup>
       <EuiHorizontalRule margin="xs" />
       <EuiFlexGroup
@@ -189,12 +189,12 @@ const EditComponent: CustomFieldType<CaseCustomFieldText>['Edit'] = ({
         {!isCustomFieldValueDefined && !isEdit && (
           <p data-test-subj="no-custom-field-value">{NO_CUSTOM_FIELD_SET}</p>
         )}
-        {!isEdit && isCustomFieldValueDefined && (
+        {!isEdit && isCustomFieldValueDefined ? (
           <EuiFlexItem>
             <View customField={customField} />
           </EuiFlexItem>
-        )}
-        {isEdit && canUpdate && (
+        ) : null}
+        {isEdit && canUpdate ? (
           <EuiFlexGroup gutterSize="m" direction="column">
             <EuiFlexItem>
               <FormWrapperComponent
@@ -232,7 +232,7 @@ const EditComponent: CustomFieldType<CaseCustomFieldText>['Edit'] = ({
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
-        )}
+        ) : null}
       </EuiFlexGroup>
     </>
   );

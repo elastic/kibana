@@ -173,7 +173,7 @@ const getCreateCommentUserAction = ({
 >): EuiCommentProps[] => {
   switch (comment.type) {
     case AttachmentType.user:
-      const userBuilder = createUserAttachmentUserActionBuilder({
+      return createUserAttachmentUserActionBuilder({
         appId,
         userProfiles,
         comment,
@@ -187,12 +187,10 @@ const getCreateCommentUserAction = ({
         handleSaveComment,
         handleManageQuote,
         handleDeleteComment,
-      });
-
-      return userBuilder.build();
+      }).build();
 
     case AttachmentType.alert:
-      const alertBuilder = createAlertAttachmentUserActionBuilder({
+      return createAlertAttachmentUserActionBuilder({
         userProfiles,
         alertData,
         comment,
@@ -203,22 +201,18 @@ const getCreateCommentUserAction = ({
         onShowAlertDetails,
         handleDeleteComment,
         loadingCommentIds,
-      });
-
-      return alertBuilder.build();
+      }).build();
 
     case AttachmentType.actions:
-      const actionBuilder = createActionAttachmentUserActionBuilder({
+      return createActionAttachmentUserActionBuilder({
         userProfiles,
         userAction,
         comment,
         actionsNavigation,
-      });
-
-      return actionBuilder.build();
+      }).build();
 
     case AttachmentType.externalReference:
-      const externalReferenceBuilder = createExternalReferenceAttachmentUserActionBuilder({
+      return createExternalReferenceAttachmentUserActionBuilder({
         userAction,
         userProfiles,
         comment,
@@ -226,12 +220,10 @@ const getCreateCommentUserAction = ({
         caseData,
         isLoading: loadingCommentIds.includes(comment.id),
         handleDeleteComment,
-      });
-
-      return externalReferenceBuilder.build();
+      }).build();
 
     case AttachmentType.persistableState:
-      const persistableBuilder = createPersistableStateAttachmentUserActionBuilder({
+      return createPersistableStateAttachmentUserActionBuilder({
         userAction,
         userProfiles,
         comment,
@@ -239,9 +231,8 @@ const getCreateCommentUserAction = ({
         caseData,
         isLoading: loadingCommentIds.includes(comment.id),
         handleDeleteComment,
-      });
+      }).build();
 
-      return persistableBuilder.build();
     default:
       return [];
   }

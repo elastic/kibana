@@ -50,7 +50,7 @@ export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
             <EuiTitle size="m">
               <h2>{i18n.CREATE_CASE_TITLE}</h2>
             </EuiTitle>
-            {headerContent && headerContent}
+            {headerContent ? headerContent : null}
           </EuiFlyoutHeader>
           <EuiFlyoutBody
             css={css`

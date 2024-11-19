@@ -5,9 +5,9 @@
  * 2.0.
  */
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { TypeOf } from '@kbn/config-schema';
-import { KueryNode } from '@kbn/es-query';
-import { aggregateOptionsSchema } from '../schemas';
+import type { TypeOf } from '@kbn/config-schema';
+import type { KueryNode } from '@kbn/es-query';
+import type { aggregateOptionsSchema } from '../schemas';
 
 type AggregateOptionsSchemaTypes = TypeOf<typeof aggregateOptionsSchema>;
 export type AggregateOptions = TypeOf<typeof aggregateOptionsSchema> & {

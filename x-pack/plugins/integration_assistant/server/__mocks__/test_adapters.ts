@@ -10,10 +10,10 @@ import type { responseMock } from './response';
 type ResponseMock = ReturnType<typeof responseMock.create>;
 type Method = keyof ResponseMock;
 
-type MockCall = any; // eslint-disable-line @typescript-eslint/no-explicit-any
+type MockCall = any;
 
 interface ResponseCall {
-  body: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  body: any;
   status: number;
 }
 

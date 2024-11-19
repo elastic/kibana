@@ -101,7 +101,7 @@ const JiraFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({ co
       <EuiSkeletonText
         lines={5}
         size="m"
-        isLoading={isLoadingFields && !isLoadingIssueTypes && !isEmpty(issueType)}
+        isLoading={isLoadingFields && !isLoadingIssueTypes ? !isEmpty(issueType) : null}
         data-test-subj="fields-by-issue-type-loading"
       >
         <div style={{ display: hasParent ? 'block' : 'none' }}>

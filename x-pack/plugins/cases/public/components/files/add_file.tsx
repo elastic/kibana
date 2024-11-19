@@ -118,7 +118,7 @@ const AddFileComponent: React.FC<AddFileProps> = ({ caseId }) => {
       >
         {i18n.ADD_FILE}
       </EuiButton>
-      {isModalVisible && (
+      {isModalVisible ? (
         <EuiModal data-test-subj="cases-files-add-modal" onClose={closeModal}>
           <EuiModalHeader>
             <EuiModalHeaderTitle>{i18n.ADD_FILE}</EuiModalHeaderTitle>
@@ -132,7 +132,7 @@ const AddFileComponent: React.FC<AddFileProps> = ({ caseId }) => {
             />
           </EuiModalBody>
         </EuiModal>
-      )}
+      ) : null}
     </EuiFlexItem>
   ) : null;
 };

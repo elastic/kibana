@@ -119,8 +119,8 @@ export const EditCategory = React.memo(({ isLoading, onSubmit, category }: EditC
             <h3>{i18n.CATEGORY}</h3>
           </EuiTitle>
         </EuiFlexItem>
-        {isLoadingAll && <EuiLoadingSpinner data-test-subj="category-loading" />}
-        {!isLoadingAll && permissions.update && (
+        {isLoadingAll ? <EuiLoadingSpinner data-test-subj="category-loading" /> : null}
+        {!isLoadingAll && permissions.update ? (
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
               data-test-subj="category-edit-button"
@@ -129,7 +129,7 @@ export const EditCategory = React.memo(({ isLoading, onSubmit, category }: EditC
               onClick={onEdit}
             />
           </EuiFlexItem>
-        )}
+        ) : null}
       </EuiFlexGroup>
       <EuiHorizontalRule margin="xs" />
       <EuiFlexGroup gutterSize="none" data-test-subj="case-category">
@@ -151,7 +151,7 @@ export const EditCategory = React.memo(({ isLoading, onSubmit, category }: EditC
             )}
           </EuiFlexItem>
         )}
-        {isEditCategory && (
+        {isEditCategory ? (
           <EuiFlexGroup data-test-subj="edit-category" direction="column">
             <CategoryFormWrapper
               onChange={setFormState}
@@ -187,7 +187,7 @@ export const EditCategory = React.memo(({ isLoading, onSubmit, category }: EditC
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
-        )}
+        ) : null}
       </EuiFlexGroup>
     </EuiFlexItem>
   );

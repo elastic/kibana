@@ -7,5 +7,4 @@
 
 export const createValidateRruleBy = (propName: string) => (array: unknown[]) => {
   if (array.length === 0) return `rRule ${propName} cannot be empty`;
-  return;
 };

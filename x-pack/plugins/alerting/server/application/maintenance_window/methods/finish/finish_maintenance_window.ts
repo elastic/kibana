@@ -12,11 +12,8 @@ import {
   mergeEvents,
 } from '../../lib/generate_maintenance_window_events';
 import { getMaintenanceWindowDateAndStatus } from '../../lib/get_maintenance_window_date_and_status';
-import {
-  DateRange,
-  MaintenanceWindowClientContext,
-  MaintenanceWindowStatus,
-} from '../../../../../common';
+import type { DateRange, MaintenanceWindowClientContext } from '../../../../../common';
+import { MaintenanceWindowStatus } from '../../../../../common';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import {
   getMaintenanceWindowSo,
@@ -34,11 +31,11 @@ export async function finishMaintenanceWindow(
   context: MaintenanceWindowClientContext,
   params: FinishMaintenanceWindowParams
 ): Promise<MaintenanceWindow> {
-  return await retryIfConflicts(
+  return retryIfConflicts(
     context.logger,
     `maintenanceWindowClient.finish('${params.id})`,
     async () => {
-      return await finishWithOCC(context, params);
+      return finishWithOCC(context, params);
     }
   );
 }

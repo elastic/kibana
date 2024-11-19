@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AsApiContract } from '@kbn/actions-plugin/common';
-import {
+import type { AsApiContract } from '@kbn/actions-plugin/common';
+import type {
   RuleExecutionStatus,
   RuleMonitoring,
   Rule,
@@ -118,7 +118,7 @@ export function transformRule(input: ApiRule): Rule {
     actions: actionsAPI,
     next_run: nextRun,
     last_run: lastRun,
-    monitoring: monitoring,
+    monitoring,
     view_in_app_relative_url: viewInAppRelativeUrl,
     ...rest
   } = input;

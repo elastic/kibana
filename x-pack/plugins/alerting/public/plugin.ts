@@ -6,16 +6,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { ManagementAppMountParams, ManagementSetup } from '@kbn/management-plugin/public';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { ManagementAppMountParams, ManagementSetup } from '@kbn/management-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
-import { AlertNavigationRegistry, AlertNavigationHandler } from './alert_navigation_registry';
+import type { AlertNavigationHandler } from './alert_navigation_registry';
+import { AlertNavigationRegistry } from './alert_navigation_registry';
 import { loadRule, loadRuleType } from './services/rule_api';
-import { ENABLE_MAINTENANCE_WINDOWS, Rule, MAINTENANCE_WINDOWS_APP_ID } from '../common';
+import type { Rule } from '../common';
+import { ENABLE_MAINTENANCE_WINDOWS, MAINTENANCE_WINDOWS_APP_ID } from '../common';
 
 export interface PluginSetupContract {
   /**
@@ -103,12 +105,14 @@ export class AlertingPublicPlugin
       ruleTypeId: string,
       handler: AlertNavigationHandler
     ) => {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.alertNavigationRegistry!.register(applicationId, ruleTypeId, handler);
     };
 
     const registerDefaultNavigation = async (
       applicationId: string,
       handler: AlertNavigationHandler
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     ) => this.alertNavigationRegistry!.registerDefault(applicationId, handler);
 
     if (ENABLE_MAINTENANCE_WINDOWS) {
@@ -156,7 +160,9 @@ export class AlertingPublicPlugin
           return;
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         if (this.alertNavigationRegistry!.has(rule.consumer, ruleType)) {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           const navigationHandler = this.alertNavigationRegistry!.get(rule.consumer, ruleType);
           const navUrl = navigationHandler(rule);
           if (navUrl) return navUrl;

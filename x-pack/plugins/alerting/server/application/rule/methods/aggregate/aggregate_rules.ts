@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { KueryNode, nodeBuilder } from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
+import { nodeBuilder } from '@kbn/es-query';
 import { isEmpty } from 'lodash';
 import { findRulesSo } from '../../../../data/rule';
 import { AlertingAuthorizationEntity } from '../../../../authorization';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { buildKueryNodeFilter } from '../../../../rules_client/common';
 import { alertingAuthorizationFilterOpts } from '../../../../rules_client/common/constants';
-import { RulesClientContext } from '../../../../rules_client/types';
+import type { RulesClientContext } from '../../../../rules_client/types';
 import { aggregateOptionsSchema } from './schemas';
 import type { AggregateParams } from './types';
 import { validateRuleAggregationFields } from './validation';

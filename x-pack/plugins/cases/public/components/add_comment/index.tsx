@@ -180,7 +180,7 @@ export const AddComment = React.memo(
 
       return (
         <span id="add-comment-permLink">
-          {isLoading && showLoading && (
+          {isLoading && showLoading ? (
             <EuiLoadingSpinner
               css={css`
                 position: absolute;
@@ -190,8 +190,8 @@ export const AddComment = React.memo(
               data-test-subj="loading-spinner"
               size="xl"
             />
-          )}
-          {permissions.create && (
+          ) : null}
+          {permissions.create ? (
             <Form form={form}>
               <UseField
                 path={fieldName}
@@ -206,9 +206,9 @@ export const AddComment = React.memo(
                   placeholder: i18n.ADD_COMMENT_HELP_TEXT,
                   bottomRightContent: (
                     <EuiFlexGroup gutterSize="s" alignItems="flexEnd" responsive={false} wrap>
-                      {statusActionButton && (
+                      {statusActionButton ? (
                         <EuiFlexItem grow={false}>{statusActionButton}</EuiFlexItem>
-                      )}
+                      ) : null}
                       <EuiFlexItem grow={false}>
                         <EuiButton
                           data-test-subj="submit-comment"
@@ -227,7 +227,7 @@ export const AddComment = React.memo(
               />
               <InsertTimeline fieldName="comment" />
             </Form>
-          )}
+          ) : null}
         </span>
       );
     }

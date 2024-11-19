@@ -88,14 +88,14 @@ export const FormFieldsWithFormContext: React.FC<FormFieldsWithFormContextProps>
 
     return (
       <>
-        {shouldShowOwnerSelector && (
+        {shouldShowOwnerSelector ? (
           <CreateCaseOwnerSelector
             selectedOwner={selectedOwner}
             availableOwners={availableOwners}
             isLoading={isLoadingCaseConfiguration}
             onOwnerChange={onOwnerChange}
           />
-        )}
+        ) : null}
         <CreateCaseFormFields
           connectors={connectors}
           isLoading={isLoadingConnectors || isLoadingCaseConfiguration}
@@ -192,13 +192,13 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
                 >
                   {i18n.CANCEL}
                 </EuiButtonEmpty>
-                {showConfirmationModal && (
+                {showConfirmationModal ? (
                   <CancelCreationConfirmationModal
                     title={i18n.MODAL_TITLE}
                     onConfirm={onConfirmModal}
                     onCancel={onCancelModal}
                   />
-                )}
+                ) : null}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <SubmitCaseButton />

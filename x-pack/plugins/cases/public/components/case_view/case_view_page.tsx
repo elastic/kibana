@@ -89,7 +89,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
           data-test-subj="case-view-title"
           titleNode={
             <EditableTitle
-              isLoading={isLoading && loadingKey === 'title'}
+              isLoading={isLoading ? loadingKey === 'title' : null}
               title={caseData.title}
               onSubmit={onSubmitTitle}
             />
@@ -98,7 +98,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
         >
           <CaseActionBar
             caseData={caseData}
-            isLoading={isLoading && (loadingKey === 'status' || loadingKey === 'settings')}
+            isLoading={isLoading ? loadingKey === 'status' || loadingKey === 'settings' : null}
             onUpdateField={onUpdateField}
           />
         </HeaderPage>
@@ -118,9 +118,9 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
               useFetchAlertData={useFetchAlertData}
             />
           )}
-          {activeTabId === CASE_VIEW_PAGE_TABS.ALERTS && features.alerts.enabled && (
+          {activeTabId === CASE_VIEW_PAGE_TABS.ALERTS && features.alerts.enabled ? (
             <CaseViewAlerts caseData={caseData} onAlertsTableLoaded={onAlertsTableLoaded} />
-          )}
+          ) : null}
           {activeTabId === CASE_VIEW_PAGE_TABS.FILES && <CaseViewFiles caseData={caseData} />}
         </EuiFlexGroup>
       </>

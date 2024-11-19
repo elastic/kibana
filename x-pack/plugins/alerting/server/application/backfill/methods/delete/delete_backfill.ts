@@ -7,9 +7,9 @@
 
 import Boom from '@hapi/boom';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
-import { AdHocRunSO } from '../../../../data/ad_hoc_run/types';
+import type { AdHocRunSO } from '../../../../data/ad_hoc_run/types';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { RulesClientContext } from '../../../../rules_client';
+import type { RulesClientContext } from '../../../../rules_client';
 import { AlertingAuthorizationEntity, WriteOperations } from '../../../../authorization';
 import {
   AdHocRunAuditAction,
@@ -17,10 +17,8 @@ import {
 } from '../../../../rules_client/common/audit_events';
 
 export async function deleteBackfill(context: RulesClientContext, id: string): Promise<{}> {
-  return await retryIfConflicts(
-    context.logger,
-    `rulesClient.deleteBackfill('${id}')`,
-    async () => await deleteWithOCC(context, { id })
+  return retryIfConflicts(context.logger, `rulesClient.deleteBackfill('${id}')`, async () =>
+    deleteWithOCC(context, { id })
   );
 }
 

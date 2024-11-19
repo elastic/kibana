@@ -9,5 +9,4 @@ export const validateEndDate = (date: string) => {
   const parsedValue = Date.parse(date);
   if (isNaN(parsedValue)) return `Invalid date: ${date}`;
   if (parsedValue <= Date.now()) return `Invalid snooze date as it is in the past: ${date}`;
-  return;
 };

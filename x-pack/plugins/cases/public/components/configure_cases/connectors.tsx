@@ -88,65 +88,63 @@ const ConnectorsComponent: React.FC<Props> = ({
     [connectorsName, handleShowEditFlyout, updateConnectorDisabled]
   );
   return (
-    <>
-      <EuiDescribedFormGroup
+    <EuiDescribedFormGroup
+      fullWidth
+      title={<h3>{i18n.INCIDENT_MANAGEMENT_SYSTEM_TITLE}</h3>}
+      description={i18n.INCIDENT_MANAGEMENT_SYSTEM_DESC}
+      data-test-subj="case-connectors-form-group"
+    >
+      <EuiFormRow
         fullWidth
-        title={<h3>{i18n.INCIDENT_MANAGEMENT_SYSTEM_TITLE}</h3>}
-        description={i18n.INCIDENT_MANAGEMENT_SYSTEM_DESC}
-        data-test-subj="case-connectors-form-group"
+        label={dropDownLabel}
+        data-test-subj="case-connectors-form-row"
+        labelAppend={
+          canSave ? (
+            <EuiButtonEmpty
+              size="xs"
+              data-test-subj="add-new-connector"
+              onClick={onAddNewConnector}
+            >
+              {i18n.ADD_CONNECTOR}
+            </EuiButtonEmpty>
+          ) : null
+        }
       >
-        <EuiFormRow
-          fullWidth
-          label={dropDownLabel}
-          data-test-subj="case-connectors-form-row"
-          labelAppend={
-            canSave ? (
-              <EuiButtonEmpty
-                size="xs"
-                data-test-subj="add-new-connector"
-                onClick={onAddNewConnector}
-              >
-                {i18n.ADD_CONNECTOR}
-              </EuiButtonEmpty>
-            ) : null
-          }
-        >
-          <EuiFlexGroup direction="column">
-            <EuiFlexItem grow={false}>
-              {canUseConnectors ? (
-                <ConnectorsDropdown
-                  connectors={connectors}
-                  disabled={disabled}
-                  selectedConnector={selectedConnector.id}
-                  isLoading={isLoading}
-                  onChange={onChangeConnector}
-                  data-test-subj="case-connectors-dropdown"
-                />
-              ) : (
-                <EuiText data-test-subj="configure-case-connector-permissions-error-msg" size="s">
-                  <span>{i18n.READ_ACTIONS_PERMISSIONS_ERROR_MSG}</span>
-                </EuiText>
-              )}
-            </EuiFlexItem>
-            {selectedConnector.type !== ConnectorTypes.none && isDeprecatedConnector(connector) && (
-              <EuiFlexItem grow={false}>
-                <DeprecatedCallout />
-              </EuiFlexItem>
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem grow={false}>
+            {canUseConnectors ? (
+              <ConnectorsDropdown
+                connectors={connectors}
+                disabled={disabled}
+                selectedConnector={selectedConnector.id}
+                isLoading={isLoading}
+                onChange={onChangeConnector}
+                data-test-subj="case-connectors-dropdown"
+              />
+            ) : (
+              <EuiText data-test-subj="configure-case-connector-permissions-error-msg" size="s">
+                <span>{i18n.READ_ACTIONS_PERMISSIONS_ERROR_MSG}</span>
+              </EuiText>
             )}
-            {selectedConnector.type !== ConnectorTypes.none ? (
-              <EuiFlexItem grow={false}>
-                <Mapping
-                  actionTypeName={actionTypeName}
-                  connectorType={selectedConnector.type}
-                  isLoading={isLoading}
-                  mappings={mappings}
-                />
-              </EuiFlexItem>
-            ) : null}
-          </EuiFlexGroup>
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
-    </>
+          </EuiFlexItem>
+          {selectedConnector.type !== ConnectorTypes.none && isDeprecatedConnector(connector) && (
+            <EuiFlexItem grow={false}>
+              <DeprecatedCallout />
+            </EuiFlexItem>
+          )}
+          {selectedConnector.type !== ConnectorTypes.none ? (
+            <EuiFlexItem grow={false}>
+              <Mapping
+                actionTypeName={actionTypeName}
+                connectorType={selectedConnector.type}
+                isLoading={isLoading}
+                mappings={mappings}
+              />
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
   );
 };
 ConnectorsComponent.displayName = 'Connectors';

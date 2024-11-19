@@ -175,14 +175,14 @@ export const FileActionsPopoverButton: React.FC<{ caseId: string; theFile: FileJ
           data-test-subj={'cases-files-popover-context-menu'}
         />
       </EuiPopover>
-      {showDeletionModal && (
+      {showDeletionModal ? (
         <DeleteAttachmentConfirmationModal
           title={i18n.DELETE_FILE_TITLE}
           confirmButtonText={i18n.DELETE}
           onCancel={onCancel}
           onConfirm={onConfirm}
         />
-      )}
+      ) : null}
     </>
   );
 };

@@ -14,7 +14,7 @@ import { WriteOperations, AlertingAuthorizationEntity } from '../../../../author
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { validateSnoozeStartDate } from '../../../../lib/validate_snooze_date';
 import { RuleMutedError } from '../../../../lib/errors/rule_muted';
-import { RulesClientContext } from '../../../../rules_client/types';
+import type { RulesClientContext } from '../../../../rules_client/types';
 import {
   getSnoozeAttributes,
   verifySnoozeAttributeScheduleLimit,
@@ -38,10 +38,10 @@ export async function snoozeRule(
     throw new RuleMutedError(snoozeDateValidationMsg);
   }
 
-  return await retryIfConflicts(
+  return retryIfConflicts(
     context.logger,
     `rulesClient.snooze('${id}', ${JSON.stringify(snoozeSchedule, null, 4)})`,
-    async () => await snoozeWithOCC(context, { id, snoozeSchedule })
+    async () => snoozeWithOCC(context, { id, snoozeSchedule })
   );
 }
 

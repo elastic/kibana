@@ -184,7 +184,7 @@ export class CasePlugin
     this.userProfileService.initialize({
       spaces: plugins.spaces,
       // securityPluginSetup will be set to a defined value in the setup() function
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
       securityPluginSetup: this.securityPluginSetup!,
       securityPluginStart: plugins.security,
       licensingPluginStart: plugins.licensing,
@@ -192,7 +192,7 @@ export class CasePlugin
 
     this.clientFactory.initialize({
       // securityPluginSetup will be set to a defined value in the setup() function
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
       securityPluginSetup: this.securityPluginSetup!,
       securityPluginStart: plugins.security,
       securityServiceStart: core.security,
@@ -204,7 +204,7 @@ export class CasePlugin
        * Lens will be always defined as
        * it is declared as required plugin in kibana.json
        */
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
       lensEmbeddableFactory: this.lensEmbeddableFactory!,
       persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
       externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,

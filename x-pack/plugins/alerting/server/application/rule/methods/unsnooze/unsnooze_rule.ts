@@ -12,7 +12,7 @@ import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common
 import { getRuleSavedObject } from '../../../../rules_client/lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
-import { RulesClientContext } from '../../../../rules_client/types';
+import type { RulesClientContext } from '../../../../rules_client/types';
 import { getUnsnoozeAttributes } from '../../../../rules_client/common';
 import { updateRuleSo } from '../../../../data/rule';
 import { updateMetaAttributes } from '../../../../rules_client/lib/update_meta_attributes';
@@ -27,10 +27,8 @@ export async function unsnoozeRule(
   context: RulesClientContext,
   { id, scheduleIds }: UnsnoozeParams
 ): Promise<void> {
-  return await retryIfConflicts(
-    context.logger,
-    `rulesClient.unsnooze('${id}')`,
-    async () => await unsnoozeWithOCC(context, { id, scheduleIds })
+  return retryIfConflicts(context.logger, `rulesClient.unsnooze('${id}')`, async () =>
+    unsnoozeWithOCC(context, { id, scheduleIds })
   );
 }
 

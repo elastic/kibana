@@ -100,7 +100,7 @@ export const MarkdownEditorForm = React.memo(
               data-test-subj={`${dataTestSubj}-markdown-editor`}
             />
           </EuiFormRow>
-          {bottomRightContent && (
+          {bottomRightContent ? (
             <EuiFlexGroup
               css={css`
                 padding: ${euiTheme.size.m} 0;
@@ -109,13 +109,13 @@ export const MarkdownEditorForm = React.memo(
             >
               <EuiFlexItem grow={false}>
                 <EuiText color="danger" size="s">
-                  {hasConflicts && conflictWarningText}
+                  {hasConflicts ? conflictWarningText : null}
                 </EuiText>
                 <EuiSpacer size="s" />
                 {bottomRightContent}
               </EuiFlexItem>
             </EuiFlexGroup>
-          )}
+          ) : null}
         </CommentEditorContext.Provider>
       );
     }

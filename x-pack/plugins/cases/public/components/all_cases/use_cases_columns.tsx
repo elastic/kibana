@@ -409,7 +409,7 @@ export const ExternalServiceColumn: React.FC<Props> = ({ theCase, connectors }) 
 
   return (
     <p>
-      {actions.read && (
+      {actions.read ? (
         <span css={iconWrapperCss}>
           <EuiIcon
             size="original"
@@ -418,7 +418,7 @@ export const ExternalServiceColumn: React.FC<Props> = ({ theCase, connectors }) 
             data-test-subj="cases-table-connector-icon"
           />
         </span>
-      )}
+      ) : null}
       <EuiLink
         data-test-subj={`case-table-column-external`}
         title={theCase.externalService?.connectorName}

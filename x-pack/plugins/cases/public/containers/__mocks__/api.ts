@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import type {
   ActionLicense,
   CasesFindResponseUI,
@@ -54,13 +56,13 @@ import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 
 export const getCase = async (
   caseId: string,
-  includeComments: boolean = true,
+  includeComments = true,
   signal: AbortSignal
 ): Promise<CaseUI> => Promise.resolve(basicCase);
 
 export const resolveCase = async (
   caseId: string,
-  includeComments: boolean = true,
+  includeComments = true,
   signal: AbortSignal
 ): Promise<ResolvedCase> => Promise.resolve(basicResolvedCase);
 

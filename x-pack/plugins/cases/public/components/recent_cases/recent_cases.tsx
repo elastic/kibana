@@ -75,7 +75,7 @@ export const RecentCasesComp = React.memo<RecentCasesProps>(
                 </CaseDetailsLink>
               </EuiText>
               <EuiSpacer size="xs" />
-              {c.description && c.description.length && (
+              {c.description && c.description.length ? (
                 <div css={getMarkdownContainerCss(euiTheme)}>
                   <div css={getTruncateCompCss}>
                     <MarkdownRenderer disableLinks={true} textSize="relative">
@@ -83,7 +83,7 @@ export const RecentCasesComp = React.memo<RecentCasesProps>(
                     </MarkdownRenderer>
                   </div>
                 </div>
-              )}
+              ) : null}
               <EuiSpacer size="xs" />
               <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem grow={false}>

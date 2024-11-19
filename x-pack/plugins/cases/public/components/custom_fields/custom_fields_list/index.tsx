@@ -76,9 +76,9 @@ const CustomFieldsListComponent: React.FC<Props> = (props) => {
                       <EuiBadge color={euiTheme.colors.body}>
                         {renderTypeLabel(customField.type)}
                       </EuiBadge>
-                      {customField.required && (
+                      {customField.required ? (
                         <EuiBadge color={euiTheme.colors.body}>{i18n.REQUIRED}</EuiBadge>
-                      )}
+                      ) : null}
                     </EuiFlexGroup>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>

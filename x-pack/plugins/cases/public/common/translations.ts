@@ -15,7 +15,7 @@ export const CANCEL = i18n.translate('xpack.cases.caseView.cancel', {
   defaultMessage: 'Cancel',
 });
 
-export const DELETE_CASE = (quantity: number = 1) =>
+export const DELETE_CASE = (quantity = 1) =>
   i18n.translate('xpack.cases.confirmDeleteCase.deleteCase', {
     values: { quantity },
     defaultMessage: `Delete {quantity, plural, =1 {case} other {{quantity} cases}}`,
@@ -322,7 +322,7 @@ export const CASE_SUCCESS_TOAST = (title: string) =>
     defaultMessage: '{title} has been updated',
   });
 
-export const CASE_ALERT_SUCCESS_TOAST = (title: string, quantity: number = 1) =>
+export const CASE_ALERT_SUCCESS_TOAST = (title: string, quantity = 1) =>
   i18n.translate('xpack.cases.actions.caseAlertSuccessToast', {
     values: { quantity, title },
     defaultMessage: '{quantity, plural, =1 {An alert was} other {Alerts were}} added to "{title}"',

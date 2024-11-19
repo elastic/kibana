@@ -42,7 +42,7 @@ const RemovableItemComponent: React.FC<Props> = ({
       data-test-subj={`${dataTestSubj}group`}
     >
       <EuiFlexItem grow={false}>{children}</EuiFlexItem>
-      {permissions.update && (
+      {permissions.update ? (
         <EuiFlexItem grow={false}>
           <EuiToolTip
             position="left"
@@ -64,7 +64,7 @@ const RemovableItemComponent: React.FC<Props> = ({
             />
           </EuiToolTip>
         </EuiFlexItem>
-      )}
+      ) : null}
     </EuiFlexGroup>
   );
 };

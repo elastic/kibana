@@ -11,7 +11,8 @@
 // have the caller make explicit conflict checks, where the conflict was
 // caused by a background update.
 
-import { Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 type RetryableForConflicts<T> = () => Promise<T>;
 
@@ -48,7 +49,7 @@ export async function retryIfConflicts<T>(
     // delay a bit before retrying
     logger.debug(`${name} conflict, retrying ...`);
     await waitBeforeNextRetry();
-    return await retryIfConflicts(logger, name, operation, retries - 1);
+    return retryIfConflicts(logger, name, operation, retries - 1);
   }
 }
 

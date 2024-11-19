@@ -167,7 +167,7 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
 
     return (
       <>
-        {isSubmitting && (
+        {isSubmitting ? (
           <EuiLoadingSpinner
             css={css`
               position: absolute;
@@ -178,7 +178,7 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
             data-test-subj="create-case-loading-spinner"
             size="xl"
           />
-        )}
+        ) : null}
         {withSteps ? (
           <EuiSteps
             headingElement="h2"
@@ -205,7 +205,7 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
                 </EuiFlexItem>
                 <EuiFlexItem>{secondStep.children}</EuiFlexItem>
               </EuiFlexGroup>
-              {isSyncAlertsEnabled && (
+              {isSyncAlertsEnabled ? (
                 <EuiFlexGroup direction="column">
                   <EuiFlexItem>
                     <EuiTitle size="s">
@@ -214,7 +214,7 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
                   </EuiFlexItem>
                   <EuiFlexItem>{thirdStep.children}</EuiFlexItem>
                 </EuiFlexGroup>
-              )}
+              ) : null}
               <EuiFlexGroup direction="column">
                 <EuiFlexItem>
                   <EuiTitle size="s">

@@ -7,7 +7,7 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiLoadingSpinner } from '@elastic/eui';
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import type { AlertConsumers } from '@kbn/rule-data-utils';
 import type { Filter } from '@kbn/es-query';
 import { AlertsSearchBar } from '@kbn/alerts-ui-shared';
 import { PLUGIN } from '../../../../common/constants/plugin';

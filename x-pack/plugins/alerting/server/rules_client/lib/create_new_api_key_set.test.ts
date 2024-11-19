@@ -16,12 +16,12 @@ import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertingAuthorization } from '../../authorization/alerting_authorization';
-import { ActionsAuthorization } from '@kbn/actions-plugin/server';
-import { RawRule } from '../../types';
+import type { AlertingAuthorization } from '../../authorization/alerting_authorization';
+import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import type { RawRule } from '../../types';
 import { getBeforeSetup, mockedDateString } from '../tests/lib';
 import { createNewAPIKeySet } from './create_new_api_key_set';
-import { RulesClientContext } from '../types';
+import type { RulesClientContext } from '../types';
 import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
 import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
 
@@ -140,14 +140,13 @@ describe('createNewAPIKeySet', () => {
 
   test('should throw an error if getting the api key fails', async () => {
     rulesClientParams.createAPIKey.mockRejectedValueOnce(new Error('Test failure'));
-    await expect(
-      async () =>
-        await createNewAPIKeySet(rulesClientParams, {
-          id: attributes.alertTypeId,
-          ruleName: attributes.name,
-          username,
-          shouldUpdateApiKey: true,
-        })
+    await expect(async () =>
+      createNewAPIKeySet(rulesClientParams, {
+        id: attributes.alertTypeId,
+        ruleName: attributes.name,
+        username,
+        shouldUpdateApiKey: true,
+      })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Error creating API key for rule - Test failure"`
     );
@@ -155,15 +154,14 @@ describe('createNewAPIKeySet', () => {
 
   test('should throw an error if getting the api key fails and an error message is passed in', async () => {
     rulesClientParams.createAPIKey.mockRejectedValueOnce(new Error('Test failure'));
-    await expect(
-      async () =>
-        await createNewAPIKeySet(rulesClientParams, {
-          id: attributes.alertTypeId,
-          ruleName: attributes.name,
-          username,
-          shouldUpdateApiKey: true,
-          errorMessage: 'Error updating rule: could not create API key',
-        })
+    await expect(async () =>
+      createNewAPIKeySet(rulesClientParams, {
+        id: attributes.alertTypeId,
+        ruleName: attributes.name,
+        username,
+        shouldUpdateApiKey: true,
+        errorMessage: 'Error updating rule: could not create API key',
+      })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Error updating rule: could not create API key - Test failure"`
     );

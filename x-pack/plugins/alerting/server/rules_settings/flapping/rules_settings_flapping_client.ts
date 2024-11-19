@@ -6,23 +6,21 @@
  */
 
 import Boom from '@hapi/boom';
-import {
-  Logger,
-  SavedObjectsClientContract,
-  SavedObject,
-  SavedObjectsErrorHelpers,
-} from '@kbn/core/server';
+import type { Logger, SavedObjectsClientContract, SavedObject } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
   MAX_LOOK_BACK_WINDOW,
   MAX_STATUS_CHANGE_THRESHOLD,
   MIN_LOOK_BACK_WINDOW,
   MIN_STATUS_CHANGE_THRESHOLD,
 } from '@kbn/alerting-types/flapping/latest';
-import {
+import type {
   RulesSettings,
   RulesSettingsFlapping,
   RulesSettingsFlappingProperties,
   RulesSettingsModificationMetadata,
+} from '../../../common';
+import {
   RULES_SETTINGS_SAVED_OBJECT_TYPE,
   RULES_SETTINGS_FLAPPING_SAVED_OBJECT_ID,
   DEFAULT_FLAPPING_SETTINGS,
@@ -84,10 +82,8 @@ export class RulesSettingsFlappingClient {
   }
 
   public async update(newFlappingProperties: RulesSettingsFlappingProperties) {
-    return await retryIfConflicts(
-      this.logger,
-      'ruleSettingsClient.flapping.update()',
-      async () => await this.updateWithOCC(newFlappingProperties)
+    return retryIfConflicts(this.logger, 'ruleSettingsClient.flapping.update()', async () =>
+      this.updateWithOCC(newFlappingProperties)
     );
   }
 
@@ -133,7 +129,7 @@ export class RulesSettingsFlappingClient {
   }
 
   private async getSettings(): Promise<SavedObject<RulesSettings>> {
-    return await this.savedObjectsClient.get<RulesSettings>(
+    return this.savedObjectsClient.get<RulesSettings>(
       RULES_SETTINGS_SAVED_OBJECT_TYPE,
       RULES_SETTINGS_FLAPPING_SAVED_OBJECT_ID
     );
@@ -171,7 +167,7 @@ export class RulesSettingsFlappingClient {
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         this.logger.info('Creating new default flapping rules settings for current space.');
-        return await this.createSettings();
+        return this.createSettings();
       }
       this.logger.error(`Failed to get flapping rules setting for current space. Error: ${e}`);
       throw e;

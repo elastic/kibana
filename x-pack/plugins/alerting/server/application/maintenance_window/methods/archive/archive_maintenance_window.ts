@@ -36,11 +36,11 @@ export async function archiveMaintenanceWindow(
   context: MaintenanceWindowClientContext,
   params: ArchiveMaintenanceWindowParams
 ): Promise<MaintenanceWindow> {
-  return await retryIfConflicts(
+  return retryIfConflicts(
     context.logger,
     `maintenanceWindowClient.archive('${params.id})`,
     async () => {
-      return await archiveWithOCC(context, params);
+      return archiveWithOCC(context, params);
     }
   );
 }

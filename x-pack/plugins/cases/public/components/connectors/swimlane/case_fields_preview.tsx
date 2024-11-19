@@ -28,7 +28,7 @@ const SwimlaneFieldsPreviewComponent: React.FunctionComponent<
         listItems={[]}
         title={connector.name}
       />
-      {showMappingWarning && (
+      {showMappingWarning ? (
         <EuiCallOut
           title={i18n.EMPTY_MAPPING_WARNING_TITLE}
           color="danger"
@@ -37,7 +37,7 @@ const SwimlaneFieldsPreviewComponent: React.FunctionComponent<
         >
           {i18n.EMPTY_MAPPING_WARNING_DESC}
         </EuiCallOut>
-      )}
+      ) : null}
     </>
   );
 };

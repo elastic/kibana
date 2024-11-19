@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { EcsFields, ECS_FULL } from '../../../common/ecs';
 import { mergeSamples } from '../../util/samples';
 import { ECS_RESERVED } from './constants';

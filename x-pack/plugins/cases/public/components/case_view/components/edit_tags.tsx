@@ -83,8 +83,8 @@ export const EditTags = React.memo(({ isLoading, onSubmit, tags }: EditTagsProps
             <h3>{i18n.TAGS}</h3>
           </EuiTitle>
         </EuiFlexItem>
-        {isLoading && <EuiLoadingSpinner data-test-subj="tag-list-loading" />}
-        {!isLoading && permissions.update && (
+        {isLoading ? <EuiLoadingSpinner data-test-subj="tag-list-loading" /> : null}
+        {!isLoading && permissions.update ? (
           <EuiFlexItem data-test-subj="tag-list-edit" grow={false}>
             <EuiButtonIcon
               data-test-subj="tag-list-edit-button"
@@ -93,7 +93,7 @@ export const EditTags = React.memo(({ isLoading, onSubmit, tags }: EditTagsProps
               onClick={() => setIsEditTags(true)}
             />
           </EuiFlexItem>
-        )}
+        ) : null}
       </EuiFlexGroup>
       <EuiHorizontalRule margin="xs" />
       <EuiFlexGroup
@@ -113,7 +113,7 @@ export const EditTags = React.memo(({ isLoading, onSubmit, tags }: EditTagsProps
             <Tags tags={tags} color="hollow" />
           </EuiFlexItem>
         )}
-        {isEditTags && (
+        {isEditTags ? (
           <EuiFlexGroup
             css={css`
               & {
@@ -172,7 +172,7 @@ export const EditTags = React.memo(({ isLoading, onSubmit, tags }: EditTagsProps
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
-        )}
+        ) : null}
       </EuiFlexGroup>
     </EuiFlexItem>
   );
