@@ -13,6 +13,7 @@ import { DataUsageMetrics } from './data_usage_metrics';
 import { useGetDataUsageMetrics } from '../../hooks/use_get_usage_metrics';
 import { useGetDataUsageDataStreams } from '../../hooks/use_get_data_streams';
 import { coreMock as mockCore } from '@kbn/core/public/mocks';
+import { options } from '@kbn/esql-ast/src/mutate/generic/commands';
 
 jest.mock('../../utils/use_breadcrumbs', () => {
   return {
@@ -147,6 +148,13 @@ const getBaseMockedDataUsageMetrics = () => ({
   refetch: jest.fn(),
 });
 
+const generateDataStreams = (count: number) => {
+  return Array.from({ length: count }, (_, i) => ({
+    name: `.ds-${i}`,
+    storageSizeBytes: 1024 ** 2 * (22 / 7),
+  }));
+};
+
 describe('DataUsageMetrics', () => {
   let user: UserEvent;
   const testId = 'test';
@@ -196,28 +204,7 @@ describe('DataUsageMetrics', () => {
   it('should show selected data streams on the filter', () => {
     mockUseGetDataUsageDataStreams.mockReturnValue({
       error: undefined,
-      data: [
-        {
-          name: '.ds-1',
-          storageSizeBytes: 10000,
-        },
-        {
-          name: '.ds-2',
-          storageSizeBytes: 20000,
-        },
-        {
-          name: '.ds-3',
-          storageSizeBytes: 10300,
-        },
-        {
-          name: '.ds-4',
-          storageSizeBytes: 23000,
-        },
-        {
-          name: '.ds-5',
-          storageSizeBytes: 23200,
-        },
-      ],
+      data: generateDataStreams(5),
       isFetching: false,
     });
     const { getByTestId } = render(<DataUsageMetrics data-test-subj={testId} />);
@@ -226,46 +213,35 @@ describe('DataUsageMetrics', () => {
     );
   });
 
+  it('should show at most 50 selected data streams on the filter', async () => {
+    mockUseGetDataUsageDataStreams.mockReturnValue({
+      error: undefined,
+      data: generateDataStreams(100),
+      isFetching: false,
+    });
+    const { getByTestId } = render(<DataUsageMetrics data-test-subj={testId} />);
+    const toggleFilterButton = getByTestId(`${testIdFilter}-dataStreams-popoverButton`);
+
+    expect(toggleFilterButton).toHaveTextContent('Data streams50');
+  });
+
   it('should allow de-selecting all but one data stream option', async () => {
     mockUseGetDataUsageDataStreams.mockReturnValue({
       error: undefined,
-      data: [
-        {
-          name: '.ds-1',
-          storageSizeBytes: 10000,
-        },
-        {
-          name: '.ds-2',
-          storageSizeBytes: 20000,
-        },
-        {
-          name: '.ds-3',
-          storageSizeBytes: 10300,
-        },
-        {
-          name: '.ds-4',
-          storageSizeBytes: 23000,
-        },
-        {
-          name: '.ds-5',
-          storageSizeBytes: 23200,
-        },
-      ],
+      data: generateDataStreams(5),
       isFetching: false,
     });
     const { getByTestId, getAllByTestId } = render(<DataUsageMetrics data-test-subj={testId} />);
-    expect(getByTestId(`${testIdFilter}-dataStreams-popoverButton`)).toHaveTextContent(
-      'Data streams5'
-    );
-    await user.click(getByTestId(`${testIdFilter}-dataStreams-popoverButton`));
+    const toggleFilterButton = getByTestId(`${testIdFilter}-dataStreams-popoverButton`);
+
+    expect(toggleFilterButton).toHaveTextContent('Data streams5');
+    await user.click(toggleFilterButton);
     const allFilterOptions = getAllByTestId('dataStreams-filter-option');
     for (let i = 0; i < allFilterOptions.length - 1; i++) {
       await user.click(allFilterOptions[i]);
     }
 
-    expect(getByTestId(`${testIdFilter}-dataStreams-popoverButton`)).toHaveTextContent(
-      'Data streams1'
-    );
+    expect(toggleFilterButton).toHaveTextContent('Data streams1');
   });
 
   it('should not call usage metrics API if no data streams', async () => {
