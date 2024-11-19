@@ -293,7 +293,7 @@ describe('filterPolicyTemplatesTiles', () => {
     status: 'not_installed',
     description: 'nginx',
     download: 'nginx',
-    path: 'nginx'
+    path: 'nginx',
   };
 
   const childPolicyTemplates: PackageListItem[] = [
@@ -306,7 +306,7 @@ describe('filterPolicyTemplatesTiles', () => {
       status: 'not_installed',
       description: 'nginx-template-1',
       download: 'nginx-template-1',
-      path: 'nginx-template-1'
+      path: 'nginx-template-1',
     },
     {
       id: 'nginx-template2',
@@ -317,7 +317,7 @@ describe('filterPolicyTemplatesTiles', () => {
       status: 'not_installed',
       description: 'nginx-template-2',
       download: 'nginx-template-2',
-      path: 'nginx-template-2'
+      path: 'nginx-template-2',
     },
   ];
   it('should return all tiles as undefined value', () => {
@@ -331,7 +331,7 @@ describe('filterPolicyTemplatesTiles', () => {
         status: 'not_installed',
         description: 'nginx',
         download: 'nginx',
-        path: 'nginx'
+        path: 'nginx',
       },
       {
         id: 'nginx-template1',
@@ -342,7 +342,7 @@ describe('filterPolicyTemplatesTiles', () => {
         status: 'not_installed',
         description: 'nginx-template-1',
         download: 'nginx-template-1',
-        path: 'nginx-template-1'
+        path: 'nginx-template-1',
       },
       {
         id: 'nginx-template2',
@@ -353,7 +353,7 @@ describe('filterPolicyTemplatesTiles', () => {
         status: 'not_installed',
         description: 'nginx-template-2',
         download: 'nginx-template-2',
-        path: 'nginx-template-2'
+        path: 'nginx-template-2',
       },
     ]);
   });
@@ -368,7 +368,7 @@ describe('filterPolicyTemplatesTiles', () => {
         status: 'not_installed',
         description: 'nginx',
         download: 'nginx',
-        path: 'nginx'
+        path: 'nginx',
       },
       {
         id: 'nginx-template1',
@@ -379,7 +379,7 @@ describe('filterPolicyTemplatesTiles', () => {
         status: 'not_installed',
         description: 'nginx-template-1',
         download: 'nginx-template-1',
-        path: 'nginx-template-1'
+        path: 'nginx-template-1',
       },
       {
         id: 'nginx-template2',
@@ -404,7 +404,7 @@ describe('filterPolicyTemplatesTiles', () => {
         status: 'not_installed',
         description: 'nginx',
         download: 'nginx',
-        path: 'nginx'
+        path: 'nginx',
       },
     ]);
   });
@@ -421,7 +421,7 @@ describe('filterPolicyTemplatesTiles', () => {
         status: 'not_installed',
         description: 'nginx-template-1',
         download: 'nginx-template-1',
-        path: 'nginx-template-1'
+        path: 'nginx-template-1',
       },
       {
         id: 'nginx-template2',
@@ -432,7 +432,7 @@ describe('filterPolicyTemplatesTiles', () => {
         status: 'not_installed',
         description: 'nginx-template-2',
         download: 'nginx-template-2',
-        path: 'nginx-template-2'
+        path: 'nginx-template-2',
       },
     ]);
   });
