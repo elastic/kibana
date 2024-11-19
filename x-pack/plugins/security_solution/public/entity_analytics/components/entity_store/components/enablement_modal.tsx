@@ -66,21 +66,15 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
     riskScore: !!riskScore.checked,
     entityStore: !!entityStore.checked,
   });
-<<<<<<< HEAD
   const riskEnginePrivileges = useMissingRiskEnginePrivileges();
-=======
-  const { data: privileges, isLoading: isLoadingPrivileges } = useEntityEnginePrivileges();
   const enablementOptions = enablements.riskScore || enablements.entityStore;
->>>>>>> 5d0b62ce9eb (Confirmation Modal - show warning message when nothing has been changed in modal.  (#199523))
 
   if (!visible) {
     return null;
   }
-<<<<<<< HEAD
   const hasRiskEnginePrivileges =
     !riskEnginePrivileges.isLoading && riskEnginePrivileges?.hasAllRequiredPrivileges;
 
-=======
   const proceedWarning = (
     <EuiCallOut
       size="s"
@@ -92,7 +86,6 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
       <p>{ENABLEMENT_WARNING_SELECT_TO_PROCEED}</p>
     </EuiCallOut>
   );
->>>>>>> 5d0b62ce9eb (Confirmation Modal - show warning message when nothing has been changed in modal.  (#199523))
   return (
     <EuiModal onClose={() => toggle(false)}>
       <EuiModalHeader>
