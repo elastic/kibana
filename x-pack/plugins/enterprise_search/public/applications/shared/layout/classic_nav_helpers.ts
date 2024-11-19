@@ -8,7 +8,7 @@
 import { ChromeNavLink, EuiSideNavItemTypeEnhanced } from '@kbn/core-chrome-browser';
 import type { ClassicNavItem } from '@kbn/search-navigation/public';
 
-import { GenerateNavLinkFromDeepLinkParameters, GenerateNavLinkParameters } from '../types';
+import type { GenerateNavLinkFromDeepLinkParameters, GenerateNavLinkParameters } from '../types';
 
 import { generateNavLink } from './nav_link_helpers';
 
