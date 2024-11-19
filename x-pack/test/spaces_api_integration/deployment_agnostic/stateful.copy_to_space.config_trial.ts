@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createTestConfig } from './stateful.config';
+import { createTestConfig } from './stateful.common.config';
 
 export default createTestConfig({
   license: 'trial',
