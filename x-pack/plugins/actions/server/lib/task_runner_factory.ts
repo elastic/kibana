@@ -34,7 +34,6 @@ import {
   ActionTaskParams,
   ActionTypeExecutorResult,
   ActionTypeRegistryContract,
-  isPersistedActionTask,
   SpaceIdToNamespaceFunction,
 } from '../types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
@@ -210,19 +209,17 @@ export class TaskRunnerFactory {
       },
       cleanup: async () => {
         // Cleanup action_task_params object now that we're done with it
-        if (isPersistedActionTask(actionTaskExecutorParams)) {
-          try {
-            await savedObjectsRepository.delete(
-              ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
-              actionTaskExecutorParams.actionTaskParamsId,
-              { refresh: false, namespace: spaceIdToNamespace(actionTaskExecutorParams.spaceId) }
-            );
-          } catch (e) {
-            // Log error only, we shouldn't fail the task because of an error here (if ever there's retry logic)
-            logger.error(
-              `Failed to cleanup ${ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE} object [id="${actionTaskExecutorParams.actionTaskParamsId}"]: ${e.message}`
-            );
-          }
+        try {
+          await savedObjectsRepository.delete(
+            ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+            actionTaskExecutorParams.actionTaskParamsId,
+            { refresh: false, namespace: spaceIdToNamespace(actionTaskExecutorParams.spaceId) }
+          );
+        } catch (e) {
+          // Log error only, we shouldn't fail the task because of an error here (if ever there's retry logic)
+          logger.error(
+            `Failed to cleanup ${ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE} object [id="${actionTaskExecutorParams.actionTaskParamsId}"]: ${e.message}`
+          );
         }
       },
     };

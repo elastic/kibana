@@ -236,17 +236,9 @@ export interface ActionTaskParams extends SavedObjectAttributes {
   source?: string;
 }
 
-interface PersistedActionTaskExecutorParams {
+export type ActionTaskExecutorParams = {
   spaceId: string;
   actionTaskParamsId: string;
-}
-
-export type ActionTaskExecutorParams = PersistedActionTaskExecutorParams;
-
-export function isPersistedActionTask(
-  actionTask: ActionTaskExecutorParams
-): actionTask is PersistedActionTaskExecutorParams {
-  return typeof (actionTask as PersistedActionTaskExecutorParams).actionTaskParamsId === 'string';
 }
 
 export interface ProxySettings {
