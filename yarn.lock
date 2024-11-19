@@ -3666,6 +3666,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/content-management-favorites-common@link:packages/content-management/favorites/favorites_common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/content-management-favorites-public@link:packages/content-management/favorites/favorites_public":
   version "0.0.0"
   uid ""
@@ -4339,6 +4343,10 @@
   uid ""
 
 "@kbn/core-rendering-browser-mocks@link:packages/core/rendering/core-rendering-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-rendering-browser@link:packages/core/rendering/core-rendering-browser":
   version "0.0.0"
   uid ""
 
