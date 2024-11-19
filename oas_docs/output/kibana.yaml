@@ -10776,6 +10776,9 @@ paths:
             enum:
               - eventFilters
             type: string
+  /api/entity_store/enable:
+    post:
+      operationId: InitEntityStore
       requestBody:
         content:
           application/json; Elastic-Api-Version=2023-10-31:
@@ -11155,6 +11158,26 @@ paths:
                   - total
           description: Entities returned successfully
       summary: List Entity Store Entities
+      tags:
+        - Security Entity Analytics API
+  /api/entity_store/status:
+    get:
+      operationId: GetEntityStoreStatus
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                type: object
+                properties:
+                  engines:
+                    items:
+                      $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineDescriptor'
+                    type: array
+                  status:
+                    $ref: '#/components/schemas/Security_Entity_Analytics_API_StoreStatus'
+          description: Successful response
+      summary: Get the status of the Entity Store
       tags:
         - Security Entity Analytics API
   /api/exception_lists:
@@ -39165,6 +39188,14 @@ components:
         - index
         - description
         - category
+    Security_Entity_Analytics_API_StoreStatus:
+      enum:
+        - not_installed
+        - installing
+        - running
+        - stopped
+        - error
+      type: string
     Security_Entity_Analytics_API_TaskManagerUnavailableResponse:
       description: Task manager is unavailable
       type: object
