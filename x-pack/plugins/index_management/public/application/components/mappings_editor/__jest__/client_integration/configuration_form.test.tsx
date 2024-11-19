@@ -28,19 +28,18 @@ const setup = (props: any = { onUpdate() {} }, appDependencies?: any) => {
   return testBed;
 };
 
-const getContext = (sourceFieldEnabled: boolean = true) =>
-  ({
-    config: {
-      enableMappingsSourceFieldSection: sourceFieldEnabled,
-    },
-  } as unknown as AppDependencies);
-
 describe('Mappings editor: configuration form', () => {
   let testBed: TestBed<TestSubjects>;
 
   it('renders the form', async () => {
+    const ctx = {
+      config: {
+        enableMappingsSourceFieldSection: true,
+      },
+    } as unknown as AppDependencies;
+
     await act(async () => {
-      testBed = setup({ esNodesPlugins: [] }, getContext());
+      testBed = setup({ esNodesPlugins: [] }, ctx);
     });
     testBed.component.update();
     const { exists } = testBed;
@@ -49,64 +48,36 @@ describe('Mappings editor: configuration form', () => {
   });
 
   describe('_source field', () => {
-    describe('renders depending on enableMappingsSourceFieldSection config', () => {
-      it('renders when config set to true', async () => {
-        await act(async () => {
-          testBed = setup({ esNodesPlugins: [] }, getContext(true));
-        });
-        testBed.component.update();
-        const { exists } = testBed;
+    it('renders the _source field when it is enabled', async () => {
+      const ctx = {
+        config: {
+          enableMappingsSourceFieldSection: true,
+        },
+      } as unknown as AppDependencies;
 
-        expect(exists('sourceField')).toBe(true);
+      await act(async () => {
+        testBed = setup({ esNodesPlugins: [] }, ctx);
       });
+      testBed.component.update();
+      const { exists } = testBed;
 
-      it("doesn't render when config set to false", async () => {
-        await act(async () => {
-          testBed = setup({ esNodesPlugins: [] }, getContext(false));
-        });
-        testBed.component.update();
-        const { exists } = testBed;
-
-        expect(exists('sourceField')).toBe(false);
-      });
+      expect(exists('sourceField')).toBe(true);
     });
 
-    describe('has synthetic option depending on license', () => {
-      it('has synthetic option on enterprise license', async () => {
-        jest.mock('../../mappings_state_context', () => ({
-          useMappingsState: jest.fn().mockReturnValue({
-            hasEnterpriseLicense: true,
-          }),
-        }));
+    it("doesn't render the _source field when it is disabled", async () => {
+      const ctx = {
+        config: {
+          enableMappingsSourceFieldSection: false,
+        },
+      } as unknown as AppDependencies;
 
-        await act(async () => {
-          testBed = setup({ esNodesPlugins: [] }, getContext(true));
-        });
-        testBed.component.update();
-        const { exists, find } = testBed;
-
-        // Clicking on the field to open the options dropdown
-        find('sourceValueField').simulate('click');
-        expect(exists('syntheticSourceFieldOption')).toBe(true);
+      await act(async () => {
+        testBed = setup({ esNodesPlugins: [] }, ctx);
       });
+      testBed.component.update();
+      const { exists } = testBed;
 
-      it("doesn't have synthetic option on lower than enterprise license", async () => {
-        jest.mock('../../mappings_state_context', () => ({
-          useMappingsState: jest.fn().mockReturnValue({
-            hasEnterpriseLicense: false,
-          }),
-        }));
-
-        await act(async () => {
-          testBed = setup({ esNodesPlugins: [] }, getContext(true));
-        });
-        testBed.component.update();
-        const { exists, find } = testBed;
-
-        // Clicking on the field to open the options dropdown
-        find('sourceValueField').simulate('click');
-        expect(exists('syntheticSourceFieldOption')).toBe(false);
-      });
+      expect(exists('sourceField')).toBe(false);
     });
   });
 });

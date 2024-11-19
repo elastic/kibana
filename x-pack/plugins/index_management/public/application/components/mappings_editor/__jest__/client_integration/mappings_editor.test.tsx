@@ -28,6 +28,8 @@ describe('Mappings editor: core', () => {
   let onChangeHandler: jest.Mock = jest.fn();
   let getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
   let testBed: MappingsEditorTestBed;
+  let hasEnterpriseLicense = true;
+  const mockLicenseCheck = jest.fn((type: any) => hasEnterpriseLicense);
   const appDependencies = {
     plugins: {
       ml: { mlApi: {} },
@@ -36,7 +38,7 @@ describe('Mappings editor: core', () => {
           subscribe: jest.fn((callback: any) => {
             callback({
               isActive: true,
-              hasAtLeast: jest.fn((type: any) => true),
+              hasAtLeast: mockLicenseCheck,
             });
             return { unsubscribe: jest.fn() };
           }),
@@ -485,7 +487,7 @@ describe('Mappings editor: core', () => {
     });
 
     describe('props.indexMode sets the correct default value of _source field', () => {
-      it("defaults to 'stored' if index mode prop is 'standard'", async () => {
+      it("defaults to 'stored' with 'standard' index mode prop", async () => {
         await act(async () => {
           testBed = setup(
             {
@@ -509,52 +511,56 @@ describe('Mappings editor: core', () => {
         expect(find('sourceValueField').prop('value')).toBe('stored');
       });
 
-      it("defaults to 'synthetic' if index mode prop is 'logsdb'", async () => {
-        await act(async () => {
-          testBed = setup(
-            {
-              value: { ...defaultMappings, _source: undefined },
-              onChange: onChangeHandler,
-              indexMode: 'logsdb',
-            },
-            ctx
-          );
+      ['logsdb', 'time_series'].forEach((indexMode) => {
+        it(`defaults to 'synthetic' with ${indexMode} index mode prop on enterprise license`, async () => {
+          hasEnterpriseLicense = true;
+          await act(async () => {
+            testBed = setup(
+              {
+                value: { ...defaultMappings, _source: undefined },
+                onChange: onChangeHandler,
+                indexMode,
+              },
+              ctx
+            );
+          });
+          testBed.component.update();
+
+          const {
+            actions: { selectTab },
+            find,
+          } = testBed;
+
+          await selectTab('advanced');
+
+          // Check that the synthetic option is selected
+          expect(find('sourceValueField').prop('value')).toBe('synthetic');
         });
-        testBed.component.update();
 
-        const {
-          actions: { selectTab },
-          find,
-        } = testBed;
+        it(`defaults to 'standard' with ${indexMode} index mode prop on basic license`, async () => {
+          hasEnterpriseLicense = false;
+          await act(async () => {
+            testBed = setup(
+              {
+                value: { ...defaultMappings, _source: undefined },
+                onChange: onChangeHandler,
+                indexMode,
+              },
+              ctx
+            );
+          });
+          testBed.component.update();
 
-        await selectTab('advanced');
+          const {
+            actions: { selectTab },
+            find,
+          } = testBed;
 
-        // Check that the synthetic option is selected
-        expect(find('sourceValueField').prop('value')).toBe('synthetic');
-      });
+          await selectTab('advanced');
 
-      it("defaults to 'synthetic' if index mode prop is 'time_series'", async () => {
-        await act(async () => {
-          testBed = setup(
-            {
-              value: { ...defaultMappings, _source: undefined },
-              onChange: onChangeHandler,
-              indexMode: 'time_series',
-            },
-            ctx
-          );
+          // Check that the stored option is selected
+          expect(find('sourceValueField').prop('value')).toBe('stored');
         });
-        testBed.component.update();
-
-        const {
-          actions: { selectTab },
-          find,
-        } = testBed;
-
-        await selectTab('advanced');
-
-        // Check that the synthetic option is selected
-        expect(find('sourceValueField').prop('value')).toBe('synthetic');
       });
     });
   });
