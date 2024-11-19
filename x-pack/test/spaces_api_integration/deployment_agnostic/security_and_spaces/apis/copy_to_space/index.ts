@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { createUsersAndRoles } from '../../../common/lib/create_users_and_roles';
-import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import { createUsersAndRoles } from '../../../../common/lib/create_users_and_roles';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile, getService }: DeploymentAgnosticFtrProviderContext) {
   const config = getService('config');
@@ -20,11 +20,6 @@ export default function ({ loadTestFile, getService }: DeploymentAgnosticFtrProv
         await createUsersAndRoles(es, supertest);
       }
     });
-    loadTestFile(require.resolve('./resolve_copy_to_space_conflicts'));
-    loadTestFile(require.resolve('./create'));
-    loadTestFile(require.resolve('./delete'));
-    loadTestFile(require.resolve('./get_all'));
-    loadTestFile(require.resolve('./get'));
-    loadTestFile(require.resolve('./update'));
+    loadTestFile(require.resolve('./copy_to_space'));
   });
 }

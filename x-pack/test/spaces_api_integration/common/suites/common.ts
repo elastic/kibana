@@ -20,23 +20,46 @@ export async function getSupertest(
   const roleScopedSupertest = getService('roleScopedSupertest');
   const samlAuth = getService('samlAuth');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const config = getService('config');
+  const license = config.get('esTestCluster.license');
+  let scopedSupertest: SupertestWithRoleScopeType | SuperTestAgent;
 
-  if (user) {
+  if (user && license === 'trial') {
     const isBuiltIn = isBuiltInRole(user.role);
     if (!isBuiltIn) {
       await samlAuth.setCustomRole(getRoleDefinitionForUser(user));
     }
 
-    return await roleScopedSupertest.getSupertestWithRoleScope(
+    scopedSupertest = await roleScopedSupertest.getSupertestWithRoleScope(
       isBuiltIn ? user.role : 'customRole',
       {
         useCookieHeader: true,
         withInternalHeaders: true,
       }
     );
+  } else {
+    scopedSupertest = supertestWithoutAuth;
   }
 
-  return supertestWithoutAuth;
+  // TODO: fix types
+  const wrapRequestWithAuth = (method: keyof SuperTestAgent) => {
+    return (...args: any[]) => {
+      const request = (scopedSupertest as any)[method](...args);
+      if (user && license === 'basic') {
+        return request.auth(user.username, user.password);
+      }
+      return request;
+    };
+  };
+
+  return new Proxy(scopedSupertest, {
+    get(target, prop: string) {
+      if (['post', 'get', 'put', 'delete', 'patch', 'head'].includes(prop)) {
+        return wrapRequestWithAuth(prop as keyof SuperTestAgent);
+      }
+      return Reflect.get(target, prop);
+    },
+  });
 }
 
 export async function maybeDestroySupertest(
