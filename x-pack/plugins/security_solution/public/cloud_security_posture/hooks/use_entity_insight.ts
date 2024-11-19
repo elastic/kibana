@@ -7,28 +7,45 @@
 
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useCallback } from 'react';
-import { EntityDetailsLeftPanelTab } from '../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import { HostDetailsPanelKey } from '../../flyout/entity_details/host_details_left';
+import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
+import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { UserDetailsPanelKey } from '../../flyout/entity_details/user_details_left';
+import { HostDetailsPanelKey } from '../../flyout/entity_details/host_details_left';
+import { EntityDetailsLeftPanelTab } from '../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import { useGlobalTime } from '../../common/containers/use_global_time';
+import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../overview/components/detection_response/alerts_by_status/types';
+import { useNonClosedAlerts } from './use_non_closed_alerts';
+import { useHasRiskScore } from './use_risk_score_data';
 
 export const useNavigateEntityInsight = ({
   field,
   name,
-  hasRiskScore,
-  hasMisconfigurationFindings,
-  hasNonClosedAlerts,
-  hasVulnerabilitiesFindings,
   subTab,
+  queryIdExtension,
 }: {
   field: 'host.name' | 'user.name';
   name: string;
-  hasRiskScore: boolean;
-  hasMisconfigurationFindings: boolean;
-  hasNonClosedAlerts: boolean;
-  hasVulnerabilitiesFindings: boolean;
   subTab: string;
+  queryIdExtension: string;
 }) => {
   const isHostNameField = field === 'host.name';
+  const { to, from } = useGlobalTime();
+
+  const { hasNonClosedAlerts } = useNonClosedAlerts({
+    field,
+    queryName: name,
+    to,
+    from,
+    queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}${queryIdExtension}`,
+  });
+
+  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(field, name);
+
+  const { hasRiskScore } = useHasRiskScore({
+    field,
+    name,
+  });
+  const { hasMisconfigurationFindings } = useHasMisconfigurations(field, name);
   const { openLeftPanel } = useExpandableFlyoutApi();
 
   const goToEntityInsightTab = useCallback(() => {
@@ -37,7 +54,7 @@ export const useNavigateEntityInsight = ({
       params: isHostNameField
         ? {
             name,
-            hasRiskScore,
+            isRiskScoreExist: hasRiskScore,
             hasMisconfigurationFindings,
             hasVulnerabilitiesFindings,
             hasNonClosedAlerts,
@@ -48,7 +65,7 @@ export const useNavigateEntityInsight = ({
           }
         : {
             user: { name },
-            hasRiskScore,
+            isRiskScoreExist: hasRiskScore,
             hasMisconfigurationFindings,
             hasNonClosedAlerts,
             path: {

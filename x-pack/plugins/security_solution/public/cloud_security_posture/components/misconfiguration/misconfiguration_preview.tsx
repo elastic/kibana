@@ -13,20 +13,15 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { i18n } from '@kbn/i18n';
-import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { statusColors } from '@kbn/cloud-security-posture';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
   ENTITY_FLYOUT_WITH_MISCONFIGURATION_VISIT,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
-import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
-import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
 import { CspInsightLeftPanelSubTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { useNavigateEntityInsight } from '../../hooks/use_entity_insight';
-import { useHasRiskScore } from '../../hooks/use_risk_score_data';
-import { useNonClosedAlerts } from '../../hooks/use_non_closed_alerts';
 
 export const getFindingsStats = (passedFindingsStats: number, failedFindingsStats: number) => {
   if (passedFindingsStats === 0 && failedFindingsStats === 0) return [];
@@ -103,35 +98,15 @@ export const MisconfigurationsPreview = ({
     name
   );
 
-  const { to, from } = useGlobalTime();
-
-  const { hasNonClosedAlerts } = useNonClosedAlerts({
-    field,
-    queryName: name,
-    to,
-    from,
-    queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}MISCONFIGURATION_PREVIEW`,
-  });
-
   useEffect(() => {
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, ENTITY_FLYOUT_WITH_MISCONFIGURATION_VISIT);
   }, []);
   const { euiTheme } = useEuiTheme();
 
-  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(field, name);
-
-  const { hasRiskScore } = useHasRiskScore({
-    field,
-    name,
-  });
-
   const { goToEntityInsightTab } = useNavigateEntityInsight({
     field,
     name,
-    hasRiskScore,
-    hasMisconfigurationFindings,
-    hasNonClosedAlerts,
-    hasVulnerabilitiesFindings,
+    queryIdExtension: 'MISCONFIGURATION_PREVIEW',
     subTab: CspInsightLeftPanelSubTab.MISCONFIGURATIONS,
   });
   const link = useMemo(

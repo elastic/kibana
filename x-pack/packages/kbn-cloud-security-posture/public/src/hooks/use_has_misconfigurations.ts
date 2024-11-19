@@ -14,7 +14,6 @@ export const useHasMisconfigurations = (field: 'host.name' | 'user.name', value:
     sort: [],
     enabled: true,
     pageSize: 1,
-    ignore_unavailable: true,
   });
 
   const passedFindings = data?.count.passed || 0;

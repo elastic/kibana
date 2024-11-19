@@ -12,8 +12,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle, useEuiTheme } 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
-import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
-import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import type {
   AlertsByStatus,
   ParsedAlertsData,
@@ -22,7 +20,6 @@ import { ExpandablePanel } from '../../../flyout/shared/components/expandable_pa
 import { getSeverityColor } from '../../../detections/components/alerts_kpis/severity_level_panel/helpers';
 import { CspInsightLeftPanelSubTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { useNavigateEntityInsight } from '../../hooks/use_entity_insight';
-import { useHasRiskScore } from '../../hooks/use_risk_score_data';
 
 const AlertsCount = ({
   alertsTotal,
@@ -91,26 +88,12 @@ export const AlertsPreview = ({
 
   const totalAlertsCount = alertStats.reduce((total, item) => total + item.count, 0);
 
-  const { hasMisconfigurationFindings } = useHasMisconfigurations(field, name);
-
-  // const isUsingHostName = field === 'host.name';
-
-  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(field, name);
-
-  const { hasRiskScore } = useHasRiskScore({
-    field,
-    name,
-  });
-
   const hasNonClosedAlerts = totalAlertsCount > 0;
 
   const { goToEntityInsightTab } = useNavigateEntityInsight({
     field,
     name,
-    hasRiskScore,
-    hasMisconfigurationFindings,
-    hasNonClosedAlerts,
-    hasVulnerabilitiesFindings,
+    queryIdExtension: 'ALERTS_PREVIEW',
     subTab: CspInsightLeftPanelSubTab.ALERTS,
   });
   const link = useMemo(

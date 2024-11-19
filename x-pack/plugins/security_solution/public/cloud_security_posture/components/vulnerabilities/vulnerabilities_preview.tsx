@@ -17,7 +17,6 @@ import {
   getAbbreviatedNumber,
 } from '@kbn/cloud-security-posture-common';
 import { getVulnerabilityStats, hasVulnerabilitiesData } from '@kbn/cloud-security-posture';
-import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import {
   ENTITY_FLYOUT_WITH_VULNERABILITY_PREVIEW,
   uiMetricService,
@@ -26,10 +25,6 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
 import { CspInsightLeftPanelSubTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { useNavigateEntityInsight } from '../../hooks/use_entity_insight';
-import { useHasRiskScore } from '../../hooks/use_risk_score_data';
-import { useGlobalTime } from '../../../common/containers/use_global_time';
-import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
-import { useNonClosedAlerts } from '../../hooks/use_non_closed_alerts';
 
 const VulnerabilitiesCount = ({
   vulnerabilitiesTotal,
@@ -84,16 +79,6 @@ export const VulnerabilitiesPreview = ({
     pageSize: 1,
   });
 
-  const { to, from } = useGlobalTime();
-
-  const { hasNonClosedAlerts } = useNonClosedAlerts({
-    field,
-    queryName: name,
-    to,
-    from,
-    queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}VULNERABILITIES_PREVIEW`,
-  });
-
   const { CRITICAL = 0, HIGH = 0, MEDIUM = 0, LOW = 0, NONE = 0 } = data?.count || {};
 
   const totalVulnerabilities = CRITICAL + HIGH + MEDIUM + LOW + NONE;
@@ -108,20 +93,10 @@ export const VulnerabilitiesPreview = ({
 
   const { euiTheme } = useEuiTheme();
 
-  const { hasMisconfigurationFindings } = useHasMisconfigurations(field, name);
-
-  const { hasRiskScore } = useHasRiskScore({
-    field,
-    name,
-  });
-
   const { goToEntityInsightTab } = useNavigateEntityInsight({
     field,
     name,
-    hasRiskScore,
-    hasMisconfigurationFindings,
-    hasNonClosedAlerts,
-    hasVulnerabilitiesFindings,
+    queryIdExtension: 'VULNERABILITIES_PREVIEW',
     subTab: CspInsightLeftPanelSubTab.VULNERABILITIES,
   });
   const link = useMemo(
