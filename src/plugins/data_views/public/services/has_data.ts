@@ -8,8 +8,10 @@
  */
 
 import { CoreStart, HttpStart } from '@kbn/core/public';
-import { isHttpFetchError } from '@kbn/core-http-browser';
-import { DEFAULT_ASSETS_TO_IGNORE } from '../../common';
+import { IHttpFetchError, ResponseErrorBody, isHttpFetchError } from '@kbn/core-http-browser';
+import { isObject } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { DEFAULT_ASSETS_TO_IGNORE, HasEsDataFailureReason } from '../../common';
 import { HasDataViewsResponse, IndicesViaSearchResponse } from '..';
 import { IndicesResponse, IndicesResponseModified } from '../types';
 
@@ -49,16 +51,27 @@ export class HasData {
         );
         return hasEsData;
       } catch (e) {
-        if (isHttpFetchError(e) && e.response?.status === 400 && e.body) {
-          const body: { attributes: { failureReason: string } } = e.body as any;
+        if (
+          this.isResponseError(e) &&
+          e.body?.statusCode === 400 &&
+          e.body?.attributes?.failureReason === HasEsDataFailureReason.remoteDataTimeout
+        ) {
+          core.notifications.toasts.addDanger({
+            title: i18n.translate('dataViews.hasData.remoteDataTimeoutTitle', {
+              defaultMessage: 'Remote cluster timeout',
+            }),
+            text: i18n.translate('dataViews.hasData.remoteDataTimeoutText', {
+              defaultMessage:
+                'Checking for data on remote clusters timed out. One or more remote clusters may be unavailable.',
+            }),
+          });
 
-          if (body?.attributes.failureReason === 'cross_cluster_data_timeout') {
-            core.notifications.toasts.addDanger({
-              title: 'Remote cluster timeout',
-              text: 'Checking for data on remote clusters timed out. One or more remote clusters may be unavailable.',
-            });
-          }
+          // In the case of a remote cluster timeout,
+          // we can't be sure if there is data or not,
+          // so just assume there is
+          return true;
         }
+
         // fallback to previous implementation
         return hasESDataViaResolveIndex();
       }
@@ -92,6 +105,9 @@ export class HasData {
   }
 
   // ES Data
+
+  private isResponseError = (e: any): e is IHttpFetchError<ResponseErrorBody> =>
+    isHttpFetchError(e) && isObject(e.body) && 'message' in e.body && 'statusCode' in e.body;
 
   private responseToItemArray = (response: IndicesResponse): IndicesResponseModified[] => {
     const { indices = [], aliases = [] } = response;

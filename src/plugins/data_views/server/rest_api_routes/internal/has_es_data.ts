@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElasticsearchClient, IRouter, RequestHandlerContext } from '@kbn/core/server';
+import type { ElasticsearchClient, IRouter, Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { KibanaResponseFactory, VersionedRoute } from '@kbn/core-http-server';
 import { schema } from '@kbn/config-schema';
-import { DEFAULT_ASSETS_TO_IGNORE } from '../../../common';
+import { DEFAULT_ASSETS_TO_IGNORE, HasEsDataFailureReason } from '../../../common';
 
 type Handler = Parameters<VersionedRoute<any, RequestHandlerContext>['addVersion']>[1];
 
@@ -20,48 +20,62 @@ const patterns = ['*', '-.*'].concat(
 
 const crossClusterPatterns = patterns.map((ds) => `*:${ds}`);
 
-const resolveClusterTimeout = '5s';
+export const createHandler =
+  (parentLogger: Logger, hasEsDataTimeout: number): Handler =>
+  async (ctx: RequestHandlerContext, _, res) => {
+    const logger = parentLogger.get('hasEsData');
+    const core = await ctx.core;
+    const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
+    const commonParams: Omit<HasEsDataParams, 'matchPatterns' | 'timeoutReason'> = {
+      elasticsearchClient,
+      logger,
+      res,
+      hasEsDataTimeout,
+    };
 
-export const handler: Handler = async (ctx: RequestHandlerContext, _, res) => {
-  const core = await ctx.core;
-  const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
+    const localDataResponse = await hasEsData({
+      ...commonParams,
+      matchPatterns: patterns,
+      timeoutReason: HasEsDataFailureReason.localDataTimeout,
+    });
 
-  const hasLocalEsData = await hasEsData({
-    elasticsearchClient,
-    res,
-    matchPatterns: patterns,
-    timeoutReason: 'local_data_timeout',
-  });
+    if (localDataResponse) {
+      return localDataResponse;
+    }
 
-  if (hasLocalEsData) {
-    return hasLocalEsData;
-  }
+    const remoteDataResponse = await hasEsData({
+      ...commonParams,
+      matchPatterns: crossClusterPatterns,
+      timeoutReason: HasEsDataFailureReason.remoteDataTimeout,
+    });
 
-  const hasCrossClusterEsData = await hasEsData({
-    elasticsearchClient,
-    res,
-    matchPatterns: crossClusterPatterns,
-    timeoutReason: 'cross_cluster_data_timeout',
-  });
+    if (remoteDataResponse) {
+      return remoteDataResponse;
+    }
 
-  if (hasCrossClusterEsData) {
-    return hasCrossClusterEsData;
-  }
+    return res.ok({ body: { hasEsData: false } });
+  };
 
-  return res.ok({ body: { hasEsData: false } });
-};
+interface HasEsDataParams {
+  elasticsearchClient: ElasticsearchClient;
+  logger: Logger;
+  res: KibanaResponseFactory;
+  matchPatterns: string[];
+  hasEsDataTimeout: number;
+  timeoutReason: HasEsDataFailureReason;
+}
+
+const timeoutMessage = 'Timeout while checking for Elasticsearch data';
+const errorMessage = 'Error while checking for Elasticsearch data';
 
 const hasEsData = async ({
   elasticsearchClient,
+  logger,
   res,
   matchPatterns,
+  hasEsDataTimeout,
   timeoutReason,
-}: {
-  elasticsearchClient: ElasticsearchClient;
-  res: KibanaResponseFactory;
-  matchPatterns: string[];
-  timeoutReason: string;
-}) => {
+}: HasEsDataParams) => {
   try {
     const response = await elasticsearchClient.indices.resolveCluster(
       {
@@ -69,7 +83,7 @@ const hasEsData = async ({
         allow_no_indices: true,
         ignore_unavailable: true,
       },
-      { requestTimeout: resolveClusterTimeout }
+      { requestTimeout: hasEsDataTimeout === 0 ? undefined : hasEsDataTimeout }
     );
 
     const hasData = !!Object.values(response).find((cluster) => cluster.matching_indices);
@@ -79,24 +93,36 @@ const hasEsData = async ({
     }
   } catch (e) {
     if (e.name === 'TimeoutError') {
+      const warningMessage =
+        `${timeoutMessage}: ${timeoutReason}. Current timeout value is ${hasEsDataTimeout}ms. ` +
+        `Use "dataViews.hasEsDataTimeout" in kibana.yml to change it, or set to 0 to disable timeouts.`;
+
+      logger.warn(warningMessage);
+
       return res.badRequest({
         body: {
-          message: 'Timeout while checking for Elasticsearch data',
+          message: timeoutMessage,
           attributes: { failureReason: timeoutReason },
         },
       });
     }
 
+    logger.error(e);
+
     return res.badRequest({
       body: {
-        message: 'Error while checking for Elasticsearch data',
-        attributes: { failureReason: 'unknown' },
+        message: errorMessage,
+        attributes: { failureReason: HasEsDataFailureReason.unknown },
       },
     });
   }
 };
 
-export const registerHasEsDataRoute = (router: IRouter): void => {
+export const registerHasEsDataRoute = (
+  router: IRouter,
+  logger: Logger,
+  hasEsDataTimeout: number
+): void => {
   router.versioned
     .get({
       path: '/internal/data_views/has_es_data',
@@ -125,6 +151,6 @@ export const registerHasEsDataRoute = (router: IRouter): void => {
           },
         },
       },
-      handler
+      createHandler(logger, hasEsDataTimeout)
     );
 };
