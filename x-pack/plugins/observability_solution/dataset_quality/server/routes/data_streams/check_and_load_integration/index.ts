@@ -9,7 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { PackageClient } from '@kbn/fleet-plugin/server';
 import { Logger } from '@kbn/logging';
 import { validateCustomComponentTemplate } from './validate_custom_component_template';
-import { getIntegrations } from '../../integrations/get_integrations';
+import { getIntegration, getIntegrations } from '../../integrations/get_integrations';
 import { getComponentTemplatePrefixFromIndexTemplate } from '../../../../common/utils/component_template_name';
 import { CheckAndLoadIntegrationResponse } from '../../../../common/api_types';
 import { dataStreamService } from '../../../services';
@@ -43,27 +43,29 @@ export async function checkAndLoadIntegration({
     return { isIntegration: false, areAssetsAvailable: false };
   }
 
-  const allIntegrations = await getIntegrations({ packageClient, logger });
-
   // If integration name is present, then we find and return the integration
   if (integrationNameFromDataStream) {
-    const integrationDetailsMatchingDataStream = allIntegrations.find(
-      (integration) => integration.name === integrationNameFromDataStream
-    );
+    try {
+      const integrationDetailsMatchingDataStream = await getIntegration({
+        packageClient,
+        logger,
+        packageName: integrationNameFromDataStream,
+      });
 
-    if (integrationDetailsMatchingDataStream) {
-      return {
-        isIntegration: true,
-        integration: integrationDetailsMatchingDataStream,
-        areAssetsAvailable: true,
-      };
+      if (integrationDetailsMatchingDataStream) {
+        return {
+          isIntegration: true,
+          integration: integrationDetailsMatchingDataStream,
+          areAssetsAvailable: true,
+        };
+      }
+    } catch (e) {
+      // This should ideally not happen. As integration name is present in Data stream
+      // meta response but the integration itself is not found
+      // Worst case i could think of is, may be the integration is deleted from the
+      // system at a later point of time
+      return { isIntegration: false, areAssetsAvailable: false };
     }
-
-    // This should ideally not happen. As integration name is present in Data stream
-    // meta response but the integration itself is not found
-    // Worst case i could think of is, may be the integration is deleted from the
-    // system at a later point of time
-    return { isIntegration: false, areAssetsAvailable: false };
   }
 
   // cleaning the index template name as some have @template suffix
@@ -89,6 +91,7 @@ export async function checkAndLoadIntegration({
 
   const datasetName = indexTemplateNameWithoutSuffix.split('-')[1];
 
+  const allIntegrations = await getIntegrations({ packageClient, logger });
   const integrationFromDataset = allIntegrations.find(
     (integration) => datasetName in (integration?.datasets ?? {})
   );
