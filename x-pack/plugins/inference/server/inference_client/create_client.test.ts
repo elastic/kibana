@@ -55,7 +55,7 @@ describe('createClient', () => {
       expect(result).toBe(expectedResult);
     });
 
-    it('return a client with the expected type', () => {
+    it('return a client with the expected type', async () => {
       createInferenceClientMock.mockReturnValue({
         chatComplete: jest.fn(),
       } as any);
@@ -67,7 +67,7 @@ describe('createClient', () => {
       });
 
       // type check on client.chatComplete
-      client.chatComplete({
+      await client.chatComplete({
         messages: [],
         connectorId: '.foo',
       });
@@ -106,7 +106,7 @@ describe('createClient', () => {
       expect(result).toBe(bindClientResult);
     });
 
-    it('return a client with the expected type', () => {
+    it('return a client with the expected type', async () => {
       bindClientMock.mockReturnValue({
         chatComplete: jest.fn(),
       } as any);
@@ -121,7 +121,7 @@ describe('createClient', () => {
       });
 
       // type check on client.chatComplete
-      client.chatComplete({
+      await client.chatComplete({
         messages: [],
       });
     });
