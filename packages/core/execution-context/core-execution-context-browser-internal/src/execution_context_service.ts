@@ -18,6 +18,7 @@ import type {
   ExecutionContextSetup,
   ExecutionContextStart,
 } from '@kbn/core-execution-context-browser';
+import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 
 // Should be exported from elastic/apm-rum
 export type LabelValue = string | number | boolean;
@@ -32,6 +33,7 @@ export interface SetupDeps {
 
 export interface StartDeps {
   curApp$: Observable<string | undefined>;
+  history: InternalApplicationStart['history'];
 }
 
 /** @internal */
@@ -75,7 +77,7 @@ export class ExecutionContextService
     return this.contract;
   }
 
-  public start({ curApp$ }: StartDeps) {
+  public start({ curApp$, history }: StartDeps) {
     const start = this.contract!;
 
     // Track app id changes and clear context on app change
@@ -83,6 +85,13 @@ export class ExecutionContextService
       curApp$.subscribe((appId) => {
         this.appId = appId;
         start.clear();
+      })
+    );
+
+    // Track URL changes to make sure that we reflect the new path name
+    this.subscription.add(
+      history.listen((location) => {
+        start.set({ url: location.pathname });
       })
     );
 
