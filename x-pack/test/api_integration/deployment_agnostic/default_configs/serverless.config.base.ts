@@ -85,6 +85,7 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
         // services can be customized, but must extend DeploymentAgnosticCommonServices
         ...(options.services || services),
       },
+      deploymentAgnosticSnapshots: true,
       dockerServers: defineDockerServersConfig({
         registry: {
           enabled: !!dockerRegistryPort,

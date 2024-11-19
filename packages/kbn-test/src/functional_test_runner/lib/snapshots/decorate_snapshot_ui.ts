@@ -33,11 +33,13 @@ const globalState: {
   registered: boolean;
   currentTest: Test | null;
   snapshotStates: Record<string, ISnapshotState>;
+  deploymentAgnostic: boolean;
 } = {
   updateSnapshot: 'none',
   registered: false,
   currentTest: null,
   snapshotStates: {},
+  deploymentAgnostic: false,
 };
 
 const modifyStackTracePrepareOnce = once(() => {
@@ -66,10 +68,12 @@ export function decorateSnapshotUi({
   lifecycle,
   updateSnapshots,
   isCi,
+  deploymentAgnostic = false,
 }: {
   lifecycle: Lifecycle;
   updateSnapshots: boolean;
   isCi: boolean;
+  deploymentAgnostic?: boolean;
 }) {
   let rootSuite: Suite | undefined;
 
@@ -82,6 +86,7 @@ export function decorateSnapshotUi({
     globalState.registered = true;
     globalState.snapshotStates = {};
     globalState.currentTest = null;
+    globalState.deploymentAgnostic = deploymentAgnostic;
 
     if (isCi) {
       // make sure snapshots that have not been committed
@@ -125,7 +130,9 @@ export function decorateSnapshotUi({
       const snapshotState = globalState.snapshotStates[file];
 
       if (snapshotState && !test.isPassed()) {
-        snapshotState.markSnapshotsAsCheckedForTest(test.fullTitle());
+        snapshotState.markSnapshotsAsCheckedForTest(
+          getTestTitle(test, globalState.deploymentAgnostic)
+        );
       }
     });
 
@@ -194,7 +201,7 @@ export function expectSnapshot(received: any) {
 
   const context: SnapshotContext = {
     snapshotState,
-    currentTestName: test.fullTitle(),
+    currentTestName: getTestTitle(test, globalState.deploymentAgnostic),
   };
 
   return {
@@ -202,6 +209,13 @@ export function expectSnapshot(received: any) {
     // use bind to support optional 3rd argument (actual)
     toMatchInline: expectToMatchInlineSnapshot.bind(null, context, received),
   };
+}
+
+function getTestTitle(test: Test, deploymentAgnostic: boolean = false) {
+  if (deploymentAgnostic) {
+    return ['Deployment-agnostic', ...test.titlePath().splice(1)].join(' ');
+  }
+  return test.fullTitle();
 }
 
 function expectToMatchSnapshot(snapshotContext: SnapshotContext, received: any) {
