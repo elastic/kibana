@@ -18,6 +18,7 @@ import {
   HasLegacyLibraryTransforms,
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { DASHBOARD_ACTION_GROUP } from '.';
 
 import { dashboardAddToLibraryActionStrings } from './_dashboard_actions_strings';
 import { coreServices } from '../services/kibana_services';
@@ -35,6 +36,7 @@ export class LegacyAddToLibraryAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_LEGACY_ADD_TO_LIBRARY;
   public readonly id = ACTION_LEGACY_ADD_TO_LIBRARY;
   public order = 15;
+  public grouping = [DASHBOARD_ACTION_GROUP];
 
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();

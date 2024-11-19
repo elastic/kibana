@@ -7,7 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLCommand, ESQLCommandOption, ESQLFunction, ESQLMessage } from '@kbn/esql-ast';
+import type {
+  ESQLAst,
+  ESQLAstItem,
+  ESQLCommand,
+  ESQLCommandOption,
+  ESQLFunction,
+  ESQLMessage,
+} from '@kbn/esql-ast';
+import { GetColumnsByTypeFn, SuggestionRawDefinition } from '../autocomplete/types';
 
 /**
  * All supported field types in ES|QL. This is all the types
@@ -111,6 +119,7 @@ export const isReturnType = (str: string | FunctionParameterType): str is Functi
 
 export interface FunctionDefinition {
   type: 'builtin' | 'agg' | 'eval';
+  preview?: boolean;
   ignoreAsSuggestion?: boolean;
   name: string;
   alias?: string[];
@@ -128,6 +137,10 @@ export interface FunctionDefinition {
        * though a function can be used to create the value. (e.g. now() for dates or concat() for strings)
        */
       constantOnly?: boolean;
+      /**
+       * Default to false. If set to true, this parameter does not accept a function or literal, only fields.
+       */
+      fieldsOnly?: boolean;
       /**
        * if provided this means that the value must be one
        * of the options in the array iff the value is a literal.
@@ -158,14 +171,25 @@ export interface FunctionDefinition {
   validate?: (fnDef: ESQLFunction) => ESQLMessage[];
 }
 
-export interface CommandBaseDefinition {
-  name: string;
+export interface CommandBaseDefinition<CommandName extends string> {
+  name: CommandName;
   alias?: string;
   description: string;
   /**
    * Whether to show or hide in autocomplete suggestion list
    */
   hidden?: boolean;
+  suggest?: (
+    innerText: string,
+    command: ESQLCommand<CommandName>,
+    getColumnsByType: GetColumnsByTypeFn,
+    columnExists: (column: string) => boolean,
+    getSuggestedVariableName: () => string,
+    getExpressionType: (expression: ESQLAstItem | undefined) => SupportedDataType | 'unknown',
+    getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>,
+    fullTextAst?: ESQLAst
+  ) => Promise<SuggestionRawDefinition[]>;
+  /** @deprecated this property will disappear in the future */
   signature: {
     multipleParams: boolean;
     // innerTypes here is useful to drill down the type in case of "column"
@@ -183,7 +207,8 @@ export interface CommandBaseDefinition {
   };
 }
 
-export interface CommandOptionsDefinition extends CommandBaseDefinition {
+export interface CommandOptionsDefinition<CommandName extends string = string>
+  extends CommandBaseDefinition<CommandName> {
   wrapped?: string[];
   optional: boolean;
   skipCommonValidation?: boolean;
@@ -201,12 +226,15 @@ export interface CommandModeDefinition {
   prefix?: string;
 }
 
-export interface CommandDefinition extends CommandBaseDefinition {
-  options: CommandOptionsDefinition[];
+export interface CommandDefinition<CommandName extends string>
+  extends CommandBaseDefinition<CommandName> {
   examples: string[];
   validate?: (option: ESQLCommand) => ESQLMessage[];
-  modes: CommandModeDefinition[];
   hasRecommendedQueries?: boolean;
+  /** @deprecated this property will disappear in the future */
+  modes: CommandModeDefinition[];
+  /** @deprecated this property will disappear in the future */
+  options: CommandOptionsDefinition[];
 }
 
 export interface Literals {

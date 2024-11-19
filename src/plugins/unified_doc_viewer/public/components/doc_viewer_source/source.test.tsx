@@ -103,5 +103,7 @@ describe('Source Viewer component', () => {
     );
     const jsonCodeEditor = comp.find(JsonCodeEditorCommon);
     expect(jsonCodeEditor).not.toBe(null);
+    expect(jsonCodeEditor.props().jsonValue).toContain('_source');
+    expect(jsonCodeEditor.props().jsonValue).not.toContain('_score');
   });
 });

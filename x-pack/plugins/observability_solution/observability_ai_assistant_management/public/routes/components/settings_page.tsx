@@ -8,6 +8,7 @@
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
+import { useKnowledgeBase } from '@kbn/ai-assistant';
 import { useAppContext } from '../../hooks/use_app_context';
 import { SettingsTab } from './settings_tab/settings_tab';
 import { KnowledgeBaseTab } from './knowledge_base_tab';
@@ -21,13 +22,13 @@ export function SettingsPage() {
   const { setBreadcrumbs } = useAppContext();
   const {
     services: {
-      application: { navigateToApp },
+      application: { navigateToApp, isAppRegistered },
       serverless,
-      enterpriseSearch,
     },
   } = useKibana();
 
   const router = useObservabilityAIAssistantManagementRouter();
+  const knowledgeBase = useKnowledgeBase();
 
   const {
     query: { tab },
@@ -40,7 +41,7 @@ export function SettingsPage() {
           text: i18n.translate(
             'xpack.observabilityAiAssistantManagement.breadcrumb.serverless.observability',
             {
-              defaultMessage: 'AI Assistant for Observability Settings',
+              defaultMessage: 'AI Assistant for Observability and Search Settings',
             }
           ),
         },
@@ -85,6 +86,7 @@ export function SettingsPage() {
         }
       ),
       content: <KnowledgeBaseTab />,
+      disabled: !knowledgeBase.status.value?.enabled,
     },
     {
       id: 'search_connector',
@@ -95,7 +97,7 @@ export function SettingsPage() {
         }
       ),
       content: <SearchConnectorTab />,
-      disabled: enterpriseSearch == null,
+      disabled: !isAppRegistered('enterpriseSearch'),
     },
   ];
 

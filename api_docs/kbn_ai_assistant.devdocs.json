@@ -55,7 +55,7 @@
             "section": "def-public.FlyoutPositionMode",
             "text": "FlyoutPositionMode"
           },
-          ") => void) | undefined; navigateToConversation: (conversationId?: string | undefined) => void; }) => React.JSX.Element"
+          ") => void) | undefined; navigateToConversation?: ((conversationId?: string | undefined) => void) | undefined; }) => React.JSX.Element"
         ],
         "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_body.tsx",
         "deprecated": false,
@@ -311,7 +311,7 @@
                 "label": "navigateToConversation",
                 "description": [],
                 "signature": [
-                  "(conversationId?: string | undefined) => void"
+                  "((conversationId?: string | undefined) => void) | undefined"
                 ],
                 "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_body.tsx",
                 "deprecated": false,
@@ -349,7 +349,7 @@
         "label": "ChatFlyout",
         "description": [],
         "signature": [
-          "({\n  initialTitle,\n  initialMessages,\n  initialFlyoutPositionMode,\n  isOpen,\n  onClose,\n  navigateToConversation,\n}: { initialTitle: string; initialMessages: ",
+          "({\n  initialTitle,\n  initialMessages,\n  initialFlyoutPositionMode,\n  isOpen,\n  onClose,\n  navigateToConversation,\n  hideConversationList,\n}: { initialTitle: string; initialMessages: ",
           {
             "pluginId": "observabilityAIAssistant",
             "scope": "common",
@@ -365,7 +365,7 @@
             "section": "def-public.FlyoutPositionMode",
             "text": "FlyoutPositionMode"
           },
-          " | undefined; isOpen: boolean; onClose: () => void; navigateToConversation(conversationId?: string | undefined): void; }) => React.JSX.Element | null"
+          " | undefined; isOpen: boolean; onClose: () => void; navigateToConversation?: ((conversationId?: string | undefined) => void) | undefined; hideConversationList?: boolean | undefined; }) => React.JSX.Element | null"
         ],
         "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_flyout.tsx",
         "deprecated": false,
@@ -376,7 +376,7 @@
             "id": "def-public.ChatFlyout.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  initialTitle,\n  initialMessages,\n  initialFlyoutPositionMode,\n  isOpen,\n  onClose,\n  navigateToConversation,\n}",
+            "label": "{\n  initialTitle,\n  initialMessages,\n  initialFlyoutPositionMode,\n  isOpen,\n  onClose,\n  navigateToConversation,\n  hideConversationList,\n}",
             "description": [],
             "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_flyout.tsx",
             "deprecated": false,
@@ -470,7 +470,7 @@
                 "label": "navigateToConversation",
                 "description": [],
                 "signature": [
-                  "(conversationId?: string | undefined) => void"
+                  "((conversationId?: string | undefined) => void) | undefined"
                 ],
                 "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_flyout.tsx",
                 "deprecated": false,
@@ -493,6 +493,20 @@
                   }
                 ],
                 "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ChatFlyout.$1.hideConversationList",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "hideConversationList",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_flyout.tsx",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -803,7 +817,7 @@
         "label": "ConversationView",
         "description": [],
         "signature": [
-          "({ conversationId, navigateToConversation, getConversationHref, newConversationHref, scope, }: ConversationViewProps) => React.JSX.Element"
+          "({ conversationId, navigateToConversation, getConversationHref, newConversationHref, scopes, }: ConversationViewProps) => React.JSX.Element"
         ],
         "path": "x-pack/packages/kbn-ai-assistant/src/conversation/conversation_view.tsx",
         "deprecated": false,
@@ -814,7 +828,7 @@
             "id": "def-public.ConversationView.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  conversationId,\n  navigateToConversation,\n  getConversationHref,\n  newConversationHref,\n  scope,\n}",
+            "label": "{\n  conversationId,\n  navigateToConversation,\n  getConversationHref,\n  newConversationHref,\n  scopes,\n}",
             "description": [],
             "signature": [
               "ConversationViewProps"
@@ -1041,10 +1055,10 @@
       },
       {
         "parentPluginId": "@kbn/ai-assistant",
-        "id": "def-public.useScope",
+        "id": "def-public.useScopes",
         "type": "Function",
         "tags": [],
-        "label": "useScope",
+        "label": "useScopes",
         "description": [],
         "signature": [
           "() => ",
@@ -1054,9 +1068,10 @@
             "docId": "kibKbnAiAssistantCommonPluginApi",
             "section": "def-common.AssistantScope",
             "text": "AssistantScope"
-          }
+          },
+          "[]"
         ],
-        "path": "x-pack/packages/kbn-ai-assistant/src/hooks/use_scope.ts",
+        "path": "x-pack/packages/kbn-ai-assistant/src/hooks/use_scopes.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -1084,11 +1099,13 @@
             "label": "status",
             "description": [],
             "signature": [
-              "State<{ ready: boolean; error?: any; deployment_state?: ",
+              "State<{ errorMessage?: string | undefined; ready: boolean; enabled: boolean; endpoint?: Partial<",
+              "InferenceInferenceEndpointInfo",
+              "> | undefined; model_stats?: { deployment_state: ",
               "MlDeploymentState",
-              " | undefined; allocation_state?: ",
+              " | undefined; allocation_state: ",
               "MlDeploymentAllocationState",
-              " | undefined; model_name?: string | undefined; }> & { refresh: () => void; }"
+              " | undefined; } | undefined; }> & { refresh: () => void; }"
             ],
             "path": "x-pack/packages/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
             "deprecated": false,

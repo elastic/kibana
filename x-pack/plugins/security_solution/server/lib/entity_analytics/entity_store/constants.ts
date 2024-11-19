@@ -5,17 +5,23 @@
  * 2.0.
  */
 
-import type { EngineStatus } from '../../../../common/api/entity_analytics';
+import type { EngineStatus, StoreStatus } from '../../../../common/api/entity_analytics';
 
 export const DEFAULT_LOOKBACK_PERIOD = '24h';
-
-export const DEFAULT_INTERVAL = '30s';
 
 export const ENGINE_STATUS: Record<Uppercase<EngineStatus>, EngineStatus> = {
   INSTALLING: 'installing',
   STARTED: 'started',
   STOPPED: 'stopped',
   UPDATING: 'updating',
+  ERROR: 'error',
+};
+
+export const ENTITY_STORE_STATUS: Record<Uppercase<StoreStatus>, StoreStatus> = {
+  RUNNING: 'running',
+  STOPPED: 'stopped',
+  INSTALLING: 'installing',
+  NOT_INSTALLED: 'not_installed',
   ERROR: 'error',
 };
 

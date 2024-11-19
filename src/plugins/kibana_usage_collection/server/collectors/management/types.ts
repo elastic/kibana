@@ -46,8 +46,6 @@ export interface UsageStats {
   'observability:apmEnableContinuousRollups': boolean;
   'observability:apmAWSLambdaPriceFactor': string;
   'observability:apmAWSLambdaRequestCostPerMillion': number;
-  'observability:enableInfrastructureHostsView': boolean;
-  'observability:enableInfrastructureContainerAssetView': boolean;
   'observability:enableInfrastructureProfilingIntegration': boolean;
   'observability:enableInfrastructureAssetCustomDashboards': boolean;
   'observability:apmAgentExplorerView': boolean;
@@ -110,6 +108,7 @@ export interface UsageStats {
   'timepicker:quickRanges': string;
   'theme:version': string;
   'theme:darkMode': boolean;
+  'theme:name': string;
   'state:storeInSessionStorage': boolean;
   'savedObjects:perPage': number;
   'search:queryLanguage': string;
@@ -154,7 +153,6 @@ export interface UsageStats {
   'discover:rowHeightOption': number;
   hideAnnouncements: boolean;
   isDefaultIndexMigrated: boolean;
-  'metrics:allowCheckingForFailedShards': boolean;
   'observability:syntheticsThrottlingEnabled': boolean;
   'observability:enableLegacyUptimeApp': boolean;
   'observability:apmLabsButton': boolean;

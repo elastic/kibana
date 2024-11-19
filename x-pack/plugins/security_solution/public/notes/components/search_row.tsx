@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import { UserFilterDropdown } from './user_filter_dropdown';
+import { CreatedByFilterDropdown } from './created_by_filter_dropdown';
 import { ASSOCIATED_NOT_SELECT_TEST_ID, SEARCH_BAR_TEST_ID } from './test_ids';
 import { userFilterAssociatedNotes, userSearchedNotes } from '..';
 import { AssociatedFilter } from '../../../common/notes/constants';
@@ -65,7 +65,7 @@ export const SearchRow = React.memo(() => {
         <EuiSearchBar box={searchBox} onChange={onQueryChange} defaultQuery="" />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <UserFilterDropdown />
+        <CreatedByFilterDropdown />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiSelect

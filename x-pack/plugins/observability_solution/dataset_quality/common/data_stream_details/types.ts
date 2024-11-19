@@ -14,3 +14,8 @@ export interface AnalyzeDegradedFieldsParams {
   lastBackingIndex: string;
   degradedField: string;
 }
+
+export interface UpdateFieldLimitParams {
+  dataStream: string;
+  newFieldLimit: number;
+}

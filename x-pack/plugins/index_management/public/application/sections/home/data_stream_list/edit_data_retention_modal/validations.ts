@@ -7,34 +7,44 @@
 
 import { i18n } from '@kbn/i18n';
 import { splitSizeAndUnits } from '../../../../../../common';
+import { deserializeGlobalMaxRetention } from '../../../../lib/data_streams';
 
-const convertToMinutes = (value: string) => {
+const convertToSeconds = (value: string) => {
   const { size, unit } = splitSizeAndUnits(value);
   const sizeNum = parseInt(size, 10);
 
   switch (unit) {
     case 'd':
-      // days to minutes
-      return sizeNum * 24 * 60;
+      // days to seconds
+      return sizeNum * 24 * 60 * 60;
     case 'h':
-      // hours to minutes
-      return sizeNum * 60;
+      // hours to seconds
+      return sizeNum * 60 * 60;
     case 'm':
-      // minutes to minutes
-      return sizeNum;
+      // minutes to seconds
+      return sizeNum * 60;
     case 's':
-      // seconds to minutes (round up if any remainder)
-      return Math.ceil(sizeNum / 60);
+      // seconds to seconds
+      return sizeNum;
+    case 'ms':
+      // milliseconds to seconds
+      return sizeNum / 1000;
+    case 'micros':
+      // microseconds to seconds
+      return sizeNum / 1000 / 1000;
+    case 'nanos':
+      // nanoseconds to seconds
+      return sizeNum / 1000 / 1000 / 1000;
     default:
       throw new Error(`Unknown unit: ${unit}`);
   }
 };
 
 const isRetentionBiggerThan = (valueA: string, valueB: string) => {
-  const minutesA = convertToMinutes(valueA);
-  const minutesB = convertToMinutes(valueB);
+  const secondsA = convertToSeconds(valueA);
+  const secondsB = convertToSeconds(valueB);
 
-  return minutesA > minutesB;
+  return secondsA > secondsB;
 };
 
 export const isBiggerThanGlobalMaxRetention = (
@@ -46,14 +56,19 @@ export const isBiggerThanGlobalMaxRetention = (
     return undefined;
   }
 
+  const { size, unitText } = deserializeGlobalMaxRetention(globalMaxRetention);
   return isRetentionBiggerThan(`${retentionValue}${retentionTimeUnit}`, globalMaxRetention)
     ? {
         message: i18n.translate(
           'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.dataRetentionFieldMaxError',
           {
-            defaultMessage: 'Maximum data retention period on this project is {maxRetention} days.',
+            defaultMessage:
+              'Maximum data retention period on this project is {maxRetention} {unitText}.',
             // Remove the unit from the globalMaxRetention value
-            values: { maxRetention: globalMaxRetention.slice(0, -1) },
+            values: {
+              maxRetention: size,
+              unitText,
+            },
           }
         ),
       }

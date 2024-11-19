@@ -9,8 +9,7 @@
  * This module contains helpers for managing the task manager storage layer.
  */
 import apm from 'elastic-apm-node';
-import { Subject, Observable, from, of } from 'rxjs';
-import { mergeScan } from 'rxjs';
+import { Subject } from 'rxjs';
 import { groupBy, pick } from 'lodash';
 
 import { asOk } from '../lib/result_type';
@@ -52,57 +51,50 @@ interface OwnershipClaimingOpts {
   taskStore: TaskStore;
   events$: Subject<TaskClaim>;
   definitions: TaskTypeDictionary;
-  unusedTypes: string[];
   excludedTaskTypes: string[];
   taskMaxAttempts: Record<string, number>;
 }
 
-export function claimAvailableTasksUpdateByQuery(
+export async function claimAvailableTasksUpdateByQuery(
   opts: TaskClaimerOpts
-): Observable<ClaimOwnershipResult> {
+): Promise<ClaimOwnershipResult> {
   const { getCapacity, claimOwnershipUntil, batches, events$, taskStore } = opts;
-  const { definitions, unusedTypes, excludedTaskTypes, taskMaxAttempts } = opts;
+  const { definitions, excludedTaskTypes, taskMaxAttempts } = opts;
   const initialCapacity = getCapacity();
-  return from(batches).pipe(
-    mergeScan(
-      (accumulatedResult, batch) => {
-        const stopTaskTimer = startTaskTimer();
-        const capacity = Math.min(
-          initialCapacity - accumulatedResult.stats.tasksClaimed,
-          isLimited(batch) ? getCapacity(batch.tasksTypes) : getCapacity()
-        );
-        // if we have no more capacity, short circuit here
-        if (capacity <= 0) {
-          return of(accumulatedResult);
-        }
-        return from(
-          executeClaimAvailableTasks({
-            claimOwnershipUntil,
-            size: capacity,
-            events$,
-            taskTypes: isLimited(batch) ? new Set([batch.tasksTypes]) : batch.tasksTypes,
-            taskStore,
-            definitions,
-            unusedTypes,
-            excludedTaskTypes,
-            taskMaxAttempts,
-          }).then((result) => {
-            const { stats, docs } = accumulateClaimOwnershipResults(accumulatedResult, result);
-            stats.tasksConflicted = correctVersionConflictsForContinuation(
-              stats.tasksClaimed,
-              stats.tasksConflicted,
-              initialCapacity
-            );
-            return { stats, docs, timing: stopTaskTimer() };
-          })
-        );
-      },
-      // initialise the accumulation with no results
-      accumulateClaimOwnershipResults(),
-      // only run one batch at a time
-      1
-    )
-  );
+
+  let accumulatedResult = getEmptyClaimOwnershipResult();
+  const stopTaskTimer = startTaskTimer();
+  for (const batch of batches) {
+    const capacity = Math.min(
+      initialCapacity - accumulatedResult.stats.tasksClaimed,
+      isLimited(batch) ? getCapacity(batch.tasksTypes) : getCapacity()
+    );
+
+    // if we have no more capacity, short circuit here
+    if (capacity <= 0) {
+      return accumulatedResult;
+    }
+
+    const result = await executeClaimAvailableTasks({
+      claimOwnershipUntil,
+      size: capacity,
+      events$,
+      taskTypes: isLimited(batch) ? new Set([batch.tasksTypes]) : batch.tasksTypes,
+      taskStore,
+      definitions,
+      excludedTaskTypes,
+      taskMaxAttempts,
+    });
+
+    accumulatedResult = accumulateClaimOwnershipResults(accumulatedResult, result);
+    accumulatedResult.stats.tasksConflicted = correctVersionConflictsForContinuation(
+      accumulatedResult.stats.tasksClaimed,
+      accumulatedResult.stats.tasksConflicted,
+      initialCapacity
+    );
+  }
+
+  return { ...accumulatedResult, timing: stopTaskTimer() };
 }
 
 async function executeClaimAvailableTasks(
@@ -143,7 +135,6 @@ async function markAvailableTasksAsClaimed({
   claimOwnershipUntil,
   size,
   taskTypes,
-  unusedTypes,
   taskMaxAttempts,
 }: OwnershipClaimingOpts): Promise<UpdateByQueryResult> {
   const { taskTypesToSkip = [], taskTypesToClaim = [] } = groupBy(
@@ -170,7 +161,6 @@ async function markAvailableTasksAsClaimed({
     },
     claimableTaskTypes: taskTypesToClaim,
     skippedTaskTypes: taskTypesToSkip,
-    unusedTaskTypes: unusedTypes,
     taskMaxAttempts: pick(taskMaxAttempts, taskTypesToClaim),
   });
 
@@ -230,7 +220,7 @@ function accumulateClaimOwnershipResults(
         tasksConflicted: stats.tasksConflicted + prev.stats.tasksConflicted,
         tasksClaimed: stats.tasksClaimed + prev.stats.tasksClaimed,
       },
-      docs,
+      docs: [...prev.docs, ...docs],
       timing,
     };
     return res;

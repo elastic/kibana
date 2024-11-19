@@ -6,13 +6,7 @@
  */
 
 import { faker } from '@faker-js/faker';
-import {
-  ENTITY_DISPLAY_NAME,
-  ENTITY_TYPE,
-  ENTITY_ID,
-  ENTITY_LAST_SEEN,
-} from '@kbn/observability-shared-plugin/common';
-import { Entity, EntityType } from '../../../../common/entities';
+import type { InventoryEntity } from '../../../../common/entities';
 
 const idGenerator = () => {
   let id = 0;
@@ -31,40 +25,53 @@ function generateRandomTimestamp() {
   return randomDate.toISOString();
 }
 
-const getEntity = (entityType: EntityType) => ({
-  [ENTITY_LAST_SEEN]: generateRandomTimestamp(),
-  [ENTITY_TYPE]: entityType,
-  [ENTITY_DISPLAY_NAME]: faker.person.fullName(),
-  [ENTITY_ID]: generateId(),
+const indentityFieldsPerType: Record<string, string[]> = {
+  host: ['host.name'],
+  container: ['container.id'],
+  service: ['service.name'],
+};
+
+const getEntityLatest = (
+  entityType: string,
+  overrides?: Partial<InventoryEntity>
+): InventoryEntity => ({
+  entityLastSeenTimestamp: generateRandomTimestamp(),
+  entityType,
+  entityDisplayName: faker.person.fullName(),
+  entityId: generateId(),
+  entityDefinitionId: faker.string.uuid(),
+  entityDefinitionVersion: '1.0.0',
+  entityIdentityFields: indentityFieldsPerType[entityType],
+  entitySchemaVersion: '1.0.0',
+  ...overrides,
 });
 
-const alertsMock = [
-  {
-    ...getEntity('host'),
-    alertsCount: 3,
-  },
-  {
-    ...getEntity('service'),
-    alertsCount: 3,
-  },
-
-  {
-    ...getEntity('host'),
-    alertsCount: 10,
-  },
-  {
-    ...getEntity('host'),
+const alertsMock: InventoryEntity[] = [
+  getEntityLatest('host', {
     alertsCount: 1,
-  },
+  }),
+  getEntityLatest('service', {
+    alertsCount: 3,
+  }),
+  getEntityLatest('host', {
+    alertsCount: 10,
+  }),
+  getEntityLatest('host', {
+    alertsCount: 1,
+  }),
 ];
 
-const hostsMock = Array.from({ length: 20 }, () => getEntity('host'));
-const containersMock = Array.from({ length: 20 }, () => getEntity('container'));
-const servicesMock = Array.from({ length: 20 }, () => getEntity('service'));
+const hostsMock = Array.from({ length: 20 }, () =>
+  getEntityLatest('host', { cloud: { provider: 'gcp' } })
+);
+const containersMock = Array.from({ length: 20 }, () => getEntityLatest('container'));
+const servicesMock = Array.from({ length: 20 }, () =>
+  getEntityLatest('service', { agent: { name: 'java' } })
+);
 
 export const entitiesMock = [
   ...alertsMock,
   ...hostsMock,
   ...containersMock,
   ...servicesMock,
-] as Entity[];
+] as InventoryEntity[];
