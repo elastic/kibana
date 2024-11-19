@@ -125,6 +125,7 @@ export const SourceSelection: FC = () => {
             </>
           )}
           <SavedObjectFinder
+            id="mlDFASourceSelection"
             key="searchSavedObjectFinder"
             onChoose={onSearchSelected}
             showFilter

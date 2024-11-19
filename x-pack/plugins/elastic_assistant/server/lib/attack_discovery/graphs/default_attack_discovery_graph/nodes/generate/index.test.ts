@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import type { ActionsClientLlm } from '@kbn/langchain/server';
-import { loggerMock } from '@kbn/logging-mocks';
 import { FakeLLM } from '@langchain/core/utils/testing';
 
 import { getGenerateNode } from '.';
@@ -16,7 +16,15 @@ import {
 } from '../../../../evaluation/__mocks__/mock_anonymized_alerts';
 import { getAnonymizedAlertsFromState } from './helpers/get_anonymized_alerts_from_state';
 import { getChainWithFormatInstructions } from '../helpers/get_chain_with_format_instructions';
+import { getDefaultAttackDiscoveryPrompt } from '../helpers/get_default_attack_discovery_prompt';
+import { getDefaultRefinePrompt } from '../refine/helpers/get_default_refine_prompt';
 import { GraphState } from '../../types';
+import {
+  getParsedAttackDiscoveriesMock,
+  getRawAttackDiscoveriesMock,
+} from '../../../../../../__mocks__/raw_attack_discoveries';
+
+const attackDiscoveryTimestamp = '2024-10-11T17:55:59.702Z';
 
 jest.mock('../helpers/get_chain_with_format_instructions', () => {
   const mockInvoke = jest.fn().mockResolvedValue('');
@@ -27,19 +35,21 @@ jest.mock('../helpers/get_chain_with_format_instructions', () => {
         invoke: mockInvoke,
       },
       formatInstructions: ['mock format instructions'],
-      llmType: 'fake',
+      llmType: 'openai',
       mockInvoke, // <-- added for testing
     }),
   };
 });
 
-const mockLogger = loggerMock.create();
+const mockLogger = {
+  debug: (x: Function) => x(),
+} as unknown as Logger;
+
 let mockLlm: ActionsClientLlm;
 
 const initialGraphState: GraphState = {
   attackDiscoveries: null,
-  attackDiscoveryPrompt:
-    "You are a cyber security analyst tasked with analyzing security events from Elastic Security to identify and report on potential cyber attacks or progressions. Your report should focus on high-risk incidents that could severely impact the organization, rather than isolated alerts. Present your findings in a way that can be easily understood by anyone, regardless of their technical expertise, as if you were briefing the CISO. Break down your response into sections based on timing, hosts, and users involved. When correlating alerts, use kibana.alert.original_time when it's available, otherwise use @timestamp. Include appropriate context about the affected hosts and users. Describe how the attack progression might have occurred and, if feasible, attribute it to known threat groups. Prioritize high and critical alerts, but include lower-severity alerts if desired. In the description field, provide as much detail as possible, in a bulleted list explaining any attack progressions. Accuracy is of utmost importance. You MUST escape all JSON special characters (i.e. backslashes, double quotes, newlines, tabs, carriage returns, backspaces, and form feeds).",
+  attackDiscoveryPrompt: getDefaultAttackDiscoveryPrompt(),
   anonymizedAlerts: [...mockAnonymizedAlerts],
   combinedGenerations: '',
   combinedRefinements: '',
@@ -51,8 +61,7 @@ const initialGraphState: GraphState = {
   maxHallucinationFailures: 5,
   maxRepeatedGenerations: 3,
   refinements: [],
-  refinePrompt:
-    'You previously generated the following insights, but sometimes they represent the same attack.\n\nCombine the insights below, when they represent the same attack; leave any insights that are not combined unchanged:',
+  refinePrompt: getDefaultRefinePrompt(),
   replacements: {
     ...mockAnonymizedAlertsReplacements,
   },
@@ -63,9 +72,16 @@ describe('getGenerateNode', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date(attackDiscoveryTimestamp));
+
     mockLlm = new FakeLLM({
-      response: JSON.stringify({}, null, 2),
+      response: '',
     }) as unknown as ActionsClientLlm;
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   it('returns a function', () => {
@@ -77,9 +93,8 @@ describe('getGenerateNode', () => {
     expect(typeof generateNode).toBe('function');
   });
 
-  it('invokes the chain with the alerts from state and format instructions', async () => {
-    // @ts-expect-error
-    const { mockInvoke } = getChainWithFormatInstructions(mockLlm);
+  it('invokes the chain with the expected alerts from state and formatting instructions', async () => {
+    const mockInvoke = getChainWithFormatInstructions(mockLlm).chain.invoke as jest.Mock;
 
     const generateNode = getGenerateNode({
       llm: mockLlm,
@@ -98,6 +113,216 @@ Use context from the following alerts to provide insights:
 ${getAnonymizedAlertsFromState(initialGraphState).join('\n\n')}
 \"\"\"
 `,
+    });
+  });
+
+  it('removes the surrounding json from the response', async () => {
+    const response =
+      'You asked for some JSON, here it is:\n```json\n{"key": "value"}\n```\nI hope that works for you.';
+
+    const mockLlmWithResponse = new FakeLLM({ response }) as unknown as ActionsClientLlm;
+    const mockInvoke = getChainWithFormatInstructions(mockLlmWithResponse).chain
+      .invoke as jest.Mock;
+
+    mockInvoke.mockResolvedValue(response);
+
+    const generateNode = getGenerateNode({
+      llm: mockLlmWithResponse,
+      logger: mockLogger,
+    });
+
+    const state = await generateNode(initialGraphState);
+
+    expect(state).toEqual({
+      ...initialGraphState,
+      combinedGenerations: '{"key": "value"}',
+      errors: [
+        'generate node is unable to parse (fake) response from attempt 0; (this may be an incomplete response from the model): [\n  {\n    "code": "invalid_type",\n    "expected": "array",\n    "received": "undefined",\n    "path": [\n      "insights"\n    ],\n    "message": "Required"\n  }\n]',
+      ],
+      generationAttempts: 1,
+      generations: ['{"key": "value"}'],
+    });
+  });
+
+  it('handles hallucinations', async () => {
+    const hallucinatedResponse =
+      'tactics like **Credential Access**, **Command and Control**, and **Persistence**.",\n      "entitySummaryMarkdown": "Malware detected on host **{{ host.name hostNameValue }}**';
+
+    const mockLlmWithHallucination = new FakeLLM({
+      response: hallucinatedResponse,
+    }) as unknown as ActionsClientLlm;
+    const mockInvoke = getChainWithFormatInstructions(mockLlmWithHallucination).chain
+      .invoke as jest.Mock;
+
+    mockInvoke.mockResolvedValue(hallucinatedResponse);
+
+    const generateNode = getGenerateNode({
+      llm: mockLlmWithHallucination,
+      logger: mockLogger,
+    });
+
+    const withPreviousGenerations = {
+      ...initialGraphState,
+      combinedGenerations: '{"key": "value"}',
+      generationAttempts: 1,
+      generations: ['{"key": "value"}'],
+    };
+
+    const state = await generateNode(withPreviousGenerations);
+
+    expect(state).toEqual({
+      ...withPreviousGenerations,
+      combinedGenerations: '', // <-- reset
+      generationAttempts: 2, // <-- incremented
+      generations: [], // <-- reset
+      hallucinationFailures: 1, // <-- incremented
+    });
+  });
+
+  it('discards previous generations and starts over when the maxRepeatedGenerations limit is reached', async () => {
+    const repeatedResponse = 'gen1';
+
+    const mockLlmWithRepeatedGenerations = new FakeLLM({
+      response: repeatedResponse,
+    }) as unknown as ActionsClientLlm;
+    const mockInvoke = getChainWithFormatInstructions(mockLlmWithRepeatedGenerations).chain
+      .invoke as jest.Mock;
+
+    mockInvoke.mockResolvedValue(repeatedResponse);
+
+    const generateNode = getGenerateNode({
+      llm: mockLlmWithRepeatedGenerations,
+      logger: mockLogger,
+    });
+
+    const withPreviousGenerations = {
+      ...initialGraphState,
+      combinedGenerations: 'gen1gen1',
+      generationAttempts: 2,
+      generations: ['gen1', 'gen1'],
+    };
+
+    const state = await generateNode(withPreviousGenerations);
+
+    expect(state).toEqual({
+      ...withPreviousGenerations,
+      combinedGenerations: '',
+      generationAttempts: 3, // <-- incremented
+      generations: [],
+    });
+  });
+
+  it('combines the response with the previous generations', async () => {
+    const response = 'gen1';
+
+    const mockLlmWithResponse = new FakeLLM({
+      response,
+    }) as unknown as ActionsClientLlm;
+    const mockInvoke = getChainWithFormatInstructions(mockLlmWithResponse).chain
+      .invoke as jest.Mock;
+
+    mockInvoke.mockResolvedValue(response);
+
+    const generateNode = getGenerateNode({
+      llm: mockLlmWithResponse,
+      logger: mockLogger,
+    });
+
+    const withPreviousGenerations = {
+      ...initialGraphState,
+      combinedGenerations: 'gen0',
+      generationAttempts: 1,
+      generations: ['gen0'],
+    };
+
+    const state = await generateNode(withPreviousGenerations);
+
+    expect(state).toEqual({
+      ...withPreviousGenerations,
+      combinedGenerations: 'gen0gen1',
+      errors: [
+        'generate node is unable to parse (fake) response from attempt 1; (this may be an incomplete response from the model): SyntaxError: Unexpected token \'g\', "gen0gen1" is not valid JSON',
+      ],
+      generationAttempts: 2,
+      generations: ['gen0', 'gen1'],
+    });
+  });
+
+  it('returns unrefined results when combined responses pass validation', async () => {
+    // split the response into two parts to simulate a valid response
+    const splitIndex = 100; // arbitrary index
+    const firstResponse = getRawAttackDiscoveriesMock().slice(0, splitIndex);
+    const secondResponse = getRawAttackDiscoveriesMock().slice(splitIndex);
+
+    const mockLlmWithResponse = new FakeLLM({
+      response: secondResponse,
+    }) as unknown as ActionsClientLlm;
+    const mockInvoke = getChainWithFormatInstructions(mockLlmWithResponse).chain
+      .invoke as jest.Mock;
+
+    mockInvoke.mockResolvedValue(secondResponse);
+
+    const generateNode = getGenerateNode({
+      llm: mockLlmWithResponse,
+      logger: mockLogger,
+    });
+
+    const withPreviousGenerations = {
+      ...initialGraphState,
+      combinedGenerations: firstResponse,
+      generationAttempts: 1,
+      generations: [firstResponse],
+    };
+
+    const state = await generateNode(withPreviousGenerations);
+
+    expect(state).toEqual({
+      ...withPreviousGenerations,
+      attackDiscoveries: null,
+      combinedGenerations: firstResponse.concat(secondResponse),
+      errors: [],
+      generationAttempts: 2,
+      generations: [firstResponse, secondResponse],
+      unrefinedResults: getParsedAttackDiscoveriesMock(attackDiscoveryTimestamp), // <-- generated from the combined response
+    });
+  });
+
+  it('skips the refinements step if the max number of retries has already been reached', async () => {
+    // split the response into two parts to simulate a valid response
+    const splitIndex = 100; // arbitrary index
+    const firstResponse = getRawAttackDiscoveriesMock().slice(0, splitIndex);
+    const secondResponse = getRawAttackDiscoveriesMock().slice(splitIndex);
+
+    const mockLlmWithResponse = new FakeLLM({
+      response: secondResponse,
+    }) as unknown as ActionsClientLlm;
+    const mockInvoke = getChainWithFormatInstructions(mockLlmWithResponse).chain
+      .invoke as jest.Mock;
+
+    mockInvoke.mockResolvedValue(secondResponse);
+
+    const generateNode = getGenerateNode({
+      llm: mockLlmWithResponse,
+      logger: mockLogger,
+    });
+
+    const withPreviousGenerations = {
+      ...initialGraphState,
+      combinedGenerations: firstResponse,
+      generationAttempts: 9,
+      generations: [firstResponse],
+    };
+
+    const state = await generateNode(withPreviousGenerations);
+
+    expect(state).toEqual({
+      ...withPreviousGenerations,
+      attackDiscoveries: getParsedAttackDiscoveriesMock(attackDiscoveryTimestamp), // <-- skip the refinement step
+      combinedGenerations: firstResponse.concat(secondResponse),
+      errors: [],
+      generationAttempts: 10,
+      generations: [firstResponse, secondResponse],
+      unrefinedResults: getParsedAttackDiscoveriesMock(attackDiscoveryTimestamp), // <-- generated from the combined response
     });
   });
 });

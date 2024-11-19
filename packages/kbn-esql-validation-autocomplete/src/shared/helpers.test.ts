@@ -57,6 +57,10 @@ describe('getExpressionType', () => {
     return root.commands[1].args[0];
   };
 
+  test('empty expression', () => {
+    expect(getExpressionType(getASTForExpression(''))).toBe('unknown');
+  });
+
   describe('literal expressions', () => {
     const cases: Array<{ expression: string; expectedType: SupportedDataType }> = [
       {
@@ -288,6 +292,19 @@ describe('getExpressionType', () => {
 
     it('supports COUNT(*)', () => {
       expect(getExpressionType(getASTForExpression('COUNT(*)'))).toBe<SupportedDataType>('long');
+    });
+
+    it('accounts for the "any" parameter type', () => {
+      setTestFunctions([
+        {
+          type: 'eval',
+          name: 'test',
+          description: 'Test function',
+          supportedCommands: ['eval'],
+          signatures: [{ params: [{ name: 'arg', type: 'any' }], returnType: 'keyword' }],
+        },
+      ]);
+      expect(getExpressionType(getASTForExpression('test(1)'))).toBe('keyword');
     });
   });
 

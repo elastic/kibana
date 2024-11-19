@@ -16,7 +16,7 @@ import { timelineActions } from '../../../../timelines/store';
 import { TimelineId } from '../../../../../common/types/timeline';
 import type { GetSecuritySolutionUrl } from '../../link_to';
 import { useGetSecuritySolutionUrl } from '../../link_to';
-import type { TelemetryClientStart } from '../../../lib/telemetry';
+import { AppEventTypes, type TelemetryServiceStart } from '../../../lib/telemetry';
 import { useKibana, useNavigateTo, type NavigateTo } from '../../../lib/kibana';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import { updateBreadcrumbsNav } from '../../../breadcrumbs';
@@ -68,7 +68,7 @@ const addOnClicksHandlers = (
   breadcrumbs: ChromeBreadcrumb[],
   dispatch: Dispatch,
   navigateTo: NavigateTo,
-  telemetry: TelemetryClientStart
+  telemetry: TelemetryServiceStart
 ): ChromeBreadcrumb[] =>
   breadcrumbs.map((breadcrumb) => ({
     ...breadcrumb,
@@ -89,13 +89,13 @@ const createOnClickHandler =
     href: string,
     dispatch: Dispatch,
     navigateTo: NavigateTo,
-    telemetry: TelemetryClientStart,
+    telemetry: TelemetryServiceStart,
     title: React.ReactNode
   ) =>
   (ev: SyntheticEvent) => {
     ev.preventDefault();
     if (typeof title === 'string') {
-      telemetry.reportBreadcrumbClicked({ title });
+      telemetry.reportEvent(AppEventTypes.BreadcrumbClicked, { title });
     }
     dispatch(timelineActions.showTimeline({ id: TimelineId.active, show: false }));
     navigateTo({ url: href });
