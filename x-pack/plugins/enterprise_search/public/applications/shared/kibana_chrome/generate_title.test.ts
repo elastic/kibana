@@ -27,7 +27,7 @@ describe('searchTitle', () => {
 
   it('falls back to product name', () => {
     const title = searchTitle();
-    expect(title).toEqual('Search');
+    expect(title).toEqual('Elasticsearch');
   });
 });
 

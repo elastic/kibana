@@ -63,7 +63,7 @@ export function toSearchResult({
     score,
     title: name,
     type: i18n.translate('xpack.enterpriseSearch.searchProvider.type.name', {
-      defaultMessage: 'Search',
+      defaultMessage: 'Elasticsearch',
     }),
     url: {
       path: url ?? newUrl,
