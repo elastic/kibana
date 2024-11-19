@@ -690,6 +690,10 @@ the infrastructure monitoring use-case within Kibana.
 using the CURL scripts in the scripts folder.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/ai_infra/llm_tasks/README.md[llmTasks]
+|This plugin contains various LLM tasks.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/logs_data_access/README.md[logsDataAccess]
 |Exposes services to access logs data.
 
@@ -765,6 +769,10 @@ Elastic.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/painless_lab/README.md[painlessLab]
 |This plugin helps users learn how to use the Painless scripting language.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/ai_infra/product_doc_base/README.md[productDocBase]
+|This plugin contains the product documentation base service.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/profiling/README.md[profiling]
