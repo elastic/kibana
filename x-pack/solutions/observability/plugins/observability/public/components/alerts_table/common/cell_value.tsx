@@ -23,7 +23,7 @@ import {
   ALERT_RULE_EXECUTION_TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash';
-import { Alert } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { Alert } from '@kbn/alerting-types';
 import { asDuration } from '../../../../common/utils/formatters';
 import { AlertSeverityBadge } from '../../alert_severity_badge';
 import { AlertStatusIndicator } from '../../alert_status_indicator';

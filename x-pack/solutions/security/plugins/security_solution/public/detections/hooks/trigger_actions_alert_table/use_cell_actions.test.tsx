@@ -22,6 +22,7 @@ import type { ComponentProps, JSXElementConstructor, PropsWithChildren } from 'r
 import React from 'react';
 import { makeAction } from '../../../common/components/cell_actions/mocks';
 import { VIEW_SELECTION } from '../../../../common/constants';
+import type { LegacyField } from '@kbn/alerting-types';
 
 const mockDataGridRef: {
   current: EuiDataGridRefProps;
@@ -88,7 +89,7 @@ describe('getUseCellActionsHook', () => {
       () =>
         useCellActionsOptions(TableId.test, {
           columns: mockColumns as unknown as EuiDataGridColumn[],
-          oldAlertsData: mockData,
+          oldAlertsData: mockData as LegacyField[][],
           dataGridRef: mockDataGridRef,
           pageSize: 10,
           pageIndex: 0,
@@ -112,7 +113,7 @@ describe('getUseCellActionsHook', () => {
       () =>
         useCellActionsOptions(TableId.test, {
           columns: mockColumns as unknown as EuiDataGridColumn[],
-          oldAlertsData: mockData,
+          oldAlertsData: mockData as LegacyField[][],
           dataGridRef: mockDataGridRef,
           pageSize: 10,
           pageIndex: 0,
