@@ -170,7 +170,12 @@ Below is a document in the expected structure, with descriptions of the fields:
             gap_range: {
               gte: "Gap range start date",
               lte: "Gap range end date",
-            }
+            },
+            unfilled_gaps_ms: {
+              last_1d: "duration in milliseconds of unfilled gaps in the last 1 day",
+              last_3d: "duration in milliseconds of unfilled gaps in the last 3 days",
+              last_7d: "duration in milliseconds of unfilled gaps in the last 7 days",
+            },
           }
         }
       }

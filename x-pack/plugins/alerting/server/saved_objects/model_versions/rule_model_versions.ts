@@ -36,7 +36,36 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
     },
   },
   '4': {
-    changes: [],
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          monitoring: {
+            properties: {
+              run: {
+                properties: {
+                  last_run: {
+                    properties: {
+                      metrics: {
+                        properties: {
+                          unfilled_gaps_ms: {
+                            properties: {
+                              last_1d: { type: 'long' },
+                              last_3d: { type: 'long' },
+                              last_7d: { type: 'long' },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    ],
     schemas: {
       forwardCompatibility: rawRuleSchemaV4.extends({}, { unknowns: 'ignore' }),
       create: rawRuleSchemaV4,
