@@ -26,7 +26,7 @@ describe('AddToNewCase', () => {
         helpers: {
           ...casesServiceMock.helpers,
           canUseCases: () => ({
-            create: true,
+            createComment: true,
             update: true,
           }),
         },
@@ -51,7 +51,7 @@ describe('AddToNewCase', () => {
         helpers: {
           ...casesServiceMock.helpers,
           canUseCases: () => ({
-            create: true,
+            createComment: true,
             update: true,
           }),
         },
@@ -86,7 +86,7 @@ describe('AddToNewCase', () => {
         helpers: {
           ...casesServiceMock.helpers,
           canUseCases: () => ({
-            create: false,
+            createComment: false,
             update: false,
           }),
         },

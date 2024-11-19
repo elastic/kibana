@@ -181,6 +181,9 @@ export default function ({ getService }: FtrProviderContext) {
           "case_3_feature_a",
           "case_4_feature_a",
           "case_4_feature_b",
+          "generalCases",
+          "observabilityCases",
+          "securitySolutionCases",
         ]
       `);
     });

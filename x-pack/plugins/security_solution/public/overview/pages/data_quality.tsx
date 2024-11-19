@@ -95,8 +95,8 @@ const DataQualityComponent: React.FC = () => {
 
   const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
   const canUserCreateAndReadCases = useCallback(
-    () => userCasesPermissions.create && userCasesPermissions.read,
-    [userCasesPermissions.create, userCasesPermissions.read]
+    () => userCasesPermissions.createComment && userCasesPermissions.read,
+    [userCasesPermissions.createComment, userCasesPermissions.read]
   );
 
   const createCaseFlyout = cases.hooks.useCasesAddToNewCaseFlyout({
