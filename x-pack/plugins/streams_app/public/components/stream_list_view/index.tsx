@@ -39,7 +39,7 @@ export function StreamListView() {
       <StreamsAppPageHeader
         title={
           <StreamsAppPageHeaderTitle
-            title={i18n.translate('app_not_found_in_i18nrc.streamsListViewPageHeaderTitle', {
+            title={i18n.translate('xpack.streams.streamsListViewPageHeaderTitle', {
               defaultMessage: 'Streams',
             })}
           />
