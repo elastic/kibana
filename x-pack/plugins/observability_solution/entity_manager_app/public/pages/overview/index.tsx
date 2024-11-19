@@ -268,7 +268,7 @@ export function EntityManagerOverviewPage() {
               onFieldChange={(
                 index: number,
                 field: Exclude<keyof EntitySource, 'id'>,
-                value: string[]
+                value: any
               ) => {
                 entitySources[index][field] = value;
                 setEntitySources([...entitySources]);

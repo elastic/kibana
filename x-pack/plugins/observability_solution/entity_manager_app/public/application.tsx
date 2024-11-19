@@ -20,7 +20,7 @@ import ReactDOM from 'react-dom';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { Router } from '@kbn/shared-ux-router';
 import { PluginContext } from './context/plugin_context';
-import { EntityManagerAppPluginStart } from './types';
+import { EntityManagerPluginStart } from './types';
 import { EntityManagerOverviewPage } from './pages/overview';
 
 export function renderApp({
@@ -35,7 +35,7 @@ export function renderApp({
   entityClient,
 }: {
   core: CoreStart;
-  plugins: EntityManagerAppPluginStart;
+  plugins: EntityManagerPluginStart;
   appMountParameters: AppMountParameters;
   ObservabilityPageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
   usageCollection: UsageCollectionSetup;
@@ -110,11 +110,6 @@ export function renderApp({
   );
 
   return () => {
-    // This needs to be present to fix https://github.com/elastic/kibana/issues/155704
-    // as the Overview page renders the UX Section component. That component renders a Lens embeddable
-    // via the ExploratoryView app, which uses search sessions. Therefore on unmounting we need to clear
-    // these sessions.
-    plugins.data.search.session.clear();
     ReactDOM.unmountComponentAtNode(element);
   };
 }

@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+const path = require('path');
+
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
+  rootDir: path.resolve(__dirname, '../../../..'),
   roots: ['<rootDir>/x-pack/plugins/observability_solution/entity_manager_app'],
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/observability_solution/entity_manager_app',
