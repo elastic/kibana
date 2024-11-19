@@ -1018,14 +1018,17 @@ paths:
                       - last_execution_date
                   flapping:
                     additionalProperties: false
+                    description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
                     nullable: true
                     type: object
                     properties:
                       look_back_window:
+                        description: The minimum number of runs in which the threshold must be met.
                         maximum: 20
                         minimum: 2
                         type: number
                       status_change_threshold:
+                        description: The minimum number of times an alert must switch states in the look back window.
                         maximum: 20
                         minimum: 2
                         type: number
@@ -1600,14 +1603,17 @@ paths:
                   type: boolean
                 flapping:
                   additionalProperties: false
+                  description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
                   nullable: true
                   type: object
                   properties:
                     look_back_window:
+                      description: The minimum number of runs in which the threshold must be met.
                       maximum: 20
                       minimum: 2
                       type: number
                     status_change_threshold:
+                      description: The minimum number of times an alert must switch states in the look back window.
                       maximum: 20
                       minimum: 2
                       type: number
@@ -1925,14 +1931,17 @@ paths:
                       - last_execution_date
                   flapping:
                     additionalProperties: false
+                    description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
                     nullable: true
                     type: object
                     properties:
                       look_back_window:
+                        description: The minimum number of runs in which the threshold must be met.
                         maximum: 20
                         minimum: 2
                         type: number
                       status_change_threshold:
+                        description: The minimum number of times an alert must switch states in the look back window.
                         maximum: 20
                         minimum: 2
                         type: number
@@ -2510,14 +2519,17 @@ paths:
                     - active
                 flapping:
                   additionalProperties: false
+                  description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
                   nullable: true
                   type: object
                   properties:
                     look_back_window:
+                      description: The minimum number of runs in which the threshold must be met.
                       maximum: 20
                       minimum: 2
                       type: number
                     status_change_threshold:
+                      description: The minimum number of times an alert must switch states in the look back window.
                       maximum: 20
                       minimum: 2
                       type: number
@@ -2807,14 +2819,17 @@ paths:
                       - last_execution_date
                   flapping:
                     additionalProperties: false
+                    description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
                     nullable: true
                     type: object
                     properties:
                       look_back_window:
+                        description: The minimum number of runs in which the threshold must be met.
                         maximum: 20
                         minimum: 2
                         type: number
                       status_change_threshold:
+                        description: The minimum number of times an alert must switch states in the look back window.
                         maximum: 20
                         minimum: 2
                         type: number
@@ -3852,14 +3867,17 @@ paths:
                       - last_execution_date
                   flapping:
                     additionalProperties: false
+                    description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
                     nullable: true
                     type: object
                     properties:
                       look_back_window:
+                        description: The minimum number of runs in which the threshold must be met.
                         maximum: 20
                         minimum: 2
                         type: number
                       status_change_threshold:
+                        description: The minimum number of times an alert must switch states in the look back window.
                         maximum: 20
                         minimum: 2
                         type: number
@@ -7377,6 +7395,43 @@ paths:
       tags:
         - Security Endpoint Management API
       x-beta: true
+  /api/entity_store/enable:
+    post:
+      operationId: InitEntityStore
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              type: object
+              properties:
+                fieldHistoryLength:
+                  default: 10
+                  description: The number of historical values to keep for each field.
+                  type: integer
+                filter:
+                  type: string
+                indexPattern:
+                  $ref: '#/components/schemas/Security_Entity_Analytics_API_IndexPattern'
+        description: Schema for the entity store initialization
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                type: object
+                properties:
+                  engines:
+                    items:
+                      $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineDescriptor'
+                    type: array
+                  succeeded:
+                    type: boolean
+          description: Successful response
+      summary: Initialize the Entity Store
+      tags:
+        - Security Entity Analytics API
+      x-beta: true
   /api/entity_store/engines:
     get:
       operationId: ListEntityEngines
@@ -7692,6 +7747,27 @@ paths:
                   - total
           description: Entities returned successfully
       summary: List Entity Store Entities
+      tags:
+        - Security Entity Analytics API
+      x-beta: true
+  /api/entity_store/status:
+    get:
+      operationId: GetEntityStoreStatus
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                type: object
+                properties:
+                  engines:
+                    items:
+                      $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineDescriptor'
+                    type: array
+                  status:
+                    $ref: '#/components/schemas/Security_Entity_Analytics_API_StoreStatus'
+          description: Successful response
+      summary: Get the status of the Entity Store
       tags:
         - Security Entity Analytics API
       x-beta: true
@@ -16686,6 +16762,38 @@ paths:
                         - active
                         - created_at
                     type: array
+                  list:
+                    deprecated: true
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        active:
+                          description: When false, the enrollment API key is revoked and cannot be used for enrolling Elastic Agents.
+                          type: boolean
+                        api_key:
+                          description: The enrollment API key (token) used for enrolling Elastic Agents.
+                          type: string
+                        api_key_id:
+                          description: The ID of the API key in the Security API.
+                          type: string
+                        created_at:
+                          type: string
+                        id:
+                          type: string
+                        name:
+                          description: The name of the enrollment API key.
+                          type: string
+                        policy_id:
+                          description: The ID of the agent policy the Elastic Agent will be enrolled in.
+                          type: string
+                      required:
+                        - id
+                        - api_key_id
+                        - api_key
+                        - active
+                        - created_at
+                    type: array
                   page:
                     type: number
                   perPage:
@@ -16697,6 +16805,7 @@ paths:
                   - total
                   - page
                   - perPage
+                  - list
         '400':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
@@ -19272,7 +19381,7 @@ paths:
       tags:
         - Elastic Package Manager (EPM)
       x-beta: true
-  /api/fleet/epm/packages/{pkgName}/{pkgVersion}/{filePath*}:
+  /api/fleet/epm/packages/{pkgName}/{pkgVersion}/{filePath}:
     get:
       operationId: get-fleet-epm-packages-pkgname-pkgversion-filepath
       parameters:
@@ -45829,6 +45938,14 @@ components:
         - index
         - description
         - category
+    Security_Entity_Analytics_API_StoreStatus:
+      enum:
+        - not_installed
+        - installing
+        - running
+        - stopped
+        - error
+      type: string
     Security_Entity_Analytics_API_TaskManagerUnavailableResponse:
       description: Task manager is unavailable
       type: object

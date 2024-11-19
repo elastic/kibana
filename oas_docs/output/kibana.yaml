@@ -1367,14 +1367,17 @@ paths:
                       - last_execution_date
                   flapping:
                     additionalProperties: false
+                    description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
                     nullable: true
                     type: object
                     properties:
                       look_back_window:
+                        description: The minimum number of runs in which the threshold must be met.
                         maximum: 20
                         minimum: 2
                         type: number
                       status_change_threshold:
+                        description: The minimum number of times an alert must switch states in the look back window.
                         maximum: 20
                         minimum: 2
                         type: number
@@ -1948,14 +1951,17 @@ paths:
                   type: boolean
                 flapping:
                   additionalProperties: false
+                  description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
                   nullable: true
                   type: object
                   properties:
                     look_back_window:
+                      description: The minimum number of runs in which the threshold must be met.
                       maximum: 20
                       minimum: 2
                       type: number
                     status_change_threshold:
+                      description: The minimum number of times an alert must switch states in the look back window.
                       maximum: 20
                       minimum: 2
                       type: number
@@ -2273,14 +2279,17 @@ paths:
                       - last_execution_date
                   flapping:
                     additionalProperties: false
+                    description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
                     nullable: true
                     type: object
                     properties:
                       look_back_window:
+                        description: The minimum number of runs in which the threshold must be met.
                         maximum: 20
                         minimum: 2
                         type: number
                       status_change_threshold:
+                        description: The minimum number of times an alert must switch states in the look back window.
                         maximum: 20
                         minimum: 2
                         type: number
@@ -2857,14 +2866,17 @@ paths:
                     - active
                 flapping:
                   additionalProperties: false
+                  description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
                   nullable: true
                   type: object
                   properties:
                     look_back_window:
+                      description: The minimum number of runs in which the threshold must be met.
                       maximum: 20
                       minimum: 2
                       type: number
                     status_change_threshold:
+                      description: The minimum number of times an alert must switch states in the look back window.
                       maximum: 20
                       minimum: 2
                       type: number
@@ -3154,14 +3166,17 @@ paths:
                       - last_execution_date
                   flapping:
                     additionalProperties: false
+                    description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
                     nullable: true
                     type: object
                     properties:
                       look_back_window:
+                        description: The minimum number of runs in which the threshold must be met.
                         maximum: 20
                         minimum: 2
                         type: number
                       status_change_threshold:
+                        description: The minimum number of times an alert must switch states in the look back window.
                         maximum: 20
                         minimum: 2
                         type: number
@@ -4191,14 +4206,17 @@ paths:
                       - last_execution_date
                   flapping:
                     additionalProperties: false
+                    description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
                     nullable: true
                     type: object
                     properties:
                       look_back_window:
+                        description: The minimum number of runs in which the threshold must be met.
                         maximum: 20
                         minimum: 2
                         type: number
                       status_change_threshold:
+                        description: The minimum number of times an alert must switch states in the look back window.
                         maximum: 20
                         minimum: 2
                         type: number
@@ -6644,6 +6662,41 @@ paths:
                 $ref: '#/components/schemas/Cases_4xx_response'
           description: Authorization information is missing or invalid.
       summary: Push a case to an external service
+      tags:
+        - cases
+  /api/cases/{caseId}/files:
+    post:
+      description: |
+        Attach a file to a case. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're updating. The request must include:
+        - The `Content-Type: multipart/form-data` HTTP header.
+        - The location of the file that is being uploaded.
+      operationId: addCaseFileDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_kbn_xsrf'
+        - $ref: '#/components/parameters/Cases_case_id'
+      requestBody:
+        content:
+          multipart/form-data; Elastic-Api-Version=2023-10-31:
+            schema:
+              $ref: '#/components/schemas/Cases_add_case_file_request'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                addCaseFileResponse:
+                  $ref: '#/components/examples/Cases_add_comment_response'
+              schema:
+                $ref: '#/components/schemas/Cases_case_response_properties'
+          description: Indicates a successful call.
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Cases_4xx_response'
+          description: Authorization information is missing or invalid.
+      summary: Attach a file to a case
       tags:
         - cases
   /api/cases/{caseId}/user_actions:
@@ -10229,6 +10282,42 @@ paths:
       summary: Create or update a protection updates note
       tags:
         - Security Endpoint Management API
+  /api/entity_store/enable:
+    post:
+      operationId: InitEntityStore
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              type: object
+              properties:
+                fieldHistoryLength:
+                  default: 10
+                  description: The number of historical values to keep for each field.
+                  type: integer
+                filter:
+                  type: string
+                indexPattern:
+                  $ref: '#/components/schemas/Security_Entity_Analytics_API_IndexPattern'
+        description: Schema for the entity store initialization
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                type: object
+                properties:
+                  engines:
+                    items:
+                      $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineDescriptor'
+                    type: array
+                  succeeded:
+                    type: boolean
+          description: Successful response
+      summary: Initialize the Entity Store
+      tags:
+        - Security Entity Analytics API
   /api/entity_store/engines:
     get:
       operationId: ListEntityEngines
@@ -10536,6 +10625,26 @@ paths:
                   - total
           description: Entities returned successfully
       summary: List Entity Store Entities
+      tags:
+        - Security Entity Analytics API
+  /api/entity_store/status:
+    get:
+      operationId: GetEntityStoreStatus
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                type: object
+                properties:
+                  engines:
+                    items:
+                      $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineDescriptor'
+                    type: array
+                  status:
+                    $ref: '#/components/schemas/Security_Entity_Analytics_API_StoreStatus'
+          description: Successful response
+      summary: Get the status of the Entity Store
       tags:
         - Security Entity Analytics API
   /api/exception_lists:
@@ -19470,6 +19579,38 @@ paths:
                         - active
                         - created_at
                     type: array
+                  list:
+                    deprecated: true
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        active:
+                          description: When false, the enrollment API key is revoked and cannot be used for enrolling Elastic Agents.
+                          type: boolean
+                        api_key:
+                          description: The enrollment API key (token) used for enrolling Elastic Agents.
+                          type: string
+                        api_key_id:
+                          description: The ID of the API key in the Security API.
+                          type: string
+                        created_at:
+                          type: string
+                        id:
+                          type: string
+                        name:
+                          description: The name of the enrollment API key.
+                          type: string
+                        policy_id:
+                          description: The ID of the agent policy the Elastic Agent will be enrolled in.
+                          type: string
+                      required:
+                        - id
+                        - api_key_id
+                        - api_key
+                        - active
+                        - created_at
+                    type: array
                   page:
                     type: number
                   perPage:
@@ -19481,6 +19622,7 @@ paths:
                   - total
                   - page
                   - perPage
+                  - list
         '400':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
@@ -22041,7 +22183,7 @@ paths:
       summary: Update package settings
       tags:
         - Elastic Package Manager (EPM)
-  /api/fleet/epm/packages/{pkgName}/{pkgVersion}/{filePath*}:
+  /api/fleet/epm/packages/{pkgName}/{pkgVersion}/{filePath}:
     get:
       operationId: get-fleet-epm-packages-pkgname-pkgversion-filepath
       parameters:
@@ -43581,6 +43723,20 @@ components:
         - $ref: '#/components/schemas/Cases_add_alert_comment_request_properties'
         - $ref: '#/components/schemas/Cases_add_user_comment_request_properties'
       title: Add case comment request
+    Cases_add_case_file_request:
+      description: Defines the file that will be attached to the case. Optional parameters will be generated automatically from the file metadata if not defined.
+      type: object
+      properties:
+        file:
+          description: The file being attached to the case.
+          format: binary
+          type: string
+        filename:
+          description: The desired name of the file being attached to the case, it can be different than the name of the file in the filesystem. **This should not include the file extension.**
+          type: string
+      required:
+        - file
+      title: Add case file request properties
     Cases_add_user_comment_request_properties:
       description: Defines properties for case comment requests when type is user.
       properties:
@@ -53501,6 +53657,14 @@ components:
         - index
         - description
         - category
+    Security_Entity_Analytics_API_StoreStatus:
+      enum:
+        - not_installed
+        - installing
+        - running
+        - stopped
+        - error
+      type: string
     Security_Entity_Analytics_API_TaskManagerUnavailableResponse:
       description: Task manager is unavailable
       type: object
