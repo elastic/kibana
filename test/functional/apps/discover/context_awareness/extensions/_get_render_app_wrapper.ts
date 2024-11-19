@@ -13,12 +13,13 @@ import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, discover, header, unifiedFieldList, dashboard } = getPageObjects([
+  const { common, discover, header, unifiedFieldList, dashboard, context } = getPageObjects([
     'common',
     'discover',
     'header',
     'unifiedFieldList',
     'dashboard',
+    'context',
   ]);
   const testSubjects = getService('testSubjects');
   const dataViews = getService('dataViews');
@@ -129,6 +130,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await header.waitUntilLoadingHasFinished();
         await browser.refresh();
         await header.waitUntilLoadingHasFinished();
+        await context.waitUntilContextLoadingHasFinished();
 
         await retry.try(async () => {
           messageCell = await dataGrid.getCellElementByColumnName(0, 'message');
