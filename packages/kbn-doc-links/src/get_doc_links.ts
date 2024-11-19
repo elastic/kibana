@@ -428,6 +428,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       mappingSimilarity: `${ELASTICSEARCH_DOCS}similarity.html`,
       mappingSourceFields: `${ELASTICSEARCH_DOCS}mapping-source-field.html`,
       mappingSourceFieldsDisable: `${ELASTICSEARCH_DOCS}mapping-source-field.html#disable-source-field`,
+      mappingSyntheticSourceFields: `${ELASTICSEARCH_DOCS}mapping-source-field.html#synthetic-source`,
       mappingStore: `${ELASTICSEARCH_DOCS}mapping-store.html`,
       mappingSubobjects: `${ELASTICSEARCH_DOCS}subobjects.html`,
       mappingTermVector: `${ELASTICSEARCH_DOCS}term-vector.html`,
@@ -717,6 +718,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       mappingRoles: `${ELASTICSEARCH_DOCS}mapping-roles.html`,
       mappingRolesFieldRules: `${ELASTICSEARCH_DOCS}role-mapping-resources.html#mapping-roles-rule-field`,
       runAsPrivilege: `${ELASTICSEARCH_DOCS}security-privileges.html#_run_as_privilege`,
+      deprecatedV1Endpoints: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-199656`,
     },
     spaces: {
       kibanaLegacyUrlAliases: `${KIBANA_DOCS}legacy-url-aliases.html`,
