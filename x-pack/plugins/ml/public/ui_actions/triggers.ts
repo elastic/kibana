@@ -30,6 +30,16 @@ export const entityFieldSelectionTrigger: Trigger = {
   description: 'Entity field selection triggered',
 };
 
+export const SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER =
+  'SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER';
+export const smvEntityFieldSelectionTrigger: Trigger = {
+  id: SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER,
+  // This is empty string to hide title of ui_actions context menu that appears
+  // when this trigger is executed.
+  title: '',
+  description: 'Single metric viewer entity field selection triggered',
+};
+
 export interface AnomalySwimLaneSelectionTriggerContext extends EmbeddableApiContext {
   embeddable: AnomalySwimLaneEmbeddableApi;
   /**

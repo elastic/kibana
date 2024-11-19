@@ -48,8 +48,6 @@ export interface BulkOperationError {
   };
 }
 
-export type BulkActionError = BulkOperationError | unknown;
-
 const buildBulkResponse = (
   response: KibanaResponseFactory,
   {
