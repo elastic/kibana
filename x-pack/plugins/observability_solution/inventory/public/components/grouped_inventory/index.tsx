@@ -8,6 +8,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
 import React from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
+import { flattenObject } from '@kbn/observability-utils-common/object/flatten_object';
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
 import { useKibana } from '../../hooks/use_kibana';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search_context';
@@ -52,15 +53,18 @@ export function GroupedInventory() {
     <>
       <InventorySummary totalEntities={value.entitiesCount} totalGroups={value.groups.length} />
       <EuiSpacer size="m" />
-      {value.groups.map((group) => (
-        <InventoryGroupAccordion
-          key={`${value.groupBy}-${group[value.groupBy]}`}
-          groupBy={value.groupBy}
-          groupValue={group[value.groupBy]}
-          groupCount={group.count}
-          isLoading={loading}
-        />
-      ))}
+      {value.groups.map((group) => {
+        const groupValue = flattenObject(group)[value.groupBy];
+        return (
+          <InventoryGroupAccordion
+            key={`${value.groupBy}-${groupValue}`}
+            groupBy={value.groupBy}
+            groupValue={groupValue}
+            groupCount={group.count}
+            isLoading={loading}
+          />
+        );
+      })}
     </>
   );
 }
