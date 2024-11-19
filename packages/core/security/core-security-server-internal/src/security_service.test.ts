@@ -32,10 +32,8 @@ describe('SecurityService', function () {
     const mockConfig = {
       xpack: {
         security: {
-          experimental: {
-            fipsMode: {
-              enabled: !!getFips(),
-            },
+          fipsMode: {
+            enabled: !!getFips(),
           },
         },
       },
