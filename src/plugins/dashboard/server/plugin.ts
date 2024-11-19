@@ -75,6 +75,8 @@ export class DashboardPlugin
       },
     });
 
+    plugins.contentManagement.favorites.registerFavoriteType('dashboard');
+
     if (plugins.taskManager) {
       initializeDashboardTelemetryTask(this.logger, core, plugins.taskManager, plugins.embeddable);
     }
