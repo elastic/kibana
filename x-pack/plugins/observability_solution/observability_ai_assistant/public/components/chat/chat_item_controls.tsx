@@ -64,7 +64,7 @@ export function ChatItemControls({
 
   return controls ? (
     <>
-      <EuiHorizontalRule margin="none" color={euiTheme.colors.lightestShade} />
+      <EuiHorizontalRule margin="none" color={euiTheme.colors.backgroundBaseDisabled} />
       <EuiPanel hasShadow={false} paddingSize="s" className={containerClassName}>
         {controls}
       </EuiPanel>
