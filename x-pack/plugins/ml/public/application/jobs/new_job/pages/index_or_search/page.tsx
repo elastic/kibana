@@ -56,6 +56,7 @@ export const Page: FC<PageProps> = ({
         </MlPageHeader>
         <EuiPanel hasShadow={false} hasBorder>
           <SavedObjectFinder
+            id="mlJobsDatafeedDataView"
             key="searchSavedObjectFinder"
             onChoose={onObjectSelection}
             showFilter

@@ -11,7 +11,7 @@ export const getKBUserFilter = (user: AuthenticatedUser | null) => {
   // Only return the current users entries and all other global entries (where user[] is empty)
   const globalFilter = 'NOT users: {name:* OR id:* }';
 
-  const nameFilter = user?.username ? `users: {name: ${user?.username}}` : '';
+  const nameFilter = user?.username ? `users: {name: "${user?.username}"}` : '';
   const idFilter = user?.profile_uid ? `users: {id: ${user?.profile_uid}}` : '';
   const userFilter =
     user?.username && user?.profile_uid
