@@ -15,13 +15,6 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import {
-  apiHasExecutionContext,
-  fetch$,
-  initializeTimeRange,
-  initializeTitles,
-  useBatchedPublishingSubjects,
-} from '@kbn/presentation-publishing';
 
 import fastIsEqual from 'fast-deep-equal';
 import { cloneDeep } from 'lodash';
@@ -61,6 +54,14 @@ export const getChangePointChartEmbeddableFactory = (
       return serializedState;
     },
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
+      const {
+        apiHasExecutionContext,
+        fetch$,
+        initializeTimeRange,
+        initializeTitles,
+        useBatchedPublishingSubjects,
+      } = await import('@kbn/presentation-publishing');
+
       const [coreStart, pluginStart] = await getStartServices();
 
       const {

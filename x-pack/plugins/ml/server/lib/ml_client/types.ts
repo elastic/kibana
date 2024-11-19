@@ -101,7 +101,6 @@ export type MlClientParams =
   | Parameters<MlClient['info']>
   | Parameters<MlClient['openJob']>
   | Parameters<MlClient['postCalendarEvents']>
-  | Parameters<MlClient['postData']>
   | Parameters<MlClient['previewDatafeed']>
   | Parameters<MlClient['putCalendar']>
   | Parameters<MlClient['putCalendarJob']>

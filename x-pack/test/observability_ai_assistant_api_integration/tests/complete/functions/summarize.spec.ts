@@ -15,8 +15,10 @@ import {
   deleteActionConnector,
 } from '../../../common/action_connectors';
 import {
+  TINY_ELSER,
   clearKnowledgeBase,
   createKnowledgeBaseModel,
+  deleteInferenceEndpoint,
   deleteKnowledgeBaseModel,
 } from '../../knowledge_base/helpers';
 
@@ -32,11 +34,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     let connectorId: string;
 
     before(async () => {
-      await clearKnowledgeBase(es);
       await createKnowledgeBaseModel(ml);
       await observabilityAIAssistantAPIClient
-        .editorUser({
+        .admin({
           endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
+          params: {
+            query: {
+              model_id: TINY_ELSER.id,
+            },
+          },
         })
         .expect(200);
 
@@ -55,7 +61,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           name: 'summarize',
           trigger: MessageRole.User,
           arguments: JSON.stringify({
-            id: 'my-id',
+            title: 'My Title',
             text: 'Hello world',
             is_correction: false,
             confidence: 'high',
@@ -72,28 +78,30 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       await deleteActionConnector({ supertest, connectorId, log });
       await deleteKnowledgeBaseModel(ml);
+      await clearKnowledgeBase(es);
+      await deleteInferenceEndpoint({ es });
     });
 
     it('persists entry in knowledge base', async () => {
-      const res = await observabilityAIAssistantAPIClient.editorUser({
+      const res = await observabilityAIAssistantAPIClient.editor({
         endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
         params: {
           query: {
             query: '',
-            sortBy: 'doc_id',
+            sortBy: 'title',
             sortDirection: 'asc',
           },
         },
       });
 
-      const { role, public: isPublic, text, type, user, id } = res.body.entries[0];
+      const { role, public: isPublic, text, type, user, title } = res.body.entries[0];
 
       expect(role).to.eql('assistant_summarization');
       expect(isPublic).to.eql(false);
       expect(text).to.eql('Hello world');
       expect(type).to.eql('contextual');
       expect(user?.name).to.eql('editor');
-      expect(id).to.eql('my-id');
+      expect(title).to.eql('My Title');
       expect(res.body.entries).to.have.length(1);
     });
   });

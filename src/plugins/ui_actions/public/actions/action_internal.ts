@@ -9,7 +9,9 @@
 
 import * as React from 'react';
 import type { Presentable, PresentableGrouping } from '@kbn/ui-actions-browser/src/types';
+import { i18n } from '@kbn/i18n';
 import { Action, ActionDefinition, ActionMenuItemProps } from './action';
+import { getNotifications } from '../services';
 
 /**
  * @internal
@@ -45,8 +47,17 @@ export class ActionInternal<Context extends object = object>
     }
   }
 
-  public execute(context: Context) {
-    return this.definition.execute(context);
+  public async execute(context: Context) {
+    try {
+      return await this.definition.execute(context);
+    } catch (e) {
+      getNotifications()?.toasts.addWarning(
+        i18n.translate('uiActions.execute.unhandledErrorMsg', {
+          defaultMessage: `Unable to execute action, error: {errorMessage}`,
+          values: { errorMessage: e.message },
+        })
+      );
+    }
   }
 
   public getIconType(context: Context): string | undefined {

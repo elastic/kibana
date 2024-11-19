@@ -1,11 +1,18 @@
 openapi: 3.0.3
 info:
-  title: Common Splunk Rules Attributes
+  title: SIEM Rule Migration common components
   version: 'not applicable'
 paths: {}
 components:
   x-codegen-enabled: true
   schemas:
+
+    OriginalRuleVendor:
+      type: string
+      description: The original rule vendor identifier.
+      enum:
+        - splunk
+
     OriginalRule:
       type: object
       description: The original rule to migrate.
@@ -21,10 +28,7 @@ components:
           type: string
           description: The original rule id.
         vendor:
-          type: string
-          description: The original rule vendor identifier.
-          enum:
-            - splunk
+          $ref: '#/components/schemas/OriginalRuleVendor'
         title:
           type: string
           description: The original rule name.
@@ -180,3 +184,50 @@ components:
               migration_id:
                 type: string
                 description: The migration id
+
+## Rule migration resources
+    
+    RuleMigrationResourceType:
+      type: string
+      description: The type of the rule migration resource.
+      enum:
+        - macro # Reusable part a query that can be customized and called from multiple rules
+        - list # A list of values that can be used inside queries reused in different rules
+
+    RuleMigrationResourceData:
+      type: object
+      description: The rule migration resource data provided by the vendor.
+      required:
+        - type
+        - name
+        - content
+      properties:
+        type:
+          $ref: '#/components/schemas/RuleMigrationResourceType'
+        name:
+          type: string
+          description: The resource name identifier.
+        content:
+          type: string
+          description: The resource content value.
+        metadata:
+          type: object
+          description: The resource arbitrary metadata.
+
+    RuleMigrationResource:
+      description: The rule migration resource document object.
+      allOf:
+        - $ref: '#/components/schemas/RuleMigrationResourceData'
+        - type: object
+          required:
+            - migration_id
+          properties:
+            migration_id:
+              type: string
+              description: The migration id
+            updated_at:
+              type: string
+              description: The moment of the last update
+            updated_by:
+              type: string
+              description: The user who last updated the resource

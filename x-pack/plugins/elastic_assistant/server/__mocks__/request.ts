@@ -23,10 +23,14 @@ import {
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID_MESSAGES,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
   ELASTIC_AI_ASSISTANT_EVALUATE_URL,
+  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL,
+  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BULK_ACTION,
+  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_INDICES_URL,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
   ELASTIC_AI_ASSISTANT_PROMPTS_URL_BULK_ACTION,
   ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND,
+  PerformKnowledgeBaseEntryBulkActionRequestBody,
   PostEvaluateRequestBodyInput,
 } from '@kbn/elastic-assistant-common';
 import {
@@ -34,6 +38,7 @@ import {
   getCreateConversationSchemaMock,
   getUpdateConversationSchemaMock,
 } from './conversations_schema.mock';
+import { getCreateKnowledgeBaseEntrySchemaMock } from './knowledge_base_entry_schema.mock';
 import {
   PromptCreateProps,
   PromptUpdateProps,
@@ -67,11 +72,20 @@ export const getPostKnowledgeBaseRequest = (resource?: string) =>
     query: { resource },
   });
 
-export const getDeleteKnowledgeBaseRequest = (resource?: string) =>
+export const getCreateKnowledgeBaseEntryRequest = () =>
   requestMock.create({
-    method: 'delete',
-    path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
-    query: { resource },
+    method: 'post',
+    path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL,
+    body: getCreateKnowledgeBaseEntrySchemaMock(),
+  });
+
+export const getBulkActionKnowledgeBaseEntryRequest = (
+  body: PerformKnowledgeBaseEntryBulkActionRequestBody
+) =>
+  requestMock.create({
+    method: 'post',
+    path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BULK_ACTION,
+    body,
   });
 
 export const getGetCapabilitiesRequest = () =>
@@ -85,6 +99,12 @@ export const getPostEvaluateRequest = ({ body }: { body: PostEvaluateRequestBody
     body,
     method: 'post',
     path: ELASTIC_AI_ASSISTANT_EVALUATE_URL,
+  });
+
+export const getKnowledgeBaseEntryFindRequest = () =>
+  requestMock.create({
+    method: 'get',
+    path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND,
   });
 
 export const getCurrentUserFindRequest = () =>
