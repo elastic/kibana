@@ -39,10 +39,12 @@ export async function getDeprecationsInfo(
     return [];
   }
 
-  return [
-    ...(await getUsersDeprecations(client, apmDeps, docLinks)),
-    ...(await getRoleMappingsDeprecations(client, apmDeps, docLinks)),
-  ];
+  const [userDeprecations, roleMappingDeprecations] = await Promise.all([
+    getUsersDeprecations(client, apmDeps, docLinks),
+    getRoleMappingsDeprecations(client, apmDeps, docLinks),
+  ]);
+
+  return [...userDeprecations, ...roleMappingDeprecations];
 }
 
 async function getUsersDeprecations(
@@ -62,13 +64,13 @@ async function getUsersDeprecations(
     const { logger } = apmDeps;
     if (deprecations.getErrorStatusCode(err) === 403) {
       logger.warn(
-        `Failed to retrieve users when checking for deprecations:` +
-          ` the "manage_security" cluster privilege is required.`
+        'Failed to retrieve users when checking for deprecations: the "manage_security" cluster privilege is required.'
       );
     } else {
       logger.error(
-        `Failed to retrieve users when checking for deprecations,` +
-          ` unexpected error: ${deprecations.getDetailedErrorMessage(err)}.`
+        `Failed to retrieve users when checking for deprecations, unexpected error: ${deprecations.getDetailedErrorMessage(
+          err
+        )}.`
       );
     }
     return deprecations.deprecationError(title, err, docLinks);
@@ -87,7 +89,7 @@ async function getUsersDeprecations(
       title,
       message: i18n.translate('xpack.apm.deprecations.apmUser.description', {
         defaultMessage: `The "{apmUserRoleName}" role has been deprecated. Remove the "{apmUserRoleName}" role from affected users in this cluster including: {users}`,
-        values: { apmUserRoleName: APM_USER_ROLE_NAME, users: reportingUsers.join(', ') },
+        values: { apmUserRoleName: APM_USER_ROLE_NAME, users: reportingUsers.join() },
       }),
       correctiveActions: {
         manualSteps: [
@@ -126,13 +128,13 @@ async function getRoleMappingsDeprecations(
     const { logger } = apmDeps;
     if (deprecations.getErrorStatusCode(err) === 403) {
       logger.warn(
-        `Failed to retrieve role mappings when checking for deprecations:` +
-          ` the "manage_security" cluster privilege is required.`
+        'Failed to retrieve role mappings when checking for deprecations: the "manage_security" cluster privilege is required.'
       );
     } else {
       logger.error(
-        `Failed to retrieve role mappings when checking for deprecations,` +
-          ` unexpected error: ${deprecations.getDetailedErrorMessage(err)}.`
+        `Failed to retrieve role mappings when checking for deprecations, unexpected error: ${deprecations.getDetailedErrorMessage(
+          err
+        )}.`
       );
     }
     return deprecations.deprecationError(title, err, docLinks);
@@ -153,7 +155,7 @@ async function getRoleMappingsDeprecations(
         defaultMessage: `The "{apmUserRoleName}" role has been deprecated. Remove the "{apmUserRoleName}" role from affected role mappings in this cluster including: {roles}`,
         values: {
           apmUserRoleName: APM_USER_ROLE_NAME,
-          roles: roleMappingsWithReportingRole.join(', '),
+          roles: roleMappingsWithReportingRole.join(),
         },
       }),
       correctiveActions: {
