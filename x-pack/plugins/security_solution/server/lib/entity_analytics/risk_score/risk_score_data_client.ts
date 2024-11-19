@@ -52,7 +52,7 @@ interface RiskScoringDataClientOpts {
 
 export class RiskScoreDataClient {
   private writerCache: Map<string, Writer> = new Map();
-  constructor(private readonly options: RiskScoringDataClientOpts) { }
+  constructor(private readonly options: RiskScoringDataClientOpts) {}
 
   public async getWriter({ namespace }: { namespace: string }): Promise<Writer> {
     if (this.writerCache.get(namespace)) {
