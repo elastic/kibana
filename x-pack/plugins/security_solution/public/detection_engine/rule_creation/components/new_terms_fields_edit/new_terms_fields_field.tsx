@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 
 import type { DataViewFieldBase } from '@kbn/es-query';
 import type { FieldHook } from '../../../../shared_imports';
 import { Field } from '../../../../shared_imports';
-import { NEW_TERMS_FIELD_PLACEHOLDER } from './translations';
+import { PLACEHOLDER } from './translations';
 
 interface NewTermsFieldsProps {
   fieldNames: DataViewFieldBase[];
@@ -21,20 +21,18 @@ const FIELD_COMBO_BOX_WIDTH = 410;
 
 const fieldDescribedByIds = 'newTermsFieldEdit';
 
-const NewTermsFieldsEditFieldComponent: React.FC<NewTermsFieldsProps> = ({
+export const NewTermsFieldsField = memo(function NewTermsFieldsField({
   fieldNames,
   field,
-}: NewTermsFieldsProps) => {
+}: NewTermsFieldsProps): JSX.Element {
   const fieldEuiFieldProps = {
     fullWidth: true,
     noSuggestions: false,
     options: fieldNames.map((name) => ({ label: name })),
-    placeholder: NEW_TERMS_FIELD_PLACEHOLDER,
+    placeholder: PLACEHOLDER,
     onCreateOption: undefined,
     style: { width: `${FIELD_COMBO_BOX_WIDTH}px` },
   };
 
   return <Field field={field} idAria={fieldDescribedByIds} euiFieldProps={fieldEuiFieldProps} />;
-};
-
-export const NewTermsFieldsField = React.memo(NewTermsFieldsEditFieldComponent);
+});
