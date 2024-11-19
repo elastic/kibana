@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EuiSkeletonRectangle, EuiFlexGroup } from '@elastic/eui';
+import { EuiSkeletonRectangle, EuiFlexGroup, EuiLink } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { useDatasetRedirectLinkTelemetry, useRedirectLink } from '../../../hooks';
 import { QualityPercentageIndicator } from '../../quality_indicator';
 import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
 import { TimeRangeConfig } from '../../../../common/types';
@@ -25,6 +26,18 @@ export const FailedDocsPercentageLink = ({
     failedDocs: { percentage, count },
   } = dataStreamStat;
 
+  const { sendTelemetry } = useDatasetRedirectLinkTelemetry({
+    rawName: dataStreamStat.rawName,
+    query: { language: 'kuery', query: '' },
+  });
+
+  const redirectLinkProps = useRedirectLink({
+    dataStreamStat,
+    query: { language: 'kuery', query: '' },
+    sendTelemetry,
+    timeRangeConfig: timeRange,
+  });
+
   const tooltip = (failedDocsCount: number) =>
     i18n.translate('xpack.datasetQuality.fewFailedDocsTooltip', {
       defaultMessage: '{failedDocsCount} failed docs in this data set.',
@@ -36,11 +49,24 @@ export const FailedDocsPercentageLink = ({
   return (
     <EuiSkeletonRectangle width="50px" height="20px" borderRadius="m" isLoading={isLoading}>
       <EuiFlexGroup alignItems="center" gutterSize="s">
-        <QualityPercentageIndicator
-          percentage={percentage}
-          docsCount={count}
-          tooltipContent={tooltip}
-        />
+        {percentage ? (
+          <EuiLink
+            data-test-subj="datasetQualityFailedDocsPercentageLink"
+            {...redirectLinkProps.linkProps}
+          >
+            <QualityPercentageIndicator
+              percentage={percentage}
+              docsCount={count}
+              tooltipContent={tooltip}
+            />
+          </EuiLink>
+        ) : (
+          <QualityPercentageIndicator
+            percentage={percentage}
+            docsCount={count}
+            tooltipContent={tooltip}
+          />
+        )}
       </EuiFlexGroup>
     </EuiSkeletonRectangle>
   );

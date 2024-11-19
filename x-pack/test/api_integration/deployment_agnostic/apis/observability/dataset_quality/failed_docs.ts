@@ -27,7 +27,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const namespace = 'default';
   const serviceName = 'my-service';
   const hostName = 'synth-host';
-  const dataStreamName = `${dataStreamType}-${dataset}-${namespace}`;
   const syntheticsDataStreamName = `${dataStreamType}-${syntheticsDataset}-${namespace}`;
 
   const endpoint = 'GET /internal/dataset_quality/data_streams/failed_docs';
