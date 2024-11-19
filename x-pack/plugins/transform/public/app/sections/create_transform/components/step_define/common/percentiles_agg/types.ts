@@ -16,7 +16,8 @@ export interface PercentilesAggConfig {
 export type ValidationResultErrorType =
   | 'INVALID_FORMAT'
   | 'PERCENTILE_OUT_OF_RANGE'
-  | 'NUMBER_TOO_PRECISE';
+  | 'NUMBER_TOO_PRECISE'
+  | 'DUPLICATE_VALUE';
 
 export type IPivotAggsConfigPercentiles = PivotAggsConfigWithExtra<
   PercentilesAggConfig,

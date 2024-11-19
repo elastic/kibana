@@ -24,6 +24,9 @@ const ERROR_MESSAGES: Record<ValidationResultErrorType, string> = {
   NUMBER_TOO_PRECISE: i18n.translate('xpack.transform.agg.popoverForm.numberTooPreciseError', {
     defaultMessage: 'Value is too precise',
   }),
+  DUPLICATE_VALUE: i18n.translate('xpack.transform.agg.popoverForm.duplicateValueError', {
+    defaultMessage: 'Value already exists',
+  }),
 };
 
 export const PercentilesAggForm: IPivotAggsConfigPercentiles['AggFormComponent'] = ({
@@ -43,12 +46,6 @@ export const PercentilesAggForm: IPivotAggsConfigPercentiles['AggFormComponent']
 
       const newValue = Number(inputValue.replace(',', '.'));
 
-      // Skip if this percentile value already exists after normalizing number formats
-      // e.g. "+12" and "12" are considered the same value
-      if (aggConfig.percents?.includes(newValue)) {
-        return false;
-      }
-
       const newOption = {
         label: newValue.toString(),
       };
@@ -58,7 +55,7 @@ export const PercentilesAggForm: IPivotAggsConfigPercentiles['AggFormComponent']
         percents: updatedOptions.map((option) => Number(option.label)),
       });
     },
-    [isValid, onChange, selectedOptions, aggConfig.percents]
+    [isValid, onChange, selectedOptions]
   );
 
   const handleOptionsChange = useCallback(

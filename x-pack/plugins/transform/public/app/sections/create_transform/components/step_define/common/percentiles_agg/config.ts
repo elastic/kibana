@@ -20,6 +20,14 @@ function validatePercentsInput(config: Partial<PercentilesAggConfig>): Validatio
   if (config.pendingPercentileInput) {
     // Replace comma with dot before converting to number
     const normalizedInput = config.pendingPercentileInput.replace(',', '.');
+    const pendingValue = Number(normalizedInput);
+
+    if (allValues.includes(pendingValue)) {
+      return {
+        isValid: false,
+        errorType: 'DUPLICATE_VALUE',
+      };
+    }
 
     if (normalizedInput.replace('.', '').length > 17) {
       return {
@@ -27,7 +35,7 @@ function validatePercentsInput(config: Partial<PercentilesAggConfig>): Validatio
         errorType: 'NUMBER_TOO_PRECISE',
       };
     }
-    const pendingValue = Number(normalizedInput);
+
     allValues.push(pendingValue);
   }
 
