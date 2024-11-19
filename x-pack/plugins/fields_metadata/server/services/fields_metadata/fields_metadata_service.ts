@@ -6,7 +6,7 @@
  */
 
 import { EcsFlat as ecsFields } from '@elastic/ecs';
-import { Logger } from '@kbn/core/server';
+import { CoreStart, Logger } from '@kbn/core/server';
 import { FieldsMetadataClient } from './fields_metadata_client';
 import { EcsFieldsRepository } from './repositories/ecs_fields_repository';
 import { IntegrationFieldsRepository } from './repositories/integration_fields_repository';
@@ -32,7 +32,7 @@ export class FieldsMetadataService {
     };
   }
 
-  public start(): FieldsMetadataServiceStart {
+  public start(core: CoreStart): FieldsMetadataServiceStart {
     const { logger, integrationFieldsExtractor, integrationListExtractor } = this;
 
     const ecsFieldsRepository = EcsFieldsRepository.create({ ecsFields });
@@ -43,8 +43,13 @@ export class FieldsMetadataService {
     });
 
     return {
-      getClient() {
+      getClient: async (request) => {
+        const { fleet, fleetv2 } = await core.capabilities.resolveCapabilities(request, {
+          capabilityPath: '*',
+        });
+
         return FieldsMetadataClient.create({
+          capabilities: { fleet, fleetv2 },
           logger,
           ecsFieldsRepository,
           metadataFieldsRepository,
