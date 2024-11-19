@@ -3426,7 +3426,6 @@ describe('Task Runner', () => {
   });
 
   test('when there is a gap, report it to alert event log', async () => {
-    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
     const taskRunner = new TaskRunner({

@@ -62,5 +62,5 @@ export const rawRuleMonitoringSchema = schema.object({
 });
 
 export const rawRuleSchema = rawRuleSchemaV3.extends({
-  monitoring: rawRuleMonitoringSchema,
+  monitoring: schema.maybe(rawRuleMonitoringSchema),
 });
