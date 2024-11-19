@@ -5,29 +5,27 @@
  * 2.0.
  */
 
-import type { Client } from '@elastic/elasticsearch';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ProductDocumentationAttributes } from '@kbn/product-doc-common';
 
 // https://search-labs.elastic.co/search-labs/blog/elser-rag-search-for-relevance
 
-export const performSemanticSearch = async ({
+export const performSearch = async ({
   searchQuery,
+  size,
   index,
   client,
 }: {
   searchQuery: string;
-  index: string;
-  client: Client;
+  size: number;
+  index: string | string[];
+  client: ElasticsearchClient;
 }) => {
-  const results = await client.search({
+  const results = await client.search<ProductDocumentationAttributes>({
     index,
-    size: 3,
+    size,
     query: {
       bool: {
-        filter: {
-          bool: {
-            must: [{ term: { version: '8.15' } }],
-          },
-        },
         should: [
           {
             multi_match: {
@@ -37,7 +35,7 @@ export const performSemanticSearch = async ({
               fields: [
                 'content_title',
                 'content_body.text',
-                'ai_subtitle.text',
+                'ai_subtitle',
                 'ai_summary.text',
                 'ai_questions_answered.text',
                 'ai_tags',
@@ -62,12 +60,6 @@ export const performSemanticSearch = async ({
           {
             semantic: {
               field: 'content_body',
-              query: searchQuery,
-            },
-          },
-          {
-            semantic: {
-              field: 'ai_subtitle',
               query: searchQuery,
             },
           },

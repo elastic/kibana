@@ -77,7 +77,7 @@ export class ObservabilityAIAssistantPlugin
       privileges: {
         all: {
           app: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID, 'kibana'],
-          api: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID, 'ai_assistant'],
+          api: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID, 'ai_assistant', 'manage_llm_product_doc'],
           catalogue: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID],
           savedObject: {
             all: [

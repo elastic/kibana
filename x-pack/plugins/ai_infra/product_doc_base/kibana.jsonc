@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/product-doc-base-plugin",
+  "owner": "@elastic/appex-ai-infra",
+  "plugin": {
+    "id": "productDocBase",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack", "productDocBase"],
+    "requiredPlugins": ["licensing", "taskManager"],
+    "requiredBundles": [],
+    "optionalPlugins": [],
+    "extraPublicDirs": []
+  }
+}

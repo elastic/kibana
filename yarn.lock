@@ -5550,6 +5550,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/llm-tasks-plugin@link:x-pack/plugins/ai_infra/llm_tasks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/locator-examples-plugin@link:examples/locator_examples":
   version "0.0.0"
   uid ""
@@ -6031,6 +6035,14 @@
   uid ""
 
 "@kbn/product-doc-artifact-builder@link:x-pack/packages/ai-infra/product-doc-artifact-builder":
+  version "0.0.0"
+  uid ""
+
+"@kbn/product-doc-base-plugin@link:x-pack/plugins/ai_infra/product_doc_base":
+  version "0.0.0"
+  uid ""
+
+"@kbn/product-doc-common@link:x-pack/packages/ai-infra/product-doc-common":
   version "0.0.0"
   uid ""
 
