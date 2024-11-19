@@ -629,5 +629,11 @@ export const reducer = (state: State, action: Action): State => {
         inferenceToModelIdMap: action.value.inferenceToModelIdMap,
       };
     }
+    case 'hasEnterpriseLicense.update': {
+      return {
+        ...state,
+        hasEnterpriseLicense: action.value,
+      };
+    }
   }
 };
