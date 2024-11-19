@@ -21,6 +21,9 @@ const ERROR_MESSAGES: Record<ValidationResultErrorType, string> = {
       defaultMessage: 'Percentiles must be between 0 and 100',
     }
   ),
+  NUMBER_TOO_PRECISE: i18n.translate('xpack.transform.agg.popoverForm.numberTooPreciseError', {
+    defaultMessage: 'Value is too precise',
+  }),
 };
 
 export const PercentilesAggForm: IPivotAggsConfigPercentiles['AggFormComponent'] = ({

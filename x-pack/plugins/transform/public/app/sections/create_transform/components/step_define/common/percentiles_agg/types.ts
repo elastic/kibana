@@ -13,7 +13,10 @@ export interface PercentilesAggConfig {
   pendingPercentileInput?: string;
 }
 
-export type ValidationResultErrorType = 'INVALID_FORMAT' | 'PERCENTILE_OUT_OF_RANGE';
+export type ValidationResultErrorType =
+  | 'INVALID_FORMAT'
+  | 'PERCENTILE_OUT_OF_RANGE'
+  | 'NUMBER_TOO_PRECISE';
 
 export type IPivotAggsConfigPercentiles = PivotAggsConfigWithExtra<
   PercentilesAggConfig,
