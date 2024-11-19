@@ -15,12 +15,24 @@ export const searchEntitiesRoute = createEntityManagerServerRoute({
   params: z.object({
     body: z.object({
       type: z.string(),
+      start: z
+        .optional(z.string())
+        .default(() => moment().subtract(5, 'minutes').toISOString())
+        .refine((val) => moment(val).isValid(), {
+          message: 'start should be a date in ISO format',
+        }),
+      end: z
+        .optional(z.string())
+        .default(() => moment().toISOString())
+        .refine((val) => moment(val).isValid(), {
+          message: 'start should be a date in ISO format',
+        }),
       limit: z.optional(z.number()).default(10),
     }),
   }),
   handler: async ({ request, response, params, logger, getScopedClient }) => {
     try {
-      const { type, limit } = params.body;
+      const { type, start, end, limit } = params.body;
 
       const client = await getScopedClient({ request });
 
@@ -29,7 +41,7 @@ export const searchEntitiesRoute = createEntityManagerServerRoute({
         return response.notFound({ body: { message: `No sources found for type [${type}]` } });
       }
 
-      const entities = await client.searchEntities({ sources, limit });
+      const entities = await client.searchEntities({ sources, start, end, limit });
 
       return response.ok({ body: { entities } });
     } catch (e) {

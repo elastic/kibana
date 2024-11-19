@@ -18,7 +18,7 @@ export const entitySourceSchema = z.object({
 
 export type EntitySource = z.infer<typeof entitySourceSchema>;
 
-const sourceCommand = (source: EntitySource) => {
+const sourceCommand = ({ source }: { source: EntitySource }) => {
   let query = `FROM ${source.index_patterns}`;
 
   const esMetadataFields = source.metadata_fields.filter((field) =>
@@ -31,7 +31,15 @@ const sourceCommand = (source: EntitySource) => {
   return query;
 };
 
-const filterCommands = (source: EntitySource) => {
+const filterCommands = ({
+  source,
+  start,
+  end,
+}: {
+  source: EntitySource;
+  start?: string;
+  end?: string;
+}) => {
   const commands: string[] = [];
 
   source.identity_fields.forEach((field) => {
@@ -42,10 +50,18 @@ const filterCommands = (source: EntitySource) => {
     commands.push(`WHERE ${filter}`);
   });
 
+  if (start) {
+    commands.push(`WHERE ${source.timestamp_field} >= "${start}"`);
+  }
+
+  if (end) {
+    commands.push(`WHERE ${source.timestamp_field} <= "${end}"`);
+  }
+
   return commands;
 };
 
-const statsCommand = (source: EntitySource) => {
+const statsCommand = ({ source }: { source: EntitySource }) => {
   const aggs = [
     // default 'last_seen' attribute
     `entity.last_seen_timestamp=MAX(${source.timestamp_field})`,
@@ -57,11 +73,21 @@ const statsCommand = (source: EntitySource) => {
   return `STATS ${aggs.join(', ')} BY ${source.identity_fields.join(',')}`;
 };
 
-export function getEntityInstancesQuery(source: EntitySource, limit: number): string {
+export function getEntityInstancesQuery({
+  source,
+  limit,
+  start,
+  end,
+}: {
+  source: EntitySource;
+  limit: number;
+  start?: string;
+  end?: string;
+}): string {
   const commands = [
-    sourceCommand(source),
-    ...filterCommands(source),
-    statsCommand(source),
+    sourceCommand({ source }),
+    ...filterCommands({ source, start, end }),
+    statsCommand({ source }),
     `SORT entity.last_seen_timestamp DESC`,
     `LIMIT ${limit}`,
   ];

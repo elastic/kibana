@@ -187,7 +187,17 @@ export class EntityClient {
     return result.hits.hits.map((hit) => hit._source) as EntitySource[];
   }
 
-  async searchEntities({ sources, limit = 10 }: { sources: EntitySource[]; limit?: number }) {
+  async searchEntities({
+    sources,
+    start,
+    end,
+    limit = 10,
+  }: {
+    sources: EntitySource[];
+    start?: string;
+    end?: string;
+    limit?: number;
+  }) {
     const entities = await Promise.all(
       sources.map(async (source) => {
         const esClient = createObservabilityEsClient({
@@ -212,10 +222,12 @@ export class EntityClient {
         // but metadata field not being available is fine
         const availableMetadataFields = source.metadata_fields.filter((field) => fields[field]);
 
-        const query = getEntityInstancesQuery(
-          { ...source, metadata_fields: availableMetadataFields },
-          limit
-        );
+        const query = getEntityInstancesQuery({
+          source: { ...source, metadata_fields: availableMetadataFields },
+          start,
+          end,
+          limit,
+        });
         this.options.logger.info(`Entity query: ${query}`);
 
         const rawEntities = await runESQLQuery<Entity>({ query, esClient: this.options.esClient });
