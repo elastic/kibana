@@ -59,12 +59,12 @@ const AlertsCount = ({
 export const AlertsPreview = ({
   alertsData,
   field,
-  name,
+  value,
   isPreviewMode,
 }: {
   alertsData: ParsedAlertsData;
   field: 'host.name' | 'user.name';
-  name: string;
+  value: string;
   isPreviewMode?: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -92,7 +92,7 @@ export const AlertsPreview = ({
 
   const { goToEntityInsightTab } = useNavigateEntityInsight({
     field,
-    name,
+    value,
     queryIdExtension: 'ALERTS_PREVIEW',
     subTab: CspInsightLeftPanelSubTab.ALERTS,
   });

@@ -104,7 +104,7 @@ export const HostPanel = ({
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({
     field: 'host.name',
-    queryName: hostName,
+    value: hostName,
     to,
     from,
     queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}HOST_NAME_RIGHT`,

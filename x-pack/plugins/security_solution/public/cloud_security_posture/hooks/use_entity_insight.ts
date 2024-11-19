@@ -19,12 +19,12 @@ import { useHasRiskScore } from './use_risk_score_data';
 
 export const useNavigateEntityInsight = ({
   field,
-  name,
+  value,
   subTab,
   queryIdExtension,
 }: {
   field: 'host.name' | 'user.name';
-  name: string;
+  value: string;
   subTab: string;
   queryIdExtension: string;
 }) => {
@@ -33,19 +33,19 @@ export const useNavigateEntityInsight = ({
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({
     field,
-    queryName: name,
+    value,
     to,
     from,
     queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}${queryIdExtension}`,
   });
 
-  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(field, name);
+  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(field, value);
 
   const { hasRiskScore } = useHasRiskScore({
     field,
-    name,
+    value,
   });
-  const { hasMisconfigurationFindings } = useHasMisconfigurations(field, name);
+  const { hasMisconfigurationFindings } = useHasMisconfigurations(field, value);
   const { openLeftPanel } = useExpandableFlyoutApi();
 
   const goToEntityInsightTab = useCallback(() => {
@@ -53,7 +53,7 @@ export const useNavigateEntityInsight = ({
       id: isHostNameField ? HostDetailsPanelKey : UserDetailsPanelKey,
       params: isHostNameField
         ? {
-            name,
+            name: value,
             isRiskScoreExist: hasRiskScore,
             hasMisconfigurationFindings,
             hasVulnerabilitiesFindings,
@@ -64,7 +64,7 @@ export const useNavigateEntityInsight = ({
             },
           }
         : {
-            user: { name },
+            user: { name: value },
             isRiskScoreExist: hasRiskScore,
             hasMisconfigurationFindings,
             hasNonClosedAlerts,
@@ -77,7 +77,7 @@ export const useNavigateEntityInsight = ({
   }, [
     openLeftPanel,
     isHostNameField,
-    name,
+    value,
     hasRiskScore,
     hasMisconfigurationFindings,
     hasVulnerabilitiesFindings,

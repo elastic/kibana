@@ -85,17 +85,17 @@ const MisconfigurationPreviewScore = ({
 };
 
 export const MisconfigurationsPreview = ({
-  name,
+  value,
   field,
   isPreviewMode,
 }: {
-  name: string;
+  value: string;
   field: 'host.name' | 'user.name';
   isPreviewMode?: boolean;
 }) => {
   const { hasMisconfigurationFindings, passedFindings, failedFindings } = useHasMisconfigurations(
     field,
-    name
+    value
   );
 
   useEffect(() => {
@@ -105,7 +105,7 @@ export const MisconfigurationsPreview = ({
 
   const { goToEntityInsightTab } = useNavigateEntityInsight({
     field,
-    name,
+    value,
     queryIdExtension: 'MISCONFIGURATION_PREVIEW',
     subTab: CspInsightLeftPanelSubTab.MISCONFIGURATIONS,
   });

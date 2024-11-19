@@ -60,11 +60,11 @@ const VulnerabilitiesCount = ({
 };
 
 export const VulnerabilitiesPreview = ({
-  name,
+  value,
   field,
   isPreviewMode,
 }: {
-  name: string;
+  value: string;
   field: 'host.name' | 'user.name';
   isPreviewMode?: boolean;
 }) => {
@@ -73,7 +73,7 @@ export const VulnerabilitiesPreview = ({
   }, []);
 
   const { data } = useVulnerabilitiesPreview({
-    query: buildEntityFlyoutPreviewQuery(field, name),
+    query: buildEntityFlyoutPreviewQuery(field, value),
     sort: [],
     enabled: true,
     pageSize: 1,
@@ -95,7 +95,7 @@ export const VulnerabilitiesPreview = ({
 
   const { goToEntityInsightTab } = useNavigateEntityInsight({
     field,
-    name,
+    value,
     queryIdExtension: 'VULNERABILITIES_PREVIEW',
     subTab: CspInsightLeftPanelSubTab.VULNERABILITIES,
   });

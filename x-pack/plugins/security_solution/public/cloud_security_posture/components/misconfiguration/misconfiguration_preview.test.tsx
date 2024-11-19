@@ -37,7 +37,7 @@ describe('MisconfigurationsPreview', () => {
   it('renders', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <MisconfigurationsPreview name="host1" field="host.name" />
+        <MisconfigurationsPreview value="host1" field="host.name" />
       </TestProviders>
     );
 

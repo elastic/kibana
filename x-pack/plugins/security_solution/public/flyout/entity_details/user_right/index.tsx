@@ -104,7 +104,7 @@ export const UserPanel = ({
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({
     field: 'user.name',
-    queryName: userName,
+    value: userName,
     to,
     from,
     queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}USER_NAME_RIGHT`,

@@ -18,15 +18,15 @@ import { FIRST_RECORD_PAGINATION } from '../../entity_analytics/common';
 
 export const useHasRiskScore = ({
   field,
-  name,
+  value,
 }: {
   field: 'host.name' | 'user.name';
-  name: string;
+  value: string;
 }) => {
   const isHostNameField = field === 'host.name';
   const buildFilterQuery = useMemo(
-    () => (isHostNameField ? buildHostNamesFilter([name]) : buildUserNamesFilter([name])),
-    [isHostNameField, name]
+    () => (isHostNameField ? buildHostNamesFilter([value]) : buildUserNamesFilter([value])),
+    [isHostNameField, value]
   );
   const { data } = useRiskScore({
     riskEntity: isHostNameField ? RiskScoreEntity.host : RiskScoreEntity.user,

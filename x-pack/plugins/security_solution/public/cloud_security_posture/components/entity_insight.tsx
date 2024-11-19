@@ -20,11 +20,11 @@ import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../overview/component
 import { useNonClosedAlerts } from '../hooks/use_non_closed_alerts';
 
 export const EntityInsight = <T,>({
-  name,
+  value,
   field,
   isPreviewMode,
 }: {
-  name: string;
+  value: string;
   field: 'host.name' | 'user.name';
   isPreviewMode?: boolean;
 }) => {
@@ -33,10 +33,10 @@ export const EntityInsight = <T,>({
 
   const { hasMisconfigurationFindings: showMisconfigurationsPreview } = useHasMisconfigurations(
     field,
-    name
+    value
   );
 
-  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(field, name);
+  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(field, value);
 
   const showVulnerabilitiesPreview = hasVulnerabilitiesFindings && field === 'host.name';
 
@@ -44,7 +44,7 @@ export const EntityInsight = <T,>({
 
   const { hasNonClosedAlerts: showAlertsPreview, filteredAlertsData } = useNonClosedAlerts({
     field,
-    queryName: name,
+    value,
     to,
     from,
     queryId: DETECTION_RESPONSE_ALERTS_BY_STATUS_ID,
@@ -56,7 +56,7 @@ export const EntityInsight = <T,>({
         <AlertsPreview
           alertsData={filteredAlertsData}
           field={field}
-          name={name}
+          value={value}
           isPreviewMode={isPreviewMode}
         />
         <EuiSpacer size="s" />
@@ -67,14 +67,14 @@ export const EntityInsight = <T,>({
   if (showMisconfigurationsPreview)
     insightContent.push(
       <>
-        <MisconfigurationsPreview name={name} field={field} isPreviewMode={isPreviewMode} />
+        <MisconfigurationsPreview value={value} field={field} isPreviewMode={isPreviewMode} />
         <EuiSpacer size="s" />
       </>
     );
   if (showVulnerabilitiesPreview)
     insightContent.push(
       <>
-        <VulnerabilitiesPreview name={name} field={field} isPreviewMode={isPreviewMode} />
+        <VulnerabilitiesPreview value={value} field={field} isPreviewMode={isPreviewMode} />
         <EuiSpacer size="s" />
       </>
     );

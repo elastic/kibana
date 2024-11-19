@@ -13,20 +13,20 @@ import type { ParsedAlertsData } from '../../overview/components/detection_respo
 
 export const useNonClosedAlerts = ({
   field,
-  queryName,
+  value,
   to,
   from,
   queryId,
 }: {
   field: 'host.name' | 'user.name';
-  queryName: string;
+  value: string;
   to: string;
   from: string;
   queryId: string;
 }) => {
   const { signalIndexName } = useSignalIndex();
 
-  const entityFilter = useMemo(() => ({ field, value: queryName }), [field, queryName]);
+  const entityFilter = useMemo(() => ({ field, value }), [field, value]);
 
   const { items: alertsData } = useAlertsByStatus({
     entityFilter,
