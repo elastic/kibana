@@ -10,6 +10,49 @@
 import type { Rule } from 'eslint';
 import type { TSESTree } from '@typescript-eslint/typescript-estree';
 
+/**
+ * @description Regex to match css color values,
+ * see {@link https://developer.mozilla.org/en-US/docs/Web/CSS/color_value} for  definitions of valid css color values
+ */
+const cssColorRegex = /(#|rgb|hsl|hwb|lab|lch|oklab).*/;
+
+/**
+ * @description List of css properties that can that can apply color to html box element and text node
+ */
+const propertiesSupportingCssColor = ['color', 'background', 'backgroundColor', 'border'];
+
+/**
+ * @description Builds off the existing color definition regex to match css declarations that can apply color to html elements and text nodes
+ */
+const htmlElementColorDeclarationRegex = RegExp(
+  String.raw`(${propertiesSupportingCssColor.join('|')})\:\s?(\'|\")?${cssColorRegex.source}`
+);
+
+const raiseReportIfPropertyHasCssColor = (
+  context: Rule.RuleContext,
+  node: TSESTree.ObjectLiteralElement
+) => {
+  let didReport: boolean;
+
+  // checks if property value is a css color value for instances where style declaration is computed from an object
+  if (
+    (didReport = Boolean(
+      node.type === 'Property' &&
+        node.key.type === 'Identifier' &&
+        node.value.type === 'Literal' &&
+        propertiesSupportingCssColor.indexOf(node.key.name) > -1 &&
+        cssColorRegex.test(String(node.value.value) ?? '')
+    ))
+  ) {
+    context.report({
+      loc: node.loc,
+      messageId: 'noCssColor',
+    });
+  }
+
+  return didReport;
+};
+
 export const NoCssColor: Rule.RuleModule = {
   meta: {
     type: 'suggestion',
@@ -33,7 +76,7 @@ export const NoCssColor: Rule.RuleModule = {
 
         if (node.name.name === 'style') {
           /**
-           * @example <EuiCode style={`{ color: '#dd4040' }`}>This is a test</EuiCode>
+           * @example <EuiCode style={`{ color: '#dd4040' }`}>This is an example</EuiCode>
            */
           if (
             node.value &&
@@ -42,11 +85,7 @@ export const NoCssColor: Rule.RuleModule = {
           ) {
             const declarationTemplateNode = node.value.expression.quasis[0];
 
-            if (
-              /color\:\s?(\'|\")?(#|rgb|hsl|hwb|lab|lch|oklab)/.test(
-                declarationTemplateNode.value.raw
-              )
-            ) {
+            if (htmlElementColorDeclarationRegex.test(declarationTemplateNode.value.raw)) {
               context.report({
                 node: declarationTemplateNode,
                 messageId: 'noCssColor',
@@ -55,7 +94,7 @@ export const NoCssColor: Rule.RuleModule = {
           }
 
           /**
-           * @example <EuiCode style={{ color: '#dd4040' }}>This is a test</EuiCode>
+           * @example <EuiCode style={{ color: '#dd4040' }}>This is an example</EuiCode>
            */
           if (
             node.value &&
@@ -70,19 +109,8 @@ export const NoCssColor: Rule.RuleModule = {
 
             for (let i = 0; i < declarationTemplateNode.length; i++) {
               const property = declarationTemplateNode[i];
-              if (
-                property.type === 'Property' &&
-                property.key.type === 'Identifier' &&
-                property.key.name === 'color' &&
-                property.value.type === 'Literal' &&
-                property.value.value &&
-                /(#|rgb|hsl|hwb|lab|lch|oklab).*/.test(String(property.value.value))
-              ) {
-                context.report({
-                  node: property.key,
-                  messageId: 'noCssColor',
-                });
 
+              if (raiseReportIfPropertyHasCssColor(context, property)) {
                 break;
               }
             }
@@ -91,7 +119,7 @@ export const NoCssColor: Rule.RuleModule = {
 
         if (node.name.name === 'css') {
           /**
-           * @example <EuiCode css={`{ color: '#dd4040' }`}>This is a test</EuiCode>
+           * @example <EuiCode css={`{ color: '#dd4040' }`}>This is an example</EuiCode>
            */
           if (
             node.value &&
@@ -100,11 +128,7 @@ export const NoCssColor: Rule.RuleModule = {
           ) {
             const declarationTemplateNode = node.value.expression.quasis[0];
 
-            if (
-              /color\:\s?(\'|\")(#|rgb|hsl|hwb|lab|lch|oklab)/.test(
-                declarationTemplateNode.value.raw
-              )
-            ) {
+            if (htmlElementColorDeclarationRegex.test(declarationTemplateNode.value.raw)) {
               context.report({
                 node: declarationTemplateNode,
                 messageId: 'noCssColor',
@@ -113,7 +137,7 @@ export const NoCssColor: Rule.RuleModule = {
           }
 
           /**
-           * @example <EuiCode css={{ color: '#dd4040' }}>This is a test</EuiCode>
+           * @example <EuiCode css={{ color: '#dd4040' }}>This is an example</EuiCode>
            */
           if (
             node.value &&
@@ -129,26 +153,14 @@ export const NoCssColor: Rule.RuleModule = {
             for (let i = 0; i < declarationTemplateNode.length; i++) {
               const property = declarationTemplateNode[i];
 
-              if (
-                property.type === 'Property' &&
-                property.key.type === 'Identifier' &&
-                property.key.name === 'color' &&
-                property.value.type === 'Literal' &&
-                property.value.value &&
-                /(#|rgb|hsl|hwb|lab|lch|oklab).*/.test(String(property.value.value))
-              ) {
-                context.report({
-                  node: property.key,
-                  messageId: 'noCssColor',
-                });
-
+              if (raiseReportIfPropertyHasCssColor(context, property)) {
                 break;
               }
             }
           }
 
           /**
-           * @example <EuiCode css={css`{ color: #dd4040 }`}>This is a test</EuiCode>
+           * @example <EuiCode css={css`{ color: #dd4040 }`}>This is an example</EuiCode>
            */
           if (
             node.value &&
@@ -159,11 +171,7 @@ export const NoCssColor: Rule.RuleModule = {
           ) {
             const declarationTemplateNode = node.value.expression.quasi.quasis[0];
 
-            if (
-              /color\:\s?(\'|\")(#|rgb|hsl|hwb|lab|lch|oklab)/.test(
-                declarationTemplateNode.value.raw
-              )
-            ) {
+            if (htmlElementColorDeclarationRegex.test(declarationTemplateNode.value.raw)) {
               context.report({
                 node: declarationTemplateNode,
                 messageId: 'noCssColor',
@@ -172,7 +180,7 @@ export const NoCssColor: Rule.RuleModule = {
           }
 
           /**
-           * @example <EuiCode css={() => ({ color: '#dd4040' })}>This is a test</EuiCode>
+           * @example <EuiCode css={() => ({ color: '#dd4040' })}>This is an example</EuiCode>
            */
           if (
             node.value &&
@@ -207,19 +215,7 @@ export const NoCssColor: Rule.RuleModule = {
             for (let i = 0; i < declarationPropertiesNode.length; i++) {
               const property = declarationPropertiesNode[i];
 
-              if (
-                property.type === 'Property' &&
-                property.key.type === 'Identifier' &&
-                property.key.name === 'color' &&
-                property.value.type === 'Literal' &&
-                property.value.value &&
-                /(#|rgb|hsl|hwb|lab|lch|oklab).*/.test(String(property.value.value))
-              ) {
-                context.report({
-                  node: property.key,
-                  messageId: 'noCssColor',
-                });
-
+              if (raiseReportIfPropertyHasCssColor(context, property)) {
                 break;
               }
             }
