@@ -298,7 +298,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       // UNSUPPORTED TEST CASES - when data is loaded
-      // TODO: These tests should be migrated to use synthtrace
+      // TODO: These tests should be migrated to use synthtrace: https://github.com/elastic/kibana/issues/200743
     });
   });
 }
