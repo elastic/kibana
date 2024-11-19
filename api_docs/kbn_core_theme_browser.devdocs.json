@@ -29,6 +29,19 @@
             "path": "packages/core/theme/core-theme-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-theme-browser",
+            "id": "def-public.CoreTheme.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nName of the active theme"
+            ],
+            "path": "packages/core/theme/core-theme-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
