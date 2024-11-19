@@ -393,19 +393,7 @@ const likeFunctions: FunctionDefinition[] = [
   //     defaultMessage: 'Case insensitive equality',
   //   }),
   // },
-  {
-    name: 'like',
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.likeDoc', {
-      defaultMessage: 'Filter data based on string patterns',
-    }),
-  },
   { name: 'not_like', description: '' },
-  {
-    name: 'rlike',
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.rlikeDoc', {
-      defaultMessage: 'Filter data based on string regular expressions',
-    }),
-  },
   { name: 'not_rlike', description: '' },
 ].map(({ name, description }) => {
   const def: FunctionDefinition = {
@@ -451,13 +439,6 @@ const likeFunctions: FunctionDefinition[] = [
 });
 
 const inFunctions: FunctionDefinition[] = [
-  {
-    name: 'in',
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.inDoc', {
-      defaultMessage:
-        'Tests if the value an expression takes is contained in a list of other expressions',
-    }),
-  },
   { name: 'not_in', description: '' },
 ].map<FunctionDefinition>(({ name, description }) => ({
   // set all arrays to type "any" for now
@@ -646,6 +627,8 @@ const otherDefinitions: FunctionDefinition[] = [
 
 export const builtinFunctions: FunctionDefinition[] = [
   ...operatorsFunctionDefinitions,
+  ...inFunctions,
+  ...likeFunctions,
   ...logicalOperators,
   ...nullFunctions,
   ...otherDefinitions,
