@@ -1044,7 +1044,6 @@ x-pack/test_serverless/api_integration/test_suites/common/platform_security @ela
 /test/functional/page_objects/context_page.ts @elastic/kibana-data-discovery
 /test/functional/services/data_views.ts @elastic/kibana-data-discovery
 /test/functional/services/saved_objects_finder.ts @elastic/kibana-data-discovery
-/test/functional/page_objects/unified_search_page.ts @elastic/kibana-data-discovery
 /test/plugin_functional/plugins/index_patterns @elastic/kibana-data-discovery
 /test/plugin_functional/plugins/data_search @elastic/kibana-data-discovery
 /test/functional/page_objects/discover_page.ts @elastic/kibana-data-discovery
