@@ -98,7 +98,6 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
     },
     triggersActionsUi: {
       getAlertSummaryWidget: () => <></>,
-      getAlertsStateTable: () => <></>,
     },
     charts: {
       theme: {

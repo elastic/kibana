@@ -21,6 +21,7 @@ import { AttachmentType } from '@kbn/cases-plugin/common';
 import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useRouteMatch } from 'react-router-dom';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
+import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
 import type { EventNonEcsData } from '../../../../common/typings';
 import type { GetObservabilityAlertsTableProp } from '../../../components/alerts_table/types';
 import { RULE_DETAILS_PAGE_ID } from '../../rule_details/constants';
@@ -48,7 +49,6 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
     http: {
       basePath: { prepend },
     },
-    triggersActionsUi,
   } = useKibana().services;
 
   const data = useMemo(
@@ -136,21 +136,22 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
     closeActionsPopover();
   };
 
-  const DefaultRowActions = useMemo(
-    () =>
-      triggersActionsUi.getAlertsTableDefaultAlertActions({
-        key: 'defaultRowActions',
-        onActionExecuted: closeActionsPopover,
-        isAlertDetailsEnabled: true,
-        resolveRulePagePath: (ruleId, currentPageId) =>
-          currentPageId !== RULE_DETAILS_PAGE_ID ? paths.observability.ruleDetails(ruleId) : null,
-        resolveAlertPagePath: (alertId, currentPageId) =>
-          currentPageId !== ALERT_DETAILS_PAGE_ID
-            ? paths.observability.alertDetails(alertId)
-            : null,
-        ...customActionsProps,
-      }),
-    [customActionsProps, triggersActionsUi]
+  const defaultRowActions = useMemo(
+    () => (
+      <DefaultAlertActions
+        key="defaultRowActions"
+        onActionExecuted={closeActionsPopover}
+        isAlertDetailsEnabled={true}
+        resolveRulePagePath={(ruleId, currentPageId) =>
+          currentPageId !== RULE_DETAILS_PAGE_ID ? paths.observability.ruleDetails(ruleId) : null
+        }
+        resolveAlertPagePath={(alertId, currentPageId) =>
+          currentPageId !== ALERT_DETAILS_PAGE_ID ? paths.observability.alertDetails(alertId) : null
+        }
+        {...customActionsProps}
+      />
+    ),
+    [customActionsProps]
   );
 
   const actionsMenuItems = [
@@ -178,7 +179,7 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
           </EuiContextMenuItem>,
         ]
       : []),
-    DefaultRowActions,
+    defaultRowActions,
   ];
 
   const actionsToolTip =

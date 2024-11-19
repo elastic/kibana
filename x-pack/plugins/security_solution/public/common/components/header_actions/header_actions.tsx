@@ -10,6 +10,7 @@ import { EuiButtonIcon, EuiToolTip, EuiCheckbox } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 
 import styled from 'styled-components';
+import { FieldBrowser } from '@kbn/response-ops-alerts-fields-browser';
 import { isFullScreen } from '../../../timelines/components/timeline/helpers';
 import type { HeaderActionProps } from '../../../../common/types';
 import { TimelineId } from '../../../../common/types';
@@ -17,7 +18,6 @@ import { isActiveTimeline } from '../../../helpers';
 import { getColumnHeader } from '../../../timelines/components/timeline/body/column_headers/helpers';
 import { timelineActions } from '../../../timelines/store';
 import { useGlobalFullScreen, useTimelineFullScreen } from '../../containers/use_full_screen';
-import { useKibana } from '../../lib/kibana';
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '.';
 import { EventsTh, EventsThContent } from '../../../timelines/components/timeline/styles';
 import { EXIT_FULL_SCREEN } from '../exit_full_screen/translations';
@@ -61,7 +61,6 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = memo(
     timelineId,
     fieldBrowserOptions,
   }) => {
-    const { triggersActionsUi } = useKibana().services;
     const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
     const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
     const dispatch = useDispatch();
@@ -143,13 +142,13 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = memo(
         {fieldBrowserOptions && (
           <EventsTh role="button">
             <FieldBrowserContainer>
-              {triggersActionsUi.getFieldBrowser({
-                browserFields,
-                columnIds: columnHeaders.map(({ id }) => id),
-                onResetColumns,
-                onToggleColumn,
-                options: fieldBrowserOptions,
-              })}
+              <FieldBrowser
+                browserFields={browserFields}
+                columnIds={columnHeaders.map(({ id }) => id)}
+                onResetColumns={onResetColumns}
+                onToggleColumn={onToggleColumn}
+                options={fieldBrowserOptions}
+              />
             </FieldBrowserContainer>
           </EventsTh>
         )}
