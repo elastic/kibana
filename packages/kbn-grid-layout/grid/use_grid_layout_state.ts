@@ -20,11 +20,16 @@ import {
   PanelInteractionEvent,
   RuntimeGridSettings,
 } from './types';
+import { cloneDeep } from 'lodash';
+import { compactGridRow } from './utils/resolve_grid_row';
+import { isLayoutEqual } from './utils/equality_checks';
 
 export const useGridLayoutState = ({
-  getCreationOptions,
+  layout,
+  gridSettings,
 }: {
-  getCreationOptions: () => { initialLayout: GridLayoutData; gridSettings: GridSettings };
+  layout: GridLayoutData;
+  gridSettings: GridSettings;
 }): {
   gridLayoutStateManager: GridLayoutStateManager;
   setDimensionsRef: (instance: HTMLDivElement | null) => void;
@@ -32,11 +37,9 @@ export const useGridLayoutState = ({
   const rowRefs = useRef<Array<HTMLDivElement | null>>([]);
   const panelRefs = useRef<Array<{ [id: string]: HTMLDivElement | null }>>([]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const { initialLayout, gridSettings } = useMemo(() => getCreationOptions(), []);
-
   const gridLayoutStateManager = useMemo(() => {
-    const gridLayout$ = new BehaviorSubject<GridLayoutData>(initialLayout);
+    console.log('gridLayoutStateManager');
+    const gridLayout$ = new BehaviorSubject<GridLayoutData>(layout);
     const gridDimensions$ = new BehaviorSubject<ObservedSize>({ width: 0, height: 0 });
     const interactionEvent$ = new BehaviorSubject<PanelInteractionEvent | undefined>(undefined);
     const activePanel$ = new BehaviorSubject<ActivePanel | undefined>(undefined);
@@ -45,7 +48,7 @@ export const useGridLayoutState = ({
       columnPixelWidth: 0,
     });
     const panelIds$ = new BehaviorSubject<string[][]>(
-      initialLayout.map(({ panels }) => Object.keys(panels))
+      layout.map(({ panels }) => Object.keys(panels))
     );
 
     return {
@@ -60,6 +63,21 @@ export const useGridLayoutState = ({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    /**
+     *
+     */
+    if (!isLayoutEqual(layout, gridLayoutStateManager.gridLayout$.getValue())) {
+      const newLayout = cloneDeep(layout);
+      newLayout.forEach((row, rowIndex) => {
+        newLayout[rowIndex] = compactGridRow(row);
+      });
+      console.log('NEXT!!!', newLayout);
+      gridLayoutStateManager.gridLayout$.next(newLayout);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [layout]);
 
   useEffect(() => {
     /**

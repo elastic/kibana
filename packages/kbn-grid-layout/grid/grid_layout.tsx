@@ -8,109 +8,116 @@
  */
 
 import { cloneDeep } from 'lodash';
-import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { combineLatest, distinctUntilChanged, filter, map, pairwise, skip } from 'rxjs';
 
 import { GridHeightSmoother } from './grid_height_smoother';
 import { GridRow } from './grid_row';
-import { GridLayoutApi, GridLayoutData, GridSettings } from './types';
-import { useGridLayoutApi } from './use_grid_layout_api';
+import { GridLayoutData, GridSettings } from './types';
 import { useGridLayoutEvents } from './use_grid_layout_events';
 import { useGridLayoutState } from './use_grid_layout_state';
 import { isLayoutEqual } from './utils/equality_checks';
 
 interface GridLayoutProps {
-  getCreationOptions: () => { initialLayout: GridLayoutData; gridSettings: GridSettings };
+  layout: GridLayoutData;
+  gridSettings: GridSettings;
   renderPanelContents: (panelId: string) => React.ReactNode;
   onLayoutChange: (newLayout: GridLayoutData) => void;
 }
 
-export const GridLayout = forwardRef<GridLayoutApi, GridLayoutProps>(
-  ({ getCreationOptions, renderPanelContents, onLayoutChange }, ref) => {
-    const { gridLayoutStateManager, setDimensionsRef } = useGridLayoutState({
-      getCreationOptions,
-    });
-    useGridLayoutEvents({ gridLayoutStateManager });
+export const GridLayout = ({
+  layout,
+  gridSettings,
+  renderPanelContents,
+  onLayoutChange,
+}: GridLayoutProps) => {
+  const { gridLayoutStateManager, setDimensionsRef } = useGridLayoutState({
+    layout,
+    gridSettings,
+  });
+  useGridLayoutEvents({ gridLayoutStateManager });
 
-    const gridLayoutApi = useGridLayoutApi({ gridLayoutStateManager });
-    useImperativeHandle(ref, () => gridLayoutApi, [gridLayoutApi]);
+  const [rowCount, setRowCount] = useState<number>(
+    gridLayoutStateManager.gridLayout$.getValue().length
+  );
 
-    const [rowCount, setRowCount] = useState<number>(
-      gridLayoutStateManager.gridLayout$.getValue().length
-    );
+  useEffect(() => {
+    console.log('layout prop', layout);
+  }, [layout, gridLayoutStateManager]);
 
-    useEffect(() => {
-      /**
-       * The only thing that should cause the entire layout to re-render is adding a new row;
-       * this subscription ensures this by updating the `rowCount` state when it changes.
-       */
-      const rowCountSubscription = gridLayoutStateManager.gridLayout$
-        .pipe(
-          skip(1), // we initialized `rowCount` above, so skip the initial emit
-          map((newLayout) => newLayout.length),
-          distinctUntilChanged()
-        )
-        .subscribe((newRowCount) => {
-          setRowCount(newRowCount);
-        });
+  useEffect(() => {
+    console.log('USE EFFECT');
+    /**
+     * The only thing that should cause the entire layout to re-render is adding a new row;
+     * this subscription ensures this by updating the `rowCount` state when it changes.
+     */
+    const rowCountSubscription = gridLayoutStateManager.gridLayout$
+      .pipe(
+        skip(1), // we initialized `rowCount` above, so skip the initial emit
+        map((newLayout) => newLayout.length),
+        distinctUntilChanged()
+      )
+      .subscribe((newRowCount) => {
+        setRowCount(newRowCount);
+      });
 
-      const onLayoutChangeSubscription = combineLatest([
-        gridLayoutStateManager.gridLayout$,
-        gridLayoutStateManager.interactionEvent$,
-      ])
-        .pipe(
-          // if an interaction event is happening, then ignore any "draft" layout changes
-          filter(([_, event]) => !Boolean(event)),
-          // once no interaction event, create pairs of "old" and "new" layouts for comparison
-          map(([layout]) => layout),
-          pairwise()
-        )
-        .subscribe(([layoutBefore, layoutAfter]) => {
-          if (!isLayoutEqual(layoutBefore, layoutAfter)) {
-            onLayoutChange(layoutAfter);
-          }
-        });
+    const onLayoutChangeSubscription = combineLatest([
+      gridLayoutStateManager.gridLayout$,
+      gridLayoutStateManager.interactionEvent$,
+    ])
+      .pipe(
+        // if an interaction event is happening, then ignore any "draft" layout changes
+        filter(([_, event]) => !Boolean(event)),
+        // once no interaction event, create pairs of "old" and "new" layouts for comparison
+        map(([layout]) => layout),
+        pairwise()
+      )
+      .subscribe(([layoutBefore, layoutAfter]) => {
+        if (!isLayoutEqual(layoutBefore, layoutAfter)) {
+          console.log('onLayoutChange 123');
+          onLayoutChange(layoutAfter);
+        }
+      });
 
-      return () => {
-        rowCountSubscription.unsubscribe();
-        onLayoutChangeSubscription.unsubscribe();
-      };
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    return () => {
+      rowCountSubscription.unsubscribe();
+      onLayoutChangeSubscription.unsubscribe();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-    return (
-      <>
-        <GridHeightSmoother gridLayoutStateManager={gridLayoutStateManager}>
-          <div
-            ref={(divElement) => {
-              setDimensionsRef(divElement);
-            }}
-          >
-            {Array.from({ length: rowCount }, (_, rowIndex) => {
-              return (
-                <GridRow
-                  key={rowIndex}
-                  rowIndex={rowIndex}
-                  renderPanelContents={renderPanelContents}
-                  gridLayoutStateManager={gridLayoutStateManager}
-                  toggleIsCollapsed={() => {
-                    const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.value);
-                    newLayout[rowIndex].isCollapsed = !newLayout[rowIndex].isCollapsed;
-                    gridLayoutStateManager.gridLayout$.next(newLayout);
-                  }}
-                  setInteractionEvent={(nextInteractionEvent) => {
-                    if (!nextInteractionEvent) {
-                      gridLayoutStateManager.activePanel$.next(undefined);
-                    }
-                    gridLayoutStateManager.interactionEvent$.next(nextInteractionEvent);
-                  }}
-                  ref={(element) => (gridLayoutStateManager.rowRefs.current[rowIndex] = element)}
-                />
-              );
-            })}
-          </div>
-        </GridHeightSmoother>
-      </>
-    );
-  }
-);
+  return (
+    <>
+      <GridHeightSmoother gridLayoutStateManager={gridLayoutStateManager}>
+        <div
+          ref={(divElement) => {
+            setDimensionsRef(divElement);
+          }}
+        >
+          {Array.from({ length: rowCount }, (_, rowIndex) => {
+            return (
+              <GridRow
+                key={rowIndex}
+                rowIndex={rowIndex}
+                renderPanelContents={renderPanelContents}
+                gridLayoutStateManager={gridLayoutStateManager}
+                toggleIsCollapsed={() => {
+                  const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.value);
+                  newLayout[rowIndex].isCollapsed = !newLayout[rowIndex].isCollapsed;
+                  gridLayoutStateManager.gridLayout$.next(newLayout);
+                }}
+                setInteractionEvent={(nextInteractionEvent) => {
+                  if (!nextInteractionEvent) {
+                    gridLayoutStateManager.activePanel$.next(undefined);
+                  }
+                  gridLayoutStateManager.interactionEvent$.next(nextInteractionEvent);
+                }}
+                ref={(element) => (gridLayoutStateManager.rowRefs.current[rowIndex] = element)}
+              />
+            );
+          })}
+        </div>
+      </GridHeightSmoother>
+    </>
+  );
+};

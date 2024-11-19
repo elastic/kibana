@@ -138,6 +138,14 @@ export const GridPanel = forwardRef<
             padding: 0;
             position: relative;
             height: 100%;
+
+            &:hover,
+            &:active {
+              & .dragHandle,
+              & .resizeHandle {
+                opacity: 1;
+              }
+            }
           `}
         >
           {/* drag handle */}
