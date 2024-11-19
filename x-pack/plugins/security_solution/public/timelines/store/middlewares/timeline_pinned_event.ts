@@ -21,7 +21,7 @@ import {
   showCallOutUnauthorizedMsg,
 } from '../actions';
 import { persistPinnedEvent } from '../../containers/pinned_event/api';
-import { ensureTimelineIsSaved, refreshTimelines } from './helpers';
+import { ensureTimelineIsSaved, isHttpFetchError, refreshTimelines } from './helpers';
 
 type PinnedEventAction = ReturnType<typeof pinEvent | typeof unPinEvent>;
 
@@ -64,10 +64,6 @@ export const addPinnedEventToTimelineMiddleware: (kibana: CoreStart) => Middlewa
           timelineId: timeline.savedObjectId,
         });
 
-        if (response && 'code' in response && response.code === 403) {
-          store.dispatch(showCallOutUnauthorizedMsg());
-        }
-
         refreshTimelines(store.getState());
 
         const currentTimeline = selectTimelineById(store.getState(), action.payload.id);
@@ -103,10 +99,14 @@ export const addPinnedEventToTimelineMiddleware: (kibana: CoreStart) => Middlewa
           );
         }
       } catch (error) {
-        kibana.notifications.toasts.addDanger({
-          title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
-          text: error?.message ?? i18n.UPDATE_TIMELINE_ERROR_TEXT,
-        });
+        if (isHttpFetchError(error) && error.body?.status_code === 403) {
+          store.dispatch(showCallOutUnauthorizedMsg());
+        } else {
+          kibana.notifications.toasts.addDanger({
+            title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
+            text: error?.message ?? i18n.UPDATE_TIMELINE_ERROR_TEXT,
+          });
+        }
       } finally {
         store.dispatch(
           endTimelineSaving({

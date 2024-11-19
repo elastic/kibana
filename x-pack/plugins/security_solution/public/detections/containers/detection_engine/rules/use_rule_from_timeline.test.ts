@@ -271,7 +271,7 @@ describe('useRuleFromTimeline', () => {
       const { result } = renderHook(() => useRuleFromTimeline(setRuleQuery));
       expect(result.current.loading).toEqual(false);
       await act(async () => {
-        result.current.onOpenTimeline(selectedTimeline.timeline);
+        result.current.onOpenTimeline(selectedTimeline.timeline as unknown as TimelineModel);
       });
 
       // not loading anything as an external call to onOpenTimeline provides the timeline

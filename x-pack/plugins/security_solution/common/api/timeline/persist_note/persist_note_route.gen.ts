@@ -20,8 +20,6 @@ import { BareNote, Note } from '../model/components.gen';
 
 export type ResponseNote = z.infer<typeof ResponseNote>;
 export const ResponseNote = z.object({
-  code: z.number(),
-  message: z.string(),
   note: Note,
 });
 

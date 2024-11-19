@@ -35,7 +35,14 @@ jest.mock('../actions', () => {
   };
 });
 jest.mock('../../containers/api');
-jest.mock('./helpers');
+jest.mock('./helpers', () => {
+  const actual = jest.requireActual('./helpers');
+
+  return {
+    ...actual,
+    refreshTimelines: jest.fn(),
+  };
+});
 
 const startTimelineSavingMock = startTimelineSaving as unknown as jest.Mock;
 const endTimelineSavingMock = endTimelineSaving as unknown as jest.Mock;
@@ -53,7 +60,6 @@ describe('Timeline favorite middleware', () => {
 
   it('should persist a timeline favorite when a favorite action is dispatched', async () => {
     (persistFavorite as jest.Mock).mockResolvedValue({
-      code: 200,
       favorite: [{}],
       savedObjectId: newSavedObjectId,
       version: newVersion,
@@ -84,7 +90,6 @@ describe('Timeline favorite middleware', () => {
       })
     );
     (persistFavorite as jest.Mock).mockResolvedValue({
-      code: 200,
       favorite: [],
       savedObjectId: newSavedObjectId,
       version: newVersion,
@@ -105,8 +110,8 @@ describe('Timeline favorite middleware', () => {
   });
 
   it('should show an error message when the call is unauthorized', async () => {
-    (persistFavorite as jest.Mock).mockResolvedValue({
-      code: 403,
+    (persistFavorite as jest.Mock).mockRejectedValue({
+      body: { status_code: 403 },
     });
 
     await store.dispatch(updateIsFavorite({ id: TimelineId.test, isFavorite: true }));

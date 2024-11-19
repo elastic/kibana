@@ -14,12 +14,13 @@ import {
   updateIsFavorite,
   updateTimeline,
   startTimelineSaving,
+  showCallOutUnauthorizedMsg,
 } from '../actions';
 import { TimelineTypeEnum } from '../../../../common/api/timeline';
 import { persistFavorite } from '../../containers/api';
 import { selectTimelineById } from '../selectors';
 import * as i18n from '../../pages/translations';
-import { refreshTimelines } from './helpers';
+import { isHttpFetchError, refreshTimelines } from './helpers';
 
 type FavoriteTimelineAction = ReturnType<typeof updateIsFavorite>;
 
@@ -60,10 +61,14 @@ export const favoriteTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, S
           })
         );
       } catch (error) {
-        kibana.notifications.toasts.addDanger({
-          title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
-          text: error?.message ?? i18n.UPDATE_TIMELINE_ERROR_TEXT,
-        });
+        if (isHttpFetchError(error) && error.body?.status_code === 403) {
+          store.dispatch(showCallOutUnauthorizedMsg());
+        } else {
+          kibana.notifications.toasts.addDanger({
+            title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
+            text: error?.message ?? i18n.UPDATE_TIMELINE_ERROR_TEXT,
+          });
+        }
       } finally {
         store.dispatch(
           endTimelineSaving({

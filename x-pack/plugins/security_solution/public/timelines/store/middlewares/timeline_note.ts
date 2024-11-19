@@ -23,7 +23,7 @@ import {
 import { persistNote } from '../../containers/notes/api';
 import { selectTimelineById } from '../selectors';
 import * as i18n from '../../pages/translations';
-import { ensureTimelineIsSaved, refreshTimelines } from './helpers';
+import { ensureTimelineIsSaved, isHttpFetchError, refreshTimelines } from './helpers';
 
 type NoteAction = ReturnType<typeof addNote | typeof addNoteToEvent>;
 
@@ -72,10 +72,6 @@ export const addNoteToTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, 
           },
         });
 
-        if (response.code === 403) {
-          store.dispatch(showCallOutUnauthorizedMsg());
-        }
-
         refreshTimelines(store.getState());
 
         await store.dispatch(
@@ -109,10 +105,14 @@ export const addNoteToTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, 
           }
         }
       } catch (error) {
-        kibana.notifications.toasts.addDanger({
-          title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
-          text: error?.message ?? i18n.UPDATE_TIMELINE_ERROR_TEXT,
-        });
+        if (isHttpFetchError(error) && error.body?.status_code === 403) {
+          store.dispatch(showCallOutUnauthorizedMsg());
+        } else {
+          kibana.notifications.toasts.addDanger({
+            title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
+            text: error?.message ?? i18n.UPDATE_TIMELINE_ERROR_TEXT,
+          });
+        }
       } finally {
         store.dispatch(
           endTimelineSaving({
