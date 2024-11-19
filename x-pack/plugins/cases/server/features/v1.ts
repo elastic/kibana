@@ -123,7 +123,9 @@ export const getV1 = (): KibanaFeatureConfig => {
                   delete: [APP_ID],
                 },
                 ui: capabilities.delete,
-                replacedBy: [{ feature: FEATURE_ID_V2, privileges: ['cases_delete'] }],
+                replacedBy: [
+                  { feature: FEATURE_ID_V2, privileges: [CASES_DELETE_SUB_PRIVILEGE_ID] },
+                ],
               },
             ],
           },
@@ -151,7 +153,9 @@ export const getV1 = (): KibanaFeatureConfig => {
                   settings: [APP_ID],
                 },
                 ui: capabilities.settings,
-                replacedBy: [{ feature: FEATURE_ID_V2, privileges: ['cases_settings'] }],
+                replacedBy: [
+                  { feature: FEATURE_ID_V2, privileges: [CASES_SETTINGS_SUB_PRIVILEGE_ID] },
+                ],
               },
             ],
           },

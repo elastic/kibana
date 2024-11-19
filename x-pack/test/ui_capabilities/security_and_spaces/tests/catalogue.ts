@@ -148,15 +148,15 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
             expect(uiCapabilities.value!.catalogue).to.eql(expected);
             break;
           }
-          case 'global_read at nothing_space':
-          case 'dual_privileges_read at nothing_space':
-          case 'nothing_space_all at nothing_space':
-          case 'nothing_space_read at nothing_space':
           // the nothing_space has no Kibana features enabled, so even if we have
           // privileges to perform these actions, we won't be able to.
+          case 'global_read at nothing_space':
           case 'foo_all at nothing_space':
           case 'foo_read at nothing_space':
           case 'dual_privileges_all at nothing_space':
+          case 'dual_privileges_read at nothing_space':
+          case 'nothing_space_all at nothing_space':
+          case 'nothing_space_read at nothing_space':
           case 'no_kibana_privileges at everything_space':
           case 'no_kibana_privileges at nothing_space':
           case 'legacy_all at everything_space':

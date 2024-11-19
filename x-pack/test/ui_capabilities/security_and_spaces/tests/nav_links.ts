@@ -80,11 +80,11 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
               navLinksBuilder.only('kibana', 'foo', 'management')
             );
             break;
-          case 'foo_all at nothing_space':
-          case 'foo_read at nothing_space':
           case 'superuser at nothing_space':
           case 'global_all at nothing_space':
           case 'global_read at nothing_space':
+          case 'foo_all at nothing_space':
+          case 'foo_read at nothing_space':
           case 'dual_privileges_all at nothing_space':
           case 'dual_privileges_read at nothing_space':
           case 'nothing_space_all at nothing_space':
