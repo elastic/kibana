@@ -37,7 +37,7 @@ interface SerializedSourceField {
   mode?: string;
   includes?: string[];
   excludes?: string[];
-};
+}
 
 const formSerializer = (formData: GenericObject) => {
   const { dynamicMapping, sourceField, metaField, _routing, _size, subobjects } = formData;
