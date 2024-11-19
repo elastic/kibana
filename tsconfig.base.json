@@ -206,6 +206,8 @@
       "@kbn/content-management-content-insights-server/*": ["packages/content-management/content_insights/content_insights_server/*"],
       "@kbn/content-management-examples-plugin": ["examples/content_management_examples"],
       "@kbn/content-management-examples-plugin/*": ["examples/content_management_examples/*"],
+      "@kbn/content-management-favorites-common": ["packages/content-management/favorites/favorites_common"],
+      "@kbn/content-management-favorites-common/*": ["packages/content-management/favorites/favorites_common/*"],
       "@kbn/content-management-favorites-public": ["packages/content-management/favorites/favorites_public"],
       "@kbn/content-management-favorites-public/*": ["packages/content-management/favorites/favorites_public/*"],
       "@kbn/content-management-favorites-server": ["packages/content-management/favorites/favorites_server"],
