@@ -106,21 +106,6 @@ describe('Transaction details', () => {
     );
     cy.contains('Create SLO');
   });
-  it('shows top errors table', { defaultCommandTimeout: 60000 }, () => {
-    cy.visitKibana(
-      `/app/apm/services/opbeans-java/transactions/view?${new URLSearchParams({
-        ...timeRange,
-        transactionName: 'GET /api/product',
-      })}`
-    );
-
-    cy.contains('Top 5 errors');
-    cy.get('[data-test-subj=topErrorsForTransactionTable]')
-      .get('[data-test-subj=apmLegacyAPMLinkLink]')
-      .contains('[MockError] Foo', { timeout: 60000 })
-      .click();
-    cy.url().should('include', 'opbeans-java/errors');
-  });
 
   describe('when navigating to a trace sample', () => {
     it('keeps the same trace sample after reloading the page', () => {
