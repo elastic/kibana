@@ -43,7 +43,7 @@ import { getIndexListUri } from '../../../../services/routing';
 import { documentationService } from '../../../../services/documentation';
 import { splitSizeAndUnits, DataStream } from '../../../../../../common';
 import { timeUnits } from '../../../../constants/time_units';
-import { isDSLWithILMIndices } from '../../../../lib/data_streams';
+import { deserializeGlobalMaxRetention, isDSLWithILMIndices } from '../../../../lib/data_streams';
 import { useAppContext } from '../../../../app_context';
 import { UnitField } from '../../../../components/shared';
 import { updateDataRetention } from '../../../../services/api';
@@ -214,6 +214,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
   const { history } = useAppContext();
   const dslWithIlmIndices = isDSLWithILMIndices(dataStream);
   const { size, unit } = splitSizeAndUnits(lifecycle?.data_retention as string);
+  const globalMaxRetention = deserializeGlobalMaxRetention(lifecycle?.globalMaxRetention);
   const {
     services: { notificationService },
     config: { enableTogglingDataRetention, enableProjectLevelRetentionChecks },
@@ -331,8 +332,11 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
             <>
               <FormattedMessage
                 id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.modalTitleText"
-                defaultMessage="Maximum data retention period is {maxRetention} days"
-                values={{ maxRetention: lifecycle?.globalMaxRetention.slice(0, -1) }}
+                defaultMessage="Maximum data retention period is {maxRetention} {unitText}"
+                values={{
+                  maxRetention: globalMaxRetention.size,
+                  unitText: globalMaxRetention.unitText,
+                }}
               />
               <EuiSpacer />
             </>

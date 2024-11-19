@@ -10,13 +10,18 @@ import Ajv, { type ErrorObject, type ValidateFunction } from 'ajv';
 import dedent from 'dedent';
 import { compact, keyBy } from 'lodash';
 import { FunctionVisibility, type FunctionResponse } from '../../../common/functions/types';
-import type { Message, ObservabilityAIAssistantScreenContextRequest } from '../../../common/types';
+import type {
+  AdHocInstruction,
+  Message,
+  ObservabilityAIAssistantScreenContextRequest,
+} from '../../../common/types';
 import { filterFunctionDefinitions } from '../../../common/utils/filter_function_definitions';
 import type {
   FunctionCallChatFunction,
   FunctionHandler,
   FunctionHandlerRegistry,
   InstructionOrCallback,
+  RegisterAdHocInstruction,
   RegisterFunction,
   RegisterInstruction,
 } from '../types';
@@ -35,6 +40,8 @@ export const GET_DATA_ON_SCREEN_FUNCTION_NAME = 'get_data_on_screen';
 
 export class ChatFunctionClient {
   private readonly instructions: InstructionOrCallback[] = [];
+  private readonly adhocInstructions: AdHocInstruction[] = [];
+
   private readonly functionRegistry: FunctionHandlerRegistry = new Map();
   private readonly validators: Map<string, ValidateFunction> = new Map();
 
@@ -49,9 +56,7 @@ export class ChatFunctionClient {
       this.registerFunction(
         {
           name: GET_DATA_ON_SCREEN_FUNCTION_NAME,
-          description: dedent(`Get data that is on the screen:
-            ${allData.map((data) => `${data.name}: ${data.description}`).join('\n')}
-          `),
+          description: `Retrieve the structured data of content currently visible on the user's screen. Use this tool to understand what the user is viewing at this moment to provide more accurate and context-aware responses to their questions.`,
           visibility: FunctionVisibility.AssistantOnly,
           parameters: {
             type: 'object',
@@ -75,6 +80,13 @@ export class ChatFunctionClient {
           };
         }
       );
+
+      this.registerAdhocInstruction({
+        text: `The ${GET_DATA_ON_SCREEN_FUNCTION_NAME} function will retrieve specific content from the user's screen by specifying a data key. Use this tool to provide context-aware responses. Available data: ${dedent(
+          allData.map((data) => `${data.name}: ${data.description}`).join('\n')
+        )}`,
+        instruction_type: 'application_instruction',
+      });
     }
 
     this.actions.forEach((action) => {
@@ -95,6 +107,10 @@ export class ChatFunctionClient {
     this.instructions.push(instruction);
   };
 
+  registerAdhocInstruction: RegisterAdHocInstruction = (instruction: AdHocInstruction) => {
+    this.adhocInstructions.push(instruction);
+  };
+
   validate(name: string, parameters: unknown) {
     const validator = this.validators.get(name)!;
     if (!validator) {
@@ -109,6 +125,10 @@ export class ChatFunctionClient {
 
   getInstructions(): InstructionOrCallback[] {
     return this.instructions;
+  }
+
+  getAdhocInstructions(): AdHocInstruction[] {
+    return this.adhocInstructions;
   }
 
   hasAction(name: string) {

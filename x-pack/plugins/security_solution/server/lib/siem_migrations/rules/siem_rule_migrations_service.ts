@@ -5,52 +5,74 @@
  * 2.0.
  */
 
-import type { IClusterClient, Logger } from '@kbn/core/server';
-import { RuleMigrationsDataStream } from './data_stream/rule_migrations_data_stream';
+import assert from 'assert';
+import type { Subject } from 'rxjs';
 import type {
-  SiemRuleMigrationsClient,
-  SiemRulesMigrationsSetupParams,
-  SiemRuleMigrationsGetClientParams,
-} from './types';
+  AuthenticatedUser,
+  LoggerFactory,
+  IClusterClient,
+  KibanaRequest,
+  Logger,
+} from '@kbn/core/server';
+import { RuleMigrationsDataService } from './data/rule_migrations_data_service';
+import type { RuleMigrationsDataClient } from './data/rule_migrations_data_client';
+import type { RuleMigrationsTaskClient } from './task/rule_migrations_task_client';
+import { RuleMigrationsTaskService } from './task/rule_migrations_task_service';
+
+export interface SiemRulesMigrationsSetupParams {
+  esClusterClient: IClusterClient;
+  pluginStop$: Subject<void>;
+  tasksTimeoutMs?: number;
+}
+
+export interface SiemRuleMigrationsCreateClientParams {
+  request: KibanaRequest;
+  currentUser: AuthenticatedUser | null;
+  spaceId: string;
+}
+
+export interface SiemRuleMigrationsClient {
+  data: RuleMigrationsDataClient;
+  task: RuleMigrationsTaskClient;
+}
 
 export class SiemRuleMigrationsService {
-  private dataStreamAdapter: RuleMigrationsDataStream;
+  private dataService: RuleMigrationsDataService;
   private esClusterClient?: IClusterClient;
+  private taskService: RuleMigrationsTaskService;
+  private logger: Logger;
 
-  constructor(private logger: Logger, kibanaVersion: string) {
-    this.dataStreamAdapter = new RuleMigrationsDataStream({ kibanaVersion });
+  constructor(logger: LoggerFactory, kibanaVersion: string) {
+    this.logger = logger.get('siemRuleMigrations');
+    this.dataService = new RuleMigrationsDataService(this.logger, kibanaVersion);
+    this.taskService = new RuleMigrationsTaskService(this.logger);
   }
 
   setup({ esClusterClient, ...params }: SiemRulesMigrationsSetupParams) {
     this.esClusterClient = esClusterClient;
     const esClient = esClusterClient.asInternalUser;
-    this.dataStreamAdapter.install({ ...params, esClient, logger: this.logger }).catch((err) => {
-      this.logger.error(`Error installing data stream for rule migrations: ${err.message}`);
-      throw err;
+
+    this.dataService.install({ ...params, esClient }).catch((err) => {
+      this.logger.error('Error installing data service.', err);
     });
   }
 
-  getClient({ spaceId, request }: SiemRuleMigrationsGetClientParams): SiemRuleMigrationsClient {
-    if (!this.esClusterClient) {
-      throw new Error('ES client not available, please call setup first');
-    }
-    // Installs the data stream for the specific space. it will only install if it hasn't been installed yet.
-    // The adapter stores the data stream name promise, it will return it directly when the data stream is known to be installed.
-    const dataStreamNamePromise = this.dataStreamAdapter.installSpace(spaceId);
+  createClient({
+    spaceId,
+    currentUser,
+    request,
+  }: SiemRuleMigrationsCreateClientParams): SiemRuleMigrationsClient {
+    assert(currentUser, 'Current user must be authenticated');
+    assert(this.esClusterClient, 'ES client not available, please call setup first');
 
-    const esClient = this.esClusterClient.asScoped(request).asCurrentUser;
-    return {
-      create: async (ruleMigrations) => {
-        const _index = await dataStreamNamePromise;
-        return esClient.bulk({
-          refresh: 'wait_for',
-          body: ruleMigrations.flatMap((ruleMigration) => [{ create: { _index } }, ruleMigration]),
-        });
-      },
-      search: async (term) => {
-        const index = await dataStreamNamePromise;
-        return esClient.search({ index, body: { query: { term } } });
-      },
-    };
+    const esClient = this.esClusterClient.asInternalUser;
+    const dataClient = this.dataService.createClient({ spaceId, currentUser, esClient });
+    const taskClient = this.taskService.createClient({ currentUser, dataClient });
+
+    return { data: dataClient, task: taskClient };
+  }
+
+  stop() {
+    this.taskService.stopAll();
   }
 }

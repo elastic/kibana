@@ -1,1 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="15 15 70 70" fill="none"><circle cx="50" cy="50" r="35" fill="#0060d5"/><mask id="A" maskUnits="userSpaceOnUse" x="15" y="15" width="70" height="70" mask-type="alpha"><circle cx="50" cy="50" r="35" fill="#0060d5"/></mask><g mask="url(#A)"><path fill-rule="evenodd" d="M49.293 36.565l-2.828-2.828a5 5 0 0 0-7.071 0l-5.657 5.657a5 5 0 0 0 0 7.071l2.828 2.828 12.728-12.728zm-.707-4.95a8 8 0 0 0-11.314 0l-5.657 5.657a8 8 0 0 0 0 11.314l4.95 4.95 16.971-16.971-4.95-4.95zm17.678 21.92l-2.828-2.828-12.728 12.728 2.828 2.828a5 5 0 0 0 7.071 0l5.657-5.657a5 5 0 0 0 0-7.071zm-2.828-7.071l-16.97 16.971 4.95 4.95a8 8 0 0 0 11.314 0l5.657-5.657a8 8 0 0 0 0-11.314l-4.95-4.95z" fill="#fff"/><rect x="23.13" y="21.716" width="20" height="3" rx="1.5" transform="rotate(45 23.13 21.716)" fill="#fff"/><rect x="64.142" y="62.728" width="20" height="3" rx="1.5" transform="rotate(45 64.142 62.728)" fill="#fff"/><rect x="40.101" y="45.757" width="11" height="3" rx="1.5" transform="rotate(45 40.101 45.757)" fill="#fff"/><rect x="47.879" y="37.979" width="11" height="3" rx="1.5" transform="rotate(45 47.879 37.979)" fill="#fff"/></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+  <g clip-path="url(#a)">
+    <path fill="#343741" d="m10.059 19.244-5.303-5.303 1.673-.448 4.078 4.078 5.572-1.493 1.492-5.57-4.078-4.08.448-1.672 5.303 5.303-1.716 6.408 3.712 3.712-.224.836-.837.225-3.712-3.713-6.408 1.717Z"/>
+    <path fill="#007871" fill-rule="evenodd" d="m14.652 14.652-3.623.97-2.651-2.651.746-2.786L2.76 3.821l.224-.837.837-.224 6.364 6.364 2.785-.746 2.652 2.652-.97 3.622Zm-.703-3.174-.522 1.95-1.95.521-1.426-1.427.522-1.949 1.95-.522 1.426 1.427Z" clip-rule="evenodd"/>
+  </g>
+  <defs>
+    <clipPath id="a">
+      <path fill="#fff" d="M0 0h24v24H0z"/>
+    </clipPath>
+  </defs>
+</svg>

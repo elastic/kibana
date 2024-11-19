@@ -10,7 +10,7 @@ import moment from 'moment';
 import { Chart, Axis, AreaSeries, Position, ScaleType, Settings } from '@elastic/charts';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { EuiSkeletonText } from '@elastic/eui';
-import { getBrushData } from '@kbn/observability-utils/chart/utils';
+import { getBrushData } from '@kbn/observability-utils-browser/chart/utils';
 import { Group } from '@kbn/observability-alerting-rule-utils';
 import { ALERT_GROUP } from '@kbn/rule-data-utils';
 import { SERVICE_NAME } from '@kbn/observability-shared-plugin/common';

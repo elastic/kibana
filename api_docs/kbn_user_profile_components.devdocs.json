@@ -976,9 +976,9 @@
                   ", \"reportEvent\"> | undefined; theme: ",
                   {
                     "pluginId": "@kbn/react-kibana-context-common",
-                    "scope": "public",
+                    "scope": "common",
                     "docId": "kibKbnReactKibanaContextCommonPluginApi",
-                    "section": "def-public.ThemeServiceStart",
+                    "section": "def-common.ThemeServiceStart",
                     "text": "ThemeServiceStart"
                   },
                   "; }"
@@ -1081,7 +1081,7 @@
           },
           "<Option> extends Pick<",
           "EuiSelectableProps",
-          "<{}>, \"singleSelection\" | \"data-test-subj\" | \"height\" | \"errorMessage\" | \"loadingMessage\" | \"noMatchesMessage\" | \"emptyMessage\">"
+          "<{}>, \"data-test-subj\" | \"height\" | \"errorMessage\" | \"singleSelection\" | \"loadingMessage\" | \"noMatchesMessage\" | \"emptyMessage\">"
         ],
         "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
         "deprecated": false,

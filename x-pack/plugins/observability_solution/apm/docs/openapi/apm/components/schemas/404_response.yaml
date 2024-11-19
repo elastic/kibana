@@ -1,0 +1,14 @@
+type: object
+properties:
+  statusCode:
+    type: number
+    example: 404
+    description: Error status code
+  error:
+    type: string
+    example: Not Found
+    description: Error type
+  message:
+    type: string
+    example: Not Found
+    description: Error message

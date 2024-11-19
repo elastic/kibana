@@ -9,6 +9,7 @@ import { EuiForm, EuiFormRow, EuiHorizontalRule, EuiSpacer } from '@elastic/eui'
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useFormContext, Controller } from 'react-hook-form';
+import { defaultAnnotationColor } from '@kbn/event-annotation-common';
 import { CreateAnnotationForm } from './components/create_annotation';
 import { AnnotationApplyTo } from './components/annotation_apply_to';
 import { Annotation } from '../../../common/annotations';
@@ -17,7 +18,8 @@ import { AnnotationRange } from './components/annotation_range';
 import { AnnotationAppearance } from './annotation_apearance';
 
 export function AnnotationForm({ editAnnotation }: { editAnnotation?: Annotation | null }) {
-  const { control, formState, watch, trigger } = useFormContext<CreateAnnotationForm>();
+  const { control, formState, watch, trigger, unregister, setValue } =
+    useFormContext<CreateAnnotationForm>();
 
   const timestampStart = watch('@timestamp');
 
@@ -39,7 +41,14 @@ export function AnnotationForm({ editAnnotation }: { editAnnotation?: Annotation
             )}
             checked={Boolean(value)}
             onChange={(evt) => {
-              field.onChange(evt.target.checked ? timestampStart : null);
+              if (evt.target.checked) {
+                field.onChange(timestampStart);
+              } else {
+                // we need to do this to avoid validation errors
+                unregister('event.end');
+                field.onChange(null);
+                setValue('annotation.style.color', defaultAnnotationColor);
+              }
             }}
             compressed
           />
