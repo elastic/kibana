@@ -19,7 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const toasts = getService('toasts');
   const dataViews = getService('dataViews');
-  const { common, discover, header, timePicker, home } = getPageObjects([
+  const { common, discover, header, timePicker } = getPageObjects([
     'common',
     'discover',
     'header',
