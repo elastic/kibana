@@ -36,7 +36,7 @@ export interface InferenceClient {
 }
 
 /**
- * A version of the {@link InferenceClient} that was pre-bound to a set of parameters.
+ * A version of the {@link InferenceClient} that is pre-bound to a set of parameters.
  */
 export interface BoundInferenceClient {
   /**

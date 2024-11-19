@@ -6,17 +6,17 @@
  */
 
 import type { BoundChatCompleteOptions } from '@kbn/inference-common';
-import { createScopedChatCompleteAPI } from '../../common/chat_complete';
-import { createScopedOutputAPI } from '../../common/output';
+import { bindChatComplete } from '../../common/chat_complete';
+import { bindOutput } from '../../common/output';
 import type { InferenceClient, BoundInferenceClient } from './types';
 
-export const createBoundInferenceClient = (
+export const bindClient = (
   unboundClient: InferenceClient,
   boundParams: BoundChatCompleteOptions
 ): BoundInferenceClient => {
   return {
     ...unboundClient,
-    chatComplete: createScopedChatCompleteAPI(unboundClient.chatComplete, boundParams),
-    output: createScopedOutputAPI(unboundClient.output, boundParams),
+    chatComplete: bindChatComplete(unboundClient.chatComplete, boundParams),
+    output: bindOutput(unboundClient.output, boundParams),
   };
 };

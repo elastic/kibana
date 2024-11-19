@@ -6,4 +6,4 @@
  */
 
 export { createOutputApi } from './create_output_api';
-export { createScopedOutputAPI } from './create_scoped_output';
+export { bindOutput } from './bind_output';

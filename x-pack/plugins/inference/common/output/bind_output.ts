@@ -14,11 +14,11 @@ import type {
   ToolSchema,
 } from '@kbn/inference-common';
 
-export function createScopedOutputAPI(
+export function bindOutput(
   chatComplete: OutputAPI,
   boundParams: BoundOutputOptions
 ): BoundOutputAPI;
-export function createScopedOutputAPI(chatComplete: OutputAPI, boundParams: BoundOutputOptions) {
+export function bindOutput(chatComplete: OutputAPI, boundParams: BoundOutputOptions) {
   return (dynamicParams: UnboundOutputOptions<string, ToolSchema, boolean>) => {
     const params: OutputOptions<string, ToolSchema, boolean> = {
       ...boundParams,

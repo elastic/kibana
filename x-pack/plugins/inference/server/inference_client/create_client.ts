@@ -11,7 +11,7 @@ import type { BoundChatCompleteOptions } from '@kbn/inference-common';
 import type { InferenceClientCreateOptions } from '../types';
 import type { BoundInferenceClient, InferenceClient } from './types';
 import { createInferenceClient } from './inference_client';
-import { createBoundInferenceClient } from './scoped_client';
+import { bindClient } from './bind_client';
 
 export function createClient<T extends BoundChatCompleteOptions | undefined>(
   options: InferenceClientCreateOptions<T> & {
@@ -30,7 +30,7 @@ export function createClient<T extends BoundChatCompleteOptions | undefined>({
 }): BoundInferenceClient | InferenceClient {
   const client = createInferenceClient({ request, actions, logger });
   if (bindTo) {
-    return createBoundInferenceClient(client, bindTo);
+    return bindClient(client, bindTo);
   } else {
     return client;
   }

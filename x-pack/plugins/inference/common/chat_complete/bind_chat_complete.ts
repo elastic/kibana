@@ -14,11 +14,11 @@ import type {
   ToolOptions,
 } from '@kbn/inference-common';
 
-export function createScopedChatCompleteAPI(
+export function bindChatComplete(
   chatComplete: ChatCompleteAPI,
   boundParams: BoundChatCompleteOptions
 ): BoundChatCompleteAPI;
-export function createScopedChatCompleteAPI(
+export function bindChatComplete(
   chatComplete: ChatCompleteAPI,
   boundParams: BoundChatCompleteOptions
 ) {

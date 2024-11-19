@@ -9,7 +9,7 @@ import type { OutputOptions, OutputCompositeResponse } from './api';
 import type { ToolSchema } from '../chat_complete/tool_schema';
 
 /**
- * Static options used to call the {@link BoundChatCompleteAPI}
+ * Static options used to call the {@link BoundOutputAPI}
  */
 export type BoundOutputOptions<
   TId extends string = string,
@@ -18,7 +18,7 @@ export type BoundOutputOptions<
 > = Pick<OutputOptions<TId, TOutputSchema, TStream>, 'connectorId' | 'functionCalling'>;
 
 /**
- * Options used to call the {@link BoundChatCompleteAPI}
+ * Options used to call the {@link BoundOutputAPI}
  */
 export type UnboundOutputOptions<
   TId extends string = string,
@@ -27,7 +27,7 @@ export type UnboundOutputOptions<
 > = Omit<OutputOptions<TId, TOutputSchema, TStream>, 'connectorId' | 'functionCalling'>;
 
 /**
- * Version of {@link ChatCompleteAPI} that got pre-bound to a set of static parameters
+ * Version of {@link OutputAPI} that got pre-bound to a set of static parameters
  */
 export type BoundOutputAPI = <
   TId extends string = string,

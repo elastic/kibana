@@ -23,6 +23,9 @@ export interface InferenceStartDependencies {
   actions: ActionsPluginStart;
 }
 
+/**
+ * Setup contract of the inference plugin.
+ */
 export interface InferenceServerSetup {}
 
 /**

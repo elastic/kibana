@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { createScopedChatCompleteAPI } from './create_scoped_chat_complete';
+export { bindChatComplete } from './bind_chat_complete';
