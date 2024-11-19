@@ -30,7 +30,7 @@
           "siem": ["read", "read_alerts"],
           "securitySolutionAssistant": ["none"],
           "securitySolutionAttackDiscovery": ["none"],
-          "securitySolutionCases": ["read"],
+          "securitySolutionCasesV2": ["read"],
           "actions": ["read"],
           "builtInAlerts": ["read"]
         },
@@ -79,7 +79,7 @@
           "siem": ["all", "read_alerts", "crud_alerts"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
-          "securitySolutionCases": ["all"],
+          "securitySolutionCasesV2": ["all"],
           "actions": ["read"],
           "builtInAlerts": ["all"]
         },
@@ -128,7 +128,7 @@
           "siem": ["all", "read_alerts", "crud_alerts"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
-          "securitySolutionCases": ["all"],
+          "securitySolutionCasesV2": ["all"],
           "builtInAlerts": ["all"]
         },
         "spaces": ["*"],
