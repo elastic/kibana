@@ -357,7 +357,7 @@ export function Chart({
                 <EuiProgress size="xs" color="accent" position="absolute" />
               </EuiDelayRender>
             )}
-            {dataView.id === visContext?.requestData.dataViewId ? (
+            {dataView?.id === visContext?.requestData.dataViewId ? (
               <HistogramMemoized
                 abortController={abortController}
                 services={services}
