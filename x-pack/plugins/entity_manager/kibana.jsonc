@@ -11,28 +11,10 @@
     "browser": true,
     "server": true,
     "requiredPlugins": [
-      "data",
-      "dataViews",
-      "dataViewEditor",
-      "dataViewFieldEditor",
       "security",
       "encryptedSavedObjects",
-      "lens",
-      "observability",
-      "observabilityShared",
-      "embeddable",
-      "presentationUtil",
-      "usageCollection",
-      "licensing",
-      "transform"
+      "licensing"
     ],
-    "optionalPlugins": [
-      "cloud",
-      "serverless"
-    ],
-    "requiredBundles": [
-      "kibanaReact",
-      "kibanaUtils"
-    ]
+    "requiredBundles": []
   }
 }

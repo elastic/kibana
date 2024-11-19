@@ -47,6 +47,7 @@ function EntitySourceForm({
       <EuiFlexItem>
         <EuiFormRow label="Index patterns (comma-separated)">
           <EuiFieldText
+            data-test-subj="entityManagerFormIndexPatterns"
             name="index_patterns"
             defaultValue={source.index_patterns.join(',')}
             isInvalid={source.index_patterns.length === 0}
@@ -58,6 +59,7 @@ function EntitySourceForm({
       <EuiFlexItem>
         <EuiFormRow label="Identify fields (comma-separated field names)">
           <EuiFieldText
+            data-test-subj="entityManagerFormIdentityFields"
             name="identity_fields"
             defaultValue={source.identity_fields.join(',')}
             isInvalid={source.identity_fields.length === 0}
@@ -69,6 +71,7 @@ function EntitySourceForm({
       <EuiFlexItem>
         <EuiFormRow label="Filters (comma-separated ESQL filters)">
           <EuiFieldText
+            data-test-subj="entityManagerFormFilters"
             name="filters"
             defaultValue={source.filters.join(',')}
             onChange={onArrayFieldChange('filters')}
@@ -79,6 +82,7 @@ function EntitySourceForm({
       <EuiFlexItem>
         <EuiFormRow label="Metadata (comma-separated field names)">
           <EuiFieldText
+            data-test-subj="entityManagerFormMetadata"
             name="metadata"
             defaultValue={source.metadata_fields.join(',')}
             onChange={onArrayFieldChange('metadata_fields')}
@@ -186,6 +190,7 @@ export function EntityManagerOverviewPage() {
           <EuiFlexItem>
             <EuiFormRow>
               <EuiFieldText
+                data-test-subj="entityManagerFormType"
                 name="type"
                 defaultValue={entityType}
                 placeholder="host, service, user..."
@@ -208,6 +213,7 @@ export function EntityManagerOverviewPage() {
 
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
+              data-test-subj="entityManagerFormAddSource"
               iconType="plusInCircle"
               onClick={() => setEntitySources([...entitySources, newEntitySource({})])}
             />
@@ -227,6 +233,7 @@ export function EntityManagerOverviewPage() {
               {entitySources.length > 1 ? (
                 <EuiFlexItem grow={false}>
                   <EuiButtonIcon
+                    data-test-subj="entityManagerFormRemoveSource"
                     color={'danger'}
                     iconType={'minusInCircle'}
                     onClick={() => {
@@ -263,12 +270,16 @@ export function EntityManagerOverviewPage() {
         <EuiFormRow>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiButton isDisabled={isSearchingEntities} onClick={searchEntities}>
+              <EuiButton
+                data-test-subj="entityManagerFormPreview"
+                isDisabled={isSearchingEntities}
+                onClick={searchEntities}
+              >
                 Preview
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiButton isDisabled={true} color="primary">
+              <EuiButton data-test-subj="entityManagerFormCreate" isDisabled={true} color="primary">
                 Create
               </EuiButton>
             </EuiFlexItem>

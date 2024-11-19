@@ -14,28 +14,14 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { EntityClient } from '@kbn/entityManager-plugin/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { Route, Router, Routes } from '@kbn/shared-ux-router';
+import { Router } from '@kbn/shared-ux-router';
 import { PluginContext } from './context/plugin_context';
-import { EntityManagerPluginStart } from './types';
-import { getRoutes } from './routes';
-import { EntityClient } from './lib/entity_client';
+import { EntityManagerAppPluginStart } from './types';
 import { EntityManagerOverviewPage } from './pages/overview';
-
-function App() {
-  const routes = getRoutes();
-  return (
-    <Routes>
-      {Object.keys(routes).map((path) => {
-        const { handler, exact } = routes[path];
-        const Wrapper = () => handler();
-        return <Route key={path} path={path} exact={exact} component={Wrapper} />;
-      })}
-    </Routes>
-  );
-}
 
 export function renderApp({
   core,
@@ -49,7 +35,7 @@ export function renderApp({
   entityClient,
 }: {
   core: CoreStart;
-  plugins: EntityManagerPluginStart;
+  plugins: EntityManagerAppPluginStart;
   appMountParameters: AppMountParameters;
   ObservabilityPageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
   usageCollection: UsageCollectionSetup;
