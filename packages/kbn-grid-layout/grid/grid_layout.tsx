@@ -17,6 +17,7 @@ import { GridLayoutData, GridSettings } from './types';
 import { useGridLayoutEvents } from './use_grid_layout_events';
 import { useGridLayoutState } from './use_grid_layout_state';
 import { isLayoutEqual } from './utils/equality_checks';
+import { compactGridRow } from './utils/resolve_grid_row';
 
 interface GridLayoutProps {
   layout: GridLayoutData;
@@ -41,12 +42,28 @@ export const GridLayout = ({
     gridLayoutStateManager.gridLayout$.getValue().length
   );
 
+  /**
+   * Update the `gridLayout$` behaviour subject in response to the `layout` prop changing
+   */
   useEffect(() => {
-    console.log('layout prop', layout);
-  }, [layout, gridLayoutStateManager]);
+    if (!isLayoutEqual(layout, gridLayoutStateManager.gridLayout$.getValue())) {
+      const newLayout = cloneDeep(layout);
+      /**
+       * the layout sent in as a prop is not guaranteed to be valid (i.e it may have floating panels) -
+       * so, we need to loop through each row and ensure it is compacted
+       */
+      newLayout.forEach((row, rowIndex) => {
+        newLayout[rowIndex] = compactGridRow(row);
+      });
+      gridLayoutStateManager.gridLayout$.next(newLayout);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [layout]);
 
+  /**
+   * Set up subscriptions
+   */
   useEffect(() => {
-    console.log('USE EFFECT');
     /**
      * The only thing that should cause the entire layout to re-render is adding a new row;
      * this subscription ensures this by updating the `rowCount` state when it changes.
@@ -69,12 +86,11 @@ export const GridLayout = ({
         // if an interaction event is happening, then ignore any "draft" layout changes
         filter(([_, event]) => !Boolean(event)),
         // once no interaction event, create pairs of "old" and "new" layouts for comparison
-        map(([layout]) => layout),
+        map(([newLayout]) => newLayout),
         pairwise()
       )
       .subscribe(([layoutBefore, layoutAfter]) => {
         if (!isLayoutEqual(layoutBefore, layoutAfter)) {
-          console.log('onLayoutChange 123');
           onLayoutChange(layoutAfter);
         }
       });

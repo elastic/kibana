@@ -27,7 +27,7 @@ import {
 } from '@elastic/eui';
 import { AppMountParameters } from '@kbn/core-application-browser';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { GridLayout, GridLayoutData } from '@kbn/grid-layout';
+import { GridLayout, GridLayoutData, isLayoutEqual } from '@kbn/grid-layout';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -75,7 +75,7 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
         mockDashboardApi.panels$.next(otherPanels);
       },
       addNewPanel: ({ id: newId }: { id: string }) => {
-        // we are only implementing "place at top" here
+        // we are only implementing "place at top" here, for demo purposes
         const currentPanels = mockDashboardApi.panels$.getValue();
         const otherPanels = { ...currentPanels };
         for (const [id, panel] of Object.entries(currentPanels)) {
@@ -83,7 +83,6 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
           currentPanel.gridData.y = currentPanel.gridData.y + DEFAULT_PANEL_HEIGHT;
           otherPanels[id] = currentPanel;
         }
-
         mockDashboardApi.panels$.next({
           ...otherPanels,
           [newId]: {
@@ -117,36 +116,38 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const renderPanel = useCallback((id: string) => {
-    return (
-      <>
-        <div style={{ padding: 8 }}>{id}</div>
-        <EuiButtonEmpty
-          onClick={() => {
-            mockDashboardApi.removePanel(id);
-          }}
-        >
-          {i18n.translate('examples.gridExample.deletePanelButton', {
-            defaultMessage: 'Delete panel',
-          })}
-        </EuiButtonEmpty>
-        <EuiButtonEmpty
-          onClick={async () => {
-            const newPanelId =
-              (await getPanelId({
+  const renderPanel = useCallback(
+    (id: string) => {
+      return (
+        <>
+          <div style={{ padding: 8 }}>{id}</div>
+          <EuiButtonEmpty
+            onClick={() => {
+              mockDashboardApi.removePanel(id);
+            }}
+          >
+            {i18n.translate('examples.gridExample.deletePanelButton', {
+              defaultMessage: 'Delete panel',
+            })}
+          </EuiButtonEmpty>
+          <EuiButtonEmpty
+            onClick={async () => {
+              const newPanelId = await getPanelId({
                 coreStart,
-                suggestion: `panel${Object.keys(mockDashboardApi.panels$.getValue()).length + 1}`,
-              })) ?? uuidv4();
-            mockDashboardApi.replacePanel(id, newPanelId);
-          }}
-        >
-          {i18n.translate('examples.gridExample.replacePanelButton', {
-            defaultMessage: 'Replace panel',
-          })}
-        </EuiButtonEmpty>
-      </>
-    );
-  }, []);
+                suggestion: id,
+              });
+              if (newPanelId) mockDashboardApi.replacePanel(id, newPanelId);
+            }}
+          >
+            {i18n.translate('examples.gridExample.replacePanelButton', {
+              defaultMessage: 'Replace panel',
+            })}
+          </EuiButtonEmpty>
+        </>
+      );
+    },
+    [coreStart, mockDashboardApi]
+  );
 
   return (
     <EuiProvider>
@@ -182,14 +183,11 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
             <EuiFlexItem grow={false}>
               <EuiButton
                 onClick={async () => {
-                  const panelId =
-                    (await getPanelId({
-                      coreStart,
-                      suggestion: `panel${
-                        Object.keys(mockDashboardApi.panels$.getValue()).length + 1
-                      }`,
-                    })) ?? uuidv4();
-                  mockDashboardApi.addNewPanel({ id: panelId });
+                  const panelId = await getPanelId({
+                    coreStart,
+                    suggestion: uuidv4(),
+                  });
+                  if (panelId) mockDashboardApi.addNewPanel({ id: panelId });
                 }}
               >
                 {i18n.translate('examples.gridExample.addPanelButton', {
@@ -243,18 +241,18 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
           </EuiFlexGroup>
           <EuiSpacer size="m" />
           <GridLayout
+            layout={currentLayout}
             gridSettings={{
               gutterSize: DASHBOARD_MARGIN_SIZE,
               rowHeight: DASHBOARD_GRID_HEIGHT,
               columnCount: DASHBOARD_GRID_COLUMN_COUNT,
             }}
-            layout={currentLayout}
+            renderPanelContents={renderPanel}
             onLayoutChange={(newLayout) => {
               const { panels, rows } = gridLayoutToDashboardPanelMap(newLayout);
               mockDashboardApi.panels$.next(panels);
               mockDashboardApi.rows$.next(rows);
             }}
-            renderPanelContents={renderPanel}
           />
         </EuiPageTemplate.Section>
       </EuiPageTemplate>

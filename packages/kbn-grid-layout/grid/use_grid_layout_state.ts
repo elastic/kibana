@@ -20,9 +20,6 @@ import {
   PanelInteractionEvent,
   RuntimeGridSettings,
 } from './types';
-import { cloneDeep } from 'lodash';
-import { compactGridRow } from './utils/resolve_grid_row';
-import { isLayoutEqual } from './utils/equality_checks';
 
 export const useGridLayoutState = ({
   layout,
@@ -38,7 +35,6 @@ export const useGridLayoutState = ({
   const panelRefs = useRef<Array<{ [id: string]: HTMLDivElement | null }>>([]);
 
   const gridLayoutStateManager = useMemo(() => {
-    console.log('gridLayoutStateManager');
     const gridLayout$ = new BehaviorSubject<GridLayoutData>(layout);
     const gridDimensions$ = new BehaviorSubject<ObservedSize>({ width: 0, height: 0 });
     const interactionEvent$ = new BehaviorSubject<PanelInteractionEvent | undefined>(undefined);
@@ -63,21 +59,6 @@ export const useGridLayoutState = ({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  useEffect(() => {
-    /**
-     *
-     */
-    if (!isLayoutEqual(layout, gridLayoutStateManager.gridLayout$.getValue())) {
-      const newLayout = cloneDeep(layout);
-      newLayout.forEach((row, rowIndex) => {
-        newLayout[rowIndex] = compactGridRow(row);
-      });
-      console.log('NEXT!!!', newLayout);
-      gridLayoutStateManager.gridLayout$.next(newLayout);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [layout]);
 
   useEffect(() => {
     /**
