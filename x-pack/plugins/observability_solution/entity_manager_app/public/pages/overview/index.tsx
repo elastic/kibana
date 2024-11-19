@@ -89,6 +89,17 @@ function EntitySourceForm({
           />
         </EuiFormRow>
       </EuiFlexItem>
+
+      <EuiFlexItem>
+        <EuiFormRow label="Timestamp field">
+          <EuiFieldText
+            data-test-subj="entityManagerFormTimestamp"
+            name="timestamp_field"
+            defaultValue={source.timestamp_field}
+            onChange={(e) => onFieldChange(index, 'timestamp_field', e.target.value)}
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }
@@ -99,6 +110,7 @@ interface EntitySource {
   identity_fields?: string[];
   metadata_fields?: string[];
   filters?: string[];
+  timestamp_field?: string;
 }
 
 const newEntitySource = ({
@@ -106,16 +118,19 @@ const newEntitySource = ({
   identityFields = [],
   metadataFields = [],
   filters = [],
+  timestampField = '@timestamp',
 }: {
   indexPatterns?: string[];
   identityFields?: string[];
   metadataFields?: string[];
   filters?: string[];
+  timestampField?: string;
 }) => ({
   id: uuid(),
   index_patterns: indexPatterns,
   identity_fields: identityFields,
   metadata_fields: metadataFields,
+  timestamp_field: timestampField,
   filters,
 });
 

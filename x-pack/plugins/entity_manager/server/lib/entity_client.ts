@@ -209,6 +209,9 @@ export class EntityClient {
         if (!sourceHasMandatoryFields) {
           // we can't build entities without id fields so we ignore the source.
           // filters should likely behave similarly.
+          this.options.logger.info(
+            `Ignoring source for type [${source.type}] with index_patterns [${source.index_patterns}] because some mandatory fields [${mandatoryFields}] are not mapped`
+          );
           return [];
         }
 
@@ -221,7 +224,7 @@ export class EntityClient {
           end,
           limit,
         });
-        this.options.logger.info(`Entity query: ${query}`);
+        this.options.logger.debug(`Entity query: ${query}`);
 
         const rawEntities = await runESQLQuery<Entity>({ query, esClient: this.options.esClient });
 
