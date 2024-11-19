@@ -90,6 +90,7 @@
     "@kbn/doc-links",
     "@kbn/core-capabilities-server",
     "@kbn/core-elasticsearch-server",
+    "@kbn/core-http-server-utils",
   ],
   "exclude": [
     "target/**/*",

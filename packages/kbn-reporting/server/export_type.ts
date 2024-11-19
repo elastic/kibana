@@ -27,7 +27,7 @@ import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 
-import { kibanaRequestFactory } from '@kbn/core-http-server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { CreateJobFn, RunTaskFn } from './types';
 import type { ReportingConfigType } from '.';
 

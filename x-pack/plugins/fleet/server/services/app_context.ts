@@ -10,7 +10,7 @@ import { BehaviorSubject } from 'rxjs';
 import { kibanaPackageJson } from '@kbn/repo-info';
 
 import type { HttpServiceSetup, KibanaRequest } from '@kbn/core-http-server';
-import { kibanaRequestFactory } from '@kbn/core-http-server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type {

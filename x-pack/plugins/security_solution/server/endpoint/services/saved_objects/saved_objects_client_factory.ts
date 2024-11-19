@@ -10,7 +10,7 @@
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { HttpServiceSetup, KibanaRequest } from '@kbn/core-http-server';
-import { kibanaRequestFactory } from '@kbn/core-http-server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { DEFAULT_SPACE_ID, addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { EndpointError } from '../../../../common/endpoint/errors';

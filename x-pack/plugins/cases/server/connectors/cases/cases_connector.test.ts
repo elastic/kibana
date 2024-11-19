@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { kibanaRequestFactory } from '@kbn/core-http-server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';

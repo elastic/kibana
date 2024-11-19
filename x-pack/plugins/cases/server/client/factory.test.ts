@@ -12,7 +12,7 @@ import { CasesClientFactory } from './factory';
 import { createCasesClientFactoryMockArgs } from './mocks';
 import { createCasesClient } from './client';
 import type { FakeRawRequest } from '@kbn/core-http-server';
-import { kibanaRequestFactory } from '@kbn/core-http-server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 
 jest.mock('./client');
 

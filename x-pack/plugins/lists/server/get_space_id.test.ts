@@ -6,7 +6,7 @@
  */
 
 import { spacesServiceMock } from '@kbn/spaces-plugin/server/spaces_service/spaces_service.mock';
-import { kibanaRequestFactory } from '@kbn/core-http-server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 import { getSpaceId } from './get_space_id';

@@ -118,5 +118,6 @@
     "@kbn/reporting-public",
     "@kbn/field-formats-plugin",
     "@kbn/core-security-server",
+    "@kbn/core-http-server-utils",
   ]
 }

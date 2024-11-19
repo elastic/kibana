@@ -9,7 +9,8 @@ import type {
   CreateRestAPIKeyParams,
   CreateRestAPIKeyWithKibanaPrivilegesParams,
 } from '@kbn/security-plugin/server';
-import { kibanaRequestFactory, type FakeRawRequest, type Headers } from '@kbn/core-http-server';
+import { type FakeRawRequest, type Headers } from '@kbn/core-http-server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 
 import type { Logger } from '@kbn/logging';
 

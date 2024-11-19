@@ -6,7 +6,7 @@
  */
 
 import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
-import { kibanaRequestFactory } from '@kbn/core-http-server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 
 export function getFakeKibanaRequest(apiKey: { id: string; api_key: string }) {
   const requestHeaders: Headers = {};
