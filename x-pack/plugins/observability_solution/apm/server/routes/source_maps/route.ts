@@ -49,7 +49,7 @@ function throwNotImplementedIfSourceMapNotAvailable(featureFlags: ApmFeatureFlag
 
 const listSourceMapRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/sourcemaps 2023-10-31',
-  options: { tags: ['access:apm'], access: 'public' },
+  options: { tags: ['access:apm'] },
   params: t.partial({
     query: t.partial({
       page: toNumberRt,
@@ -87,7 +87,6 @@ const uploadSourceMapRoute = createApmServerRoute({
   options: {
     tags: ['access:apm', 'access:apm_write'],
     body: { accepts: ['multipart/form-data'] },
-    access: 'public',
   },
   params: t.type({
     body: t.type({
@@ -160,7 +159,7 @@ const uploadSourceMapRoute = createApmServerRoute({
 
 const deleteSourceMapRoute = createApmServerRoute({
   endpoint: 'DELETE /api/apm/sourcemaps/{id} 2023-10-31',
-  options: { tags: ['access:apm', 'access:apm_write'], access: 'public' },
+  options: { tags: ['access:apm', 'access:apm_write'] },
   params: t.type({
     path: t.type({
       id: t.string,
