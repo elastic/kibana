@@ -11,7 +11,7 @@ import {
   METRIC_TYPE_API_VALUES_TO_UI_OPTIONS_MAP,
   METRIC_TYPE_VALUES,
 } from '../../../common/rest_types';
-import { PAGING_PARAMS } from '../../../common';
+import { DEFAULT_SELECTED_OPTIONS } from '../../../common';
 import { FILTER_NAMES } from '../translations';
 import { useDataUsageMetricsUrlParams } from './use_charts_url_params';
 import { formatBytes } from '../../utils/format_bytes';
@@ -86,7 +86,7 @@ export const useChartsFilter = ({
             ? selectedDataStreamsFromUrl.includes(filterOption)
               ? 'on'
               : undefined
-            : i < PAGING_PARAMS.default
+            : i < DEFAULT_SELECTED_OPTIONS
             ? 'on'
             : undefined,
           'data-test-subj': `${filterOptions.filterName}-filter-option`,

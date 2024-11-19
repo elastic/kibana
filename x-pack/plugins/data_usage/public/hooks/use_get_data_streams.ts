@@ -8,7 +8,7 @@
 import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { DATA_USAGE_DATA_STREAMS_API_ROUTE, PAGING_PARAMS } from '../../common';
+import { DATA_USAGE_DATA_STREAMS_API_ROUTE, DEFAULT_SELECTED_OPTIONS } from '../../common';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 
 type GetDataUsageDataStreamsResponse = Array<{
@@ -53,7 +53,7 @@ export const useGetDataUsageDataStreams = ({
             selected: ds.selected,
           };
 
-          if (selectedDataStreams?.includes(ds.name) && i < PAGING_PARAMS.default) {
+          if (selectedDataStreams?.includes(ds.name) && i < DEFAULT_SELECTED_OPTIONS) {
             acc.selected.push({ ...item, selected: true });
           } else {
             acc.rest.push({ ...item, selected: false });
