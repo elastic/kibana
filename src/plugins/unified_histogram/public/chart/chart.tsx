@@ -357,26 +357,28 @@ export function Chart({
                 <EuiProgress size="xs" color="accent" position="absolute" />
               </EuiDelayRender>
             )}
-            <HistogramMemoized
-              abortController={abortController}
-              services={services}
-              dataView={dataView}
-              request={request}
-              hits={hits}
-              chart={chart}
-              getTimeRange={getTimeRange}
-              refetch$={refetch$}
-              visContext={visContext}
-              isPlainRecord={isPlainRecord}
-              disableTriggers={disableTriggers}
-              disabledActions={disabledActions}
-              onTotalHitsChange={onTotalHitsChange}
-              hasLensSuggestions={hasLensSuggestions}
-              onChartLoad={onChartLoad}
-              onFilter={onFilter}
-              onBrushEnd={onBrushEnd}
-              withDefaultActions={withDefaultActions}
-            />
+            {dataView.id === visContext?.requestData.dataViewId ? (
+              <HistogramMemoized
+                abortController={abortController}
+                services={services}
+                dataView={dataView}
+                request={request}
+                hits={hits}
+                chart={chart}
+                getTimeRange={getTimeRange}
+                refetch$={refetch$}
+                visContext={visContext}
+                isPlainRecord={isPlainRecord}
+                disableTriggers={disableTriggers}
+                disabledActions={disabledActions}
+                onTotalHitsChange={onTotalHitsChange}
+                hasLensSuggestions={hasLensSuggestions}
+                onChartLoad={onChartLoad}
+                onFilter={onFilter}
+                onBrushEnd={onBrushEnd}
+                withDefaultActions={withDefaultActions}
+              />
+            ) : null}
           </section>
           {appendHistogram}
         </EuiFlexItem>

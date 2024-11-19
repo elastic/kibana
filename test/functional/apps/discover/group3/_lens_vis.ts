@@ -19,11 +19,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const toasts = getService('toasts');
   const dataViews = getService('dataViews');
-  const { common, discover, header, timePicker } = getPageObjects([
+  const { common, discover, header, timePicker, home } = getPageObjects([
     'common',
     'discover',
     'header',
     'timePicker',
+    'home',
   ]);
   const security = getService('security');
   const defaultSettings = {
@@ -110,8 +111,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return seriesType;
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/184600
-  describe.skip('discover lens vis', function () {
+  describe('discover lens vis', function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
