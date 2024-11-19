@@ -28,6 +28,7 @@ const INITIAL_LAST_RUN_METRICS = {
   gap_duration_s: null,
   // TODO: should initialised field, after inermidiate release
   // gap_range: null,
+  // unfilled_gaps_ms: null,
 };
 
 const transformEsExecutionStatus = (
