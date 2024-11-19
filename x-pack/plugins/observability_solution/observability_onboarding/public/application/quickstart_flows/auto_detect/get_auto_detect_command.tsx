@@ -19,7 +19,7 @@ export function getAutoDetectCommand(
       --kibana-url=${options.kibanaUrl}
       --install-key=${options.installApiKey}
       --ingest-key=${options.ingestApiKey}
-      --ea-version=${options.elasticAgentVersion}
+      --ea-version=${options.elasticAgentVersionInfo.agentVersion}
   `;
 }
 function oneLine(parts: TemplateStringsArray, ...args: string[]) {
