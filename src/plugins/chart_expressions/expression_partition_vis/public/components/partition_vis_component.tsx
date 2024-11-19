@@ -42,6 +42,7 @@ import {
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { getOverridesFor } from '@kbn/chart-expressions-common';
 import { useKbnPalettes } from '@kbn/palettes';
+import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { consolidateMetricColumns } from '../../common/utils';
 import { DEFAULT_PERCENT_DECIMALS } from '../../common/constants';
 import {
@@ -389,7 +390,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     [visType, visParams, containerDimensions, rescaleFactor, hasOpenedOnAggBasedEditor]
   );
 
-  const fixedViewPort = document.getElementById('app-fixed-viewport');
+  const fixedViewPort = useAppFixedViewport();
 
   const legendPosition = visParams.legendPosition ?? Position.Right;
 

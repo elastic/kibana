@@ -3680,6 +3680,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/content-management-favorites-common@link:packages/content-management/favorites/favorites_common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/content-management-favorites-public@link:packages/content-management/favorites/favorites_public":
   version "0.0.0"
   uid ""
@@ -4356,6 +4360,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-rendering-browser@link:packages/core/rendering/core-rendering-browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-rendering-server-internal@link:packages/core/rendering/core-rendering-server-internal":
   version "0.0.0"
   uid ""
@@ -4469,10 +4477,6 @@
   uid ""
 
 "@kbn/core-security-server@link:packages/core/security/core-security-server":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-status-common-internal@link:packages/core/status/core-status-common-internal":
   version "0.0.0"
   uid ""
 
@@ -5560,6 +5564,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/llm-tasks-plugin@link:x-pack/plugins/ai_infra/llm_tasks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/locator-examples-plugin@link:examples/locator_examples":
   version "0.0.0"
   uid ""
@@ -6045,6 +6053,14 @@
   uid ""
 
 "@kbn/product-doc-artifact-builder@link:x-pack/packages/ai-infra/product-doc-artifact-builder":
+  version "0.0.0"
+  uid ""
+
+"@kbn/product-doc-base-plugin@link:x-pack/plugins/ai_infra/product_doc_base":
+  version "0.0.0"
+  uid ""
+
+"@kbn/product-doc-common@link:x-pack/packages/ai-infra/product-doc-common":
   version "0.0.0"
   uid ""
 
@@ -12141,19 +12157,19 @@
   resolved "https://registry.yarnpkg.com/@xtuc/long/-/long-4.2.2.tgz#d291c6a4e97989b5c61d9acf396ae4fe133a718d"
   integrity sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==
 
-"@xyflow/react@^12.3.4":
-  version "12.3.4"
-  resolved "https://registry.yarnpkg.com/@xyflow/react/-/react-12.3.4.tgz#cccc57f7a992faecc5ed1dda82838b31c1afa522"
-  integrity sha512-KjFkj84S+wK8aJF/PORxSkOAeotTTPz++hus+Y95NFMIJGVyl8jjVaaz5B1zyV0prk6ZkbMp6q0vqMjJdZT25Q==
+"@xyflow/react@^12.3.5":
+  version "12.3.5"
+  resolved "https://registry.yarnpkg.com/@xyflow/react/-/react-12.3.5.tgz#88ca2efe2ddf1300bc171a2ef797f7cb41386ca4"
+  integrity sha512-wAYqpicdrVo1rxCu0X3M9s3YIF45Agqfabw0IBryTGqjWvr2NyfciI8gIP4MB+NKpWWN5kxZ9tiZ9u8lwC7iAg==
   dependencies:
-    "@xyflow/system" "0.0.45"
+    "@xyflow/system" "0.0.46"
     classcat "^5.0.3"
     zustand "^4.4.0"
 
-"@xyflow/system@0.0.45":
-  version "0.0.45"
-  resolved "https://registry.yarnpkg.com/@xyflow/system/-/system-0.0.45.tgz#ca1f4d843d2925ce9c5763f16abf51a4c69953ef"
-  integrity sha512-szP1LjDD4jlRYYhxvgZqOCTMToUVNqjQkrlhb0fhv1sXomU1+yMDdhpQT+FjE4d+rKx08fS10sOuZUl2ycXaDw==
+"@xyflow/system@0.0.46":
+  version "0.0.46"
+  resolved "https://registry.yarnpkg.com/@xyflow/system/-/system-0.0.46.tgz#b0a5915d59c0ea5ca6d24e1eb90c5a0d7eda7864"
+  integrity sha512-bmFXvboVdiydIFZmDCjrbBCYgB0d5pYdkcZPWbAxGmhMRUZ+kW3CksYgYxWabrw51rwpWitLEadvLrivG0mVfA==
   dependencies:
     "@types/d3-drag" "^3.0.7"
     "@types/d3-selection" "^3.0.10"
