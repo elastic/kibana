@@ -79,7 +79,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/177619
     describe('data is loaded', () => {
       const GO_PROD_RATE = 75;
       const GO_PROD_ERROR_RATE = 25;

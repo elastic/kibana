@@ -70,7 +70,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/177620
     describe('when data is loaded', () => {
       describe('Transaction groups main statistics', () => {
         const GO_PROD_RATE = 75;

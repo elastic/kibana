@@ -70,7 +70,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/177596
     describe('Latency when data is loaded', () => {
       const GO_PROD_RATE = 80;
       const GO_DEV_RATE = 20;

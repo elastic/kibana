@@ -12,6 +12,7 @@ import type { Agent as SuperTestAgent } from 'supertest';
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import { ApmRuleParamsType } from '@kbn/apm-plugin/common/rules/schema';
 import { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
+import { SupertestWithRoleScope } from '../../../../api_integration/deployment_agnostic/services/role_scoped_supertest';
 import {
   APM_ACTION_VARIABLE_INDEX,
   APM_ALERTS_INDEX,
@@ -24,7 +25,7 @@ export async function createApmRule<T extends ApmRuleType>({
   params,
   actions = [],
 }: {
-  supertest: SuperTestAgent;
+  supertest: SuperTestAgent | SupertestWithRoleScope;
   ruleTypeId: T;
   name: string;
   params: ApmRuleParamsType[T];
@@ -57,7 +58,7 @@ export async function runRuleSoon({
   supertest,
 }: {
   ruleId: string;
-  supertest: SuperTestAgent;
+  supertest: SuperTestAgent | SupertestWithRoleScope;
 }): Promise<Record<string, any>> {
   return pRetry(
     async () => {
@@ -89,13 +90,13 @@ export async function deleteRuleById({
   supertest,
   ruleId,
 }: {
-  supertest: SuperTestAgent;
+  supertest: SuperTestAgent | SupertestWithRoleScope;
   ruleId: string;
 }) {
   await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'foo');
 }
 
-export async function deleteApmRules(supertest: SuperTestAgent) {
+export async function deleteApmRules(supertest: SuperTestAgent | SupertestWithRoleScope) {
   const res = await supertest.get(
     `/api/alerting/rules/_find?filter=alert.attributes.consumer:apm&per_page=10000`
   );
@@ -109,7 +110,7 @@ export async function deleteAllActionConnectors({
   supertest,
   es,
 }: {
-  supertest: SuperTestAgent;
+  supertest: SuperTestAgent | SupertestWithRoleScope;
   es: Client;
 }): Promise<any> {
   const res = await supertest.get(`/api/actions/connectors`);
@@ -143,7 +144,7 @@ async function deleteActionConnector({
   supertest,
   actionId,
 }: {
-  supertest: SuperTestAgent;
+  supertest: SuperTestAgent | SupertestWithRoleScope;
   actionId: string;
 }) {
   return supertest.delete(`/api/actions/connector/${actionId}`).set('kbn-xsrf', 'foo');

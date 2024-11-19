@@ -7,7 +7,8 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 import pRetry from 'p-retry';
-import type SuperTest from 'supertest';
+import type { Agent as SuperTestAgent } from 'supertest';
+import { SupertestWithRoleScope } from '../../../../api_integration/deployment_agnostic/services/role_scoped_supertest';
 
 const RETRIES_COUNT = 10;
 
@@ -17,7 +18,7 @@ export async function waitForActiveRule({
   logger,
 }: {
   ruleId: string;
-  supertest: SuperTest.Agent;
+  supertest: SuperTestAgent | SupertestWithRoleScope;
   logger?: ToolingLog;
 }): Promise<Record<string, any>> {
   return pRetry(

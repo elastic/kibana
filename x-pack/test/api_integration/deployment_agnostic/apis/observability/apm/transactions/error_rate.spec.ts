@@ -84,7 +84,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/177598
     describe('Error rate when data is loaded', () => {
       const config = {
         firstTransaction: {

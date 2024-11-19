@@ -14,6 +14,7 @@ import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { AggregationType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { SupertestWithRoleScope } from '../../../../services/role_scoped_supertest';
 import { waitForAlertsForRule } from '../../../../../../apm_api_integration/tests/alerts/helpers/wait_for_alerts_for_rule';
 import {
   createApmRule,
@@ -29,7 +30,7 @@ type TransactionsGroupsMainStatistics =
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const apmApiClient = getService('apmApi');
   const synthtrace = getService('synthtrace');
-  const supertest = getService('supertest');
+  const roleScopedSupertest = getService('roleScopedSupertest');
   const es = getService('es');
   const serviceName = 'synth-go';
   const dayInMs = 24 * 60 * 60 * 1000;
@@ -76,7 +77,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   }
 
   describe('Transaction groups alerts', () => {
-    // FLAKY: https://github.com/elastic/kibana/issues/177617
     describe('when data is loaded', () => {
       const transactions = [
         {
@@ -106,8 +106,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         },
       ];
       let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+      let supertestEditorWithApiKey: SupertestWithRoleScope;
 
       before(async () => {
+        supertestEditorWithApiKey = await roleScopedSupertest.getSupertestWithRoleScope('editor', {
+          withInternalHeaders: true,
+        });
         apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
         const serviceGoProdInstance = apm
           .service({ name: serviceName, environment: 'production', agentName: 'go' })
@@ -143,14 +147,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       after(() => apmSynthtraceEsClient.clean());
 
-      // FLAKY: https://github.com/elastic/kibana/issues/198866
       describe('Transaction groups with avg transaction duration alerts', () => {
         let ruleId: string;
         let alerts: ApmAlertFields[];
 
         before(async () => {
           const createdRule = await createApmRule({
-            supertest,
+            supertest: supertestEditorWithApiKey,
             name: `Latency threshold | ${serviceName}`,
             params: {
               serviceName,
@@ -175,18 +178,21 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         after(async () => {
-          await cleanupRuleAndAlertState({ es, supertest, logger });
+          await cleanupRuleAndAlertState({ es, supertest: supertestEditorWithApiKey, logger });
         });
 
         it('checks if rule is active', async () => {
-          const ruleStatus = await waitForActiveRule({ ruleId, supertest });
+          const ruleStatus = await waitForActiveRule({
+            ruleId,
+            supertest: supertestEditorWithApiKey,
+          });
           expect(ruleStatus).to.be('active');
         });
 
         it('should successfully run the rule', async () => {
           const response = await runRuleSoon({
             ruleId,
-            supertest,
+            supertest: supertestEditorWithApiKey,
           });
           expect(response.status).to.be(204);
         });
@@ -222,7 +228,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         before(async () => {
           const createdRule = await createApmRule({
-            supertest,
+            supertest: supertestEditorWithApiKey,
             name: `Latency threshold | ${serviceName}`,
             params: {
               serviceName,
@@ -248,18 +254,21 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         after(async () => {
-          await cleanupRuleAndAlertState({ es, supertest, logger });
+          await cleanupRuleAndAlertState({ es, supertest: supertestEditorWithApiKey, logger });
         });
 
         it('checks if rule is active', async () => {
-          const ruleStatus = await waitForActiveRule({ ruleId, supertest });
+          const ruleStatus = await waitForActiveRule({
+            ruleId,
+            supertest: supertestEditorWithApiKey,
+          });
           expect(ruleStatus).to.be('active');
         });
 
         it('should successfully run the rule', async () => {
           const response = await runRuleSoon({
             ruleId,
-            supertest,
+            supertest: supertestEditorWithApiKey,
           });
           expect(response.status).to.be(204);
         });
@@ -298,7 +307,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         before(async () => {
           const createdRule = await createApmRule({
-            supertest,
+            supertest: supertestEditorWithApiKey,
             name: `Error rate | ${serviceName}`,
             params: {
               serviceName,
@@ -322,18 +331,21 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         after(async () => {
-          await cleanupRuleAndAlertState({ es, supertest, logger });
+          await cleanupRuleAndAlertState({ es, supertest: supertestEditorWithApiKey, logger });
         });
 
         it('checks if rule is active', async () => {
-          const ruleStatus = await waitForActiveRule({ ruleId, supertest });
+          const ruleStatus = await waitForActiveRule({
+            ruleId,
+            supertest: supertestEditorWithApiKey,
+          });
           expect(ruleStatus).to.be('active');
         });
 
         it('should successfully run the rule', async () => {
           const response = await runRuleSoon({
             ruleId,
-            supertest,
+            supertest: supertestEditorWithApiKey,
           });
           expect(response.status).to.be(204);
         });
