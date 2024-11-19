@@ -659,7 +659,7 @@ src/plugins/files @elastic/appex-sharedux
 src/plugins/files_management @elastic/appex-sharedux
 src/plugins/ftr_apis @elastic/kibana-core
 src/plugins/guided_onboarding @elastic/appex-sharedux
-src/plugins/home @elastic/kibana-core
+src/plugins/home @elastic/appex-sharedux
 src/plugins/image_embeddable @elastic/appex-sharedux
 src/plugins/input_control_vis @elastic/kibana-presentation
 src/plugins/inspector @elastic/kibana-presentation
@@ -1096,7 +1096,6 @@ x-pack/test_serverless/api_integration/test_suites/common/platform_security @ela
 src/plugins/discover/public/context_awareness/profile_providers/security @elastic/kibana-data-discovery @elastic/security-threat-hunting-investigations
 
 # Platform Docs
-/x-pack/test/functional/services/sample_data @elastic/platform-docs
 /x-pack/test_serverless/functional/test_suites/security/screenshot_creation/index.ts @elastic/platform-docs
 /x-pack/test_serverless/functional/test_suites/security/config.screenshots.ts @elastic/platform-docs
 /x-pack/test/screenshot_creation @elastic/platform-docs
@@ -2275,6 +2274,10 @@ x-pack/test/profiling_api_integration @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/observability_shared/public/components/profiling @elastic/obs-ux-infra_services-team
 
 # Shared UX
+/test/api_integration/apis/short_url/**/*.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200209/files#r1846654156
+/test/functional/page_objects/share_page.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200209/files#r1846648444
+/test/accessibility/apps/kibana_overview_* @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200209/files/cab99bce5ac2082fa77222beebe3b61ff836b94b#r1846659920
+/x-pack/test/functional/services/sample_data @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200142#discussion_r1846512756
 /test/functional/page_objects/files_management.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200017#discussion_r1840477291
 /test/accessibility/apps/home.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/199771/files#r1840077237
 /test/api_integration/apis/home/*.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/199771/files#r1840077065
