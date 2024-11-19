@@ -14,14 +14,20 @@ import { of, BehaviorSubject } from 'rxjs';
 import { useEuiTheme } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
+import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
+
 import type { CoreTheme } from '@kbn/core-theme-browser';
 import { CoreThemeProvider } from './core_theme_provider';
 
 describe('CoreThemeProvider', () => {
   let euiTheme: UseEuiTheme | undefined;
+  let userProfile: UserProfileService;
 
   beforeEach(() => {
     euiTheme = undefined;
+    userProfile = userProfileServiceMock.createStart();
   });
 
   const flushPromises = async () => {
@@ -53,7 +59,7 @@ describe('CoreThemeProvider', () => {
     const coreTheme: CoreTheme = { darkMode: true, name: 'amsterdam' };
 
     const wrapper = mountWithIntl(
-      <CoreThemeProvider theme$={of(coreTheme)}>
+      <CoreThemeProvider theme$={of(coreTheme)} userProfile={userProfile}>
         <InnerComponent />
       </CoreThemeProvider>
     );
@@ -67,7 +73,7 @@ describe('CoreThemeProvider', () => {
     const coreTheme$ = new BehaviorSubject<CoreTheme>({ darkMode: true, name: 'amsterdam' });
 
     const wrapper = mountWithIntl(
-      <CoreThemeProvider theme$={coreTheme$}>
+      <CoreThemeProvider theme$={coreTheme$} userProfile={userProfile}>
         <InnerComponent />
       </CoreThemeProvider>
     );

@@ -17,6 +17,7 @@ import { EuiPageTemplate } from '@elastic/eui';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { AppMountParameters } from '@kbn/core-application-browser';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { UrlOverflowUi } from './url_overflow_ui';
 
 interface Props {
@@ -69,16 +70,20 @@ const ErrorApp: React.FC<{ basePath: IBasePath; history: History }> = ({ basePat
 
 interface Deps {
   basePath: IBasePath;
+  userProfile: UserProfileService;
 }
 
 /**
  * Renders UI for displaying error messages.
  * @internal
  */
-export const renderApp = ({ element, history, theme$ }: AppMountParameters, { basePath }: Deps) => {
+export const renderApp = (
+  { element, history, theme$ }: AppMountParameters,
+  { basePath, userProfile }: Deps
+) => {
   ReactDOM.render(
     <I18nProvider>
-      <KibanaThemeProvider theme={{ theme$ }}>
+      <KibanaThemeProvider theme={{ theme$ }} userProfile={userProfile}>
         <ErrorApp history={history} basePath={basePath} />
       </KibanaThemeProvider>
     </I18nProvider>,

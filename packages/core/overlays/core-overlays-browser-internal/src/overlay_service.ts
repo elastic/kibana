@@ -9,6 +9,7 @@
 
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
@@ -20,6 +21,7 @@ interface StartDeps {
   analytics: AnalyticsServiceStart;
   i18n: I18nStart;
   theme: ThemeServiceStart;
+  userProfile: UserProfileService;
   targetDomElement: HTMLElement;
   uiSettings: IUiSettingsClient;
 }
@@ -30,17 +32,25 @@ export class OverlayService {
   private modalService = new ModalService();
   private flyoutService = new FlyoutService();
 
-  public start({ analytics, i18n, targetDomElement, uiSettings, theme }: StartDeps): OverlayStart {
+  public start({
+    analytics,
+    i18n,
+    targetDomElement,
+    uiSettings,
+    theme,
+    userProfile,
+  }: StartDeps): OverlayStart {
     const flyoutElement = document.createElement('div');
     targetDomElement.appendChild(flyoutElement);
     const flyouts = this.flyoutService.start({
       analytics,
       i18n,
       theme,
+      userProfile,
       targetDomElement: flyoutElement,
     });
 
-    const banners = this.bannersService.start({ uiSettings, analytics, i18n, theme });
+    const banners = this.bannersService.start({ uiSettings, analytics, i18n, theme, userProfile });
 
     const modalElement = document.createElement('div');
     targetDomElement.appendChild(modalElement);
@@ -48,6 +58,7 @@ export class OverlayService {
       analytics,
       i18n,
       theme,
+      userProfile,
       targetDomElement: modalElement,
     });
 
