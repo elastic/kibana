@@ -29,6 +29,11 @@ export function registerPolicyRoutes(
     .addVersion(
       {
         version: '2023-10-31',
+        security: {
+          authz: {
+            requiredPrivileges: ['securitySolution'],
+          },
+        },
         validate: {
           request: GetPolicyResponseSchema,
         },
