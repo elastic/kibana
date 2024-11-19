@@ -194,7 +194,7 @@
             "label": "privileges",
             "description": [],
             "signature": [
-              "{ canCreateApiKeys: boolean; canCreateIndex: boolean; }"
+              "{ canCreateApiKeys: boolean; canManageIndex: boolean; canDeleteDocuments: boolean; }"
             ],
             "path": "x-pack/plugins/search_indices/common/types.ts",
             "deprecated": false,

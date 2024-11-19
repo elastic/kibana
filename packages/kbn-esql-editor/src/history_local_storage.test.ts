@@ -20,7 +20,6 @@ describe('history local storage', function () {
   it('should add queries to cache correctly ', function () {
     addQueriesToCache({
       queryString: 'from kibana_sample_data_flights | limit 10',
-      timeZone: 'Browser',
     });
     const historyItems = getCachedQueries();
     expect(historyItems.length).toBe(1);
@@ -31,7 +30,6 @@ describe('history local storage', function () {
   it('should update queries to cache correctly ', function () {
     addQueriesToCache({
       queryString: 'from kibana_sample_data_flights \n | limit 10 \n | stats meow = avg(woof)',
-      timeZone: 'Browser',
       status: 'success',
     });
 
@@ -49,7 +47,6 @@ describe('history local storage', function () {
   it('should update queries to cache correctly if they are the same with different format', function () {
     addQueriesToCache({
       queryString: 'from kibana_sample_data_flights | limit 10 | stats meow = avg(woof)      ',
-      timeZone: 'Browser',
       status: 'success',
     });
 
@@ -68,7 +65,6 @@ describe('history local storage', function () {
     addQueriesToCache(
       {
         queryString: 'row 1',
-        timeZone: 'Browser',
         status: 'success',
       },
       2
