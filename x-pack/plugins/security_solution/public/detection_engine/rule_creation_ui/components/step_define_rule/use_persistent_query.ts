@@ -139,6 +139,6 @@ export function usePersistentQuery({
       setPersistentEqlQuery: (value: FieldValueQueryBar) => (eqlQueryRef.current = value),
       setPersistentEsqlQuery: (value: FieldValueQueryBar) => (esqlQueryRef.current = value),
     }),
-    [queryRef]
+    []
   );
 }
