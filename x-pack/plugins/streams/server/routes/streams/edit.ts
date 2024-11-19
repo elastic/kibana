@@ -59,22 +59,10 @@ export const editStreamRoute = createServerRoute({
       const parentId = getParentId(params.path.id);
       let parentDefinition: StreamDefinition | undefined;
 
-      if (parentId) {
-        parentDefinition = await updateParentStream(
-          scopedClusterClient,
-          parentId,
-          params.path.id,
-          logger
-        );
-      }
       const streamDefinition = { ...params.body };
 
-      await syncStream({
-        scopedClusterClient,
-        definition: { ...streamDefinition, id: params.path.id },
-        rootDefinition: parentDefinition,
-        logger,
-      });
+      // always need to go from the leaves to the parent when syncing ingest pipelines, otherwise data
+      // will be routed before the data stream is ready
 
       for (const child of streamDefinition.children) {
         const streamExists = await checkStreamExists({
@@ -97,6 +85,22 @@ export const editStreamRoute = createServerRoute({
           definition: childDefinition,
           logger,
         });
+      }
+
+      await syncStream({
+        scopedClusterClient,
+        definition: { ...streamDefinition, id: params.path.id },
+        rootDefinition: parentDefinition,
+        logger,
+      });
+
+      if (parentId) {
+        parentDefinition = await updateParentStream(
+          scopedClusterClient,
+          parentId,
+          params.path.id,
+          logger
+        );
       }
 
       return response.ok({ body: { acknowledged: true } });
