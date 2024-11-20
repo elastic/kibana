@@ -50,7 +50,7 @@ For Elastic Security release information, refer to {security-guide}/release-note
 ==== Kibana APIs
 
 [discrete]
-[[REPO-PR]]
+[[breaking-201004]]
 .[Cases] Legacy deprecations (9.0.0)
 [%collapsible]
 ====
