@@ -36,16 +36,11 @@ interface SemanticTextProperty extends MappingPropertyBase {
 }
 
 /*  
-  Preconfigured endpoints should be used from `search-inference-endpoint` plugin.
-  The plugin is private at this moment and will refactor once a decision is made.
+  This will be repalce once we add default elser inference_id 
+  with the index mapping response.
 */
-const PRECONFIGURED_ENDPOINTS = {
-  E5: '.multilingual-e5-small-elasticsearch',
-  ELSER: '.elser-2-elasticsearch',
-};
-
-const isInferencePreconfigured = (inferenceId: string) =>
-  Object.values(PRECONFIGURED_ENDPOINTS).includes(inferenceId);
+const ELSER_PRECONFIGURED_ENDPOINTS = '.elser-2-elasticsearch';
+const isInferencePreconfigured = (inferenceId: string) => inferenceId.startsWith('.');
 
 const parseMapping = (mappings: MappingTypeMapping) => {
   const fields = mappings.properties;
@@ -64,7 +59,7 @@ const getSemanticTextFields = (
     if (value.type === 'semantic_text') {
       value = value.inference_id
         ? value
-        : { ...value, inference_id: PRECONFIGURED_ENDPOINTS.ELSER };
+        : { ...value, inference_id: ELSER_PRECONFIGURED_ENDPOINTS };
     }
     const currentField: Array<{ path: string; source: SemanticTextProperty }> =
       value.type === 'semantic_text' ? [{ path: currentPath, source: value }] : [];
