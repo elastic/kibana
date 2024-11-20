@@ -44,6 +44,14 @@ const operatorConditionAndResults = [
     condition: { field: 'log.logger', operator: 'contains' as const, value: 'proxy' },
     result: '(ctx.log?.logger !== null && ctx.log?.logger.contains("proxy"))',
   },
+  {
+    condition: { field: 'log.logger', operator: 'exists' as const },
+    result: 'ctx.log?.logger !== null',
+  },
+  {
+    condition: { field: 'log.logger', operator: 'notExists' as const },
+    result: 'ctx.log?.logger == null',
+  },
 ];
 
 describe('conditionToPainless', () => {
