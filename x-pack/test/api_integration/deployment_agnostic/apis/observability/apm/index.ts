@@ -32,8 +32,11 @@ export default function apmApiIntegrationTests({
     loadTestFile(require.resolve('./service_maps'));
     loadTestFile(require.resolve('./inspect'));
     loadTestFile(require.resolve('./service_groups'));
+    loadTestFile(require.resolve('./time_range_metadata'));
     loadTestFile(require.resolve('./diagnostics'));
     loadTestFile(require.resolve('./service_nodes'));
     loadTestFile(require.resolve('./span_links'));
+    loadTestFile(require.resolve('./suggestions'));
+    loadTestFile(require.resolve('./throughput'));
   });
 }
