@@ -11,6 +11,49 @@ export const OVERVIEW = i18n.translate('xpack.securitySolution.endpointDetails.o
   defaultMessage: 'Overview',
 });
 
+export const ENDPOINT_INSIGHTS = {
+  sectionTitle: i18n.translate(
+    'xpack.securitySolution.endpointDetails.endpointInsights.sectionTitle',
+    {
+      defaultMessage: 'Issues',
+    }
+  ),
+  sectionTitleRight: i18n.translate(
+    'xpack.securitySolution.endpointDetails.endpointInsights.extraAction',
+    {
+      defaultMessage: 'Last scans: ',
+    }
+  ),
+  scanTitle: i18n.translate('xpack.securitySolution.endpointDetails.endpointInsights.scanTitle', {
+    defaultMessage: 'AI-Powered issue scan',
+  }),
+  scanButton: {
+    title: i18n.translate(
+      'xpack.securitySolution.endpointDetails.endpointInsights.scanButton.title',
+      {
+        defaultMessage: 'Scan',
+      }
+    ),
+    addScanner: i18n.translate(
+      'xpack.securitySolution.endpointDetails.endpointInsights.scanButton.addScanner',
+      {
+        defaultMessage: 'Add scanner',
+      }
+    ),
+  },
+  issues: {
+    title: i18n.translate('xpack.securitySolution.endpointDetails.endpointInsights.issues.title', {
+      defaultMessage: 'Issues',
+    }),
+    emptyResults: i18n.translate(
+      'xpack.securitySolution.endpointDetails.endpointInsights.issues.emptyResults',
+      {
+        defaultMessage: 'No issues had been found',
+      }
+    ),
+  },
+};
+
 export const ACTIVITY_LOG = {
   tabTitle: i18n.translate('xpack.securitySolution.endpointDetails.responseActionsHistory', {
     defaultMessage: 'Response actions history',

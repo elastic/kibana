@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EndpointInsights } from './components/insights/endpoint_insights';
 import { isPolicyOutOfDate } from '../../utils';
 import { AgentStatus } from '../../../../../common/components/endpoint/agents/agent_status';
 import type { HostInfo } from '../../../../../../common/endpoint/types';
@@ -184,6 +185,7 @@ export const EndpointDetailsContent = memo<EndpointDetailsContentProps>(
 
     return (
       <div>
+        <EndpointInsights />
         <EuiSpacer size="s" />
         <EuiDescriptionList
           columnWidths={[1, 3]}
