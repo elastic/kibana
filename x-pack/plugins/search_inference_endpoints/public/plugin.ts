@@ -52,12 +52,9 @@ export class SearchInferenceEndpointsPlugin
         {
           id: 'inferenceEndpoints',
           path: `/${INFERENCE_ENDPOINTS_PATH}`,
-          title: i18n.translate(
-            'xpack.enterpriseSearch.navigation.relevanceInferenceEndpointsLinkLabel',
-            {
-              defaultMessage: 'Inference Endpoints',
-            }
-          ),
+          title: i18n.translate('xpack.searchInferenceEndpoints.InferenceEndpointsLinkLabel', {
+            defaultMessage: 'Inference Endpoints',
+          }),
         },
       ],
       title: PLUGIN_NAME,
