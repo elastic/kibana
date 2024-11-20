@@ -54,10 +54,11 @@ export function usePersistentQuery({ form }: UsePersistentQueryParams): UsePersi
    * fields. Kibana's Form lib doesn't persist field values when corresponding UseField hooks
    * aren't rendered.
    */
-  const [{ [RULE_TYPE_FIELD_NAME]: ruleType, [QUERY_BAR_FIELD_NAME]: currentQuery }] = useFormData({
-    form,
-    watch: [RULE_TYPE_FIELD_NAME, QUERY_BAR_FIELD_NAME],
-  });
+  const [{ [RULE_TYPE_FIELD_NAME]: ruleType, [QUERY_BAR_FIELD_NAME]: currentQuery }] =
+    useFormData<DefineStepRule>({
+      form,
+      watch: [RULE_TYPE_FIELD_NAME, QUERY_BAR_FIELD_NAME],
+    });
   const previousRuleType = usePrevious(ruleType);
   const queryRef = useRef<FieldValueQueryBar>(DEFAULT_KQL_QUERY_FIELD_VALUE);
   const eqlQueryRef = useRef<FieldValueQueryBar>(DEFAULT_EQL_QUERY_FIELD_VALUE);
