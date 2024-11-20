@@ -121,7 +121,7 @@ export class HasData {
 
   // ES Data
 
-  private isResponseError = (e: any): e is IHttpFetchError<ResponseErrorBody> =>
+  private isResponseError = (e: Error): e is IHttpFetchError<ResponseErrorBody> =>
     isHttpFetchError(e) && isObject(e.body) && 'message' in e.body && 'statusCode' in e.body;
 
   private responseToItemArray = (response: IndicesResponse): IndicesResponseModified[] => {
