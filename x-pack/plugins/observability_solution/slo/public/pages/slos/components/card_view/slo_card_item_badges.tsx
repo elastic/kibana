@@ -9,7 +9,7 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useCallback } from 'react';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 import { SloIndicatorTypeBadge } from '../badges/slo_indicator_type_badge';
 import { SloActiveAlertsBadge } from '../../../../components/slo/slo_status_badge/slo_active_alerts_badge';
 import { BurnRateRuleParams } from '../../../../typings';
@@ -29,11 +29,6 @@ interface Props {
   handleCreateRule?: () => void;
 }
 
-const Container = styled.div`
-  display: inline-block;
-  margin-top: 5px;
-`;
-
 export function SloCardItemBadges({ slo, activeAlerts, rules, handleCreateRule }: Props) {
   const { onStateChange } = useUrlSearchState();
 
@@ -52,10 +47,15 @@ export function SloCardItemBadges({ slo, activeAlerts, rules, handleCreateRule }
   const numberOfTagsToDisplay = !isRemote || (rules ?? []).length > 0 ? 2 : 1;
 
   return (
-    <Container
+    <div
+      css={({ euiTheme }) => css`
+        display: inline-block;
+        margin-top: ${euiTheme.size.xs};
+      `}
       onClick={(evt) => {
         evt.stopPropagation();
       }}
+      aria-hidden="true"
     >
       <EuiFlexGroup direction="row" responsive={false} gutterSize="xs" alignItems="center" wrap>
         {!slo.summary ? (
@@ -78,6 +78,6 @@ export function SloCardItemBadges({ slo, activeAlerts, rules, handleCreateRule }
           </>
         )}
       </EuiFlexGroup>
-    </Container>
+    </div>
   );
 }
