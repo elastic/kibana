@@ -1378,6 +1378,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test/api_integration/apis/logs_shared @elastic/obs-ux-logs-team
 
 # Observability-ui
+/x-pack/test_serverless/functional/test_suites/observability @elastic/observability-ui
 /x-pack/test_serverless/api_integration/test_suites/observability/index.ts @elastic/observability-ui
 /x-pack/test/functional_solution_sidenav/tests/observability_sidenav.ts @elastic/observability-ui
 /x-pack/test/functional/page_objects/observability_page.ts @elastic/observability-ui
