@@ -371,6 +371,8 @@ import type {
   StartRuleMigrationResponse,
   StopRuleMigrationRequestParamsInput,
   StopRuleMigrationResponse,
+  UpdateRuleMigrationRequestBodyInput,
+  UpdateRuleMigrationResponse,
   UpsertRuleMigrationResourcesRequestParamsInput,
   UpsertRuleMigrationResourcesRequestBodyInput,
   UpsertRuleMigrationResourcesResponse,
@@ -2099,6 +2101,22 @@ detection engine rules.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Updates rules migrations attributes
+   */
+  async updateRuleMigration(props: UpdateRuleMigrationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpdateRuleMigration`);
+    return this.kbnClient
+      .request<UpdateRuleMigrationResponse>({
+        path: '/internal/siem_migrations/rules',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'PUT',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async uploadAssetCriticalityRecords(props: UploadAssetCriticalityRecordsProps) {
     this.log.info(`${new Date().toISOString()} Calling API UploadAssetCriticalityRecords`);
     return this.kbnClient
@@ -2400,6 +2418,9 @@ export interface TriggerRiskScoreCalculationProps {
 }
 export interface UpdateRuleProps {
   body: UpdateRuleRequestBodyInput;
+}
+export interface UpdateRuleMigrationProps {
+  body: UpdateRuleMigrationRequestBodyInput;
 }
 export interface UploadAssetCriticalityRecordsProps {
   attachment: FormData;
