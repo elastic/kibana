@@ -143,7 +143,7 @@ describe('EditConnectorFlyout', () => {
     });
 
     await waitFor(() => {
-      expect(queryByText('This connector is readonly.')).not.toBeInTheDocument();
+      expect(queryByText('This connector is read-only.')).not.toBeInTheDocument();
       expect(getByTestId('nameInput')).toHaveValue('My test');
       expect(getByTestId('test-connector-text-field')).toHaveValue('My text field');
     });
@@ -176,7 +176,7 @@ describe('EditConnectorFlyout', () => {
       />
     );
 
-    expect(getByText('This connector is readonly.')).toBeInTheDocument();
+    expect(getByText('This connector is read-only.')).toBeInTheDocument();
   });
 
   it('shows the buttons', async () => {

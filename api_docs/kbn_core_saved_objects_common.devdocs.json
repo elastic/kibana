@@ -1266,14 +1266,6 @@
             "path": "x-pack/plugins/canvas/public/components/home/hooks/use_upload_workpad.ts"
           },
           {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/saved_object/helpers/find_object_by_title.test.ts"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/saved_object/helpers/find_object_by_title.test.ts"
-          },
-          {
             "plugin": "@kbn/core",
             "path": "src/core/types/index.ts"
           },
@@ -1656,30 +1648,6 @@
             "path": "src/plugins/saved_objects/public/types.ts"
           },
           {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/saved_object/helpers/find_object_by_title.ts"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/saved_object/helpers/find_object_by_title.ts"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/saved_object/helpers/create_source.ts"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/saved_object/helpers/create_source.ts"
-          },
-          {
             "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/utils/saved_visualize_utils.ts"
           },
@@ -1726,18 +1694,6 @@
           {
             "plugin": "graph",
             "path": "x-pack/plugins/graph/public/helpers/saved_workspace_utils.ts"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.test.ts"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.test.ts"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.test.ts"
           },
           {
             "plugin": "@kbn/core",
