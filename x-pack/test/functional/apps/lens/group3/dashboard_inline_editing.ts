@@ -138,9 +138,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await timeToVisualize.resetNewDashboard();
     });
 
-    it('should reset changes made to the previous chart created from dashboard', async () => {
+    it('should reset changes made to the previous chart with adHoc dataView created from dashboard', async () => {
       await dashboard.navigateToApp();
       await dashboard.clickNewDashboard();
+
+      // it creates a XY histogram with a breakdown by ip
+      await lens.createAndAddLensFromDashboard({ useAdHocDataView: true });
+      await elasticChart.setNewChartUiDebugFlag(true);
+      // now edit inline and remove the breakdown dimension
+      await dashboardPanelActions.clickInlineEdit();
+      await lens.removeDimension('lnsXY_splitDimensionPanel');
+
+      log.debug('Cancels the changes');
+      await testSubjects.click('cancelFlyoutButton');
+      await dashboard.waitForRenderComplete();
+
+      const data = await lens.getCurrentChartDebugStateForVizType('xyVisChart');
+      expect(data?.bars?.length).to.be.above(1);
+      // open the inline editor again and check that the breakdown is still there
+      await dashboardPanelActions.clickInlineEdit();
+      expect(await testSubjects.exists('lnsXY_splitDimensionPanel')).to.be(true);
+      // exit via cancel again
+      await testSubjects.click('cancelFlyoutButton');
+    });
+
+    it('should reset changes made to the previous chart created from dashboard', async () => {
+      await dashboardPanelActions.removePanel();
 
       // it creates a XY histogram with a breakdown by ip
       await lens.createAndAddLensFromDashboard({});
