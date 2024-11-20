@@ -7,10 +7,15 @@
 
 import type { DeprecationsDetails, GetDeprecationsContext, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-
+import { DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL } from '../../common/constants';
 import type { ConfigType } from '../config';
 
 import { getNonMigratedSignalsInfo } from '../lib/detection_engine/migrations/get_non_migrated_signals_info';
+
+const constructMigrationApiCall = (space: string, range: string) =>
+  `GET <kibana host>:<port>${
+    space === 'default' ? '' : `/s/${space}`
+  }${DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL}?from=${range}`;
 
 export const getSignalsMigrationDeprecationsInfo = async (
   ctx: GetDeprecationsContext,
@@ -55,16 +60,27 @@ export const getSignalsMigrationDeprecationsInfo = async (
                 },
               }
             ),
-            i18n.translate(
-              'xpack.securitySolution.deprecations.migrateIndexIlmPolicy.signalsMigrationManualStepThree',
-              {
-                defaultMessage:
-                  'Oldest non-migrated signal found with "{fromRange}" timestamp. Use this value as query parameter "from" in migration API.',
-                values: {
-                  fromRange,
-                },
-              }
-            ),
+            ...(fromRange
+              ? [
+                  i18n.translate(
+                    'xpack.securitySolution.deprecations.migrateIndexIlmPolicy.signalsMigrationManualStepThree',
+                    {
+                      defaultMessage:
+                        'Oldest non-migrated signal found with "{fromRange}" timestamp. Use this value as query parameter "from" in migration API.',
+                      values: {
+                        fromRange,
+                      },
+                    }
+                  ),
+                  i18n.translate(
+                    'xpack.securitySolution.deprecations.migrateIndexIlmPolicy.signalsMigrationManualStepFour',
+                    {
+                      defaultMessage: 'Example of migration API calls:',
+                    }
+                  ),
+                  ...spaces.map((space) => constructMigrationApiCall(space, fromRange)),
+                ]
+              : []),
           ],
         },
       },
