@@ -20,9 +20,5 @@ export function parseEndpoint(endpoint: string) {
     throw new Error(`Endpoint ${endpoint} was not prefixed with a valid HTTP method`);
   }
 
-  if (!version && pathname.startsWith('/api')) {
-    throw new Error(`Missing version for public endpoint ${endpoint}`);
-  }
-
   return { method, pathname, version };
 }

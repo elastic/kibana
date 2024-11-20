@@ -22,7 +22,7 @@ import {
 } from '@kbn/server-route-repository-utils';
 import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
 import { isZod } from '@kbn/zod';
-import { merge } from 'lodash';
+import { merge, omit } from 'lodash';
 import { Observable, isObservable } from 'rxjs';
 import { ServerSentEvent } from '@kbn/sse-utils';
 import { passThroughValidationObject, noParamsValidationObject } from './validation_objects';
@@ -52,7 +52,10 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
   const router = core.http.createRouter();
 
   routes.forEach((route) => {
-    const { params, endpoint, options, handler } = route;
+    const { endpoint, handler } = route;
+
+    const params = 'params' in route ? route.params : undefined;
+    const options = 'options' in route ? route.options! : {};
 
     const { method, pathname, version } = parseEndpoint(endpoint);
 
@@ -141,16 +144,18 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
       router[method](
         {
           path: pathname,
-          options,
+          options: omit(options, 'security'),
           validate: validationObject,
+          security: options.security,
         },
         wrappedHandler
       );
     } else {
       router.versioned[method]({
         path: pathname,
-        access: pathname.startsWith('/internal/') ? 'internal' : 'public',
-        options,
+        access: options.access ?? (pathname.startsWith('/internal/') ? 'internal' : 'public'),
+        options: omit(options, 'access', 'security'),
+        security: options.security,
       }).addVersion(
         {
           version,

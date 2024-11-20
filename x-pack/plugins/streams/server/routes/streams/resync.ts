@@ -10,12 +10,9 @@ import { createServerRoute } from '../create_server_route';
 import { syncStream, readStream, listStreams } from '../../lib/streams/stream_crud';
 
 export const resyncStreamsRoute = createServerRoute({
-  endpoint: 'POST /api/streams/_resync 2023-10-31',
+  endpoint: 'POST /api/streams/_resync',
   options: {
-    access: 'public',
-    availability: {
-      stability: 'experimental',
-    },
+    access: 'internal',
     security: {
       authz: {
         enabled: false,
@@ -25,15 +22,20 @@ export const resyncStreamsRoute = createServerRoute({
     },
   },
   params: z.object({}),
-  handler: async ({ response, logger, request, getScopedClients }) => {
+  handler: async ({
+    response,
+    logger,
+    request,
+    getScopedClients,
+  }): Promise<{ acknowledged: true }> => {
     const { scopedClusterClient } = await getScopedClients({ request });
 
-    const streams = await listStreams({ scopedClusterClient });
+    const { definitions: streams } = await listStreams({ scopedClusterClient });
 
     for (const stream of streams) {
       const { definition } = await readStream({
         scopedClusterClient,
-        id: stream.id[0],
+        id: stream.id,
       });
       await syncStream({
         scopedClusterClient,
@@ -42,6 +44,6 @@ export const resyncStreamsRoute = createServerRoute({
       });
     }
 
-    return response.ok({});
+    return { acknowledged: true };
   },
 });

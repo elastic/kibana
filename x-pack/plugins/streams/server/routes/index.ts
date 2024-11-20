@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { esqlRoutes } from './esql/route';
 import { deleteStreamRoute } from './streams/delete';
+import { disableStreamsRoute } from './streams/disable';
 import { editStreamRoute } from './streams/edit';
 import { enableStreamsRoute } from './streams/enable';
 import { forkStreamsRoute } from './streams/fork';
 import { listStreamsRoute } from './streams/list';
 import { readStreamRoute } from './streams/read';
 import { resyncStreamsRoute } from './streams/resync';
+import { streamsStatusRoutes } from './streams/settings';
 
 export const StreamsRouteRepository = {
   ...enableStreamsRoute,
@@ -21,6 +24,9 @@ export const StreamsRouteRepository = {
   ...editStreamRoute,
   ...deleteStreamRoute,
   ...listStreamsRoute,
+  ...streamsStatusRoutes,
+  ...esqlRoutes,
+  ...disableStreamsRoute,
 };
 
 export type StreamsRouteRepository = typeof StreamsRouteRepository;
