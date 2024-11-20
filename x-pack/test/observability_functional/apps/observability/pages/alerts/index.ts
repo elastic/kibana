@@ -73,8 +73,7 @@ export default ({ getService }: FtrProviderContext) => {
           await observability.alerts.common.submitQuery('');
         });
 
-        // TODO: This test fails on CI but succeeds locally
-        it.skip('Autocompletion works', async () => {
+        it('Autocompletion works', async () => {
           await observability.alerts.common.typeInQueryBar('kibana.alert.s');
           await observability.alerts.common.clickOnQueryBar();
           await testSubjects.existOrFail('autocompleteSuggestion-field-kibana.alert.start-');
