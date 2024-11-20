@@ -71,6 +71,7 @@ export const useMockDashboardApi = ({
       canRemovePanels: () => true,
     };
     // only run onMount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return mockDashboardApi;
