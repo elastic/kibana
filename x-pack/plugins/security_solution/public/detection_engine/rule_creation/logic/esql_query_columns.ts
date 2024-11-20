@@ -35,11 +35,16 @@ function tanstackFetchConfigFactory(esqlQuery: string): FetchQueryOptions<Datata
         return [];
       }
 
-      return getESQLQueryColumns({
-        esqlQuery,
-        search: KibanaServices.get().data.search.search,
-      });
+      try {
+        return getESQLQueryColumns({
+          esqlQuery,
+          search: KibanaServices.get().data.search.search,
+        });
+      } catch {
+        return [];
+      }
     },
     staleTime: 60 * 1000,
+    retry: 0,
   };
 }
