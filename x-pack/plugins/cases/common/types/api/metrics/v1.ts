@@ -23,6 +23,7 @@ export enum CaseMetricsFeature {
   CONNECTORS = 'connectors',
   LIFESPAN = 'lifespan',
   MTTR = 'mttr',
+  STATUS = 'status',
 }
 
 export const SingleCaseMetricsFeatureFieldRt = rt.union([
@@ -37,6 +38,7 @@ export const SingleCaseMetricsFeatureFieldRt = rt.union([
 export const CasesMetricsFeatureFieldRt = rt.union([
   SingleCaseMetricsFeatureFieldRt,
   rt.literal(CaseMetricsFeature.MTTR),
+  rt.literal(CaseMetricsFeature.STATUS),
 ]);
 
 const StatusInfoRt = rt.strict({
@@ -210,6 +212,10 @@ export const CasesMetricsResponseRt = rt.exact(
      * The average resolve time of all cases in seconds
      */
     mttr: rt.union([rt.number, rt.null]),
+    /**
+     * The number of total cases per status
+     */
+    status: rt.strict({ open: rt.number, inProgress: rt.number, closed: rt.number }),
   })
 );
 
