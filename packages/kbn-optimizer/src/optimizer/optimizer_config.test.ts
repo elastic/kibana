@@ -8,10 +8,10 @@
  */
 
 jest.mock('@kbn/repo-packages');
+jest.mock('@kbn/core-ui-settings-common');
 jest.mock('./assign_bundles_to_workers');
 jest.mock('./kibana_platform_plugins');
 jest.mock('./get_plugin_bundles');
-jest.mock('../common/theme_tags');
 jest.mock('./filter_by_id');
 jest.mock('./focus_bundles');
 jest.mock('../limits');
@@ -29,7 +29,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 
 import { OptimizerConfig, ParsedOptions } from './optimizer_config';
-import { parseThemeTags } from '../common';
+import { parseThemeTags } from '@kbn/core-ui-settings-common';
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
