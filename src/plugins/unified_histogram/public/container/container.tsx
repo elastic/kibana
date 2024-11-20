@@ -28,6 +28,7 @@ import { useStateProps } from './hooks/use_state_props';
 import { useStateSelector } from './utils/use_state_selector';
 import { topPanelHeightSelector } from './utils/state_selectors';
 import { exportVisContext } from '../utils/external_vis_context';
+import { getBreakdownField } from './utils/local_storage_utils';
 
 type LayoutProps = Pick<
   UnifiedHistogramLayoutProps,
@@ -94,7 +95,7 @@ export type UnifiedHistogramApi = {
 export const UnifiedHistogramContainer = forwardRef<
   UnifiedHistogramApi,
   UnifiedHistogramContainerProps
->(({ breakdownField, onBreakdownFieldChange, onVisContextChanged, ...containerProps }, ref) => {
+>(({ onBreakdownFieldChange, onVisContextChanged, ...containerProps }, ref) => {
   const [layoutProps, setLayoutProps] = useState<LayoutProps>();
   const [localStorageKeyPrefix, setLocalStorageKeyPrefix] = useState<string>();
   const [stateService, setStateService] = useState<UnifiedHistogramStateService>();
@@ -141,6 +142,13 @@ export const UnifiedHistogramContainer = forwardRef<
   const { services, dataView, query, columns, searchSessionId, requestAdapter, isChartLoading } =
     containerProps;
   const topPanelHeight = useStateSelector(stateService?.state$, topPanelHeightSelector);
+  const initialBreakdownField = useMemo(
+    () =>
+      localStorageKeyPrefix
+        ? getBreakdownField(services.storage, localStorageKeyPrefix)
+        : undefined,
+    [localStorageKeyPrefix, services.storage]
+  );
   const stateProps = useStateProps({
     services,
     localStorageKeyPrefix,
@@ -150,7 +158,8 @@ export const UnifiedHistogramContainer = forwardRef<
     searchSessionId,
     requestAdapter,
     columns,
-    breakdownField,
+    breakdownField: initialBreakdownField,
+    ...pick(containerProps, 'breakdownField'),
     onBreakdownFieldChange,
   });
 

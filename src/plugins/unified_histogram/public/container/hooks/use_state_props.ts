@@ -64,6 +64,7 @@ export const useStateProps = ({
     stateService?.state$,
     lensEmbeddableOutputSelector$
   );
+
   /**
    * Contexts
    */
