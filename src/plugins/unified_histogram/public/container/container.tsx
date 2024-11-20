@@ -50,6 +50,8 @@ export type UnifiedHistogramContainerProps = {
   searchSessionId?: UnifiedHistogramRequestContext['searchSessionId'];
   requestAdapter?: UnifiedHistogramRequestContext['adapter'];
   isChartLoading?: boolean;
+  breakdownField?: string;
+  onBreakdownFieldChange?: (breakdownField: string | undefined) => void;
   onVisContextChanged?: (
     nextVisContext: UnifiedHistogramVisContext | undefined,
     externalVisContextStatus: UnifiedHistogramExternalVisContextStatus
@@ -86,19 +88,15 @@ export type UnifiedHistogramApi = {
   refetch: () => void;
 } & Pick<
   UnifiedHistogramStateService,
-  | 'state$'
-  | 'setChartHidden'
-  | 'setTopPanelHeight'
-  | 'setBreakdownField'
-  | 'setTimeInterval'
-  | 'setTotalHits'
+  'state$' | 'setChartHidden' | 'setTopPanelHeight' | 'setTimeInterval' | 'setTotalHits'
 >;
 
 export const UnifiedHistogramContainer = forwardRef<
   UnifiedHistogramApi,
   UnifiedHistogramContainerProps
->(({ onVisContextChanged, ...containerProps }, ref) => {
+>(({ breakdownField, onBreakdownFieldChange, onVisContextChanged, ...containerProps }, ref) => {
   const [layoutProps, setLayoutProps] = useState<LayoutProps>();
+  const [localStorageKeyPrefix, setLocalStorageKeyPrefix] = useState<string>();
   const [stateService, setStateService] = useState<UnifiedHistogramStateService>();
   const [lensSuggestionsApi, setLensSuggestionsApi] = useState<LensSuggestionsApi>();
   const [input$] = useState(() => new Subject<UnifiedHistogramInputMessage>());
@@ -114,6 +112,7 @@ export const UnifiedHistogramContainer = forwardRef<
     const apiHelper = await services.lens.stateHelperApi();
 
     setLayoutProps(pick(options, 'disableAutoFetching', 'disableTriggers', 'disabledActions'));
+    setLocalStorageKeyPrefix(options?.localStorageKeyPrefix);
     setStateService(createStateService({ services, ...options }));
     setLensSuggestionsApi(() => apiHelper.suggestions);
   });
@@ -133,21 +132,26 @@ export const UnifiedHistogramContainer = forwardRef<
         'state$',
         'setChartHidden',
         'setTopPanelHeight',
-        'setBreakdownField',
         'setTimeInterval',
         'setTotalHits'
       ),
     });
   }, [input$, stateService]);
-  const { dataView, query, searchSessionId, requestAdapter, isChartLoading } = containerProps;
+
+  const { services, dataView, query, columns, searchSessionId, requestAdapter, isChartLoading } =
+    containerProps;
   const topPanelHeight = useStateSelector(stateService?.state$, topPanelHeightSelector);
   const stateProps = useStateProps({
+    services,
+    localStorageKeyPrefix,
     stateService,
     dataView,
     query,
     searchSessionId,
     requestAdapter,
-    columns: containerProps.columns,
+    columns,
+    breakdownField,
+    onBreakdownFieldChange,
   });
 
   const handleVisContextChange: UnifiedHistogramLayoutProps['onVisContextChanged'] | undefined =
