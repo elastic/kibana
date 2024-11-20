@@ -147,7 +147,7 @@ export class SingleMetricLensAttributes extends LensAttributes {
             ? {
                 id: 'percent',
                 params: {
-                  decimals: 1,
+                  decimals: 3,
                 },
               }
             : undefined,

@@ -7,7 +7,8 @@
 
 import { UrlFilter } from '@kbn/exploratory-view-plugin/public';
 import { useSelector } from 'react-redux';
-import { useGetUrlParams } from '../../../hooks';
+import { isEmpty } from 'lodash';
+import { useGetUrlParams } from '../../../hooks/use_url_params';
 import { useKibanaSpace } from '../../../../../hooks/use_kibana_space';
 import { selectOverviewStatus } from '../../../state/overview_status';
 
@@ -19,7 +20,7 @@ export const useMonitorFilters = ({ forAlerts }: { forAlerts?: boolean }): UrlFi
 
   return [
     // since schedule isn't available in heartbeat data, in that case we rely on monitor.id
-    ...(allIds?.length && schedules ? [{ field: 'monitor.id', values: allIds }] : []),
+    ...(allIds?.length && !isEmpty(schedules) ? [{ field: 'monitor.id', values: allIds }] : []),
     ...(projects?.length ? [{ field: 'monitor.project.id', values: getValues(projects) }] : []),
     ...(monitorTypes?.length ? [{ field: 'monitor.type', values: getValues(monitorTypes) }] : []),
     ...(tags?.length ? [{ field: 'tags', values: getValues(tags) }] : []),
