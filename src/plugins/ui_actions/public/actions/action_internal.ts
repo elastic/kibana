@@ -29,6 +29,7 @@ export class ActionInternal<Context extends object = object>
 
   public readonly subscribeToCompatibilityChanges?: Action<Context>['subscribeToCompatibilityChanges'];
   public readonly couldBecomeCompatible?: Action<Context>['couldBecomeCompatible'];
+  public errorLogged?: boolean;
 
   constructor(public readonly definition: ActionDefinition<Context>) {
     this.id = this.definition.id;
@@ -38,6 +39,7 @@ export class ActionInternal<Context extends object = object>
     this.grouping = this.definition.grouping;
     this.showNotification = this.definition.showNotification;
     this.disabled = this.definition.disabled;
+    this.errorLogged = false;
 
     if (this.definition.subscribeToCompatibilityChanges) {
       this.subscribeToCompatibilityChanges = definition.subscribeToCompatibilityChanges;
@@ -77,7 +79,16 @@ export class ActionInternal<Context extends object = object>
 
   public async isCompatible(context: Context): Promise<boolean> {
     if (!this.definition.isCompatible) return true;
-    return await this.definition.isCompatible(context);
+    try {
+      return await this.definition.isCompatible(context);
+    } catch (e) {
+      if (!this.errorLogged) {
+        // eslint-disable-next-line no-console
+        console.error(e);
+        this.errorLogged = true;
+      }
+      return false;
+    }
   }
 
   public async getHref(context: Context): Promise<string | undefined> {
