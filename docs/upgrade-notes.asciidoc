@@ -50,6 +50,25 @@ For Elastic Security release information, refer to {security-guide}/release-note
 ==== Kibana APIs
 
 [discrete]
+[[REPO-PR]]
+.[Cases] Legacy deprecations (9.0.0)
+[%collapsible]
+====
+*Details* +
+`GET /api/cases/status` has been deprecated with no replacement
+`GET /api/cases/{case_id}/comments` has been replaced by `GET /api/cases/{case_id}/comments/_find` released in 7.13
+`GET /api/cases/<case_id>/user_actions` has been replaced by `GET /api/cases/<case_id>/user_actions/_find` released in 8.7
+`includeComments` parameter in `GET /api/cases/{case_id}`has been deprecated. Use `GET /api/cases/{case_id}/comments/_find` instead, released in 7.13
+
+*Impact* +
+Deprecated endpoints will fail with a 404 status code starting from version 9.0.0
+
+*Action* +
+Remove references to `GET /api/cases/status` endpoint.
+Replace references to endpoints listed as deprecated by it's replacement. See `Details` section 
+====
+
+[discrete]
 [[breaking-193792]]
 .Access to all internal APIs is blocked (9.0.0)
 [%collapsible]
