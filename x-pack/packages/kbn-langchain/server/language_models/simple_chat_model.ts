@@ -43,7 +43,7 @@ function _formatMessages(messages: BaseMessage[]) {
   if (!messages.length) {
     throw new Error('No messages provided.');
   }
-  return messages.map((message, i) => {
+  return messages.map((message) => {
     if (typeof message.content !== 'string') {
       throw new Error('Multimodal messages are not supported.');
     }
