@@ -14,6 +14,7 @@
       "entityManager",
       "observabilityShared",
       "presentationUtil",
+      "usageCollection",
       "licensing"
     ],
     "optionalPlugins": [

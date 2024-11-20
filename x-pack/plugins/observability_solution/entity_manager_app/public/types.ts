@@ -12,11 +12,13 @@ import {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { EntityManagerPublicPluginSetup } from '@kbn/entityManager-plugin/public/types';
 
 export interface EntityManagerPluginSetup {
   observabilityShared: ObservabilitySharedPluginSetup;
   serverless?: ServerlessPluginSetup;
+  usageCollection: UsageCollectionSetup;
   entityManager: EntityManagerPublicPluginSetup;
 }
 
