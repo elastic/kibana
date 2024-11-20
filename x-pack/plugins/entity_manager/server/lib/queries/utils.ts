@@ -25,9 +25,10 @@ function mergeEntities(entity1: Entity, entity2: Entity): Entity {
     _key.startsWith('metadata.')
   )) {
     if (merged[key]) {
-      merged[key] = uniq(
-        Array.isArray(merged[key]) ? [...merged[key], value] : [merged[key], value]
-      );
+      merged[key] = uniq([
+        ...(Array.isArray(merged[key]) ? merged[key] : [merged[key]]),
+        ...(Array.isArray(value) ? value : [value]),
+      ]);
     } else {
       merged[key] = value;
     }
