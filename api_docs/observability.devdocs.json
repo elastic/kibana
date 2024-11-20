@@ -14233,11 +14233,29 @@
         "parentPluginId": "observability",
         "id": "def-common.casesFeatureId",
         "type": "string",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "casesFeatureId",
         "description": [],
         "signature": [
           "\"observabilityCases\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability/common/index.ts",
+        "deprecated": true,
+        "trackAdoption": false,
+        "references": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.casesFeatureIdV2",
+        "type": "string",
+        "tags": [],
+        "label": "casesFeatureIdV2",
+        "description": [],
+        "signature": [
+          "\"observabilityCasesV2\""
         ],
         "path": "x-pack/plugins/observability_solution/observability/common/index.ts",
         "deprecated": false,

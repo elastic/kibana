@@ -25686,6 +25686,20 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.PackageSpecManifest.policy_templates_behavior",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "policy_templates_behavior",
+            "description": [],
+            "signature": [
+              "\"all\" | \"combined_policy\" | \"individual_policies\" | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/package_spec.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.PackageSpecManifest.policy_templates",
             "type": "Array",
             "tags": [],
@@ -28718,7 +28732,7 @@
             "section": "def-common.RegistryDataStream",
             "text": "RegistryDataStream"
           },
-          "[] | undefined; policy_templates?: ",
+          "[] | undefined; policy_templates_behavior?: \"all\" | \"combined_policy\" | \"individual_policies\" | undefined; policy_templates?: ",
           {
             "pluginId": "fleet",
             "scope": "common",

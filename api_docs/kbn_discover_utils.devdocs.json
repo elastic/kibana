@@ -3821,7 +3821,7 @@
             "label": "color",
             "description": [],
             "signature": [
-              "\"text\" | \"warning\" | \"success\" | \"primary\" | \"accent\" | \"danger\" | undefined"
+              "\"text\" | \"warning\" | \"success\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | undefined"
             ],
             "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
             "deprecated": false,
