@@ -11,19 +11,11 @@ import useDebounce from 'react-use/lib/useDebounce';
 import { computeIsESQLQueryAggregating } from '@kbn/securitysolution-utils';
 import { useEsqlQueryColumns } from '../../rule_creation/logic/esql_query_columns';
 
-const esqlToFields = (
-  columns: { error: unknown } | DatatableColumn[] | undefined | null
-): DataViewFieldBase[] => {
-  if (columns && 'error' in columns) {
-    return [];
-  }
-
-  const fields = (columns ?? []).map(({ id, meta }) => {
-    return {
-      name: id,
-      type: meta.type,
-    };
-  });
+const esqlToFields = (columns: DatatableColumn[]): DataViewFieldBase[] => {
+  const fields = columns.map(({ id, meta }) => ({
+    name: id,
+    type: meta.type,
+  }));
 
   return fields;
 };
@@ -37,11 +29,11 @@ type UseEsqlFields = (esqlQuery: string | undefined) => {
  * fetches ES|QL fields and convert them to DataViewBase fields
  */
 export const useEsqlFields: UseEsqlFields = (esqlQuery) => {
-  const { data, isLoading } = useEsqlQueryColumns(esqlQuery ?? '');
+  const { columns, isLoading } = useEsqlQueryColumns(esqlQuery ?? '');
 
   const fields = useMemo(() => {
-    return esqlToFields(data);
-  }, [data]);
+    return esqlToFields(columns);
+  }, [columns]);
 
   return {
     fields,

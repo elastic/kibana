@@ -37,6 +37,11 @@ describe('esqlQueryValidator', () => {
         'FROM kibana_sample_data_logs | STATS total_bytes = SUM(bytes) BY host | WHERE total_bytes > 200000 | SORT total_bytes DESC | LIMIT 10',
       ],
       [
+        `from packetbeat* metadata
+        _id
+        | limit 100`,
+      ],
+      [
         `FROM kibana_sample_data_logs |
          STATS total_bytes = SUM(bytes) BY host |
          WHERE total_bytes > 200000 |
@@ -73,7 +78,14 @@ describe('esqlQueryValidator', () => {
       ['from test* metadata _id, _index'],
       ['from test* metadata _index, _id'],
       ['from test*  metadata _id '],
+      ['from test*    metadata _id '],
       ['from test*  metadata _id | limit 10'],
+      [
+        `from packetbeat* metadata
+
+        _id
+        | limit 100`,
+      ],
     ])(
       'succeeds validation when METADATA operator EXISTS in a NON aggregating query "%s"',
       (esqlQuery) =>
@@ -114,8 +126,10 @@ describe('esqlQueryValidator', () => {
         } as EsqlQueryValidatorArgs)
       ).resolves.toBeUndefined();
     });
+  });
 
-    it('succeeds validation when METADATA operator with "_id" field is missing in an aggregating query "%s"', () => {
+  describe('METADATA _id field validation for aggregating queries', () => {
+    it('succeeds validation when METADATA operator with "_id" field is missing', () => {
       getESQLQueryColumnsMock.mockResolvedValue([{ id: 'column1' }, { id: 'column2' }]);
 
       return expect(
@@ -129,7 +143,7 @@ describe('esqlQueryValidator', () => {
   });
 
   describe('when getESQLQueryColumns fails', () => {
-    it('reports an error message', () => {
+    it('returns an empty array', () => {
       // suppress the expected error messages
       jest.spyOn(console, 'error').mockReturnValue();
 

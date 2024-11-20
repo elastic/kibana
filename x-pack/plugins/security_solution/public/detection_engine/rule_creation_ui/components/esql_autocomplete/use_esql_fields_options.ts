@@ -11,15 +11,8 @@ import { useEsqlQueryColumns } from '../../../rule_creation/logic/esql_query_col
 
 type FieldType = 'string';
 
-export const esqlToOptions = (
-  columns: { error: unknown } | DatatableColumn[] | undefined | null,
-  fieldType?: FieldType
-) => {
-  if (columns && 'error' in columns) {
-    return [];
-  }
-
-  const options = (columns ?? []).reduce<Array<{ label: string }>>((acc, { id, meta }) => {
+export const esqlToOptions = (columns: DatatableColumn[], fieldType?: FieldType) => {
+  const options = columns.reduce<Array<{ label: string }>>((acc, { id, meta }) => {
     // if fieldType absent, we do not filter columns by type
     if (!fieldType || fieldType === meta.type) {
       acc.push({ label: id });
@@ -42,7 +35,7 @@ type UseEsqlFieldOptions = (
  * fetches ES|QL fields and convert them to Combobox options
  */
 export const useEsqlFieldOptions: UseEsqlFieldOptions = (esqlQuery, fieldType) => {
-  const { data: columns, isLoading } = useEsqlQueryColumns(esqlQuery ?? '');
+  const { columns, isLoading } = useEsqlQueryColumns(esqlQuery ?? '');
 
   const options = useMemo(() => {
     return esqlToOptions(columns, fieldType);

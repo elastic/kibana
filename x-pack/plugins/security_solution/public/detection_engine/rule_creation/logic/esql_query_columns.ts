@@ -5,46 +5,72 @@
  * 2.0.
  */
 
-import type { FetchQueryOptions, QueryClient, UseQueryResult } from '@tanstack/react-query';
+import type { QueryClient, QueryFunction, QueryKey } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { getESQLQueryColumns } from '@kbn/esql-utils';
 import { KibanaServices } from '../../../common/lib/kibana';
+
+const DEFAULT_STALE_TIME = 60 * 1000;
 
 interface FetchEsqlQueryColumnsParams {
   esqlQuery: string;
   queryClient: QueryClient;
 }
 
-export function fetchEsqlQueryColumns({
+export async function fetchEsqlQueryColumns({
   esqlQuery,
   queryClient,
 }: FetchEsqlQueryColumnsParams): Promise<DatatableColumn[]> {
-  return queryClient.fetchQuery(tanstackFetchConfigFactory(esqlQuery));
-}
-
-export function useEsqlQueryColumns(esqlQuery: string): UseQueryResult<DatatableColumn[]> {
-  return useQuery(tanstackFetchConfigFactory(esqlQuery));
-}
-
-function tanstackFetchConfigFactory(esqlQuery: string): FetchQueryOptions<DatatableColumn[]> {
-  return {
+  const data = await queryClient.fetchQuery({
     queryKey: [esqlQuery.trim()],
-    queryFn: () => {
-      if (esqlQuery.trim() === '') {
-        return [];
-      }
+    queryFn: queryEsqlColumnsFactory(esqlQuery),
+    staleTime: DEFAULT_STALE_TIME,
+    retry: false,
+  });
 
-      try {
-        return getESQLQueryColumns({
-          esqlQuery,
-          search: KibanaServices.get().data.search.search,
-        });
-      } catch {
-        return [];
-      }
-    },
-    staleTime: 60 * 1000,
-    retry: 0,
+  if (data instanceof Error) {
+    throw data;
+  }
+
+  return data;
+}
+
+interface UseEsqlQueryColumnsResult {
+  columns: DatatableColumn[];
+  isLoading: boolean;
+}
+
+export function useEsqlQueryColumns(esqlQuery: string): UseEsqlQueryColumnsResult {
+  const { data, isLoading } = useQuery({
+    queryKey: [esqlQuery.trim()],
+    queryFn: queryEsqlColumnsFactory(esqlQuery),
+    staleTime: DEFAULT_STALE_TIME,
+    retry: false,
+    retryOnMount: false,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+  });
+
+  return { columns: !data || data instanceof Error ? [] : data, isLoading };
+}
+
+function queryEsqlColumnsFactory(
+  esqlQuery: string
+): QueryFunction<DatatableColumn[] | Error, QueryKey> {
+  return async ({ signal }) => {
+    if (esqlQuery.trim() === '') {
+      return [];
+    }
+
+    try {
+      return await getESQLQueryColumns({
+        esqlQuery,
+        search: KibanaServices.get().data.search.search,
+        signal,
+      });
+    } catch (e) {
+      return e;
+    }
   };
 }
