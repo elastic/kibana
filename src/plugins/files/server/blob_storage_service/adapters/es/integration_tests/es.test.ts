@@ -27,10 +27,13 @@ describe('Elasticsearch blob storage', () => {
 
   beforeAll(async () => {
     ElasticsearchBlobStorageClient.configureConcurrentTransfers(Infinity);
-    const { startES, startKibana } = createTestServers({ adjustTimeout: jest.setTimeout });
+
+    const { startES, startKibana } = createTestServers({
+      adjustTimeout: jest.setTimeout,
+    });
     manageES = await startES();
     manageKbn = await startKibana();
-    esClient = manageKbn.coreStart.elasticsearch.client.asInternalUser;
+    esClient = manageKbn.coreStart.elasticsearch.createClient('es.test').asInternalUser;
   });
 
   afterAll(async () => {
