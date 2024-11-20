@@ -113,10 +113,7 @@ export async function _updatePackagePoliciesThatNeedBump(logger: Logger, cancell
 
     const agentPoliciesToBump = uniq(packagePolicies.map((item) => item.policy_ids).flat());
 
-    // TODO bump at once
-    for (const agentPolicyId of agentPoliciesToBump) {
-      await agentPolicyService.bumpRevision(soClient, esClient, agentPolicyId);
-    }
+    await agentPolicyService.bumpAgentPoliciesByIds(soClient, esClient, agentPoliciesToBump);
 
     logger.debug(
       `Updated ${updatedCount} package policies in space ${spaceId} in ${

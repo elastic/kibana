@@ -40,6 +40,13 @@ describe('_updatePackagePoliciesThatNeedBump', () => {
           },
         },
         {
+          id: 'packagePolicy12',
+          namespaces: ['default'],
+          attributes: {
+            policy_ids: ['policy1'],
+          },
+        },
+        {
           id: 'packagePolicy2',
           namespaces: ['space'],
           attributes: {
@@ -75,6 +82,11 @@ describe('_updatePackagePoliciesThatNeedBump', () => {
         id: 'packagePolicy1',
         type: 'fleet-package-policies',
       },
+      {
+        attributes: { bump_agent_policy_revision: false },
+        id: 'packagePolicy12',
+        type: 'fleet-package-policies',
+      },
     ]);
     expect(mockSoClient.bulkUpdate).toHaveBeenCalledWith([
       {
@@ -89,20 +101,15 @@ describe('_updatePackagePoliciesThatNeedBump', () => {
       },
     ]);
 
-    expect(mockedAgentPolicyService.bumpRevision).toHaveBeenCalledWith(
+    expect(mockedAgentPolicyService.bumpAgentPoliciesByIds).toHaveBeenCalledWith(
       expect.anything(),
       undefined,
-      'policy1'
+      ['policy1']
     );
-    expect(mockedAgentPolicyService.bumpRevision).toHaveBeenCalledWith(
+    expect(mockedAgentPolicyService.bumpAgentPoliciesByIds).toHaveBeenCalledWith(
       expect.anything(),
       undefined,
-      'policy2'
-    );
-    expect(mockedAgentPolicyService.bumpRevision).toHaveBeenCalledWith(
-      expect.anything(),
-      undefined,
-      'policy3'
+      ['policy2', 'policy3']
     );
   });
 });
