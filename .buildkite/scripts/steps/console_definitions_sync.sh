@@ -11,7 +11,10 @@ main () {
   report_main_step "Cloning repositories"
 
   rm -rf elasticsearch-specification
-  git clone https://github.com/elastic/elasticsearch-specification --depth 1
+  if ! git clone https://github.com/elastic/elasticsearch-specification --depth 1; then
+    echo "Error: Failed to clone the elasticsearch-specification repository."
+    exit 1
+  fi
 
   cd "$KIBANA_DIR"
 
