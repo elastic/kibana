@@ -44,7 +44,6 @@ export class Plugin implements EntityManagerAppPluginClass {
         core: coreStart,
         isDev: this.context.env.mode.dev,
         kibanaVersion,
-        usageCollection: pluginSetup.usageCollection,
         ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
         plugins: pluginsStart,
         isServerless: !!pluginsStart.serverless,

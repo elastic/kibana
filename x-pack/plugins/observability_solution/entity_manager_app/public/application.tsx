@@ -17,7 +17,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { EntityClient } from '@kbn/entityManager-plugin/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { Router } from '@kbn/shared-ux-router';
 import { PluginContext } from './context/plugin_context';
 import { EntityManagerPluginStart } from './types';
@@ -28,7 +27,6 @@ export function renderApp({
   plugins,
   appMountParameters,
   ObservabilityPageTemplate,
-  usageCollection,
   isDev,
   kibanaVersion,
   isServerless,
@@ -38,7 +36,6 @@ export function renderApp({
   plugins: EntityManagerPluginStart;
   appMountParameters: AppMountParameters;
   ObservabilityPageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
-  usageCollection: UsageCollectionSetup;
   isDev?: boolean;
   kibanaVersion: string;
   isServerless?: boolean;
@@ -52,9 +49,6 @@ export function renderApp({
 
   const queryClient = new QueryClient();
 
-  const ApplicationUsageTrackingProvider =
-    usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
-
   const CloudProvider = plugins.cloud?.CloudContextProvider ?? React.Fragment;
 
   const PresentationContextProvider = React.Fragment;
@@ -62,48 +56,43 @@ export function renderApp({
   ReactDOM.render(
     <KibanaRenderContextProvider {...core}>
       <PresentationContextProvider>
-        <ApplicationUsageTrackingProvider>
-          <KibanaThemeProvider {...{ theme: { theme$ } }}>
-            <CloudProvider>
-              <KibanaContextProvider
-                services={{
-                  ...core,
-                  ...plugins,
-                  storage: new Storage(localStorage),
-                  entityClient: new EntityClient(core),
+        <KibanaThemeProvider {...{ theme: { theme$ } }}>
+          <CloudProvider>
+            <KibanaContextProvider
+              services={{
+                ...core,
+                ...plugins,
+                storage: new Storage(localStorage),
+                entityClient: new EntityClient(core),
+                isDev,
+                kibanaVersion,
+                isServerless,
+              }}
+            >
+              <PluginContext.Provider
+                value={{
                   isDev,
-                  kibanaVersion,
                   isServerless,
+                  appMountParameters,
+                  ObservabilityPageTemplate,
+                  entityClient,
                 }}
               >
-                <PluginContext.Provider
-                  value={{
-                    isDev,
-                    isServerless,
-                    appMountParameters,
-                    ObservabilityPageTemplate,
-                    entityClient,
-                  }}
-                >
-                  <Router history={history}>
-                    <EuiThemeProvider darkMode={isDarkMode}>
-                      <RedirectAppLinks
-                        coreStart={core}
-                        data-test-subj="observabilityMainContainer"
-                      >
-                        <PerformanceContextProvider>
-                          <QueryClientProvider client={queryClient}>
-                            <EntityManagerOverviewPage />
-                          </QueryClientProvider>
-                        </PerformanceContextProvider>
-                      </RedirectAppLinks>
-                    </EuiThemeProvider>
-                  </Router>
-                </PluginContext.Provider>
-              </KibanaContextProvider>
-            </CloudProvider>
-          </KibanaThemeProvider>
-        </ApplicationUsageTrackingProvider>
+                <Router history={history}>
+                  <EuiThemeProvider darkMode={isDarkMode}>
+                    <RedirectAppLinks coreStart={core} data-test-subj="observabilityMainContainer">
+                      <PerformanceContextProvider>
+                        <QueryClientProvider client={queryClient}>
+                          <EntityManagerOverviewPage />
+                        </QueryClientProvider>
+                      </PerformanceContextProvider>
+                    </RedirectAppLinks>
+                  </EuiThemeProvider>
+                </Router>
+              </PluginContext.Provider>
+            </KibanaContextProvider>
+          </CloudProvider>
+        </KibanaThemeProvider>
       </PresentationContextProvider>
     </KibanaRenderContextProvider>,
     element
