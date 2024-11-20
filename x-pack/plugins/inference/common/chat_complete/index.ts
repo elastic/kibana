@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { createClient } from './create_client';
-export type { InferenceClient, BoundInferenceClient } from './types';
+export { bindChatComplete } from './bind_chat_complete';
