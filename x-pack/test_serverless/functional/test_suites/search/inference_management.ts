@@ -44,38 +44,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await svlSearchNavigation.navigateToInferenceManagementPage();
     });
 
-    describe('endpoint empty view', () => {
-      it('is loaded successfully', async () => {
-        await pageObjects.svlSearchInferenceManagementPage.InferenceEmptyPage.expectComponentsToBeExist();
-      });
-    });
-
     describe('endpoint tabular view', () => {
-      before(async () => {
-        await ml.api.createInferenceEndpoint(endpoint, taskType, modelConfig);
-        await browser.refresh();
-      });
-
-      after(async () => {
-        await ml.api.deleteInferenceEndpoint(endpoint, taskType);
-      });
-
       it('is loaded successfully', async () => {
         await pageObjects.svlSearchInferenceManagementPage.InferenceTabularPage.expectHeaderToBeExist();
         await pageObjects.svlSearchInferenceManagementPage.InferenceTabularPage.expectTabularViewToBeLoaded();
       });
+
+      it('preconfigured endpoints can not be deleted', async () => {
+        await pageObjects.svlSearchInferenceManagementPage.InferenceTabularPage.expectPreconfiguredEndpointsCannotBeDeleted();
+      });
     });
 
     describe('copy endpoint id action', () => {
-      beforeEach(async () => {
-        await ml.api.createInferenceEndpoint(endpoint, taskType, modelConfig);
-        await browser.refresh();
-      });
-
-      after(async () => {
-        await ml.api.deleteInferenceEndpoint(endpoint, taskType);
-      });
-
       it('can copy an endpoint id', async () => {
         await pageObjects.svlSearchInferenceManagementPage.InferenceTabularPage.expectToCopyEndpoint();
       });
