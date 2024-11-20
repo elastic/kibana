@@ -11,12 +11,20 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { v4 as uuidv4 } from 'uuid';
+import { uniq } from 'lodash';
 
-import { appContextService, packagePolicyService } from '..';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+
+import { agentPolicyService, appContextService } from '..';
 import { runWithCache } from '../epm/packages/cache';
+import { getPackagePolicySavedObjectType } from '../package_policy';
+import { mapPackagePolicySavedObjectToPackagePolicy } from '../package_policies';
+import type { PackagePolicy, PackagePolicySOAttributes } from '../../types';
+import { normalizeKuery } from '../saved_object';
+import { SO_SEARCH_LIMIT } from '../../constants';
 
 const TASK_TYPE = 'fleet:bump_agent_policies';
-const BATCH_SIZE = 100;
+
 export function registerBumpAgentPoliciesTask(taskManagerSetup: TaskManagerSetupContract) {
   taskManagerSetup.registerTaskDefinitions({
     [TASK_TYPE]: {
@@ -32,9 +40,7 @@ export function registerBumpAgentPoliciesTask(taskManagerSetup: TaskManagerSetup
             }
 
             await runWithCache(async () => {
-              await _updatePackagePoliciesThatNeedBump(appContextService.getLogger());
-
-              // TODO agent policies
+              await _updatePackagePoliciesThatNeedBump(appContextService.getLogger(), cancelled);
             });
           },
           async cancel() {
@@ -46,39 +52,76 @@ export function registerBumpAgentPoliciesTask(taskManagerSetup: TaskManagerSetup
   });
 }
 
-async function getPackagePoliciesToBump() {
-  return await packagePolicyService.list(appContextService.getInternalUserSOClient(), {
-    kuery: 'ingest-package-policies.bump_agent_policy_revision:true',
-    perPage: BATCH_SIZE,
-  });
+async function getPackagePoliciesToBump(savedObjectType: string) {
+  const result = await appContextService
+    .getInternalUserSOClientWithoutSpaceExtension()
+    .find<PackagePolicySOAttributes>({
+      type: savedObjectType,
+      filter: normalizeKuery(savedObjectType, `${savedObjectType}.bump_agent_policy_revision:true`),
+      perPage: SO_SEARCH_LIMIT,
+      namespaces: ['*'],
+      fields: ['id', 'namespaces', 'policy_ids'],
+    });
+  return {
+    total: result.total,
+    items: result.saved_objects.map((so) =>
+      mapPackagePolicySavedObjectToPackagePolicy(so, so.namespaces)
+    ),
+  };
 }
 
-export async function _updatePackagePoliciesThatNeedBump(logger: Logger) {
-  // TODO spaces?
-  let packagePoliciesToBump = await getPackagePoliciesToBump();
+export async function _updatePackagePoliciesThatNeedBump(logger: Logger, cancelled: boolean) {
+  const savedObjectType = await getPackagePolicySavedObjectType();
+  const packagePoliciesToBump = await getPackagePoliciesToBump(savedObjectType);
 
   logger.info(
     `Found ${packagePoliciesToBump.total} package policies that need agent policy revision bump`
   );
 
-  while (packagePoliciesToBump.total > 0) {
-    const start = Date.now();
-    // resetting the flag will trigger a revision bump
-    await packagePolicyService.bulkUpdate(
-      appContextService.getInternalUserSOClient(),
-      appContextService.getInternalUserESClient(),
-      packagePoliciesToBump.items.map((item) => ({
-        ...item,
-        bump_agent_policy_revision: false,
+  const packagePoliciesIndexedBySpace = packagePoliciesToBump.items.reduce((acc, policy) => {
+    const spaceId = policy.spaceIds?.[0] ?? DEFAULT_SPACE_ID;
+    if (!acc[spaceId]) {
+      acc[spaceId] = [];
+    }
+
+    acc[spaceId].push(policy);
+
+    return acc;
+  }, {} as { [k: string]: PackagePolicy[] });
+
+  const start = Date.now();
+
+  for (const [spaceId, packagePolicies] of Object.entries(packagePoliciesIndexedBySpace)) {
+    if (cancelled) {
+      throw new Error('Task has been cancelled');
+    }
+
+    const soClient = appContextService.getInternalUserSOClientForSpaceId(spaceId);
+    const esClient = appContextService.getInternalUserESClient();
+
+    await soClient.bulkUpdate<PackagePolicySOAttributes>(
+      packagePolicies.map((item) => ({
+        type: savedObjectType,
+        id: item.id,
+        attributes: {
+          bump_agent_policy_revision: false,
+        },
       }))
     );
-    const updatedCount = packagePoliciesToBump.items.length;
 
-    packagePoliciesToBump = await getPackagePoliciesToBump();
+    const updatedCount = packagePolicies.length;
+
+    const agentPoliciesToBump = uniq(packagePolicies.map((item) => item.policy_ids).flat());
+
+    // TODO bump at once
+    for (const agentPolicyId of agentPoliciesToBump) {
+      await agentPolicyService.bumpRevision(soClient, esClient, agentPolicyId);
+    }
+
     logger.debug(
-      `Updated ${updatedCount} package policies in ${Date.now() - start}ms, ${
-        packagePoliciesToBump.total
-      } remaining`
+      `Updated ${updatedCount} package policies in space ${spaceId} in ${
+        Date.now() - start
+      }ms, bump ${agentPoliciesToBump.length} agent policies`
     );
   }
 }

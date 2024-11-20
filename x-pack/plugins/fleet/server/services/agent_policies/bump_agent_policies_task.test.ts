@@ -7,8 +7,6 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
-import { agentPolicyService } from '../agent_policy';
-
 import { packagePolicyService } from '../package_policy';
 import type { PackagePolicy } from '../../types';
 
@@ -18,7 +16,6 @@ jest.mock('../app_context');
 jest.mock('../agent_policy');
 jest.mock('../package_policy');
 
-const mockedAgentPolicyService = jest.mocked(agentPolicyService);
 const mockedPackagePolicyService = jest.mocked(packagePolicyService);
 
 describe('_updatePackagePoliciesThatNeedBump', () => {
@@ -29,7 +26,6 @@ describe('_updatePackagePoliciesThatNeedBump', () => {
       items: [
         {
           id: 'packagePolicy1',
-          bump_agent_policy_revision: true,
         } as PackagePolicy,
       ],
       page: 1,
@@ -46,7 +42,7 @@ describe('_updatePackagePoliciesThatNeedBump', () => {
   it('should update package policy if bump agent policy revision needed', async () => {
     const logger = loggingSystemMock.createLogger();
 
-    await _updatePackagePoliciesThatNeedBump(logger);
+    await _updatePackagePoliciesThatNeedBump(logger, false);
 
     expect(mockedPackagePolicyService.bulkUpdate).toHaveBeenCalledWith(undefined, undefined, [
       { bump_agent_policy_revision: false, id: 'packagePolicy1' },
