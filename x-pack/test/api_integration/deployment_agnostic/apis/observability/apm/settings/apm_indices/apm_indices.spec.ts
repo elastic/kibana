@@ -33,9 +33,6 @@ export default function apmIndicesTests({ getService }: DeploymentAgnosticFtrPro
     beforeEach(async () => {
       await deleteSavedObject();
     });
-    afterEach(async () => {
-      await deleteSavedObject();
-    });
 
     it('returns APM Indices', async () => {
       const response = await apmApiClient.readUser({
