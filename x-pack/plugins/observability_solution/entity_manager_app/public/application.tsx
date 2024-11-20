@@ -13,7 +13,6 @@ import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shar
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { EntityClient } from '@kbn/entityManager-plugin/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -50,61 +49,50 @@ export function renderApp({
   // ensure all divs are .kbnAppWrappers
   element.classList.add(APP_WRAPPER_CLASS);
 
-  const queryClient = new QueryClient();
-
   const ApplicationUsageTrackingProvider =
     usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
 
   const CloudProvider = plugins.cloud?.CloudContextProvider ?? React.Fragment;
 
-  const PresentationContextProvider = React.Fragment;
-
   ReactDOM.render(
     <KibanaRenderContextProvider {...core}>
-      <PresentationContextProvider>
-        <ApplicationUsageTrackingProvider>
-          <KibanaThemeProvider {...{ theme: { theme$ } }}>
-            <CloudProvider>
-              <KibanaContextProvider
-                services={{
-                  ...core,
-                  ...plugins,
-                  storage: new Storage(localStorage),
-                  entityClient: new EntityClient(core),
+      <ApplicationUsageTrackingProvider>
+        <KibanaThemeProvider {...{ theme: { theme$ } }}>
+          <CloudProvider>
+            <KibanaContextProvider
+              services={{
+                ...core,
+                ...plugins,
+                storage: new Storage(localStorage),
+                entityClient: new EntityClient(core),
+                isDev,
+                kibanaVersion,
+                isServerless,
+              }}
+            >
+              <PluginContext.Provider
+                value={{
                   isDev,
-                  kibanaVersion,
                   isServerless,
+                  appMountParameters,
+                  ObservabilityPageTemplate,
+                  entityClient,
                 }}
               >
-                <PluginContext.Provider
-                  value={{
-                    isDev,
-                    isServerless,
-                    appMountParameters,
-                    ObservabilityPageTemplate,
-                    entityClient,
-                  }}
-                >
-                  <Router history={history}>
-                    <EuiThemeProvider darkMode={isDarkMode}>
-                      <RedirectAppLinks
-                        coreStart={core}
-                        data-test-subj="observabilityMainContainer"
-                      >
-                        <PerformanceContextProvider>
-                          <QueryClientProvider client={queryClient}>
-                            <EntityManagerOverviewPage />
-                          </QueryClientProvider>
-                        </PerformanceContextProvider>
-                      </RedirectAppLinks>
-                    </EuiThemeProvider>
-                  </Router>
-                </PluginContext.Provider>
-              </KibanaContextProvider>
-            </CloudProvider>
-          </KibanaThemeProvider>
-        </ApplicationUsageTrackingProvider>
-      </PresentationContextProvider>
+                <Router history={history}>
+                  <EuiThemeProvider darkMode={isDarkMode}>
+                    <RedirectAppLinks coreStart={core} data-test-subj="observabilityMainContainer">
+                      <PerformanceContextProvider>
+                        <EntityManagerOverviewPage />
+                      </PerformanceContextProvider>
+                    </RedirectAppLinks>
+                  </EuiThemeProvider>
+                </Router>
+              </PluginContext.Provider>
+            </KibanaContextProvider>
+          </CloudProvider>
+        </KibanaThemeProvider>
+      </ApplicationUsageTrackingProvider>
     </KibanaRenderContextProvider>,
     element
   );
