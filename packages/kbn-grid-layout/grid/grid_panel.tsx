@@ -129,6 +129,10 @@ export const GridPanel = forwardRef<
       []
     );
 
+    const panelContents = useMemo(() => {
+      return renderPanelContents(panelId);
+    }, [panelId, renderPanelContents]);
+
     return (
       <div ref={panelRef} css={initialStyles}>
         <EuiPanel
@@ -211,7 +215,7 @@ export const GridPanel = forwardRef<
             ${useEuiOverflowScroll('x', false)}
             `}
           >
-            {renderPanelContents(panelId)}
+            {panelContents}
           </div>
         </EuiPanel>
       </div>
