@@ -19,7 +19,7 @@ import React from 'react';
 import { ChatActionClickHandler, ChatActionClickType } from '../chat/types';
 
 const getCodeBlockClassName = (theme: UseEuiTheme) => css`
-  background-color: ${theme.euiTheme.colors.backgroundBaseDisabled};
+  background-color: ${theme.euiTheme.colors.lightestShade};
   .euiCodeBlock__pre {
     margin-bottom: 0;
     padding: ${theme.euiTheme.size.m};
