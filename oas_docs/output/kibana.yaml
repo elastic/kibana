@@ -10848,7 +10848,7 @@ paths:
       summary: Release an isolated endpoint
       tags:
         - Security Endpoint Management API
- /api/entity_store/enable:
+  /api/entity_store/enable:
     post:
       operationId: InitEntityStore
       requestBody:
