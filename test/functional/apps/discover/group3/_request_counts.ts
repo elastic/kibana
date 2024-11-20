@@ -76,7 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await cb();
       await waitForLoadingToFinish();
       searchCount = await getSearchCount(type);
-      expect(searchCount).to.be.below(expected + 1);
+      expect(searchCount).to.be(expected);
     };
 
     const getSharedTests = ({
@@ -104,7 +104,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         await waitForLoadingToFinish();
         const searchCount = await getSearchCount(type);
-        expect(searchCount).to.be.below(expectedRequests + 1);
+        expect(searchCount).to.be(expectedRequests);
       });
 
       it(`should send no more than ${expectedRequests} requests (documents + chart) when refreshing`, async () => {

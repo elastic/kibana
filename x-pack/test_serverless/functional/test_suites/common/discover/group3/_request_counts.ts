@@ -77,7 +77,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await cb();
       await waitForLoadingToFinish();
       searchCount = await getSearchCount(type);
-      expect(searchCount).to.be.below(expected + 1);
+      expect(searchCount).to.be(expected);
     };
 
     const getSharedTests = ({
@@ -102,7 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         await waitForLoadingToFinish();
         const searchCount = await getSearchCount(type);
-        expect(searchCount).to.be.below(3);
+        expect(searchCount).to.be(2);
       });
 
       it('should send no more than 2 requests (documents + chart) when refreshing', async () => {
