@@ -12,6 +12,8 @@ export const PLUGIN_NAME = i18n.translate('xpack.dataUsage.name', {
   defaultMessage: 'Data Usage',
 });
 
+export const DEFAULT_SELECTED_OPTIONS = 50 as const;
+
 export const DATA_USAGE_API_ROUTE_PREFIX = '/api/data_usage/';
 export const DATA_USAGE_METRICS_API_ROUTE = `/internal${DATA_USAGE_API_ROUTE_PREFIX}metrics`;
 export const DATA_USAGE_DATA_STREAMS_API_ROUTE = `/internal${DATA_USAGE_API_ROUTE_PREFIX}data_streams`;

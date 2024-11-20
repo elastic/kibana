@@ -15,6 +15,7 @@ import type {
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import moment from 'moment';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 export interface DateRangePickerValues {
@@ -66,7 +67,7 @@ export const UsageMetricsDateRangePicker = memo<UsageMetricsDateRangePickerProps
       <EuiSuperDatePicker
         data-test-subj={getTestId('date-range')}
         isLoading={isDataLoading}
-        dateFormat={uiSettings.get('dateFormat')}
+        dateFormat={'MMM D, YYYY @ HH:mm'}
         commonlyUsedRanges={commonlyUsedRanges}
         end={dateRangePickerState.endDate}
         isPaused={!dateRangePickerState.autoRefreshOptions.enabled}
@@ -77,7 +78,11 @@ export const UsageMetricsDateRangePicker = memo<UsageMetricsDateRangePickerProps
         recentlyUsedRanges={dateRangePickerState.recentlyUsedDateRanges}
         start={dateRangePickerState.startDate}
         showUpdateButton={false}
+        timeFormat={'HH:mm'}
         updateButtonProps={{ iconOnly: false, fill: false }}
+        utcOffset={moment().utcOffset() / 60}
+        maxDate={moment()}
+        minDate={moment().subtract(9, 'days').startOf('day')}
         width="auto"
       />
     );
