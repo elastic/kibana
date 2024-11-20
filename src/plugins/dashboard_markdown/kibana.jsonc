@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "id": "@kbn/dashboard-markdown-plugin",
+  "owner": "@elastic/kibana-presentation",
+  "description": "Adds an in-place editable markdown component",
+  "plugin": {
+    "id": "dashboardMarkdown",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": ["embeddable", "uiActions"],
+    "optionalPlugins": [],
+    "requiredBundles": ["presentationUtil", "dashboard", "visualizations"]
+  }
+}
