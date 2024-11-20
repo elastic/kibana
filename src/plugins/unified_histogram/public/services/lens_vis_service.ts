@@ -409,7 +409,7 @@ export class LensVisService {
 
     const datasourceState = {
       layers: {
-        [UNIFIED_HISTOGRAM_LAYER_ID]: { columnOrder, columns },
+        [UNIFIED_HISTOGRAM_LAYER_ID]: { columnOrder, columns, indexPatternId: dataView.id },
       },
     };
 
