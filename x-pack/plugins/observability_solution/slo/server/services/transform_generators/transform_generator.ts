@@ -9,8 +9,8 @@ import {
   MappingRuntimeFields,
   TransformPutTransformRequest,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ALL_VALUE, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 import { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
+import { ALL_VALUE, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 import { TransformSettings } from '../../assets/transform_templates/slo_transform_template';
 import { SLODefinition } from '../../domain/models';
 

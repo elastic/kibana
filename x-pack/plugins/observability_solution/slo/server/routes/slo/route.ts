@@ -8,7 +8,6 @@
 import { errors } from '@elastic/elasticsearch';
 import { failedDependency, forbidden } from '@hapi/boom';
 import { KibanaRequest } from '@kbn/core-http-server';
-import { DataViewsService } from '@kbn/data-views-plugin/server';
 import {
   PutSLOSettingsParams,
   createSLOParamsSchema,
@@ -30,7 +29,6 @@ import {
   updateSLOParamsSchema,
 } from '@kbn/slo-schema';
 import { getOverviewParamsSchema } from '@kbn/slo-schema/src/rest_specs/routes/get_overview';
-import type { IndicatorTypes } from '../../domain/models';
 import { executeWithErrorHandler } from '../../errors';
 import {
   CreateSLO,
@@ -61,43 +59,9 @@ import { SloDefinitionClient } from '../../services/slo_definition_client';
 import { getSloSettings, storeSloSettings } from '../../services/slo_settings';
 import { DefaultSummarySearchClient } from '../../services/summary_search_client';
 import { DefaultSummaryTransformGenerator } from '../../services/summary_transform_generator/summary_transform_generator';
-import {
-  ApmTransactionDurationTransformGenerator,
-  ApmTransactionErrorRateTransformGenerator,
-  HistogramTransformGenerator,
-  KQLCustomTransformGenerator,
-  MetricCustomTransformGenerator,
-  SyntheticsAvailabilityTransformGenerator,
-  TimesliceMetricTransformGenerator,
-  TransformGenerator,
-} from '../../services/transform_generators';
+import { createTransformGenerators } from '../../services/transform_generators';
 import { createSloServerRoute } from '../create_slo_server_route';
 import { SLORoutesDependencies } from '../types';
-
-// TODO Kevin: Move to factory file next to the transform generators.
-const transformGeneratorsFactory = (
-  spaceId: string,
-  dataViewsService: DataViewsService,
-  isServerless: boolean
-): Record<IndicatorTypes, TransformGenerator> => ({
-  'sli.apm.transactionDuration': new ApmTransactionDurationTransformGenerator(
-    spaceId,
-    dataViewsService
-  ),
-  'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(
-    spaceId,
-    dataViewsService
-  ),
-  'sli.synthetics.availability': new SyntheticsAvailabilityTransformGenerator(
-    spaceId,
-    dataViewsService,
-    isServerless
-  ),
-  'sli.kql.custom': new KQLCustomTransformGenerator(spaceId, dataViewsService),
-  'sli.metric.custom': new MetricCustomTransformGenerator(spaceId, dataViewsService),
-  'sli.histogram.custom': new HistogramTransformGenerator(spaceId, dataViewsService),
-  'sli.metric.timeslice': new TimesliceMetricTransformGenerator(spaceId, dataViewsService),
-});
 
 const assertPlatinumLicense = async (plugins: SLORoutesDependencies['plugins']) => {
   const licensing = await plugins.licensing.start();
@@ -137,7 +101,7 @@ const createSLORoute = createSloServerRoute({
       dataViews.dataViewsServiceFactory(soClient, esClient),
     ]);
 
-    const transformGenerators = transformGeneratorsFactory(
+    const transformGenerators = createTransformGenerators(
       spaceId,
       dataViewsService,
       sloContext.isServerless
@@ -189,7 +153,7 @@ const inspectSLORoute = createSloServerRoute({
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
     const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, esClient);
 
-    const transformGenerators = transformGeneratorsFactory(
+    const transformGenerators = createTransformGenerators(
       spaceId,
       dataViewsService,
       sloContext.isServerless
@@ -242,7 +206,7 @@ const updateSLORoute = createSloServerRoute({
     const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, esClient);
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
 
-    const transformGenerators = transformGeneratorsFactory(
+    const transformGenerators = createTransformGenerators(
       spaceId,
       dataViewsService,
       sloContext.isServerless
@@ -297,7 +261,7 @@ const deleteSLORoute = createSloServerRoute({
 
     const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, esClient);
 
-    const transformGenerators = transformGeneratorsFactory(
+    const transformGenerators = createTransformGenerators(
       spaceId,
       dataViewsService,
       sloContext.isServerless
@@ -375,7 +339,7 @@ const enableSLORoute = createSloServerRoute({
     const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, esClient);
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
 
-    const transformGenerators = transformGeneratorsFactory(
+    const transformGenerators = createTransformGenerators(
       spaceId,
       dataViewsService,
       sloContext.isServerless
@@ -421,7 +385,7 @@ const disableSLORoute = createSloServerRoute({
     const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, esClient);
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
 
-    const transformGenerators = transformGeneratorsFactory(
+    const transformGenerators = createTransformGenerators(
       spaceId,
       dataViewsService,
       sloContext.isServerless
@@ -466,7 +430,7 @@ const resetSLORoute = createSloServerRoute({
     const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, esClient);
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
 
-    const transformGenerators = transformGeneratorsFactory(
+    const transformGenerators = createTransformGenerators(
       spaceId,
       dataViewsService,
       sloContext.isServerless

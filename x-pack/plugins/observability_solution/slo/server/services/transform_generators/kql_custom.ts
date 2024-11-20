@@ -6,14 +6,13 @@
  */
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { kqlCustomIndicatorSchema, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
-
 import { DataViewsService } from '@kbn/data-views-plugin/common';
-import { getElasticsearchQueryOrThrow, parseIndex, TransformGenerator } from '.';
+import { kqlCustomIndicatorSchema, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
+import { TransformGenerator, getElasticsearchQueryOrThrow, parseIndex } from '.';
 import {
+  SLO_DESTINATION_INDEX_NAME,
   getSLOPipelineId,
   getSLOTransformId,
-  SLO_DESTINATION_INDEX_NAME,
 } from '../../../common/constants';
 import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
 import { KQLCustomIndicator, SLODefinition } from '../../domain/models';
