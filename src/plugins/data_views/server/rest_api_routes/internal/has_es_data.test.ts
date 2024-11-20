@@ -151,7 +151,7 @@ describe('has_es_data route', () => {
     expect(response).toEqual({ body: { hasEsData: false } });
   });
 
-  it('should return a 400 response and log a warning if the local data request times out', async () => {
+  it('should return a 504 response and log a warning if the local data request times out', async () => {
     const mockESClient = {
       indices: {
         resolveCluster: jest.fn().mockRejectedValue({ name: 'TimeoutError' }),
@@ -165,7 +165,7 @@ describe('has_es_data route', () => {
     const mockRequest = httpServerMock.createKibanaRequest();
     const mockResponse = httpServerMock.createResponseFactory();
     jest
-      .spyOn(mockResponse, 'badRequest')
+      .spyOn(mockResponse, 'customError')
       .mockImplementation((params) => params as unknown as IKibanaResponse);
     const handler = createHandler(mockLogger, mockEsDataTimeout);
     const response = await handler(mockContext, mockRequest, mockResponse);
@@ -178,14 +178,16 @@ describe('has_es_data route', () => {
       },
       { requestTimeout: mockEsDataTimeout }
     );
-    expect(mockResponse.badRequest).toBeCalledTimes(1);
-    expect(mockResponse.badRequest).toBeCalledWith({
+    expect(mockResponse.customError).toBeCalledTimes(1);
+    expect(mockResponse.customError).toBeCalledWith({
+      statusCode: 504,
       body: {
         message: 'Timeout while checking for Elasticsearch data',
         attributes: { failureReason: 'local_data_timeout' },
       },
     });
     expect(response).toEqual({
+      statusCode: 504,
       body: {
         message: 'Timeout while checking for Elasticsearch data',
         attributes: { failureReason: 'local_data_timeout' },
@@ -198,7 +200,7 @@ describe('has_es_data route', () => {
     );
   });
 
-  it('should return a 400 response and log a warning if the remote data request times out', async () => {
+  it('should return a 504 response and log a warning if the remote data request times out', async () => {
     const mockESClient = {
       indices: {
         resolveCluster: jest.fn().mockImplementation(({ name }) => {
@@ -223,7 +225,7 @@ describe('has_es_data route', () => {
     const mockRequest = httpServerMock.createKibanaRequest();
     const mockResponse = httpServerMock.createResponseFactory();
     jest
-      .spyOn(mockResponse, 'badRequest')
+      .spyOn(mockResponse, 'customError')
       .mockImplementation((params) => params as unknown as IKibanaResponse);
     const handler = createHandler(mockLogger, mockEsDataTimeout);
     const response = await handler(mockContext, mockRequest, mockResponse);
@@ -246,14 +248,16 @@ describe('has_es_data route', () => {
       },
       { requestTimeout: mockEsDataTimeout }
     );
-    expect(mockResponse.badRequest).toBeCalledTimes(1);
-    expect(mockResponse.badRequest).toBeCalledWith({
+    expect(mockResponse.customError).toBeCalledTimes(1);
+    expect(mockResponse.customError).toBeCalledWith({
+      statusCode: 504,
       body: {
         message: 'Timeout while checking for Elasticsearch data',
         attributes: { failureReason: 'remote_data_timeout' },
       },
     });
     expect(response).toEqual({
+      statusCode: 504,
       body: {
         message: 'Timeout while checking for Elasticsearch data',
         attributes: { failureReason: 'remote_data_timeout' },
@@ -266,7 +270,7 @@ describe('has_es_data route', () => {
     );
   });
 
-  it('should return a 400 response and log an error if the request fails for an unknown reason', async () => {
+  it('should return a 500 response and log an error if the request fails for an unknown reason', async () => {
     const someError = new Error('Some error');
     const mockESClient = {
       indices: {
@@ -281,7 +285,7 @@ describe('has_es_data route', () => {
     const mockRequest = httpServerMock.createKibanaRequest();
     const mockResponse = httpServerMock.createResponseFactory();
     jest
-      .spyOn(mockResponse, 'badRequest')
+      .spyOn(mockResponse, 'customError')
       .mockImplementation((params) => params as unknown as IKibanaResponse);
     const handler = createHandler(mockLogger, mockEsDataTimeout);
     const response = await handler(mockContext, mockRequest, mockResponse);
@@ -294,14 +298,16 @@ describe('has_es_data route', () => {
       },
       { requestTimeout: mockEsDataTimeout }
     );
-    expect(mockResponse.badRequest).toBeCalledTimes(1);
-    expect(mockResponse.badRequest).toBeCalledWith({
+    expect(mockResponse.customError).toBeCalledTimes(1);
+    expect(mockResponse.customError).toBeCalledWith({
+      statusCode: 500,
       body: {
         message: 'Error while checking for Elasticsearch data',
         attributes: { failureReason: 'unknown' },
       },
     });
     expect(response).toEqual({
+      statusCode: 500,
       body: {
         message: 'Error while checking for Elasticsearch data',
         attributes: { failureReason: 'unknown' },

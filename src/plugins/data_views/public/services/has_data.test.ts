@@ -185,7 +185,7 @@ describe('when calling hasData service', () => {
               new Request(''),
               undefined,
               {
-                statusCode: 400,
+                statusCode: 504,
                 message: 'Timeout while checking for Elasticsearch data',
                 attributes: {
                   failureReason: 'remote_data_timeout',
@@ -213,7 +213,7 @@ describe('when calling hasData service', () => {
 
         // Mock getIndices
         const responseBody = {
-          statusCode: 400,
+          statusCode: 504,
           message: 'Timeout while checking for Elasticsearch data',
           attributes: {
             failureReason: 'remote_data_timeout',

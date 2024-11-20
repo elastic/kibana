@@ -63,7 +63,7 @@ export class HasData {
       } catch (e) {
         if (
           this.isResponseError(e) &&
-          e.body?.statusCode === 400 &&
+          e.body?.statusCode === 504 &&
           e.body?.attributes?.failureReason === HasEsDataFailureReason.remoteDataTimeout
         ) {
           onRemoteDataTimeout(e.body);

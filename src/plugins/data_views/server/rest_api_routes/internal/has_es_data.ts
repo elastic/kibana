@@ -99,7 +99,8 @@ const hasEsData = async ({
 
       logger.warn(warningMessage);
 
-      return res.badRequest({
+      return res.customError({
+        statusCode: 504,
         body: {
           message: timeoutMessage,
           attributes: { failureReason: timeoutReason },
@@ -109,7 +110,8 @@ const hasEsData = async ({
 
     logger.error(e);
 
-    return res.badRequest({
+    return res.customError({
+      statusCode: 500,
       body: {
         message: errorMessage,
         attributes: { failureReason: HasEsDataFailureReason.unknown },
