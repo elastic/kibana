@@ -324,8 +324,48 @@ const operatorsMeta: Record<
     extraSignatures?: Signature[];
   }
 > = {
-  add: { name: '+', isMathOperator: true, isComparisonOperator: false },
-  sub: { name: '-', isMathOperator: true, isComparisonOperator: false },
+  add: {
+    name: '+',
+    isMathOperator: true,
+    isComparisonOperator: false,
+    extraSignatures: [
+      {
+        params: [
+          { name: 'left', type: 'time_literal' as const },
+          { name: 'right', type: 'date' as const },
+        ],
+        returnType: 'date' as const,
+      },
+      {
+        params: [
+          { name: 'left', type: 'date' as const },
+          { name: 'right', type: 'time_literal' as const },
+        ],
+        returnType: 'date' as const,
+      },
+    ],
+  },
+  sub: {
+    name: '-',
+    isMathOperator: true,
+    isComparisonOperator: false,
+    extraSignatures: [
+      {
+        params: [
+          { name: 'left', type: 'time_literal' as const },
+          { name: 'right', type: 'date' as const },
+        ],
+        returnType: 'date' as const,
+      },
+      {
+        params: [
+          { name: 'left', type: 'date' as const },
+          { name: 'right', type: 'time_literal' as const },
+        ],
+        returnType: 'date' as const,
+      },
+    ],
+  },
   div: { name: '/', isMathOperator: true, isComparisonOperator: false },
   equals: {
     name: '==',
@@ -504,6 +544,8 @@ const enrichOperators = (
     const isComparisonOperator =
       Object.hasOwn(operatorsMeta, op.name) && operatorsMeta[op.name]?.isComparisonOperator;
 
+    const isInOperator = op.name === 'in';
+
     const signatures = op.signatures.map((s) => ({
       ...s,
       // Elasticsearch docs uses lhs and rhs instead of left and right that Kibana code uses
@@ -512,12 +554,23 @@ const enrichOperators = (
     let supportedCommands = op.supportedCommands;
     let supportedOptions = op.supportedOptions;
     if (isComparisonOperator) {
-      supportedCommands = ['eval', 'where', 'row', 'sort'];
+      supportedCommands = _.uniq([...op.supportedCommands, 'eval', 'where', 'row', 'sort']);
       supportedOptions = ['by'];
     }
     if (isMathOperator) {
-      supportedCommands = ['eval', 'where', 'row', 'stats', 'metrics', 'sort'];
+      supportedCommands = _.uniq([
+        ...op.supportedCommands,
+        'eval',
+        'where',
+        'row',
+        'stats',
+        'metrics',
+        'sort',
+      ]);
       supportedOptions = ['by'];
+    }
+    if (isInOperator) {
+      supportedCommands = _.uniq([...op.supportedCommands, 'eval', 'where', 'row', 'sort']);
     }
     if (
       Object.hasOwn(operatorsMeta, op.name) &&
