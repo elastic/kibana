@@ -11,10 +11,12 @@ import { i18n } from '@kbn/i18n';
 import { useAppContext } from '../../../hooks/use_app_context';
 import { useKibana } from '../../../hooks/use_kibana';
 import { UISettings } from './ui_settings';
+import { ProductDocEntry } from './product_doc_entry';
 
 export function SettingsTab() {
   const {
     application: { navigateToApp },
+    productDocBase,
   } = useKibana().services;
   const { config } = useAppContext();
 
@@ -108,6 +110,7 @@ export function SettingsTab() {
         </EuiFormRow>
       </EuiDescribedFormGroup>
 
+      {productDocBase ? <ProductDocEntry /> : undefined}
       <UISettings />
     </EuiPanel>
   );

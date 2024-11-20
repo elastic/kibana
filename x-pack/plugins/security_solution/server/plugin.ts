@@ -166,7 +166,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
     this.siemMigrationsService = new SiemMigrationsService(
       this.config,
-      this.logger,
+      this.pluginContext.logger,
       this.pluginContext.env.packageInfo.version
     );
 
