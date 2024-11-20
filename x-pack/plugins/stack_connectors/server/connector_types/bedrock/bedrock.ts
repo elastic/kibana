@@ -7,6 +7,7 @@
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import aws from 'aws4';
+import { BedrockRuntimeClient } from '@aws-sdk/client-bedrock-runtime';
 import { AxiosError, Method } from 'axios';
 import { IncomingMessage } from 'http';
 import { PassThrough } from 'stream';
@@ -60,13 +61,20 @@ interface SignedRequest {
 export class BedrockConnector extends SubActionConnector<Config, Secrets> {
   private url;
   private model;
+  private bedrockClient;
 
   constructor(params: ServiceParams<Config, Secrets>) {
     super(params);
 
     this.url = this.config.apiUrl;
     this.model = this.config.defaultModel;
-
+    this.bedrockClient = new BedrockRuntimeClient({
+      region: extractRegionId(this.config.apiUrl),
+      credentials: {
+        accessKeyId: this.secrets.accessKey,
+        secretAccessKey: this.secrets.secret,
+      },
+    });
     this.registerSubActions();
   }
 
@@ -442,12 +450,13 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
    * @returns A promise that resolves to the response of the conversation action.
    */
   public async converse(
-    { signal, ...converseApiInput }: ConverseActionParams,
+    { signal, ...command }: ConverseActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<ConverseActionResponse> {
+    const res2 = await this.bedrockClient.send({ ...command });
     const res = await this.runApi(
       {
-        body: JSON.stringify(converseApiInput),
+        body: JSON.stringify(command),
         raw: true,
         apiType: 'converse',
         signal,
@@ -571,3 +580,13 @@ function parseContent(content: Array<{ text?: string; type: string }>): string {
 }
 
 const usesDeprecatedArguments = (body: string): boolean => JSON.parse(body)?.prompt != null;
+
+function extractRegionId(url) {
+  const match = url.match(/bedrock\.(.*?)\.amazonaws\./);
+  if (match) {
+    return match[1];
+  } else {
+    // fallback to us-east-1
+    return 'us-east-1';
+  }
+}
