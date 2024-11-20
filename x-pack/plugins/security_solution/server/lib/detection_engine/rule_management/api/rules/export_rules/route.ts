@@ -33,8 +33,12 @@ export const exportRulesRoute = (
     .post({
       access: 'public',
       path: `${DETECTION_ENGINE_RULES_URL}/_export`,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
       options: {
-        tags: ['access:securitySolution'],
         timeout: {
           idleSocket: RULE_MANAGEMENT_IMPORT_EXPORT_SOCKET_TIMEOUT_MS,
         },

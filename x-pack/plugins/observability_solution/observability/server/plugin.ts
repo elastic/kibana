@@ -21,7 +21,6 @@ import {
 } from '@kbn/core/server';
 import { LogsExplorerLocatorParams, LOGS_EXPLORER_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 import { i18n } from '@kbn/i18n';
 import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
@@ -32,7 +31,7 @@ import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { ObservabilityConfig } from '.';
-import { casesFeatureId, observabilityFeatureId } from '../common';
+import { observabilityFeatureId } from '../common';
 import {
   kubernetesGuideConfig,
   kubernetesGuideId,
@@ -50,6 +49,8 @@ import { threshold } from './saved_objects/threshold';
 import { AlertDetailsContextualInsightsService } from './services';
 import { uiSettings } from './ui_settings';
 import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '../common/constants';
+import { getCasesFeature } from './features/cases_v1';
+import { getCasesFeatureV2 } from './features/cases_v2';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
@@ -98,112 +99,8 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
 
     const alertDetailsContextualInsightsService = new AlertDetailsContextualInsightsService();
 
-    plugins.features.registerKibanaFeature({
-      id: casesFeatureId,
-      name: i18n.translate('xpack.observability.featureRegistry.linkObservabilityTitle', {
-        defaultMessage: 'Cases',
-      }),
-      order: 1100,
-      category: DEFAULT_APP_CATEGORIES.observability,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
-      app: [casesFeatureId, 'kibana'],
-      catalogue: [observabilityFeatureId],
-      cases: [observabilityFeatureId],
-      privileges: {
-        all: {
-          api: casesApiTags.all,
-          app: [casesFeatureId, 'kibana'],
-          catalogue: [observabilityFeatureId],
-          cases: {
-            create: [observabilityFeatureId],
-            read: [observabilityFeatureId],
-            update: [observabilityFeatureId],
-            push: [observabilityFeatureId],
-          },
-          savedObject: {
-            all: [...filesSavedObjectTypes],
-            read: [...filesSavedObjectTypes],
-          },
-          ui: casesCapabilities.all,
-        },
-        read: {
-          api: casesApiTags.read,
-          app: [casesFeatureId, 'kibana'],
-          catalogue: [observabilityFeatureId],
-          cases: {
-            read: [observabilityFeatureId],
-          },
-          savedObject: {
-            all: [],
-            read: [...filesSavedObjectTypes],
-          },
-          ui: casesCapabilities.read,
-        },
-      },
-      subFeatures: [
-        {
-          name: i18n.translate('xpack.observability.featureRegistry.deleteSubFeatureName', {
-            defaultMessage: 'Delete',
-          }),
-          privilegeGroups: [
-            {
-              groupType: 'independent',
-              privileges: [
-                {
-                  api: casesApiTags.delete,
-                  id: 'cases_delete',
-                  name: i18n.translate(
-                    'xpack.observability.featureRegistry.deleteSubFeatureDetails',
-                    {
-                      defaultMessage: 'Delete cases and comments',
-                    }
-                  ),
-                  includeIn: 'all',
-                  savedObject: {
-                    all: [...filesSavedObjectTypes],
-                    read: [...filesSavedObjectTypes],
-                  },
-                  cases: {
-                    delete: [observabilityFeatureId],
-                  },
-                  ui: casesCapabilities.delete,
-                },
-              ],
-            },
-          ],
-        },
-        {
-          name: i18n.translate('xpack.observability.featureRegistry.casesSettingsSubFeatureName', {
-            defaultMessage: 'Case settings',
-          }),
-          privilegeGroups: [
-            {
-              groupType: 'independent',
-              privileges: [
-                {
-                  id: 'cases_settings',
-                  name: i18n.translate(
-                    'xpack.observability.featureRegistry.casesSettingsSubFeatureDetails',
-                    {
-                      defaultMessage: 'Edit case settings',
-                    }
-                  ),
-                  includeIn: 'all',
-                  savedObject: {
-                    all: [...filesSavedObjectTypes],
-                    read: [...filesSavedObjectTypes],
-                  },
-                  cases: {
-                    settings: [observabilityFeatureId],
-                  },
-                  ui: casesCapabilities.settings,
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    });
+    plugins.features.registerKibanaFeature(getCasesFeature(casesCapabilities, casesApiTags));
+    plugins.features.registerKibanaFeature(getCasesFeatureV2(casesCapabilities, casesApiTags));
 
     let annotationsApiPromise: Promise<AnnotationsAPI> | undefined;
 

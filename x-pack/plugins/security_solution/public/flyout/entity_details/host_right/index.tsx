@@ -216,7 +216,10 @@ export const HostPanel = ({
             <FlyoutNavigation
               flyoutIsExpandable={
                 !isPreviewMode &&
-                (isRiskScoreExist || hasMisconfigurationFindings || hasVulnerabilitiesFindings)
+                (isRiskScoreExist ||
+                  hasMisconfigurationFindings ||
+                  hasVulnerabilitiesFindings ||
+                  hasNonClosedAlerts)
               }
               expandDetails={openDefaultPanel}
             />
