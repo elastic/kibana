@@ -27,7 +27,6 @@ import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { getErrorSource, TaskErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { getAlertFromRaw } from '../rules_client/lib/get_alert_from_raw';
 
-
 // create mocks
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
