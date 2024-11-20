@@ -13,6 +13,7 @@ import {
   RULES_CREATE_PATH,
   RULES_LANDING_PATH,
   RULES_PATH,
+  SIEM_MIGRATIONS_PATH,
   SERVER_APP_ID,
 } from '../../common/constants';
 import {
@@ -21,6 +22,7 @@ import {
   CREATE_NEW_RULE,
   EXCEPTIONS,
   RULES,
+  SIEM_MIGRATIONS,
   SIEM_RULES,
 } from '../app/translations';
 import { SecurityPageName } from '../app/types';
@@ -106,6 +108,24 @@ export const links: LinkItem = {
         }),
       ],
     },
+    {
+      id: SecurityPageName.rulesSiemMigrations,
+      title: SIEM_MIGRATIONS,
+      description: i18n.translate('xpack.securitySolution.appLinks.siemMigrationsDescription', {
+        defaultMessage: 'SIEM Rules Migrations.',
+      }),
+      landingIcon: IconConsoleCloud,
+      path: SIEM_MIGRATIONS_PATH,
+      capabilities: [`${SERVER_APP_ID}.show`],
+      skipUrlState: true,
+      hideTimeline: true,
+      globalSearchKeywords: [
+        i18n.translate('xpack.securitySolution.appLinks.siemMigrations', {
+          defaultMessage: 'SIEM Rules Migrations',
+        }),
+      ],
+      experimentalKey: 'siemMigrationsEnabled',
+    },
   ],
   categories: [
     {
@@ -116,6 +136,7 @@ export const links: LinkItem = {
         SecurityPageName.rules,
         SecurityPageName.cloudSecurityPostureBenchmarks,
         SecurityPageName.exceptions,
+        SecurityPageName.rulesSiemMigrations,
       ],
     },
     {

@@ -1,0 +1,101 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiText, EuiLink } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import { SeverityBadge } from '../../../../common/components/severity_badge';
+import * as rulesI18n from '../../../../detections/pages/detection_engine/rules/translations';
+import * as i18n from './translations';
+import { useSiemMigrationsTableContext } from './siem_migrations_table_context';
+import { getNormalizedSeverity } from '../rules_table/helpers';
+import { StatusBadge } from './status_badge';
+import { DEFAULT_TRANSLATION_RISK_SCORE, DEFAULT_TRANSLATION_SEVERITY } from './constants';
+
+export type TableColumn = EuiBasicTableColumn<RuleMigration>;
+
+interface RuleNameProps {
+  name: string;
+  ruleId: string;
+}
+
+const RuleName = ({ name, ruleId }: RuleNameProps) => {
+  const {
+    actions: { openRuleTranslationPreview: openRulePreview },
+  } = useSiemMigrationsTableContext();
+
+  return (
+    <EuiLink
+      onClick={() => {
+        openRulePreview(ruleId);
+      }}
+      data-test-subj="ruleName"
+    >
+      {name}
+    </EuiLink>
+  );
+};
+
+export const RULE_NAME_COLUMN: TableColumn = {
+  field: 'original_rule.title',
+  name: rulesI18n.COLUMN_RULE,
+  render: (value: RuleMigration['original_rule']['title'], rule: RuleMigration) => (
+    <RuleName name={value} ruleId={rule.original_rule.id} />
+  ),
+  sortable: true,
+  truncateText: true,
+  width: '40%',
+  align: 'left',
+};
+
+const STATUS_COLUMN: TableColumn = {
+  field: 'translation_result',
+  name: i18n.COLUMN_STATUS,
+  render: (value: RuleMigration['translation_result'], rule: RuleMigration) => (
+    <StatusBadge value={value} installedRuleId={rule.elastic_rule?.id} />
+  ),
+  sortable: false,
+  truncateText: true,
+  width: '12%',
+};
+
+export const useSiemMigrationsTableColumns = (): TableColumn[] => {
+  return useMemo(
+    () => [
+      RULE_NAME_COLUMN,
+      STATUS_COLUMN,
+      {
+        field: 'risk_score',
+        name: rulesI18n.COLUMN_RISK_SCORE,
+        render: () => (
+          <EuiText data-test-subj="riskScore" size="s">
+            {DEFAULT_TRANSLATION_RISK_SCORE}
+          </EuiText>
+        ),
+        sortable: true,
+        truncateText: true,
+        width: '75px',
+      },
+      {
+        field: 'elastic_rule.severity',
+        name: rulesI18n.COLUMN_SEVERITY,
+        render: (value?: Severity) => (
+          <SeverityBadge value={value ?? DEFAULT_TRANSLATION_SEVERITY} />
+        ),
+        sortable: ({ elastic_rule: elasticRule }: RuleMigration) =>
+          getNormalizedSeverity(
+            (elasticRule?.severity as Severity) ?? DEFAULT_TRANSLATION_SEVERITY
+          ),
+        truncateText: true,
+        width: '12%',
+      },
+    ],
+    []
+  );
+};
