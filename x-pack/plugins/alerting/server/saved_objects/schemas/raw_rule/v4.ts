@@ -51,8 +51,8 @@ export const rawRuleMonitoringSchema = schema.object({
           schema.nullable(
             schema.object({
               last_1d: schema.number(),
+              last_3d: schema.number(),
               last_7d: schema.number(),
-              last_30d: schema.number(),
             })
           )
         ),

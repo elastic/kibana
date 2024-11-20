@@ -150,8 +150,8 @@ export interface RuleMonitoringLastRunMetrics extends SavedObjectAttributes {
   } | null;
   unfilled_gaps_ms?: {
     last_1d: number;
+    last_3d: number;
     last_7d: number;
-    last_30d: number;
   } | null;
 }
 
