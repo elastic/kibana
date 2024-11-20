@@ -32,6 +32,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const start = Date.now() - dayInMs;
   const end = Date.now() + dayInMs;
 
+  type Alerts = Awaited<ReturnType<typeof alertingApi.waitForAlertInIndex>>;
+
   async function getTransactionGroups(overrides?: {
     path?: {
       serviceName?: string;
@@ -145,7 +147,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       describe('with avg transaction duration alerts', () => {
         let ruleId: string;
-        let alerts;
+        let alerts: Alerts;
 
         before(async () => {
           const createdRule = await alertingApi.createRule({
@@ -202,7 +204,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         it('indexes alert document', async () => {
-          expect(alerts.length).to.be(1);
+          expect(alerts.hits.hits.length).to.be(1);
         });
 
         it('returns the correct number of alert counts', async () => {
@@ -228,7 +230,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       describe('with p99 transaction duration alerts', () => {
         let ruleId: string;
-        let alerts;
+        let alerts: Alerts;
 
         before(async () => {
           const createdRule = await alertingApi.createRule({
@@ -286,7 +288,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         it('indexes alert document', async () => {
-          expect(alerts.length).to.be(1);
+          expect(alerts.hits.hits.length).to.be(1);
         });
 
         it('returns the correct number of alert counts', async () => {
@@ -315,7 +317,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       describe('with error rate alerts', () => {
         let ruleId: string;
-        let alerts;
+        let alerts: Alerts;
 
         before(async () => {
           const createdRule = await alertingApi.createRule({
@@ -372,7 +374,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         it('indexes alert document', async () => {
-          expect(alerts.length).to.be(1);
+          expect(alerts.hits.hits.length).to.be(1);
         });
 
         it('returns the correct number of alert counts', async () => {
