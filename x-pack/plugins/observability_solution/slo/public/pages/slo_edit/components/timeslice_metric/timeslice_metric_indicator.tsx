@@ -19,7 +19,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { IndexAndTimestampField } from '../custom_common/index_and_timestamp_field';
-import { useKibana } from '../../../../utils/kibana_react';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { GroupByField } from '../common/group_by_field';
 import { CreateSLOForm } from '../../types';
 import { DataPreviewChart } from '../common/data_preview_chart';

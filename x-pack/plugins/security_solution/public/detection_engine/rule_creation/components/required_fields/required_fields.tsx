@@ -16,6 +16,7 @@ import { RequiredFieldsHelpInfo } from './required_fields_help_info';
 import { RequiredFieldRow } from './required_fields_row';
 import * as defineRuleI18n from '../../../rule_creation_ui/components/step_define_rule/translations';
 import * as i18n from './translations';
+import { getFlattenedArrayFieldNames } from './utils';
 
 interface RequiredFieldsComponentProps {
   path: string;
@@ -65,7 +66,7 @@ const RequiredFieldsList = ({
   form,
 }: RequiredFieldsListProps) => {
   /*
-    This component should only re-render when either the "index" form field (index patterns) or the required fields change. 
+    This component should only re-render when either the "index" form field (index patterns) or the required fields change.
 
     By default, the `useFormData` hook triggers a re-render whenever any form field changes.
     It also allows optimization by passing a "watch" array of field names. The component then only re-renders when these specified fields change.
@@ -77,10 +78,7 @@ const RequiredFieldsList = ({
     To work around this, we manually construct a list of "flattened" field names to watch, based on the current state of the form.
     This is a temporary solution and ideally, `useFormData` should be updated to handle this scenario.
   */
-
-  const internalField = form.getFields()[`${path}__array__`] ?? {};
-  const internalFieldValue = (internalField?.value ?? []) as ArrayItem[];
-  const flattenedFieldNames = internalFieldValue.map((item) => item.path);
+  const flattenedFieldNames = getFlattenedArrayFieldNames(form, path);
 
   /*
     Not using "watch" for the initial render, to let row components render and initialize form fields.
