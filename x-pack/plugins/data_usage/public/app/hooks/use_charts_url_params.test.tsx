@@ -9,7 +9,8 @@ import moment from 'moment';
 import { METRIC_TYPE_VALUES, MetricTypes } from '../../../common/rest_types';
 import { getDataUsageMetricsFiltersFromUrlParams } from './use_charts_url_params';
 
-describe('#getDataUsageMetricsFiltersFromUrlParams', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/200888
+describe.skip('#getDataUsageMetricsFiltersFromUrlParams', () => {
   const getMetricTypesAsArray = (): MetricTypes[] => {
     return [...METRIC_TYPE_VALUES];
   };
