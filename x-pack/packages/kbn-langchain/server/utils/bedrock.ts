@@ -10,7 +10,7 @@ import { finished } from 'stream/promises';
 import { Logger } from '@kbn/core/server';
 import { EventStreamCodec } from '@smithy/eventstream-codec';
 import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
-import { Message } from '@aws-sdk/client-bedrock-runtime/dist-types/models/models_0';
+import { Message } from '@aws-sdk/client-bedrock-runtime';
 import { StreamParser } from './types';
 
 export const parseBedrockStreamAsAsyncIterator = async function* (

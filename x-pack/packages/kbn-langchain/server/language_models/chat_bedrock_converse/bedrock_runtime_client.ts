@@ -69,7 +69,7 @@ export class BedrockRuntimeClient extends _BedrockRuntimeClient {
 
     if (data.status === 'error') {
       throw new Error(
-        `ActionsClientBedrockChat: action result status is error: ${data?.message} - ${data?.serviceMessage}`
+        `ActionsClient BedrockRuntimeClient: action result status is error: ${data?.message} - ${data?.serviceMessage}`
       );
     }
 
