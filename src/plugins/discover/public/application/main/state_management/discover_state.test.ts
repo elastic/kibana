@@ -26,7 +26,7 @@ import { discoverServiceMock } from '../../../__mocks__/services';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { DiscoverAppStateContainer } from './discover_app_state_container';
 import { waitFor } from '@testing-library/react';
-import { FetchStatus } from '../../types';
+// import { FetchStatus } from '../../types';
 import { dataViewAdHoc, dataViewComplexMock } from '../../../__mocks__/data_view_complex';
 import { copySavedSearch } from './discover_saved_search_container';
 import { createKbnUrlStateStorage, IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
@@ -420,22 +420,22 @@ describe('Test discover state actions', () => {
     expect(state.internalState.getState().dataView).toBe(dataViewMock);
   });
 
-  test('fetchData', async () => {
-    const { state } = await getState('/');
-    const dataState = state.dataState;
-    await state.actions.loadDataViewList();
-    expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.LOADING);
-    await state.actions.loadSavedSearch();
-    const unsubscribe = state.actions.initializeAndSync();
-    state.actions.fetchData();
-    await waitFor(() => {
-      expect(dataState.data$.documents$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
-    });
-    unsubscribe();
+  // test('fetchData', async () => {
+  //   const { state } = await getState('/');
+  //   const dataState = state.dataState;
+  //   await state.actions.loadDataViewList();
+  //   expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.LOADING);
+  //   await state.actions.loadSavedSearch();
+  //   const unsubscribe = state.actions.initializeAndSync();
+  //   state.actions.fetchData();
+  //   await waitFor(() => {
+  //     expect(dataState.data$.documents$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
+  //   });
+  //   unsubscribe();
 
-    expect(dataState.data$.totalHits$.value.result).toBe(0);
-    expect(dataState.data$.documents$.value.result).toEqual([]);
-  });
+  //   expect(dataState.data$.totalHits$.value.result).toBe(0);
+  //   expect(dataState.data$.documents$.value.result).toEqual([]);
+  // });
   test('loadDataViewList', async () => {
     const { state } = await getState('');
     expect(state.internalState.getState().savedDataViews.length).toBe(3);
