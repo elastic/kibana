@@ -21,7 +21,7 @@ main () {
   report_main_step "Generating console definitions"
   node scripts/generate_console_definitions.js --source "$PARENT_DIR/elasticsearch-specification" --emptyDest
 
-  # Check for differences
+  # Check if there are any differences
   set +e
   git diff --exit-code --quiet "$destination_file"
   if [ $? -eq 0 ]; then
@@ -49,7 +49,7 @@ main () {
 
   echo "No existing PR found. Proceeding.."
 
-  # Make a commit
+  # Commit diff
   BRANCH_NAME="console_definitions_sync_$(date +%s)"
 
   git checkout -b "$BRANCH_NAME"
@@ -61,7 +61,7 @@ main () {
 
   git push origin "$BRANCH_NAME"
 
-  # Create a PR
+  # Create PR
   gh pr create --title "$PR_TITLE" --body "$PR_BODY" --base main --head "${BRANCH_NAME}" --label 'release_note:skip' --label 'Feature:Console' --label 'Team:Kibana Management'
 }
 
