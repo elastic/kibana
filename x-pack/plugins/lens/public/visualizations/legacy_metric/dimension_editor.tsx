@@ -5,13 +5,18 @@
  * 2.0.
  */
 import { EuiButtonGroup, EuiFormRow, htmlIdGenerator } from '@elastic/eui';
-import { PaletteRegistry, CustomizablePalette, CUSTOM_PALETTE } from '@kbn/coloring';
+import {
+  PaletteRegistry,
+  CustomizablePalette,
+  CUSTOM_PALETTE,
+  applyPaletteParams,
+} from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ColorMode } from '@kbn/charts-plugin/common';
 import type { LegacyMetricState } from '../../../common/types';
 import { isNumericFieldForDatatable } from '../../../common/expressions/datatable/utils';
-import { applyPaletteParams, PalettePanelContainer } from '../../shared_components';
+import { PalettePanelContainer } from '../../shared_components';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { defaultPaletteParams } from './palette_config';
 

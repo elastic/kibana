@@ -45,8 +45,8 @@ export class ChartsPlugin implements Plugin<ChartsPluginSetup, ChartsPluginStart
     dependencies.expressions.registerFunction(systemPalette);
     this.themeService.init(core.theme);
     this.legacyColorsService.init(core.uiSettings);
-    this.palettes = this.paletteService.setup(this.legacyColorsService);
-
+    // TODO: make this reactive to changes in $theme
+    this.palettes = this.paletteService.setup(this.legacyColorsService, core.theme.getTheme());
     this.activeCursor.setup();
 
     return {

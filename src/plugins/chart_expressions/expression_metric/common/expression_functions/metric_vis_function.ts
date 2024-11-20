@@ -212,7 +212,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
             secondaryPrefix: args.secondaryPrefix,
             color: args.color,
             icon: args.icon,
-            palette: args.palette?.params,
+            palette: args.palette,
             progressDirection: args.progressDirection,
             titlesTextAlign: args.titlesTextAlign,
             valuesTextAlign: args.valuesTextAlign,

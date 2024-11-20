@@ -7,7 +7,13 @@
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { Ast } from '@kbn/interpreter';
-import { PaletteOutput, PaletteRegistry, CUSTOM_PALETTE, shiftPalette } from '@kbn/coloring';
+import {
+  PaletteOutput,
+  PaletteRegistry,
+  CUSTOM_PALETTE,
+  shiftPalette,
+  getDefaultColorStops,
+} from '@kbn/coloring';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { ColorMode, CustomPaletteState } from '@kbn/charts-plugin/common';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
@@ -65,20 +71,20 @@ const toExpression = (
   const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
   const operation = datasource && datasource.getOperationForColumnId(state.accessor);
 
-  const stops = state.palette?.params?.stops || [];
+  const colorStops = getDefaultColorStops(paletteService, state.palette) ?? [];
   const isCustomPalette = state.palette?.params?.name === CUSTOM_PALETTE;
 
   const canColor = operation?.dataType === 'number';
 
   const paletteParams = {
     ...state.palette?.params,
-    colors: stops.map(({ color }) => color),
+    colors: colorStops.map(({ color }) => color),
     stops:
       isCustomPalette || state.palette?.params?.rangeMax == null
-        ? stops.map(({ stop }) => stop)
+        ? colorStops.map(({ stop }) => stop)
         : shiftPalette(
-            stops,
-            Math.max(state.palette?.params?.rangeMax, ...stops.map(({ stop }) => stop))
+            colorStops,
+            Math.max(state.palette?.params?.rangeMax, ...colorStops.map(({ stop }) => stop))
           ).map(({ stop }) => stop),
     reverse: false,
   };
@@ -215,7 +221,8 @@ export const getLegacyMetricVisualization = ({
 
   getConfiguration(props) {
     const hasColoring = props.state.palette != null;
-    const stops = props.state.palette?.params?.stops || [];
+    const colorStops = getDefaultColorStops(paletteService, props.state.palette);
+
     return {
       groups: [
         {
@@ -236,7 +243,7 @@ export const getLegacyMetricVisualization = ({
                 {
                   columnId: props.state.accessor,
                   triggerIconType: hasColoring ? 'colorBy' : undefined,
-                  palette: hasColoring ? stops.map(({ color }) => color) : undefined,
+                  palette: hasColoring ? colorStops?.map(({ color }) => color) : undefined,
                 },
               ]
             : [],
@@ -314,7 +321,7 @@ export const getLegacyMetricVisualization = ({
     }
 
     const hasColoring = state.palette != null;
-    const stops = state.palette?.params?.stops || [];
+    const colorStops = getDefaultColorStops(paletteService, state.palette);
 
     return {
       layers: [
@@ -324,7 +331,7 @@ export const getLegacyMetricVisualization = ({
           chartType: 'metric',
           ...this.getDescription(state),
           dimensions,
-          palette: hasColoring ? stops.map(({ color }) => color) : undefined,
+          palette: hasColoring ? colorStops?.map(({ color }) => color) : undefined,
         },
       ],
     };

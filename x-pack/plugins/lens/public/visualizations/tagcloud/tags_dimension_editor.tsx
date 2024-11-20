@@ -13,7 +13,6 @@ import {
   ColorMapping,
   SPECIAL_TOKENS_STRING_CONVERSION,
   PaletteOutput,
-  AVAILABLE_PALETTES,
   getColorsFromMapping,
 } from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
@@ -21,6 +20,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiFormRow, EuiText, EuiBadge } f
 import { useState, MutableRefObject, useCallback } from 'react';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { getColorCategories } from '@kbn/chart-expressions-common';
+import { KbnPalettes } from '@kbn/palettes';
 import type { TagcloudState } from './types';
 import { PalettePanelContainer, PalettePicker } from '../../shared_components';
 import { FramePublicAPI } from '../../types';
@@ -28,6 +28,7 @@ import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 
 interface Props {
   paletteService: PaletteRegistry;
+  palettes: KbnPalettes;
   state: TagcloudState;
   setState: (state: TagcloudState) => void;
   frame: FramePublicAPI;
@@ -42,6 +43,7 @@ export function TagsDimensionEditor({
   setState,
   panelRef,
   isDarkMode,
+  palettes,
   paletteService,
   isInlineEditing,
 }: Props) {
@@ -52,7 +54,7 @@ export function TagsDimensionEditor({
     });
   const [useNewColorMapping, setUseNewColorMapping] = useState(state.colorMapping ? true : false);
 
-  const colors = getColorsFromMapping(isDarkMode, state.colorMapping);
+  const colors = getColorsFromMapping(palettes, isDarkMode, state.colorMapping);
   const table = frame.activeData?.[state.layerId];
   const splitCategories = getColorCategories(table?.rows ?? [], state.tagAccessor);
 
@@ -136,7 +138,7 @@ export function TagsDimensionEditor({
                   isDarkMode={isDarkMode}
                   model={state.colorMapping ?? { ...DEFAULT_COLOR_MAPPING_CONFIG }}
                   onModelUpdate={(model: ColorMapping.Config) => setColorMapping(model)}
-                  palettes={AVAILABLE_PALETTES}
+                  palettes={palettes}
                   data={{
                     type: 'categories',
                     categories: splitCategories,
