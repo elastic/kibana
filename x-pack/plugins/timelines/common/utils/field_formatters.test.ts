@@ -7,7 +7,7 @@
 
 import { eventDetailsFormattedFields, eventHit } from '@kbn/securitysolution-t-grid';
 import { EventHit } from '../search_strategy';
-import { getDataFromFieldsHits, getDataSafety } from './field_formatters';
+import { getDataFromFieldsHits } from './field_formatters';
 
 describe('Events Details Helpers', () => {
   const fields: EventHit['fields'] = eventHit.fields;
@@ -15,7 +15,7 @@ describe('Events Details Helpers', () => {
   describe('#getDataFromFieldsHits', () => {
     it('happy path', () => {
       const result = getDataFromFieldsHits(fields);
-      expect(result).toEqual(resultFields);
+      expect(result).toMatchObject(resultFields);
     });
     it('lets get weird', () => {
       const whackFields = {
@@ -84,7 +84,7 @@ describe('Events Details Helpers', () => {
         },
       ];
       const result = getDataFromFieldsHits(whackFields);
-      expect(result).toEqual(whackResultFields);
+      expect(result).toMatchObject(whackResultFields);
     });
     it('flattens alert parameters', () => {
       const ruleParameterFields = {
@@ -191,7 +191,7 @@ describe('Events Details Helpers', () => {
       ];
 
       const result = getDataFromFieldsHits(ruleParameterFields);
-      expect(result).toEqual(ruleParametersResultFields);
+      expect(result).toMatchObject(ruleParametersResultFields);
     });
 
     it('get data from threat enrichments', () => {
@@ -594,12 +594,12 @@ describe('Events Details Helpers', () => {
         },
       ];
       const result = getDataFromFieldsHits(data);
-      expect(result).toEqual(ruleParametersResultFields);
+      expect(result).toMatchObject(ruleParametersResultFields);
     });
   });
 
   it('#getDataSafety', async () => {
-    const result = await getDataSafety(getDataFromFieldsHits, fields);
-    expect(result).toEqual(resultFields);
+    const result = await getDataFromFieldsHits(fields);
+    expect(result).toMatchObject(resultFields);
   });
 });

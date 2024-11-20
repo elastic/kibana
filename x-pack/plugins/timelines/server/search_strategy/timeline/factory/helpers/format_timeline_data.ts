@@ -6,7 +6,12 @@
  */
 
 import { get, has } from 'lodash/fp';
-import { EventHit, TimelineEdges, TimelineNonEcsData } from '../../../../../common/search_strategy';
+import {
+  EventHit,
+  TimelineEdges,
+  TimelineNonEcsData,
+  EventSource,
+} from '../../../../../common/search_strategy';
 import { toStringArray } from '../../../../../common/utils/to_array';
 import { getDataFromFieldsHits } from '../../../../../common/utils/field_formatters';
 import { getTimestamp } from './get_timestamp';
@@ -27,6 +32,17 @@ const createBaseTimelineEdges = (): TimelineEdges => ({
   },
 });
 
+function deepMerge(target: EventSource, source: EventSource) {
+  for (const key in source) {
+    if (source[key] instanceof Object && key in target) {
+      deepMerge(target[key], source[key]);
+    } else {
+      target[key] = source[key];
+    }
+  }
+  return target;
+}
+
 const processMetadataField = (fieldName: string, hit: EventHit): TimelineNonEcsData[] => [
   {
     field: fieldName,
@@ -44,14 +60,16 @@ const processFieldData = (
     : { [fieldName]: hit.fields[fieldName] };
 
   const formattedData = getDataFromFieldsHits(fieldToEval);
-
-  // Filter and map in one pass
-  return formattedData
-    .filter((item) => item.field.includes(fieldName))
-    .map(({ field, values }) => ({
-      field,
-      value: values,
-    }));
+  const fieldsData: TimelineNonEcsData[] = [];
+  return formattedData.reduce((agg, { field, values }) => {
+    if (field.includes(fieldName)) {
+      agg.push({
+        field,
+        value: values,
+      });
+    }
+    return agg;
+  }, fieldsData);
 };
 
 export const formatTimelineData = async (
@@ -87,18 +105,14 @@ export const formatTimelineData = async (
 
       for (const fieldName of uniqueFields) {
         const nestedParentPath = getNestedParentPath(fieldName, hit.fields);
-
-        if (
-          !nestedParentPath &&
-          !has(fieldName, hit.fields) &&
-          !ECS_METADATA_FIELDS.includes(fieldName)
-        ) {
+        const isEcs = ECS_METADATA_FIELDS.includes(fieldName);
+        if (!nestedParentPath && !has(fieldName, hit.fields) && !isEcs) {
           // eslint-disable-next-line no-continue
           continue;
         }
 
         if (dataFieldSet.has(fieldName)) {
-          const values = ECS_METADATA_FIELDS.includes(fieldName)
+          const values = isEcs
             ? processMetadataField(fieldName, hit)
             : processFieldData(fieldName, hit, nestedParentPath);
 
@@ -106,7 +120,7 @@ export const formatTimelineData = async (
         }
 
         if (ecsFieldSet.has(fieldName)) {
-          Object.assign(result.node.ecs, buildObjectRecursive(fieldName, hit.fields));
+          deepMerge(result.node.ecs, buildObjectRecursive(fieldName, hit.fields));
         }
       }
 

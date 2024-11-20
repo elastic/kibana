@@ -106,10 +106,14 @@ const processNestedFields = (
   );
 };
 
+type DisjointFieldNames = 'ecs.version' | 'event.action' | 'event.kind' | 'event.original';
+
 // Memoized field maps
-const fieldMaps: Partial<EcsFieldMap & TechnicalRuleFieldMap & ExperimentalRuleFieldMap> = {
-  ...ecsFieldMap,
+const fieldMaps: EcsFieldMap &
+  Omit<TechnicalRuleFieldMap, DisjointFieldNames> &
+  ExperimentalRuleFieldMap = {
   ...technicalRuleFieldMap,
+  ...ecsFieldMap,
   ...legacyExperimentalFieldMap,
 };
 
