@@ -13,9 +13,9 @@ import {
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
-import { SuperuserAtSpace1, UserAtSpaceScenarios, StackAlertsOnly } from '../../../../scenarios';
-import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../../common/lib';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { SuperuserAtSpace1, UserAtSpaceScenarios, StackAlertsOnly } from '../../../scenarios';
+import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createFindTests({ getService }: FtrProviderContext) {

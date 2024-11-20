@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
-import { UserAtSpaceScenarios } from '../../../../scenarios';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { UserAtSpaceScenarios } from '../../../scenarios';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   AlertUtils,
   checkAAD,
@@ -17,7 +17,7 @@ import {
   ObjectRemover,
   getUnauthorizedErrorMessage,
   TaskManagerDoc,
-} from '../../../../../common/lib';
+} from '../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
 export default function createDisableAlertTests({ getService }: FtrProviderContext) {
