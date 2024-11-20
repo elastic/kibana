@@ -8,6 +8,7 @@
  */
 
 import { compact, isEqual, isUndefined, omitBy } from 'lodash';
+import type { History } from 'history';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { map } from 'rxjs';
@@ -18,7 +19,6 @@ import type {
   ExecutionContextSetup,
   ExecutionContextStart,
 } from '@kbn/core-execution-context-browser';
-import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 
 // Should be exported from elastic/apm-rum
 export type LabelValue = string | number | boolean;
@@ -33,7 +33,7 @@ export interface SetupDeps {
 
 export interface StartDeps {
   curApp$: Observable<string | undefined>;
-  history: InternalApplicationStart['history'];
+  history: History<unknown>;
 }
 
 /** @internal */
