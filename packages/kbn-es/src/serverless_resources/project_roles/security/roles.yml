@@ -150,6 +150,8 @@ t1_analyst:
         - write
         - maintenance
     - names:
+        - .lists*
+        - .items*
         - apm-*-transaction*
         - traces-apm*
         - auditbeat-*
@@ -273,6 +275,7 @@ t3_analyst:
       privileges:
         - read
         - write
+        - view_index_metadata
     - names:
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*
@@ -474,6 +477,7 @@ soc_manager:
       privileges:
         - read
         - write
+        - view_index_metadata
     - names:
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*
