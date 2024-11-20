@@ -256,8 +256,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/189636
-    describe.skip('switch modal', () => {
+    describe('switch modal', () => {
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.timePicker.setDefaultAbsoluteRange();
@@ -302,6 +301,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.discover.saveSearch('esql_test2');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
         const testQuery = 'from logstash-* | limit 100 | drop @timestamp';
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');

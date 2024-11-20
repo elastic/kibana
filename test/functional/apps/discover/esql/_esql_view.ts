@@ -296,6 +296,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
         await discover.saveSearch('esql_test2');
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
         const testQuery = 'from logstash-* | limit 100 | drop @timestamp';
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
