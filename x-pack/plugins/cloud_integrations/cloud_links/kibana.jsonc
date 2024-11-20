@@ -1,20 +1,24 @@
 {
   "type": "plugin",
   "id": "@kbn/cloud-links-plugin",
-  "owner": "@elastic/kibana-core",
+  "owner": [
+    "@elastic/kibana-core"
+  ],
+  "group": "platform",
+  "visibility": "private",
   "description": "Adds the links to the Elastic Cloud console",
   "plugin": {
     "id": "cloudLinks",
-    "server": false,
     "browser": true,
+    "server": false,
+    "requiredPlugins": [
+      "share"
+    ],
     "optionalPlugins": [
       "cloud",
       "security",
       "guidedOnboarding"
     ],
-    "requiredBundles": [],
-    "requiredPlugins": [
-      "share"
-    ]
+    "requiredBundles": []
   }
 }

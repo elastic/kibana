@@ -24,7 +24,7 @@ export const UserEntity = z.object({
   '@timestamp': z.string().datetime(),
   entity: z.object({
     name: z.string(),
-    source: z.array(z.string()),
+    source: z.string(),
   }),
   user: z.object({
     full_name: z.array(z.string()).optional(),
@@ -48,7 +48,7 @@ export const HostEntity = z.object({
   '@timestamp': z.string().datetime(),
   entity: z.object({
     name: z.string(),
-    source: z.array(z.string()),
+    source: z.string(),
   }),
   host: z.object({
     hostname: z.array(z.string()).optional(),

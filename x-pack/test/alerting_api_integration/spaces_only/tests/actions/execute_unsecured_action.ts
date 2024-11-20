@@ -12,7 +12,7 @@ import { getWebhookServer } from '@kbn/actions-simulators-plugin/server/plugin';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { ObjectRemover } from '../../../common/lib';
 import { Spaces } from '../../scenarios';
-import { createWebhookAction } from './connector_types/stack/webhook';
+import { createWebhookConnector } from './connector_types/stack/webhook';
 
 // eslint-disable-next-line import/no-default-export
 export default function createUnsecuredActionTests({ getService }: FtrProviderContext) {
@@ -150,7 +150,7 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
       const webhookServer = await getWebhookServer();
       const availablePort = await getPort({ port: 9000 });
       webhookServer.listen(availablePort);
-      const webhookActionId = await createWebhookAction(
+      const webhookConnectorId = await createWebhookConnector(
         supertest,
         `http://localhost:${availablePort}`
       );
@@ -160,7 +160,7 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
         .set('kbn-xsrf', 'xxx')
         .send({
           requesterId: 'background_task',
-          id: webhookActionId,
+          id: webhookConnectorId,
           params: {
             body: 'success',
           },
@@ -175,10 +175,10 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
         })
         .expect(200);
       expect(response.body.status).to.eql('success');
-      expect(response.body.result.actionId).to.eql(webhookActionId);
+      expect(response.body.result.actionId).to.eql(webhookConnectorId);
       expect(response.body.result.status).to.eql('ok');
 
-      const query = getEventLogExecuteQuery(testStart, webhookActionId);
+      const query = getEventLogExecuteQuery(testStart, webhookConnectorId);
       await retry.try(async () => {
         const searchResult = await es.search(query);
         expect((searchResult.hits.total as SearchTotalHits).value).to.eql(1);
@@ -188,7 +188,7 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
         expect(hit?._source?.event?.outcome).to.eql('success');
         // @ts-expect-error _source: unknown
         expect(hit?._source?.message).to.eql(
-          `action executed: .webhook:${webhookActionId}: A generic Webhook action`
+          `action executed: .webhook:${webhookConnectorId}: A generic Webhook connector`
         );
         // @ts-expect-error _source: unknown
         expect(hit?._source?.kibana?.action?.execution?.source).to.eql('background_task');

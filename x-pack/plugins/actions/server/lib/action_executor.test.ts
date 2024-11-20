@@ -851,7 +851,7 @@ describe('Action Executor', () => {
         status: 'error',
         retry: false,
         message: `error validating action params: [param1]: expected value of type [string] but got [undefined]`,
-        errorSource: TaskErrorSource.FRAMEWORK,
+        errorSource: TaskErrorSource.USER,
       });
     });
 

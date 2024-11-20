@@ -101,26 +101,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         await uninstallDefinition(supertest, { id: mockDefinition.id });
       });
-
-      it('rejects updates to managed definitions', async () => {
-        await installDefinition(supertest, {
-          definition: { ...mockDefinition, managed: true },
-          installOnly: true,
-        });
-
-        await updateDefinition(supertest, {
-          id: mockDefinition.id,
-          update: {
-            version: '1.0.0',
-            latest: {
-              timestampField: '@updatedTimestampField',
-            },
-          },
-          expectedCode: 403,
-        });
-
-        await uninstallDefinition(supertest, { id: mockDefinition.id });
-      });
     });
 
     describe('entity data', () => {
@@ -169,6 +149,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const parsedSample = entityLatestSchema.safeParse(sample.hits.hits[0]._source);
         expect(parsedSample.success).to.be(true);
+        expect(parsedSample.data?.entity.id).to.be('admin-console');
       });
 
       it('should delete entities data when specified', async () => {

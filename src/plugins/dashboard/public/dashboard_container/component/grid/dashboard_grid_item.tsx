@@ -15,6 +15,7 @@ import { css } from '@emotion/react';
 import { EmbeddablePanel, ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { DASHBOARD_MARGIN_SIZE } from '../../../dashboard_constants';
 import { DashboardPanelState } from '../../../../common';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 import { embeddableService, presentationUtilService } from '../../../services/kibana_services';
@@ -22,6 +23,8 @@ import { embeddableService, presentationUtilService } from '../../../services/ki
 type DivProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'className' | 'style' | 'children'>;
 
 export interface Props extends DivProps {
+  appFixedViewport?: HTMLElement;
+  dashboardContainer?: HTMLElement;
   id: DashboardPanelState['explicitInput']['id'];
   index?: number;
   type: DashboardPanelState['type'];
@@ -34,6 +37,8 @@ export interface Props extends DivProps {
 export const Item = React.forwardRef<HTMLDivElement, Props>(
   (
     {
+      appFixedViewport,
+      dashboardContainer,
       expandedPanelId,
       focusedPanelId,
       id,
@@ -91,12 +96,19 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       }
     }, [id, dashboardApi, scrollToPanelId, highlightPanelId, ref, blurPanel]);
 
+    const dashboardContainerTopOffset = dashboardContainer?.offsetTop || 0;
+    const globalNavTopOffset = appFixedViewport?.offsetTop || 0;
+
     const focusStyles = blurPanel
       ? css`
           pointer-events: none;
           opacity: 0.25;
         `
-      : undefined;
+      : css`
+          scroll-margin-top: ${dashboardContainerTopOffset +
+          globalNavTopOffset +
+          DASHBOARD_MARGIN_SIZE}px;
+        `;
 
     const renderedEmbeddable = useMemo(() => {
       const panelProps = {

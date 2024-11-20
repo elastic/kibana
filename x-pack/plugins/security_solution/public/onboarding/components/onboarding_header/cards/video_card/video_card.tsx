@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
+import { OnboardingHeaderCardId } from '../../../constants';
 import { OnboardingHeaderVideoModal } from './video_modal';
 import * as i18n from './translations';
 import videoImage from './images/video_card.png';
@@ -14,6 +15,7 @@ import { LinkCard } from '../common/link_card';
 
 export const VideoCard = React.memo<{ isDarkMode: boolean }>(({ isDarkMode }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
+
   const closeVideoModal = useCallback(() => {
     setIsModalVisible(false);
   }, []);
@@ -24,6 +26,7 @@ export const VideoCard = React.memo<{ isDarkMode: boolean }>(({ isDarkMode }) =>
   return (
     <>
       <LinkCard
+        id={OnboardingHeaderCardId.video}
         onClick={showVideoModal}
         icon={isDarkMode ? darkVideoImage : videoImage}
         title={i18n.ONBOARDING_HEADER_VIDEO_TITLE}

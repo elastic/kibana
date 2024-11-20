@@ -21,11 +21,8 @@ import {
   RequiredFieldArray,
   RiskScore,
   RiskScoreMapping,
-  RuleAuthorArray,
   RuleDescription,
-  RuleExceptionList,
   RuleFalsePositiveArray,
-  RuleLicense,
   RuleName,
   RuleReferenceArray,
   RuleSignatureId,
@@ -82,12 +79,9 @@ export const DiffableCommonFields = z.object({
   setup: SetupGuide,
   related_integrations: RelatedIntegrationArray,
   required_fields: RequiredFieldArray,
-  author: RuleAuthorArray,
-  license: RuleLicense,
 
   // Other domain fields
   rule_schedule: RuleSchedule, // NOTE: new field
-  exceptions_list: z.array(RuleExceptionList),
   max_signals: MaxSignals,
 
   // Optional fields

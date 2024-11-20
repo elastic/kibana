@@ -18,7 +18,7 @@ import {
   ServiceStatusLevels,
   CoreStatus,
 } from '@kbn/core/server';
-import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
+import type { CloudStart } from '@kbn/cloud-plugin/server';
 import {
   registerDeleteInactiveNodesTaskDefinition,
   scheduleDeleteInactiveNodesTaskDefinition,
@@ -29,7 +29,7 @@ import { TaskManagerConfig } from './config';
 import { createInitialMiddleware, addMiddlewareToChain, Middleware } from './lib/middleware';
 import { removeIfExists } from './lib/remove_if_exists';
 import { setupSavedObjects, BACKGROUND_TASK_NODE_SO_NAME, TASK_SO_NAME } from './saved_objects';
-import { TaskDefinitionRegistry, TaskTypeDictionary, REMOVED_TYPES } from './task_type_dictionary';
+import { TaskDefinitionRegistry, TaskTypeDictionary } from './task_type_dictionary';
 import { AggregationOpts, FetchResult, SearchOpts, TaskStore } from './task_store';
 import { createManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskScheduling } from './task_scheduling';
@@ -45,7 +45,10 @@ import { metricsStream, Metrics } from './metrics';
 import { TaskManagerMetricsCollector } from './metrics/task_metrics_collector';
 import { TaskPartitioner } from './lib/task_partitioner';
 import { getDefaultCapacity } from './lib/get_default_capacity';
-import { setClaimStrategy } from './lib/set_claim_strategy';
+import {
+  registerMarkRemovedTasksAsUnrecognizedDefinition,
+  scheduleMarkRemovedTasksAsUnrecognizedDefinition,
+} from './removed_tasks/mark_removed_tasks_as_unrecognized';
 
 export interface TaskManagerSetupContract {
   /**
@@ -127,17 +130,9 @@ export class TaskManagerPlugin
 
   public setup(
     core: CoreSetup<TaskManagerStartContract, unknown>,
-    plugins: { cloud?: CloudSetup; usageCollection?: UsageCollectionSetup }
+    plugins: { usageCollection?: UsageCollectionSetup }
   ): TaskManagerSetupContract {
     this.elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability(core.status.core$);
-
-    this.config = setClaimStrategy({
-      config: this.config,
-      deploymentId: plugins.cloud?.deploymentId,
-      isServerless: this.initContext.env.packageInfo.buildFlavor === 'serverless',
-      isCloud: plugins.cloud?.isCloudEnabled ?? false,
-      logger: this.logger,
-    });
 
     core.metrics
       .getOpsMetrics$()
@@ -146,7 +141,7 @@ export class TaskManagerPlugin
         this.heapSizeLimit = metrics.process.memory.heap.size_limit;
       });
 
-    setupSavedObjects(core.savedObjects);
+    setupSavedObjects(core.savedObjects, this.config);
     this.taskManagerId = this.initContext.env.instanceUuid;
 
     if (!this.taskManagerId) {
@@ -230,6 +225,11 @@ export class TaskManagerPlugin
     }
 
     registerDeleteInactiveNodesTaskDefinition(this.logger, core.getStartServices, this.definitions);
+    registerMarkRemovedTasksAsUnrecognizedDefinition(
+      this.logger,
+      core.getStartServices,
+      this.definitions
+    );
 
     if (this.config.unsafe.exclude_task_types.length) {
       this.logger.warn(
@@ -310,9 +310,9 @@ export class TaskManagerPlugin
         this.config!.claim_strategy
       } isBackgroundTaskNodeOnly=${this.isNodeBackgroundTasksOnly()} heapSizeLimit=${
         this.heapSizeLimit
-      } defaultCapacity=${defaultCapacity} pollingInterval=${
-        this.config!.poll_interval
-      } autoCalculateDefaultEchCapacity=${this.config.auto_calculate_default_ech_capacity}`
+      } defaultCapacity=${defaultCapacity} autoCalculateDefaultEchCapacity=${
+        this.config.auto_calculate_default_ech_capacity
+      }`
     );
 
     const managedConfiguration = createManagedConfiguration({
@@ -341,7 +341,6 @@ export class TaskManagerPlugin
       this.taskPollingLifecycle = new TaskPollingLifecycle({
         config: this.config!,
         definitions: this.definitions,
-        unusedTypes: REMOVED_TYPES,
         logger: this.logger,
         executionContext,
         taskStore,
@@ -393,6 +392,7 @@ export class TaskManagerPlugin
     });
 
     scheduleDeleteInactiveNodesTaskDefinition(this.logger, taskScheduling).catch(() => {});
+    scheduleMarkRemovedTasksAsUnrecognizedDefinition(this.logger, taskScheduling).catch(() => {});
 
     return {
       fetch: (opts: SearchOpts): Promise<FetchResult> => taskStore.fetch(opts),

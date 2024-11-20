@@ -40,7 +40,7 @@ function mergeFunc(entity: EntityLatestServiceRaw, existingEntity?: MergedServic
   const commonEntityFields = {
     serviceName: entity.service.name,
     agentName: entity.agent.name[0],
-    lastSeenTimestamp: entity.entity.lastSeenTimestamp,
+    lastSeenTimestamp: entity.entity.last_seen_timestamp,
   };
 
   if (!existingEntity) {

@@ -26,10 +26,8 @@ import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ModelIdMapEntry } from '../../../../components/mappings_editor/components/document_fields/fields';
 import { isSemanticTextField } from '../../../../components/mappings_editor/lib/utils';
 import { deNormalize } from '../../../../components/mappings_editor/lib';
-import { useMLModelNotificationToasts } from '../../../../../hooks/use_ml_model_status_toasts';
 import { useMappingsState } from '../../../../components/mappings_editor/mappings_state_context';
 import { useAppContext } from '../../../../app_context';
 
@@ -55,15 +53,11 @@ export function TrainedModelsDeploymentModal({
 }: TrainedModelsDeploymentModalProps) {
   const modalTitleId = useGeneratedHtmlId();
   const { fields, inferenceToModelIdMap } = useMappingsState();
-  const {
-    plugins: { ml },
-    url,
-  } = useAppContext();
+  const { url } = useAppContext();
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const closeModal = () => setIsModalVisible(false);
   const [mlManagementPageUrl, setMlManagementPageUrl] = useState<string>('');
   const [allowForceSaveMappings, setAllowForceSaveMappings] = useState<boolean>(false);
-  const { showErrorToasts, showSuccessfullyDeployedToast } = useMLModelNotificationToasts();
 
   useEffect(() => {
     const mlLocator = url?.locators.get(ML_APP_LOCATOR);
@@ -86,25 +80,6 @@ export function TrainedModelsDeploymentModal({
 
   const [pendingDeployments, setPendingDeployments] = useState<string[]>([]);
 
-  const startModelAllocation = async (entry: ModelIdMapEntry & { inferenceId: string }) => {
-    try {
-      await ml?.mlApi?.trainedModels.startModelAllocation(entry.trainedModelId, {
-        number_of_allocations: 1,
-        threads_per_allocation: 1,
-        priority: 'normal',
-        deployment_id: entry.inferenceId,
-      });
-      showSuccessfullyDeployedToast(entry.trainedModelId);
-    } catch (error) {
-      setErrorsInTrainedModelDeployment((previousState) => ({
-        ...previousState,
-        [entry.inferenceId]: error.message,
-      }));
-      showErrorToasts(error);
-      setIsModalVisible(true);
-    }
-  };
-
   useEffect(() => {
     const models = inferenceIdsInPendingList.map((inferenceId) =>
       inferenceToModelIdMap?.[inferenceId]
@@ -114,18 +89,6 @@ export function TrainedModelsDeploymentModal({
           }
         : undefined
     ); // filter out third-party models
-    for (const model of models) {
-      if (
-        model?.trainedModelId &&
-        model.isDeployable &&
-        !model.isDownloading &&
-        !model.isDeployed
-      ) {
-        // Sometimes the model gets stuck in a ready to deploy state, so we need to trigger deployment manually
-        // This is currently the only way to surface a specific error message to the user
-        startModelAllocation(model);
-      }
-    }
     const allPendingDeployments = models
       .map((model) => {
         return model?.trainedModelId && !model?.isDeployed ? model?.inferenceId : '';
@@ -135,7 +98,6 @@ export function TrainedModelsDeploymentModal({
       (deployment, index) => allPendingDeployments.indexOf(deployment) === index
     );
     setPendingDeployments(uniqueDeployments);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inferenceIdsInPendingList, inferenceToModelIdMap]);
 
   const erroredDeployments = pendingDeployments.filter(

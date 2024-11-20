@@ -7,15 +7,46 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import { buildDataTableRecord, DataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { render, screen } from '@testing-library/react';
-import React from 'react';
+import { DataGridDensity, ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
 import { getServiceNameCell } from './service_name_cell';
+import { CellRenderersExtensionParams } from '../../../context_awareness';
+
+const core = {
+  application: {
+    capabilities: {
+      apm: {
+        show: true,
+      },
+    },
+  },
+  uiSettings: {
+    get: () => true,
+  },
+};
+
+jest.mock('../../../hooks/use_discover_services', () => {
+  const originalModule = jest.requireActual('../../../hooks/use_discover_services');
+  return {
+    ...originalModule,
+    useDiscoverServices: () => ({ core, share: {} }),
+  };
+});
 
 const renderCell = (serviceNameField: string, record: DataTableRecord) => {
-  const ServiceNameCell = getServiceNameCell(serviceNameField);
+  const cellRenderersExtensionParamsMock: CellRenderersExtensionParams = {
+    actions: {
+      addFilter: jest.fn(),
+    },
+    dataView: dataViewMock,
+    density: DataGridDensity.COMPACT,
+    rowHeight: ROWS_HEIGHT_OPTIONS.single,
+  };
+  const ServiceNameCell = getServiceNameCell(serviceNameField, cellRenderersExtensionParamsMock);
   render(
     <ServiceNameCell
       rowIndex={0}
@@ -40,22 +71,12 @@ describe('getServiceNameCell', () => {
       dataViewMock
     );
     renderCell('service.name', record);
-    expect(screen.getByTestId('serviceNameCell-nodejs')).toBeInTheDocument();
+    expect(screen.getByTestId('dataTableCellActionsPopover_service.name')).toBeInTheDocument();
   });
 
-  it('renders default icon with unknwon test subject if agent name is missing', () => {
-    const record = buildDataTableRecord(
-      { fields: { 'service.name': 'test-service' } },
-      dataViewMock
-    );
-    renderCell('service.name', record);
-    expect(screen.getByTestId('serviceNameCell-unknown')).toBeInTheDocument();
-  });
-
-  it('does not render if service name is missing', () => {
+  it('does render empty div if service name is missing', () => {
     const record = buildDataTableRecord({ fields: { 'agent.name': 'nodejs' } }, dataViewMock);
     renderCell('service.name', record);
-    expect(screen.queryByTestId('serviceNameCell-nodejs')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('serviceNameCell-unknown')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('serviceNameCell-empty')).toBeInTheDocument();
   });
 });

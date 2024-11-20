@@ -17,10 +17,10 @@ import type { DocumentDetailsProps } from '../shared/types';
 import { PanelNavigation } from './navigation';
 import { PanelHeader } from './header';
 import { PanelContent } from './content';
-import { RightPanelTour } from './components/tour';
 import type { RightPanelTabType } from './tabs';
 import { PanelFooter } from './footer';
 import { useFlyoutIsExpandable } from './hooks/use_flyout_is_expandable';
+import { DocumentEventTypes } from '../../../common/lib/telemetry';
 
 export type RightPanelPaths = 'overview' | 'table' | 'json';
 
@@ -54,7 +54,7 @@ export const RightPanel: FC<Partial<DocumentDetailsProps>> = memo(({ path }) => 
     // saving which tab is currently selected in the right panel in local storage
     storage.set(FLYOUT_STORAGE_KEYS.RIGHT_PANEL_SELECTED_TABS, tabId);
 
-    telemetry.reportDetailsFlyoutTabClicked({
+    telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutTabClicked, {
       location: scopeId,
       panel: 'right',
       tabId,
@@ -76,7 +76,6 @@ export const RightPanel: FC<Partial<DocumentDetailsProps>> = memo(({ path }) => 
 
   return (
     <>
-      {flyoutIsExpandable && <RightPanelTour />}
       <PanelNavigation flyoutIsExpandable={flyoutIsExpandable} />
       <PanelHeader
         tabs={tabsDisplayed}

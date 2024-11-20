@@ -162,7 +162,7 @@ export class HttpService
     return this.internalPreboot;
   }
 
-  public async setup(deps: SetupDeps) {
+  public async setup(deps: SetupDeps): Promise<InternalHttpServiceSetup> {
     this.requestHandlerContext = deps.context.createContextContainer();
     this.configSubscription = this.config$.subscribe(() => {
       if (this.httpServer.isListening()) {
@@ -185,9 +185,11 @@ export class HttpService
 
     this.internalSetup = {
       ...serverContract,
-
+      registerOnPostValidation: (cb) => {
+        Router.on('onPostValidate', cb);
+      },
+      getRegisteredDeprecatedApis: () => serverContract.getDeprecatedRoutes(),
       externalUrl: new ExternalUrlConfig(config.externalUrl),
-
       createRouter: <Context extends RequestHandlerContextBase = RequestHandlerContextBase>(
         path: string,
         pluginId: PluginOpaqueId = this.coreContext.coreId

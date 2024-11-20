@@ -19,7 +19,7 @@ export const initialSection = (
   <Markdown
     markdownContent={i18n.translate('languageDocumentation.documentationESQL.markdown', {
       defaultMessage: `
-An ES|QL (Elasticsearch query language) query consists of a series of commands, separated by pipe characters: \`|\`. Each query starts with a **source command**, which produces a table, typically with data from Elasticsearch. 
+An ES|QL (Elasticsearch query language) query consists of a series of commands, separated by pipe characters: \`|\`. Each query starts with a **source command**, which produces a table, typically with data from Elasticsearch.
 
 A source command can be followed by one or more **processing commands**. Processing commands can change the output table of the previous command by adding, removing, and changing rows and columns.
 
@@ -29,7 +29,7 @@ source-command
 | processing-command2
 \`\`\`
 
-The result of a query is the table produced by the final processing command.                                  
+The result of a query is the table produced by the final processing command.
                                       `,
     })}
   />
@@ -77,7 +77,7 @@ ES|QL can access the following metadata fields:
 Use the \`METADATA\` directive to enable metadata fields:
 
 \`\`\`
-FROM index [METADATA _index, _id]
+FROM index METADATA _index, _id
 \`\`\`
 
 Metadata fields are only available if the source of the data is an index. Consequently, \`FROM\` is the only source commands that supports the \`METADATA\` directive.
@@ -85,7 +85,7 @@ Metadata fields are only available if the source of the data is an index. Conseq
 Once enabled, the fields are then available to subsequent processing commands, just like the other index fields:
 
 \`\`\`
-FROM ul_logs, apps [METADATA _index, _version]
+FROM ul_logs, apps METADATA _index, _version
 | WHERE id IN (13, 14) AND _version == 1
 | EVAL key = CONCAT(_index, "_", TO_STR(id))
 | SORT id, _index
@@ -95,7 +95,7 @@ FROM ul_logs, apps [METADATA _index, _version]
 Also, similar to the index fields, once an aggregation is performed, a metadata field will no longer be accessible to subsequent commands, unless used as grouping field:
 
 \`\`\`
-FROM employees [METADATA _index, _id]
+FROM employees METADATA _index, _id
 | STATS max = MAX(emp_no) BY _index
 \`\`\`
             `,
@@ -114,7 +114,7 @@ FROM employees [METADATA _index, _id]
           markdownContent={i18n.translate('languageDocumentation.documentationESQL.row.markdown', {
             defaultMessage: `### ROW
 The \`ROW\` source command produces a row with one or more columns with values that you specify. This can be useful for testing.
-              
+
 \`\`\`
 ROW a = 1, b = "two", c = null
 \`\`\`
@@ -207,7 +207,7 @@ ROW a = "1953-01-23T12:15:00Z - some text - 127.0.0.1"
           markdownContent={i18n.translate('languageDocumentation.documentationESQL.drop.markdown', {
             defaultMessage: `### DROP
 Use \`DROP\` to remove columns from a table:
-              
+
 \`\`\`
 FROM employees
 | DROP height
@@ -347,7 +347,7 @@ ROW a = "12 15.5 15.6 true"
 The \`KEEP\` command enables you to specify what columns are returned and the order in which they are returned.
 
 To limit the columns that are returned, use a comma-separated list of column names. The columns are returned in the specified order:
-              
+
 \`\`\`
 FROM employees
 | KEEP first_name, last_name, height
@@ -384,7 +384,7 @@ FROM employees
             {
               defaultMessage: `### LIMIT
 The \`LIMIT\` processing command enables you to limit the number of rows:
-              
+
 \`\`\`
 FROM employees
 | LIMIT 5
@@ -407,7 +407,7 @@ FROM employees
             'languageDocumentation.documentationESQL.mvExpand.markdown',
             {
               defaultMessage: `### MV_EXPAND
-The \`MV_EXPAND\` processing command expands multivalued fields into one row per value, duplicating other fields:              
+The \`MV_EXPAND\` processing command expands multivalued fields into one row per value, duplicating other fields:
 \`\`\`
 ROW a=[1,2,3], b="b", j=["a","b"]
 | MV_EXPAND a
@@ -607,7 +607,7 @@ FROM employees
             {
               defaultMessage: `### WHERE
 Use \`WHERE\` to produce a table that contains all the rows from the input table for which the provided condition evaluates to \`true\`:
-              
+
 \`\`\`
 FROM employees
 | KEEP first_name, last_name, still_hired
@@ -654,7 +654,7 @@ export const groupingFunctions = {
               defaultMessage: `### BUCKET
 Creates groups of values - buckets - out of a datetime or numeric input. The size of the buckets can either be provided directly, or chosen based on a recommended count and values range.
 
-\`BUCKET\` works in two modes: 
+\`BUCKET\` works in two modes:
 
 1. Where the size of the bucket is computed based on a buckets count recommendation (four parameters) and a range.
 2. Where the bucket size is provided directly (two parameters).

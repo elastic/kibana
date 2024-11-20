@@ -1711,7 +1711,15 @@
             "label": "getApiCredentialsForRole",
             "description": [],
             "signature": [
-              "(role: string) => Promise<{ Cookie: string; }>"
+              "(role: string, options?: ",
+              {
+                "pluginId": "@kbn/test",
+                "scope": "common",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-common.GetCookieOptions",
+                "text": "GetCookieOptions"
+              },
+              " | undefined) => Promise<{ Cookie: string; }>"
             ],
             "path": "packages/kbn-test/src/auth/session_manager.ts",
             "deprecated": false,
@@ -1731,6 +1739,28 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.SamlSessionManager.getApiCredentialsForRole.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.GetCookieOptions",
+                    "text": "GetCookieOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-test/src/auth/session_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -1743,7 +1773,15 @@
             "label": "getInteractiveUserSessionCookieWithRoleScope",
             "description": [],
             "signature": [
-              "(role: string) => Promise<string>"
+              "(role: string, options?: ",
+              {
+                "pluginId": "@kbn/test",
+                "scope": "common",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-common.GetCookieOptions",
+                "text": "GetCookieOptions"
+              },
+              " | undefined) => Promise<string>"
             ],
             "path": "packages/kbn-test/src/auth/session_manager.ts",
             "deprecated": false,
@@ -1763,6 +1801,28 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.SamlSessionManager.getInteractiveUserSessionCookieWithRoleScope.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.GetCookieOptions",
+                    "text": "GetCookieOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-test/src/auth/session_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -4716,6 +4776,31 @@
               "\nDid the user request that baselines get updated?"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.GetCookieOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetCookieOptions",
+        "description": [],
+        "path": "packages/kbn-test/src/auth/session_manager.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.GetCookieOptions.forceNewSession",
+            "type": "boolean",
+            "tags": [],
+            "label": "forceNewSession",
+            "description": [],
+            "path": "packages/kbn-test/src/auth/session_manager.ts",
             "deprecated": false,
             "trackAdoption": false
           }

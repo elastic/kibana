@@ -16,7 +16,9 @@ export const CreateIndexButton: React.FC = () => {
     services: { application, share },
   } = useKibana();
   const createIndexLocator = useMemo(
-    () => share.url.locators.get('CREATE_INDEX_LOCATOR_ID'),
+    () =>
+      share.url.locators.get('CREATE_INDEX_LOCATOR_ID') ??
+      share.url.locators.get('SEARCH_CREATE_INDEX'),
     [share.url.locators]
   );
   const handleNavigateToIndex = useCallback(async () => {

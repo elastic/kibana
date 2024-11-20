@@ -31,7 +31,6 @@ spec:
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/scripts/pipelines/trigger_version_dependent_jobs/pipeline.sh
-      skip_intermediate_builds: false
       provider_settings:
         prefix_pull_request_fork_branch_names: false
         skip_pull_request_builds_for_existing_commits: true

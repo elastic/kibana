@@ -429,11 +429,14 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         onClickAgentActivity={onClickAgentActivity}
         showAgentActivityTour={showAgentActivityTour}
         latestAgentActionErrors={latestAgentActionErrors.length}
+        sortField={sortField}
+        sortOrder={sortOrder}
       />
       <EuiSpacer size="m" />
       {/* Agent total, bulk actions and status bar */}
       <AgentTableHeader
         totalAgents={nAgentsInTable}
+        totalManagedAgents={totalManagedAgentIds.length || 0}
         agentStatus={agentsStatus}
         selectableAgents={agentsOnCurrentPage?.filter(isAgentSelectable).length || 0}
         managedAgentsOnCurrentPage={managedAgentsOnCurrentPage}

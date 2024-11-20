@@ -15,7 +15,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('getting started', function () {
     before(async () => {
-      await pageObjects.svlCommonPage.loginAsAdmin();
+      await pageObjects.svlCommonPage.loginWithRole('developer');
     });
 
     it('has serverless side nav', async () => {

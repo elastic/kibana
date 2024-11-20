@@ -238,7 +238,7 @@ describe('saved search embeddable', () => {
       await waitOneTick(); // wait for build to complete
 
       expect(resolveRootProfileSpy).toHaveBeenCalledWith({ solutionNavId: 'test' });
-      resolveRootProfileSpy.mockReset();
+      resolveRootProfileSpy.mockClear();
       expect(resolveRootProfileSpy).not.toHaveBeenCalled();
     });
 

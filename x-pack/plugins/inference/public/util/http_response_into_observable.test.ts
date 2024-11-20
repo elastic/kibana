@@ -7,10 +7,12 @@
 
 import { lastValueFrom, of, toArray } from 'rxjs';
 import { httpResponseIntoObservable } from './http_response_into_observable';
+import {
+  ChatCompletionEventType,
+  InferenceTaskEventType,
+  InferenceTaskErrorCode,
+} from '@kbn/inference-common';
 import type { StreamedHttpResponse } from './create_observable_from_http_response';
-import { ChatCompletionEventType } from '../../common/chat_complete';
-import { InferenceTaskEventType } from '../../common/inference_task';
-import { InferenceTaskErrorCode } from '../../common/errors';
 
 function toSse(...events: Array<Record<string, any>>) {
   return events.map((event) => new TextEncoder().encode(`data: ${JSON.stringify(event)}\n\n`));
