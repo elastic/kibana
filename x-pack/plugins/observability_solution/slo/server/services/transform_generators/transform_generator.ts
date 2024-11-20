@@ -18,7 +18,8 @@ export abstract class TransformGenerator {
   public abstract getTransformParams(
     slo: SLODefinition,
     spaceId: string,
-    dataViewService: DataViewsService
+    dataViewService: DataViewsService,
+    isServerless: boolean
   ): Promise<TransformPutTransformRequest>;
 
   public buildCommonRuntimeMappings(slo: SLODefinition, dataView?: DataView): MappingRuntimeFields {
