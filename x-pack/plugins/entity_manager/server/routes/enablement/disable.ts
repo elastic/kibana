@@ -44,6 +44,15 @@ import { createEntityManagerServerRoute } from '../create_entity_manager_server_
  */
 export const disableEntityDiscoveryRoute = createEntityManagerServerRoute({
   endpoint: 'DELETE /internal/entities/managed/enablement',
+  options: {
+    security: {
+      authz: {
+        enabled: false,
+        reason:
+          'This endpoint leverages the security plugin to evaluate the privileges needed as part of its core flow',
+      },
+    },
+  },
   params: z.object({
     query: z.object({
       deleteData: z.optional(BooleanFromString).default(false),

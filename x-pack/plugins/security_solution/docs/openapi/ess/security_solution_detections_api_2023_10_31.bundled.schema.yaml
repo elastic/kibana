@@ -1560,17 +1560,19 @@ components:
       type: object
       properties:
         unit:
-          enum:
-            - s
-            - m
-            - h
-          type: string
+          $ref: '#/components/schemas/AlertSuppressionDurationUnit'
         value:
           minimum: 1
           type: integer
       required:
         - value
         - unit
+    AlertSuppressionDurationUnit:
+      enum:
+        - s
+        - m
+        - h
+      type: string
     AlertSuppressionGroupBy:
       items:
         type: string
