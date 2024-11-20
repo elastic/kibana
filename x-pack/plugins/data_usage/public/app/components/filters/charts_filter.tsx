@@ -7,7 +7,7 @@
 
 import { orderBy } from 'lodash/fp';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
+import { EuiPopoverTitle, EuiSelectable, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import {
@@ -17,6 +17,7 @@ import {
 
 import { UX_LABELS } from '../../translations';
 import { ChartsFilterPopover } from './charts_filter_popover';
+import { SelectAllButton } from './select_all_button';
 import { FilterItems, FilterName, useChartsFilter } from '../../hooks';
 
 const getSearchPlaceholder = (filterName: FilterName) => {
@@ -162,6 +163,17 @@ export const ChartsFilter = memo<ChartsFilterProps>(
       ]
     );
 
+    const onSelectAll = useCallback(() => {
+      const allItems: FilterItems = items.map((item) => {
+        return {
+          ...item,
+          checked: 'on',
+        };
+      });
+      setItems(allItems);
+      onChangeFilterOptions(items.map((i) => i.label));
+    }, [items, setItems, onChangeFilterOptions]);
+
     useEffect(() => {
       return () => {
         wasPopoverOpen.current = isPopoverOpen;
@@ -203,6 +215,15 @@ export const ChartsFilter = memo<ChartsFilterProps>(
                   </EuiPopoverTitle>
                 )}
                 {list}
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <SelectAllButton
+                      data-test-subj={getTestId(`${filterName}-filter-selectAllButton`)}
+                      isDisabled={hasActiveFilters && numFilters === 0}
+                      onClick={onSelectAll}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </div>
             );
           }}
