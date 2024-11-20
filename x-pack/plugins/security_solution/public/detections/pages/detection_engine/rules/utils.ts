@@ -14,7 +14,7 @@ import {
   ALERT_SUPPRESSION_DEFAULT_DURATION,
 } from '../../../../detection_engine/rule_creation/components/alert_suppression_edit';
 import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../../detection_engine/rule_creation/components/threshold_alert_suppression_edit';
-import { DEFAULT_KQL_QUERY_FIELD_VALUE } from '../../../../detection_engine/rule_creation_ui/components/query_field';
+import { DEFAULT_KQL_QUERY_FIELD_VALUE } from '../../../../detection_engine/rule_creation_ui/components/query_bar_field';
 import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import { DEFAULT_MAX_SIGNALS, DEFAULT_THREAT_MATCH_QUERY } from '../../../../../common/constants';

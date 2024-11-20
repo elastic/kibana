@@ -16,7 +16,7 @@ import { useAssistantAvailability } from '../../../../assistant/use_assistant_av
 import * as i18nAssistant from '../../../../detections/pages/detection_engine/translations';
 import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import type { FormHook, ValidationError } from '../../../../shared_imports';
-import { QUERY_BAR_FIELD_NAME } from '../query_field';
+import { QUERY_BAR_FIELD_NAME } from '../query_bar_field';
 import * as i18n from './translations';
 
 const getLanguageName = (language: string | undefined) => {

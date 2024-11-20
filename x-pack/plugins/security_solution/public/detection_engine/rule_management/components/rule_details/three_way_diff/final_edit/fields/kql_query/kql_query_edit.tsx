@@ -14,8 +14,8 @@ import { schema } from '../../../../../../../rule_creation_ui/components/step_de
 import { HiddenField, UseField } from '../../../../../../../../shared_imports';
 import {
   QUERY_BAR_FIELD_NAME,
-  QueryField,
-} from '../../../../../../../rule_creation_ui/components/query_field';
+  QueryBarField,
+} from '../../../../../../../rule_creation_ui/components/query_bar_field';
 import * as stepDefineRuleI18n from '../../../../../../../rule_creation_ui/components/step_define_rule/translations';
 import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import type { SetRuleQuery } from '../../../../../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
@@ -61,7 +61,7 @@ export function KqlQueryEdit({
             <ImportTimelineQueryButton handleOpenTimelineSearch={toggleIsTimelineSearchOpen} />
           ),
         }}
-        component={QueryField}
+        component={QueryBarField}
         componentProps={{
           indexPattern: dataView ?? DEFAULT_DATA_VIEW,
           isLoading,

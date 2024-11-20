@@ -23,7 +23,7 @@ import {
   DEFAULT_THREAT_MATCH_KQL_QUERY_FIELD_VALUE,
   QUERY_BAR_FIELD_NAME,
   type FieldValueQueryBar,
-} from '../query_field';
+} from '../query_bar_field';
 import { RULE_TYPE_FIELD_NAME } from '../select_rule_type';
 
 const EQL_QUERY_LANGUAGE = 'eql';

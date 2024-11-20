@@ -72,8 +72,8 @@ import {
   ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
 } from '../../../rule_creation/components/alert_suppression_edit';
 import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../rule_creation/components/threshold_alert_suppression_edit';
-import type { FieldValueQueryBar } from '../query_field';
-import { QUERY_BAR_FIELD_NAME } from '../query_field';
+import type { FieldValueQueryBar } from '../query_bar_field';
+import { QUERY_BAR_FIELD_NAME } from '../query_bar_field';
 import { RULE_TYPE_FIELD_NAME } from '../select_rule_type';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`

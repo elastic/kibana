@@ -8,7 +8,7 @@
 import { QueryClient } from '@tanstack/react-query';
 import { getESQLQueryColumns } from '@kbn/esql-utils';
 import type { FormData, ValidationFunc, ValidationFuncArg } from '../../../../../shared_imports';
-import type { FieldValueQueryBar } from '../../../../rule_creation_ui/components/query_field';
+import type { FieldValueQueryBar } from '../../../../rule_creation_ui/components/query_bar_field';
 import { esqlQueryValidatorFactory } from './esql_query_validator_factory';
 import { ESQL_ERROR_CODES } from './error_codes';
 

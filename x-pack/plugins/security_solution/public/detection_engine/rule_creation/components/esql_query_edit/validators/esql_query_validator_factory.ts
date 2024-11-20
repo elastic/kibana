@@ -12,7 +12,7 @@ import { parse } from '@kbn/esql-ast';
 import { isAggregatingQuery } from '@kbn/securitysolution-utils';
 import { isColumnItem, isOptionItem } from '@kbn/esql-validation-autocomplete';
 import type { FormData, ValidationError, ValidationFunc } from '../../../../../shared_imports';
-import type { FieldValueQueryBar } from '../../../../rule_creation_ui/components/query_field';
+import type { FieldValueQueryBar } from '../../../../rule_creation_ui/components/query_bar_field';
 import { fetchEsqlQueryColumns } from '../../../logic/esql_query_columns';
 import { ESQL_ERROR_CODES } from './error_codes';
 import * as i18n from './translations';

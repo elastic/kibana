@@ -37,8 +37,8 @@ import type {
 } from '../../../../detections/pages/detection_engine/rules/types';
 import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
 import { StepRuleDescription } from '../description_step';
-import type { QueryBarDefineRuleProps } from '../query_field';
-import { QUERY_BAR_FIELD_NAME, QueryField } from '../query_field';
+import type { QueryBarFieldProps } from '../query_bar_field';
+import { QUERY_BAR_FIELD_NAME, QueryBarField } from '../query_bar_field';
 import { RULE_TYPE_FIELD_NAME, SelectRuleType } from '../select_rule_type';
 import { AnomalyThresholdSlider } from '../anomaly_threshold_slider';
 import { MlJobSelect } from '../../../rule_creation/components/ml_job_select';
@@ -545,7 +545,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             </MyLabelButton>
           ),
         }}
-        component={QueryField}
+        component={QueryBarField}
         componentProps={
           {
             idAria: 'detectionEngineStepDefineRuleQueryBar',
@@ -560,7 +560,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             onSavedQueryError: handleSavedQueryError,
             defaultSavedQuery,
             onOpenTimeline,
-          } as QueryBarDefineRuleProps
+          } as QueryBarFieldProps
         }
       />
     ),

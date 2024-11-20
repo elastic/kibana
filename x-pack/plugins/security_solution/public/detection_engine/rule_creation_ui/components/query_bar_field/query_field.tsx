@@ -24,7 +24,7 @@ import { getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 import type { FieldValueQueryBar } from './types';
 import * as i18n from './translations';
 
-export interface QueryBarDefineRuleProps {
+export interface QueryBarFieldProps {
   dataTestSubj: string;
   field: FieldHook;
   idAria: string;
@@ -65,7 +65,7 @@ const savedQueryToFieldValue = (savedQuery: SavedQuery): FieldValueQueryBar => (
   title: savedQuery.attributes.title,
 });
 
-export const QueryField = ({
+export const QueryBarField = ({
   defaultSavedQuery,
   dataTestSubj,
   field,
@@ -80,7 +80,7 @@ export const QueryField = ({
   resetToSavedQuery,
   onOpenTimeline,
   onSavedQueryError,
-}: QueryBarDefineRuleProps) => {
+}: QueryBarFieldProps) => {
   const { value: fieldValue, setValue: setFieldValue } = field as FieldHook<FieldValueQueryBar>;
   const [originalHeight, setOriginalHeight] = useState(-1);
   const [loadingTimeline, setLoadingTimeline] = useState(false);

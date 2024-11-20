@@ -11,8 +11,8 @@ import type { DataViewBase } from '@kbn/es-query';
 import { debounceAsync } from '@kbn/securitysolution-utils';
 import type { FieldConfig } from '../../../../shared_imports';
 import { UseField } from '../../../../shared_imports';
-import type { FieldValueQueryBar } from '../../../rule_creation_ui/components/query_field';
-import { QueryField } from '../../../rule_creation_ui/components/query_field';
+import type { FieldValueQueryBar } from '../../../rule_creation_ui/components/query_bar_field';
+import { QueryBarField } from '../../../rule_creation_ui/components/query_bar_field';
 import { queryRequiredValidatorFactory } from '../../../rule_creation_ui/validators/query_required_validator_factory';
 import { esqlQueryValidatorFactory } from './validators/esql_query_validator_factory';
 import { EsqlInfoIcon } from './esql_info_icon';
@@ -75,7 +75,7 @@ export const EsqlQueryEdit = memo(function EsqlQueryEdit({
   return (
     <UseField
       path={path}
-      component={QueryField}
+      component={QueryBarField}
       componentProps={componentProps}
       config={fieldConfig}
     />
