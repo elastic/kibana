@@ -38,6 +38,7 @@ import {
   type LogRateAnalysisResultsData,
 } from '../log_rate_analysis_results';
 import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
+import { LogRateAnalysisAttachmentsMenu } from './log_rate_analysis_attachments_menu';
 
 export const DEFAULT_SEARCH_QUERY: estypes.QueryDslQueryContainer = { match_all: {} };
 const DEFAULT_SEARCH_BAR_QUERY: estypes.QueryDslQueryContainer = {
@@ -216,6 +217,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
           barColorOverride={barColorOverride}
           barHighlightColorOverride={barHighlightColorOverride}
           barStyleAccessor={barStyleAccessor}
+          attachmentsMenu={<LogRateAnalysisAttachmentsMenu />}
         />
       )}
       <EuiSpacer size="m" />
