@@ -14,29 +14,23 @@ import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { AggregationType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { SupertestWithRoleScope } from '../../../../services/role_scoped_supertest';
-import { waitForAlertsForRule } from '../../../../../../apm_api_integration/tests/alerts/helpers/wait_for_alerts_for_rule';
-import {
-  createApmRule,
-  runRuleSoon,
-  ApmAlertFields,
-} from '../../../../../../apm_api_integration/tests/alerts/helpers/alerting_api_helper';
-import { waitForActiveRule } from '../../../../../../apm_api_integration/tests/alerts/helpers/wait_for_active_rule';
-import { cleanupRuleAndAlertState } from '../../../../../../apm_api_integration/tests/alerts/helpers/cleanup_rule_and_alert_state';
+import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+import { APM_ACTION_VARIABLE_INDEX, APM_ALERTS_INDEX } from '../alerts/helpers/alerting_helper';
+
 type TransactionsGroupsMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const apmApiClient = getService('apmApi');
   const synthtrace = getService('synthtrace');
-  const roleScopedSupertest = getService('roleScopedSupertest');
-  const es = getService('es');
+  const alertingApi = getService('alertingApi');
+  const samlAuth = getService('samlAuth');
+
   const serviceName = 'synth-go';
   const dayInMs = 24 * 60 * 60 * 1000;
   const start = Date.now() - dayInMs;
   const end = Date.now() + dayInMs;
-  const logger = getService('log');
 
   async function getTransactionGroups(overrides?: {
     path?: {
@@ -73,6 +67,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       },
     });
     expect(response.status).to.be(200);
+
     return response.body as TransactionsGroupsMainStatistics;
   }
 
@@ -106,12 +101,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         },
       ];
       let apmSynthtraceEsClient: ApmSynthtraceEsClient;
-      let supertestEditorWithApiKey: SupertestWithRoleScope;
+      let roleAuthc: RoleCredentials;
 
       before(async () => {
-        supertestEditorWithApiKey = await roleScopedSupertest.getSupertestWithRoleScope('editor', {
-          withInternalHeaders: true,
-        });
+        roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
         apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
         const serviceGoProdInstance = apm
           .service({ name: serviceName, environment: 'production', agentName: 'go' })
@@ -145,15 +138,17 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         ]);
       });
 
-      after(() => apmSynthtraceEsClient.clean());
+      after(async () => {
+        await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+        await apmSynthtraceEsClient.clean();
+      });
 
       describe('with avg transaction duration alerts', () => {
         let ruleId: string;
-        let alerts: ApmAlertFields[];
+        let alerts;
 
         before(async () => {
-          const createdRule = await createApmRule({
-            supertest: supertestEditorWithApiKey,
+          const createdRule = await alertingApi.createRule({
             name: `Latency threshold | ${serviceName}`,
             params: {
               serviceName,
@@ -172,28 +167,37 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               ],
             },
             ruleTypeId: ApmRuleType.TransactionDuration,
+            consumer: 'apm',
+            roleAuthc,
           });
           ruleId = createdRule.id;
-          alerts = await waitForAlertsForRule({ es, ruleId });
+          alerts = await alertingApi.waitForAlertInIndex({
+            ruleId,
+            indexName: APM_ALERTS_INDEX,
+          });
         });
 
         after(async () => {
-          await cleanupRuleAndAlertState({ es, supertest: supertestEditorWithApiKey, logger });
+          await alertingApi.cleanUpAlerts({
+            ruleId,
+            alertIndexName: APM_ALERTS_INDEX,
+            connectorIndexName: APM_ACTION_VARIABLE_INDEX,
+            consumer: 'apm',
+            roleAuthc,
+          });
         });
 
         it('checks if rule is active', async () => {
-          const ruleStatus = await waitForActiveRule({
+          const ruleStatus = await alertingApi.waitForRuleStatus({
             ruleId,
-            supertest: supertestEditorWithApiKey,
+            expectedStatus: 'active',
+            roleAuthc,
           });
           expect(ruleStatus).to.be('active');
         });
 
         it('should successfully run the rule', async () => {
-          const response = await runRuleSoon({
-            ruleId,
-            supertest: supertestEditorWithApiKey,
-          });
+          const response = await alertingApi.runRule(roleAuthc, ruleId);
           expect(response.status).to.be(204);
         });
 
@@ -224,11 +228,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       describe('with p99 transaction duration alerts', () => {
         let ruleId: string;
-        let alerts: ApmAlertFields[];
+        let alerts;
 
         before(async () => {
-          const createdRule = await createApmRule({
-            supertest: supertestEditorWithApiKey,
+          const createdRule = await alertingApi.createRule({
             name: `Latency threshold | ${serviceName}`,
             params: {
               serviceName,
@@ -247,29 +250,38 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               ],
             },
             ruleTypeId: ApmRuleType.TransactionDuration,
+            consumer: 'apm',
+            roleAuthc,
           });
 
           ruleId = createdRule.id;
-          alerts = await waitForAlertsForRule({ es, ruleId });
+          alerts = await alertingApi.waitForAlertInIndex({
+            ruleId,
+            indexName: APM_ALERTS_INDEX,
+          });
         });
 
         after(async () => {
-          await cleanupRuleAndAlertState({ es, supertest: supertestEditorWithApiKey, logger });
+          await alertingApi.cleanUpAlerts({
+            ruleId,
+            alertIndexName: APM_ALERTS_INDEX,
+            connectorIndexName: APM_ACTION_VARIABLE_INDEX,
+            consumer: 'apm',
+            roleAuthc,
+          });
         });
 
         it('checks if rule is active', async () => {
-          const ruleStatus = await waitForActiveRule({
+          const ruleStatus = await alertingApi.waitForRuleStatus({
             ruleId,
-            supertest: supertestEditorWithApiKey,
+            expectedStatus: 'active',
+            roleAuthc,
           });
           expect(ruleStatus).to.be('active');
         });
 
         it('should successfully run the rule', async () => {
-          const response = await runRuleSoon({
-            ruleId,
-            supertest: supertestEditorWithApiKey,
-          });
+          const response = await alertingApi.runRule(roleAuthc, ruleId);
           expect(response.status).to.be(204);
         });
 
@@ -303,11 +315,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       describe('with error rate alerts', () => {
         let ruleId: string;
-        let alerts: ApmAlertFields[];
+        let alerts;
 
         before(async () => {
-          const createdRule = await createApmRule({
-            supertest: supertestEditorWithApiKey,
+          const createdRule = await alertingApi.createRule({
             name: `Error rate | ${serviceName}`,
             params: {
               serviceName,
@@ -325,28 +336,38 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               ],
             },
             ruleTypeId: ApmRuleType.TransactionErrorRate,
+            consumer: 'apm',
+            roleAuthc,
           });
+
           ruleId = createdRule.id;
-          alerts = await waitForAlertsForRule({ es, ruleId });
+          alerts = await alertingApi.waitForAlertInIndex({
+            ruleId,
+            indexName: APM_ALERTS_INDEX,
+          });
         });
 
         after(async () => {
-          await cleanupRuleAndAlertState({ es, supertest: supertestEditorWithApiKey, logger });
+          await alertingApi.cleanUpAlerts({
+            ruleId,
+            alertIndexName: APM_ALERTS_INDEX,
+            connectorIndexName: APM_ACTION_VARIABLE_INDEX,
+            consumer: 'apm',
+            roleAuthc,
+          });
         });
 
         it('checks if rule is active', async () => {
-          const ruleStatus = await waitForActiveRule({
+          const ruleStatus = await alertingApi.waitForRuleStatus({
             ruleId,
-            supertest: supertestEditorWithApiKey,
+            expectedStatus: 'active',
+            roleAuthc,
           });
           expect(ruleStatus).to.be('active');
         });
 
         it('should successfully run the rule', async () => {
-          const response = await runRuleSoon({
-            ruleId,
-            supertest: supertestEditorWithApiKey,
-          });
+          const response = await alertingApi.runRule(roleAuthc, ruleId);
           expect(response.status).to.be(204);
         });
 
