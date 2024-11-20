@@ -24,6 +24,7 @@ describe('getGenAiTokenTracking', () => {
   let mockGetTokenCountFromInvokeStream: jest.Mock;
   let mockGetTokenCountFromInvokeAsyncIterator: jest.Mock;
   beforeEach(() => {
+    jest.clearAllMocks();
     mockGetTokenCountFromBedrockInvoke = (
       getTokenCountFromBedrockInvoke as jest.Mock
     ).mockResolvedValueOnce({
