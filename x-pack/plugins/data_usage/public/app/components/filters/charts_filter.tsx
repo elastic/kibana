@@ -171,8 +171,10 @@ export const ChartsFilter = memo<ChartsFilterProps>(
         };
       });
       setItems(allItems);
-      onChangeFilterOptions(items.map((i) => i.label));
-    }, [items, setItems, onChangeFilterOptions]);
+      const dataStreamNames = items.map((i) => i.label);
+      setUrlDataStreamsFilter(dataStreamNames.join(','));
+      onChangeFilterOptions(dataStreamNames);
+    }, [items, setItems, onChangeFilterOptions, setUrlDataStreamsFilter]);
 
     useEffect(() => {
       return () => {
