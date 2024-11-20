@@ -592,6 +592,7 @@ const adjustCommandsForSentinelOne = ({
         command.about = getCommandAboutInfo({
           aboutInfo: command.about,
           isSupported: false,
+          dataTestSubj: 'sentineloneProcessesWindowsWarningTooltip',
           tooltipContent: i18n.translate(
             'xpack.securitySolution.consoleCommandsDefinition.sentineloneProcessesWindowRestriction',
             {

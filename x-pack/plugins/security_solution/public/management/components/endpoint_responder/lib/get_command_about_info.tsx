@@ -22,16 +22,24 @@ export const getCommandAboutInfo = ({
   aboutInfo,
   isSupported,
   tooltipContent = UNSUPPORTED_COMMAND_INFO,
+  dataTestSubj,
 }: {
   aboutInfo: React.ReactNode;
   isSupported: boolean;
   tooltipContent?: EuiToolTipProps['content'];
+  dataTestSubj?: string;
 }) => {
   return isSupported ? (
     aboutInfo
   ) : (
     <>
-      {aboutInfo} <EuiIconTip content={tooltipContent} type="warning" color="danger" />
+      {aboutInfo}{' '}
+      <EuiIconTip
+        anchorProps={{ 'data-test-subj': dataTestSubj }}
+        content={tooltipContent}
+        type="warning"
+        color="danger"
+      />
     </>
   );
 };

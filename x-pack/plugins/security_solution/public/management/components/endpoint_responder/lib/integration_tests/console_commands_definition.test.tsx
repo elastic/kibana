@@ -90,6 +90,8 @@ describe('When displaying Endpoint Response Actions', () => {
         responseActionsCrowdstrikeManualHostIsolationEnabled: true,
         responseActionsSentinelOneV1Enabled: true,
         responseActionsSentinelOneGetFileEnabled: true,
+        responseActionsSentinelOneKillProcessEnabled: true,
+        responseActionsSentinelOneProcessesEnabled: true,
       });
 
       commands = getEndpointConsoleCommands({
@@ -112,13 +114,34 @@ describe('When displaying Endpoint Response Actions', () => {
     });
 
     it('should display response action commands in the help panel in expected order', () => {
-      render({ commands });
+      const { queryByTestId } = render({ commands });
       consoleSelectors.openHelpPanel();
       const commandsInPanel = helpPanelSelectors.getHelpCommandNames(
         HELP_GROUPS.responseActions.label
       );
 
-      expect(commandsInPanel).toEqual(['isolate', 'release', 'get-file --path']);
+      expect(commandsInPanel).toEqual([
+        'isolate',
+        'release',
+        'processes',
+        'kill-process --processName',
+        'get-file --path',
+      ]);
+      expect(queryByTestId('sentineloneProcessesWindowsWarningTooltip')).toBeNull();
+    });
+
+    it('should display warning icon on processes command if host is running on windows', () => {
+      commands = getEndpointConsoleCommands({
+        agentType: 'sentinel_one',
+        endpointAgentId: '123',
+        endpointCapabilities: endpointMetadata.Endpoint.capabilities ?? [],
+        endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
+        platform: 'windows',
+      });
+      const { getByTestId } = render({ commands });
+      consoleSelectors.openHelpPanel();
+
+      expect(getByTestId('sentineloneProcessesWindowsWarningTooltip')).not.toBeNull();
     });
   });
 
