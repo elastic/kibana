@@ -84,12 +84,14 @@ export const POLLING_TIMEOUT_MS = 5 * 60 * 1000; // 5 min
  */
 export const usePollingIncomingData = ({
   agentIds,
-  pkgKey,
+  pkgName,
+  pkgVersion,
   previewData,
   stopPollingAfterPreviewLength = 0,
 }: {
   agentIds: string[];
-  pkgKey?: string;
+  pkgName?: string;
+  pkgVersion?: string;
   previewData?: boolean;
   stopPollingAfterPreviewLength?: number;
 }) => {
@@ -126,7 +128,8 @@ export const usePollingIncomingData = ({
         const { data } = await sendGetAgentIncomingData({
           agentsIds: agentIds,
           previewData,
-          pkgKey,
+          pkgName,
+          pkgVersion,
         });
         if (data?.items) {
           // filter out  agents that have `data = false` and keep polling
@@ -163,7 +166,15 @@ export const usePollingIncomingData = ({
     return () => {
       isAborted = true;
     };
-  }, [agentIds, result, previewData, stopPollingAfterPreviewLength, startedPollingAt, pkgKey]);
+  }, [
+    agentIds,
+    result,
+    previewData,
+    stopPollingAfterPreviewLength,
+    startedPollingAt,
+    pkgName,
+    pkgVersion,
+  ]);
 
   return {
     ...result,

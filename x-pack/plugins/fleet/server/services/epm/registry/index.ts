@@ -16,7 +16,6 @@ import type { Logger } from '@kbn/logging';
 import type { ExtractedIntegrationFields } from '@kbn/fields-metadata-plugin/server';
 
 import { splitPkgKey as split } from '../../../../common/services';
-export { pkgToPkgKey } from '../../../../common/services';
 
 import { KibanaAssetType } from '../../../types';
 import type {
@@ -61,6 +60,9 @@ import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { getRegistryUrl } from './registry_url';
 
 export const splitPkgKey = split;
+
+export const pkgToPkgKey = ({ name, version }: { name: string; version: string }) =>
+  `${name}-${version}`;
 
 export async function fetchList(
   params?: GetPackagesRequest['query']

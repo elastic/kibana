@@ -47,7 +47,6 @@ import { getAgentStatusForAgentPolicy } from '../../services/agents';
 import { isAgentInNamespace } from '../../services/spaces/agent_namespaces';
 import { getCurrentNamespace } from '../../services/spaces/get_current_namespace';
 import { getPackageInfo } from '../../services/epm/packages';
-import { splitPkgKey } from '../../services/epm/registry';
 import { generateTemplateIndexPattern } from '../../services/epm/elasticsearch/template/template';
 import { buildAgentStatusRuntimeField } from '../../services/agents/build_status_runtime_field';
 
@@ -311,20 +310,20 @@ export const getAgentDataHandler: RequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asCurrentUser;
-  const returnDataPreview = request.query.previewData;
   const agentsIds = isStringArray(request.query.agentsIds)
     ? request.query.agentsIds
     : [request.query.agentsIds];
-  const pkgKey = request.query.pkgKey;
+  const { pkgName, pkgVersion, previewData: returnDataPreview } = request.query;
 
   // If a package is specified, get data stream patterns for that package
   // and scope incoming data query to that pattern
   let dataStreamPattern: string | undefined;
-  if (pkgKey) {
+  if (pkgName && pkgVersion) {
     const packageInfo = await getPackageInfo({
       savedObjectsClient: coreContext.savedObjects.client,
       prerelease: true,
-      ...splitPkgKey(pkgKey),
+      pkgName,
+      pkgVersion,
     });
     dataStreamPattern = (packageInfo.data_streams || [])
       .map((ds) => generateTemplateIndexPattern(ds))

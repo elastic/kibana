@@ -11,8 +11,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiStepStatus } from '@elastic/eui';
 import { EuiText, EuiLink, EuiSpacer, EuiCallOut } from '@elastic/eui';
 
-import { pkgToPkgKey } from '../../../common/services';
-
 import { useStartServices } from '../../hooks';
 import type { Agent, PackagePolicy } from '../../types';
 import {
@@ -35,7 +33,8 @@ export const AgentlessStepConfirmData = ({
   // Fetch integration data for the given agent and package policy
   const { incomingData, hasReachedTimeout } = usePollingIncomingData({
     agentIds: [agent.id],
-    pkgKey: pkgToPkgKey(packagePolicy.package!),
+    pkgName: packagePolicy.package!.name,
+    pkgVersion: packagePolicy.package!.version,
   });
 
   // Calculate overall UI state from polling data
