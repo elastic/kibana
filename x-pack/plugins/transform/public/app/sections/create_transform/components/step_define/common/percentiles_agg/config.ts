@@ -19,6 +19,7 @@ import {
   PERCENTILES_AGG_DEFAULT_PERCENTS,
 } from '../../../../../../common';
 import type { PivotAggsConfigWithUiBase } from '../../../../../../common/pivot_aggs';
+import { MAX_PERCENTILE_PRECISION, MAX_PERCENTILE_VALUE, MIN_PERCENTILE_VALUE } from './constants';
 
 function validatePercentsInput(config: Partial<PercentilesAggConfig>): ValidationResult {
   const allValues = [...(config.percents ?? [])];
@@ -33,7 +34,7 @@ function validatePercentsInput(config: Partial<PercentilesAggConfig>): Validatio
       errors.push('DUPLICATE_VALUE');
     }
 
-    if (normalizedInput.replace('.', '').length > 17) {
+    if (normalizedInput.replace('.', '').length > MAX_PERCENTILE_PRECISION) {
       errors.push('NUMBER_TOO_PRECISE');
     }
 
@@ -50,7 +51,7 @@ function validatePercentsInput(config: Partial<PercentilesAggConfig>): Validatio
   if (allValues.some((value) => isNaN(value))) {
     errors.push('INVALID_FORMAT');
   }
-  if (allValues.some((value) => value < 0 || value > 100)) {
+  if (allValues.some((value) => value < MIN_PERCENTILE_VALUE || value > MAX_PERCENTILE_VALUE)) {
     errors.push('PERCENTILE_OUT_OF_RANGE');
   }
 
