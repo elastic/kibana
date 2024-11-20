@@ -7,6 +7,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
 import { parseNextURL } from '@kbn/std';
 
 import type { RouteDefinitionParams } from '..';
@@ -33,6 +34,7 @@ export function defineCommonRoutes({
   license,
   logger,
   buildFlavor,
+  docLinks,
 }: RouteDefinitionParams) {
   // Generate two identical routes with new and deprecated URL and issue a warning if route with deprecated URL is ever used.
   // For a serverless build, do not register deprecated versioned routes
@@ -40,6 +42,7 @@ export function defineCommonRoutes({
     '/api/security/logout',
     ...(buildFlavor !== 'serverless' ? ['/api/security/v1/logout'] : []),
   ]) {
+    const isDeprecated = path === '/api/security/v1/logout';
     router.get(
       {
         path,
@@ -57,13 +60,29 @@ export function defineCommonRoutes({
           excludeFromOAS: true,
           authRequired: false,
           tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
+          ...(isDeprecated && {
+            deprecated: {
+              documentationUrl: docLinks.links.security.deprecatedV1Endpoints,
+              severity: 'warning',
+              message: i18n.translate('xpack.security.deprecations.logoutRouteMessage', {
+                defaultMessage:
+                  'The "{path}" URL is deprecated and will be removed in the next major version. Use "/api/security/logout" instead.',
+                values: { path },
+              }),
+              reason: {
+                type: 'migrate',
+                newApiMethod: 'GET',
+                newApiPath: '/api/security/logout',
+              },
+            },
+          }),
         },
       },
       async (context, request, response) => {
         const serverBasePath = basePath.serverBasePath;
-        if (path === '/api/security/v1/logout') {
+        if (isDeprecated) {
           logger.warn(
-            `The "${serverBasePath}${path}" URL is deprecated and will stop working in the next major version, please use "${serverBasePath}/api/security/logout" URL instead.`,
+            `The "${serverBasePath}${path}" URL is deprecated and will stop working in the next major version. Use "${serverBasePath}/api/security/logout" URL instead.`,
             { tags: ['deprecation'] }
           );
         }
@@ -96,7 +115,7 @@ export function defineCommonRoutes({
     '/internal/security/me',
     ...(buildFlavor !== 'serverless' ? ['/api/security/v1/me'] : []),
   ]) {
-    const deprecated = path === '/api/security/v1/me';
+    const isDeprecated = path === '/api/security/v1/me';
     router.get(
       {
         path,
@@ -107,10 +126,24 @@ export function defineCommonRoutes({
           },
         },
         validate: false,
-        options: { access: deprecated ? 'public' : 'internal' },
+        options: {
+          access: isDeprecated ? 'public' : 'internal',
+          ...(isDeprecated && {
+            deprecated: {
+              documentationUrl: docLinks.links.security.deprecatedV1Endpoints,
+              severity: 'warning',
+              message: i18n.translate('xpack.security.deprecations.meRouteMessage', {
+                defaultMessage:
+                  'The "{path}" endpoint is deprecated and will be removed in the next major version.',
+                values: { path },
+              }),
+              reason: { type: 'remove' },
+            },
+          }),
+        },
       },
       createLicensedRouteHandler(async (context, request, response) => {
-        if (deprecated) {
+        if (isDeprecated) {
           logger.warn(
             `The "${basePath.serverBasePath}${path}" endpoint is deprecated and will be removed in the next major version.`,
             { tags: ['deprecation'] }
