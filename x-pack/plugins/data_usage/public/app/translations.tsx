@@ -48,4 +48,18 @@ export const UX_LABELS = Object.freeze({
       defaultMessage: 'No {filterName} available',
       values: { filterName },
     }),
+  dataQualityPopup: {
+    open: i18n.translate('xpack.dataUsage.metrics.dataQuality.open.actions', {
+      defaultMessage: 'Open data stream actions',
+    }),
+    copy: i18n.translate('xpack.dataUsage.metrics.dataQuality.copy.dataStream', {
+      defaultMessage: 'Copy data stream name',
+    }),
+    manage: i18n.translate('xpack.dataUsage.metrics.dataQuality.manage.dataStream', {
+      defaultMessage: 'Manage data stream',
+    }),
+    view: i18n.translate('xpack.dataUsage.metrics.dataQuality.view', {
+      defaultMessage: 'View data quality',
+    }),
+  },
 });
