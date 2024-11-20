@@ -14195,22 +14195,6 @@
                 "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
               },
               {
-                "plugin": "infra",
-                "path": "x-pack/plugins/observability_solution/infra/public/pages/logs/settings/validation_errors.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/observability_solution/infra/public/pages/logs/settings/validation_errors.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/observability_solution/infra/public/pages/logs/settings/validation_errors.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/observability_solution/infra/public/pages/logs/settings/validation_errors.ts"
-              },
-              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/sourcerer/containers/create_sourcerer_data_view.ts"
               },
@@ -14437,10 +14421,6 @@
               {
                 "plugin": "visTypeTimeseries",
                 "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/observability_solution/infra/public/pages/metrics/inventory_view/hooks/use_waffle_filters.test.ts"
               }
             ]
           },
