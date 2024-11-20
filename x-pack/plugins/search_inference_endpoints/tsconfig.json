@@ -1,9 +1,14 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types"
+    "outDir": "target/types",
   },
-  "include": ["__mocks__/**/*", "common/**/*", "public/**/*", "server/**/*"],
+  "include": [
+    "__mocks__/**/*",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*"
+  ],
   "kbn_references": [
     "@kbn/config-schema",
     "@kbn/core",
@@ -32,5 +37,7 @@
     "@kbn/serverless",
     "@kbn/utility-types"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*",
+  ]
 }
