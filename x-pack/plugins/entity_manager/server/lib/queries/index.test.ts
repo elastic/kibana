@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getEntityInstancesQuery } from './';
+import { getEntityInstancesQuery } from '.';
 
 describe(__filename, () => {
   describe('getEntityInstancesQuery', () => {
