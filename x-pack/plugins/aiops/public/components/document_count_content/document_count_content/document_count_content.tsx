@@ -31,11 +31,13 @@ export interface DocumentCountContentProps {
   barStyleAccessor?: BarStyleAccessor;
   baselineAnnotationStyle?: RectAnnotationSpec['style'];
   deviationAnnotationStyle?: RectAnnotationSpec['style'];
+  attachmentsMenu?: React.ReactNode;
 }
 
 export const DocumentCountContent: FC<DocumentCountContentProps> = ({
   barColorOverride,
   barHighlightColorOverride,
+  attachmentsMenu,
   ...docCountChartProps
 }) => {
   const { data, uiSettings, fieldFormats, charts, embeddingOrigin } = useAiopsAppContext();
@@ -64,7 +66,12 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
   return (
     <EuiFlexGroup gutterSize="m" direction="column">
       <EuiFlexItem>
-        <TotalCountHeader totalCount={totalCount} sampleProbability={sampleProbability} />
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <TotalCountHeader totalCount={totalCount} sampleProbability={sampleProbability} />
+          </EuiFlexItem>
+          {attachmentsMenu && <EuiFlexItem grow={false}>{attachmentsMenu}</EuiFlexItem>}
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
         <DocumentCountChartRedux
