@@ -16,12 +16,14 @@ import { PLUGIN_ID, PLUGIN_NAME } from '../common/constants';
 import { docLinks } from '../common/doc_links';
 import { InferenceEndpoints, getInferenceEndpointsProvider } from './embeddable';
 import {
+  AppPluginSetupDependencies,
   AppPluginStartDependencies,
   SearchInferenceEndpointsConfigType,
   SearchInferenceEndpointsPluginSetup,
   SearchInferenceEndpointsPluginStart,
 } from './types';
 import { INFERENCE_ENDPOINTS_UI_FLAG } from '.';
+import { registerLocators } from './locators';
 
 export class SearchInferenceEndpointsPlugin
   implements Plugin<SearchInferenceEndpointsPluginSetup, SearchInferenceEndpointsPluginStart>
@@ -33,7 +35,8 @@ export class SearchInferenceEndpointsPlugin
   }
 
   public setup(
-    core: CoreSetup<AppPluginStartDependencies, SearchInferenceEndpointsPluginStart>
+    core: CoreSetup<AppPluginStartDependencies, SearchInferenceEndpointsPluginStart>,
+    plugins: AppPluginSetupDependencies
   ): SearchInferenceEndpointsPluginSetup {
     if (
       !this.config.ui?.enabled &&
@@ -55,6 +58,8 @@ export class SearchInferenceEndpointsPlugin
         return renderApp(coreStart, startDeps, element);
       },
     });
+
+    registerLocators(plugins.share);
 
     return {};
   }

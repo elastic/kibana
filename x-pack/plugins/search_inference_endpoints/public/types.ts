@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { ConsolePluginStart } from '@kbn/console-plugin/public';
+import type { ConsolePluginSetup, ConsolePluginStart } from '@kbn/console-plugin/public';
 import { HttpStart } from '@kbn/core-http-browser';
 import { AppMountParameters } from '@kbn/core/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
+import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import React from 'react';
 
 import { ServerlessPluginStart } from '@kbn/serverless/public';
@@ -30,6 +30,12 @@ export interface AppPluginStartDependencies {
   share: SharePluginStart;
   console?: ConsolePluginStart;
   serverless?: ServerlessPluginStart;
+}
+
+export interface AppPluginSetupDependencies {
+  history: AppMountParameters['history'];
+  share: SharePluginSetup;
+  console?: ConsolePluginSetup;
 }
 
 export interface AppServicesContext {

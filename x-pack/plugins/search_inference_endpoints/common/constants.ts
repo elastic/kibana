@@ -5,8 +5,12 @@
  * 2.0.
  */
 
+import { SearchInferenceEndpointsId } from '@kbn/deeplinks-search/deep_links';
+
 export const PLUGIN_ID = 'searchInferenceEndpoints';
 export const PLUGIN_NAME = 'Inference Endpoints';
 
 export const INFERENCE_ENDPOINTS_QUERY_KEY = 'inferenceEndpointsQueryKey';
 export const TRAINED_MODEL_STATS_QUERY_KEY = 'trainedModelStats';
+
+export const SEARCH_INFERENCE_ENDPOINTS: SearchInferenceEndpointsId = 'searchInferenceEndpoints';

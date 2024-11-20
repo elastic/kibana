@@ -82,11 +82,17 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
   const {
     core: { application, http },
     docLinks,
-    plugins: { ml },
+    plugins: { ml, share },
   } = useAppContext();
   const config = getFieldConfig('inference_id');
 
-  const inferenceEndpointsPageLink = `${http.basePath.get()}/app/enterprise_search/relevance/inference_endpoints`;
+  // const inferenceEndpointsPageLink = `${http.basePath.get()}/app/enterprise_search/relevance/inference_endpoints`;
+
+  const inferenceEndpointsPageLink = share?.url.locators
+    .get('SEARCH_INFERENCE_ENDPOINTS')
+    ?.useUrl({});
+
+  // console.log('serverless link', inferenceEndpointsPageLink);
 
   const [isInferenceFlyoutVisible, setIsInferenceFlyoutVisible] = useState<boolean>(false);
   const [availableTrainedModels, setAvailableTrainedModels] = useState<
