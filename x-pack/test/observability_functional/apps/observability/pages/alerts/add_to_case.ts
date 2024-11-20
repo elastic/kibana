@@ -29,7 +29,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       before(async () => {
         await observability.users.setTestUserRole(
           observability.users.defineBasicObservabilityRole({
-            observabilityCases: ['all'],
+            observabilityCasesV2: ['all'],
             logs: ['all'],
           })
         );
@@ -75,7 +75,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       before(async () => {
         await observability.users.setTestUserRole(
           observability.users.defineBasicObservabilityRole({
-            observabilityCases: ['read'],
+            observabilityCasesV2: ['read'],
             logs: ['all'],
           })
         );
