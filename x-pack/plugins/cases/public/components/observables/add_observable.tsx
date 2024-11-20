@@ -49,7 +49,7 @@ const AddObservableComponent: React.FC<AddObservableProps> = ({ caseData }) => {
         {}
       );
 
-      showSuccessToast('Observable created');
+      showSuccessToast(i18n.OBSERVABLE_CREATED);
       refreshCaseViewPage();
       closeModal();
     },
@@ -60,11 +60,7 @@ const AddObservableComponent: React.FC<AddObservableProps> = ({ caseData }) => {
     <EuiFlexItem grow={false}>
       <EuiButton
         disabled={!isObservablesEnabled}
-        title={
-          isObservablesEnabled
-            ? undefined
-            : 'In order to assign observables to cases, you must be subscribed to an Elastic Platinum license'
-        }
+        title={isObservablesEnabled ? undefined : i18n.PLATINUM_NOTICE}
         data-test-subj="cases-observables-add"
         iconType="plusInCircle"
         onClick={showModal}

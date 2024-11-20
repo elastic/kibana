@@ -85,6 +85,10 @@ export const OBSERVABLE_UPDATED = i18n.translate('xpack.cases.caseView.observabl
   defaultMessage: 'Observable updated',
 });
 
+export const OBSERVABLE_CREATED = i18n.translate('xpack.cases.caseView.observables.created', {
+  defaultMessage: 'Observable created',
+});
+
 export const EDIT_OBSERVABLE = i18n.translate('xpack.cases.caseView.observables.edit', {
   defaultMessage: 'Edit observable',
 });
@@ -98,3 +102,8 @@ export const ADDED = (type: string, value: string) =>
     defaultMessage: 'observable value "{value}" of type {type} added',
     values: { type, value },
   });
+
+export const PLATINUM_NOTICE = i18n.translate('xpack.cases.caseView.observables.platinumNotice', {
+  defaultMessage:
+    'In order to assign observables to cases, you must be subscribed to an Elastic Platinum license',
+});
