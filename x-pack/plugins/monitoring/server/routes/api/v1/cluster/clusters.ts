@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  postClustersRequestPayloadRT,
-  postClustersResponsePayloadRT,
-} from '../../../../../common/http_api/cluster';
-import { getClustersFromRequest } from '../../../../lib/cluster/get_clusters_from_request';
+import { postClustersRequestPayloadRT } from '../../../../../common/http_api/cluster';
+import { findMonitoredClusters } from '../../../../lib/cluster/get_clusters_from_request';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { verifyMonitoringAuth } from '../../../../lib/elasticsearch/verify_monitoring_auth';
 import { handleError } from '../../../../lib/errors';
@@ -40,10 +37,8 @@ export function clustersRoute(server: MonitoringCore) {
       try {
         await verifyMonitoringAuth(req);
 
-        const clusters = await getClustersFromRequest(req, {
-          codePaths: req.payload.codePaths,
-        });
-        return postClustersResponsePayloadRT.encode(clusters);
+        const clusters = await findMonitoredClusters(req);
+        return clusters;
       } catch (err) {
         throw handleError(err, req);
       }
