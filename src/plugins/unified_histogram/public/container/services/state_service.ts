@@ -13,7 +13,6 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { UnifiedHistogramFetchStatus } from '../..';
 import type { UnifiedHistogramServices, UnifiedHistogramChartLoadEvent } from '../../types';
 import {
-  getBreakdownField,
   getChartHidden,
   getTopPanelHeight,
   setChartHidden,
@@ -134,12 +133,10 @@ export const createStateService = (
 
   let initialChartHidden = false;
   let initialTopPanelHeight: number | undefined;
-  let initialBreakdownField: string | undefined;
 
   if (localStorageKeyPrefix) {
     initialChartHidden = getChartHidden(services.storage, localStorageKeyPrefix) ?? false;
     initialTopPanelHeight = getTopPanelHeight(services.storage, localStorageKeyPrefix);
-    initialBreakdownField = getBreakdownField(services.storage, localStorageKeyPrefix);
   }
 
   const state$ = new BehaviorSubject<UnifiedHistogramState>({
