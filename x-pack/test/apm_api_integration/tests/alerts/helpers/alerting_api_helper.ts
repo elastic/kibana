@@ -12,7 +12,6 @@ import type { Agent as SuperTestAgent } from 'supertest';
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import { ApmRuleParamsType } from '@kbn/apm-plugin/common/rules/schema';
 import { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
-import type { SupertestWithRoleScope } from '../../../../api_integration/deployment_agnostic/services/role_scoped_supertest';
 import {
   APM_ACTION_VARIABLE_INDEX,
   APM_ALERTS_INDEX,
@@ -25,7 +24,7 @@ export async function createApmRule<T extends ApmRuleType>({
   params,
   actions = [],
 }: {
-  supertest: SuperTestAgent | SupertestWithRoleScope;
+  supertest: SuperTestAgent;
   ruleTypeId: T;
   name: string;
   params: ApmRuleParamsType[T];
@@ -39,14 +38,13 @@ export async function createApmRule<T extends ApmRuleType>({
         params,
         consumer: 'apm',
         schedule: {
-          interval: '1m',
+          interval: '5s',
         },
         tags: ['apm'],
         name,
         rule_type_id: ruleTypeId,
         actions,
       });
-
     return body;
   } catch (error: any) {
     throw new Error(`[Rule] Creating a rule failed: ${error}`);
@@ -58,7 +56,7 @@ export async function runRuleSoon({
   supertest,
 }: {
   ruleId: string;
-  supertest: SuperTestAgent | SupertestWithRoleScope;
+  supertest: SuperTestAgent;
 }): Promise<Record<string, any>> {
   return pRetry(
     async () => {
@@ -90,13 +88,13 @@ export async function deleteRuleById({
   supertest,
   ruleId,
 }: {
-  supertest: SuperTestAgent | SupertestWithRoleScope;
+  supertest: SuperTestAgent;
   ruleId: string;
 }) {
   await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'foo');
 }
 
-export async function deleteApmRules(supertest: SuperTestAgent | SupertestWithRoleScope) {
+export async function deleteApmRules(supertest: SuperTestAgent) {
   const res = await supertest.get(
     `/api/alerting/rules/_find?filter=alert.attributes.consumer:apm&per_page=10000`
   );
@@ -110,7 +108,7 @@ export async function deleteAllActionConnectors({
   supertest,
   es,
 }: {
-  supertest: SuperTestAgent | SupertestWithRoleScope;
+  supertest: SuperTestAgent;
   es: Client;
 }): Promise<any> {
   const res = await supertest.get(`/api/actions/connectors`);
@@ -144,7 +142,7 @@ async function deleteActionConnector({
   supertest,
   actionId,
 }: {
-  supertest: SuperTestAgent | SupertestWithRoleScope;
+  supertest: SuperTestAgent;
   actionId: string;
 }) {
   return supertest.delete(`/api/actions/connector/${actionId}`).set('kbn-xsrf', 'foo');

@@ -8,7 +8,6 @@
 import { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { Agent as SuperTestAgent } from 'supertest';
-import type { SupertestWithRoleScope } from '../../../../api_integration/deployment_agnostic/services/role_scoped_supertest';
 import {
   deleteActionConnectorIndex,
   clearKibanaApmEventLog,
@@ -22,7 +21,7 @@ export async function cleanupRuleAndAlertState({
   logger,
 }: {
   es: Client;
-  supertest: SuperTestAgent | SupertestWithRoleScope;
+  supertest: SuperTestAgent;
   logger: ToolingLog;
 }) {
   try {
@@ -34,6 +33,6 @@ export async function cleanupRuleAndAlertState({
       deleteAllActionConnectors({ supertest, es }),
     ]);
   } catch (e) {
-    logger.error(`An error occurred while cleaning up the state: ${e}`);
+    logger.error(`An error occured while cleaning up the state: ${e}`);
   }
 }
