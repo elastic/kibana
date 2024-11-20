@@ -73,7 +73,6 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    loadTestFile(require.resolve('./smokescreen.ts'));
-    loadTestFile(require.resolve('./vega_chart.ts'));
+    loadTestFile(require.resolve('./logsdb.ts'));
   });
 };
