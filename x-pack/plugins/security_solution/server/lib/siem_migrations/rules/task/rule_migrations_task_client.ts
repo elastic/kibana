@@ -13,10 +13,8 @@ import type {
   RuleMigrationAllTaskStats,
   RuleMigrationTaskStats,
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
-import type {
-  RuleMigrationDataStats,
-  RuleMigrationsDataClient,
-} from '../data/rule_migrations_data_client';
+import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_client';
+import type { RuleMigrationDataStats } from '../data/rule_migrations_data_rules_client';
 import type {
   RuleMigrationTaskStartParams,
   RuleMigrationTaskStartResult,

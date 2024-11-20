@@ -23,7 +23,11 @@ export const getAssetsStatusRoute = (router: IRouter, osqueryContext: OsqueryApp
     .get({
       access: 'internal',
       path: '/internal/osquery/assets',
-      options: { tags: [`access:${PLUGIN_ID}-writePacks`] },
+      security: {
+        authz: {
+          requiredPrivileges: [`${PLUGIN_ID}-writePacks`],
+        },
+      },
     })
     .addVersion(
       {
