@@ -54,8 +54,25 @@ const visualizeButtons: EuiButtonGroupOptionProps[] = [
   },
 ];
 
-const graphVisualizationButton = {
+const graphVisualizationButton: EuiButtonGroupOptionProps = {
   id: GRAPH_VISUALIZATION_ID,
+  iconType: 'beaker',
+  iconSide: 'right',
+  toolTipProps: {
+    title: (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.left.visualize.graphVisualizationButton.technicalPreviewLabel"
+        defaultMessage="Technical Preview"
+      />
+    ),
+  },
+  toolTipContent: i18n.translate(
+    'xpack.securitySolution.flyout.left.visualize.graphVisualizationButton.technicalPreviewTooltip',
+    {
+      defaultMessage:
+        'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+    }
+  ),
   label: (
     <FormattedMessage
       id="xpack.securitySolution.flyout.left.visualize.graphVisualizationButtonLabel"

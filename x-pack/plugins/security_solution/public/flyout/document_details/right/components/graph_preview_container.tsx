@@ -8,6 +8,8 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { EuiBetaBadge } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING } from '../../../../../common/constants';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { GRAPH_PREVIEW_TEST_ID } from './test_ids';
@@ -67,6 +69,26 @@ export const GraphPreviewContainer: React.FC = () => {
             <FormattedMessage
               id="xpack.securitySolution.flyout.right.visualizations.graphPreview.graphPreviewTitle"
               defaultMessage="Graph preview"
+            />
+          ),
+          headerContent: (
+            <EuiBetaBadge
+              alignment="middle"
+              iconType="beaker"
+              data-test-subj="graphPreviewBetaBadge"
+              label={i18n.translate(
+                'xpack.securitySolution.flyout.right.visualizations.graphPreview.technicalPreviewLabel',
+                {
+                  defaultMessage: 'Technical Preview',
+                }
+              )}
+              tooltipContent={i18n.translate(
+                'xpack.securitySolution.flyout.right.visualizations.graphPreview.technicalPreviewTooltip',
+                {
+                  defaultMessage:
+                    'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+                }
+              )}
             />
           ),
           iconType: visualizationInFlyoutEnabled ? 'arrowStart' : 'indexMapping',
