@@ -66,6 +66,11 @@ import './overwrite.scss';
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
 
+interface Messages {
+  errors: MonacoMessage[];
+  warnings: MonacoMessage[];
+}
+
 export const ESQLEditor = memo(function ESQLEditor({
   query,
   onTextLangQueryChange,
@@ -125,18 +130,12 @@ export const ESQLEditor = memo(function ESQLEditor({
   const [abortController, setAbortController] = useState(new AbortController());
 
   // contains both client side validation and server messages
-  const [editorMessages, setEditorMessages] = useState<{
-    errors: MonacoMessage[];
-    warnings: MonacoMessage[];
-  }>({
+  const [editorMessages, setEditorMessages] = useState<Messages>({
     errors: serverErrors ? parseErrors(serverErrors, code) : [],
     warnings: serverWarning ? parseWarning(serverWarning) : [],
   });
   // contains only client side validation messages
-  const [clientParserMessages, setClientParserMessages] = useState<{
-    errors: MonacoMessage[];
-    warnings: MonacoMessage[];
-  }>({
+  const [clientParserMessages, setClientParserMessages] = useState<Messages>({
     errors: [],
     warnings: [],
   });
@@ -444,28 +443,31 @@ export const ESQLEditor = memo(function ESQLEditor({
     };
   }, [esqlCallbacks, code]);
 
-  const clientParserStatus = clientParserMessages.errors?.length
-    ? 'error'
-    : clientParserMessages.warnings.length
-    ? 'warning'
-    : 'success';
+  const clientParserStatus = getStatusFromMessages(clientParserMessages);
 
   useEffect(() => {
     const validateQuery = async () => {
       if (editor1?.current) {
         const parserMessages = await parseMessages();
-        setClientParserMessages({
+        const nextClientParserMessages = {
           errors: parserMessages?.errors ?? [],
           warnings: parserMessages?.warnings ?? [],
+        };
+        const nextClientParserStatus = getStatusFromMessages(nextClientParserMessages);
+        addQueriesToCache({
+          queryString: code,
+          status: nextClientParserStatus,
+        });
+        setClientParserMessages(nextClientParserMessages);
+      } else {
+        addQueriesToCache({
+          queryString: code,
+          status: clientParserStatus,
         });
       }
     };
     if (isQueryLoading || isLoading) {
       validateQuery();
-      addQueriesToCache({
-        queryString: code,
-        status: clientParserStatus,
-      });
     }
   }, [clientParserStatus, isLoading, isQueryLoading, parseMessages, code]);
 
@@ -855,3 +857,7 @@ export const ESQLEditor = memo(function ESQLEditor({
 
   return editorPanel;
 });
+
+function getStatusFromMessages(messages: Messages) {
+  return messages.errors?.length ? 'error' : messages.warnings.length ? 'warning' : 'success';
+}
