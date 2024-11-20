@@ -175,5 +175,16 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
       const button = await testSubjects.find(buttonMap[type]);
       return button.click();
     },
+
+    async clickUserNameDropdown() {
+      const button = await testSubjects.find('ownerFilterButton');
+      return button.click();
+    },
+
+    async setSearchBarValue(query: string) {
+      const searchBar = await testSubjects.find('apiKeysSearchBar');
+      await searchBar.clearValue();
+      return searchBar.type(query);
+    },
   };
 }

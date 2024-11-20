@@ -274,6 +274,7 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
         <EuiSearchBar
           query={query}
           box={{
+            'data-test-subj': 'apiKeysSearchBar',
             incremental: true,
             schema: {
               strict: true,
@@ -525,6 +526,7 @@ export const UsersFilterButton: FunctionComponent<CustomComponentProps> = ({ que
           numFilters={usernames.length}
           hasActiveFilters={numActiveFilters ? true : false}
           numActiveFilters={numActiveFilters}
+          data-test-subj="ownerFilterButton"
         >
           <FormattedMessage
             id="xpack.security.management.apiKeys.table.ownerFilter"

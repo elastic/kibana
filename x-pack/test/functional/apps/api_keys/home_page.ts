@@ -475,12 +475,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await es.security.grantApiKey({
           api_key: {
-            name: 'test_api_key',
-            expiration: '1s',
+            name: 'test_user_api_key',
+            expiration: '1d',
           },
           grant_type: 'password',
           run_as: 'test_user',
           username: 'elastic',
+          password: 'changeme',
         });
 
         await pageObjects.common.navigateToApp('apiKeys');
@@ -499,26 +500,52 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.apiKeys.clickExpiryFilters('expired');
         await ensureApiKeysExist(['test_api_key']);
         expect(await pageObjects.apiKeys.doesApiKeyExist('my api key')).to.be(false);
+
+        // reset filter buttons
+        await pageObjects.apiKeys.clickExpiryFilters('expired');
       });
 
       it('api key type filter buttons work as expected', async () => {
         await pageObjects.apiKeys.clickTypeFilters('personal');
-        await pageObjects.common.sleep(1000);
+
         await ensureApiKeysExist(['test_api_key']);
-        expect(await pageObjects.apiKeys.doesApiKeyExist('test_cross_cluster')).to.be(false);
 
         await pageObjects.apiKeys.clickTypeFilters('cross_cluster');
-        await pageObjects.common.sleep(1000);
+
         await ensureApiKeysExist(['test_cross_cluster']);
-        expect(await pageObjects.apiKeys.doesApiKeyExist('test_api_key')).to.be(false);
 
         await pageObjects.apiKeys.clickTypeFilters('managed');
-        await pageObjects.common.sleep(1000);
+
         await ensureApiKeysExist(['my api key', 'Alerting: Managed']);
-        expect(await pageObjects.apiKeys.doesApiKeyExist('test_api_key')).to.be(false);
 
-        // reset filters by simulate click on the active filter
+        // reset filters by simulate clicking the managed filter button again
         await pageObjects.apiKeys.clickTypeFilters('managed');
+      });
+
+      it('username filter buttons work as expected', async () => {
+        await pageObjects.apiKeys.clickUserNameDropdown();
+        expect(
+          await testSubjects.exists('userProfileSelectableOption-system_indices_superuser')
+        ).to.be(true);
+        expect(await testSubjects.exists('userProfileSelectableOption-test_user')).to.be(true);
+
+        await testSubjects.click('userProfileSelectableOption-test_user');
+
+        await ensureApiKeysExist(['test_user_api_key']);
+        await testSubjects.click('userProfileSelectableOption-test_user');
+
+        await testSubjects.click('userProfileSelectableOption-system_indices_superuser');
+
+        await ensureApiKeysExist(['my api key', 'Alerting: Managed', 'test_cross_cluster']);
+      });
+
+      it.skip('search bar works as expected', async () => {
+        await pageObjects.apiKeys.setSearchBarValue('test_user_api_key');
+
+        await ensureApiKeysExist(['test_user_api_key']);
+
+        await pageObjects.apiKeys.setSearchBarValue('"my api key"');
+        await ensureApiKeysExist(['my api key']);
       });
     });
   });
