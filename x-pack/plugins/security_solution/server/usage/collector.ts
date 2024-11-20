@@ -3077,7 +3077,7 @@ export const registerCollector: RegisterCollector = ({
             },
           },
         },
-        legacySiemSignals: {
+        legacy_siem_signals: {
           indices_total: {
             type: 'long',
             _meta: {

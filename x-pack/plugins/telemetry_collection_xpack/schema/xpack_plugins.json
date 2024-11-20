@@ -19531,7 +19531,7 @@
                 }
               }
             },
-            "legacySiemSignals": {
+            "legacy_siem_signals": {
               "properties": {
                 "indices_total": {
                   "type": "long",
