@@ -6,7 +6,7 @@
  */
 import { take } from 'lodash';
 import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
-import type { ApmServices } from '../../common/config';
+import type { ApmApiClient } from '../custom_dashboards/api_helper';
 
 export async function getServiceNodeIds({
   apmApiClient,
@@ -15,7 +15,7 @@ export async function getServiceNodeIds({
   serviceName = 'opbeans-java',
   count = 1,
 }: {
-  apmApiClient: Awaited<ReturnType<ApmServices['apmApiClient']>>;
+  apmApiClient: Awaited<ApmApiClient>;
   start: string;
   end: string;
   serviceName?: string;
