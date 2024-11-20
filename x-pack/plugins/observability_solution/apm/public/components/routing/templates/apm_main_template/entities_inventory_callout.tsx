@@ -13,10 +13,10 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ApmPluginStartDeps } from '../../../../plugin';
 
 interface EntitiesInventoryCalloutProps {
-  onDissmiss: () => void;
+  onDismiss: () => void;
 }
 
-export function EntitiesInventoryCallout({ onDissmiss }: EntitiesInventoryCalloutProps) {
+export function EntitiesInventoryCallout({ onDismiss }: EntitiesInventoryCalloutProps) {
   const { services } = useKibana<ApmPluginStartDeps>();
   const { observabilityShared } = services;
 
@@ -50,7 +50,7 @@ export function EntitiesInventoryCallout({ onDissmiss }: EntitiesInventoryCallou
           <EuiButtonIcon
             data-test-subj="apmEntitiesInventoryCalloutDismiss"
             iconType="cross"
-            onClick={onDissmiss}
+            onClick={onDismiss}
           />
         </EuiToolTip>
       </EuiFlexItem>

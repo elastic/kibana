@@ -7,7 +7,7 @@
 
 import { Type } from '@kbn/config-schema';
 import type { IRouter, RequestHandler, RequestHandlerContext, RouteConfig } from '@kbn/core/server';
-import { kibanaResponseFactory } from '@kbn/core/server';
+import { kibanaResponseFactory, ReservedPrivilegesSet } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 
 import { routeDefinitionParamsMock } from './index.mock';
@@ -43,9 +43,14 @@ describe('Key rotation routes', () => {
     });
 
     it('correctly defines route.', () => {
+      expect(routeConfig.security).toEqual({
+        authz: {
+          requiredPrivileges: [ReservedPrivilegesSet.superuser],
+        },
+      });
       expect(routeConfig.options).toEqual({
         access: 'public',
-        tags: ['access:rotateEncryptionKey', 'oas-tag:saved objects'],
+        tags: ['oas-tag:saved objects'],
         summary: `Rotate a key for encrypted saved objects`,
         description: `If a saved object cannot be decrypted using the primary encryption key, Kibana attempts to decrypt it using the specified decryption-only keys. In most of the cases this overhead is negligible, but if you're dealing with a large number of saved objects and experiencing performance issues, you may want to rotate the encryption key.
         NOTE: Bulk key rotation can consume a considerable amount of resources and hence only user with a superuser role can trigger it.`,
@@ -96,7 +101,7 @@ describe('Key rotation routes', () => {
 
       expect(config.options).toEqual({
         access: 'internal',
-        tags: ['access:rotateEncryptionKey', 'oas-tag:saved objects'],
+        tags: ['oas-tag:saved objects'],
         summary: `Rotate a key for encrypted saved objects`,
         description: `If a saved object cannot be decrypted using the primary encryption key, Kibana attempts to decrypt it using the specified decryption-only keys. In most of the cases this overhead is negligible, but if you're dealing with a large number of saved objects and experiencing performance issues, you may want to rotate the encryption key.
         NOTE: Bulk key rotation can consume a considerable amount of resources and hence only user with a superuser role can trigger it.`,

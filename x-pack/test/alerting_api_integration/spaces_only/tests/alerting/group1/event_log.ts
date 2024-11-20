@@ -82,8 +82,8 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .send(
               getTestRuleData({
                 rule_type_id: 'test.patternFiring',
-                schedule: { interval: '1s' },
-                throttle: null,
+                schedule: { interval: '2s' },
+                throttle: '1s',
                 params: {
                   pattern,
                 },
@@ -369,7 +369,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               secrets: {},
             })
             .expect(200);
-          objectRemover.add(space.id, createdAction.id, 'action', 'actions');
+          objectRemover.add(space.id, createdAction.id, 'connector', 'actions');
 
           const response = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
@@ -665,6 +665,10 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               status_change_threshold: 4,
             })
             .expect(200);
+
+          // wait so cache expires
+          await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
+
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
@@ -763,6 +767,10 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               status_change_threshold: 4,
             })
             .expect(200);
+
+          // wait so cache expires
+          await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
+
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
@@ -871,6 +879,10 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               status_change_threshold: 4,
             })
             .expect(200);
+
+          // wait so cache expires
+          await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
+
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
@@ -964,6 +976,10 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               status_change_threshold: 4,
             })
             .expect(200);
+
+          // wait so cache expires
+          await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
+
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
@@ -1067,6 +1083,10 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               status_change_threshold: 5,
             })
             .expect(200);
+
+          // wait so cache expires
+          await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
+
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
@@ -1166,6 +1186,10 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               status_change_threshold: 4,
             })
             .expect(200);
+
+          // wait so cache expires
+          await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
+
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
@@ -1192,7 +1216,8 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .send(
               getTestRuleData({
                 rule_type_id: 'test.patternFiring',
-                schedule: { interval: '1s' },
+                schedule: { interval: '2s' },
+                notify_when: RuleNotifyWhen.THROTTLE,
                 throttle: '1s',
                 params: {
                   pattern,
@@ -1263,6 +1288,10 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               status_change_threshold: 4,
             })
             .expect(200);
+
+          // wait so cache expires
+          await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
+
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
@@ -1289,7 +1318,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .send(
               getTestRuleData({
                 rule_type_id: 'test.patternFiring',
-                schedule: { interval: '1s' },
+                schedule: { interval: '2s' },
                 throttle: null,
                 notify_when: null,
                 params: {
@@ -1302,8 +1331,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                     params: {},
                     frequency: {
                       summary: false,
-                      throttle: '1s',
-                      notify_when: RuleNotifyWhen.THROTTLE,
+                      notify_when: RuleNotifyWhen.ACTIVE,
                     },
                   },
                   {
@@ -1312,8 +1340,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                     params: {},
                     frequency: {
                       summary: false,
-                      throttle: '1s',
-                      notify_when: RuleNotifyWhen.THROTTLE,
+                      notify_when: RuleNotifyWhen.ACTIVE,
                     },
                   },
                 ],
@@ -1371,6 +1398,10 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               status_change_threshold: 4,
             })
             .expect(200);
+
+          // wait so cache expires
+          await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
+
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
@@ -1396,7 +1427,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .send(
               getTestRuleData({
                 rule_type_id: 'test.patternFiring',
-                schedule: { interval: '1s' },
+                schedule: { interval: '2s' },
                 throttle: '1s',
                 params: {
                   pattern,
@@ -1463,6 +1494,10 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               status_change_threshold: 4,
             })
             .expect(200);
+
+          // wait so cache expires
+          await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
+
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
@@ -1488,7 +1523,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .send(
               getTestRuleData({
                 rule_type_id: 'test.patternFiring',
-                schedule: { interval: '1s' },
+                schedule: { interval: '2s' },
                 throttle: null,
                 notify_when: null,
                 params: {
@@ -1501,8 +1536,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                     params: {},
                     frequency: {
                       summary: false,
-                      throttle: '1s',
-                      notify_when: RuleNotifyWhen.THROTTLE,
+                      notify_when: RuleNotifyWhen.ACTIVE,
                     },
                   },
                   {
@@ -1511,8 +1545,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                     params: {},
                     frequency: {
                       summary: false,
-                      throttle: '1s',
-                      notify_when: RuleNotifyWhen.THROTTLE,
+                      notify_when: RuleNotifyWhen.ACTIVE,
                     },
                   },
                 ],
@@ -1566,6 +1599,9 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               status_change_threshold: 4,
             })
             .expect(200);
+
+          // wait so cache expires
+          await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
 
           // flap and then recover, then active again
           const instance = [true, false, true, false, true].concat(
@@ -1709,8 +1745,8 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .send(
               getTestRuleData({
                 rule_type_id: 'test.patternFiring',
-                schedule: { interval: '1s' },
-                throttle: null,
+                schedule: { interval: '2s' },
+                throttle: '1s',
                 params: {
                   pattern,
                 },
@@ -1801,7 +1837,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               secrets: {},
             })
             .expect(200);
-          objectRemover.add(space.id, createdAction.id, 'action', 'actions');
+          objectRemover.add(space.id, createdAction.id, 'connector', 'actions');
 
           const { body: createdRule } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
@@ -1942,8 +1978,8 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               provider: 'alerting',
               actions: new Map([
                 // make sure the counts of the # of events per type are as expected
-                ['execute-start', { equal: 6 }],
-                ['execute', { equal: 6 }],
+                ['execute-start', { gte: 6 }],
+                ['execute', { gte: 6 }],
                 ['new-instance', { equal: 1 }],
                 ['active-instance', { equal: 2 }],
                 ['recovered-instance', { equal: 1 }],

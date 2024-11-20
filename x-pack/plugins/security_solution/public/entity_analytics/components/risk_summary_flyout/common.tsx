@@ -24,7 +24,7 @@ interface EntityData {
   risk: RiskStats;
 }
 
-export const buildColumns: () => Array<EuiBasicTableColumn<TableItem>> = () => [
+export const columnsArray: Array<EuiBasicTableColumn<TableItem>> = [
   {
     field: 'category',
     name: (

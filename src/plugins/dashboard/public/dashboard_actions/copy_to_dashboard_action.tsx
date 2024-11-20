@@ -28,6 +28,7 @@ import { DASHBOARD_CONTAINER_TYPE } from '../dashboard_container';
 import { coreServices } from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { dashboardCopyToDashboardActionStrings } from './_dashboard_actions_strings';
+import { DASHBOARD_ACTION_GROUP } from '.';
 import { CopyToDashboardModal } from './copy_to_dashboard_modal';
 
 export const ACTION_COPY_TO_DASHBOARD = 'copyToDashboard';
@@ -59,6 +60,7 @@ export class CopyToDashboardAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_COPY_TO_DASHBOARD;
   public readonly id = ACTION_COPY_TO_DASHBOARD;
   public order = 1;
+  public grouping = [DASHBOARD_ACTION_GROUP];
 
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
     if (!apiIsCompatible(embeddable)) throw new IncompatibleActionError();

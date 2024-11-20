@@ -10,7 +10,7 @@
 import { EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import { MaybePromise } from '@kbn/utility-types';
 import { DashboardPanelState } from '../../../common';
-import { GridData } from '../../../common/content_management';
+import type { GridData } from '../../../server/content_management';
 import { PanelPlacementStrategy } from '../../dashboard_constants';
 
 export interface PanelPlacementSettings {

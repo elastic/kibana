@@ -3,7 +3,7 @@
 exports[`generateLatestTransform(definition) should generate a valid latest transform 1`] = `
 Object {
   "_meta": Object {
-    "definitionVersion": "1.0.0",
+    "definition_version": "1.0.0",
     "managed": false,
   },
   "defer_validation": true,
@@ -42,7 +42,7 @@ Object {
           },
         },
       },
-      "entity.lastSeenTimestamp": Object {
+      "entity.last_seen_timestamp": Object {
         "max": Object {
           "field": "@timestamp",
         },
@@ -139,16 +139,9 @@ Object {
       },
     },
     "group_by": Object {
-      "entity.identity.event.category": Object {
-        "terms": Object {
-          "field": "event.category",
-          "missing_bucket": true,
-        },
-      },
       "entity.identity.log.logger": Object {
         "terms": Object {
           "field": "log.logger",
-          "missing_bucket": false,
         },
       },
     },

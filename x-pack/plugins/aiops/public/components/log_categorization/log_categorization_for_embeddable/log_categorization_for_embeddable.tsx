@@ -10,7 +10,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
-import { buildEmptyFilter } from '@kbn/es-query';
+import { buildEmptyFilter, buildEsQuery } from '@kbn/es-query';
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
 
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
@@ -18,14 +18,14 @@ import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 import type { CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-analysis/create_category_request';
 import type { EmbeddablePatternAnalysisInput } from '@kbn/aiops-log-pattern-analysis/embeddable';
 import { useTableState } from '@kbn/ml-in-memory-table/hooks/use_table_state';
-import { AIOPS_ANALYSIS_RUN_ORIGIN } from '@kbn/aiops-common/constants';
+import { AIOPS_ANALYSIS_RUN_ORIGIN, AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
 import datemath from '@elastic/datemath';
 import useMountedState from 'react-use/lib/useMountedState';
+import { getEsQueryConfig } from '@kbn/data-service';
 import { useFilterQueryUpdates } from '../../../hooks/use_filters_query';
 import type { PatternAnalysisProps } from '../../../shared_components/pattern_analysis';
 import { useSearch } from '../../../hooks/use_search';
 import { getDefaultLogCategorizationAppState } from '../../../application/url_state/log_pattern_analysis';
-import { createMergedEsQuery } from '../../../application/utils/search_utils';
 import { useData } from '../../../hooks/use_data';
 import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 
@@ -86,7 +86,12 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
   });
 
   const appState = getDefaultLogCategorizationAppState({
-    searchQuery: createMergedEsQuery(query, filters, dataView, uiSettings),
+    searchQuery: buildEsQuery(
+      dataView,
+      query ?? [],
+      filters ?? [],
+      uiSettings ? getEsQueryConfig(uiSettings) : undefined
+    ),
     filters,
   });
   const { searchQuery } = useSearch({ dataView, savedSearch: savedSearch ?? null }, appState, true);
@@ -349,12 +354,19 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
     [lastReloadRequestTime]
   );
 
-  const actions = [...getActions(false), ...getActions(true)];
+  const isCasesEmbeddable = embeddingOrigin === AIOPS_EMBEDDABLE_ORIGIN.CASES;
+
+  // When in cases, we can only show the "Filter for pattern in Discover" actions as Cases does not have full filter management.
+  const actions = isCasesEmbeddable
+    ? getActions(true)
+    : [...getActions(false), ...getActions(true)];
 
   return (
     <>
       <FieldValidationCallout validationResults={fieldValidationResult} />
-      {(loading ?? true) === true ? <LoadingCategorization onCancel={cancelRequest} /> : null}
+      {(loading ?? true) === true ? (
+        <LoadingCategorization {...(!isCasesEmbeddable ? { onCancel: cancelRequest } : {})} />
+      ) : null}
 
       <InformationText
         loading={loading ?? true}

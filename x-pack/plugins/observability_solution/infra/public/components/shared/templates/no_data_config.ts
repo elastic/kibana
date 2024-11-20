@@ -108,11 +108,11 @@ export const getNoDataConfig = ({
 }: {
   hasData: boolean;
   loading: boolean;
-  onboardingFlow: OnboardingFlow;
+  onboardingFlow?: OnboardingFlow;
   locators: LocatorClient;
   docsLink?: string;
 }): NoDataConfig | undefined => {
-  if (hasData || loading) {
+  if (!onboardingFlow || hasData || loading) {
     return;
   }
 

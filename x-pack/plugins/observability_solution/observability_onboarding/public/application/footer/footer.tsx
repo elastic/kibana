@@ -109,34 +109,38 @@ export const Footer: FunctionComponent = () => {
   ];
 
   return (
-    <EuiFlexGroup gutterSize="xl" justifyContent="center" alignItems="center">
-      {sections.map((section, index) => (
-        <EuiFlexItem key={index} grow={false}>
-          <EuiAvatar size="l" name="" imageUrl={section.iconUrl} color="subdued" />
-          <EuiSpacer size="m" />
-          <EuiText size="s">
-            <strong>{section.title}</strong>
-          </EuiText>
-          <EuiSpacer size="s" />
-          <EuiText size="xs">
-            <p>{section.description}</p>
-          </EuiText>
-          <EuiSpacer size="s" />
-          <EuiText size="xs">
-            <p>
-              <EuiLink
-                data-test-subj="observabilityOnboardingFooterLearnMoreLink"
-                aria-label={section.linkARIALabel}
-                href={section.link}
-                target="_blank"
-                external
-              >
-                {section.linkLabel}
-              </EuiLink>
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-      ))}
-    </EuiFlexGroup>
+    <>
+      <EuiSpacer size="l" />
+      <EuiFlexGroup gutterSize="xl" justifyContent="center" alignItems="center">
+        {sections.map((section, index) => (
+          <EuiFlexItem key={index} grow={false}>
+            <EuiAvatar size="l" name="" imageUrl={section.iconUrl} color="subdued" />
+            <EuiSpacer size="m" />
+            <EuiText size="s">
+              <strong>{section.title}</strong>
+            </EuiText>
+            <EuiSpacer size="s" />
+            <EuiText size="xs">
+              <p>{section.description}</p>
+            </EuiText>
+            <EuiSpacer size="s" />
+            <EuiText size="xs">
+              <p>
+                <EuiLink
+                  data-test-subj="observabilityOnboardingFooterLearnMoreLink"
+                  aria-label={section.linkARIALabel}
+                  href={section.link}
+                  target="_blank"
+                  external
+                >
+                  {section.linkLabel}
+                </EuiLink>
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+      <EuiSpacer size="xl" />
+    </>
   );
 };

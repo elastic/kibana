@@ -534,21 +534,6 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.DISCOVER_SHOW_LEGACY_FIELD_TOP_VALUES_ID",
-        "type": "string",
-        "tags": [],
-        "label": "DISCOVER_SHOW_LEGACY_FIELD_TOP_VALUES_ID",
-        "description": [],
-        "signature": [
-          "\"discover:showLegacyFieldTopValues\""
-        ],
-        "path": "packages/kbn-management/settings/setting_ids/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.DISCOVER_SHOW_MULTI_FIELDS_ID",
         "type": "string",
         "tags": [],
@@ -916,21 +901,6 @@
         "description": [],
         "signature": [
           "\"metaFields\""
-        ],
-        "path": "packages/kbn-management/settings/setting_ids/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.METRICS_ALLOW_CHECKING_FOR_FAILED_SHARDS_ID",
-        "type": "string",
-        "tags": [],
-        "label": "METRICS_ALLOW_CHECKING_FOR_FAILED_SHARDS_ID",
-        "description": [],
-        "signature": [
-          "\"metrics:allowCheckingForFailedShards\""
         ],
         "path": "packages/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,
@@ -1366,36 +1336,6 @@
         "description": [],
         "signature": [
           "\"observability:enableInfrastructureAssetCustomDashboards\""
-        ],
-        "path": "packages/kbn-management/settings/setting_ids/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.OBSERVABILITY_ENABLE_INFRASTRUCTURE_CONTAINER_ASSET_VIEW_ID",
-        "type": "string",
-        "tags": [],
-        "label": "OBSERVABILITY_ENABLE_INFRASTRUCTURE_CONTAINER_ASSET_VIEW_ID",
-        "description": [],
-        "signature": [
-          "\"observability:enableInfrastructureContainerAssetView\""
-        ],
-        "path": "packages/kbn-management/settings/setting_ids/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.OBSERVABILITY_ENABLE_INFRASTRUCTURE_HOSTS_VIEW_ID",
-        "type": "string",
-        "tags": [],
-        "label": "OBSERVABILITY_ENABLE_INFRASTRUCTURE_HOSTS_VIEW_ID",
-        "description": [],
-        "signature": [
-          "\"observability:enableInfrastructureHostsView\""
         ],
         "path": "packages/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,
@@ -1923,6 +1863,21 @@
         "description": [],
         "signature": [
           "\"theme:darkMode\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.THEME_NAME_ID",
+        "type": "string",
+        "tags": [],
+        "label": "THEME_NAME_ID",
+        "description": [],
+        "signature": [
+          "\"theme:name\""
         ],
         "path": "packages/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,

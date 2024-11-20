@@ -13,6 +13,7 @@ import { useKibanaContextForPlugin } from '../utils/use_kibana';
 
 type GetDataUsageDataStreamsResponse = Array<{
   name: string;
+  storageSizeBytes: number;
   selected: boolean;
 }>;
 
@@ -22,39 +23,42 @@ const PAGING_PARAMS = Object.freeze({
 });
 
 export const useGetDataUsageDataStreams = ({
-  searchString,
   selectedDataStreams,
-  options = {},
+  options = {
+    enabled: false,
+  },
 }: {
-  searchString: string;
   selectedDataStreams?: string[];
   options?: UseQueryOptions<GetDataUsageDataStreamsResponse, IHttpFetchError>;
 }): UseQueryResult<GetDataUsageDataStreamsResponse, IHttpFetchError> => {
-  const http = useKibanaContextForPlugin().services.http;
+  const { http } = useKibanaContextForPlugin().services;
 
   return useQuery<GetDataUsageDataStreamsResponse, IHttpFetchError>({
     queryKey: ['get-data-usage-data-streams'],
     ...options,
     keepPreviousData: true,
-    queryFn: async () => {
-      const dataStreamsResponse = await http.get<GetDataUsageDataStreamsResponse>(
-        DATA_USAGE_DATA_STREAMS_API_ROUTE,
-        {
+    queryFn: async ({ signal }) => {
+      const dataStreamsResponse = await http
+        .get<GetDataUsageDataStreamsResponse>(DATA_USAGE_DATA_STREAMS_API_ROUTE, {
+          signal,
           version: '1',
-          query: {},
-        }
-      );
+        })
+        .catch((error) => {
+          throw error.body;
+        });
 
       const augmentedDataStreamsBasedOnSelectedItems = dataStreamsResponse.reduce<{
         selected: GetDataUsageDataStreamsResponse;
         rest: GetDataUsageDataStreamsResponse;
       }>(
-        (acc, list) => {
+        (acc, ds) => {
           const item = {
-            name: list.name,
+            name: ds.name,
+            storageSizeBytes: ds.storageSizeBytes,
+            selected: ds.selected,
           };
 
-          if (selectedDataStreams?.includes(list.name)) {
+          if (selectedDataStreams?.includes(ds.name)) {
             acc.selected.push({ ...item, selected: true });
           } else {
             acc.rest.push({ ...item, selected: false });

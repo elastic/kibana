@@ -7,10 +7,10 @@
 import { AggregationType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import expect from '@kbn/expect';
+import { waitForActiveApmAlert } from '../../alerts/helpers/wait_for_active_apm_alerts';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { createApmRule } from '../../alerts/helpers/alerting_api_helper';
 import { cleanupRuleAndAlertState } from '../../alerts/helpers/cleanup_rule_and_alert_state';
-import { waitForActiveApmAlert } from '../../alerts/helpers/wait_for_active_apm_alerts';
 import {
   createServiceGroupApi,
   deleteAllServiceGroups,
@@ -45,8 +45,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177655
-  registry.when('Service group counts', { config: 'basic', archives: [] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/197912
+  registry.when.skip('Service group counts', { config: 'basic', archives: [] }, () => {
     let synthbeansServiceGroupId: string;
     let opbeansServiceGroupId: string;
     before(async () => {
@@ -72,14 +72,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     after(async () => {
       await deleteAllServiceGroups(apmApiClient);
       await apmSynthtraceEsClient.clean();
-    });
-
-    it('returns the correct number of services', async () => {
-      const response = await getServiceGroupCounts(apmApiClient);
-      expect(response.status).to.be(200);
-      expect(Object.keys(response.body).length).to.be(2);
-      expect(response.body[synthbeansServiceGroupId]).to.have.property('services', 2);
-      expect(response.body[opbeansServiceGroupId]).to.have.property('services', 1);
     });
 
     describe('with alerts', () => {

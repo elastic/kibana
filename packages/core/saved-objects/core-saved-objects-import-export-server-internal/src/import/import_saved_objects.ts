@@ -17,6 +17,7 @@ import type {
   ISavedObjectTypeRegistry,
   SavedObjectsImportHook,
 } from '@kbn/core-saved-objects-server';
+import type { Logger } from '@kbn/logging';
 import {
   checkReferenceOrigins,
   validateReferences,
@@ -59,6 +60,7 @@ export interface ImportSavedObjectsOptions {
    * If provided, Kibana will apply the given option to the `managed` property.
    */
   managed?: boolean;
+  log: Logger;
 }
 
 /**
@@ -79,7 +81,11 @@ export async function importSavedObjectsFromStream({
   refresh,
   compatibilityMode,
   managed,
+  log,
 }: ImportSavedObjectsOptions): Promise<SavedObjectsImportResponse> {
+  log.debug(
+    `Importing with overwrite ${overwrite ? 'enabled' : 'disabled'} and size limit ${objectLimit}`
+  );
   let errorAccumulator: SavedObjectsImportFailure[] = [];
   const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((type) => type.name);
 
@@ -90,6 +96,11 @@ export async function importSavedObjectsFromStream({
     supportedTypes,
     managed,
   });
+  log.debug(
+    `Importing types: ${[
+      ...new Set(collectSavedObjectsResult.collectedObjects.map((obj) => obj.type)),
+    ].join(', ')}`
+  );
   errorAccumulator = [...errorAccumulator, ...collectSavedObjectsResult.errors];
   // Map of all IDs for objects that we are attempting to import, and any references that are not included in the read stream;
   // each value is empty by default
@@ -197,7 +208,17 @@ export async function importSavedObjectsFromStream({
     objects: createSavedObjectsResult.createdObjects,
     importHooks,
   });
-
+  if (errorAccumulator.length > 0) {
+    log.error(
+      `Failed to import saved objects. ${errorAccumulator.length} errors: ${JSON.stringify(
+        errorAccumulator
+      )}`
+    );
+  } else {
+    log.info(
+      `Successfully imported ${createSavedObjectsResult.createdObjects.length} saved objects.`
+    );
+  }
   return {
     successCount: createSavedObjectsResult.createdObjects.length,
     success: errorAccumulator.length === 0,

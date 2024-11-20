@@ -12,10 +12,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'ingestPipelines', 'savedObjects']);
   const security = getService('security');
   const maxMindDatabaseName = 'GeoIP2-Anonymous-IP';
-  const ipInfoDatabaseName = 'ASN';
+  const ipInfoDatabaseName = 'Free IP to ASN';
 
-  // TODO: Fix flaky tests
-  describe.skip('Ingest Pipelines: Manage Processors', function () {
+  describe('Ingest Pipelines: Manage Processors', function () {
     this.tags('smoke');
     before(async () => {
       await security.testUser.setRoles(['manage_processors_user']);
@@ -36,8 +35,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('Create a MaxMind database', async () => {
       await pageObjects.ingestPipelines.openCreateDatabaseModal();
       await pageObjects.ingestPipelines.fillAddDatabaseForm(
-        'MaxMind',
-        'GeoIP2 Anonymous IP',
+        'maxmind',
+        maxMindDatabaseName,
         '123456'
       );
       await pageObjects.ingestPipelines.clickAddDatabaseButton();
@@ -53,9 +52,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(databaseExists).to.be(true);
     });
 
-    it('Create an IPInfo database', async () => {
+    it('Create an IPinfo database', async () => {
       await pageObjects.ingestPipelines.openCreateDatabaseModal();
-      await pageObjects.ingestPipelines.fillAddDatabaseForm('IPInfo', ipInfoDatabaseName);
+      await pageObjects.ingestPipelines.fillAddDatabaseForm('ipinfo', 'asn');
       await pageObjects.ingestPipelines.clickAddDatabaseButton();
 
       // Wait for new row to gets displayed
@@ -81,7 +80,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         database.includes(ipInfoDatabaseName)
       );
       expect(ipInfoDatabaseRow).to.contain(ipInfoDatabaseName);
-      expect(ipInfoDatabaseRow).to.contain('IPInfo');
+      expect(ipInfoDatabaseRow).to.contain('IPinfo');
     });
 
     it('Modal to delete a database', async () => {

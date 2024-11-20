@@ -35,6 +35,10 @@ export const ADD_NEW_CONNECTOR = i18n.translate('xpack.cases.configureCases.addN
   defaultMessage: 'Add new connector',
 });
 
+export const ADD_CONNECTOR = i18n.translate('xpack.cases.configureCases.addConnector', {
+  defaultMessage: 'Add connector',
+});
+
 export const CASE_CLOSURE_OPTIONS_TITLE = i18n.translate(
   'xpack.cases.configureCases.caseClosureOptionsTitle',
   {

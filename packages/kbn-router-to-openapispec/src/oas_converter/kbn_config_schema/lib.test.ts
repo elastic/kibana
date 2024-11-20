@@ -147,6 +147,30 @@ describe('convertPathParameters', () => {
       convertPathParameters(schema.object({ b: schema.string() }), { a: { optional: false } })
     ).toThrow(/Unknown parameter: b/);
   });
+
+  test('converting paths with nullables', () => {
+    expect(
+      convertPathParameters(schema.nullable(schema.object({ a: schema.string() })), {
+        a: { optional: true },
+      })
+    ).toEqual({
+      params: [
+        {
+          in: 'path',
+          name: 'a',
+          required: false,
+          schema: {
+            type: 'string',
+          },
+        },
+      ],
+      shared: {},
+    });
+  });
+
+  test('throws if properties cannot be exracted', () => {
+    expect(() => convertPathParameters(schema.string(), {})).toThrow(/expected to be an object/);
+  });
 });
 
 describe('convertQuery', () => {
@@ -166,9 +190,29 @@ describe('convertQuery', () => {
     });
   });
 
+  test('converting queries with nullables', () => {
+    expect(convertQuery(schema.nullable(schema.object({ a: schema.string() })))).toEqual({
+      query: [
+        {
+          in: 'query',
+          name: 'a',
+          required: false,
+          schema: {
+            type: 'string',
+          },
+        },
+      ],
+      shared: {},
+    });
+  });
+
   test('conversion with refs is disallowed', () => {
     const sharedSchema = schema.object({ a: schema.string() }, { meta: { id: 'myparams' } });
     expect(() => convertQuery(sharedSchema)).toThrow(/myparams.*not supported/);
+  });
+
+  test('throws if properties cannot be exracted', () => {
+    expect(() => convertPathParameters(schema.string(), {})).toThrow(/expected to be an object/);
   });
 });
 

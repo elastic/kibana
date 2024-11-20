@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
 
-export const isWriteBlockException = (errorCause?: estypes.ErrorCause): boolean => {
+export const isWriteBlockException = (errorCause?: ErrorCause): boolean => {
   return (
     errorCause?.type === 'cluster_block_exception' &&
-    errorCause?.reason?.match(/index \[.+] blocked by: \[FORBIDDEN\/8\/.+ \(api\)\]/) !== null
+    hasAllKeywordsInOrder(errorCause?.reason, ['index [', '] blocked by: [FORBIDDEN/8/', ' (api)]'])
   );
 };
 
-export const isIncompatibleMappingException = (errorCause?: estypes.ErrorCause): boolean => {
+export const isIncompatibleMappingException = (errorCause?: ErrorCause): boolean => {
   return (
     errorCause?.type === 'strict_dynamic_mapping_exception' ||
     errorCause?.type === 'mapper_parsing_exception' ||
@@ -24,17 +24,29 @@ export const isIncompatibleMappingException = (errorCause?: estypes.ErrorCause):
   );
 };
 
-export const isIndexNotFoundException = (errorCause?: estypes.ErrorCause): boolean => {
+export const isIndexNotFoundException = (errorCause?: ErrorCause): boolean => {
   return errorCause?.type === 'index_not_found_exception';
 };
 
-export const isClusterShardLimitExceeded = (errorCause?: estypes.ErrorCause): boolean => {
+export const isClusterShardLimitExceeded = (errorCause?: ErrorCause): boolean => {
   // traditional ES: validation_exception. serverless ES: illegal_argument_exception
   return (
     (errorCause?.type === 'validation_exception' ||
       errorCause?.type === 'illegal_argument_exception') &&
-    errorCause?.reason?.match(
-      /this action would add .* shards, but this cluster currently has .* maximum normal shards open/
-    ) !== null
+    hasAllKeywordsInOrder(errorCause?.reason, [
+      'this action would add',
+      'shards, but this cluster currently has',
+      'maximum normal shards open',
+    ])
   );
+};
+
+export const hasAllKeywordsInOrder = (message: string | undefined, keywords: string[]): boolean => {
+  if (!message || !keywords.length) {
+    return false;
+  }
+
+  const keywordIndices = keywords.map((keyword) => message?.indexOf(keyword) ?? -1);
+  // check that all keywords are present and in the right order
+  return keywordIndices.every((v, i, a) => v >= 0 && (!i || a[i - 1] <= v));
 };

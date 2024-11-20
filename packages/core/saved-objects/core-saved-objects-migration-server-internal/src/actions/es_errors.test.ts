@@ -8,6 +8,7 @@
  */
 
 import {
+  hasAllKeywordsInOrder,
   isClusterShardLimitExceeded,
   isIncompatibleMappingException,
   isIndexNotFoundException,
@@ -126,5 +127,33 @@ describe('isClusterShardLimitExceeded', () => {
   });
   it('returns false undefined', () => {
     expect(isClusterShardLimitExceeded(undefined)).toEqual(false);
+  });
+});
+
+describe('hasAllKeywordsInOrder', () => {
+  it('returns false if not all keywords are present', () => {
+    expect(
+      hasAllKeywordsInOrder('some keywords in a message', ['some', 'in', 'message', 'missing'])
+    ).toEqual(false);
+  });
+
+  it('returns false if keywords are not in the right order', () => {
+    expect(
+      hasAllKeywordsInOrder('some keywords in a message', ['some', 'message', 'keywords'])
+    ).toEqual(false);
+  });
+
+  it('returns false if the message is empty', () => {
+    expect(hasAllKeywordsInOrder('', ['some', 'message', 'keywords'])).toEqual(false);
+  });
+
+  it('returns false if the keyword list is empty', () => {
+    expect(hasAllKeywordsInOrder('some keywords in a message', [])).toEqual(false);
+  });
+
+  it('returns true if keywords are present and in the right order', () => {
+    expect(
+      hasAllKeywordsInOrder('some keywords in a message', ['some', 'keywords', 'in', 'message'])
+    ).toEqual(true);
   });
 });

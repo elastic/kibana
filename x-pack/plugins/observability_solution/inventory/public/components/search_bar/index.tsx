@@ -4,40 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { SearchBarOwnProps } from '@kbn/unified-search-plugin/public/search_bar';
+import type { SearchBarOwnProps } from '@kbn/unified-search-plugin/public/search_bar';
 import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { EntityType } from '../../../common/entities';
-import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
-import { useAdHocInventoryDataView } from '../../hooks/use_adhoc_inventory_data_view';
-import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useKibana } from '../../hooks/use_kibana';
-import { EntityTypesControls } from './entity_types_controls';
-import { DiscoverButton } from './discover_button';
+import { useUnifiedSearchContext } from '../../hooks/use_unified_search_context';
+import { getKqlFieldsWithFallback } from '../../utils/get_kql_field_names_with_fallback';
+import { ControlGroups } from './control_groups';
 
 export function SearchBar() {
-  const { searchBarContentSubject$ } = useInventorySearchBarContext();
+  const { refreshSubject$, dataView, searchState, onQueryChange } = useUnifiedSearchContext();
+
   const {
     services: {
       unifiedSearch,
+      telemetry,
       data: {
         query: { queryString: queryStringService },
       },
     },
   } = useKibana();
 
-  const {
-    query: { kuery, entityTypes },
-  } = useInventoryParams('/*');
-
   const { SearchBar: UnifiedSearchBar } = unifiedSearch.ui;
 
-  const { dataView } = useAdHocInventoryDataView();
-
   const syncSearchBarWithUrl = useCallback(() => {
-    const query = kuery ? { query: kuery, language: 'kuery' } : undefined;
+    const query = searchState.query;
     if (query && !deepEqual(queryStringService.getQuery(), query)) {
       queryStringService.setQuery(query);
     }
@@ -45,53 +38,53 @@ export function SearchBar() {
     if (!query) {
       queryStringService.clearQuery();
     }
-  }, [kuery, queryStringService]);
+  }, [searchState.query, queryStringService]);
 
   useEffect(() => {
     syncSearchBarWithUrl();
   }, [syncSearchBarWithUrl]);
 
-  const handleEntityTypesChange = useCallback(
-    (nextEntityTypes: EntityType[]) => {
-      searchBarContentSubject$.next({ kuery, entityTypes: nextEntityTypes, refresh: false });
+  const registerSearchSubmittedEvent = useCallback(
+    ({ searchQuery, searchIsUpdate }: { searchQuery?: Query; searchIsUpdate?: boolean }) => {
+      telemetry.reportEntityInventorySearchQuerySubmitted({
+        kuery_fields: getKqlFieldsWithFallback(searchQuery?.query as string),
+        action: searchIsUpdate ? 'submit' : 'refresh',
+      });
     },
-    [kuery, searchBarContentSubject$]
+    [telemetry]
   );
 
   const handleQuerySubmit = useCallback<NonNullable<SearchBarOwnProps['onQuerySubmit']>>(
-    ({ query }, isUpdate) => {
-      searchBarContentSubject$.next({
-        kuery: query?.query as string,
-        entityTypes,
-        refresh: !isUpdate,
+    ({ query = { language: 'kuery', query: '' } }, isUpdate) => {
+      if (isUpdate) {
+        onQueryChange(query);
+      } else {
+        refreshSubject$.next();
+      }
+
+      registerSearchSubmittedEvent({
+        searchQuery: query,
+        searchIsUpdate: isUpdate,
       });
     },
-    [entityTypes, searchBarContentSubject$]
+    [registerSearchSubmittedEvent, onQueryChange, refreshSubject$]
   );
 
   return (
-    <EuiFlexGroup direction="row" gutterSize="s">
-      <EuiFlexItem grow>
-        <UnifiedSearchBar
-          appName="Inventory"
-          displayStyle="inPage"
-          showDatePicker={false}
-          showFilterBar={false}
-          indexPatterns={dataView ? [dataView] : undefined}
-          renderQueryInputAppend={() => <EntityTypesControls onChange={handleEntityTypesChange} />}
-          onQuerySubmit={handleQuerySubmit}
-          placeholder={i18n.translate('xpack.inventory.searchBar.placeholder', {
-            defaultMessage:
-              'Search for your entities by name or its metadata (e.g. entity.type : service)',
-          })}
-        />
-      </EuiFlexItem>
-
-      {dataView ? (
-        <EuiFlexItem grow={false}>
-          <DiscoverButton dataView={dataView} />
-        </EuiFlexItem>
-      ) : null}
-    </EuiFlexGroup>
+    <UnifiedSearchBar
+      appName="Inventory"
+      displayStyle="inPage"
+      indexPatterns={dataView ? [dataView] : undefined}
+      renderQueryInputAppend={() => <ControlGroups />}
+      onQuerySubmit={handleQuerySubmit}
+      placeholder={i18n.translate('xpack.inventory.searchBar.placeholder', {
+        defaultMessage:
+          'Search for your entities by name or its metadata (e.g. entity.type : service)',
+      })}
+      showDatePicker={false}
+      showFilterBar
+      showQueryInput
+      showQueryMenu
+    />
   );
 }
