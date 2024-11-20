@@ -83,7 +83,7 @@ const EntityStoreDashboardPanelsComponent = () => {
       )}
       {storeStatusQuery.data?.status !== 'not_installed' &&
         storeStatusQuery.data?.status !== 'installing' && (
-          <EuiFlexItem>
+          <EuiFlexItem data-test-subj="entitiesListPanel">
             <EntitiesList />
           </EuiFlexItem>
         )}

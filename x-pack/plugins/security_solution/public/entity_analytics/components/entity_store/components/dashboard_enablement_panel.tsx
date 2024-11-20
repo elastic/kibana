@@ -99,7 +99,7 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({ state }
 
   if (riskEngineInitializing) {
     return (
-      <EuiPanel hasBorder>
+      <EuiPanel hasBorder data-test-subj="riskEngineInitializingPanel">
         <EuiEmptyPrompt
           icon={<EuiLoadingLogo logo="logoElastic" size="xl" />}
           title={<h2>{ENABLEMENT_INITIALIZING_RISK_ENGINE}</h2>}
@@ -110,7 +110,7 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({ state }
 
   if (entityStoreStatus === 'installing' || storeEnablement.isLoading) {
     return (
-      <EuiPanel hasBorder>
+      <EuiPanel hasBorder data-test-subj="entityStoreInitializingPanel">
         <EuiEmptyPrompt
           icon={<EuiLoadingLogo logo="logoElastic" size="xl" />}
           title={<h2>{ENABLEMENT_INITIALIZING_ENTITY_STORE}</h2>}
