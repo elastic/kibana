@@ -1346,8 +1346,6 @@
     "@emotion/babel-preset-css-prop": "^11.11.0",
     "@emotion/jest": "^11.11.0",
     "@frsource/cypress-plugin-visual-regression-diff": "^3.3.10",
-    "@istanbuljs/nyc-config-typescript": "^1.0.2",
-    "@istanbuljs/schema": "^0.1.2",
     "@jest/console": "^29.7.0",
     "@jest/reporters": "^29.7.0",
     "@jest/transform": "^29.6.1",

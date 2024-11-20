@@ -137,8 +137,6 @@
       "groupName": "@elastic/appex-qa dependencies",
       "matchDepNames": [
         "cheerio",
-        "@istanbuljs/nyc-config-typescript",
-        "@istanbuljs/schema",
         "@types/enzyme",
         "@types/faker",
         "@types/pixelmatch",
