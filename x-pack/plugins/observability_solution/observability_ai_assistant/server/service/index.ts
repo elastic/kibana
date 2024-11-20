@@ -20,6 +20,7 @@ import { conversationComponentTemplate } from './conversation_component_template
 import { kbComponentTemplate } from './kb_component_template';
 import { KnowledgeBaseService } from './knowledge_base_service';
 import type { RegistrationCallback, RespondFunctionResources } from './types';
+import { ObservabilityAIAssistantConfig } from '../config';
 
 function getResourceName(resource: string) {
   return `.kibana-observability-ai-assistant-${resource}`;
@@ -47,27 +48,23 @@ export const resourceNames = {
 export class ObservabilityAIAssistantService {
   private readonly core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
   private readonly logger: Logger;
-  private readonly getSearchConnectorModelId: () => Promise<string>;
   private kbService?: KnowledgeBaseService;
-  private enableKnowledgeBase: boolean;
+  private config: ObservabilityAIAssistantConfig;
 
   private readonly registrations: RegistrationCallback[] = [];
 
   constructor({
     logger,
     core,
-    getSearchConnectorModelId,
-    enableKnowledgeBase,
+    config,
   }: {
     logger: Logger;
     core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
-    getSearchConnectorModelId: () => Promise<string>;
-    enableKnowledgeBase: boolean;
+    config: ObservabilityAIAssistantConfig;
   }) {
     this.core = core;
     this.logger = logger;
-    this.getSearchConnectorModelId = getSearchConnectorModelId;
-    this.enableKnowledgeBase = enableKnowledgeBase;
+    this.config = config;
 
     this.resetInit();
   }
@@ -166,12 +163,12 @@ export class ObservabilityAIAssistantService {
       });
 
       this.kbService = new KnowledgeBaseService({
+        core: this.core,
         logger: this.logger.get('kb'),
+        config: this.config,
         esClient: {
           asInternalUser,
         },
-        getSearchConnectorModelId: this.getSearchConnectorModelId,
-        enabled: this.enableKnowledgeBase,
       });
 
       this.logger.info('Successfully set up index assets');
