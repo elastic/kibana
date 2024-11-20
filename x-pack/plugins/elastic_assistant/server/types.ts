@@ -37,7 +37,7 @@ import {
   LicensingPluginStart,
 } from '@kbn/licensing-plugin/server';
 import {
-  ActionsClientBedrockChatModel,
+  ActionsClientChatBedrockConverse,
   ActionsClientChatOpenAI,
   ActionsClientChatVertexAI,
   ActionsClientGeminiChatModel,
@@ -151,13 +151,6 @@ export type ElasticAssistantPluginCoreSetupDependencies = CoreSetup<
 
 export type GetElser = () => Promise<string> | never;
 
-export interface InitAssistantResult {
-  assistantResourcesInstalled: boolean;
-  assistantNamespaceResourcesInstalled: boolean;
-  assistantSettingsCreated: boolean;
-  errors: string[];
-}
-
 export interface AssistantResourceNames {
   componentTemplate: {
     conversations: string;
@@ -201,18 +194,6 @@ export interface IIndexPatternString {
   secondaryAlias?: string;
 }
 
-export interface PublicAIAssistantDataClient {
-  getConversationsLimitValue: () => number;
-}
-
-export interface IAIAssistantDataClient {
-  client(): PublicAIAssistantDataClient | null;
-}
-
-export interface AIAssistantPrompts {
-  id: string;
-}
-
 /**
  * Interfaces for registering tools to be used by the elastic assistant
  */
@@ -227,7 +208,7 @@ export interface AssistantTool {
 }
 
 export type AssistantToolLlm =
-  | ActionsClientBedrockChatModel
+  | ActionsClientChatBedrockConverse
   | ActionsClientChatOpenAI
   | ActionsClientGeminiChatModel
   | ActionsClientChatVertexAI;
