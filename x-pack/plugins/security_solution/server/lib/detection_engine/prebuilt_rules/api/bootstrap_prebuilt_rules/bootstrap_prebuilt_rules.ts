@@ -21,8 +21,10 @@ export const bootstrapPrebuiltRulesRoute = (router: SecuritySolutionPluginRouter
     .post({
       access: 'internal',
       path: BOOTSTRAP_PREBUILT_RULES_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(
