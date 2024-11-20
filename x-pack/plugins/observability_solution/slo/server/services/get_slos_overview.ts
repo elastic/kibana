@@ -88,6 +88,17 @@ export class GetSLOsOverview {
                 status: 'HEALTHY',
               },
             },
+            aggs: {
+              not_stale: {
+                filter: {
+                  range: {
+                    summaryUpdatedAt: {
+                      gte: 'now-48h',
+                    },
+                  },
+                },
+              },
+            },
           },
           degrading: {
             filter: {
@@ -133,7 +144,7 @@ export class GetSLOsOverview {
     return {
       violated: aggs?.violated.doc_count ?? 0,
       degrading: aggs?.degrading.doc_count ?? 0,
-      healthy: aggs?.healthy.doc_count ?? 0,
+      healthy: aggs?.healthy?.not_stale?.doc_count ?? 0,
       noData: aggs?.noData.doc_count ?? 0,
       stale: aggs?.stale.doc_count ?? 0,
       worst: {
