@@ -18,7 +18,6 @@ import {
   type ObservabilityAIAssistantChatService,
   type TelemetryEventTypeWithPayload,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 import { ChatItem } from './chat_item';
 import { ChatConsolidatedItems } from './chat_consolidated_items';
 import { getTimelineItemsfromConversation } from '../utils/get_timeline_items_from_conversation';
@@ -47,7 +46,6 @@ export interface ChatTimelineItem
 
 export interface ChatTimelineProps {
   messages: Message[];
-  knowledgeBase: UseKnowledgeBaseResult;
   chatService: ObservabilityAIAssistantChatService;
   hasConnector: boolean;
   chatState: ChatState;

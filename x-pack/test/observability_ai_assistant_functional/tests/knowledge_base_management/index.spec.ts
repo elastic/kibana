@@ -7,13 +7,7 @@
 
 import expect from '@kbn/expect';
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
-import {
-  TINY_ELSER,
-  clearKnowledgeBase,
-  createKnowledgeBaseModel,
-  deleteInferenceEndpoint,
-  deleteKnowledgeBaseModel,
-} from '../../../observability_ai_assistant_api_integration/tests/knowledge_base/helpers';
+import { clearKnowledgeBase } from '../../../observability_ai_assistant_api_integration/tests/knowledge_base/helpers';
 import { ObservabilityAIAssistantApiClient } from '../../../observability_ai_assistant_api_integration/common/observability_ai_assistant_api_client';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -22,7 +16,6 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
   const ui = getService('observabilityAIAssistantUI');
   const testSubjects = getService('testSubjects');
   const log = getService('log');
-  const ml = getService('ml');
   const es = getService('es');
   const { common } = getPageObjects(['common']);
 
@@ -52,34 +45,12 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
     before(async () => {
       await clearKnowledgeBase(es);
 
-      // create a knowledge base model
-      await createKnowledgeBaseModel(ml);
-
-      await Promise.all([
-        // setup the knowledge base
-        observabilityAIAssistantAPIClient
-          .admin({
-            endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
-            params: {
-              query: {
-                model_id: TINY_ELSER.id,
-              },
-            },
-          })
-          .expect(200),
-
-        // login as editor
-        ui.auth.login('editor'),
-      ]);
+      // login as editor
+      await ui.auth.login('editor');
     });
 
     after(async () => {
-      await Promise.all([
-        deleteKnowledgeBaseModel(ml),
-        deleteInferenceEndpoint({ es }),
-        clearKnowledgeBase(es),
-        ui.auth.logout(),
-      ]);
+      await Promise.all([clearKnowledgeBase(es), ui.auth.logout()]);
     });
 
     describe('when the LLM calls the "summarize" function for two different users', () => {

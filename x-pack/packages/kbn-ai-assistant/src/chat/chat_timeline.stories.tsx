@@ -53,19 +53,6 @@ const Template: ComponentStory<typeof Component> = (props: ChatTimelineProps) =>
 };
 
 const defaultProps: ComponentProps<typeof Component> = {
-  knowledgeBase: {
-    status: {
-      loading: false,
-      value: {
-        ready: true,
-        enabled: true,
-      },
-      refresh: () => {},
-    },
-    isInstalling: false,
-    installError: undefined,
-    install: async () => {},
-  },
   chatService: {
     hasRenderFunction: () => false,
   } as unknown as ObservabilityAIAssistantChatService,

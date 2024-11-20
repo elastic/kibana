@@ -32,18 +32,6 @@ const defaultProps: ComponentStoryObj<typeof Component> = {
         },
       },
     ],
-    knowledgeBase: {
-      status: {
-        loading: false,
-        value: {
-          ready: true,
-          enabled: true,
-        },
-        refresh: () => {},
-      },
-      isInstalling: false,
-      install: async () => {},
-    },
     connectors: {
       connectors: [
         {

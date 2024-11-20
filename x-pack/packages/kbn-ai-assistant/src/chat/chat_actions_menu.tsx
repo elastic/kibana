@@ -18,7 +18,7 @@ import {
 import { ConnectorSelectorBase } from '@kbn/observability-ai-assistant-plugin/public';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
 import { useKibana } from '../hooks/use_kibana';
-import { useKnowledgeBase } from '../hooks';
+import { useKnowledgeBaseStatus } from '../hooks';
 
 export function ChatActionsMenu({
   connectors,
@@ -32,7 +32,7 @@ export function ChatActionsMenu({
   onCopyConversationClick: () => void;
 }) {
   const { application, http } = useKibana().services;
-  const knowledgeBase = useKnowledgeBase();
+  const knowledgeBase = useKnowledgeBaseStatus();
   const [isOpen, setIsOpen] = useState(false);
 
   const handleNavigateToConnectors = () => {

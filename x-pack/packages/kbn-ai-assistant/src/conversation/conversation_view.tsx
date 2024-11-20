@@ -16,7 +16,6 @@ import { ConversationList, ChatBody, ChatInlineEditingContent } from '../chat';
 import { useConversationKey } from '../hooks/use_conversation_key';
 import { useCurrentUser } from '../hooks/use_current_user';
 import { useGenAIConnectors } from '../hooks/use_genai_connectors';
-import { useKnowledgeBase } from '../hooks/use_knowledge_base';
 import { useAIAssistantAppService } from '../hooks/use_ai_assistant_app_service';
 import { useAbortableAsync } from '../hooks/use_abortable_async';
 import { useConversationList } from '../hooks/use_conversation_list';
@@ -45,8 +44,6 @@ export const ConversationView: React.FC<ConversationViewProps> = ({
   const service = useAIAssistantAppService();
 
   const connectors = useGenAIConnectors();
-
-  const knowledgeBase = useKnowledgeBase();
 
   const {
     services: {
@@ -173,7 +170,6 @@ export const ConversationView: React.FC<ConversationViewProps> = ({
             currentUser={currentUser}
             connectors={connectors}
             initialConversationId={conversationId}
-            knowledgeBase={knowledgeBase}
             showLinkToConversationsApp={false}
             onConversationUpdate={handleConversationUpdate}
             navigateToConversation={navigateToConversation}

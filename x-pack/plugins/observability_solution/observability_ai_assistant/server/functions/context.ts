@@ -24,8 +24,7 @@ export function registerContextFunction({
   client,
   functions,
   resources,
-  isKnowledgeBaseReady,
-}: FunctionRegistrationParameters & { isKnowledgeBaseReady: boolean }) {
+}: FunctionRegistrationParameters) {
   functions.registerFunction(
     {
       name: CONTEXT_FUNCTION_NAME,
@@ -53,13 +52,6 @@ export function registerContextFunction({
           learnings: [],
           ...(dataWithinTokenLimit.length ? { data_on_screen: dataWithinTokenLimit } : {}),
         };
-
-        if (!isKnowledgeBaseReady) {
-          resources.logger.warn(
-            `Knowledge base is not ready. Context function will not perform recall`
-          );
-          return { content };
-        }
 
         const userMessage = last(
           messages.filter((message) => message.message.role === MessageRole.User)

@@ -6,7 +6,8 @@
  */
 
 import { ClusterComponentTemplate } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { AI_ASSISTANT_KB_INFERENCE_ID } from './inference_endpoint';
+
+export const PRE_CONFIGURED_ELSER_ENDPOINT = '.elser-2-elasticsearch';
 
 const keyword = {
   type: 'keyword' as const,
@@ -61,7 +62,7 @@ export const kbComponentTemplate: ClusterComponentTemplate['component_template']
       text,
       semantic_text: {
         type: 'semantic_text',
-        inference_id: AI_ASSISTANT_KB_INFERENCE_ID, // replace with pre-configured ".elser-2-elasticsearch"
+        inference_id: PRE_CONFIGURED_ELSER_ENDPOINT,
       },
       confidence: keyword,
       is_correction: {

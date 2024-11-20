@@ -8,13 +8,7 @@
 import expect from '@kbn/expect';
 import { type KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import {
-  TINY_ELSER,
-  clearKnowledgeBase,
-  createKnowledgeBaseModel,
-  deleteInferenceEndpoint,
-  deleteKnowledgeBaseModel,
-} from './helpers';
+import { clearKnowledgeBase } from './helpers';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const ml = getService('ml');
@@ -22,24 +16,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
 
   describe('Knowledge base', () => {
-    before(async () => {
-      await createKnowledgeBaseModel(ml);
-
-      await observabilityAIAssistantAPIClient
-        .admin({
-          endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
-          params: {
-            query: {
-              model_id: TINY_ELSER.id,
-            },
-          },
-        })
-        .expect(200);
-    });
-
     after(async () => {
-      await deleteKnowledgeBaseModel(ml);
-      await deleteInferenceEndpoint({ es });
       await clearKnowledgeBase(es);
     });
 

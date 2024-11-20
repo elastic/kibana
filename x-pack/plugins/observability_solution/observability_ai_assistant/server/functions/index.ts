@@ -87,8 +87,6 @@ export const registerFunctions: RegistrationCallback = async ({
     );
   }
 
-  const { ready: isKnowledgeBaseReady } = await client.getKnowledgeBaseStatus();
-
   functions.registerInstruction(({ availableFunctionNames }) => {
     const instructions: string[] = [];
 
@@ -109,31 +107,24 @@ export const registerFunctions: RegistrationCallback = async ({
         Data that is compact enough automatically gets included in the response for the "${CONTEXT_FUNCTION_NAME}" function.`);
     }
 
-    if (isKnowledgeBaseReady) {
-      if (availableFunctionNames.includes(SUMMARIZE_FUNCTION_NAME)) {
-        instructions.push(`You can use the "${SUMMARIZE_FUNCTION_NAME}" function to store new information you have learned in a knowledge database.
+    if (availableFunctionNames.includes(SUMMARIZE_FUNCTION_NAME)) {
+      instructions.push(`You can use the "${SUMMARIZE_FUNCTION_NAME}" function to store new information you have learned in a knowledge database.
           Only use this function when the user asks for it.
           All summaries MUST be created in English, even if the conversation was carried out in a different language.`);
-      }
+    }
 
-      if (availableFunctionNames.includes(CONTEXT_FUNCTION_NAME)) {
-        instructions.push(
-          `Additionally, you can use the "${CONTEXT_FUNCTION_NAME}" function to retrieve relevant information from the knowledge database.`
-        );
-      }
-    } else {
+    if (availableFunctionNames.includes(CONTEXT_FUNCTION_NAME)) {
       instructions.push(
-        `You do not have a working memory. If the user expects you to remember the previous conversations, tell them they can set up the knowledge base.`
+        `Additionally, you can use the "${CONTEXT_FUNCTION_NAME}" function to retrieve relevant information from the knowledge database.`
       );
     }
+
     return instructions.map((instruction) => dedent(instruction));
   });
 
-  if (isKnowledgeBaseReady) {
-    registerSummarizationFunction(registrationParameters);
-  }
+  registerSummarizationFunction(registrationParameters);
 
-  registerContextFunction({ ...registrationParameters, isKnowledgeBaseReady });
+  registerContextFunction({ ...registrationParameters });
 
   registerElasticsearchFunction(registrationParameters);
   const request = registrationParameters.resources.request;

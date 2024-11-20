@@ -8,11 +8,11 @@
 import React from 'react';
 import { coreStartMock, render } from '../../helpers/test_helper';
 import { SettingsPage } from './settings_page';
-import { useKnowledgeBase } from '@kbn/ai-assistant';
+import { useKnowledgeBaseStatus } from '@kbn/ai-assistant';
 
 jest.mock('@kbn/ai-assistant');
 
-const useKnowledgeBaseMock = useKnowledgeBase as jest.Mock;
+const useKnowledgeBaseMock = useKnowledgeBaseStatus as jest.Mock;
 
 describe('Settings Page', () => {
   const appContextValue = {

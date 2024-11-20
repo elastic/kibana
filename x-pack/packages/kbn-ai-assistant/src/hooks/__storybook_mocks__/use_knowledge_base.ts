@@ -7,16 +7,13 @@
 
 import { UseKnowledgeBaseResult } from '../use_knowledge_base';
 
-export function useKnowledgeBase(): UseKnowledgeBaseResult {
+export function useKnowledgeBaseStatus(): UseKnowledgeBaseResult {
   return {
-    install: async () => {},
-    isInstalling: false,
     status: {
       loading: false,
       refresh: () => {},
       error: undefined,
       value: {
-        ready: true,
         enabled: true,
       },
     },

@@ -7,17 +7,11 @@
 
 import { orderBy } from 'lodash';
 import expect from '@kbn/expect';
-import { AI_ASSISTANT_KB_INFERENCE_ID } from '@kbn/observability-ai-assistant-plugin/server/service/inference_endpoint';
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common';
+import { PRE_CONFIGURED_ELSER_ENDPOINT } from '@kbn/observability-ai-assistant-plugin/server/service/kb_component_template';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import {
-  deleteKnowledgeBaseModel,
-  createKnowledgeBaseModel,
-  clearKnowledgeBase,
-  deleteInferenceEndpoint,
-  TINY_ELSER,
-} from './helpers';
+import { clearKnowledgeBase } from './helpers';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
@@ -32,24 +26,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     before(async () => {
       await clearKnowledgeBase(es);
       await esArchiver.load(archive);
-      await createKnowledgeBaseModel(ml);
-      await observabilityAIAssistantAPIClient
-        .admin({
-          endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
-          params: {
-            query: {
-              model_id: TINY_ELSER.id,
-            },
-          },
-        })
-        .expect(200);
     });
 
     after(async () => {
       await clearKnowledgeBase(es);
       await esArchiver.unload(archive);
-      await deleteKnowledgeBaseModel(ml);
-      await deleteInferenceEndpoint({ es });
     });
 
     async function getKnowledgeBaseEntries() {
@@ -107,12 +88,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ).to.eql([
           {
             text: 'To infinity and beyond!',
-            inferenceId: AI_ASSISTANT_KB_INFERENCE_ID,
+            inferenceId: PRE_CONFIGURED_ELSER_ENDPOINT,
             chunkCount: 1,
           },
           {
             text: "The user's favourite color is blue.",
-            inferenceId: AI_ASSISTANT_KB_INFERENCE_ID,
+            inferenceId: PRE_CONFIGURED_ELSER_ENDPOINT,
             chunkCount: 1,
           },
         ]);

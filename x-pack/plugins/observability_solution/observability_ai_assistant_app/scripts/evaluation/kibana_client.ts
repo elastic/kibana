@@ -30,7 +30,6 @@ import { streamIntoObservable } from '@kbn/observability-ai-assistant-plugin/ser
 import { ToolingLog } from '@kbn/tooling-log';
 import axios, { AxiosInstance, AxiosResponse, isAxiosError } from 'axios';
 import { isArray, omit, pick, remove } from 'lodash';
-import pRetry from 'p-retry';
 import {
   concatMap,
   defer,
@@ -148,38 +147,6 @@ export class KibanaClient {
       }
       throw error;
     });
-  }
-
-  async installKnowledgeBase() {
-    this.log.debug('Checking to see whether knowledge base is installed');
-
-    const {
-      data: { ready },
-    } = await this.callKibana<{ ready: boolean }>('GET', {
-      pathname: '/internal/observability_ai_assistant/kb/status',
-    });
-
-    if (ready) {
-      this.log.info('Knowledge base is installed');
-      return;
-    }
-
-    if (!ready) {
-      this.log.info('Installing knowledge base');
-    }
-
-    await pRetry(
-      async () => {
-        const response = await this.callKibana<{}>('POST', {
-          pathname: '/internal/observability_ai_assistant/kb/setup',
-        });
-        this.log.info('Knowledge base is ready');
-        return response.data;
-      },
-      { retries: 10 }
-    );
-
-    this.log.info('Knowledge base installed');
   }
 
   async createSpaceIfNeeded() {

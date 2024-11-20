@@ -725,16 +725,6 @@ export class ObservabilityAIAssistantClient {
     return this.dependencies.knowledgeBaseService.getStatus();
   };
 
-  setupKnowledgeBase = (modelId: string | undefined) => {
-    const { esClient } = this.dependencies;
-    return this.dependencies.knowledgeBaseService.setup(esClient, modelId);
-  };
-
-  resetKnowledgeBase = () => {
-    const { esClient } = this.dependencies;
-    return this.dependencies.knowledgeBaseService.reset(esClient);
-  };
-
   migrateKnowledgeBaseToSemanticText = () => {
     return runSemanticTextKnowledgeBaseMigration({
       esClient: this.dependencies.esClient,

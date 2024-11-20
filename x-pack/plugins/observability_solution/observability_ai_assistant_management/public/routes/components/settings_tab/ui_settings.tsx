@@ -18,7 +18,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { LogSourcesSettingSynchronisationInfo } from '@kbn/logs-data-access-plugin/public';
-import { useKnowledgeBase } from '@kbn/ai-assistant';
+import { useKnowledgeBaseStatus } from '@kbn/ai-assistant';
 import { useAppContext } from '../../../hooks/use_app_context';
 import { useKibana } from '../../../hooks/use_kibana';
 
@@ -29,7 +29,7 @@ export function UISettings() {
     notifications,
     application: { capabilities, getUrlForApp },
   } = useKibana().services;
-  const knowledgeBase = useKnowledgeBase();
+  const knowledgeBase = useKnowledgeBaseStatus();
   const { config } = useAppContext();
 
   const settingsKeys = [

@@ -71,8 +71,6 @@ function runEvaluations() {
 
           log.info(`Using connector ${evaluationConnector.id} for evaluation`);
 
-          await kibanaClient.installKnowledgeBase();
-
           const scenarios =
             (argv.files !== undefined &&
               castArray(argv.files).map((file) => Path.join(process.cwd(), file))) ||

@@ -12,9 +12,6 @@ import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/se
 import {
   clearConversations,
   clearKnowledgeBase,
-  createKnowledgeBaseModel,
-  deleteInferenceEndpoint,
-  deleteKnowledgeBaseModel,
 } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/tests/knowledge_base/helpers';
 import { getConversationCreatedEvent } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/tests/conversations/helpers';
 import {
@@ -29,7 +26,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
-  const ml = getService('ml');
   const log = getService('log');
   const svlUserManager = getService('svlUserManager');
   const svlCommonApi = getService('svlCommonApi');
@@ -47,20 +43,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       johnRoleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       editorRoleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('editor');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
-      await createKnowledgeBaseModel(ml);
-
-      await observabilityAIAssistantAPIClient
-        .slsUser({
-          endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
-          roleAuthc: editorRoleAuthc,
-          internalReqHeader,
-        })
-        .expect(200);
     });
 
     after(async () => {
-      await deleteKnowledgeBaseModel(ml);
-      await deleteInferenceEndpoint({ es });
       await clearKnowledgeBase(es);
       await clearConversations(es);
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(johnRoleAuthc);

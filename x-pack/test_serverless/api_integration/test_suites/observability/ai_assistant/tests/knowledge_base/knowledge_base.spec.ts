@@ -6,17 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  clearKnowledgeBase,
-  createKnowledgeBaseModel,
-  deleteInferenceEndpoint,
-  deleteKnowledgeBaseModel,
-} from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/tests/knowledge_base/helpers';
+import { clearKnowledgeBase } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/tests/knowledge_base/helpers';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import type { InternalRequestHeader, RoleCredentials } from '../../../../../../shared/services';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const ml = getService('ml');
   const es = getService('es');
   const svlUserManager = getService('svlUserManager');
   const svlCommonApi = getService('svlCommonApi');
@@ -31,25 +25,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('editor');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
-      await createKnowledgeBaseModel(ml);
     });
 
     after(async () => {
-      await deleteKnowledgeBaseModel(ml);
-      await deleteInferenceEndpoint({ es });
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
-    it('returns 200 on knowledge base setup', async () => {
-      const res = await observabilityAIAssistantAPIClient
-        .slsUser({
-          endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
-          roleAuthc,
-          internalReqHeader,
-        })
-        .expect(200);
-      expect(res.body).to.eql({});
-    });
     describe('when managing a single entry', () => {
       const knowledgeBaseEntry = {
         id: 'my-doc-id-1',

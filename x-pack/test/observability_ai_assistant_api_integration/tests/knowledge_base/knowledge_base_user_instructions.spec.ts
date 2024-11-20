@@ -11,14 +11,7 @@ import { Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/com
 import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context';
 import { Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import {
-  TINY_ELSER,
-  clearConversations,
-  clearKnowledgeBase,
-  createKnowledgeBaseModel,
-  deleteInferenceEndpoint,
-  deleteKnowledgeBaseModel,
-} from './helpers';
+import { clearConversations, clearKnowledgeBase } from './helpers';
 import { getConversationCreatedEvent } from '../conversations/helpers';
 import { LlmProxy, createLlmProxy } from '../../common/create_llm_proxy';
 import { createProxyActionConnector, deleteActionConnector } from '../../common/action_connectors';
@@ -28,29 +21,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
   const supertest = getService('supertest');
   const es = getService('es');
-  const ml = getService('ml');
   const log = getService('log');
   const retry = getService('retry');
   const getScopedApiClientForUsername = getService('getScopedApiClientForUsername');
 
   describe('Knowledge base user instructions', () => {
-    before(async () => {
-      await createKnowledgeBaseModel(ml);
-      await observabilityAIAssistantAPIClient
-        .admin({
-          endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
-          params: {
-            query: {
-              model_id: TINY_ELSER.id,
-            },
-          },
-        })
-        .expect(200);
-    });
-
     after(async () => {
-      await deleteKnowledgeBaseModel(ml);
-      await deleteInferenceEndpoint({ es });
       await clearKnowledgeBase(es);
       await clearConversations(es);
     });

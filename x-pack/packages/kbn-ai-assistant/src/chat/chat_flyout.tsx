@@ -27,7 +27,6 @@ import { ChatBody } from './chat_body';
 import { ChatInlineEditingContent } from './chat_inline_edit';
 import { ConversationList } from './conversation_list';
 import { useKibana } from '../hooks/use_kibana';
-import { useKnowledgeBase } from '../hooks/use_knowledge_base';
 import { NewChatButton } from '../buttons/new_chat_button';
 
 const CONVERSATIONS_SIDEBAR_WIDTH = 260;
@@ -63,8 +62,6 @@ export function ChatFlyout({
   const currentUser = useCurrentUser();
 
   const connectors = useGenAIConnectors();
-
-  const knowledgeBase = useKnowledgeBase();
 
   const [conversationId, setConversationId] = useState<string | undefined>(undefined);
 
@@ -266,7 +263,6 @@ export function ChatFlyout({
               initialTitle={initialTitle}
               initialMessages={initialMessages}
               initialConversationId={conversationId}
-              knowledgeBase={knowledgeBase}
               showLinkToConversationsApp
               onConversationUpdate={(conversation) => {
                 if (!conversationId) {

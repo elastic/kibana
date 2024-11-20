@@ -9,10 +9,8 @@ import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import pLimit from 'p-limit';
 import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { CoreSetup, Logger } from '@kbn/core/server';
-import pRetry from 'p-retry';
 import { KnowledgeBaseEntry } from '../../../common';
 import { resourceNames } from '..';
-import { getInferenceEndpoint } from '../inference_endpoint';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 
 const TASK_ID = 'obs-ai-assistant:knowledge-base-migration-task-id';
@@ -107,8 +105,6 @@ export async function runSemanticTextKnowledgeBaseMigration({
 
     logger.debug(`Knowledge base migration: Found ${response.hits.hits.length} entries to migrate`);
 
-    await waitForInferenceEndpoint({ esClient, logger });
-
     // Limit the number of concurrent requests to avoid overloading the cluster
     const limiter = pLimit(10);
     const promises = response.hits.hits.map((hit) => {
@@ -138,25 +134,6 @@ export async function runSemanticTextKnowledgeBaseMigration({
     logger.error('Knowledge base migration: Failed to migrate entries');
     logger.error(e);
   }
-}
-
-async function waitForInferenceEndpoint({
-  esClient,
-  logger,
-}: {
-  esClient: { asInternalUser: ElasticsearchClient };
-  logger: Logger;
-}) {
-  return pRetry(
-    async () => {
-      const endpoint = await getInferenceEndpoint({ esClient });
-      if (!endpoint) {
-        logger.debug('Inference endpoint not yet ready. Retrying...');
-        throw new Error('Inference endpoint not yet ready');
-      }
-    },
-    { factor: 2, retries: 30, maxTimeout: 60_000 }
-  );
 }
 
 function sleep(ms: number) {

@@ -31,7 +31,6 @@ import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { findLastIndex } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 import { ASSISTANT_SETUP_TITLE, EMPTY_CONVERSATION_TITLE, UPGRADE_LICENSE_TITLE } from '../i18n';
 import { useAIAssistantChatService } from '../hooks/use_ai_assistant_chat_service';
 import { useSimulatedFunctionCalling } from '../hooks/use_simulated_function_calling';
@@ -107,7 +106,6 @@ export function ChatBody({
   initialConversationId,
   initialMessages,
   initialTitle,
-  knowledgeBase,
   showLinkToConversationsApp,
   onConversationUpdate,
   onToggleFlyoutPositionMode,
@@ -119,7 +117,6 @@ export function ChatBody({
   initialTitle?: string;
   initialMessages?: Message[];
   initialConversationId?: string;
-  knowledgeBase: UseKnowledgeBaseResult;
   showLinkToConversationsApp: boolean;
   onConversationUpdate: (conversation: { conversation: Conversation['conversation'] }) => void;
   onToggleFlyoutPositionMode?: (flyoutPositionMode: FlyoutPositionMode) => void;
@@ -148,10 +145,7 @@ export function ChatBody({
   let footer: React.ReactNode;
 
   const isLoading = Boolean(
-    connectors.loading ||
-      knowledgeBase.status.loading ||
-      state === ChatState.Loading ||
-      conversation.loading
+    connectors.loading || state === ChatState.Loading || conversation.loading
   );
 
   let title = conversation.value?.conversation.title || initialTitle;
@@ -352,7 +346,6 @@ export function ChatBody({
               {connectors.connectors?.length === 0 || messages.length === 1 ? (
                 <WelcomeMessage
                   connectors={connectors}
-                  knowledgeBase={knowledgeBase}
                   onSelectPrompt={(message) =>
                     next(
                       messages.concat([
@@ -367,7 +360,6 @@ export function ChatBody({
               ) : (
                 <ChatTimeline
                   messages={messages}
-                  knowledgeBase={knowledgeBase}
                   chatService={chatService}
                   currentUser={currentUser}
                   chatState={state}
