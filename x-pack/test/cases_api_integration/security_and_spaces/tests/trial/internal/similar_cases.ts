@@ -82,6 +82,59 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(casesSimilarToB.length).to.be(1);
       });
 
+      it('does not return cases similar to given case if the owner does not match', async () => {
+        const [caseA, caseB] = await Promise.all([
+          createCase(supertest, { ...getPostCaseRequest(), owner: 'securitySolution' }),
+          createCase(supertest, getPostCaseRequest()),
+          createCase(supertest, getPostCaseRequest()),
+        ]);
+
+        const newObservableData = {
+          value: 'value',
+          typeKey: OBSERVABLE_TYPES_BUILTIN[0].key,
+          description: '',
+        };
+
+        const { cases } = await similarCases({
+          supertest,
+          body: { perPage: 10, page: 1 },
+          caseId: caseA.id,
+        });
+        expect(cases.length).to.be(0);
+
+        await addObservable({
+          supertest,
+          caseId: caseA.id,
+          params: {
+            observable: newObservableData,
+          },
+        });
+
+        await addObservable({
+          supertest,
+          caseId: caseB.id,
+          params: {
+            observable: newObservableData,
+          },
+        });
+
+        const { cases: casesSimilarToA } = await similarCases({
+          supertest,
+          body: { perPage: 10, page: 1 },
+          caseId: caseA.id,
+        });
+
+        expect(casesSimilarToA.length).to.be(0);
+
+        const { cases: casesSimilarToB } = await similarCases({
+          supertest,
+          body: { perPage: 10, page: 1 },
+          caseId: caseB.id,
+        });
+
+        expect(casesSimilarToB.length).to.be(0);
+      });
+
       it('returns cases similar to given case with json in the value', async () => {
         const [caseA, caseB] = await Promise.all([
           createCase(supertest, getPostCaseRequest()),
