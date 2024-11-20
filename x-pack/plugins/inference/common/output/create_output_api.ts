@@ -16,7 +16,7 @@ import {
   withoutTokenCountEvents,
 } from '@kbn/inference-common';
 import { isObservable, map } from 'rxjs';
-import { ensureMultiTurn } from './utils/ensure_multi_turn';
+import { ensureMultiTurn } from '../utils/ensure_multi_turn';
 
 export function createOutputApi(chatCompleteApi: ChatCompleteAPI): OutputAPI;
 export function createOutputApi(chatCompleteApi: ChatCompleteAPI) {
