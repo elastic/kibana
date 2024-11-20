@@ -42,7 +42,7 @@ Elasticsearch deprecations can be handled in a number of ways:
     2. Create a target index with the following name `reindexed-v{majorVersion}-{originalIndex}`. E.g., if `my-index` is the original, the target will be named `reindexed-v8-my-index`.
     3. [Reindex](https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-reindex.html) from the original index to the target index. Kibana will continuously report reindexing status.
     4. Once reindexing is done, create an alias from the original index to the target index. All existing aliases referencing the original index will be re-pointed to the target index. E.g., `my-index` will be an alias referencing `reindexed-v8-my-index`.
-       1. **NOTE:** writing/indexing will effectively be re-enabled at this point via the alias.
+       1. **NOTE:** writing/indexing will effectively be re-enabled at this point via the alias, unless the original was write-blocked by users as index settings are inherited from the original.
     5. Delete the original index.
     6. The Upgrade Assistant's reindex action is complete at this point.
        1. If the original index was closed before reindexing, the new target will also be closed at this point.
