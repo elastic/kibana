@@ -106,7 +106,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       describe('without any indices', () => {
-        it('hide no create index button when index added', async () => {
+        it('hide create index button when index added', async () => {
           await createIndex();
           await pageObjects.searchPlayground.PlaygroundStartChatPage.expectOpenFlyoutAndSelectIndex();
         });
@@ -127,6 +127,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         it('can select index from dropdown and load chat page', async () => {
           await pageObjects.searchPlayground.PlaygroundStartChatPage.expectToSelectIndicesAndLoadChat();
+        });
+
+        it('load start page after removing selected index', async () => {
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectToSelectIndicesAndLoadChat();
+          await esArchiver.unload(esArchiveIndex);
+          await browser.refresh();
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundStartChatPageComponentsToExist();
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectCreateIndexButtonToExists();
         });
 
         after(async () => {
