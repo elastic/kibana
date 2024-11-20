@@ -24,7 +24,6 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { mlPluginMock } from '@kbn/ml-plugin/public/mocks';
-import { searchPlaygroundMock } from '@kbn/search-playground/__mocks__/search_playground_mock';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
@@ -86,7 +85,6 @@ export const mockKibanaProps: KibanaLogicProps = {
     hasWebCrawler: true,
   },
   renderHeaderActions: jest.fn(),
-  searchPlayground: searchPlaygroundMock.createStart(),
   security: securityMock.createStart(),
   setBreadcrumbs: jest.fn(),
   setChromeIsVisible: jest.fn(),

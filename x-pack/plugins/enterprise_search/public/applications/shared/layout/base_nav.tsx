@@ -88,7 +88,7 @@ export const buildBaseClassicNavItems = ({
       {
         'data-test-subj': 'searchSideNav-Playground',
         deepLink: {
-          link: 'enterpriseSearchApplications:playground',
+          link: 'searchPlayground',
           shouldShowActiveForSubroutes: true,
         },
         id: 'playground',

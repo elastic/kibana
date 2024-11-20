@@ -151,7 +151,7 @@ export const getNavigationTreeDefinition = ({
                 {
                   children: [
                     {
-                      link: 'enterpriseSearchApplications:playground',
+                      link: 'searchPlayground',
                     },
                     {
                       getIsActive: ({ pathNameSerialized, prepend }) => {
