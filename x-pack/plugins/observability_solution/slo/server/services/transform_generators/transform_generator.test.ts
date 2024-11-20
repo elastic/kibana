@@ -9,11 +9,7 @@ import { createAPMTransactionErrorRateIndicator, createSLO } from '../fixtures/s
 import { ApmTransactionErrorRateTransformGenerator } from './apm_transaction_error_rate';
 import { dataViewsService } from '@kbn/data-views-plugin/server/mocks';
 
-const generator = new ApmTransactionErrorRateTransformGenerator(
-  'my-space-id',
-  dataViewsService,
-  false
-);
+const generator = new ApmTransactionErrorRateTransformGenerator('my-space-id', dataViewsService);
 
 describe('Transform Generator', () => {
   describe('buildCommonGroupBy', () => {
