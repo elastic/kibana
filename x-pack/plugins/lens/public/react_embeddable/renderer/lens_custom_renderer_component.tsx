@@ -7,7 +7,7 @@
 
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { useSearchApi } from '@kbn/presentation-publishing';
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import type { LensApi, LensRendererProps, LensRuntimeState, LensSerializedState } from '../types';
 import { LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
@@ -45,7 +45,8 @@ export function LensRenderer({
     viewMode$Ref.current.next(viewMode);
   }
 
-  const apiRef = useRef<LensApi | undefined>(undefined);
+  // Lens API will be set once, but when set trigger a reflow to adopt the latest attributes
+  const [lensApi, setLensApi] = useState<LensApi | undefined>(undefined);
   const initialStateRef = useRef<LensSerializedState>(
     props.attributes ? { attributes: props.attributes } : createEmptyLensState(null, title)
   );
@@ -57,7 +58,6 @@ export function LensRenderer({
   // Re-render on changes
   // internally the embeddable will evaluate whether it is worth to actual render or not
   useEffect(() => {
-    const lensApi = apiRef.current;
     // trigger a re-render if the attributes change
     if (lensApi) {
       lensApi.updateAttributes({
@@ -68,7 +68,7 @@ export function LensRenderer({
       });
       lensApi.updateOverrides(props.overrides);
     }
-  }, [props.attributes, props.overrides]);
+  }, [lensApi, props.attributes, props.overrides]);
 
   useEffect(() => {
     if (syncColors != null && settings.syncColors$.getValue() !== syncColors) {
@@ -102,9 +102,7 @@ export function LensRenderer({
           attributes: props.attributes,
         }),
       })}
-      onApiAvailable={(api) => {
-        apiRef.current = api;
-      }}
+      onApiAvailable={setLensApi}
       hidePanelChrome={!showPanelChrome}
       panelProps={{
         hideInspector: !showInspector,
