@@ -11,6 +11,7 @@ import { EX_ANSWER_PROGRAM, SAMPLE_CEL_PROGRAMS } from './constants';
 import { CEL_BASE_PROGRAM_PROMPT } from './prompts';
 import { CelInputNodeParams } from './types';
 import { CelValidator } from './validation/validate';
+import { validate } from './validation/validate_global';
 
 export async function handleBuildProgram({
   state,
@@ -27,8 +28,10 @@ export async function handleBuildProgram({
     ex_answer: EX_ANSWER_PROGRAM,
   });
 
-  const validator = new CelValidator(state.packageInfo);
-  const validated = await validator.validate(program.trim());
+  //const validator = new CelValidator(state.packageInfo);
+  console.log("Before validating", process.memoryUsage());
+  const validated = await validate(program.trim());
+  console.log("After Validating", process.memoryUsage());
   return {
     currentProgram: validated.trim(),
     lastExecutedChain: 'buildCelProgram',

@@ -81,6 +81,9 @@ export function registerCelInputRoutes(router: IRouter<IntegrationAssistantRoute
           const graph = await getCelGraph({ model });
           const results = await graph.invoke(parameters, options);
 
+          console.log("Main thread end: ", process.memoryUsage());
+
+
           return res.ok({ body: CelInputResponse.parse(results) });
         } catch (e) {
           if (isErrorThatHandlesItsOwnResponse(e)) {
