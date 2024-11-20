@@ -24,6 +24,7 @@ import {
   EuiKeyPadMenuItem,
   EuiPopover,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
   EuiToolTip,
   useEuiTheme,
@@ -114,13 +115,6 @@ export interface UserProfileFormValues {
   avatarType: 'initials' | 'image';
 }
 
-interface KeyPadItem {
-  id: string;
-  label: string;
-  icon: string;
-  isDefault?: boolean;
-}
-
 const UserDetailsEditor: FunctionComponent<UserDetailsEditorProps> = ({ user }) => {
   const { services } = useKibana<CoreStart>();
 
@@ -195,24 +189,30 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
     return null;
   }
 
-  let idSelectedTheme = formik.values.data.userSettings.darkMode;
+  let idSelected = formik.values.data.userSettings.darkMode;
 
   if (isThemeOverridden) {
     if (isOverriddenThemeDarkMode) {
-      idSelectedTheme = 'dark';
+      idSelected = 'dark';
     } else {
-      idSelectedTheme = 'light';
+      idSelected = 'light';
     }
   }
 
-  const themeItem = ({ id, label, icon }: KeyPadItem) => {
+  interface ThemeKeyPadItem {
+    id: string;
+    label: string;
+    icon: string;
+  }
+
+  const themeItem = ({ id, label, icon }: ThemeKeyPadItem) => {
     return (
       <EuiKeyPadMenuItem
         name={id}
         label={label}
         data-test-subj={`themeKeyPadItem${label}`}
         checkable="single"
-        isSelected={idSelectedTheme === id}
+        isSelected={idSelected === id}
         isDisabled={isThemeOverridden}
         onChange={() => formik.setFieldValue('data.userSettings.darkMode', id)}
       >
@@ -236,7 +236,7 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
             <FormLabel for="data.userSettings.darkMode">
               <FormattedMessage
                 id="xpack.security.accountManagement.userProfile.userSettings.theme"
-                defaultMessage="Mode"
+                defaultMessage="Color mode"
               />
             </FormLabel>
           ),
@@ -283,111 +283,59 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
   };
 
   const idSelectedContrast = formik.values.data.userSettings.contrastMode;
-
-  const contrastModeItem = ({ id, label, icon, isDefault }: KeyPadItem) => {
-    return (
-      <EuiKeyPadMenuItem
-        name={id}
-        label={label}
-        data-test-subj={`contrastModeKeyPadItem${label}`}
-        checkable="single"
-        isSelected={idSelectedContrast === id || (!idSelectedContrast && isDefault)}
-        onChange={() => formik.setFieldValue('data.userSettings.contrastMode', id)}
-      >
-        <EuiIcon type={icon} size="l" />
-      </EuiKeyPadMenuItem>
-    );
-  };
-
   const contrastModeMenu = () => {
-    const contrastModeKeyPadMenu = (
-      <EuiKeyPadMenu
-        aria-label={i18n.translate(
-          'xpack.security.accountManagement.userProfile.userSettings.contrastModeGroupDescription',
-          { defaultMessage: 'Contrast mode' }
+    return (
+      <EuiSwitch
+        id="contrastMode"
+        label={i18n.translate(
+          'xpack.security.accountManagement.userProfile.highContrastModeButton',
+          { defaultMessage: 'High contrast' }
         )}
-        data-test-subj="contrastModeMenu"
-        checkable={{
-          legend: (
-            <FormLabel for="data.userSettings.contrastMode">
-              <FormattedMessage
-                id="xpack.security.accountManagement.userProfile.userSettings.contrastMode"
-                defaultMessage="Mode"
-              />
-            </FormLabel>
-          ),
+        checked={idSelectedContrast === 'high'}
+        onChange={({ target }) => {
+          const value = target.checked ? 'high' : 'standard';
+          return formik.setFieldValue('data.userSettings.contrastMode', value);
         }}
-      >
-        {contrastModeItem({
-          id: 'standard',
-          isDefault: true,
-          label: i18n.translate(
-            'xpack.security.accountManagement.userProfile.standardContrastModeButton',
-            { defaultMessage: 'Standard' }
-          ),
-          icon: 'heart',
-        })}
-        {contrastModeItem({
-          id: 'high',
-          label: i18n.translate(
-            'xpack.security.accountManagement.userProfile.highContrastModeButton',
-            { defaultMessage: 'High contrast' }
-          ),
-          icon: 'heart',
-        })}
-      </EuiKeyPadMenu>
+      />
     );
-    return contrastModeKeyPadMenu;
   };
 
   return (
-    <>
-      <EuiDescribedFormGroup
-        fullWidth
-        fieldFlexItemProps={{ style: { alignSelf: 'flex-start' } }}
-        title={
-          <h2>
-            <FormattedMessage
-              id="xpack.security.accountManagement.userProfile.userSettingsTitle.theme"
-              defaultMessage="Theme"
-            />
-          </h2>
-        }
-        description={
+    <EuiDescribedFormGroup
+      fullWidth
+      fieldFlexItemProps={{ style: { alignSelf: 'flex-start' } }}
+      title={
+        <h2>
           <FormattedMessage
-            id="xpack.security.accountManagement.userProfile.themeFormGroupDescription"
-            defaultMessage="Select the appearance of your interface."
+            id="xpack.security.accountManagement.userProfile.userSettingsTitle"
+            defaultMessage="Appearance"
+          />
+        </h2>
+      }
+      description={
+        <FormattedMessage
+          id="xpack.security.accountManagement.userProfile.themeFormGroupDescription"
+          defaultMessage="Select the appearance of your interface."
+        />
+      }
+    >
+      <FormRow name="data.userSettings.darkMode" fullWidth>
+        {themeMenu(isThemeOverridden)}
+      </FormRow>
+      <FormRow
+        name="data.userSettings.contrastMode"
+        fullWidth
+        label={
+          <FormattedMessage
+            id="xpack.security.accountManagement.userProfile.userSettings.contrastMode"
+            defaultMessage="Accessibility"
           />
         }
+        hasChildLabel={false}
       >
-        <FormRow name="data.userSettings.darkMode" fullWidth>
-          {themeMenu(isThemeOverridden)}
-        </FormRow>
-      </EuiDescribedFormGroup>
-
-      <EuiDescribedFormGroup
-        fullWidth
-        fieldFlexItemProps={{ style: { alignSelf: 'flex-start' } }}
-        title={
-          <h2>
-            <FormattedMessage
-              id="xpack.security.accountManagement.userProfile.userSettingsTitle.contrast"
-              defaultMessage="Contrast"
-            />
-          </h2>
-        }
-        description={
-          <FormattedMessage
-            id="xpack.security.accountManagement.userProfile.contrastFormGroupDescription"
-            defaultMessage="Increase contrast levels to improve accessibility."
-          />
-        }
-      >
-        <FormRow name="data.userSettings.contrast" fullWidth>
-          {contrastModeMenu()}
-        </FormRow>
-      </EuiDescribedFormGroup>
-    </>
+        {contrastModeMenu()}
+      </FormRow>
+    </EuiDescribedFormGroup>
   );
 };
 
