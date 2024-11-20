@@ -75,7 +75,7 @@ describe('percentiles agg config', () => {
 
       // act and assert
       expect(config.isValid()).toBeFalsy();
-      expect(config.errorMessageType).toBe('PERCENTILE_OUT_OF_RANGE');
+      expect(config.aggConfig.errors).toContain('PERCENTILE_OUT_OF_RANGE');
     });
 
     test('returns false for invalid number format', () => {
@@ -84,7 +84,7 @@ describe('percentiles agg config', () => {
 
       // act and assert
       expect(config.isValid()).toBeFalsy();
-      expect(config.errorMessageType).toBe('INVALID_FORMAT');
+      expect(config.aggConfig.errors).toContain('INVALID_FORMAT');
     });
 
     test('returns true for valid percents', () => {
@@ -93,7 +93,7 @@ describe('percentiles agg config', () => {
 
       // act and assert
       expect(config.isValid()).toBeTruthy();
-      expect(config.errorMessageType).toBeUndefined();
+      expect(config.aggConfig.errors).toBeUndefined();
     });
 
     test('validates pending input along with existing percents', () => {
@@ -103,7 +103,44 @@ describe('percentiles agg config', () => {
 
       // act and assert
       expect(config.isValid()).toBeTruthy();
-      expect(config.errorMessageType).toBeUndefined();
+      expect(config.aggConfig.errors).toBeUndefined();
+    });
+  });
+
+  describe('#getErrorMessages', () => {
+    test('returns undefined when there are no errors', () => {
+      // arrange
+      config.aggConfig.errors = undefined;
+
+      // act and assert
+      expect(config.getErrorMessages?.()).toBeUndefined();
+    });
+
+    test('returns undefined when errors array is empty', () => {
+      // arrange
+      config.aggConfig.errors = [];
+
+      // act and assert
+      expect(config.getErrorMessages?.()).toBeUndefined();
+    });
+
+    test('returns translated messages for single error', () => {
+      // arrange
+      config.aggConfig.errors = ['PERCENTILE_OUT_OF_RANGE'];
+
+      // act and assert
+      expect(config.getErrorMessages?.()).toEqual(['Percentiles must be between 0 and 100']);
+    });
+
+    test('returns translated messages for multiple errors', () => {
+      // arrange
+      config.aggConfig.errors = ['PERCENTILE_OUT_OF_RANGE', 'INVALID_FORMAT'];
+
+      // act and assert
+      expect(config.getErrorMessages?.()).toEqual([
+        'Percentiles must be between 0 and 100',
+        'Percentile must be a valid number',
+      ]);
     });
   });
 });
