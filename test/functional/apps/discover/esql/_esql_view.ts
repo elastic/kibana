@@ -42,8 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     enableESQL: true,
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/196866
-  describe.skip('discover esql view', function () {
+  describe('discover esql view', function () {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
@@ -453,6 +452,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('querySubmitButton');
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
+
+        await retry.waitFor('footer to show error', async () => {
+          return (await testSubjects.getVisibleText('ESQLEditor-footer')).includes('error');
+        });
 
         await testSubjects.click('ESQLEditor-toggle-query-history-button');
         const historyItem = await esql.getHistoryItem(0);
