@@ -29,3 +29,7 @@ export function kibanaRequestFactory<P, Q, B>(
 ): KibanaRequest<P, Q, B> {
   return CoreKibanaRequest.from<P, Q, B>(req, routeSchemas, withoutSecretHeaders);
 }
+
+export function isCoreKibanaRequest<P, Q, B>(req: KibanaRequest<P, Q, B>) {
+  return req instanceof CoreKibanaRequest;
+}
