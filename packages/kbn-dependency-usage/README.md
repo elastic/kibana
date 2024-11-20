@@ -9,7 +9,7 @@ A CLI tool for analyzing dependencies across packages and plugins. This tool pro
 1. [Usage](#usage)
    - [Show all packages/plugins using a dependency](#show-all-packagesplugins-using-a-dependency)
    - [Show dependencies grouped by code owner](#show-dependencies-grouped-by-code-owner)
-   - [List all dependencies for a package or directory](#list-all-dependencies-for-a-package-or-directory)
+   - [List all dependencies for a package or directory](#list-all-dependencies-for-source-directory)
    - [Group by code owner with adjustable collapse depth](#group-by-code-owner-with-adjustable-collapse-depth)
    - [Show dependencies matching a pattern](#show-dependencies-matching-a-pattern)
    - [Verbose flag to debug dependency graph issues](#verbose-flag-to-debug-dependency-graph-issues)

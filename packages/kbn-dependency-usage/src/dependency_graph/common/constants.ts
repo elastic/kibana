@@ -21,7 +21,6 @@ export const excludePaths = [
   '(^|/)target($|/)',
   '^kbn',
   '^@kbn',
-  '@elastic',
   '^.buildkite',
   '^docs',
   '^dev_docs',

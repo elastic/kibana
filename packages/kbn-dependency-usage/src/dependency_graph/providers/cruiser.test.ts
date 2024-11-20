@@ -19,6 +19,15 @@ const codeOwners: Record<string, string[]> = {
   'plugins/data_charts': ['team_visualization'],
   'plugins/analytics': ['team_analytics'],
   'plugins/notification': ['team_alerts', 'team_notifications'],
+  'plugins/security_solution/public/entity_analytics/components': ['team_security_analytics'],
+  'plugins/security_solution/public/entity_analytics/components/componentA.ts': [
+    'team_security_analytics',
+  ],
+  'plugins/security_solution/public/entity_analytics/components/componentB.ts': [
+    'team_security_analytics',
+  ],
+  'plugins/security_solution/server/lib/analytics/analytics.ts': ['team_security_analytics'],
+  'plugins/security_solution/common/api/detection_engine': ['team_security_solution'],
 };
 
 jest.mock('dependency-cruiser', () => ({
@@ -282,6 +291,63 @@ describe('identifyDependencyUsage', () => {
         modules: ['plugins/security'],
         deps: ['rxjs'],
         teams: ['team_security'],
+      },
+    });
+  });
+
+  it('should search for specific dependency and group by owner', async () => {
+    const customCruiseResult = {
+      output: {
+        summary: {
+          violations: [
+            {
+              from: 'plugins/security_solution/public/entity_analytics/components/componentA.ts',
+              to: 'node_modules/lodash/fp.js',
+            },
+            {
+              from: 'plugins/security_solution/public/entity_analytics/components/componentB.ts',
+              to: 'node_modules/lodash/partition.js',
+            },
+            {
+              from: 'plugins/security_solution/server/lib/analytics/analytics.ts',
+              to: 'node_modules/lodash/partition.js',
+            },
+            {
+              from: 'plugins/security_solution/server/lib/analytics/analytics.ts',
+              to: 'node_modules/lodash/cloneDeep.js',
+            },
+            {
+              from: 'plugins/security_solution/common/api/detection_engine',
+              to: 'node_modules/lodash/sortBy.js',
+            },
+          ],
+        },
+        modules: [],
+      },
+    };
+    (cruise as jest.Mock).mockResolvedValue(customCruiseResult);
+
+    const result = await identifyDependencyUsage([], 'lodash', {
+      groupBy: 'owner',
+      collapseDepth: 3,
+      summary: false,
+    });
+
+    expect(cruise).toHaveBeenCalled();
+    expect(result).toEqual({
+      team_security_analytics: {
+        modules: [
+          'plugins/security_solution/public/entity_analytics/components/componentA.ts',
+          'plugins/security_solution/public/entity_analytics/components/componentB.ts',
+          'plugins/security_solution/server/lib/analytics/analytics.ts',
+        ],
+        deps: ['lodash/fp.js', 'lodash/partition.js', 'lodash/cloneDeep.js'],
+        teams: ['team_security_analytics'],
+      },
+      team_security_solution: {
+        modules: ['plugins/security_solution/common/api/detection_engine'],
+        deps: ['lodash/sortBy.js'],
+        teams: ['team_security_solution'],
       },
     });
   });

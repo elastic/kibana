@@ -112,6 +112,10 @@ export async function identifyDependencyUsageWithCruiser(
 
   const { violations } = result.output.summary;
 
+  if (groupBy === 'owner') {
+    return groupFilesByOwners(violations);
+  }
+
   if (dependencyName) {
     const dependencyRegex = new RegExp(`node_modules/${dependencyName}`);
 
@@ -137,10 +141,6 @@ export async function identifyDependencyUsageWithCruiser(
       modules: [...new Set(violations.map(({ from }) => from))],
       ...(!summary && { dependents: dependentsList }),
     };
-  }
-
-  if (groupBy === 'owner') {
-    return groupFilesByOwners(violations);
   }
 
   return groupBySource(violations);

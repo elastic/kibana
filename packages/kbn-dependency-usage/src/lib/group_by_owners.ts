@@ -26,7 +26,7 @@ export function groupFilesByOwners(dependencies: Array<{ from: string; to: strin
     const { from, to } = dep;
 
     const owners = getCodeOwnersForFile(from, reversedCodeowners) ?? [UNKNOWN_OWNER];
-    const ownerKey = owners.length > 1 ? MULTIPLE_TEAMS_OWNER : owners.join(',');
+    const ownerKey = owners.length > 1 ? MULTIPLE_TEAMS_OWNER : owners[0];
 
     if (ownerKey === MULTIPLE_TEAMS_OWNER) {
       if (!ownerFilesMap.has(ownerKey)) {

@@ -66,8 +66,8 @@ describe('dependency-usage CLI', () => {
   });
 
   it('should use default values when optional arguments are not provided', () => {
-    const argv = parser.parse(['--paths', './src']);
-    expect(argv.paths).toEqual(['./src']);
+    const argv = parser.parse([]);
+    expect(argv.paths).toEqual(['.']);
     expect(argv['dependency-name']).toBeUndefined();
     expect(argv['collapse-depth']).toBe(1);
     expect(argv.verbose).toBe(false);
@@ -77,11 +77,6 @@ describe('dependency-usage CLI', () => {
     expect(() => {
       parser.parse(['--summary', '--paths', './src']);
     }).toThrow('Summary option can only be used when a dependency name is provided');
-  });
-
-  it('should set default values for unspecified options', () => {
-    const argv = parser.parse(['--paths', './src']);
-    expect(argv['collapse-depth']).toBe(1);
   });
 
   it('should validate collapse-depth as a positive integer', () => {

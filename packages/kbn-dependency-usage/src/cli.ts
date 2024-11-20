@@ -85,7 +85,6 @@ export const configureYargs = () => {
 
             return true;
           })
-          .demandOption(['paths'], 'Please provide at least one path to search within')
           .example(
             '--dependency-name lodash --paths ./src ./lib',
             chalk.blue(
