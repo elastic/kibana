@@ -315,10 +315,8 @@ export const ConfigSchema = schema.object({
       roleMappingManagementEnabled: schema.boolean({ defaultValue: true }),
     }),
   }),
-  experimental: schema.object({
-    fipsMode: schema.object({
-      enabled: schema.boolean({ defaultValue: false }),
-    }),
+  fipsMode: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
   }),
 });
 
