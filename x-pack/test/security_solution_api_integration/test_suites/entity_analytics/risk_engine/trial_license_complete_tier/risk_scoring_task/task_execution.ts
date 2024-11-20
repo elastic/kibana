@@ -103,7 +103,7 @@ export default ({ getService }: FtrProviderContext): void => {
             );
           });
 
-          it('@skipInServerlessMKI @skipInServerless starts the latest transform', async () => {
+          it('@skipInServerlessMKI starts the latest transform', async () => {
             // Transform states that indicate the transform is running happily
             const TRANSFORM_STARTED_STATES = ['started', 'indexing'];
 
