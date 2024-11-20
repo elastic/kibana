@@ -7,12 +7,12 @@
 
 import expect from '@kbn/expect';
 import { LatencyDistributionChartType } from '@kbn/apm-plugin/common/latency_distribution_chart_types';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+import { ARCHIVER_ROUTES } from '../constants/archiver';
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const registry = getService('registry');
-  const apmApiClient = getService('apmApiClient');
-
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
+  const esArchiver = getService('esArchiver');
   const endpoint = 'POST /internal/apm/latency/overall_distribution/transactions';
 
   // This matches the parameters used for the other tab's search strategy approach in `../correlations/*`.
@@ -29,10 +29,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     },
   });
 
-  registry.when.skip(
-    'latency overall distribution without data',
-    { config: 'trial', archives: [] },
-    () => {
+  describe('Latency overall distribution', () => {
+    describe('without data', () => {
       it('handles the empty state', async () => {
         const response = await apmApiClient.readUser({
           endpoint,
@@ -43,14 +41,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.body?.percentileThresholdValue).to.be(undefined);
         expect(response.body?.overallHistogram?.length).to.be(undefined);
       });
-    }
-  );
+    });
 
-  registry.when.skip(
-    'latency overall distribution with data and default args',
-    // This uses the same archive used for the other tab's search strategy approach in `../correlations/*`.
-    { config: 'trial', archives: ['8.0.0'] },
-    () => {
+    describe('with data and default args', () => {
+      before(async () => {
+        await esArchiver.load(ARCHIVER_ROUTES['8.0.0']);
+      });
+      after(async () => {
+        await esArchiver.unload(ARCHIVER_ROUTES['8.0.0']);
+      });
+
+      // This uses the same archive used for the other tab's search strategy approach in `../correlations/*`.
       it('returns percentileThresholdValue and overall histogram', async () => {
         const response = await apmApiClient.readUser({
           endpoint,
@@ -62,6 +63,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.body?.percentileThresholdValue).to.be(1309695.875);
         expect(response.body?.overallHistogram?.length).to.be(101);
       });
-    }
-  );
+    });
+  });
 }
