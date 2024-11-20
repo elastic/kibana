@@ -21,10 +21,8 @@ import {
   DEFAULT_ESQL_QUERY_FIELD_VALUE,
   DEFAULT_KQL_QUERY_FIELD_VALUE,
   DEFAULT_THREAT_MATCH_KQL_QUERY_FIELD_VALUE,
-  QUERY_BAR_FIELD_NAME,
   type FieldValueQueryBar,
 } from '../query_bar_field';
-import { RULE_TYPE_FIELD_NAME } from '../select_rule_type';
 
 const EQL_QUERY_LANGUAGE = 'eql';
 const ESQL_QUERY_LANGUAGE = 'esql';
@@ -54,11 +52,10 @@ export function usePersistentQuery({ form }: UsePersistentQueryParams): UsePersi
    * fields. Kibana's Form lib doesn't persist field values when corresponding UseField hooks
    * aren't rendered.
    */
-  const [{ [RULE_TYPE_FIELD_NAME]: ruleType, [QUERY_BAR_FIELD_NAME]: currentQuery }] =
-    useFormData<DefineStepRule>({
-      form,
-      watch: [RULE_TYPE_FIELD_NAME, QUERY_BAR_FIELD_NAME],
-    });
+  const [{ ruleType, queryBar: currentQuery }] = useFormData<DefineStepRule>({
+    form,
+    watch: ['ruleType', 'queryBar'],
+  });
   const previousRuleType = usePrevious(ruleType);
   const queryRef = useRef<FieldValueQueryBar>(DEFAULT_KQL_QUERY_FIELD_VALUE);
   const eqlQueryRef = useRef<FieldValueQueryBar>(DEFAULT_EQL_QUERY_FIELD_VALUE);
@@ -107,7 +104,7 @@ export function usePersistentQuery({ form }: UsePersistentQueryParams): UsePersi
       return;
     }
 
-    const queryField = form.getFields()[QUERY_BAR_FIELD_NAME] as FieldHook<FieldValueQueryBar>;
+    const queryField = form.getFields().queryBar as FieldHook<FieldValueQueryBar>;
 
     if (isEqlRule(ruleType)) {
       queryField.reset({

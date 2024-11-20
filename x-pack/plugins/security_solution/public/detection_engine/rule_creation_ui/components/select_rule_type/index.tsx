@@ -23,8 +23,6 @@ import type { FieldHook } from '../../../../shared_imports';
 import * as i18n from './translations';
 import { MlCardDescription } from './ml_card_description';
 
-export * from './constants';
-
 interface SelectRuleTypeProps {
   describedByIds: string[];
   field: FieldHook;

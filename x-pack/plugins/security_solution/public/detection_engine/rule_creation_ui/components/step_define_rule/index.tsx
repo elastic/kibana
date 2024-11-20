@@ -38,8 +38,8 @@ import type {
 import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
 import { StepRuleDescription } from '../description_step';
 import type { QueryBarFieldProps } from '../query_bar_field';
-import { QUERY_BAR_FIELD_NAME, QueryBarField } from '../query_bar_field';
-import { RULE_TYPE_FIELD_NAME, SelectRuleType } from '../select_rule_type';
+import { QueryBarField } from '../query_bar_field';
+import { SelectRuleType } from '../select_rule_type';
 import { AnomalyThresholdSlider } from '../anomaly_threshold_slider';
 import { MlJobSelect } from '../../../rule_creation/components/ml_job_select';
 import { PickTimeline } from '../../../rule_creation/components/pick_timeline';
@@ -168,11 +168,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   threatIndicesConfig,
   thresholdFields,
 }) => {
-  const [{ ruleType, [QUERY_BAR_FIELD_NAME]: queryBar, machineLearningJobId }] =
-    useFormData<DefineStepRule>({
-      form,
-      watch: [RULE_TYPE_FIELD_NAME, QUERY_BAR_FIELD_NAME, 'machineLearningJobId'],
-    });
+  const [{ ruleType, queryBar, machineLearningJobId }] = useFormData<DefineStepRule>({
+    form,
+    watch: ['ruleType', 'queryBar', 'machineLearningJobId'],
+  });
 
   const { isSuppressionEnabled: isAlertSuppressionEnabled } = useAlertSuppression(ruleType);
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
@@ -198,7 +197,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const { getFields, reset, setFieldValue } = form;
 
   const setRuleTypeCallback = useSetFieldValueWithCallback({
-    field: RULE_TYPE_FIELD_NAME,
+    field: 'ruleType',
     value: ruleType,
     setFieldValue,
   });
@@ -207,7 +206,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     ({ index: timelineIndex, queryBar: timelineQueryBar, eqlOptions }) => {
       const setQuery = () => {
         setFieldValue('index', timelineIndex);
-        setFieldValue(QUERY_BAR_FIELD_NAME, timelineQueryBar);
+        setFieldValue('queryBar', timelineQueryBar);
       };
       if (timelineQueryBar.query.language === 'eql') {
         setPersistentEqlQuery(timelineQueryBar);

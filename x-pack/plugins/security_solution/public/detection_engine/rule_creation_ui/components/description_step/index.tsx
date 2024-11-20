@@ -73,8 +73,6 @@ import {
 } from '../../../rule_creation/components/alert_suppression_edit';
 import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../rule_creation/components/threshold_alert_suppression_edit';
 import type { FieldValueQueryBar } from '../query_bar_field';
-import { QUERY_BAR_FIELD_NAME } from '../query_bar_field';
-import { RULE_TYPE_FIELD_NAME } from '../select_rule_type';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
   max-width: 600px;
@@ -208,13 +206,13 @@ export const getDescriptionItem = (
   license: LicenseService,
   indexPatterns?: DataViewBase
 ): ListItems[] => {
-  if (field === QUERY_BAR_FIELD_NAME) {
-    const queryBar = get(QUERY_BAR_FIELD_NAME, data) as FieldValueQueryBar;
+  if (field === 'queryBar') {
+    const queryBar = get('queryBar', data) as FieldValueQueryBar;
     const filters = addFilterStateIfNotThere(queryBar.filters);
     const query = queryBar.query.query as string;
     const savedId = queryBar.saved_id ?? '';
     const savedQueryName = queryBar.title;
-    const ruleType: Type = get(RULE_TYPE_FIELD_NAME, data) as Type;
+    const ruleType: Type = get('ruleType', data) as Type;
     const queryLabel = getQueryLabel(ruleType);
     return buildQueryBarDescription({
       field,
@@ -229,7 +227,7 @@ export const getDescriptionItem = (
   } else if (field === 'responseActions') {
     return [];
   } else if (field === ALERT_SUPPRESSION_FIELDS_FIELD_NAME) {
-    const ruleType: Type = get(RULE_TYPE_FIELD_NAME, data);
+    const ruleType: Type = get('ruleType', data);
 
     const ruleCanHaveGroupByFields = isSuppressionRuleConfiguredWithGroupBy(ruleType);
     if (!ruleCanHaveGroupByFields) {
@@ -240,7 +238,7 @@ export const getDescriptionItem = (
   } else if (field === ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME) {
     return [];
   } else if (field === ALERT_SUPPRESSION_DURATION_FIELD_NAME) {
-    const ruleType: Type = get(RULE_TYPE_FIELD_NAME, data);
+    const ruleType: Type = get('ruleType', data);
 
     const ruleCanHaveDuration = isSuppressionRuleConfiguredWithDuration(ruleType);
     if (!ruleCanHaveDuration) {
@@ -265,7 +263,7 @@ export const getDescriptionItem = (
       return [];
     }
   } else if (field === ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME) {
-    const ruleType: Type = get(RULE_TYPE_FIELD_NAME, data);
+    const ruleType: Type = get('ruleType', data);
     const ruleCanHaveSuppressionMissingFields =
       isSuppressionRuleConfiguredWithMissingFields(ruleType);
 
@@ -322,7 +320,7 @@ export const getDescriptionItem = (
   } else if (field === 'setup') {
     const val: string = get(field, data);
     return buildSetupDescription(label, val);
-  } else if (field === RULE_TYPE_FIELD_NAME) {
+  } else if (field === 'ruleType') {
     const ruleType: Type = get(field, data);
     return buildRuleTypeDescription(label, ruleType);
   } else if (field === 'kibanaSiemAppUrl') {
