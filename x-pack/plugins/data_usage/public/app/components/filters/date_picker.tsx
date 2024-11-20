@@ -50,16 +50,23 @@ export const UsageMetricsDateRangePicker = memo<UsageMetricsDateRangePickerProps
     const kibana = useKibana<IUnifiedSearchPluginServices>();
     const { uiSettings } = kibana.services;
     const [commonlyUsedRanges] = useState(() => {
-      return (
-        uiSettings
-          ?.get(UI_SETTINGS.TIMEPICKER_QUICK_RANGES)
-          ?.map(({ from, to, display }: { from: string; to: string; display: string }) => {
-            return {
+      const _commonlyUsedRanges: Array<{ from: string; to: string; display: string }> =
+        uiSettings.get(UI_SETTINGS.TIMEPICKER_QUICK_RANGES);
+      if (!_commonlyUsedRanges) {
+        return [];
+      }
+      return _commonlyUsedRanges.reduce<DurationRange[]>(
+        (acc, { from, to, display }: { from: string; to: string; display: string }) => {
+          if (!['now-30d/d', 'now-90d/d', 'now-1y/d'].includes(from)) {
+            acc.push({
               start: from,
               end: to,
               label: display,
-            };
-          }) ?? []
+            });
+          }
+          return acc;
+        },
+        []
       );
     });
 
