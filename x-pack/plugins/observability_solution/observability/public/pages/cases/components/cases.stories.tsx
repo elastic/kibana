@@ -28,6 +28,8 @@ const defaultProps: CasesProps = {
     update: true,
     connectors: true,
     settings: true,
+    reopenCase: true,
+    createComment: true,
   },
 };
 
@@ -45,5 +47,7 @@ CasesPageWithNoPermissions.args = {
     update: false,
     connectors: false,
     settings: false,
+    reopenCase: false,
+    createComment: false,
   },
 };
