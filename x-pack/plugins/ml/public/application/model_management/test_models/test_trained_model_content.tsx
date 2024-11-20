@@ -13,13 +13,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiSelect, EuiSpacer, EuiTab, EuiTabs, useEuiPaddingSize } from '@elastic/eui';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SelectedModel } from './selected_model';
-import { isNLPModelItem, type ExistingModelBaseWithStats } from '../models_list';
+import { isNLPModelItem, type TrainedModelItem } from '../models_list';
 import { INPUT_TYPE } from './models/inference_base';
 import { useTestTrainedModelsContext } from './test_trained_models_context';
 import { type InferecePipelineCreationState } from '../create_pipeline_for_model/state';
 
 interface ContentProps {
-  model: ExistingModelBaseWithStats;
+  model: TrainedModelItem;
   handlePipelineConfigUpdate?: (configUpdate: Partial<InferecePipelineCreationState>) => void;
   externalPipelineConfig?: estypes.IngestPipeline;
 }

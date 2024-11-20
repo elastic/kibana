@@ -11,11 +11,11 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiSpacer, EuiTitle } from '@elastic/eui';
 
-import { type ExistingModelBaseWithStats } from '../models_list';
+import { type TrainedModelItem } from '../models_list';
 import { TestTrainedModelContent } from './test_trained_model_content';
 
 interface Props {
-  model: ExistingModelBaseWithStats;
+  model: TrainedModelItem;
   onClose: () => void;
 }
 export const TestTrainedModelFlyout: FC<Props> = ({ model, onClose }) => (

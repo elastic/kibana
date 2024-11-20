@@ -8,7 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IngestInferenceProcessor } from '@elastic/elasticsearch/lib/api/types';
 import { getDefaultOnFailureConfiguration } from '../../components/ml_inference/state';
-import type { ModelItem } from '../models_list';
+import type { DFAModelItem } from '../models_list';
 
 export interface InferecePipelineCreationState {
   creatingPipeline: boolean;
@@ -26,7 +26,7 @@ export interface InferecePipelineCreationState {
 }
 
 export const getInitialState = (
-  model: ModelItem,
+  model: DFAModelItem,
   initialPipelineConfig: estypes.IngestPipeline | undefined
 ): InferecePipelineCreationState => ({
   creatingPipeline: false,

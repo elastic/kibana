@@ -18,13 +18,13 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useMlKibana } from '../../contexts/kibana';
-import type { ExistingModelBaseWithStats } from '../models_list';
+import type { TrainedModelItem } from '../models_list';
 import { ProcessorsStats } from './expanded_row';
 
-export type IngestStatsResponse = Exclude<ExistingModelBaseWithStats['stats'], undefined>['ingest'];
+export type IngestStatsResponse = Exclude<TrainedModelItem['stats'], undefined>['ingest'];
 
 interface ModelPipelinesProps {
-  pipelines: ExistingModelBaseWithStats['pipelines'];
+  pipelines: TrainedModelItem['pipelines'];
   ingestStats: IngestStatsResponse;
 }
 

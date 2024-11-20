@@ -11,11 +11,16 @@ import {
   SUPPORTED_PYTORCH_TASKS,
   type SupportedPytorchTasksType,
 } from '@kbn/ml-trained-models-utils';
-import { type ModelItem, isDFAModelItem, isNLPModelItem, isExistingModel } from '../models_list';
+import {
+  type TrainedModelUIItem,
+  isDFAModelItem,
+  isNLPModelItem,
+  isExistingModel,
+} from '../models_list';
 
 const PYTORCH_TYPES = Object.values(SUPPORTED_PYTORCH_TASKS);
 
-export function isTestable(modelItem: ModelItem, checkForState = false) {
+export function isTestable(modelItem: TrainedModelUIItem, checkForState = false) {
   if (
     isNLPModelItem(modelItem) &&
     PYTORCH_TYPES.includes(

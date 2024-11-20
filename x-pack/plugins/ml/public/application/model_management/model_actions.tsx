@@ -25,14 +25,14 @@ import { getUserInputModelDeploymentParamsProvider } from './deployment_setup';
 import { useMlKibana, useMlLocator, useNavigateToPath } from '../contexts/kibana';
 import { ML_PAGES } from '../../../common/constants/locator';
 import { isTestable } from './test_models';
-import type { DFAModelItem, ExistingModelBaseWithStats, NLPModelItem } from './models_list';
+import type { DFAModelItem, TrainedModelItem, NLPModelItem } from './models_list';
 import {
   isBuiltInModel,
   isDFAModelItem,
   isExistingModel,
   isModelDownloadItem,
   isNLPModelItem,
-  type ModelItem,
+  type TrainedModelUIItem,
 } from './models_list';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
 import { useCloudCheck } from '../components/node_available_warning/hooks';
@@ -50,14 +50,14 @@ export function useModelActions({
 }: {
   isLoading: boolean;
   onDfaTestAction: (model: DFAModelItem) => void;
-  onTestAction: (model: ExistingModelBaseWithStats) => void;
-  onModelsDeleteRequest: (models: ModelItem[]) => void;
+  onTestAction: (model: TrainedModelItem) => void;
+  onModelsDeleteRequest: (models: TrainedModelUIItem[]) => void;
   onModelDeployRequest: (model: DFAModelItem) => void;
   onModelDownloadRequest: (modelId: string) => void;
   onLoading: (isLoading: boolean) => void;
   fetchModels: () => Promise<void>;
   modelAndDeploymentIds: string[];
-}): Array<Action<ModelItem>> {
+}): Array<Action<TrainedModelUIItem>> {
   const isMobileLayout = useIsWithinMaxBreakpoint('l');
   const isMounted = useMountedState();
 
@@ -133,7 +133,7 @@ export function useModelActions({
     [overlays, startServices, startModelDeploymentDocUrl, cloudInfo, showNodeInfo, nlpSettings]
   );
 
-  return useMemo<Array<Action<ModelItem>>>(
+  return useMemo<Array<Action<TrainedModelUIItem>>>(
     () => [
       {
         name: i18n.translate('xpack.ml.trainedModels.modelsList.viewTrainingDataNameActionLabel', {
@@ -494,7 +494,7 @@ export function useModelActions({
             </>
           );
         },
-        description: (model: ModelItem) => {
+        description: (model: TrainedModelUIItem) => {
           if (isModelDownloadItem(model) && model.state === MODEL_STATE.DOWNLOADING) {
             return i18n.translate('xpack.ml.trainedModels.modelsList.cancelDownloadActionLabel', {
               defaultMessage: 'Cancel download',

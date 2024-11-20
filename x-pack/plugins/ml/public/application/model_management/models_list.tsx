@@ -93,14 +93,16 @@ interface BaseNLPModelItem extends BaseModelItem {
   downloadState?: ModelDownloadState;
 }
 
+/** Model available for download */
 export type ModelDownloadItem = BaseNLPModelItem &
   Omit<ModelDefinitionResponse, 'version' | 'config'> & {
     putModelConfig?: object;
     softwareLicense?: string;
   };
 
+/** Trained NLP model, i.e. pytorch model returned by the trained_models API */
 export type NLPModelItem = BaseNLPModelItem &
-  ExistingModelBaseWithStats & {
+  TrainedModelItem & {
     stats?: Stats & { deployment_stats: TrainedModelDeploymentStatsResponse[] };
     /**
      * Description of the current model state
@@ -112,7 +114,8 @@ export type NLPModelItem = BaseNLPModelItem &
     deployment_ids: string[];
   };
 
-export type DFAModelItem = ExistingModelBaseWithStats & {
+/** Trained DFA model */
+export type DFAModelItem = TrainedModelItem & {
   origin_job_exists?: boolean;
 };
 
@@ -126,10 +129,10 @@ export function isNLPModelItem(item: unknown): item is NLPModelItem {
 
 type ExistingModelBase = TrainedModelConfigResponse & BaseModelItem;
 
-// We always fetch stats before rendering the model list
-export type ExistingModelBaseWithStats = ExistingModelBase & { stats: Stats };
+/** Any model returned by the trained_models API, e.g. lang_ident, elser, dfa model */
+export type TrainedModelItem = ExistingModelBase & { stats: Stats };
 
-export function isExistingModel(item: unknown): item is ExistingModelBaseWithStats {
+export function isExistingModel(item: unknown): item is TrainedModelItem {
   return (
     typeof item === 'object' &&
     item !== null &&
@@ -143,11 +146,11 @@ export function isDFAModelItem(item: unknown): item is DFAModelItem {
   return isExistingModel(item) && item.model_type === TRAINED_MODEL_TYPE.TREE_ENSEMBLE;
 }
 
-export function isModelDownloadItem(item: ModelItem): item is ModelDownloadItem {
+export function isModelDownloadItem(item: TrainedModelUIItem): item is ModelDownloadItem {
   return 'putModelConfig' in item && !!item.type?.includes(TRAINED_MODEL_TYPE.PYTORCH);
 }
 
-export const isBuiltInModel = (item: ModelItem) => item.tags.includes(BUILT_IN_MODEL_TAG);
+export const isBuiltInModel = (item: TrainedModelUIItem) => item.tags.includes(BUILT_IN_MODEL_TAG);
 
 /**
  * This type represents a union of different model entities:
@@ -156,11 +159,7 @@ export const isBuiltInModel = (item: ModelItem) => item.tags.includes(BUILT_IN_M
  * - NLP models already downloaded into Elasticsearch
  * - DFA models
  */
-export type ModelItem =
-  | ExistingModelBaseWithStats
-  | ModelDownloadItem
-  | NLPModelItem
-  | DFAModelItem;
+export type TrainedModelUIItem = TrainedModelItem | ModelDownloadItem | NLPModelItem | DFAModelItem;
 
 interface PageUrlState {
   pageKey: typeof ML_PAGES.TRAINED_MODELS_MANAGE;
@@ -242,19 +241,19 @@ export const ModelsList: FC<Props> = ({
 
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [items, setItems] = useState<ModelItem[]>([]);
-  const [selectedModels, setSelectedModels] = useState<ModelItem[]>([]);
-  const [modelsToDelete, setModelsToDelete] = useState<ModelItem[]>([]);
+  const [items, setItems] = useState<TrainedModelUIItem[]>([]);
+  const [selectedModels, setSelectedModels] = useState<TrainedModelUIItem[]>([]);
+  const [modelsToDelete, setModelsToDelete] = useState<TrainedModelUIItem[]>([]);
   const [modelToDeploy, setModelToDeploy] = useState<DFAModelItem | undefined>();
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
     {}
   );
-  const [modelToTest, setModelToTest] = useState<ExistingModelBaseWithStats | null>(null);
+  const [modelToTest, setModelToTest] = useState<TrainedModelItem | null>(null);
   const [dfaModelToTest, setDfaModelToTest] = useState<DFAModelItem | null>(null);
   const [isAddModelFlyoutVisible, setIsAddModelFlyoutVisible] = useState(false);
 
   const isElasticModel = useCallback(
-    (item: ModelItem) => item.tags.includes(ELASTIC_MODEL_TAG),
+    (item: TrainedModelUIItem) => item.tags.includes(ELASTIC_MODEL_TAG),
     []
   );
 
@@ -279,11 +278,11 @@ export const ModelsList: FC<Props> = ({
         with_indices: false,
       });
 
-      const newItems: ModelItem[] = [];
+      const newItems: TrainedModelUIItem[] = [];
       const expandedItemsToRefresh = [];
 
       for (const model of response) {
-        const tableItem: ModelItem = {
+        const tableItem: TrainedModelUIItem = {
           ...model,
           // Extract model types
           ...(typeof model.inference_config === 'object'
@@ -291,12 +290,12 @@ export const ModelsList: FC<Props> = ({
                 type: [
                   model.model_type,
                   ...Object.keys(model.inference_config),
-                  ...(isBuiltInModel(model as ModelItem) ? [BUILT_IN_MODEL_TYPE] : []),
-                  ...(isElasticModel(model as ModelItem) ? [ELASTIC_MODEL_TYPE] : []),
+                  ...(isBuiltInModel(model as TrainedModelUIItem) ? [BUILT_IN_MODEL_TYPE] : []),
+                  ...(isElasticModel(model as TrainedModelUIItem) ? [ELASTIC_MODEL_TYPE] : []),
                 ],
               }
             : {}),
-        } as ModelItem;
+        } as TrainedModelUIItem;
         newItems.push(tableItem);
 
         if (itemIdToExpandedRowMap[model.model_id]) {
@@ -311,7 +310,7 @@ export const ModelsList: FC<Props> = ({
       let resultItems = newItems;
       // don't add any of the built-in models (e.g. elser) if NLP is disabled
       if (isNLPEnabled) {
-        const idMap = new Map<string, ModelItem>(
+        const idMap = new Map<string, TrainedModelUIItem>(
           resultItems.map((model) => [model.model_id, model])
         );
         /**
@@ -319,7 +318,7 @@ export const ModelsList: FC<Props> = ({
          */
         const forDownload = await getTrainedModelDownloads();
 
-        const notDownloaded: ModelItem[] = forDownload
+        const notDownloaded: TrainedModelUIItem[] = forDownload
           .filter(({ model_id: modelId, hidden, recommended, supported, disclaimer }) => {
             if (idMap.has(modelId)) {
               const model = idMap.get(modelId)! as NLPModelItem;
@@ -374,7 +373,7 @@ export const ModelsList: FC<Props> = ({
         return Object.fromEntries(
           Object.keys(prev).map((modelId) => {
             const item = resultItems.find((i) => i.model_id === modelId);
-            return item ? [modelId, <ExpandedRow item={item as ExistingModelBaseWithStats} />] : [];
+            return item ? [modelId, <ExpandedRow item={item as TrainedModelItem} />] : [];
           })
         );
       });
@@ -433,7 +432,7 @@ export const ModelsList: FC<Props> = ({
 
           const isNlpModel = isNLPModelItem(model);
 
-          (model as ExistingModelBaseWithStats).stats = {
+          (model as TrainedModelItem).stats = {
             // ...(model.stats ?? {}),
             ...modelStats[0],
             ...(isNlpModel
@@ -609,23 +608,21 @@ export const ModelsList: FC<Props> = ({
     onModelDownloadRequest,
   });
 
-  const toggleDetails = async (item: ModelItem) => {
+  const toggleDetails = async (item: TrainedModelUIItem) => {
     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
     if (itemIdToExpandedRowMapValues[item.model_id]) {
       delete itemIdToExpandedRowMapValues[item.model_id];
     } else {
-      itemIdToExpandedRowMapValues[item.model_id] = (
-        <ExpandedRow item={item as ExistingModelBaseWithStats} />
-      );
+      itemIdToExpandedRowMapValues[item.model_id] = <ExpandedRow item={item as TrainedModelItem} />;
     }
     setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
   };
 
-  const columns: Array<EuiBasicTableColumn<ModelItem>> = [
+  const columns: Array<EuiBasicTableColumn<TrainedModelUIItem>> = [
     {
       isExpander: true,
       align: 'center',
-      render: (item: ModelItem) => {
+      render: (item: TrainedModelUIItem) => {
         if (isModelDownloadItem(item) || !item.stats) {
           return null;
         }
@@ -649,11 +646,11 @@ export const ModelsList: FC<Props> = ({
     },
     {
       name: modelIdColumnName,
-      sortable: ({ model_id: modelId }: ModelItem) => modelId,
+      sortable: ({ model_id: modelId }: TrainedModelUIItem) => modelId,
       truncateText: false,
       textOnly: false,
       'data-test-subj': 'mlModelsTableColumnId',
-      render: (item: ModelItem) => {
+      render: (item: TrainedModelUIItem) => {
         const { description, model_id: modelId, type } = item;
 
         const isTechPreview = description?.includes('(Tech Preview)');
@@ -736,7 +733,7 @@ export const ModelsList: FC<Props> = ({
       }),
       truncateText: false,
       width: '150px',
-      render: (item: ModelItem) => {
+      render: (item: TrainedModelUIItem) => {
         if (isDFAModelItem(item)) return null;
 
         const { state, downloadState } = item;
@@ -839,7 +836,7 @@ export const ModelsList: FC<Props> = ({
 
   const isSelectionAllowed = canDeleteTrainedModels;
 
-  const selection: EuiTableSelectionType<ModelItem> | undefined = isSelectionAllowed
+  const selection: EuiTableSelectionType<TrainedModelUIItem> | undefined = isSelectionAllowed
     ? {
         selectableMessage: (selectable, item) => {
           if (selectable) {
@@ -868,7 +865,7 @@ export const ModelsList: FC<Props> = ({
       }
     : undefined;
 
-  const { onTableChange, pagination, sorting } = useTableSettings<ModelItem>(
+  const { onTableChange, pagination, sorting } = useTableSettings<TrainedModelUIItem>(
     items.length,
     pageState,
     updatePageState,
@@ -956,7 +953,7 @@ export const ModelsList: FC<Props> = ({
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <div data-test-subj="mlModelsTableContainer">
-        <EuiInMemoryTable<ModelItem>
+        <EuiInMemoryTable<TrainedModelUIItem>
           tableLayout={'auto'}
           responsiveBreakpoint={'xl'}
           allowNeutralSort={false}
