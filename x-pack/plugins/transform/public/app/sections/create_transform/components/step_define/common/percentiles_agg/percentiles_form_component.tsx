@@ -9,31 +9,13 @@ import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
-import type { IPivotAggsConfigPercentiles, ValidationResultErrorType } from './types';
-
-const ERROR_MESSAGES: Record<ValidationResultErrorType, string> = {
-  INVALID_FORMAT: i18n.translate('xpack.transform.agg.popoverForm.invalidFormatError', {
-    defaultMessage: 'Percentile must be a valid number',
-  }),
-  PERCENTILE_OUT_OF_RANGE: i18n.translate(
-    'xpack.transform.agg.popoverForm.percentileOutOfRangeError',
-    {
-      defaultMessage: 'Percentiles must be between 0 and 100',
-    }
-  ),
-  NUMBER_TOO_PRECISE: i18n.translate('xpack.transform.agg.popoverForm.numberTooPreciseError', {
-    defaultMessage: 'Value is too precise',
-  }),
-  DUPLICATE_VALUE: i18n.translate('xpack.transform.agg.popoverForm.duplicateValueError', {
-    defaultMessage: 'Value already exists',
-  }),
-};
+import type { IPivotAggsConfigPercentiles } from './types';
 
 export const PercentilesAggForm: IPivotAggsConfigPercentiles['AggFormComponent'] = ({
   aggConfig,
   onChange,
   isValid,
-  errorMessageType,
+  errorMessages,
 }) => {
   const selectedOptions = useMemo(
     () => aggConfig.percents?.map((p) => ({ label: p.toString() })) ?? [],
@@ -79,11 +61,10 @@ export const PercentilesAggForm: IPivotAggsConfigPercentiles['AggFormComponent']
     [aggConfig, onChange, isValid]
   );
 
-  const getErrorMessage = () => {
-    if (!isValid && errorMessageType) {
-      return ERROR_MESSAGES[errorMessageType];
-    }
-  };
+  // Get the last error message if there are any
+  const lastErrorMessage = errorMessages?.length
+    ? errorMessages[errorMessages.length - 1]
+    : undefined;
 
   return (
     <>
@@ -91,7 +72,7 @@ export const PercentilesAggForm: IPivotAggsConfigPercentiles['AggFormComponent']
         label={i18n.translate('xpack.transform.agg.popoverForm.percentsLabel', {
           defaultMessage: 'Percents',
         })}
-        error={getErrorMessage()}
+        error={lastErrorMessage}
         isInvalid={!isValid}
       >
         <EuiComboBox

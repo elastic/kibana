@@ -5,8 +5,14 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { PercentilesAggForm } from './percentiles_form_component';
-import type { IPivotAggsConfigPercentiles, PercentilesAggConfig, ValidationResult } from './types';
+import type {
+  IPivotAggsConfigPercentiles,
+  PercentilesAggConfig,
+  ValidationResult,
+  ValidationResultErrorType,
+} from './types';
 import type { PivotAggsConfigBase } from '../../../../../../common';
 import {
   isPivotAggsConfigWithUiBase,
@@ -16,6 +22,7 @@ import type { PivotAggsConfigWithUiBase } from '../../../../../../common/pivot_a
 
 function validatePercentsInput(config: Partial<PercentilesAggConfig>): ValidationResult {
   const allValues = [...(config.percents ?? [])];
+  const errors: ValidationResultErrorType[] = [];
   // Combine existing percents with pending input for validation
   if (config.pendingPercentileInput) {
     // Replace comma with dot before converting to number
@@ -23,17 +30,11 @@ function validatePercentsInput(config: Partial<PercentilesAggConfig>): Validatio
     const pendingValue = Number(normalizedInput);
 
     if (allValues.includes(pendingValue)) {
-      return {
-        isValid: false,
-        errorType: 'DUPLICATE_VALUE',
-      };
+      errors.push('DUPLICATE_VALUE');
     }
 
     if (normalizedInput.replace('.', '').length > 17) {
-      return {
-        isValid: false,
-        errorType: 'NUMBER_TOO_PRECISE',
-      };
+      errors.push('NUMBER_TOO_PRECISE');
     }
 
     allValues.push(pendingValue);
@@ -42,23 +43,21 @@ function validatePercentsInput(config: Partial<PercentilesAggConfig>): Validatio
   if (allValues.length === 0) {
     return {
       isValid: false,
+      errors: [],
     };
   }
 
   if (allValues.some((value) => isNaN(value))) {
-    return {
-      isValid: false,
-      errorType: 'INVALID_FORMAT',
-    };
+    errors.push('INVALID_FORMAT');
   }
   if (allValues.some((value) => value < 0 || value > 100)) {
-    return {
-      isValid: false,
-      errorType: 'PERCENTILE_OUT_OF_RANGE',
-    };
+    errors.push('PERCENTILE_OUT_OF_RANGE');
   }
 
-  return { isValid: true };
+  return {
+    isValid: errors.length === 0,
+    errors: errors.length > 0 ? errors : undefined,
+  };
 }
 
 export function getPercentilesAggConfig(
@@ -93,8 +92,31 @@ export function getPercentilesAggConfig(
     },
     isValid() {
       const validationResult = validatePercentsInput(this.aggConfig);
-      this.errorMessageType = validationResult.errorType;
+      this.aggConfig.errors = validationResult.errors;
       return validationResult.isValid;
+    },
+    getErrorMessages() {
+      if (!this.aggConfig.errors?.length) return;
+
+      return this.aggConfig.errors.map((error) => ERROR_MESSAGES[error]);
     },
   };
 }
+
+const ERROR_MESSAGES: Record<ValidationResultErrorType, string> = {
+  INVALID_FORMAT: i18n.translate('xpack.transform.agg.popoverForm.invalidFormatError', {
+    defaultMessage: 'Percentile must be a valid number',
+  }),
+  PERCENTILE_OUT_OF_RANGE: i18n.translate(
+    'xpack.transform.agg.popoverForm.percentileOutOfRangeError',
+    {
+      defaultMessage: 'Percentiles must be between 0 and 100',
+    }
+  ),
+  NUMBER_TOO_PRECISE: i18n.translate('xpack.transform.agg.popoverForm.numberTooPreciseError', {
+    defaultMessage: 'Value is too precise',
+  }),
+  DUPLICATE_VALUE: i18n.translate('xpack.transform.agg.popoverForm.duplicateValueError', {
+    defaultMessage: 'Value already exists',
+  }),
+};

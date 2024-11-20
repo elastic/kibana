@@ -8,9 +8,9 @@
 import type { PivotAggsConfigWithExtra } from '../../../../../../common/pivot_aggs';
 
 export interface PercentilesAggConfig {
-  /** Comma separated list */
   percents: number[];
   pendingPercentileInput?: string;
+  errors?: ValidationResultErrorType[];
 }
 
 export type ValidationResultErrorType =
@@ -21,11 +21,10 @@ export type ValidationResultErrorType =
 
 export type IPivotAggsConfigPercentiles = PivotAggsConfigWithExtra<
   PercentilesAggConfig,
-  { field: string; percents: number[] },
-  ValidationResultErrorType
+  { field: string; percents: number[] }
 >;
 
 export interface ValidationResult {
   isValid: boolean;
-  errorType?: ValidationResultErrorType;
+  errors?: ValidationResultErrorType[];
 }

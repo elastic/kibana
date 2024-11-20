@@ -217,7 +217,7 @@ export interface PivotAggsConfigWithUiBase extends PivotAggsConfigBase {
   field: EsFieldName | EsFieldName[] | null;
 }
 
-export interface PivotAggsConfigWithExtra<T, ESConfig extends { [key: string]: any }, V = never>
+export interface PivotAggsConfigWithExtra<T, ESConfig extends { [key: string]: any }>
   extends PivotAggsConfigWithUiBase {
   /** Form component */
   AggFormComponent: FC<{
@@ -225,7 +225,7 @@ export interface PivotAggsConfigWithExtra<T, ESConfig extends { [key: string]: a
     onChange: (arg: Partial<T>) => void;
     selectedField: string;
     isValid?: boolean;
-    errorMessageType?: V;
+    errorMessages?: string[];
   }>;
   /** Aggregation specific configuration */
   aggConfig: Partial<T>;
@@ -239,8 +239,8 @@ export interface PivotAggsConfigWithExtra<T, ESConfig extends { [key: string]: a
   getAggName?: () => string | undefined;
   /** Helper text for the aggregation reflecting some configuration info */
   helperText?: () => string | undefined;
-  /** Provides error message type */
-  errorMessageType?: V | undefined;
+  /** Returns validation error messages */
+  getErrorMessages?: () => string[] | undefined;
 }
 
 interface PivotAggsConfigPercentiles extends PivotAggsConfigWithUiBase {
