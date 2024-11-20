@@ -12381,6 +12381,8 @@ paths:
                               nullable: true
                             agent_limits_go_max_procs:
                               nullable: true
+                            agent_logging_files_interval:
+                              nullable: true
                             agent_logging_files_keepfiles:
                               nullable: true
                             agent_logging_files_rotateeverybytes:
@@ -12908,6 +12910,8 @@ paths:
                       nullable: true
                     agent_limits_go_max_procs:
                       nullable: true
+                    agent_logging_files_interval:
+                      nullable: true
                     agent_logging_files_keepfiles:
                       nullable: true
                     agent_logging_files_rotateeverybytes:
@@ -13084,6 +13088,8 @@ paths:
                           agent_download_timeout:
                             nullable: true
                           agent_limits_go_max_procs:
+                            nullable: true
+                          agent_logging_files_interval:
                             nullable: true
                           agent_logging_files_keepfiles:
                             nullable: true
@@ -13631,6 +13637,8 @@ paths:
                               nullable: true
                             agent_limits_go_max_procs:
                               nullable: true
+                            agent_logging_files_interval:
+                              nullable: true
                             agent_logging_files_keepfiles:
                               nullable: true
                             agent_logging_files_rotateeverybytes:
@@ -14156,6 +14164,8 @@ paths:
                           agent_download_timeout:
                             nullable: true
                           agent_limits_go_max_procs:
+                            nullable: true
+                          agent_logging_files_interval:
                             nullable: true
                           agent_logging_files_keepfiles:
                             nullable: true
@@ -14683,6 +14693,8 @@ paths:
                       nullable: true
                     agent_limits_go_max_procs:
                       nullable: true
+                    agent_logging_files_interval:
+                      nullable: true
                     agent_logging_files_keepfiles:
                       nullable: true
                     agent_logging_files_rotateeverybytes:
@@ -14859,6 +14871,8 @@ paths:
                           agent_download_timeout:
                             nullable: true
                           agent_limits_go_max_procs:
+                            nullable: true
+                          agent_logging_files_interval:
                             nullable: true
                           agent_logging_files_keepfiles:
                             nullable: true
@@ -15405,6 +15419,8 @@ paths:
                           agent_download_timeout:
                             nullable: true
                           agent_limits_go_max_procs:
+                            nullable: true
+                          agent_logging_files_interval:
                             nullable: true
                           agent_logging_files_keepfiles:
                             nullable: true
@@ -16040,6 +16056,8 @@ paths:
                                     additionalProperties: false
                                     type: object
                                     properties:
+                                      interval:
+                                        type: string
                                       keepfiles:
                                         type: number
                                       rotateeverybytes:
