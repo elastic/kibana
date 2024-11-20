@@ -14,3 +14,11 @@ export type Stored<T extends object> = T & { _id: string };
 
 export type StoredRuleMigration = Stored<RuleMigration>;
 export type StoredRuleMigrationResource = Stored<RuleMigrationResource>;
+
+export interface Integration {
+  title: string;
+  _id: string;
+  description: string;
+  data_streams: Array<{ dataset: string; title: string; index_pattern: string }>;
+  elser_embedding: string;
+}

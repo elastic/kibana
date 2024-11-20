@@ -47,3 +47,18 @@ export const ruleMigrationResourcesFieldMap: FieldMap<SchemaFieldMapKeys<RuleMig
   updated_at: { type: 'date', required: false },
   updated_by: { type: 'keyword', required: false },
 };
+
+export const integrationsFieldMap: FieldMap = {
+  '@timestamp': { type: 'date', required: true },
+  title: { type: 'text', required: true },
+  description: { type: 'text', required: true },
+  data_streams: { type: 'nested', array: true, required: true },
+  'data_streams.dataset': { type: 'keyword', required: true },
+  'data_streams.title': { type: 'text', required: true },
+  'data_streams.index_pattern': { type: 'keyword', required: true },
+  elser_embeddings: {
+    type: 'semantic_text',
+    required: true,
+    inference_id: '.elser-2-elasticsearch',
+  },
+};

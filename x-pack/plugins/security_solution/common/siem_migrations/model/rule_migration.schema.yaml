@@ -73,6 +73,16 @@ components:
         prebuilt_rule_id:
           type: string
           description: The Elastic prebuilt rule id matched.
+        integration_ids:
+          type: array
+          items:
+            type: string
+          description: The Elastic integration IDs related to the rule.
+        index_patterns:
+          type: array
+          items:
+            type: string
+          description: The index patterns used by the integrations related to the rule.
         id:
           type: string
           description: The Elastic rule id installed as a result.

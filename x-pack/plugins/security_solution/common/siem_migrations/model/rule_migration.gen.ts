@@ -84,6 +84,14 @@ export const ElasticRule = z.object({
    */
   prebuilt_rule_id: z.string().optional(),
   /**
+   * The Elastic integration IDs related to the rule.
+   */
+  integration_ids: z.array(z.string()).optional(),
+  /**
+   * The index patterns used by the integrations related to the rule.
+   */
+  index_patterns: z.array(z.string()).optional(),
+  /**
    * The Elastic rule id installed as a result.
    */
   id: z.string().optional(),
