@@ -9522,15 +9522,20 @@ paths:
                             agent_download_target_directory:
                               nullable: true
                             agent_download_timeout:
-                              default: 2h
                               nullable: true
                             agent_limits_go_max_procs:
                               nullable: true
+                            agent_logging_files_interval:
+                              nullable: true
+                            agent_logging_files_keepfiles:
+                              nullable: true
+                            agent_logging_files_rotateeverybytes:
+                              nullable: true
                             agent_logging_level:
-                              default: info
                               nullable: true
                             agent_logging_metrics_period:
-                              default: 30s
+                              nullable: true
+                            agent_logging_to_files:
                               nullable: true
                         agent_features:
                           items:
@@ -10052,15 +10057,20 @@ paths:
                     agent_download_target_directory:
                       nullable: true
                     agent_download_timeout:
-                      default: 2h
                       nullable: true
                     agent_limits_go_max_procs:
                       nullable: true
+                    agent_logging_files_interval:
+                      nullable: true
+                    agent_logging_files_keepfiles:
+                      nullable: true
+                    agent_logging_files_rotateeverybytes:
+                      nullable: true
                     agent_logging_level:
-                      default: info
                       nullable: true
                     agent_logging_metrics_period:
-                      default: 30s
+                      nullable: true
+                    agent_logging_to_files:
                       nullable: true
                 agent_features:
                   items:
@@ -10226,15 +10236,20 @@ paths:
                           agent_download_target_directory:
                             nullable: true
                           agent_download_timeout:
-                            default: 2h
                             nullable: true
                           agent_limits_go_max_procs:
                             nullable: true
+                          agent_logging_files_interval:
+                            nullable: true
+                          agent_logging_files_keepfiles:
+                            nullable: true
+                          agent_logging_files_rotateeverybytes:
+                            nullable: true
                           agent_logging_level:
-                            default: info
                             nullable: true
                           agent_logging_metrics_period:
-                            default: 30s
+                            nullable: true
+                          agent_logging_to_files:
                             nullable: true
                       agent_features:
                         items:
@@ -10775,15 +10790,20 @@ paths:
                             agent_download_target_directory:
                               nullable: true
                             agent_download_timeout:
-                              default: 2h
                               nullable: true
                             agent_limits_go_max_procs:
                               nullable: true
+                            agent_logging_files_interval:
+                              nullable: true
+                            agent_logging_files_keepfiles:
+                              nullable: true
+                            agent_logging_files_rotateeverybytes:
+                              nullable: true
                             agent_logging_level:
-                              default: info
                               nullable: true
                             agent_logging_metrics_period:
-                              default: 30s
+                              nullable: true
+                            agent_logging_to_files:
                               nullable: true
                         agent_features:
                           items:
@@ -11304,15 +11324,20 @@ paths:
                           agent_download_target_directory:
                             nullable: true
                           agent_download_timeout:
-                            default: 2h
                             nullable: true
                           agent_limits_go_max_procs:
                             nullable: true
+                          agent_logging_files_interval:
+                            nullable: true
+                          agent_logging_files_keepfiles:
+                            nullable: true
+                          agent_logging_files_rotateeverybytes:
+                            nullable: true
                           agent_logging_level:
-                            default: info
                             nullable: true
                           agent_logging_metrics_period:
-                            default: 30s
+                            nullable: true
+                          agent_logging_to_files:
                             nullable: true
                       agent_features:
                         items:
@@ -11833,15 +11858,20 @@ paths:
                     agent_download_target_directory:
                       nullable: true
                     agent_download_timeout:
-                      default: 2h
                       nullable: true
                     agent_limits_go_max_procs:
                       nullable: true
+                    agent_logging_files_interval:
+                      nullable: true
+                    agent_logging_files_keepfiles:
+                      nullable: true
+                    agent_logging_files_rotateeverybytes:
+                      nullable: true
                     agent_logging_level:
-                      default: info
                       nullable: true
                     agent_logging_metrics_period:
-                      default: 30s
+                      nullable: true
+                    agent_logging_to_files:
                       nullable: true
                 agent_features:
                   items:
@@ -12007,15 +12037,20 @@ paths:
                           agent_download_target_directory:
                             nullable: true
                           agent_download_timeout:
-                            default: 2h
                             nullable: true
                           agent_limits_go_max_procs:
                             nullable: true
+                          agent_logging_files_interval:
+                            nullable: true
+                          agent_logging_files_keepfiles:
+                            nullable: true
+                          agent_logging_files_rotateeverybytes:
+                            nullable: true
                           agent_logging_level:
-                            default: info
                             nullable: true
                           agent_logging_metrics_period:
-                            default: 30s
+                            nullable: true
+                          agent_logging_to_files:
                             nullable: true
                       agent_features:
                         items:
@@ -12556,15 +12591,20 @@ paths:
                           agent_download_target_directory:
                             nullable: true
                           agent_download_timeout:
-                            default: 2h
                             nullable: true
                           agent_limits_go_max_procs:
                             nullable: true
+                          agent_logging_files_interval:
+                            nullable: true
+                          agent_logging_files_keepfiles:
+                            nullable: true
+                          agent_logging_files_rotateeverybytes:
+                            nullable: true
                           agent_logging_level:
-                            default: info
                             nullable: true
                           agent_logging_metrics_period:
-                            default: 30s
+                            nullable: true
+                          agent_logging_to_files:
                             nullable: true
                       agent_features:
                         items:
@@ -13183,6 +13223,30 @@ paths:
                                   required:
                                     - enabled
                                 type: object
+                              limits:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  go_max_procs:
+                                    type: number
+                              logging:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  files:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      interval:
+                                        type: string
+                                      keepfiles:
+                                        type: number
+                                      rotateeverybytes:
+                                        type: number
+                                  level:
+                                    type: string
+                                  to_files:
+                                    type: boolean
                               monitoring:
                                 additionalProperties: false
                                 type: object
