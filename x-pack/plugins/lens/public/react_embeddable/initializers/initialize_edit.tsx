@@ -178,11 +178,17 @@ export function initializeEditApi(
           );
           return navigateFn();
         }
+
+        // save the initial state in case it needs to revert later on
+        const firstState = getState();
+
         const rootEmbeddable = parentApi;
         const overlayTracker = tracksOverlays(rootEmbeddable) ? rootEmbeddable : undefined;
         const ConfigPanel = await openInlineEditor({
           onApply: (attributes: LensRuntimeState['attributes']) =>
             updateState({ ...getState(), attributes }),
+          // restore the first state found when the panel opened
+          onCancel: () => updateState({ ...firstState }),
         });
         if (ConfigPanel) {
           mountInlineEditPanel(ConfigPanel, startDependencies.coreStart, overlayTracker, uuid);
