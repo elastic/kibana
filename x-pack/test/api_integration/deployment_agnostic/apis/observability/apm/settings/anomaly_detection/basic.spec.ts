@@ -45,8 +45,6 @@ export default function apiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   describe('ML jobs return a 403 for', () => {
     describe('basic', function () {
-      this.tags('skipFIPS');
-
       it('read user', async () => {
         await expectForbidden(apmApiClient.readUser);
       });
