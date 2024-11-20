@@ -66,7 +66,8 @@ Sensitive properties, such as passwords, can also be stored in the
 [[managing-preconfigured-connectors]]
 === View preconfigured connectors
 
-When you open the main menu, click *{stack-manage-app} > {connectors-ui}*. 
+go to the *{connectors-ui}* page using the navigation menu or the 
+<<kibana-navigation-search,global search field>>. 
 Preconfigured connectors appear regardless of which space you are in.
 They are tagged as “preconfigured”, and you cannot delete them.
 

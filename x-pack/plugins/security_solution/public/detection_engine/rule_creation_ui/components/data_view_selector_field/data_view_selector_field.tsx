@@ -11,7 +11,7 @@ import { EuiCallOut, EuiComboBox, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import type { FieldHook } from '../../../../shared_imports';
 import { getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 import { isDataViewIdValid } from '../../validators/data_view_id_validator_factory';
-import { useDataViews } from './use_data_views';
+import { useDataViewListItems } from './use_data_view_list_items';
 import * as i18n from './translations';
 
 const SECURITY_DEFAULT_DATA_VIEW_ID = 'security-solution-default';
@@ -21,7 +21,7 @@ export interface DataViewSelectorProps {
 }
 
 export function DataViewSelectorField({ field }: DataViewSelectorProps): JSX.Element {
-  const { data: dataViews, isFetching: areDataViewsFetching } = useDataViews();
+  const { data: dataViews, isFetching: areDataViewsFetching } = useDataViewListItems();
   const fieldAndError = field ? getFieldValidityAndErrorMessage(field) : undefined;
   const isInvalid = fieldAndError?.isInvalid;
   const errorMessage = fieldAndError?.errorMessage;

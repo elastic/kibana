@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
@@ -30,7 +30,8 @@ const ProcessHashField = schema.oneOf([
   schema.literal('process.hash.sha256'),
 ]);
 const ProcessExecutablePath = schema.literal('process.executable.caseless');
-const ProcessCodeSigner = schema.literal('process.Ext.code_signature');
+const ProcessWindowsCodeSigner = schema.literal('process.Ext.code_signature');
+const ProcessMacCodeSigner = schema.literal('process.code_signature');
 
 const ConditionEntryTypeSchema = schema.conditional(
   schema.siblingRef('field'),
@@ -43,7 +44,8 @@ const ConditionEntryOperatorSchema = schema.literal('included');
 type ConditionEntryFieldAllowedType =
   | TypeOf<typeof ProcessHashField>
   | TypeOf<typeof ProcessExecutablePath>
-  | TypeOf<typeof ProcessCodeSigner>;
+  | TypeOf<typeof ProcessWindowsCodeSigner>
+  | TypeOf<typeof ProcessMacCodeSigner>;
 
 type TrustedAppConditionEntry<
   T extends ConditionEntryFieldAllowedType = ConditionEntryFieldAllowedType
@@ -54,7 +56,8 @@ type TrustedAppConditionEntry<
       operator: 'included';
       value: string;
     }
-  | TypeOf<typeof WindowsSignerEntrySchema>;
+  | TypeOf<typeof SignerWindowsEntrySchema>
+  | TypeOf<typeof SignerMacEntrySchema>;
 
 /*
  * A generic Entry schema to be used for a specific entry schema depending on the OS
@@ -85,11 +88,10 @@ const CommonEntrySchema = {
   ),
 };
 
-// Windows Signer entries use a Nested field that checks to ensure
+// Windows/MacOS Signer entries use a Nested field that checks to ensure
 // that the certificate is trusted
-const WindowsSignerEntrySchema = schema.object({
+const SignerEntrySchema = {
   type: schema.literal('nested'),
-  field: ProcessCodeSigner,
   entries: schema.arrayOf(
     schema.oneOf([
       schema.object({
@@ -107,10 +109,28 @@ const WindowsSignerEntrySchema = schema.object({
     ]),
     { minSize: 2, maxSize: 2 }
   ),
+};
+
+const SignerWindowsEntrySchema = schema.object({
+  ...SignerEntrySchema,
+  field: ProcessWindowsCodeSigner,
+});
+
+const SignerMacEntrySchema = schema.object({
+  ...SignerEntrySchema,
+  field: ProcessMacCodeSigner,
 });
 
 const WindowsEntrySchema = schema.oneOf([
-  WindowsSignerEntrySchema,
+  SignerWindowsEntrySchema,
+  schema.object({
+    ...CommonEntrySchema,
+    field: schema.oneOf([ProcessHashField, ProcessExecutablePath]),
+  }),
+]);
+
+const MacEntrySchema = schema.oneOf([
+  SignerMacEntrySchema,
   schema.object({
     ...CommonEntrySchema,
     field: schema.oneOf([ProcessHashField, ProcessExecutablePath]),
@@ -118,10 +138,6 @@ const WindowsEntrySchema = schema.oneOf([
 ]);
 
 const LinuxEntrySchema = schema.object({
-  ...CommonEntrySchema,
-});
-
-const MacEntrySchema = schema.object({
   ...CommonEntrySchema,
 });
 
@@ -172,7 +188,7 @@ const TrustedAppDataSchema = schema.object(
 
 export class TrustedAppValidator extends BaseValidator {
   static isTrustedApp(item: { listId: string }): boolean {
-    return item.listId === ENDPOINT_TRUSTED_APPS_LIST_ID;
+    return item.listId === ENDPOINT_ARTIFACT_LISTS.trustedApps.id;
   }
 
   protected async validateHasWritePrivilege(): Promise<void> {
