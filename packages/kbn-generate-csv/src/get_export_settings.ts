@@ -64,7 +64,11 @@ export const getExportSettings = async (
   ]);
 
   const escapeFormulaValues = config.escapeFormulaValues;
-  const escapeValue = createEscapeValue(quoteValues, escapeFormulaValues);
+  const escapeValue = createEscapeValue({
+    separator,
+    quoteValues,
+    escapeFormulaValues,
+  });
   const bom = config.useByteOrderMarkEncoding ? CSV_BOM_CHARS : '';
 
   return {
