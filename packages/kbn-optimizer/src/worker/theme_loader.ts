@@ -43,18 +43,21 @@ export default function (this: webpack.LoaderContext<any>) {
     defaultClause = `
     default:
       console.error(new Error("SASS files in [${bundleId}] were not built for theme [" + window.__kbnThemeTag__ + "]. Styles were compiled using the [${FALLBACK_THEME_TAG}] theme instead to keep Kibana somewhat usable. Please adjust the advanced settings to make use of [${themeTags}] or make sure the KBN_OPTIMIZER_THEMES environment variable includes [" + window.__kbnThemeTag__ + "] in a comma-separated list of themes you want to compile. You can also set it to \'*\' to build all themes."));
-      return require(${getStringifiedRequest(this, `${this.resourcePath}?${FALLBACK_THEME_TAG}`)});`;
+      return require(${getStringifiedRequest(
+        this,
+        `${this.resourcePath}?${FALLBACK_THEME_TAG}`
+      )});`;
   }
 
   return `
 switch (window.__kbnThemeTag__) {
 ${themeTags
-    .map(
-      (tag) => `
+  .map(
+    (tag) => `
   case '${tag}':
     return require(${getStringifiedRequest(this, `${this.resourcePath}?${tag}`)});`
-    )
-    .join('\n')}
+  )
+  .join('\n')}
   ${defaultClause}
 }`;
 }
