@@ -110,8 +110,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return seriesType;
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/184600
-  describe.skip('discover lens vis', function () {
+  describe('discover lens vis', function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
@@ -655,8 +654,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilSearchingHasFinished();
       await testSubjects.missingOrFail('unsavedChangesBadge');
 
-      await discover.chooseLensSuggestion('pie');
-      expect(await getCurrentVisTitle()).to.be('Pie');
+      await discover.chooseLensSuggestion('waffle');
+      expect(await getCurrentVisTitle()).to.be('Waffle');
       await testSubjects.existOrFail('partitionVisChart');
       expect(await discover.getVisContextSuggestionType()).to.be('lensSuggestion');
 
