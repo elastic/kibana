@@ -555,7 +555,7 @@ export class AlertsClient<
 
       try {
         const response = await esClient.bulk({
-          refresh: true,
+          refresh: 'wait_for',
           index: this.indexTemplateAndPattern.alias,
           require_alias: !this.isUsingDataStreams(),
           body: bulkBody,

@@ -566,7 +566,7 @@ describe('Alerts Client', () => {
 
           expect(clusterClient.bulk).toHaveBeenCalledWith({
             index: '.alerts-test.alerts-default',
-            refresh: true,
+            refresh: 'wait_for',
             require_alias: !useDataStreamForAlerts,
             body: [
               {
@@ -659,7 +659,7 @@ describe('Alerts Client', () => {
 
           expect(clusterClient.bulk).toHaveBeenCalledWith({
             index: '.alerts-test.alerts-default',
-            refresh: true,
+            refresh: 'wait_for',
             require_alias: !useDataStreamForAlerts,
             body: [
               {
@@ -732,7 +732,7 @@ describe('Alerts Client', () => {
 
           expect(clusterClient.bulk).toHaveBeenCalledWith({
             index: '.alerts-test.alerts-default',
-            refresh: true,
+            refresh: 'wait_for',
             require_alias: !useDataStreamForAlerts,
             body: [
               {
@@ -867,7 +867,7 @@ describe('Alerts Client', () => {
 
           expect(clusterClient.bulk).toHaveBeenCalledWith({
             index: '.alerts-test.alerts-default',
-            refresh: true,
+            refresh: 'wait_for',
             require_alias: !useDataStreamForAlerts,
             body: [
               {
@@ -940,7 +940,7 @@ describe('Alerts Client', () => {
 
           expect(clusterClient.bulk).toHaveBeenCalledWith({
             index: '.alerts-test.alerts-default',
-            refresh: true,
+            refresh: 'wait_for',
             require_alias: !useDataStreamForAlerts,
             body: [
               {
@@ -1039,7 +1039,7 @@ describe('Alerts Client', () => {
 
           expect(clusterClient.bulk).toHaveBeenCalledWith({
             index: '.alerts-test.alerts-default',
-            refresh: true,
+            refresh: 'wait_for',
             require_alias: !useDataStreamForAlerts,
             body: [
               {
@@ -1196,7 +1196,7 @@ describe('Alerts Client', () => {
 
           expect(clusterClient.bulk).toHaveBeenCalledWith({
             index: '.alerts-test.alerts-default',
-            refresh: true,
+            refresh: 'wait_for',
             require_alias: !useDataStreamForAlerts,
             body: [
               {
@@ -1314,7 +1314,7 @@ describe('Alerts Client', () => {
 
           expect(clusterClient.bulk).toHaveBeenCalledWith({
             index: '.alerts-test.alerts-default',
-            refresh: true,
+            refresh: 'wait_for',
             require_alias: !useDataStreamForAlerts,
             body: [
               {
@@ -1518,7 +1518,7 @@ describe('Alerts Client', () => {
 
           expect(clusterClient.bulk).toHaveBeenCalledWith({
             index: '.alerts-test.alerts-default',
-            refresh: true,
+            refresh: 'wait_for',
             require_alias: !useDataStreamForAlerts,
             body: [
               {
@@ -2451,7 +2451,7 @@ describe('Alerts Client', () => {
 
           expect(clusterClient.bulk).toHaveBeenCalledWith({
             index: '.alerts-test.alerts-default',
-            refresh: true,
+            refresh: 'wait_for',
             require_alias: !useDataStreamForAlerts,
             body: [
               {
@@ -2725,7 +2725,7 @@ describe('Alerts Client', () => {
 
           expect(clusterClient.bulk).toHaveBeenCalledWith({
             index: '.alerts-test.alerts-default',
-            refresh: true,
+            refresh: 'wait_for',
             require_alias: !useDataStreamForAlerts,
             body: [
               {
@@ -2826,7 +2826,7 @@ describe('Alerts Client', () => {
 
           expect(clusterClient.bulk).toHaveBeenCalledWith({
             index: '.alerts-test.alerts-default',
-            refresh: true,
+            refresh: 'wait_for',
             require_alias: !useDataStreamForAlerts,
             body: [
               {
@@ -2923,7 +2923,7 @@ describe('Alerts Client', () => {
 
           expect(clusterClient.bulk).toHaveBeenCalledWith({
             index: '.alerts-test.alerts-default',
-            refresh: true,
+            refresh: 'wait_for',
             require_alias: !useDataStreamForAlerts,
             body: [
               {
