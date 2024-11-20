@@ -11,16 +11,9 @@ import Path from 'path';
 import Os from 'os';
 import V8 from 'v8';
 import { getPackages, getPluginPackagesFilter, type PluginSelector } from '@kbn/repo-packages';
+import { ThemeTag, ThemeTags, parseThemeTags } from '@kbn/core-ui-settings-common';
 
-import {
-  Bundle,
-  WorkerConfig,
-  CacheableWorkerConfig,
-  ThemeTag,
-  ThemeTags,
-  parseThemeTags,
-  omit,
-} from '../common';
+import { Bundle, WorkerConfig, CacheableWorkerConfig, omit } from '../common';
 
 import { toKibanaPlatformPlugin, KibanaPlatformPlugin } from './kibana_platform_plugins';
 import { getPluginBundles } from './get_plugin_bundles';
