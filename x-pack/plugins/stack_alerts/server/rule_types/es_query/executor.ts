@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { v4 } from 'uuid';
 import { sha256 } from 'js-sha256';
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, Logger } from '@kbn/core/server';
 import { getEcsGroups } from '@kbn/observability-alerting-rule-utils';
-import { isGroupAggregation, UngroupedGroupId } from '@kbn/triggers-actions-ui-plugin/common';
+import { isGroupAggregation } from '@kbn/triggers-actions-ui-plugin/common';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
@@ -33,7 +34,7 @@ import {
   OnlySearchSourceRuleParams,
   OnlyEsqlQueryRuleParams,
 } from './types';
-import { ActionGroupId, ConditionMetAlertInstanceId } from './constants';
+import { ActionGroupId } from './constants';
 import { fetchEsQuery } from './lib/fetch_es_query';
 import { EsQueryRuleParams } from './rule_type_params';
 import { fetchSearchSourceQuery } from './lib/fetch_search_source_query';
@@ -179,11 +180,11 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
       index,
     });
 
-    const id = alertId === UngroupedGroupId && !isGroupAgg ? ConditionMetAlertInstanceId : alertId;
+    // const id = alertId === UngroupedGroupId && !isGroupAgg ? ConditionMetAlertInstanceId : alertId;
     const ecsGroups = getEcsGroups(result.groups);
 
     alertsClient.report({
-      id,
+      id: v4(),
       actionGroup: ActionGroupId,
       state: { latestTimestamp, dateStart, dateEnd },
       context: actionContext,
