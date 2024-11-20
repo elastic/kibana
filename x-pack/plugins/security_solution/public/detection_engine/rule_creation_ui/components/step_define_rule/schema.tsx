@@ -9,6 +9,8 @@ import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
 import React from 'react';
+
+import { fromKueryExpression } from '@kbn/es-query';
 import { debounceAsync } from '@kbn/securitysolution-utils';
 import {
   singleEntryThreat,
@@ -31,7 +33,6 @@ import type { ERROR_CODE, FormSchema, ValidationFunc } from '../../../../shared_
 import { FIELD_TYPES, fieldValidators } from '../../../../shared_imports';
 import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
-import { debounceAsync, eqlValidator } from '../eql_query_bar/validators';
 import { dataViewIdValidatorFactory } from '../../validators/data_view_id_validator_factory';
 import { indexPatternValidatorFactory } from '../../validators/index_pattern_validator_factory';
 import { alertSuppressionFieldsValidatorFactory } from '../../validators/alert_suppression_fields_validator_factory';
@@ -41,12 +42,8 @@ import {
   ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
 } from '../../../rule_creation/components/alert_suppression_edit';
 import * as alertSuppressionEditI81n from '../../../rule_creation/components/alert_suppression_edit/components/translations';
-import { debounceAsync } from '../../validators/debounce_async';
 import { RULE_TYPE_FIELD_NAME } from '../select_rule_type';
-import { getQueryRequiredMessage } from './utils';
 import {
-  CUSTOM_QUERY_REQUIRED,
-  INVALID_CUSTOM_QUERY,
   INDEX_HELPER_TEXT,
   THREAT_MATCH_INDEX_HELPER_TEXT,
   THREAT_MATCH_REQUIRED,

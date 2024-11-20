@@ -8,12 +8,12 @@
 import React, { memo, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { DataViewBase } from '@kbn/es-query';
+import { debounceAsync } from '@kbn/securitysolution-utils';
 import type { FieldConfig } from '../../../../shared_imports';
 import { UseField } from '../../../../shared_imports';
 import type { FieldValueQueryBar } from '../../../rule_creation_ui/components/query_field';
 import { QueryField } from '../../../rule_creation_ui/components/query_field';
 import { queryRequiredValidatorFactory } from '../../../rule_creation_ui/validators/query_required_validator_factory';
-import { debounceAsync } from '../../../rule_creation_ui/validators/debounce_async';
 import { esqlQueryValidatorFactory } from './validators/esql_query_validator_factory';
 import { EsqlInfoIcon } from './esql_info_icon';
 import * as i18n from './translations';
