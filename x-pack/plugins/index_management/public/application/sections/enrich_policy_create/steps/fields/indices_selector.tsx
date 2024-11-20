@@ -27,62 +27,74 @@ interface Props {
 
 interface GetMatchingOptionsParams {
   matches: string[];
-  optionsLabel: string;
-  optionsDefaultMessage: string;
-  noMatchingOption: string;
-  noMatchingDefaultMessage: string;
+  optionsMessage: string;
+  noMatchingMessage: string;
 }
+
+const i18nTexts = {
+  indices: {
+    options: i18n.translate('xpack.idxMgmt.enrichPolicyCreate.indicesSelector.optionsLabel', {
+      defaultMessage: 'Based on your indices',
+    }),
+    noMatches: i18n.translate('xpack.idxMgmt.enrichPolicyCreate.indicesSelector.noMatchingOption', {
+      defaultMessage: 'No indices match your search criteria.',
+    }),
+  },
+  dataStreams: {
+    options: i18n.translate(
+      'xpack.idxMgmt.enrichPolicyCreate.indicesSelector.dataStream.optionsLabel',
+      {
+        defaultMessage: 'Based on your data streams',
+      }
+    ),
+    noMatches: i18n.translate(
+      'xpack.idxMgmt.enrichPolicyCreate.indicesSelector.dataStream.noMatchingOption',
+      {
+        defaultMessage: 'No data stream match your search criteria.',
+      }
+    ),
+  },
+  sourcePlaceholder: i18n.translate(
+    'xpack.idxMgmt.enrichPolicyCreate.indicesSelector.placeholder',
+    {
+      defaultMessage: 'Select source indices and/or data streams.',
+    }
+  ),
+};
 
 const getIndexOptions = async (patternString: string) => {
   if (!patternString) {
     return [];
   }
-  const indices = await getIndices(patternString);
-  const dataStreams = await getDataStreams(patternString);
+
+  const { data: indicesData } = await getMatchingIndices(patternString);
+  const { data: dataStreamsData } = await getMatchingDataStreams(patternString);
+
+  const indices = getMatchingOptions({
+    matches: indicesData.indices,
+    optionsMessage: i18nTexts.indices.options,
+    noMatchingMessage: i18nTexts.indices.noMatches,
+  });
+  const dataStreams = getMatchingOptions({
+    matches: dataStreamsData.dataStreams,
+    optionsMessage: i18nTexts.dataStreams.options,
+    noMatchingMessage: i18nTexts.dataStreams.noMatches,
+  });
 
   return [...indices, ...dataStreams];
 };
 
-const getIndices = async (patternString: string) => {
-  const { data } = await getMatchingIndices(patternString);
-
-  return getMatchingOptions({
-    matches: data.indices,
-    optionsLabel: 'xpack.idxMgmt.enrichPolicyCreate.indicesSelector.optionsLabel',
-    optionsDefaultMessage: 'Based on your indices',
-    noMatchingOption: 'xpack.idxMgmt.enrichPolicyCreate.indicesSelector.noMatchingOption',
-    noMatchingDefaultMessage: 'No indices match your search criteria.',
-  });
-};
-
-const getDataStreams = async (patternString: string) => {
-  const { data } = await getMatchingDataStreams(patternString);
-
-  return getMatchingOptions({
-    matches: data.dataStreams,
-    optionsLabel: 'xpack.idxMgmt.enrichPolicyCreate.indicesSelector.dataStream.optionsLabel',
-    optionsDefaultMessage: 'Based on your data streams',
-    noMatchingOption:
-      'xpack.idxMgmt.enrichPolicyCreate.indicesSelector.dataStream.noMatchingOption',
-    noMatchingDefaultMessage: 'No data stream match your search criteria.',
-  });
-};
-
 const getMatchingOptions = ({
   matches,
-  optionsLabel,
-  optionsDefaultMessage,
-  noMatchingOption,
-  noMatchingDefaultMessage,
+  optionsMessage,
+  noMatchingMessage,
 }: GetMatchingOptionsParams) => {
   const options: IOption[] = [];
   if (matches.length) {
     const matchingOptions = uniq([...matches]);
 
     options.push({
-      label: i18n.translate(optionsLabel, {
-        defaultMessage: optionsDefaultMessage,
-      }),
+      label: optionsMessage,
       options: matchingOptions
         .map((match) => {
           return {
@@ -94,9 +106,7 @@ const getMatchingOptions = ({
     });
   } else {
     options.push({
-      label: i18n.translate(noMatchingOption, {
-        defaultMessage: noMatchingDefaultMessage,
-      }),
+      label: noMatchingMessage,
       options: [],
     });
   }
@@ -137,6 +147,7 @@ export const IndicesSelector = ({ field, euiFieldProps, ...rest }: Props) => {
     >
       <EuiComboBox
         async
+        placeholder={i18nTexts.sourcePlaceholder}
         isLoading={isIndiciesLoading}
         options={indexOptions}
         noSuggestions={!indexOptions.length}

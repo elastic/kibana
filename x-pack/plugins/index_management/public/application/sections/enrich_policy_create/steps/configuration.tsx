@@ -95,7 +95,7 @@ export const configurationFormSchema: FormSchema = {
 
   sourceIndices: {
     label: i18n.translate('xpack.idxMgmt.enrichPolicyCreate.configurationStep.sourceIndicesLabel', {
-      defaultMessage: 'Source indices',
+      defaultMessage: 'Source',
     }),
     validations: [
       {
@@ -103,7 +103,7 @@ export const configurationFormSchema: FormSchema = {
           i18n.translate(
             'xpack.idxMgmt.enrichPolicyCreate.configurationStep.sourceIndicesRequiredError',
             {
-              defaultMessage: 'At least one source index is required.',
+              defaultMessage: 'At least one source is required.',
             }
           )
         ),
