@@ -15,7 +15,7 @@ export const useQueryIndices = (
 ): { indices: IndexName[]; isLoading: boolean } => {
   const { services } = useKibana();
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isFetched } = useQuery({
     queryKey: ['indices', query],
     queryFn: async () => {
       const response = await services.http.get<{
@@ -32,5 +32,5 @@ export const useQueryIndices = (
     initialData: [],
   });
 
-  return { indices: data, isLoading };
+  return { indices: data, isLoading, isFetched };
 };
