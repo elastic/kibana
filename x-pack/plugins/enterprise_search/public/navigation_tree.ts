@@ -31,7 +31,7 @@ export interface DynamicSideNavItems {
 const title = i18n.translate(
   'xpack.enterpriseSearch.searchNav.headerSolutionSwitcher.searchSolutionTitle',
   {
-    defaultMessage: 'Search',
+    defaultMessage: 'Elasticsearch',
   }
 );
 const icon = 'logoElasticsearch';

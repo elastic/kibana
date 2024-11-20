@@ -27,7 +27,7 @@ import { IngestPipelineParams } from '@kbn/search-connectors';
 import { ProductFeatures } from './types';
 
 export const SEARCH_PRODUCT_NAME = i18n.translate('xpack.enterpriseSearch.search.productName', {
-  defaultMessage: 'Search',
+  defaultMessage: 'Elasticsearch',
 });
 export const ENTERPRISE_SEARCH_PRODUCT_NAME = i18n.translate('xpack.enterpriseSearch.productName', {
   defaultMessage: 'Enterprise Search',
