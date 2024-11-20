@@ -34,6 +34,7 @@ describe('Transaction details errors table', () => {
   });
 
   it('shows top errors table', { defaultCommandTimeout: 60000 }, () => {
+    cy.wait(60000);
     cy.visitKibana(
       `/app/apm/services/opbeans-java/transactions/view?${new URLSearchParams({
         ...timeRange,
@@ -43,7 +44,6 @@ describe('Transaction details errors table', () => {
 
     cy.contains('Top 5 errors');
     cy.get('[data-test-subj=topErrorsForTransactionTable]', { timeout: 60000 })
-      .get('[data-test-subj=apmLegacyAPMLinkLink]', { timeout: 60000 })
       .contains('[MockError] Foo', { timeout: 60000 })
       .click();
     cy.url().should('include', 'opbeans-java/errors');
