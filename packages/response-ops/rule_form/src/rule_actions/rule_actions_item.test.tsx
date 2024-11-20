@@ -10,7 +10,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { RuleType } from '@kbn/alerting-types';
-import { ActionTypeModel, RuleTypeModel, TypeRegistry } from '@kbn/alerts-ui-shared';
+import type { ActionTypeModel, RuleTypeModel } from '@kbn/alerts-ui-shared';
+import { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
 import {
   getAction,
   getActionType,

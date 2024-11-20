@@ -10,37 +10,37 @@
 import { i18n } from '@kbn/i18n';
 
 export const PRODUCER_DISPLAY_NAMES = {
-  apm: i18n.translate('alertsUIShared.producerDisplayNames.apm', {
+  apm: i18n.translate('responseOpsRuleForm.producerDisplayNames.apm', {
     defaultMessage: 'APM and User Experience',
   }),
-  uptime: i18n.translate('alertsUIShared.producerDisplayNames.uptime', {
+  uptime: i18n.translate('responseOpsRuleForm.producerDisplayNames.uptime', {
     defaultMessage: 'Synthetics and Uptime',
   }),
-  stackAlerts: i18n.translate('alertsUIShared.producerDisplayNames.stackAlerts', {
+  stackAlerts: i18n.translate('responseOpsRuleForm.producerDisplayNames.stackAlerts', {
     defaultMessage: 'Stack Alerts',
   }),
-  metrics: i18n.translate('alertsUIShared.producerDisplayNames.metrics', {
+  metrics: i18n.translate('responseOpsRuleForm.producerDisplayNames.metrics', {
     defaultMessage: 'Metrics',
   }),
-  logs: i18n.translate('alertsUIShared.producerDisplayNames.logs', {
+  logs: i18n.translate('responseOpsRuleForm.producerDisplayNames.logs', {
     defaultMessage: 'Logs',
   }),
-  siem: i18n.translate('alertsUIShared.producerDisplayNames.siem', {
+  siem: i18n.translate('responseOpsRuleForm.producerDisplayNames.siem', {
     defaultMessage: 'Security',
   }),
-  observability: i18n.translate('alertsUIShared.producerDisplayNames.observability', {
+  observability: i18n.translate('responseOpsRuleForm.producerDisplayNames.observability', {
     defaultMessage: 'Observability',
   }),
-  ml: i18n.translate('alertsUIShared.producerDisplayNames.ml', {
+  ml: i18n.translate('responseOpsRuleForm.producerDisplayNames.ml', {
     defaultMessage: 'Machine Learning',
   }),
-  slo: i18n.translate('alertsUIShared.producerDisplayNames.slo', {
+  slo: i18n.translate('responseOpsRuleForm.producerDisplayNames.slo', {
     defaultMessage: 'SLOs',
   }),
-  infrastructure: i18n.translate('alertsUIShared.producerDisplayNames.infrastructure', {
+  infrastructure: i18n.translate('responseOpsRuleForm.producerDisplayNames.infrastructure', {
     defaultMessage: 'Infrastructure',
   }),
-  monitoring: i18n.translate('alertsUIShared.producerDisplayNames.monitoring', {
+  monitoring: i18n.translate('responseOpsRuleForm.producerDisplayNames.monitoring', {
     defaultMessage: 'Stack Monitoring',
   }),
 };

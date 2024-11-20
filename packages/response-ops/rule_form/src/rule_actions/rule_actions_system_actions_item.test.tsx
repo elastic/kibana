@@ -11,7 +11,8 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { RuleType } from '@kbn/alerting-types';
 import userEvent from '@testing-library/user-event';
-import { ActionTypeModel, TypeRegistry } from '@kbn/alerts-ui-shared';
+import type { ActionTypeModel } from '@kbn/alerts-ui-shared';
+import { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
 import {
   getAction,
   getActionType,

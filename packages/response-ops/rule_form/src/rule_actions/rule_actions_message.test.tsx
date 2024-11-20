@@ -11,12 +11,8 @@ import React, { lazy } from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { RuleActionsMessage } from './rule_actions_message';
 import { RuleType } from '@kbn/alerting-types';
-import {
-  ActionParamsProps,
-  ActionTypeModel,
-  RuleTypeModel,
-  TypeRegistry,
-} from '@kbn/alerts-ui-shared';
+import type { ActionParamsProps, ActionTypeModel, RuleTypeModel } from '@kbn/alerts-ui-shared';
+import { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
 import {
   getAction,
   getActionType,
