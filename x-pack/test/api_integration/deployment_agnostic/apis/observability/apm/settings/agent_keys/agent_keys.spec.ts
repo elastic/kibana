@@ -19,17 +19,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const allApplicationPrivileges = [PrivilegeType.AGENT_CONFIG, PrivilegeType.EVENT];
   const clusterPrivileges = [ClusterPrivilegeType.MANAGE_OWN_API_KEY];
 
-  async function createAgentKey(
-    apiClient: (typeof apmApiClient)[keyof typeof apmApiClient],
-    roleAuthc: RoleCredentials,
-    privileges = allApplicationPrivileges
-  ) {
-    return await apiClient({
+  async function createAgentKey(roleAuthc: RoleCredentials) {
+    return await apmApiClient.publicApi({
       endpoint: 'POST /api/apm/agent_keys 2023-10-31',
       params: {
         body: {
           name: agentKeyName,
-          privileges,
+          privileges: allApplicationPrivileges,
         },
       },
       roleAuthc,
@@ -62,9 +58,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     describe('When the user does not have the required cluster privileges', () => {
       it('should return an error when creating an agent key', async () => {
-        const error = await expectToReject<ApmApiError>(() =>
-          createAgentKey(apmApiClient.writeUser, roleAuthc)
-        );
+        const error = await expectToReject<ApmApiError>(() => createAgentKey(roleAuthc));
         expect(error.res.status).to.be(403);
         expect(error.res.body.message).contain('is missing the following requested privilege');
         expect(error.res.body.attributes).to.eql({
