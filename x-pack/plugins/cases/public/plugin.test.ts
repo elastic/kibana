@@ -129,7 +129,6 @@ describe('Cases Ui Plugin', () => {
             bulkGet: expect.any(Function),
             find: expect.any(Function),
             getCasesMetrics: expect.any(Function),
-            getCasesStatus: expect.any(Function),
           },
           getRelatedCases: expect.any(Function),
         },

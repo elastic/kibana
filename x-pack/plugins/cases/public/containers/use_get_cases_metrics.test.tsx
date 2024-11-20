@@ -42,7 +42,10 @@ describe('useGetCasesMetrics', () => {
     expect(spy).toHaveBeenCalledWith({
       http: expect.anything(),
       signal: abortCtrl.signal,
-      query: { owner: [SECURITY_SOLUTION_OWNER], features: [CaseMetricsFeature.MTTR] },
+      query: {
+        owner: [SECURITY_SOLUTION_OWNER],
+        features: [CaseMetricsFeature.MTTR, CaseMetricsFeature.STATUS],
+      },
     });
   });
 
