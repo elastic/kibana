@@ -9,18 +9,19 @@ import type { LocatorDefinition } from '@kbn/share-plugin/common';
 import type { SharePluginSetup } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 
-import { PLUGIN_ID } from '../common/constants';
-import { SEARCH_INFERENCE_ENDPOINTS_PATH } from './routes';
+import { SEARCH_RELEVANCE_PLUGIN } from '../constants';
 
 export function registerLocators(share: SharePluginSetup) {
   share.url.locators.create<SerializableRecord>(new SearchInferenceEndpointLocatorDefinition());
 }
 
-class SearchInferenceEndpointLocatorDefinition implements LocatorDefinition<SerializableRecord> {
+export class SearchInferenceEndpointLocatorDefinition
+  implements LocatorDefinition<SerializableRecord>
+{
   public readonly getLocation = async () => {
     return {
-      app: PLUGIN_ID,
-      path: SEARCH_INFERENCE_ENDPOINTS_PATH,
+      app: SEARCH_RELEVANCE_PLUGIN.ID,
+      path: '/inference_endpoints',
       state: {},
     };
   };
