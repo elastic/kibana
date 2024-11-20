@@ -16770,7 +16770,12 @@ paths:
                 type: array
               - type: string
         - in: query
-          name: pkgKey
+          name: pkgName
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: pkgVersion
           required: false
           schema:
             type: string
