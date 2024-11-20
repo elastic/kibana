@@ -16,7 +16,6 @@ export function initializeRangeControlSelections(
   onSelectionChange: () => void
 ) {
   const value$ = new BehaviorSubject<RangeValue | undefined>(initialState.value);
-
   function setValue(next: RangeValue | undefined) {
     if (value$.value !== next) {
       value$.next(next);

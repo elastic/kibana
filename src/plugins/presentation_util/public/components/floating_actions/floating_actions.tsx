@@ -73,17 +73,13 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
     const handleActionCompatibilityChange = (isCompatible: boolean, action: Action) => {
       if (!mounted) return;
       setFloatingActions((currentActions) => {
-        const newActions = currentActions
+        const newActions: FloatingActionItem[] = currentActions
           ?.filter((current) => current.id !== action.id)
           .sort((a, b) => (a.order || 0) - (b.order || 0));
         if (isCompatible) {
-          return [action, ...newActions] as Array<
-            AnyApiAction & {
-              MenuItem: React.FC<{ context: unknown }>;
-            }
-          >;
+          return [action as FloatingActionItem, ...newActions];
         }
-        return newActions as FloatingActionItem[];
+        return newActions;
       });
     };
 
