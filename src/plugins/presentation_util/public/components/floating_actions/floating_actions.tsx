@@ -57,6 +57,10 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
       trigger: panelHoverTrigger,
     };
 
+    const sortByOrder = (a: Action | FloatingActionItem, b: Action | FloatingActionItem) => {
+      return (a.order || 0) - (b.order || 0);
+    };
+
     const getActions: () => Promise<FloatingActionItem[]> = async () => {
       const actions = (
         await uiActionsService.getTriggerCompatibleActions(PANEL_HOVER_TRIGGER, context)
@@ -64,7 +68,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
         .filter((action) => {
           return action.MenuItem !== undefined && (disabledActions ?? []).indexOf(action.id) === -1;
         })
-        .sort((a, b) => (a.order || 0) - (b.order || 0));
+        .sort(sortByOrder);
       return actions as FloatingActionItem[];
     };
 
@@ -75,7 +79,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
       setFloatingActions((currentActions) => {
         const newActions: FloatingActionItem[] = currentActions
           ?.filter((current) => current.id !== action.id)
-          .sort((a, b) => (a.order || 0) - (b.order || 0));
+          .sort(sortByOrder) as FloatingActionItem[];
         if (isCompatible) {
           return [action as FloatingActionItem, ...newActions];
         }
@@ -109,7 +113,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
   return (
     <div className="presentationUtil__floatingActionsWrapper">
       {children}
-      {isEnabled && floatingActions && (
+      {isEnabled && Boolean(floatingActions.length) && (
         <div
           data-test-subj={`presentationUtil__floatingActions__${
             apiHasUniqueId(api) ? api.uuid : v4()

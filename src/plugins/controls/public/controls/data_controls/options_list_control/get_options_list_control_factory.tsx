@@ -9,7 +9,15 @@
 
 import fastIsEqual from 'fast-deep-equal';
 import React, { useEffect } from 'react';
-import { BehaviorSubject, combineLatest, debounceTime, distinctUntilChanged, filter, map, skip } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  debounceTime,
+  distinctUntilChanged,
+  filter,
+  map,
+  skip,
+} from 'rxjs';
 
 import { buildExistsFilter, buildPhraseFilter, buildPhrasesFilter, Filter } from '@kbn/es-query';
 import { PublishingSubject, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
