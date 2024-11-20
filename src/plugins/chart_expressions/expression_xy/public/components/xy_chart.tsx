@@ -159,7 +159,7 @@ function nonNullable<T>(v: T): v is NonNullable<T> {
 function getValueLabelsStyling(isHorizontal: boolean): {
   displayValue: RecursivePartial<DisplayValueStyle>;
 } {
-  const VALUE_LABELS_MAX_FONTSIZE = 12;
+  const VALUE_LABELS_MAX_FONTSIZE = 10;
   const VALUE_LABELS_MIN_FONTSIZE = 10;
   const VALUE_LABELS_VERTICAL_OFFSET = -10;
   const VALUE_LABELS_HORIZONTAL_OFFSET = 10;
