@@ -11,12 +11,12 @@ import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregati
 import { ApmDocumentType, ApmTransactionDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const registry = getService('registry');
-  const apmApiClient = getService('apmApiClient');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
+  const synthtrace = getService('synthtrace');
 
   const serviceName = 'synth-go';
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
@@ -45,7 +45,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         query: {
           start: new Date(start).toISOString(),
           end: new Date(end).toISOString(),
-          latencyAggregationType: 'avg' as LatencyAggregationType,
+          latencyAggregationType: LatencyAggregationType.avg,
           transactionType: 'request',
           environment: 'ENVIRONMENT_ALL',
           useDurationSummary: false,
@@ -60,22 +60,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     return response.body;
   }
 
-  registry.when(
-    'Transaction groups main statistics when data is not loaded',
-    { config: 'basic', archives: [] },
-    () => {
+  describe('Transaction groups main statistics', () => {
+    describe('when data is not loaded', () => {
       it('handles the empty state', async () => {
         const transactionsGroupsPrimaryStatistics = await callApi();
 
         expect(transactionsGroupsPrimaryStatistics.transactionGroups).to.empty();
         expect(transactionsGroupsPrimaryStatistics.maxCountExceeded).to.be(false);
       });
-    }
-  );
+    });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177620
-  registry.when('when data is loaded', { config: 'basic', archives: [] }, () => {
-    describe('Transaction groups main statistics', () => {
+    describe('when data is loaded', () => {
       const GO_PROD_RATE = 75;
       const GO_PROD_ERROR_RATE = 25;
       const transactions = [
@@ -92,7 +87,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           duration: 1000,
         },
       ];
+      let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+
       before(async () => {
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
         const serviceGoProdInstance = apm
           .service({ name: serviceName, environment: 'production', agentName: 'go' })
           .instance('instance-a');
