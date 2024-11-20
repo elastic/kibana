@@ -6,23 +6,33 @@
  */
 import React, { createContext, useContext, type ReactChild } from 'react';
 import { Subject } from 'rxjs';
-import { EntityType } from '../../../common/entities';
+import { DataView } from '@kbn/data-views-plugin/common';
+import { useAdHocInventoryDataView } from '../../hooks/use_adhoc_inventory_data_view';
 
 interface InventorySearchBarContextType {
   searchBarContentSubject$: Subject<{
     kuery?: string;
-    entityTypes?: EntityType[];
-    refresh: boolean;
+    entityTypes?: string[];
   }>;
+  refreshSubject$: Subject<void>;
+  dataView?: DataView;
 }
 
 const InventorySearchBarContext = createContext<InventorySearchBarContextType>({
   searchBarContentSubject$: new Subject(),
+  refreshSubject$: new Subject(),
 });
 
 export function InventorySearchBarContextProvider({ children }: { children: ReactChild }) {
+  const { dataView } = useAdHocInventoryDataView();
   return (
-    <InventorySearchBarContext.Provider value={{ searchBarContentSubject$: new Subject() }}>
+    <InventorySearchBarContext.Provider
+      value={{
+        searchBarContentSubject$: new Subject(),
+        refreshSubject$: new Subject(),
+        dataView,
+      }}
+    >
       {children}
     </InventorySearchBarContext.Provider>
   );

@@ -643,6 +643,7 @@ module.exports = {
         'x-pack/test/*/*config.*ts',
         'x-pack/test/saved_object_api_integration/*/apis/**/*',
         'x-pack/test/ui_capabilities/*/tests/**/*',
+        'x-pack/test/upgrade_assistant_integration/**/*',
         'x-pack/test/performance/**/*.ts',
         '**/cypress.config.{js,ts}',
         'x-pack/test_serverless/**/config*.ts',
@@ -1014,6 +1015,7 @@ module.exports = {
           'error',
           {
             patterns: ['**/legacy_uptime/*'],
+            paths: RESTRICTED_IMPORTS,
           },
         ],
       },
@@ -1024,7 +1026,9 @@ module.exports = {
      */
     {
       files: ['x-pack/plugins/fleet/**/*.{js,mjs,ts,tsx}'],
+      plugins: ['testing-library'],
       rules: {
+        'testing-library/await-async-utils': 'error',
         '@typescript-eslint/consistent-type-imports': 'error',
         'import/order': [
           'warn',
@@ -1055,6 +1059,7 @@ module.exports = {
           {
             // prevents UI code from importing server side code and then webpack including it when doing builds
             patterns: ['**/server/*'],
+            paths: RESTRICTED_IMPORTS,
           },
         ],
       },
@@ -1113,6 +1118,7 @@ module.exports = {
           {
             // prevents UI code from importing server side code and then webpack including it when doing builds
             patterns: ['**/server/*'],
+            paths: RESTRICTED_IMPORTS,
           },
         ],
       },
@@ -1184,13 +1190,7 @@ module.exports = {
             // to help deprecation and prevent accidental re-use/continued use of code we plan on removing. If you are
             // finding yourself turning this off a lot for "new code" consider renaming the file and functions if it is has valid uses.
             patterns: ['*legacy*'],
-            paths: [
-              {
-                name: 'react-router-dom',
-                importNames: ['Route'],
-                message: "import { Route } from '@kbn/kibana-react-plugin/public'",
-              },
-            ],
+            paths: RESTRICTED_IMPORTS,
           },
         ],
       },
@@ -1348,6 +1348,7 @@ module.exports = {
           {
             // prevents UI code from importing server side code and then webpack including it when doing builds
             patterns: ['**/server/*'],
+            paths: RESTRICTED_IMPORTS,
           },
         ],
       },
@@ -1525,6 +1526,7 @@ module.exports = {
             // to help deprecation and prevent accidental re-use/continued use of code we plan on removing. If you are
             // finding yourself turning this off a lot for "new code" consider renaming the file and functions if it has valid uses.
             patterns: ['*legacy*'],
+            paths: RESTRICTED_IMPORTS,
           },
         ],
       },
@@ -1955,6 +1957,16 @@ module.exports = {
     },
 
     /**
+     * Cloud Security Team overrides
+     */
+    {
+      files: ['x-pack/plugins/cloud_security_posture/**/*.{js,mjs,ts,tsx}'],
+      plugins: ['testing-library'],
+      rules: {
+        'testing-library/await-async-utils': 'error',
+      },
+    },
+    /**
      * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with ts-node. It needs a few tweaks because of this.
      */
     {
@@ -1976,6 +1988,31 @@ module.exports = {
       ],
       rules: {
         'max-classes-per-file': 'off',
+      },
+    },
+    {
+      files: [
+        // logsShared depends on o11y/private plugins, but platform plugins depend on it
+        'x-pack/plugins/observability_solution/logs_shared/**',
+
+        // TODO @kibana/operations
+        'scripts/create_observability_rules.js', // is importing "@kbn/observability-alerting-test-data" (observability/private)
+        'src/cli_setup/**', // is importing "@kbn/interactive-setup-plugin" (platform/private)
+        'src/dev/build/tasks/install_chromium.ts', // is importing "@kbn/screenshotting-plugin" (platform/private)
+
+        // @kbn/osquery-plugin could be categorised as Security, but @kbn/infra-plugin (observability) depends on it!
+        'x-pack/plugins/osquery/**',
+
+        // For now, we keep the exception to let tests depend on anythying.
+        // Ideally, we need to classify the solution specific ones to reduce CI times
+        'test/**',
+        'x-pack/test_serverless/**',
+        'x-pack/test/**',
+        'x-pack/test/plugin_functional/plugins/resolver_test/**',
+      ],
+      rules: {
+        '@kbn/imports/no_group_crossing_manifests': 'warn',
+        '@kbn/imports/no_group_crossing_imports': 'warn',
       },
     },
   ],

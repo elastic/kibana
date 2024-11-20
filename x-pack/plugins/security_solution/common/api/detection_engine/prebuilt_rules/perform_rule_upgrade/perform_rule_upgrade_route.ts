@@ -11,10 +11,55 @@ import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
 import { AggregatedPrebuiltRuleError, DiffableAllFields } from '../model';
 import { RuleSignatureId, RuleVersion } from '../../model';
 
+export type Mode = z.infer<typeof Mode>;
+export const Mode = z.enum(['ALL_RULES', 'SPECIFIC_RULES']);
+export type ModeEnum = typeof Mode.enum;
+export const ModeEnum = Mode.enum;
+
 export type PickVersionValues = z.infer<typeof PickVersionValues>;
 export const PickVersionValues = z.enum(['BASE', 'CURRENT', 'TARGET', 'MERGED']);
 export type PickVersionValuesEnum = typeof PickVersionValues.enum;
 export const PickVersionValuesEnum = PickVersionValues.enum;
+
+// Specific handling of special fields according to:
+// https://github.com/elastic/kibana/issues/186544
+export const FIELDS_TO_UPGRADE_TO_CURRENT_VERSION = [
+  'enabled',
+  'exceptions_list',
+  'alert_suppression',
+  'actions',
+  'throttle',
+  'response_actions',
+  'meta',
+  'output_index',
+  'namespace',
+  'alias_purpose',
+  'alias_target_id',
+  'outcome',
+  'concurrent_searches',
+  'items_per_search',
+] as const;
+
+export const FIELDS_TO_UPGRADE_TO_TARGET_VERSION = [
+  'type',
+  'rule_id',
+  'version',
+  'author',
+  'license',
+] as const;
+
+// Fields which are part of DiffableRule but are not upgradeable
+// and need to be omittted from the DiffableUpgradableFields
+export const NON_UPGRADEABLE_DIFFABLE_FIELDS = ['type', 'rule_id', 'version'] as const;
+
+type NON_UPGRADEABLE_DIFFABLE_FIELDS_TO_OMIT_TYPE = {
+  readonly [key in (typeof NON_UPGRADEABLE_DIFFABLE_FIELDS)[number]]: true;
+};
+
+// This transformation is needed to have Zod's `omit` accept the rule fields that need to be omitted
+export const DiffableFieldsToOmit = NON_UPGRADEABLE_DIFFABLE_FIELDS.reduce((acc, field) => {
+  return { ...acc, [field]: true };
+}, {} as NON_UPGRADEABLE_DIFFABLE_FIELDS_TO_OMIT_TYPE);
 
 /**
  * Fields upgradable by the /upgrade/_perform endpoint.
@@ -23,18 +68,12 @@ export const PickVersionValuesEnum = PickVersionValues.enum;
  * See: https://github.com/elastic/kibana/issues/186544
  */
 export type DiffableUpgradableFields = z.infer<typeof DiffableUpgradableFields>;
-export const DiffableUpgradableFields = DiffableAllFields.omit({
-  type: true,
-  rule_id: true,
-  version: true,
-  author: true,
-  license: true,
-});
+export const DiffableUpgradableFields = DiffableAllFields.omit(DiffableFieldsToOmit);
 
 export type FieldUpgradeSpecifier<T> = z.infer<
   ReturnType<typeof fieldUpgradeSpecifier<z.ZodType<T>>>
 >;
-const fieldUpgradeSpecifier = <T extends z.ZodTypeAny>(fieldSchema: T) =>
+export const fieldUpgradeSpecifier = <T extends z.ZodTypeAny>(fieldSchema: T) =>
   z.discriminatedUnion('pick_version', [
     z
       .object({

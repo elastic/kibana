@@ -38,7 +38,7 @@ import { ChatSend } from './chat_send';
 import { WELCOME_CONVERSATION_TITLE } from './use_conversation/translations';
 import { getDefaultConnector } from './helpers';
 
-import { useAssistantContext, UserAvatar } from '../assistant_context';
+import { useAssistantContext } from '../assistant_context';
 import { ContextPills } from './context_pills';
 import { getNewSelectedPromptContext } from '../data_anonymization/get_new_selected_prompt_context';
 import type { PromptContext, SelectedPromptContext } from './prompt_context/types';
@@ -61,7 +61,6 @@ const CommentContainer = styled('span')`
 export interface Props {
   chatHistoryVisible?: boolean;
   conversationTitle?: string;
-  currentUserAvatar?: UserAvatar;
   onCloseFlyout?: () => void;
   promptContextId?: string;
   setChatHistoryVisible?: Dispatch<SetStateAction<boolean>>;
@@ -75,7 +74,6 @@ export interface Props {
 const AssistantComponent: React.FC<Props> = ({
   chatHistoryVisible,
   conversationTitle,
-  currentUserAvatar,
   onCloseFlyout,
   promptContextId = '',
   setChatHistoryVisible,
@@ -90,11 +88,9 @@ const AssistantComponent: React.FC<Props> = ({
     getLastConversationId,
     http,
     promptContexts,
-    setCurrentUserAvatar,
+    currentUserAvatar,
     setLastConversationId,
   } = useAssistantContext();
-
-  setCurrentUserAvatar(currentUserAvatar);
 
   const [selectedPromptContexts, setSelectedPromptContexts] = useState<
     Record<string, SelectedPromptContext>

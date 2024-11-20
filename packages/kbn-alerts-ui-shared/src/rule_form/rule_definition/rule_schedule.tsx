@@ -80,9 +80,6 @@ export const RuleSchedule = () => {
 
   const onIntervalNumberChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (!e.target.validity.valid) {
-        return;
-      }
       const value = e.target.value.trim();
       if (INTEGER_REGEX.test(value)) {
         const parsedValue = parseInt(value, 10);

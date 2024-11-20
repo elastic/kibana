@@ -91,11 +91,10 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           expect(Date.parse(response.body.next_run)).to.be.greaterThan(0);
         }
 
-        response = await supertest.get(
-          `${getUrlPrefix(
-            Spaces.space1.id
-          )}/internal/alerting/rules/_find?filter=alert.attributes.params.risk_score:40`
-        );
+        response = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_find`)
+          .set('kbn-xsrf', 'kibana')
+          .send({ filter: `alert.attributes.params.risk_score:40` });
 
         expect(response.body.data[0].mapped_params).to.eql({
           risk_score: 40,

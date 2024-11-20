@@ -8,11 +8,15 @@
 import { getUnitedEntityDefinition } from './get_united_definition';
 
 describe('getUnitedEntityDefinition', () => {
+  const indexPatterns = ['test*'];
   describe('host', () => {
     const unitedDefinition = getUnitedEntityDefinition({
       entityType: 'host',
       namespace: 'test',
       fieldHistoryLength: 10,
+      indexPatterns,
+      syncDelay: '1m',
+      frequency: '1m',
     });
 
     it('mapping', () => {
@@ -28,10 +32,10 @@ describe('getUnitedEntityDefinition', () => {
             "entity.name": Object {
               "fields": Object {
                 "text": Object {
-                  "type": "keyword",
+                  "type": "match_only_text",
                 },
               },
-              "type": "text",
+              "type": "keyword",
             },
             "entity.source": Object {
               "type": "keyword",
@@ -55,6 +59,22 @@ describe('getUnitedEntityDefinition', () => {
               "type": "keyword",
             },
             "host.name": Object {
+              "fields": Object {
+                "text": Object {
+                  "type": "match_only_text",
+                },
+              },
+              "type": "keyword",
+            },
+            "host.os.name": Object {
+              "fields": Object {
+                "text": Object {
+                  "type": "match_only_text",
+                },
+              },
+              "type": "keyword",
+            },
+            "host.os.type": Object {
               "type": "keyword",
             },
             "host.risk.calculated_level": Object {
@@ -94,6 +114,16 @@ describe('getUnitedEntityDefinition', () => {
               "operation": "collect_values",
             },
             Object {
+              "field": "host.os.name",
+              "maxLength": 10,
+              "operation": "collect_values",
+            },
+            Object {
+              "field": "host.os.type",
+              "maxLength": 10,
+              "operation": "collect_values",
+            },
+            Object {
               "field": "host.ip",
               "maxLength": 10,
               "operation": "collect_values",
@@ -115,8 +145,7 @@ describe('getUnitedEntityDefinition', () => {
             },
             Object {
               "field": "entity.source",
-              "maxLength": 10,
-              "operation": "collect_values",
+              "operation": "prefer_oldest_value",
             },
             Object {
               "field": "asset.criticality",
@@ -151,20 +180,14 @@ describe('getUnitedEntityDefinition', () => {
             },
           ],
           "indexPatterns": Array [
-            "apm-*-transaction*",
-            "auditbeat-*",
-            "endgame-*",
-            "filebeat-*",
-            "logs-*",
-            "packetbeat-*",
-            "traces-apm*",
-            "winlogbeat-*",
-            "-*elastic-cloud-logs-*",
-            ".asset-criticality.asset-criticality-test",
-            "risk-score.risk-score-latest-test",
+            "test*",
           ],
           "latest": Object {
             "lookbackPeriod": "24h",
+            "settings": Object {
+              "frequency": "1m",
+              "syncDelay": "1m",
+            },
             "timestampField": "@timestamp",
           },
           "managed": true,
@@ -192,6 +215,22 @@ describe('getUnitedEntityDefinition', () => {
               },
               "destination": "host.id",
               "source": "host.id",
+            },
+            Object {
+              "aggregation": Object {
+                "limit": 10,
+                "type": "terms",
+              },
+              "destination": "host.os.name",
+              "source": "host.os.name",
+            },
+            Object {
+              "aggregation": Object {
+                "limit": 10,
+                "type": "terms",
+              },
+              "destination": "host.os.type",
+              "source": "host.os.type",
             },
             Object {
               "aggregation": Object {
@@ -227,8 +266,10 @@ describe('getUnitedEntityDefinition', () => {
             },
             Object {
               "aggregation": Object {
-                "limit": 10,
-                "type": "terms",
+                "sort": Object {
+                  "@timestamp": "asc",
+                },
+                "type": "top_value",
               },
               "destination": "entity.source",
               "source": "_index",
@@ -286,6 +327,9 @@ describe('getUnitedEntityDefinition', () => {
       entityType: 'user',
       namespace: 'test',
       fieldHistoryLength: 10,
+      indexPatterns,
+      syncDelay: '1m',
+      frequency: '1m',
     });
 
     it('mapping', () => {
@@ -301,10 +345,10 @@ describe('getUnitedEntityDefinition', () => {
             "entity.name": Object {
               "fields": Object {
                 "text": Object {
-                  "type": "keyword",
+                  "type": "match_only_text",
                 },
               },
-              "type": "text",
+              "type": "keyword",
             },
             "entity.source": Object {
               "type": "keyword",
@@ -316,6 +360,11 @@ describe('getUnitedEntityDefinition', () => {
               "type": "keyword",
             },
             "user.full_name": Object {
+              "fields": Object {
+                "text": Object {
+                  "type": "match_only_text",
+                },
+              },
               "type": "keyword",
             },
             "user.hash": Object {
@@ -325,6 +374,11 @@ describe('getUnitedEntityDefinition', () => {
               "type": "keyword",
             },
             "user.name": Object {
+              "fields": Object {
+                "text": Object {
+                  "type": "match_only_text",
+                },
+              },
               "type": "keyword",
             },
             "user.risk.calculated_level": Object {
@@ -380,8 +434,7 @@ describe('getUnitedEntityDefinition', () => {
             },
             Object {
               "field": "entity.source",
-              "maxLength": 10,
-              "operation": "collect_values",
+              "operation": "prefer_oldest_value",
             },
             Object {
               "field": "asset.criticality",
@@ -416,20 +469,14 @@ describe('getUnitedEntityDefinition', () => {
             },
           ],
           "indexPatterns": Array [
-            "apm-*-transaction*",
-            "auditbeat-*",
-            "endgame-*",
-            "filebeat-*",
-            "logs-*",
-            "packetbeat-*",
-            "traces-apm*",
-            "winlogbeat-*",
-            "-*elastic-cloud-logs-*",
-            ".asset-criticality.asset-criticality-test",
-            "risk-score.risk-score-latest-test",
+            "test*",
           ],
           "latest": Object {
             "lookbackPeriod": "24h",
+            "settings": Object {
+              "frequency": "1m",
+              "syncDelay": "1m",
+            },
             "timestampField": "@timestamp",
           },
           "managed": true,
@@ -484,8 +531,10 @@ describe('getUnitedEntityDefinition', () => {
             },
             Object {
               "aggregation": Object {
-                "limit": 10,
-                "type": "terms",
+                "sort": Object {
+                  "@timestamp": "asc",
+                },
+                "type": "top_value",
               },
               "destination": "entity.source",
               "source": "_index",

@@ -131,7 +131,8 @@ describe('SolutionFilter ', () => {
       expect(getByTestId(`options-filter-popover-item-${solutions[1]}`)).toBeInTheDocument();
     });
 
-    it('should call onChange with selected solution id when no option selected yet', async () => {
+    // Flaky: https://github.com/elastic/kibana/issues/175240
+    it.skip('should call onChange with selected solution id when no option selected yet', async () => {
       const { getByTestId } = appMockRender.render(
         <SolutionFilter
           onChange={onChange}

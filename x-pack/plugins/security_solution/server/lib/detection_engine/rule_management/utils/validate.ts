@@ -8,7 +8,6 @@
 import type { PartialRule } from '@kbn/alerting-plugin/server';
 import { isEqual, xorWith } from 'lodash';
 import { stringifyZodError } from '@kbn/zod-helpers';
-import { shouldShowResponseActions } from '../../../../../common/detection_engine/utils';
 import {
   type ResponseAction,
   type RuleCreateProps,
@@ -59,16 +58,6 @@ export const validateResponseActionsPermissions = async (
   ruleUpdate: RuleCreateProps | RuleUpdateProps,
   existingRule?: RuleAlertType | null
 ): Promise<void> => {
-  const { experimentalFeatures } = await securitySolution.getConfig();
-  if (
-    !shouldShowResponseActions(
-      ruleUpdate.type,
-      experimentalFeatures.automatedResponseActionsForAllRulesEnabled
-    )
-  ) {
-    return;
-  }
-
   if (
     !rulePayloadContainsResponseActions(ruleUpdate) ||
     (existingRule && !ruleObjectContainsResponseActions(existingRule))

@@ -16,7 +16,9 @@ const ACTION_TYPE_ID = '.inference';
 let actionTypeModel: ActionTypeModel;
 
 beforeAll(() => {
-  ExperimentalFeaturesService.init({ experimentalFeatures: experimentalFeaturesMock });
+  ExperimentalFeaturesService.init({
+    experimentalFeatures: { ...experimentalFeaturesMock, inferenceConnectorOn: true } as any,
+  });
   const connectorTypeRegistry = new TypeRegistry<ActionTypeModel>();
   registerConnectorTypes({ connectorTypeRegistry, services: registrationServicesMock });
   const getResult = connectorTypeRegistry.get(ACTION_TYPE_ID);

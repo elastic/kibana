@@ -87,6 +87,7 @@ describe('request logging', () => {
         route: {
           method: 'get',
           path: '/',
+          routePath: '/',
           options: expect.any(Object),
         },
         uuid: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
@@ -116,10 +117,12 @@ describe('request logging', () => {
           auth: { isAuthenticated: false },
           route: {
             path: '/',
+            routePath: '/',
             method: 'get',
             options: {
               authRequired: true,
               xsrfRequired: false,
+              deprecated: undefined,
               access: 'internal',
               tags: [],
               security: undefined,
@@ -127,7 +130,8 @@ describe('request logging', () => {
               body: undefined
             }
           },
-          authzResult: undefined
+          authzResult: undefined,
+          apiVersion: undefined
         }"
       `);
     });

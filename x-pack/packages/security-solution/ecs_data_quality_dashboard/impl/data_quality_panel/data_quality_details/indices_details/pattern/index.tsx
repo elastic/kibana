@@ -35,6 +35,7 @@ import { getPageIndex } from './utils/get_page_index';
 import { useAbortControllerRef } from '../../../hooks/use_abort_controller_ref';
 import { useHistoricalResults } from './hooks/use_historical_results';
 import { HistoricalResultsContext } from './contexts/historical_results_context';
+import { HistoricalResultsTour } from './historical_results_tour';
 
 const EMPTY_INDEX_NAMES: string[] = [];
 
@@ -44,6 +45,11 @@ interface Props {
   patternRollup: PatternRollup | undefined;
   chartSelectedIndex: SelectedIndex | null;
   setChartSelectedIndex: (selectedIndex: SelectedIndex | null) => void;
+  isTourActive: boolean;
+  isFirstOpenNonEmptyPattern: boolean;
+  onAccordionToggle: (patternName: string, isOpen: boolean, isEmpty: boolean) => void;
+  onDismissTour: () => void;
+  openPatternsUpdatedAt?: number;
 }
 
 const PatternComponent: React.FC<Props> = ({
@@ -52,6 +58,11 @@ const PatternComponent: React.FC<Props> = ({
   patternRollup,
   chartSelectedIndex,
   setChartSelectedIndex,
+  isTourActive,
+  isFirstOpenNonEmptyPattern,
+  onAccordionToggle,
+  onDismissTour,
+  openPatternsUpdatedAt,
 }) => {
   const { historicalResultsState, fetchHistoricalResults } = useHistoricalResults();
   const historicalResultsContextValue = useMemo(
@@ -124,6 +135,35 @@ const PatternComponent: React.FC<Props> = ({
     ]
   );
 
+  const [isAccordionOpen, setIsAccordionOpen] = useState(true);
+
+  const isAccordionOpenRef = useRef(isAccordionOpen);
+  useEffect(() => {
+    isAccordionOpenRef.current = isAccordionOpen;
+  }, [isAccordionOpen]);
+
+  useEffect(() => {
+    // this use effect syncs isEmpty state with the parent component
+    //
+    // we do not add isAccordionOpen to the dependency array because
+    // it is already handled by handleAccordionToggle
+    // so we don't want to additionally trigger this useEffect when isAccordionOpen changes
+    // because it's confusing and unnecessary
+    // that's why we use ref here to keep separation of concerns
+    onAccordionToggle(pattern, isAccordionOpenRef.current, items.length === 0);
+  }, [items.length, onAccordionToggle, pattern]);
+
+  const handleAccordionToggle = useCallback(
+    (isOpen: boolean) => {
+      const isEmpty = items.length === 0;
+      setIsAccordionOpen(isOpen);
+      onAccordionToggle(pattern, isOpen, isEmpty);
+    },
+    [items.length, onAccordionToggle, pattern]
+  );
+
+  const firstRow = items[0];
+
   const handleFlyoutClose = useCallback(() => {
     setExpandedIndexName(null);
   }, []);
@@ -153,6 +193,9 @@ const PatternComponent: React.FC<Props> = ({
 
   const handleFlyoutViewCheckHistoryAction = useCallback(
     (indexName: string) => {
+      if (isTourActive) {
+        onDismissTour();
+      }
       fetchHistoricalResults({
         abortController: flyoutViewCheckHistoryAbortControllerRef.current,
         indexName,
@@ -160,8 +203,15 @@ const PatternComponent: React.FC<Props> = ({
       setExpandedIndexName(indexName);
       setInitialFlyoutTabId(HISTORY_TAB_ID);
     },
-    [fetchHistoricalResults, flyoutViewCheckHistoryAbortControllerRef]
+    [fetchHistoricalResults, flyoutViewCheckHistoryAbortControllerRef, isTourActive, onDismissTour]
   );
+
+  const handleOpenFlyoutHistoryTab = useCallback(() => {
+    const firstItemIndexName = firstRow?.indexName;
+    if (firstItemIndexName) {
+      handleFlyoutViewCheckHistoryAction(firstItemIndexName);
+    }
+  }, [firstRow?.indexName, handleFlyoutViewCheckHistoryAction]);
 
   useEffect(() => {
     const newIndexNames = getIndexNames({ stats, ilmExplain, ilmPhases, isILMAvailable });
@@ -270,8 +320,11 @@ const PatternComponent: React.FC<Props> = ({
       <HistoricalResultsContext.Provider value={historicalResultsContextValue}>
         <PatternAccordion
           id={patternComponentAccordionId}
-          initialIsOpen={true}
-          buttonElement="div"
+          forceState={isAccordionOpen ? 'open' : 'closed'}
+          onToggle={handleAccordionToggle}
+          buttonProps={{
+            'data-test-subj': `patternAccordionButton-${pattern}`,
+          }}
           buttonContent={
             <PatternSummary
               incompatible={getTotalPatternIncompatible(patternRollup?.results)}
@@ -308,6 +361,34 @@ const PatternComponent: React.FC<Props> = ({
 
             {!loading && error == null && (
               <div ref={containerRef}>
+                <HistoricalResultsTour
+                  // this is a hack to force popover anchor position recalculation
+                  // when the first open non-empty pattern layout changes due to other
+                  // patterns being opened/closed
+                  // It's a bug on Eui side
+                  //
+                  // TODO: remove this hack when EUI popover is fixed
+                  // https://github.com/elastic/eui/issues/5226
+                  {...(isFirstOpenNonEmptyPattern && { key: openPatternsUpdatedAt })}
+                  anchorSelectorValue={pattern}
+                  onTryIt={handleOpenFlyoutHistoryTab}
+                  isOpen={
+                    isTourActive &&
+                    !isFlyoutVisible &&
+                    isFirstOpenNonEmptyPattern &&
+                    isAccordionOpen
+                  }
+                  onDismissTour={onDismissTour}
+                  // Only set zIndex when the tour is in list view (not in flyout)
+                  //
+                  // 1 less than the z-index of the left navigation
+                  // 5 less than the z-index of the timeline
+                  //
+                  //
+                  // TODO this hack should be removed when we properly set z-indexes
+                  // in the timeline and left navigation
+                  zIndex={998}
+                />
                 <SummaryTable
                   getTableColumns={getSummaryTableColumns}
                   items={items}
@@ -334,6 +415,8 @@ const PatternComponent: React.FC<Props> = ({
             ilmExplain={ilmExplain}
             stats={stats}
             onClose={handleFlyoutClose}
+            onDismissTour={onDismissTour}
+            isTourActive={isTourActive}
           />
         ) : null}
       </HistoricalResultsContext.Provider>

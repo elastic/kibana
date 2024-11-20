@@ -19,8 +19,12 @@ import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 
 const ParamsObjectSchema = schema.object({
-  key: schema.string(),
-  value: schema.string(),
+  key: schema.string({
+    minLength: 1,
+  }),
+  value: schema.string({
+    minLength: 1,
+  }),
   description: schema.maybe(schema.string()),
   tags: schema.maybe(schema.arrayOf(schema.string())),
   share_across_spaces: schema.maybe(schema.boolean()),

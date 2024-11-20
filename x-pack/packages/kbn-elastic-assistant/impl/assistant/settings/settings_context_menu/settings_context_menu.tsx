@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ReactElement, useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,8 +18,12 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { KnowledgeBaseTour } from '../../../tour/knowledge_base';
+import { AnonymizationSettingsManagement } from '../../../data_anonymization/settings/anonymization_settings_management';
 import { useAssistantContext } from '../../../..';
 import * as i18n from '../../assistant_header/translations';
+import { AlertsSettingsModal } from '../alerts_settings/alerts_settings_modal';
+import { KNOWLEDGE_BASE_TAB } from '../const';
 
 interface Params {
   isDisabled?: boolean;
@@ -28,15 +32,20 @@ interface Params {
 
 export const SettingsContextMenu: React.FC<Params> = React.memo(
   ({ isDisabled = false, onChatCleared }: Params) => {
-    const {
-      navigateToApp,
-      knowledgeBase,
-      assistantFeatures: { assistantKnowledgeBaseByDefault: enableKnowledgeBaseByDefault },
-    } = useAssistantContext();
+    const { navigateToApp, knowledgeBase } = useAssistantContext();
 
     const [isPopoverOpen, setPopover] = useState(false);
 
     const [isResetConversationModalVisible, setIsResetConversationModalVisible] = useState(false);
+
+    const [isAlertsSettingsModalVisible, setIsAlertsSettingsModalVisible] = useState(false);
+    const closeAlertSettingsModal = useCallback(() => setIsAlertsSettingsModalVisible(false), []);
+    const showAlertSettingsModal = useCallback(() => setIsAlertsSettingsModalVisible(true), []);
+
+    const [isAnonymizationModalVisible, setIsAnonymizationModalVisible] = useState(false);
+    const closeAnonymizationModal = useCallback(() => setIsAnonymizationModalVisible(false), []);
+    const showAnonymizationModal = useCallback(() => setIsAnonymizationModalVisible(true), []);
+
     const closeDestroyModal = useCallback(() => setIsResetConversationModalVisible(false), []);
 
     const onButtonClick = useCallback(() => {
@@ -60,20 +69,29 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
       [navigateToApp]
     );
 
+    const handleNavigateToAnonymization = useCallback(() => {
+      showAnonymizationModal();
+      closePopover();
+    }, [closePopover, showAnonymizationModal]);
+
     const handleNavigateToKnowledgeBase = useCallback(
       () =>
         navigateToApp('management', {
-          path: 'kibana/securityAiAssistantManagement',
+          path: `kibana/securityAiAssistantManagement?tab=${KNOWLEDGE_BASE_TAB}`,
         }),
       [navigateToApp]
     );
 
-    // We are migrating away from the settings modal in favor of the new Stack Management UI
-    // Currently behind `assistantKnowledgeBaseByDefault` FF
-    const newItems: ReactElement[] = useMemo(
+    const handleShowAlertsModal = useCallback(() => {
+      showAlertSettingsModal();
+      closePopover();
+    }, [closePopover, showAlertSettingsModal]);
+
+    const items = useMemo(
       () => [
         <EuiContextMenuItem
           aria-label={'ai-assistant-settings'}
+          key={'ai-assistant-settings'}
           onClick={handleNavigateToSettings}
           icon={'gear'}
           data-test-subj={'ai-assistant-settings'}
@@ -81,15 +99,8 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
           {i18n.AI_ASSISTANT_SETTINGS}
         </EuiContextMenuItem>,
         <EuiContextMenuItem
-          aria-label={'anonymization'}
-          onClick={handleNavigateToSettings}
-          icon={'eye'}
-          data-test-subj={'anonymization'}
-        >
-          {i18n.ANONYMIZATION}
-        </EuiContextMenuItem>,
-        <EuiContextMenuItem
           aria-label={'knowledge-base'}
+          key={'knowledge-base'}
           onClick={handleNavigateToKnowledgeBase}
           icon={'documents'}
           data-test-subj={'knowledge-base'}
@@ -97,8 +108,18 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
           {i18n.KNOWLEDGE_BASE}
         </EuiContextMenuItem>,
         <EuiContextMenuItem
+          aria-label={'anonymization'}
+          key={'anonymization'}
+          onClick={handleNavigateToAnonymization}
+          icon={'eye'}
+          data-test-subj={'anonymization'}
+        >
+          {i18n.ANONYMIZATION}
+        </EuiContextMenuItem>,
+        <EuiContextMenuItem
           aria-label={'alerts-to-analyze'}
-          onClick={handleNavigateToSettings}
+          key={'alerts-to-analyze'}
+          onClick={handleShowAlertsModal}
           icon={'magnifyWithExclamation'}
           data-test-subj={'alerts-to-analyze'}
         >
@@ -111,15 +132,9 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiContextMenuItem>,
-      ],
-      [handleNavigateToKnowledgeBase, handleNavigateToSettings, knowledgeBase]
-    );
-
-    const items = useMemo(
-      () => [
-        ...(enableKnowledgeBaseByDefault ? newItems : []),
         <EuiContextMenuItem
           aria-label={'clear-chat'}
+          key={'clear-chat'}
           onClick={showDestroyModal}
           icon={'refresh'}
           data-test-subj={'clear-chat'}
@@ -131,7 +146,14 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
         </EuiContextMenuItem>,
       ],
 
-      [enableKnowledgeBaseByDefault, newItems, showDestroyModal]
+      [
+        handleNavigateToAnonymization,
+        handleNavigateToKnowledgeBase,
+        handleNavigateToSettings,
+        handleShowAlertsModal,
+        knowledgeBase.latestAlerts,
+        showDestroyModal,
+      ]
     );
 
     const handleReset = useCallback(() => {
@@ -144,13 +166,15 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
       <>
         <EuiPopover
           button={
-            <EuiButtonIcon
-              aria-label="test"
-              isDisabled={isDisabled}
-              iconType="boxesVertical"
-              onClick={onButtonClick}
-              data-test-subj="chat-context-menu"
-            />
+            <KnowledgeBaseTour>
+              <EuiButtonIcon
+                aria-label="test"
+                isDisabled={isDisabled}
+                iconType="boxesVertical"
+                onClick={onButtonClick}
+                data-test-subj="chat-context-menu"
+              />
+            </KnowledgeBaseTour>
           }
           isOpen={isPopoverOpen}
           closePopover={closePopover}
@@ -164,6 +188,10 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
             `}
           />
         </EuiPopover>
+        {isAlertsSettingsModalVisible && <AlertsSettingsModal onClose={closeAlertSettingsModal} />}
+        {isAnonymizationModalVisible && (
+          <AnonymizationSettingsManagement modalMode onClose={closeAnonymizationModal} />
+        )}
         {isResetConversationModalVisible && (
           <EuiConfirmModal
             title={i18n.RESET_CONVERSATION}

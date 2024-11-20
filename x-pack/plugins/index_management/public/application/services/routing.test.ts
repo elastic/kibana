@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-import { getIndexDetailsLink, getIndexListUri } from './routing';
+import { getIndexDetailsLink, getIndexListUri, navigateToIndexDetailsPage } from './routing';
+import { applicationServiceMock, httpServiceMock } from '@kbn/core/public/mocks';
+import { ExtensionsService } from '../../services/extensions_service';
+import { IndexDetailsSection } from '../../../common/constants';
 
 describe('routing', () => {
   describe('index details link', () => {
+    const application = applicationServiceMock.createStartContract();
+    const http = httpServiceMock.createSetupContract();
+
     it('adds the index name to the url', () => {
       const indexName = 'testIndex';
       const url = getIndexDetailsLink(indexName, '');
@@ -25,6 +31,33 @@ describe('routing', () => {
       const tab = 'dynamic-tab';
       const url = getIndexDetailsLink('testIndex', '', tab);
       expect(url).toContain(`tab=${tab}`);
+    });
+    it('renders default index details route without extensionService indexDetailsPageRoute ', () => {
+      const extensionService = {
+        indexDetailsPageRoute: null,
+      } as ExtensionsService;
+      navigateToIndexDetailsPage('testIndex', '', extensionService, application, http);
+      expect(application.navigateToUrl).toHaveBeenCalled();
+    });
+
+    it('renders route from extensionService indexDetailsPageRoute with tab id', () => {
+      const extensionService = {
+        indexDetailsPageRoute: {
+          renderRoute: (indexName: string, detailsTabId?: string) => {
+            return `test_url/${detailsTabId}`;
+          },
+        },
+      } as ExtensionsService;
+      navigateToIndexDetailsPage(
+        'testIndex',
+        '',
+        extensionService,
+        application,
+        http,
+        IndexDetailsSection.Settings
+      );
+      expect(application.navigateToUrl).toHaveBeenCalled();
+      expect(application.navigateToUrl).toHaveBeenCalledWith('test_url/settings');
     });
   });
 

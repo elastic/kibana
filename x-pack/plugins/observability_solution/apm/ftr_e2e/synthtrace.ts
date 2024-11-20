@@ -14,3 +14,12 @@ export const synthtrace = {
     ),
   clean: () => cy.task('synthtrace:clean'),
 };
+
+export const synthtraceOtel = {
+  index: (events: SynthtraceGenerator<ApmFields> | Array<Serializable<ApmFields>>) =>
+    cy.task(
+      'synthtraceOtel:index',
+      Array.from(events).flatMap((event) => event.serialize())
+    ),
+  clean: () => cy.task('synthtraceOtel:clean'),
+};

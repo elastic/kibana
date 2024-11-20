@@ -73,7 +73,7 @@ describe('useGetCases', () => {
 
     appMockRender.coreStart.application.capabilities = {
       ...appMockRender.coreStart.application.capabilities,
-      observabilityCases: {
+      observabilityCasesV2: {
         create_cases: true,
         read_cases: true,
         update_cases: true,
@@ -82,7 +82,7 @@ describe('useGetCases', () => {
         delete_cases: true,
         cases_settings: true,
       },
-      securitySolutionCases: {
+      securitySolutionCasesV2: {
         create_cases: true,
         read_cases: true,
         update_cases: true,

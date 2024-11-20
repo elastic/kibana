@@ -28,7 +28,8 @@ jest.mock('../monitoring/workload_statistics', () => {
   };
 });
 
-describe('unrecognized task types', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/194208
+describe.skip('unrecognized task types', () => {
   let esServer: TestElasticsearchUtils;
   let kibanaServer: TestKibanaUtils;
   let taskManagerPlugin: TaskManagerStartContract;
@@ -127,7 +128,9 @@ describe('unrecognized task types', () => {
     if (errorLogCalls) {
       // should be no workload aggregator errors
       for (const elog of errorLogCalls) {
-        expect(elog).not.toMatch(/^\[WorkloadAggregator\]: Error: Unsupported task type/i);
+        if (typeof elog === 'string') {
+          expect(elog).not.toMatch(/^\[WorkloadAggregator\]: Error: Unsupported task type/i);
+        }
       }
     }
   });

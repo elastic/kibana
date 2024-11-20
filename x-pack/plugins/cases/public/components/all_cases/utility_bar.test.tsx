@@ -41,7 +41,17 @@ describe('Severity form field', () => {
     showClearFiltersButton: false,
   };
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+    sessionStorage.removeItem(localStorageKey);
+  });
+
   beforeEach(() => {
+    jest.useFakeTimers();
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
     user = userEvent.setup({
       advanceTimers: jest.advanceTimersByTime,

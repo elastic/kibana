@@ -25,7 +25,7 @@ export type IndexPattern = z.infer<typeof IndexPattern>;
 export const IndexPattern = z.string();
 
 export type EngineStatus = z.infer<typeof EngineStatus>;
-export const EngineStatus = z.enum(['installing', 'started', 'stopped']);
+export const EngineStatus = z.enum(['installing', 'started', 'stopped', 'updating', 'error']);
 export type EngineStatusEnum = typeof EngineStatus.enum;
 export const EngineStatusEnum = EngineStatus.enum;
 
@@ -36,7 +36,13 @@ export const EngineDescriptor = z.object({
   status: EngineStatus,
   filter: z.string().optional(),
   fieldHistoryLength: z.number().int(),
+  error: z.object({}).optional(),
 });
+
+export type StoreStatus = z.infer<typeof StoreStatus>;
+export const StoreStatus = z.enum(['not_installed', 'installing', 'running', 'stopped', 'error']);
+export type StoreStatusEnum = typeof StoreStatus.enum;
+export const StoreStatusEnum = StoreStatus.enum;
 
 export type InspectQuery = z.infer<typeof InspectQuery>;
 export const InspectQuery = z.object({

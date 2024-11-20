@@ -93,9 +93,13 @@ export class ActionsClientChatConnection<Auth> extends ChatConnection<Auth> {
         };
 
         if (actionResult.status === 'error') {
-          throw new Error(
+          const error = new Error(
             `ActionsClientChatVertexAI: action result status is error: ${actionResult?.message} - ${actionResult?.serviceMessage}`
           );
+          if (actionResult?.serviceMessage) {
+            error.name = actionResult?.serviceMessage;
+          }
+          throw error;
         }
 
         if (actionResult.data.candidates && actionResult.data.candidates.length > 0) {

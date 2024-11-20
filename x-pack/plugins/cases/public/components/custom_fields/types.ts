@@ -59,7 +59,7 @@ export type CustomFieldFactory<
   build: () => CustomFieldType<T, I>;
   getFilterOptions?: (configuration: I) => Array<CustomFieldFactoryFilterOption<T>>;
   getDefaultValue?: () => string | boolean | null;
-  convertNullToEmpty?: (value: string | boolean | null) => string;
+  convertNullToEmpty?: (value: string | number | boolean | null) => string;
   convertValueToDisplayText?: (value: T['value'], configuration: I) => string;
 };
 

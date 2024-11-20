@@ -8,15 +8,18 @@
 import type { CoreStart, Plugin } from '@kbn/core/public';
 import { type CoreSetup } from '@kbn/core/public';
 import { firstValueFrom } from 'rxjs';
-import { dynamic } from '@kbn/shared-ux-utility';
 
 import { getChangePointDetectionComponent } from './shared_components';
+import { LogCategorizationForDiscover as PatternAnalysisComponent } from './shared_lazy_components';
 import type {
   AiopsPluginSetup,
   AiopsPluginSetupDeps,
   AiopsPluginStart,
   AiopsPluginStartDeps,
 } from './types';
+import { registerEmbeddables } from './embeddables';
+import { registerAiopsUiActions } from './ui_actions';
+import { registerCases } from './cases/register_cases';
 
 export type AiopsCoreSetup = CoreSetup<AiopsPluginStartDeps, AiopsPluginStart>;
 
@@ -27,20 +30,8 @@ export class AiopsPlugin
     core: AiopsCoreSetup,
     { embeddable, cases, licensing, uiActions }: AiopsPluginSetupDeps
   ) {
-    Promise.all([
-      firstValueFrom(licensing.license$),
-      import('./embeddables'),
-      import('./ui_actions'),
-      import('./cases/register_change_point_charts_attachment'),
-      core.getStartServices(),
-    ]).then(
-      ([
-        license,
-        { registerEmbeddables },
-        { registerAiopsUiActions },
-        { registerChangePointChartsAttachment },
-        [coreStart, pluginStart],
-      ]) => {
+    Promise.all([firstValueFrom(licensing.license$), core.getStartServices()]).then(
+      ([license, [coreStart, pluginStart]]) => {
         const { canUseAiops } = coreStart.application.capabilities.ml;
 
         if (license.hasAtLeast('platinum') && canUseAiops) {
@@ -53,7 +44,7 @@ export class AiopsPlugin
           }
 
           if (cases) {
-            registerChangePointChartsAttachment(cases, coreStart, pluginStart);
+            registerCases(cases, coreStart, pluginStart);
           }
         }
       }
@@ -69,12 +60,7 @@ export class AiopsPlugin
         );
         return getPatternAnalysisAvailable(plugins.licensing);
       },
-      PatternAnalysisComponent: dynamic(
-        async () =>
-          import(
-            './components/log_categorization/log_categorization_for_embeddable/log_categorization_for_discover_wrapper'
-          )
-      ),
+      PatternAnalysisComponent,
     };
   }
 

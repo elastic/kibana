@@ -10,6 +10,7 @@ import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/a
 import React from 'react';
 import type { AssistantAvailability } from '@kbn/elastic-assistant';
 import { AssistantProvider } from '@kbn/elastic-assistant';
+import type { UserProfileService } from '@kbn/core/public';
 import { BASE_SECURITY_CONVERSATIONS } from '../../assistant/content/conversations';
 
 interface Props {
@@ -33,6 +34,7 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({
     hasConnectorsAllPrivilege: true,
     hasConnectorsReadPrivilege: true,
     hasUpdateAIAssistantAnonymization: true,
+    hasManageGlobalKnowledgeBase: true,
     isAssistantEnabled: true,
   };
 
@@ -51,6 +53,7 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({
       navigateToApp={mockNavigateToApp}
       baseConversations={BASE_SECURITY_CONVERSATIONS}
       currentAppId={'test'}
+      userProfileService={jest.fn() as unknown as UserProfileService}
     >
       {children}
     </AssistantProvider>

@@ -21,13 +21,18 @@ import { limitedArraySchema, limitedStringSchema, regexStringRt } from '../../..
 import {
   CustomFieldTextTypeRt,
   CustomFieldToggleTypeRt,
+  CustomFieldNumberTypeRt,
   CustomFieldListTypeRt,
 } from '../../domain';
 import type { Configurations, Configuration } from '../../domain/configure/v1';
 import { ConfigurationBasicWithoutOwnerRt, ClosureTypeRt } from '../../domain/configure/v1';
 import { CaseConnectorRt } from '../../domain/connector/v1';
 import { CaseBaseOptionalFieldsRequestRt } from '../case/v1';
-import { CaseCustomFieldTextWithValidationValueRt } from '../custom_field/v1';
+import {
+  CaseCustomFieldTextWithValidationValueRt,
+  CaseCustomFieldNumberWithValidationValueRt,
+  CaseCustomFieldListWithValidationValueRt,
+} from '../custom_field/v1';
 
 export const CustomFieldConfigurationWithoutTypeRt = rt.strict({
   /**
@@ -86,7 +91,20 @@ export const ListCustomFieldConfigurationRt = rt.intersection([
   }),
   rt.exact(
     rt.partial({
-      defaultValue: rt.union([rt.record(rt.string, rt.string), rt.null]),
+      defaultValue: rt.union([CaseCustomFieldListWithValidationValueRt('value'), rt.null]),
+    })
+  ),
+]);
+
+export const NumberCustomFieldConfigurationRt = rt.intersection([
+  rt.strict({ type: CustomFieldNumberTypeRt }),
+  CustomFieldConfigurationWithoutTypeRt,
+  rt.exact(
+    rt.partial({
+      defaultValue: rt.union([
+        CaseCustomFieldNumberWithValidationValueRt({ fieldName: 'defaultValue' }),
+        rt.null,
+      ]),
     })
   ),
 ]);
@@ -95,6 +113,7 @@ export const CustomFieldsConfigurationRt = limitedArraySchema({
   codec: rt.union([
     TextCustomFieldConfigurationRt,
     ToggleCustomFieldConfigurationRt,
+    NumberCustomFieldConfigurationRt,
     ListCustomFieldConfigurationRt,
   ]),
   min: 0,

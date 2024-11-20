@@ -83,6 +83,8 @@ const casesSchemaObject = schema.maybe(
     delete: schema.maybe(casesSchema),
     push: schema.maybe(casesSchema),
     settings: schema.maybe(casesSchema),
+    createComment: schema.maybe(casesSchema),
+    reopenCase: schema.maybe(casesSchema),
   })
 );
 
@@ -116,6 +118,21 @@ const kibanaPrivilegeSchema = schema.object({
     read: schema.arrayOf(schema.string()),
   }),
   ui: listOfCapabilitiesSchema,
+  replacedBy: schema.maybe(
+    schema.oneOf([
+      schema.arrayOf(
+        schema.object({ feature: schema.string(), privileges: schema.arrayOf(schema.string()) })
+      ),
+      schema.object({
+        minimal: schema.arrayOf(
+          schema.object({ feature: schema.string(), privileges: schema.arrayOf(schema.string()) })
+        ),
+        default: schema.arrayOf(
+          schema.object({ feature: schema.string(), privileges: schema.arrayOf(schema.string()) })
+        ),
+      }),
+    ])
+  ),
 });
 
 const kibanaIndependentSubFeaturePrivilegeSchema = schema.object({
@@ -155,6 +172,11 @@ const kibanaIndependentSubFeaturePrivilegeSchema = schema.object({
     read: schema.arrayOf(schema.string()),
   }),
   ui: listOfCapabilitiesSchema,
+  replacedBy: schema.maybe(
+    schema.arrayOf(
+      schema.object({ feature: schema.string(), privileges: schema.arrayOf(schema.string()) })
+    )
+  ),
 });
 
 const kibanaMutuallyExclusiveSubFeaturePrivilegeSchema =
@@ -256,6 +278,7 @@ const kibanaFeatureSchema = schema.object({
       ),
     })
   ),
+  deprecated: schema.maybe(schema.object({ notice: schema.string() })),
 });
 
 const elasticsearchPrivilegeSchema = schema.object({

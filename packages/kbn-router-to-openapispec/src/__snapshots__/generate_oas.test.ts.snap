@@ -44,7 +44,7 @@ Object {
   "paths": Object {
     "/foo/{id}": Object {
       "get": Object {
-        "operationId": "%2Ffoo%2F%7Bid%7D#0",
+        "operationId": "get-foo-id",
         "parameters": Array [
           Object {
             "description": "The version of the API to use",
@@ -138,7 +138,7 @@ Object {
     "/bar": Object {
       "get": Object {
         "deprecated": true,
-        "operationId": "%2Fbar#0",
+        "operationId": "get-bar",
         "parameters": Array [
           Object {
             "description": "The version of the API to use",
@@ -228,10 +228,10 @@ OK response oas-test-version-2",
         "x-discontinued": "route discontinued version or date",
       },
     },
-    "/foo/{id}/{path*}": Object {
+    "/foo/{id}/{path}": Object {
       "delete": Object {
         "description": "route description",
-        "operationId": "%2Ffoo%2F%7Bid%7D%2F%7Bpath*%7D#2",
+        "operationId": "delete-foo-id-path",
         "parameters": Array [
           Object {
             "description": "The version of the API to use",
@@ -269,7 +269,7 @@ OK response oas-test-version-2",
       },
       "get": Object {
         "description": "route description",
-        "operationId": "%2Ffoo%2F%7Bid%7D%2F%7Bpath*%7D#0",
+        "operationId": "get-foo-id-path",
         "parameters": Array [
           Object {
             "description": "The version of the API to use",
@@ -415,7 +415,7 @@ OK response oas-test-version-2",
       },
       "post": Object {
         "description": "route description",
-        "operationId": "%2Ffoo%2F%7Bid%7D%2F%7Bpath*%7D#1",
+        "operationId": "post-foo-id-path",
         "parameters": Array [
           Object {
             "description": "The version of the API to use",
@@ -570,9 +570,10 @@ OK response oas-test-version-2",
         ],
       },
     },
-    "/no-xsrf/{id}/{path*}": Object {
+    "/no-xsrf/{id}/{path}": Object {
       "post": Object {
-        "operationId": "%2Fno-xsrf%2F%7Bid%7D%2F%7Bpath*%7D#1",
+        "deprecated": true,
+        "operationId": "post-no-xsrf-id-path-2",
         "parameters": Array [
           Object {
             "description": "The version of the API to use",
@@ -724,7 +725,7 @@ Object {
   "paths": Object {
     "/recursive": Object {
       "get": Object {
-        "operationId": "%2Frecursive#0",
+        "operationId": "get-recursive",
         "parameters": Array [
           Object {
             "description": "The version of the API to use",
@@ -807,7 +808,7 @@ Object {
   "paths": Object {
     "/foo/{id}": Object {
       "get": Object {
-        "operationId": "%2Ffoo%2F%7Bid%7D#0",
+        "operationId": "get-foo-id",
         "parameters": Array [
           Object {
             "description": "The version of the API to use",
@@ -845,7 +846,7 @@ Object {
     },
     "/test": Object {
       "get": Object {
-        "operationId": "%2Ftest#0",
+        "operationId": "get-test",
         "parameters": Array [
           Object {
             "description": "The version of the API to use",

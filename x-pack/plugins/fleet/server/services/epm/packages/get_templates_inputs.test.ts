@@ -5,9 +5,20 @@
  * 2.0.
  */
 
-import type { PackagePolicyInput } from '../../../../common/types';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
-import { templatePackagePolicyToFullInputStreams } from './get_template_inputs';
+import { createAppContextStartContractMock } from '../../../mocks';
+import type { PackagePolicyInput } from '../../../../common/types';
+import { appContextService } from '../..';
+
+import { getTemplateInputs, templatePackagePolicyToFullInputStreams } from './get_template_inputs';
+import REDIS_1_18_0_PACKAGE_INFO from './__fixtures__/redis_1_18_0_package_info.json';
+import { getPackageAssetsMap, getPackageInfo } from './get';
+import { REDIS_ASSETS_MAP } from './__fixtures__/redis_1_18_0_streams_template';
+import { LOGS_2_3_0_ASSETS_MAP, LOGS_2_3_0_PACKAGE_INFO } from './__fixtures__/logs_2_3_0';
+import { DOCKER_2_11_0_PACKAGE_INFO, DOCKER_2_11_0_ASSETS_MAP } from './__fixtures__/docker_2_11_0';
+
+jest.mock('./get');
 
 const packageInfoCache = new Map();
 packageInfoCache.set('mock_package-0.0.0', {
@@ -28,6 +39,10 @@ packageInfoCache.set('limited_package-0.0.0', {
     },
   ],
 });
+
+packageInfoCache.set('redis-1.18.0', REDIS_1_18_0_PACKAGE_INFO);
+packageInfoCache.set('log-2.3.0', LOGS_2_3_0_PACKAGE_INFO);
+packageInfoCache.set('docker-2.11.0', DOCKER_2_11_0_PACKAGE_INFO);
 
 describe('Fleet - templatePackagePolicyToFullInputStreams', () => {
   const mockInput: PackagePolicyInput = {
@@ -189,7 +204,7 @@ describe('Fleet - templatePackagePolicyToFullInputStreams', () => {
   it('returns agent inputs without streams', async () => {
     expect(await templatePackagePolicyToFullInputStreams([mockInput2])).toEqual([
       {
-        id: 'test-metrics-some-template',
+        id: 'some-template-test-metrics',
         type: 'test-metrics',
         streams: [
           {
@@ -303,5 +318,56 @@ describe('Fleet - templatePackagePolicyToFullInputStreams', () => {
         ],
       },
     ]);
+  });
+});
+
+describe('Fleet - getTemplateInputs', () => {
+  beforeEach(() => {
+    appContextService.start(createAppContextStartContractMock());
+    jest.mocked(getPackageAssetsMap).mockImplementation(async ({ packageInfo }) => {
+      if (packageInfo.name === 'redis' && packageInfo.version === '1.18.0') {
+        return REDIS_ASSETS_MAP;
+      }
+
+      if (packageInfo.name === 'log') {
+        return LOGS_2_3_0_ASSETS_MAP;
+      }
+      if (packageInfo.name === 'docker') {
+        return DOCKER_2_11_0_ASSETS_MAP;
+      }
+
+      return new Map();
+    });
+    jest.mocked(getPackageInfo).mockImplementation(async ({ pkgName, pkgVersion }) => {
+      const pkgInfo = packageInfoCache.get(`${pkgName}-${pkgVersion}`);
+      if (!pkgInfo) {
+        throw new Error('package not mocked');
+      }
+
+      return pkgInfo;
+    });
+  });
+  it('should work for integration package', async () => {
+    const soMock = savedObjectsClientMock.create();
+    soMock.get.mockResolvedValue({ attributes: {} } as any);
+    const template = await getTemplateInputs(soMock, 'redis', '1.18.0', 'yml');
+
+    expect(template).toMatchSnapshot();
+  });
+
+  it('should work for package with dynamic ids', async () => {
+    const soMock = savedObjectsClientMock.create();
+    soMock.get.mockResolvedValue({ attributes: {} } as any);
+    const template = await getTemplateInputs(soMock, 'docker', '2.11.0', 'yml');
+
+    expect(template).toMatchSnapshot();
+  });
+
+  it('should work for input package', async () => {
+    const soMock = savedObjectsClientMock.create();
+    soMock.get.mockResolvedValue({ attributes: {} } as any);
+    const template = await getTemplateInputs(soMock, 'log', '2.3.0', 'yml');
+
+    expect(template).toMatchSnapshot();
   });
 });

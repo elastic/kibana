@@ -12,6 +12,7 @@ export type {
   AppId,
   ChromeBadge,
   ChromeBreadcrumb,
+  ChromeSetBreadcrumbsParams,
   ChromeBreadcrumbsAppendExtension,
   ChromeDocTitle,
   ChromeGlobalHelpExtensionMenuLink,
@@ -41,7 +42,6 @@ export type {
   SideNavCompProps,
   SideNavComponent,
   SideNavNodeStatus,
-  ChromeProjectBreadcrumb,
   ChromeSetProjectBreadcrumbsParams,
   NodeDefinition,
   NodeDefinitionWithChildren,
@@ -60,4 +60,5 @@ export type {
   SolutionNavigationDefinitions,
   EuiSideNavItemTypeEnhanced,
   RenderAs,
+  SolutionId,
 } from './src';

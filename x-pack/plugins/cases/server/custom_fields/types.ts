@@ -7,15 +7,16 @@
 
 import type { CustomFieldTypes } from '../../common/types/domain';
 
+type FilteringValue = string[] | string | number | boolean | null | number;
+export type FilteringValues = FilteringValue[];
+
 export interface ICasesCustomField {
   isFilterable: boolean;
   isSortable: boolean;
   savedObjectMappingType: string;
   validateFilteringValues: (values: FilteringValues) => void;
-  getDefaultValue?: () => boolean | string | null | string[];
+  getDefaultValue?: () => FilteringValue;
 }
-
-export type FilteringValues = Array<string[] | string | number | boolean | null>;
 
 export interface CasesCustomFieldsMap {
   get: (type: CustomFieldTypes) => ICasesCustomField | null;

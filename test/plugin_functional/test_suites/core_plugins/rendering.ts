@@ -314,6 +314,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.ml.nlp.modelDeployment.vCPURange.medium.static (number?)',
         'xpack.osquery.actionEnabled (boolean?)',
         'xpack.remote_clusters.ui.enabled (boolean?)',
+        'xpack.ingest_pipelines.enableManageProcessors (boolean?|never)',
         /**
          * NOTE: The Reporting plugin is currently disabled in functional tests (see test/functional/config.base.js).
          * It will be re-enabled once #102552 is completed.
@@ -361,6 +362,9 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observability_onboarding.ui.enabled (boolean?)',
         'xpack.observabilityLogsExplorer.navigation.showAppLink (boolean?|never)',
         'xpack.observabilityAIAssistant.scope (observability?|search?)',
+        'xpack.observabilityAiAssistantManagement.logSourcesEnabled (boolean?)',
+        'xpack.observabilityAiAssistantManagement.spacesEnabled (boolean?)',
+        'xpack.observabilityAiAssistantManagement.visibilityEnabled (boolean?)',
         'share.new_version.enabled (boolean?)',
         'aiAssistantManagementSelection.preferredAIAssistantType (default?|never?|observability?)',
         /**

@@ -20,7 +20,7 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createReadySignal } from '@kbn/event-log-plugin/server/lib/ready_signal';
-import { ActionsConfig } from '../config';
+import { ActionsConfig, DEFAULT_USAGE_API_URL } from '../config';
 import { ActionsConfigurationUtilities, getActionsConfigurationUtilities } from '../actions_config';
 import { resolveCustomHosts } from '../lib/custom_host_settings';
 import {
@@ -28,6 +28,7 @@ import {
   DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
   DEFAULT_MICROSOFT_GRAPH_API_URL,
 } from '../../common';
+import { getFips } from 'crypto';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
@@ -251,19 +252,6 @@ describe('axios connections', () => {
       expect(res.status).toBe(200);
     });
 
-    test('it works with pfx and passphrase in SSL overrides', async () => {
-      const { url, server } = await createServer({ useHttps: true, requestCert: true });
-      testServer = server;
-
-      const configurationUtilities = getACUfromConfig();
-      const sslOverrides = {
-        pfx: KIBANA_P12,
-        passphrase: 'storepass',
-      };
-      const res = await request({ axios, url, logger, configurationUtilities, sslOverrides });
-      expect(res.status).toBe(200);
-    });
-
     test('it fails with cert and key but no ca in SSL overrides', async () => {
       const { url, server } = await createServer({ useHttps: true, requestCert: true });
       testServer = server;
@@ -278,18 +266,33 @@ describe('axios connections', () => {
       await expect(fn()).rejects.toThrow('certificate');
     });
 
-    test('it fails with pfx but no passphrase in SSL overrides', async () => {
-      const { url, server } = await createServer({ useHttps: true, requestCert: true });
-      testServer = server;
+    if (getFips() !== 1) {
+      test('it works with pfx and passphrase in SSL overrides', async () => {
+        const { url, server } = await createServer({ useHttps: true, requestCert: true });
+        testServer = server;
 
-      const configurationUtilities = getACUfromConfig();
-      const sslOverrides = {
-        pfx: KIBANA_P12,
-      };
-      const fn = async () =>
-        await request({ axios, url, logger, configurationUtilities, sslOverrides });
-      await expect(fn()).rejects.toThrow('mac verify');
-    });
+        const configurationUtilities = getACUfromConfig();
+        const sslOverrides = {
+          pfx: KIBANA_P12,
+          passphrase: 'storepass',
+        };
+        const res = await request({ axios, url, logger, configurationUtilities, sslOverrides });
+        expect(res.status).toBe(200);
+      });
+
+      test('it fails with pfx but no passphrase in SSL overrides', async () => {
+        const { url, server } = await createServer({ useHttps: true, requestCert: true });
+        testServer = server;
+
+        const configurationUtilities = getACUfromConfig();
+        const sslOverrides = {
+          pfx: KIBANA_P12,
+        };
+        const fn = async () =>
+          await request({ axios, url, logger, configurationUtilities, sslOverrides });
+        await expect(fn()).rejects.toThrow('mac verify');
+      });
+    }
 
     test('it fails with a client-side certificate issued by an invalid ca', async () => {
       const { url, server } = await createServer({ useHttps: true, requestCert: true });
@@ -461,7 +464,6 @@ async function rejectUnauthorizedTargetProxyTest(opts: RunTestOptions) {
   await runWithSetup(opts, async (target, proxyInstance, axiosDefaults) => {
     const acu = getACUfromConfig({
       proxyUrl: proxyInstance.url,
-      rejectUnauthorized: false,
       customHostSettings: [{ url: target.url, ssl: { verificationMode: 'none' } }],
     });
 
@@ -676,14 +678,12 @@ const BaseActionsConfig: ActionsConfig = {
   preconfigured: {},
   proxyUrl: undefined,
   proxyHeaders: undefined,
-  proxyRejectUnauthorizedCertificates: true,
   ssl: {
     proxyVerificationMode: 'full',
     verificationMode: 'full',
   },
   proxyBypassHosts: undefined,
   proxyOnlyHosts: undefined,
-  rejectUnauthorized: true,
   maxResponseContentLength: ByteSizeValue.parse('1mb'),
   responseTimeout: momentDuration(1000 * 30),
   customHostSettings: undefined,
@@ -691,6 +691,9 @@ const BaseActionsConfig: ActionsConfig = {
   microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
   microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
   microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
+  usage: {
+    url: DEFAULT_USAGE_API_URL,
+  },
 };
 
 function getACUfromConfig(config: Partial<ActionsConfig> = {}): ActionsConfigurationUtilities {

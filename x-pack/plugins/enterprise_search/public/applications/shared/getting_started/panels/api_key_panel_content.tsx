@@ -102,26 +102,18 @@ export const ApiKeyPanelContent: React.FC<ApiKeyPanelContent> = ({ apiKeys, open
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="s">
-                <EuiFlexItem>
-                  <EuiText size="xs" color="subdued">
-                    <FormattedMessage
-                      id="xpack.enterpriseSearch.apiKey.activeKeys"
-                      defaultMessage="{number} active API keys."
-                      values={{
-                        number: (
-                          <EuiBadge
-                            color={(apiKeys?.length || 0) > 0 ? 'success' : 'warning'}
-                            data-test-subj="api-keys-count-badge"
-                          >
-                            {apiKeys?.length || 0}
-                          </EuiBadge>
-                        ),
-                      }}
-                    />
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <EuiBadge
+                color={(apiKeys?.length || 0) > 0 ? 'success' : 'warning'}
+                data-test-subj="api-keys-count-badge"
+              >
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.apiKey.activeKeys"
+                  defaultMessage="{number} active API keys"
+                  values={{
+                    number: apiKeys?.length || 0,
+                  }}
+                />
+              </EuiBadge>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

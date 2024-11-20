@@ -6,7 +6,10 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { TypesRulesResponseBodyV1 } from '../../../../../common/routes/rule/apis/list_types';
+import {
+  TypesRulesResponseBodyV1,
+  typesRulesResponseSchemaV1,
+} from '../../../../../common/routes/rule/apis/list_types';
 import { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
@@ -24,7 +27,18 @@ export const ruleTypesRoute = (
         summary: `Get the rule types`,
         tags: ['oas-tag:alerting'],
       },
-      validate: {},
+      validate: {
+        request: {},
+        response: {
+          200: {
+            body: () => typesRulesResponseSchemaV1,
+            description: 'Indicates a successful call.',
+          },
+          401: {
+            description: 'Authorization information is missing or invalid.',
+          },
+        },
+      },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {

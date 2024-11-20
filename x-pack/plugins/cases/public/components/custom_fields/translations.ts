@@ -55,6 +55,10 @@ export const LIST_LABEL = i18n.translate('xpack.cases.customFields.listLabel', {
   defaultMessage: 'List',
 });
 
+export const NUMBER_LABEL = i18n.translate('xpack.cases.customFields.textLabel', {
+  defaultMessage: 'Number',
+});
+
 export const FIELD_TYPE = i18n.translate('xpack.cases.customFields.fieldType', {
   defaultMessage: 'Field type',
 });

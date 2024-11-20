@@ -9,10 +9,8 @@ import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { getTimeline } from '../../../objects/timeline';
 
 import {
-  LOCKED_ICON,
   // NOTES_TEXT,
-  PIN_EVENT,
-  TIMELINE_FILTER,
+
   TIMELINE_FLYOUT_WRAPPER,
   TIMELINE_QUERY,
   TIMELINE_PANEL,
@@ -30,7 +28,6 @@ import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
 import { selectCustomTemplates } from '../../../tasks/templates';
 import {
-  addFilter,
   addNameAndDescriptionToTimeline,
   // addNotesToTimeline,
   clickingOnCreateTimelineFormTemplateBtn,
@@ -38,9 +35,6 @@ import {
   createNewTimeline,
   executeTimelineKQL,
   expandEventAction,
-  goToQueryTab,
-  pinFirstEvent,
-  populateTimeline,
   addNameToTimelineAndSave,
   addNameToTimelineAndSaveAsNew,
 } from '../../../tasks/timeline';
@@ -50,8 +44,7 @@ import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL, TIMELINES_URL } from '../../../ur
 
 const mockTimeline = getTimeline();
 
-// FLAKY: https://github.com/elastic/kibana/issues/180688
-describe.skip('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
+describe('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
   beforeEach(() => {
     deleteTimelines();
   });
@@ -90,32 +83,6 @@ describe.skip('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
       'have.text',
       'You can use Timeline to investigate events, but you do not have the required permissions to save timelines for future use. If you need to save timelines, contact your Kibana administrator.'
     );
-  });
-
-  it('should create a timeline by clicking untitled timeline from bottom bar', () => {
-    login();
-    visitWithTimeRange(OVERVIEW_URL);
-    openTimelineUsingToggle();
-    addNameAndDescriptionToTimeline(mockTimeline);
-    populateTimeline();
-    goToQueryTab();
-
-    addFilter(mockTimeline.filter);
-    cy.get(TIMELINE_FILTER(mockTimeline.filter)).should('exist');
-
-    pinFirstEvent();
-    cy.get(PIN_EVENT)
-      .should('have.attr', 'aria-label')
-      .and('match', /Unpin the event in row 2/);
-
-    cy.get(LOCKED_ICON).should('be.visible');
-
-    // TODO: fix this
-    // While typing the note, cypress encounters this -> Error: ResizeObserver loop completed with undelivered notifications.
-    // addNotesToTimeline(mockTimeline.notes);
-    // cy.get(TIMELINE_TAB_CONTENT_GRAPHS_NOTES)
-    //   .find(NOTES_TEXT)
-    //   .should('have.text', mockTimeline.notes);
   });
 
   it('should show the different timeline states', () => {

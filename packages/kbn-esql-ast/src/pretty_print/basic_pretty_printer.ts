@@ -7,9 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { binaryExpressionGroup } from '../ast/helpers';
+import {
+  binaryExpressionGroup,
+  isBinaryExpression,
+  isColumn,
+  isDoubleLiteral,
+  isIntegerLiteral,
+  isLiteral,
+  isProperNode,
+} from '../ast/helpers';
 import { ESQLAstBaseItem, ESQLAstCommand, ESQLAstQueryExpression } from '../types';
 import { ESQLAstExpressionNode, Visitor } from '../visitor';
+import { resolveItem } from '../visitor/utils';
+import { commandOptionsWithEqualsSeparator, commandsWithNoCommaArgSeparator } from './constants';
 import { LeafPrinter } from './leaf_printer';
 
 export interface BasicPrettyPrinterOptions {
@@ -152,6 +162,62 @@ export class BasicPrettyPrinter {
     return formatted;
   }
 
+  protected simplifyMultiplicationByOne(
+    node: ESQLAstExpressionNode,
+    minusCount: number = 0
+  ): string | undefined {
+    if (isBinaryExpression(node) && node.name === '*') {
+      let [left, right] = node.args;
+      left = resolveItem(left);
+      right = resolveItem(right);
+
+      if (isProperNode(left) && isProperNode(right)) {
+        if (!!left.formatting || !!right.formatting) {
+          return undefined;
+        }
+        if (isIntegerLiteral(left)) {
+          if (left.value === 1) {
+            return this.simplifyMultiplicationByOne(right, minusCount);
+          } else if (left.value === -1) {
+            return this.simplifyMultiplicationByOne(right, minusCount + 1);
+          }
+        }
+        if (isIntegerLiteral(right)) {
+          if (right.value === 1) {
+            return this.simplifyMultiplicationByOne(left, minusCount);
+          } else if (right.value === -1) {
+            return this.simplifyMultiplicationByOne(left, minusCount + 1);
+          }
+        }
+        return undefined;
+      } else {
+        return undefined;
+      }
+    }
+
+    const isNegative = minusCount % 2 === 1;
+
+    if (isNegative && (isIntegerLiteral(node) || isDoubleLiteral(node)) && node.value < 0) {
+      return BasicPrettyPrinter.expression(
+        {
+          ...node,
+          value: Math.abs(node.value),
+        },
+        this.opts
+      );
+    }
+
+    let expression = BasicPrettyPrinter.expression(node, this.opts);
+    const sign = isNegative ? '-' : '';
+    const needsBrackets = !!sign && !isColumn(node) && !isLiteral(node);
+
+    if (needsBrackets) {
+      expression = `(${expression})`;
+    }
+
+    return sign ? `${sign}${expression}` : expression;
+  }
+
   protected readonly visitor: Visitor<any> = new Visitor()
     .on('visitExpression', (ctx) => {
       return '<EXPRESSION>';
@@ -237,6 +303,18 @@ export class BasicPrettyPrinter {
           const groupLeft = binaryExpressionGroup(left);
           const groupRight = binaryExpressionGroup(right);
 
+          if (
+            node.name === '*' &&
+            ((isIntegerLiteral(left) && Math.abs(left.value) === 1) ||
+              (isIntegerLiteral(right) && Math.abs(right.value) === 1))
+          ) {
+            const formatted = this.simplifyMultiplicationByOne(node);
+
+            if (formatted) {
+              return formatted;
+            }
+          }
+
           let leftFormatted = ctx.visitArgument(0);
           let rightFormatted = ctx.visitArgument(1);
 
@@ -301,7 +379,8 @@ export class BasicPrettyPrinter {
         args += (args ? ', ' : '') + arg;
       }
 
-      const argsFormatted = args ? ` ${args}` : '';
+      const separator = commandOptionsWithEqualsSeparator.has(ctx.node.name) ? ' = ' : ' ';
+      const argsFormatted = args ? `${separator}${args}` : '';
       const optionFormatted = `${option}${argsFormatted}`;
 
       return optionFormatted;
@@ -315,7 +394,10 @@ export class BasicPrettyPrinter {
       let options = '';
 
       for (const source of ctx.visitArguments()) {
-        args += (args ? ', ' : '') + source;
+        const needsSeparator = !!args;
+        const needsComma = !commandsWithNoCommaArgSeparator.has(ctx.node.name);
+        const separator = needsSeparator ? (needsComma ? ',' : '') + ' ' : '';
+        args += separator + source;
       }
 
       for (const option of ctx.visitOptions()) {

@@ -101,7 +101,7 @@ import {
   migratePackagePolicySetRequiresRootToV8150,
 } from './migrations/to_v8_15_0';
 import { backfillAgentPolicyToV4 } from './model_versions/agent_policy_v4';
-import { packagePolicyV15AdvancedFieldsForEndpointV816 } from './model_versions/security_solution/v15_advanced_package_policy_fields';
+import { backfillOutputPolicyToV7 } from './model_versions/outputs';
 
 /*
  * Saved object types and mappings
@@ -559,6 +559,18 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '7': {
+          changes: [
+            {
+              type: 'mappings_deprecation',
+              deprecatedMappings: ['topics'],
+            },
+            {
+              type: 'data_backfill',
+              backfillFn: backfillOutputPolicyToV7,
+            },
+          ],
+        },
       },
       migrations: {
         '7.13.0': migrateOutputToV7130,
@@ -748,14 +760,6 @@ export const getSavedObjectTypes = (
               addedMappings: {
                 output_id: { type: 'keyword' },
               },
-            },
-          ],
-        },
-        '15': {
-          changes: [
-            {
-              type: 'data_backfill',
-              backfillFn: packagePolicyV15AdvancedFieldsForEndpointV816,
             },
           ],
         },

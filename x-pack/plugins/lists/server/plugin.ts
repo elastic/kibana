@@ -103,7 +103,7 @@ export class ListPlugin implements Plugin<ListPluginSetup, ListsPluginStart, {},
         security,
         savedObjects: { client: savedObjectsClient },
         elasticsearch: {
-          client: { asCurrentUser: esClient },
+          client: { asCurrentUser: esClient, asInternalUser: internalEsClient },
         },
       } = await context.core;
       if (config == null) {
@@ -121,6 +121,13 @@ export class ListPlugin implements Plugin<ListPluginSetup, ListsPluginStart, {},
             }),
           getExtensionPointClient: (): ExtensionPointStorageClientInterface =>
             extensionPoints.getClient(),
+          getInternalListClient: (): ListClient =>
+            new ListClient({
+              config,
+              esClient: internalEsClient,
+              spaceId,
+              user,
+            }),
           getListClient: (): ListClient =>
             new ListClient({
               config,

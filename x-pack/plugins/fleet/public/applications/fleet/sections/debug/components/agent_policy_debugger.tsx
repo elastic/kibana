@@ -22,7 +22,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import { sendGetAgentPolicies, useLink } from '../../../hooks';
-import { SO_SEARCH_LIMIT } from '../../../constants';
 
 import { policyHasFleetServer } from '../../../services';
 import type { AgentPolicy } from '../../../types';
@@ -35,7 +34,7 @@ import { CodeBlock } from './code_block';
 const fetchAgentPolicies = async () => {
   const response = await sendGetAgentPolicies({
     full: true,
-    perPage: SO_SEARCH_LIMIT,
+    perPage: 100,
     sortOrder: 'asc',
   });
 

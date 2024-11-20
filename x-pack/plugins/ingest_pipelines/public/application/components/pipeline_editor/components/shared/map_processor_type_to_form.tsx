@@ -32,6 +32,7 @@ import {
   Foreach,
   GeoGrid,
   GeoIP,
+  IpLocation,
   Grok,
   Gsub,
   HtmlStrip,
@@ -467,10 +468,28 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
     typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.geoip', {
       defaultMessage:
-        'Adds geo data based on an IP address. Uses geo data from a Maxmind database file.',
+        'Adds geo data based on an IP address. Uses geo data from a MaxMind database file.',
     }),
     getDefaultDescription: ({ field }) =>
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.geoip', {
+        defaultMessage: 'Adds geo data to documents based on the value of "{field}"',
+        values: {
+          field,
+        },
+      }),
+  },
+  ip_location: {
+    category: processorCategories.DATA_ENRICHMENT,
+    FieldsComponent: IpLocation,
+    docLinkPath: '/geoip-processor.html',
+    label: i18n.translate('xpack.ingestPipelines.processors.label.ipLocation', {
+      defaultMessage: 'IP Location',
+    }),
+    typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.ipLocation', {
+      defaultMessage: 'Adds geo data based on an IP address.',
+    }),
+    getDefaultDescription: ({ field }) =>
+      i18n.translate('xpack.ingestPipelines.processors.defaultDescription.ipLocation', {
         defaultMessage: 'Adds geo data to documents based on the value of "{field}"',
         values: {
           field,
@@ -553,7 +572,8 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
       defaultMessage: 'Inference',
     }),
     typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.inference', {
-      defaultMessage: 'Uses a trained model to infer against incoming data.',
+      defaultMessage:
+        'Uses an inference endpoint or a trained model to infer against incoming data.',
     }),
     getDefaultDescription: ({
       model_id: modelId,
@@ -880,6 +900,21 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
         values: {
           field,
         },
+      }),
+  },
+  terminate: {
+    category: processorCategories.PIPELINE_HANDLING,
+    docLinkPath: '/terminate-processor.html',
+    label: i18n.translate('xpack.ingestPipelines.processors.label.terminate', {
+      defaultMessage: 'Terminate',
+    }),
+    typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.terminate', {
+      defaultMessage:
+        'Terminates the current ingest pipeline, causing no further processors to be run.',
+    }),
+    getDefaultDescription: () =>
+      i18n.translate('xpack.ingestPipelines.processors.defaultDescription.terminate', {
+        defaultMessage: 'Terminates the current pipeline',
       }),
   },
   trim: {

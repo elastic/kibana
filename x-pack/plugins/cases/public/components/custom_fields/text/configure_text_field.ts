@@ -31,5 +31,6 @@ export const configureTextCustomFieldFactory: CustomFieldFactory<
     View,
     Create,
   }),
-  convertNullToEmpty: (value: string | boolean | null) => (value == null ? '' : String(value)),
+  convertNullToEmpty: (value: string | number | boolean | null) =>
+    value == null ? '' : String(value),
 });

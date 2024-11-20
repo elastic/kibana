@@ -53,6 +53,7 @@ export interface ListPluginSetup {
  * @public
  */
 export interface ListsApiRequestHandlerContext {
+  getInternalListClient: () => ListClient;
   getListClient: () => ListClient;
   getExceptionListClient: () => ExceptionListClient;
   getExtensionPointClient: () => ExtensionPointStorageClientInterface;

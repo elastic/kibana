@@ -9,13 +9,13 @@ steps:
 
   - wait
 
-  - label: 'Build Kibana Distribution and Plugins'
+  - label: 'Build Kibana Distribution'
     command: .buildkite/scripts/steps/build_kibana.sh
     agents:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2-standard-16
+      machineType: n2-standard-8
       preemptible: true
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"

@@ -63,7 +63,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     },
   ];
 
-  describe('/internal/observability_ai_assistant/chat/complete', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/197175
+  describe.skip('/internal/observability_ai_assistant/chat/complete', function () {
     // TODO: https://github.com/elastic/kibana/issues/192751
     this.tags(['skipMKI']);
     let proxy: LlmProxy;
@@ -91,7 +92,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             connectorId,
             persist: true,
             screenContexts: params.screenContexts || [],
-            scope: 'all',
+            scopes: ['all'],
           })
           .then((response: Response) => resolve(response))
           .catch((err: Error) => reject(err));
@@ -164,7 +165,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           connectorId,
           persist: false,
           screenContexts: [],
-          scope: 'all',
+          scopes: ['all'],
         })
         .pipe(passThrough);
 
@@ -436,7 +437,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 connectorId,
                 persist: true,
                 screenContexts: [],
-                scope: 'all',
+                scopes: ['all'],
               },
             },
           })
@@ -483,7 +484,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 persist: true,
                 screenContexts: [],
                 conversationId,
-                scope: 'all',
+                scopes: ['all'],
               },
             },
           })

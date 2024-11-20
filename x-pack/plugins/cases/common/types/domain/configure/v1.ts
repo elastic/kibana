@@ -11,6 +11,7 @@ import { UserRt } from '../user/v1';
 import {
   CustomFieldTextTypeRt,
   CustomFieldToggleTypeRt,
+  CustomFieldNumberTypeRt,
   CustomFieldListTypeRt,
 } from '../custom_field/v1';
 import { CaseBaseOptionalFieldsRt } from '../case/v1';
@@ -73,10 +74,21 @@ export const ListCustomFieldConfigurationRt = rt.intersection([
   ),
 ]);
 
+export const NumberCustomFieldConfigurationRt = rt.intersection([
+  rt.strict({ type: CustomFieldNumberTypeRt }),
+  CustomFieldConfigurationWithoutTypeRt,
+  rt.exact(
+    rt.partial({
+      defaultValue: rt.union([rt.number, rt.null]),
+    })
+  ),
+]);
+
 export const CustomFieldConfigurationRt = rt.union([
   TextCustomFieldConfigurationRt,
   ToggleCustomFieldConfigurationRt,
   ListCustomFieldConfigurationRt,
+  NumberCustomFieldConfigurationRt,
 ]);
 
 export const CustomFieldsConfigurationRt = rt.array(CustomFieldConfigurationRt);

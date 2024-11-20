@@ -98,11 +98,14 @@ export class ActionsClientChatVertexAI extends ChatVertexAI {
       };
 
       const actionResult = await this.#actionsClient.execute(requestBody);
-
       if (actionResult.status === 'error') {
-        throw new Error(
+        const error = new Error(
           `ActionsClientChatVertexAI: action result status is error: ${actionResult?.message} - ${actionResult?.serviceMessage}`
         );
+        if (actionResult?.serviceMessage) {
+          error.name = actionResult?.serviceMessage;
+        }
+        throw error;
       }
 
       const readable = get('data', actionResult) as Readable;

@@ -85,12 +85,16 @@ export const applyRulePatch = async ({
     from: rulePatch.from ?? existingRule.from,
     license: rulePatch.license ?? existingRule.license,
     output_index: rulePatch.output_index ?? existingRule.output_index,
+    alias_purpose: rulePatch.alias_purpose ?? existingRule.alias_purpose,
+    alias_target_id: rulePatch.alias_target_id ?? existingRule.alias_target_id,
     timeline_id: rulePatch.timeline_id ?? existingRule.timeline_id,
     timeline_title: rulePatch.timeline_title ?? existingRule.timeline_title,
     meta: rulePatch.meta ?? existingRule.meta,
     max_signals: rulePatch.max_signals ?? existingRule.max_signals,
     related_integrations: rulePatch.related_integrations ?? existingRule.related_integrations,
-    required_fields: addEcsToRequiredFields(rulePatch.required_fields),
+    required_fields: rulePatch.required_fields
+      ? addEcsToRequiredFields(rulePatch.required_fields)
+      : existingRule.required_fields,
     risk_score: rulePatch.risk_score ?? existingRule.risk_score,
     risk_score_mapping: rulePatch.risk_score_mapping ?? existingRule.risk_score_mapping,
     rule_name_override: rulePatch.rule_name_override ?? existingRule.rule_name_override,

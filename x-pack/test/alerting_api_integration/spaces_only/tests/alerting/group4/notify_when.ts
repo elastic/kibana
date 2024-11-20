@@ -92,7 +92,11 @@ export default function createNotifyWhenTests({ getService }: FtrProviderContext
         });
       });
 
-      const executeActionEvents = getEventsByAction(events, 'execute-action');
+      // Slice in case the rule ran more times than we are asserting on
+      const executeActionEvents = getEventsByAction(events, 'execute-action').slice(
+        0,
+        expectedActionGroupBasedOnPattern.length
+      );
       const executeActionEventsActionGroup = executeActionEvents.map(
         (event) => event?.kibana?.alerting?.action_group_id
       );

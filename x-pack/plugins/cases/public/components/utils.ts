@@ -12,7 +12,7 @@ import type {
   ValidationConfig,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import type { ConnectorTypeFields, CustomFieldConfiguration } from '../../common/types/domain';
+import type { ConnectorTypeFields } from '../../common/types/domain';
 import { ConnectorTypes, CustomFieldTypes } from '../../common/types/domain';
 import type { CasesPublicStartDependencies } from '../types';
 import { connectorValidator as swimlaneConnectorValidator } from './connectors/swimlane/validator';
@@ -234,17 +234,23 @@ export const parseCaseUsers = ({
   return { userProfiles, reporterAsArray };
 };
 
-export const convertCustomFieldValue = (
-  value: string | boolean,
-  configCustomField: CustomFieldConfiguration
-) => {
-  if (configCustomField.type === CustomFieldTypes.LIST) {
-    const listValue = configCustomField.options.find((option) => option.key === value);
-    return { [value as string]: listValue?.label ?? '' };
-  }
-
+export const convertCustomFieldValue = ({
+  value,
+  type,
+}: {
+  value: string | number | boolean | null;
+  type: CustomFieldTypes;
+}) => {
   if (typeof value === 'string' && isEmpty(value)) {
     return null;
+  }
+
+  if (type === CustomFieldTypes.NUMBER) {
+    if (value !== null && Number.isSafeInteger(Number(value))) {
+      return Number(value);
+    } else {
+      return null;
+    }
   }
 
   return value;
@@ -286,8 +292,6 @@ export const customFieldsFormDeserializer = (
     return null;
   }
 
-  console.log('DESERIALIZE', customFields); //
-
   return customFields.reduce((acc, customField) => {
     if (customField.type === CustomFieldTypes.LIST) {
       return {
@@ -305,7 +309,7 @@ export const customFieldsFormDeserializer = (
 };
 
 export const customFieldsFormSerializer = (
-  customFields: Record<string, string | boolean>,
+  customFields: Record<string, string | boolean | number | null>,
   selectedCustomFieldsConfiguration: CasesConfigurationUI['customFields']
 ): CaseUI['customFields'] => {
   const transformedCustomFields: CaseUI['customFields'] = [];
@@ -321,7 +325,7 @@ export const customFieldsFormSerializer = (
       transformedCustomFields.push({
         key: configCustomField.key,
         type: configCustomField.type,
-        value: convertCustomFieldValue(value, configCustomField),
+        value: convertCustomFieldValue({ value, type: configCustomField.type }),
       } as CaseUICustomField);
     }
   }

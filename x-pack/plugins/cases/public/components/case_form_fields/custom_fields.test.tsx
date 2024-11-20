@@ -135,6 +135,7 @@ describe.skip('CustomFields', () => {
     const textField = customFieldsConfigurationMock[2];
     const toggleField = customFieldsConfigurationMock[3];
     const listField = customFieldsConfigurationMock[4];
+    const numberField = customFieldsConfigurationMock[5];
 
     await userEvent.type(
       await screen.findByTestId(`${textField.key}-${textField.type}-create-custom-field`),
@@ -142,6 +143,10 @@ describe.skip('CustomFields', () => {
     );
     await userEvent.click(
       await screen.findByTestId(`${toggleField.key}-${toggleField.type}-create-custom-field`)
+    );
+    await userEvent.type(
+      await screen.findByTestId(`${numberField.key}-${numberField.type}-create-custom-field`),
+      '4'
     );
 
     await userEvent.click(await screen.findByText('Submit'));
@@ -156,6 +161,8 @@ describe.skip('CustomFields', () => {
             [textField.key]: 'hello',
             [toggleField.key]: true,
             [listField.key]: 'option_1',
+            [customFieldsConfigurationMock[4].key]: customFieldsConfigurationMock[4].defaultValue,
+            [numberField.key]: '4',
           },
         },
         true
