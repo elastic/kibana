@@ -395,7 +395,7 @@ const serviceAnnotationsRoute = createApmServerRoute({
     }),
     query: t.intersection([environmentRt, rangeRt]),
   }),
-  options: { tags: ['access:apm', 'oas-tag:APM annotations'], access: 'public' },
+  options: { tags: ['access:apm', 'oas-tag:APM annotations'] },
   handler: async (resources): Promise<ServiceAnnotationResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params, plugins, context, request, logger, config } = resources;
@@ -440,7 +440,6 @@ const serviceAnnotationsCreateRoute = createApmServerRoute({
   endpoint: 'POST /api/apm/services/{serviceName}/annotation 2023-10-31',
   options: {
     tags: ['access:apm', 'access:apm_write', 'oas-tag:APM annotations'],
-    access: 'public',
   },
   params: t.type({
     path: t.type({

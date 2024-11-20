@@ -21,25 +21,20 @@ import type {
   GetDownloadSourceResponse,
 } from '../../../common/types';
 import { downloadSourceService } from '../../services/download_source';
-import { defaultFleetErrorHandler } from '../../errors';
 import { agentPolicyService } from '../../services';
 
 export const getDownloadSourcesHandler: RequestHandler = async (context, request, response) => {
   const soClient = (await context.core).savedObjects.client;
-  try {
-    const downloadSources = await downloadSourceService.list(soClient);
+  const downloadSources = await downloadSourceService.list(soClient);
 
-    const body: GetDownloadSourceResponse = {
-      items: downloadSources.items,
-      page: downloadSources.page,
-      perPage: downloadSources.perPage,
-      total: downloadSources.total,
-    };
+  const body: GetDownloadSourceResponse = {
+    items: downloadSources.items,
+    page: downloadSources.page,
+    perPage: downloadSources.perPage,
+    total: downloadSources.total,
+  };
 
-    return response.ok({ body });
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
-  }
+  return response.ok({ body });
 };
 
 export const getOneDownloadSourcesHandler: RequestHandler<
@@ -61,7 +56,7 @@ export const getOneDownloadSourcesHandler: RequestHandler<
       });
     }
 
-    return defaultFleetErrorHandler({ error, response });
+    throw error;
   }
 };
 
@@ -94,7 +89,7 @@ export const putDownloadSourcesHandler: RequestHandler<
       });
     }
 
-    return defaultFleetErrorHandler({ error, response });
+    throw error;
   }
 };
 
@@ -106,21 +101,17 @@ export const postDownloadSourcesHandler: RequestHandler<
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  try {
-    const { id, ...data } = request.body;
-    const downloadSource = await downloadSourceService.create(soClient, data, { id });
-    if (downloadSource.is_default) {
-      await agentPolicyService.bumpAllAgentPolicies(esClient);
-    }
-
-    const body: GetOneDownloadSourceResponse = {
-      item: downloadSource,
-    };
-
-    return response.ok({ body });
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
+  const { id, ...data } = request.body;
+  const downloadSource = await downloadSourceService.create(soClient, data, { id });
+  if (downloadSource.is_default) {
+    await agentPolicyService.bumpAllAgentPolicies(esClient);
   }
+
+  const body: GetOneDownloadSourceResponse = {
+    item: downloadSource,
+  };
+
+  return response.ok({ body });
 };
 
 export const deleteDownloadSourcesHandler: RequestHandler<
@@ -142,6 +133,6 @@ export const deleteDownloadSourcesHandler: RequestHandler<
       });
     }
 
-    return defaultFleetErrorHandler({ error, response });
+    throw error;
   }
 };
