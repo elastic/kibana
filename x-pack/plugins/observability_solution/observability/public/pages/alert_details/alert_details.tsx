@@ -7,6 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -84,6 +85,7 @@ export const getPageTitle = (ruleCategory: string) => {
 };
 
 export function AlertDetails() {
+  const { onPageReady } = usePerformanceContext();
   const {
     cases: {
       helpers: { canUseCases },
@@ -180,6 +182,12 @@ export function AlertDetails() {
   const onUntrackAlert = () => {
     setAlertStatus(ALERT_STATUS_UNTRACKED);
   };
+
+  useEffect(() => {
+    if (onPageReady && !isLoading && alertDetail !== undefined && activeTabId === OVERVIEW_TAB_ID) {
+      onPageReady();
+    }
+  }, [onPageReady, alertDetail, isLoading, activeTabId]);
 
   if (isLoading) {
     return <CenterJustifiedSpinner />;
