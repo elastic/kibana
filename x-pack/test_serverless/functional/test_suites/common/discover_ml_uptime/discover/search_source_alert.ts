@@ -506,7 +506,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await testSubjects.click('thresholdPopover');
       await testSubjects.setValue('alertThresholdInput0', '1');
-      await testSubjects.click('saveEditedRuleButton');
+
+      // Different save buttons in serverless
+      if (await testSubjects.exists('saveEditedRuleButton')) {
+        await testSubjects.click('saveEditedRuleButton');
+      } else {
+        await testSubjects.click('rulePageFooterSaveButton');
+      }
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await openAlertResults(RULE_NAME);
@@ -656,8 +662,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await retry.waitFor('rule name value is correct', async () => {
-        await testSubjects.setValue('ruleNameInput', newAlert);
-        const ruleName = await testSubjects.getAttribute('ruleNameInput', 'value');
+        let ruleName;
+        // Rule name input is different in serverless
+        if (await testSubjects.exists('ruleNameInput')) {
+          await testSubjects.setValue('ruleNameInput', newAlert);
+          ruleName = await testSubjects.getAttribute('ruleNameInput', 'value');
+        } else {
+          await testSubjects.setValue('ruleDetailsNameInput', newAlert);
+          ruleName = await testSubjects.getAttribute('ruleDetailsNameInput', 'value');
+        }
         return ruleName === newAlert;
       });
 
@@ -681,7 +694,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await comboBox.set('ruleFormConsumerSelect', 'Stack Rules');
       }
 
-      await testSubjects.click('saveRuleButton');
+      // Save rule button is different in serverless
+      if (await testSubjects.exists('saveRuleButton')) {
+        await testSubjects.click('saveRuleButton');
+      } else {
+        await testSubjects.click('rulePageFooterSaveButton');
+      }
 
       await retry.waitFor('confirmation modal', async () => {
         return await testSubjects.exists('confirmModalConfirmButton');
