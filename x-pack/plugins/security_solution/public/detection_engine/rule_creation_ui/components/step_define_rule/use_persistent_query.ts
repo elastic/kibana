@@ -48,6 +48,12 @@ interface UsePersistentQueryResult {
  *   * from '*:*' back to '' if the type is switched back from "threat_match" to another one
  */
 export function usePersistentQuery({ form }: UsePersistentQueryParams): UsePersistentQueryResult {
+  /**
+   * The main idea of this hook is persisting of the state when user switches between
+   * different rule types. It's necessary since we conditionally render different query type
+   * fields. Kibana's Form lib doesn't persist field values when corresponding UseField hooks
+   * aren't rendered.
+   */
   const [{ [RULE_TYPE_FIELD_NAME]: ruleType, [QUERY_FIELD_NAME]: currentQuery }] = useFormData({
     form,
     watch: [RULE_TYPE_FIELD_NAME, QUERY_FIELD_NAME],
@@ -57,6 +63,12 @@ export function usePersistentQuery({ form }: UsePersistentQueryParams): UsePersi
   const eqlQueryRef = useRef<FieldValueQueryBar>(DEFAULT_EQL_QUERY_FIELD_VALUE);
   const esqlQueryRef = useRef<FieldValueQueryBar>(DEFAULT_ESQL_QUERY_FIELD_VALUE);
 
+  /**
+   * This useEffect is concerned about persisting the current query in a corresponding React
+   * reference. There are 3 query types (kuery, EQL, ES|QL). An additional check is required to
+   * make sure query type matches rule type. When switching between rule types it takes a few
+   * re-renders to update the form data.
+   */
   useEffect(() => {
     if (!ruleType) {
       return;
@@ -83,6 +95,12 @@ export function usePersistentQuery({ form }: UsePersistentQueryParams): UsePersi
     queryRef.current = currentQuery;
   }, [ruleType, currentQuery]);
 
+  /**
+   * This useEffect restores a corresponding query (kuery, EQL or ES|QL) in form data
+   * after switching rule types. There is an exceptional case with threat_match rules
+   * having a special default kuery `*:*` while the other rules using kuery have en empty
+   * string kuery by default.
+   */
   useEffect(() => {
     if (ruleType === previousRuleType || !ruleType) {
       return;
