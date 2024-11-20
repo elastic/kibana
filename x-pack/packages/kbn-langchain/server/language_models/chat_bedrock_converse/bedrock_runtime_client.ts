@@ -8,14 +8,16 @@
 import {
   BedrockRuntimeClient as _BedrockRuntimeClient,
   BedrockRuntimeClientConfig,
+  ConverseCommand,
   ConverseResponse,
+  ConverseStreamCommand,
 } from '@aws-sdk/client-bedrock-runtime';
 import { constructStack } from '@smithy/middleware-stack';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 
+import { HttpHandlerOptions } from '@smithy/types/dist-types/http';
 import { prepareMessages } from '../../utils/bedrock';
-import { NodeHttpHandler } from './node_http_handler';
 
 export interface CustomChatModelInput extends BedrockRuntimeClientConfig {
   actionsClient: PublicMethodsOf<ActionsClient>;
@@ -31,11 +33,6 @@ export class BedrockRuntimeClient extends _BedrockRuntimeClient {
 
   constructor({ actionsClient, connectorId, ...fields }: CustomChatModelInput) {
     super(fields ?? {});
-    this.config.requestHandler = new NodeHttpHandler({
-      streaming: fields.streaming ?? true,
-      actionsClient,
-      connectorId,
-    });
     this.streaming = fields.streaming ?? true;
     this.actionsClient = actionsClient;
     this.connectorId = connectorId;
@@ -43,14 +40,24 @@ export class BedrockRuntimeClient extends _BedrockRuntimeClient {
     this.middlewareStack = constructStack() as _BedrockRuntimeClient['middlewareStack'];
   }
 
-  public async send(command, optionsOrCb?: { abortSignal?: AbortSignal }) {
-    const messages = prepareMessages(command.messages);
-
+  public async send(
+    command: ConverseCommand | ConverseStreamCommand,
+    optionsOrCb?: HttpHandlerOptions | ((err: unknown, data: unknown) => void)
+  ) {
+    const options = typeof optionsOrCb !== 'function' ? optionsOrCb : {};
+    if (command.input.messages) {
+      // without this, our human + human messages do not work and result in error:
+      // A conversation must alternate between user and assistant roles.
+      command.input.messages = prepareMessages(command.input.messages);
+    }
     const data = (await this.actionsClient.execute({
       actionId: this.connectorId,
       params: {
-        subAction: 'converse',
-        subActionParams: { ...command, messages, signal: optionsOrCb?.abortSignal },
+        subAction: 'bedrockClientSend',
+        subActionParams: {
+          command,
+          signal: options?.abortSignal,
+        },
       },
     })) as { data: ConverseResponse; status: string; message?: string; serviceMessage?: string };
 
