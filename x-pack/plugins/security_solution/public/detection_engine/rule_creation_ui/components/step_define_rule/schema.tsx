@@ -28,7 +28,7 @@ import {
 } from '../../../../../common/detection_engine/utils';
 import { MAX_NUMBER_OF_NEW_TERMS_FIELDS } from '../../../../../common/constants';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
-import { QUERY_FIELD_NAME, type FieldValueQueryBar } from '../query_field';
+import { QUERY_BAR_FIELD_NAME, type FieldValueQueryBar } from '../query_field';
 import type { ERROR_CODE, FormSchema, ValidationFunc } from '../../../../shared_imports';
 import { FIELD_TYPES, fieldValidators } from '../../../../shared_imports';
 import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
@@ -58,7 +58,7 @@ import { RULE_TYPE_FIELD_NAME } from '../select_rule_type';
 export const schema: FormSchema<DefineStepRule> = {
   index: {
     defaultValue: [],
-    fieldsToValidateOnChange: ['index', QUERY_FIELD_NAME],
+    fieldsToValidateOnChange: ['index', QUERY_BAR_FIELD_NAME],
     type: FIELD_TYPES.COMBO_BOX,
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fiedIndexPatternsLabel',
@@ -120,7 +120,7 @@ export const schema: FormSchema<DefineStepRule> = {
     validations: [],
   },
   eqlOptions: {
-    fieldsToValidateOnChange: ['eqlOptions', QUERY_FIELD_NAME],
+    fieldsToValidateOnChange: ['eqlOptions', QUERY_BAR_FIELD_NAME],
   },
   queryBar: {
     fieldsToValidateOnChange: ['queryBar', ALERT_SUPPRESSION_FIELDS_FIELD_NAME],

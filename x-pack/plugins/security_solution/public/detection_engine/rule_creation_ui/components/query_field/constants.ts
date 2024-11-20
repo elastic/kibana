@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const QUERY_FIELD_NAME = 'queryBar' as const;
+export const QUERY_BAR_FIELD_NAME = 'queryBar' as const;

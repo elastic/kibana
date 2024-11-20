@@ -16,7 +16,7 @@ import { useAssistantAvailability } from '../../../../assistant/use_assistant_av
 import * as i18nAssistant from '../../../../detections/pages/detection_engine/translations';
 import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import type { FormHook, ValidationError } from '../../../../shared_imports';
-import { QUERY_FIELD_NAME } from '../query_field';
+import { QUERY_BAR_FIELD_NAME } from '../query_field';
 import * as i18n from './translations';
 
 const getLanguageName = (language: string | undefined) => {
@@ -53,7 +53,7 @@ const AiAssistantComponent: React.FC<AiAssistantProps> = ({
 
   const getPromptContext = useCallback(async () => {
     const queryField = getFields().queryBar;
-    const { query } = (queryField.value as DefineStepRule[typeof QUERY_FIELD_NAME]).query;
+    const { query } = (queryField.value as DefineStepRule[typeof QUERY_BAR_FIELD_NAME]).query;
 
     if (!query) {
       return '';
@@ -76,12 +76,12 @@ Proposed solution should be valid and must not contain new line symbols (\\n)`;
   const handleOnExportCodeBlock = useCallback(
     (codeBlock: string) => {
       const queryField = getFields().queryBar;
-      const queryBar = queryField.value as DefineStepRule[typeof QUERY_FIELD_NAME];
+      const queryBar = queryField.value as DefineStepRule[typeof QUERY_BAR_FIELD_NAME];
 
       // sometimes AI assistant include redundant backtick symbols in code block
       const newQuery = codeBlock.replaceAll('`', '');
       if (queryBar.query.query !== newQuery) {
-        setFieldValue(QUERY_FIELD_NAME, {
+        setFieldValue(QUERY_BAR_FIELD_NAME, {
           ...queryBar,
           query: { ...queryBar.query, query: newQuery },
         });

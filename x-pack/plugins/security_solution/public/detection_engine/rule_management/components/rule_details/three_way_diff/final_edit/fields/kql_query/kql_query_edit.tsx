@@ -13,7 +13,7 @@ import type { DataViewBase } from '@kbn/es-query';
 import { schema } from '../../../../../../../rule_creation_ui/components/step_define_rule/schema';
 import { HiddenField, UseField } from '../../../../../../../../shared_imports';
 import {
-  QUERY_FIELD_NAME,
+  QUERY_BAR_FIELD_NAME,
   QueryField,
 } from '../../../../../../../rule_creation_ui/components/query_field';
 import * as stepDefineRuleI18n from '../../../../../../../rule_creation_ui/components/step_define_rule/translations';
@@ -33,7 +33,7 @@ export function KqlQueryEdit({
 
   const handleSetRuleFromTimeline = useCallback<SetRuleQuery>(
     ({ queryBar: timelineQueryBar }) => {
-      setFieldValue(QUERY_FIELD_NAME, timelineQueryBar);
+      setFieldValue(QUERY_BAR_FIELD_NAME, timelineQueryBar);
     },
     [setFieldValue]
   );
