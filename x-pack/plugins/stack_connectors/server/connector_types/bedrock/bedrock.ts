@@ -282,7 +282,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
 
   /**
    *  NOT INTENDED TO BE CALLED DIRECTLY
-   *  call invokeStream or converseStream instead
+   *  call invokeStream instead
    *  responsible for making a POST request to a specified URL with a given request body.
    *  The response is then processed based on whether it is a streaming response or a regular response.
    * @param body The stringified request body to be sent in the POST request.
@@ -436,7 +436,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
    * Sends a request via the BedrockRuntimeClient to perform a conversation action.
    * @param params - The parameters for the conversation action.
    * @param params.signal - The signal to cancel the request.
-   * @param params.command - The command to be sent to the API. (ConverseCommand | ConverseStreamCommand)
+   * @param params.command - The command class to be sent to the API. (ConverseCommand | ConverseStreamCommand)
    * @param connectorUsageCollector - The usage collector for the connector.
    * @returns A promise that resolves to the response of the conversation action.
    */
@@ -545,7 +545,7 @@ function parseContent(content: Array<{ text?: string; type: string }>): string {
 const usesDeprecatedArguments = (body: string): boolean => JSON.parse(body)?.prompt != null;
 
 function extractRegionId(url: string) {
-  const match = url.match(/bedrock\.(.*?)\.amazonaws\./);
+  const match = (url ?? '').match(/bedrock\.(.*?)\.amazonaws\./);
   if (match) {
     return match[1];
   } else {

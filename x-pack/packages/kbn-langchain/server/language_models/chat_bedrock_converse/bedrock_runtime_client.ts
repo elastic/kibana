@@ -11,6 +11,7 @@ import {
   ConverseCommand,
   ConverseResponse,
   ConverseStreamCommand,
+  ConverseStreamResponse,
 } from '@aws-sdk/client-bedrock-runtime';
 import { constructStack } from '@smithy/middleware-stack';
 import { PublicMethodsOf } from '@kbn/utility-types';
@@ -59,7 +60,12 @@ export class BedrockRuntimeClient extends _BedrockRuntimeClient {
           signal: options?.abortSignal,
         },
       },
-    })) as { data: ConverseResponse; status: string; message?: string; serviceMessage?: string };
+    })) as {
+      data: ConverseResponse | ConverseStreamResponse;
+      status: string;
+      message?: string;
+      serviceMessage?: string;
+    };
 
     if (data.status === 'error') {
       throw new Error(

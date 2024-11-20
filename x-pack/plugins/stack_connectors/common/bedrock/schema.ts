@@ -151,8 +151,7 @@ export const DashboardActionResponseSchema = schema.object({
 
 export const BedrockClientSendParamsSchema = schema.object(
   {
-    // ConverseCommand | ConverseStreamCommand from '@aws-sdk/client-bedrock-runtime
-    // cannot validate a class with schema "Request validation failed (Error: [command]: expected a plain object value, but found [Object] instead.)",
+    // ConverseCommand | ConverseStreamCommand from @aws-sdk/client-bedrock-runtime
     command: schema.maybe(schema.any()),
     // Kibana related properties
     signal: schema.maybe(schema.any()),
