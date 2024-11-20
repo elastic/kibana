@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink, EuiLoadingChart } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiLoadingChart,
+  UseEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -136,7 +143,7 @@ const container = css`
   height: 100%;
 `;
 
-const link = css`
-  font-size: 16px;
-  font-weight: 700;
+const link = ({ euiTheme }: UseEuiTheme) => css`
+  font-size: ${euiTheme.size.base};
+  font-weight: ${euiTheme.font.weight.bold};
 `;

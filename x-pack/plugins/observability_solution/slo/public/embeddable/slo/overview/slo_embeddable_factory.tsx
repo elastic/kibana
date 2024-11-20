@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
@@ -166,20 +166,20 @@ export const getOverviewEmbeddableFactory = ({
               const groups = groupFilters?.groups ?? [];
               return (
                 <div
-                  css={css`
+                  css={({ euiTheme }: UseEuiTheme) => css`
                     width: 100%;
-                    padding: 5px 15px;
+                    padding: ${euiTheme.size.xs} ${euiTheme.size.base};
                     overflow: scroll;
 
                     .euiAccordion__buttonContent {
-                      min-width: 100px;
+                      min-width: ${euiTheme.base * 6}px;
                     }
                   `}
                 >
                   <EuiFlexGroup data-test-subj="sloGroupOverviewPanel" data-shared-item="">
                     <EuiFlexItem
-                      css={css`
-                        margin-top: 20px;
+                      css={({ euiTheme }: UseEuiTheme) => css`
+                        margin-top: ${euiTheme.base * 1.25}px;
                       `}
                     >
                       <GroupSloView

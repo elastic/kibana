@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useEuiShadow, useEuiTheme } from '@elastic/eui';
+import { useEuiShadow } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
@@ -25,18 +25,17 @@ interface Props {
 }
 
 export function SloCardItemActions(props: Props) {
-  const borderRadius = useEuiTheme().euiTheme.border.radius.medium;
-
+  const shadow = useEuiShadow('l');
   return (
     <div
-      css={css`
+      css={({ euiTheme }) => css`
         display: inline-block;
         position: relative;
-        bottom: 42px;
-        left: 12px;
+        bottom: ${euiTheme.size.xxl};
+        left: ${euiTheme.size.m};
         z-index: 1;
-        border-radius: ${borderRadius};
-        ${useEuiShadow('l')}
+        border-radius: ${euiTheme.border.radius.medium};
+        ${shadow}
       `}
     >
       <SloItemActions

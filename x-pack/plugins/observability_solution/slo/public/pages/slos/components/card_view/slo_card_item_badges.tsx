@@ -48,9 +48,9 @@ export function SloCardItemBadges({ slo, activeAlerts, rules, handleCreateRule }
 
   return (
     <div
-      css={css`
+      css={({ euiTheme }) => css`
         display: inline-block;
-        margin-top: 5px;
+        margin-top: ${euiTheme.size.xs};
       `}
       onClick={(evt) => {
         evt.stopPropagation();
