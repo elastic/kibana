@@ -86,7 +86,6 @@ export class ReportingPublicPlugin
 
   private getContract(apiClient: ReportingAPIClient, startServices$: StartServices$) {
     this.contract = {
-      usesUiCapabilities: () => this.config.roles?.enabled === false,
       components: getSharedComponents(apiClient, startServices$),
     };
 
@@ -125,7 +124,6 @@ export class ReportingPublicPlugin
         ];
       })
     );
-    const usesUiCapabilities = !this.config.roles.enabled;
 
     const apiClient = new ReportingAPIClient(core.http, core.uiSettings, this.kibanaVersion);
     this.apiClient = apiClient;
@@ -206,7 +204,6 @@ export class ReportingPublicPlugin
         core,
         apiClient,
         startServices$,
-        usesUiCapabilities,
         csvConfig: this.config.csv,
       })
     );
@@ -218,7 +215,6 @@ export class ReportingPublicPlugin
             apiClient,
             license,
             application,
-            usesUiCapabilities,
             startServices$,
           })
         );
@@ -229,7 +225,6 @@ export class ReportingPublicPlugin
               apiClient,
               license,
               application,
-              usesUiCapabilities,
               startServices$,
             })
           );

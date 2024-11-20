@@ -25,10 +25,6 @@ import type { ExportType } from './export_type';
 
 export interface ReportingServerPluginSetup {
   registerExportTypes: (item: ExportType) => void;
-  /**
-   * Used to inform plugins if Reporting config is compatible with UI Capabilities / Application Sub-Feature Controls
-   */
-  usesUiCapabilities: () => boolean;
 }
 
 // standard type for create job function of any ExportType implementation

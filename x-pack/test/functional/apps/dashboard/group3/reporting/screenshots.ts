@@ -67,10 +67,7 @@ export default function ({
         ],
       });
 
-      await security.testUser.setRoles([
-        'test_dashboard_user',
-        'reporting_user', // NOTE: the built-in role granting full reporting access is deprecated. See the xpack.reporting.roles.enabled setting
-      ]);
+      await security.testUser.setRoles(['test_dashboard_user', 'reporting_user']);
     });
     after('clean up archives', async () => {
       await share.closeShareModal();

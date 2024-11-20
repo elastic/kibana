@@ -46,7 +46,6 @@ export const reportingExportModalProvider = ({
   apiClient,
   license,
   application,
-  usesUiCapabilities,
   startServices$,
 }: ExportModalShareOpts): ShareMenuProvider => {
   const getShareMenuItems = ({
@@ -64,18 +63,10 @@ export const reportingExportModalProvider = ({
     const licenseHasScreenshotReporting = showLinks;
     const licenseDisabled = !enableLinks;
 
-    let capabilityHasDashboardScreenshotReporting = false;
-    let capabilityHasVisualizeScreenshotReporting = false;
-    if (usesUiCapabilities) {
-      capabilityHasDashboardScreenshotReporting =
-        application.capabilities.dashboard?.generateScreenshot === true;
-      capabilityHasVisualizeScreenshotReporting =
-        application.capabilities.visualize?.generateScreenshot === true;
-    } else {
-      // deprecated
-      capabilityHasDashboardScreenshotReporting = true;
-      capabilityHasVisualizeScreenshotReporting = true;
-    }
+    const capabilityHasDashboardScreenshotReporting =
+      application.capabilities.dashboard?.generateScreenshot === true;
+    const capabilityHasVisualizeScreenshotReporting =
+      application.capabilities.visualize?.generateScreenshot === true;
 
     if (!licenseHasScreenshotReporting) {
       return [];

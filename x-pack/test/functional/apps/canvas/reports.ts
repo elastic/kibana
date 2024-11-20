@@ -31,10 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           },
         ],
       });
-      await security.testUser.setRoles([
-        'test_canvas_user',
-        'reporting_user', // NOTE: the built-in role granting full reporting access is deprecated. See xpack.reporting.roles.enabled
-      ]);
+      await security.testUser.setRoles(['test_canvas_user', 'reporting_user']);
       await kibanaServer.importExport.load(archive);
       await browser.setWindowSize(1600, 850);
     });

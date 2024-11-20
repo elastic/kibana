@@ -119,7 +119,6 @@ describe('GetCsvReportPanelAction', () => {
       core,
       apiClient,
       startServices$: mockStartServices$,
-      usesUiCapabilities: true,
       csvConfig,
     });
 
@@ -154,7 +153,6 @@ describe('GetCsvReportPanelAction', () => {
       core,
       apiClient,
       startServices$: mockStartServices$,
-      usesUiCapabilities: true,
       csvConfig,
     });
 
@@ -177,7 +175,6 @@ describe('GetCsvReportPanelAction', () => {
       core,
       apiClient,
       startServices$: mockStartServices$,
-      usesUiCapabilities: true,
       csvConfig,
     });
 
@@ -197,7 +194,6 @@ describe('GetCsvReportPanelAction', () => {
       core,
       apiClient,
       startServices$: mockStartServices$,
-      usesUiCapabilities: true,
       csvConfig,
     });
 
@@ -219,7 +215,6 @@ describe('GetCsvReportPanelAction', () => {
       core,
       apiClient,
       startServices$: mockStartServices$,
-      usesUiCapabilities: true,
       csvConfig,
     });
 
@@ -232,7 +227,6 @@ describe('GetCsvReportPanelAction', () => {
       core,
       apiClient,
       startServices$: mockStartServices$,
-      usesUiCapabilities: true,
       csvConfig,
     });
 
@@ -249,7 +243,6 @@ describe('GetCsvReportPanelAction', () => {
         core,
         apiClient,
         startServices$: mockStartServices$,
-        usesUiCapabilities: true,
         csvConfig,
       });
 
@@ -263,7 +256,6 @@ describe('GetCsvReportPanelAction', () => {
         core,
         apiClient,
         startServices$: mockStartServices$,
-        usesUiCapabilities: true,
         csvConfig,
       });
 
@@ -277,7 +269,6 @@ describe('GetCsvReportPanelAction', () => {
         core,
         apiClient,
         startServices$: mockStartServices$,
-        usesUiCapabilities: false,
         csvConfig,
       });
 

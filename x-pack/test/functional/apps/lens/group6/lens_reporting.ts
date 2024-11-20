@@ -31,12 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await security.testUser.setRoles(
-        [
-          'test_logstash_reader',
-          'global_dashboard_read',
-          'global_visualize_all',
-          'reporting_user', // NOTE: the built-in role granting full reporting access is deprecated. See xpack.reporting.roles.enabled
-        ],
+        ['test_logstash_reader', 'global_dashboard_read', 'global_visualize_all', 'reporting_user'],
         { skipBrowserRefresh: true }
       );
     });

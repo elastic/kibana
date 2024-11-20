@@ -6,14 +6,11 @@
  */
 
 import { RequestHandler, RouteMethod } from '@kbn/core/server';
-import { i18n } from '@kbn/i18n';
 import { AuthenticatedUser } from '@kbn/security-plugin/server';
 
 import { ReportingCore } from '../../core';
 import { ReportingRequestHandlerContext } from '../../types';
 import { getUser } from './get_user';
-
-const superuserRole = 'superuser';
 
 type ReportingRequestUser = AuthenticatedUser | false;
 
@@ -30,7 +27,7 @@ export const authorizedUserPreRouting = <P, Q, B>(
   reporting: ReportingCore,
   handler: RequestHandlerUser<P, Q, B>
 ): RequestHandler<P, Q, B, ReportingRequestHandlerContext, RouteMethod> => {
-  const { logger, security: securitySetup, docLinks } = reporting.getPluginSetupDeps(); // ReportingInternalSetup.security?: SecurityPluginSetup | undefined
+  const { logger, security: securitySetup } = reporting.getPluginSetupDeps(); // ReportingInternalSetup.security?: SecurityPluginSetup | undefined
 
   return async (context, req, res) => {
     const { securityService } = await reporting.getPluginStartDeps();
@@ -42,30 +39,6 @@ export const authorizedUserPreRouting = <P, Q, B>(
         if (!user) {
           // security is enabled but the user is null
           return res.unauthorized({ body: `Sorry, you aren't authenticated` });
-        }
-      }
-
-      const deprecatedAllowedRoles = reporting.getDeprecatedAllowedRoles();
-      if (user && deprecatedAllowedRoles !== false) {
-        // check allowance with the configured set of roleas + "superuser"
-        const allowedRoles = deprecatedAllowedRoles || [];
-        const authorizedRoles = [superuserRole, ...allowedRoles];
-
-        if (!user.roles.find((role) => authorizedRoles.includes(role))) {
-          const body = i18n.translate('xpack.reporting.userAccessError.message', {
-            defaultMessage: `Ask your administrator for access to reporting features. {grantUserAccessDocs}.`,
-            values: {
-              grantUserAccessDocs:
-                `<a href=${docLinks.links.reporting.grantUserAccess} style="font-weight: 600;"
-                    target="_blank" rel="noopener">` +
-                i18n.translate('xpack.reporting.userAccessError.learnMoreLink', {
-                  defaultMessage: 'Learn more',
-                }) +
-                '</a>',
-            },
-          });
-          // user's roles do not allow
-          return res.forbidden({ body });
         }
       }
 

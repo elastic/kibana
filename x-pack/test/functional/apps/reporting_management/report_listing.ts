@@ -27,7 +27,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     before(async () => {
       await security.testUser.setRoles([
         'kibana_admin', // to access stack management
-        'reporting_user', // NOTE: the built-in role granting full reporting access is deprecated. See xpack.reporting.roles.enabled
       ]);
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(kbnArchive);
