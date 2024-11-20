@@ -166,6 +166,12 @@ export class DataGridService extends FtrService {
     );
   }
 
+  public async getCellElementByColumnName(rowIndex: number, columnName: string) {
+    return await this.find.byCssSelector(
+      `[data-test-subj="euiDataGridBody"] [data-test-subj="dataGridRowCell"][data-gridcell-column-id="${columnName}"][data-gridcell-visible-row-index="${rowIndex}"]`
+    );
+  }
+
   private async getCellActionButton(
     rowIndex: number = 0,
     columnIndex: number = 0,

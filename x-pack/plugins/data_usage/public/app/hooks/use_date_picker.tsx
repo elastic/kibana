@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { useCallback, useState } from 'react';
 import type {
   DurationRange,
@@ -18,8 +19,8 @@ export const DEFAULT_DATE_RANGE_OPTIONS = Object.freeze({
     enabled: false,
     duration: 10000,
   },
-  startDate: 'now-24h/h',
-  endDate: 'now',
+  startDate: moment().subtract(24, 'hours').startOf('day').toISOString(),
+  endDate: moment().toISOString(),
   recentlyUsedDateRanges: [],
 });
 
