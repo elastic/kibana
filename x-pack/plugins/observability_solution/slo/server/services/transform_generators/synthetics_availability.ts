@@ -31,7 +31,8 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
   public async getTransformParams(
     slo: SLODefinition,
     spaceId: string,
-    dataViewService: DataViewsService
+    dataViewService: DataViewsService,
+    isServerless: boolean
   ): Promise<TransformPutTransformRequest> {
     if (!syntheticsAvailabilityIndicatorSchema.is(slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
@@ -44,7 +45,7 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
       this.buildDestination(slo),
       this.buildGroupBy(slo, slo.indicator),
       this.buildAggregations(slo),
-      this.buildSettings(slo, 'event.ingested'),
+      this.buildSettings(slo, isServerless ? '@timestamp' : 'event.ingested'),
       slo
     );
   }
@@ -56,7 +57,7 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
   private buildGroupBy(slo: SLODefinition, indicator: SyntheticsAvailabilityIndicator) {
     // These are the group by fields that will be used in `groupings` key
     // in the summary and rollup documents. For Synthetics, we want to use the
-    // user-readible `monitor.name` and `observer.geo.name` fields by default,
+    // user-readable `monitor.name` and `observer.geo.name` fields by default,
     // unless otherwise specified by the user.
     const flattenedGroupBy = [slo.groupBy].flat().filter((value) => !!value);
     const groupings =

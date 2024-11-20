@@ -141,6 +141,7 @@ export class SLOPlugin
       },
       logger: this.logger,
       repository: getSloServerRouteRepository({ isServerless: this.isServerless }),
+      isServerless: this.isServerless,
     });
 
     core
