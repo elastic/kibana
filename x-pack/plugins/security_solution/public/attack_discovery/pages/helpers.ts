@@ -7,9 +7,6 @@
 
 export const getInitialIsOpen = (index: number) => index < 3;
 
-export const getFallbackActionTypeId = (actionTypeId: string | undefined): string =>
-  actionTypeId != null ? actionTypeId : '.gen-ai';
-
 interface ErrorWithStringMessage {
   body?: {
     error?: string;
@@ -49,10 +46,6 @@ export function isErrorWithStructuredMessage(error: any): error is ErrorWithStru
 }
 
 export const CONNECTOR_ID_LOCAL_STORAGE_KEY = 'connectorId';
-
-export const CACHED_ATTACK_DISCOVERIES_SESSION_STORAGE_KEY = 'cachedAttackDiscoveries';
-
-export const GENERATION_INTERVALS_LOCAL_STORAGE_KEY = 'generationIntervals';
 
 export const getErrorToastText = (
   error: ErrorWithStringMessage | ErrorWithStructuredMessage | unknown

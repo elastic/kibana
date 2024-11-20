@@ -63,6 +63,7 @@ interface DataVisualizerTableProps<T extends object> {
   overallStatsRunning: boolean;
   renderFieldName?: FieldStatisticTableEmbeddableProps['renderFieldName'];
   error?: Error | string;
+  isEsql?: boolean;
 }
 
 const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
@@ -78,6 +79,7 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
   overallStatsRunning,
   renderFieldName,
   error,
+  isEsql = false,
 }: DataVisualizerTableProps<T>) => {
   const { euiTheme } = useEuiTheme();
 
@@ -87,7 +89,8 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
   const { onTableChange, pagination, sorting } = useTableSettings<T>(
     items,
     pageState,
-    updatePageState
+    updatePageState,
+    isEsql
   );
   const [showDistributions, setShowDistributions] = useState<boolean>(showPreviewByDefault ?? true);
   const [dimensions, setDimensions] = useState(calculateTableColumnsDimensions());
