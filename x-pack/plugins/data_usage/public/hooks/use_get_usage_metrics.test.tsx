@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import React, { ReactNode } from 'react';
 import { QueryClient, QueryClientProvider, useQuery as _useQuery } from '@tanstack/react-query';
 import { renderHook } from '@testing-library/react-hooks';
@@ -41,8 +42,8 @@ jest.mock('../utils/use_kibana', () => {
 });
 
 const defaultUsageMetricsRequestBody = {
-  from: 'now-15m',
-  to: 'now',
+  from: moment().subtract(15, 'minutes').toISOString(),
+  to: moment().toISOString(),
   metricTypes: ['ingest_rate'],
   dataStreams: ['ds-1'],
 };
