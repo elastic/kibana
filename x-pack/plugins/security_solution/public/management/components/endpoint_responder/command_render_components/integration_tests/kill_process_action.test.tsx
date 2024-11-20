@@ -63,6 +63,7 @@ describe.skip('When using the kill-process action from response actions console'
         canSuspendProcess: true,
         canGetRunningProcesses: true,
       },
+      platform: 'linux',
     });
   };
 

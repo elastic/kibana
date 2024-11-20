@@ -73,6 +73,7 @@ describe('When using the suspend-process action from response actions console', 
                     canSuspendProcess: true,
                     canGetRunningProcesses: true,
                   },
+                  platform: 'linux',
                 }),
               },
             };

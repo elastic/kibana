@@ -52,6 +52,7 @@ describe('When displaying Endpoint Response Actions', () => {
         endpointAgentId: '123',
         endpointCapabilities: endpointMetadata.Endpoint.capabilities ?? [],
         endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
+        platform: 'linux',
       });
     });
 
@@ -96,6 +97,7 @@ describe('When displaying Endpoint Response Actions', () => {
         endpointAgentId: '123',
         endpointCapabilities: endpointMetadata.Endpoint.capabilities ?? [],
         endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
+        platform: 'linux',
       });
     });
 
@@ -130,6 +132,7 @@ describe('When displaying Endpoint Response Actions', () => {
         endpointAgentId: '123',
         endpointCapabilities: endpointMetadata.Endpoint.capabilities ?? [],
         endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
+        platform: 'linux',
       });
     });
 

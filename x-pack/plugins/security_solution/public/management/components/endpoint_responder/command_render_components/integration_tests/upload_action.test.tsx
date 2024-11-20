@@ -88,6 +88,7 @@ describe.skip('When using `upload` response action', () => {
                   endpointAgentId: 'a.b.c',
                   endpointCapabilities,
                   endpointPrivileges,
+                  platform: 'linux',
                 }),
               },
             };
