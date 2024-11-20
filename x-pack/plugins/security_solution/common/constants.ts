@@ -22,6 +22,7 @@ export const APP_UI_ID = 'securitySolutionUI' as const;
 export const ASSISTANT_FEATURE_ID = 'securitySolutionAssistant' as const;
 export const ATTACK_DISCOVERY_FEATURE_ID = 'securitySolutionAttackDiscovery' as const;
 export const CASES_FEATURE_ID = 'securitySolutionCasesV2' as const;
+export const TIMELINE_FEATURE_ID = 'securitySolutionTimeline' as const;
 export const SERVER_APP_ID = 'siem' as const;
 export const APP_NAME = 'Security' as const;
 export const APP_ICON = 'securityAnalyticsApp' as const;

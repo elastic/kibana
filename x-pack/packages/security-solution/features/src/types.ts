@@ -20,6 +20,7 @@ import type {
   AssistantSubFeatureId,
   CasesSubFeatureId,
   SecuritySubFeatureId,
+  ProductFeatureTimelineFeatureKey,
 } from './product_features_keys';
 
 export type { ProductFeatureKeyType };
@@ -54,6 +55,11 @@ export type ProductFeaturesAssistantConfig = Map<
 
 export type ProductFeaturesAttackDiscoveryConfig = Map<
   ProductFeatureAttackDiscoveryKey,
+  ProductFeatureKibanaConfig
+>;
+
+export type ProductFeaturesTimelineConfig = Map<
+  ProductFeatureTimelineFeatureKey,
   ProductFeatureKibanaConfig
 >;
 
