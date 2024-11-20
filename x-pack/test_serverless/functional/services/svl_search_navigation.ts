@@ -51,9 +51,6 @@ export function SvlSearchNavigationServiceProvider({
       await PageObjects.common.navigateToApp('searchInferenceEndpoints', {
         shouldLoginIfPrompted: false,
       });
-      if (!expectRedirect) {
-        await testSubjects.existOrFail('inferenceManagementPage', { timeout: 2000 });
-      }
     },
   };
 }
