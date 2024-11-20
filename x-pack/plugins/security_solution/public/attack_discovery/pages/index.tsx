@@ -29,7 +29,7 @@ import { CONNECTOR_ID_LOCAL_STORAGE_KEY, getSize, showLoading } from './helpers'
 import { LoadingCallout } from './loading_callout';
 import { PageTitle } from './page_title';
 import { Results } from './results';
-import { useAttackDiscovery } from '../use_attack_discovery';
+import { useAttackDiscovery } from './use_attack_discovery';
 
 const AttackDiscoveryPageComponent: React.FC = () => {
   const spaceId = useSpaceId() ?? 'default';

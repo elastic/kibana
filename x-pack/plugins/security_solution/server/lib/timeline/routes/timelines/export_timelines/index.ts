@@ -26,8 +26,10 @@ export const exportTimelinesRoute = (router: SecuritySolutionPluginRouter, confi
   router.versioned
     .post({
       path: TIMELINE_EXPORT_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
       access: 'public',
     })
