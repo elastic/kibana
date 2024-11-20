@@ -21,7 +21,7 @@ export default defineCypressConfig({
   responseTimeout: 60000,
   screenshotsFolder: '../../../target/kibana-security-solution/cypress/screenshots',
   trashAssetsBeforeRuns: false,
-  video: true,
+  video: false,
   videosFolder: '../../../target/kibana-security-solution/cypress/videos',
   viewportHeight: 1200,
   viewportWidth: 1920,
