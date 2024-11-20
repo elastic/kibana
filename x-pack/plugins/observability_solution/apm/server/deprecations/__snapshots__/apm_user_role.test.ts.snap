@@ -5,7 +5,7 @@ Array [
   Object {
     "correctiveActions": Object {
       "manualSteps": Array [
-        "Go to Management > Security > Roles to find roles with the \\"apm_user\\" role.",
+        "Go to Management > Security > Role Mappings to find roles mappings with the \\"apm_user\\" role.",
         "Remove the \\"apm_user\\" role from all role mappings and add the built-in \\"viewer\\" role",
       ],
     },
