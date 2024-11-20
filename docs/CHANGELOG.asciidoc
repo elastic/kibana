@@ -2247,7 +2247,33 @@ There are no user-facing changes in the 8.11.4 release.
 [[release-notes-8.11.3]]
 == {kib} 8.11.3
 
-The 8.11.3 release includes the following bug fixes.
+For information about the Kibana 8.11.3 release, review the following information.
+
+[float]
+[[known-issues-8.11.3]]
+=== Known issues
+
+// tag::known-issue-xxxxxx[]
+[discrete]
+Incorrect backslash escaping on keyword wildcard questions {kibana-issue}169709[#169709].
+[%collapsible]
+====
+*Details* +
+Support for wildcard queries in KQL was introduced in 8.5. {kibana-pull}}140629[#140629]
+
+It appears that backslashes are not properly re-escaped when providing them to a wildcard query.
+
+When running a KQL wildcard query for a keyword field that contains backslashes, such as `field: \*\\\*`, they have to be double-escaped to produce the expected results.
+
+
+*Impact* +
+Results for `field: \*\\\*` are not returned.
+
+*Workaround* +
+Double escape the slashes `field: \*\\\\\*`.
+
+====
+// end::known-issue-xxxxxx[]
 
 [float]
 [[fixes-v8.11.3]]
