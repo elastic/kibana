@@ -12,7 +12,7 @@ import { writeFile } from 'fs/promises';
 import { join } from 'path';
 import _ from 'lodash';
 import type { RecursivePartial } from '@kbn/utility-types';
-import { FunctionDefinition } from '../src/definitions/types';
+import { FunctionDefinition, Signature } from '../src/definitions/types';
 import { FULL_TEXT_SEARCH_FUNCTIONS } from '../src/shared/constants';
 const aliasTable: Record<string, string[]> = {
   to_version: ['to_ver'],
@@ -315,7 +315,15 @@ const comparisonOperatorSignatures = (['ip', 'version'] as const).flatMap((type)
     returnType: 'boolean' as const,
   },
 ]);
-const operatorsMeta = {
+const operatorsMeta: Record<
+  string,
+  {
+    name: string;
+    isMathOperator: boolean;
+    isComparisonOperator: boolean;
+    extraSignatures?: Signature[];
+  }
+> = {
   add: { name: '+', isMathOperator: true, isComparisonOperator: false },
   sub: { name: '-', isMathOperator: true, isComparisonOperator: false },
   div: { name: '/', isMathOperator: true, isComparisonOperator: false },
@@ -402,7 +410,7 @@ const operatorsMeta = {
   mul: { name: '*', isMathOperator: true, isComparisonOperator: false },
 };
 
-const operatorNames = {
+const operatorNames: Record<string, string> = {
   add: '+',
   sub: '-',
   div: '/',
@@ -415,7 +423,7 @@ const operatorNames = {
   mod: '%',
   mul: '*',
 };
-const validators: Record<'div' | 'mod', FunctionDefinition['validate']> = {
+const validators: Record<string, string> = {
   div: `(fnDef) => {
     const [left, right] = fnDef.args;
     const messages = [];
@@ -486,11 +494,15 @@ const replaceParamName = (str: string) => {
   }
 };
 
-const enrichOperators = (operatorsFunctionDefinitions: FunctionDefinition[]) => {
+const enrichOperators = (
+  operatorsFunctionDefinitions: FunctionDefinition[]
+): FunctionDefinition[] => {
+  // @ts-expect-error Stringified version of the validator function
   return operatorsFunctionDefinitions.map((op) => {
-    const isMathOperator = op.name in operatorsMeta && operatorsMeta[op.name]?.isMathOperator;
+    const isMathOperator =
+      Object.hasOwn(operatorsMeta, op.name) && operatorsMeta[op.name]?.isMathOperator;
     const isComparisonOperator =
-      op.name in operatorsMeta && operatorsMeta[op.name]?.isComparisonOperator;
+      Object.hasOwn(operatorsMeta, op.name) && operatorsMeta[op.name]?.isComparisonOperator;
 
     const signatures = op.signatures.map((s) => ({
       ...s,
@@ -507,21 +519,22 @@ const enrichOperators = (operatorsFunctionDefinitions: FunctionDefinition[]) => 
       supportedCommands = ['eval', 'where', 'row', 'stats', 'metrics', 'sort'];
       supportedOptions = ['by'];
     }
-    if (operatorsMeta[op.name] && operatorsMeta[op.name]?.extraSignatures) {
-      signatures.push(...operatorsMeta[op.name].extraSignatures);
+    if (
+      Object.hasOwn(operatorsMeta, op.name) &&
+      Array.isArray(operatorsMeta[op.name]?.extraSignatures)
+    ) {
+      signatures.push(...(operatorsMeta[op.name].extraSignatures ?? []));
     }
 
-    const description = operatorsMeta[op.name]?.description ?? op.description;
     return {
       ...op,
-      description,
       signatures,
       // Elasticsearch docs does not include the full supported commands for math operators
       // so we are overriding to add proper support
       supportedCommands,
       supportedOptions,
       // @TODO: change to operator type
-      type: 'builtin',
+      type: 'builtin' as const,
       validate: validators[op.name],
     };
   });
