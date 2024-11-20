@@ -71,6 +71,7 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
             endpointAgentId: agentId,
             endpointCapabilities: capabilities,
             endpointPrivileges,
+            platform,
           }),
           'data-test-subj': `${agentType}ResponseActionsConsole`,
           storagePrefix: 'xpack.securitySolution.Responder',
