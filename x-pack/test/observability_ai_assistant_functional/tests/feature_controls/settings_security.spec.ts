@@ -16,7 +16,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   describe('ai assistant management privileges', () => {
-    describe('all privileges', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/191707
+    describe.skip('all privileges', () => {
       before(async () => {
         await createAndLoginUserWithCustomRole(getPageObjects, getService, {
           // we need all these privileges to view and modify Obs AI Assistant settings view
