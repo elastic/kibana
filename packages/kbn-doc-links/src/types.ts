@@ -342,6 +342,7 @@ export interface DocLinks {
     readonly aiAssistant: string;
     readonly artifactControl: string;
     readonly avcResults: string;
+    readonly bidirectionalIntegrations: string;
     readonly trustedApps: string;
     readonly eventFilters: string;
     readonly eventMerging: string;
