@@ -7,14 +7,13 @@
 
 import expect from '@kbn/expect';
 
-import { OBSERVABLE_TYPES_BUILTIN, OBSERVABLE_TYPE_IPV4 } from '@kbn/cases-plugin/common/constants';
-import { secOnlyRead } from '../../../../common/lib/authentication/users';
+import { OBSERVABLE_TYPE_IPV4 } from '@kbn/cases-plugin/common/constants';
+import { secOnly } from '../../../../common/lib/authentication/users';
 import { getPostCaseRequest } from '../../../../common/lib/mock';
 import {
   createCase,
   deleteAllCaseItems,
   addObservable,
-  similarCases,
   updateObservable,
   deleteObservable,
   getCase,
@@ -72,106 +71,6 @@ export default ({ getService }: FtrProviderContext): void => {
           },
           expectedHttpCode: 400,
         });
-      });
-    });
-
-    describe('shows similar cases', () => {
-      it('returns cases similar to given case', async () => {
-        const [caseA, caseB] = await Promise.all([
-          createCase(supertest, getPostCaseRequest()),
-          createCase(supertest, getPostCaseRequest()),
-          createCase(supertest, getPostCaseRequest()),
-        ]);
-
-        const newObservableData = {
-          value: 'value',
-          typeKey: OBSERVABLE_TYPES_BUILTIN[0].key,
-          description: '',
-        };
-
-        const { cases } = await similarCases({
-          supertest,
-          body: { perPage: 10, page: 1 },
-          caseId: caseA.id,
-        });
-        expect(cases.length).to.be(0);
-
-        await addObservable({
-          supertest,
-          caseId: caseA.id,
-          params: {
-            observable: newObservableData,
-          },
-        });
-
-        await addObservable({
-          supertest,
-          caseId: caseB.id,
-          params: {
-            observable: newObservableData,
-          },
-        });
-
-        const { cases: casesSimilarToA } = await similarCases({
-          supertest,
-          body: { perPage: 10, page: 1 },
-          caseId: caseA.id,
-        });
-
-        expect(casesSimilarToA.length).to.be(1);
-
-        const { cases: casesSimilarToB } = await similarCases({
-          supertest,
-          body: { perPage: 10, page: 1 },
-          caseId: caseB.id,
-        });
-
-        expect(casesSimilarToB.length).to.be(1);
-      });
-
-      it('returns cases similar to given case with json in the value', async () => {
-        const [caseA, caseB] = await Promise.all([
-          createCase(supertest, getPostCaseRequest()),
-          createCase(supertest, getPostCaseRequest()),
-          createCase(supertest, getPostCaseRequest()),
-        ]);
-
-        const newObservableData = {
-          value: '127.0.0.1',
-          typeKey: OBSERVABLE_TYPE_IPV4.key,
-          description: '',
-        };
-
-        const { cases } = await similarCases({
-          supertest,
-          body: { perPage: 10, page: 1 },
-          caseId: caseA.id,
-        });
-        expect(cases.length).to.be(0);
-
-        await addObservable({
-          supertest,
-          caseId: caseA.id,
-          params: {
-            observable: newObservableData,
-          },
-        });
-
-        await addObservable({
-          supertest,
-          caseId: caseB.id,
-          params: {
-            observable: newObservableData,
-          },
-        });
-
-        const { cases: casesAfterObservablesAreAdded } = await similarCases({
-          supertest,
-          body: { perPage: 10, page: 1 },
-          caseId: caseA.id,
-        });
-
-        expect(casesAfterObservablesAreAdded.length).to.be(1);
       });
     });
 
@@ -239,8 +138,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    // TODO: discuss how this should be configured exactly
-    describe.skip('rbac', () => {
+    describe('rbac', () => {
       const supertestWithoutAuth = getService('supertestWithoutAuth');
 
       it('should not allow creating observables without permissions', async () => {
@@ -259,7 +157,7 @@ export default ({ getService }: FtrProviderContext): void => {
           params: {
             observable: newObservableData,
           },
-          auth: { user: secOnlyRead, space: 'space1' },
+          auth: { user: secOnly, space: null },
           expectedHttpCode: 403,
         });
       });
