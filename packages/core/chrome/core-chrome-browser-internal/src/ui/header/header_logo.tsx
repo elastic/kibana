@@ -118,13 +118,13 @@ export function HeaderLogo({ href, navigateToApp, loadingCount$, ...observables 
       {customizedLogo ? (
         <img
           src={customizedLogo}
-          className="chrHeaderLogo__mark"
+          data-test-subj="logoMark"
           css={styles.logoMarkCss}
           style={{ maxWidth: '200px', maxHeight: '84px' }}
           alt="custom mark"
         />
       ) : (
-        <ElasticMark className="chrHeaderLogo__mark" css={styles.logoMarkCss} aria-hidden={true} />
+        <ElasticMark data-test-subj="logoMark" css={styles.logoMarkCss} aria-hidden={true} />
       )}
     </a>
   );
