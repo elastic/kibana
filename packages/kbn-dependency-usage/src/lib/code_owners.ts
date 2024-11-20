@@ -26,6 +26,12 @@ const existOrThrow = (targetFile: string) => {
     throw Error(`Unable to determine code owners: file ${targetFile} Not Found`);
 };
 
+/**
+ * Get the .github/CODEOWNERS entries, prepared for path matching.
+ * The last matching CODEOWNERS entry has highest precedence:
+ * https://help.github.com/articles/about-codeowners/
+ * so entries are returned in reversed order to later search for the first match.
+ */
 export function getPathsWithOwnersReversed(): PathWithOwners[] {
   const codeownersPath = joinPath(REPO_ROOT, '.github', 'CODEOWNERS');
   existOrThrow(codeownersPath);
