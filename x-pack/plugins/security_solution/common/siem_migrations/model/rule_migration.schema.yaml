@@ -79,9 +79,8 @@ components:
 
     ElasticRulePartial:
       description: The partial version of the migrated elastic rule.
-      allOf:
-        - $ref: '#/components/schemas/ElasticRule'
-          x-modify: partial
+      $ref: '#/components/schemas/ElasticRule'
+      x-modify: partial
 
     RuleMigration:
       description: The rule migration document object.
