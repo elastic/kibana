@@ -6,7 +6,7 @@
  */
 
 import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, omit } from 'lodash';
 import { processorsFormatter } from './processors_formatter';
 import { LegacyConfigKey } from '../../../../common/constants/monitor_management';
 import { ConfigKey, MonitorTypeEnum, MonitorFields } from '../../../../common/runtime_types';
@@ -53,21 +53,24 @@ export const formatSyntheticsPolicy = (
     dataStream.enabled = true;
   }
 
-  configKeys.forEach((key) => {
-    const configItem = dataStream?.vars?.[key];
-    if (configItem) {
-      if (syntheticsPolicyFormatters[key]) {
-        configItem.value = syntheticsPolicyFormatters[key]?.(config, key);
-      } else if (key === ConfigKey.MONITOR_SOURCE_TYPE && isLegacy) {
-        configItem.value = undefined;
-      } else {
-        configItem.value = config[key] === undefined || config[key] === null ? null : config[key];
+  // TODO: temp for testing purposes
+  configKeys
+    .filter((k) => k !== ConfigKey.SOURCE_INLINE)
+    .forEach((key) => {
+      const configItem = dataStream?.vars?.[key];
+      if (configItem) {
+        if (syntheticsPolicyFormatters[key]) {
+          configItem.value = syntheticsPolicyFormatters[key]?.(config, key);
+        } else if (key === ConfigKey.MONITOR_SOURCE_TYPE && isLegacy) {
+          configItem.value = undefined;
+        } else {
+          configItem.value = config[key] === undefined || config[key] === null ? null : config[key];
+        }
+        if (!PARAMS_KEYS_TO_SKIP.includes(key)) {
+          configItem.value = replaceStringWithParams(configItem.value, params);
+        }
       }
-      if (!PARAMS_KEYS_TO_SKIP.includes(key)) {
-        configItem.value = replaceStringWithParams(configItem.value, params);
-      }
-    }
-  });
+    });
 
   const processorItem = dataStream?.vars?.processors;
   if (processorItem) {
@@ -80,5 +83,9 @@ export const formatSyntheticsPolicy = (
     throttling.value = throttlingFormatter?.(config, ConfigKey.THROTTLING_CONFIG);
   }
 
-  return { formattedPolicy, hasDataStream: Boolean(dataStream), hasInput: Boolean(currentInput) };
+  return {
+    formattedPolicy: omit(formattedPolicy, [ConfigKey.SOURCE_INLINE]) as NewPackagePolicy,
+    hasDataStream: Boolean(dataStream),
+    hasInput: Boolean(currentInput),
+  };
 };
