@@ -55,6 +55,9 @@ export function registerContextFunction({
         };
 
         if (!isKnowledgeBaseReady) {
+          resources.logger.warn(
+            `Knowledge base is not ready. Context function will not perform recall`
+          );
           return { content };
         }
 

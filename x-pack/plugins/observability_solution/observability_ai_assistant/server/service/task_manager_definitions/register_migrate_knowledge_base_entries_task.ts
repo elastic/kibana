@@ -72,6 +72,15 @@ export async function runSemanticTextKnowledgeBaseMigration({
 }) {
   logger.debug('Knowledge base migration: Running migration');
 
+  const indexExists = await esClient.asInternalUser.indices.exists({
+    index: resourceNames.aliases.kb,
+  });
+
+  if (!indexExists) {
+    logger.debug('Knowledge base index does not exist. Migration not necessary');
+    return;
+  }
+
   try {
     const response = await esClient.asInternalUser.search<KnowledgeBaseEntry>({
       size: 100,
@@ -124,6 +133,7 @@ export async function runSemanticTextKnowledgeBaseMigration({
     await Promise.all(promises);
     logger.debug(`Knowledge base migration: Migrated ${promises.length} entries`);
     await runSemanticTextKnowledgeBaseMigration({ esClient, logger });
+    await sleep(1000);
   } catch (e) {
     logger.error('Knowledge base migration: Failed to migrate entries');
     logger.error(e);
@@ -139,11 +149,16 @@ async function waitForInferenceEndpoint({
 }) {
   return pRetry(
     async () => {
-      const endpoint = await getInferenceEndpoint({ esClient, logger });
+      const endpoint = await getInferenceEndpoint({ esClient });
       if (!endpoint) {
+        logger.debug('Inference endpoint not yet ready. Retrying...');
         throw new Error('Inference endpoint not yet ready');
       }
     },
-    { retries: 20, factor: 2 }
+    { factor: 2, retries: 30, maxTimeout: 60_000 }
   );
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

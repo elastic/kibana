@@ -76,22 +76,15 @@ export async function deleteInferenceEndpoint({
 
 export async function getInferenceEndpoint({
   esClient,
-  logger,
 }: {
   esClient: { asInternalUser: ElasticsearchClient };
-  logger: Logger;
 }) {
-  try {
-    const response = await esClient.asInternalUser.inference.get({
-      inference_id: AI_ASSISTANT_KB_INFERENCE_ID,
-    });
+  const response = await esClient.asInternalUser.inference.get({
+    inference_id: AI_ASSISTANT_KB_INFERENCE_ID,
+  });
 
-    if (response.endpoints.length > 0) {
-      return response.endpoints[0];
-    }
-  } catch (e) {
-    logger.error(`Failed to fetch inference endpoint: ${e.message}`);
-    throw e;
+  if (response.endpoints.length > 0) {
+    return response.endpoints[0];
   }
 }
 
