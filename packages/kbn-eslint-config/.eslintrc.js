@@ -334,7 +334,6 @@ module.exports = {
     '@kbn/imports/no_group_crossing_manifests': 'error',
     '@kbn/imports/no_group_crossing_imports': 'error',
     '@kbn/css/no_css_color': 'warn',
-    '@kbn/css/prefer_css_attributes_for_eui_components': 'warn',
     'no-new-func': 'error',
     'no-implied-eval': 'error',
     'no-prototype-builtins': 'error',

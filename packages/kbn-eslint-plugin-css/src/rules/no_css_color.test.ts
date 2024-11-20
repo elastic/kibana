@@ -51,7 +51,35 @@ const invalid: RuleTester.InvalidTestCase[] = [
         <EuiCode style={{ color: '#dd4040' }}>This is a test</EuiCode>
       )
     }`,
+    errors: [{ messageId: 'noCssColorSpecific' }],
+  },
+  {
+    name: 'Raises an error when a CSS color is used in a JSX style attribute with template literals',
+    filename: '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
+    code: `
+    import React from 'react';
+
+    function TestComponent() {
+      return (
+        <EuiCode style={\`{ color: '#dd4040', margin: '${Math.floor(
+          Math.random() * 5
+        )}px'  }\`}>This is a test</EuiCode>
+      )
+    }`,
     errors: [{ messageId: 'noCssColor' }],
+  },
+  {
+    name: 'Raises an error when a CSS color is used for the background property in a JSX style attribute',
+    filename: '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
+    code: `
+    import React from 'react';
+    
+    function TestComponent() {
+      return (
+        <EuiCode style={{ background: '#dd4040' }}>This is a test</EuiCode>
+      )
+    }`,
+    errors: [{ messageId: 'noCssColorSpecific' }],
   },
   {
     name: 'Raises an error when a CSS color for the color property is used in a JSX css attribute for EuiComponents',
@@ -64,7 +92,7 @@ const invalid: RuleTester.InvalidTestCase[] = [
         <EuiCode css={{ color: '#dd4040' }}>This is a test</EuiCode>
       )
     }`,
-    errors: [{ messageId: 'noCssColor' }],
+    errors: [{ messageId: 'noCssColorSpecific' }],
   },
   {
     name: 'Raises an error when a CSS color for the color property is used in a JSX css attribute for EuiComponents with the css template function',
@@ -90,7 +118,7 @@ const invalid: RuleTester.InvalidTestCase[] = [
         <EuiCode css={() => ({ color: '#dd4040' })}>This is a test</EuiCode>
       )
     }`,
-    errors: [{ messageId: 'noCssColor' }],
+    errors: [{ messageId: 'noCssColorSpecific' }],
   },
   {
     name: 'Raises an error when a CSS color for the color property is used in a JSX css attribute for EuiComponents with a regular function',
@@ -103,7 +131,7 @@ const invalid: RuleTester.InvalidTestCase[] = [
         <EuiCode css={function () { return { color: '#dd4040' }; }}>This is a test</EuiCode>
       )
     }`,
-    errors: [{ messageId: 'noCssColor' }],
+    errors: [{ messageId: 'noCssColorSpecific' }],
   },
 ];
 

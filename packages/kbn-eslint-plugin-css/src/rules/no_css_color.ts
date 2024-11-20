@@ -22,7 +22,8 @@ const cssColorRegex = /(#|rgb|hsl|hwb|lab|lch|oklab).*/;
 const propertiesSupportingCssColor = ['color', 'background', 'backgroundColor', 'border'];
 
 /**
- * @description Builds off the existing color definition regex to match css declarations that can apply color to html elements and text nodes
+ * @description Builds off the existing color definition regex to match css declarations that can apply color to
+ * html elements and text nodes for string declarations
  */
 const htmlElementColorDeclarationRegex = RegExp(
   String.raw`(${propertiesSupportingCssColor.join('|')})\:\s?(\'|\")?${cssColorRegex.source}`
@@ -46,7 +47,11 @@ const raiseReportIfPropertyHasCssColor = (
   ) {
     context.report({
       loc: node.loc,
-      messageId: 'noCssColor',
+      messageId: 'noCssColorSpecific',
+      data: {
+        // @ts-expect-error the key name is always pretty else this code will not execute
+        property: node.key.name,
+      },
     });
   }
 
@@ -63,7 +68,9 @@ export const NoCssColor: Rule.RuleModule = {
       url: 'https://eui.elastic.co/#/theming/colors/values',
     },
     messages: {
-      noCssColor: 'Avoid using CSS colors',
+      noCssColorSpecific:
+        'Avoid using a literal CSS color value for {{property}}, use an EUI theme color instead',
+      noCssColor: 'Avoid using a literal CSS color value, use an EUI theme color instead',
     },
     schema: [],
   },
@@ -83,13 +90,17 @@ export const NoCssColor: Rule.RuleModule = {
             node.value.type === 'JSXExpressionContainer' &&
             node.value.expression.type === 'TemplateLiteral'
           ) {
-            const declarationTemplateNode = node.value.expression.quasis[0];
+            for (let i = 0; i < node.value.expression.quasis.length; i++) {
+              const declarationTemplateNode = node.value.expression.quasis[i];
 
-            if (htmlElementColorDeclarationRegex.test(declarationTemplateNode.value.raw)) {
-              context.report({
-                node: declarationTemplateNode,
-                messageId: 'noCssColor',
-              });
+              if (htmlElementColorDeclarationRegex.test(declarationTemplateNode.value.raw)) {
+                context.report({
+                  loc: declarationTemplateNode.loc,
+                  messageId: 'noCssColor',
+                });
+
+                break;
+              }
             }
           }
 
@@ -126,13 +137,17 @@ export const NoCssColor: Rule.RuleModule = {
             node.value.type === 'JSXExpressionContainer' &&
             node.value.expression.type === 'TemplateLiteral'
           ) {
-            const declarationTemplateNode = node.value.expression.quasis[0];
+            for (let i = 0; i < node.value.expression.quasis.length; i++) {
+              const declarationTemplateNode = node.value.expression.quasis[i];
 
-            if (htmlElementColorDeclarationRegex.test(declarationTemplateNode.value.raw)) {
-              context.report({
-                node: declarationTemplateNode,
-                messageId: 'noCssColor',
-              });
+              if (htmlElementColorDeclarationRegex.test(declarationTemplateNode.value.raw)) {
+                context.report({
+                  node: declarationTemplateNode,
+                  messageId: 'noCssColor',
+                });
+
+                break;
+              }
             }
           }
 
@@ -169,13 +184,17 @@ export const NoCssColor: Rule.RuleModule = {
             node.value.expression.tag.type === 'Identifier' &&
             node.value.expression.tag.name === 'css'
           ) {
-            const declarationTemplateNode = node.value.expression.quasi.quasis[0];
+            for (let i = 0; i < node.value.expression.quasi.quasis.length; i++) {
+              const declarationTemplateNode = node.value.expression.quasi.quasis[i];
 
-            if (htmlElementColorDeclarationRegex.test(declarationTemplateNode.value.raw)) {
-              context.report({
-                node: declarationTemplateNode,
-                messageId: 'noCssColor',
-              });
+              if (htmlElementColorDeclarationRegex.test(declarationTemplateNode.value.raw)) {
+                context.report({
+                  loc: declarationTemplateNode.loc,
+                  messageId: 'noCssColor',
+                });
+
+                break;
+              }
             }
           }
 
