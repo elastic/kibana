@@ -1278,6 +1278,8 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test/common/utils/synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team # Assigned per https://github.com/elastic/kibana/blob/main/packages/kbn-apm-synthtrace/kibana.jsonc#L5
 
 # Infra Monitoring tests
+/x-pack/test/common/services/infra_synthtrace_kibana_client.ts @elastic/obs-ux-infra_services-team
+/x-pack/test/common/services/infra_log_views.ts @elastic/obs-ux-infra_services-team # Assigned per https://github.com/elastic/kibana/pull/188204
 /x-pack/test/api_integration/apis/infra @elastic/obs-ux-infra_services-team
 /x-pack/test/functional/apps/infra @elastic/obs-ux-infra_services-team
 /x-pack/test/functional/apps/infra/logs @elastic/obs-ux-logs-team
