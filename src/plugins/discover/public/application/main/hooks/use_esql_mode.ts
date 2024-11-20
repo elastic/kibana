@@ -74,6 +74,28 @@ export function useEsqlMode({
             return;
           }
 
+          if (next.fetchStatus === FetchStatus.LOADING) {
+            const appStateQuery = stateContainer.appState.getState().query;
+
+            if (isOfAggregateQueryType(appStateQuery)) {
+              if (prev.current.initialFetch) {
+                prev.current.query = appStateQuery.esql;
+              }
+
+              const indexPatternChanged =
+                getIndexPatternFromESQLQuery(appStateQuery.esql) !==
+                getIndexPatternFromESQLQuery(prev.current.query);
+
+              if (indexPatternChanged) {
+                stateContainer.internalState.transitions.setResetDefaultProfileState({
+                  columns: true,
+                  rowHeight: true,
+                  breakdownField: true,
+                });
+              }
+            }
+          }
+
           if (next.fetchStatus !== FetchStatus.PARTIAL) {
             return;
           }
@@ -110,17 +132,11 @@ export function useEsqlMode({
           const { viewMode } = stateContainer.appState.getState();
           const changeViewMode = viewMode !== getValidViewMode({ viewMode, isEsqlMode: true });
 
-          if (indexPatternChanged) {
-            stateContainer.internalState.transitions.setResetDefaultProfileState({
-              columns: true,
-              rowHeight: true,
-              breakdownField: true,
-            });
-          } else if (allColumnsChanged) {
+          if (!indexPatternChanged && allColumnsChanged) {
             stateContainer.internalState.transitions.setResetDefaultProfileState({
               columns: true,
               rowHeight: false,
-              breakdownField: true,
+              breakdownField: false,
             });
           }
 
