@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '@kbn/core/public';
+import { APP_WRAPPER_CLASS, AppMountParameters, CoreStart } from '@kbn/core/public';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
@@ -25,7 +24,7 @@ import { ExperimentalFeatures } from '../common/config';
 import { PluginContext } from './context/plugin_context';
 import { usePluginContext } from './hooks/use_plugin_context';
 import { getRoutes } from './routes/routes';
-import { SLORepositoryClient, SLOPublicPluginsStart } from './types';
+import { SLOPublicPluginsStart, SLORepositoryClient } from './types';
 
 interface Props {
   core: CoreStart;
@@ -55,7 +54,6 @@ export const renderApp = ({
   sloClient,
 }: Props) => {
   const { element, history, theme$ } = appMountParameters;
-  const isDarkMode = core.theme.getTheme().darkMode;
 
   // ensure all divs are .kbnAppWrappers
   element.classList.add(APP_WRAPPER_CLASS);
@@ -116,15 +114,13 @@ export const renderApp = ({
                 }}
               >
                 <Router history={history}>
-                  <EuiThemeProvider darkMode={isDarkMode}>
-                    <RedirectAppLinks coreStart={core} data-test-subj="observabilityMainContainer">
-                      <PerformanceContextProvider>
-                        <QueryClientProvider client={queryClient}>
-                          <App />
-                        </QueryClientProvider>
-                      </PerformanceContextProvider>
-                    </RedirectAppLinks>
-                  </EuiThemeProvider>
+                  <RedirectAppLinks coreStart={core} data-test-subj="observabilityMainContainer">
+                    <PerformanceContextProvider>
+                      <QueryClientProvider client={queryClient}>
+                        <App />
+                      </QueryClientProvider>
+                    </PerformanceContextProvider>
+                  </RedirectAppLinks>
                 </Router>
               </PluginContext.Provider>
             </KibanaContextProvider>
