@@ -44,8 +44,8 @@ Elasticsearch deprecations can be handled in a number of ways:
     4. Once reindexing is done, in one atomic operation via the aliases API:
       1. Create an alias from the original index to the target index. All existing aliases referencing the original index will be re-pointed to the target index. E.g., `my-index` will be an alias referencing `reindexed-v8-my-index`.
       2. Delete the original index.
-      3. **NOTE:** writing/indexing will effectively be re-enabled at this point via the alias, unless the original was write-blocked by users as index settings are inherited from the original.
-    6. The Upgrade Assistant's reindex action is complete at this point.
+      3. **NOTE:** writing/indexing will effectively be re-enabled at this point via the alias, unless the original was write-blocked by users. This and other index settings are inherited from the original.
+    5. The Upgrade Assistant's reindex action is complete at this point.
        1. If the original index was closed before reindexing, the new target will also be closed at this point.
 
     Currently reindexing deprecations are only enabled for major version upgrades  by setting the config `featureSet.reindexCorrectiveActions` to `true` on the `x.last` version of the stack.
