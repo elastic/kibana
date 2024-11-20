@@ -41,6 +41,7 @@ export const GraphNodeExpandPopover: React.FC<GraphNodeExpandPopoverProps> = mem
         isOpen={isOpen}
         anchorElement={anchorElement}
         closePopover={closePopover}
+        data-test-subj="graphNodeExpandPopover"
       >
         <EuiListGroup gutterSize="none" bordered={false} flush={true}>
           <ExpandPopoverListItem

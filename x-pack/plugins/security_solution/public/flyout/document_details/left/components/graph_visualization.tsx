@@ -66,9 +66,10 @@ const useGraphData = (eventIds: string[], timeRange: TimeRange, filter: { bool: 
   return { data, refresh, isFetching };
 };
 
-const buildPhraseFilter = (field: string, value: string): PhraseFilter => ({
+const buildPhraseFilter = (field: string, value: string, dataViewId?: string): PhraseFilter => ({
   meta: {
     key: field,
+    index: dataViewId,
     negate: false,
     disabled: false,
     type: 'phrase',
@@ -110,7 +111,7 @@ const addFilter = (dataViewId: string, prev: Filter[], key: string, value: strin
       ...otherFilters,
     ];
   } else {
-    return [buildPhraseFilter(key, value), ...prev];
+    return [buildPhraseFilter(key, value, dataViewId), ...prev];
   }
 };
 

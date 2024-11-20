@@ -14,9 +14,13 @@ import { BenchmarkPagePageProvider } from './benchmark_page';
 import { CspSecurityCommonProvider } from './security_common';
 import { RulePagePageProvider } from './rule_page';
 import { AlertsPageObject } from './alerts_page';
+import { NetworkEventsPageObject } from './network_events_page';
+import { ExpandedFlyout } from './expanded_flyout';
 
 export const cloudSecurityPosturePageObjects = {
   alerts: AlertsPageObject,
+  networkEvents: NetworkEventsPageObject,
+  expandedFlyout: ExpandedFlyout,
   findings: FindingsPageProvider,
   cloudPostureDashboard: CspDashboardPageProvider,
   cisAddIntegration: AddCisIntegrationFormPageProvider,
