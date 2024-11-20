@@ -26,7 +26,7 @@ import { DatasetQualityIndicator } from '../../../quality_indicator';
 const degradedDocsTooltip = (
   <FormattedMessage
     id="xpack.datasetQuality.details.degradedDocsTooltip"
-    defaultMessage="The percentage of degraded documents —documents with the {ignoredProperty} property— in your data set."
+    defaultMessage="The number of degraded documents —documents with the {ignoredProperty} property— in your data set."
     values={{
       ignoredProperty: (
         <EuiCode language="json" transparentBackground>
@@ -40,7 +40,7 @@ const degradedDocsTooltip = (
 const failedDocsColumnTooltip = (
   <FormattedMessage
     id="xpack.datasetQuality.failedDocsColumnTooltip"
-    defaultMessage="The percentage of docs sent to failure store due to an issue during ingestion."
+    defaultMessage="The number of documents sent to failure store due to an issue during ingestion."
   />
 );
 
