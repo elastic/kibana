@@ -7,9 +7,9 @@
 
 import { getAnalysisType } from '@kbn/ml-data-frame-analytics-utils';
 import type { MlInferenceState } from './types';
-import type { ModelItem } from '../../model_management/models_list';
+import type { DFAModelItem } from '../../model_management/models_list';
 
-export const getModelType = (model: ModelItem): string | undefined => {
+export const getModelType = (model: DFAModelItem): string | undefined => {
   const analysisConfig = model.metadata?.analytics_config?.analysis;
   return analysisConfig !== undefined ? getAnalysisType(analysisConfig) : undefined;
 };
@@ -54,7 +54,7 @@ export const getDefaultOnFailureConfiguration = (): MlInferenceState['onFailure'
   },
 ];
 
-export const getInitialState = (model: ModelItem): MlInferenceState => {
+export const getInitialState = (model: DFAModelItem): MlInferenceState => {
   const modelType = getModelType(model);
   let targetField;
 

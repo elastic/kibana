@@ -32,6 +32,7 @@ import { useTimefilter } from '@kbn/ml-date-picker';
 import { isDefined } from '@kbn/ml-is-defined';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { useStorage } from '@kbn/ml-local-storage';
+import type { ModelDefinitionResponse } from '@kbn/ml-trained-models-utils';
 import {
   BUILT_IN_MODEL_TAG,
   BUILT_IN_MODEL_TYPE,
@@ -39,6 +40,7 @@ import {
   ELASTIC_MODEL_TYPE,
   ELSER_ID_V1,
   MODEL_STATE,
+  TRAINED_MODEL_TYPE,
   type ModelState,
 } from '@kbn/ml-trained-models-utils';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
@@ -52,7 +54,6 @@ import { ML_PAGES } from '../../../common/constants/locator';
 import { ML_ELSER_CALLOUT_DISMISSED } from '../../../common/types/storage';
 import type {
   ModelDownloadState,
-  ModelPipelines,
   TrainedModelConfigResponse,
   TrainedModelDeploymentStatsResponse,
   TrainedModelStat,
@@ -77,33 +78,89 @@ import { TestModelAndPipelineCreationFlyout } from './test_models';
 
 type Stats = Omit<TrainedModelStat, 'model_id' | 'deployment_stats'>;
 
-export type ModelItem = TrainedModelConfigResponse & {
+/** Common properties for all items in the Trained models table */
+interface BaseModelItem {
   type?: string[];
-  stats?: Stats & { deployment_stats: TrainedModelDeploymentStatsResponse[] };
-  pipelines?: ModelPipelines['pipelines'] | null;
-  origin_job_exists?: boolean;
-  deployment_ids: string[];
-  putModelConfig?: object;
-  state: ModelState | undefined;
-  /**
-   * Description of the current model state
-   */
-  stateDescription?: string;
-  recommended?: boolean;
-  supported: boolean;
-  /**
-   * Model name, e.g. elser
-   */
-  modelName?: string;
-  os?: string;
-  arch?: string;
-  softwareLicense?: string;
-  licenseUrl?: string;
-  downloadState?: ModelDownloadState;
+  tags: string[];
+}
+
+/** Common properties for existing NLP models and NLP model download configs */
+interface BaseNLPModelItem extends BaseModelItem {
   disclaimer?: string;
+  recommended?: boolean;
+  supported?: boolean;
+  state: ModelState | undefined;
+  downloadState?: ModelDownloadState;
+}
+
+export type ModelDownloadItem = BaseNLPModelItem &
+  Omit<ModelDefinitionResponse, 'version' | 'config'> & {
+    putModelConfig?: object;
+    softwareLicense?: string;
+  };
+
+export type NLPModelItem = BaseNLPModelItem &
+  ExistingModelBaseWithStats & {
+    stats?: Stats & { deployment_stats: TrainedModelDeploymentStatsResponse[] };
+    /**
+     * Description of the current model state
+     */
+    stateDescription?: string;
+    /**
+     * Deployment ids extracted from the deployment stats
+     */
+    deployment_ids: string[];
+  };
+
+export type DFAModelItem = ExistingModelBaseWithStats & {
+  origin_job_exists?: boolean;
 };
 
-export type ModelItemFull = Required<ModelItem>;
+function isBaseNLPModelItem(item: unknown): item is BaseNLPModelItem {
+  return typeof item === 'object' && item !== null && 'state' in item;
+}
+
+export function isNLPModelItem(item: unknown): item is NLPModelItem {
+  return isExistingModel(item) && item.model_type === TRAINED_MODEL_TYPE.PYTORCH;
+}
+
+type ExistingModelBase = TrainedModelConfigResponse & BaseModelItem;
+
+// We always fetch stats before rendering the model list
+export type ExistingModelBaseWithStats = ExistingModelBase & { stats: Stats };
+
+export function isExistingModel(item: unknown): item is ExistingModelBaseWithStats {
+  return (
+    typeof item === 'object' &&
+    item !== null &&
+    'model_type' in item &&
+    'create_time' in item &&
+    !!item.create_time
+  );
+}
+
+export function isDFAModelItem(item: unknown): item is DFAModelItem {
+  return isExistingModel(item) && item.model_type === TRAINED_MODEL_TYPE.TREE_ENSEMBLE;
+}
+
+export function isModelDownloadItem(item: ModelItem): item is ModelDownloadItem {
+  return 'putModelConfig' in item && !!item.type?.includes(TRAINED_MODEL_TYPE.PYTORCH);
+}
+
+export const isBuiltInModel = (item: ModelItem) => item.tags.includes(BUILT_IN_MODEL_TAG);
+
+/**
+ * This type represents a union of different model entities:
+ * - Any existing trained model returned by the API, e.g., lang_ident_model_1, DFA models, etc.
+ * - Hosted model configurations available for download, e.g., ELSER or E5
+ * - NLP models already downloaded into Elasticsearch
+ * - DFA models
+ */
+export type ModelItem =
+  | ExistingModelBaseWithStats
+  | ModelDownloadItem
+  | NLPModelItem
+  | DFAModelItem;
 
 interface PageUrlState {
   pageKey: typeof ML_PAGES.TRAINED_MODELS_MANAGE;
@@ -188,18 +245,13 @@ export const ModelsList: FC<Props> = ({
   const [items, setItems] = useState<ModelItem[]>([]);
   const [selectedModels, setSelectedModels] = useState<ModelItem[]>([]);
   const [modelsToDelete, setModelsToDelete] = useState<ModelItem[]>([]);
-  const [modelToDeploy, setModelToDeploy] = useState<ModelItem | undefined>();
+  const [modelToDeploy, setModelToDeploy] = useState<DFAModelItem | undefined>();
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
     {}
   );
-  const [modelToTest, setModelToTest] = useState<ModelItem | null>(null);
-  const [dfaModelToTest, setDfaModelToTest] = useState<ModelItem | null>(null);
+  const [modelToTest, setModelToTest] = useState<ExistingModelBaseWithStats | null>(null);
+  const [dfaModelToTest, setDfaModelToTest] = useState<DFAModelItem | null>(null);
   const [isAddModelFlyoutVisible, setIsAddModelFlyoutVisible] = useState(false);
-
-  const isBuiltInModel = useCallback(
-    (item: ModelItem) => item.tags.includes(BUILT_IN_MODEL_TAG),
-    []
-  );
 
   const isElasticModel = useCallback(
     (item: ModelItem) => item.tags.includes(ELASTIC_MODEL_TAG),
@@ -207,8 +259,8 @@ export const ModelsList: FC<Props> = ({
   );
 
   // List of downloaded/existing models
-  const existingModels = useMemo(() => {
-    return items.filter((i) => !i.putModelConfig);
+  const existingModels = useMemo<Array<NLPModelItem | DFAModelItem>>(() => {
+    return items.filter((i): i is NLPModelItem | DFAModelItem => !isModelDownloadItem(i));
   }, [items]);
 
   /**
@@ -224,7 +276,7 @@ export const ModelsList: FC<Props> = ({
     try {
       const response = await trainedModelsApiService.getTrainedModels(undefined, {
         with_pipelines: true,
-        with_indices: true,
+        with_indices: false,
       });
 
       const newItems: ModelItem[] = [];
@@ -254,7 +306,7 @@ export const ModelsList: FC<Props> = ({
 
       // Need to fetch stats for all models to enable/disable actions
       // TODO combine fetching models definitions and stats into a single function
-      await fetchModelsStats(newItems);
+      await fetchModelsStats(newItems as ExistingModelBase[]);
 
       let resultItems = newItems;
       // don't add any of the built-in models (e.g. elser) if NLP is disabled
@@ -270,7 +322,7 @@ export const ModelsList: FC<Props> = ({
         const notDownloaded: ModelItem[] = forDownload
           .filter(({ model_id: modelId, hidden, recommended, supported, disclaimer }) => {
             if (idMap.has(modelId)) {
-              const model = idMap.get(modelId)!;
+              const model = idMap.get(modelId)! as NLPModelItem;
               if (recommended) {
                 model.recommended = true;
               }
@@ -279,7 +331,7 @@ export const ModelsList: FC<Props> = ({
             }
             return !idMap.has(modelId) && !hidden;
           })
-          .map<ModelItem>((modelDefinition) => {
+          .map<ModelDownloadItem>((modelDefinition) => {
             return {
               model_id: modelDefinition.model_id,
               type: modelDefinition.type,
@@ -295,7 +347,7 @@ export const ModelsList: FC<Props> = ({
               licenseUrl: modelDefinition.licenseUrl,
               supported: modelDefinition.supported,
               disclaimer: modelDefinition.disclaimer,
-            } as ModelItem;
+            } as ModelDownloadItem;
           });
         resultItems = [...resultItems, ...notDownloaded];
       }
@@ -307,7 +359,7 @@ export const ModelsList: FC<Props> = ({
           const prevItem = prevItems.find((i) => i.model_id === item.model_id);
           return {
             ...item,
-            ...(prevItem?.state === MODEL_STATE.DOWNLOADING
+            ...(!isDFAModelItem(prevItem) && prevItem?.state === MODEL_STATE.DOWNLOADING
               ? {
                   state: prevItem.state,
                   downloadState: prevItem.downloadState,
@@ -322,7 +374,7 @@ export const ModelsList: FC<Props> = ({
         return Object.fromEntries(
           Object.keys(prev).map((modelId) => {
             const item = resultItems.find((i) => i.model_id === modelId);
-            return item ? [modelId, <ExpandedRow item={item as ModelItemFull} />] : [];
+            return item ? [modelId, <ExpandedRow item={item as ExistingModelBaseWithStats} />] : [];
           })
         );
       });
@@ -368,7 +420,7 @@ export const ModelsList: FC<Props> = ({
   /**
    * Fetches models stats and update the original object
    */
-  const fetchModelsStats = useCallback(async (models: ModelItem[]) => {
+  const fetchModelsStats = useCallback(async (models: ExistingModelBase[]) => {
     try {
       if (models) {
         const { trained_model_stats: modelsStatsResponse } =
@@ -378,22 +430,29 @@ export const ModelsList: FC<Props> = ({
 
         models.forEach((model) => {
           const modelStats = groupByModelId[model.model_id];
-          model.stats = {
-            ...(model.stats ?? {}),
+
+          const isNlpModel = isNLPModelItem(model);
+
+          (model as ExistingModelBaseWithStats).stats = {
+            // ...(model.stats ?? {}),
             ...modelStats[0],
-            deployment_stats: modelStats.map((d) => d.deployment_stats).filter(isDefined),
+            ...(isNlpModel
+              ? { deployment_stats: modelStats.map((d) => d.deployment_stats).filter(isDefined) }
+              : {}),
           };
 
-          // Extract deployment ids from deployment stats
-          model.deployment_ids = modelStats
-            .map((v) => v.deployment_stats?.deployment_id)
-            .filter(isDefined);
+          if (isNlpModel) {
+            // Extract deployment ids from deployment stats
+            model.deployment_ids = modelStats
+              .map((v) => v.deployment_stats?.deployment_id)
+              .filter(isDefined);
 
-          model.state = getModelDeploymentState(model);
-          model.stateDescription = model.stats.deployment_stats.reduce((acc, c) => {
-            if (acc) return acc;
-            return c.reason ?? '';
-          }, '');
+            model.state = getModelDeploymentState(model);
+            model.stateDescription = model.stats!.deployment_stats.reduce((acc, c) => {
+              if (acc) return acc;
+              return c.reason ?? '';
+            }, '');
+          }
         });
       }
 
@@ -432,7 +491,7 @@ export const ModelsList: FC<Props> = ({
         if (isMounted()) {
           setItems((prevItems) => {
             return prevItems.map((item) => {
-              if (!item.type?.includes('pytorch')) {
+              if (!isBaseNLPModelItem(item)) {
                 return item;
               }
               const newItem = cloneDeep(item);
@@ -504,15 +563,15 @@ export const ModelsList: FC<Props> = ({
       }));
   }, [existingModels]);
 
-  const modelAndDeploymentIds = useMemo(
-    () => [
+  const modelAndDeploymentIds = useMemo(() => {
+    const nlpModels = existingModels.filter(isNLPModelItem);
+    return [
       ...new Set([
-        ...existingModels.flatMap((v) => v.deployment_ids),
-        ...existingModels.map((i) => i.model_id),
+        ...nlpModels.flatMap((v) => v.deployment_ids),
+        ...nlpModels.map((i) => i.model_id),
       ]),
-    ],
-    [existingModels]
-  );
+    ];
+  }, [existingModels]);
 
   const onModelDownloadRequest = useCallback(
     async (modelId: string) => {
@@ -555,7 +614,9 @@ export const ModelsList: FC<Props> = ({
     if (itemIdToExpandedRowMapValues[item.model_id]) {
       delete itemIdToExpandedRowMapValues[item.model_id];
     } else {
-      itemIdToExpandedRowMapValues[item.model_id] = <ExpandedRow item={item as ModelItemFull} />;
+      itemIdToExpandedRowMapValues[item.model_id] = (
+        <ExpandedRow item={item as ExistingModelBaseWithStats} />
+      );
     }
     setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
   };
@@ -565,7 +626,7 @@ export const ModelsList: FC<Props> = ({
       isExpander: true,
       align: 'center',
       render: (item: ModelItem) => {
-        if (!item.stats) {
+        if (isModelDownloadItem(item) || !item.stats) {
           return null;
         }
         return (
@@ -592,34 +653,34 @@ export const ModelsList: FC<Props> = ({
       truncateText: false,
       textOnly: false,
       'data-test-subj': 'mlModelsTableColumnId',
-      render: ({
-        description,
-        model_id: modelId,
-        recommended,
-        supported,
-        type,
-        disclaimer,
-      }: ModelItem) => {
+      render: (item: ModelItem) => {
+        const { description, model_id: modelId, type } = item;
+
         const isTechPreview = description?.includes('(Tech Preview)');
 
         let descriptionText = description?.replace('(Tech Preview)', '');
 
-        if (disclaimer) {
-          descriptionText += '. ' + disclaimer;
-        }
+        let tooltipContent = null;
 
-        const tooltipContent =
-          supported === false ? (
-            <FormattedMessage
-              id="xpack.ml.trainedModels.modelsList.notSupportedDownloadContent"
-              defaultMessage="Model version is not supported by your cluster's hardware configuration"
-            />
-          ) : recommended === false ? (
-            <FormattedMessage
-              id="xpack.ml.trainedModels.modelsList.notRecommendedDownloadContent"
-              defaultMessage="Model version is not optimized for your cluster's hardware configuration"
-            />
-          ) : null;
+        if (isBaseNLPModelItem(item)) {
+          const { disclaimer, recommended, supported } = item;
+          if (disclaimer) {
+            descriptionText += '. ' + disclaimer;
+          }
+
+          tooltipContent =
+            supported === false ? (
+              <FormattedMessage
+                id="xpack.ml.trainedModels.modelsList.notSupportedDownloadContent"
+                defaultMessage="Model version is not supported by your cluster's hardware configuration"
+              />
+            ) : recommended === false ? (
+              <FormattedMessage
+                id="xpack.ml.trainedModels.modelsList.notRecommendedDownloadContent"
+                defaultMessage="Model version is not optimized for your cluster's hardware configuration"
+              />
+            ) : null;
+        }
 
         return (
           <EuiFlexGroup gutterSize={'xs'} direction={'column'}>
@@ -675,7 +736,10 @@ export const ModelsList: FC<Props> = ({
       }),
       truncateText: false,
       width: '150px',
-      render: ({ state, downloadState }: ModelItem) => {
+      render: (item: ModelItem) => {
+        if (isDFAModelItem(item)) return null;
+
+        const { state, downloadState } = item;
         const config = getModelStateColor(state);
         if (!config) return null;
 
@@ -783,24 +847,21 @@ export const ModelsList: FC<Props> = ({
               defaultMessage: 'Select a model',
             });
           }
-          if (isPopulatedObject(item.pipelines)) {
+          // TODO support multiple model downloads with selection
+          if (!isModelDownloadItem(item) && isPopulatedObject(item.pipelines)) {
             return i18n.translate('xpack.ml.trainedModels.modelsList.disableSelectableMessage', {
               defaultMessage: 'Model has associated pipelines',
             });
           }
-
           if (isBuiltInModel(item)) {
             return i18n.translate('xpack.ml.trainedModels.modelsList.builtInModelMessage', {
               defaultMessage: 'Built-in model',
             });
           }
-
           return '';
         },
         selectable: (item) =>
-          !isPopulatedObject(item.pipelines) &&
-          !isBuiltInModel(item) &&
-          !(isElasticModel(item) && !item.state),
+          !isModelDownloadItem(item) && !isPopulatedObject(item.pipelines) && !isBuiltInModel(item),
         onSelectionChange: (selectedItems) => {
           setSelectedModels(selectedItems);
         },
@@ -846,7 +907,7 @@ export const ModelsList: FC<Props> = ({
       return items;
     } else {
       // by default show only deployed models or recommended for download
-      return items.filter((item) => item.create_time || item.recommended);
+      return items.filter((item) => !isModelDownloadItem(item) || item.recommended);
     }
   }, [items, pageState.showAll]);
 
@@ -951,7 +1012,7 @@ export const ModelsList: FC<Props> = ({
         <DeleteModelsModal
           onClose={(refreshList) => {
             modelsToDelete.forEach((model) => {
-              if (model.state === MODEL_STATE.DOWNLOADING) {
+              if (isBaseNLPModelItem(model) && model.state === MODEL_STATE.DOWNLOADING) {
                 abortedDownload.current.add(model.model_id);
               }
             });
@@ -995,7 +1056,7 @@ export const ModelsList: FC<Props> = ({
       ) : null}
       {isAddModelFlyoutVisible ? (
         <AddModelFlyout
-          modelDownloads={items.filter((i) => i.state === MODEL_STATE.NOT_DOWNLOADED)}
+          modelDownloads={items.filter(isModelDownloadItem)}
           onClose={setIsAddModelFlyoutVisible.bind(null, false)}
           onSubmit={(modelId) => {
             onModelDownloadRequest(modelId);

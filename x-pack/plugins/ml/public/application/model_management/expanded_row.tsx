@@ -26,10 +26,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
-import { TRAINED_MODEL_TYPE } from '@kbn/ml-trained-models-utils';
+import { MODEL_STATE, TRAINED_MODEL_TYPE } from '@kbn/ml-trained-models-utils';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { InferenceApi } from './inference_api_tab';
-import type { ModelItemFull } from './models_list';
+import type { NLPModelItem } from './models_list';
+import { isNLPModelItem, type ExistingModelBaseWithStats } from './models_list';
 import { ModelPipelines } from './pipelines';
 import { AllocatedModels } from '../memory_usage/nodes_overview/allocated_models';
 import type { AllocatedModel, TrainedModelStat } from '../../../common/types/trained_models';
@@ -37,7 +38,7 @@ import { useFieldFormatter } from '../contexts/kibana/use_field_formatter';
 import { useEnabledFeatures } from '../contexts/ml';
 
 interface ExpandedRowProps {
-  item: ModelItemFull;
+  item: ExistingModelBaseWithStats;
 }
 
 const JobMap = dynamic(async () => ({
@@ -170,7 +171,9 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
   ]);
 
   const deploymentStatItems: AllocatedModel[] = useMemo<AllocatedModel[]>(() => {
-    const deploymentStats = stats.deployment_stats;
+    if (!isNLPModelItem(item)) return [];
+
+    const deploymentStats = (stats as NLPModelItem['stats'])!.deployment_stats;
     const modelSizeStats = stats.model_size_stats;
 
     if (!deploymentStats || !modelSizeStats) return [];
@@ -203,7 +206,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
     });
 
     return items;
-  }, [stats]);
+  }, [stats, item]);
 
   const hideColumns = useMemo(() => {
     return showNodeInfo ? ['model_id'] : ['model_id', 'node_name'];
@@ -504,7 +507,9 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
   ]);
 
   const initialSelectedTab =
-    item.state === 'started' ? tabs.find((t) => t.id === 'stats') : tabs[0];
+    isNLPModelItem(item) && item.state === MODEL_STATE.STARTED
+      ? tabs.find((t) => t.id === 'stats')
+      : tabs[0];
 
   return (
     <EuiTabbedContent

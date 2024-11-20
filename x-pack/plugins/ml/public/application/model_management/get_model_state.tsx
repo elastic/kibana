@@ -17,7 +17,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ModelItem } from './models_list';
+import type { NLPModelItem } from './models_list';
 
 /**
  * Resolves result model state based on the state of each deployment.
@@ -26,7 +26,7 @@ import type { ModelItem } from './models_list';
  * Then if none of the deployments are in the STARTED state, but at least one is in the STARTING state, the model state is STARTING.
  * If all deployments are in the STOPPING state, the model state is STOPPING.
  */
-export const getModelDeploymentState = (model: ModelItem): ModelState | undefined => {
+export const getModelDeploymentState = (model: NLPModelItem): ModelState | undefined => {
   if (!model.stats?.deployment_stats?.length) return;
 
   if (model.stats?.deployment_stats?.some((v) => v.state === DEPLOYMENT_STATE.STARTED)) {

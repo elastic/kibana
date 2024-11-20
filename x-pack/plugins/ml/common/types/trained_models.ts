@@ -113,6 +113,9 @@ export type TrainedModelConfigResponse = estypes.MlTrainedModelConfig & {
   tags: string[];
   version: string;
   inference_config?: Record<string, any>;
+  /**
+   * Indices with associated pipelines that have inference processors utilizing the model deployments.
+   */
   indices?: Array<Record<IndexName, IndicesIndexState | null>>;
   /**
    * Whether the model has inference services

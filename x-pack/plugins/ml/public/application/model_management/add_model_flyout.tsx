@@ -32,10 +32,10 @@ import { groupBy } from 'lodash';
 import { ElandPythonClient } from '@kbn/inference_integration_flyout';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
 import { useMlKibana } from '../contexts/kibana';
-import type { ModelItem } from './models_list';
+import type { ModelDownloadItem } from './models_list';
 
 export interface AddModelFlyoutProps {
-  modelDownloads: ModelItem[];
+  modelDownloads: ModelDownloadItem[];
   onClose: () => void;
   onSubmit: (modelId: string) => void;
 }
@@ -138,7 +138,7 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
 };
 
 interface ClickToDownloadTabContentProps {
-  modelDownloads: ModelItem[];
+  modelDownloads: ModelDownloadItem[];
   onModelDownload: (modelId: string) => void;
 }
 

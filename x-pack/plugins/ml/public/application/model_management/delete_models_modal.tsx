@@ -26,7 +26,7 @@ import { type WithRequired } from '../../../common/types/common';
 import { useTrainedModelsApiService } from '../services/ml_api_service/trained_models';
 import { useToastNotificationService } from '../services/toast_notification_service';
 import { DeleteSpaceAwareItemCheckModal } from '../components/delete_space_aware_item_check_modal';
-import { type ModelItem } from './models_list';
+import { type ExistingModelBaseWithStats, type ModelItem, isExistingModel } from './models_list';
 
 interface DeleteModelsModalProps {
   models: ModelItem[];
@@ -42,11 +42,14 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
 
   const modelIds = models.map((m) => m.model_id);
 
-  const modelsWithPipelines = models.filter((m) => isPopulatedObject(m.pipelines)) as Array<
-    WithRequired<ModelItem, 'pipelines'>
-  >;
+  const modelsWithPipelines = models.filter(
+    (m): m is WithRequired<ExistingModelBaseWithStats, 'pipelines'> =>
+      isExistingModel(m) && isPopulatedObject(m.pipelines)
+  );
 
-  const modelsWithInferenceAPIs = models.filter((m) => m.hasInferenceServices);
+  const modelsWithInferenceAPIs = models.filter(
+    (m): m is ExistingModelBaseWithStats => isExistingModel(m) && !!m.hasInferenceServices
+  );
 
   const inferenceAPIsIDs: string[] = modelsWithInferenceAPIs.flatMap((model) => {
     return (model.inference_apis ?? []).map((inference) => inference.inference_id);
