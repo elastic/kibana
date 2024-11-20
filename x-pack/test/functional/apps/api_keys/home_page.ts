@@ -473,6 +473,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           },
         });
 
+        await es.security.grantApiKey({
+          api_key: {
+            name: 'test_api_key',
+            expiration: '1s',
+          },
+          grant_type: 'password',
+          run_as: 'test_user',
+          username: 'elastic',
+        });
+
         await pageObjects.common.navigateToApp('apiKeys');
       });
 
