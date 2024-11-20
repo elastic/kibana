@@ -298,7 +298,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
       <EuiHorizontalRule margin="none" />
       <EuiContextMenuItem icon={<EuiIcon type="help" color="primary" />} size="s">
         <EuiLink
-          href={docLinks.links.enterpriseSearch.inferenceApiCreate}
+          href={docLinks.links.inferenceManagement.inferenceAPIDocumentation}
           target="_blank"
           data-test-subj="learn-how-to-create-inference-endpoints"
         >
