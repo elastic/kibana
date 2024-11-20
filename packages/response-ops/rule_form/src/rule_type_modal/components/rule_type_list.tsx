@@ -23,7 +23,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { omit } from 'lodash';
-import { PRODUCER_DISPLAY_NAMES } from '@kbn/alerts-ui-shared';
+import { PRODUCER_DISPLAY_NAMES } from '../../common/i18n';
 import { RuleTypeWithDescription, RuleTypeCountsByProducer } from '../types';
 
 interface RuleTypeListProps {

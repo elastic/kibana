@@ -25,7 +25,10 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { RuleSpecificFlappingProperties } from '@kbn/alerting-types';
-import { RuleSettingsFlappingForm, RuleSettingsFlappingTitleTooltip } from '@kbn/alerts-ui-shared';
+import {
+  RuleSettingsFlappingForm,
+  RuleSettingsFlappingTitleTooltip,
+} from '@kbn/alerts-ui-shared/lib';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
