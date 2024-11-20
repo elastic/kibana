@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { ScheduleItemField } from '../schedule_item_field';
-import type { ValidationFunc } from '../../../../shared_imports';
 import { type FieldConfig, UseField } from '../../../../shared_imports';
 import { type HistoryWindowStart } from '../../../../../common/api/detection_engine';
 import * as i18n from './translations';
+import { validateHistoryWindowStart } from './validate_history_window_start';
 
 const COMPONENT_PROPS = {
   idAria: 'historyWindowSize',
@@ -38,27 +38,7 @@ const HISTORY_WINDOW_START_FIELD_CONFIG: FieldConfig<HistoryWindowStart> = {
   helpText: i18n.HELP_TEXT,
   validations: [
     {
-      validator: (...args: Parameters<ValidationFunc>) => {
-        const [{ path, value }] = args;
-
-        const historyWindowSize = Number.parseInt(String(value), 10);
-
-        if (Number.isNaN(historyWindowSize)) {
-          return {
-            code: 'ERR_NOT_INT_NUMBER',
-            path,
-            message: i18n.MUST_BE_POSITIVE_INTEGER_VALIDATION_ERROR,
-          };
-        }
-
-        if (historyWindowSize <= 0) {
-          return {
-            code: 'ERR_MIN_LENGTH',
-            path,
-            message: i18n.MUST_BE_GREATER_THAN_ZERO_VALIDATION_ERROR,
-          };
-        }
-      },
+      validator: validateHistoryWindowStart,
     },
   ],
 };

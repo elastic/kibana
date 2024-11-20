@@ -8,8 +8,8 @@
 import React, { memo } from 'react';
 
 import type { DataViewFieldBase } from '@kbn/es-query';
+import { ComboBoxField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { FieldHook } from '../../../../shared_imports';
-import { Field } from '../../../../shared_imports';
 import { PLACEHOLDER } from './translations';
 
 interface NewTermsFieldsProps {
@@ -34,5 +34,7 @@ export const NewTermsFieldsField = memo(function NewTermsFieldsField({
     style: { width: `${FIELD_COMBO_BOX_WIDTH}px` },
   };
 
-  return <Field field={field} idAria={fieldDescribedByIds} euiFieldProps={fieldEuiFieldProps} />;
+  return (
+    <ComboBoxField field={field} idAria={fieldDescribedByIds} euiFieldProps={fieldEuiFieldProps} />
+  );
 });

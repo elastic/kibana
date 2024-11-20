@@ -6,8 +6,7 @@
  */
 
 import React, { memo } from 'react';
-// import { i18n } from '@kbn/i18n';
-import { FIELD_TYPES, UseField, fieldValidators } from '../../../../shared_imports';
+import { UseField, fieldValidators } from '../../../../shared_imports';
 import { NewTermsFieldsField } from './new_terms_fields_field';
 import * as i18n from './translations';
 
@@ -31,7 +30,6 @@ export const NewTermsFieldsEdit = memo(function NewTermsFieldsEdit({
 });
 
 const NEW_TERMS_FIELDS_CONFIG = {
-  type: FIELD_TYPES.COMBO_BOX,
   label: i18n.NEW_TERMS_FIELDS_LABEL,
   helpText: i18n.HELP_TEXT,
   validations: [
