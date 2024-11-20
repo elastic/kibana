@@ -12,7 +12,7 @@ import { APIRoutes } from '../types';
 
 export const useQueryIndices = (
   query: string = ''
-): { indices: IndexName[]; isLoading: boolean } => {
+): { indices: IndexName[]; isLoading: boolean; isFetched: boolean } => {
   const { services } = useKibana();
 
   const { data, isLoading, isFetched } = useQuery({
