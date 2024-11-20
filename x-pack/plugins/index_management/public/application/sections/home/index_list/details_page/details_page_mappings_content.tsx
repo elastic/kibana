@@ -30,7 +30,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react';
 import { ILicense } from '@kbn/licensing-plugin/public';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
-import { PRECONFIGURED_ENDPOINTS } from '../../../../constants';
 import {
   getStateWithCopyToFields,
   isSemanticTextField,
@@ -64,8 +63,7 @@ import { SemanticTextBanner } from './semantic_text_banner';
 import { TrainedModelsDeploymentModal } from './trained_models_deployment_modal';
 import { parseMappings } from '../../../../shared/parse_mappings';
 
-const isInferencePreconfigured = (inferenceId: string) =>
-  Object.values(PRECONFIGURED_ENDPOINTS).includes(inferenceId);
+const isInferencePreconfigured = (inferenceId: string) => inferenceId.startsWith('.');
 
 export const DetailsPageMappingsContent: FunctionComponent<{
   index: Index;
