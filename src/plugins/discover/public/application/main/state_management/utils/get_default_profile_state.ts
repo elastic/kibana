@@ -22,52 +22,64 @@ import type { DataDocumentsMsg } from '../discover_data_state_container';
 export const getDefaultProfileState = ({
   profilesManager,
   resetDefaultProfileState,
-  defaultColumns,
   dataView,
-  esqlQueryColumns,
 }: {
   profilesManager: ProfilesManager;
   resetDefaultProfileState: InternalState['resetDefaultProfileState'];
-  defaultColumns: string[];
   dataView: DataView;
-  esqlQueryColumns: DataDocumentsMsg['esqlQueryColumns'];
 }) => {
-  const stateUpdate: DiscoverAppState = {};
   const defaultState = getDefaultState(profilesManager, dataView);
 
-  if (resetDefaultProfileState.columns) {
-    const mappedDefaultColumns = defaultColumns.map((name) => ({ name }));
-    const isValidColumn = getIsValidColumn(dataView, esqlQueryColumns);
-    const validColumns = uniqBy(
-      defaultState.columns?.concat(mappedDefaultColumns).filter(isValidColumn),
-      'name'
-    );
+  return {
+    getPreFetchState: () => {
+      const stateUpdate: DiscoverAppState = {};
 
-    if (validColumns?.length) {
-      const hasAutoWidthColumn = validColumns.some(({ width }) => !width);
-      const columns = validColumns.reduce<DiscoverGridSettings['columns']>(
-        (acc, { name, width }, index) => {
-          // Ensure there's at least one auto width column so the columns fill the grid
-          const skipColumnWidth = !hasAutoWidthColumn && index === validColumns.length - 1;
-          return width && !skipColumnWidth ? { ...acc, [name]: { width } } : acc;
-        },
-        undefined
-      );
+      if (resetDefaultProfileState.breakdownField && defaultState.breakdownField !== undefined) {
+        stateUpdate.breakdownField = defaultState.breakdownField;
+      }
 
-      stateUpdate.grid = columns ? { columns } : undefined;
-      stateUpdate.columns = validColumns.map(({ name }) => name);
-    }
-  }
+      return Object.keys(stateUpdate).length ? stateUpdate : undefined;
+    },
+    getPostFetchState: ({
+      defaultColumns,
+      esqlQueryColumns,
+    }: {
+      defaultColumns: string[];
+      esqlQueryColumns: DataDocumentsMsg['esqlQueryColumns'];
+    }) => {
+      const stateUpdate: DiscoverAppState = {};
 
-  if (resetDefaultProfileState.rowHeight && defaultState.rowHeight !== undefined) {
-    stateUpdate.rowHeight = defaultState.rowHeight;
-  }
+      if (resetDefaultProfileState.columns) {
+        const mappedDefaultColumns = defaultColumns.map((name) => ({ name }));
+        const isValidColumn = getIsValidColumn(dataView, esqlQueryColumns);
+        const validColumns = uniqBy(
+          defaultState.columns?.concat(mappedDefaultColumns).filter(isValidColumn),
+          'name'
+        );
 
-  if (resetDefaultProfileState.breakdownField && defaultState.breakdownField !== undefined) {
-    stateUpdate.breakdownField = defaultState.breakdownField;
-  }
+        if (validColumns?.length) {
+          const hasAutoWidthColumn = validColumns.some(({ width }) => !width);
+          const columns = validColumns.reduce<DiscoverGridSettings['columns']>(
+            (acc, { name, width }, index) => {
+              // Ensure there's at least one auto width column so the columns fill the grid
+              const skipColumnWidth = !hasAutoWidthColumn && index === validColumns.length - 1;
+              return width && !skipColumnWidth ? { ...acc, [name]: { width } } : acc;
+            },
+            undefined
+          );
 
-  return Object.keys(stateUpdate).length ? stateUpdate : undefined;
+          stateUpdate.grid = columns ? { columns } : undefined;
+          stateUpdate.columns = validColumns.map(({ name }) => name);
+        }
+      }
+
+      if (resetDefaultProfileState.rowHeight && defaultState.rowHeight !== undefined) {
+        stateUpdate.rowHeight = defaultState.rowHeight;
+      }
+
+      return Object.keys(stateUpdate).length ? stateUpdate : undefined;
+    },
+  };
 };
 
 const getDefaultState = (profilesManager: ProfilesManager, dataView: DataView) => {

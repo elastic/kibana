@@ -158,6 +158,17 @@ export const buildStateSubscribe =
         queryChanged: logEntry(queryChanged, prevQuery, nextQuery),
       };
 
+      if (dataState.disableNextFetchOnStateChange$.getValue()) {
+        addLog(
+          '[buildStateSubscribe] fetch disabled on state changes',
+          JSON.stringify(logData, null, 2)
+        );
+
+        dataState.disableNextFetchOnStateChange$.next(false);
+
+        return;
+      }
+
       addLog(
         '[buildStateSubscribe] state changes triggers data fetching',
         JSON.stringify(logData, null, 2)
