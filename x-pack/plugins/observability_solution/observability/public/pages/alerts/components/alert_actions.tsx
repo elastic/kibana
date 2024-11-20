@@ -159,7 +159,7 @@ export function AlertActions({
   );
 
   const actionsMenuItems = [
-    ...(userCasesPermissions.create && userCasesPermissions.read
+    ...(userCasesPermissions.createComment && userCasesPermissions.read
       ? [
           <EuiContextMenuItem
             data-test-subj="add-to-existing-case-action"
