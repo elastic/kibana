@@ -2,6 +2,30 @@
 
 exports[`ColorFormatEditor should render multiple colors 1`] = `
 <Fragment>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    isInvalid={false}
+    label={
+      <Memo(MemoizedFormattedMessage)
+        defaultMessage="Transform"
+        id="indexPatternFieldEditor.color.transformLabel"
+      />
+    }
+    labelType="label"
+  >
+    <EuiSelect
+      data-test-subj="colorEditorTransform"
+      isInvalid={false}
+      onChange={[Function]}
+      options={Array []}
+    />
+  </EuiFormRow>
+  <EuiSpacer
+    size="m"
+  />
   <EuiBasicTable
     columns={
       Array [
@@ -102,6 +126,30 @@ exports[`ColorFormatEditor should render multiple colors 1`] = `
 
 exports[`ColorFormatEditor should render other type normally (range field) 1`] = `
 <Fragment>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    isInvalid={false}
+    label={
+      <Memo(MemoizedFormattedMessage)
+        defaultMessage="Transform"
+        id="indexPatternFieldEditor.color.transformLabel"
+      />
+    }
+    labelType="label"
+  >
+    <EuiSelect
+      data-test-subj="colorEditorTransform"
+      isInvalid={false}
+      onChange={[Function]}
+      options={Array []}
+    />
+  </EuiFormRow>
+  <EuiSpacer
+    size="m"
+  />
   <EuiBasicTable
     columns={
       Array [
@@ -195,6 +243,30 @@ exports[`ColorFormatEditor should render other type normally (range field) 1`] =
 
 exports[`ColorFormatEditor should render string type normally (regex field) 1`] = `
 <Fragment>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    isInvalid={false}
+    label={
+      <Memo(MemoizedFormattedMessage)
+        defaultMessage="Transform"
+        id="indexPatternFieldEditor.color.transformLabel"
+      />
+    }
+    labelType="label"
+  >
+    <EuiSelect
+      data-test-subj="colorEditorTransform"
+      isInvalid={false}
+      onChange={[Function]}
+      options={Array []}
+    />
+  </EuiFormRow>
+  <EuiSpacer
+    size="m"
+  />
   <EuiBasicTable
     columns={
       Array [

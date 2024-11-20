@@ -12,6 +12,7 @@ import { shallowWithI18nProvider } from '@kbn/test-jest-helpers';
 
 import { ColorFormatEditor } from './color';
 import { FieldFormat, DEFAULT_CONVERTER_COLOR } from '@kbn/field-formats-plugin/common';
+import { fieldFormatsMock as fieldFormats } from '@kbn/field-formats-plugin/common/mocks';
 
 const fieldType = 'string';
 const format = {
@@ -19,6 +20,7 @@ const format = {
 };
 const formatParams = {
   colors: [{ ...DEFAULT_CONVERTER_COLOR }],
+  transform: undefined,
 };
 const onChange = jest.fn();
 const onError = jest.fn();
@@ -34,6 +36,7 @@ describe('ColorFormatEditor', () => {
         fieldType={fieldType}
         format={format as unknown as FieldFormat}
         formatParams={formatParams}
+        fieldFormats={fieldFormats}
         onChange={onChange}
         onError={onError}
       />
@@ -48,6 +51,7 @@ describe('ColorFormatEditor', () => {
         fieldType={'number'}
         format={format as unknown as FieldFormat}
         formatParams={formatParams}
+        fieldFormats={fieldFormats}
         onChange={onChange}
         onError={onError}
       />
@@ -61,7 +65,11 @@ describe('ColorFormatEditor', () => {
       <ColorFormatEditor
         fieldType={fieldType}
         format={format as unknown as FieldFormat}
-        formatParams={{ colors: [...formatParams.colors, ...formatParams.colors] }}
+        formatParams={{
+          colors: [...formatParams.colors, ...formatParams.colors],
+          transform: undefined,
+        }}
+        fieldFormats={fieldFormats}
         onChange={onChange}
         onError={onError}
       />
