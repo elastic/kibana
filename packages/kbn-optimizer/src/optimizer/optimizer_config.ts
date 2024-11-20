@@ -9,7 +9,6 @@
 
 import Path from 'path';
 import Os from 'os';
-import V8 from 'v8';
 import { getPackages, getPluginPackagesFilter, type PluginSelector } from '@kbn/repo-packages';
 import { ThemeTag, ThemeTags, parseThemeTags } from '@kbn/core-ui-settings-common';
 
@@ -29,22 +28,13 @@ export interface Limits {
 
 interface SystemInfo {
   cpuCount: number;
-  totalMemory: number;
-  freeMemory: number;
 }
 
 function getSystemInfo(): SystemInfo {
   // collects useful system information for resource usage calculations
   const cpuCount = Math.max(Os.cpus()?.length ?? 0, 1);
-  const totalMemory = Os.totalmem();
-  const freeMemory = Os.freemem();
 
-  return { cpuCount, totalMemory, freeMemory };
-}
-
-function calculateMemoryPerWorker(totalMemory: number, maxWorkers: number): number {
-  // allocate ~2GB per worker, or a fraction of the total memory divided by maxWorkers, whichever is smaller
-  return Math.min(2000 * 1024 * 1024, totalMemory / maxWorkers);
+  return { cpuCount };
 }
 
 // Keep the old legacy PickMaxWorkerCount for now. It can be removed in the future
@@ -64,7 +54,7 @@ const pickMaxWorkerCount = (dist: boolean) => {
   const isCI = !!process.env.CI;
   const isUseMaxAvailableResources = !!process.env.KBN_OPTIMIZER_USE_MAX_AVAILABLE_RESOURCES;
   const minWorkers = 2;
-  const { cpuCount, totalMemory, freeMemory } = getSystemInfo();
+  const { cpuCount } = getSystemInfo();
   const maxWorkers = Math.max(cpuCount - 1, minWorkers);
 
   // In case we get this env var set, just use max workers and avoid any kind of
@@ -86,12 +76,6 @@ const pickMaxWorkerCount = (dist: boolean) => {
     workerCount = Math.max(Math.floor(cpuCount * 0.5), 2);
   }
 
-  // Adjust based on available memory making sure we don't use more memory
-  // than the one available in the system as this will affect performance hardly
-  const memoryPerWorker = calculateMemoryPerWorker(totalMemory, maxWorkers);
-  const memoryBasedWorkerCount = Math.floor(freeMemory / memoryPerWorker);
-  workerCount = Math.min(workerCount, memoryBasedWorkerCount);
-
   // Adjust by the ratio workerCount to maxWorkers.
   // If it is lower or equal to 50% it adds an extra worker
   // so the available resources are better used
@@ -103,12 +87,6 @@ const pickMaxWorkerCount = (dist: boolean) => {
   // Make sure we respect min and max worker limits
   workerCount = Math.max(workerCount, minWorkers);
   workerCount = Math.min(workerCount, maxWorkers);
-
-  // Ensure we never exceed v8's max old space size limits as this will result in
-  // out of memory errors during the compilation
-  const maxOldSpaceSize = V8.getHeapStatistics().heap_size_limit * cpuCount;
-  const v8LimitedWorkerCount = Math.floor(maxOldSpaceSize / memoryPerWorker);
-  workerCount = Math.min(workerCount, v8LimitedWorkerCount);
 
   return workerCount;
 };
