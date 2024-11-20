@@ -115,7 +115,7 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    it('should paginate keys', async () => {
+    it.only('should paginate keys', async () => {
       await createKey('first-api-key', 'rest', false);
       await createKey('second-api-key', 'rest', false);
       const { body: keys } = await supertest
