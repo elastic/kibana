@@ -7,6 +7,7 @@
 import { Transform } from 'stream';
 import {
   getTokenCountFromInvokeStream,
+  parseBedrockConverseStream,
   parseGeminiStreamForUsageMetadata,
 } from './get_token_count_from_invoke_stream';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -147,6 +148,43 @@ describe('getTokenCountFromInvokeStream', () => {
     beforeEach(() => {
       stream = createStreamMock();
       stream.write(encodeBedrockResponse('Simple.'));
+    });
+
+    it('parses the Bedrock converse stream and returns token counts', async () => {
+      const usageData = {
+        usage: {
+          totalTokens: 100,
+          inputTokens: 40,
+          outputTokens: 60,
+        },
+      };
+      const encodedUsageData = new EventStreamCodec(toUtf8, fromUtf8).encode({
+        headers: {},
+        body: Uint8Array.from(Buffer.from(JSON.stringify(usageData))),
+      });
+
+      stream.write(encodedUsageData);
+      stream.complete();
+
+      const tokens = await parseBedrockConverseStream(stream.transform);
+      expect(tokens).toEqual({
+        total_tokens: 100,
+        prompt_tokens: 40,
+        completion_tokens: 60,
+      });
+    });
+
+    it('returns null if the converse stream usage object is not present', async () => {
+      const invalidData = new EventStreamCodec(toUtf8, fromUtf8).encode({
+        headers: {},
+        body: Uint8Array.from(Buffer.from(JSON.stringify({}))),
+      });
+
+      stream.write(invalidData);
+      stream.complete();
+
+      const tokens = await parseBedrockConverseStream(stream.transform);
+      expect(tokens).toBeNull();
     });
 
     it('calculates from the usage object when latest api is used', async () => {

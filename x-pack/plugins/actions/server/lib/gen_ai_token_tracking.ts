@@ -19,6 +19,7 @@ import { getTokenCountFromOpenAIStream } from './get_token_count_from_openai_str
 import {
   getTokenCountFromInvokeStream,
   InvokeBody,
+  parseBedrockConverseStream,
   parseGeminiStreamForUsageMetadata,
 } from './get_token_count_from_invoke_stream';
 
@@ -84,7 +85,7 @@ export const getGenAiTokenTracking = async ({
     }
   }
 
-  // this is a streamed Gemini response, using the subAction invokeStream to stream the response as a simple string
+  // streamed Gemini response, using the subAction invokeStream to stream the response as a simple string
   if (
     validatedParams.subAction === 'invokeStream' &&
     result.data instanceof Readable &&
@@ -109,7 +110,7 @@ export const getGenAiTokenTracking = async ({
     }
   }
 
-  // this is a streamed OpenAI or Bedrock response, using the subAction invokeStream to stream the response as a simple string
+  // streamed OpenAI or Bedrock response, using the subAction invokeStream to stream the response as a simple string
   if (
     validatedParams.subAction === 'invokeStream' &&
     result.data instanceof Readable &&
@@ -134,7 +135,7 @@ export const getGenAiTokenTracking = async ({
     }
   }
 
-  // this is a streamed OpenAI response, which did not use the subAction invokeStream
+  // streamed OpenAI response, which did not use the subAction invokeStream
   if (actionTypeId === '.gen-ai' && result.data instanceof Readable) {
     try {
       const { total, prompt, completion } = await getTokenCountFromOpenAIStream({
@@ -154,7 +155,7 @@ export const getGenAiTokenTracking = async ({
     }
   }
 
-  // this is a non-streamed OpenAI response, which comes with the usage object
+  // non-streamed OpenAI response, which comes with the usage object
   if (actionTypeId === '.gen-ai') {
     const data = result.data as unknown as {
       usage: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number };
@@ -170,7 +171,7 @@ export const getGenAiTokenTracking = async ({
     };
   }
 
-  // this is a non-streamed Bedrock response
+  // non-streamed Bedrock response
   if (
     actionTypeId === '.bedrock' &&
     (validatedParams.subAction === 'run' || validatedParams.subAction === 'test')
@@ -226,7 +227,7 @@ export const getGenAiTokenTracking = async ({
     };
   }
 
-  // this is a non-streamed Bedrock response used by security solution
+  // non-streamed Bedrock response used by chat model ActionsClientBedrockChatModel
   if (actionTypeId === '.bedrock' && validatedParams.subAction === 'invokeAI') {
     try {
       const rData = result.data as unknown as {
@@ -260,6 +261,44 @@ export const getGenAiTokenTracking = async ({
       }
     } catch (e) {
       logger.error('Failed to calculate tokens from Bedrock invoke response');
+      logger.error(e);
+      // silently fail and null is returned at bottom of function
+    }
+  }
+  // non-streamed Bedrock response used by chat model ActionsClientChatBedrockConverse
+  if (actionTypeId === '.bedrock' && validatedParams.subAction === 'converse') {
+    console.log('tokenTrack converse');
+    const { usage } = result.data as unknown as {
+      usage: { inputTokens: number; outputTokens: number; totalTokens: number };
+    };
+
+    if (usage) {
+      return {
+        total_tokens: usage.totalTokens,
+        prompt_tokens: usage.inputTokens,
+        completion_tokens: usage.outputTokens,
+      };
+    } else {
+      logger.error('Response from Bedrock converse API did not contain usage object');
+      return {
+        total_tokens: 0,
+        prompt_tokens: 0,
+        completion_tokens: 0,
+      };
+    }
+  }
+  // streamed Bedrock response used by chat model ActionsClientChatBedrockConverse
+  if (
+    actionTypeId === '.bedrock' &&
+    result.data instanceof Readable &&
+    validatedParams.subAction === 'converseStream'
+  ) {
+    try {
+      console.log('converseStream result', result);
+      const converseTokens = await parseBedrockConverseStream(result.data.pipe(new PassThrough()));
+      return converseTokens;
+    } catch (e) {
+      logger.error('Failed to calculate tokens from converseStream subaction streaming response');
       logger.error(e);
       // silently fail and null is returned at bottom of function
     }

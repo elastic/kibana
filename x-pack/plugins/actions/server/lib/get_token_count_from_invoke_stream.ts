@@ -105,6 +105,49 @@ const parseBedrockStream: StreamParser = async (responseStream, logger) => {
   return parseBedrockBuffer(responseBuffer);
 };
 
+export const parseBedrockConverseStream = async (
+  responseStream: Readable
+): Promise<{
+  total_tokens: number;
+  prompt_tokens: number;
+  completion_tokens: number;
+} | null> => {
+  const responseBuffer: Uint8Array[] = [];
+  // do not destroy response stream on abort for bedrock
+  // Amazon charges the same tokens whether the stream is destroyed or not, so let it finish to calculate
+  responseStream.on('data', (chunk) => {
+    // special encoding for bedrock, do not attempt to convert to string
+    responseBuffer.push(chunk);
+  });
+  await finished(responseStream);
+  const awsDecoder = new EventStreamCodec(toUtf8, fromUtf8);
+
+  const finalChunk = responseBuffer[responseBuffer.length - 1];
+  try {
+    console.log('debugGoHere finalChunk', finalChunk);
+    const event = awsDecoder.decode(finalChunk);
+    console.log('debugGoHere event', event);
+    const decoded = new TextDecoder().decode(event.body);
+    console.log('debugGoHere decoded', decoded);
+    const usage = JSON.parse(decoded).usage;
+    console.log('debugGoHere usage', usage);
+    return usage
+      ? {
+          total_tokens: usage.totalTokens,
+          prompt_tokens: usage.inputTokens,
+          completion_tokens: usage.outputTokens,
+        }
+      : null;
+  } catch (e) {
+    const regularDecoded = new TextDecoder().decode(finalChunk);
+    console.log('debugGoHere error regularDecoded', regularDecoded);
+    console.log('debugGoHere error', e);
+    // Tool response does not contain usage object, thus parsing throws an error
+    // return null as token from tool usage will be included in the final response of the stream
+    return null;
+  }
+};
+
 const parseOpenAIStream: StreamParser = async (responseStream, logger, signal) => {
   let responseBody: string = '';
   const destroyStream = () => {
