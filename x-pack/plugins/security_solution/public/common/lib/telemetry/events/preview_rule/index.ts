@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { TelemetryEvent } from '../../types';
-import { TelemetryEventTypes } from '../../constants';
+import type { PreviewRuleTelemetryEvent } from './types';
+import { PreviewRuleEventTypes } from './types';
 
-export const previewRuleEvent: TelemetryEvent = {
-  eventType: TelemetryEventTypes.PreviewRule,
+export const previewRuleEvent: PreviewRuleTelemetryEvent = {
+  eventType: PreviewRuleEventTypes.PreviewRule,
   schema: {
     ruleType: {
       type: 'keyword',
@@ -27,3 +27,5 @@ export const previewRuleEvent: TelemetryEvent = {
     },
   },
 };
+
+export const previewRuleTelemetryEvents = [previewRuleEvent];

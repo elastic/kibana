@@ -135,3 +135,5 @@ export function ApmApiProvider(context: DeploymentAgnosticFtrProviderContext) {
     writeUser: createApmApiClient(context, 'editor'),
   };
 }
+
+export type ApmApiClient = ReturnType<typeof ApmApiProvider>;

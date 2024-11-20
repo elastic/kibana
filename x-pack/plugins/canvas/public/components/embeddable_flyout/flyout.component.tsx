@@ -135,6 +135,7 @@ export const AddEmbeddableFlyout: FC<Props> = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <SavedObjectFinder
+          id="canvasEmbeddableFlyout"
           onChoose={onAddPanel}
           savedObjectMetaData={metaData}
           showFilter={true}

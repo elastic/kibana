@@ -202,7 +202,7 @@ export class SyntheticsMonitorTestService {
       full_name: 'a kibana user',
     });
 
-    return { username, password, SPACE_ID };
+    return { username, password, SPACE_ID, roleName };
   }
 
   async deleteMonitor(monitorId?: string | string[], statusCode = 200, spaceId?: string) {

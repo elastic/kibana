@@ -11,7 +11,7 @@ import moment from 'moment';
 import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
-import type { RouteAccess } from '@kbn/core-http-server';
+import type { RouteAccess, RouteDeprecationInfo } from '@kbn/core-http-server';
 import type { InternalSavedObjectRouter } from '../../internal_types';
 import { exportDashboards } from './lib';
 
@@ -22,11 +22,13 @@ export const registerLegacyExportRoute = (
     coreUsageData,
     logger,
     access,
+    legacyDeprecationInfo,
   }: {
     kibanaVersion: string;
     coreUsageData: InternalCoreUsageDataSetup;
     logger: Logger;
     access: RouteAccess;
+    legacyDeprecationInfo: RouteDeprecationInfo;
   }
 ) => {
   router.get(
@@ -39,6 +41,7 @@ export const registerLegacyExportRoute = (
       },
       options: {
         access,
+        deprecated: legacyDeprecationInfo,
         tags: ['api'],
       },
     },

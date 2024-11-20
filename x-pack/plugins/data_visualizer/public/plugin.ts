@@ -21,7 +21,6 @@ import type {
   DataVisualizerStartDependencies,
 } from './application/common/types/data_visualizer_plugin';
 import { registerEmbeddables } from './application/index_data_visualizer/embeddables/field_stats';
-import { registerDataVisualizerUiActions } from './application/index_data_visualizer/ui_actions';
 export type DataVisualizerPluginSetup = ReturnType<DataVisualizerPlugin['setup']>;
 export type DataVisualizerPluginStart = ReturnType<DataVisualizerPlugin['start']>;
 
@@ -57,12 +56,6 @@ export class DataVisualizerPlugin
       registerEmbeddables(plugins.embeddable, core);
     }
 
-    const [coreStart, pluginStart] = await core.getStartServices();
-
-    if (plugins.uiActions) {
-      registerDataVisualizerUiActions(plugins.uiActions, coreStart, pluginStart);
-    }
-
     if (plugins.home) {
       registerHomeAddData(plugins.home, this.resultsLinks);
       registerHomeFeatureCatalogue(plugins.home);
@@ -84,6 +77,12 @@ export class DataVisualizerPlugin
       getIndexDataVisualizerComponent,
       getDataDriftComponent,
       getMaxBytesFormatted,
+      FieldStatsUnavailableMessage: dynamic(
+        async () =>
+          import(
+            './application/index_data_visualizer/embeddables/grid_embeddable/embeddable_error_msg'
+          )
+      ),
       FieldStatisticsTable: dynamic(
         async () =>
           import(
