@@ -37,18 +37,6 @@ function getSystemInfo(): SystemInfo {
   return { cpuCount };
 }
 
-// Keep the old legacy PickMaxWorkerCount for now. It can be removed in the future
-// in case the new one works great as expected
-// @ts-expect-error unused function
-function legacyPickMaxWorkerCount(dist: boolean) {
-  // don't break if cpus() returns nothing, or an empty array
-  const cpuCount = Math.max(Os.cpus()?.length, 1);
-  // if we're buiding the dist then we can use more of the system's resources to get things done a little quicker
-  const maxWorkers = dist ? cpuCount - 1 : Math.ceil(cpuCount / 3);
-  // ensure we always have at least two workers
-  return Math.max(maxWorkers, 2);
-}
-
 const pickMaxWorkerCount = (dist: boolean) => {
   const isDist = dist;
   const isCI = !!process.env.CI;
