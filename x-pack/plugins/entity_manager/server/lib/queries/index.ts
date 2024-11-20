@@ -65,7 +65,7 @@ const statsCommand = ({ source }: { source: EntitySource }) => {
       .map((field) => `metadata.${field}=VALUES(${field})`),
   ];
 
-  return `STATS ${aggs.join(', ')} BY ${source.identity_fields.join(',')}`;
+  return `STATS ${aggs.join(',')} BY ${source.identity_fields.join(',')}`;
 };
 
 export function getEntityInstancesQuery({
