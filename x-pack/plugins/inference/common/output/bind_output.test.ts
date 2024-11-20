@@ -50,4 +50,80 @@ describe('createScopedOutputAPI', () => {
 
     expect(result).toEqual(expectedReturnValue);
   });
+
+  it('only passes the expected parameters from the bound param object', async () => {
+    const bound = {
+      connectorId: 'some-id',
+      functionCalling: 'native',
+      foo: 'bar',
+    } as BoundOutputOptions;
+
+    const unbound: UnboundOutputOptions = {
+      id: 'foo',
+      input: 'hello there',
+    };
+
+    const boundApi = bindOutput(chatComplete, bound);
+
+    await boundApi({ ...unbound });
+
+    expect(chatComplete).toHaveBeenCalledTimes(1);
+    expect(chatComplete).toHaveBeenCalledWith({
+      connectorId: 'some-id',
+      functionCalling: 'native',
+      id: 'foo',
+      input: 'hello there',
+    });
+  });
+
+  it('ignores mutations of the bound parameters after binding', async () => {
+    const bound: BoundOutputOptions = {
+      connectorId: 'some-id',
+      functionCalling: 'native',
+    };
+
+    const unbound: UnboundOutputOptions = {
+      id: 'foo',
+      input: 'hello there',
+    };
+
+    const boundApi = bindOutput(chatComplete, bound);
+
+    bound.connectorId = 'some-other-id';
+
+    await boundApi({ ...unbound });
+
+    expect(chatComplete).toHaveBeenCalledTimes(1);
+    expect(chatComplete).toHaveBeenCalledWith({
+      connectorId: 'some-id',
+      functionCalling: 'native',
+      id: 'foo',
+      input: 'hello there',
+    });
+  });
+
+  it('does not allow overriding bound parameters with the unbound object', async () => {
+    const bound: BoundOutputOptions = {
+      connectorId: 'some-id',
+      functionCalling: 'native',
+    };
+
+    const unbound = {
+      id: 'foo',
+      input: 'hello there',
+      connectorId: 'overridden',
+    } as UnboundOutputOptions;
+
+    const boundApi = bindOutput(chatComplete, bound);
+
+    await boundApi({ ...unbound });
+
+    expect(chatComplete).toHaveBeenCalledTimes(1);
+    expect(chatComplete).toHaveBeenCalledWith({
+      connectorId: 'some-id',
+      functionCalling: 'native',
+      id: 'foo',
+      input: 'hello there',
+    });
+  });
 });

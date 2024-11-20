@@ -14,15 +14,21 @@ import type {
   ToolSchema,
 } from '@kbn/inference-common';
 
+/**
+ * Bind output to the provided parameters,
+ * returning a bound version of the API.
+ */
 export function bindOutput(
   chatComplete: OutputAPI,
   boundParams: BoundOutputOptions
 ): BoundOutputAPI;
 export function bindOutput(chatComplete: OutputAPI, boundParams: BoundOutputOptions) {
-  return (dynamicParams: UnboundOutputOptions<string, ToolSchema, boolean>) => {
+  const { connectorId, functionCalling } = boundParams;
+  return (unboundParams: UnboundOutputOptions<string, ToolSchema, boolean>) => {
     const params: OutputOptions<string, ToolSchema, boolean> = {
-      ...boundParams,
-      ...dynamicParams,
+      ...unboundParams,
+      connectorId,
+      functionCalling,
     };
     return chatComplete(params);
   };

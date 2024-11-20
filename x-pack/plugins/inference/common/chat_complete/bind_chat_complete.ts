@@ -14,6 +14,10 @@ import type {
   ToolOptions,
 } from '@kbn/inference-common';
 
+/**
+ * Bind chatComplete to the provided parameters,
+ * returning a bound version of the API.
+ */
 export function bindChatComplete(
   chatComplete: ChatCompleteAPI,
   boundParams: BoundChatCompleteOptions
@@ -22,10 +26,12 @@ export function bindChatComplete(
   chatComplete: ChatCompleteAPI,
   boundParams: BoundChatCompleteOptions
 ) {
-  return (dynamicParams: UnboundChatCompleteOptions<ToolOptions, boolean>) => {
+  const { connectorId, functionCalling } = boundParams;
+  return (unboundParams: UnboundChatCompleteOptions<ToolOptions, boolean>) => {
     const params: ChatCompleteOptions<ToolOptions, boolean> = {
-      ...boundParams,
-      ...dynamicParams,
+      ...unboundParams,
+      connectorId,
+      functionCalling,
     };
     return chatComplete(params);
   };
