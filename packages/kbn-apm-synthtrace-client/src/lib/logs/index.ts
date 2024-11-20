@@ -16,7 +16,6 @@ const LOGSDB_DATASET_PREFIX = 'logsdb.';
 
 interface LogsOptions {
   isLogsDb: boolean;
-  index?: string;
 }
 
 const defaultLogsOptions: LogsOptions = {
@@ -162,7 +161,7 @@ function create(logsOptions: LogsOptions = defaultLogsOptions): Log {
       'tls.established': Math.random() < 0.5,
     },
     logsOptions
-  );
+  ).dataset('synth');
 }
 
 function createForIndex(index: string): Log {
