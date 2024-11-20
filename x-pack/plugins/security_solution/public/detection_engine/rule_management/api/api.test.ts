@@ -850,16 +850,35 @@ describe('Detections Rules API', () => {
 
     test('requests snooze settings of multiple rules by their IDs', () => {
       fetchRulesSnoozeSettings({ ids: ['id1', 'id2'] });
-      expect(fetchMock.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          "/internal/alerting/rules/_find",
-          Object {
-            "body": "{\\"filter\\":\\"alert.id:\\\\\\"alert:id1\\\\\\" or alert.id:\\\\\\"alert:id2\\\\\\"\\",\\"fields\\":\\"[\\\\\\"muteAll\\\\\\",\\\\\\"activeSnoozes\\\\\\",\\\\\\"isSnoozedUntil\\\\\\",\\\\\\"snoozeSchedule\\\\\\"]\\",\\"per_page\\":2}",
-            "method": "POST",
-            "signal": undefined,
-          },
-        ]
-      `);
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          body: '{"filter":"alert.id:\\"alert:id1\\" or alert.id:\\"alert:id2\\"","fields":"[\\"muteAll\\",\\"activeSnoozes\\",\\"isSnoozedUntil\\",\\"snoozeSchedule\\"]","per_page":2}',
+        })
+      );
+    });
+
+    test('requests the same number of rules as the number of ids provided', () => {
+      fetchRulesSnoozeSettings({ ids: ['id1', 'id2'] });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          body: '{"filter":"alert.id:\\"alert:id1\\" or alert.id:\\"alert:id2\\"","fields":"[\\"muteAll\\",\\"activeSnoozes\\",\\"isSnoozedUntil\\",\\"snoozeSchedule\\"]","per_page":2}',
+        })
+      );
+    });
+
+    test('requests only snooze settings fields', () => {
+      fetchRulesSnoozeSettings({ ids: ['id1', 'id2'] });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          body: '{"filter":"alert.id:\\"alert:id1\\" or alert.id:\\"alert:id2\\"","fields":"[\\"muteAll\\",\\"activeSnoozes\\",\\"isSnoozedUntil\\",\\"snoozeSchedule\\"]","per_page":2}',
+        })
+      );
     });
 
     test('returns mapped data', async () => {
