@@ -84,6 +84,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   hideQueryHistory,
   hasOutline,
   displayDocumentationAsFlyout,
+  dashboardApi,
 }: ESQLEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const datePickerOpenStatusRef = useRef<boolean>(false);
@@ -97,6 +98,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     core,
     fieldsMetadata,
     uiSettings,
+    uiActions,
   } = kibana.services;
   const darkMode = core.theme?.getTheme().darkMode;
 
@@ -244,6 +246,17 @@ export const ESQLEditor = memo(function ESQLEditor({
 
   monaco.editor.registerCommand('esql.timepicker.choose', (...args) => {
     openTimePickerPopover();
+  });
+
+  monaco.editor.registerCommand('esql.control.time_literal.create', async (...args) => {
+    if (!dashboardApi) {
+      return;
+    }
+    await uiActions.getTrigger('ESQL_CONTROL_TRIGGER').exec({
+      queryString: query.esql,
+      controlType: 'time_literal',
+      dashboardApi,
+    });
   });
 
   const styles = esqlEditorStyles(

@@ -68,6 +68,7 @@ export type ControlGroupApi = PresentationContainer &
       controlStateTransform?: ControlStateTransform;
       onSave?: () => void;
     }) => void;
+    addNewControl: (controlType: string, initialState: object) => void;
     untilInitialized: () => Promise<void>;
 
     /** Public getters */

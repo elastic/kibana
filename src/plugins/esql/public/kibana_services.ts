@@ -15,6 +15,7 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { IndexManagementPluginSetup } from '@kbn/index-management-shared-types';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 export let core: CoreStart;
 
@@ -23,6 +24,7 @@ interface ServiceDeps {
   dataViews: DataViewsPublicPluginStart;
   expressions: ExpressionsStart;
   storage: Storage;
+  uiActions: UiActionsStart;
   indexManagementApiService?: IndexManagementPluginSetup['apiService'];
   fieldsMetadata?: FieldsMetadataPublicStart;
   usageCollection?: UsageCollectionStart;
@@ -46,6 +48,7 @@ export const setKibanaServices = (
   dataViews: DataViewsPublicPluginStart,
   expressions: ExpressionsStart,
   storage: Storage,
+  uiActions: UiActionsStart,
   indexManagement?: IndexManagementPluginSetup,
   fieldsMetadata?: FieldsMetadataPublicStart,
   usageCollection?: UsageCollectionStart
@@ -56,6 +59,7 @@ export const setKibanaServices = (
     dataViews,
     expressions,
     storage,
+    uiActions,
     indexManagementApiService: indexManagement?.apiService,
     fieldsMetadata,
     usageCollection,

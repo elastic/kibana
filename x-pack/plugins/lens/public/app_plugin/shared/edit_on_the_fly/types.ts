@@ -6,6 +6,7 @@
  */
 import type { Observable } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
+import type { PresentationContainer } from '@kbn/presentation-containers';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import type {
@@ -89,6 +90,8 @@ export interface EditConfigPanelProps {
   // in cases where the embeddable is not filtered by time
   // (e.g. through unified search) set this property to true
   hideTimeFilterInfo?: boolean;
+
+  dashboardApi?: PresentationContainer;
 }
 
 export interface LayerConfigurationProps {

@@ -30,6 +30,10 @@ import { isNumericType } from '../shared/esql_types';
 import { getTestFunctions } from '../shared/test_functions';
 import { builtinFunctions } from '../definitions/builtin';
 
+enum EsqlControlType {
+  TIME_LITERAL = 'time_literal',
+}
+
 const techPreviewLabel = i18n.translate(
   'kbn-esql-validation-autocomplete.esql.autocomplete.techPreviewLabel',
   {
@@ -474,6 +478,7 @@ export function getCompatibleLiterals(
   if (types.includes('time_literal')) {
     // filter plural for now and suggest only unit + singular
     suggestions.push(
+      ...getControlSuggestion(EsqlControlType.TIME_LITERAL),
       ...buildConstantsDefinitions(getUnitDuration(1), undefined, undefined, options)
     ); // i.e. 1 year
   }
@@ -559,6 +564,37 @@ export function getDateLiterals(options?: {
           'kbn-esql-validation-autocomplete.esql.autocomplete.chooseFromTimePicker',
           {
             defaultMessage: 'Click to choose',
+          }
+        ),
+      },
+    } as SuggestionRawDefinition,
+  ];
+}
+
+export function getControlSuggestion(type: EsqlControlType): SuggestionRawDefinition[] {
+  return [
+    {
+      label: i18n.translate(
+        'kbn-esql-validation-autocomplete.esql.autocomplete.createControlLabel',
+        {
+          defaultMessage: 'Create control',
+        }
+      ),
+      text: '',
+      kind: 'Issue',
+      detail: i18n.translate(
+        'kbn-esql-validation-autocomplete.esql.autocomplete.createControlDetailLabel',
+        {
+          defaultMessage: 'Click to create',
+        }
+      ),
+      sortText: '1A',
+      command: {
+        id: `esql.control.${type}.create`,
+        title: i18n.translate(
+          'kbn-esql-validation-autocomplete.esql.autocomplete.createControlDetailLabel',
+          {
+            defaultMessage: 'Click to create',
           }
         ),
       },

@@ -20,6 +20,9 @@ import {
   updateESQLQueryTrigger,
   UpdateESQLQueryAction,
   UPDATE_ESQL_QUERY_TRIGGER,
+  esqlControlTrigger,
+  CreateESQLControlAction,
+  ESQL_CONTROL_TRIGGER,
 } from './triggers';
 import { setKibanaServices } from './kibana_services';
 
@@ -44,6 +47,7 @@ export class EsqlPlugin implements Plugin<{}, void> {
     this.indexManagement = indexManagement;
 
     uiActions.registerTrigger(updateESQLQueryTrigger);
+    uiActions.registerTrigger(esqlControlTrigger);
 
     return {};
   }
@@ -53,13 +57,19 @@ export class EsqlPlugin implements Plugin<{}, void> {
     { dataViews, expressions, data, uiActions, fieldsMetadata, usageCollection }: EsqlPluginStart
   ): void {
     const storage = new Storage(localStorage);
+
+    // Register triggers
     const appendESQLAction = new UpdateESQLQueryAction(data);
     uiActions.addTriggerAction(UPDATE_ESQL_QUERY_TRIGGER, appendESQLAction);
+    const createESQLControlAction = new CreateESQLControlAction(core);
+    uiActions.addTriggerAction(ESQL_CONTROL_TRIGGER, createESQLControlAction);
+
     setKibanaServices(
       core,
       dataViews,
       expressions,
       storage,
+      uiActions,
       this.indexManagement,
       fieldsMetadata,
       usageCollection

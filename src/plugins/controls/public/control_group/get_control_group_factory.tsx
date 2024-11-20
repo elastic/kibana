@@ -164,6 +164,12 @@ export const getControlGroupEmbeddableFactory = () => {
           });
         },
         isEditingEnabled: () => true,
+        addNewControl: (type, initialState) => {
+          controlsManager.api.addNewPanel({
+            panelType: type,
+            initialState,
+          });
+        },
         openAddDataControlFlyout: (settings) => {
           const parentDataViewId = apiPublishesDataViews(parentApi)
             ? parentApi.dataViews.value?.[0]?.id

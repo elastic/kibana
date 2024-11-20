@@ -6,12 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { DefaultDataControlState } from '../../../../common';
+import type { DataControlApi } from '../types';
 
-export {
-  updateESQLQueryTrigger,
-  UPDATE_ESQL_QUERY_TRIGGER,
-} from './update_esql_query/update_esql_query_trigger';
-export { UpdateESQLQueryAction } from './update_esql_query/update_esql_query_actions';
+export interface StaticValuesListControlState extends DefaultDataControlState {
+  availableOptions: string[];
+  selectedOptions: string[];
+}
 
-export { esqlControlTrigger, ESQL_CONTROL_TRIGGER } from './esql_controls/esql_control_trigger';
-export { CreateESQLControlAction } from './esql_controls/esql_control_action';
+export type StaticValuesListControlApi = DataControlApi;

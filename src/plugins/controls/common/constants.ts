@@ -30,3 +30,6 @@ export const DEFAULT_AUTO_APPLY_SELECTIONS = true;
 export const TIME_SLIDER_CONTROL = 'timeSlider';
 export const RANGE_SLIDER_CONTROL = 'rangeSliderControl';
 export const OPTIONS_LIST_CONTROL = 'optionsListControl';
+
+export const ESQL_CONTROL_STATIC_VALUES = 'esqlControlStaticValues';
+export const ESQL_CONTROL_VALUES_FROM_QUERY = 'esqlControlValuesFromQuery';

@@ -903,6 +903,7 @@ export class Embeddable
       'formBased') as EditLensConfigurationProps['datasourceId'];
 
     const attributes = this.savedVis as TypedLensByValueInput['attributes'];
+    const dashboardApi = this.parentApi;
     if (attributes) {
       return (
         <Component
@@ -922,6 +923,7 @@ export class Embeddable
           canEditTextBasedQuery={this.isTextBasedLanguage()}
           isNewPanel={isNewPanel}
           deletePanel={deletePanel}
+          dashboardApi={dashboardApi}
         />
       );
     }

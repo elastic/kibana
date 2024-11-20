@@ -1,0 +1,6 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/esql-controls",
+  "owner": "@elastic/kibana-esql",
+  "visibility": "shared"
+}

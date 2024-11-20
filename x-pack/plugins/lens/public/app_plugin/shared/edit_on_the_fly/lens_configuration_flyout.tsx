@@ -78,6 +78,7 @@ export function LensEditConfigurationFlyout({
   onApplyCb,
   onCancelCb,
   hideTimeFilterInfo,
+  dashboardApi,
 }: EditConfigPanelProps) {
   const euiTheme = useEuiTheme();
   const previousAttributes = useRef<TypedLensByValueInput['attributes']>(attributes);
@@ -519,6 +520,7 @@ export function LensEditConfigurationFlyout({
                 isDisabled={false}
                 allowQueryCancellation
                 isLoading={isVisualizationLoading}
+                dashboardApi={dashboardApi}
               />
             </EuiFlexItem>
           )}

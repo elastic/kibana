@@ -121,6 +121,7 @@ export async function getEditLensConfiguration(
     onApplyCb,
     onCancelCb,
     hideTimeFilterInfo,
+    dashboardApi,
   }: EditLensConfigurationProps) => {
     if (!lensServices || !datasourceMap || !visualizationMap) {
       return <LoadingSpinnerWithOverlay />;
@@ -220,6 +221,7 @@ export async function getEditLensConfiguration(
       onApplyCb,
       onCancelCb,
       hideTimeFilterInfo,
+      dashboardApi,
     };
 
     return getWrapper(
