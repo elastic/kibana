@@ -347,7 +347,9 @@ export default function ({ getService }: FtrProviderContext) {
         .get(`/api/fleet/agent_status/data?agentsIds=agent1&agentsIds=agent2`)
         .expect(200);
       const { body: apiResponse2 } = await supertest
-        .get(`/api/fleet/agent_status/data?agentsIds=agent1&agentsIds=agent2&pkgKey=system-1.50.0`)
+        .get(
+          `/api/fleet/agent_status/data?agentsIds=agent1&agentsIds=agent2&pkgName=system&pkgVersion=1.50.0`
+        )
         .expect(200);
       expect(apiResponse1).to.eql({
         items: [{ agent1: { data: false } }, { agent2: { data: false } }],
