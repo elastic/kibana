@@ -35,7 +35,7 @@ export default function customLinksTests({ getService }: DeploymentAgnosticFtrPr
     });
 
     after(async () => {
-      await esArchiver.unload(ARCHIVER_ROUTES['8.0.0']);
+      await esArchiver.unload(ARCHIVER_ROUTES[archiveName]);
     });
 
     it('should fail if the user does not have write access', async () => {
