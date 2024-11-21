@@ -16,7 +16,8 @@ export default function searchSolutionNavigation({
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
 
-  describe('Search Solution Navigation', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/201037
+  describe.skip('Search Solution Navigation', () => {
     let cleanUp: () => Promise<unknown>;
     let spaceCreated: { id: string } = { id: '' };
 
