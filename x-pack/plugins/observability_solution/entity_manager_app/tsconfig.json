@@ -28,5 +28,6 @@
     "@kbn/cloud-plugin",
     "@kbn/serverless",
     "@kbn/entityManager-plugin",
+    "@kbn/entities-schema",
   ]
 }
