@@ -8,13 +8,10 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { getOptionsListControlFactory } from '../controls/data_controls/options_list_control/get_options_list_control_factory';
-import { getMockedBuildApi, getMockedControlGroupApi } from '../controls/mocks/control_mocks';
+import { getMockedControlGroupApi } from '../controls/mocks/control_mocks';
 import { ClearControlAction } from './clear_control_action';
-import { CanClearSelections } from '../types';
 
-import type { ViewMode, EmbeddableApiContext } from '@kbn/presentation-publishing';
-import type { OptionsListControlApi } from '../controls/data_controls/options_list_control/types';
+import type { ViewMode } from '@kbn/presentation-publishing';
 
 const dashboardApi = {
   viewMode: new BehaviorSubject<ViewMode>('view'),
@@ -26,44 +23,23 @@ const controlGroupApi = getMockedControlGroupApi(dashboardApi, {
   children$: new BehaviorSubject({}),
 });
 
-let clearControlAction: ClearControlAction;
-let embeddable: Partial<EmbeddableApiContext & CanClearSelections>;
-let optionsListApi: OptionsListControlApi;
-let hasSelectionsSubject: BehaviorSubject<boolean | undefined>;
+const clearControlAction = new ClearControlAction();
+const hasSelections$ = new BehaviorSubject<boolean | undefined>(undefined);
 
-beforeAll(async () => {
-  const controlFactory = getOptionsListControlFactory();
-  const optionsListUuid = 'optionsListControlUuid';
-  const optionsListControl = await controlFactory.buildControl(
-    {
-      dataViewId: 'test-data-view',
-      title: 'test',
-      fieldName: 'test-field',
-      width: 'medium',
-      grow: false,
-    },
-    getMockedBuildApi(optionsListUuid, controlFactory, controlGroupApi),
-    optionsListUuid,
-    controlGroupApi
-  );
-
-  optionsListApi = optionsListControl.api;
-});
-
+const controlApi = {
+  type: 'test',
+  uuid: '1',
+  parentApi: controlGroupApi,
+  hasSelections$,
+  clearSelections: jest.fn(),
+};
 beforeEach(() => {
-  hasSelectionsSubject = new BehaviorSubject<boolean | undefined>(undefined);
-  clearControlAction = new ClearControlAction();
-
-  embeddable = {
-    ...optionsListApi,
-    clearSelections: jest.fn(),
-    hasSelections$: hasSelectionsSubject,
-  };
+  hasSelections$.next(false);
 });
 
 describe('ClearControlAction', () => {
   test('should throw an error when called with an embeddable not in a parent', async () => {
-    const noParentApi = { ...optionsListApi, parentApi: undefined };
+    const noParentApi = { ...controlApi, parentApi: undefined };
 
     await expect(async () => {
       await clearControlAction.execute({ embeddable: noParentApi });
@@ -73,21 +49,21 @@ describe('ClearControlAction', () => {
   test('should call onChange when isCompatible changes', () => {
     const onChange = jest.fn();
 
-    clearControlAction.subscribeToCompatibilityChanges({ embeddable }, onChange);
-    hasSelectionsSubject.next(false);
+    hasSelections$.next(true);
+    clearControlAction.subscribeToCompatibilityChanges({ embeddable: controlApi }, onChange);
 
-    expect(onChange).toHaveBeenCalledWith(false, clearControlAction);
+    expect(onChange).toHaveBeenCalledWith(true, clearControlAction);
   });
 
   describe('Clear control button compatibility', () => {
     test('should be incompatible if there is no selection', async () => {
-      const nothingIsSelected = { ...optionsListApi, hasSelections$: false };
+      const nothingIsSelected = { ...controlApi, hasSelections$: false };
 
       expect(await clearControlAction.isCompatible({ embeddable: nothingIsSelected })).toBe(false);
     });
 
     test('should be compatible if there is a selection', async () => {
-      const hasSelections = { ...optionsListApi, hasSelections$: true };
+      const hasSelections = { ...controlApi, hasSelections$: true };
 
       expect(await clearControlAction.isCompatible({ embeddable: hasSelections })).toBe(true);
     });

@@ -113,7 +113,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
   return (
     <div className="presentationUtil__floatingActionsWrapper">
       {children}
-      {isEnabled && Boolean(floatingActions.length) && (
+      {isEnabled && floatingActions.length > 0 && (
         <div
           data-test-subj={`presentationUtil__floatingActions__${
             apiHasUniqueId(api) ? api.uuid : v4()
