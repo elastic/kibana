@@ -21,8 +21,8 @@ export const ChartsLoading = ({
       alignItems="center"
       data-test-subj={getTestId('charts-loading')}
     >
-      {[...Array(2)].map(() => (
-        <EuiFlexItem>
+      {[...Array(2)].map((i) => (
+        <EuiFlexItem key={i}>
           <EuiPanel paddingSize="xl" hasShadow={false} hasBorder={false}>
             <EuiLoadingChart size="l" />
           </EuiPanel>

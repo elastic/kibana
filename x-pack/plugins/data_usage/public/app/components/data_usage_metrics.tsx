@@ -215,7 +215,6 @@ export const DataUsageMetrics = memo(
             data-test-subj={getTestId('filter')}
           />
         </FlexItemWithCss>
-
         <FlexItemWithCss>
           {hasFetchedDataUsageMetricsData && usageMetricsData?.metrics ? (
             <Charts data={usageMetricsData} data-test-subj={dataTestSubj} />
