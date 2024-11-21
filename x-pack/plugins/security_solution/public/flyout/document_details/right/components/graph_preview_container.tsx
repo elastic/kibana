@@ -41,6 +41,7 @@ export const GraphPreviewContainer: React.FC = () => {
     eventIds,
     timestamp = new Date().toISOString(),
     isAuditLog,
+    isAlert,
   } = useGraphPreview({
     getFieldsData,
     ecsData: dataAsNestedObject,
@@ -50,9 +51,10 @@ export const GraphPreviewContainer: React.FC = () => {
   const { isLoading, isError, data } = useFetchGraphData({
     req: {
       query: {
-        eventIds,
+        eventIds: isAlert ? eventIds : [],
         start: `${timestamp}||-30m`,
         end: `${timestamp}||+30m`,
+        esQuery: !isAlert ? { bool: { filter: [{ terms: { 'event.id': eventIds } }] } } : undefined,
       },
     },
     options: {

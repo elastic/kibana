@@ -6,6 +6,7 @@
  */
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { ALERT_UUID } from '@kbn/rule-data-utils';
 import { get } from 'lodash/fp';
 import type { GetFieldsData } from './use_get_fields_data';
 import { getField, getFieldArray } from '../utils';
@@ -54,6 +55,8 @@ export interface UseGraphPreviewResult {
    * Boolean indicating if the event is an audit log (contains event ids, actor ids and action)
    */
   isAuditLog: boolean;
+
+  isAlert: boolean;
 }
 
 /**
@@ -77,6 +80,7 @@ export const useGraphPreview = ({
     actorIds.length > 0 &&
     eventIds.length > 0 &&
     targetIds.length > 0;
+  const isAlert = Boolean(getFieldsData(ALERT_UUID));
 
-  return { timestamp, eventIds, actorIds, action, targetIds, isAuditLog };
+  return { timestamp, eventIds, actorIds, action, targetIds, isAuditLog, isAlert };
 };

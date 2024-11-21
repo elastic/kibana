@@ -316,7 +316,7 @@ const determineEntityNodeShape = (
     return { shape: 'diamond', icon: 'globe' };
   }
 
-  return { shape: 'hexagon', icon: 'questionInCircle' };
+  return { shape: 'hexagon', icon: '' };
 };
 
 const sortNodes = (nodesMap: Record<string, NodeDataModel>) => {

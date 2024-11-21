@@ -19,6 +19,10 @@ import {
 import type { Filter, Query, TimeRange, BoolQuery, PhraseFilter } from '@kbn/es-query';
 import { css } from '@emotion/css';
 import { getEsQueryConfig } from '@kbn/data-service';
+import dateMath from '@kbn/datemath';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { normalizeTimeRange } from '../../../../common/utils/normalize_time_range';
+import { InvestigateInTimelineButton } from '../../../../common/components/event_details/investigate_in_timeline_button';
 import { useGetScopedSourcererDataView } from '../../../../sourcerer/components/use_get_sourcerer_data_view';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { useDocumentDetailsContext } from '../../shared/context';
@@ -47,15 +51,22 @@ const useTimeRange = (timestamp: string) => {
   return { timeRange, setTimeRange, setPartialTimeRange };
 };
 
-const useGraphData = (eventIds: string[], timeRange: TimeRange, filter: { bool: BoolQuery }) => {
+const useGraphData = (
+  eventIds: string[],
+  isAlert: boolean,
+  timeRange: TimeRange,
+  filter: { bool: BoolQuery }
+) => {
   const { data, refresh, isFetching } = useFetchGraphData({
     req: {
       query: {
-        eventIds,
+        eventIds: isAlert ? eventIds : [],
         esQuery: filter,
         start: timeRange.from,
         end: timeRange.to,
       },
+      nodesLimit: 50,
+      showUnknownTarget: false,
     },
     options: {
       refetchOnWindowFocus: false,
@@ -169,7 +180,7 @@ export const GraphVisualization: React.FC = memo(() => {
   });
   const [searchFilters, setSearchFilters] = useState<Filter[]>(() => []);
   const { getFieldsData, dataAsNestedObject } = useDocumentDetailsContext();
-  const { eventIds, timestamp } = useGraphPreview({
+  const { eventIds, isAlert, timestamp } = useGraphPreview({
     getFieldsData,
     ecsData: dataAsNestedObject,
   });
@@ -183,7 +194,9 @@ export const GraphVisualization: React.FC = memo(() => {
     buildEsQuery(
       dataView,
       [],
-      [...searchFilters],
+      isAlert
+        ? [...searchFilters]
+        : addFilter(dataView?.id ?? '', searchFilters, 'event.id', eventIds[0]),
       getEsQueryConfig(uiSettings as Parameters<typeof getEsQueryConfig>[0])
     )
   );
@@ -193,11 +206,13 @@ export const GraphVisualization: React.FC = memo(() => {
       buildEsQuery(
         dataView,
         [],
-        [...searchFilters],
+        isAlert
+          ? [...searchFilters]
+          : addFilter(dataView?.id ?? '', searchFilters, 'event.id', eventIds[0]),
         getEsQueryConfig(uiSettings as Parameters<typeof getEsQueryConfig>[0])
       )
     );
-  }, [searchFilters, dataView, uiSettings]);
+  }, [searchFilters, dataView, uiSettings, isAlert, eventIds]);
 
   const { nodeExpandPopover, popoverOpenWrapper } = useGraphPopovers(
     dataView?.id ?? '',
@@ -206,8 +221,15 @@ export const GraphVisualization: React.FC = memo(() => {
   const expandButtonClickHandler = (...args: unknown[]) =>
     popoverOpenWrapper(nodeExpandPopover.onNodeExpandButtonClick, ...args);
   const isPopoverOpen = [nodeExpandPopover].some(({ state: { isOpen } }) => isOpen);
-  const { data, refresh, isFetching } = useGraphData(eventIds, timeRange, query);
+  const { data, refresh, isFetching } = useGraphData(eventIds, isAlert, timeRange, query);
   const nodes = useGraphNodes(data?.nodes ?? [], expandButtonClickHandler);
+  const parsedTimeRange: TimeRange = useMemo(() => {
+    return {
+      ...timeRange,
+      from: dateMath.parse(timeRange.from),
+      to: dateMath.parse(timeRange.to),
+    };
+  }, [timeRange]);
 
   return (
     <div data-test-subj={GRAPH_VISUALIZATION_TEST_ID}>
@@ -223,8 +245,8 @@ export const GraphVisualization: React.FC = memo(() => {
             showQueryInput: false,
             isLoading: isFetching,
             isAutoRefreshDisabled: true,
-            dateRangeFrom: timeRange.from.split('/')[0],
-            dateRangeTo: timeRange.to.split('/')[0],
+            dateRangeFrom: timeRange.from,
+            dateRangeTo: timeRange.to,
             query: { query: '', language: 'kuery' },
             indexPatterns: [dataView],
             filters: searchFilters,
@@ -242,6 +264,19 @@ export const GraphVisualization: React.FC = memo(() => {
           }}
         />
       )}
+      <InvestigateInTimelineButton
+        asEmptyButton
+        dataProviders={[]}
+        filters={addFilter(dataView?.id ?? '', searchFilters, 'event.id', eventIds[0])}
+        keepDataView
+        iconType={'timeline'}
+        timeRange={{ ...normalizeTimeRange(parsedTimeRange), kind: 'absolute' }}
+      >
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.documentDetails.left.graphVisualization.investigateInTimelineButtonLabel"
+          defaultMessage="Investigate in Timeline"
+        />
+      </InvestigateInTimelineButton>
       <React.Suspense fallback={null}>
         <GraphLazy
           css={css`
