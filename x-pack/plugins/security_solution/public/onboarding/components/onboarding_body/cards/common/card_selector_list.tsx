@@ -41,7 +41,7 @@ const scrollToSelectedItem = (
   animationDuration: number = SCROLL_ANIMATION_DURATION
 ) => {
   setTimeout(() => {
-    const element = document.getElementById(`${cardId}-selector`);
+    const element = document.getElementById(`selector-${cardId}`);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
@@ -57,10 +57,15 @@ export const CardSelectorList = React.memo<CardSelectorListProps>(
     }, [selectedItem]);
 
     return (
-      <EuiFlexGroup direction="column" gutterSize="s" className={styles}>
+      <EuiFlexGroup
+        data-test-subj="cardSelectorList"
+        direction="column"
+        gutterSize="s"
+        className={styles}
+      >
         {title && (
           <EuiFlexItem>
-            <EuiText data-test-subj="rulesCardDescription" size="xs" className="cardSelectorTitle">
+            <EuiText size="xs" className="cardSelectorTitle">
               {title}
             </EuiText>
           </EuiFlexItem>
@@ -73,9 +78,10 @@ export const CardSelectorList = React.memo<CardSelectorListProps>(
             gutterSize="s"
           >
             {items.map((item) => (
-              <EuiFlexItem id={`${item.id}-selector`} grow={false}>
+              <EuiFlexItem id={`selector-${item.id}`} grow={false}>
                 <EuiPanel
                   hasBorder
+                  data-test-subj={`cardSelectorItem-${item.id}`}
                   className={selectedItem.id === item.id ? 'selectedCardPanelItem' : ''}
                   color={selectedItem.id === item.id ? 'subdued' : 'plain'}
                   element="button"
@@ -83,13 +89,11 @@ export const CardSelectorList = React.memo<CardSelectorListProps>(
                     onSelect(item);
                   }}
                 >
-                  <EuiTitle data-test-subj="rulesCardDescription" size="xxs">
+                  <EuiTitle size="xxs">
                     <h5>{item.title}</h5>
                   </EuiTitle>
                   <EuiSpacer size="xs" />
-                  <EuiText data-test-subj="rulesCardDescription" size="xs">
-                    {item.description}
-                  </EuiText>
+                  <EuiText size="xs">{item.description}</EuiText>
                 </EuiPanel>
               </EuiFlexItem>
             ))}

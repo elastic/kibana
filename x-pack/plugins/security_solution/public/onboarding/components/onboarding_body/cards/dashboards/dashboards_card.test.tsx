@@ -5,21 +5,24 @@
  * 2.0.
  */
 import React from 'react';
-import { fireEvent, render } from '@testing-library/react';
-import { DashboardsCard } from './dashboards_card';
+import { render, fireEvent } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
-import { OnboardingCardId } from '../../../../constants';
+import { OnboardingContextProvider } from '../../../onboarding_context';
+import DashboardsCard from './dashboards_card';
 
-jest.mock('../../../onboarding_context');
+const mockSetComplete = jest.fn();
+const mockSetExpandedCardId = jest.fn();
+const mockIsCardComplete = jest.fn();
 
 const props = {
-  setComplete: jest.fn(),
+  setComplete: mockSetComplete,
   checkComplete: jest.fn(),
-  isCardComplete: jest.fn(),
-  setExpandedCardId: jest.fn(),
+  isCardComplete: mockIsCardComplete,
+  setExpandedCardId: mockSetExpandedCardId,
+  isExpanded: true,
 };
 
-describe('RulesCard', () => {
+describe('DashboardsCard', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -27,50 +30,71 @@ describe('RulesCard', () => {
   it('description should be in the document', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <DashboardsCard {...props} />
+        <OnboardingContextProvider spaceId="default">
+          <DashboardsCard {...props} />
+        </OnboardingContextProvider>
       </TestProviders>
     );
 
     expect(getByTestId('dashboardsDescription')).toBeInTheDocument();
   });
 
-  it('card callout should be rendered if integrations cards is not complete', () => {
-    props.isCardComplete.mockReturnValueOnce(false);
+  it('renders card callout if integrations card is not complete', () => {
+    mockIsCardComplete.mockReturnValueOnce(false);
 
     const { getByText } = render(
       <TestProviders>
-        <DashboardsCard {...props} />
+        <OnboardingContextProvider spaceId="default">
+          <DashboardsCard {...props} />
+        </OnboardingContextProvider>
       </TestProviders>
     );
 
     expect(getByText('To view dashboards add integrations first.')).toBeInTheDocument();
   });
 
-  it('card button should be disabled if integrations cards is not complete', () => {
-    props.isCardComplete.mockReturnValueOnce(false);
+  it('renders a disabled button if integrations card is not complete', () => {
+    mockIsCardComplete.mockReturnValueOnce(false);
 
     const { getByTestId } = render(
       <TestProviders>
-        <DashboardsCard {...props} />
+        <OnboardingContextProvider spaceId="default">
+          <DashboardsCard {...props} />
+        </OnboardingContextProvider>
       </TestProviders>
     );
 
     expect(getByTestId('dashboardsCardButton').querySelector('button')).toBeDisabled();
   });
-  it('should expand integrations card when callout link is clicked', () => {
-    props.isCardComplete.mockReturnValueOnce(false); // To show the callout
+
+  it('renders an enabled button if integrations card is complete', () => {
+    mockIsCardComplete.mockReturnValueOnce(true);
 
     const { getByTestId } = render(
       <TestProviders>
-        <DashboardsCard {...props} />
+        <OnboardingContextProvider spaceId="default">
+          <DashboardsCard {...props} />
+        </OnboardingContextProvider>
       </TestProviders>
     );
 
-    const link = getByTestId('dashboardsCardCalloutLink');
-    fireEvent.click(link);
+    expect(getByTestId('dashboardsCardButton').querySelector('button')).not.toBeDisabled();
+  });
 
-    expect(props.setExpandedCardId).toHaveBeenCalledWith(OnboardingCardId.integrations, {
-      scroll: true,
-    });
+  it('calls setExpandedCardId when the callout link is clicked', () => {
+    mockIsCardComplete.mockReturnValueOnce(false);
+
+    const { getByText } = render(
+      <TestProviders>
+        <OnboardingContextProvider spaceId="default">
+          <DashboardsCard {...props} />
+        </OnboardingContextProvider>
+      </TestProviders>
+    );
+
+    const calloutLink = getByText('Add integrations step');
+    fireEvent.click(calloutLink);
+
+    expect(mockSetExpandedCardId).toHaveBeenCalledWith('integrations', { scroll: true });
   });
 });

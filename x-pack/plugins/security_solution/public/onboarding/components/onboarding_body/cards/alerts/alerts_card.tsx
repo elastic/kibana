@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
+import { css } from '@emotion/css';
 import { LocalStorageKey, useStoredSelectedCardItemId } from '../../../../hooks/use_stored_state';
 import { SecuritySolutionLinkButton } from '../../../../../common/components/links';
 import { OnboardingCardId } from '../../../../constants';
@@ -67,7 +68,11 @@ export const AlertsCard: OnboardingCardComponent = ({
         justifyContent="flexStart"
         alignItems="flexStart"
       >
-        <EuiFlexItem style={{ width: '100%' }}>
+        <EuiFlexItem
+          className={css`
+            width: 100%;
+          `}
+        >
           <EuiText data-test-subj="alertsCardDescription" size="s">
             {i18n.ALERTS_CARD_DESCRIPTION}
           </EuiText>
