@@ -12,6 +12,7 @@ import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
 
 import { AlertNavigationRegistry, AlertNavigationHandler } from './alert_navigation_registry';
 import { loadRule, loadRuleType } from './services/rule_api';
@@ -68,6 +69,7 @@ export interface AlertingPluginStart {
   spaces: SpacesPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   data: DataPublicPluginStart;
+  serverless?: ServerlessPluginStart;
 }
 
 export interface AlertingUIConfig {

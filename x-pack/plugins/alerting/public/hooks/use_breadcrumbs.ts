@@ -75,6 +75,7 @@ export const useBreadcrumbs = (pageDeepLink: MaintenanceWindowDeepLinkIds) => {
       serverless,
     },
   } = useKibana();
+
   const setTitle = docTitle.change;
   const { getAppUrl } = useNavigation(MANAGEMENT_APP_ID);
 
@@ -93,7 +94,7 @@ export const useBreadcrumbs = (pageDeepLink: MaintenanceWindowDeepLinkIds) => {
       },
     ];
 
-    if (serverless && serverless.setBreadcrumbs) {
+    if (serverless?.setBreadcrumbs) {
       serverless.setBreadcrumbs(breadcrumbs);
     } else {
       setBreadcrumbs(addClickHandlers(breadcrumbs, navigateToUrl));
