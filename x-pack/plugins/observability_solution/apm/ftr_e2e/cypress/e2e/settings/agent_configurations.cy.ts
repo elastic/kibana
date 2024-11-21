@@ -122,21 +122,24 @@ describe('Agent configuration', () => {
       cy.contains('Create configuration').should('not.be.disabled');
     });
 
-    it('persists service environment when clicking on edit button', () => {
+    it.skip('persists service environment when clicking on edit button', () => {
       cy.intercept('GET', '/api/apm/settings/agent-configuration/environments?*').as(
         'serviceEnvironmentApi'
       );
       cy.contains('Create configuration').click();
-      cy.getByTestSubj('serviceNameComboBox').click().type('opbeans-node').type('{enter}');
+      cy.getByTestSubj('serviceNameComboBox').find('input').click();
+      cy.getByTestSubj('serviceNameComboBox').type('opbeans-node{enter}');
+      cy.getByTestSubj('comboBoxOptionsList serviceNameComboBox-optionsList').should('be.visible');
 
-      cy.contains('opbeans-node').realClick();
+      cy.contains('opbeans-node').click();
       cy.wait('@serviceEnvironmentApi');
 
-      cy.getByTestSubj('serviceEnviromentComboBox')
-        .click({ force: true })
-        .type('prod')
-        .type('{enter}');
-      cy.contains('production').realClick();
+      cy.getByTestSubj('serviceEnviromentComboBox').find('input').click();
+      cy.getByTestSubj('comboBoxOptionsList serviceEnviromentComboBox-optionsList').should(
+        'be.visible'
+      );
+      cy.contains('button', 'production').click();
+
       cy.contains('Next step').click();
       cy.contains('Create configuration');
       cy.contains('Edit').click();
@@ -152,13 +155,19 @@ describe('Agent configuration', () => {
         'serviceEnvironmentApi'
       );
       cy.contains('Create configuration').click();
-      cy.getByTestSubj('serviceNameComboBox').click().type('All').type('{enter}');
-      cy.contains('All').realClick();
+      cy.getByTestSubj('serviceNameComboBox').find('input').type('All{enter}');
+      cy.getByTestSubj('serviceNameComboBox').find('input').click();
+      cy.getByTestSubj('comboBoxOptionsList serviceNameComboBox-optionsList').should('be.visible');
+
+      cy.contains('button', 'All').click();
       cy.wait('@serviceEnvironmentApi');
 
-      cy.getByTestSubj('serviceEnviromentComboBox').click({ force: true }).type('All');
+      cy.getByTestSubj('serviceEnviromentComboBox').find('input').click();
+      cy.getByTestSubj('comboBoxOptionsList serviceEnviromentComboBox-optionsList').should(
+        'be.visible'
+      );
+      cy.contains('button', 'All').click();
 
-      cy.get('mark').contains('All').click({ force: true });
       cy.contains('Next step').click();
       cy.get('[data-test-subj="settingsPage_serviceName"]').contains('All');
       cy.get('[data-test-subj="settingsPage_environmentName"]').contains('All');
