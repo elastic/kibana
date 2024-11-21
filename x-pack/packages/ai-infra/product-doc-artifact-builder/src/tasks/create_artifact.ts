@@ -8,9 +8,9 @@
 import Path from 'path';
 import AdmZip from 'adm-zip';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { getArtifactName, type ProductName } from '@kbn/product-doc-common';
 import { getArtifactMappings } from '../artifact/mappings';
 import { getArtifactManifest } from '../artifact/manifest';
-import { getArtifactName } from '../artifact/artifact_name';
 
 export const createArtifact = async ({
   productName,
@@ -21,7 +21,7 @@ export const createArtifact = async ({
 }: {
   buildFolder: string;
   targetFolder: string;
-  productName: string;
+  productName: ProductName;
   stackVersion: string;
   log: ToolingLog;
 }) => {
