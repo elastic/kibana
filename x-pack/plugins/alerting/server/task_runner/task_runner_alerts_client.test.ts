@@ -412,6 +412,7 @@ describe('Task Runner', () => {
           elasticsearchClientPromise: Promise.resolve(clusterClient),
           dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts }),
           elasticsearchAndSOAvailability$,
+          isServerless: false,
         });
         elasticsearchAndSOAvailability$.next(true);
 
@@ -544,6 +545,7 @@ describe('Task Runner', () => {
           elasticsearchClientPromise: Promise.resolve(clusterClient),
           dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts }),
           elasticsearchAndSOAvailability$,
+          isServerless: false,
         });
         elasticsearchAndSOAvailability$.next(true);
 

@@ -131,6 +131,7 @@ const alertsService = new AlertsService({
   elasticsearchClientPromise: Promise.resolve(clusterClient),
   dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts }),
   elasticsearchAndSOAvailability$,
+  isServerless: false,
 });
 const backfillClient = backfillClientMock.create();
 const dataPlugin = dataPluginMock.createStartContract();
