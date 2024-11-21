@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export const isEndpointPreconfigured = (endpoint: string) => endpoint.startsWith('.');
+export { createOutputApi } from './create_output_api';
+export { bindOutput } from './bind_output';
