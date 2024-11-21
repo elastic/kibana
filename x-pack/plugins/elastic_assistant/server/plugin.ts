@@ -109,10 +109,12 @@ export class ElasticAssistantPlugin
         this.getElserId = createGetElserId(this.mlTrainedModelsProvider);
       }
     });
-    removeLegacyQuickPrompt(core.elasticsearch.client.asInternalUser).then((res) => {
-      if (res?.total)
-        this.logger.info(`Removed ${res.total} legacy quick prompts from AI Assistant`);
-    });
+    removeLegacyQuickPrompt(core.elasticsearch.client.asInternalUser)
+      .then((res) => {
+        if (res?.total)
+          this.logger.info(`Removed ${res.total} legacy quick prompts from AI Assistant`);
+      })
+      .catch(() => {});
 
     return {
       actions: plugins.actions,
