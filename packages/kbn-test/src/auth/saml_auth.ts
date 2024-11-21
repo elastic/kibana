@@ -11,7 +11,7 @@ import { createSAMLResponse as createMockedSAMLResponse } from '@kbn/mock-idp-ut
 import { ToolingLog } from '@kbn/tooling-log';
 import axios, { AxiosResponse } from 'axios';
 import util from 'util';
-import cheerio from 'cheerio';
+import { load } from 'cheerio';
 import { Cookie, parse as parseCookie } from 'tough-cookie';
 import Url from 'url';
 import { isValidHostname, isValidUrl } from './helper';
@@ -229,7 +229,7 @@ export const createSAMLResponse = async (params: SAMLResponseValueParams) => {
       },
       maxRedirects: 0,
     });
-    const $ = cheerio.load(samlResponse.data);
+    const $ = load(samlResponse.data);
     value = $('input').attr('value');
   } catch (err) {
     if (err.isAxiosError) {

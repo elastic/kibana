@@ -10,7 +10,7 @@
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { WebElement, WebDriver, By, Key } from 'selenium-webdriver';
 import { PNG } from 'pngjs';
-import cheerio from 'cheerio';
+import { load } from 'cheerio';
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
 import { ToolingLog } from '@kbn/tooling-log';
 import { CustomCheerio, CustomCheerioStatic } from './custom_cheerio_api';
@@ -792,7 +792,7 @@ export class WebElementWrapper {
    */
   public async parseDomContent(): Promise<CustomCheerioStatic> {
     const htmlContent: any = await this.getAttribute('innerHTML');
-    const $: any = cheerio.load(htmlContent, {
+    const $: any = load(htmlContent, {
       normalizeWhitespace: true,
       xmlMode: true,
     });
