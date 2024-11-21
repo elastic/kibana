@@ -322,14 +322,17 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
       <FormRow name="data.userSettings.darkMode" fullWidth>
         {themeMenu(isThemeOverridden)}
       </FormRow>
+
       <FormRow
         name="data.userSettings.contrastMode"
         fullWidth
         label={
-          <FormattedMessage
-            id="xpack.security.accountManagement.userProfile.userSettings.contrastMode"
-            defaultMessage="Accessibility"
-          />
+          <FormLabel for="data.userSettings.contrastMode">
+            <FormattedMessage
+              id="xpack.security.accountManagement.userProfile.userSettings.contrastMode"
+              defaultMessage="Accessibility"
+            />
+          </FormLabel>
         }
         hasChildLabel={false}
       >
