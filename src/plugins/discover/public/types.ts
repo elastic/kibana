@@ -174,5 +174,4 @@ export interface DiscoverStartPlugins {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   urlForwarding: UrlForwardingStart;
   usageCollection?: UsageCollectionSetup;
-  discoverShared: DiscoverSharedPublicStart;
 }
