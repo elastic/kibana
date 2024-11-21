@@ -52,6 +52,7 @@ import {
 import { RuleRunMetrics, RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { getEsErrorMessage } from '../lib/errors';
 import { Result, isOk, asOk, asErr } from '../lib/result_type';
+import { processGapsAfterExecution } from '../lib/rule_gaps/process_gaps_after_execution';
 
 interface ConstructorParams {
   context: TaskRunnerContext;
@@ -484,6 +485,21 @@ export class AdHocTaskRunner implements CancellableTask {
         await this.updateAdHocRunSavedObjectPostRun(adHocRunParamsId, namespace, {
           ...(this.shouldDeleteTask ? { status: adHocRunStatus.ERROR } : {}),
           ...(this.scheduleToRunIndex > -1 ? { schedule: this.adHocRunSchedule } : {}),
+        });
+
+        // TODO: calculate end time of the interval
+        const end = new Date();
+        // TODO: check if we need to fill gaps
+        const needToFillGaps = true;
+
+        processGapsAfterExecution({
+          ruleId: this.ruleId,
+          executedInterval: { from: start, to: end },
+          alertingEventLogger: this.alertingEventLogger,
+          eventLogClient: this.context.eventLogger,
+          savedObjectsClient: this.internalSavedObjectsRepository,
+          logger: this.logger,
+          needToFillGaps,
         });
 
         if (startedAt) {
