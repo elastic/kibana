@@ -42,6 +42,8 @@ export interface PresentationPanelInternalProps<
   showBadges?: boolean;
   showNotifications?: boolean;
 
+  setDragHandles?: (refs: Array<HTMLElement | null>) => void;
+
   /**
    * Set to true to not show PanelLoader component while Panel is loading
    */

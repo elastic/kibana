@@ -12,8 +12,8 @@ import 'react-grid-layout/css/styles.css';
 
 import { pick } from 'lodash';
 import classNames from 'classnames';
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { Layout, Responsive as ResponsiveReactGridLayout } from 'react-grid-layout';
+import React, { useState, useMemo, useCallback, useEffect, Profiler } from 'react';
+import { GridLayout, type GridLayoutData } from '@kbn/grid-layout';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
@@ -28,7 +28,11 @@ import { useDashboardGridSettings } from './use_dashboard_grid_settings';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 import { arePanelLayoutsEqual } from '../../../dashboard_api/are_panel_layouts_equal';
 import { useDashboardInternalApi } from '../../../dashboard_api/use_dashboard_internal_api';
-import { DASHBOARD_GRID_HEIGHT, DASHBOARD_MARGIN_SIZE } from '../../../dashboard_constants';
+import {
+  DASHBOARD_GRID_COLUMN_COUNT,
+  DASHBOARD_GRID_HEIGHT,
+  DASHBOARD_MARGIN_SIZE,
+} from '../../../dashboard_constants';
 
 export const DashboardGrid = ({
   dashboardContainer,
@@ -52,6 +56,48 @@ export const DashboardGrid = ({
       dashboardApi.viewMode
     );
 
+  // const [currentLayout, setCurrentLayout] = useState(() => {
+  //   const singleRow: GridLayoutData[number] = {
+  //     title: 'First row',
+  //     isCollapsed: false,
+  //     panels: {},
+  //   };
+
+  //   Object.keys(panels).forEach((panelId) => {
+  //     const gridData = panels[panelId].gridData;
+  //     singleRow.panels[panelId] = {
+  //       id: panelId,
+  //       row: gridData.y,
+  //       column: gridData.x,
+  //       width: gridData.w,
+  //       height: gridData.h,
+  //     };
+  //   });
+
+  //   return [singleRow] as GridLayoutData;
+  // });
+
+  const currentLayout: GridLayoutData = useMemo(() => {
+    const singleRow: GridLayoutData[number] = {
+      title: 'First row',
+      isCollapsed: false,
+      panels: {},
+    };
+
+    Object.keys(panels).forEach((panelId) => {
+      const gridData = panels[panelId].gridData;
+      singleRow.panels[panelId] = {
+        id: panelId,
+        row: gridData.y,
+        column: gridData.x,
+        width: gridData.w,
+        height: gridData.h,
+      };
+    });
+
+    return [singleRow];
+  }, [panels]);
+
   /**
    *  Track panel maximized state delayed by one tick and use it to prevent
    * panel sliding animations on maximize and minimize.
@@ -67,67 +113,33 @@ export const DashboardGrid = ({
 
   const appFixedViewport = useAppFixedViewport();
 
-  const panelsInOrder: string[] = useMemo(() => {
-    return Object.keys(panels).sort((embeddableIdA, embeddableIdB) => {
-      const panelA = panels[embeddableIdA];
-      const panelB = panels[embeddableIdB];
-
-      // need to manually sort the panels by position because we want the panels to be collapsed from the left to the
-      // right when switching to the single column layout, but RGL sorts by ID which can cause unexpected behaviour between
-      // by-reference and by-value panels + we want the HTML order to align with this in the multi-panel view
-      if (panelA.gridData.y === panelB.gridData.y) {
-        return panelA.gridData.x - panelB.gridData.x;
-      } else {
-        return panelA.gridData.y - panelB.gridData.y;
-      }
-    });
-  }, [panels]);
-
-  const panelComponents = useMemo(() => {
-    return panelsInOrder.map((embeddableId, index) => {
-      const type = panels[embeddableId].type;
-      return (
-        <DashboardGridItem
-          appFixedViewport={appFixedViewport}
-          dashboardContainer={dashboardContainer}
-          data-grid={panels[embeddableId].gridData}
-          key={embeddableId}
-          id={embeddableId}
-          index={index + 1}
-          type={type}
-          expandedPanelId={expandedPanelId}
-          focusedPanelId={focusedPanelId}
-        />
-      );
-    });
-  }, [
-    appFixedViewport,
-    dashboardContainer,
-    expandedPanelId,
-    panels,
-    panelsInOrder,
-    focusedPanelId,
-  ]);
-
   const onLayoutChange = useCallback(
-    (newLayout: Array<Layout & { i: string }>) => {
+    (newLayout: GridLayoutData) => {
       if (viewMode !== ViewMode.EDIT) return;
+      console.log('ON LAYOUT CHANGE', newLayout[0]);
 
-      const updatedPanels: { [key: string]: DashboardPanelState } = newLayout.reduce(
-        (updatedPanelsAcc, panelLayout) => {
-          updatedPanelsAcc[panelLayout.i] = {
-            ...panels[panelLayout.i],
-            gridData: pick(panelLayout, ['x', 'y', 'w', 'h', 'i']),
-          };
-          return updatedPanelsAcc;
-        },
-        {} as { [key: string]: DashboardPanelState }
-      );
-      if (!arePanelLayoutsEqual(panels, updatedPanels)) {
+      const currentPanels = dashboardApi.panels$.getValue();
+      const updatedPanels: { [key: string]: DashboardPanelState } = Object.values(
+        newLayout[0].panels
+      ).reduce((updatedPanelsAcc, panelLayout) => {
+        updatedPanelsAcc[panelLayout.id] = {
+          ...currentPanels[panelLayout.id],
+          gridData: {
+            i: panelLayout.id,
+            y: panelLayout.row,
+            x: panelLayout.column,
+            w: panelLayout.width,
+            h: panelLayout.height,
+          },
+        };
+        return updatedPanelsAcc;
+      }, {} as { [key: string]: DashboardPanelState });
+      if (!arePanelLayoutsEqual(currentPanels, updatedPanels)) {
         dashboardApi.setPanels(updatedPanels);
       }
+      // setCurrentLayout(newLayout);
     },
-    [dashboardApi, panels, viewMode]
+    [dashboardApi, viewMode]
   );
 
   const classes = classNames({
@@ -138,29 +150,64 @@ export const DashboardGrid = ({
     'dshLayout-isMaximizedPanel': expandedPanelId !== undefined,
   });
 
-  const { layouts, breakpoints, columns } = useDashboardGridSettings(panelsInOrder, panels);
+  const renderPanelContents = useCallback(
+    (id: string, setDragHandles: (refs: Array<HTMLElement | null>) => void) => {
+      const currentPanels = dashboardApi.panels$.getValue();
+      if (!currentPanels[id]) return;
+      console.log('renderPanelContents');
 
-  // in print mode, dashboard layout is not controlled by React Grid Layout
-  if (viewMode === ViewMode.PRINT) {
-    return <>{panelComponents}</>;
-  }
+      const type = currentPanels[id].type;
+      return (
+        <DashboardGridItem
+          data-grid={currentPanels[id].gridData}
+          key={id}
+          id={id}
+          type={type}
+          setDragHandles={setDragHandles}
+          expandedPanelId={expandedPanelId}
+          focusedPanelId={focusedPanelId}
+          appFixedViewport={appFixedViewport}
+        />
+      );
+    },
+    [expandedPanelId, focusedPanelId, appFixedViewport, dashboardApi]
+  );
+
+  const gridSettings = useMemo(() => {
+    return {
+      gutterSize: DASHBOARD_MARGIN_SIZE,
+      rowHeight: DASHBOARD_GRID_HEIGHT,
+      columnCount: DASHBOARD_GRID_COLUMN_COUNT,
+    };
+  }, []);
+
+  // // in print mode, dashboard layout is not controlled by React Grid Layout
+  // if (viewMode === ViewMode.PRINT) {
+  //   return <>{panelComponents}</>;
+  // }
 
   return (
-    <ResponsiveReactGridLayout
-      cols={columns}
-      layouts={layouts}
-      className={classes}
-      width={viewportWidth}
-      breakpoints={breakpoints}
-      onLayoutChange={onLayoutChange}
-      isResizable={!expandedPanelId && !focusedPanelId}
-      isDraggable={!expandedPanelId && !focusedPanelId}
-      rowHeight={DASHBOARD_GRID_HEIGHT}
-      margin={useMargins ? [DASHBOARD_MARGIN_SIZE, DASHBOARD_MARGIN_SIZE] : [0, 0]}
-      draggableHandle={'.embPanel--dragHandle'}
-      useCSSTransforms={false}
+    <Profiler
+      id="KbnGridLayout"
+      onRender={(id, phase, actualDuration, baseDuration, startTime, commitTime) => {
+        console.log('on render', {
+          id,
+          phase,
+          actualDuration,
+          baseDuration,
+          startTime,
+          commitTime,
+        });
+      }}
     >
-      {panelComponents}
-    </ResponsiveReactGridLayout>
+      <div className={classes}>
+        <GridLayout
+          layout={currentLayout}
+          gridSettings={gridSettings}
+          renderPanelContents={renderPanelContents}
+          onLayoutChange={onLayoutChange}
+        />
+      </div>
+    </Profiler>
   );
 };

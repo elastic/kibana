@@ -69,6 +69,7 @@ export const ReactEmbeddableRenderer = <
     | 'hideLoader'
     | 'hideHeader'
     | 'hideInspector'
+    | 'setDragHandles'
   >;
   hidePanelChrome?: boolean;
   /**

@@ -24,7 +24,10 @@ export const GridRow = forwardRef<
   {
     rowIndex: number;
     toggleIsCollapsed: () => void;
-    renderPanelContents: (panelId: string) => React.ReactNode;
+    renderPanelContents: (
+      panelId: string,
+      setDragHandles: (refs: Array<HTMLElement | null>) => void
+    ) => React.ReactNode;
     setInteractionEvent: (interactionData?: PanelInteractionEvent) => void;
     gridLayoutStateManager: GridLayoutStateManager;
   }
@@ -155,6 +158,37 @@ export const GridRow = forwardRef<
       [rowIndex]
     );
 
+    const interactionStart = useCallback(
+      (
+        panelId: string,
+        type: PanelInteractionEvent['type'] | 'drop',
+        e: MouseEvent | React.MouseEvent<HTMLDivElement, MouseEvent>
+      ) => {
+        e.stopPropagation();
+        const panelRef = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
+        if (!panelRef) return;
+
+        const panelRect = panelRef.getBoundingClientRect();
+        if (type === 'drop') {
+          setInteractionEvent(undefined);
+        } else {
+          setInteractionEvent({
+            type,
+            id: panelId,
+            panelDiv: panelRef,
+            targetRowIndex: rowIndex,
+            mouseOffsets: {
+              top: e.clientY - panelRect.top,
+              left: e.clientX - panelRect.left,
+              right: e.clientX - panelRect.right,
+              bottom: e.clientY - panelRect.bottom,
+            },
+          });
+        }
+      },
+      []
+    );
+
     /**
      * Memoize panel children components to prevent unnecessary re-renders
      */
@@ -166,30 +200,7 @@ export const GridRow = forwardRef<
           rowIndex={rowIndex}
           gridLayoutStateManager={gridLayoutStateManager}
           renderPanelContents={renderPanelContents}
-          interactionStart={(type, e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            const panelRef = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
-            if (!panelRef) return;
-
-            const panelRect = panelRef.getBoundingClientRect();
-            if (type === 'drop') {
-              setInteractionEvent(undefined);
-            } else {
-              setInteractionEvent({
-                type,
-                id: panelId,
-                panelDiv: panelRef,
-                targetRowIndex: rowIndex,
-                mouseOffsets: {
-                  top: e.clientY - panelRect.top,
-                  left: e.clientX - panelRect.left,
-                  right: e.clientX - panelRect.right,
-                  bottom: e.clientY - panelRect.bottom,
-                },
-              });
-            }
-          }}
+          interactionStart={interactionStart}
           ref={(element) => {
             if (!gridLayoutStateManager.panelRefs.current[rowIndex]) {
               gridLayoutStateManager.panelRefs.current[rowIndex] = {};

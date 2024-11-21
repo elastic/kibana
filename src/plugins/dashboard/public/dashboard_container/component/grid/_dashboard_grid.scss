@@ -78,22 +78,28 @@
 
 // REACT-GRID
 
-.react-grid-item {
-  /**
-    * Copy over and overwrite the fill color with EUI color mixin (for theming)
-    */
-  > .react-resizable-handle {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='6' viewBox='0 0 6 6'%3E%3Cpolygon fill='#{hexToRGB($euiColorDarkShade)}' points='6 6 0 6 0 4.2 4 4.2 4.2 4.2 4.2 0 6 0' /%3E%3C/svg%3E%0A");
+.react-draggable-dragging {
+  transition: box-shadow $euiAnimSpeedFast $euiAnimSlightResistance;
+  @include euiBottomShadowLarge;
+  border-radius: $euiBorderRadius; // keeps shadow within bounds
 
-    &::after {
-      border: none !important;  /** overrides library default visual indicator **/
+  .embPanel__hoverActionsWrapper {
+    z-index: $euiZLevel9;
+    top: -$euiSizeXL;
+
+    // Show hover actions with drag handle
+    .embPanel__hoverActions:has(.embPanel--dragHandle) {
+      opacity: 1;
     }
 
-    &:hover,
-    &:focus {
-      background-color: transparentize($euiColorWarning, lightOrDarkTheme(.9, .7));
+    // Hide hover actions without drag handle
+    .embPanel__hoverActions:not(:has(.embPanel--dragHandle)) {
+      opacity: 0;
     }
   }
+}
+
+.react-grid-item {
 
   /**
    * Dragged/Resized panels in dashboard should always appear above other panels
