@@ -25,6 +25,7 @@ interface EsqlQueryEditProps {
   required?: boolean;
   loading?: boolean;
   disabled?: boolean;
+  skipIdColumnCheck?: boolean;
   onValidityChange?: (arg: boolean) => void;
 }
 
@@ -35,6 +36,7 @@ export const EsqlQueryEdit = memo(function EsqlQueryEdit({
   required = false,
   loading = false,
   disabled = false,
+  skipIdColumnCheck,
   onValidityChange,
 }: EsqlQueryEditProps): JSX.Element {
   const queryClient = useQueryClient();
@@ -65,11 +67,14 @@ export const EsqlQueryEdit = memo(function EsqlQueryEdit({
             ]
           : []),
         {
-          validator: debounceAsync(esqlQueryValidatorFactory({ queryClient }), 300),
+          validator: debounceAsync(
+            esqlQueryValidatorFactory({ queryClient, skipIdColumnCheck }),
+            300
+          ),
         },
       ],
     }),
-    [required, path, fieldsToValidateOnChange, queryClient]
+    [required, path, fieldsToValidateOnChange, queryClient, skipIdColumnCheck]
   );
 
   return (

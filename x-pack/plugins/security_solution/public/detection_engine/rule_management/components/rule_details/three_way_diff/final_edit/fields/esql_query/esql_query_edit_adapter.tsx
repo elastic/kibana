@@ -23,6 +23,7 @@ export function EsqlQueryEditAdapter({
       dataView={dataView ?? DEFAULT_DATA_VIEW_BASE}
       loading={isLoading}
       disabled={isLoading}
+      skipIdColumnCheck
     />
   );
 }
