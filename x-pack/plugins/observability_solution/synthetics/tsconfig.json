@@ -106,7 +106,9 @@
     "@kbn/alerting-types",
     "@kbn/core-chrome-browser",
     "@kbn/core-rendering-browser",
-    "@kbn/index-lifecycle-management-common-shared"
+    "@kbn/index-lifecycle-management-common-shared",
+    "@kbn/uptime-plugin",
+    "@kbn/apm-data-access-plugin"
   ],
   "exclude": ["target/**/*"]
 }
