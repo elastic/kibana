@@ -10,19 +10,24 @@ import { IndexName } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useKibana } from './use_kibana';
 import { APIRoutes } from '../types';
 
-export const useQueryIndices = (
-  query: string = ''
-): { indices: IndexName[]; isLoading: boolean; isFetched: boolean } => {
+export const useQueryIndices = ({
+  query,
+  targetIndices = [],
+}: {
+  query?: string;
+  targetIndices?: string[];
+} = {}): { indices: IndexName[]; isLoading: boolean; isFetched: boolean } => {
   const { services } = useKibana();
 
   const { data, isLoading, isFetched } = useQuery({
-    queryKey: ['indices', query],
+    queryKey: ['indices', query, targetIndices.join(',')],
     queryFn: async () => {
       const response = await services.http.get<{
         indices: string[];
       }>(APIRoutes.GET_INDICES, {
         query: {
           search_query: query,
+          target_indices: targetIndices.join(','),
           size: 10,
         },
       });
