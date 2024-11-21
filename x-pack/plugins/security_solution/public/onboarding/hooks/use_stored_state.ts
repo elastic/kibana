@@ -58,11 +58,11 @@ export const useStoredExpandedCardId = (spaceId: string) =>
 export const useStoredSelectedCardItemId = (
   selectedCardKey: string,
   spaceId: string,
-  defaultSelectedDashboardsCardItemId: CardSelectorListItem['id']
+  defaultSelectedCardItemId: CardSelectorListItem['id']
 ) =>
   useDefinedLocalStorage<CardSelectorListItem['id']>(
     `${selectedCardKey}.${spaceId}`,
-    defaultSelectedDashboardsCardItemId
+    defaultSelectedCardItemId
   );
 
 /**
