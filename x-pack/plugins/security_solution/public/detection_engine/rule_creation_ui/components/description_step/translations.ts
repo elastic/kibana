@@ -126,6 +126,13 @@ export const THRESHOLD_RESULTS_AGGREGATED_BY = i18n.translate(
   }
 );
 
+export const THRESHOLD_CARDINALITY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.thresholdResultsAggregatedByDescription',
+  {
+    defaultMessage: 'when unique value count of',
+  }
+);
+
 export const EQL_EVENT_CATEGORY_FIELD_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.eqlEventCategoryFieldLabel',
   {

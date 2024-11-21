@@ -179,15 +179,25 @@ interface ThresholdProps {
   threshold: ThresholdType;
 }
 
-export const Threshold = ({ threshold }: ThresholdProps) => (
-  <div data-test-subj="thresholdPropertyValue">
-    {isEmpty(threshold.field[0])
-      ? `${descriptionStepI18n.THRESHOLD_RESULTS_ALL} >= ${threshold.value}`
-      : `${descriptionStepI18n.THRESHOLD_RESULTS_AGGREGATED_BY} ${
-          Array.isArray(threshold.field) ? threshold.field.join(',') : threshold.field
-        } >= ${threshold.value}`}
-  </div>
-);
+export const Threshold = ({ threshold }: ThresholdProps) => {
+  let thresholdDescription = isEmpty(threshold.field[0])
+    ? `${descriptionStepI18n.THRESHOLD_RESULTS_ALL} >= ${threshold.value}`
+    : `${descriptionStepI18n.THRESHOLD_RESULTS_AGGREGATED_BY} ${
+        Array.isArray(threshold.field) ? threshold.field.join(',') : threshold.field
+      } >= ${threshold.value}`;
+  if (threshold.cardinality) {
+    const cardinalityDescriptions = threshold.cardinality.map(
+      (cardinality) =>
+        `${descriptionStepI18n.THRESHOLD_CARDINALITY} ${cardinality.field} >= ${cardinality.value}`
+    );
+    thresholdDescription = `${thresholdDescription} ${cardinalityDescriptions.join(' and ')}`;
+  }
+  return (
+    <div data-test-subj="thresholdPropertyValue">
+      <div data-test-subj="thresholdPropertyValue">{thresholdDescription}</div>
+    </div>
+  );
+};
 
 interface AnomalyThresholdProps {
   anomalyThreshold: number;

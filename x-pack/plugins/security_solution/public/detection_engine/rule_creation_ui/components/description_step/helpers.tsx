@@ -490,20 +490,22 @@ export const buildRuleTypeDescription = (label: string, ruleType: Type): ListIte
   }
 };
 
-export const buildThresholdDescription = (label: string, threshold: Threshold): ListItems[] => [
-  {
-    title: label,
-    description: (
-      <>
-        {isEmpty(threshold.field[0])
-          ? `${i18n.THRESHOLD_RESULTS_ALL} >= ${threshold.value}`
-          : `${i18n.THRESHOLD_RESULTS_AGGREGATED_BY} ${
-              Array.isArray(threshold.field) ? threshold.field.join(',') : threshold.field
-            } >= ${threshold.value}`}
-      </>
-    ),
-  },
-];
+export const buildThresholdDescription = (label: string, threshold: Threshold): ListItems[] => {
+  let thresholdDescription = isEmpty(threshold.field[0])
+    ? `${i18n.THRESHOLD_RESULTS_ALL} >= ${threshold.value}`
+    : `${i18n.THRESHOLD_RESULTS_AGGREGATED_BY} ${
+        Array.isArray(threshold.field) ? threshold.field.join(',') : threshold.field
+      } >= ${threshold.value}`;
+  if (threshold.cardinality) {
+    thresholdDescription = `${thresholdDescription} ${i18n.THRESHOLD_CARDINALITY} ${threshold.cardinality.field} >= ${threshold.cardinality.value}`;
+  }
+  return [
+    {
+      title: label,
+      description: <>{thresholdDescription}</>,
+    },
+  ];
+};
 
 export const buildThreatMappingDescription = (
   title: string,
