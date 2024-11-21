@@ -102,7 +102,7 @@ sub parsefile {
     }
     # Add an example if there is one, like this:    include::../examples/example-logging-root-level.asciidoc[]
     if ($group_example) {
-      $asciidocoutput .= "\ninclude::../embeds/".$group_example."[]\n";
+      $asciidocoutput .= "\n\n$group_example\n\n";
     }
 
     my $settings = $group->{settings};
@@ -232,7 +232,7 @@ sub parsefile {
 
       # Add an example if there is one, like this:    include::../examples/example-logging-root-level.asciidoc[]
       if ($setting_example) {
-        $asciidocoutput .= "\n\ninclude::../embeds/".$setting_example."[]\n";
+        $asciidocoutput .= "\n\n$setting_example\n\n";
       }
 
       $asciidocoutput .= "====\n";
