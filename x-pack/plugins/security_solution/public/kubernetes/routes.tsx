@@ -7,14 +7,13 @@
 
 import React from 'react';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
+import { allowedExperimentalValues } from '../../common';
 import { KubernetesContainer } from './pages';
 
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { SecurityPageName } from '../app/types';
 import { KUBERNETES_PATH } from '../../common/constants';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
-
-const HIDE_K8S: boolean = true;
 
 export const KubernetesRoutes = () => (
   <PluginTemplateWrapper>
@@ -26,7 +25,7 @@ export const KubernetesRoutes = () => (
 
 export const routes: SecuritySubPluginRoutes = [
   {
-    path: HIDE_K8S ? ' ' : KUBERNETES_PATH,
+    path: allowedExperimentalValues.kubernetesEnabled ? KUBERNETES_PATH : ' ',
     component: KubernetesRoutes,
   },
 ];
