@@ -133,6 +133,7 @@ export interface RuleExecutorOptions<
   namespace?: string;
   flappingSettings: RulesSettingsFlappingProperties;
   getTimeRange: (timeWindow?: string) => GetTimeRangeResult;
+  isServerless: boolean;
 }
 
 export interface RuleParamsAndRefs<Params extends RuleTypeParams> {

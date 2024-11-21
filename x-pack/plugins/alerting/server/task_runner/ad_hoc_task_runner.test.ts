@@ -177,6 +177,7 @@ const taskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType
   supportsEphemeralTasks: false,
   uiSettings: uiSettingsService,
   usageCounter: mockUsageCounter,
+  isServerless: false,
 };
 
 const mockedTaskInstance: ConcreteTaskInstance = {

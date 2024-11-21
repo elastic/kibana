@@ -225,6 +225,7 @@ describe('Task Runner', () => {
       supportsEphemeralTasks: false,
       uiSettings: uiSettingsService,
       usageCounter: mockUsageCounter,
+      isServerless: false,
     };
 
     describe(`using ${label} for alert indices`, () => {
