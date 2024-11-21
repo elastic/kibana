@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { logger } from './logger';
 import { inputConsoleCommand, submitCommand } from './response_console';
 import type { UserAuthzAccessLevel } from '../screens';
 import { loadPage, request } from './common';
@@ -144,21 +143,16 @@ export const waitForActionToComplete = (
   actionId: string,
   timeout = 120000
 ): Cypress.Chainable<ActionDetails> => {
-  logger.info(`Checking on action id [${actionId}] until it completes`);
   let action: ActionDetails | undefined;
-  let checkCount = 1;
 
   return cy
     .waitUntil(
       () => {
-        logger.info(` ... [${checkCount++}] checking action id [${actionId}]`);
         return request<ActionDetailsApiResponse>({
           method: 'GET',
           url: resolvePathVariables(ACTION_DETAILS_ROUTE, { action_id: actionId || 'undefined' }),
         }).then((response) => {
           if (response.body.data.isCompleted) {
-            logger.info(` ...   Action [${actionId}] is complete`);
-            logger.verbose(JSON.stringify(response.body.data, null, 2));
             action = response.body.data;
             return true;
           }
@@ -170,7 +164,7 @@ export const waitForActionToComplete = (
     )
     .then(() => {
       if (!action) {
-        throw new Error(`Failed to retrieve completed action for action id [${actionId}]`);
+        throw new Error(`Failed to retrieve completed action`);
       }
 
       return action;

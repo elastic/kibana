@@ -11,9 +11,9 @@ export const logger = Object.freeze({
     return cy.task('logIt', { level: 'info', data });
   },
   debug: (...data: any): Cypress.Chainable<null> => {
-    return cy.task('logIt', { level: 'debug', data });
+    return cy.task('logIt', { level: 'info', data });
   },
   verbose: (...data: any): Cypress.Chainable<null> => {
-    return cy.task('logIt', { level: 'verbose', data });
+    return cy.task('logIt', { level: 'info', data });
   },
 });

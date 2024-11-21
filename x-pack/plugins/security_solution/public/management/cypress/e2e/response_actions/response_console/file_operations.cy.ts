@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { waitForActionToComplete } from '../../../tasks/response_actions';
 import type { PolicyData } from '../../../../../../common/endpoint/types';
 import type { CreateAndEnrollEndpointHostResponse } from '../../../../../../scripts/endpoint/common/endpoint_host_services';
 import {
@@ -82,9 +81,7 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
       openResponseConsoleFromEndpointList();
       inputConsoleCommand(`get-file --path ${filePath}`);
       submitCommand();
-      cy.wait('@getFileAction', { timeout: 60000 }).then((interception) => {
-        return waitForActionToComplete(interception.response?.body.data.id);
-      });
+      cy.wait('@getFileAction', { timeout: 60000 });
 
       // verify that the file was retrieved
       // and that the file download link is available
