@@ -206,7 +206,7 @@ export const DataUsageMetrics = memo(
         </FlexItemWithCss>
 
         <FlexItemWithCss>
-          {isFetched && data?.metrics ? (
+          {isFetched && data ? (
             <Charts data={data} data-test-subj={dataTestSubj} />
           ) : isFetching ? (
             <EuiLoadingElastic data-test-subj={getTestId('charts-loading')} />

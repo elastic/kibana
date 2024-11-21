@@ -28,6 +28,7 @@ import {
   EuiLink,
   EuiCodeBlock,
   EuiCallOut,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -51,6 +52,7 @@ export const GenerateApiKeyModal: React.FC<GenerateApiKeyModalProps> = ({ indexN
   const { setKeyName } = useActions(GenerateApiKeyModalLogic);
   const { makeRequest } = useActions(GenerateApiKeyLogic);
   const copyApiKeyRef = useRef<HTMLAnchorElement>(null);
+  const modalTitleId = useGeneratedHtmlId();
 
   useEffect(() => {
     if (isSuccess) {
@@ -59,9 +61,9 @@ export const GenerateApiKeyModal: React.FC<GenerateApiKeyModalProps> = ({ indexN
   }, [isSuccess]);
 
   return (
-    <EuiModal onClose={onClose}>
+    <EuiModal onClose={onClose} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           {i18n.translate('xpack.enterpriseSearch.content.overview.generateApiKeyModal.title', {
             defaultMessage: 'Generate API Key',
           })}
