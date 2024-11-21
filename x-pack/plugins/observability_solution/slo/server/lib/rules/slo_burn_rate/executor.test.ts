@@ -204,6 +204,7 @@ describe('BurnRateRuleExecutor', () => {
           state: {},
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
           getTimeRange,
+          isServerless: false,
         })
       ).rejects.toThrowError();
     });
@@ -226,6 +227,7 @@ describe('BurnRateRuleExecutor', () => {
         state: {},
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange,
+        isServerless: false,
       });
 
       expect(esClientMock.search).not.toHaveBeenCalled();
@@ -276,6 +278,7 @@ describe('BurnRateRuleExecutor', () => {
         state: {},
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange,
+        isServerless: false,
       });
 
       expect(servicesMock.alertsClient?.report).not.toBeCalled();
@@ -323,6 +326,7 @@ describe('BurnRateRuleExecutor', () => {
         state: {},
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange,
+        isServerless: false,
       });
 
       expect(servicesMock.alertsClient?.report).not.toBeCalled();
@@ -382,6 +386,7 @@ describe('BurnRateRuleExecutor', () => {
         state: {},
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange,
+        isServerless: false,
       });
 
       expect(servicesMock.alertsClient?.report).toBeCalledWith({
@@ -531,6 +536,7 @@ describe('BurnRateRuleExecutor', () => {
         state: {},
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange,
+        isServerless: false,
       });
 
       expect(servicesMock.alertsClient?.report).toBeCalledWith({
@@ -651,6 +657,7 @@ describe('BurnRateRuleExecutor', () => {
         state: {},
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange,
+        isServerless: false,
       });
 
       expect(servicesMock.alertsClient!.report).toBeCalledWith({
