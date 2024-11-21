@@ -9,8 +9,8 @@ import { schema, type TypeOf } from '@kbn/config-schema';
 
 export const config = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
-  modelId: schema.maybe(schema.string()),
   scope: schema.maybe(schema.oneOf([schema.literal('observability'), schema.literal('search')])),
+  enableKnowledgeBase: schema.boolean({ defaultValue: true }),
 });
 
 export type ObservabilityAIAssistantConfig = TypeOf<typeof config>;

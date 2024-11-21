@@ -48,6 +48,8 @@ describe(`cases`, () => {
         ['update', 'observability'],
         ['delete', 'securitySolution'],
         ['settings', 'observability'],
+        ['createComment', 'securitySolution'],
+        ['reopenCase', 'observability'],
       ])('grants %s privileges under feature with id %s', (operation, featureID) => {
         const actions = new Actions();
         const casesFeaturePrivilege = new FeaturePrivilegeCasesBuilder(actions);
@@ -89,6 +91,8 @@ describe(`cases`, () => {
             delete: ['security'],
             read: ['obs'],
             settings: ['security'],
+            createComment: ['security'],
+            reopenCase: ['security'],
           },
           savedObject: {
             all: [],
@@ -112,7 +116,6 @@ describe(`cases`, () => {
           Array [
             "cases:security/pushCase",
             "cases:security/createCase",
-            "cases:security/createComment",
             "cases:security/getCase",
             "cases:security/getComment",
             "cases:security/getTags",
@@ -125,6 +128,8 @@ describe(`cases`, () => {
             "cases:security/deleteComment",
             "cases:security/createConfiguration",
             "cases:security/updateConfiguration",
+            "cases:security/createComment",
+            "cases:security/reopenCase",
             "cases:obs/getCase",
             "cases:obs/getComment",
             "cases:obs/getTags",
@@ -168,7 +173,6 @@ describe(`cases`, () => {
           Array [
             "cases:security/pushCase",
             "cases:security/createCase",
-            "cases:security/createComment",
             "cases:security/getCase",
             "cases:security/getComment",
             "cases:security/getTags",
@@ -181,9 +185,10 @@ describe(`cases`, () => {
             "cases:security/deleteComment",
             "cases:security/createConfiguration",
             "cases:security/updateConfiguration",
+            "cases:security/createComment",
+            "cases:security/reopenCase",
             "cases:other-security/pushCase",
             "cases:other-security/createCase",
-            "cases:other-security/createComment",
             "cases:other-security/getCase",
             "cases:other-security/getComment",
             "cases:other-security/getTags",
@@ -196,6 +201,8 @@ describe(`cases`, () => {
             "cases:other-security/deleteComment",
             "cases:other-security/createConfiguration",
             "cases:other-security/updateConfiguration",
+            "cases:other-security/createComment",
+            "cases:other-security/reopenCase",
             "cases:obs/getCase",
             "cases:obs/getComment",
             "cases:obs/getTags",

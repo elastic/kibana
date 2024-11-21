@@ -17,19 +17,10 @@ describe('Transform Generator', () => {
       indicator: createAPMTransactionErrorRateIndicator(),
     });
     const commonRuntime = generator.buildCommonRuntimeMappings(slo);
-
-    expect(commonRuntime).toEqual({});
+    expect(commonRuntime).toMatchSnapshot();
 
     const commonGroupBy = generator.buildCommonGroupBy(slo);
-
-    expect(commonGroupBy).toEqual({
-      '@timestamp': {
-        date_histogram: {
-          field: '@timestamp',
-          fixed_interval: '1m',
-        },
-      },
-    });
+    expect(commonGroupBy).toMatchSnapshot();
   });
 
   it.each(['example', ['example']])(
@@ -42,24 +33,10 @@ describe('Transform Generator', () => {
         indicator,
       });
       const commonRuntime = generator.buildCommonRuntimeMappings(slo);
-
-      expect(commonRuntime).toEqual({});
+      expect(commonRuntime).toMatchSnapshot();
 
       const commonGroupBy = generator.buildCommonGroupBy(slo);
-
-      expect(commonGroupBy).toEqual({
-        '@timestamp': {
-          date_histogram: {
-            field: '@timestamp',
-            fixed_interval: '1m',
-          },
-        },
-        'slo.groupings.example': {
-          terms: {
-            field: 'example',
-          },
-        },
-      });
+      expect(commonGroupBy).toMatchSnapshot();
     }
   );
 
@@ -71,28 +48,9 @@ describe('Transform Generator', () => {
       indicator,
     });
     const commonRuntime = generator.buildCommonRuntimeMappings(slo);
-
-    expect(commonRuntime).toEqual({});
+    expect(commonRuntime).toMatchSnapshot();
 
     const commonGroupBy = generator.buildCommonGroupBy(slo);
-
-    expect(commonGroupBy).toEqual({
-      '@timestamp': {
-        date_histogram: {
-          field: '@timestamp',
-          fixed_interval: '1m',
-        },
-      },
-      'slo.groupings.example1': {
-        terms: {
-          field: 'example1',
-        },
-      },
-      'slo.groupings.example2': {
-        terms: {
-          field: 'example2',
-        },
-      },
-    });
+    expect(commonGroupBy).toMatchSnapshot();
   });
 });

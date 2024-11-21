@@ -217,6 +217,11 @@ export function setupSavedObjects(
   // Encrypted attributes
   encryptedSavedObjects.registerType({
     type: RULE_SAVED_OBJECT_TYPE,
+    /**
+     * We disable enforcing random SO IDs for the rule SO
+     * to allow users creating rules with a predefined ID.
+     */
+    enforceRandomId: false,
     attributesToEncrypt: new Set(RuleAttributesToEncrypt),
     attributesToIncludeInAAD: new Set(RuleAttributesIncludedInAAD),
   });

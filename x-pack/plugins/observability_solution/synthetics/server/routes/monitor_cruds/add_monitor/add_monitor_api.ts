@@ -10,10 +10,10 @@ import { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { DeleteMonitorAPI } from '../services/delete_monitor_api';
 import { parseMonitorLocations } from './utils';
 import { MonitorValidationError } from '../monitor_validation';
 import { getSavedObjectKqlFilter } from '../../common';
-import { deleteMonitor } from '../delete_monitor';
 import { monitorAttributes, syntheticsMonitorType } from '../../../../common/types/saved_objects';
 import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import { ConfigKey } from '../../../../common/constants/monitor_management';
@@ -339,9 +339,9 @@ export class AddEditMonitorAPI {
       if (encryptedMonitor) {
         await savedObjectsClient.delete(syntheticsMonitorType, newMonitorId);
 
-        await deleteMonitor({
-          routeContext: this.routeContext,
-          monitorId: newMonitorId,
+        const deleteMonitorAPI = new DeleteMonitorAPI(this.routeContext);
+        await deleteMonitorAPI.execute({
+          monitorIds: [newMonitorId],
         });
       }
     } catch (e) {

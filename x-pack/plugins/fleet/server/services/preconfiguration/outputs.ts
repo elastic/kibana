@@ -74,7 +74,6 @@ export async function createOrUpdatePreconfiguredOutputs(
   }
 
   const existingOutputs = await outputService.bulkGet(
-    soClient,
     outputs.map(({ id }) => id),
     { ignoreNotFound: true }
   );
@@ -153,7 +152,6 @@ export async function hashSecret(secret: string) {
 
   return `${salt}:${derivedKey.toString('hex')}`;
 }
-
 async function verifySecret(hash: string, secret: string) {
   const [salt, key] = hash.split(':');
   const derivedKey = await pbkdf2Async(secret, salt, maxIteration, keyLength, 'sha512');
@@ -319,7 +317,6 @@ async function isPreconfiguredOutputDifferentFromCurrent(
       isDifferent(existingOutput.round_robin, preconfiguredOutput.round_robin) ||
       isDifferent(existingOutput.hash, preconfiguredOutput.hash) ||
       isDifferent(existingOutput.topic, preconfiguredOutput.topic) ||
-      isDifferent(existingOutput.topics, preconfiguredOutput.topics) ||
       isDifferent(existingOutput.headers, preconfiguredOutput.headers) ||
       isDifferent(existingOutput.timeout, preconfiguredOutput.timeout) ||
       isDifferent(existingOutput.broker_timeout, preconfiguredOutput.broker_timeout) ||

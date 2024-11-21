@@ -15,12 +15,19 @@ import { streamSlice } from '@kbn/ml-response-stream/client';
 import { logRateAnalysisResultsSlice } from '../api/stream_reducer';
 
 import { logRateAnalysisSlice } from './log_rate_analysis_slice';
-import { logRateAnalysisTableRowSlice } from './log_rate_analysis_table_row_slice';
+import {
+  logRateAnalysisTableSlice,
+  getPreloadedState,
+  localStorageListenerMiddleware,
+} from './log_rate_analysis_table_slice';
 import { logRateAnalysisFieldCandidatesSlice } from './log_rate_analysis_field_candidates_slice';
 import type { InitialAnalysisStart } from './log_rate_analysis_slice';
 
 const getReduxStore = () =>
   configureStore({
+    preloadedState: {
+      logRateAnalysisTable: getPreloadedState(),
+    },
     reducer: {
       // General page state
       logRateAnalysis: logRateAnalysisSlice.reducer,
@@ -28,11 +35,13 @@ const getReduxStore = () =>
       logRateAnalysisFieldCandidates: logRateAnalysisFieldCandidatesSlice.reducer,
       // Analysis results
       logRateAnalysisResults: logRateAnalysisResultsSlice.reducer,
-      // Handles running the analysis
-      logRateAnalysisStream: streamSlice.reducer,
-      // Handles hovering and pinning table rows
-      logRateAnalysisTableRow: logRateAnalysisTableRowSlice.reducer,
+      // Handles running the analysis, needs to be "stream" for the async thunk to work properly.
+      stream: streamSlice.reducer,
+      // Handles hovering and pinning table rows and column selection
+      logRateAnalysisTable: logRateAnalysisTableSlice.reducer,
     },
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware().prepend(localStorageListenerMiddleware.middleware),
   });
 
 interface LogRateAnalysisReduxProviderProps {
@@ -54,6 +63,6 @@ export const LogRateAnalysisReduxProvider: FC<
 };
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
-export type AppStore = ReturnType<typeof getReduxStore>;
+type AppStore = ReturnType<typeof getReduxStore>;
 export type RootState = ReturnType<AppStore['getState']>;
 export type AppDispatch = AppStore['dispatch'];

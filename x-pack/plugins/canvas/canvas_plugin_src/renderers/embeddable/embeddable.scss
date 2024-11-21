@@ -3,25 +3,20 @@
     outline: none !important;
     background: none;
     border-radius: 0 !important;
+    box-shadow: none;
 
     .embPanel__title {
       margin-bottom: $euiSizeXS;
     }
+  }
 
-    .embPanel__optionsMenuButton {
-      border-radius: $euiBorderRadius;
-    }
+  .embPanel__hoverActionsLeft, .embPanel__hoverActions > .embPanel--dragHandle {
+    visibility: hidden;
+  }
 
-    .canvas-isFullscreen & {
-      .embPanel__optionsMenuButton {
-        opacity: 0;
-      }
-
-      &:focus .embPanel__optionsMenuButton,
-      &:hover .embPanel__optionsMenuButton {
-        opacity: 1;
-      }
-    }
+  .embPanel--dragHandle:hover {
+    background-color: transparentize($euiColorWarning, lightOrDarkTheme(.9, .7));
+    cursor: move;
   }
 
   .euiTable {

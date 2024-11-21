@@ -82,9 +82,22 @@ export const EntityStoreUtils = (
         if (body.engines.every((engine: any) => engine.status === 'started')) {
           return true;
         }
+        if (body.engines.some((engine: any) => engine.status === 'error')) {
+          throw new Error(`Engines not started: ${JSON.stringify(body)}`);
+        }
         return false;
       }
     );
+  };
+
+  const enableEntityStore = async () => {
+    const res = await api.initEntityStore({ body: {} }, namespace);
+    if (res.status !== 200) {
+      log.error(`Failed to enable entity store`);
+      log.error(JSON.stringify(res.body));
+    }
+    expect(res.status).to.eql(200);
+    return res;
   };
 
   const expectTransformStatus = async (
@@ -141,5 +154,6 @@ export const EntityStoreUtils = (
     expectTransformStatus,
     expectEngineAssetsExist,
     expectEngineAssetsDoNotExist,
+    enableEntityStore,
   };
 };

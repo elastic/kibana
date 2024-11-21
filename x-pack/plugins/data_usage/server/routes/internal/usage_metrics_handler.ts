@@ -6,30 +6,29 @@
  */
 
 import { RequestHandler } from '@kbn/core/server';
-import { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
   MetricTypes,
   UsageMetricsAutoOpsResponseSchemaBody,
   UsageMetricsRequestBody,
   UsageMetricsResponseSchemaBody,
 } from '../../../common/rest_types';
-import { DataUsageRequestHandlerContext } from '../../types';
-import { DataUsageService } from '../../services';
+import { DataUsageContext, DataUsageRequestHandlerContext } from '../../types';
 
 import { errorHandler } from '../error_handler';
 import { CustomHttpRequestError } from '../../utils';
+import { DataUsageService } from '../../services';
 
 const formatStringParams = <T extends string>(value: T | T[]): T[] | MetricTypes[] =>
   typeof value === 'string' ? [value] : value;
 
 export const getUsageMetricsHandler = (
-  dataUsageService: DataUsageService
+  dataUsageContext: DataUsageContext
 ): RequestHandler<never, unknown, UsageMetricsRequestBody, DataUsageRequestHandlerContext> => {
-  const logger = dataUsageService.getLogger('usageMetricsRoute');
-
+  const logger = dataUsageContext.logFactory.get('usageMetricsRoute');
   return async (context, request, response) => {
     try {
       const core = await context.core;
+
       const esClient = core.elasticsearch.client.asCurrentUser;
 
       logger.debug(`Retrieving usage metrics`);
@@ -44,12 +43,24 @@ export const getUsageMetricsHandler = (
           new CustomHttpRequestError('[request body.dataStreams]: no data streams selected', 400)
         );
       }
+      let dataStreamsResponse;
 
-      const { data_streams: dataStreamsResponse }: IndicesGetDataStreamResponse =
-        await esClient.indices.getDataStream({
+      try {
+        // Attempt to fetch data streams
+        const { data_streams: dataStreams } = await esClient.indices.getDataStream({
           name: requestDsNames,
           expand_wildcards: 'all',
         });
+        dataStreamsResponse = dataStreams;
+      } catch (error) {
+        return errorHandler(
+          logger,
+          response,
+          new CustomHttpRequestError('Failed to retrieve data streams', 400)
+        );
+      }
+
+      const dataUsageService = new DataUsageService(logger);
       const metrics = await dataUsageService.getMetrics({
         from,
         to,
@@ -69,21 +80,19 @@ export const getUsageMetricsHandler = (
   };
 };
 
-function transformMetricsData(
+export function transformMetricsData(
   data: UsageMetricsAutoOpsResponseSchemaBody
 ): UsageMetricsResponseSchemaBody {
-  return {
-    metrics: Object.fromEntries(
-      Object.entries(data.metrics).map(([metricType, series]) => [
-        metricType,
-        series.map((metricSeries) => ({
-          name: metricSeries.name,
-          data: (metricSeries.data as Array<[number, number]>).map(([timestamp, value]) => ({
-            x: timestamp,
-            y: value,
-          })),
+  return Object.fromEntries(
+    Object.entries(data).map(([metricType, series]) => [
+      metricType,
+      series.map((metricSeries) => ({
+        name: metricSeries.name,
+        data: (metricSeries.data as Array<[number, number]>).map(([timestamp, value]) => ({
+          x: timestamp,
+          y: value,
         })),
-      ])
-    ),
-  };
+      })),
+    ])
+  ) as UsageMetricsResponseSchemaBody;
 }

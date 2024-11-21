@@ -88,6 +88,7 @@ describe('fetchSearchResults lib function', () => {
       index: indexName,
       q: query,
       size: DEFAULT_DOCS_PER_PAGE,
+      track_total_hits: false,
     });
   });
 
@@ -109,6 +110,7 @@ describe('fetchSearchResults lib function', () => {
       index: indexName,
       q: '\\"yellow banana\\"',
       size: DEFAULT_DOCS_PER_PAGE,
+      track_total_hits: false,
     });
   });
 
@@ -123,6 +125,7 @@ describe('fetchSearchResults lib function', () => {
       from: DEFAULT_FROM_VALUE,
       index: indexName,
       size: DEFAULT_DOCS_PER_PAGE,
+      track_total_hits: false,
     });
   });
 
@@ -150,6 +153,42 @@ describe('fetchSearchResults lib function', () => {
       index: indexName,
       q: query,
       size: DEFAULT_DOCS_PER_PAGE,
+      track_total_hits: false,
+    });
+  });
+
+  it('should send track_total_hits true when specified', async () => {
+    mockClient.search.mockImplementationOnce(() =>
+      Promise.resolve({
+        ...mockSearchResponseWithHits,
+        hits: {
+          ...mockSearchResponseWithHits.hits,
+          total: {
+            ...mockSearchResponseWithHits.hits.total,
+            value: 0,
+          },
+          hits: [],
+        },
+      })
+    );
+
+    await expect(
+      fetchSearchResults(
+        mockClient as unknown as ElasticsearchClient,
+        indexName,
+        query,
+        0,
+        25,
+        true
+      )
+    ).resolves.toEqual(emptySearchResultsResponse);
+
+    expect(mockClient.search).toHaveBeenCalledWith({
+      from: DEFAULT_FROM_VALUE,
+      index: indexName,
+      q: query,
+      size: DEFAULT_DOCS_PER_PAGE,
+      track_total_hits: true,
     });
   });
 });

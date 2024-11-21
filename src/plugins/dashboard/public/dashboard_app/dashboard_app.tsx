@@ -157,6 +157,9 @@ export function DashboardApp({
       },
       getInitialInput,
       validateLoadedSavedObject: validateOutcome,
+      fullScreenMode:
+        kbnUrlStateStorage.get<{ fullScreenMode?: boolean }>(DASHBOARD_STATE_STORAGE_KEY)
+          ?.fullScreenMode ?? false,
       isEmbeddedExternally: Boolean(embedSettings), // embed settings are only sent if the dashboard URL has `embed=true`
       getEmbeddableAppContext: (dashboardId) => ({
         currentAppId: DASHBOARD_APP_ID,

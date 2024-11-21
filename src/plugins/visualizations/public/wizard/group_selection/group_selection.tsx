@@ -95,7 +95,7 @@ function GroupSelection({
   visTypesRegistry,
   ...props
 }: GroupSelectionProps) {
-  const visualizeGuideLink = props.docLinks.links.dashboard.guide;
+  const visualizeGuideLink = props.docLinks.links.visualize.guide;
   const promotedVisGroups = useMemo(
     () =>
       orderBy(

@@ -8,7 +8,12 @@
 import { createReducer } from '@reduxjs/toolkit';
 import { SyntheticsParams } from '../../../../../common/runtime_types';
 import { IHttpSerializedFetchError } from '..';
-import { addNewGlobalParamAction, editGlobalParamAction, getGlobalParamAction } from './actions';
+import {
+  addNewGlobalParamAction,
+  deleteGlobalParamsAction,
+  editGlobalParamAction,
+  getGlobalParamAction,
+} from './actions';
 
 export interface GlobalParamsState {
   isLoading?: boolean;
@@ -16,6 +21,7 @@ export interface GlobalParamsState {
   addError: IHttpSerializedFetchError | null;
   editError: IHttpSerializedFetchError | null;
   isSaving?: boolean;
+  isDeleting?: boolean;
   savedData?: SyntheticsParams;
 }
 
@@ -23,6 +29,7 @@ const initialState: GlobalParamsState = {
   isLoading: false,
   addError: null,
   isSaving: false,
+  isDeleting: false,
   editError: null,
   listOfParams: [],
 };
@@ -62,6 +69,16 @@ export const globalParamsReducer = createReducer(initialState, (builder) => {
     .addCase(editGlobalParamAction.fail, (state, action) => {
       state.isSaving = false;
       state.editError = action.payload;
+    })
+    .addCase(deleteGlobalParamsAction.get, (state) => {
+      state.isDeleting = true;
+    })
+    .addCase(deleteGlobalParamsAction.success, (state) => {
+      state.isDeleting = false;
+      state.listOfParams = [];
+    })
+    .addCase(deleteGlobalParamsAction.fail, (state) => {
+      state.isDeleting = false;
     });
 });
 

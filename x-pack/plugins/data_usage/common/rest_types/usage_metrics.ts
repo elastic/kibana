@@ -82,47 +82,45 @@ export type UsageMetricsRequestBody = TypeOf<typeof UsageMetricsRequestSchema>;
 
 export const UsageMetricsResponseSchema = {
   body: () =>
-    schema.object({
-      metrics: schema.recordOf(
-        metricTypesSchema,
-        schema.arrayOf(
-          schema.object({
-            name: schema.string(),
-            data: schema.arrayOf(
-              schema.object({
-                x: schema.number(),
-                y: schema.number(),
-              })
-            ),
-          })
-        )
-      ),
-    }),
+    schema.recordOf(
+      metricTypesSchema,
+      schema.arrayOf(
+        schema.object({
+          name: schema.string(),
+          error: schema.nullable(schema.string()),
+          data: schema.arrayOf(
+            schema.object({
+              x: schema.number(),
+              y: schema.number(),
+            })
+          ),
+        })
+      )
+    ),
 };
-export type UsageMetricsResponseSchemaBody = Omit<
-  TypeOf<typeof UsageMetricsResponseSchema.body>,
-  'metrics'
-> & {
-  metrics: Partial<Record<MetricTypes, MetricSeries[]>>;
-};
-export type MetricSeries = TypeOf<
-  typeof UsageMetricsResponseSchema.body
->['metrics'][MetricTypes][number];
+
+export type UsageMetricsResponseSchemaBody = Partial<Record<MetricTypes, MetricSeries[]>>;
+
+export type MetricSeries = TypeOf<typeof UsageMetricsResponseSchema.body>[MetricTypes][number];
 
 export const UsageMetricsAutoOpsResponseSchema = {
   body: () =>
-    schema.object({
-      metrics: schema.recordOf(
-        metricTypesSchema,
-        schema.arrayOf(
-          schema.object({
-            name: schema.string(),
-            data: schema.arrayOf(schema.arrayOf(schema.number(), { minSize: 2, maxSize: 2 })),
-          })
-        )
-      ),
-    }),
+    schema.recordOf(
+      metricTypesSchema,
+      schema.arrayOf(
+        schema.object({
+          name: schema.string(),
+          error: schema.nullable(schema.string()),
+          data: schema.arrayOf(schema.arrayOf(schema.number(), { minSize: 2, maxSize: 2 })),
+        })
+      )
+    ),
 };
-export type UsageMetricsAutoOpsResponseSchemaBody = TypeOf<
+
+export type UsageMetricsAutoOpsResponseMetricSeries = TypeOf<
   typeof UsageMetricsAutoOpsResponseSchema.body
+>[MetricTypes][number];
+
+export type UsageMetricsAutoOpsResponseSchemaBody = Partial<
+  Record<MetricTypes, UsageMetricsAutoOpsResponseMetricSeries[]>
 >;

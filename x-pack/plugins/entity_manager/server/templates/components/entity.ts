@@ -29,22 +29,22 @@ export const entitiesEntityComponentTemplateConfig: ClusterPutComponentTemplateR
               ignore_above: 1024,
               type: 'keyword',
             },
-            definitionId: {
+            definition_id: {
               ignore_above: 1024,
               type: 'keyword',
             },
-            definitionVersion: {
+            definition_version: {
               ignore_above: 1024,
               type: 'keyword',
             },
-            schemaVersion: {
+            schema_version: {
               ignore_above: 1024,
               type: 'keyword',
             },
-            lastSeenTimestamp: {
+            last_seen_timestamp: {
               type: 'date',
             },
-            identityFields: {
+            identity_fields: {
               type: 'keyword',
             },
           },

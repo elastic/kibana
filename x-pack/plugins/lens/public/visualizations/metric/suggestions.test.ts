@@ -159,7 +159,7 @@ describe('metric suggestions', () => {
               // should ignore bucketed column for initial drag
             },
             title: 'Metric',
-            hide: true,
+            hide: false,
             previewIcon: IconChartMetric,
             score: 0.51,
           },

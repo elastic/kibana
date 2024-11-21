@@ -39,7 +39,7 @@ describe('getExportSettings', () => {
       scroll: { size: 500, duration: '30s', strategy: 'pit' },
       useByteOrderMarkEncoding: false,
       maxConcurrentShardRequests: 5,
-      enablePanelActionDownload: true,
+      enablePanelActionDownload: false,
     };
 
     taskInstanceFields = { startedAt: null, retryAt: null };

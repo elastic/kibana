@@ -17,6 +17,9 @@ import {
   ThreatMatchRule,
   FIELDS_TO_UPGRADE_TO_CURRENT_VERSION,
   ModeEnum,
+  AllFieldsDiff,
+  DataSourceIndexPatterns,
+  QueryRule,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
@@ -246,6 +249,41 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(installedRule.tags).toEqual(reviewRuleResponseMap.get(ruleId)?.tags);
         }
       });
+
+      it('correctly upgrades rules with DataSource diffs to their MERGED versions', async () => {
+        await createHistoricalPrebuiltRuleAssetSavedObjects(es, [queryRule]);
+        await installPrebuiltRules(es, supertest);
+
+        const targetObject = cloneDeep(queryRule);
+        targetObject['security-rule'].version += 1;
+        targetObject['security-rule'].name = TARGET_NAME;
+        targetObject['security-rule'].tags = TARGET_TAGS;
+        targetObject['security-rule'].index = ['auditbeat-*'];
+        await createHistoricalPrebuiltRuleAssetSavedObjects(es, [targetObject]);
+
+        const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
+        const ruleDiffFields = reviewResponse.rules[0].diff.fields as AllFieldsDiff;
+
+        const performUpgradeResponse = await performUpgradePrebuiltRules(es, supertest, {
+          mode: ModeEnum.ALL_RULES,
+          pick_version: 'MERGED',
+        });
+
+        expect(performUpgradeResponse.summary.succeeded).toEqual(1);
+
+        const installedRules = await getInstalledRules(supertest);
+        const installedRule = installedRules.data[0] as QueryRule;
+
+        expect(installedRule.name).toEqual(ruleDiffFields.name.merged_version);
+        expect(installedRule.tags).toEqual(ruleDiffFields.tags.merged_version);
+
+        // Check that the updated rules has an `index` field which equals the output of the diff algorithm
+        // for the DataSource diffable field, and that the data_view_id is correspondingly set to undefined.
+        expect(installedRule.index).toEqual(
+          (ruleDiffFields.data_source.merged_version as DataSourceIndexPatterns).index_patterns
+        );
+        expect(installedRule.data_view_id).toBe(undefined);
+      });
     });
 
     describe('edge cases and unhappy paths', () => {
@@ -464,8 +502,13 @@ function createIdToRuleMap(rules: Array<PrebuiltRuleAsset | RuleResponse>) {
 
 async function createAction(supertest: SuperTest.Agent) {
   const createConnector = async (payload: Record<string, unknown>) =>
-    (await supertest.post('/api/actions/action').set('kbn-xsrf', 'true').send(payload).expect(200))
-      .body;
+    (
+      await supertest
+        .post('/api/actions/connector')
+        .set('kbn-xsrf', 'true')
+        .send(payload)
+        .expect(200)
+    ).body;
 
   const createWebHookConnector = () => createConnector(getWebHookAction());
 

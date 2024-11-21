@@ -8,16 +8,19 @@
 import { User } from '../../../../cases_api_integration/common/lib/authentication/types';
 import {
   casesAll,
+  casesV2All,
   casesNoDelete,
   casesOnlyDelete,
   casesOnlyReadDelete,
   casesRead,
   obsCasesAll,
+  obsCasesV2All,
   obsCasesNoDelete,
   obsCasesOnlyDelete,
   obsCasesOnlyReadDelete,
   obsCasesRead,
   secAll,
+  secCasesV2All,
   secAllCasesNoDelete,
   secAllCasesNone,
   secAllCasesOnlyDelete,
@@ -56,6 +59,12 @@ export const secAllUser: User = {
   username: 'sec_all_user_api_int',
   password: 'password',
   roles: [secAll.name],
+};
+
+export const secCasesV2AllUser: User = {
+  username: 'sec_cases_v2_all_user_api_int',
+  password: 'password',
+  roles: [secCasesV2All.name],
 };
 
 export const secAllSpace1User: User = {
@@ -128,6 +137,12 @@ export const casesAllUser: User = {
   roles: [casesAll.name],
 };
 
+export const casesV2AllUser: User = {
+  username: 'cases_v2_all_user_api_int',
+  password: 'password',
+  roles: [casesV2All.name],
+};
+
 export const casesReadUser: User = {
   username: 'cases_read_user_api_int',
   password: 'password',
@@ -162,6 +177,12 @@ export const obsCasesAllUser: User = {
   roles: [obsCasesAll.name],
 };
 
+export const obsCasesV2AllUser: User = {
+  username: 'obs_cases_v2_all_user_api_int',
+  password: 'password',
+  roles: [obsCasesV2All.name],
+};
+
 export const obsCasesReadUser: User = {
   username: 'obs_cases_read_user_api_int',
   password: 'password',
@@ -189,6 +210,7 @@ export const users = [
   secAllCasesOnlyReadDeleteUser,
   secAllCasesNoDeleteUser,
   secAllUser,
+  secCasesV2AllUser,
   secAllSpace1User,
   secAllCasesReadUser,
   secAllCasesNoneUser,
@@ -200,11 +222,13 @@ export const users = [
   casesOnlyReadDeleteUser,
   casesNoDeleteUser,
   casesAllUser,
+  casesV2AllUser,
   casesReadUser,
   obsCasesOnlyDeleteUser,
   obsCasesOnlyReadDeleteUser,
   obsCasesNoDeleteUser,
   obsCasesAllUser,
+  obsCasesV2AllUser,
   obsCasesReadUser,
   obsSecCasesAllUser,
   obsSecCasesReadUser,

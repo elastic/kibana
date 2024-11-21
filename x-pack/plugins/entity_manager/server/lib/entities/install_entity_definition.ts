@@ -29,6 +29,7 @@ import { mergeEntityDefinitionUpdate } from './helpers/merge_definition_update';
 import { EntityDefinitionWithState } from './types';
 import { stopLatestTransform, stopTransforms } from './stop_transforms';
 import { deleteLatestTransform, deleteTransforms } from './delete_transforms';
+import { deleteIndices } from './delete_index';
 
 export interface InstallDefinitionParams {
   esClient: ElasticsearchClient;
@@ -49,10 +50,7 @@ export async function installEntityDefinition({
   validateDefinitionCanCreateValidTransformIds(definition);
 
   if (await entityDefinitionExists(soClient, definition.id)) {
-    throw new EntityIdConflict(
-      `Entity definition with [${definition.id}] already exists.`,
-      definition
-    );
+    throw new EntityIdConflict(`Entity definition [${definition.id}] already exists.`, definition);
   }
 
   try {
@@ -65,7 +63,7 @@ export async function installEntityDefinition({
 
     return await install({ esClient, soClient, logger, definition: entityDefinition });
   } catch (e) {
-    logger.error(`Failed to install entity definition ${definition.id}: ${e}`);
+    logger.error(`Failed to install entity definition [${definition.id}]: ${e}`);
 
     await stopLatestTransform(esClient, definition, logger);
     await deleteLatestTransform(esClient, definition, logger);
@@ -94,21 +92,25 @@ export async function installBuiltInEntityDefinitions({
   soClient,
   logger,
   definitions,
-}: Omit<InstallDefinitionParams, 'definition'> & {
+}: Omit<InstallDefinitionParams, 'definition' | 'esClient'> & {
+  esClient: ElasticsearchClient;
   definitions: EntityDefinition[];
 }): Promise<EntityDefinition[]> {
   if (definitions.length === 0) return [];
 
-  logger.debug(`Starting installation of ${definitions.length} built-in definitions`);
+  logger.info(`Checking installation of ${definitions.length} built-in definitions`);
   const installPromises = definitions.map(async (builtInDefinition) => {
     const installedDefinition = await findEntityDefinitionById({
-      esClient,
       soClient,
+      esClient,
       id: builtInDefinition.id,
       includeState: true,
     });
 
     if (!installedDefinition) {
+      // clean data from previous installation
+      await deleteIndices(esClient, builtInDefinition, logger);
+
       return await installEntityDefinition({
         definition: builtInDefinition,
         esClient,
@@ -127,7 +129,7 @@ export async function installBuiltInEntityDefinitions({
       return installedDefinition;
     }
 
-    logger.debug(
+    logger.info(
       `Detected failed or outdated installation of definition [${installedDefinition.id}] v${installedDefinition.version}, installing v${builtInDefinition.version}`
     );
     return await reinstallEntityDefinition({
@@ -136,6 +138,7 @@ export async function installBuiltInEntityDefinitions({
       logger,
       definition: installedDefinition,
       definitionUpdate: builtInDefinition,
+      deleteData: true,
     });
   });
 
@@ -150,22 +153,16 @@ async function install({
   definition,
   logger,
 }: InstallDefinitionParams): Promise<EntityDefinition> {
-  logger.debug(
-    () =>
-      `Installing definition ${definition.id} v${definition.version}\n${JSON.stringify(
-        definition,
-        null,
-        2
-      )}`
-  );
+  logger.info(`Installing definition [${definition.id}] v${definition.version}`);
+  logger.debug(() => JSON.stringify(definition, null, 2));
 
-  logger.debug(`Installing index templates for definition ${definition.id}`);
+  logger.debug(`Installing index templates for definition [${definition.id}]`);
   const templates = await createAndInstallTemplates(esClient, definition, logger);
 
-  logger.debug(`Installing ingest pipelines for definition ${definition.id}`);
+  logger.debug(`Installing ingest pipelines for definition [${definition.id}]`);
   const pipelines = await createAndInstallIngestPipelines(esClient, definition, logger);
 
-  logger.debug(`Installing transforms for definition ${definition.id}`);
+  logger.debug(`Installing transforms for definition [${definition.id}]`);
   const transforms = await createAndInstallTransforms(esClient, definition, logger);
 
   const updatedProps = await updateEntityDefinition(soClient, definition.id, {
@@ -182,15 +179,18 @@ export async function reinstallEntityDefinition({
   definition,
   definitionUpdate,
   logger,
-}: InstallDefinitionParams & {
+  deleteData = false,
+}: Omit<InstallDefinitionParams, 'esClient'> & {
+  esClient: ElasticsearchClient;
   definitionUpdate: EntityDefinitionUpdate;
+  deleteData?: boolean;
 }): Promise<EntityDefinition> {
   try {
     const updatedDefinition = mergeEntityDefinitionUpdate(definition, definitionUpdate);
 
     logger.debug(
       () =>
-        `Reinstalling definition ${definition.id} from v${definition.version} to v${
+        `Reinstalling definition [${definition.id}] from v${definition.version} to v${
           definitionUpdate.version
         }\n${JSON.stringify(updatedDefinition, null, 2)}`
     );
@@ -201,13 +201,17 @@ export async function reinstallEntityDefinition({
       installStartedAt: new Date().toISOString(),
     });
 
-    logger.debug(`Deleting transforms for definition ${definition.id} v${definition.version}`);
+    logger.debug(`Deleting transforms for definition [${definition.id}] v${definition.version}`);
     await stopAndDeleteTransforms(esClient, definition, logger);
 
+    if (deleteData) {
+      await deleteIndices(esClient, definition, logger);
+    }
+
     return await install({
-      esClient,
       soClient,
       logger,
+      esClient,
       definition: updatedDefinition,
     });
   } catch (err) {

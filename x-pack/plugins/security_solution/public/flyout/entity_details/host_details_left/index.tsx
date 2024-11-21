@@ -25,6 +25,7 @@ export interface HostDetailsPanelProps extends Record<string, unknown> {
   scopeId: string;
   hasMisconfigurationFindings?: boolean;
   hasVulnerabilitiesFindings?: boolean;
+  hasNonClosedAlerts?: boolean;
   path?: {
     tab?: EntityDetailsLeftPanelTab;
     subTab?: CspInsightLeftPanelSubTab;
@@ -43,6 +44,7 @@ export const HostDetailsPanel = ({
   path,
   hasMisconfigurationFindings,
   hasVulnerabilitiesFindings,
+  hasNonClosedAlerts,
 }: HostDetailsPanelProps) => {
   const [selectedTabId, setSelectedTabId] = useState(
     path?.tab === EntityDetailsLeftPanelTab.CSP_INSIGHTS
@@ -58,11 +60,18 @@ export const HostDetailsPanel = ({
 
     // Determine if the Insights tab should be included
     const insightsTab =
-      hasMisconfigurationFindings || hasVulnerabilitiesFindings
+      hasMisconfigurationFindings || hasVulnerabilitiesFindings || hasNonClosedAlerts
         ? [getInsightsInputTab({ name, fieldName: 'host.name' })]
         : [];
     return [[...riskScoreTab, ...insightsTab], EntityDetailsLeftPanelTab.RISK_INPUTS, () => {}];
-  }, [isRiskScoreExist, name, scopeId, hasMisconfigurationFindings, hasVulnerabilitiesFindings]);
+  }, [
+    isRiskScoreExist,
+    name,
+    scopeId,
+    hasMisconfigurationFindings,
+    hasVulnerabilitiesFindings,
+    hasNonClosedAlerts,
+  ]);
 
   return (
     <>

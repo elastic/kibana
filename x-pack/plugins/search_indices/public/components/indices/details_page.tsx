@@ -37,20 +37,15 @@ import { SearchIndexDetailsPageMenuItemPopover } from './details_page_menu_item'
 import { useIndexDocumentSearch } from '../../hooks/api/use_document_search';
 import { useUsageTracker } from '../../contexts/usage_tracker_context';
 import { AnalyticsEvents } from '../../analytics/constants';
+import { useUserPrivilegesQuery } from '../../hooks/api/use_user_permissions';
+import { usePageChrome } from '../../hooks/use_page_chrome';
+import { IndexManagementBreadcrumbs } from '../shared/breadcrumbs';
 
 export const SearchIndexDetailsPage = () => {
   const indexName = decodeURIComponent(useParams<{ indexName: string }>().indexName);
   const tabId = decodeURIComponent(useParams<{ tabId: string }>().tabId);
 
-  const {
-    console: consolePlugin,
-    docLinks,
-    application,
-    history,
-    share,
-    chrome,
-    serverless,
-  } = useKibana().services;
+  const { console: consolePlugin, docLinks, application, history, share } = useKibana().services;
   const {
     data: index,
     refetch,
@@ -66,6 +61,7 @@ export const SearchIndexDetailsPage = () => {
   } = useIndexMapping(indexName);
   const { data: indexDocuments, isInitialLoading: indexDocumentsIsInitialLoading } =
     useIndexDocumentSearch(indexName);
+  const { data: userPrivileges } = useUserPrivilegesQuery(indexName);
 
   const navigateToPlayground = useCallback(async () => {
     const playgroundLocator = share.url.locators.get('PLAYGROUND_LOCATOR_ID');
@@ -82,23 +78,12 @@ export const SearchIndexDetailsPage = () => {
     setHasDocuments(!(!isInitialLoading && indexDocuments?.results?.data.length === 0));
   }, [indexDocuments, isInitialLoading, setHasDocuments, setDocumentsLoading]);
 
-  useEffect(() => {
-    chrome.docTitle.change(indexName);
-
-    if (serverless) {
-      serverless.setBreadcrumbs([
-        {
-          text: i18n.translate('xpack.searchIndices.indexBreadcrumbLabel', {
-            defaultMessage: 'Index Management',
-          }),
-          href: '/app/management/data/index_management/indices',
-        },
-        {
-          text: indexName,
-        },
-      ]);
-    }
-  }, [chrome, indexName, serverless]);
+  usePageChrome(indexName, [
+    ...IndexManagementBreadcrumbs,
+    {
+      text: indexName,
+    },
+  ]);
 
   const usageTracker = useUsageTracker();
 
@@ -114,6 +99,7 @@ export const SearchIndexDetailsPage = () => {
             indexName={indexName}
             indexDocuments={indexDocuments}
             isInitialLoading={indexDocumentsIsInitialLoading}
+            userPrivileges={userPrivileges}
           />
         ),
         'data-test-subj': `${SearchIndexDetailsTabs.DATA}Tab`,
@@ -123,7 +109,7 @@ export const SearchIndexDetailsPage = () => {
         name: i18n.translate('xpack.searchIndices.mappingsTabLabel', {
           defaultMessage: 'Mappings',
         }),
-        content: <SearchIndexDetailsMappings index={index} />,
+        content: <SearchIndexDetailsMappings index={index} userPrivileges={userPrivileges} />,
         'data-test-subj': `${SearchIndexDetailsTabs.MAPPINGS}Tab`,
       },
       {
@@ -131,11 +117,13 @@ export const SearchIndexDetailsPage = () => {
         name: i18n.translate('xpack.searchIndices.settingsTabLabel', {
           defaultMessage: 'Settings',
         }),
-        content: <SearchIndexDetailsSettings indexName={indexName} />,
+        content: (
+          <SearchIndexDetailsSettings indexName={indexName} userPrivileges={userPrivileges} />
+        ),
         'data-test-subj': `${SearchIndexDetailsTabs.SETTINGS}Tab`,
       },
     ];
-  }, [index, indexName, indexDocuments, indexDocumentsIsInitialLoading]);
+  }, [index, indexName, indexDocuments, indexDocumentsIsInitialLoading, userPrivileges]);
   const [selectedTab, setSelectedTab] = useState(detailsPageTabs[0]);
 
   useEffect(() => {
@@ -190,7 +178,7 @@ export const SearchIndexDetailsPage = () => {
   }, [isShowingDeleteModal]);
   const { euiTheme } = useEuiTheme();
 
-  if (isInitialLoading || isMappingsInitialLoading) {
+  if (isInitialLoading || isMappingsInitialLoading || indexDocumentsIsInitialLoading) {
     return (
       <SectionLoading>
         {i18n.translate('xpack.searchIndices.loadingDescription', {
@@ -209,7 +197,7 @@ export const SearchIndexDetailsPage = () => {
       panelled
       bottomBorder
     >
-      {isIndexError || isMappingsError || !index || !mappings ? (
+      {isIndexError || isMappingsError || !index || !mappings || !indexDocuments ? (
         <IndexloadingError
           error={indexError}
           navigateToIndexListPage={navigateToIndexListPage}
@@ -273,6 +261,7 @@ export const SearchIndexDetailsPage = () => {
                   <SearchIndexDetailsPageMenuItemPopover
                     handleDeleteIndexModal={handleDeleteIndexModal}
                     showApiReference={hasDocuments}
+                    userPrivileges={userPrivileges}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>,
@@ -297,7 +286,7 @@ export const SearchIndexDetailsPage = () => {
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiFlexGroup>
-                    <QuickStats index={index} mappings={mappings} />
+                    <QuickStats indexDocuments={indexDocuments} index={index} mappings={mappings} />
                   </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
