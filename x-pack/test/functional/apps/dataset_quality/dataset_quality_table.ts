@@ -6,8 +6,11 @@
  */
 
 import expect from '@kbn/expect';
+import merge from 'lodash/merge';
 import { DatasetQualityFtrProviderContext } from './config';
 import {
+  createFailedRecords,
+  customLogLevelProcessor,
   datasetNames,
   defaultNamespace,
   getInitialTestLogs,
@@ -26,6 +29,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   const to = '2024-01-01T12:00:00.000Z';
   const apacheAccessDatasetName = 'apache.access';
   const apacheAccessDatasetHumanName = 'Apache access logs';
+  const failedDatasetName = 'synth.failed';
   const pkg = {
     name: 'apache',
     version: '1.14.0',
@@ -33,6 +37,22 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
   describe('Dataset quality table', () => {
     before(async () => {
+      // Enable failure store for logs
+      await synthtrace.createCustomPipeline(customLogLevelProcessor);
+      await synthtrace.updateIndexTemplate(
+        'logs',
+        (template: Record<string, any>): Record<string, any> => {
+          const next: Record<string, any> = {
+            name: 'logs',
+            data_stream: {
+              failure_store: true,
+            },
+          };
+
+          return merge({}, template, next);
+        }
+      );
+
       // Install Integration and ingest logs for it
       await PageObjects.observabilityLogsExplorer.installPackage(pkg);
       // Ingest basic logs
@@ -52,6 +72,13 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           count: 10,
           dataset: apacheAccessDatasetName,
           namespace: productionNamespace,
+        }),
+        // Ingest Failed Logs
+        createFailedRecords({
+          to: new Date().toISOString(),
+          count: 10,
+          dataset: failedDatasetName,
+          rate: 0.5,
         }),
       ]);
       await PageObjects.datasetQuality.navigateTo();
@@ -107,6 +134,14 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       const degradedDocsCol = cols['Degraded docs (%)'];
       const degradedDocsColCellTexts = await degradedDocsCol.getCellTexts();
       expect(degradedDocsColCellTexts).to.eql(['0%', '0%', '0%', '100%']);
+    });
+
+    it('shows failed docs percentage', async () => {
+      const cols = await PageObjects.datasetQuality.parseDatasetTable();
+
+      const failedDocsCol = cols['Failed docs (%)'];
+      const failedDocsColCellTexts = await failedDocsCol.getCellTexts();
+      expect(failedDocsColCellTexts).to.eql(['0%', '0%', '0%', '0%', '20%']);
     });
 
     it('shows the value in the size column', async () => {

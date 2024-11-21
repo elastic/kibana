@@ -6,7 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import {
+  createFailedRecords,
+  customLogLevelProcessor,
+} from '@kbn/test-suites-xpack/functional/apps/dataset_quality/data';
+import merge from 'lodash/merge';
+import { IndicesIndexTemplate } from '@elastic/elasticsearch/lib/api/types';
 import {
   datasetNames,
   defaultNamespace,
@@ -14,6 +19,7 @@ import {
   getLogsForDataset,
   productionNamespace,
 } from './data';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects([
@@ -28,6 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const to = '2024-01-01T12:00:00.000Z';
   const apacheAccessDatasetName = 'apache.access';
   const apacheAccessDatasetHumanName = 'Apache access logs';
+  const failedDatasetName = 'synth.failed';
   const pkg = {
     name: 'apache',
     version: '1.14.0',
@@ -35,6 +42,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Dataset quality table', function () {
     before(async () => {
+      // Enable failure store for logs
+      await synthtrace.createCustomPipeline(customLogLevelProcessor);
+      await synthtrace.updateIndexTemplate('logs', (template: IndicesIndexTemplate) => {
+        const next = {
+          name: 'logs',
+          data_stream: {
+            failure_store: true,
+          },
+        };
+
+        return merge({}, template, next);
+      });
+
       // Install Integration and ingest logs for it
       await PageObjects.observabilityLogsExplorer.installPackage(pkg);
       // Ingest basic logs
@@ -54,6 +74,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           count: 10,
           dataset: apacheAccessDatasetName,
           namespace: productionNamespace,
+        }),
+        // Ingest Failed Logs
+        createFailedRecords({
+          to: new Date().toISOString(),
+          count: 10,
+          dataset: failedDatasetName,
+          rate: 0.5,
         }),
       ]);
       await PageObjects.svlCommonPage.loginAsAdmin();
@@ -110,6 +137,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const degradedDocsCol = cols['Degraded docs (%)'];
       const degradedDocsColCellTexts = await degradedDocsCol.getCellTexts();
       expect(degradedDocsColCellTexts).to.eql(['0%', '0%', '0%', '100%']);
+    });
+
+    it('shows failed docs percentage', async () => {
+      const cols = await PageObjects.datasetQuality.parseDatasetTable();
+
+      const failedDocsCol = cols['Failed docs (%)'];
+      const failedDocsColCellTexts = await failedDocsCol.getCellTexts();
+      expect(failedDocsColCellTexts).to.eql(['0%', '0%', '0%', '0%', '20%']);
     });
 
     it('shows the value in the size column', async () => {

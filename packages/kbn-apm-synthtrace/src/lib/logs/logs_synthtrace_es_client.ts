@@ -10,7 +10,11 @@
 import { Client, estypes } from '@elastic/elasticsearch';
 import { pipeline, Readable } from 'stream';
 import { LogDocument } from '@kbn/apm-synthtrace-client/src/lib/logs';
-import { IngestProcessorContainer, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import {
+  IndicesIndexSettings,
+  IngestProcessorContainer,
+  MappingTypeMapping,
+} from '@elastic/elasticsearch/lib/api/types';
 import { ValuesType } from 'utility-types';
 import { SynthtraceEsClient, SynthtraceEsClientOptions } from '../shared/base_client';
 import { getSerializeTransform } from '../shared/get_serialize_transform';
@@ -52,7 +56,11 @@ export class LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> {
     }
   }
 
-  async createComponentTemplate(name: string, mappings: MappingTypeMapping) {
+  async createComponentTemplate(
+    name: string,
+    mappings?: MappingTypeMapping,
+    settings?: IndicesIndexSettings
+  ) {
     const isTemplateExisting = await this.client.cluster.existsComponentTemplate({ name });
 
     if (isTemplateExisting) return this.logger.info(`Component template already exists: ${name}`);
@@ -61,7 +69,8 @@ export class LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> {
       await this.client.cluster.putComponentTemplate({
         name,
         template: {
-          mappings,
+          ...((mappings && { mappings }) || {}),
+          ...((settings && { settings }) || {}),
         },
       });
       this.logger.info(`Component template successfully created: ${name}`);
@@ -124,16 +133,17 @@ export class LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> {
     }
   }
 
-  async createCustomPipeline(processors: IngestProcessorContainer[]) {
+  async createCustomPipeline(processors: IngestProcessorContainer[], pipelineId?: string) {
+    const id = pipelineId ?? LogsCustom;
     try {
       this.client.ingest.putPipeline({
-        id: LogsCustom,
+        id,
         processors,
         version: 1,
       });
-      this.logger.info(`Custom pipeline created: ${LogsCustom}`);
+      this.logger.info(`Custom pipeline created: ${id}`);
     } catch (err) {
-      this.logger.error(`Custom pipeline creation failed: ${LogsCustom} - ${err.message}`);
+      this.logger.error(`Custom pipeline creation failed: ${id} - ${err.message}`);
     }
   }
 

@@ -97,6 +97,7 @@ export default function DocumentTrends({ lastReloadTime }: { lastReloadTime: num
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
           <EuiFlexItem>
             <EuiButtonGroup
+              data-test-subj="datasetQualityDetailsChartTypeButtonGroup"
               legend={i18n.translate('xpack.datasetQuality.details.chartTypeLegend', {
                 defaultMessage: 'Quality chart type',
               })}

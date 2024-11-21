@@ -6,9 +6,12 @@
  */
 
 import expect from '@kbn/expect';
+import merge from 'lodash/merge';
 import { DatasetQualityFtrProviderContext } from './config';
 import {
   createDegradedFieldsRecord,
+  createFailedRecords,
+  customLogLevelProcessor,
   datasetNames,
   defaultNamespace,
   getInitialTestLogs,
@@ -54,6 +57,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   const regularDataStreamName = `logs-${datasetNames[0]}-${defaultNamespace}`;
   const degradedDatasetName = datasetNames[2];
   const degradedDataStreamName = `logs-${degradedDatasetName}-${defaultNamespace}`;
+  const failedDatasetName = datasetNames[1];
+  const failedDataStreamName = `logs-${failedDatasetName}-${defaultNamespace}`;
 
   describe('Dataset Quality Details', () => {
     before(async () => {
@@ -62,6 +67,25 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
       // Install Bitbucket Integration (package which does not has Dashboards) and ingest logs for it
       await PageObjects.observabilityLogsExplorer.installPackage(bitbucketPkg);
+
+      // Enable failure store for logs
+      await synthtrace.createCustomPipeline(customLogLevelProcessor, 'logs-apache.access@custom');
+      await synthtrace.createComponentTemplate('logs-apache.access@custom', undefined, {
+        'index.default_pipeline': 'logs-apache.access@custom',
+      });
+      await synthtrace.updateIndexTemplate(
+        'logs-apache.access',
+        (template: Record<string, any>): Record<string, any> => {
+          const next: Record<string, any> = {
+            name: 'logs-apache.access',
+            data_stream: {
+              failure_store: true,
+            },
+          };
+
+          return merge({}, template, next);
+        }
+      );
 
       await synthtrace.index([
         // Ingest basic logs
@@ -86,6 +110,14 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           dataset: apacheAccessDatasetName,
           namespace: productionNamespace,
           isMalformed: true,
+        }),
+        // Index failed docs for Apache integration
+        createFailedRecords({
+          to: new Date().toISOString(),
+          count: 10,
+          dataset: apacheAccessDatasetName,
+          namespace: productionNamespace,
+          rate: 0.5,
         }),
         // Index logs for Bitbucket integration
         getLogsForDataset({ to, count: 10, dataset: bitbucketDatasetName }),
@@ -160,6 +192,19 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           expect(currentUrl).to.not.contain('breakdownField');
         });
       });
+
+      it('reflects the selected quality issue chart state in url', async () => {
+        await PageObjects.datasetQuality.navigateToDetails({ dataStream: failedDataStreamName });
+
+        const charType = 'failedDocs';
+        await PageObjects.datasetQuality.selectQualityIssuesChartType(charType);
+
+        // Wait for URL to contain "qualityIssuesChart:failedDocs"
+        await retry.tryForTime(5000, async () => {
+          const currentUrl = await browser.getCurrentUrl();
+          expect(decodeURIComponent(currentUrl)).to.contain(`qualityIssuesChart:${charType}`);
+        });
+      });
     });
 
     describe('overview summary panel', () => {
@@ -168,13 +213,14 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           dataStream: apacheAccessDataStreamName,
         });
 
-        const { docsCountTotal, degradedDocs, services, hosts, size } =
+        const { docsCountTotal, degradedDocs, failedDocs, services, hosts, size } =
           await PageObjects.datasetQuality.parseOverviewSummaryPanelKpis();
-        expect(parseInt(docsCountTotal, 10)).to.be(226);
+        expect(parseInt(docsCountTotal, 10)).to.be(306);
         expect(parseInt(degradedDocs, 10)).to.be(1);
         expect(parseInt(services, 10)).to.be(3);
         expect(parseInt(hosts, 10)).to.be(52);
         expect(parseInt(size, 10)).to.be.greaterThan(0);
+        expect(parseInt(failedDocs, 10)).to.be(20);
       });
     });
 
@@ -371,7 +417,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         const rows =
           await PageObjects.datasetQuality.getDatasetQualityDetailsDegradedFieldTableRows();
 
-        expect(rows.length).to.eql(3);
+        expect(rows.length).to.eql(2);
       });
 
       it('should display Spark Plot for every row of degraded fields', async () => {

@@ -118,7 +118,7 @@ export function createLogRecord(
     .create()
     .dataset(dataset)
     .message(msg.message)
-    .logLevel(isMalformed ? MORE_THAN_1024_CHARS : msg.level)
+    .logLevel(msg.level)
     .service(serviceName)
     .namespace(namespace)
     .defaults({
@@ -163,7 +163,7 @@ export function createDegradedFieldsRecord({
             .create()
             .dataset(dataset)
             .message(MESSAGE_LOG_LEVELS[0].message)
-            .logLevel(MORE_THAN_1024_CHARS)
+            .logLevel(MESSAGE_LOG_LEVELS[0].level)
             .service(SERVICE_NAMES[0])
             .namespace(defaultNamespace)
             .defaults({
@@ -188,6 +188,67 @@ export function createDegradedFieldsRecord({
         ]);
     });
 }
+
+/*
+The helper function generates Failed Docs for the given dataset.
+ */
+export function createFailedRecords({
+  to,
+  count = 1,
+  dataset,
+  namespace,
+  rate = 1, // rate of failed logs (min value 0, max value 1)
+}: {
+  to: string;
+  count?: number;
+  dataset: string;
+  namespace?: string;
+  rate?: number;
+}) {
+  return timerange(moment(to).subtract(count, 'minute'), moment(to))
+    .interval('1m')
+    .rate(1)
+    .generator((timestamp) => {
+      return Array(count)
+        .fill(0)
+        .flatMap((_, index) => {
+          const isFailed = index % (count * rate) === 0;
+          return log
+            .create()
+            .dataset(dataset)
+            .message(MESSAGE_LOG_LEVELS[0].message)
+            .logLevel(isFailed ? 'anyLevel' : LogLevel.INFO)
+            .service(SERVICE_NAMES[0])
+            .namespace(namespace ?? defaultNamespace)
+            .defaults({
+              'trace.id': generateShortId(),
+              'agent.name': 'synth-agent',
+            })
+            .timestamp(timestamp);
+        });
+    });
+}
+
+export const customLogLevelProcessor = [
+  {
+    script: {
+      tag: 'normalize log level',
+      lang: 'painless',
+      source: `
+        String level = ctx['log.level'];
+        if ('info'.equals(level)) {
+          ctx['log.level'] = 'info';
+        } else if ('debug'.equals(level)) {
+          ctx['log.level'] = 'debug';
+        } else if ('error'.equals(level)) {
+          ctx['log.level'] = 'error';
+        } else {
+          throw new Exception("Not a valid log level");
+        }
+      `,
+    },
+  },
+];
 
 export const datasetNames = ['synth.1', 'synth.2', 'synth.3'];
 export const defaultNamespace = 'default';
