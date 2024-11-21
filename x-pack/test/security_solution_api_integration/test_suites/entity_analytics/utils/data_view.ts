@@ -11,6 +11,14 @@ export const dataViewRouteHelpersFactory = (
   namespace: string = 'default'
 ) => ({
   create: (name: string) => {
+    const { body: existingDataView } = supertest.get(
+      `/s/${namespace}/api/data_views/data_view/${name}-${namespace}`
+    );
+
+    if (existingDataView) {
+      return existingDataView;
+    }
+
     return supertest
       .post(`/s/${namespace}/api/data_views/data_view`)
       .set('kbn-xsrf', 'foo')
