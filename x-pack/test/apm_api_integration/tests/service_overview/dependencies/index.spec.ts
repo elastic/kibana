@@ -6,23 +6,16 @@
  */
 
 import expect from '@kbn/expect';
-import { last, omit, pick, sortBy } from 'lodash';
-import { ValuesType } from 'utility-types';
-import { Node, NodeType } from '@kbn/apm-plugin/common/connections';
-import {
-  ENVIRONMENT_ALL,
-  ENVIRONMENT_NOT_DEFINED,
-} from '@kbn/apm-plugin/common/environment_filter_values';
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { roundNumber } from '../../../utils';
+import { omit, sortBy } from 'lodash';
+import { type Node, NodeType } from '@kbn/apm-plugin/common/connections';
+import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
+import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import archives from '../../../common/fixtures/es_archiver/archives_metadata';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { apmDependenciesMapping, createServiceDependencyDocs } from './es_utils';
+import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const es = getService('es');
 
   const archiveName = 'apm_8.0.0';
   const { start, end } = archives[archiveName];
@@ -32,278 +25,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   }
 
   registry.when(
-    'Service overview dependencies when data is not loaded',
-    { config: 'basic', archives: [] },
-    () => {
-      it('handles the empty state', async () => {
-        const response = await apmApiClient.readUser({
-          endpoint: `GET /internal/apm/services/{serviceName}/dependencies`,
-          params: {
-            path: { serviceName: 'opbeans-java' },
-            query: {
-              start,
-              end,
-              numBuckets: 20,
-              environment: ENVIRONMENT_ALL.value,
-            },
-          },
-        });
-
-        expect(response.status).to.be(200);
-        expect(response.body.serviceDependencies).to.eql([]);
-      });
-    }
-  );
-
-  registry.when(
-    'Service overview dependencies when specific data is loaded',
-    { config: 'basic', archives: [] },
-    () => {
-      let response: {
-        status: number;
-        body: APIReturnType<'GET /internal/apm/services/{serviceName}/dependencies'>;
-      };
-
-      const indices = {
-        metric: 'apm-dependencies-metric',
-        transaction: 'apm-dependencies-transaction',
-        span: 'apm-dependencies-span',
-      };
-
-      const startTime = new Date(start).getTime();
-      const endTime = new Date(end).getTime();
-
-      after(async () => {
-        const allIndices = Object.values(indices).join(',');
-        const indexExists = await es.indices.exists({ index: allIndices });
-        if (indexExists) {
-          await es.indices.delete({
-            index: allIndices,
-          });
-        }
-      });
-
-      before(async () => {
-        await es.indices.create({
-          index: indices.metric,
-          body: {
-            mappings: apmDependenciesMapping,
-          },
-        });
-
-        await es.indices.create({
-          index: indices.transaction,
-          body: {
-            mappings: apmDependenciesMapping,
-          },
-        });
-
-        await es.indices.create({
-          index: indices.span,
-          body: {
-            mappings: apmDependenciesMapping,
-          },
-        });
-
-        const docs = [
-          ...createServiceDependencyDocs({
-            service: {
-              name: 'opbeans-java',
-              environment: 'production',
-            },
-            agentName: 'java',
-            span: {
-              type: 'external',
-              subtype: 'http',
-            },
-            resource: 'opbeans-node:3000',
-            outcome: 'success',
-            responseTime: {
-              count: 2,
-              sum: 10,
-            },
-            time: startTime,
-            to: {
-              service: {
-                name: 'opbeans-node',
-              },
-              agentName: 'nodejs',
-            },
-          }),
-          ...createServiceDependencyDocs({
-            service: {
-              name: 'opbeans-java',
-              environment: 'production',
-            },
-            agentName: 'java',
-            span: {
-              type: 'external',
-              subtype: 'http',
-            },
-            resource: 'opbeans-node:3000',
-            outcome: 'failure',
-            responseTime: {
-              count: 1,
-              sum: 10,
-            },
-            time: startTime,
-          }),
-          ...createServiceDependencyDocs({
-            service: {
-              name: 'opbeans-java',
-              environment: 'production',
-            },
-            agentName: 'java',
-            span: {
-              type: 'external',
-              subtype: 'http',
-            },
-            resource: 'postgres',
-            outcome: 'success',
-            responseTime: {
-              count: 1,
-              sum: 3,
-            },
-            time: startTime,
-          }),
-          ...createServiceDependencyDocs({
-            service: {
-              name: 'opbeans-java',
-              environment: 'production',
-            },
-            agentName: 'java',
-            span: {
-              type: 'external',
-              subtype: 'http',
-            },
-            resource: 'opbeans-node-via-proxy',
-            outcome: 'success',
-            responseTime: {
-              count: 1,
-              sum: 1,
-            },
-            time: endTime - 1,
-            to: {
-              service: {
-                name: 'opbeans-node',
-              },
-              agentName: 'nodejs',
-            },
-          }),
-        ];
-
-        const bulkActions = docs.reduce(
-          (prev, doc) => {
-            return [...prev, { index: { _index: indices[doc.processor.event] } }, doc];
-          },
-          [] as Array<
-            | {
-                index: {
-                  _index: string;
-                };
-              }
-            | ValuesType<typeof docs>
-          >
-        );
-
-        await es.bulk({
-          body: bulkActions,
-          refresh: 'wait_for',
-        });
-
-        response = await apmApiClient.readUser({
-          endpoint: `GET /internal/apm/services/{serviceName}/dependencies`,
-          params: {
-            path: { serviceName: 'opbeans-java' },
-            query: {
-              start,
-              end,
-              numBuckets: 20,
-              environment: ENVIRONMENT_ALL.value,
-            },
-          },
-        });
-      });
-
-      it('returns a 200', () => {
-        expect(response.status).to.be(200);
-      });
-
-      it('returns two dependencies', () => {
-        expect(response.body.serviceDependencies.length).to.be(2);
-      });
-
-      it('returns opbeans-node as a dependency', () => {
-        const opbeansNode = response.body.serviceDependencies.find(
-          (item) => getName(item.location) === 'opbeans-node'
-        );
-
-        expect(opbeansNode !== undefined).to.be(true);
-
-        const values = {
-          latency: roundNumber(opbeansNode?.currentStats.latency.value),
-          throughput: roundNumber(opbeansNode?.currentStats.throughput.value),
-          errorRate: roundNumber(opbeansNode?.currentStats.errorRate.value),
-          impact: opbeansNode?.currentStats.impact,
-          ...pick(opbeansNode?.location, 'serviceName', 'type', 'agentName', 'environment'),
-        };
-
-        const count = 4;
-        const sum = 21;
-        const errors = 1;
-
-        expect(values).to.eql({
-          agentName: 'nodejs',
-          environment: ENVIRONMENT_NOT_DEFINED.value,
-          serviceName: 'opbeans-node',
-          type: 'service',
-          errorRate: roundNumber(errors / count),
-          latency: roundNumber(sum / count),
-          throughput: roundNumber(count / ((endTime - startTime) / 1000 / 60)),
-          impact: 100,
-        });
-
-        const firstValue = roundNumber(opbeansNode?.currentStats.latency.timeseries[0].y);
-        const lastValue = roundNumber(last(opbeansNode?.currentStats.latency.timeseries)?.y);
-
-        expect(firstValue).to.be(roundNumber(20 / 3));
-        expect(lastValue).to.be(1);
-      });
-
-      it('returns postgres as an external dependency', () => {
-        const postgres = response.body.serviceDependencies.find(
-          (item) => getName(item.location) === 'postgres'
-        );
-
-        expect(postgres !== undefined).to.be(true);
-
-        const values = {
-          latency: roundNumber(postgres?.currentStats.latency.value),
-          throughput: roundNumber(postgres?.currentStats.throughput.value),
-          errorRate: roundNumber(postgres?.currentStats.errorRate.value),
-          impact: postgres?.currentStats.impact,
-          ...pick(postgres?.location, 'spanType', 'spanSubtype', 'dependencyName', 'type'),
-        };
-
-        const count = 1;
-        const sum = 3;
-        const errors = 0;
-
-        expect(values).to.eql({
-          spanType: 'external',
-          spanSubtype: 'http',
-          dependencyName: 'postgres',
-          type: 'dependency',
-          errorRate: roundNumber(errors / count),
-          latency: roundNumber(sum / count),
-          throughput: roundNumber(count / ((endTime - startTime) / 1000 / 60)),
-          impact: 0,
-        });
-      });
-    }
-  );
-
-  registry.when(
     'Service overview dependencies when data is loaded',
     { config: 'basic', archives: [archiveName] },
     () => {
@@ -311,7 +32,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         status: number;
         body: APIReturnType<'GET /internal/apm/services/{serviceName}/dependencies'>;
       };
-      // eslint-disable-next-line mocha/no-sibling-hooks
+
       before(async () => {
         response = await apmApiClient.readUser({
           endpoint: `GET /internal/apm/services/{serviceName}/dependencies`,

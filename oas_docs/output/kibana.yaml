@@ -10282,6 +10282,42 @@ paths:
       summary: Create or update a protection updates note
       tags:
         - Security Endpoint Management API
+  /api/entity_store/enable:
+    post:
+      operationId: InitEntityStore
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              type: object
+              properties:
+                fieldHistoryLength:
+                  default: 10
+                  description: The number of historical values to keep for each field.
+                  type: integer
+                filter:
+                  type: string
+                indexPattern:
+                  $ref: '#/components/schemas/Security_Entity_Analytics_API_IndexPattern'
+        description: Schema for the entity store initialization
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                type: object
+                properties:
+                  engines:
+                    items:
+                      $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineDescriptor'
+                    type: array
+                  succeeded:
+                    type: boolean
+          description: Successful response
+      summary: Initialize the Entity Store
+      tags:
+        - Security Entity Analytics API
   /api/entity_store/engines:
     get:
       operationId: ListEntityEngines
@@ -10589,6 +10625,26 @@ paths:
                   - total
           description: Entities returned successfully
       summary: List Entity Store Entities
+      tags:
+        - Security Entity Analytics API
+  /api/entity_store/status:
+    get:
+      operationId: GetEntityStoreStatus
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                type: object
+                properties:
+                  engines:
+                    items:
+                      $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineDescriptor'
+                    type: array
+                  status:
+                    $ref: '#/components/schemas/Security_Entity_Analytics_API_StoreStatus'
+          description: Successful response
+      summary: Get the status of the Entity Store
       tags:
         - Security Entity Analytics API
   /api/exception_lists:
@@ -12322,15 +12378,20 @@ paths:
                             agent_download_target_directory:
                               nullable: true
                             agent_download_timeout:
-                              default: 2h
                               nullable: true
                             agent_limits_go_max_procs:
                               nullable: true
+                            agent_logging_files_interval:
+                              nullable: true
+                            agent_logging_files_keepfiles:
+                              nullable: true
+                            agent_logging_files_rotateeverybytes:
+                              nullable: true
                             agent_logging_level:
-                              default: info
                               nullable: true
                             agent_logging_metrics_period:
-                              default: 30s
+                              nullable: true
+                            agent_logging_to_files:
                               nullable: true
                         agent_features:
                           items:
@@ -12846,15 +12907,20 @@ paths:
                     agent_download_target_directory:
                       nullable: true
                     agent_download_timeout:
-                      default: 2h
                       nullable: true
                     agent_limits_go_max_procs:
                       nullable: true
+                    agent_logging_files_interval:
+                      nullable: true
+                    agent_logging_files_keepfiles:
+                      nullable: true
+                    agent_logging_files_rotateeverybytes:
+                      nullable: true
                     agent_logging_level:
-                      default: info
                       nullable: true
                     agent_logging_metrics_period:
-                      default: 30s
+                      nullable: true
+                    agent_logging_to_files:
                       nullable: true
                 agent_features:
                   items:
@@ -13020,15 +13086,20 @@ paths:
                           agent_download_target_directory:
                             nullable: true
                           agent_download_timeout:
-                            default: 2h
                             nullable: true
                           agent_limits_go_max_procs:
                             nullable: true
+                          agent_logging_files_interval:
+                            nullable: true
+                          agent_logging_files_keepfiles:
+                            nullable: true
+                          agent_logging_files_rotateeverybytes:
+                            nullable: true
                           agent_logging_level:
-                            default: info
                             nullable: true
                           agent_logging_metrics_period:
-                            default: 30s
+                            nullable: true
+                          agent_logging_to_files:
                             nullable: true
                       agent_features:
                         items:
@@ -13563,15 +13634,20 @@ paths:
                             agent_download_target_directory:
                               nullable: true
                             agent_download_timeout:
-                              default: 2h
                               nullable: true
                             agent_limits_go_max_procs:
                               nullable: true
+                            agent_logging_files_interval:
+                              nullable: true
+                            agent_logging_files_keepfiles:
+                              nullable: true
+                            agent_logging_files_rotateeverybytes:
+                              nullable: true
                             agent_logging_level:
-                              default: info
                               nullable: true
                             agent_logging_metrics_period:
-                              default: 30s
+                              nullable: true
+                            agent_logging_to_files:
                               nullable: true
                         agent_features:
                           items:
@@ -14086,15 +14162,20 @@ paths:
                           agent_download_target_directory:
                             nullable: true
                           agent_download_timeout:
-                            default: 2h
                             nullable: true
                           agent_limits_go_max_procs:
                             nullable: true
+                          agent_logging_files_interval:
+                            nullable: true
+                          agent_logging_files_keepfiles:
+                            nullable: true
+                          agent_logging_files_rotateeverybytes:
+                            nullable: true
                           agent_logging_level:
-                            default: info
                             nullable: true
                           agent_logging_metrics_period:
-                            default: 30s
+                            nullable: true
+                          agent_logging_to_files:
                             nullable: true
                       agent_features:
                         items:
@@ -14609,15 +14690,20 @@ paths:
                     agent_download_target_directory:
                       nullable: true
                     agent_download_timeout:
-                      default: 2h
                       nullable: true
                     agent_limits_go_max_procs:
                       nullable: true
+                    agent_logging_files_interval:
+                      nullable: true
+                    agent_logging_files_keepfiles:
+                      nullable: true
+                    agent_logging_files_rotateeverybytes:
+                      nullable: true
                     agent_logging_level:
-                      default: info
                       nullable: true
                     agent_logging_metrics_period:
-                      default: 30s
+                      nullable: true
+                    agent_logging_to_files:
                       nullable: true
                 agent_features:
                   items:
@@ -14783,15 +14869,20 @@ paths:
                           agent_download_target_directory:
                             nullable: true
                           agent_download_timeout:
-                            default: 2h
                             nullable: true
                           agent_limits_go_max_procs:
                             nullable: true
+                          agent_logging_files_interval:
+                            nullable: true
+                          agent_logging_files_keepfiles:
+                            nullable: true
+                          agent_logging_files_rotateeverybytes:
+                            nullable: true
                           agent_logging_level:
-                            default: info
                             nullable: true
                           agent_logging_metrics_period:
-                            default: 30s
+                            nullable: true
+                          agent_logging_to_files:
                             nullable: true
                       agent_features:
                         items:
@@ -15326,15 +15417,20 @@ paths:
                           agent_download_target_directory:
                             nullable: true
                           agent_download_timeout:
-                            default: 2h
                             nullable: true
                           agent_limits_go_max_procs:
                             nullable: true
+                          agent_logging_files_interval:
+                            nullable: true
+                          agent_logging_files_keepfiles:
+                            nullable: true
+                          agent_logging_files_rotateeverybytes:
+                            nullable: true
                           agent_logging_level:
-                            default: info
                             nullable: true
                           agent_logging_metrics_period:
-                            default: 30s
+                            nullable: true
+                          agent_logging_to_files:
                             nullable: true
                       agent_features:
                         items:
@@ -15946,6 +16042,30 @@ paths:
                                   required:
                                     - enabled
                                 type: object
+                              limits:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  go_max_procs:
+                                    type: number
+                              logging:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  files:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      interval:
+                                        type: string
+                                      keepfiles:
+                                        type: number
+                                      rotateeverybytes:
+                                        type: number
+                                  level:
+                                    type: string
+                                  to_files:
+                                    type: boolean
                               monitoring:
                                 additionalProperties: false
                                 type: object
@@ -53601,6 +53721,14 @@ components:
         - index
         - description
         - category
+    Security_Entity_Analytics_API_StoreStatus:
+      enum:
+        - not_installed
+        - installing
+        - running
+        - stopped
+        - error
+      type: string
     Security_Entity_Analytics_API_TaskManagerUnavailableResponse:
       description: Task manager is unavailable
       type: object
