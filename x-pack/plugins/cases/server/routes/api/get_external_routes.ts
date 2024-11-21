@@ -43,7 +43,7 @@ export const getExternalRoutes = ({
   [
     deleteCaseRoute,
     findCaseRoute,
-    getCaseRoute({ isServerless, docLinks }),
+    getCaseRoute({ isServerless }),
     resolveCaseRoute,
     patchCaseRoute,
     postCaseRoute,
@@ -58,7 +58,7 @@ export const getExternalRoutes = ({
     deleteAllCommentsRoute,
     findCommentsRoute,
     getCommentRoute,
-    getAllCommentsRoute({ isServerless }),
+    getAllCommentsRoute({ isServerless, docLinks }),
     patchCommentRoute,
     postCommentRoute,
     getCaseConfigureRoute,

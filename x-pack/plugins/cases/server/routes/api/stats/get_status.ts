@@ -33,8 +33,9 @@ export const getStatusRoute = ({
       tags: ['oas-tag:cases'],
       description:
         'Returns the number of cases that are open, closed, and in progress in the default space.',
+      // You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.
       deprecated: {
-        documentationUrl: docLinks.links.upgradeAssistant.exampleId,
+        documentationUrl: docLinks.links.cases.legacyDeprecations,
         severity: 'warning',
         reason: {
           type: 'deprecate',

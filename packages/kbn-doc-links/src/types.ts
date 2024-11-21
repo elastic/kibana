@@ -674,6 +674,9 @@ export interface DocLinks {
     readonly context: string;
     readonly hiddenFields: string;
   };
+  readonly cases: {
+    readonly legacyDeprecations: string;
+  };
 }
 
 export type BuildFlavor = 'serverless' | 'traditional';

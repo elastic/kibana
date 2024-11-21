@@ -8,7 +8,6 @@
 import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
 
-import type { DocLinksServiceSetup } from '@kbn/core/server';
 import type { caseApiV1 } from '../../../../common/types/api';
 import type { caseDomainV1 } from '../../../../common/types/domain';
 import { getWarningHeader, logDeprecatedEndpoint } from '../utils';
@@ -28,13 +27,7 @@ const params = {
   }),
 };
 
-export const getCaseRoute = ({
-  isServerless,
-  docLinks,
-}: {
-  isServerless?: boolean;
-  docLinks: DocLinksServiceSetup;
-}) =>
+export const getCaseRoute = ({ isServerless }: { isServerless?: boolean }) =>
   createCasesRoute({
     method: 'get',
     path: CASE_DETAILS_URL,

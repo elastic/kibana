@@ -998,5 +998,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       context: `${KIBANA_DOCS}playground-context.html`,
       hiddenFields: `${KIBANA_DOCS}playground-query.html#playground-hidden-fields`,
     },
+    cases: {
+      legacyDeprecations: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-201004`,
+    },
   });
 };
