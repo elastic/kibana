@@ -17,15 +17,15 @@ import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
 import { meanBy } from 'lodash';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
 type LatencyChartReturnType =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/latency'>;
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const registry = getService('registry');
-  const apmApiClient = getService('apmApiClient');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
+  const synthtrace = getService('synthtrace');
 
   const serviceName = 'synth-go';
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
@@ -57,10 +57,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   }
 
-  registry.when(
-    'Latency with a basic license when data is not loaded ',
-    { config: 'basic', archives: [] },
-    () => {
+  describe('Latency', () => {
+    describe('when data is not loaded ', () => {
       it('handles the empty state', async () => {
         const response = await fetchLatencyCharts();
         expect(response.status).to.be(200);
@@ -70,19 +68,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(latencyChartReturn.currentPeriod.latencyTimeseries.length).to.be(0);
         expect(latencyChartReturn.previousPeriod.latencyTimeseries.length).to.be(0);
       });
-    }
-  );
+    });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177596
-  registry.when(
-    'Latency with a basic license when data is loaded',
-    { config: 'basic', archives: [] },
-    () => {
+    describe('when data is loaded', () => {
       const GO_PROD_RATE = 80;
       const GO_DEV_RATE = 20;
       const GO_PROD_DURATION = 1000;
       const GO_DEV_DURATION = 500;
+      let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+
       before(async () => {
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
         const serviceGoProdInstance = apm
           .service({ name: serviceName, environment: 'production', agentName: 'go' })
           .instance('instance-a');
@@ -439,6 +435,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           }
         });
       });
-    }
-  );
+    });
+  });
 }
