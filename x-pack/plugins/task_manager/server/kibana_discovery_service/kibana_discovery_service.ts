@@ -59,6 +59,7 @@ export class KibanaDiscoveryService {
   }
 
   private async scheduleUpsertCurrentNode() {
+    let retryInterval = this.discoveryInterval;
     if (!this.stopped) {
       const lastSeenDate = new Date();
       const lastSeen = lastSeenDate.toISOString();
@@ -71,18 +72,21 @@ export class KibanaDiscoveryService {
       } catch (e) {
         if (!this.started) {
           this.logger.error(
-            `Kibana Discovery Service couldn't be started and will be retried in ${this.discoveryInterval}ms, error:${e.message}`
+            `Kibana Discovery Service couldn't be started and will be retried in ${retryInterval}ms, error:${e.message}`
           );
         } else {
           this.logger.error(
             `Kibana Discovery Service couldn't update this node's last_seen timestamp. id: ${this.currentNode}, last_seen: ${lastSeen}, error:${e.message}`
           );
         }
+        if (e.message.includes('cluster_block_exception')) {
+          retryInterval = 60000;
+        }
       } finally {
         this.timer = setTimeout(
           async () => await this.scheduleUpsertCurrentNode(),
           // The timeout should not be less than the default timeout of two seconds
-          Math.max(this.discoveryInterval - (Date.now() - lastSeenDate.getTime()), DEFAULT_TIMEOUT)
+          Math.max(retryInterval - (Date.now() - lastSeenDate.getTime()), DEFAULT_TIMEOUT)
         );
       }
     }
