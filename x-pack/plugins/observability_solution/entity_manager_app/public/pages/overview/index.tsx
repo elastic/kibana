@@ -164,7 +164,7 @@ export function EntityManagerOverviewPage() {
 
     try {
       const { entities } = await entityClient.repositoryClient(
-        'POST /internal/entities/_search/preview',
+        'POST /internal/entities/v2/_search/preview',
         {
           params: {
             body: {

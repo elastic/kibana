@@ -11,10 +11,12 @@ import { createEntityManagerServerRoute } from '../create_entity_manager_server_
 import { entitySourceSchema } from '../../lib/queries';
 
 export const searchEntitiesRoute = createEntityManagerServerRoute({
-  endpoint: 'POST /internal/entities/_search',
+  endpoint: 'POST /internal/entities/v2/_search',
   params: z.object({
     body: z.object({
       type: z.string(),
+      metadata_fields: z.optional(z.array(z.string())).default([]),
+      filters: z.optional(z.array(z.string())).default([]),
       start: z
         .optional(z.string())
         .default(() => moment().subtract(5, 'minutes').toISOString())
@@ -32,7 +34,7 @@ export const searchEntitiesRoute = createEntityManagerServerRoute({
   }),
   handler: async ({ request, response, params, logger, getScopedClient }) => {
     try {
-      const { type, start, end, limit } = params.body;
+      const { type, start, end, limit, filters, metadata_fields: metadataFields } = params.body;
 
       const client = await getScopedClient({ request });
 
@@ -41,7 +43,7 @@ export const searchEntitiesRoute = createEntityManagerServerRoute({
         return response.notFound({ body: { message: `No sources found for type [${type}]` } });
       }
 
-      const entities = await client.searchEntities({ sources, start, end, limit });
+      const entities = await client.searchEntities({ sources, filters, metadataFields, start, end, limit });
 
       return response.ok({ body: { entities } });
     } catch (e) {
@@ -52,7 +54,7 @@ export const searchEntitiesRoute = createEntityManagerServerRoute({
 });
 
 export const searchEntitiesPreviewRoute = createEntityManagerServerRoute({
-  endpoint: 'POST /internal/entities/_search/preview',
+  endpoint: 'POST /internal/entities/v2/_search/preview',
   params: z.object({
     body: z.object({
       sources: z.array(entitySourceSchema),
