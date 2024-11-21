@@ -8,7 +8,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { combineLatest, distinctUntilChanged, filter, map, pairwise, skip } from 'rxjs';
 
 import { GridHeightSmoother } from './grid_height_smoother';
@@ -102,38 +102,45 @@ export const GridLayout = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return (
-    <>
-      <GridHeightSmoother gridLayoutStateManager={gridLayoutStateManager}>
-        <div
-          ref={(divElement) => {
-            setDimensionsRef(divElement);
+  /**
+   * Memoize row children components to prevent unnecessary re-renders
+   */
+  const children = useMemo(() => {
+    return Array.from({ length: rowCount }, (_, rowIndex) => {
+      return (
+        <GridRow
+          key={rowIndex}
+          rowIndex={rowIndex}
+          renderPanelContents={renderPanelContents}
+          gridLayoutStateManager={gridLayoutStateManager}
+          toggleIsCollapsed={() => {
+            const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.value);
+            newLayout[rowIndex].isCollapsed = !newLayout[rowIndex].isCollapsed;
+            gridLayoutStateManager.gridLayout$.next(newLayout);
           }}
-        >
-          {Array.from({ length: rowCount }, (_, rowIndex) => {
-            return (
-              <GridRow
-                key={rowIndex}
-                rowIndex={rowIndex}
-                renderPanelContents={renderPanelContents}
-                gridLayoutStateManager={gridLayoutStateManager}
-                toggleIsCollapsed={() => {
-                  const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.value);
-                  newLayout[rowIndex].isCollapsed = !newLayout[rowIndex].isCollapsed;
-                  gridLayoutStateManager.gridLayout$.next(newLayout);
-                }}
-                setInteractionEvent={(nextInteractionEvent) => {
-                  if (!nextInteractionEvent) {
-                    gridLayoutStateManager.activePanel$.next(undefined);
-                  }
-                  gridLayoutStateManager.interactionEvent$.next(nextInteractionEvent);
-                }}
-                ref={(element) => (gridLayoutStateManager.rowRefs.current[rowIndex] = element)}
-              />
-            );
-          })}
-        </div>
-      </GridHeightSmoother>
-    </>
+          setInteractionEvent={(nextInteractionEvent) => {
+            if (!nextInteractionEvent) {
+              gridLayoutStateManager.activePanel$.next(undefined);
+            }
+            gridLayoutStateManager.interactionEvent$.next(nextInteractionEvent);
+          }}
+          ref={(element: HTMLDivElement | null) =>
+            (gridLayoutStateManager.rowRefs.current[rowIndex] = element)
+          }
+        />
+      );
+    });
+  }, [rowCount, gridLayoutStateManager, renderPanelContents]);
+
+  return (
+    <GridHeightSmoother gridLayoutStateManager={gridLayoutStateManager}>
+      <div
+        ref={(divElement) => {
+          setDimensionsRef(divElement);
+        }}
+      >
+        {children}
+      </div>
+    </GridHeightSmoother>
   );
 };
