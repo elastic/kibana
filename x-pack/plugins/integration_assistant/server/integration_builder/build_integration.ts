@@ -182,12 +182,14 @@ function createPackageManifestDict(
   };
 
   if (package_logo !== undefined && package_logo !== '') {
-    data.icons = {
-      src: '/img/logo.svg',
-      title: `${package_title} Logo`,
-      size: '32x32',
-      type: 'image/svg+xml',
-    };
+    data.icons = [
+      {
+        src: '/img/logo.svg',
+        title: `${package_title} Logo`,
+        size: '32x32',
+        type: 'image/svg+xml',
+      },
+    ];
   }
   return data;
 }
