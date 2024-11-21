@@ -37,7 +37,6 @@ import {
 } from '@kbn/unified-data-table';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
-  HIDE_ANNOUNCEMENTS,
   isLegacyTableEnabled,
   MAX_DOC_FIELDS_DISPLAYED,
   ROW_HEIGHT_OPTION,
@@ -59,7 +58,6 @@ import { FetchStatus } from '../../../types';
 import { DiscoverStateContainer } from '../../state_management/discover_state';
 import { useDataState } from '../../hooks/use_data_state';
 import { DocTableInfinite } from '../../../../components/doc_table/doc_table_infinite';
-import { DocumentExplorerCallout } from '../document_explorer_callout';
 import {
   getMaxAllowedSampleSize,
   getAllowedSampleSize,
@@ -146,7 +144,6 @@ function DiscoverDocumentsComponent({
   const expandedDoc = useInternalStateSelector((state) => state.expandedDoc);
   const isEsqlMode = useIsEsqlMode();
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
-  const hideAnnouncements = useMemo(() => uiSettings.get(HIDE_ANNOUNCEMENTS), [uiSettings]);
   const isLegacy = useMemo(
     () => isLegacyTableEnabled({ uiSettings, isEsqlMode }),
     [uiSettings, isEsqlMode]
@@ -434,7 +431,6 @@ function DiscoverDocumentsComponent({
           <>
             {rows && rows.length > 0 && (
               <>
-                {!hideAnnouncements && <DocumentExplorerCallout />}
                 <DocTableInfiniteMemoized
                   columns={currentColumns}
                   dataView={dataView}

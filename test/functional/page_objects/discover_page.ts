@@ -22,7 +22,6 @@ export class DiscoverPageObject extends FtrService {
   private readonly browser = this.ctx.getService('browser');
   private readonly globalNav = this.ctx.getService('globalNav');
   private readonly elasticChart = this.ctx.getService('elasticChart');
-  private readonly docTable = this.ctx.getService('docTable');
   private readonly config = this.ctx.getService('config');
   private readonly dataGrid = this.ctx.getService('dataGrid');
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
@@ -43,12 +42,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async getDocTable() {
-    const isLegacyDefault = await this.useLegacyTable();
-    if (isLegacyDefault) {
-      return this.docTable;
-    } else {
-      return this.dataGrid;
-    }
+    return this.dataGrid;
   }
 
   public async saveSearch(
@@ -117,10 +111,6 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async getColumnHeaders() {
-    const isLegacy = await this.useLegacyTable();
-    if (isLegacy) {
-      return await this.docTable.getHeaderFields('embeddedSavedSearchDocTable');
-    }
     const table = await this.getDocTable();
     return await table.getHeaderFields();
   }
@@ -366,17 +356,12 @@ export class DiscoverPageObject extends FtrService {
     return await table.getBodyRows();
   }
 
+  // TODO: remove
   public async useLegacyTable() {
     return (await this.kibanaServer.uiSettings.get('doc_table:legacy')) === true;
   }
 
   public async getDocTableIndex(index: number, visibleText = false) {
-    const isLegacyDefault = await this.useLegacyTable();
-    if (isLegacyDefault) {
-      const row = await this.find.byCssSelector(`tr.kbnDocTable__row:nth-child(${index})`);
-      return await row.getVisibleText();
-    }
-
     const row = await this.dataGrid.getRow({ rowIndex: index - 1 });
     const result = await Promise.all(
       row.map(async (cell) => {
@@ -472,7 +457,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async getMarks() {
-    const table = await this.docTable.getTable();
+    const table = await this.dataGrid.getTable();
     const marks = await table.findAllByTagName('mark');
     return await Promise.all(marks.map((mark) => mark.getVisibleText()));
   }
