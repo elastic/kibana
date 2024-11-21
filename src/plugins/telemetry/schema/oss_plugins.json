@@ -9960,12 +9960,6 @@
             "description": "Non-default value of setting."
           }
         },
-        "visualization:colorMapping": {
-          "type": "text",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
         "visualization:useLegacyTimeAxis": {
           "type": "boolean",
           "_meta": {
@@ -10268,6 +10262,12 @@
         },
         "theme:darkMode": {
           "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "theme:name": {
+          "type": "keyword",
           "_meta": {
             "description": "Non-default value of setting."
           }

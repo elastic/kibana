@@ -21,8 +21,10 @@ export const createTagRoute = (router: SecuritySolutionPluginRouter, logger: Log
     .put({
       path: INTERNAL_TAGS_URL,
       access: 'internal',
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(
