@@ -9,7 +9,7 @@ import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
 import React from 'react';
-
+import { debounceAsync } from '@kbn/securitysolution-utils';
 import {
   singleEntryThreat,
   containsInvalidItems,
@@ -28,7 +28,6 @@ import { MAX_NUMBER_OF_NEW_TERMS_FIELDS } from '../../../../../common/constants'
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import type { ERROR_CODE, FormSchema, ValidationFunc } from '../../../../shared_imports';
 import { FIELD_TYPES, fieldValidators } from '../../../../shared_imports';
-import { debounceAsync } from '../../validators/debounce_async';
 import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
 import { esqlValidator } from '../../../rule_creation/logic/esql_validator';

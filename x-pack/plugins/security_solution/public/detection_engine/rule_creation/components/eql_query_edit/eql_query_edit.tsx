@@ -7,11 +7,11 @@
 
 import React, { useMemo } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
+import { debounceAsync } from '@kbn/securitysolution-utils';
 import type { FormData, FieldConfig, ValidationFuncArg } from '../../../../shared_imports';
 import { UseMultiFields } from '../../../../shared_imports';
 import type { EqlFieldsComboBoxOptions, EqlOptions } from '../../../../../common/search_strategy';
 import { queryRequiredValidatorFactory } from '../../../rule_creation_ui/validators/query_required_validator_factory';
-import { debounceAsync } from '../../../rule_creation_ui/validators/debounce_async';
 import { eqlQueryValidatorFactory } from './eql_query_validator_factory';
 import { EqlQueryBar } from './eql_query_bar';
 import * as i18n from './translations';
