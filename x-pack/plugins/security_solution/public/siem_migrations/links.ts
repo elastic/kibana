@@ -11,13 +11,13 @@ import {
   SERVER_APP_ID,
   SIEM_MIGRATIONS_RULES_PATH,
 } from '../../common/constants';
-import { SIEM_MIGRATIONS } from '../app/translations';
+import { SIEM_MIGRATIONS_RULES } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
 import { IconConsoleCloud } from '../common/icons/console_cloud';
 
 export const siemMigrationsLinks: LinkItem = {
   id: SecurityPageName.siemMigrationsRules,
-  title: SIEM_MIGRATIONS,
+  title: SIEM_MIGRATIONS_RULES,
   description: i18n.translate('xpack.securitySolution.appLinks.siemMigrationsRulesDescription', {
     defaultMessage: 'SIEM Rules Migrations.',
   }),
