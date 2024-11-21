@@ -283,7 +283,6 @@ A configuration URL that varies by connector:
 --
 * For an <<bedrock-action-type,{bedrock} connector>>, specifies the {bedrock} request URL.
 * For an <<gemini-action-type,{gemini} connector>>, specifies the {gemini} request URL.
-* For an <<inference-action-type,{inference} connector>>, specifies the Elastic {inference} request.
 * For a <<openai-action-type,OpenAI connector>>, specifies the OpenAI request URL.
 * For a <<resilient-action-type,{ibm-r} connector>>, specifies the {ibm-r} instance URL.
 * For a <<jira-action-type,Jira connector>>, specifies the Jira instance URL.
@@ -291,7 +290,9 @@ A configuration URL that varies by connector:
 * For a <<pagerduty-action-type,PagerDuty connector>>, specifies the PagerDuty event URL. Defaults to `https://events.pagerduty.com/v2/enqueue`.
 * For a <<servicenow-action-type,{sn-itsm}>>, <<servicenow-sir-action-type,{sn-sir}>>, or <<servicenow-itom-action-type,{sn-itom} connector>> specifies the ServiceNow instance URL.
 * For a <<swimlane-action-type,{swimlane} connector>>, specifies the {swimlane} instance URL.
-
+// ifeval::["featureAIConnector"=="true"]
+// * For an <<inference-action-type,AI connector>>, specifies the Elastic {inference} request.
+// endif::[]
 NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure the hostname in the URL is added to the allowed hosts.
 --
 

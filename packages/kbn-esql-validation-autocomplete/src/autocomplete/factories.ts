@@ -30,6 +30,13 @@ import { isNumericType } from '../shared/esql_types';
 import { getTestFunctions } from '../shared/test_functions';
 import { builtinFunctions } from '../definitions/builtin';
 
+const techPreviewLabel = i18n.translate(
+  'kbn-esql-validation-autocomplete.esql.autocomplete.techPreviewLabel',
+  {
+    defaultMessage: `Technical Preview`,
+  }
+);
+
 const allFunctions = memoize(
   () =>
     aggregationFunctionDefinitions
@@ -60,13 +67,17 @@ function getSafeInsertSourceText(text: string) {
 }
 
 export function getFunctionSuggestion(fn: FunctionDefinition): SuggestionRawDefinition {
+  let detail = fn.description;
+  if (fn.preview) {
+    detail = `[${techPreviewLabel}] ${detail}`;
+  }
   const fullSignatures = getFunctionSignatures(fn, { capitalize: true, withTypes: true });
   return {
     label: fn.name.toUpperCase(),
     text: `${fn.name.toUpperCase()}($0)`,
     asSnippet: true,
     kind: 'Function',
-    detail: fn.description,
+    detail,
     documentation: {
       value: buildFunctionDocumentation(fullSignatures, fn.examples),
     },

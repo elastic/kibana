@@ -44,7 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resp.body).to.be.an('array');
 
-        expect(resp.body.length).to.be(108); // the beats
+        expect(resp.body.length).to.be(107); // the beats
       });
     });
   });

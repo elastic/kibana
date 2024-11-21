@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
 import { CoreSetup, CoreStart } from '@kbn/core/public';
 import {
   ClientRequestParamsOf,
@@ -14,7 +13,7 @@ import {
   isHttpFetchError,
 } from '@kbn/server-route-repository-client';
 import { type KueryNode, nodeTypes, toKqlExpression } from '@kbn/es-query';
-import { entityLatestSchema } from '@kbn/entities-schema';
+import type { EntityInstance, EntityMetadata } from '@kbn/entities-schema';
 import { castArray } from 'lodash';
 import {
   DisableManagedEntityResponse,
@@ -38,8 +37,6 @@ type DeleteEntityDefinitionQuery = QueryParamOf<
 type CreateEntityDefinitionQuery = QueryParamOf<
   ClientRequestParamsOf<EntityManagerRouteRepository, 'PUT /internal/entities/managed/enablement'>
 >;
-
-export type EnitityInstance = z.infer<typeof entityLatestSchema>;
 
 export class EntityClient {
   public readonly repositoryClient: EntityManagerRepositoryClient['fetch'];
@@ -90,11 +87,15 @@ export class EntityClient {
     }
   }
 
-  asKqlFilter(entityLatest: EnitityInstance) {
-    const identityFieldsValue = this.getIdentityFieldsValue(entityLatest);
+  asKqlFilter(
+    entityInstance: {
+      entity: Pick<EntityInstance['entity'], 'identity_fields'>;
+    } & Required<EntityMetadata>
+  ) {
+    const identityFieldsValue = this.getIdentityFieldsValue(entityInstance);
 
     const nodes: KueryNode[] = Object.entries(identityFieldsValue).map(([identityField, value]) => {
-      return nodeTypes.function.buildNode('is', identityField, value);
+      return nodeTypes.function.buildNode('is', identityField, `"${value}"`);
     });
 
     if (nodes.length === 0) return '';
@@ -104,8 +105,12 @@ export class EntityClient {
     return toKqlExpression(kqlExpression);
   }
 
-  getIdentityFieldsValue(entityLatest: EnitityInstance) {
-    const { identity_fields: identityFields } = entityLatest.entity;
+  getIdentityFieldsValue(
+    entityInstance: {
+      entity: Pick<EntityInstance['entity'], 'identity_fields'>;
+    } & Required<EntityMetadata>
+  ) {
+    const { identity_fields: identityFields } = entityInstance.entity;
 
     if (!identityFields) {
       throw new Error('Identity fields are missing');
@@ -114,7 +119,7 @@ export class EntityClient {
     return castArray(identityFields).reduce((acc, field) => {
       const value = field.split('.').reduce((obj: any, part: string) => {
         return obj && typeof obj === 'object' ? (obj as Record<string, any>)[part] : undefined;
-      }, entityLatest);
+      }, entityInstance);
 
       if (value) {
         acc[field] = value;
