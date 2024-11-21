@@ -27,7 +27,11 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
     .get({
       access: 'internal',
       path: '/internal/osquery/status',
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      security: {
+        authz: {
+          requiredPrivileges: [`${PLUGIN_ID}-read`],
+        },
+      },
     })
     .addVersion(
       {

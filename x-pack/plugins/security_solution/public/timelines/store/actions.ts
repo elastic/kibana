@@ -191,11 +191,6 @@ export const updateEqlOptions = actionCreator<{
   value: string | undefined;
 }>('UPDATE_EQL_OPTIONS_TIMELINE');
 
-export const updateIsLoading = actionCreator<{
-  id: string;
-  isLoading: boolean;
-}>('UPDATE_LOADING');
-
 export const setEventsLoading = actionCreator<{
   id: string;
   eventIds: string[];
