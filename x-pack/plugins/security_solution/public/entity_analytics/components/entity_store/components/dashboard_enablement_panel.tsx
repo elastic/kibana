@@ -91,7 +91,7 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({ state }
           color="danger"
           iconType="error"
         >
-          <p>{(storeEnablement.error as { body: { message: string } }).body.message}</p>
+          <p>{storeEnablement.error.body.message}</p>
         </EuiCallOut>
       </>
     );
@@ -141,7 +141,6 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({ state }
         css={{ minWidth: '100%' }}
         hasBorder
         layout="horizontal"
-        className="eui-fullWidth"
         title={<h2>{title}</h2>}
         body={<p>{body}</p>}
         actions={

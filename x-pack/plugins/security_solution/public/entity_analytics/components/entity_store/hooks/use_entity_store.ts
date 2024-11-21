@@ -22,6 +22,10 @@ import { useEntityStoreRoutes } from '../../../api/entity_store';
 import { EntityEventTypes } from '../../../../common/lib/telemetry';
 
 const ENTITY_STORE_STATUS = ['GET', 'ENTITY_STORE_STATUS'];
+
+interface ResponseError {
+  body: { message: string };
+}
 export const useEntityStoreStatus = (options: UseQueryOptions<GetEntityStoreStatusResponse>) => {
   const { getEntityStoreStatus } = useEntityStoreRoutes();
 
@@ -43,7 +47,7 @@ export const useEnableEntityStoreMutation = (options?: UseMutationOptions<{}>) =
   const queryClient = useQueryClient();
   const { enableEntityStore } = useEntityStoreRoutes();
 
-  return useMutation<InitEntityStoreResponse>(
+  return useMutation<InitEntityStoreResponse, ResponseError>(
     () => {
       telemetry?.reportEvent(EntityEventTypes.EntityStoreEnablementToggleClicked, {
         timestamp: new Date().toISOString(),
