@@ -10,7 +10,6 @@ import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test/src/kbn_client';
 import { kibanaPackageJson } from '@kbn/repo-info';
-import { prefixedOutputLogger } from '../../../../scripts/endpoint/common/utils';
 import { isServerlessKibanaFlavor } from '../../../../common/endpoint/utils/kibana_status';
 import { fetchFleetLatestAvailableAgentVersion } from '../../../../common/endpoint/utils/fetch_fleet_version';
 import { isFleetServerRunning } from '../../../../scripts/endpoint/common/fleet_server/fleet_server_services';
@@ -60,7 +59,7 @@ export interface CreateAndEnrollEndpointHostCIResponse {
 export const createAndEnrollEndpointHostCI = async ({
   kbnClient,
   esClient,
-  log: _log,
+  log,
   agentPolicyId,
   cpus,
   disk,
@@ -70,7 +69,6 @@ export const createAndEnrollEndpointHostCI = async ({
   useClosestVersionMatch = true,
   forceVersion = false,
 }: CreateAndEnrollEndpointHostCIOptions): Promise<CreateAndEnrollEndpointHostCIResponse> => {
-  const log = prefixedOutputLogger('cy.createAndEnrollEndpointHostCI()', _log);
   const vmName = hostname ?? `test-host-${Math.random().toString().substring(2, 6)}`;
   let agentVersion = version;
 
@@ -148,8 +146,6 @@ export const createAndEnrollEndpointHostCI = async ({
     5 * 60 * 1000,
     esClient
   );
-
-  log.info(`Host [${hostVm.name}] enrolled with Fleet successfully`);
 
   return {
     hostname: hostVm.name,
