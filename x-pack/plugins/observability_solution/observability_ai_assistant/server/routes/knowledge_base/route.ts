@@ -17,14 +17,12 @@ const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
   options: {
     tags: ['access:ai_assistant'],
   },
-  handler: async ({ service, request }): Promise<{ enabled: boolean }> => {
-    const client = await service.getClient({ request });
+  handler: async ({ service }): Promise<{ enabled: boolean }> => {
+    const { enableKnowledgeBase } = service.getConfig();
 
-    if (!client) {
-      throw notImplemented();
-    }
-
-    return client.getKnowledgeBaseStatus();
+    return {
+      enabled: enableKnowledgeBase,
+    };
   },
 });
 

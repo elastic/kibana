@@ -376,9 +376,4 @@ export class KnowledgeBaseService {
 
     return Promise.resolve();
   };
-
-  getStatus = (): { enabled: boolean } => {
-    const enabled = this.dependencies.config.enableKnowledgeBase;
-    return { enabled };
-  };
 }

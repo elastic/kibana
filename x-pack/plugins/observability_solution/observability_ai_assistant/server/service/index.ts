@@ -60,6 +60,10 @@ export class ObservabilityAIAssistantService {
     this.config = config;
   }
 
+  getConfig() {
+    return this.config;
+  }
+
   async getClient({
     request,
     scopes,
