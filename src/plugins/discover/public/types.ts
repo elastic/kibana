@@ -152,6 +152,7 @@ export interface DiscoverStartPlugins {
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   dataViews: DataViewsServicePublic;
   dataVisualizer?: DataVisualizerPluginStart;
+  discoverShared: DiscoverSharedPublicStart;
   embeddable: EmbeddableStart;
   expressions: ExpressionsStart;
   fieldFormats: FieldFormatsStart;

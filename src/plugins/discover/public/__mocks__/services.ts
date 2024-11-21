@@ -144,7 +144,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
   };
 
   const { profilesManagerMock } = createContextAwarenessMocks();
-  const theme = themeServiceMock.createSetupContract({ darkMode: false });
+  const theme = themeServiceMock.createSetupContract({ darkMode: false, name: 'amsterdam' });
 
   corePluginMock.theme = theme;
   corePluginMock.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject(null));

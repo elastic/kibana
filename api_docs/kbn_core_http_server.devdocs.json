@@ -4970,6 +4970,10 @@
                 "path": "x-pack/plugins/watcher/server/routes/api/register_load_history_route.ts"
               },
               {
+                "plugin": "productDocBase",
+                "path": "x-pack/plugins/ai_infra/product_doc_base/server/routes/installation.ts"
+              },
+              {
                 "plugin": "customBranding",
                 "path": "x-pack/plugins/custom_branding/server/routes/info.ts"
               },
@@ -7510,6 +7514,14 @@
               {
                 "plugin": "watcher",
                 "path": "x-pack/plugins/watcher/server/routes/api/register_list_fields_route.ts"
+              },
+              {
+                "plugin": "productDocBase",
+                "path": "x-pack/plugins/ai_infra/product_doc_base/server/routes/installation.ts"
+              },
+              {
+                "plugin": "productDocBase",
+                "path": "x-pack/plugins/ai_infra/product_doc_base/server/routes/installation.ts"
               },
               {
                 "plugin": "grokdebugger",
@@ -14120,16 +14132,16 @@
                 "pluginId": "@kbn/core-http-server",
                 "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.AuthzDisabled",
-                "text": "AuthzDisabled"
+                "section": "def-server.AuthzEnabled",
+                "text": "AuthzEnabled"
               },
               " | ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.AuthzEnabled",
-                "text": "AuthzEnabled"
+                "section": "def-server.AuthzDisabled",
+                "text": "AuthzDisabled"
               }
             ],
             "path": "packages/core/http/core-http-server/src/router/route.ts",
@@ -15178,7 +15190,11 @@
               },
               {
                 "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/server/routes/elasticsearch_routes.ts"
+                "path": "x-pack/plugins/cloud/server/routes/elasticsearch_route.ts"
+              },
+              {
+                "plugin": "cloud",
+                "path": "x-pack/plugins/cloud/server/routes/get_cloud_data_route.ts"
               },
               {
                 "plugin": "dataViews",
@@ -15295,6 +15311,10 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/server/routes/workpad/resolve.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/routes/workpad/has_workpads.ts"
               },
               {
                 "plugin": "canvas",
@@ -15661,6 +15681,14 @@
                 "path": "x-pack/plugins/elastic_assistant/server/routes/knowledge_base/entries/find_route.ts"
               },
               {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/plugins/elastic_assistant/server/routes/defend_insights/get_defend_insight.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/plugins/elastic_assistant/server/routes/defend_insights/get_defend_insights.ts"
+              },
+              {
                 "plugin": "logsShared",
                 "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
@@ -16002,6 +16030,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/status.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/siem_migrations/rules/api/get.ts"
               },
               {
@@ -16014,7 +16046,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/index.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/siem_migrations/rules/api/resources/get.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -16027,10 +16059,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/policy/index.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -16055,10 +16083,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/state.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/audit_log.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -16537,11 +16561,19 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/siem_migrations/rules/api/update.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/siem_migrations/rules/api/start.ts"
               },
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/siem_migrations/rules/api/stop.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/siem_migrations/rules/api/retry.ts"
               },
               {
                 "plugin": "transform",
@@ -16678,6 +16710,10 @@
             "deprecated": false,
             "trackAdoption": true,
             "references": [
+              {
+                "plugin": "cloud",
+                "path": "x-pack/plugins/cloud/server/routes/set_cloud_data_route.ts"
+              },
               {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/server/rest_api_routes/public/fields/update_fields.ts"
@@ -17203,6 +17239,10 @@
                 "path": "x-pack/plugins/elastic_assistant/server/routes/knowledge_base/entries/create_route.ts"
               },
               {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/plugins/elastic_assistant/server/routes/defend_insights/post_defend_insights.ts"
+              },
+              {
                 "plugin": "logsShared",
                 "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
@@ -17552,11 +17592,15 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/enablement.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/siem_migrations/rules/api/create.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/siem_migrations/rules/api/resources/upsert.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -17593,14 +17637,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/suggestions/index.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -17733,6 +17769,10 @@
               {
                 "plugin": "@kbn/core-http-router-server-internal",
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.test.ts"
+              },
+              {
+                "plugin": "cloud",
+                "path": "x-pack/plugins/cloud/server/routes/set_cloud_data_route.test.ts"
               },
               {
                 "plugin": "ecsDataQualityDashboard",
@@ -20695,16 +20735,16 @@
             "pluginId": "@kbn/core-http-server",
             "scope": "server",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.AuthzDisabled",
-            "text": "AuthzDisabled"
+            "section": "def-server.AuthzEnabled",
+            "text": "AuthzEnabled"
           },
           " | ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "server",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.AuthzEnabled",
-            "text": "AuthzEnabled"
+            "section": "def-server.AuthzDisabled",
+            "text": "AuthzDisabled"
           }
         ],
         "path": "packages/core/http/core-http-server/src/router/route.ts",

@@ -32,6 +32,14 @@ export interface ObservabilityLogsAIAssistantFeature {
   render: (deps: ObservabilityLogsAIAssistantFeatureRenderDeps) => JSX.Element;
 }
 
+export interface ObservabilityCreateSLOFeature {
+  id: 'observability-create-slo';
+  createSLOFlyout: (props: {
+    onClose: () => void;
+    initialValues: Record<string, unknown>;
+  }) => React.ReactNode;
+}
+
 /** ***************************** Security **********/
 export interface SecuritySolutionCellRendererFeature {
   id: 'security-solution-cell-renderer';
@@ -51,7 +59,10 @@ export type SecuritySolutionFeature =
 /** ****************************************************************************************/
 
 // This should be a union of all the available client features.
-export type DiscoverFeature = ObservabilityLogsAIAssistantFeature | SecuritySolutionFeature;
+export type DiscoverFeature =
+  | ObservabilityLogsAIAssistantFeature
+  | ObservabilityCreateSLOFeature
+  | SecuritySolutionFeature;
 
 /**
  * Service types
