@@ -14,7 +14,8 @@ import { createAppMockRenderer } from '../../common/mock';
 
 const showMoreClickMock = jest.fn();
 
-describe('ShowMoreButton', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/192672
+describe.skip('ShowMoreButton', () => {
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
