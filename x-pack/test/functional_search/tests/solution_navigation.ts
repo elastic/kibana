@@ -155,15 +155,15 @@ export default function searchSolutionNavigation({
       // check Build
       // > Playground
       await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'enterpriseSearchApplications:playground',
+        deepLinkId: 'searchPlayground',
       });
       await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'enterpriseSearchApplications:playground',
+        deepLinkId: 'searchPlayground',
       });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Build' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Playground' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'enterpriseSearchApplications:playground',
+        deepLinkId: 'searchPlayground',
       });
       // > Search applications
       await solutionNavigation.sidenav.clickLink({
@@ -304,7 +304,7 @@ export default function searchSolutionNavigation({
         'enterpriseSearchContent:connectors',
         'enterpriseSearchContent:webCrawlers',
         'build',
-        'enterpriseSearchApplications:playground',
+        'searchPlayground',
         'enterpriseSearchApplications:searchApplications',
         'enterpriseSearchAnalytics',
         'relevance',

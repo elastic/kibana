@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import type {
-  CoreSetup,
+import {
+  type CoreSetup,
   Plugin,
-  CoreStart,
-  AppMountParameters,
-  PluginInitializerContext,
+  type CoreStart,
+  type AppMountParameters,
+  type PluginInitializerContext,
+  DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/public';
 import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_PATH } from '../common';
 import { docLinks } from '../common/doc_links';
-import { PlaygroundHeaderDocs } from './components/playground_header_docs';
-import { Playground, getPlaygroundProvider } from './embeddable';
 import type {
   AppPluginSetupDependencies,
   AppPluginStartDependencies,
@@ -43,12 +42,15 @@ export class SearchPlaygroundPlugin
     core.application.register({
       id: PLUGIN_ID,
       appRoute: PLUGIN_PATH,
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      euiIconType: 'logoEnterpriseSearch',
       title: PLUGIN_NAME,
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart, depsStart] = await core.getStartServices();
 
         coreStart.chrome.docTitle.change(PLUGIN_NAME);
+        depsStart.searchNavigation?.handleOnAppMount();
 
         const startDeps: AppPluginStartDependencies = {
           ...depsStart,
@@ -57,6 +59,8 @@ export class SearchPlaygroundPlugin
 
         return renderApp(coreStart, startDeps, element);
       },
+      visibleIn: ['sideNav', 'globalSearch'],
+      order: 2,
     });
 
     registerLocators(deps.share);
@@ -66,11 +70,7 @@ export class SearchPlaygroundPlugin
 
   public start(core: CoreStart, deps: AppPluginStartDependencies): SearchPlaygroundPluginStart {
     docLinks.setDocLinks(core.docLinks.links);
-    return {
-      PlaygroundProvider: getPlaygroundProvider(core, deps),
-      Playground,
-      PlaygroundHeaderDocs,
-    };
+    return {};
   }
 
   public stop() {}

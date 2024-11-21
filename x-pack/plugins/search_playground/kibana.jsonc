@@ -29,6 +29,7 @@
       "cloud",
       "console",
       "usageCollection",
+      "searchNavigation"
     ],
     "requiredBundles": [
       "kibanaReact",

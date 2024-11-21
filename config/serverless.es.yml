@@ -116,9 +116,6 @@ xpack.ml.compatibleModuleType: 'search'
 
 data_visualizer.resultLinks.fileBeat.enabled: false
 
-# Search Playground
-xpack.searchPlayground.ui.enabled: true
-
 # Search InferenceEndpoints
 xpack.searchInferenceEndpoints.ui.enabled: true
 
