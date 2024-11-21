@@ -14,7 +14,7 @@ import { mlLog } from '../lib/log';
 import { capabilitiesProvider } from '../lib/capabilities';
 import { spacesUtilsProvider } from '../lib/spaces_utils';
 import type { RouteInitialization, SystemRouteDeps } from '../types';
-import { getMlNodeCount } from '../lib/node_utils';
+import { getLazyMlNodeCount, getMlNodeCount } from '../lib/node_utils';
 
 /**
  * System routes
@@ -187,10 +187,15 @@ export function systemRoutes(
 
           let isMlAutoscalingEnabled = false;
           try {
-            await client.asInternalUser.autoscaling.getAutoscalingPolicy({ name: 'ml' });
+            // kibana_system user does not have the manage_autoscaling cluster privilege.
+            // perform this check as a current user.
+            await client.asCurrentUser.autoscaling.getAutoscalingPolicy({ name: 'ml' });
             isMlAutoscalingEnabled = true;
           } catch (e) {
-            // If doesn't exist, then keep the false
+            // If ml autoscaling policy doesn't exist or the user does not have privileges to fetch it,
+            // check the number of lazy ml nodes to determine if autoscaling is enabled.
+            const lazyMlNodeCount = await getLazyMlNodeCount(client);
+            isMlAutoscalingEnabled = lazyMlNodeCount > 0;
           }
 
           return response.ok({
