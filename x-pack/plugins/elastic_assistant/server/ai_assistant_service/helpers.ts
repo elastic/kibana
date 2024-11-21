@@ -9,6 +9,8 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import { DeleteByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
+import { getResourceName } from '.';
 import { knowledgeBaseIngestPipeline } from '../ai_assistant_data_clients/knowledge_base/ingest_pipeline';
 import { GetElser } from '../types';
 
@@ -95,4 +97,32 @@ export const deletePipeline = async ({ esClient, id }: DeletePipelineParams): Pr
   });
 
   return response.acknowledged;
+};
+
+export const removeLegacyQuickPrompt = async (esClient: ElasticsearchClient) => {
+  const deleteQuery: DeleteByQueryRequest = {
+    index: `${getResourceName('prompts')}-*`,
+    query: {
+      bool: {
+        must: [
+          {
+            term: {
+              name: 'ES|QL Query Generation',
+            },
+          },
+          {
+            term: {
+              prompt_type: 'quick',
+            },
+          },
+          {
+            term: {
+              is_default: true,
+            },
+          },
+        ],
+      },
+    },
+  };
+  return esClient.deleteByQuery(deleteQuery);
 };

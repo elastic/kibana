@@ -25,7 +25,7 @@ import { RequestContextFactory } from './routes/request_context_factory';
 import { PLUGIN_ID } from '../common/constants';
 import { registerRoutes } from './routes/register_routes';
 import { appContextService } from './services/app_context';
-import { createGetElserId } from './ai_assistant_service/helpers';
+import { createGetElserId, removeLegacyQuickPrompt } from './ai_assistant_service/helpers';
 
 export class ElasticAssistantPlugin
   implements
@@ -108,6 +108,10 @@ export class ElasticAssistantPlugin
       if (this.mlTrainedModelsProvider) {
         this.getElserId = createGetElserId(this.mlTrainedModelsProvider);
       }
+    });
+    removeLegacyQuickPrompt(core.elasticsearch.client.asInternalUser).then((res) => {
+      if (res?.total)
+        this.logger.info(`Removed ${res.total} legacy quick prompts from AI Assistant`);
     });
 
     return {
