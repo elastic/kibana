@@ -15,7 +15,7 @@ import { k8sClusterJobEntity } from './kubernetes/cluster_entity';
 import { k8sCronJobEntity } from './kubernetes/cron_job_entity';
 import { k8sDaemonSetEntity } from './kubernetes/daemon_set_entity';
 import { k8sDeploymentEntity } from './kubernetes/deployment_entity';
-import { k8sJobSetEntity } from './kubernetes/job_set_entity';
+import { k8sJobEntity } from './kubernetes/job_entity';
 import { k8sNodeEntity } from './kubernetes/node_entity';
 import { k8sPodEntity } from './kubernetes/pod_entity';
 import { k8sReplicaSetEntity } from './kubernetes/replica_set';
@@ -52,7 +52,7 @@ export const entities = {
     k8sCronJobEntity,
     k8sDaemonSetEntity,
     k8sDeploymentEntity,
-    k8sJobSetEntity,
+    k8sJobEntity,
     k8sNodeEntity,
     k8sPodEntity,
     k8sReplicaSetEntity,

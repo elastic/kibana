@@ -100,7 +100,7 @@ const scenario: Scenario<Partial<EntityFields>> = async (runOptions) => {
               })
               .timestamp(timestamp),
             entities.k8s
-              .k8sJobSetEntity({
+              .k8sJobEntity({
                 clusterName: CLUSTER_NAME,
                 name: 'job_set_foo',
                 schema,
