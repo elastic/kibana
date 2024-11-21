@@ -330,6 +330,7 @@ export class SpacesGridPage extends Component<Props, State> {
         render: (solution: Space['solution'], record: Space) => (
           <SpaceSolutionBadge solution={solution} data-test-subj={`${record.id}-solution`} />
         ),
+        width: '18%',
       });
     }
 
@@ -415,6 +416,7 @@ export class SpacesGridPage extends Component<Props, State> {
           'data-test-subj': (rowRecord) => `${rowRecord.id}-deleteSpace`,
         },
       ],
+      width: '18%',
     });
 
     return config;
