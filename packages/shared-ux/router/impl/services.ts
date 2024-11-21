@@ -8,6 +8,7 @@
  */
 
 import { Observable } from 'rxjs';
+import type { ExecutionContextStart } from '@kbn/core-execution-context-browser';
 import { createContext, useContext } from 'react';
 import { SharedUXExecutionContext } from './types';
 
@@ -49,8 +50,7 @@ export interface SharedUXExecutionContextSetup {
  * https://github.com/Microsoft/web-build-tools/issues/1237
  */
 export interface SharedUXExecutionContextSetup {
-  /** {@link SharedUXExecutionContextSetup} */
-  executionContext: SharedUXExecutionContextStart;
+  executionContext: ExecutionContextStart;
 }
 
 export type KibanaServices = Partial<SharedUXExecutionContextSetup>;
@@ -63,12 +63,12 @@ const defaultContextValue = {
   services: {},
 };
 
-export const sharedUXContext =
+export const SharedUXContext =
   createContext<SharedUXRouterContextValue<KibanaServices>>(defaultContextValue);
 
 export const useKibanaSharedUX = <Extra extends object = {}>(): SharedUXRouterContextValue<
   KibanaServices & Extra
 > =>
   useContext(
-    sharedUXContext as unknown as React.Context<SharedUXRouterContextValue<KibanaServices & Extra>>
+    SharedUXContext as unknown as React.Context<SharedUXRouterContextValue<KibanaServices & Extra>>
   );

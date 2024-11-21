@@ -8,7 +8,7 @@
  */
 
 import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
-import { SharedUXExecutionContextSetup } from './services';
+import type { ExecutionContextStart } from '@kbn/core-execution-context-browser';
 import { SharedUXExecutionContext } from './types';
 
 /**
@@ -17,7 +17,7 @@ import { SharedUXExecutionContext } from './types';
  * @param context
  */
 export function useSharedUXExecutionContext(
-  executionContext: SharedUXExecutionContextSetup | undefined,
+  executionContext: ExecutionContextStart | undefined,
   context: SharedUXExecutionContext
 ) {
   useDeepCompareEffect(() => {
