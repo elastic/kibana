@@ -7,17 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
-import { LegacyColorsService } from './colors';
+export interface DashboardGridData {
+  w: number;
+  h: number;
+  x: number;
+  y: number;
+  i: string;
+}
 
-const colors = new LegacyColorsService();
-colors.init(coreMock.createSetup().uiSettings);
+export interface MockedDashboardPanelMap {
+  [key: string]: { id: string; gridData: DashboardGridData & { row: number } };
+}
 
-export const colorsServiceMock: LegacyColorsService = {
-  createColorLookupFunction: jest.fn(colors.createColorLookupFunction.bind(colors)),
-  mappedColors: {
-    mapKeys: jest.fn(),
-    get: jest.fn(),
-    getColorFromConfig: jest.fn(),
-  },
-} as any;
+export type MockedDashboardRowMap = Array<{ title: string; collapsed: boolean }>;
+
+export interface MockSerializedDashboardState {
+  panels: MockedDashboardPanelMap;
+  rows: MockedDashboardRowMap;
+}
