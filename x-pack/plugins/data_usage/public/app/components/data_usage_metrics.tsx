@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Charts } from './charts';
 import { useBreadcrumbs } from '../../utils/use_breadcrumbs';
@@ -19,6 +19,7 @@ import { useDataUsageMetricsUrlParams } from '../hooks/use_charts_url_params';
 import { DEFAULT_DATE_RANGE_OPTIONS, useDateRangePicker } from '../hooks/use_date_picker';
 import { DEFAULT_METRIC_TYPES, UsageMetricsRequestBody } from '../../../common/rest_types';
 import { ChartFilters, ChartFiltersProps } from './filters/charts_filters';
+import { ChartsLoading } from './charts_loading';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 
 const EuiItemCss = css`
@@ -111,7 +112,7 @@ export const DataUsageMetrics = memo(
       error: errorFetchingDataUsageMetrics,
       data: usageMetricsData,
       isFetching,
-      isFetched,
+      isFetched: hasFetchedDataUsageMetricsData,
       refetch: refetchDataUsageMetrics,
     } = useGetDataUsageMetrics(
       {
@@ -126,10 +127,10 @@ export const DataUsageMetrics = memo(
     );
 
     useEffect(() => {
-      if (!isFetching && isFetched) {
+      if (!isFetching && hasFetchedDataUsageMetricsData) {
         setIsFirstPageLoad(false);
       }
-    }, [isFetching, isFetched]);
+    }, [isFetching, hasFetchedDataUsageMetricsData]);
 
     const onRefresh = useCallback(() => {
       refetchDataUsageMetrics();
@@ -215,10 +216,10 @@ export const DataUsageMetrics = memo(
         </FlexItemWithCss>
 
         <FlexItemWithCss>
-          {isFetched && usageMetricsData?.metrics ? (
+          {hasFetchedDataUsageMetricsData && usageMetricsData?.metrics ? (
             <Charts data={usageMetricsData} data-test-subj={dataTestSubj} />
           ) : isFetching ? (
-            <EuiLoadingElastic data-test-subj={getTestId('charts-loading')} />
+            <ChartsLoading data-test-subj={dataTestSubj} />
           ) : null}
         </FlexItemWithCss>
       </EuiFlexGroup>
