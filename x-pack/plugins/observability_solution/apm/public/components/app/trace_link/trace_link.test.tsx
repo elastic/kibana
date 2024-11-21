@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, render, waitFor } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { shallow } from 'enzyme';
 import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
@@ -67,12 +67,9 @@ describe('TraceLink', () => {
       },
     });
 
-    let result;
-    act(() => {
-      const component = render(<TraceLink />, renderOptions);
+    const component = render(<TraceLink />, renderOptions);
 
-      result = component.getByText('Fetching trace...');
-    });
+    const result = component.getByText('Fetching trace...');
     await waitFor(() => {});
     expect(result).toBeDefined();
   });
