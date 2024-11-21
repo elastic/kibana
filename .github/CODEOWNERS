@@ -1513,6 +1513,28 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /.eslintignore @elastic/kibana-operations
 
 # QA - Appex QA
+/x-pack/test/functional/fixtures/package_registry_config.yml @elastic/appex-qa # No usages found
+/x-pack/test/functional/fixtures/kbn_archiver/packaging.json @elastic/appex-qa # No usages found
+/x-pack/test/functional/es_archives/filebeat @elastic/appex-qa
+/x-pack/test/functional/es_archives/logstash_functional @elastic/appex-qa
+/x-pack/test/functional/es_archives/event_log_legacy_ids @elastic/appex-qa
+/x-pack/test/functional/es_archives/dlstest @elastic/appex-qa # No usages found
+/x-pack/test/functional/es_archives/beats/list/data.json @elastic/appex-qa # No usages found
+/test/functional/fixtures/kbn_archiver/stress_test.json @elastic/appex-qa
+/test/functional/fixtures/kbn_archiver/many_fields_data_view.json @elastic/appex-qa
+/test/functional/fixtures/kbn_archiver/long_window_logstash_index_pattern.json @elastic/appex-qa
+/test/functional/fixtures/kbn_archiver/kibana_sample_data_logs_tsdb.json @elastic/appex-qa
+/test/functional/fixtures/kbn_archiver/kibana_sample_data_logs_logsdb.json @elastic/appex-qa
+/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern.json @elastic/appex-qa
+/test/functional/fixtures/es_archiver/stress_test @elastic/appex-qa
+/test/functional/fixtures/es_archiver/many_fields @elastic/appex-qa
+/test/functional/fixtures/es_archiver/logstash_functional @elastic/appex-qa
+/test/functional/fixtures/es_archiver/long_window_logstash @elastic/appex-qa
+/test/functional/fixtures/es_archiver/kibana_sample_data_logs_* @elastic/appex-qa
+/test/functional/fixtures/es_archiver/kibana_sample_data_flights* @elastic/appex-qa
+/test/functional/fixtures/es_archiver/getting_started/shakespeare @elastic/appex-qa
+/test/api_integration/fixtures/es_archiver/elasticsearch @elastic/appex-qa
+/x-pack/test/plugin_functional/services.ts @elastic/appex-qa
 /test/server_integration/services/index.js @elastic/appex-qa
 /x-pack/test/stack_functional_integration/configs/config.stack_functional_integration_base.js @elastic/appex-qa
 /x-pack/test/stack_functional_integration/configs/consume_state.js @elastic/appex-qa
