@@ -13,6 +13,7 @@ import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import { EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis/constants';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { useAiopsAppContext } from '@kbn/aiops-context';
 import type { EuiContextMenuProps } from '@elastic/eui';
 import {
   EuiButton,
@@ -31,7 +32,6 @@ import type { SignificantItem } from '@kbn/ml-agg-utils';
 import { useCasesModal } from '../../../hooks/use_cases_modal';
 import { useDataSource } from '../../../hooks/use_data_source';
 import type { LogRateAnalysisEmbeddableState } from '../../../embeddables/log_rate_analysis/types';
-import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
