@@ -1,0 +1,237 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  EuiBadge,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiPanel,
+  EuiSelect,
+} from '@elastic/eui';
+import {
+  AndCondition,
+  Condition,
+  FilterCondition,
+  OrCondition,
+} from '@kbn/streams-plugin/common/types';
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+
+export function ConditionEditor(props: {
+  condition: Condition;
+  readonly?: boolean;
+  onConditionChange?: (condition: Condition) => void;
+}) {
+  if (!props.condition) {
+    return null;
+  }
+  if (props.readonly) {
+    return (
+      <EuiPanel color="subdued" borderRadius="none" hasShadow={false} paddingSize="xs">
+        <ConditionDisplay condition={props.condition} />
+      </EuiPanel>
+    );
+  }
+  return (
+    <ConditionForm
+      condition={props.condition}
+      onConditionChange={props.onConditionChange || (() => {})}
+    />
+  );
+}
+
+export function ConditionForm(props: {
+  condition: Condition;
+  onConditionChange: (condition: Condition) => void;
+}) {
+  return (
+    props.condition &&
+    ('operator' in props.condition ? (
+      <FilterForm
+        condition={props.condition as FilterCondition}
+        onConditionChange={props.onConditionChange}
+      />
+    ) : (
+      <pre>{JSON.stringify(props.condition, null, 2)}</pre>
+    ))
+  );
+}
+
+function FilterForm(props: {
+  condition: FilterCondition;
+  onConditionChange: (condition: FilterCondition) => void;
+}) {
+  return (
+    <EuiFlexGroup gutterSize="s" alignItems="center">
+      <EuiFlexItem grow>
+        <EuiFormRow
+          label={i18n.translate('xpack.streams.filter.field', { defaultMessage: 'Field' })}
+        >
+          <EuiFieldText
+            data-test-subj="streamsAppFilterFormFieldText"
+            value={props.condition.field}
+            onChange={(e) => {
+              props.onConditionChange({ ...props.condition, field: e.target.value });
+            }}
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+      <EuiFlexItem grow>
+        <EuiFormRow
+          label={i18n.translate('xpack.streams.filter.operator', { defaultMessage: 'Operator' })}
+        >
+          <EuiSelect
+            data-test-subj="streamsAppFilterFormSelect"
+            options={[
+              {
+                value: 'eq',
+                text: 'equals',
+              },
+              {
+                value: 'neq',
+                text: 'not equals',
+              },
+              {
+                value: 'lt',
+                text: 'less than',
+              },
+              {
+                value: 'lte',
+                text: 'less than or equals',
+              },
+              {
+                value: 'gt',
+                text: 'greater than',
+              },
+              {
+                value: 'gte',
+                text: 'greater than or equals',
+              },
+              {
+                value: 'contains',
+                text: 'contains',
+              },
+              {
+                value: 'startsWith',
+                text: 'starts with',
+              },
+              {
+                value: 'endsWith',
+                text: 'ends with',
+              },
+              {
+                value: 'exists',
+                text: 'exists',
+              },
+              {
+                value: 'notExists',
+                text: 'not exists',
+              },
+            ]}
+            value={props.condition.operator}
+            onChange={(e) => {
+              const newCondition: FilterCondition = {
+                ...props.condition,
+              };
+
+              const newOperator = e.target.value as FilterCondition['operator'];
+              if (
+                'value' in newCondition &&
+                (newOperator === 'exists' || newOperator === 'notExists')
+              ) {
+                delete newCondition.value;
+              } else if (!('value' in newCondition)) {
+                newCondition.value = '';
+              }
+              props.onConditionChange({ ...newCondition, operator: newOperator });
+            }}
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+
+      {'value' in props.condition && (
+        <EuiFlexItem grow>
+          <EuiFormRow
+            label={i18n.translate('xpack.streams.filter.value', { defaultMessage: 'Value' })}
+          >
+            <EuiFieldText
+              value={props.condition.value}
+              data-test-subj="streamsAppFilterFormValueText"
+              onChange={(e) => {
+                props.onConditionChange({ ...props.condition, value: e.target.value });
+              }}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  );
+}
+
+export function ConditionDisplay(props: { condition: Condition }) {
+  if (!props.condition) {
+    return null;
+  }
+  return (
+    <>
+      {'or' in props.condition ? (
+        <OrDisplay condition={props.condition as OrCondition} />
+      ) : 'and' in props.condition ? (
+        <AndDisplay condition={props.condition as AndCondition} />
+      ) : (
+        <FilterDisplay condition={props.condition as FilterCondition} />
+      )}
+    </>
+  );
+}
+
+function OrDisplay(props: { condition: OrCondition }) {
+  return (
+    <div>
+      {i18n.translate('xpack.streams.orDisplay.div.orLabel', { defaultMessage: 'Or' })}
+      {props.condition.or.map((condition, index) => (
+        <ConditionEditor key={index} condition={condition} readonly />
+      ))}
+    </div>
+  );
+}
+
+function AndDisplay(props: { condition: AndCondition }) {
+  return (
+    <div>
+      {i18n.translate('xpack.streams.andDisplay.div.andLabel', { defaultMessage: 'And' })}
+      {props.condition.and.map((condition, index) => (
+        <ConditionEditor key={index} condition={condition} readonly />
+      ))}
+    </div>
+  );
+}
+
+function FilterDisplay(props: { condition: FilterCondition }) {
+  return (
+    <EuiFlexGroup gutterSize="xs" alignItems="center">
+      <EuiBadge>
+        {i18n.translate('xpack.streams.filter.field', { defaultMessage: 'Field' })}
+      </EuiBadge>
+      {props.condition.field}
+      <EuiBadge>
+        {i18n.translate('xpack.streams.filter.operator', { defaultMessage: 'Operator' })}
+      </EuiBadge>
+      {props.condition.operator}
+      {'value' in props.condition && (
+        <>
+          <EuiBadge>
+            {i18n.translate('xpack.streams.filter.value', { defaultMessage: 'Value' })}
+          </EuiBadge>
+          {props.condition.value}
+        </>
+      )}
+    </EuiFlexGroup>
+  );
+}

@@ -11,6 +11,7 @@ import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../hooks/use_kibana';
 import { StreamDetailOverview } from '../stream_detail_overview';
+import { StreamDetailRouting } from '../stream_detail_routing';
 
 export function StreamDetailView() {
   const {
@@ -48,21 +49,21 @@ export function StreamDetailView() {
     {
       name: 'overview',
       content: <StreamDetailOverview definition={streamEntity} />,
-      label: i18n.translate('app_not_found_in_i18nrc.streamDetailView.overviewTab', {
+      label: i18n.translate('xpack.streams.streamDetailView.overviewTab', {
         defaultMessage: 'Overview',
       }),
     },
     {
       name: 'routing',
-      content: <></>,
-      label: i18n.translate('app_not_found_in_i18nrc.streamDetailView.routingTab', {
+      content: <StreamDetailRouting definition={streamEntity} />,
+      label: i18n.translate('xpack.streams.streamDetailView.routingTab', {
         defaultMessage: 'Routing',
       }),
     },
     {
       name: 'processing',
       content: <></>,
-      label: i18n.translate('app_not_found_in_i18nrc.streamDetailView.processingTab', {
+      label: i18n.translate('xpack.streams.streamDetailView.processingTab', {
         defaultMessage: 'Processing',
       }),
     },
