@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { cleanup, renderHook } from '@testing-library/react-hooks';
+import { renderHook, cleanup } from '@testing-library/react';
 import type { UseRuleDetailsTabsProps } from './use_rule_details_tabs';
 import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';
 import type { Rule } from '../../../rule_management/logic';

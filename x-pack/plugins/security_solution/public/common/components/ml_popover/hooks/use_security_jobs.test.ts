@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { waitFor, renderHook } from '@testing-library/react';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
@@ -71,33 +71,31 @@ describe('useSecurityJobs', () => {
         bucketSpanSeconds: 900,
       };
 
-      const { result, waitForNextUpdate } = renderHook(() => useSecurityJobs(), {
+      const { result } = renderHook(() => useSecurityJobs(), {
         wrapper: TestProviders,
       });
-      await waitForNextUpdate();
-
-      expect(result.current.jobs).toHaveLength(6);
+      await waitFor(() => expect(result.current.jobs).toHaveLength(6));
       expect(result.current.jobs).toEqual(expect.arrayContaining([expectedSecurityJob]));
     });
 
     it('returns those permissions', async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useSecurityJobs(), {
+      const { result } = renderHook(() => useSecurityJobs(), {
         wrapper: TestProviders,
       });
-      await waitForNextUpdate();
-
-      expect(result.current.isMlAdmin).toEqual(true);
-      expect(result.current.isLicensed).toEqual(true);
+      await waitFor(() => {
+        expect(result.current.isMlAdmin).toEqual(true);
+        expect(result.current.isLicensed).toEqual(true);
+      });
     });
 
     it('renders a toast error if an ML call fails', async () => {
       (getModules as jest.Mock).mockRejectedValue('whoops');
-      const { waitFor } = renderHook(() => useSecurityJobs(), {
+      renderHook(() => useSecurityJobs(), {
         wrapper: TestProviders,
       });
 
       // addError might be called after an arbitrary number of renders, so we
-      // need to use waitFor here instead of waitForNextUpdate
+      // need to use waitFor here instead of waitFor
       await waitFor(() => {
         expect(appToastsMock.addError).toHaveBeenCalledWith('whoops', {
           title: 'Security job fetch failure',
