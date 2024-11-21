@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash';
-import { ExistsFilter, Query, isExistsFilter } from '@kbn/es-query';
+import { type ExistsFilter, type Query, type Filter, isExistsFilter } from '@kbn/es-query';
 import {
   AvgIndexPatternColumn,
   CardinalityIndexPatternColumn,
