@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { renderHook, act } from '@testing-library/react-hooks';
+
+import { renderHook, act } from '@testing-library/react';
 import { useConversationChanged } from './use_conversation_changed';
 import { customConvo } from '../../../mock/conversation';
 import { mockConnectors } from '../../../mock/connectors';

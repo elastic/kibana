@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, waitFor, renderHook } from '@testing-library/react';
 
 import {
   DeleteConversationParams,
@@ -32,18 +32,18 @@ describe('conversations api', () => {
     await act(async () => {
       const deleteProps = { http, toasts, id: 'test' } as unknown as DeleteConversationParams;
 
-      const { waitForNextUpdate } = renderHook(() => deleteConversation(deleteProps));
-      await waitForNextUpdate();
-
-      expect(deleteProps.http.fetch).toHaveBeenCalledWith(
-        '/api/security_ai_assistant/current_user/conversations/test',
-        {
-          method: 'DELETE',
-          signal: undefined,
-          version: '2023-10-31',
-        }
-      );
-      expect(toasts.addError).not.toHaveBeenCalled();
+      renderHook(() => deleteConversation(deleteProps));
+      await waitFor(() => {
+        expect(deleteProps.http.fetch).toHaveBeenCalledWith(
+          '/api/security_ai_assistant/current_user/conversations/test',
+          {
+            method: 'DELETE',
+            signal: undefined,
+            version: '2023-10-31',
+          }
+        );
+        expect(toasts.addError).not.toHaveBeenCalled();
+      });
     });
   });
 
@@ -58,18 +58,18 @@ describe('conversations api', () => {
   it('should call api to get conversation', async () => {
     await act(async () => {
       const getProps = { http, toasts, id: 'test' } as unknown as GetConversationByIdParams;
-      const { waitForNextUpdate } = renderHook(() => getConversationById(getProps));
-      await waitForNextUpdate();
-
-      expect(getProps.http.fetch).toHaveBeenCalledWith(
-        '/api/security_ai_assistant/current_user/conversations/test',
-        {
-          method: 'GET',
-          signal: undefined,
-          version: '2023-10-31',
-        }
-      );
-      expect(toasts.addError).not.toHaveBeenCalled();
+      renderHook(() => getConversationById(getProps));
+      await waitFor(() => {
+        expect(getProps.http.fetch).toHaveBeenCalledWith(
+          '/api/security_ai_assistant/current_user/conversations/test',
+          {
+            method: 'GET',
+            signal: undefined,
+            version: '2023-10-31',
+          }
+        );
+        expect(toasts.addError).not.toHaveBeenCalled();
+      });
     });
   });
 
