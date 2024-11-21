@@ -38,7 +38,7 @@ export const getAllMonitors = async ({
   return withApmSpan('get_all_monitors', async () => {
     const finder = soClient.createPointInTimeFinder<EncryptedSyntheticsMonitorAttributes>({
       type: syntheticsMonitorType,
-      perPage: 1000,
+      perPage: 5000,
       search,
       sortField,
       sortOrder,
