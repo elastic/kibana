@@ -5541,6 +5541,7 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'order',
           type: 'keyword',
           optional: true,
+          acceptedValues: ['asc', 'desc'],
         },
       ],
       returnType: 'version',

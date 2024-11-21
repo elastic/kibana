@@ -424,8 +424,11 @@ describe('validation logic', () => {
         ]);
       }
 
-      testErrorsAndWarnings(`row var = mv_sort(["a", "b"], "bogus")`, [], []);
-
+      testErrorsAndWarnings(
+        `row var = mv_sort(["a", "b"], "bogus")`,
+        [],
+        ['Invalid option ["bogus"] for mv_sort. Supported options: ["asc", "desc"].']
+      );
       testErrorsAndWarnings(`row var = mv_sort(["a", "b"], "ASC")`, []);
       testErrorsAndWarnings(`row var = mv_sort(["a", "b"], "DESC")`, []);
 
@@ -1218,7 +1221,11 @@ describe('validation logic', () => {
         "SyntaxError: mismatched input '<EOF>' expecting {',', ')'}",
       ]);
 
-      testErrorsAndWarnings('from a_index | eval mv_sort(["a", "b"], "bogus")', [], []);
+      testErrorsAndWarnings(
+        'from a_index | eval mv_sort(["a", "b"], "bogus")',
+        [],
+        ['Invalid option ["bogus"] for mv_sort. Supported options: ["asc", "desc"].']
+      );
 
       testErrorsAndWarnings(`from a_index | eval mv_sort(["a", "b"], "ASC")`, []);
       testErrorsAndWarnings(`from a_index | eval mv_sort(["a", "b"], "DESC")`, []);
