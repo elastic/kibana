@@ -131,7 +131,7 @@ const basicCase: Case = {
       id: 'df927ab8-54ed-47d6-be07-9948c255c097',
       createdAt: '2024-11-14',
       updatedAt: '2024-11-14',
-      description: undefined,
+      description: null,
     },
   ],
 };

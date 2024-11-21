@@ -128,7 +128,6 @@ export const updateObservable = async (
 ) => {
   const {
     services: { caseService },
-    logger,
     authorization,
   } = clientArgs;
 
