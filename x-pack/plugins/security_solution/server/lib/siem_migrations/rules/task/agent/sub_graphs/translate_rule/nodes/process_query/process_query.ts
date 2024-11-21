@@ -26,7 +26,6 @@ export const getProcessQueryNode = ({
 }: GetProcessQueryNodeParams): GraphNode => {
   return async (state) => {
     let query = state.original_rule.query;
-    logger.info(JSON.stringify(state.original_rule));
     const resources = await resourceRetriever.getResources(state.original_rule);
     if (!isEmpty(resources)) {
       const replaceQueryResourcesPrompt = getReplaceQueryResourcesPrompt(state, resources);

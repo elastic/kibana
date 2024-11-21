@@ -31,7 +31,7 @@ export const getRetrieveIntegrationsNode = ({
   const semanticQueryChain = CREATE_SEMANTIC_QUERY_PROMPT.pipe(model).pipe(jsonParser);
 
   return async (state) => {
-    const query = state.original_rule.query;
+    const query = state.inline_query;
 
     const integrationQuery = (await semanticQueryChain.invoke({
       title: state.original_rule.title,

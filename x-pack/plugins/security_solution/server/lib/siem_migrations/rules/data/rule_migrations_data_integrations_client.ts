@@ -25,7 +25,7 @@ export class RuleMigrationsDataIntegrationsClient extends RuleMigrationsDataBase
   /** Indexes an array of integrations to be used with ELSER semantic search queries */
   async create(): Promise<void> {
     const index = await this.getIndexName();
-    this.logger.info(`Indexing integrations to ${index}`);
+    this.logger.debug(`Indexing integrations to ${index}`);
     // for each integration in the array, run getPackage() to retrieve information from each, and populate a new array
     await this.esClient
       .bulk({
