@@ -89,7 +89,6 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
         type={'logoElastic'}
         size="l"
         data-test-subj={testSubj}
-        className="chrHeaderLogo__cluster"
         aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.logoAriaLabel', {
           defaultMessage: 'Elastic Logo',
         })}

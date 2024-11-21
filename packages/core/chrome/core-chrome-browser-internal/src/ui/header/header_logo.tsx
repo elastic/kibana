@@ -106,7 +106,6 @@ export function HeaderLogo({ href, navigateToApp, loadingCount$, ...observables 
   return (
     <a
       onClick={(e) => onClick(e, forceNavigation, navLinks, navigateToApp)}
-      className="chrHeaderLogo"
       css={styles.logoCss}
       href={href}
       data-test-subj="logo"
