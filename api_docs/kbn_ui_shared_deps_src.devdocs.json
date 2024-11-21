@@ -456,6 +456,17 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.elasticeuithemeborealis",
+            "type": "string",
+            "tags": [],
+            "label": "'@elastic/eui-theme-borealis'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
             "id": "def-common.externals.hellopangeadnd",
             "type": "string",
             "tags": [],

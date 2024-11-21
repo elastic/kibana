@@ -31,7 +31,8 @@ export class DefaultTransformManager implements TransformManager {
     private scopedClusterClient: IScopedClusterClient,
     private logger: Logger,
     private spaceId: string,
-    private dataViewService: DataViewsService
+    private dataViewService: DataViewsService,
+    private isServerless: boolean
   ) {}
 
   async install(slo: SLODefinition): Promise<TransformId> {
@@ -44,7 +45,8 @@ export class DefaultTransformManager implements TransformManager {
     const transformParams = await generator.getTransformParams(
       slo,
       this.spaceId,
-      this.dataViewService
+      this.dataViewService,
+      this.isServerless
     );
     try {
       await retryTransientEsErrors(
@@ -72,7 +74,12 @@ export class DefaultTransformManager implements TransformManager {
       throw new Error(`Unsupported indicator type [${slo.indicator.type}]`);
     }
 
-    return await generator.getTransformParams(slo, this.spaceId, this.dataViewService);
+    return await generator.getTransformParams(
+      slo,
+      this.spaceId,
+      this.dataViewService,
+      this.isServerless
+    );
   }
 
   async preview(transformId: string): Promise<void> {
