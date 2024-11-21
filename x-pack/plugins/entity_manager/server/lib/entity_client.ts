@@ -190,19 +190,24 @@ export class EntityClient {
     sources,
     start,
     end,
+    metadataFields = [],
+    filters = [],
     limit = 10,
   }: {
     sources: EntitySource[];
     start: string;
     end: string;
+    metadataFields?: string[];
+    filters?: string[];
     limit?: number;
   }) {
     const entities = await Promise.all(
       sources.map(async (source) => {
         const mandatoryFields = [source.timestamp_field, ...source.identity_fields];
+        const metaFields = [...metadataFields, ...source.metadata_fields];
         const { fields } = await this.options.esClient.fieldCaps({
           index: source.index_patterns,
-          fields: [...mandatoryFields, ...source.metadata_fields],
+          fields: [...mandatoryFields, ...metaFields],
         });
 
         const sourceHasMandatoryFields = mandatoryFields.every((field) => !!fields[field]);
@@ -216,10 +221,14 @@ export class EntityClient {
         }
 
         // but metadata field not being available is fine
-        const availableMetadataFields = source.metadata_fields.filter((field) => fields[field]);
+        const availableMetadataFields = metaFields.filter((field) => fields[field]);
 
         const query = getEntityInstancesQuery({
-          source: { ...source, metadata_fields: availableMetadataFields },
+          source: {
+            ...source,
+            metadata_fields: availableMetadataFields,
+            filters: [...source.filters, ...filters],
+          },
           start,
           end,
           limit,
