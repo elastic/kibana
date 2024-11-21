@@ -654,9 +654,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilSearchingHasFinished();
       await testSubjects.missingOrFail('unsavedChangesBadge');
 
-      await discover.chooseLensSuggestion('heatMap');
-      expect(await getCurrentVisTitle()).to.be('Heat map');
-      await testSubjects.existOrFail('heatmapChart');
+      await discover.chooseLensSuggestion('waffle');
+      expect(await getCurrentVisTitle()).to.be('Waffle');
+      await testSubjects.existOrFail('partitionVisChart');
       expect(await discover.getVisContextSuggestionType()).to.be('lensSuggestion');
 
       await openLensEditFlyout();

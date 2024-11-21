@@ -1754,6 +1754,200 @@
       },
       {
         "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.BoundChatCompleteAPI",
+        "type": "Type",
+        "tags": [],
+        "label": "BoundChatCompleteAPI",
+        "description": [
+          "\nVersion of {@link ChatCompleteAPI} that got pre-bound to a set of static parameters"
+        ],
+        "signature": [
+          "<TToolOptions extends ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolOptions",
+            "text": "ToolOptions"
+          },
+          "<string> = ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolOptions",
+            "text": "ToolOptions"
+          },
+          "<string>, TStream extends boolean = false>(options: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.UnboundChatCompleteOptions",
+            "text": "UnboundChatCompleteOptions"
+          },
+          "<TToolOptions, TStream>) => ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompleteCompositeResponse",
+            "text": "ChatCompleteCompositeResponse"
+          },
+          "<TToolOptions, TStream>"
+        ],
+        "path": "x-pack/packages/ai-infra/inference-common/src/chat_complete/bound_api.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.BoundChatCompleteAPI.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "{ [P in \"system\" | \"stream\" | \"messages\" | Exclude<keyof TToolOptions, \"connectorId\" | \"functionCalling\">]: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompleteOptions",
+                "text": "ChatCompleteOptions"
+              },
+              "<TToolOptions, TStream>[P]; }"
+            ],
+            "path": "x-pack/packages/ai-infra/inference-common/src/chat_complete/bound_api.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.BoundChatCompleteOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "BoundChatCompleteOptions",
+        "description": [
+          "\nStatic options used to call the {@link BoundChatCompleteAPI}"
+        ],
+        "signature": [
+          "{ connectorId: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompleteOptions",
+            "text": "ChatCompleteOptions"
+          },
+          "<TToolOptions, TStream>[\"connectorId\"]; functionCalling?: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompleteOptions",
+            "text": "ChatCompleteOptions"
+          },
+          "<TToolOptions, TStream>[\"functionCalling\"] | undefined; }"
+        ],
+        "path": "x-pack/packages/ai-infra/inference-common/src/chat_complete/bound_api.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.BoundOutputAPI",
+        "type": "Type",
+        "tags": [],
+        "label": "BoundOutputAPI",
+        "description": [
+          "\nVersion of {@link OutputAPI} that got pre-bound to a set of static parameters"
+        ],
+        "signature": [
+          "<TId extends string = string, TOutputSchema extends ",
+          "ToolSchemaTypeObject",
+          " | undefined = ",
+          "ToolSchemaTypeObject",
+          " | undefined, TStream extends boolean = false>(options: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.UnboundOutputOptions",
+            "text": "UnboundOutputOptions"
+          },
+          "<TId, TOutputSchema, TStream>) => ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.OutputCompositeResponse",
+            "text": "OutputCompositeResponse"
+          },
+          "<TId, TOutputSchema, TStream>"
+        ],
+        "path": "x-pack/packages/ai-infra/inference-common/src/output/bound_api.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.BoundOutputAPI.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "{ id: TId; input: string; schema?: TOutputSchema | undefined; system?: string | undefined; stream?: TStream | undefined; previousMessages?: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.Message",
+                "text": "Message"
+              },
+              "[] | undefined; }"
+            ],
+            "path": "x-pack/packages/ai-infra/inference-common/src/output/bound_api.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.BoundOutputOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "BoundOutputOptions",
+        "description": [
+          "\nStatic options used to call the {@link BoundOutputAPI}"
+        ],
+        "signature": [
+          "{ connectorId: string; functionCalling?: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.FunctionCallingMode",
+            "text": "FunctionCallingMode"
+          },
+          " | undefined; }"
+        ],
+        "path": "x-pack/packages/ai-infra/inference-common/src/output/bound_api.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
         "id": "def-common.ChatCompleteAPI",
         "type": "Type",
         "tags": [],
@@ -2756,6 +2950,56 @@
           " | ToolSchemaTypeString | ToolSchemaTypeBoolean | ToolSchemaTypeNumber | ToolSchemaTypeArray"
         ],
         "path": "x-pack/packages/ai-infra/inference-common/src/chat_complete/tool_schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.UnboundChatCompleteOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "UnboundChatCompleteOptions",
+        "description": [
+          "\nOptions used to call the {@link BoundChatCompleteAPI}"
+        ],
+        "signature": [
+          "{ [P in \"system\" | \"stream\" | \"messages\" | Exclude<keyof TToolOptions, \"connectorId\" | \"functionCalling\">]: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompleteOptions",
+            "text": "ChatCompleteOptions"
+          },
+          "<TToolOptions, TStream>[P]; }"
+        ],
+        "path": "x-pack/packages/ai-infra/inference-common/src/chat_complete/bound_api.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.UnboundOutputOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "UnboundOutputOptions",
+        "description": [
+          "\nOptions used to call the {@link BoundOutputAPI}"
+        ],
+        "signature": [
+          "{ id: TId; input: string; schema?: TOutputSchema | undefined; system?: string | undefined; stream?: TStream | undefined; previousMessages?: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.Message",
+            "text": "Message"
+          },
+          "[] | undefined; }"
+        ],
+        "path": "x-pack/packages/ai-infra/inference-common/src/output/bound_api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
