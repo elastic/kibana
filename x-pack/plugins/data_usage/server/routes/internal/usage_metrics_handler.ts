@@ -51,9 +51,11 @@ export const getUsageMetricsHandler = (
 
       try {
         if (requestDsNames.length <= 50) {
+          logger.debug(`Retrieving usage metrics`);
           const { data_streams: dataStreams } = await getDataStreams(requestDsNames);
           dataStreamsResponse = dataStreams;
         } else {
+          logger.debug(`Retrieving usage metrics in chunks of 50`);
           // Attempt to fetch data streams in chunks of 50
           const dataStreamsChunks = Math.ceil(requestDsNames.length / 50);
           const chunkedDsLists = chunk(dataStreamsChunks, requestDsNames);
