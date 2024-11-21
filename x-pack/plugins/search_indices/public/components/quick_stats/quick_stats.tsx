@@ -68,7 +68,7 @@ export const QuickStats: React.FC<QuickStatsProps> = ({ index, mappings, indexDo
   const mappingStats = useMemo(() => countVectorBasedTypesFromMappings(mappings), [mappings]);
   const vectorFieldCount =
     mappingStats.sparse_vector + mappingStats.dense_vector + mappingStats.semantic_text;
-  const docCount = index.documents ?? 0;
+  const docCount = indexDocuments?.results._meta.page.total ?? 0;
 
   return (
     <EuiPanel
