@@ -11,7 +11,6 @@ import {
   EuiFlexItem,
   EuiHealth,
   EuiLink,
-  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
@@ -186,7 +185,6 @@ export const EndpointDetailsContent = memo<EndpointDetailsContentProps>(
     return (
       <div>
         <EndpointInsights />
-        <EuiSpacer size="s" />
         <EuiDescriptionList
           columnWidths={[1, 3]}
           compressed

@@ -12,34 +12,22 @@ export const OVERVIEW = i18n.translate('xpack.securitySolution.endpointDetails.o
 });
 
 export const ENDPOINT_INSIGHTS = {
-  sectionTitle: i18n.translate(
-    'xpack.securitySolution.endpointDetails.endpointInsights.sectionTitle',
-    {
-      defaultMessage: 'Issues',
-    }
-  ),
-  sectionTitleRight: i18n.translate(
+  title: i18n.translate('xpack.securitySolution.endpointDetails.endpointInsights.sectionTitle', {
+    defaultMessage: 'Issues',
+  }),
+  titleRight: i18n.translate(
     'xpack.securitySolution.endpointDetails.endpointInsights.extraAction',
     {
       defaultMessage: 'Last scans: ',
     }
   ),
-  scanTitle: i18n.translate('xpack.securitySolution.endpointDetails.endpointInsights.scanTitle', {
-    defaultMessage: 'AI-Powered issue scan',
-  }),
-  scanButton: {
-    title: i18n.translate(
-      'xpack.securitySolution.endpointDetails.endpointInsights.scanButton.title',
-      {
-        defaultMessage: 'Scan',
-      }
-    ),
-    addScanner: i18n.translate(
-      'xpack.securitySolution.endpointDetails.endpointInsights.scanButton.addScanner',
-      {
-        defaultMessage: 'Add scanner',
-      }
-    ),
+  scan: {
+    title: i18n.translate('xpack.securitySolution.endpointDetails.endpointInsights.scan.title', {
+      defaultMessage: 'AI-Powered issue scan',
+    }),
+    button: i18n.translate('xpack.securitySolution.endpointDetails.endpointInsights.scan.button', {
+      defaultMessage: 'Scan',
+    }),
   },
   issues: {
     title: i18n.translate('xpack.securitySolution.endpointDetails.endpointInsights.issues.title', {

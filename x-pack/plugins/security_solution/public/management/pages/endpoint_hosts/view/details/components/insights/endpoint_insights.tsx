@@ -7,24 +7,30 @@
 
 import { EuiHorizontalRule, EuiAccordion, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
-import { useLoadConnectors } from '@kbn/elastic-assistant';
 import { useIsExperimentalFeatureEnabled } from '../../../../../../../common/hooks/use_experimental_features';
 import { EndpointInsightsResults } from './endpoint_insights_results';
 import { ENDPOINT_INSIGHTS } from '../../../translations';
-import { EndpointInsightsScan } from './endpoint_insights_scan';
-import { useKibana } from '../../../../../../../common/lib/kibana';
+import { EndpointInsightsScanSection } from './endpoint_insights_scan';
 
 export const EndpointInsights = () => {
   const isEndpointInsightsEnabled = useIsExperimentalFeatureEnabled('defendInsights');
-  const { http } = useKibana().services;
-  const { data: aiConnectors } = useLoadConnectors({
-    http,
-  });
-  const configureConnectors = !(aiConnectors && aiConnectors[0] && aiConnectors[0].id);
 
   if (!isEndpointInsightsEnabled) {
     return null;
   }
+
+  const results = null;
+
+  const renderLastResultsCaption = () => {
+    if (!results) {
+      return null;
+    }
+    return (
+      <EuiText color={'subdued'} size={'xs'}>
+        {ENDPOINT_INSIGHTS.titleRight}
+      </EuiText>
+    );
+  };
 
   return (
     <>
@@ -32,24 +38,20 @@ export const EndpointInsights = () => {
         id={'endpoint-insights-wrapper'}
         buttonContent={
           <EuiText size={'m'}>
-            <strong>{ENDPOINT_INSIGHTS.sectionTitle}</strong>
+            <h4>{ENDPOINT_INSIGHTS.title}</h4>
           </EuiText>
         }
         initialIsOpen
-        extraAction={
-          <EuiText color={'subdued'} size={'xs'}>
-            {ENDPOINT_INSIGHTS.sectionTitleRight}
-          </EuiText>
-        }
+        extraAction={renderLastResultsCaption()}
         paddingSize={'none'}
       >
         <EuiSpacer size={'m'} />
-        <EndpointInsightsScan configureConnectors={configureConnectors} />
+        <EndpointInsightsScanSection />
         <EuiSpacer size={'m'} />
-        <EndpointInsightsResults results={!configureConnectors} />
+        <EndpointInsightsResults results={true} />
         <EuiHorizontalRule />
       </EuiAccordion>
-      <EuiSpacer size={'m'} />
+      <EuiSpacer size="l" />
     </>
   );
 };

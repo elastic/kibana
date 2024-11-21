@@ -32,7 +32,7 @@ export const EndpointInsightsResults = ({ results }: EndpointInsightsResultsProp
   return (
     <>
       <EuiText size={'s'}>
-        <strong>{ENDPOINT_INSIGHTS.issues.title}</strong>
+        <h4>{ENDPOINT_INSIGHTS.issues.title}</h4>
       </EuiText>
       <EuiSpacer size={'s'} />
       <EuiPanel paddingSize="m" hasShadow={false} hasBorder>
@@ -56,7 +56,7 @@ export const EndpointInsightsResults = ({ results }: EndpointInsightsResultsProp
             <EuiButtonIcon
               iconType="popout"
               aria-label="External link"
-              href="https://your-link-here.com"
+              href="https://google.com"
               target="_blank"
             />
           </EuiFlexItem>

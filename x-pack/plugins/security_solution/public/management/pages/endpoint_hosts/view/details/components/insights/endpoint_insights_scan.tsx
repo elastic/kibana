@@ -5,23 +5,67 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
-import { AssistantAvatar } from '@kbn/elastic-assistant';
+import {
+  AssistantAvatar,
+  ENDPOINT_INSIGHTS_STORAGE_KEY,
+  ConnectorSelectorInline,
+  DEFAULT_ASSISTANT_NAMESPACE,
+  useLoadConnectors,
+} from '@kbn/elastic-assistant';
+import { noop } from 'lodash/fp';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { some } from 'lodash';
+import { useSpaceId } from '../../../../../../../common/hooks/use_space_id';
 import { ENDPOINT_INSIGHTS } from '../../../translations';
+import { useKibana } from '../../../../../../../common/lib/kibana';
 
-interface EndpointInsightsScanProps {
-  configureConnectors: boolean;
-}
+export const EndpointInsightsScanSection = () => {
+  const CONNECTOR_ID_LOCAL_STORAGE_KEY = 'connectorId';
 
-export const EndpointInsightsScan = ({ configureConnectors }: EndpointInsightsScanProps) => {
-  const renderButton = () => {
-    if (configureConnectors) {
-      return <EuiButton size="s">{ENDPOINT_INSIGHTS.scanButton.addScanner}</EuiButton>;
-    } else {
-      return <EuiButton size="s">{ENDPOINT_INSIGHTS.scanButton.title}</EuiButton>;
+  const spaceId = useSpaceId() ?? 'default';
+  const { http } = useKibana().services;
+  const { data: aiConnectors } = useLoadConnectors({
+    http,
+  });
+
+  // Store the selected connector id in local storage so that it persists across page reloads
+  const [localStorageEndpointInsightsConnectorId, setLocalStorageEndpointInsightsConnectorId] =
+    useLocalStorage<string>(
+      `${DEFAULT_ASSISTANT_NAMESPACE}.${ENDPOINT_INSIGHTS_STORAGE_KEY}.${spaceId}.${CONNECTOR_ID_LOCAL_STORAGE_KEY}`
+    );
+
+  const [connectorId, setConnectorId] = React.useState<string | undefined>(
+    localStorageEndpointInsightsConnectorId
+  );
+
+  const onConnectorIdSelected = useCallback(
+    (selectedConnectorId: string) => {
+      setConnectorId(selectedConnectorId);
+      setLocalStorageEndpointInsightsConnectorId(selectedConnectorId);
+    },
+    [setLocalStorageEndpointInsightsConnectorId]
+  );
+
+  // Check if the selected connector exists in the list of connectors, i.e. it is not deleted
+  const connectorExists = useMemo(
+    () => some(aiConnectors, ['id', connectorId]),
+    [aiConnectors, connectorId]
+  );
+
+  // Render the scan button only if a connector is selected
+  const renderScanButton = useMemo(() => {
+    if (!connectorExists) {
+      return null;
     }
-  };
+    return (
+      <EuiFlexItem grow={false}>
+        <EuiButton size="s">{ENDPOINT_INSIGHTS.scan.button}</EuiButton>
+      </EuiFlexItem>
+    );
+  }, [connectorExists]);
+
   return (
     <EuiPanel paddingSize="m" hasShadow={false} hasBorder>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m">
@@ -31,11 +75,24 @@ export const EndpointInsightsScan = ({ configureConnectors }: EndpointInsightsSc
               <AssistantAvatar size={'xs'} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiText size="s">{ENDPOINT_INSIGHTS.scanTitle}</EuiText>
+              <EuiText size="s">
+                <h4>{ENDPOINT_INSIGHTS.scan.title}</h4>
+              </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>{renderButton()}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <ConnectorSelectorInline
+                onConnectorSelected={noop}
+                onConnectorIdSelected={onConnectorIdSelected}
+                selectedConnectorId={connectorId}
+              />
+            </EuiFlexItem>
+            {renderScanButton}
+          </EuiFlexGroup>
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
   );
