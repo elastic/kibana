@@ -9,10 +9,22 @@ import React from 'react';
 import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiImage, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import icon from './assets/illustration_product_no_results_magnifying_glass.svg';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 
-export const NoDataCallout = () => {
+export const NoDataCallout = ({
+  'data-test-subj': dateTestSubj,
+}: {
+  'data-test-subj'?: string;
+}) => {
+  const getTestId = useTestIdGenerator(dateTestSubj);
+
   return (
-    <EuiFlexGroup style={{ height: 490 }} alignItems="center" justifyContent="center">
+    <EuiFlexGroup
+      style={{ height: 490 }}
+      alignItems="center"
+      justifyContent="center"
+      data-test-subj={getTestId('no-charts-callout')}
+    >
       <EuiFlexItem grow={false}>
         <EuiPanel hasBorder={true} style={{ maxWidth: 500 }}>
           <EuiFlexGroup>

@@ -231,23 +231,45 @@ describe('DataUsageMetrics', () => {
     expect(toggleFilterButton).toHaveTextContent('Data streams50');
   });
 
-  it('should allow de-selecting all but one data stream option', async () => {
+  it('should allow de-selecting data stream options', async () => {
     mockUseGetDataUsageDataStreams.mockReturnValue({
       error: undefined,
-      data: generateDataStreams(5),
+      data: generateDataStreams(10),
       isFetching: false,
     });
     const { getByTestId, getAllByTestId } = renderComponent();
     const toggleFilterButton = getByTestId(`${testIdFilter}-dataStreams-popoverButton`);
 
-    expect(toggleFilterButton).toHaveTextContent('Data streams5');
+    expect(toggleFilterButton).toHaveTextContent('Data streams10');
     await user.click(toggleFilterButton);
     const allFilterOptions = getAllByTestId('dataStreams-filter-option');
-    for (let i = 0; i < allFilterOptions.length - 1; i++) {
+    // deselect 9 options
+    for (let i = 0; i < allFilterOptions.length; i++) {
       await user.click(allFilterOptions[i]);
     }
 
     expect(toggleFilterButton).toHaveTextContent('Data streams1');
+  });
+
+  it('should allow de-selecting all data stream options using `clear all`', async () => {
+    mockUseGetDataUsageDataStreams.mockReturnValue({
+      error: undefined,
+      data: generateDataStreams(10),
+      isFetching: false,
+    });
+    const { getByTestId } = renderComponent();
+    const toggleFilterButton = getByTestId(`${testIdFilter}-dataStreams-popoverButton`);
+
+    expect(toggleFilterButton).toHaveTextContent('Data streams10');
+    await user.click(toggleFilterButton);
+
+    expect(getByTestId(`${testIdFilter}-dataStreams-search`)).toBeTruthy();
+
+    const clearAllButton = getByTestId(`${testIdFilter}-dataStreams-clearAllButton`);
+    expect(clearAllButton).toBeTruthy();
+    await user.click(clearAllButton);
+
+    expect(toggleFilterButton).toHaveTextContent('Data streams10');
   });
 
   it('should not call usage metrics API if no data streams', async () => {

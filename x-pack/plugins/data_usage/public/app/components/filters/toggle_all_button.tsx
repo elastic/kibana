@@ -15,52 +15,29 @@ const EuiButtonEmptyCss = css`
   border-radius: 0;
 `;
 
-interface StyledButtonEmptyProps {
+interface ToggleAllButtonProps {
+  'data-test-subj'?: string;
   color: EuiButtonEmptyProps['color'];
   icon: EuiButtonEmptyProps['iconType'];
   isDisabled: boolean;
   onClick: () => void;
+  label: string;
 }
-const StyledEuiButtonEmpty = ({
-  isDisabled,
-  onClick,
-  children,
-  color,
-  icon,
-}: StyledButtonEmptyProps & { children: React.ReactNode }) => (
-  <EuiButtonEmpty
-    iconType={icon}
-    color={color}
-    isDisabled={isDisabled}
-    onClick={onClick}
-    css={EuiButtonEmptyCss}
-  >
-    {children}
-  </EuiButtonEmpty>
-);
 
-export const ToggleAllButton = memo(
-  ({
-    color,
-    'data-test-subj': dataTestSubj,
-    icon,
-    isDisabled,
-    label,
-    onClick,
-  }: {
-    'data-test-subj'?: string;
-    label: string;
-  } & StyledButtonEmptyProps) => {
+export const ToggleAllButton = memo<ToggleAllButtonProps>(
+  ({ color, 'data-test-subj': dataTestSubj, icon, isDisabled, label, onClick }) => {
+    // const getTestId = useTestIdGenerator(dataTestSubj);
     return (
-      <StyledEuiButtonEmpty
+      <EuiButtonEmpty
         color={color}
+        css={EuiButtonEmptyCss}
         data-test-subj={dataTestSubj}
-        icon={icon}
+        iconType={icon}
         isDisabled={isDisabled}
         onClick={onClick}
       >
         {label}
-      </StyledEuiButtonEmpty>
+      </EuiButtonEmpty>
     );
   }
 );

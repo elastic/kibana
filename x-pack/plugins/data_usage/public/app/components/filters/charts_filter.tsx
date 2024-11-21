@@ -228,7 +228,7 @@ export const ChartsFilter = memo<ChartsFilterProps>(
                   <EuiFlexItem grow={1}>
                     <ToggleAllButton
                       color="primary"
-                      data-test-subj={getTestId(`${filterName}-filter-selectAllButton`)}
+                      data-test-subj={getTestId(`${filterName}-selectAllButton`)}
                       icon="check"
                       label={UX_LABELS.filterSelectAll}
                       isDisabled={hasActiveFilters && numFilters === 0}
@@ -238,7 +238,7 @@ export const ChartsFilter = memo<ChartsFilterProps>(
                   <EuiFlexItem grow={1}>
                     <ToggleAllButton
                       color="danger"
-                      data-test-subj={getTestId(`${filterName}-filter-clearAllButton`)}
+                      data-test-subj={getTestId(`${filterName}-clearAllButton`)}
                       icon="cross"
                       label={UX_LABELS.filterClearAll}
                       isDisabled={!hasActiveFilters}
