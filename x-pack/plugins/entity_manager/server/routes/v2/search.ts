@@ -9,6 +9,7 @@ import moment from 'moment';
 import { z } from '@kbn/zod';
 import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
 import { entitySourceSchema } from '../../lib/queries';
+import { UnknownEntityType } from '../../lib/entities/errors/unknown_entity_type';
 
 export const searchEntitiesRoute = createEntityManagerServerRoute({
   endpoint: 'POST /internal/entities/v2/_search',
@@ -37,17 +38,23 @@ export const searchEntitiesRoute = createEntityManagerServerRoute({
       const { type, start, end, limit, filters, metadata_fields: metadataFields } = params.body;
 
       const client = await getScopedClient({ request });
-
-      const sources = await client.getEntitySources({ type });
-      if (sources.length === 0) {
-        return response.notFound({ body: { message: `No sources found for type [${type}]` } });
-      }
-
-      const entities = await client.searchEntities({ sources, filters, metadataFields, start, end, limit });
+      const entities = await client.searchEntities({
+        type,
+        filters,
+        metadataFields,
+        start,
+        end,
+        limit,
+      });
 
       return response.ok({ body: { entities } });
     } catch (e) {
       logger.error(e);
+
+      if (e instanceof UnknownEntityType) {
+        return response.notFound({ body: e });
+      }
+
       return response.customError({ body: e, statusCode: 500 });
     }
   },
@@ -78,7 +85,7 @@ export const searchEntitiesPreviewRoute = createEntityManagerServerRoute({
       const { sources, start, end, limit } = params.body;
 
       const client = await getScopedClient({ request });
-      const entities = await client.searchEntities({
+      const entities = await client.searchEntitiesBySources({
         sources,
         start,
         end,

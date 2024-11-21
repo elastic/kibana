@@ -25,6 +25,7 @@ import { EntityDefinitionWithState } from './entities/types';
 import { EntityDefinitionUpdateConflict } from './entities/errors/entity_definition_update_conflict';
 import { EntitySource, getEntityInstancesQuery } from './queries';
 import { mergeEntitiesList, runESQLQuery } from './queries/utils';
+import { UnknownEntityType } from './entities/errors/unknown_entity_type';
 
 export class EntityClient {
   constructor(
@@ -187,6 +188,36 @@ export class EntityClient {
   }
 
   async searchEntities({
+    type,
+    start,
+    end,
+    metadataFields = [],
+    filters = [],
+    limit = 10,
+  }: {
+    type: string;
+    start: string;
+    end: string;
+    metadataFields?: string[];
+    filters?: string[];
+    limit?: number;
+  }) {
+    const sources = await this.getEntitySources({ type });
+    if (sources.length === 0) {
+      throw new UnknownEntityType(`No sources found for entity type [${type}]`);
+    }
+
+    return this.searchEntitiesBySources({
+      sources,
+      start,
+      end,
+      metadataFields,
+      filters,
+      limit,
+    });
+  }
+
+  async searchEntitiesBySources({
     sources,
     start,
     end,
