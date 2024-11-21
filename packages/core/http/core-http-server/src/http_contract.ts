@@ -12,7 +12,7 @@ import type {
   IContextProvider,
   IRouter,
   RequestHandlerContextBase,
-  RouterDeprecatedRouteDetails,
+  RouterDeprecatedApiDetails,
 } from './router';
 import type {
   AuthenticationHandler,
@@ -362,12 +362,12 @@ export interface HttpServiceSetup<
   getServerInfo: () => HttpServerInfo;
 
   /**
-   * Provides a list of all registered deprecated routes {{@link RouterDeprecatedRouteDetails | information}}.
+   * Provides a list of all registered deprecated routes {{@link RouterDeprecatedApiDetails | information}}.
    * The routers will be evaluated everytime this function gets called to
    * accommodate for any late route registrations
-   * @returns {RouterDeprecatedRouteDetails[]}
+   * @returns {RouterDeprecatedApiDetails[]}
    */
-  getDeprecatedRoutes: () => RouterDeprecatedRouteDetails[];
+  getDeprecatedRoutes: () => RouterDeprecatedApiDetails[];
 }
 
 /** @public */

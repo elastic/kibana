@@ -11,32 +11,37 @@ import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import {
   type ChatCompleteAPI,
-  type ChatCompletionResponse,
+  type ChatCompleteCompositeResponse,
   createInferenceRequestError,
+  type ToolOptions,
+  ChatCompleteOptions,
 } from '@kbn/inference-common';
-import type { InferenceStartDependencies } from '../types';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { getConnectorById } from '../util/get_connector_by_id';
 import { getInferenceAdapter } from './adapters';
-import { createInferenceExecutor, chunksIntoMessage } from './utils';
+import { createInferenceExecutor, chunksIntoMessage, streamToResponse } from './utils';
 
-export function createChatCompleteApi({
-  request,
-  actions,
-  logger,
-}: {
+interface CreateChatCompleteApiOptions {
   request: KibanaRequest;
-  actions: InferenceStartDependencies['actions'];
+  actions: ActionsPluginStart;
   logger: Logger;
-}) {
-  const chatCompleteAPI: ChatCompleteAPI = ({
+}
+
+export function createChatCompleteApi(options: CreateChatCompleteApiOptions): ChatCompleteAPI;
+export function createChatCompleteApi({ request, actions, logger }: CreateChatCompleteApiOptions) {
+  return ({
     connectorId,
     messages,
     toolChoice,
     tools,
     system,
     functionCalling,
-  }): ChatCompletionResponse => {
-    return defer(async () => {
+    stream,
+  }: ChatCompleteOptions<ToolOptions, boolean>): ChatCompleteCompositeResponse<
+    ToolOptions,
+    boolean
+  > => {
+    const obs$ = defer(async () => {
       const actionsClient = await actions.getActionsClientWithRequest(request);
       const connector = await getConnectorById({ connectorId, actionsClient });
       const executor = createInferenceExecutor({ actionsClient, connector });
@@ -73,7 +78,11 @@ export function createChatCompleteApi({
         logger,
       })
     );
-  };
 
-  return chatCompleteAPI;
+    if (stream) {
+      return obs$;
+    } else {
+      return streamToResponse(obs$);
+    }
+  };
 }

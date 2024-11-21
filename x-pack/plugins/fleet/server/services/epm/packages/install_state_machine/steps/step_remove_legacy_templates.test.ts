@@ -24,6 +24,8 @@ import { appContextService } from '../../../../app_context';
 import { createAppContextStartContractMock } from '../../../../../mocks';
 import { removeLegacyTemplates } from '../../../elasticsearch/template/remove_legacy';
 
+import { createArchiveIteratorFromMap } from '../../../archive/archive_iterator';
+
 import { stepRemoveLegacyTemplates } from './step_remove_legacy_templates';
 
 jest.mock('../../../elasticsearch/template/remove_legacy');
@@ -82,6 +84,7 @@ describe('stepRemoveLegacyTemplates', () => {
     } as any,
     paths: ['some/path/1', 'some/path/2'],
     assetsMap: new Map(),
+    archiveIterator: createArchiveIteratorFromMap(new Map()),
   };
   appContextService.start(
     createAppContextStartContractMock({

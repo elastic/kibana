@@ -10,6 +10,12 @@ import {
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import {
+  TEXT_XL_A,
+  TEXT_XL_B,
+  TEXT_XL_C,
+  TEXT_XL_MERGED,
+} from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/logic/diff/calculation/algorithms/multi_line_string_diff_algorithm.mock';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   deleteAllTimelines,
@@ -235,6 +241,56 @@ export default ({ getService }: FtrProviderContext): void => {
               current_version: 'My GREAT description.\nThis is a second line.',
               target_version: 'My description.\nThis is a second line, now longer.',
               merged_version: 'My GREAT description.\nThis is a second line, now longer.',
+              diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
+              merge_outcome: ThreeWayMergeOutcome.Merged,
+              conflict: ThreeWayDiffConflict.SOLVABLE,
+              has_update: true,
+              has_base_version: true,
+            });
+            expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(2);
+            expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(1);
+            expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
+
+            expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
+            expect(reviewResponse.stats.num_rules_with_conflicts).toBe(1);
+            expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(0);
+          });
+
+          it('should handle long multi-line strings without timing out', async () => {
+            // Install base prebuilt detection rule
+            await createHistoricalPrebuiltRuleAssetSavedObjects(es, [
+              createRuleAssetSavedObject({
+                rule_id: 'rule-1',
+                version: 1,
+                description: TEXT_XL_A,
+              }),
+            ]);
+            await installPrebuiltRules(es, supertest);
+
+            // Customize a multi line string field on the installed rule
+            await patchRule(supertest, log, {
+              rule_id: 'rule-1',
+              description: TEXT_XL_B,
+            });
+
+            // Increment the version of the installed rule, update a multi line string field, and create the new rule assets
+            const updatedRuleAssetSavedObjects = [
+              createRuleAssetSavedObject({
+                rule_id: 'rule-1',
+                version: 2,
+                description: TEXT_XL_C,
+              }),
+            ];
+            await createHistoricalPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
+
+            // Call the upgrade review prebuilt rules endpoint and check that one rule is eligible for update
+            // and multi line string field update has no conflict
+            const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
+            expect(reviewResponse.rules[0].diff.fields.description).toEqual({
+              base_version: TEXT_XL_A,
+              current_version: TEXT_XL_B,
+              target_version: TEXT_XL_C,
+              merged_version: TEXT_XL_MERGED,
               diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
               merge_outcome: ThreeWayMergeOutcome.Merged,
               conflict: ThreeWayDiffConflict.SOLVABLE,

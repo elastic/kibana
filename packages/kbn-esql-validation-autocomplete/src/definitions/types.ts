@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLCommand, ESQLCommandOption, ESQLFunction, ESQLMessage } from '@kbn/esql-ast';
+import type {
+  ESQLAst,
+  ESQLAstItem,
+  ESQLCommand,
+  ESQLCommandOption,
+  ESQLFunction,
+  ESQLMessage,
+} from '@kbn/esql-ast';
 import { GetColumnsByTypeFn, SuggestionRawDefinition } from '../autocomplete/types';
 
 /**
@@ -112,6 +119,7 @@ export const isReturnType = (str: string | FunctionParameterType): str is Functi
 
 export interface FunctionDefinition {
   type: 'builtin' | 'agg' | 'eval';
+  preview?: boolean;
   ignoreAsSuggestion?: boolean;
   name: string;
   alias?: string[];
@@ -129,6 +137,10 @@ export interface FunctionDefinition {
        * though a function can be used to create the value. (e.g. now() for dates or concat() for strings)
        */
       constantOnly?: boolean;
+      /**
+       * Default to false. If set to true, this parameter does not accept a function or literal, only fields.
+       */
+      fieldsOnly?: boolean;
       /**
        * if provided this means that the value must be one
        * of the options in the array iff the value is a literal.
@@ -173,7 +185,9 @@ export interface CommandBaseDefinition<CommandName extends string> {
     getColumnsByType: GetColumnsByTypeFn,
     columnExists: (column: string) => boolean,
     getSuggestedVariableName: () => string,
-    getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>
+    getExpressionType: (expression: ESQLAstItem | undefined) => SupportedDataType | 'unknown',
+    getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>,
+    fullTextAst?: ESQLAst
   ) => Promise<SuggestionRawDefinition[]>;
   /** @deprecated this property will disappear in the future */
   signature: {

@@ -20,6 +20,7 @@ import {
   isAssignment,
   isColumnItem,
   isFunctionItem,
+  isFunctionOperatorParam,
   isLiteralItem,
 } from '../shared/helpers';
 import { ENRICH_MODES } from './settings';
@@ -36,6 +37,7 @@ import { suggest as suggestForSort } from '../autocomplete/commands/sort';
 import { suggest as suggestForKeep } from '../autocomplete/commands/keep';
 import { suggest as suggestForDrop } from '../autocomplete/commands/drop';
 import { suggest as suggestForStats } from '../autocomplete/commands/stats';
+import { suggest as suggestForWhere } from '../autocomplete/commands/where';
 
 const statsValidator = (command: ESQLCommand) => {
   const messages: ESQLMessage[] = [];
@@ -72,7 +74,7 @@ const statsValidator = (command: ESQLCommand) => {
     function checkAggExistence(arg: ESQLFunction): boolean {
       // TODO the grouping function check may not
       // hold true for all future cases
-      if (isAggFunction(arg)) {
+      if (isAggFunction(arg) || isFunctionOperatorParam(arg)) {
         return true;
       }
       if (isOtherFunction(arg)) {
@@ -313,7 +315,8 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
   {
     name: 'keep',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.keepDoc', {
-      defaultMessage: 'Rearranges fields in the input table by applying the keep clauses in fields',
+      defaultMessage:
+        'Rearranges fields in the Results table by applying the keep clauses in fields',
     }),
     examples: ['… | keep a', '… | keep a,b'],
     suggest: suggestForKeep,
@@ -409,6 +412,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     },
     options: [],
     modes: [],
+    suggest: suggestForWhere,
   },
   {
     name: 'dissect',
