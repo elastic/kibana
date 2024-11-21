@@ -63,7 +63,6 @@
     "@kbn/presentation-containers",
     "@kbn/presentation-publishing",
     "@kbn/presentation-util-plugin",
-    "@kbn/react-kibana-context-theme",
     "@kbn/react-kibana-mount",
     "@kbn/rison",
     "@kbn/saved-search-plugin",
