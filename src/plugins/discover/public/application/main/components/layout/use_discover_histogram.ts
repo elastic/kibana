@@ -12,13 +12,14 @@ import {
   canImportVisContext,
   UnifiedHistogramApi,
   UnifiedHistogramContainerProps,
+  UnifiedHistogramCreationOptions,
   UnifiedHistogramExternalVisContextStatus,
   UnifiedHistogramFetchStatus,
   UnifiedHistogramState,
   UnifiedHistogramVisContext,
 } from '@kbn/unified-histogram-plugin/public';
 import { isEqual } from 'lodash';
-import { RefAttributes, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   debounceTime,
   distinctUntilChanged,
@@ -63,8 +64,13 @@ export const useDiscoverHistogram = ({
   stateContainer,
   inspectorAdapters,
   hideChart,
-}: UseDiscoverHistogramProps): Omit<UnifiedHistogramContainerProps, 'container'> &
-  RefAttributes<UnifiedHistogramApi> => {
+}: UseDiscoverHistogramProps): Omit<
+  UnifiedHistogramContainerProps,
+  'container' | 'getCreationOptions'
+> & {
+  ref: (api: UnifiedHistogramApi | null) => void;
+  getCreationOptions: () => UnifiedHistogramCreationOptions;
+} => {
   const services = useDiscoverServices();
   const { main$, documents$, totalHits$ } = stateContainer.dataState.data$;
   const savedSearchState = useSavedSearch();
