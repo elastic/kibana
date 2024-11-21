@@ -6,17 +6,13 @@
  */
 
 import React from 'react';
-import { screen, within, waitFor } from '@testing-library/react';
+import { screen, within, waitFor, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SyncAlertsToggle } from './sync_alerts_toggle';
 import { schema } from '../create/schema';
 import { FormTestComponent } from '../../common/test_utils';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
 
-// Failing: https://github.com/elastic/kibana/issues/190270
-describe.skip('SyncAlertsToggle', () => {
-  let appMockRender: AppMockRenderer;
+describe('SyncAlertsToggle', () => {
   const onSubmit = jest.fn();
   const defaultFormProps = {
     onSubmit,
@@ -28,15 +24,10 @@ describe.skip('SyncAlertsToggle', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
-  });
-
-  afterEach(async () => {
-    await appMockRender.clearQueryCache();
   });
 
   it('it renders', async () => {
-    appMockRender.render(
+    render(
       <FormTestComponent>
         <SyncAlertsToggle isLoading={false} />
       </FormTestComponent>
@@ -48,7 +39,7 @@ describe.skip('SyncAlertsToggle', () => {
   });
 
   it('it toggles the switch', async () => {
-    appMockRender.render(
+    render(
       <FormTestComponent>
         <SyncAlertsToggle isLoading={false} />
       </FormTestComponent>
@@ -63,7 +54,7 @@ describe.skip('SyncAlertsToggle', () => {
   });
 
   it('calls onSubmit with correct data', async () => {
-    appMockRender.render(
+    render(
       <FormTestComponent {...defaultFormProps}>
         <SyncAlertsToggle isLoading={false} />
       </FormTestComponent>
@@ -73,7 +64,7 @@ describe.skip('SyncAlertsToggle', () => {
 
     await userEvent.click(within(synAlerts).getByRole('switch'));
 
-    await userEvent.click(screen.getByText('Submit'));
+    await userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith(
