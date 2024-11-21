@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { KibanaRequest } from '@kbn/core-http-server';
 import { createFieldsMetadataClientMock } from './fields_metadata_client.mock';
 import { FieldsMetadataServiceSetup, FieldsMetadataServiceStart } from './types';
 
@@ -16,5 +17,7 @@ export const createFieldsMetadataServiceSetupMock =
 
 export const createFieldsMetadataServiceStartMock =
   (): jest.Mocked<FieldsMetadataServiceStart> => ({
-    getClient: jest.fn(() => createFieldsMetadataClientMock()),
+    getClient: jest.fn((_request: KibanaRequest) =>
+      Promise.resolve(createFieldsMetadataClientMock())
+    ),
   });

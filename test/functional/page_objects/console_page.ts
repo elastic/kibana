@@ -276,8 +276,12 @@ export class ConsolePageObject extends FtrService {
     await this.testSubjects.click('consoleSkipTourButton');
   }
 
-  public async clickNextTourStep() {
+  public async clickNextTourStep(andWaitFor: number = 0) {
     await this.testSubjects.click('consoleNextTourStepButton');
+
+    if (andWaitFor) {
+      await this.common.sleep(andWaitFor);
+    }
   }
 
   public async clickCompleteTour() {

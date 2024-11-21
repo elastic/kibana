@@ -349,7 +349,10 @@ export const TemplateForm = ({
         </FormWizardStep>
 
         <FormWizardStep id={wizardSections.mappings.id} label={wizardSections.mappings.label}>
-          <StepMappingsContainer esDocsBase={documentationService.getEsDocsBase()} />
+          <StepMappingsContainer
+            esDocsBase={documentationService.getEsDocsBase()}
+            getTemplateData={buildTemplateObject(indexTemplate)}
+          />
         </FormWizardStep>
 
         <FormWizardStep id={wizardSections.aliases.id} label={wizardSections.aliases.label}>
