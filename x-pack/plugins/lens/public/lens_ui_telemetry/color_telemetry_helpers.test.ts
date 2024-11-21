@@ -13,7 +13,7 @@ import {
   DEFAULT_COLOR_MAPPING_CONFIG,
   DEFAULT_OTHER_ASSIGNMENT_INDEX,
 } from '@kbn/coloring';
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 
 const exampleAssignment = (
   valuesCount = 1,
@@ -35,7 +35,7 @@ const exampleAssignment = (
   return {
     rule: {
       type: 'matchExactly',
-      values: Array.from({ length: valuesCount }, () => faker.random.alpha()),
+      values: Array.from({ length: valuesCount }, () => faker.string.alpha()),
     },
     color,
     touched: false,

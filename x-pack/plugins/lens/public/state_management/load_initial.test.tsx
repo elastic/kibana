@@ -18,7 +18,7 @@ import { act } from 'react-dom/test-utils';
 import { LensEmbeddableInput } from '../embeddable';
 import { loadInitial } from './lens_slice';
 import { Filter } from '@kbn/es-query';
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 
 const history = {
   location: {

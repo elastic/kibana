@@ -137,12 +137,10 @@
       "groupName": "@elastic/appex-qa dependencies",
       "matchDepNames": [
         "cheerio",
-        "@types/faker",
         "@types/pixelmatch",
         "@types/pngjs",
         "@types/supertest",
         "babel-plugin-istanbul",
-        "faker",
         "nyc",
         "oboe",
         "pixelmatch",
@@ -1303,10 +1301,21 @@
     },
     {
       "groupName": "@elastic/request-converter",
-      "matchDepNames": ["@elastic/request-converter"],
-      "reviewers": ["team:kibana-management"],
-      "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "backport:skip", "Team:Kibana Management", "Feature:Console"],
+      "matchDepNames": [
+        "@elastic/request-converter"
+      ],
+      "reviewers": [
+        "team:kibana-management"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:skip",
+        "Team:Kibana Management",
+        "Feature:Console"
+      ],
       "enabled": true
     }
   ],

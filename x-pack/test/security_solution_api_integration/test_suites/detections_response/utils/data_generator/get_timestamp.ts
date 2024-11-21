@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 import type { IndexingInterval } from './types';
 
 export const getTimestamp = (interval?: IndexingInterval) => {

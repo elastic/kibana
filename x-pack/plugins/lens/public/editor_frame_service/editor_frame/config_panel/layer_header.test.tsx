@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { screen } from '@testing-library/react';
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 import {
   createMockDatasource,
   createMockFramePublicAPI,

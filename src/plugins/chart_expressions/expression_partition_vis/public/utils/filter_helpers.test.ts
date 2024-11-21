@@ -18,7 +18,7 @@ import {
 import { createMockBucketColumns, createMockVisData, createMockPieParams } from '../mocks';
 import { consolidateMetricColumns } from '../../common/utils';
 import { LayerValue } from '@elastic/charts';
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 
 const bucketColumns = createMockBucketColumns();
 const visData = createMockVisData();
@@ -186,26 +186,26 @@ describe('getFilterClickData', () => {
         const clickedLayers: LayerValue[] = [
           {
             groupByRollup: 'circle',
-            value: faker.random.number(),
-            depth: faker.random.number(),
+            value: faker.number.int(),
+            depth: faker.number.int(),
             path: [],
-            sortIndex: faker.random.number(),
+            sortIndex: faker.number.int(),
             smAccessorValue: '',
           },
           {
             groupByRollup: 'green',
-            value: faker.random.number(),
-            depth: faker.random.number(),
+            value: faker.number.int(),
+            depth: faker.number.int(),
             path: [],
-            sortIndex: faker.random.number(),
+            sortIndex: faker.number.int(),
             smAccessorValue: '',
           },
           {
             groupByRollup: 'metric2',
-            value: faker.random.number(),
-            depth: faker.random.number(),
+            value: faker.number.int(),
+            depth: faker.number.int(),
             path: [],
-            sortIndex: faker.random.number(),
+            sortIndex: faker.number.int(),
             smAccessorValue: '',
           },
         ];

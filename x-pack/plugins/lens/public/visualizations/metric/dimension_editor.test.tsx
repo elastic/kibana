@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 import userEvent from '@testing-library/user-event';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { euiLightVars } from '@kbn/ui-theme';
@@ -77,7 +77,7 @@ describe('dimension editor', () => {
         id: 'first',
         rows: Array(3).fill({
           'metric-col-id': faker.lorem.word(3),
-          'max-col-id': faker.random.number(),
+          'max-col-id': faker.number.int(),
         }),
       },
     ]),
@@ -106,8 +106,8 @@ describe('dimension editor', () => {
           {
             id: 'first',
             rows: Array(3).fill({
-              'metric-col-id': faker.random.number(),
-              'secondary-metric-col-id': faker.random.number(),
+              'metric-col-id': faker.number.int(),
+              'secondary-metric-col-id': faker.number.int(),
             }),
           },
         ]),
