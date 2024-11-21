@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import { FIELD_TYPES, fieldValidators, UseField } from '../../../../../../shared_imports';
 
-import { XJsonAndJsonEditor } from '../field_components';
+import { XJsonEditor } from '../field_components';
 
 import { FieldNameField } from './common_fields/field_name_field';
 import { FieldsConfig, to, EDITOR_PX_HEIGHT, from, isXJsonField } from './shared';
@@ -65,7 +65,7 @@ export const Foreach: FunctionComponent = () => {
       />
 
       <UseField
-        component={XJsonAndJsonEditor}
+        component={XJsonEditor}
         componentProps={{
           editorProps: {
             'data-test-subj': 'processorField',

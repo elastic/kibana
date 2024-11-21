@@ -76,6 +76,7 @@ describe('convert processors to json', () => {
       processor: '{"1": """aaa"bbb"""}',
       inference_config: '{"1": """aaa"bbb"""}',
       field_map: '{"1": """aaa"bbb"""}',
+      customOptions: '{"customProcessor": """aaa"bbb"""}',
     };
 
     expect(convertProccesorsToJson(obj)).toEqual({
@@ -90,6 +91,8 @@ describe('convert processors to json', () => {
       inference_config: { 1: "aaa\"bbb" },
       // eslint-disable-next-line prettier/prettier
       field_map: { 1: "aaa\"bbb" },
+      // eslint-disable-next-line prettier/prettier
+      customProcessor: "aaa\"bbb"
     });
   });
 });

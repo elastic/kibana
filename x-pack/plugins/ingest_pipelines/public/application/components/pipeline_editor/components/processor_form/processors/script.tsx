@@ -19,7 +19,7 @@ import {
   useFormData,
 } from '../../../../../../shared_imports';
 
-import { XJsonAndJsonEditor, TextEditor } from '../field_components';
+import { XJsonEditor, TextEditor } from '../field_components';
 
 import {
   FieldsConfig,
@@ -196,7 +196,7 @@ export const Script: FormFieldsComponent = ({ initialFieldValues }) => {
       )}
 
       <UseField
-        component={XJsonAndJsonEditor}
+        component={XJsonEditor}
         componentProps={{
           editorProps: {
             'data-test-subj': 'paramsField',

@@ -21,7 +21,7 @@ import {
 import { TargetField } from './common_fields/target_field';
 
 import { FieldsConfig, to, from, EDITOR_PX_HEIGHT, isXJsonField } from './shared';
-import { XJsonAndJsonEditor } from '../field_components';
+import { XJsonEditor } from '../field_components';
 
 const { emptyField } = fieldValidators;
 
@@ -159,7 +159,7 @@ export const Inference: FunctionComponent = () => {
 
       <UseField
         config={fieldsConfig.field_map}
-        component={XJsonAndJsonEditor}
+        component={XJsonEditor}
         componentProps={{
           editorProps: {
             'data-test-subj': 'fieldMap',
@@ -175,7 +175,7 @@ export const Inference: FunctionComponent = () => {
           ...fieldsConfig.inference_config,
           helpText: getInferenceConfigHelpText(documentationDocsLink),
         }}
-        component={XJsonAndJsonEditor}
+        component={XJsonEditor}
         componentProps={{
           editorProps: {
             'data-test-subj': 'inferenceConfig',

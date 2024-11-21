@@ -158,9 +158,15 @@ const fieldToConvertToJson = [
 
 export const convertProccesorsToJson = (obj: { [key: string]: any }): { [key: string]: any } => {
   return Object.fromEntries(
-    Object.entries(obj).map(([key, value]) => [
-      key,
-      fieldToConvertToJson.includes(key) ? convertProcessorValueToJson(value) : value,
-    ])
+    Object.entries(obj).flatMap(([key, value]) => {
+      if (key === 'customOptions') {
+        const convertedValue = convertProcessorValueToJson(value);
+        return Object.entries(convertedValue);
+      } else if (fieldToConvertToJson.includes(key)) {
+        return [[key, convertProcessorValueToJson(value)]];
+      } else {
+        return [[key, value]];
+      }
+    })
   );
 };
