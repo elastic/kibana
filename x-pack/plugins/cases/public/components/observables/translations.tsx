@@ -11,6 +11,10 @@ export const ADD_OBSERVABLE = i18n.translate('xpack.cases.caseView.observables.a
   defaultMessage: 'Add observable',
 });
 
+export const EDIT_OBSERVABLE = i18n.translate('xpack.cases.caseView.observables.edit', {
+  defaultMessage: 'Edit observable',
+});
+
 export const NO_OBSERVABLES = i18n.translate(
   'xpack.cases.caseView.observables.noObservablesAvailable',
   {
@@ -87,10 +91,6 @@ export const OBSERVABLE_UPDATED = i18n.translate('xpack.cases.caseView.observabl
 
 export const OBSERVABLE_CREATED = i18n.translate('xpack.cases.caseView.observables.created', {
   defaultMessage: 'Observable created',
-});
-
-export const EDIT_OBSERVABLE = i18n.translate('xpack.cases.caseView.observables.edit', {
-  defaultMessage: 'Edit observable',
 });
 
 export const SAVE_OBSERVABLE = i18n.translate('xpack.cases.caseView.observables.save', {

@@ -626,7 +626,9 @@ export const ConfigureCases: React.FC = React.memo(() => {
         }
         onCloseFlyout={onCloseObservableTypesFlyout}
         onSaveField={onObservableTypeSave}
-        renderHeader={() => <span>{i18n.ADD_OBSERVABLE_TYPE}</span>}
+        renderHeader={() => (
+          <span>{observableTypeToEdit ? i18n.EDIT_OBSERVABLE_TYPE : i18n.ADD_OBSERVABLE_TYPE}</span>
+        )}
       >
         {({ onChange }) => (
           <ObservableTypesForm onChange={onChange} initialValue={observableTypeToEdit} />

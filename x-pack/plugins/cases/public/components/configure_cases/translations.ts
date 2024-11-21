@@ -193,3 +193,10 @@ export const ADD_OBSERVABLE_TYPE = i18n.translate(
     defaultMessage: 'Add observable type',
   }
 );
+
+export const EDIT_OBSERVABLE_TYPE = i18n.translate(
+  'xpack.cases.configureCases.observableTypes.editObservableType',
+  {
+    defaultMessage: 'Edit observable type',
+  }
+);
