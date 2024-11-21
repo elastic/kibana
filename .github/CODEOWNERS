@@ -1812,6 +1812,9 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 #CC# /x-pack/plugins/security/ @elastic/kibana-security
 
 # Response Ops team
+/x-pack/test/functional/es_archives/rule_registry @elastic/response-ops
+/x-pack/test/functional/es_archives/event_log_multiple_indicies @elastic/response-ops
+/x-pack/test/functional/es_archives/task_manager* @elastic/response-ops # Assigned per https://github.com/elastic/kibana/blob/assign-response-ops/x-pack/test/plugin_api_perf/plugins/task_manager_performance/kibana.jsonc#L4
 /x-pack/test/plugin_api_perf @elastic/response-ops # Assigned per https://github.com/elastic/kibana/blob/assign-response-ops/x-pack/test/plugin_api_perf/plugins/task_manager_performance/kibana.jsonc#L4
 /x-pack/test/functional/page_objects/maintenance_windows_page.ts @elastic/response-ops
 /x-pack/test_serverless/functional/test_suites/observability/screenshot_creation/index.ts @elastic/response-ops
