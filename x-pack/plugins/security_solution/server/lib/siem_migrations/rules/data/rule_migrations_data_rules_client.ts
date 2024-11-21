@@ -15,12 +15,20 @@ import type {
 import type { StoredRuleMigration } from '../types';
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
 import type {
+  ElasticRule,
   RuleMigration,
   RuleMigrationTaskStats,
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
 
-export type CreateRuleMigrationInput = Omit<RuleMigration, '@timestamp' | 'status' | 'created_by'>;
+export type CreateRuleMigrationInput = Omit<
+  RuleMigration,
+  '@timestamp' | 'id' | 'status' | 'created_by'
+>;
+export type UpdateRuleMigrationInput = { elastic_rule?: Partial<ElasticRule> } & Pick<
+  RuleMigration,
+  'id' | 'translation_result' | 'comments'
+>;
 export type RuleMigrationDataStats = Omit<RuleMigrationTaskStats, 'status'>;
 export type RuleMigrationAllDataStats = Array<RuleMigrationDataStats & { migration_id: string }>;
 
@@ -35,6 +43,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     const index = await this.getIndexName();
 
     let ruleMigrationsSlice: CreateRuleMigrationInput[];
+    const createdAt = new Date().toISOString();
     while ((ruleMigrationsSlice = ruleMigrations.splice(0, BULK_MAX_SIZE)).length) {
       await this.esClient
         .bulk({
@@ -43,14 +52,47 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
             { create: { _index: index } },
             {
               ...ruleMigration,
-              '@timestamp': new Date().toISOString(),
+              '@timestamp': createdAt,
               status: SiemMigrationStatus.PENDING,
               created_by: this.username,
+              updated_by: this.username,
+              updated_at: createdAt,
             },
           ]),
         })
         .catch((error) => {
           this.logger.error(`Error creating rule migrations: ${error.message}`);
+          throw error;
+        });
+    }
+  }
+
+  /** Updates an array of rule migrations to be processed */
+  async update(ruleMigrations: UpdateRuleMigrationInput[]): Promise<void> {
+    const index = await this.getIndexName();
+
+    let ruleMigrationsSlice: UpdateRuleMigrationInput[];
+    const updatedAt = new Date().toISOString();
+    while ((ruleMigrationsSlice = ruleMigrations.splice(0, BULK_MAX_SIZE)).length) {
+      await this.esClient
+        .bulk({
+          refresh: 'wait_for',
+          operations: ruleMigrationsSlice.flatMap((ruleMigration) => {
+            const { id, ...rest } = ruleMigration;
+            return [
+              { update: { _index: index, _id: id } },
+              {
+                doc: {
+                  ...rest,
+                  updated_by: this.username,
+                  updated_at: updatedAt,
+                },
+              },
+            ];
+          }),
+        })
+        .catch((error) => {
+          this.logger.error(`Error updating rule migrations: ${error.message}`);
           throw error;
         });
     }
@@ -94,8 +136,8 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     await this.esClient
       .bulk({
         refresh: 'wait_for',
-        operations: storedRuleMigrations.flatMap(({ _id, status }) => [
-          { update: { _id, _index: index } },
+        operations: storedRuleMigrations.flatMap(({ id, status }) => [
+          { update: { _id: id, _index: index } },
           {
             doc: { status, updated_by: this.username, updated_at: new Date().toISOString() },
           },
@@ -112,7 +154,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
   }
 
   /** Updates one rule migration with the provided data and sets the status to `completed` */
-  async saveCompleted({ _id, ...ruleMigration }: StoredRuleMigration): Promise<void> {
+  async saveCompleted({ id, ...ruleMigration }: StoredRuleMigration): Promise<void> {
     const index = await this.getIndexName();
     const doc = {
       ...ruleMigration,
@@ -120,14 +162,14 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
       updated_by: this.username,
       updated_at: new Date().toISOString(),
     };
-    await this.esClient.update({ index, id: _id, doc, refresh: 'wait_for' }).catch((error) => {
+    await this.esClient.update({ index, id, doc, refresh: 'wait_for' }).catch((error) => {
       this.logger.error(`Error updating rule migration status to completed: ${error.message}`);
       throw error;
     });
   }
 
   /** Updates one rule migration with the provided data and sets the status to `failed` */
-  async saveError({ _id, ...ruleMigration }: StoredRuleMigration): Promise<void> {
+  async saveError({ id, ...ruleMigration }: StoredRuleMigration): Promise<void> {
     const index = await this.getIndexName();
     const doc = {
       ...ruleMigration,
@@ -135,7 +177,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
       updated_by: this.username,
       updated_at: new Date().toISOString(),
     };
-    await this.esClient.update({ index, id: _id, doc, refresh: 'wait_for' }).catch((error) => {
+    await this.esClient.update({ index, id, doc, refresh: 'wait_for' }).catch((error) => {
       this.logger.error(`Error updating rule migration status to failed: ${error.message}`);
       throw error;
     });
