@@ -101,10 +101,11 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   barHighlightColorOverride,
 }) => {
   const { analytics, http, embeddingOrigin, eventBus } = useAiopsAppContext();
+  const logRateAnalysis = eventBus.get(logRateAnalysisSlice);
   const { dataView } = useDataSource();
 
   const dispatch = useAppDispatch();
-  const { setGroupResults } = eventBus.get(logRateAnalysisSlice).actions;
+  const { setGroupResults } = logRateAnalysis.actions;
   const {
     analysisType,
     earliest,
@@ -114,7 +115,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     stickyHistogram,
     isBrushCleared,
     groupResults,
-  } = eventBus.useEventBusValue(logRateAnalysisSlice);
+  } = logRateAnalysis.useState();
   const { isRunning, errors: streamErrors } = useAppSelector((s) => s.stream);
   const data = useAppSelector((s) => s.logRateAnalysisResults);
   const fieldCandidates = useAppSelector((s) => s.logRateAnalysisFieldCandidates);

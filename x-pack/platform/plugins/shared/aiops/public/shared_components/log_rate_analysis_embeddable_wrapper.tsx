@@ -18,10 +18,10 @@ import { LogRateAnalysisReduxProvider } from '@kbn/aiops-log-rate-analysis/state
 import type { TimeRange } from '@kbn/es-query';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
-
+import { AiopsAppContext, type AiopsAppContextValue } from '@kbn/aiops-context';
 import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
 import type { PublishesFilters } from '@kbn/presentation-publishing';
-import { AiopsAppContext, type AiopsAppContextValue } from '../hooks/use_aiops_app_context';
+
 import { DataSourceContextProvider } from '../hooks/use_data_source';
 import { ReloadContextProvider } from '../hooks/use_reload';
 import { FilterQueryContextProvider } from '../hooks/use_filters_query';
@@ -76,11 +76,21 @@ const LogRateAnalysisEmbeddableWrapperWithDeps: FC<LogRateAnalysisPropsWithDeps>
   filtersApi,
 }) => {
   const deps = useMemo(() => {
-    const { lens, data, usageCollection, fieldFormats, charts, share, storage, unifiedSearch } =
-      pluginStart;
+    const {
+      lens,
+      data,
+      eventBus,
+      usageCollection,
+      fieldFormats,
+      charts,
+      share,
+      storage,
+      unifiedSearch,
+    } = pluginStart;
 
     return {
       data,
+      eventBus,
       lens,
       usageCollection,
       fieldFormats,

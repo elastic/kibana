@@ -12,8 +12,8 @@ import datemath from '@elastic/datemath';
 import type { TimeRange } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-service';
+import { useAiopsAppContext } from '@kbn/aiops-context';
 
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useFilterQueryUpdates } from '../../hooks/use_filters_query';
 import { useSearch } from '../../hooks/use_search';
 import { useDataSource } from '../../hooks/use_data_source';
