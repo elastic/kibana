@@ -1,0 +1,150 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`authorization ensureAuthorized with operation arrays handles multiple operations successfully when authorized 1`] = `
+Array [
+  Array [
+    Object {
+      "event": Object {
+        "action": "case_create",
+        "category": Array [
+          "database",
+        ],
+        "outcome": "unknown",
+        "type": Array [
+          "creation",
+        ],
+      },
+      "kibana": Object {
+        "saved_object": Object {
+          "id": "1",
+          "type": "cases",
+        },
+      },
+      "message": "User is creating cases [id=1] as owner \\"a\\"",
+    },
+  ],
+  Array [
+    Object {
+      "event": Object {
+        "action": "case_get",
+        "category": Array [
+          "database",
+        ],
+        "outcome": "success",
+        "type": Array [
+          "access",
+        ],
+      },
+      "kibana": Object {
+        "saved_object": Object {
+          "id": "1",
+          "type": "cases",
+        },
+      },
+      "message": "User has accessed cases [id=1] as owner \\"a\\"",
+    },
+  ],
+]
+`;
+
+exports[`authorization ensureAuthorized with operation arrays logs each operation separately 1`] = `
+Array [
+  Array [
+    Object {
+      "event": Object {
+        "action": "case_create",
+        "category": Array [
+          "database",
+        ],
+        "outcome": "unknown",
+        "type": Array [
+          "creation",
+        ],
+      },
+      "kibana": Object {
+        "saved_object": Object {
+          "id": "1",
+          "type": "cases",
+        },
+      },
+      "message": "User is creating cases [id=1] as owner \\"a\\"",
+    },
+  ],
+  Array [
+    Object {
+      "event": Object {
+        "action": "case_get",
+        "category": Array [
+          "database",
+        ],
+        "outcome": "success",
+        "type": Array [
+          "access",
+        ],
+      },
+      "kibana": Object {
+        "saved_object": Object {
+          "id": "1",
+          "type": "cases",
+        },
+      },
+      "message": "User has accessed cases [id=1] as owner \\"a\\"",
+    },
+  ],
+]
+`;
+
+exports[`authorization ensureAuthorized with operation arrays throws on first unauthorized operation in array 1`] = `
+Array [
+  Array [
+    Object {
+      "error": Object {
+        "code": "Error",
+        "message": "Unauthorized to create, access case with owners: \\"a\\"",
+      },
+      "event": Object {
+        "action": "case_create",
+        "category": Array [
+          "database",
+        ],
+        "outcome": "failure",
+        "type": Array [
+          "creation",
+        ],
+      },
+      "kibana": Object {
+        "saved_object": Object {
+          "id": "1",
+          "type": "cases",
+        },
+      },
+      "message": "Failed attempt to create cases [id=1] as owner \\"a\\"",
+    },
+  ],
+  Array [
+    Object {
+      "error": Object {
+        "code": "Error",
+        "message": "Unauthorized to create, access case with owners: \\"a\\"",
+      },
+      "event": Object {
+        "action": "case_get",
+        "category": Array [
+          "database",
+        ],
+        "outcome": "failure",
+        "type": Array [
+          "access",
+        ],
+      },
+      "kibana": Object {
+        "saved_object": Object {
+          "id": "1",
+          "type": "cases",
+        },
+      },
+      "message": "Failed attempt to access cases [id=1] as owner \\"a\\"",
+    },
+  ],
+]
+`;
