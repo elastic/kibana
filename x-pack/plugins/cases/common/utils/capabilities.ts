@@ -13,6 +13,8 @@ import {
   READ_CASES_CAPABILITY,
   UPDATE_CASES_CAPABILITY,
   CASES_SETTINGS_CAPABILITY,
+  CASES_REOPEN_CAPABILITY,
+  CREATE_COMMENT_CAPABILITY,
 } from '../constants';
 
 export interface CasesUiCapabilities {
@@ -20,6 +22,8 @@ export interface CasesUiCapabilities {
   read: readonly string[];
   delete: readonly string[];
   settings: readonly string[];
+  reopenCase: readonly string[];
+  createComment: readonly string[];
 }
 /**
  * Return the UI capabilities for each type of operation. These strings must match the values defined in the UI
@@ -32,8 +36,11 @@ export const createUICapabilities = (): CasesUiCapabilities => ({
     UPDATE_CASES_CAPABILITY,
     PUSH_CASES_CAPABILITY,
     CASES_CONNECTORS_CAPABILITY,
+    CASES_SETTINGS_CAPABILITY,
   ] as const,
   read: [READ_CASES_CAPABILITY, CASES_CONNECTORS_CAPABILITY] as const,
   delete: [DELETE_CASES_CAPABILITY] as const,
   settings: [CASES_SETTINGS_CAPABILITY] as const,
+  reopenCase: [CASES_REOPEN_CAPABILITY] as const,
+  createComment: [CREATE_COMMENT_CAPABILITY] as const,
 });

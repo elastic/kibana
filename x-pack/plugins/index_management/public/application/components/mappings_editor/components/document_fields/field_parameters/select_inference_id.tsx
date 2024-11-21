@@ -52,15 +52,6 @@ type SelectInferenceIdContentProps = SelectInferenceIdProps & {
   value: string;
 };
 
-const defaultEndpoints = [
-  {
-    inference_id: 'elser_model_2',
-  },
-  {
-    inference_id: 'e5',
-  },
-];
-
 export const SelectInferenceId: React.FC<SelectInferenceIdProps> = ({
   createInferenceEndpoint,
   'data-test-subj': dataTestSubj,
@@ -134,13 +125,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
         endpoint.task_type === 'text_embedding' || endpoint.task_type === 'sparse_embedding'
     );
 
-    const missingDefaultEndpoints = defaultEndpoints.filter(
-      (endpoint) => !(filteredEndpoints || []).find((e) => e.inference_id === endpoint.inference_id)
-    );
-    const newOptions: EuiSelectableOption[] = [
-      ...(filteredEndpoints || []),
-      ...missingDefaultEndpoints,
-    ].map((endpoint) => ({
+    const newOptions: EuiSelectableOption[] = [...(filteredEndpoints || [])].map((endpoint) => ({
       label: endpoint.inference_id,
       'data-test-subj': `custom-inference_${endpoint.inference_id}`,
       checked: value === endpoint.inference_id ? 'on' : undefined,

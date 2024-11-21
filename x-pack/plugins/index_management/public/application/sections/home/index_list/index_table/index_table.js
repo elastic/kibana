@@ -404,24 +404,47 @@ export class IndexTable extends Component {
   }
 
   renderBanners(extensionsService) {
-    const { allIndices = [], filterChanged } = this.props;
+    const { allIndices = [], filterChanged, performExtensionAction } = this.props;
     return extensionsService.banners.map((bannerExtension, i) => {
       const bannerData = bannerExtension(allIndices);
       if (!bannerData) {
         return null;
       }
 
-      const { type, title, message, filter, filterLabel } = bannerData;
+      const { type, title, message, filter, filterLabel, action } = bannerData;
 
       return (
         <Fragment key={`bannerExtension${i}`}>
           <EuiCallOut color={type} size="m" title={title}>
-            <EuiText>
-              {message}
-              {filter ? (
-                <EuiLink onClick={() => filterChanged(filter)}>{filterLabel}</EuiLink>
-              ) : null}
-            </EuiText>
+            {message && <p>{message}</p>}
+            {action || filter ? (
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                {action ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      color="warning"
+                      fill
+                      onClick={() => {
+                        performExtensionAction(
+                          action.requestMethod,
+                          action.successMessage,
+                          action.indexNames
+                        );
+                      }}
+                    >
+                      {action.buttonLabel}
+                    </EuiButton>
+                  </EuiFlexItem>
+                ) : null}
+                {filter ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiText>
+                      <EuiLink onClick={() => filterChanged(filter)}>{filterLabel}</EuiLink>
+                    </EuiText>
+                  </EuiFlexItem>
+                ) : null}
+              </EuiFlexGroup>
+            ) : null}
           </EuiCallOut>
           <EuiSpacer size="m" />
         </Fragment>
