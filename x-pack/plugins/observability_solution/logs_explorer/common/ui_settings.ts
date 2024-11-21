@@ -25,6 +25,13 @@ export const uiSettings: Record<string, UiSettingsParams> = {
       defaultMessage:
         'A list of base patterns to match and explore data views in Logs Explorer. Remote clusters will be automatically matched for the provided base patterns.',
     }),
+    deprecation: {
+      message: i18n.translate('xpack.logsExplorer.allowedDataViewsDeprecationWarning', {
+        defaultMessage:
+          'Logs Explorer is deprecated, and this setting will be removed in Kibana 9.0.',
+      }),
+      docLinksKey: 'generalSettings',
+    },
     type: 'array',
     schema: schema.arrayOf(schema.string()),
     requiresPageReload: true,
