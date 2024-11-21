@@ -52,7 +52,7 @@ export const PrivateLocationsTable = ({
 
   const { locationMonitors, loading } = useLocationMonitors();
 
-  const { canSave } = useSyntheticsSettingsContext();
+  const { canSave, canManagePrivateLocations } = useSyntheticsSettingsContext();
 
   const tagsList = privateLocations.reduce((acc, item) => {
     const tags = item.tags || [];
@@ -128,13 +128,16 @@ export const PrivateLocationsTable = ({
 
   const renderToolRight = () => {
     return [
-      <NoPermissionsTooltip canEditSynthetics={canSave}>
+      <NoPermissionsTooltip
+        canEditSynthetics={canSave}
+        canManagePrivateLocations={canManagePrivateLocations}
+        key="addPrivateLocationButton"
+      >
         <EuiButton
-          key="addPrivateLocationButton"
           fill
           data-test-subj={'addPrivateLocationButton'}
           isLoading={loading}
-          disabled={!canSave}
+          disabled={!canSave || !canManagePrivateLocations}
           onClick={() => setIsAddingNew(true)}
           iconType="plusInCircle"
         >

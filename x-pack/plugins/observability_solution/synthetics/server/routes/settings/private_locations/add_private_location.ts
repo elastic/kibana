@@ -6,6 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { validatePrivateLocationPermissions } from '../../monitor_cruds/edit_monitor';
 import { migrateLegacyPrivateLocations } from './migrate_legacy_private_locations';
 import { SyntheticsRestApiRouteFactory } from '../../types';
 import { getPrivateLocationsAndAgentPolicies } from './get_private_locations';
@@ -44,6 +45,11 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
     const { response, request, savedObjectsClient, syntheticsMonitorClient } = routeContext;
 
     const location = request.body as PrivateLocationObject;
+
+    const error = await validatePrivateLocationPermissions(routeContext);
+    if (error) {
+      return response.forbidden({ body: { message: error } });
+    }
 
     const { locations, agentPolicies } = await getPrivateLocationsAndAgentPolicies(
       savedObjectsClient,

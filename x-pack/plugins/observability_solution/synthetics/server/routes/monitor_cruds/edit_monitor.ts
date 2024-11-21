@@ -8,6 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { invalidOriginError } from './add_monitor';
 import { InvalidLocationError } from '../../synthetics_service/project_monitor/normalizers/common_fields';
 import { AddEditMonitorAPI, CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
@@ -305,7 +306,7 @@ export const syncEditedMonitor = async ({
 };
 
 export const validatePermissions = async (
-  { server, response, request }: RouteContext,
+  routeContext: RouteContext,
   monitorLocations: MonitorLocations
 ) => {
   const hasPublicLocations = monitorLocations?.some((loc) => loc.isServiceManaged);
@@ -313,17 +314,31 @@ export const validatePermissions = async (
     return;
   }
 
-  const elasticManagedLocationsEnabled =
-    Boolean(
-      (
-        await server.coreStart?.capabilities.resolveCapabilities(request, {
-          capabilityPath: 'uptime.*',
-        })
-      ).uptime.elasticManagedLocationsEnabled
-    ) ?? true;
+  const { elasticManagedLocationsEnabled } = await validateLocationPermissions(routeContext);
   if (!elasticManagedLocationsEnabled) {
     return ELASTIC_MANAGED_LOCATIONS_DISABLED;
   }
+};
+
+export const validatePrivateLocationPermissions = async (routeContext: RouteContext) => {
+  const { canManagePrivateLocations } = await validateLocationPermissions(routeContext);
+  if (!canManagePrivateLocations) {
+    return NO_MANAGE_PRIVATE_LOCATIONS;
+  }
+};
+
+export const validateLocationPermissions = async ({ server, request }: RouteContext) => {
+  const uptimeFeature = await server.coreStart?.capabilities.resolveCapabilities(request, {
+    capabilityPath: 'uptime.*',
+  });
+  const elasticManagedLocationsEnabled =
+    Boolean(uptimeFeature.uptime.elasticManagedLocationsEnabled) ?? true;
+  const canManagePrivateLocations = Boolean(uptimeFeature.uptime.canManagePrivateLocations) ?? true;
+
+  return {
+    canManagePrivateLocations,
+    elasticManagedLocationsEnabled,
+  };
 };
 
 const getInvalidOriginError = (monitor: SyntheticsMonitor) => {
@@ -337,3 +352,10 @@ const getInvalidOriginError = (monitor: SyntheticsMonitor) => {
     },
   };
 };
+
+const NO_MANAGE_PRIVATE_LOCATIONS = i18n.translate(
+  'xpack.synthetics.server.monitor.noManagePrivateLocations',
+  {
+    defaultMessage: 'User does not have permission to manage private locations',
+  }
+);

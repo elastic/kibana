@@ -22,22 +22,22 @@ export const migrateLegacyPrivateLocations = async ({
   savedObjectsClient,
 }: RouteContext) => {
   try {
+    const soClient = server.coreStart.savedObjects.createInternalRepository();
+
     let obj: SavedObject<SyntheticsPrivateLocationsAttributes> | undefined;
     try {
-      obj = await savedObjectsClient.get<SyntheticsPrivateLocationsAttributes>(
+      obj = await soClient.get<SyntheticsPrivateLocationsAttributes>(
         legacyPrivateLocationsSavedObjectName,
         legacyPrivateLocationsSavedObjectId
       );
     } catch (e) {
-      server.logger.error(`Error getting legacy private locations: ${e}`);
+      // we don't need to do anything if the legacy object doesn't exist
       return;
     }
     const legacyLocations = obj?.attributes.locations ?? [];
     if (legacyLocations.length === 0) {
       return;
     }
-
-    const soClient = server.coreStart.savedObjects.createInternalRepository();
 
     await soClient.bulkCreate<PrivateLocationAttributes>(
       legacyLocations.map((location) => ({

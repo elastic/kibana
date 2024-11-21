@@ -52,6 +52,24 @@ const elasticManagedLocationsEnabledPrivilege: SubFeaturePrivilegeGroupConfig = 
   ],
 };
 
+const canManagePrivateLocationsPrivilege: SubFeaturePrivilegeGroupConfig = {
+  groupType: 'independent' as SubFeaturePrivilegeGroupType,
+  privileges: [
+    {
+      id: 'can_manage_private_locations',
+      name: i18n.translate('xpack.synthetics.features.canManagePrivateLocations', {
+        defaultMessage: 'Can manage private locations',
+      }),
+      includeIn: 'all',
+      savedObject: {
+        all: [privateLocationSavedObjectName, legacyPrivateLocationsSavedObjectName],
+        read: [],
+      },
+      ui: ['canManagePrivateLocations'],
+    },
+  ],
+};
+
 export const syntheticsFeature = {
   id: PLUGIN.ID,
   name: PLUGIN.NAME,
@@ -106,6 +124,7 @@ export const syntheticsFeature = {
           syntheticsSettingsObjectType,
           syntheticsMonitorType,
           syntheticsApiKeyObjectType,
+          privateLocationSavedObjectName,
           legacyPrivateLocationsSavedObjectName,
           // uptime settings object is also registered here since feature is shared between synthetics and uptime
           uptimeSettingsObjectType,
@@ -130,7 +149,10 @@ export const syntheticsFeature = {
       name: i18n.translate('xpack.synthetics.features.app', {
         defaultMessage: 'Synthetics',
       }),
-      privilegeGroups: [elasticManagedLocationsEnabledPrivilege],
+      privilegeGroups: [
+        elasticManagedLocationsEnabledPrivilege,
+        canManagePrivateLocationsPrivilege,
+      ],
     },
   ],
 };

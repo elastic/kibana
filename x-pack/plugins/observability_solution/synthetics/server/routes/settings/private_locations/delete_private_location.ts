@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { isEmpty } from 'lodash';
+import { validatePrivateLocationPermissions } from '../../monitor_cruds/edit_monitor';
 import { migrateLegacyPrivateLocations } from './migrate_legacy_private_locations';
 import { getMonitorsByLocation } from './get_location_monitors';
 import { getPrivateLocationsAndAgentPolicies } from './get_private_locations';
@@ -27,8 +28,13 @@ export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory<undefined
   },
   handler: async (routeContext) => {
     await migrateLegacyPrivateLocations(routeContext);
-
     const { savedObjectsClient, syntheticsMonitorClient, request, response, server } = routeContext;
+
+    const error = await validatePrivateLocationPermissions(routeContext);
+    if (error) {
+      return response.forbidden({ body: { message: error } });
+    }
+
     const { locationId } = request.params as { locationId: string };
 
     const { locations } = await getPrivateLocationsAndAgentPolicies(
