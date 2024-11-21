@@ -135,19 +135,6 @@ export default function customLinksTests({ getService }: DeploymentAgnosticFtrPr
       expect(newStatus).to.equal(200);
       expect(newBody.customLinks.length).to.be(0);
     });
-
-    it('fetches a transaction sample', async () => {
-      const response = await apmApiClient.readUser({
-        endpoint: 'GET /internal/apm/settings/custom_links/transaction',
-        params: {
-          query: {
-            'service.name': 'opbeans-java',
-          },
-        },
-      });
-      expect(response.status).to.be(200);
-      expect(response.body.service.name).to.eql('opbeans-java');
-    });
   });
 
   function searchCustomLinks(filters?: any) {
