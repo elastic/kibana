@@ -52,9 +52,7 @@ export function registerTopNFunctionsAPMTransactionsRoute({
           });
         }
         const core = await context.core;
-        const { transaction: transactionIndices } = await apmDataAccess.getApmIndices(
-          core.savedObjects.client
-        );
+        const { transaction: transactionIndices } = await apmDataAccess.getApmIndices();
 
         const esClient = await getClient(context);
 

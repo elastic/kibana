@@ -5,32 +5,19 @@
  * 2.0.
  */
 
-import {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  SavedObjectsClientContract,
-  Logger,
-} from '@kbn/core/server';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
 import { APMDataAccessConfig } from '.';
-import {
-  ApmDataAccessPluginSetup,
-  ApmDataAccessPluginStart,
-  ApmDataAccessServerDependencies,
-} from './types';
+import { ApmDataAccessPluginSetup, ApmDataAccessPluginStart } from './types';
 import { migrateLegacyAPMIndicesToSpaceAware } from './saved_objects/migrations/migrate_legacy_apm_indices_to_space_aware';
 import {
   apmIndicesSavedObjectDefinition,
   getApmIndicesSavedObject,
 } from './saved_objects/apm_indices';
 import { getServices } from './services/get_services';
-import { ApmDataAccessPrivilegesCheck, checkPrivileges } from './lib/check_privileges';
 
 export class ApmDataAccessPlugin
   implements Plugin<ApmDataAccessPluginSetup, ApmDataAccessPluginStart>
 {
-  public server?: ApmDataAccessServerDependencies;
   public config: APMDataAccessConfig;
   public logger: Logger;
 
@@ -39,45 +26,34 @@ export class ApmDataAccessPlugin
     this.logger = initContext.logger.get();
   }
 
-  getApmIndices = async (savedObjectsClient: SavedObjectsClientContract) => {
-    const apmIndicesFromSavedObject = await getApmIndicesSavedObject(savedObjectsClient);
-    return { ...this.config.indices, ...apmIndicesFromSavedObject };
-  };
-
   public setup(core: CoreSetup): ApmDataAccessPluginSetup {
     // register saved object
     core.savedObjects.registerType(apmIndicesSavedObjectDefinition);
 
+    const getApmIndices = async () => {
+      const [coreStart] = await core.getStartServices();
+      const soClient = await coreStart.savedObjects.createInternalRepository();
+
+      const apmIndicesFromSavedObject = await getApmIndicesSavedObject(soClient);
+      return { ...this.config.indices, ...apmIndicesFromSavedObject };
+    };
+
     // expose
     return {
       apmIndicesFromConfigFile: this.config.indices,
-      getApmIndices: this.getApmIndices,
+      getApmIndices,
       getServices,
     };
   }
 
-  public start(core: CoreStart, plugins: ApmDataAccessServerDependencies) {
+  public start(core: CoreStart) {
     // TODO: remove in 9.0
     migrateLegacyAPMIndicesToSpaceAware({ coreStart: core, logger: this.logger }).catch((e) => {
       this.logger.error('Failed to run migration making APM indices space aware');
       this.logger.error(e);
     });
 
-    const getApmIndicesWithInternalUserFn = async () => {
-      const soClient = core.savedObjects.createInternalRepository();
-      return this.getApmIndices(soClient);
-    };
-
-    const startServices = {
-      hasPrivileges: ({ request }: Pick<ApmDataAccessPrivilegesCheck, 'request'>) =>
-        checkPrivileges({
-          request,
-          getApmIndices: getApmIndicesWithInternalUserFn,
-          security: plugins.security,
-        }),
-    };
-
-    return { ...startServices };
+    return {};
   }
 
   public stop() {}
