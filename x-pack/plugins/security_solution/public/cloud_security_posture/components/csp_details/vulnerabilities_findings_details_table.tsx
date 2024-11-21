@@ -44,7 +44,7 @@ interface VulnerabilitiesPackage extends Vulnerability {
   };
 }
 
-export const VulnerabilitiesFindingsDetailsTable = memo(({ queryName }: { queryName: string }) => {
+export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: string }) => {
   useEffect(() => {
     uiMetricService.trackUiMetric(
       METRIC_TYPE.COUNT,
@@ -53,7 +53,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ queryName }: { queryN
   }, []);
 
   const { data } = useVulnerabilitiesFindings({
-    query: buildEntityFlyoutPreviewQuery('host.name', queryName),
+    query: buildEntityFlyoutPreviewQuery('host.name', value),
     sort: [],
     enabled: true,
     pageSize: 1,
@@ -204,7 +204,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ queryName }: { queryN
       <EuiPanel hasShadow={false}>
         <SecuritySolutionLinkAnchor
           deepLinkId={SecurityPageName.cloudSecurityPostureFindings}
-          path={`${getVulnerabilityUrl(queryName, 'host.name')}`}
+          path={`${getVulnerabilityUrl(value, 'host.name')}`}
           target={'_blank'}
           external={false}
           onClick={() => {

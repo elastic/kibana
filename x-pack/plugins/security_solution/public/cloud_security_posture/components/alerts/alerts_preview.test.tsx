@@ -58,7 +58,7 @@ describe('AlertsPreview', () => {
   it('renders', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <AlertsPreview alertsData={mockAlertsData} name="host1" fieldName="host.name" />
+        <AlertsPreview alertsData={mockAlertsData} value="host1" field="host.name" />
       </TestProviders>
     );
 
@@ -68,7 +68,7 @@ describe('AlertsPreview', () => {
   it('renders correct alerts number', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <AlertsPreview alertsData={mockAlertsData} name="host1" fieldName="host.name" />
+        <AlertsPreview alertsData={mockAlertsData} value="host1" field="host.name" />
       </TestProviders>
     );
 
@@ -78,7 +78,7 @@ describe('AlertsPreview', () => {
   it('should render the correct number of distribution bar section based on the number of severities', () => {
     const { queryAllByTestId } = render(
       <TestProviders>
-        <AlertsPreview alertsData={mockAlertsData} name="host1" fieldName="host.name" />
+        <AlertsPreview alertsData={mockAlertsData} value="host1" field="host.name" />
       </TestProviders>
     );
 
