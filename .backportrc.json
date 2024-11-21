@@ -4,6 +4,7 @@
   "targetBranchChoices": [
     "main",
     "8.x",
+    "8.17",
     "8.16",
     "8.15",
     "8.14",
@@ -55,7 +56,7 @@
   ],
   "branchLabelMapping": {
     "^v9.0.0$": "main",
-    "^v8.17.0$": "8.x",
+    "^v8.18.0$": "8.x",
     "^v(\\d+).(\\d+).\\d+$": "$1.$2"
   },
   "autoMerge": true,

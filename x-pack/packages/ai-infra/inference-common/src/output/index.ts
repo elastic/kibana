@@ -12,6 +12,7 @@ export type {
   OutputResponse,
   OutputStreamResponse,
 } from './api';
+export type { BoundOutputAPI, BoundOutputOptions, UnboundOutputOptions } from './bound_api';
 export {
   OutputEventType,
   type OutputCompleteEvent,
