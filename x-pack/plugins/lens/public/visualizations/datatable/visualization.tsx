@@ -465,10 +465,7 @@ export const getDatatableVisualization = ({
     };
   },
   DimensionEditorComponent(props) {
-    const isDarkMode = useObservable(kibanaTheme.theme$, {
-      darkMode: false,
-      name: 'amsterdam',
-    }).darkMode;
+    const isDarkMode = useObservable(kibanaTheme.theme$, { darkMode: false }).darkMode;
 
     return (
       <TableDimensionEditor {...props} isDarkMode={isDarkMode} paletteService={paletteService} />

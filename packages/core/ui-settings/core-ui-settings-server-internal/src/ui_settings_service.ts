@@ -68,15 +68,10 @@ export class UiSettingsService
   public async preboot(): Promise<InternalUiSettingsServicePreboot> {
     this.log.debug('Prebooting ui settings service');
 
-    const { overrides, experimental } = await firstValueFrom(this.config$);
+    const { overrides } = await firstValueFrom(this.config$);
     this.overrides = overrides;
 
-    this.register(
-      getCoreSettings({
-        isDist: this.isDist,
-        isThemeSwitcherEnabled: experimental?.themeSwitcherEnabled,
-      })
-    );
+    this.register(getCoreSettings({ isDist: this.isDist }));
 
     return {
       createDefaultsClient: () =>

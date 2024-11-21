@@ -10,12 +10,11 @@
 import { inspect } from 'util';
 
 import { ToolingLog } from '@kbn/tooling-log';
-import { hasNonDefaultThemeTags } from '@kbn/core-ui-settings-common';
 import { tap } from 'rxjs';
 
 import { OptimizerConfig } from './optimizer';
 import { OptimizerUpdate$ } from './run_optimizer';
-import { CompilerMsg, pipeClosure } from './common';
+import { CompilerMsg, pipeClosure, ALL_THEMES } from './common';
 
 export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
   return pipeClosure((update$: OptimizerUpdate$) => {
@@ -81,9 +80,9 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
               );
             }
 
-            if (hasNonDefaultThemeTags(config.themeTags)) {
+            if (config.themeTags.length !== ALL_THEMES.length) {
               log.warning(
-                `running with non-default [${config.themeTags}] set of themes, customize with the KBN_OPTIMIZER_THEMES environment variable`
+                `only building [${config.themeTags}] themes, customize with the KBN_OPTIMIZER_THEMES environment variable`
               );
             }
           }

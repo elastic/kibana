@@ -108,7 +108,6 @@ export interface UsageStats {
   'timepicker:quickRanges': string;
   'theme:version': string;
   'theme:darkMode': boolean;
-  'theme:name': string;
   'state:storeInSessionStorage': boolean;
   'savedObjects:perPage': number;
   'search:queryLanguage': string;

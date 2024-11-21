@@ -19,7 +19,7 @@ import { ThemeService } from './theme';
 import { coreMock } from '@kbn/core/public/mocks';
 
 const createTheme$Mock = (mode: boolean) => {
-  return from([{ darkMode: mode, name: 'amsterdam' }]);
+  return from([{ darkMode: mode }]);
 };
 
 const { theme: setUpMockTheme } = coreMock.createSetup();
@@ -37,7 +37,6 @@ describe('ThemeService', () => {
 
       expect(await themeService.darkModeEnabled$.pipe(take(1)).toPromise()).toStrictEqual({
         darkMode: false,
-        name: 'amsterdam',
       });
     });
 
@@ -48,7 +47,6 @@ describe('ThemeService', () => {
 
       expect(await themeService.darkModeEnabled$.pipe(take(1)).toPromise()).toStrictEqual({
         darkMode: true,
-        name: 'amsterdam',
       });
     });
   });

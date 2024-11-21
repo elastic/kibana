@@ -78,4 +78,3 @@ export const KbnCodeEditor = require('@kbn/code-editor');
 export const KbnEsqlAst = require('@kbn/esql-ast');
 export const KbnEbtTools = require('@kbn/ebt-tools');
 export const ElasticApmRumCore = require('@elastic/apm-rum-core');
-export const KbnReactKibanaContextTheme = require('@kbn/react-kibana-context-theme');

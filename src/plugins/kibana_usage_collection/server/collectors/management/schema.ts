@@ -272,10 +272,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'theme:name': {
-    type: 'keyword',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'state:storeInSessionStorage': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },

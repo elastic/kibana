@@ -27,7 +27,6 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
 
   const mockTheme: CoreTheme = {
     darkMode: false,
-    name: 'amsterdam',
   };
 
   const createTheme$Mock = () => {

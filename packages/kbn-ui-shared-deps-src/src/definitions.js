@@ -105,7 +105,6 @@ const externals = {
   '@kbn/esql-ast': '__kbnSharedDeps__.KbnEsqlAst',
   '@kbn/ebt-tools': '__kbnSharedDeps__.KbnEbtTools',
   '@elastic/apm-rum-core': '__kbnSharedDeps__.ElasticApmRumCore',
-  '@kbn/react-kibana-context-theme': '__kbnSharedDeps__.KbnReactKibanaContextTheme',
 };
 
 module.exports = { distDir, jsFilename, cssDistFilename, externals };
