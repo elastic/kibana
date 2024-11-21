@@ -110,6 +110,18 @@ describe('Home page', () => {
         cy.url().should('include', '/app/apm/services/synth-node-trace-logs/overview');
       });
 
+      it('Navigates to apm when clicking on a logs only service', () => {
+        cy.intercept('GET', '/internal/entities/managed/enablement', {
+          fixture: 'eem_enabled.json',
+        }).as('getEEMStatus');
+        cy.visitKibana('/app/inventory');
+        cy.wait('@getEEMStatus');
+        cy.contains('service').click();
+        cy.contains('service-logs-only').click();
+        cy.url().should('include', '/app/apm/services/service-logs-only/overview');
+        cy.contains('Detect and resolve issues faster with deep visibility into your application');
+      });
+
       it('Navigates to hosts when clicking on a host type entity', () => {
         cy.intercept('GET', '/internal/entities/managed/enablement', {
           fixture: 'eem_enabled.json',
