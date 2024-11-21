@@ -218,7 +218,7 @@ describe('getGenAiTokenTracking', () => {
       actionId: '123',
       status: 'ok' as const,
       data: {
-        stream: chunkIterable,
+        tokenStream: chunkIterable,
       },
     };
     const validatedParams = {

@@ -271,12 +271,12 @@ export const getGenAiTokenTracking = async ({
 
   // BedrockRuntimeClient.send response used by chat model ActionsClientChatBedrockConverse
   if (actionTypeId === '.bedrock' && validatedParams.subAction === 'bedrockClientSend') {
-    const { stream, usage } = result.data as unknown as {
-      stream?: SmithyStream;
+    const { tokenStream, usage } = result.data as unknown as {
+      tokenStream?: SmithyStream;
       usage?: { inputTokens: number; outputTokens: number; totalTokens: number };
     };
-    if (stream != null) {
-      const res = await getTokensFromBedrockConverseStream(stream);
+    if (tokenStream) {
+      const res = await getTokensFromBedrockConverseStream(tokenStream, logger);
       return res;
     }
     if (usage) {

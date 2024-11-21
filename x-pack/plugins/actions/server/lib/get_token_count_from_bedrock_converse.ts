@@ -6,6 +6,7 @@
  */
 
 import { SmithyMessageDecoderStream } from '@smithy/eventstream-codec';
+import { Logger } from '@kbn/logging';
 
 export type SmithyStream = SmithyMessageDecoderStream<{
   metadata?: {
@@ -13,39 +14,23 @@ export type SmithyStream = SmithyMessageDecoderStream<{
   };
 }>;
 
-const handleAsyncGenerator = async function* (
+export const getTokensFromBedrockConverseStream = async function (
   responseStream: SmithyStream,
-  cb?: (tokens: unknown) => void
-) {
-  for await (const chunk of responseStream) {
-    console.log('W00f yield chunk', chunk);
-    if (cb && chunk.metadata) {
-      cb({
-        total_tokens: chunk.metadata.usage.totalTokens,
-        prompt_tokens: chunk.metadata.usage.inputTokens,
-        completion_tokens: chunk.metadata.usage.outputTokens,
-      });
+  logger: Logger
+): Promise<{ total_tokens: number; prompt_tokens: number; completion_tokens: number } | null> {
+  try {
+    for await (const { metadata } of responseStream) {
+      if (metadata) {
+        return {
+          total_tokens: metadata.usage.totalTokens,
+          prompt_tokens: metadata.usage.inputTokens,
+          completion_tokens: metadata.usage.outputTokens,
+        };
+      }
     }
-    yield chunk; // Yielding chunks to the caller
+    return null; // Return the final tokens once the generator finishes
+  } catch (e) {
+    logger.error('Response from Bedrock converse API did not contain usage object');
+    return null;
   }
-};
-
-export const getTokensFromBedrockConverseStream = async function* (responseStream: SmithyStream) {
-  let finalTokens = null;
-
-  const cb = (tokens: unknown) => {
-    console.log('W00f cbtokens', tokens);
-    finalTokens = tokens;
-  };
-
-  const generator = handleAsyncGenerator(responseStream, cb);
-
-  // Yield chunks back to the caller while processing tokens
-  for await (const chunk of generator) {
-    console.log('W00f processed chunk', chunk); // Log the chunk
-    yield chunk; // Yield the chunk back to the caller
-  }
-
-  console.log('W00f finalTokens', finalTokens); // Log the final tokens
-  return finalTokens; // Return the final tokens once the generator finishes
 };

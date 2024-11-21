@@ -8,6 +8,7 @@
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import aws from 'aws4';
 import { BedrockRuntimeClient } from '@aws-sdk/client-bedrock-runtime';
+import { SmithyMessageDecoderStream } from '@smithy/eventstream-codec';
 import { AxiosError, Method } from 'axios';
 import { IncomingMessage } from 'http';
 import { PassThrough } from 'stream';
@@ -448,6 +449,14 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     const res = await this.bedrockClient.send(command, {
       abortSignal: signal,
     });
+
+    if ('stream' in res) {
+      const resultStream = res.stream as SmithyMessageDecoderStream<unknown>;
+      // splits the stream in two, [stream = consumer, tokenStream = token tracking]
+      const [stream, tokenStream] = tee(resultStream);
+      return { ...res, stream, tokenStream };
+    }
+
     return res;
   }
 }
@@ -552,4 +561,78 @@ function extractRegionId(url: string) {
     // fallback to us-east-1
     return 'us-east-1';
   }
+}
+
+function tee<T>(
+  aIterator: SmithyMessageDecoderStream<T>
+): [SmithyMessageDecoderStream<T>, SmithyMessageDecoderStream<T>] {
+  // @ts-ignore options is private, but we need it to create the new streams
+  const streamOptions = aIterator.options;
+
+  const streamLeft = new SmithyMessageDecoderStream<T>(streamOptions);
+  const streamRight = new SmithyMessageDecoderStream<T>(streamOptions);
+
+  // Queues to store chunks for each stream
+  const leftQueue: T[] = [];
+  const rightQueue: T[] = [];
+
+  // Promises for managing when a chunk is available
+  let leftPending: ((chunk: T | null) => void) | null = null;
+  let rightPending: ((chunk: T | null) => void) | null = null;
+
+  const distribute = async () => {
+    for await (const chunk of aIterator) {
+      // Push the chunk into both queues
+      if (leftPending) {
+        leftPending(chunk);
+        leftPending = null;
+      } else {
+        leftQueue.push(chunk);
+      }
+
+      if (rightPending) {
+        rightPending(chunk);
+        rightPending = null;
+      } else {
+        rightQueue.push(chunk);
+      }
+    }
+
+    // Signal the end of the iterator
+    if (leftPending) {
+      leftPending(null);
+    }
+    if (rightPending) {
+      rightPending(null);
+    }
+  };
+
+  // Start distributing chunks from the iterator
+  distribute().catch(() => {
+    // swallow errors
+  });
+
+  // Helper to create an async iterator for each stream
+  const createIterator = (
+    queue: T[],
+    setPending: (fn: ((chunk: T | null) => void) | null) => void
+  ) => {
+    return async function* () {
+      while (true) {
+        if (queue.length > 0) {
+          yield queue.shift()!;
+        } else {
+          const chunk = await new Promise<T | null>((resolve) => setPending(resolve));
+          if (chunk === null) break; // End of the stream
+          yield chunk;
+        }
+      }
+    };
+  };
+
+  // Assign independent async iterators to each stream
+  streamLeft[Symbol.asyncIterator] = createIterator(leftQueue, (fn) => (leftPending = fn));
+  streamRight[Symbol.asyncIterator] = createIterator(rightQueue, (fn) => (rightPending = fn));
+
+  return [streamLeft, streamRight];
 }

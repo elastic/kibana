@@ -66,7 +66,6 @@ export class BedrockRuntimeClient extends _BedrockRuntimeClient {
       message?: string;
       serviceMessage?: string;
     };
-    console.log('ActionsClient BedrockRuntimeClient: action result:', data);
 
     if (data.status === 'error') {
       throw new Error(
