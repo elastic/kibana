@@ -40,7 +40,7 @@ import {
 import { PackageInvalidArchiveError } from '../../../errors';
 import { pkgToPkgKey } from '../registry';
 
-import { unpackBufferEntries } from '.';
+import { traverseArchiveEntries } from '.';
 
 const readFileAsync = promisify(readFile);
 export const MANIFEST_NAME = 'manifest.yml';
@@ -160,9 +160,8 @@ export async function generatePackageInfoFromArchiveBuffer(
   contentType: string
 ): Promise<{ paths: string[]; packageInfo: ArchivePackage }> {
   const assetsMap: AssetsBufferMap = {};
-  const entries = await unpackBufferEntries(archiveBuffer, contentType);
   const paths: string[] = [];
-  entries.forEach(({ path: bufferPath, buffer }) => {
+  await traverseArchiveEntries(archiveBuffer, contentType, async ({ path: bufferPath, buffer }) => {
     paths.push(bufferPath);
     if (buffer && filterAssetPathForParseAndVerifyArchive(bufferPath)) {
       assetsMap[bufferPath] = buffer;

@@ -174,9 +174,9 @@
           "ExplainExplanation",
           " | undefined; highlight?: Record<string, string[]> | undefined; inner_hits?: Record<string, ",
           "SearchInnerHitsResult",
-          "> | undefined; matched_queries?: string[] | undefined; _nested?: ",
+          "> | undefined; matched_queries?: string[] | Record<string, number> | undefined; _nested?: ",
           "SearchNestedIdentity",
-          " | undefined; _ignored?: string[] | undefined; ignored_field_values?: Record<string, string[]> | undefined; _shard?: string | undefined; _node?: string | undefined; _routing?: string | undefined; _rank?: number | undefined; _seq_no?: number | undefined; _primary_term?: number | undefined; _version?: number | undefined; }; id: string; isAnchor?: boolean | undefined; }"
+          " | undefined; _ignored?: string[] | undefined; ignored_field_values?: Record<string, any[]> | undefined; _shard?: string | undefined; _node?: string | undefined; _routing?: string | undefined; _rank?: number | undefined; _seq_no?: number | undefined; _primary_term?: number | undefined; _version?: number | undefined; }; id: string; isAnchor?: boolean | undefined; }"
         ],
         "path": "packages/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx",
         "deprecated": false,

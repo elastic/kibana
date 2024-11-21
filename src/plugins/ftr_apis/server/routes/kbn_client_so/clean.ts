@@ -15,8 +15,10 @@ export const registerCleanRoute = (router: IRouter) => {
   router.post(
     {
       path: `${KBN_CLIENT_API_PREFIX}/_clean`,
-      options: {
-        tags: ['access:ftrApis'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ftrApis'],
+        },
       },
       validate: {
         body: schema.object({

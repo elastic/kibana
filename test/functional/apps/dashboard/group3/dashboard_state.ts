@@ -309,12 +309,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 panels: (appState.panels ?? []).map((panel) => {
                   return {
                     ...panel,
-                    embeddableConfig: {
-                      ...(panel.embeddableConfig ?? {}),
+                    panelConfig: {
+                      ...(panel.panelConfig ?? {}),
                       vis: {
-                        ...((panel.embeddableConfig?.vis as object) ?? {}),
+                        ...((panel.panelConfig?.vis as object) ?? {}),
                         colors: {
-                          ...((panel.embeddableConfig?.vis as { colors: object })?.colors ?? {}),
+                          ...((panel.panelConfig?.vis as { colors: object })?.colors ?? {}),
                           ['80000']: 'FFFFFF',
                         },
                       },
@@ -353,10 +353,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 panels: (appState.panels ?? []).map((panel) => {
                   return {
                     ...panel,
-                    embeddableConfig: {
-                      ...(panel.embeddableConfig ?? {}),
+                    panelConfig: {
+                      ...(panel.panelConfig ?? {}),
                       vis: {
-                        ...((panel.embeddableConfig?.vis as object) ?? {}),
+                        ...((panel.panelConfig?.vis as object) ?? {}),
                         colors: {},
                       },
                     },

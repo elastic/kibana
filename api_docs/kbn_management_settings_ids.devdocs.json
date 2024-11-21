@@ -909,21 +909,6 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.METRICS_ALLOW_CHECKING_FOR_FAILED_SHARDS_ID",
-        "type": "string",
-        "tags": [],
-        "label": "METRICS_ALLOW_CHECKING_FOR_FAILED_SHARDS_ID",
-        "description": [],
-        "signature": [
-          "\"metrics:allowCheckingForFailedShards\""
-        ],
-        "path": "packages/kbn-management/settings/setting_ids/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.METRICS_ALLOW_STRING_INDICES_ID",
         "type": "string",
         "tags": [],
@@ -1878,6 +1863,21 @@
         "description": [],
         "signature": [
           "\"theme:darkMode\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.THEME_NAME_ID",
+        "type": "string",
+        "tags": [],
+        "label": "THEME_NAME_ID",
+        "description": [],
+        "signature": [
+          "\"theme:name\""
         ],
         "path": "packages/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,

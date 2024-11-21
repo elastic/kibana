@@ -91,15 +91,22 @@ import {
   QUERY_EVENT_COUNT,
   TIMELINE_ENABLE_DISABLE_ALL_ROW_RENDERER,
   TIMELINE_DISCOVER_FIELDS_BUTTON,
+  TIMELINE_TITLE,
 } from '../screens/timeline';
 
-import { REFRESH_BUTTON, TIMELINE, TIMELINES_TAB_TEMPLATE } from '../screens/timelines';
+import {
+  DUPLICATE_TIMELINE,
+  REFRESH_BUTTON,
+  TIMELINE,
+  TIMELINES_TABLE,
+  TIMELINES_TAB_TEMPLATE,
+} from '../screens/timelines';
 import { waitForTabToBeLoaded } from './common';
 
 import { closeFieldsBrowser, filterFieldsBrowser } from './fields_browser';
 import { TIMELINE_CONTEXT_MENU_BTN } from '../screens/alerts';
 import { LOADING_INDICATOR } from '../screens/security_header';
-import { TOASTER } from '../screens/alerts_detection_rules';
+import { COLLAPSED_ACTION_BTN, TOASTER } from '../screens/alerts_detection_rules';
 import { RUNTIME_FIELD_INPUT, SAVE_FIELD_BUTTON } from '../screens/create_runtime_field';
 
 const hostExistsQuery = 'host.name: *';
@@ -148,6 +155,14 @@ export const addNameAndDescriptionToTimeline = (
   cy.get(TIMELINE_DESCRIPTION_INPUT).invoke('val').should('equal', timeline.description);
   cy.get(TIMELINE_SAVE_MODAL_SAVE_BUTTON).click();
   cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
+};
+
+export const duplicateFirstTimeline = () => {
+  cy.get(TIMELINES_TABLE).within(() => {
+    cy.get(COLLAPSED_ACTION_BTN).first().click();
+  });
+  cy.get(DUPLICATE_TIMELINE).click();
+  cy.get(TIMELINE_TITLE).should('be.visible');
 };
 
 export const goToNotesTab = () => {

@@ -21,7 +21,7 @@ export const APP_ID = 'securitySolution' as const;
 export const APP_UI_ID = 'securitySolutionUI' as const;
 export const ASSISTANT_FEATURE_ID = 'securitySolutionAssistant' as const;
 export const ATTACK_DISCOVERY_FEATURE_ID = 'securitySolutionAttackDiscovery' as const;
-export const CASES_FEATURE_ID = 'securitySolutionCases' as const;
+export const CASES_FEATURE_ID = 'securitySolutionCasesV2' as const;
 export const SERVER_APP_ID = 'siem' as const;
 export const APP_NAME = 'Security' as const;
 export const APP_ICON = 'securityAnalyticsApp' as const;
@@ -424,7 +424,6 @@ export const RULES_TABLE_MAX_PAGE_SIZE = 100;
 export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
   RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.13',
   TIMELINES: 'securitySolution.security.timelineFlyoutHeader.saveTimelineTour',
-  FLYOUT: 'securitySolution.documentDetails.newFeaturesTour.v8.14',
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =

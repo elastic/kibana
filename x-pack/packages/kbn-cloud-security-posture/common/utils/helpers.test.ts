@@ -10,6 +10,7 @@ import {
   defaultErrorMessage,
   buildMutedRulesFilter,
   buildEntityFlyoutPreviewQuery,
+  buildEntityAlertsQuery,
 } from './helpers';
 
 const fallbackMessage = 'thisIsAFallBackMessage';
@@ -180,6 +181,80 @@ describe('test helper methods', () => {
       };
 
       expect(buildEntityFlyoutPreviewQuery(field)).toEqual(expectedQuery);
+    });
+  });
+
+  describe('buildEntityAlertsQuery', () => {
+    const getExpectedAlertsQuery = (size?: number) => {
+      return {
+        size: size || 0,
+        _source: false,
+        fields: [
+          '_id',
+          '_index',
+          'kibana.alert.rule.uuid',
+          'kibana.alert.severity',
+          'kibana.alert.rule.name',
+          'kibana.alert.workflow_status',
+        ],
+        query: {
+          bool: {
+            filter: [
+              {
+                bool: {
+                  must: [],
+                  filter: [
+                    {
+                      match_phrase: {
+                        'host.name': {
+                          query: 'exampleHost',
+                        },
+                      },
+                    },
+                  ],
+                  should: [],
+                  must_not: [],
+                },
+              },
+              {
+                range: {
+                  '@timestamp': {
+                    gte: 'Today',
+                    lte: 'Tomorrow',
+                  },
+                },
+              },
+              {
+                terms: {
+                  'kibana.alert.workflow_status': ['open', 'acknowledged'],
+                },
+              },
+            ],
+          },
+        },
+      };
+    };
+
+    it('should return the correct query when given all params', () => {
+      const field = 'host.name';
+      const query = 'exampleHost';
+      const to = 'Tomorrow';
+      const from = 'Today';
+      const size = 100;
+
+      expect(buildEntityAlertsQuery(field, to, from, query, size)).toEqual(
+        getExpectedAlertsQuery(size)
+      );
+    });
+
+    it('should return the correct query when not given size', () => {
+      const field = 'host.name';
+      const query = 'exampleHost';
+      const to = 'Tomorrow';
+      const from = 'Today';
+      const size = undefined;
+
+      expect(buildEntityAlertsQuery(field, to, from, query)).toEqual(getExpectedAlertsQuery(size));
     });
   });
 });

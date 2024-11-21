@@ -6550,7 +6550,7 @@
         "label": "RuleStatus",
         "description": [],
         "signature": [
-          "\"enabled\" | \"disabled\" | \"snoozed\""
+          "\"disabled\" | \"enabled\" | \"snoozed\""
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,

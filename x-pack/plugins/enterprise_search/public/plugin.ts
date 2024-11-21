@@ -80,8 +80,8 @@ export type EnterpriseSearchPublicStart = ReturnType<EnterpriseSearchPlugin['sta
 
 interface PluginsSetup {
   cloud?: CloudSetup;
-  licensing: LicensingPluginStart;
   home?: HomePublicPluginSetup;
+  licensing: LicensingPluginStart;
   security?: SecurityPluginSetup;
   share?: SharePluginSetup;
 }
@@ -98,8 +98,8 @@ export interface PluginsStart {
   ml?: MlPluginStart;
   navigation: NavigationPublicPluginStart;
   searchConnectors?: SearchConnectorsPluginStart;
-  searchPlayground?: SearchPlaygroundPluginStart;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
+  searchPlayground?: SearchPlaygroundPluginStart;
   security?: SecurityPluginStart;
   share?: SharePluginStart;
 }
@@ -199,7 +199,6 @@ export class EnterpriseSearchPlugin implements Plugin {
       this.esConfig = { elasticsearch_host: ELASTICSEARCH_URL_PLACEHOLDER };
     }
 
-    if (!this.config.host) return; // No API to call
     if (this.hasInitialized) return; // We've already made an initial call
 
     try {

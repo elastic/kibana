@@ -25,6 +25,7 @@ import type { IndexDetails } from '@kbn/cloud-security-posture-common';
 import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
 import { useLocation } from 'react-router-dom';
 import { findingsNavigation } from '@kbn/cloud-security-posture';
+import { EmptyStatesIllustrationContainer } from './empty_states_illustration_container';
 import { VULN_MGMT_POLICY_TEMPLATE } from '../../common/constants';
 import { FullSizeCenteredPage } from './full_size_centered_page';
 import { CloudPosturePage } from './cloud_posture_page';
@@ -84,7 +85,11 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
         <EuiEmptyPrompt
           style={{ padding: euiTheme.size.l }}
           data-test-subj={NO_VULNERABILITIES_STATUS_TEST_SUBJ.NOT_INSTALLED}
-          icon={<EuiImage size="fullWidth" src={cloudsSVG} alt="clouds" role="presentation" />}
+          icon={
+            <EmptyStatesIllustrationContainer>
+              <EuiImage size="fullWidth" src={cloudsSVG} alt="clouds" role="presentation" />
+            </EmptyStatesIllustrationContainer>
+          }
           title={
             <h2>
               <FormattedMessage
@@ -144,12 +149,14 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
             style={{ padding: euiTheme.size.l }}
             data-test-subj={THIRD_PARTY_INTEGRATIONS_NO_VULNERABILITIES_FINDINGS_PROMPT}
             icon={
-              <EuiImage
-                size="fullWidth"
-                src={vulnerabilitiesVendorsSVG}
-                alt="vulnerabilitiesVendorsSVG"
-                role="presentation"
-              />
+              <EmptyStatesIllustrationContainer>
+                <EuiImage
+                  size="fullWidth"
+                  src={vulnerabilitiesVendorsSVG}
+                  alt="vulnerabilitiesVendorsSVG"
+                  role="presentation"
+                />
+              </EmptyStatesIllustrationContainer>
             }
             title={
               <h2>

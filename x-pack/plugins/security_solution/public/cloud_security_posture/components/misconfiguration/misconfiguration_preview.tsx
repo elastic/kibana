@@ -13,7 +13,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
 import { i18n } from '@kbn/i18n';
-import { ExpandablePanel } from '@kbn/security-solution-common';
 import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
@@ -23,6 +22,7 @@ import {
   ENTITY_FLYOUT_WITH_MISCONFIGURATION_VISIT,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
 import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
@@ -103,10 +103,12 @@ const MisconfigurationPreviewScore = ({
 export const MisconfigurationsPreview = ({
   name,
   fieldName,
+  hasNonClosedAlerts = false,
   isPreviewMode,
 }: {
   name: string;
   fieldName: 'host.name' | 'user.name';
+  hasNonClosedAlerts?: boolean;
   isPreviewMode?: boolean;
 }) => {
   const { data } = useMisconfigurationPreview({
@@ -180,6 +182,7 @@ export const MisconfigurationsPreview = ({
             isRiskScoreExist,
             hasMisconfigurationFindings,
             hasVulnerabilitiesFindings,
+            hasNonClosedAlerts,
             path: {
               tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
               subTab: CspInsightLeftPanelSubTab.MISCONFIGURATIONS,
@@ -189,11 +192,16 @@ export const MisconfigurationsPreview = ({
             user: { name },
             isRiskScoreExist,
             hasMisconfigurationFindings,
-            path: { tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS },
+            hasNonClosedAlerts,
+            path: {
+              tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
+              subTab: CspInsightLeftPanelSubTab.MISCONFIGURATIONS,
+            },
           },
     });
   }, [
     hasMisconfigurationFindings,
+    hasNonClosedAlerts,
     hasVulnerabilitiesFindings,
     isRiskScoreExist,
     isUsingHostName,

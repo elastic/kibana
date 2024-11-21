@@ -6,11 +6,18 @@
  */
 
 export type {
-  ChatCompletionResponse,
+  ChatCompleteCompositeResponse,
   ChatCompleteAPI,
   ChatCompleteOptions,
   FunctionCallingMode,
+  ChatCompleteStreamResponse,
+  ChatCompleteResponse,
 } from './api';
+export type {
+  BoundChatCompleteAPI,
+  BoundChatCompleteOptions,
+  UnboundChatCompleteOptions,
+} from './bound_api';
 export {
   ChatCompletionEventType,
   type ChatCompletionMessageEvent,
@@ -18,6 +25,7 @@ export {
   type ChatCompletionEvent,
   type ChatCompletionChunkToolCall,
   type ChatCompletionTokenCountEvent,
+  type ChatCompletionTokenCount,
 } from './events';
 export {
   MessageRole,

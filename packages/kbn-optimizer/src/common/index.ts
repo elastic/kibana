@@ -18,7 +18,6 @@ export * from './rxjs_helpers';
 export * from './array_helpers';
 export * from './event_stream_helpers';
 export * from './parse_path';
-export * from './theme_tags';
 export * from './obj_helpers';
 export * from './hashes';
 export * from './dll_manifest';

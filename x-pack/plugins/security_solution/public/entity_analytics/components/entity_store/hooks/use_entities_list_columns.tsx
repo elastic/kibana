@@ -21,6 +21,7 @@ import { type CriticalityLevels } from '../../../../../common/constants';
 import { ENTITIES_LIST_TABLE_ID } from '../constants';
 import { isUserEntity, sourceFieldToText } from '../helpers';
 import { CRITICALITY_LEVEL_TITLE } from '../../asset_criticality/translations';
+import { formatRiskScore } from '../../../common';
 
 export type EntitiesListColumns = [
   Columns<Entity>,
@@ -79,7 +80,7 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
       width: '5%',
     },
     {
-      field: 'entity.name.text',
+      field: 'entity.name',
       name: (
         <FormattedMessage
           id="xpack.securitySolution.entityAnalytics.entityStore.entitiesList.nameColumn.title"
@@ -149,7 +150,7 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
         if (riskScore != null) {
           return (
             <span data-test-subj="risk-score-truncate" title={`${riskScore}`}>
-              {Math.round(riskScore)}
+              {formatRiskScore(riskScore)}
             </span>
           );
         }

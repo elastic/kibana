@@ -135,6 +135,13 @@ export function defineRecordViolations({ router, analyticsService }: RouteDefini
   router.post(
     {
       path: '/internal/security/analytics/_record_violations',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is used by browsers to report CSP and Permission Policy violations. These requests are sent without authentication per the browser spec.',
+        },
+      },
       validate: {
         /**
          * Chrome supports CSP3 spec and sends an array of reports. Safari only sends a single
