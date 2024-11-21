@@ -156,17 +156,6 @@ function DiscoverDocumentsComponent({
     documentState.fetchStatus === FetchStatus.LOADING ||
     documentState.fetchStatus === FetchStatus.PARTIAL;
 
-  // This is needed to prevent EuiDataGrid pushing onSort because the data view has been switched.
-  // It's just necessary for non ES|QL requests since they don't have a partial result state, that's
-  // considered as loading state in the Component.
-  // 1. When switching the data view, the sorting in the URL is reset to the default sorting of the selected data view.
-  // 2. The new sort param is already available in this component and propagated to the EuiDataGrid.
-  // 3. currentColumns are still referring to the old state
-  // 4. since the new sort by field isn't available in currentColumns EuiDataGrid is emitting a 'onSort', which is unsorting the grid
-  // 5. this is propagated to Discover's URL and causes an unwanted change of state to an unsorted state
-  // This solution switches to the loading state in this component when the URL index doesn't match the dataView.id
-  const isDataViewLoading =
-    useInternalStateSelector((state) => state.isDataViewLoading) && !isEsqlMode;
   const isEmptyDataResult =
     isEsqlMode || !documentState.result || documentState.result.length === 0;
   const rows = useMemo(() => documentState.result || [], [documentState.result]);
@@ -404,7 +393,7 @@ function DiscoverDocumentsComponent({
     [viewModeToggle, callouts, loadingIndicator]
   );
 
-  if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
+  if (isEmptyDataResult && isDataLoading) {
     return (
       <div className="dscDocuments__loading">
         <EuiText size="xs" color="subdued">

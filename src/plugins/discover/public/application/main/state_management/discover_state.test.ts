@@ -851,10 +851,8 @@ describe('Test discover state actions', () => {
     });
     const unsubscribe = state.actions.initializeAndSync();
     await state.actions.onDataViewEdited(dataViewMock);
-
-    await waitFor(() => {
-      expect(state.internalState.getState().dataView).not.toBe(selectedDataView);
-    });
+    expect(state.internalState.getState().dataView?.id).toBe(dataViewMock.id);
+    expect(state.dataState.fetch).toHaveBeenCalledTimes(1);
     unsubscribe();
   });
   test('onDataViewEdited - ad-hoc data view', async () => {
@@ -866,6 +864,7 @@ describe('Test discover state actions', () => {
     await waitFor(() => {
       expect(state.internalState.getState().dataView?.id).not.toBe(previousId);
     });
+    expect(state.dataState.fetch).toHaveBeenCalledTimes(1);
     unsubscribe();
   });
 
@@ -955,6 +954,15 @@ describe('Test discover state actions', () => {
     expect(setTime).toHaveBeenCalledTimes(1);
     expect(setTime).toHaveBeenCalledWith({ from: 'now-15d', to: 'now-10d' });
     expect(setRefreshInterval).toHaveBeenCalledWith({ pause: false, value: 1000 });
+  });
+
+  test('setIsLoading', async () => {
+    const { state } = await getState('/');
+    expect(state.internalState.getState().isLoading).toBe(true);
+    await state.actions.setIsLoading(false);
+    expect(state.internalState.getState().isLoading).toBe(false);
+    await state.actions.setIsLoading(true);
+    expect(state.internalState.getState().isLoading).toBe(true);
   });
 });
 
