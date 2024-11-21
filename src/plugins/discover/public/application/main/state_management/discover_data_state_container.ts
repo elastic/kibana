@@ -277,6 +277,8 @@ export function getDataStateContainer({
             disableNextFetchOnStateChange$.next(false);
           }
 
+          // Trigger chart fetching after the pre fetch state has been updated
+          // to ensure state values that would affect data fetching are set
           fetchChart$.next();
 
           abortController = new AbortController();
@@ -302,6 +304,8 @@ export function getDataStateContainer({
                 await appStateContainer.replaceUrlState(postFetchStateUpdate);
               }
 
+              // Clear the default profile state flags after the data fetching
+              // is done so refetches don't reset the state again
               internalStateContainer.transitions.setResetDefaultProfileState({
                 columns: false,
                 rowHeight: false,

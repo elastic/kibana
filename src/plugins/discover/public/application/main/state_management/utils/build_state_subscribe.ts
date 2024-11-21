@@ -160,7 +160,7 @@ export const buildStateSubscribe =
 
       if (dataState.disableNextFetchOnStateChange$.getValue()) {
         addLog(
-          '[buildStateSubscribe] fetch disabled on state changes',
+          '[buildStateSubscribe] next fetch skipped on state change',
           JSON.stringify(logData, null, 2)
         );
 
