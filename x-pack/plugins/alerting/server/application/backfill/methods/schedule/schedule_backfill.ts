@@ -145,6 +145,7 @@ export async function scheduleBackfill(
 
   const actionsClient = await context.getActionsClient();
   return await context.backfillClient.bulkQueue({
+    actionsClient,
     auditLogger: context.auditLogger,
     params,
     rules: rulesToSchedule.map(({ id, attributes, references }) => {

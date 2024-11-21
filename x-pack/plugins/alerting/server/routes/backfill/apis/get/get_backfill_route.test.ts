@@ -35,6 +35,7 @@ describe('getBackfillRoute', () => {
       tags: ['foo'],
       alertTypeId: 'myType',
       params: {},
+      actions: [],
       apiKeyOwner: 'user',
       apiKeyCreatedByUser: false,
       consumer: 'myApp',

@@ -21,7 +21,7 @@ const rawAdHocRunSchedule = schema.object({
   runAt: schema.string(),
 });
 
-const rawAdHocRunParamsRuleSchema = schema.object({
+export const rawAdHocRunParamsRuleSchema = schema.object({
   name: schema.string(),
   tags: schema.arrayOf(schema.string()),
   alertTypeId: schema.string(),

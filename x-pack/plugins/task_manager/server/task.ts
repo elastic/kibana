@@ -351,6 +351,11 @@ export interface TaskInstance {
    * Used to break up tasks so each Kibana node can claim tasks on a subset of the partitions
    */
   partition?: number;
+
+  /*
+   * Optionally override the priority defined in the task type for this specific task instance
+   */
+  priority?: TaskPriority;
 }
 
 /**
