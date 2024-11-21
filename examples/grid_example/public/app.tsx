@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { cloneDeep } from 'lodash';
-import React, { useRef, useState } from 'react';
+import deepEqual from 'fast-deep-equal';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
+import { combineLatest, debounceTime } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
@@ -25,29 +26,77 @@ import {
 } from '@elastic/eui';
 import { AppMountParameters } from '@kbn/core-application-browser';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { GridLayout, GridLayoutData, isLayoutEqual, type GridLayoutApi } from '@kbn/grid-layout';
+import { GridLayout, GridLayoutData } from '@kbn/grid-layout';
 import { i18n } from '@kbn/i18n';
 
 import { getPanelId } from './get_panel_id';
 import {
-  clearSerializedGridLayout,
-  getSerializedGridLayout,
+  clearSerializedDashboardState,
+  getSerializedDashboardState,
   setSerializedGridLayout,
 } from './serialized_grid_layout';
+import { MockSerializedDashboardState } from './types';
+import { useMockDashboardApi } from './use_mock_dashboard_api';
+import { dashboardInputToGridLayout, gridLayoutToDashboardPanelMap } from './utils';
 
 const DASHBOARD_MARGIN_SIZE = 8;
 const DASHBOARD_GRID_HEIGHT = 20;
 const DASHBOARD_GRID_COLUMN_COUNT = 48;
-const DEFAULT_PANEL_HEIGHT = 15;
-const DEFAULT_PANEL_WIDTH = DASHBOARD_GRID_COLUMN_COUNT / 2;
 
 export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
+  const savedState = useRef<MockSerializedDashboardState>(getSerializedDashboardState());
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
+  const [currentLayout, setCurrentLayout] = useState<GridLayoutData>(
+    dashboardInputToGridLayout(savedState.current)
+  );
 
-  const [layoutKey, setLayoutKey] = useState<string>(uuidv4());
-  const [gridLayoutApi, setGridLayoutApi] = useState<GridLayoutApi | null>();
-  const savedLayout = useRef<GridLayoutData>(getSerializedGridLayout());
-  const currentLayout = useRef<GridLayoutData>(savedLayout.current);
+  const mockDashboardApi = useMockDashboardApi({ savedState: savedState.current });
+
+  useEffect(() => {
+    combineLatest([mockDashboardApi.panels$, mockDashboardApi.rows$])
+      .pipe(debounceTime(0)) // debounce to avoid subscribe being called twice when both panels$ and rows$ publish
+      .subscribe(([panels, rows]) => {
+        const hasChanges = !(
+          deepEqual(panels, savedState.current.panels) && deepEqual(rows, savedState.current.rows)
+        );
+        setHasUnsavedChanges(hasChanges);
+        setCurrentLayout(dashboardInputToGridLayout({ panels, rows }));
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const renderBasicPanel = useCallback(
+    (id: string) => {
+      return (
+        <>
+          <div style={{ padding: 8 }}>{id}</div>
+          <EuiButtonEmpty
+            onClick={() => {
+              mockDashboardApi.removePanel(id);
+            }}
+          >
+            {i18n.translate('examples.gridExample.deletePanelButton', {
+              defaultMessage: 'Delete panel',
+            })}
+          </EuiButtonEmpty>
+          <EuiButtonEmpty
+            onClick={async () => {
+              const newPanelId = await getPanelId({
+                coreStart,
+                suggestion: id,
+              });
+              if (newPanelId) mockDashboardApi.replacePanel(id, newPanelId);
+            }}
+          >
+            {i18n.translate('examples.gridExample.replacePanelButton', {
+              defaultMessage: 'Replace panel',
+            })}
+          </EuiButtonEmpty>
+        </>
+      );
+    },
+    [coreStart, mockDashboardApi]
+  );
 
   return (
     <EuiProvider>
@@ -69,7 +118,7 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
               color="accent"
               size="s"
               onClick={() => {
-                clearSerializedGridLayout();
+                clearSerializedDashboardState();
                 window.location.reload();
               }}
             >
@@ -85,13 +134,9 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
                 onClick={async () => {
                   const panelId = await getPanelId({
                     coreStart,
-                    suggestion: `panel${(gridLayoutApi?.getPanelCount() ?? 0) + 1}`,
+                    suggestion: uuidv4(),
                   });
-                  if (panelId)
-                    gridLayoutApi?.addPanel(panelId, {
-                      width: DEFAULT_PANEL_WIDTH,
-                      height: DEFAULT_PANEL_HEIGHT,
-                    });
+                  if (panelId) mockDashboardApi.addNewPanel({ id: panelId });
                 }}
               >
                 {i18n.translate('examples.gridExample.addPanelButton', {
@@ -113,9 +158,9 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     onClick={() => {
-                      currentLayout.current = cloneDeep(savedLayout.current);
-                      setHasUnsavedChanges(false);
-                      setLayoutKey(uuidv4()); // force remount of grid
+                      const { panels, rows } = savedState.current;
+                      mockDashboardApi.panels$.next(panels);
+                      mockDashboardApi.rows$.next(rows);
                     }}
                   >
                     {i18n.translate('examples.gridExample.resetLayoutButton', {
@@ -126,12 +171,13 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     onClick={() => {
-                      if (gridLayoutApi) {
-                        const layoutToSave = gridLayoutApi.serializeState();
-                        setSerializedGridLayout(layoutToSave);
-                        savedLayout.current = layoutToSave;
-                        setHasUnsavedChanges(false);
-                      }
+                      const newSavedState = {
+                        panels: mockDashboardApi.panels$.getValue(),
+                        rows: mockDashboardApi.rows$.getValue(),
+                      };
+                      savedState.current = newSavedState;
+                      setHasUnsavedChanges(false);
+                      setSerializedGridLayout(newSavedState);
                     }}
                   >
                     {i18n.translate('examples.gridExample.saveLayoutButton', {
@@ -144,50 +190,17 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
           </EuiFlexGroup>
           <EuiSpacer size="m" />
           <GridLayout
-            key={layoutKey}
+            layout={currentLayout}
+            gridSettings={{
+              gutterSize: DASHBOARD_MARGIN_SIZE,
+              rowHeight: DASHBOARD_GRID_HEIGHT,
+              columnCount: DASHBOARD_GRID_COLUMN_COUNT,
+            }}
+            renderPanelContents={renderBasicPanel}
             onLayoutChange={(newLayout) => {
-              currentLayout.current = cloneDeep(newLayout);
-              setHasUnsavedChanges(!isLayoutEqual(savedLayout.current, newLayout));
-            }}
-            ref={setGridLayoutApi}
-            renderPanelContents={(id) => {
-              return (
-                <>
-                  <div style={{ padding: 8 }}>{id}</div>
-                  <EuiButtonEmpty
-                    onClick={() => {
-                      gridLayoutApi?.removePanel(id);
-                    }}
-                  >
-                    {i18n.translate('examples.gridExample.deletePanelButton', {
-                      defaultMessage: 'Delete panel',
-                    })}
-                  </EuiButtonEmpty>
-                  <EuiButtonEmpty
-                    onClick={async () => {
-                      const newPanelId = await getPanelId({
-                        coreStart,
-                        suggestion: `panel${(gridLayoutApi?.getPanelCount() ?? 0) + 1}`,
-                      });
-                      if (newPanelId) gridLayoutApi?.replacePanel(id, newPanelId);
-                    }}
-                  >
-                    {i18n.translate('examples.gridExample.replacePanelButton', {
-                      defaultMessage: 'Replace panel',
-                    })}
-                  </EuiButtonEmpty>
-                </>
-              );
-            }}
-            getCreationOptions={() => {
-              return {
-                gridSettings: {
-                  gutterSize: DASHBOARD_MARGIN_SIZE,
-                  rowHeight: DASHBOARD_GRID_HEIGHT,
-                  columnCount: DASHBOARD_GRID_COLUMN_COUNT,
-                },
-                initialLayout: cloneDeep(currentLayout.current),
-              };
+              const { panels, rows } = gridLayoutToDashboardPanelMap(newLayout);
+              mockDashboardApi.panels$.next(panels);
+              mockDashboardApi.rows$.next(rows);
             }}
           />
         </EuiPageTemplate.Section>
