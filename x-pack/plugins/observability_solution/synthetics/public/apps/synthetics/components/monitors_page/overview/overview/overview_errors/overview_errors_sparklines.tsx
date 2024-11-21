@@ -8,20 +8,21 @@
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
-import { ClientPluginsStart } from '../../../../../../../plugin';
 import { ERRORS_LABEL } from '../../../../monitor_details/monitor_summary/monitor_errors_count';
+import { ClientPluginsStart } from '../../../../../../../plugin';
+import { useMonitorFilters } from '../../../hooks/use_monitor_filters';
+import { useMonitorQueryFilters } from '../../../hooks/use_monitor_query_filters';
 
 interface Props {
   from: string;
   to: string;
-  monitorIds: string[];
-  locations?: string[];
 }
-export const OverviewErrorsSparklines = ({ from, to, monitorIds, locations }: Props) => {
+export const OverviewErrorsSparklines = ({ from, to }: Props) => {
   const {
     exploratoryView: { ExploratoryViewEmbeddable },
   } = useKibana<ClientPluginsStart>().services;
 
+  const filters = useMonitorFilters({});
   const { euiTheme } = useEuiTheme();
 
   const time = useMemo(() => ({ from, to }), [from, to]);
@@ -33,19 +34,20 @@ export const OverviewErrorsSparklines = ({ from, to, monitorIds, locations }: Pr
       axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
       legendIsVisible={false}
       hideTicks={true}
+      dslFilters={useMonitorQueryFilters()}
       attributes={[
         {
           time,
           seriesType: 'area',
           reportDefinitions: {
-            'monitor.id': monitorIds.length > 0 ? monitorIds : ['false-monitor-id'],
-            ...(locations?.length ? { 'observer.geo.name': locations } : {}),
+            'monitor.type': ['http', 'tcp', 'browser', 'icmp'],
           },
           dataType: 'synthetics',
           selectedMetricField: 'monitor_errors',
           name: ERRORS_LABEL,
           color: euiTheme.colors.danger,
           operationType: 'unique_count',
+          filters,
         },
       ]}
     />
