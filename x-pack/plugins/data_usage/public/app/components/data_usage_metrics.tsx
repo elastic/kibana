@@ -20,6 +20,7 @@ import { DEFAULT_DATE_RANGE_OPTIONS, useDateRangePicker } from '../hooks/use_dat
 import { DEFAULT_METRIC_TYPES, UsageMetricsRequestBody } from '../../../common/rest_types';
 import { ChartFilters, ChartFiltersProps } from './filters/charts_filters';
 import { ChartsLoading } from './charts_loading';
+import { NoDataCallout } from './no_data_callout';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 
 const EuiItemCss = css`
@@ -220,7 +221,9 @@ export const DataUsageMetrics = memo(
             <Charts data={usageMetricsData} data-test-subj={dataTestSubj} />
           ) : isFetching ? (
             <ChartsLoading data-test-subj={dataTestSubj} />
-          ) : null}
+          ) : (
+            <NoDataCallout />
+          )}
         </FlexItemWithCss>
       </EuiFlexGroup>
     );
