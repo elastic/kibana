@@ -86,30 +86,28 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
   const casesPermissions = appContextValue.cases?.helpers.canUseCases();
 
   return (
-    <KibanaThemeProvider theme={appContextValue.theme}>
-      <CasesContext owner={[]} permissions={casesPermissions!}>
-        <AiopsAppContext.Provider value={appContextValue}>
-          <UrlStateProvider>
-            <DataSourceContext.Provider value={{ dataView, savedSearch }}>
-              <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
-                <DatePickerContextProvider {...datePickerDeps}>
-                  <PageHeader />
-                  <EuiSpacer />
-                  <ReloadContextProvider reload$={reload$}>
-                    <FilterQueryContextProvider>
-                      <ChangePointDetectionContextProvider>
-                        <ChangePointDetectionControlsContextProvider>
-                          <ChangePointDetectionPage />
-                        </ChangePointDetectionControlsContextProvider>
-                      </ChangePointDetectionContextProvider>
-                    </FilterQueryContextProvider>
-                  </ReloadContextProvider>
-                </DatePickerContextProvider>
-              </StorageContextProvider>
-            </DataSourceContext.Provider>
-          </UrlStateProvider>
-        </AiopsAppContext.Provider>
-      </CasesContext>
-    </KibanaThemeProvider>
+    <CasesContext owner={[]} permissions={casesPermissions!}>
+      <AiopsAppContext.Provider value={appContextValue}>
+        <UrlStateProvider>
+          <DataSourceContext.Provider value={{ dataView, savedSearch }}>
+            <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
+              <DatePickerContextProvider {...datePickerDeps}>
+                <PageHeader />
+                <EuiSpacer />
+                <ReloadContextProvider reload$={reload$}>
+                  <FilterQueryContextProvider>
+                    <ChangePointDetectionContextProvider>
+                      <ChangePointDetectionControlsContextProvider>
+                        <ChangePointDetectionPage />
+                      </ChangePointDetectionControlsContextProvider>
+                    </ChangePointDetectionContextProvider>
+                  </FilterQueryContextProvider>
+                </ReloadContextProvider>
+              </DatePickerContextProvider>
+            </StorageContextProvider>
+          </DataSourceContext.Provider>
+        </UrlStateProvider>
+      </AiopsAppContext.Provider>
+    </CasesContext>
   );
 };
