@@ -13,9 +13,8 @@ import { getKbnPalettes, KbnPalette, type IKbnPalette } from '@kbn/palettes';
 import type { ChartColorConfiguration, PaletteDefinition, SeriesLayer } from '@kbn/coloring';
 import { flatten, zip } from 'lodash';
 import { CoreTheme } from '@kbn/core/public';
-import { ChartsPluginSetup, createColorPalette as createLegacyColorPalette } from '../..';
+import { createColorPalette as createLegacyColorPalette } from '../..';
 import { lightenColor } from './lighten_color';
-import { LegacyColorsService } from '../legacy_colors';
 import { MappedColors } from '../mapped_colors';
 import { workoutColorForValue } from './helpers';
 
@@ -27,7 +26,7 @@ function buildRoundRobinCategoricalWithMappedColors(
   const behindTextColorMap: Record<string, string> = Object.fromEntries(
     zip(colors, behindTextColors)
   );
-  const mappedColors = new MappedColors(undefined, (num: number) => {
+  const mappedColors = new MappedColors((num: number) => {
     return flatten(new Array(Math.ceil(num / 10)).fill(colors)).map((color) => color.toLowerCase());
   });
   function getColor(
@@ -64,7 +63,7 @@ function buildRoundRobinCategoricalWithMappedColors(
           type: 'function',
           function: 'system_palette',
           arguments: {
-            name: ['default'],
+            name: [id],
           },
         },
       ],
@@ -109,46 +108,7 @@ function buildGradient(id: string, palette: IKbnPalette): PaletteDefinition {
   };
 }
 
-function buildSyncedKibanaPalette(
-  colors: ChartsPluginSetup['legacyColors']
-): Omit<PaletteDefinition, 'title'> {
-  const staticColors = createLegacyColorPalette(20);
-  function getColor(series: SeriesLayer[], chartConfiguration: ChartColorConfiguration = {}) {
-    let outputColor: string;
-    if (chartConfiguration.syncColors) {
-      colors.mappedColors.mapKeys([series[0].name]);
-      outputColor = colors.mappedColors.get(series[0].name);
-    } else {
-      const configColor = colors.mappedColors.getColorFromConfig(series[0].name);
-      outputColor = configColor || staticColors[series[0].rankAtDepth % staticColors.length];
-    }
-
-    if (!chartConfiguration.maxDepth || chartConfiguration.maxDepth === 1) {
-      return outputColor;
-    }
-
-    return lightenColor(outputColor, series.length, chartConfiguration.maxDepth);
-  }
-  return {
-    id: 'kibana_palette',
-    getCategoricalColor: getColor,
-    getCategoricalColors: () => colors.seedColors.slice(0, 10),
-    toExpression: () => ({
-      type: 'expression',
-      chain: [
-        {
-          type: 'function',
-          function: 'system_palette',
-          arguments: {
-            name: ['kibana_palette'],
-          },
-        },
-      ],
-    }),
-  };
-}
-
-function buildCustomPalette(): PaletteDefinition<unknown> {
+function buildCustomPalette(): PaletteDefinition {
   return {
     id: 'custom',
     getColorForValue: (
@@ -249,10 +209,7 @@ function buildCustomPalette(): PaletteDefinition<unknown> {
   } as PaletteDefinition<unknown>;
 }
 
-export const buildPalettes = (
-  legacyColorsService: LegacyColorsService,
-  theme: CoreTheme
-): Record<string, PaletteDefinition> => {
+export const buildPalettes = (theme: CoreTheme): Record<string, PaletteDefinition> => {
   const kbnPalettes = getKbnPalettes(theme);
   const defaultPalette = kbnPalettes.get(KbnPalette.Default);
   return {
@@ -276,7 +233,7 @@ export const buildPalettes = (
       title: i18n.translate('charts.palettes.kibanaPaletteLabel', {
         defaultMessage: 'Compatibility',
       }),
-      ...buildSyncedKibanaPalette(legacyColorsService),
+      ...buildRoundRobinCategoricalWithMappedColors('kibana_palette', createLegacyColorPalette(20)),
     },
     custom: buildCustomPalette(),
   };
