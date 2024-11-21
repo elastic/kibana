@@ -22,6 +22,7 @@ exports[`OpenSearchPanel render 1`] = `
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <SavedObjectFinder
+      id="discoverOpenSearch"
       noItemsMessage={
         <Memo(MemoizedFormattedMessage)
           defaultMessage="No matching searches found."

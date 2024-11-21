@@ -1367,24 +1367,17 @@ paths:
                       - last_execution_date
                   flapping:
                     additionalProperties: false
-                    description: >-
-                      When flapping detection is turned on, alerts that switch
-                      quickly between active and recovered states are identified
-                      as “flapping” and notifications are reduced.
+                    description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
                     nullable: true
                     type: object
                     properties:
                       look_back_window:
-                        description: >-
-                          The minimum number of runs in which the threshold must
-                          be met.
+                        description: The minimum number of runs in which the threshold must be met.
                         maximum: 20
                         minimum: 2
                         type: number
                       status_change_threshold:
-                        description: >-
-                          The minimum number of times an alert must switch
-                          states in the look back window.
+                        description: The minimum number of times an alert must switch states in the look back window.
                         maximum: 20
                         minimum: 2
                         type: number
@@ -1958,24 +1951,17 @@ paths:
                   type: boolean
                 flapping:
                   additionalProperties: false
-                  description: >-
-                    When flapping detection is turned on, alerts that switch
-                    quickly between active and recovered states are identified
-                    as “flapping” and notifications are reduced.
+                  description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
                   nullable: true
                   type: object
                   properties:
                     look_back_window:
-                      description: >-
-                        The minimum number of runs in which the threshold must
-                        be met.
+                      description: The minimum number of runs in which the threshold must be met.
                       maximum: 20
                       minimum: 2
                       type: number
                     status_change_threshold:
-                      description: >-
-                        The minimum number of times an alert must switch states
-                        in the look back window.
+                      description: The minimum number of times an alert must switch states in the look back window.
                       maximum: 20
                       minimum: 2
                       type: number
@@ -2293,24 +2279,17 @@ paths:
                       - last_execution_date
                   flapping:
                     additionalProperties: false
-                    description: >-
-                      When flapping detection is turned on, alerts that switch
-                      quickly between active and recovered states are identified
-                      as “flapping” and notifications are reduced.
+                    description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
                     nullable: true
                     type: object
                     properties:
                       look_back_window:
-                        description: >-
-                          The minimum number of runs in which the threshold must
-                          be met.
+                        description: The minimum number of runs in which the threshold must be met.
                         maximum: 20
                         minimum: 2
                         type: number
                       status_change_threshold:
-                        description: >-
-                          The minimum number of times an alert must switch
-                          states in the look back window.
+                        description: The minimum number of times an alert must switch states in the look back window.
                         maximum: 20
                         minimum: 2
                         type: number
@@ -2887,24 +2866,17 @@ paths:
                     - active
                 flapping:
                   additionalProperties: false
-                  description: >-
-                    When flapping detection is turned on, alerts that switch
-                    quickly between active and recovered states are identified
-                    as “flapping” and notifications are reduced.
+                  description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
                   nullable: true
                   type: object
                   properties:
                     look_back_window:
-                      description: >-
-                        The minimum number of runs in which the threshold must
-                        be met.
+                      description: The minimum number of runs in which the threshold must be met.
                       maximum: 20
                       minimum: 2
                       type: number
                     status_change_threshold:
-                      description: >-
-                        The minimum number of times an alert must switch states
-                        in the look back window.
+                      description: The minimum number of times an alert must switch states in the look back window.
                       maximum: 20
                       minimum: 2
                       type: number
@@ -3194,24 +3166,17 @@ paths:
                       - last_execution_date
                   flapping:
                     additionalProperties: false
-                    description: >-
-                      When flapping detection is turned on, alerts that switch
-                      quickly between active and recovered states are identified
-                      as “flapping” and notifications are reduced.
+                    description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
                     nullable: true
                     type: object
                     properties:
                       look_back_window:
-                        description: >-
-                          The minimum number of runs in which the threshold must
-                          be met.
+                        description: The minimum number of runs in which the threshold must be met.
                         maximum: 20
                         minimum: 2
                         type: number
                       status_change_threshold:
-                        description: >-
-                          The minimum number of times an alert must switch
-                          states in the look back window.
+                        description: The minimum number of times an alert must switch states in the look back window.
                         maximum: 20
                         minimum: 2
                         type: number
@@ -4241,24 +4206,17 @@ paths:
                       - last_execution_date
                   flapping:
                     additionalProperties: false
-                    description: >-
-                      When flapping detection is turned on, alerts that switch
-                      quickly between active and recovered states are identified
-                      as “flapping” and notifications are reduced.
+                    description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
                     nullable: true
                     type: object
                     properties:
                       look_back_window:
-                        description: >-
-                          The minimum number of runs in which the threshold must
-                          be met.
+                        description: The minimum number of runs in which the threshold must be met.
                         maximum: 20
                         minimum: 2
                         type: number
                       status_change_threshold:
-                        description: >-
-                          The minimum number of times an alert must switch
-                          states in the look back window.
+                        description: The minimum number of times an alert must switch states in the look back window.
                         maximum: 20
                         minimum: 2
                         type: number
@@ -6708,14 +6666,9 @@ paths:
         - cases
   /api/cases/{caseId}/files:
     post:
-      description: >
-        Attach a file to a case. You must have `all` privileges for the
-        **Cases** feature in the **Management**, **Observability**, or
-        **Security** section of the Kibana feature privileges, depending on the
-        owner of the case you're updating. The request must include:
-
+      description: |
+        Attach a file to a case. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're updating. The request must include:
         - The `Content-Type: multipart/form-data` HTTP header.
-
         - The location of the file that is being uploaded.
       operationId: addCaseFileDefaultSpace
       parameters:
@@ -10329,6 +10282,42 @@ paths:
       summary: Create or update a protection updates note
       tags:
         - Security Endpoint Management API
+  /api/entity_store/enable:
+    post:
+      operationId: InitEntityStore
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              type: object
+              properties:
+                fieldHistoryLength:
+                  default: 10
+                  description: The number of historical values to keep for each field.
+                  type: integer
+                filter:
+                  type: string
+                indexPattern:
+                  $ref: '#/components/schemas/Security_Entity_Analytics_API_IndexPattern'
+        description: Schema for the entity store initialization
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                type: object
+                properties:
+                  engines:
+                    items:
+                      $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineDescriptor'
+                    type: array
+                  succeeded:
+                    type: boolean
+          description: Successful response
+      summary: Initialize the Entity Store
+      tags:
+        - Security Entity Analytics API
   /api/entity_store/engines:
     get:
       operationId: ListEntityEngines
@@ -10636,6 +10625,26 @@ paths:
                   - total
           description: Entities returned successfully
       summary: List Entity Store Entities
+      tags:
+        - Security Entity Analytics API
+  /api/entity_store/status:
+    get:
+      operationId: GetEntityStoreStatus
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                type: object
+                properties:
+                  engines:
+                    items:
+                      $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineDescriptor'
+                    type: array
+                  status:
+                    $ref: '#/components/schemas/Security_Entity_Analytics_API_StoreStatus'
+          description: Successful response
+      summary: Get the status of the Entity Store
       tags:
         - Security Entity Analytics API
   /api/exception_lists:
@@ -12369,15 +12378,20 @@ paths:
                             agent_download_target_directory:
                               nullable: true
                             agent_download_timeout:
-                              default: 2h
                               nullable: true
                             agent_limits_go_max_procs:
                               nullable: true
+                            agent_logging_files_interval:
+                              nullable: true
+                            agent_logging_files_keepfiles:
+                              nullable: true
+                            agent_logging_files_rotateeverybytes:
+                              nullable: true
                             agent_logging_level:
-                              default: info
                               nullable: true
                             agent_logging_metrics_period:
-                              default: 30s
+                              nullable: true
+                            agent_logging_to_files:
                               nullable: true
                         agent_features:
                           items:
@@ -12893,15 +12907,20 @@ paths:
                     agent_download_target_directory:
                       nullable: true
                     agent_download_timeout:
-                      default: 2h
                       nullable: true
                     agent_limits_go_max_procs:
                       nullable: true
+                    agent_logging_files_interval:
+                      nullable: true
+                    agent_logging_files_keepfiles:
+                      nullable: true
+                    agent_logging_files_rotateeverybytes:
+                      nullable: true
                     agent_logging_level:
-                      default: info
                       nullable: true
                     agent_logging_metrics_period:
-                      default: 30s
+                      nullable: true
+                    agent_logging_to_files:
                       nullable: true
                 agent_features:
                   items:
@@ -13067,15 +13086,20 @@ paths:
                           agent_download_target_directory:
                             nullable: true
                           agent_download_timeout:
-                            default: 2h
                             nullable: true
                           agent_limits_go_max_procs:
                             nullable: true
+                          agent_logging_files_interval:
+                            nullable: true
+                          agent_logging_files_keepfiles:
+                            nullable: true
+                          agent_logging_files_rotateeverybytes:
+                            nullable: true
                           agent_logging_level:
-                            default: info
                             nullable: true
                           agent_logging_metrics_period:
-                            default: 30s
+                            nullable: true
+                          agent_logging_to_files:
                             nullable: true
                       agent_features:
                         items:
@@ -13610,15 +13634,20 @@ paths:
                             agent_download_target_directory:
                               nullable: true
                             agent_download_timeout:
-                              default: 2h
                               nullable: true
                             agent_limits_go_max_procs:
                               nullable: true
+                            agent_logging_files_interval:
+                              nullable: true
+                            agent_logging_files_keepfiles:
+                              nullable: true
+                            agent_logging_files_rotateeverybytes:
+                              nullable: true
                             agent_logging_level:
-                              default: info
                               nullable: true
                             agent_logging_metrics_period:
-                              default: 30s
+                              nullable: true
+                            agent_logging_to_files:
                               nullable: true
                         agent_features:
                           items:
@@ -14133,15 +14162,20 @@ paths:
                           agent_download_target_directory:
                             nullable: true
                           agent_download_timeout:
-                            default: 2h
                             nullable: true
                           agent_limits_go_max_procs:
                             nullable: true
+                          agent_logging_files_interval:
+                            nullable: true
+                          agent_logging_files_keepfiles:
+                            nullable: true
+                          agent_logging_files_rotateeverybytes:
+                            nullable: true
                           agent_logging_level:
-                            default: info
                             nullable: true
                           agent_logging_metrics_period:
-                            default: 30s
+                            nullable: true
+                          agent_logging_to_files:
                             nullable: true
                       agent_features:
                         items:
@@ -14656,15 +14690,20 @@ paths:
                     agent_download_target_directory:
                       nullable: true
                     agent_download_timeout:
-                      default: 2h
                       nullable: true
                     agent_limits_go_max_procs:
                       nullable: true
+                    agent_logging_files_interval:
+                      nullable: true
+                    agent_logging_files_keepfiles:
+                      nullable: true
+                    agent_logging_files_rotateeverybytes:
+                      nullable: true
                     agent_logging_level:
-                      default: info
                       nullable: true
                     agent_logging_metrics_period:
-                      default: 30s
+                      nullable: true
+                    agent_logging_to_files:
                       nullable: true
                 agent_features:
                   items:
@@ -14830,15 +14869,20 @@ paths:
                           agent_download_target_directory:
                             nullable: true
                           agent_download_timeout:
-                            default: 2h
                             nullable: true
                           agent_limits_go_max_procs:
                             nullable: true
+                          agent_logging_files_interval:
+                            nullable: true
+                          agent_logging_files_keepfiles:
+                            nullable: true
+                          agent_logging_files_rotateeverybytes:
+                            nullable: true
                           agent_logging_level:
-                            default: info
                             nullable: true
                           agent_logging_metrics_period:
-                            default: 30s
+                            nullable: true
+                          agent_logging_to_files:
                             nullable: true
                       agent_features:
                         items:
@@ -15373,15 +15417,20 @@ paths:
                           agent_download_target_directory:
                             nullable: true
                           agent_download_timeout:
-                            default: 2h
                             nullable: true
                           agent_limits_go_max_procs:
                             nullable: true
+                          agent_logging_files_interval:
+                            nullable: true
+                          agent_logging_files_keepfiles:
+                            nullable: true
+                          agent_logging_files_rotateeverybytes:
+                            nullable: true
                           agent_logging_level:
-                            default: info
                             nullable: true
                           agent_logging_metrics_period:
-                            default: 30s
+                            nullable: true
+                          agent_logging_to_files:
                             nullable: true
                       agent_features:
                         items:
@@ -15993,6 +16042,30 @@ paths:
                                   required:
                                     - enabled
                                 type: object
+                              limits:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  go_max_procs:
+                                    type: number
+                              logging:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  files:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      interval:
+                                        type: string
+                                      keepfiles:
+                                        type: number
+                                      rotateeverybytes:
+                                        type: number
+                                  level:
+                                    type: string
+                                  to_files:
+                                    type: boolean
                               monitoring:
                                 additionalProperties: false
                                 type: object
@@ -22174,7 +22247,7 @@ paths:
       summary: Update package settings
       tags:
         - Elastic Package Manager (EPM)
-  /api/fleet/epm/packages/{pkgName}/{pkgVersion}/{filePath*}:
+  /api/fleet/epm/packages/{pkgName}/{pkgVersion}/{filePath}:
     get:
       operationId: get-fleet-epm-packages-pkgname-pkgversion-filepath
       parameters:
@@ -43715,9 +43788,7 @@ components:
         - $ref: '#/components/schemas/Cases_add_user_comment_request_properties'
       title: Add case comment request
     Cases_add_case_file_request:
-      description: >-
-        Defines the file that will be attached to the case. Optional parameters
-        will be generated automatically from the file metadata if not defined.
+      description: Defines the file that will be attached to the case. Optional parameters will be generated automatically from the file metadata if not defined.
       type: object
       properties:
         file:
@@ -43725,10 +43796,7 @@ components:
           format: binary
           type: string
         filename:
-          description: >-
-            The desired name of the file being attached to the case, it can be
-            different than the name of the file in the filesystem. **This should
-            not include the file extension.**
+          description: The desired name of the file being attached to the case, it can be different than the name of the file in the filesystem. **This should not include the file extension.**
           type: string
       required:
         - file
@@ -53653,6 +53721,14 @@ components:
         - index
         - description
         - category
+    Security_Entity_Analytics_API_StoreStatus:
+      enum:
+        - not_installed
+        - installing
+        - running
+        - stopped
+        - error
+      type: string
     Security_Entity_Analytics_API_TaskManagerUnavailableResponse:
       description: Task manager is unavailable
       type: object

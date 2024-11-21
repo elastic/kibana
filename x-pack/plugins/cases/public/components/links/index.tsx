@@ -8,7 +8,7 @@
 import type { EuiButtonProps, EuiLinkProps, PropsForAnchor, PropsForButton } from '@elastic/eui';
 import { EuiButton, EuiLink, EuiToolTip, EuiButtonEmpty } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { useCaseViewNavigation, useConfigureCasesNavigation } from '../../common/navigation';
+import { useCaseViewNavigation, useConfigureCasesNavigation } from '../../common/navigation/hooks';
 import * as i18n from './translations';
 
 export interface CasesNavigation<T = React.MouseEvent | MouseEvent | null, K = null> {
