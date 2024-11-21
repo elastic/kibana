@@ -108,10 +108,13 @@ const LensApiMock: LensApi = {
   updateOverrides: jest.fn(),
   getByReferenceState: jest.fn(),
   getByValueState: jest.fn(),
+  getTriggerCompatibleActions: jest.fn(),
   blockingError: new BehaviorSubject<Error | undefined>(undefined),
   panelDescription: new BehaviorSubject<string | undefined>(undefined),
   setPanelDescription: jest.fn(),
   viewMode: new BehaviorSubject<ViewMode>('view'),
+  disabledActionIds: new BehaviorSubject<string[] | undefined>(undefined),
+  setDisabledActionIds: jest.fn(),
 };
 
 const LensSerializedStateMock: LensSerializedState = createEmptyLensState(

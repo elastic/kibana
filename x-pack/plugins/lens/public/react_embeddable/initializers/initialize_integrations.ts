@@ -28,6 +28,7 @@ export function initializeIntegrations(
     | 'updateSavedObjectId'
     | 'updateOverrides'
     | 'updateDataLoading'
+    | 'getTriggerCompatibleActions'
   > &
     HasSerializableState;
   cleanup: () => void;
