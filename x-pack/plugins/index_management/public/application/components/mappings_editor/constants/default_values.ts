@@ -13,3 +13,9 @@
 export const INDEX_DEFAULT = 'index_default';
 
 export const STANDARD = 'standard';
+
+/*  
+  This will be repalce once we add default elser inference_id 
+  with the index mapping response.
+*/
+export const ELSER_PRECONFIGURED_ENDPOINTS = '.elser-2-elasticsearch';
