@@ -7,7 +7,7 @@
 
 import { mergeEntitiesList } from './utils';
 
-describe(__filename, () => {
+describe('mergeEntitiesList', () => {
   describe('mergeEntitiesList', () => {
     it('merges entities on entity.id', () => {
       const entities = [
