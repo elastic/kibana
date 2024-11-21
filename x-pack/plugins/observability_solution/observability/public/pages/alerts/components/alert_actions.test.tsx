@@ -6,7 +6,6 @@
  */
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { act } from '@testing-library/react-hooks';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { kibanaStartMock } from '../../../utils/kibana_react.mock';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
@@ -20,7 +19,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { allCasesPermissions, noCasesPermissions } from '@kbn/observability-shared-plugin/public';
 import { noop } from 'lodash';
 import { EuiDataGridCellValueElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
-import { waitFor } from '@testing-library/react';
+import { waitFor, act } from '@testing-library/react';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import { ObservabilityRuleTypeRegistry } from '../../../rules/create_observability_rule_type_registry';

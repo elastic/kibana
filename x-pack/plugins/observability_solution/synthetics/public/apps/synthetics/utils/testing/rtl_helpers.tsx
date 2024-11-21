@@ -249,7 +249,7 @@ export function WrappedHelper<ExtraCore>({
   useRealStore,
   path,
   history = createMemoryHistory(),
-}: RenderRouterOptions<ExtraCore> & { children: ReactElement; useRealStore?: boolean }) {
+}: React.PropsWithChildren<RenderRouterOptions<ExtraCore> & { useRealStore?: boolean }>) {
   const testState: AppState = mergeWith({}, mockState, state, (objValue, srcValue) => {
     if (Array.isArray(objValue)) {
       return srcValue;

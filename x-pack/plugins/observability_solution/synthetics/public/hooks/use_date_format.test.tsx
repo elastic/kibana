@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { i18n } from '@kbn/i18n';
 
 jest.mock('@kbn/i18n', () => ({

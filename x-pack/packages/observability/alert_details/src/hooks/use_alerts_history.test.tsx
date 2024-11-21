@@ -6,12 +6,10 @@
  */
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { waitFor, renderHook } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import {
-  type UseAlertsHistory,
   useAlertsHistory,
-  type Props as useAlertsHistoryProps,
 } from './use_alerts_history';
 
 const queryClient = new QueryClient({
@@ -44,7 +42,7 @@ describe('useAlertsHistory', () => {
 
   it('returns no data with error when http client is not provided', async () => {
     const http = undefined;
-    const { result, waitFor } = renderHook<useAlertsHistoryProps, UseAlertsHistory>(
+    const { result } = renderHook(
       () =>
         useAlertsHistory({
           http,
@@ -56,18 +54,14 @@ describe('useAlertsHistory', () => {
         wrapper,
       }
     );
-    await act(async () => {
-      await waitFor(() => result.current.isError);
-    });
-    expect(result.current.isError).toBeTruthy();
+    await waitFor(() => expect(result.current.isError).toBeTruthy());
     expect(result.current.isSuccess).toBeFalsy();
     expect(result.current.isLoading).toBeFalsy();
   });
 
   it('returns no data when API error', async () => {
     mockServices.http.post.mockRejectedValueOnce(new Error('ES error'));
-
-    const { result, waitFor } = renderHook<useAlertsHistoryProps, UseAlertsHistory>(
+    const { result } = renderHook(
       () =>
         useAlertsHistory({
           ...mockServices,
@@ -79,10 +73,7 @@ describe('useAlertsHistory', () => {
         wrapper,
       }
     );
-    await act(async () => {
-      await waitFor(() => result.current.isError);
-    });
-    expect(result.current.isError).toBeTruthy();
+    await waitFor(() => expect(result.current.isError).toBeTruthy());
     expect(result.current.isSuccess).toBeFalsy();
     expect(result.current.isLoading).toBeFalsy();
   });
@@ -130,7 +121,7 @@ describe('useAlertsHistory', () => {
       },
     });
 
-    const { result, waitFor } = renderHook<useAlertsHistoryProps, UseAlertsHistory>(
+    const { result } = renderHook(
       () =>
         useAlertsHistory({
           ...mockServices,
@@ -142,9 +133,7 @@ describe('useAlertsHistory', () => {
         wrapper,
       }
     );
-    await act(async () => {
-      await waitFor(() => result.current.isSuccess);
-    });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.isLoading).toBeFalsy();
     expect(result.current.isError).toBeFalsy();
     expect(result.current.data.avgTimeToRecoverUS).toEqual(134959464.2857143);
@@ -167,7 +156,7 @@ describe('useAlertsHistory', () => {
       },
     });
 
-    const { result, waitFor } = renderHook<useAlertsHistoryProps, UseAlertsHistory>(
+    const { result } = renderHook(
       () =>
         useAlertsHistory({
           ...mockServices,
@@ -181,11 +170,7 @@ describe('useAlertsHistory', () => {
         wrapper,
       }
     );
-
-    await act(async () => {
-      await waitFor(() => result.current.isSuccess);
-    });
-
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(mockServices.http.post).toBeCalledWith('/internal/rac/alerts/find', {
       body:
         '{"size":0,"rule_type_ids":["apm"],"consumers":["foo"],"query":{"bool":{"must":[' +
@@ -215,7 +200,7 @@ describe('useAlertsHistory', () => {
       },
     });
 
-    const { result, waitFor } = renderHook<useAlertsHistoryProps, UseAlertsHistory>(
+    const { result } = renderHook(
       () =>
         useAlertsHistory({
           ...mockServices,
@@ -229,10 +214,7 @@ describe('useAlertsHistory', () => {
       }
     );
 
-    await act(async () => {
-      await waitFor(() => result.current.isSuccess);
-    });
-
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(mockServices.http.post).toBeCalledWith('/internal/rac/alerts/find', {
       body:
         '{"size":0,"rule_type_ids":["apm"],"query":{"bool":{"must":[' +
