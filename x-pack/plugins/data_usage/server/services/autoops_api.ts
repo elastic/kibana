@@ -52,23 +52,12 @@ export class AutoOpsAPIService {
       throw new AutoOpsError(AUTO_OPS_MISSING_CONFIG_ERROR);
     }
 
-    if (!autoopsConfig.api?.url) {
-      this.logger.error(`[AutoOps API] Missing API URL in the configuration.`, errorMetadata);
-      throw new AutoOpsError('Missing API URL in AutoOps configuration.');
-    }
-
-    if (!autoopsConfig.api?.tls?.certificate || !autoopsConfig.api?.tls?.key) {
-      this.logger.error(
-        `[AutoOps API] Missing required TLS certificate or key in the configuration.`,
-        errorMetadata
-      );
-      throw new AutoOpsError('Missing required TLS certificate or key in AutoOps configuration.');
-    }
-
     this.logger.debug(
-      `[AutoOps API] Creating autoops agent with request URL: ${autoopsConfig.api.url} and TLS cert: [REDACTED] and TLS key: [REDACTED]`
+      `[AutoOps API] Creating autoops agent with TLS cert: ${
+        autoopsConfig?.api?.tls?.certificate ? '[REDACTED]' : 'undefined'
+      } and TLS key: ${autoopsConfig?.api?.tls?.key ? '[REDACTED]' : 'undefined'}
+      and TLS ca: ${autoopsConfig?.api?.tls?.ca ? '[REDACTED]' : 'undefined'}`
     );
-
     const controller = new AbortController();
     const tlsConfig = this.createTlsConfig(autoopsConfig);
     const cloudSetup = appContextService.getCloud();
@@ -180,6 +169,7 @@ export class AutoOpsAPIService {
         enabled: true,
         certificate: autoopsConfig?.api?.tls?.certificate,
         key: autoopsConfig?.api?.tls?.key,
+        certificateAuthorities: autoopsConfig?.api?.tls?.ca,
       })
     );
   }
@@ -197,6 +187,7 @@ export class AutoOpsAPIService {
           ...requestConfig.httpsAgent.options,
           cert: requestConfig.httpsAgent.options.cert ? 'REDACTED' : undefined,
           key: requestConfig.httpsAgent.options.key ? 'REDACTED' : undefined,
+          ca: requestConfig.httpsAgent.options.ca ? 'REDACTED' : undefined,
         },
       },
     });

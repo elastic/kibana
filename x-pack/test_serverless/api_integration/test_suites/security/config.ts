@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
+import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import { createTestConfig } from '../../config.base';
 
 export default createTestConfig({
@@ -32,5 +32,6 @@ export default createTestConfig({
     '--xpack.dataUsage.autoops.api.url=http://localhost:9000',
     `--xpack.dataUsage.autoops.api.tls.certificate=${KBN_CERT_PATH}`,
     `--xpack.dataUsage.autoops.api.tls.key=${KBN_KEY_PATH}`,
+    `--xpack.dataUsage.autoops.api.tls.ca=${CA_CERT_PATH}`,
   ],
 });

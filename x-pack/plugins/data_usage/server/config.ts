@@ -20,6 +20,7 @@ export const configSchema = schema.object({
             schema.object({
               certificate: schema.maybe(schema.string()),
               key: schema.maybe(schema.string()),
+              ca: schema.maybe(schema.string()),
             })
           ),
         })
