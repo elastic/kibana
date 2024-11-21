@@ -8,9 +8,9 @@
 import moment from 'moment/moment';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
-import { asMutableArray } from '@kbn/uptime-plugin/common/utils/as_mutable_array';
 import { isEmpty } from 'lodash';
 import { withApmSpan } from '@kbn/apm-data-access-plugin/server/utils/with_apm_span';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { getMonitorFilters, OverviewStatusQuery } from '../common';
 import {
   getAllMonitors,
