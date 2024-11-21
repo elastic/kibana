@@ -37,7 +37,6 @@ export function EqlQueryEdit({
   path,
   eqlOptionsPath,
   fieldsToValidateOnChange,
-  eqlFieldsComboBoxOptions,
   showEqlSizeOption = false,
   showFilterBar = false,
   dataView,
@@ -49,7 +48,6 @@ export function EqlQueryEdit({
 }: EqlQueryEditProps): JSX.Element {
   const componentProps = useMemo(
     () => ({
-      eqlFieldsComboBoxOptions,
       isSizeOptionDisabled: !showEqlSizeOption,
       isDisabled: disabled,
       isLoading: loading,
@@ -59,15 +57,7 @@ export function EqlQueryEdit({
       dataTestSubj: 'ruleEqlQueryBar',
       onValidityChange,
     }),
-    [
-      eqlFieldsComboBoxOptions,
-      showEqlSizeOption,
-      showFilterBar,
-      onValidityChange,
-      dataView,
-      loading,
-      disabled,
-    ]
+    [showEqlSizeOption, showFilterBar, onValidityChange, dataView, loading, disabled]
   );
   const fieldConfig: FieldConfig<FieldValueQueryBar> = useMemo(
     () => ({
@@ -86,23 +76,26 @@ export function EqlQueryEdit({
         ...(!skipEqlValidation
           ? [
               {
-                validator: debounceAsync((...args) => {
-                  const [{ formData }] = args as [ValidationFuncArg<FormData>];
-                  const eqlOptions =
-                    eqlOptionsPath && formData[eqlOptionsPath] ? formData[eqlOptionsPath] : {};
+                validator: debounceAsync(
+                  (data: ValidationFuncArg<FormData, FieldValueQueryBar>) => {
+                    const { formData } = data;
+                    const eqlOptions =
+                      eqlOptionsPath && formData[eqlOptionsPath] ? formData[eqlOptionsPath] : {};
 
-                  return eqlQueryValidatorFactory(
-                    dataView.id
-                      ? {
-                          dataViewId: dataView.id,
-                          eqlOptions,
-                        }
-                      : {
-                          indexPatterns: dataView.title.split(','),
-                          eqlOptions,
-                        }
-                  )(...args);
-                }, 300),
+                    return eqlQueryValidatorFactory(
+                      dataView.id
+                        ? {
+                            dataViewId: dataView.id,
+                            eqlOptions,
+                          }
+                        : {
+                            indexPatterns: dataView.title.split(','),
+                            eqlOptions,
+                          }
+                    )(data);
+                  },
+                  300
+                ),
               },
             ]
           : []),

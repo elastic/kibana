@@ -8,7 +8,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { render, screen, fireEvent, within } from '@testing-library/react';
-
+import type { SecuritySolutionDataViewBase } from '../../../../common/types';
 import { mockIndexPattern, TestProviders, useFormFieldMock } from '../../../../common/mock';
 import { mockQueryBar } from '../../../rule_management_ui/components/rules_table/__mocks__/mock';
 import { selectEuiComboBoxOption } from '../../../../common/test/eui/combobox';
@@ -116,10 +116,29 @@ describe('EqlQueryBar', () => {
   });
 
   describe('EQL options interaction', () => {
-    const mockOptionsData = {
-      keywordFields: [{ label: 'category', value: 'category' }],
-      dateFields: [{ label: 'timestamp', value: 'timestamp' }],
-      nonDateFields: [{ label: 'tiebreaker', value: 'tiebreaker' }],
+    const mockIndexPatternWithEqlOptionsFields: SecuritySolutionDataViewBase = {
+      fields: [
+        {
+          name: 'category',
+          searchable: true,
+          type: 'keyword',
+          esTypes: ['keyword'],
+          aggregatable: true,
+        },
+        {
+          name: 'timestamp',
+          searchable: true,
+          type: 'date',
+          aggregatable: true,
+        },
+        {
+          name: 'tiebreaker',
+          searchable: true,
+          type: 'string',
+          aggregatable: true,
+        },
+      ],
+      title: 'test-*',
     };
 
     it('updates EQL options', async () => {
@@ -141,8 +160,7 @@ describe('EqlQueryBar', () => {
             field={mockField}
             eqlOptionsField={mockEqlOptionsField}
             isLoading={false}
-            eqlFieldsComboBoxOptions={mockOptionsData}
-            indexPattern={mockIndexPattern}
+            indexPattern={mockIndexPatternWithEqlOptionsFields}
           />
         </TestProviders>
       );

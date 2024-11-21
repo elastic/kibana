@@ -20,7 +20,7 @@ import React, { memo, useCallback, useState, useEffect, useMemo, useRef } from '
 
 import styled from 'styled-components';
 import { i18n as i18nCore } from '@kbn/i18n';
-import { isEqual, isEmpty } from 'lodash';
+import { isEqual } from 'lodash';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import usePrevious from 'react-use/lib/usePrevious';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
@@ -714,28 +714,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     ]
   );
 
-  const optionsData = useMemo(
-    () =>
-      isEmpty(indexPattern.fields)
-        ? {
-            keywordFields: [],
-            dateFields: [],
-            nonDateFields: [],
-          }
-        : {
-            keywordFields: (indexPattern.fields as FieldSpec[])
-              .filter((f) => f.esTypes?.includes('keyword'))
-              .map((f) => ({ label: f.name })),
-            dateFields: indexPattern.fields
-              .filter((f) => f.type === 'date')
-              .map((f) => ({ label: f.name })),
-            nonDateFields: indexPattern.fields
-              .filter((f) => f.type !== 'date')
-              .map((f) => ({ label: f.name })),
-          },
-    [indexPattern]
-  );
-
   const selectRuleTypeProps = useMemo(
     () => ({
       describedByIds: ['detectionEngineStepDefineRuleType'],
@@ -781,7 +759,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     fieldsToValidateOnChange={ALERT_SUPPRESSION_FIELDS_FIELD_NAME}
                     required
                     showFilterBar
-                    eqlFieldsComboBoxOptions={optionsData}
                     dataView={indexPattern}
                     loading={isIndexPatternLoading}
                     disabled={isLoading}

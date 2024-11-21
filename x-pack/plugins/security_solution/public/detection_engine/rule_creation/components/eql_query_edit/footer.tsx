@@ -20,10 +20,10 @@ import {
 import type { FC } from 'react';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
-
+import type { DataViewBase } from '@kbn/es-query';
 import type { DebouncedFunc } from 'lodash';
-import { debounce } from 'lodash';
-import type { EqlFieldsComboBoxOptions, EqlOptions } from '../../../../../common/search_strategy';
+import { debounce, isEmpty } from 'lodash';
+import type { EqlOptions } from '../../../../../common/search_strategy';
 import * as i18n from './translations';
 import { ErrorsPopover } from './errors_popover';
 import { EqlOverviewLink } from './eql_overview_link';
@@ -32,7 +32,7 @@ export interface EqlQueryBarFooterProps {
   errors: string[];
   isLoading?: boolean;
   isSizeOptionDisabled?: boolean;
-  optionsData?: EqlFieldsComboBoxOptions;
+  dataView: DataViewBase;
   eqlOptions?: EqlOptions;
   onEqlOptionsChange?: <Field extends keyof EqlOptions>(
     field: Field,
@@ -72,13 +72,35 @@ export const EqlQueryBarFooter: FC<EqlQueryBarFooterProps> = ({
   errors,
   isLoading,
   isSizeOptionDisabled,
-  optionsData,
+  dataView,
   eqlOptions,
   onEqlOptionsChange,
 }) => {
   const [openEqlSettings, setIsOpenEqlSettings] = useState(false);
   const [localSize, setLocalSize] = useState<number>(eqlOptions?.size ?? 100);
   const debounceSize = useRef<DebouncedFunc<SizeVoidFunc>>();
+
+  const { keywordFields, nonDateFields, dateFields } = useMemo(
+    () =>
+      isEmpty(dataView?.fields)
+        ? {
+            keywordFields: [],
+            dateFields: [],
+            nonDateFields: [],
+          }
+        : {
+            keywordFields: dataView.fields
+              .filter((f) => f.esTypes?.includes('keyword'))
+              .map((f) => ({ label: f.name })),
+            dateFields: dataView.fields
+              .filter((f) => f.type === 'date')
+              .map((f) => ({ label: f.name })),
+            nonDateFields: dataView.fields
+              .filter((f) => f.type !== 'date')
+              .map((f) => ({ label: f.name })),
+          },
+    [dataView]
+  );
 
   const openEqlSettingsHandler = useCallback(() => {
     setIsOpenEqlSettings(true);
@@ -227,7 +249,7 @@ export const EqlQueryBarFooter: FC<EqlQueryBarFooterProps> = ({
                         helpText={i18n.EQL_OPTIONS_EVENT_CATEGORY_FIELD_HELPER}
                       >
                         <EuiComboBox
-                          options={optionsData?.keywordFields}
+                          options={keywordFields}
                           selectedOptions={eventCategoryField}
                           singleSelection={singleSelection}
                           onChange={handleEventCategoryField}
@@ -239,7 +261,7 @@ export const EqlQueryBarFooter: FC<EqlQueryBarFooterProps> = ({
                         helpText={i18n.EQL_OPTIONS_EVENT_TIEBREAKER_FIELD_HELPER}
                       >
                         <EuiComboBox
-                          options={optionsData?.nonDateFields}
+                          options={nonDateFields}
                           selectedOptions={tiebreakerField}
                           singleSelection={singleSelection}
                           onChange={handleTiebreakerField}
@@ -251,7 +273,7 @@ export const EqlQueryBarFooter: FC<EqlQueryBarFooterProps> = ({
                         helpText={i18n.EQL_OPTIONS_EVENT_TIMESTAMP_FIELD_HELPER}
                       >
                         <EuiComboBox
-                          options={optionsData?.dateFields}
+                          options={dateFields}
                           selectedOptions={timestampField}
                           singleSelection={singleSelection}
                           onChange={handleTimestampField}

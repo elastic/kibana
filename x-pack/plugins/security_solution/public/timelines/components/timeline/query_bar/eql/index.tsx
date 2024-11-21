@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { isEmpty, isEqual } from 'lodash';
+import { isEqual } from 'lodash';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { EuiOutsideClickDetector } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { css } from '@emotion/css';
-import type { DataViewBase } from '@kbn/es-query';
 
 import type { EqlOptions } from '../../../../../../common/search_strategy';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
@@ -145,24 +144,6 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
     eqlOptions.size,
   ]);
 
-  const eqlFieldsComboBoxOptions = useMemo(() => {
-    const fields = Object.values(sourcererDataView.fields || {});
-
-    return isEmpty(fields)
-      ? {
-          keywordFields: [],
-          dateFields: [],
-          nonDateFields: [],
-        }
-      : {
-          keywordFields: fields
-            .filter((f) => f.esTypes?.includes('keyword'))
-            .map((f) => ({ label: f.name })),
-          dateFields: fields.filter((f) => f.type === 'date').map((f) => ({ label: f.name })),
-          nonDateFields: fields.filter((f) => f.type !== 'date').map((f) => ({ label: f.name })),
-        };
-  }, [sourcererDataView]);
-
   useEffect(() => {
     const { index: indexField } = getFields();
     const newIndexValue = [...selectedPatterns].sort();
@@ -172,6 +153,15 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
       indexField.setValue(newIndexValue);
     }
   }, [getFields, selectedPatterns]);
+
+  const dataView = useMemo(
+    () => ({
+      ...sourcererDataView,
+      title: sourcererDataView.title ?? '',
+      fields: Object.values(sourcererDataView.fields || {}),
+    }),
+    [sourcererDataView]
+  );
 
   /* Force casting `sourcererDataView` to `DataViewBase` is required since EqlQueryEdit
      accepts DataViewBase but `useSourcererDataView()` returns `DataViewSpec`.
@@ -186,9 +176,8 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
           key="EqlQueryBar"
           path="eqlQueryBar"
           eqlOptionsPath="eqlOptions"
-          eqlFieldsComboBoxOptions={eqlFieldsComboBoxOptions}
           showEqlSizeOption
-          dataView={sourcererDataView as unknown as DataViewBase}
+          dataView={dataView}
           loading={indexPatternsLoading}
           disabled={indexPatternsLoading}
         />

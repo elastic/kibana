@@ -143,8 +143,7 @@ function getUnacceptedConflictsCount(
 ): number {
   const fieldNames = Object.keys(ruleFieldsDiff);
   const fieldNamesWithConflict = fieldNames.filter(
-    (fieldName) =>
-      ruleFieldsDiff[fieldName].conflict !== ThreeWayDiffConflict.NONE && fieldName !== 'version'
+    (fieldName) => ruleFieldsDiff[fieldName].conflict !== ThreeWayDiffConflict.NONE
   );
   const fieldNamesWithConflictSet = new Set(fieldNamesWithConflict);
 
