@@ -54,72 +54,42 @@ describe('Service inventory', () => {
       cy.visitKibana(serviceInventoryHref);
     });
 
-    it('has no detectable a11y violations on load', () => {
-      cy.contains('h1', 'Services');
+    it('renders correctly', () => {
       // set skipFailures to true to not fail the test when there are accessibility failures
       checkA11y({ skipFailures: true });
-    });
-
-    it('has a list of services', () => {
-      cy.contains('opbeans-node');
-      cy.contains('opbeans-java');
-      cy.contains('opbeans-rum');
-    });
-
-    it('has a list of environments', () => {
-      cy.get('td:contains(production)').should('have.length', 3);
-    });
-
-    it('when clicking on a service it loads the service overview for that service', () => {
-      cy.contains('opbeans-node').click({ force: true });
-      cy.url().should('include', '/apm/services/opbeans-node/overview');
-      cy.contains('h1', 'opbeans-node');
-    });
-  });
-
-  describe('Calls APIs', () => {
-    beforeEach(() => {
       cy.intercept('GET', '/internal/apm/services?*').as('servicesRequest');
       cy.intercept('POST', '/internal/apm/services/detailed_statistics?*').as(
         'detailedStatisticsRequest'
       );
-
-      cy.loginAsViewerUser();
-      cy.visitKibana(serviceInventoryHref);
-    });
-
-    it('with the correct environment when changing the environment', () => {
+      cy.intercept('GET', '/internal/apm/suggestions?*').as('environmentSuggestionsRequest');
+      cy.wait('@environmentSuggestionsRequest');
       cy.wait(mainAliasNames);
 
+      // It checks page title
+      cy.contains('h1', 'Services');
+
+      // It checks inventory table
+      cy.contains('opbeans-node');
+      cy.contains('opbeans-java');
+      cy.contains('opbeans-rum');
+      cy.get('td:contains(production)').should('have.length', 3);
+
+      // It changes environment to production
       cy.getByTestSubj('environmentFilter').type('{selectall}production');
-
       cy.contains('button', 'production').click();
-
       cy.expectAPIsToHaveBeenCalledWith({
         apisIntercepted: mainAliasNames,
         value: 'environment=production',
       });
-    });
 
-    it('when selecting a different time range and clicking the update button', () => {
-      cy.wait(mainAliasNames);
-
-      cy.selectAbsoluteTimeRange(
-        moment(timeRange.rangeFrom).subtract(5, 'm').toISOString(),
-        moment(timeRange.rangeTo).subtract(5, 'm').toISOString()
-      );
+      // It changes date range
+      const from = moment(timeRange.rangeFrom).subtract(5, 'm').toISOString();
+      const to = moment(timeRange.rangeTo).subtract(5, 'm').toISOString();
+      cy.selectAbsoluteTimeRange(from, to);
       cy.contains('Update').click();
       cy.wait(mainAliasNames);
-    });
-  });
 
-  describe('Table search', () => {
-    beforeEach(() => {
-      cy.loginAsEditorUser();
-    });
-
-    it('Uses the fast filter to search for services', () => {
-      cy.visitKibana(serviceInventoryHref);
+      // It filter table content with Fast filter
       cy.get('[data-test-subj="tableSearchInput"]').should('exist');
       cy.contains('opbeans-node');
       cy.contains('opbeans-java');
@@ -132,12 +102,21 @@ describe('Service inventory', () => {
       cy.contains('opbeans-node');
       cy.contains('opbeans-java');
       cy.contains('opbeans-rum');
+
+      // It navigates to service overview page
+      cy.get('[data-test-subj="serviceLink_nodejs"]').click();
+      cy.url().should('include', '/apm/services/opbeans-node/overview');
+      cy.contains('h1', 'opbeans-node');
+      cy.go('back');
+
+      // It navigates to Inventory plugin.
+      cy.contains('Try our new Inventory').click();
+      cy.url().should('include', '/inventory');
     });
   });
 
   describe('Check detailed statistics API with multiple services', () => {
     before(() => {
-      // clean previous data created
       synthtrace.clean();
       const { rangeFrom, rangeTo } = timeRange;
       synthtrace.index(
