@@ -208,7 +208,7 @@ export const getDescriptionItem = (
 ): ListItems[] => {
   if (field === 'queryBar') {
     const queryBar = get('queryBar', data) as FieldValueQueryBar;
-    const filters = addFilterStateIfNotThere(queryBar.filters);
+    const filters = addFilterStateIfNotThere(queryBar.filters ?? []);
     const query = queryBar.query.query as string;
     const savedId = queryBar.saved_id ?? '';
     const savedQueryName = queryBar.title;
