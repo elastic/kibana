@@ -3,6 +3,6 @@
   "id": "@kbn/test-suites-src",
   "owner": [],
   "group": "platform",
-  "visibility": "private",
+  "visibility": "shared",
   "devOnly": true
 }
