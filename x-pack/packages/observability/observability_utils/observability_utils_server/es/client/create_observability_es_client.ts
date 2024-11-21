@@ -52,6 +52,8 @@ export interface EsqlQueryResponse {
   values: EsqlValue[][];
 }
 
+export type ObservabilitySearchRequest = SearchRequest;
+
 /**
  * An Elasticsearch Client with a fully typed `search` method and built-in
  * APM instrumentation.
@@ -86,10 +88,12 @@ export function createObservabilityEsClient({
   client,
   logger,
   plugin,
+  labels,
 }: {
   client: ElasticsearchClient;
   logger: Logger;
-  plugin: string;
+  plugin?: string;
+  labels?: Record<string, string>;
 }): ObservabilityElasticsearchClient {
   // wraps the ES calls in a named APM span for better analysis
   // (otherwise it would just eg be a _search span)
@@ -103,7 +107,8 @@ export function createObservabilityEsClient({
       {
         name: operationName,
         labels: {
-          plugin,
+          ...labels,
+          ...(plugin ? { plugin } : {}),
         },
       },
       callback,

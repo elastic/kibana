@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { assetsRoutes } from './assets/route';
 import { esqlRoutes } from './esql/route';
 import { deleteStreamRoute } from './streams/delete';
 import { disableStreamsRoute } from './streams/disable';
@@ -27,6 +28,7 @@ export const StreamsRouteRepository = {
   ...streamsStatusRoutes,
   ...esqlRoutes,
   ...disableStreamsRoute,
+  ...assetsRoutes,
 };
 
 export type StreamsRouteRepository = typeof StreamsRouteRepository;

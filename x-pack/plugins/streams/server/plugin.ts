@@ -23,6 +23,7 @@ import {
   StreamsPluginStartDependencies,
   StreamsServer,
 } from './types';
+import { AssetService } from './lib/streams/assets/asset_service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -52,15 +53,21 @@ export class StreamsPlugin
     this.logger = context.logger.get();
   }
 
-  public setup(core: CoreSetup, plugins: StreamsPluginSetupDependencies): StreamsPluginSetup {
+  public setup(
+    core: CoreSetup<StreamsPluginStartDependencies>,
+    plugins: StreamsPluginSetupDependencies
+  ): StreamsPluginSetup {
     this.server = {
       config: this.config,
       logger: this.logger,
     } as StreamsServer;
 
+    const assetService = new AssetService(core, this.logger);
+
     registerRoutes<RouteDependencies>({
       repository: StreamsRouteRepository,
       dependencies: {
+        assets: assetService,
         server: this.server,
         getScopedClients: async ({ request }: { request: KibanaRequest }) => {
           const [coreStart] = await core.getStartServices();
