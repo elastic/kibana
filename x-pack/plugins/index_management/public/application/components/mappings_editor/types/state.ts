@@ -140,6 +140,6 @@ export type Action =
   | { type: 'fieldsJsonEditor.update'; value: { json: { [key: string]: any }; isValid: boolean } }
   | { type: 'search:update'; value: string }
   | { type: 'validity:update'; value: boolean }
-  | { type: 'filter:update'; value: { selectedOptions: EuiSelectableOption[] } }
+  | { type: 'filter:update'; value: { selectedOptions: EuiSelectableOption[] } };
 
 export type Dispatch = (action: Action) => void;
