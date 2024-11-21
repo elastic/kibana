@@ -40,16 +40,23 @@ export async function getLatestEntity({
     return undefined;
   }
 
-  const { hits } = await inventoryEsClient.esql<{
-    'source_data_stream.type': string | string[];
-  }>('get_latest_entities', {
-    query: `FROM ${ENTITIES_LATEST_ALIAS}
+  const { hits } = await inventoryEsClient.esql<
+    {
+      'source_data_stream.type': string | string[];
+    },
+    { transform: 'plain' }
+  >(
+    'get_latest_entities',
+    {
+      query: `FROM ${ENTITIES_LATEST_ALIAS}
         | WHERE ${ENTITY_TYPE} == ?
         | WHERE ${hostOrContainerIdentityField} == ?
         | KEEP ${SOURCE_DATA_STREAM_TYPE}
       `,
-    params: [entityType, entityId],
-  });
+      params: [entityType, entityId],
+    },
+    { transform: 'plain' }
+  );
 
   return { sourceDataStreamType: hits[0]?.['source_data_stream.type'] };
 }
