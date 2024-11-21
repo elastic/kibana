@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
 
 import { useValues, useActions } from 'kea';
 
@@ -31,6 +31,7 @@ import { docLinks } from '../../../shared/doc_links';
 
 import { SettingsLogic } from './settings_logic';
 import { SettingsPanel } from './settings_panel';
+import { element } from 'prop-types';
 
 export interface DefaultSettingsFlyoutProps {
   closeFlyout: () => void;
@@ -56,6 +57,7 @@ export const DefaultSettingsFlyout: React.FC<DefaultSettingsFlyoutProps> = ({ cl
     reduce_whitespace: reduceWhitespace,
     run_ml_inference: runMLInference,
   } = pipelineState;
+  const elementRef = useRef(null);
   return (
     <EuiFlyout onClose={closeFlyout} size="s" paddingSize="l">
       <EuiFlyoutHeader hasBorder>
@@ -81,6 +83,7 @@ export const DefaultSettingsFlyout: React.FC<DefaultSettingsFlyoutProps> = ({ cl
                     data-telemetry-id="entSearchContent-defaultSettingsFlyout-ingestPipelinesLink"
                     href={docLinks.ingestPipelines}
                     target="_blank"
+                    ref={elementRef}
                   >
                     {i18n.translate(
                       'xpack.enterpriseSearch.defaultSettingsFlyout.body.description.ingestPipelinesLink.link',
@@ -204,7 +207,10 @@ export const DefaultSettingsFlyout: React.FC<DefaultSettingsFlyoutProps> = ({ cl
                   color="primary"
                   disabled={hasNoChanges}
                   isLoading={isLoading}
-                  onClick={() => setPipeline(defaultPipeline)}
+                  onClick={() => {
+                    elementRef.current?.focus();
+                    setPipeline(defaultPipeline);
+                  }}
                   data-test-subj={'entSearchContentSettingsResetButton'}
                 >
                   {i18n.translate('xpack.enterpriseSearch.content.settings.resetButtonLabel', {
