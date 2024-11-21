@@ -34,7 +34,11 @@ export const getDefaultProfileState = ({
     getPreFetchState: () => {
       const stateUpdate: DiscoverAppState = {};
 
-      if (resetDefaultProfileState.breakdownField && defaultState.breakdownField !== undefined) {
+      if (
+        resetDefaultProfileState.breakdownField &&
+        defaultState.breakdownField !== undefined &&
+        dataView.fields.getByName(defaultState.breakdownField)
+      ) {
         stateUpdate.breakdownField = defaultState.breakdownField;
       }
 
