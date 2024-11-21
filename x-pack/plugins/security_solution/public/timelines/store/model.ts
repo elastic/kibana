@@ -143,6 +143,8 @@ export interface TimelineModel {
   sampleSize: number;
   /** the note id pending deletion */
   confirmingNoteId?: string | null;
+  /** the page index of the table */
+  pageIndex?: number;
 }
 
 export type SubsetTimelineModel = Readonly<
@@ -197,6 +199,7 @@ export type SubsetTimelineModel = Readonly<
     | 'savedSearch'
     | 'isDataProviderVisible'
     | 'changed'
+    | 'pageIndex'
   >
 >;
 

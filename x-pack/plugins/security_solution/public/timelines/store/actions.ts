@@ -304,3 +304,5 @@ export const setConfirmingNoteId = actionCreator<{
   id: string;
   confirmingNoteId: string | null | undefined;
 }>('SET_CONFIRMING_NOTE_ID');
+
+export const setPageIndex = actionCreator<{ id: string; pageIndex: number }>('SET_PAGE_INDEX');

@@ -46,7 +46,6 @@ import type {
 } from '../../../common/search_strategy/timeline/events/eql';
 import { useTrackHttpRequest } from '../../common/lib/apm/use_track_http_request';
 import { APP_UI_ID } from '../../../common/constants';
-import { useFetchNotes } from '../../notes/hooks/use_fetch_notes';
 
 export interface TimelineArgs {
   events: TimelineItem[];
@@ -97,6 +96,8 @@ export interface UseTimelineEventsProps {
   startDate?: string;
   timerangeKind?: 'absolute' | 'relative';
   fetchNotes?: boolean;
+  pageIndex?: number;
+  pageSize?: number;
 }
 
 const getTimelineEvents = (timelineEdges: TimelineEdges[]): TimelineItem[] =>
@@ -483,7 +484,6 @@ export const useTimelineEvents = ({
   sort = initSortDefault,
   skip = false,
   timerangeKind,
-  fetchNotes = true,
 }: UseTimelineEventsProps): [DataLoadingState, TimelineArgs] => {
   const [dataLoadingState, timelineResponse, timelineSearchHandler] = useTimelineEventsHandler({
     dataViewId,
@@ -501,19 +501,11 @@ export const useTimelineEvents = ({
     skip,
     timerangeKind,
   });
-  const { onLoad } = useFetchNotes();
-
-  const onTimelineSearchComplete: OnNextResponseHandler = useCallback(
-    (response) => {
-      if (fetchNotes) onLoad(response.events);
-    },
-    [fetchNotes, onLoad]
-  );
 
   useEffect(() => {
     if (!timelineSearchHandler) return;
-    timelineSearchHandler(onTimelineSearchComplete);
-  }, [timelineSearchHandler, onTimelineSearchComplete]);
+    timelineSearchHandler();
+  }, [timelineSearchHandler]);
 
   return [dataLoadingState, timelineResponse];
 };

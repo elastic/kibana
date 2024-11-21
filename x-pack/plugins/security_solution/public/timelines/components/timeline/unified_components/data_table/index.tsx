@@ -371,6 +371,13 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       return enabledRowRenderers.length > 0 ? trailingControlColumns : undefined;
     }, [enabledRowRenderers.length, trailingControlColumns]);
 
+    const onDataGridPageChange = useCallback(
+      (newPageIndex: number) => {
+        dispatch(timelineActions.setPageIndex({ id: timelineId, pageIndex: newPageIndex }));
+      },
+      [dispatch, timelineId]
+    );
+
     return (
       <StatefulEventContext.Provider value={activeStatefulEventContext}>
         <StyledTimelineUnifiedDataTable>
@@ -424,6 +431,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             renderCustomGridBody={finalRenderCustomBodyCallback}
             trailingControlColumns={finalTrailControlColumns}
             externalControlColumns={leadingControlColumns}
+            onChangePage={onDataGridPageChange}
           />
         </StyledTimelineUnifiedDataTable>
       </StatefulEventContext.Provider>

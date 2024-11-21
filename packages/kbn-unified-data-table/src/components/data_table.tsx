@@ -420,6 +420,12 @@ export interface UnifiedDataTableProps {
    * @param row
    */
   getRowIndicator?: ColorIndicatorControlColumnParams['getRowIndicator'];
+  /**
+   *
+   * this callback is triggered when user navigates to a different page
+   *
+   */
+  onChangePage?: (pageIndex: number) => void;
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -493,6 +499,7 @@ export const UnifiedDataTable = ({
   getRowIndicator,
   dataGridDensityState,
   onUpdateDataGridDensity,
+  onChangePage: onChangePageProp,
 }: UnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
@@ -611,8 +618,11 @@ export const UnifiedDataTable = ({
       onUpdateRowsPerPage?.(pageSize);
     };
 
-    const onChangePage = (pageIndex: number) =>
+    const onChangePage = (pageIndex: number) => {
       setPagination((paginationData) => ({ ...paginationData, pageIndex }));
+
+      onChangePageProp?.(pageIndex);
+    };
 
     return isPaginationEnabled
       ? {
@@ -630,6 +640,7 @@ export const UnifiedDataTable = ({
     pageCount,
     rowsPerPageOptions,
     onUpdateRowsPerPage,
+    onChangePageProp,
   ]);
 
   useEffect(() => {

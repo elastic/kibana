@@ -65,6 +65,7 @@ import {
   updateColumnWidth,
   setConfirmingNoteId,
   deleteNoteFromEvent,
+  setPageIndex,
 } from './actions';
 
 import {
@@ -600,6 +601,16 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
             (note) => note !== noteId
           ),
         },
+      },
+    },
+  }))
+  .case(setPageIndex, (state, { id, pageIndex }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        pageIndex,
       },
     },
   }))

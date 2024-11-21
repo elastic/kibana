@@ -15,6 +15,7 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import { useFetchNotes } from '../../../../../notes/hooks/use_fetch_notes';
 import {
   DocumentDetailsLeftPanelKey,
   DocumentDetailsRightPanelKey,
@@ -104,7 +105,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     getManageTimeline(state, timelineId ?? TimelineId.active)
   );
 
-  const { sampleSize } = currentTimeline;
+  const { sampleSize, pageIndex = 0 } = currentTimeline;
 
   const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
   const kqlQuery: {
@@ -182,7 +183,20 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     sort: timelineQuerySortField,
     startDate: start,
     timerangeKind,
+    pageIndex,
+    pageSize: itemsPerPage,
   });
+
+  const { onLoad } = useFetchNotes();
+
+  useEffect(() => {
+    const eventsOnCurrentPage = events.slice(
+      itemsPerPage * pageIndex,
+      itemsPerPage * (pageIndex + 1)
+    );
+
+    onLoad(eventsOnCurrentPage);
+  }, [events, pageIndex, itemsPerPage, onLoad]);
 
   const { openFlyout } = useExpandableFlyoutApi();
   const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
