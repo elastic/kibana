@@ -74,10 +74,7 @@ export class DatatableUtilitiesService {
       timeZone: string;
     }> = {}
   ): DateHistogramMeta | undefined {
-    if (column.meta.source !== 'esaggs') {
-      return;
-    }
-    if (column.meta.sourceParams?.type !== BUCKET_TYPES.DATE_HISTOGRAM) {
+    if (!column.meta.sourceParams || !column.meta.sourceParams.params) {
       return;
     }
 
