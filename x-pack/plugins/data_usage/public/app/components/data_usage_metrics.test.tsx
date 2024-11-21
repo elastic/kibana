@@ -304,6 +304,15 @@ describe('DataUsageMetrics', () => {
     expect(getByTestId(`${testId}-charts`)).toBeTruthy();
   });
 
+  it('should show no charts callout', () => {
+    mockUseGetDataUsageMetrics.mockReturnValue({
+      ...getBaseMockedDataUsageMetrics,
+      isFetched: false,
+    });
+    const { getByTestId } = renderComponent();
+    expect(getByTestId(`${testId}-no-charts-callout`)).toBeTruthy();
+  });
+
   it('should refetch usage metrics with `Refresh` button click', async () => {
     const refetch = jest.fn();
     mockUseGetDataUsageMetrics.mockReturnValue({

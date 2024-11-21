@@ -221,7 +221,7 @@ export const DataUsageMetrics = memo(
           ) : isFetching ? (
             <ChartsLoading data-test-subj={dataTestSubj} />
           ) : (
-            <NoDataCallout />
+            <NoDataCallout data-test-subj={dataTestSubj} />
           )}
         </FlexItemWithCss>
       </EuiFlexGroup>
