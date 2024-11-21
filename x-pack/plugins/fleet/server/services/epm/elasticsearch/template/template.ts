@@ -1014,8 +1014,13 @@ const updateExistingDataStream = async ({
     skipDataStreamRollover?: boolean;
   };
 }) => {
+  const dataStream = await esClient.indices.getDataStream({
+    name: dataStreamName,
+    expand_wildcards: ['open', 'hidden'],
+  });
+
   const existingDs = await esClient.indices.get({
-    index: dataStreamName,
+    index: dataStream?.data_streams?.[0]?.indices?.at(-1)?.index_name ?? dataStreamName,
   });
 
   const existingDsConfig = Object.values(existingDs);
