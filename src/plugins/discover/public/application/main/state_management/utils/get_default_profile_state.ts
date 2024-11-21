@@ -31,6 +31,11 @@ export const getDefaultProfileState = ({
   const defaultState = getDefaultState(profilesManager, dataView);
 
   return {
+    /**
+     * Returns state that should be updated before data fetching occurs,
+     * for example state used as part of the data fetching process
+     * @returns The state to reset to before fetching data
+     */
     getPreFetchState: () => {
       const stateUpdate: DiscoverAppState = {};
 
@@ -44,6 +49,12 @@ export const getDefaultProfileState = ({
 
       return Object.keys(stateUpdate).length ? stateUpdate : undefined;
     },
+
+    /**
+     * Returns state that should be updated after data fetching occurs,
+     * for example state used to modify the UI after receiving data
+     * @returns The state to reset to after fetching data
+     */
     getPostFetchState: ({
       defaultColumns,
       esqlQueryColumns,

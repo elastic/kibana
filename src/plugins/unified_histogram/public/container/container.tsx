@@ -95,7 +95,7 @@ export type UnifiedHistogramApi = {
 export const UnifiedHistogramContainer = forwardRef<
   UnifiedHistogramApi,
   UnifiedHistogramContainerProps
->(({ onBreakdownFieldChange, onVisContextChanged, ...containerProps }, ref) => {
+>(({ breakdownField, onBreakdownFieldChange, onVisContextChanged, ...containerProps }, ref) => {
   const [layoutProps, setLayoutProps] = useState<LayoutProps>();
   const [localStorageKeyPrefix, setLocalStorageKeyPrefix] = useState<string>();
   const [stateService, setStateService] = useState<UnifiedHistogramStateService>();
@@ -158,8 +158,7 @@ export const UnifiedHistogramContainer = forwardRef<
     searchSessionId,
     requestAdapter,
     columns,
-    breakdownField: initialBreakdownField,
-    ...pick(containerProps, 'breakdownField'),
+    breakdownField: breakdownField ?? initialBreakdownField,
     onBreakdownFieldChange,
   });
 
