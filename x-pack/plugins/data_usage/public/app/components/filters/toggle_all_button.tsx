@@ -8,8 +8,7 @@
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import React, { memo } from 'react';
-import { EuiButtonEmpty } from '@elastic/eui';
-import { UX_LABELS } from '../../translations';
+import { EuiButtonEmpty, EuiButtonEmptyProps } from '@elastic/eui';
 
 const EuiButtonEmptyCss = css`
   border-top: ${euiThemeVars.euiBorderThin};
@@ -17,14 +16,21 @@ const EuiButtonEmptyCss = css`
 `;
 
 interface StyledButtonEmptyProps {
+  color: EuiButtonEmptyProps['color'];
+  icon: EuiButtonEmptyProps['iconType'];
   isDisabled: boolean;
   onClick: () => void;
-  children: React.ReactNode;
 }
-const StyledEuiButtonEmpty = ({ isDisabled, onClick, children }: StyledButtonEmptyProps) => (
+const StyledEuiButtonEmpty = ({
+  isDisabled,
+  onClick,
+  children,
+  color,
+  icon,
+}: StyledButtonEmptyProps & { children: React.ReactNode }) => (
   <EuiButtonEmpty
-    iconType="check"
-    color="primary"
+    iconType={icon}
+    color={color}
     isDisabled={isDisabled}
     onClick={onClick}
     css={EuiButtonEmptyCss}
@@ -33,22 +39,30 @@ const StyledEuiButtonEmpty = ({ isDisabled, onClick, children }: StyledButtonEmp
   </EuiButtonEmpty>
 );
 
-export const SelectAllButton = memo(
+export const ToggleAllButton = memo(
   ({
+    color,
     'data-test-subj': dataTestSubj,
+    icon,
     isDisabled,
+    label,
     onClick,
   }: {
     'data-test-subj'?: string;
-    isDisabled: boolean;
-    onClick: () => void;
-  }) => {
+    label: string;
+  } & StyledButtonEmptyProps) => {
     return (
-      <StyledEuiButtonEmpty data-test-subj={dataTestSubj} isDisabled={isDisabled} onClick={onClick}>
-        {UX_LABELS.filterSelectAll}
+      <StyledEuiButtonEmpty
+        color={color}
+        data-test-subj={dataTestSubj}
+        icon={icon}
+        isDisabled={isDisabled}
+        onClick={onClick}
+      >
+        {label}
       </StyledEuiButtonEmpty>
     );
   }
 );
 
-SelectAllButton.displayName = 'SelectAllButton';
+ToggleAllButton.displayName = 'ToggleAllButton';

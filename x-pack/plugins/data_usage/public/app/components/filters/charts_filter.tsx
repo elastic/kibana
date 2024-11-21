@@ -17,7 +17,7 @@ import {
 
 import { UX_LABELS } from '../../translations';
 import { ChartsFilterPopover } from './charts_filter_popover';
-import { SelectAllButton } from './select_all_button';
+import { ToggleAllButton } from './toggle_all_button';
 import { FilterItems, FilterName, useChartsFilter } from '../../hooks';
 
 const getSearchPlaceholder = (filterName: FilterName) => {
@@ -117,12 +117,6 @@ export const ChartsFilter = memo<ChartsFilterProps>(
     const onOptionsChange = useCallback(
       (newOptions: FilterItems) => {
         const optionItemsToSet = newOptions.map((option) => option);
-        const currChecks = optionItemsToSet.filter((option) => option.checked === 'on');
-
-        // don't update filter state if trying to uncheck all options
-        if (currChecks.length < 1) {
-          return;
-        }
 
         // update filter UI options state
         setItems(optionItemsToSet);
@@ -176,6 +170,19 @@ export const ChartsFilter = memo<ChartsFilterProps>(
       onChangeFilterOptions(dataStreamNames);
     }, [items, setItems, onChangeFilterOptions, setUrlDataStreamsFilter]);
 
+    const onClearAll = useCallback(() => {
+      setItems(
+        items.map((item) => {
+          return {
+            ...item,
+            checked: undefined,
+          };
+        })
+      );
+      setUrlDataStreamsFilter('');
+      onChangeFilterOptions([]);
+    }, [items, setItems, onChangeFilterOptions, setUrlDataStreamsFilter]);
+
     useEffect(() => {
       return () => {
         wasPopoverOpen.current = isPopoverOpen;
@@ -217,12 +224,25 @@ export const ChartsFilter = memo<ChartsFilterProps>(
                   </EuiPopoverTitle>
                 )}
                 {list}
-                <EuiFlexGroup>
-                  <EuiFlexItem>
-                    <SelectAllButton
+                <EuiFlexGroup gutterSize="none">
+                  <EuiFlexItem grow={1}>
+                    <ToggleAllButton
+                      color="primary"
                       data-test-subj={getTestId(`${filterName}-filter-selectAllButton`)}
+                      icon="check"
+                      label={UX_LABELS.filterSelectAll}
                       isDisabled={hasActiveFilters && numFilters === 0}
                       onClick={onSelectAll}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={1}>
+                    <ToggleAllButton
+                      color="danger"
+                      data-test-subj={getTestId(`${filterName}-filter-clearAllButton`)}
+                      icon="cross"
+                      label={UX_LABELS.filterClearAll}
+                      isDisabled={!hasActiveFilters}
+                      onClick={onClearAll}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>

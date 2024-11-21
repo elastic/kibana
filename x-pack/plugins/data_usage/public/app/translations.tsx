@@ -38,6 +38,9 @@ export const UX_LABELS = Object.freeze({
   filterSelectAll: i18n.translate('xpack.dataUsage.metrics.filter.selectAll', {
     defaultMessage: 'Select all',
   }),
+  filterClearAll: i18n.translate('xpack.dataUsage.metrics.filter.clearAll', {
+    defaultMessage: 'Clear all',
+  }),
   filterSearchPlaceholder: (filterName: string) =>
     i18n.translate('xpack.dataUsage.metrics.filter.searchPlaceholder', {
       defaultMessage: 'Search {filterName}',

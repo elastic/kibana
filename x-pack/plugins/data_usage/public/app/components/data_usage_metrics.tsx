@@ -33,6 +33,8 @@ export const DataUsageMetrics = memo(
   ({ 'data-test-subj': dataTestSubj = 'data-usage-metrics' }: { 'data-test-subj'?: string }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
 
+    const [isFirstPageLoad, setIsFirstPageLoad] = useState(true);
+
     const {
       services: { chrome, appParams, notifications },
     } = useKibanaContextForPlugin();
@@ -71,7 +73,7 @@ export const DataUsageMetrics = memo(
       if (!metricTypesFromUrl) {
         setUrlMetricTypesFilter(metricsFilters.metricTypes.join(','));
       }
-      if (!dataStreamsFromUrl && dataStreams) {
+      if (!dataStreamsFromUrl && dataStreams && isFirstPageLoad) {
         const hasMoreThan50 = dataStreams.length > 50;
         const _dataStreams = hasMoreThan50 ? dataStreams.slice(0, 50) : dataStreams;
         setUrlDataStreamsFilter(_dataStreams.map((ds) => ds.name).join(','));
@@ -83,6 +85,7 @@ export const DataUsageMetrics = memo(
       dataStreams,
       dataStreamsFromUrl,
       endDateFromUrl,
+      isFirstPageLoad,
       metricTypesFromUrl,
       metricsFilters.dataStreams,
       metricsFilters.from,
@@ -106,7 +109,7 @@ export const DataUsageMetrics = memo(
 
     const {
       error: errorFetchingDataUsageMetrics,
-      data,
+      data: usageMetricsData,
       isFetching,
       isFetched,
       refetch: refetchDataUsageMetrics,
@@ -121,6 +124,12 @@ export const DataUsageMetrics = memo(
         enabled: !!metricsFilters.dataStreams.length,
       }
     );
+
+    useEffect(() => {
+      if (!isFetching && usageMetricsData) {
+        setIsFirstPageLoad(false);
+      }
+    }, [isFetching, usageMetricsData]);
 
     const onRefresh = useCallback(() => {
       refetchDataUsageMetrics();
@@ -206,8 +215,8 @@ export const DataUsageMetrics = memo(
         </FlexItemWithCss>
 
         <FlexItemWithCss>
-          {isFetched && data?.metrics ? (
-            <Charts data={data} data-test-subj={dataTestSubj} />
+          {isFetched && usageMetricsData?.metrics ? (
+            <Charts data={usageMetricsData} data-test-subj={dataTestSubj} />
           ) : isFetching ? (
             <EuiLoadingElastic data-test-subj={getTestId('charts-loading')} />
           ) : null}
