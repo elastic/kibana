@@ -123,7 +123,8 @@ export class DynamicStyleProperty<T extends object>
   }
 
   getStyleMetaDataRequest() {
-    return this._layer.getDataRequest(SOURCE_META_DATA_REQUEST_ID);
+    const dataRequestId = this._getStyleMetaDataRequestId(this.getFieldName());
+    return dataRequestId ? this._layer.getDataRequest(dataRequestId) : undefined;
   }
 
   getValueSuggestions = async (query: string) => {
@@ -151,12 +152,7 @@ export class DynamicStyleProperty<T extends object>
   }
 
   _getRangeFieldMetaFromStyleMetaRequest(): RangeFieldMeta | null {
-    const dataRequestId = this._getStyleMetaDataRequestId(this.getFieldName());
-    if (!dataRequestId) {
-      return null;
-    }
-
-    const styleMetaDataRequest = this._layer.getDataRequest(dataRequestId);
+    const styleMetaDataRequest = this.getStyleMetaDataRequest();
     if (!styleMetaDataRequest || !styleMetaDataRequest.hasData()) {
       return null;
     }
@@ -181,12 +177,7 @@ export class DynamicStyleProperty<T extends object>
       return null;
     }
 
-    const dataRequestId = this._getStyleMetaDataRequestId(this.getFieldName());
-    if (!dataRequestId) {
-      return null;
-    }
-
-    const styleMetaDataRequest = this._layer.getDataRequest(dataRequestId);
+    const styleMetaDataRequest = this.getStyleMetaDataRequest();
     if (!styleMetaDataRequest || !styleMetaDataRequest.hasData()) {
       return null;
     }
@@ -206,12 +197,7 @@ export class DynamicStyleProperty<T extends object>
   }
 
   _getCategoryFieldMetaFromStyleMetaRequest() {
-    const dataRequestId = this._getStyleMetaDataRequestId(this.getFieldName());
-    if (!dataRequestId) {
-      return [];
-    }
-
-    const styleMetaDataRequest = this._layer.getDataRequest(dataRequestId);
+    const styleMetaDataRequest = this.getStyleMetaDataRequest();
     if (!styleMetaDataRequest || !styleMetaDataRequest.hasData()) {
       return [];
     }

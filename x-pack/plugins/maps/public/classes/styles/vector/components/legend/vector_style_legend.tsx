@@ -6,8 +6,10 @@
  */
 
 import React from 'react';
-import { EuiText } from '@elastic/eui';
+import { EuiText, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiCallOut } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { i18n } from '@kbn/i18n';
+import { DataRequest } from '../../../../util/data_request';
 import { DynamicStyleProperty } from '../../properties/dynamic_style_property';
 import { FIELD_ORIGIN } from '../../../../../../common/constants';
 import { Mask } from '../../../../layers/vector_layer/mask';
@@ -35,17 +37,46 @@ export function VectorStyleLegend({
 
   for (let i = 0; i < styles.length; i++) {
     const styleMetaDataRequest = styles[i].isDynamic()
-      ? (styles[i] as DynamicStyleProperty<any>).getStyleMetaDataRequest()
+      ? (styles[i] as DynamicStyleProperty<DataRequest>).getStyleMetaDataRequest()
       : undefined;
 
-    const row = styleMetaDataRequest?.getError()
-      ? styleMetaDataRequest.renderError()
-      : styles[i].renderLegendDetailRow({
-          isLinesOnly,
-          isPointsOnly,
-          symbolId,
-          svg,
-        });
+    const error = styleMetaDataRequest?.getError();
+    const fieldName = (styles[i] as DynamicStyleProperty<DataRequest>)?.getFieldName();
+    const styleName = styles[i].getDisplayStyleName();
+
+    const row = error ? (
+      <div>
+        <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiToolTip position="top" title={styleName} content={fieldName}>
+              <EuiText className="eui-textTruncate" size="xs" style={{ maxWidth: '180px' }}>
+                <small>
+                  <strong>{fieldName}</strong>
+                </small>
+              </EuiText>
+            </EuiToolTip>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiFlexGroup direction="column" gutterSize="none">
+          <EuiCallOut
+            title={i18n.translate('xpack.maps.vectorStyleLegend.fetchStyleMetaDataError', {
+              defaultMessage: 'Unable to fetch style meta data',
+            })}
+            color="warning"
+            iconType="warning"
+          >
+            <p>{error.message}</p>
+          </EuiCallOut>
+        </EuiFlexGroup>
+      </div>
+    ) : (
+      styles[i].renderLegendDetailRow({
+        isLinesOnly,
+        isPointsOnly,
+        symbolId,
+        svg,
+      })
+    );
 
     legendRows.push(
       <div key={i} className="vectorStyleLegendSpacer">
