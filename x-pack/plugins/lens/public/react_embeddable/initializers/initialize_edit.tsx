@@ -8,9 +8,11 @@
 import {
   HasEditCapabilities,
   HasSupportedTriggers,
+  PublishesDisabledActionIds,
   PublishesViewMode,
   ViewMode,
   apiHasAppContext,
+  apiPublishesDisabledActionIds,
 } from '@kbn/presentation-publishing';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { noop } from 'lodash';
@@ -63,7 +65,10 @@ export function initializeEditApi(
   startDependencies: LensEmbeddableStartServices,
   parentApi?: unknown
 ): {
-  api: HasSupportedTriggers & HasEditCapabilities & PublishesViewMode & { uuid: string };
+  api: HasSupportedTriggers &
+    PublishesDisabledActionIds &
+    HasEditCapabilities &
+    PublishesViewMode & { uuid: string };
   comparators: {};
   serialize: () => {};
   cleanup: () => void;
@@ -75,6 +80,18 @@ export function initializeEditApi(
   const [viewMode$] = buildObservableVariable<ViewMode>(
     extractInheritedViewModeObservable(parentApi)
   );
+
+  const { disabledActionIds, setDisabledActionIds } = apiPublishesDisabledActionIds(parentApi)
+    ? parentApi
+    : { disabledActionIds: undefined, setDisabledActionIds: noop };
+  const [disabledActionIds$, disabledActionIdsComparator] = buildObservableVariable<
+    string[] | undefined
+  >(disabledActionIds);
+
+  if (isTextBasedLanguage(initialState)) {
+    // do not expose the drilldown action for ES|QL
+    disabledActionIds$.next(disabledActionIds$.getValue()?.concat(['OPEN_FLYOUT_ADD_DRILLDOWN']));
+  }
 
   /**
    * Inline editing section
@@ -148,7 +165,7 @@ export function initializeEditApi(
     : true;
 
   return {
-    comparators: {},
+    comparators: { disabledActionIds: disabledActionIdsComparator },
     serialize: emptySerializer,
     cleanup: noop,
     api: {
@@ -159,6 +176,9 @@ export function initializeEditApi(
           defaultMessage: 'Lens',
         }),
       supportedTriggers,
+      disabledActionIds: disabledActionIds$,
+      setDisabledActionIds,
+
       /**
        * This is the key method to enable the new Editing capabilities API
        * Lens will leverage the netural nature of this function to build the inline editing experience

@@ -9,9 +9,36 @@ import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { useSearchApi } from '@kbn/presentation-publishing';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
+import type { PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
 import type { LensApi, LensRendererProps, LensRuntimeState, LensSerializedState } from '../types';
 import { LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
 import { createEmptyLensState } from '../helper';
+
+// This little utility uses the same pattern of the useSearchApi hook:
+// create the Subject once and then update its value on change
+function useObservableVariable<T extends unknown>(value: T) {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const observable = useMemo(() => new BehaviorSubject<T>(value), []);
+
+  // update the observable on change
+  useEffect(() => {
+    observable.next(value);
+  }, [observable, value]);
+
+  return observable;
+}
+
+type PanelProps = Pick<
+  PresentationPanelProps<LensApi>,
+  | 'showShadow'
+  | 'showBorder'
+  | 'showBadges'
+  | 'showNotifications'
+  | 'hideLoader'
+  | 'hideHeader'
+  | 'hideInspector'
+  | 'getActions'
+>;
 
 /**
  * The aim of this component is to provide a wrapper for other plugins who want to
@@ -28,6 +55,10 @@ export function LensRenderer({
   syncTooltips,
   viewMode,
   id,
+  query,
+  filters,
+  timeRange,
+  disabledActions,
   ...props
 }: LensRendererProps) {
   // Use the settings interface to store panel settings
@@ -38,12 +69,8 @@ export function LensRenderer({
       syncTooltips$: new BehaviorSubject(false),
     };
   }, []);
-
-  // view mode needs to be a BehaviorSubject
-  const viewMode$Ref = useRef(new BehaviorSubject(viewMode));
-  if (viewMode !== viewMode$Ref.current.getValue()) {
-    viewMode$Ref.current.next(viewMode);
-  }
+  const disabledActionIds$ = useObservableVariable(disabledActions);
+  const viewMode$ = useObservableVariable(viewMode);
 
   // Lens API will be set once, but when set trigger a reflow to adopt the latest attributes
   const [lensApi, setLensApi] = useState<LensApi | undefined>(undefined);
@@ -51,7 +78,7 @@ export function LensRenderer({
     props.attributes ? { attributes: props.attributes } : createEmptyLensState(null, title)
   );
 
-  const searchApi = useSearchApi(props);
+  const searchApi = useSearchApi({ query, filters, timeRange });
 
   const showPanelChrome = Boolean(withDefaultActions) || (extraActions?.length || 0) > 0;
 
@@ -82,6 +109,23 @@ export function LensRenderer({
     }
   }, [settings, syncColors, syncCursor, syncTooltips]);
 
+  const panelProps: PanelProps = useMemo(() => {
+    return {
+      hideInspector: !showInspector,
+      hideHeader: showPanelChrome,
+      showNotifications: false,
+      showShadow: false,
+      showBadges: false,
+      getActions: async (triggerId, context) => {
+        const actions = withDefaultActions
+          ? await lensApi?.getTriggerCompatibleActions(triggerId, context)
+          : [];
+
+        return (extraActions ?? []).concat(actions || []);
+      },
+    };
+  }, [showInspector, showPanelChrome, withDefaultActions, extraActions, lensApi]);
+
   return (
     <ReactEmbeddableRenderer<LensSerializedState, LensRuntimeState, LensApi>
       type={LENS_EMBEDDABLE_TYPE}
@@ -91,7 +135,9 @@ export function LensRenderer({
         ...props,
         // forward the unified search context
         ...searchApi,
-        viewMode: viewMode$Ref.current,
+        disabledActionIds: disabledActionIds$,
+        setDisabledActionIds: (ids: string[] | undefined) => disabledActionIds$.next(ids),
+        viewMode: viewMode$,
         // pass the sync* settings with the unified settings interface
         settings,
         // make sure to provide the initial state (useful for the comparison check)
@@ -104,13 +150,7 @@ export function LensRenderer({
       })}
       onApiAvailable={setLensApi}
       hidePanelChrome={!showPanelChrome}
-      panelProps={{
-        hideInspector: !showInspector,
-        hideHeader: showPanelChrome,
-        showNotifications: false,
-        showShadow: false,
-        showBadges: false,
-      }}
+      panelProps={panelProps}
     />
   );
 }

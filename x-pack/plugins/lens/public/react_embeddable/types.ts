@@ -21,6 +21,7 @@ import type {
   PublishesBlockingError,
   PublishesDataLoading,
   PublishesDataViews,
+  PublishesDisabledActionIds,
   PublishesSavedObjectId,
   PublishesUnifiedSearch,
   PublishesViewMode,
@@ -191,6 +192,7 @@ export interface IntegrationCallbacks extends LensApiProps {
   updateAttributes: (newAttributes: LensRuntimeState['attributes']) => void;
   updateSavedObjectId: (newSavedObjectId: LensRuntimeState['savedObjectId']) => void;
   updateOverrides: (newOverrides: LensOverrides['overrides']) => void;
+  getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<Action[]>;
 }
 
 /**
@@ -367,6 +369,7 @@ export type LensApi = Simplify<
     PublishesWritablePanelDescription &
     // This embeddable can narrow down specific triggers usage
     HasSupportedTriggers &
+    PublishesDisabledActionIds &
     // Offers methods to operate from/on the linked saved object
     HasInPlaceLibraryTransforms &
     HasLibraryTransforms<LensRuntimeState> &

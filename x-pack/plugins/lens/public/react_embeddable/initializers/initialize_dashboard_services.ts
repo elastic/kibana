@@ -39,7 +39,7 @@ export interface DashboardServicesConfig {
     PublishesWritablePanelDescription &
     HasInPlaceLibraryTransforms &
     HasLibraryTransforms<LensRuntimeState> &
-    Pick<IntegrationCallbacks, 'updateOverrides'>;
+    Pick<IntegrationCallbacks, 'updateOverrides' | 'getTriggerCompatibleActions'>;
   serialize: () => SerializedProps;
   comparators: StateComparators<SerializedProps & { isNewPanel?: boolean }>;
   cleanup: () => void;
@@ -54,7 +54,7 @@ export function initializeDashboardServices(
   internalApi: LensInternalApi,
   stateConfig: StateManagementConfig,
   parentApi: unknown,
-  { attributeService }: LensEmbeddableStartServices
+  { attributeService, uiActions }: LensEmbeddableStartServices
 ): DashboardServicesConfig {
   const { titlesApi, serializeTitles, titleComparators } = initializeTitles(initialState);
   // For some legacy reason the title and description default value is picked differently
@@ -83,6 +83,7 @@ export function initializeDashboardServices(
       ...titlesApi,
       libraryId$: stateConfig.api.savedObjectId,
       updateOverrides: internalApi.updateOverrides,
+      getTriggerCompatibleActions: uiActions.getTriggerCompatibleActions,
       // The functions below brings the HasInPlaceLibraryTransforms compliance (new interface)
       saveToLibrary: async (title: string) => {
         const { attributes } = getLatestState();
