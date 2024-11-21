@@ -1279,6 +1279,8 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test/common/utils/synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team # Assigned per https://github.com/elastic/kibana/blob/main/packages/kbn-apm-synthtrace/kibana.jsonc#L5
 
 # Infra Monitoring tests
+/x-pack/test/common/services/infra_synthtrace_kibana_client.ts @elastic/obs-ux-infra_services-team
+/x-pack/test/common/services/infra_log_views.ts @elastic/obs-ux-infra_services-team # Assigned per https://github.com/elastic/kibana/pull/188204
 /x-pack/test/api_integration/apis/infra @elastic/obs-ux-infra_services-team
 /x-pack/test/functional/apps/infra @elastic/obs-ux-infra_services-team
 /x-pack/test/functional/apps/infra/logs @elastic/obs-ux-logs-team
@@ -1317,6 +1319,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test/accessibility/apps/group3/stack_monitoring.ts @elastic/stack-monitoring
 
 # Fleet
+/x-pack/test/functional/es_archives/fleet @elastic/fleet
 /x-pack/test/api_integration/services/fleet_and_agents.ts @elastic/fleet
 /x-pack/test/fleet_api_integration @elastic/fleet
 /x-pack/test/fleet_packages @elastic/fleet
@@ -1377,6 +1380,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test/api_integration/apis/logs_shared @elastic/obs-ux-logs-team
 
 # Observability-ui
+/x-pack/test_serverless/functional/test_suites/observability @elastic/observability-ui
 /x-pack/test_serverless/api_integration/test_suites/observability/index.ts @elastic/observability-ui
 /x-pack/test/functional_solution_sidenav/tests/observability_sidenav.ts @elastic/observability-ui
 /x-pack/test/functional/page_objects/observability_page.ts @elastic/observability-ui
@@ -1392,6 +1396,12 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 ### END Observability Plugins
 
 # Presentation
+/x-pack/test/functional/fixtures/kbn_archiver/maps.json @elastic/kibana-presentation
+/x-pack/test/functional/fixtures/kbn_archiver/canvas @elastic/kibana-presentation
+/x-pack/test/functional/es_archives/dashboard/async_search @elastic/kibana-presentation
+/test/functional/fixtures/kbn_archiver/dashboard @elastic/kibana-presentation
+/test/functional/fixtures/kbn_archiver/canvas @elastic/kibana-presentation
+/test/api_integration/apis/dashboards @elastic/kibana-presentation
 /test/interpreter_functional/snapshots @elastic/kibana-presentation # Assigned per https://github.com/elastic/kibana/pull/54342
 /test/functional/services/inspector.ts @elastic/kibana-presentation
 /x-pack/test/functional/services/canvas_element.ts @elastic/kibana-presentation
@@ -1504,6 +1514,28 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /.eslintignore @elastic/kibana-operations
 
 # QA - Appex QA
+/x-pack/test/functional/fixtures/package_registry_config.yml @elastic/appex-qa # No usages found
+/x-pack/test/functional/fixtures/kbn_archiver/packaging.json @elastic/appex-qa # No usages found
+/x-pack/test/functional/es_archives/filebeat @elastic/appex-qa
+/x-pack/test/functional/es_archives/logstash_functional @elastic/appex-qa
+/x-pack/test/functional/es_archives/event_log_legacy_ids @elastic/appex-qa
+/x-pack/test/functional/es_archives/dlstest @elastic/appex-qa # No usages found
+/x-pack/test/functional/es_archives/beats/list/data.json @elastic/appex-qa # No usages found
+/test/functional/fixtures/kbn_archiver/stress_test.json @elastic/appex-qa
+/test/functional/fixtures/kbn_archiver/many_fields_data_view.json @elastic/appex-qa
+/test/functional/fixtures/kbn_archiver/long_window_logstash_index_pattern.json @elastic/appex-qa
+/test/functional/fixtures/kbn_archiver/kibana_sample_data_logs_tsdb.json @elastic/appex-qa
+/test/functional/fixtures/kbn_archiver/kibana_sample_data_logs_logsdb.json @elastic/appex-qa
+/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern.json @elastic/appex-qa
+/test/functional/fixtures/es_archiver/stress_test @elastic/appex-qa
+/test/functional/fixtures/es_archiver/many_fields @elastic/appex-qa
+/test/functional/fixtures/es_archiver/logstash_functional @elastic/appex-qa
+/test/functional/fixtures/es_archiver/long_window_logstash @elastic/appex-qa
+/test/functional/fixtures/es_archiver/kibana_sample_data_logs_* @elastic/appex-qa
+/test/functional/fixtures/es_archiver/kibana_sample_data_flights* @elastic/appex-qa
+/test/functional/fixtures/es_archiver/getting_started/shakespeare @elastic/appex-qa
+/test/api_integration/fixtures/es_archiver/elasticsearch @elastic/appex-qa
+/x-pack/test/plugin_functional/services.ts @elastic/appex-qa
 /test/server_integration/services/index.js @elastic/appex-qa
 /x-pack/test/stack_functional_integration/configs/config.stack_functional_integration_base.js @elastic/appex-qa
 /x-pack/test/stack_functional_integration/configs/consume_state.js @elastic/appex-qa
@@ -1803,6 +1835,9 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 #CC# /x-pack/plugins/security/ @elastic/kibana-security
 
 # Response Ops team
+/x-pack/test/functional/es_archives/rule_registry @elastic/response-ops
+/x-pack/test/functional/es_archives/event_log_multiple_indicies @elastic/response-ops
+/x-pack/test/functional/es_archives/task_manager* @elastic/response-ops # Assigned per https://github.com/elastic/kibana/blob/assign-response-ops/x-pack/test/plugin_api_perf/plugins/task_manager_performance/kibana.jsonc#L4
 /x-pack/test/plugin_api_perf @elastic/response-ops # Assigned per https://github.com/elastic/kibana/blob/assign-response-ops/x-pack/test/plugin_api_perf/plugins/task_manager_performance/kibana.jsonc#L4
 /x-pack/test/functional/page_objects/maintenance_windows_page.ts @elastic/response-ops
 /x-pack/test_serverless/functional/test_suites/observability/screenshot_creation/index.ts @elastic/response-ops
@@ -2313,7 +2348,10 @@ x-pack/plugins/osquery @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/public/cloud_defend @elastic/kibana-cloud-security-posture
 
 # Cloud Security Posture
-x-pack/packages/kbn-cloud-security-posture @elastic/kibana-cloud-security-posture
+/x-pack/test/functional/es_archives/kubernetes_security @elastic/kibana-cloud-security-posture
+/x-pack/test/functional/es_archives/session_view @elastic/kibana-cloud-security-posture
+/x-pack/test/session_view @elastic/kibana-cloud-security-posture # Assigned per https://github.com/elastic/kibana/blob/main/api_docs/session_view.mdx#L18
+/x-pack/packages/kbn-cloud-security-posture @elastic/kibana-cloud-security-posture
 /x-pack/test/kubernetes_security @elastic/kibana-cloud-security-posture
 /x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.* @elastic/kibana-cloud-security-posture
 /x-pack/plugins/security_solution/public/cloud_security_posture @elastic/kibana-cloud-security-posture
