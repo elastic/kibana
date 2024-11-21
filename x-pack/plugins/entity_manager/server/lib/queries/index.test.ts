@@ -7,7 +7,7 @@
 
 import { getEntityInstancesQuery } from '.';
 
-describe(__filename, () => {
+describe('getEntityInstancesQuery', () => {
   describe('getEntityInstancesQuery', () => {
     it('generates a valid esql query', () => {
       const query = getEntityInstancesQuery({
