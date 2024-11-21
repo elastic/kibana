@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { TestProvider } from '../../../common/test_utils';
-import { render, waitFor, type RenderResult } from '@testing-library/react';
+import { render, screen, waitFor, within, type RenderResult } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { DataUsageMetrics } from './data_usage_metrics';
 import { useGetDataUsageMetrics } from '../../hooks/use_get_usage_metrics';
@@ -249,9 +249,12 @@ describe('DataUsageMetrics', () => {
     }
 
     expect(toggleFilterButton).toHaveTextContent('Data streams1');
+    expect(within(toggleFilterButton).getByRole('marquee').getAttribute('aria-label')).toEqual(
+      '1 active filters'
+    );
   });
 
-  it('should allow de-selecting all data stream options using `clear all`', async () => {
+  it('should allow selecting/deselecting all data stream options using `select all` and `clear all`', async () => {
     mockUseGetDataUsageDataStreams.mockReturnValue({
       error: undefined,
       data: generateDataStreams(10),
@@ -263,13 +266,35 @@ describe('DataUsageMetrics', () => {
     expect(toggleFilterButton).toHaveTextContent('Data streams10');
     await user.click(toggleFilterButton);
 
-    expect(getByTestId(`${testIdFilter}-dataStreams-search`)).toBeTruthy();
+    // all options are selected on load
+    expect(within(toggleFilterButton).getByRole('marquee').getAttribute('aria-label')).toEqual(
+      '10 active filters'
+    );
 
+    const selectAllButton = getByTestId(`${testIdFilter}-dataStreams-selectAllButton`);
     const clearAllButton = getByTestId(`${testIdFilter}-dataStreams-clearAllButton`);
-    expect(clearAllButton).toBeTruthy();
-    await user.click(clearAllButton);
 
-    expect(toggleFilterButton).toHaveTextContent('Data streams10');
+    // select all is disabled
+    expect(selectAllButton).toBeTruthy();
+    expect(selectAllButton.getAttribute('disabled')).not.toBeNull();
+
+    // clear all is enabled
+    expect(clearAllButton).toBeTruthy();
+    expect(clearAllButton.getAttribute('disabled')).toBeNull();
+    // click clear all and expect all options to be deselected
+    await user.click(clearAllButton);
+    expect(within(toggleFilterButton).getByRole('marquee').getAttribute('aria-label')).toEqual(
+      '10 available filters'
+    );
+    // select all is enabled again
+    expect(await selectAllButton.getAttribute('disabled')).toBeNull();
+    // click select all
+    await user.click(selectAllButton);
+
+    // all options are selected and clear all is disabled
+    expect(within(toggleFilterButton).getByRole('marquee').getAttribute('aria-label')).toEqual(
+      '10 active filters'
+    );
   });
 
   it('should not call usage metrics API if no data streams', async () => {
