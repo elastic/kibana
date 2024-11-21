@@ -7,7 +7,7 @@
 
 import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
 import { useVisualizationResponse } from './use_visualization_response';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import React from 'react';
 import { parseVisualizationData } from './utils';
 

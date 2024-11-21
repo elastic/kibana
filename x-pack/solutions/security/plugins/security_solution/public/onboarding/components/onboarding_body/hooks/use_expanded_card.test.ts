@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
-import { waitFor } from '@testing-library/react';
-import type { OnboardingCardId } from '../../../constants';
 import { useExpandedCard } from './use_expanded_card';
+import type { OnboardingCardId } from '../../../constants';
+import { waitFor, renderHook, act } from '@testing-library/react';
 
 const mockSetCardDetail = jest.fn();
 jest.mock('../../hooks/use_url_detail', () => ({
