@@ -10,10 +10,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import type { InternalRequestHeader, RoleCredentials } from '../../../../../../shared/services';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const ml = getService('ml');
-  const es = getService('es');
   const svlUserManager = getService('svlUserManager');
-  const svlCommonApi = getService('svlCommonApi');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
 
   describe('/internal/observability_ai_assistant/kb/status', function () {
