@@ -2,6 +2,6 @@
   "type": "shared-common",
   "id": "@kbn/osquery-io-ts-types",
   "owner": "@elastic/security-asset-management",
-  "group": "security",
-  "visibility": "private"
+  "group": "platform",
+  "visibility": "shared"
 }
