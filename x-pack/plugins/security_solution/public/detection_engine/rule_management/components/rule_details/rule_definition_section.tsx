@@ -64,7 +64,7 @@ import {
   EQL_OPTIONS_EVENT_CATEGORY_FIELD_LABEL,
   EQL_OPTIONS_EVENT_TIEBREAKER_FIELD_LABEL,
   EQL_OPTIONS_EVENT_TIMESTAMP_FIELD_LABEL,
-} from '../../../rule_creation_ui/components/eql_query_edit/translations';
+} from '../../../rule_creation/components/eql_query_edit/translations';
 
 interface SavedQueryNameProps {
   savedQueryName: string;

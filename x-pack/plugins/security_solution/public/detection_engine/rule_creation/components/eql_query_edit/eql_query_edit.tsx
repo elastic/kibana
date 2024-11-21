@@ -10,12 +10,12 @@ import type { DataViewBase } from '@kbn/es-query';
 import type { FormData, FieldConfig, ValidationFuncArg } from '../../../../shared_imports';
 import { UseField, UseMultiFields } from '../../../../shared_imports';
 import type { EqlFieldsComboBoxOptions, EqlOptions } from '../../../../../common/search_strategy';
-import { queryRequiredValidatorFactory } from '../../validators/query_required_validator_factory';
-import { debounceAsync } from '../../validators/debounce_async';
+import { queryRequiredValidatorFactory } from '../../../rule_creation_ui/validators/query_required_validator_factory';
+import { debounceAsync } from '../../../rule_creation_ui/validators/debounce_async';
 import { eqlQueryValidatorFactory } from './eql_query_validator_factory';
 import { EqlQueryBar } from './eql_query_bar';
 import * as i18n from './translations';
-import type { FieldValueQueryBar } from '../query_bar';
+import type { FieldValueQueryBar } from '../../../rule_creation_ui/components/query_bar';
 
 interface EqlQueryEditProps {
   path: string;

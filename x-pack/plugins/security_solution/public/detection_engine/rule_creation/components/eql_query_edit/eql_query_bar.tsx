@@ -19,7 +19,7 @@ import { FilterBar } from '../../../../common/components/filter_bar';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import type { EqlFieldsComboBoxOptions, EqlOptions } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../../common/lib/kibana';
-import type { FieldValueQueryBar } from '../query_bar';
+import type { FieldValueQueryBar } from '../../../rule_creation_ui/components/query_bar';
 import type { EqlQueryBarFooterProps } from './footer';
 import { EqlQueryBarFooter } from './footer';
 import { getValidationResults } from './validators';

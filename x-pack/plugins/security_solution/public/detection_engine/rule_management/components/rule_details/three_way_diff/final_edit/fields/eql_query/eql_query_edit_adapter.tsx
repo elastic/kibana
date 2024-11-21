@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { DataViewBase } from '@kbn/es-query';
-import { EqlQueryEdit } from '../../../../../../../rule_creation_ui/components/eql_query_edit';
+import { EqlQueryEdit } from '../../../../../../../rule_creation/components/eql_query_edit';
 import type { RuleFieldEditComponentProps } from '../rule_field_edit_component_props';
 import { useDiffableRuleDataView } from '../hooks/use_diffable_rule_data_view';
 
