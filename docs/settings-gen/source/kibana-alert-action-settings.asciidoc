@@ -251,7 +251,7 @@ xpack.actions.proxyOnlyHosts: [ "events.pagerduty.com" ]
 ====
 Specifies HTTP headers for the proxy, if using a proxy for actions.
 
-Default: `HASH(0x13e2152b8)` +
+Default: `{}` +
 ====
 
 
@@ -500,7 +500,7 @@ Options:
 * `put`
 * `patch`
 
-Default: `patch` +
+Default: `put` +
 ====
 
 `xpack.actions.preconfigured.<connector-id>.config.createCommentUrl`::

@@ -436,7 +436,7 @@ groups:
         # tip: ""
         # warning: ""
         # important: ""
-        default: {}
+        default: '{}'
         # options:
         #   - option:
         #     description: ""
@@ -834,7 +834,7 @@ groups:
         # tip: ""
         # warning: ""
         # important: ""
-        default: patch
+        default: put
         options:
           - option: post
           - option: put
