@@ -7,14 +7,13 @@
 
 import { UsageMetricsRequestSchema, UsageMetricsResponseSchema } from '../../../common/rest_types';
 import { DATA_USAGE_METRICS_API_ROUTE } from '../../../common';
-import { DataUsageRouter } from '../../types';
-import { DataUsageService } from '../../services';
+import { DataUsageContext, DataUsageRouter } from '../../types';
 
 import { getUsageMetricsHandler } from './usage_metrics_handler';
 
 export const registerUsageMetricsRoute = (
   router: DataUsageRouter,
-  dataUsageService: DataUsageService
+  dataUsageContext: DataUsageContext
 ) => {
   router.versioned
     .post({
@@ -33,6 +32,6 @@ export const registerUsageMetricsRoute = (
           },
         },
       },
-      getUsageMetricsHandler(dataUsageService)
+      getUsageMetricsHandler(dataUsageContext)
     );
 };

@@ -110,7 +110,12 @@ exports[`Relationships should render dashboards normally 1`] = `
           },
         ]
       }
-      pagination={true}
+      onTableChange={[Function]}
+      pagination={
+        Object {
+          "pageSize": 10,
+        }
+      }
       rowProps={[Function]}
       search={
         Object {
@@ -310,7 +315,12 @@ exports[`Relationships should render index patterns normally 1`] = `
           },
         ]
       }
-      pagination={true}
+      onTableChange={[Function]}
+      pagination={
+        Object {
+          "pageSize": 10,
+        }
+      }
       rowProps={[Function]}
       search={
         Object {
@@ -501,7 +511,12 @@ exports[`Relationships should render invalid relations 1`] = `
         ]
       }
       items={Array []}
-      pagination={true}
+      onTableChange={[Function]}
+      pagination={
+        Object {
+          "pageSize": 10,
+        }
+      }
       rowProps={[Function]}
       search={
         Object {
@@ -652,7 +667,12 @@ exports[`Relationships should render searches normally 1`] = `
           },
         ]
       }
-      pagination={true}
+      onTableChange={[Function]}
+      pagination={
+        Object {
+          "pageSize": 10,
+        }
+      }
       rowProps={[Function]}
       search={
         Object {
@@ -813,7 +833,12 @@ exports[`Relationships should render visualizations normally 1`] = `
           },
         ]
       }
-      pagination={true}
+      onTableChange={[Function]}
+      pagination={
+        Object {
+          "pageSize": 10,
+        }
+      }
       rowProps={[Function]}
       search={
         Object {
