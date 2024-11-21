@@ -60,5 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(e.response.status).to.be(404);
       }
     });
+
+    it('cannot create private location if privileges are missing', async () => {});
   });
 }
