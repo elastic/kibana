@@ -12,6 +12,7 @@ import type { Maybe } from '@kbn/timelines-plugin/common/search_strategy/common'
 import { useKibana } from '../../../../common/lib/kibana';
 import { DocumentDetailsLeftPanelKey, DocumentDetailsRightPanelKey } from '../constants/panel_keys';
 import { GRAPH_VISUALIZATION_ID } from '../../left/components/graph_visualization';
+import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 
 export interface UseNavigateToGraphVisualizationParams {
   /**
@@ -83,7 +84,7 @@ export const useNavigateToGraphVisualization = ({
   const navigateToGraphVisualization = useCallback(() => {
     if (isFlyoutOpen) {
       openLeftPanel(left);
-      telemetry.reportDetailsFlyoutTabClicked({
+      telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutTabClicked, {
         location: scopeId,
         panel: 'left',
         tabId: 'visualize',
@@ -93,7 +94,7 @@ export const useNavigateToGraphVisualization = ({
         right,
         left,
       });
-      telemetry.reportDetailsFlyoutOpened({
+      telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
         location: scopeId,
         panel: 'left',
       });

@@ -28,14 +28,14 @@ export default function (providerContext: FtrProviderContext) {
   const cspSecurity = CspSecurityCommonProvider(providerContext);
 
   const postGraph = (agent: Agent, body: GraphRequest, auth?: { user: string; pass: string }) => {
-    const req = agent
+    let req = agent
       .post('/internal/cloud_security_posture/graph')
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .set('kbn-xsrf', 'xxxx');
 
     if (auth) {
-      req.auth(auth.user, auth.pass);
+      req = req.auth(auth.user, auth.pass);
     }
 
     return req.send(body);
