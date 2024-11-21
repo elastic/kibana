@@ -32,9 +32,9 @@ export async function getHasSetupPrivileges({
         },
       },
       kibana: [
-        securityPluginStart.authz.actions.api.get(ApiOperation.Read, `${FLEET_PLUGIN_ID}-all`),
+        securityPluginStart.authz.actions.api.get(ApiOperation.Manage, `${FLEET_PLUGIN_ID}-all`),
         securityPluginStart.authz.actions.api.get(
-          ApiOperation.Read,
+          ApiOperation.Manage,
           `${INTEGRATIONS_PLUGIN_ID}-all`
         ),
       ],
