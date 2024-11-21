@@ -34,8 +34,12 @@ export function registerTopNFunctionsAPMTransactionsRoute({
   router.get(
     {
       path: paths.APMTransactions,
+      security: {
+        authz: {
+          requiredPrivileges: ['profiling', 'apm'],
+        },
+      },
       options: {
-        tags: ['access:profiling', 'access:apm'],
         timeout: { idleSocket: IDLE_SOCKET_TIMEOUT },
       },
       validate: { query: querySchema },
@@ -48,9 +52,7 @@ export function registerTopNFunctionsAPMTransactionsRoute({
           });
         }
         const core = await context.core;
-        const { transaction: transactionIndices } = await apmDataAccess.getApmIndices(
-          core.savedObjects.client
-        );
+        const { transaction: transactionIndices } = await apmDataAccess.getApmIndices();
 
         const esClient = await getClient(context);
 
