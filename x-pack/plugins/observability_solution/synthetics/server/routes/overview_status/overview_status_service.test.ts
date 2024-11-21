@@ -6,9 +6,6 @@
  */
 import { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { periodToMs } from './overview_status';
-import { queryMonitorStatus } from '../../queries/query_monitor_status';
-import { getStatus } from './overview_status';
 import times from 'lodash/times';
 import * as monitorsFns from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import { EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
@@ -21,6 +18,7 @@ import { mockEncryptedSO } from '../../synthetics_service/utils/mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import * as allLocationsFn from '../../synthetics_service/get_all_locations';
+import { OverviewStatusService } from './overview_status_service';
 const allLocations: any = [
   {
     id: 'us_central_qa',
@@ -89,22 +87,6 @@ describe('current status route', () => {
     },
   } as unknown as SyntheticsServerSetup;
 
-  describe('periodToMs', () => {
-    it('returns 0 for unsupported unit type', () => {
-      // @ts-expect-error Providing invalid value to test handler in function
-      expect(periodToMs({ number: '10', unit: 'rad' })).toEqual(0);
-    });
-    it('converts seconds', () => {
-      expect(periodToMs({ number: '10', unit: 's' })).toEqual(10_000);
-    });
-    it('converts minutes', () => {
-      expect(periodToMs({ number: '1', unit: 'm' })).toEqual(60_000);
-    });
-    it('converts hours', () => {
-      expect(periodToMs({ number: '1', unit: 'h' })).toEqual(3_600_000);
-    });
-  });
-
   const testMonitors = [
     {
       attributes: {
@@ -136,9 +118,10 @@ describe('current status route', () => {
     },
   ];
 
-  describe('queryMonitorStatus', () => {
+  describe('OverviewStatusService', () => {
     it('parses expected agg fields', async () => {
       const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+
       esClient.msearch.mockResponseOnce({
         responses: [
           getEsResponse([
@@ -244,8 +227,14 @@ describe('current status route', () => {
         ],
         took: 605,
       });
+      const routeContext = {
+        request: {},
+        syntheticsEsClient,
+      };
+
+      const overviewStatusService = new OverviewStatusService(routeContext);
       expect(
-        await queryMonitorStatus({
+        await overviewStatusService.getOverviewStatus({
           esClient: syntheticsEsClient,
           monitorLocationIds: ['Europe - Germany', 'Asia/Pacific - Japan'],
           range: { from: 'now-1d', to: 'now' },

@@ -354,11 +354,15 @@ export class SyntheticsService {
       if (output) {
         this.logger.debug(`1 monitor will be pushed to synthetics service.`);
 
-        this.syncErrors = await this.apiClient.post({
-          monitors,
-          output,
-          license,
-        });
+        this.apiClient
+          .post({
+            monitors,
+            output,
+            license,
+          })
+          .then((res) => {
+            this.syncErrors = res;
+          });
       }
       return this.syncErrors;
     } catch (e) {

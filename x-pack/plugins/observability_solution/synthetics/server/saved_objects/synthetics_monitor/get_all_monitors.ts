@@ -12,8 +12,8 @@ import {
 } from '@kbn/core-saved-objects-api-server';
 import { intersection } from 'lodash';
 import { withApmSpan } from '@kbn/apm-data-access-plugin/server/utils';
+import { periodToMs } from '../../routes/overview_status/utils';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
-import { periodToMs } from '../../routes/overview_status/overview_status';
 import {
   ConfigKey,
   EncryptedSyntheticsMonitorAttributes,

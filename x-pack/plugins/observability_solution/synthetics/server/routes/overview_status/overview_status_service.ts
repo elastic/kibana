@@ -36,7 +36,7 @@ type LocationStatus = Array<{
 }>;
 
 export class OverviewStatusService {
-  routeContext: RouteContext;
+  routeContext: RouteContext<Record<string, any>, OverviewStatusQuery>;
   filterData: {
     locationFilter?: string[] | string;
     filtersStr?: string;
@@ -97,7 +97,7 @@ export class OverviewStatusService {
         to: 'now',
       };
 
-      const params = this.routeContext.request.query as OverviewStatusQuery;
+      const params = this.routeContext.request.query || {};
       const { scopeStatusByLocation = true } = params;
       const { locationFilter } = this.filterData;
 
@@ -275,8 +275,7 @@ export class OverviewStatusService {
 
   async getMonitorConfigs() {
     const { savedObjectsClient, request } = this.routeContext;
-    const params = request.query as OverviewStatusQuery;
-    const { query, showFromAllSpaces } = params;
+    const { query, showFromAllSpaces } = request.query || {};
     /**
      * Walk through all monitor saved objects, bucket IDs by disabled/enabled status.
      *
