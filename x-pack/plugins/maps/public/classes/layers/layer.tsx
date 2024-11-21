@@ -21,7 +21,6 @@ import React, { ReactElement, ReactNode } from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { v4 as uuidv4 } from 'uuid';
 import { FeatureCollection } from 'geojson';
-import { renderSearchError } from '@kbn/search-errors';
 import { DataRequest } from '../util/data_request';
 import { hasIncompleteResults } from '../util/tile_meta_feature_utils';
 import {
@@ -475,16 +474,6 @@ export class AbstractLayer implements ILayer {
     const dataRequestWarnings: SearchResponseWarning[] = [];
     this._dataRequests.forEach((dataRequest) => {
       const dataRequestMeta = dataRequest.getMeta();
-      const dataRequestError = dataRequest.getError();
-
-      if (dataRequestError) {
-        const error = renderSearchError(dataRequestError);
-        warningMessages.push({
-          title: error?.title ?? '',
-          body: error?.body,
-        });
-      }
-
       if (dataRequestMeta?.warnings?.length) {
         dataRequestWarnings.push(...dataRequestMeta.warnings);
       }

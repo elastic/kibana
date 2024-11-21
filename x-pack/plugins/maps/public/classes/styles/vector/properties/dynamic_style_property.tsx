@@ -122,6 +122,10 @@ export class DynamicStyleProperty<T extends object>
     this._getFieldFormatter = getFieldFormatter;
   }
 
+  getStyleMetaDataRequest() {
+    return this._layer.getDataRequest(SOURCE_META_DATA_REQUEST_ID);
+  }
+
   getValueSuggestions = async (query: string) => {
     return this._field === null
       ? []
