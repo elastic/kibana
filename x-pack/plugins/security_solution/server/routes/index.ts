@@ -97,7 +97,7 @@ export const initRoutes = (
     previewRuleDataClient,
     getStartServices,
     logger,
-    isServerless,
+    isServerless
   );
 
   registerResolverRoutes(router, getStartServices, config);
