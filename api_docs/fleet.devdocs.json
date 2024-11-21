@@ -22472,7 +22472,7 @@
             "signature": [
               "{ monitoring: ",
               "FullAgentPolicyMonitoring",
-              "; download: { sourceURI: string; }; features: Record<string, { enabled: boolean; }>; protection?: { enabled: boolean; uninstall_token_hash: string; signing_key: string; } | undefined; } | undefined"
+              "; download: { sourceURI: string; }; features: Record<string, { enabled: boolean; }>; protection?: { enabled: boolean; uninstall_token_hash: string; signing_key: string; } | undefined; logging?: { level?: string | undefined; to_files?: boolean | undefined; files?: { rotateeverybytes?: number | undefined; keepfiles?: number | undefined; interval?: string | undefined; } | undefined; } | undefined; limits?: { go_max_procs?: number | undefined; } | undefined; } | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,

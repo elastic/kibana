@@ -26666,6 +26666,20 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-common.HasEsDataFailureReason",
+        "type": "Enum",
+        "tags": [],
+        "label": "HasEsDataFailureReason",
+        "description": [
+          "\nValid `failureReason` attribute values for `has_es_data` API error responses"
+        ],
+        "path": "src/plugins/data_views/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "misc": [
