@@ -167,11 +167,11 @@ sub parsefile {
       if ($setting_id) {
         $asciidocoutput .= "\n".'[['.$setting_id.']]'."\n";
       }
-      $asciidocoutput .= '.`'.$setting_name.'`';
+      $asciidocoutput .= '`'.$setting_name.'`';
       if ($supported_cloud) {
         $asciidocoutput .= ' {ess-icon}';
       }
-      $asciidocoutput .= "\n".'[%collapsible]'."\n====\n";
+      $asciidocoutput .= "::\n+\n====\n";
 
       # Add a standard disclaimer for technical preview settings
       if ($setting_state) {
