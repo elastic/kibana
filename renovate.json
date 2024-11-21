@@ -261,6 +261,30 @@
       "enabled": true
     },
     {
+      "groupName": "@elastic/fleet dependencies",
+      "matchDepNames": [
+        "exponential-backoff",
+        "@paralleldrive/cuid2",
+        "isbinaryfile",
+        "js-search",
+        "openpgp",
+        "remark-gfm",
+        "@types/js-search"
+      ],
+      "reviewers": [
+        "team:fleet"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Fleet",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true
+    },
+    {
       "groupName": "@elastic/charts",
       "matchDepNames": [
         "@elastic/charts"
@@ -1303,10 +1327,21 @@
     },
     {
       "groupName": "@elastic/request-converter",
-      "matchDepNames": ["@elastic/request-converter"],
-      "reviewers": ["team:kibana-management"],
-      "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "backport:skip", "Team:Kibana Management", "Feature:Console"],
+      "matchDepNames": [
+        "@elastic/request-converter"
+      ],
+      "reviewers": [
+        "team:kibana-management"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:skip",
+        "Team:Kibana Management",
+        "Feature:Console"
+      ],
       "enabled": true
     }
   ],
