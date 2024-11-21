@@ -101,31 +101,38 @@ export const deletePipeline = async ({ esClient, id }: DeletePipelineParams): Pr
 };
 
 export const removeLegacyQuickPrompt = async (esClient: ElasticsearchClient) => {
-  const deleteQuery: DeleteByQueryRequest = {
-    index: `${getResourceName('prompts')}-*`,
-    query: {
-      bool: {
-        must: [
-          {
-            term: {
-              name: ESQL_QUERY_GENERATION_TITLE,
+  try {
+    const deleteQuery: DeleteByQueryRequest = {
+      index: `${getResourceName('prompts')}-*`,
+      query: {
+        bool: {
+          must: [
+            {
+              term: {
+                name: ESQL_QUERY_GENERATION_TITLE,
+              },
             },
-          },
-          {
-            term: {
-              prompt_type: 'quick',
+            {
+              term: {
+                prompt_type: 'quick',
+              },
             },
-          },
-          {
-            term: {
-              is_default: true,
+            {
+              term: {
+                is_default: true,
+              },
             },
-          },
-        ],
+          ],
+        },
       },
-    },
-  };
-  return esClient.deleteByQuery(deleteQuery);
+    };
+    return esClient.deleteByQuery(deleteQuery);
+  } catch (e) {
+    // swallow any errors
+    return {
+      total: 0,
+    };
+  }
 };
 
 const ESQL_QUERY_GENERATION_TITLE = i18n.translate(
