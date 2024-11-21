@@ -21,8 +21,12 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
 ) => ({
   ...syntheticsRoute,
   options: {
-    tags: ['access:uptime-read', ...(syntheticsRoute?.writeAccess ? ['access:uptime-write'] : [])],
     ...(syntheticsRoute.options ?? {}),
+  },
+  security: {
+    authz: {
+      requiredPrivileges: ['uptime-read', ...(syntheticsRoute?.writeAccess ? ['uptime-write'] : [])],
+    },
   },
   handler: async (context, request, response) => {
     return withApmSpan('synthetics_route_handler', async () => {
