@@ -2347,7 +2347,10 @@ x-pack/plugins/osquery @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/public/cloud_defend @elastic/kibana-cloud-security-posture
 
 # Cloud Security Posture
-x-pack/packages/kbn-cloud-security-posture @elastic/kibana-cloud-security-posture
+/x-pack/test/functional/es_archives/kubernetes_security @elastic/kibana-cloud-security-posture
+/x-pack/test/functional/es_archives/session_view @elastic/kibana-cloud-security-posture
+/x-pack/test/session_view @elastic/kibana-cloud-security-posture # Assigned per https://github.com/elastic/kibana/blob/main/api_docs/session_view.mdx#L18
+/x-pack/packages/kbn-cloud-security-posture @elastic/kibana-cloud-security-posture
 /x-pack/test/kubernetes_security @elastic/kibana-cloud-security-posture
 /x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.* @elastic/kibana-cloud-security-posture
 /x-pack/plugins/security_solution/public/cloud_security_posture @elastic/kibana-cloud-security-posture
