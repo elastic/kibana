@@ -7,9 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AggregateQuery } from '@kbn/es-query';
-import { hasTransformationalCommand } from '@kbn/esql-utils';
+export interface DashboardGridData {
+  w: number;
+  h: number;
+  x: number;
+  y: number;
+  i: string;
+}
 
-export const shouldDisplayHistogram = (query: AggregateQuery) => {
-  return !hasTransformationalCommand(query.esql);
-};
+export interface MockedDashboardPanelMap {
+  [key: string]: { id: string; gridData: DashboardGridData & { row: number } };
+}
+
+export type MockedDashboardRowMap = Array<{ title: string; collapsed: boolean }>;
+
+export interface MockSerializedDashboardState {
+  panels: MockedDashboardPanelMap;
+  rows: MockedDashboardRowMap;
+}
