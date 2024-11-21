@@ -113,8 +113,8 @@ describe('top-level navigation common to all pages in the Security app', { tags:
     navigateFromHeaderTo(ENTITY_ANALYTICS);
     cy.url().should('include', ENTITY_ANALYTICS_URL);
   });
-
-  it('navigates to the Kubernetes page', () => {
+  // Skipping this until alternative k8s datasource is found
+  it.skip('navigates to the Kubernetes page', () => {
     navigateFromHeaderTo(KUBERNETES);
     cy.url().should('include', KUBERNETES_URL);
   });
@@ -288,8 +288,8 @@ describe('Serverless side navigation links', { tags: '@serverless' }, () => {
     navigateFromHeaderTo(ServerlessHeaders.ENTITY_ANALYTICS, true);
     cy.url().should('include', ENTITY_ANALYTICS_URL);
   });
-
-  it('navigates to the Kubernetes page', () => {
+  // Skipping this until alternative k8s datasource is found
+  it.skip('navigates to the Kubernetes page', () => {
     navigateFromHeaderTo(ServerlessHeaders.KUBERNETES, true);
     cy.url().should('include', KUBERNETES_URL);
   });
