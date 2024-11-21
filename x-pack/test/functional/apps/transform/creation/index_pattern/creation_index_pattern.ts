@@ -302,6 +302,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           {
             identifier: 'percentiles(products.base_price)',
             label: 'products.base_price.percentiles',
+            form: {
+              transformPercentilesAggPercentsSelector: [1, 25, 50, 75, 100],
+            },
           },
           {
             identifier: 'filter(customer_phone)',
