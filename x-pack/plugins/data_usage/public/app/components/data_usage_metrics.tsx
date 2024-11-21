@@ -126,10 +126,10 @@ export const DataUsageMetrics = memo(
     );
 
     useEffect(() => {
-      if (!isFetching && usageMetricsData) {
+      if (!isFetching && isFetched) {
         setIsFirstPageLoad(false);
       }
-    }, [isFetching, usageMetricsData]);
+    }, [isFetching, isFetched]);
 
     const onRefresh = useCallback(() => {
       refetchDataUsageMetrics();
