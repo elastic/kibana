@@ -82,7 +82,7 @@ describe('Transform: Define Pivot Common', () => {
           aggName: 'the-field.percentiles',
           dropDownName: 'percentiles( the-f[i]e>ld )',
           AggFormComponent: PercentilesAggForm,
-          aggConfig: { percents: '1,5,25,50,75,95,99' },
+          aggConfig: { percents: [1, 5, 25, 50, 75, 95, 99] },
         },
         'filter( the-f[i]e>ld )': {
           agg: 'filter',
@@ -222,7 +222,7 @@ describe('Transform: Define Pivot Common', () => {
           dropDownName: 'percentiles( the-f[i]e>ld )',
           field: ' the-f[i]e>ld ',
           AggFormComponent: PercentilesAggForm,
-          aggConfig: { percents: '1,5,25,50,75,95,99' },
+          aggConfig: { percents: [1, 5, 25, 50, 75, 95, 99] },
         },
         'sum( the-f[i]e>ld )': {
           agg: 'sum',
@@ -292,7 +292,7 @@ describe('Transform: Define Pivot Common', () => {
           dropDownName: 'percentiles(rt_bytes_bigger)',
           field: 'rt_bytes_bigger',
           AggFormComponent: PercentilesAggForm,
-          aggConfig: { percents: '1,5,25,50,75,95,99' },
+          aggConfig: { percents: [1, 5, 25, 50, 75, 95, 99] },
         },
         'sum(rt_bytes_bigger)': {
           agg: 'sum',
