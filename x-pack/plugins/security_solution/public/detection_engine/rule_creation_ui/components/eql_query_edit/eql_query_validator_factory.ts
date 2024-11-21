@@ -6,14 +6,13 @@
  */
 
 import { isEmpty } from 'lodash';
-import { i18n } from '@kbn/i18n';
-import type { FormData, ValidationError, ValidationFunc } from '../../../shared_imports';
-import { KibanaServices } from '../../../common/lib/kibana';
-import type { EqlOptions } from '../../../../common/search_strategy';
-import type { FieldValueQueryBar } from '../components/query_bar';
-import type { EqlResponseError } from '../../../common/hooks/eql/api';
-import { EQL_ERROR_CODES, validateEql } from '../../../common/hooks/eql/api';
-import { isDataViewIdValid } from './data_view_id_validator_factory';
+import type { FormData, ValidationError, ValidationFunc } from '../../../../shared_imports';
+import { KibanaServices } from '../../../../common/lib/kibana';
+import type { EqlOptions } from '../../../../../common/search_strategy';
+import type { FieldValueQueryBar } from '../query_bar';
+import type { EqlResponseError } from '../../../../common/hooks/eql/api';
+import { EQL_ERROR_CODES, validateEql } from '../../../../common/hooks/eql/api';
+import { EQL_VALIDATION_REQUEST_ERROR } from './translations';
 
 type EqlQueryValidatorFactoryParams =
   | {
@@ -87,9 +86,6 @@ function transformEqlResponseErrorToValidationError(
   };
 }
 
-const EQL_VALIDATION_REQUEST_ERROR = i18n.translate(
-  'xpack.securitySolution.ruleManagement.eqlValidation.requestError',
-  {
-    defaultMessage: 'An error occurred while validating your EQL query',
-  }
-);
+function isDataViewIdValid(dataViewId: unknown): dataViewId is string {
+  return typeof dataViewId === 'string' && dataViewId !== '';
+}
