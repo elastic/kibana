@@ -17,7 +17,7 @@ import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantPluginRouter } from '../../types';
 
 /**
- * Get the indices that have fields of `sematic_text` type
+ * Get the indices that have fields of `semantic_text` type
  *
  * @param router IRouter for registering routes
  */
