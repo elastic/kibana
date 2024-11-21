@@ -104,6 +104,5 @@ export async function setupConversationAndKbIndexAssets({
   } catch (error) {
     logger.error(`Failed setting up index assets: ${error.message}`);
     logger.debug(error);
-    throw error;
   }
 }

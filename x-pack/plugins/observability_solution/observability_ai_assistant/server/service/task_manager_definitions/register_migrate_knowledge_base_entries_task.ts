@@ -134,7 +134,7 @@ export async function runSemanticTextKnowledgeBaseMigration({
     logger.debug(`Knowledge base migration: Migrated ${promises.length} entries`);
     await runSemanticTextKnowledgeBaseMigration({ esClient, logger });
   } catch (e) {
-    logger.error('Knowledge base migration: Failed to migrate entries');
+    logger.error(`Knowledge base migration failed: ${e.message}`);
     logger.error(e);
   }
 }

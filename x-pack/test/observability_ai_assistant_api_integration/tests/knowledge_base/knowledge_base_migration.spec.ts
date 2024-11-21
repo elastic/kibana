@@ -17,7 +17,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
-  const ml = getService('ml');
 
   const archive =
     'x-pack/test/functional/es_archives/observability/ai_assistant/knowledge_base_8_15';

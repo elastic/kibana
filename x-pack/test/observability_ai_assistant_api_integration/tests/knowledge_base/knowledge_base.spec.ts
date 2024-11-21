@@ -11,7 +11,6 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { clearKnowledgeBase } from './helpers';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const ml = getService('ml');
   const es = getService('es');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
 

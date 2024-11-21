@@ -19,7 +19,6 @@ import { clearKnowledgeBase } from '../../knowledge_base/helpers';
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const log = getService('log');
-  const ml = getService('ml');
   const es = getService('es');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
 
