@@ -200,7 +200,7 @@ include::../embeds/example-xpack-actions-proxyonlyhosts.asciidoc[]
 ====
 Specifies HTTP headers for the proxy, if using a proxy for actions.
 
-Default: `HASH(0x11e9cc888)` +
+Default: `HASH(0x151328288)` +
 ====
 
 
@@ -361,8 +361,6 @@ A configuration URL that varies by connector:
 * For an <<bedrock-action-type,{bedrock} connector>>, specifies the {bedrock} request URL.
 
 * For an <<gemini-action-type,{gemini} connector>>, specifies the {gemini} request URL.
-
-* For an <<inference-action-type,{inference} connector>>, specifies the Elastic {inference} request.
 
 * For a <<openai-action-type,OpenAI connector>>, specifies the OpenAI request URL.
 
