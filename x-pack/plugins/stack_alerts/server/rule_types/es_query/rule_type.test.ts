@@ -957,5 +957,6 @@ async function invokeExecutor({
       const date = new Date(Date.now()).toISOString();
       return { dateStart: date, dateEnd: date };
     },
+    isServerless: false,
   });
 }
