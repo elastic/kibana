@@ -47,9 +47,9 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
     render = async (props = {}) => {
       renderResult = renderSetup.renderArtifactListPage(props);
 
-      await waitFor(async () => {
-        expect(renderResult.getByTestId('testPage-flyout'));
-      });
+      await waitFor(async () =>
+        expect(renderResult.getByTestId('testPage-flyout')).toBeInTheDocument()
+      );
 
       return renderResult;
     };
