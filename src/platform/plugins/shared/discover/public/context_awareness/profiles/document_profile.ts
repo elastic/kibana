@@ -22,6 +22,7 @@ export enum DocumentType {
   Span = 'span',
   Transaction = 'transaction',
   Default = 'default',
+  Alert = 'alert',
 }
 
 /**
