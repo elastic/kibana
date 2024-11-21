@@ -398,7 +398,6 @@ export const getVisualizeEmbeddableFactory: (deps: {
 
                 if (hasRendered$.getValue() === true) return;
                 hasRendered$.next(true);
-                hasRendered$.complete();
               },
               onEvent: async (event) => {
                 // Visualize doesn't respond to sizing events, so ignore.
