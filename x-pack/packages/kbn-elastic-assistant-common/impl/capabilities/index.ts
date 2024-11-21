@@ -19,6 +19,6 @@ export type AssistantFeatureKey = keyof AssistantFeatures;
  * Default features available to the elastic assistant
  */
 export const defaultAssistantFeatures = Object.freeze({
-  assistantKnowledgeBaseByDefault: true,
   assistantModelEvaluation: false,
+  defendInsights: false,
 });
