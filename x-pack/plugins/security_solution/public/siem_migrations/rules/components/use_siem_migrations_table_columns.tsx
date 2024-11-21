@@ -9,12 +9,12 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiText, EuiLink } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
-import { SeverityBadge } from '../../../../common/components/severity_badge';
-import * as rulesI18n from '../../../../detections/pages/detection_engine/rules/translations';
+import type { RuleMigration } from '../../../../common/siem_migrations/model/rule_migration.gen';
+import { SeverityBadge } from '../../../common/components/severity_badge';
+import * as rulesI18n from '../../../detections/pages/detection_engine/rules/translations';
 import * as i18n from './translations';
 import { useSiemMigrationsTableContext } from './siem_migrations_table_context';
-import { getNormalizedSeverity } from '../rules_table/helpers';
+import { getNormalizedSeverity } from '../../../detection_engine/rule_management_ui/components/rules_table/helpers';
 import { StatusBadge } from './status_badge';
 import { DEFAULT_TRANSLATION_RISK_SCORE, DEFAULT_TRANSLATION_SEVERITY } from './constants';
 

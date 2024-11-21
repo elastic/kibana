@@ -10,8 +10,8 @@ import { isEqual } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import * as i18n from './translations';
-import { TagsFilterPopover } from '../rules_table/rules_table_filters/tags_filter_popover';
-import { RuleSearchField } from '../rules_table/rules_table_filters/rule_search_field';
+import { TagsFilterPopover } from '../../../detection_engine/rule_management_ui/components/rules_table/rules_table_filters/tags_filter_popover';
+import { RuleSearchField } from '../../../detection_engine/rule_management_ui/components/rules_table/rules_table_filters/rule_search_field';
 import { useSiemMigrationsTableContext } from './siem_migrations_table_context';
 
 const FilterWrapper = styled(EuiFlexGroup)`

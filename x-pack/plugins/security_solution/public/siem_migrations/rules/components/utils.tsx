@@ -8,7 +8,7 @@
 import {
   RuleMigrationTranslationResultEnum,
   type RuleMigrationTranslationResult,
-} from '../../../../../common/siem_migrations/model/rule_migration.gen';
+} from '../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
 
 export const convertTranslationResultIntoText = (status?: RuleMigrationTranslationResult) => {

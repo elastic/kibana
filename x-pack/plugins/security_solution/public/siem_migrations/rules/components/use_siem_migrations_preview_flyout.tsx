@@ -8,9 +8,9 @@
 import type { ReactNode } from 'react';
 import React, { useCallback, useState, useMemo } from 'react';
 import type { EuiTabbedContentTab } from '@elastic/eui';
-import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
-import { invariant } from '../../../../../common/utils/invariant';
-import type { RuleSignatureId } from '../../../../../common/api/detection_engine';
+import type { RuleMigration } from '../../../../common/siem_migrations/model/rule_migration.gen';
+import { invariant } from '../../../../common/utils/invariant';
+import type { RuleSignatureId } from '../../../../common/api/detection_engine';
 import { TranslationDetailsFlyout } from './translation_details/translation_details_flyout';
 
 interface UseSiemMigrationsPreviewFlyoutParams {

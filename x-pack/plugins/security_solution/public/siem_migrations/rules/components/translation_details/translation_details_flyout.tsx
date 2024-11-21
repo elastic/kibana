@@ -25,15 +25,15 @@ import {
 } from '@elastic/eui';
 import type { EuiTabbedContentTab, EuiTabbedContentProps, EuiFlyoutProps } from '@elastic/eui';
 
-import type { RuleMigration } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import {
   RuleOverviewTab,
   useOverviewTabSections,
-} from '../../../../rule_management/components/rule_details/rule_overview_tab';
+} from '../../../../detection_engine/rule_management/components/rule_details/rule_overview_tab';
 import {
   type RuleResponse,
   type Severity,
-} from '../../../../../../common/api/detection_engine/model/rule_schema';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 
 import * as i18n from './translations';
 import {

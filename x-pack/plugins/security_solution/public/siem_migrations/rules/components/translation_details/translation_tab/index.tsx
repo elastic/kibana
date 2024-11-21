@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { RuleMigration } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigration } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { TranslationTabHeader } from './header';
 import { RuleQueryComponent } from './rule_query';
 import * as i18n from './translations';

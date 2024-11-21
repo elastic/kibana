@@ -7,10 +7,10 @@
 
 import type { UseQueryOptions } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
-import type { GetAllStatsRuleMigrationResponse } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
-import { SIEM_RULE_MIGRATIONS_ALL_STATS_PATH } from '../../../../../../common/siem_migrations/constants';
-import { getRuleMigrationsStatsAll } from '../../api';
-import { DEFAULT_QUERY_OPTIONS } from '../constants';
+import { DEFAULT_QUERY_OPTIONS } from './constants';
+import { getRuleMigrationsStatsAll } from '../api';
+import type { GetAllStatsRuleMigrationResponse } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
+import { SIEM_RULE_MIGRATIONS_ALL_STATS_PATH } from '../../../../../common/siem_migrations/constants';
 
 export const GET_RULE_MIGRATIONS_STATS_ALL_QUERY_KEY = ['GET', SIEM_RULE_MIGRATIONS_ALL_STATS_PATH];
 

@@ -13,15 +13,6 @@ import { INTERNAL_ALERTING_API_FIND_RULES_PATH } from '@kbn/alerting-plugin/comm
 import { BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
 import type { ActionType, AsApiContract } from '@kbn/actions-plugin/common';
 import type { ActionResult } from '@kbn/actions-plugin/server';
-import { replaceParams } from '@kbn/openapi-common/shared';
-import type {
-  GetAllStatsRuleMigrationResponse,
-  GetRuleMigrationResponse,
-} from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
-import {
-  SIEM_RULE_MIGRATIONS_ALL_STATS_PATH,
-  SIEM_RULE_MIGRATION_PATH,
-} from '../../../../common/siem_migrations/constants';
 import { convertRulesFilterToKQL } from '../../../../common/detection_engine/rule_management/rule_filtering';
 import type {
   UpgradeSpecificRulesRequest,
@@ -707,56 +698,3 @@ export const bootstrapPrebuiltRules = async (): Promise<BootstrapPrebuiltRulesRe
     method: 'POST',
     version: '1',
   });
-
-/**
- * SIEM Rules Migration routes
- */
-
-/**
- * Retrieves the stats for all the existing migrations, aggregated by `migration_id`.
- *
- * @param signal AbortSignal for cancelling request
- *
- * @throws An error if response is not OK
- */
-export const getRuleMigrationsStatsAll = async ({
-  signal,
-}: {
-  signal: AbortSignal | undefined;
-}): Promise<GetAllStatsRuleMigrationResponse> =>
-  KibanaServices.get().http.fetch<GetAllStatsRuleMigrationResponse>(
-    SIEM_RULE_MIGRATIONS_ALL_STATS_PATH,
-    {
-      method: 'GET',
-      version: '1',
-      signal,
-    }
-  );
-
-/**
- * Retrieves all the migration rule documents of a specific migration.
- *
- * @param migrationId `id` of the migration to retrieve rule documents for
- * @param signal AbortSignal for cancelling request
- *
- * @throws An error if response is not OK
- */
-export const getRuleMigrations = async ({
-  migrationId,
-  signal,
-}: {
-  migrationId?: string;
-  signal: AbortSignal | undefined;
-}): Promise<GetRuleMigrationResponse> => {
-  if (!migrationId) {
-    return [];
-  }
-  return KibanaServices.get().http.fetch<GetRuleMigrationResponse>(
-    replaceParams(SIEM_RULE_MIGRATION_PATH, { migration_id: migrationId }),
-    {
-      method: 'GET',
-      version: '1',
-      signal,
-    }
-  );
-};

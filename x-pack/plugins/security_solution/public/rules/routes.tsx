@@ -30,53 +30,37 @@ import type { SecuritySubPluginRoutes } from '../app/types';
 import { RulesLandingPage } from './landing';
 import { CoverageOverviewPage } from '../detection_engine/rule_management_ui/pages/coverage_overview';
 import { RuleDetailTabs } from '../detection_engine/rule_details_ui/pages/rule_details/use_rule_details_tabs';
-import { SiemMigrationsPage } from '../detection_engine/rule_management_ui/pages/siem_migrations';
-import { useIsSiemMigrationsEnabled } from '../detection_engine/rule_management_ui/hooks/use_is_siem_migrations_enabled';
 
-const getRulesSubRoutes = (isSiemMigrationsEnabled: boolean) => {
-  return [
-    {
-      path: '/rules/id/:detailName/edit',
-      main: EditRulePage,
-      exact: true,
-    },
-    {
-      path: `/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts}|${RuleDetailTabs.exceptions}|${RuleDetailTabs.endpointExceptions}|${RuleDetailTabs.executionResults}|${RuleDetailTabs.executionEvents})`,
-      main: RuleDetailsPage,
-      exact: true,
-    },
-    {
-      path: '/rules/create',
-      main: CreateRulePage,
-      exact: true,
-    },
-    {
-      path: `/rules/:tabName(${AllRulesTabs.management}|${AllRulesTabs.monitoring}|${AllRulesTabs.updates})`,
-      main: RulesPage,
-      exact: true,
-    },
-    {
-      path: '/rules/add_rules',
-      main: AddRulesPage,
-      exact: true,
-    },
-    ...(isSiemMigrationsEnabled
-      ? [
-          {
-            path: '/rules/siem_migrations',
-            main: SiemMigrationsPage,
-            exact: true,
-          },
-        ]
-      : []),
-  ];
-};
+const RulesSubRoutes = [
+  {
+    path: '/rules/id/:detailName/edit',
+    main: EditRulePage,
+    exact: true,
+  },
+  {
+    path: `/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts}|${RuleDetailTabs.exceptions}|${RuleDetailTabs.endpointExceptions}|${RuleDetailTabs.executionResults}|${RuleDetailTabs.executionEvents})`,
+    main: RuleDetailsPage,
+    exact: true,
+  },
+  {
+    path: '/rules/create',
+    main: CreateRulePage,
+    exact: true,
+  },
+  {
+    path: `/rules/:tabName(${AllRulesTabs.management}|${AllRulesTabs.monitoring}|${AllRulesTabs.updates})`,
+    main: RulesPage,
+    exact: true,
+  },
+  {
+    path: '/rules/add_rules',
+    main: AddRulesPage,
+    exact: true,
+  },
+];
 
 const RulesContainerComponent: React.FC = () => {
   useReadonlyHeader(i18n.READ_ONLY_BADGE_TOOLTIP);
-
-  const isSiemMigrationsEnabled = useIsSiemMigrationsEnabled();
-  const rulesSubRoutes = getRulesSubRoutes(isSiemMigrationsEnabled);
 
   return (
     <PluginTemplateWrapper>
@@ -103,7 +87,7 @@ const RulesContainerComponent: React.FC = () => {
           <Route path="/rules" exact>
             <Redirect to={`/rules/${AllRulesTabs.management}`} />
           </Route>
-          {rulesSubRoutes.map((route) => (
+          {RulesSubRoutes.map((route) => (
             <Route
               key={`rules-route-${route.path}`}
               path={route.path}

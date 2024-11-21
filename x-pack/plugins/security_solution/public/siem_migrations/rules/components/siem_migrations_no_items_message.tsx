@@ -7,8 +7,8 @@
 
 import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { SecurityPageName } from '../../../../../common';
-import { useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
+import { SecurityPageName } from '../../../../common';
+import { useGetSecuritySolutionLinkProps } from '../../../common/components/links';
 import * as i18n from './translations';
 
 const SiemMigrationsTableNoItemsMessageComponent = () => {

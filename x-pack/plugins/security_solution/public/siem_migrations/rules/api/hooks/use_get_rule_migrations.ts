@@ -8,10 +8,10 @@
 import type { UseQueryOptions } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import { replaceParams } from '@kbn/openapi-common/shared';
-import type { GetRuleMigrationResponse } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
-import { SIEM_RULE_MIGRATION_PATH } from '../../../../../../common/siem_migrations/constants';
-import { getRuleMigrations } from '../../api';
-import { DEFAULT_QUERY_OPTIONS } from '../constants';
+import { DEFAULT_QUERY_OPTIONS } from './constants';
+import { getRuleMigrations } from '../api';
+import type { GetRuleMigrationResponse } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
+import { SIEM_RULE_MIGRATION_PATH } from '../../../../../common/siem_migrations/constants';
 
 export const useGetRuleMigrationsQuery = (
   migrationId?: string,

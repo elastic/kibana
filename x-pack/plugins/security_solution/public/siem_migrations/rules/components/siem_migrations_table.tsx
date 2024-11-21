@@ -19,7 +19,7 @@ import React from 'react';
 import {
   RULES_TABLE_INITIAL_PAGE_SIZE,
   RULES_TABLE_PAGE_SIZE_OPTIONS,
-} from '../rules_table/constants';
+} from '../../../detection_engine/rule_management_ui/components/rules_table/constants';
 import { SiemMigrationsTableNoItemsMessage } from './siem_migrations_no_items_message';
 import { useSiemMigrationsTableContext } from './siem_migrations_table_context';
 import { SiemMigrationsTableFilters } from './siem_migrations_table_filters';

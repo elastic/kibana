@@ -7,8 +7,8 @@
 
 import React, { useMemo } from 'react';
 import { EuiMarkdownEditor, EuiMarkdownFormat, EuiTitle } from '@elastic/eui';
-import { SideHeader } from '../../../../../rule_management/components/rule_details/three_way_diff/components/side_header';
-import { FinalSideHelpInfo } from '../../../../../rule_management/components/rule_details/three_way_diff/final_side/final_side_help_info';
+import { SideHeader } from '../../../../../detection_engine/rule_management/components/rule_details/three_way_diff/components/side_header';
+import { FinalSideHelpInfo } from '../../../../../detection_engine/rule_management/components/rule_details/three_way_diff/final_side/final_side_help_info';
 import * as i18n from './translations';
 
 interface RuleQueryProps {

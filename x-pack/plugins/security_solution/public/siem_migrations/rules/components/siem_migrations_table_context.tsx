@@ -7,14 +7,14 @@
 
 import type { Dispatch, SetStateAction } from 'react';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
-import { useGetRuleMigrationsStatsAllQuery } from '../../../rule_management/api/hooks/siem_migrations/use_get_rule_migrations_stats_all';
-import { useGetRuleMigrationsQuery } from '../../../rule_management/api/hooks/siem_migrations/use_get_rule_migrations';
-import type { RuleSignatureId } from '../../../../../common/api/detection_engine';
-import { invariant } from '../../../../../common/utils/invariant';
+import type { RuleMigration } from '../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleSignatureId } from '../../../../common/api/detection_engine';
+import { invariant } from '../../../../common/utils/invariant';
 import type { SiemMigrationsTableFilterOptions } from './use_filter_siem_migrations_to_install';
 import { useFilterSiemMigrationsToInstall } from './use_filter_siem_migrations_to_install';
 import { useSiemMigrationsPreviewFlyout } from './use_siem_migrations_preview_flyout';
+import { useGetRuleMigrationsStatsAllQuery } from '../api/hooks/use_get_rule_migrations_stats_all';
+import { useGetRuleMigrationsQuery } from '../api/hooks/use_get_rule_migrations';
 
 export interface SiemMigrationsTableState {
   /**

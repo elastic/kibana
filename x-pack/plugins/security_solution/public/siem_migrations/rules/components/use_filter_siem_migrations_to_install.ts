@@ -6,8 +6,8 @@
  */
 
 import { useMemo } from 'react';
-import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
-import type { FilterOptions } from '../../../rule_management/logic/types';
+import type { RuleMigration } from '../../../../common/siem_migrations/model/rule_migration.gen';
+import type { FilterOptions } from '../../../detection_engine/rule_management/logic/types';
 
 export type SiemMigrationsTableFilterOptions = Pick<FilterOptions, 'filter' | 'tags'>;
 
