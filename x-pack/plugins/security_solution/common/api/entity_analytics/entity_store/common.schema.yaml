@@ -30,6 +30,8 @@ components:
           type: string
         fieldHistoryLength:
           type: integer
+        error:
+          type: object
 
     EngineStatus:
       type: string
@@ -38,6 +40,15 @@ components:
         - started
         - stopped
         - updating
+        - error
+    
+    StoreStatus:
+      type: string
+      enum:
+        - not_installed
+        - installing
+        - running
+        - stopped
         - error
 
     IndexPattern:

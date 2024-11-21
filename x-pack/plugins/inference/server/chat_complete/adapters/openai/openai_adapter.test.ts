@@ -12,7 +12,7 @@ import { pick } from 'lodash';
 import { lastValueFrom, Subject, toArray } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import { loggerMock } from '@kbn/logging-mocks';
-import { ChatCompletionEventType, MessageRole } from '../../../../common/chat_complete';
+import { ChatCompletionEventType, MessageRole } from '@kbn/inference-common';
 import { observableIntoEventSourceStream } from '../../../util/observable_into_event_source_stream';
 import { InferenceExecutor } from '../../utils/inference_executor';
 import { openAIAdapter } from '.';
@@ -21,17 +21,19 @@ function createOpenAIChunk({
   delta,
   usage,
 }: {
-  delta: OpenAI.ChatCompletionChunk['choices'][number]['delta'];
+  delta?: OpenAI.ChatCompletionChunk['choices'][number]['delta'];
   usage?: OpenAI.ChatCompletionChunk['usage'];
 }): OpenAI.ChatCompletionChunk {
   return {
-    choices: [
-      {
-        finish_reason: null,
-        index: 0,
-        delta,
-      },
-    ],
+    choices: delta
+      ? [
+          {
+            finish_reason: null,
+            index: 0,
+            delta,
+          },
+        ]
+      : [],
     created: new Date().getTime(),
     id: v4(),
     model: 'gpt-4o',
@@ -313,7 +315,7 @@ describe('openAIAdapter', () => {
       ]);
     });
 
-    it('emits token events', async () => {
+    it('emits chunk events with tool calls', async () => {
       const response$ = openAIAdapter.chatComplete({
         ...defaultArgs,
         messages: [
@@ -372,6 +374,56 @@ describe('openAIAdapter', () => {
             },
           ],
           type: ChatCompletionEventType.ChatCompletionChunk,
+        },
+      ]);
+    });
+
+    it('emits token count events', async () => {
+      const response$ = openAIAdapter.chatComplete({
+        ...defaultArgs,
+        messages: [
+          {
+            role: MessageRole.User,
+            content: 'Hello',
+          },
+        ],
+      });
+
+      source$.next(
+        createOpenAIChunk({
+          delta: {
+            content: 'chunk',
+          },
+        })
+      );
+
+      source$.next(
+        createOpenAIChunk({
+          usage: {
+            prompt_tokens: 50,
+            completion_tokens: 100,
+            total_tokens: 150,
+          },
+        })
+      );
+
+      source$.complete();
+
+      const allChunks = await lastValueFrom(response$.pipe(toArray()));
+
+      expect(allChunks).toEqual([
+        {
+          type: ChatCompletionEventType.ChatCompletionChunk,
+          content: 'chunk',
+          tool_calls: [],
+        },
+        {
+          type: ChatCompletionEventType.ChatCompletionTokenCount,
+          tokens: {
+            prompt: 50,
+            completion: 100,
+            total: 150,
+          },
         },
       ]);
     });

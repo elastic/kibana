@@ -1,0 +1,37 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "@testing-library/jest-dom",
+      "@testing-library/react"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/field-formats-plugin",
+    "@kbn/discover-utils",
+    "@kbn/router-utils",
+    "@kbn/management-settings-ids",
+    "@kbn/share-plugin",
+    "@kbn/ui-theme",
+    "@kbn/unified-data-table",
+    "@kbn/unified-doc-viewer",
+    "@kbn/react-hooks",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/i18n",
+    "@kbn/unified-doc-viewer-plugin",
+    "@kbn/core",
+    "@kbn/shared-ux-utility",
+    "@kbn/elastic-agent-utils",
+    "@kbn/custom-icons", 
+  ]
+}

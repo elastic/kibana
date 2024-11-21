@@ -28,6 +28,7 @@ import {
 } from '@kbn/ml-data-grid';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 
+import { isCCSRemoteIndexName } from '@kbn/es-query';
 import {
   hasKeywordDuplicate,
   isKeywordDuplicate,
@@ -176,7 +177,7 @@ export const useIndexData = (options: UseIndexDataOptions): UseIndexDataReturnTy
       setErrorMessage(getErrorMessage(dataGridDataError));
       setStatus(INDEX_STATUS.ERROR);
     } else if (!dataGridDataIsLoading && !dataGridDataIsError && dataGridData !== undefined) {
-      const isCrossClusterSearch = indexPattern.includes(':');
+      const isCrossClusterSearch = isCCSRemoteIndexName(indexPattern);
       const isMissingFields = dataGridData.hits.hits.every((d) => typeof d.fields === 'undefined');
 
       const docs = dataGridData.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));

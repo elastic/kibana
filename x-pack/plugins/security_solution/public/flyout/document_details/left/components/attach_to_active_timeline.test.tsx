@@ -50,13 +50,13 @@ describe('AttachToActiveTimeline', () => {
 
     expect(getByTestId(SAVE_TIMELINE_BUTTON_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(SAVE_TIMELINE_BUTTON_TEST_ID)).toHaveStyle('background-color: #FEC514');
-    expect(getByTestId(SAVE_TIMELINE_BUTTON_TEST_ID)).toHaveTextContent('Save timeline');
+    expect(getByTestId(SAVE_TIMELINE_BUTTON_TEST_ID)).toHaveTextContent('Save current Timeline');
     expect(queryByTestId(ATTACH_TO_TIMELINE_CHECKBOX_TEST_ID)).not.toBeInTheDocument();
     expect(getByTestId(ATTACH_TO_TIMELINE_CALLOUT_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(ATTACH_TO_TIMELINE_CALLOUT_TEST_ID)).toHaveClass('euiCallOut--warning');
-    expect(getByText('Attach to timeline')).toBeInTheDocument();
+    expect(getByText('Attach to current Timeline')).toBeInTheDocument();
     expect(
-      getByText('Before attaching a note to the timeline, you need to save the timeline first.')
+      getByText('You must save the current Timeline before attaching notes to it.')
     ).toBeInTheDocument();
   });
 
@@ -76,7 +76,7 @@ describe('AttachToActiveTimeline', () => {
       },
     });
 
-    const { getByTestId, getByText, queryByTestId } = render(
+    const { getByTestId, getByText, getAllByText, queryByTestId } = render(
       <TestProviders store={mockStore}>
         <AttachToActiveTimeline
           setAttachToTimeline={mockSetAttachToTimeline}
@@ -89,10 +89,8 @@ describe('AttachToActiveTimeline', () => {
     expect(getByTestId(ATTACH_TO_TIMELINE_CHECKBOX_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(ATTACH_TO_TIMELINE_CALLOUT_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(ATTACH_TO_TIMELINE_CALLOUT_TEST_ID)).toHaveClass('euiCallOut--primary');
-    expect(getByText('Attach to timeline')).toBeInTheDocument();
-    expect(
-      getByText('You can associate the newly created note to the active timeline.')
-    ).toBeInTheDocument();
+    expect(getAllByText('Attach to current Timeline')).toHaveLength(2);
+    expect(getByText('Also attach this note to the current Timeline.')).toBeInTheDocument();
   });
 
   it('should call the callback when user click on the checkbox', () => {

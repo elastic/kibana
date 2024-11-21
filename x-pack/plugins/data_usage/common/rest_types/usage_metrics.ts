@@ -88,6 +88,7 @@ export const UsageMetricsResponseSchema = {
         schema.arrayOf(
           schema.object({
             name: schema.string(),
+            error: schema.nullable(schema.string()),
             data: schema.arrayOf(
               schema.object({
                 x: schema.number(),
@@ -117,12 +118,20 @@ export const UsageMetricsAutoOpsResponseSchema = {
         schema.arrayOf(
           schema.object({
             name: schema.string(),
+            error: schema.nullable(schema.string()),
             data: schema.arrayOf(schema.arrayOf(schema.number(), { minSize: 2, maxSize: 2 })),
           })
         )
       ),
     }),
 };
-export type UsageMetricsAutoOpsResponseSchemaBody = TypeOf<
+export type UsageMetricsAutoOpsResponseMetricSeries = TypeOf<
   typeof UsageMetricsAutoOpsResponseSchema.body
->;
+>['metrics'][MetricTypes][number];
+
+export type UsageMetricsAutoOpsResponseSchemaBody = Omit<
+  TypeOf<typeof UsageMetricsAutoOpsResponseSchema.body>,
+  'metrics'
+> & {
+  metrics: Partial<Record<MetricTypes, UsageMetricsAutoOpsResponseMetricSeries[]>>;
+};

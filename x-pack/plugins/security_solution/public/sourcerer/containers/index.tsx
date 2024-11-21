@@ -7,6 +7,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
+import type { FieldSpec } from '@kbn/data-plugin/common';
 import { sourcererSelectors } from '../store';
 import type { SelectedDataView, SourcererDataView, RunTimeMappings } from '../store/model';
 import { SourcererScopeName } from '../store/model';
@@ -56,8 +57,7 @@ export const useSourcererDataView = (
       id: fetchIndexReturn.dataView?.id ?? null,
       loading: indexPatternsLoading,
       patternList: fetchIndexReturn.indexes,
-      indexFields: fetchIndexReturn.indexPatterns
-        .fields as SelectedDataView['indexPattern']['fields'],
+      indexFields: fetchIndexReturn.indexPatterns.fields as FieldSpec[],
       fields: fetchIndexReturn.dataView?.fields,
     }),
     [fetchIndexReturn, indexPatternsLoading]

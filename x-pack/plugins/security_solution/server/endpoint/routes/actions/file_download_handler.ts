@@ -38,7 +38,12 @@ export const registerActionFileDownloadRoutes = (
       // we need to enable setting the version number via query params
       enableQueryVersion: true,
       path: ACTION_AGENT_FILE_DOWNLOAD_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {

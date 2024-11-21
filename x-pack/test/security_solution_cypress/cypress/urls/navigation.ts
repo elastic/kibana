@@ -22,7 +22,7 @@ export const EVENT_FILTERS_URL = '/app/security/administration/event_filters';
 export const BLOCKLIST_URL = '/app/security/administration/blocklist';
 export const CSP_BENCHMARKS_URL = '/app/security/cloud_security_posture/benchmarks';
 export const CSP_DASHBOARD_URL = '/app/security/cloud_security_posture/dashboard';
-export const CSP_FINDINGS_URL = '/app/security/cloud_security_posture/findings/vulnerabilities';
+export const CSP_FINDINGS_URL = '/app/security/cloud_security_posture/findings/configurations';
 
 export const RULES_LANDING_URL = '/app/security/rules/landing';
 export const RULES_COVERAGE_URL = '/app/security/rules_coverage_overview';

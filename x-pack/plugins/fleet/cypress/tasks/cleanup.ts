@@ -8,19 +8,19 @@
 import { request } from './common';
 
 export function cleanupAgentPolicies(spaceId?: string) {
-  request({ url: `${spaceId ? `/s/${spaceId}` : ''}/api/fleet/agent_policies` }).then(
-    (response: any) => {
-      response.body.items
-        .filter((policy: any) => policy.agents === 0)
-        .forEach((policy: any) => {
-          request({
-            method: 'POST',
-            url: `${spaceId ? `/s/${spaceId}` : ''}/api/fleet/agent_policies/delete`,
-            body: { agentPolicyId: policy.id },
-          });
+  request({
+    url: `${spaceId ? `/s/${spaceId}` : ''}/api/fleet/agent_policies?withAgentCount=true`,
+  }).then((response: any) => {
+    response.body.items
+      .filter((policy: any) => policy.agents === 0)
+      .forEach((policy: any) => {
+        request({
+          method: 'POST',
+          url: `${spaceId ? `/s/${spaceId}` : ''}/api/fleet/agent_policies/delete`,
+          body: { agentPolicyId: policy.id },
         });
-    }
-  );
+      });
+  });
 }
 
 export function unenrollAgent() {

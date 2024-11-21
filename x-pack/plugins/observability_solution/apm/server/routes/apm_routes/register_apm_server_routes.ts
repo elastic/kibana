@@ -109,10 +109,7 @@ export function registerRoutes({
         );
 
         const getApmIndices = async () => {
-          const coreContext = await context.core;
-          const apmIndices = await plugins.apmDataAccess.setup.getApmIndices(
-            coreContext.savedObjects.client
-          );
+          const apmIndices = await plugins.apmDataAccess.setup.getApmIndices();
           return apmIndices;
         };
 

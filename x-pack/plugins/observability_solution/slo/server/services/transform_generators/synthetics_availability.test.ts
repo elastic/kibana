@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { ALL_VALUE } from '@kbn/slo-schema';
 import { dataViewsService } from '@kbn/data-views-plugin/server/mocks';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { SLODefinition } from '../../domain/models';
+import { twoMinute } from '../fixtures/duration';
 import { createSLO, createSyntheticsAvailabilityIndicator } from '../fixtures/slo';
 import { SyntheticsAvailabilityTransformGenerator } from './synthetics_availability';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
-import { twoMinute } from '../fixtures/duration';
 
 const generator = new SyntheticsAvailabilityTransformGenerator();
 
@@ -20,121 +19,9 @@ describe('Synthetics Availability Transform Generator', () => {
 
   it('returns the expected transform params', async () => {
     const slo = createSLO({ id: 'irrelevant', indicator: createSyntheticsAvailabilityIndicator() });
-    const transform = await generator.getTransformParams(slo, spaceId, dataViewsService);
+    const transform = await generator.getTransformParams(slo, spaceId, dataViewsService, false);
 
-    expect(transform).toEqual({
-      _meta: {
-        managed: true,
-        managed_by: 'observability',
-        version: 3.3,
-      },
-      defer_validation: true,
-      description: 'Rolled-up SLI data for SLO: irrelevant [id: irrelevant, revision: 1]',
-      dest: {
-        index: '.slo-observability.sli-v3.3',
-        pipeline: '.slo-observability.sli.pipeline-irrelevant-1',
-      },
-      frequency: '1m',
-      pivot: {
-        aggregations: {
-          'slo.denominator': {
-            filter: {
-              term: {
-                'summary.final_attempt': true,
-              },
-            },
-          },
-          'slo.numerator': {
-            filter: {
-              term: {
-                'monitor.status': 'up',
-              },
-            },
-          },
-        },
-        group_by: {
-          '@timestamp': {
-            date_histogram: {
-              field: '@timestamp',
-              fixed_interval: '1m',
-            },
-          },
-          'monitor.config_id': {
-            terms: {
-              field: 'config_id',
-            },
-          },
-          'monitor.name': {
-            terms: {
-              field: 'monitor.name',
-            },
-          },
-          'observer.name': {
-            terms: {
-              field: 'observer.name',
-            },
-          },
-          'observer.geo.name': {
-            terms: {
-              field: 'observer.geo.name',
-            },
-          },
-          'slo.groupings.monitor.name': {
-            terms: {
-              field: 'monitor.name',
-            },
-          },
-          'slo.groupings.observer.geo.name': {
-            terms: {
-              field: 'observer.geo.name',
-            },
-          },
-          'slo.groupings.monitor.id': {
-            terms: {
-              field: 'monitor.id',
-            },
-          },
-        },
-      },
-      settings: {
-        deduce_mappings: false,
-        unattended: true,
-      },
-      source: {
-        index: SYNTHETICS_INDEX_PATTERN,
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  'summary.final_attempt': true,
-                },
-              },
-              {
-                term: {
-                  'meta.space_id': 'custom-space',
-                },
-              },
-              {
-                range: {
-                  '@timestamp': {
-                    gte: 'now-7d/d',
-                  },
-                },
-              },
-            ],
-          },
-        },
-        runtime_mappings: {},
-      },
-      sync: {
-        time: {
-          delay: '1m',
-          field: 'event.ingested',
-        },
-      },
-      transform_id: 'slo-irrelevant-1',
-    });
+    expect(transform).toMatchSnapshot();
     expect(transform.source.query?.bool?.filter).toContainEqual({
       term: {
         'summary.final_attempt': true,
@@ -147,7 +34,7 @@ describe('Synthetics Availability Transform Generator', () => {
       id: 'irrelevant',
       indicator: createSyntheticsAvailabilityIndicator(),
     });
-    const transform = await generator.getTransformParams(slo, spaceId, dataViewsService);
+    const transform = await generator.getTransformParams(slo, spaceId, dataViewsService, false);
 
     expect(transform.pivot?.group_by).toEqual(
       expect.objectContaining({
@@ -171,7 +58,7 @@ describe('Synthetics Availability Transform Generator', () => {
       indicator: createSyntheticsAvailabilityIndicator(),
       groupBy: ['host.name'],
     });
-    const transform = await generator.getTransformParams(slo, spaceId, dataViewsService);
+    const transform = await generator.getTransformParams(slo, spaceId, dataViewsService, false);
 
     expect(transform.pivot?.group_by).not.toEqual(
       expect.objectContaining({
@@ -207,7 +94,7 @@ describe('Synthetics Availability Transform Generator', () => {
         indicator: createSyntheticsAvailabilityIndicator(),
         groupBy,
       });
-      const transform = await generator.getTransformParams(slo, spaceId, dataViewsService);
+      const transform = await generator.getTransformParams(slo, spaceId, dataViewsService, false);
 
       expect(transform.pivot?.group_by).toEqual(
         expect.objectContaining({
@@ -234,7 +121,7 @@ describe('Synthetics Availability Transform Generator', () => {
         indicator: createSyntheticsAvailabilityIndicator(),
         groupBy,
       });
-      const transform = await generator.getTransformParams(slo, spaceId, dataViewsService);
+      const transform = await generator.getTransformParams(slo, spaceId, dataViewsService, false);
 
       expect(transform.pivot?.group_by).toEqual(
         expect.objectContaining({
@@ -259,7 +146,7 @@ describe('Synthetics Availability Transform Generator', () => {
       indicator: createSyntheticsAvailabilityIndicator(),
       groupBy,
     });
-    const transform = await generator.getTransformParams(slo, spaceId, dataViewsService);
+    const transform = await generator.getTransformParams(slo, spaceId, dataViewsService, false);
 
     expect(transform.pivot?.group_by).toEqual(
       expect.objectContaining({
@@ -274,7 +161,7 @@ describe('Synthetics Availability Transform Generator', () => {
 
   it('filters by summary.final_attempt', async () => {
     const slo = createSLO({ id: 'irrelevant', indicator: createSyntheticsAvailabilityIndicator() });
-    const transform = await generator.getTransformParams(slo, spaceId, dataViewsService);
+    const transform = await generator.getTransformParams(slo, spaceId, dataViewsService, false);
 
     expect(transform.source.query?.bool?.filter).toContainEqual({
       term: {
@@ -299,7 +186,7 @@ describe('Synthetics Availability Transform Generator', () => {
         },
       } as SLODefinition['indicator'],
     });
-    const transform = await generator.getTransformParams(slo, spaceId, dataViewsService);
+    const transform = await generator.getTransformParams(slo, spaceId, dataViewsService, false);
 
     expect(transform.source.query?.bool?.filter).toContainEqual({
       terms: {
@@ -329,7 +216,7 @@ describe('Synthetics Availability Transform Generator', () => {
         },
       } as SLODefinition['indicator'],
     });
-    const transform = await generator.getTransformParams(slo, spaceId, dataViewsService);
+    const transform = await generator.getTransformParams(slo, spaceId, dataViewsService, false);
 
     expect(transform.source.query?.bool?.filter).toContainEqual({
       terms: {
@@ -359,7 +246,7 @@ describe('Synthetics Availability Transform Generator', () => {
         },
       } as SLODefinition['indicator'],
     });
-    const transform = await generator.getTransformParams(slo, spaceId, dataViewsService);
+    const transform = await generator.getTransformParams(slo, spaceId, dataViewsService, false);
 
     expect(transform.source.query?.bool?.filter).toContainEqual({
       terms: {
@@ -375,7 +262,7 @@ describe('Synthetics Availability Transform Generator', () => {
 
   it('filters by space', async () => {
     const slo = createSLO({ id: 'irrelevant', indicator: createSyntheticsAvailabilityIndicator() });
-    const transform = await generator.getTransformParams(slo, spaceId, dataViewsService);
+    const transform = await generator.getTransformParams(slo, spaceId, dataViewsService, false);
 
     expect(transform.source.query?.bool?.filter).toContainEqual({
       term: {
@@ -394,7 +281,7 @@ describe('Synthetics Availability Transform Generator', () => {
       },
     });
 
-    const transform = await generator.getTransformParams(slo, 'default', dataViewsService);
+    const transform = await generator.getTransformParams(slo, 'default', dataViewsService, false);
 
     // @ts-ignore
     const rangeFilter = transform.source.query.bool.filter.find((f) => 'range' in f);

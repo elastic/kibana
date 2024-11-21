@@ -103,10 +103,11 @@ describe('FieldsMetadataClient class', () => {
       integrationListExtractor,
     });
     fieldsMetadataClient = FieldsMetadataClient.create({
+      capabilities: { fleet: { read: true }, fleetv2: { read: true } },
+      logger,
       ecsFieldsRepository,
       integrationFieldsRepository,
       metadataFieldsRepository,
-      logger,
     });
   });
 
@@ -183,6 +184,21 @@ describe('FieldsMetadataClient class', () => {
 
       expect(integrationFieldsExtractor).not.toHaveBeenCalled();
       expect(unknownFieldInstance).toBeUndefined();
+    });
+
+    it('should not resolve the field from an integration if the user has not the fleet privileges to access it', async () => {
+      const clientWithouthPrivileges = FieldsMetadataClient.create({
+        capabilities: { fleet: { read: false }, fleetv2: { read: false } },
+        logger,
+        ecsFieldsRepository,
+        integrationFieldsRepository,
+        metadataFieldsRepository,
+      });
+
+      const fieldInstance = await clientWithouthPrivileges.getByName('mysql.slowlog.filesort');
+
+      expect(integrationFieldsExtractor).not.toHaveBeenCalled();
+      expect(fieldInstance).toBeUndefined();
     });
   });
 

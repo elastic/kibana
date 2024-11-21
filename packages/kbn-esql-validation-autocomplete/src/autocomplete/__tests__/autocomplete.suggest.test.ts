@@ -42,6 +42,6 @@ describe('autocomplete.suggest', () => {
     await suggest('sHoW ?');
     await suggest('row ? |');
 
-    expect(callbacks.getFieldsFor.mock.calls.length).toBe(0);
+    expect(callbacks.getColumnsFor.mock.calls.length).toBe(0);
   });
 });

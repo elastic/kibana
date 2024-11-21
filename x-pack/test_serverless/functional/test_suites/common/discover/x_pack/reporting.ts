@@ -58,7 +58,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return res;
   };
 
-  describe('Discover CSV Export', () => {
+  describe('Discover CSV Export', function () {
+    // see details: https://github.com/elastic/kibana/issues/197957
+    this.tags(['failsOnMKI']);
     describe('Check Available', () => {
       before(async () => {
         await PageObjects.svlCommonPage.loginAsAdmin();
@@ -95,7 +97,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Generate CSV: new search', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/182603
+    describe.skip('Generate CSV: new search', () => {
       before(async () => {
         await reportingAPI.initEcommerce();
       });

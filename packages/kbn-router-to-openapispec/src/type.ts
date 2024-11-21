@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Router } from '@kbn/core-http-router-server-internal';
 import type { OpenAPIV3 } from '../openapi-types';
 export type { OpenAPIV3 } from '../openapi-types';
 export interface KnownParameters {
@@ -34,3 +35,10 @@ export interface OpenAPIConverter {
 
   is(type: unknown): boolean;
 }
+
+export type CustomOperationObject = OpenAPIV3.OperationObject<{
+  // Custom OpenAPI from ES API spec based on @availability
+  'x-state'?: 'Technical Preview' | 'Beta';
+}>;
+
+export type InternalRouterRoute = ReturnType<Router['getRoutes']>[0];

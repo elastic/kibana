@@ -230,7 +230,7 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
           color: 'danger',
           onClick: (item) => onDelete([item]),
           available: deletable,
-          'data-test-subj': 'apiKeysTableDeleteAction',
+          'data-test-subj': (item) => `apiKeysTableDeleteAction-${item.name}`,
         },
       ],
     });
@@ -274,6 +274,7 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
         <EuiSearchBar
           query={query}
           box={{
+            'data-test-subj': 'apiKeysSearchBar',
             incremental: true,
             schema: {
               strict: true,
@@ -393,6 +394,7 @@ export const TypesFilterButton: FunctionComponent<CustomComponentProps> = ({ que
             onFilterChange({ ...filters, type: filters.type === 'rest' ? undefined : 'rest' });
           }}
           withNext={types.includes('cross_cluster') || types.includes('managed')}
+          data-test-subj="personalFilterButton"
         >
           <FormattedMessage
             id="xpack.security.accountManagement.apiKeyBadge.restTitle"
@@ -412,6 +414,7 @@ export const TypesFilterButton: FunctionComponent<CustomComponentProps> = ({ que
             });
           }}
           withNext={types.includes('managed')}
+          data-test-subj="crossClusterFilterButton"
         >
           <FormattedMessage
             id="xpack.security.accountManagement.apiKeyBadge.crossClusterLabel"
@@ -430,6 +433,7 @@ export const TypesFilterButton: FunctionComponent<CustomComponentProps> = ({ que
               type: filters.type === 'managed' ? undefined : 'managed',
             });
           }}
+          data-test-subj="managedFilterButton"
         >
           <FormattedMessage
             id="xpack.security.accountManagement.apiKeyBadge.managedTitle"
@@ -463,6 +467,7 @@ export const ExpiredFilterButton: FunctionComponent<CustomComponentProps> = ({
           }
         }}
         withNext={true}
+        data-test-subj="activeFilterButton"
       >
         <FormattedMessage
           id="xpack.security.management.apiKeys.table.activeFilter"
@@ -478,6 +483,7 @@ export const ExpiredFilterButton: FunctionComponent<CustomComponentProps> = ({
             onFilterChange({ ...filters, expired: true });
           }
         }}
+        data-test-subj="expiredFilterButton"
       >
         <FormattedMessage
           id="xpack.security.management.apiKeys.table.expiredFilter"
@@ -520,6 +526,7 @@ export const UsersFilterButton: FunctionComponent<CustomComponentProps> = ({ que
           numFilters={usernames.length}
           hasActiveFilters={numActiveFilters ? true : false}
           numActiveFilters={numActiveFilters}
+          data-test-subj="ownerFilterButton"
         >
           <FormattedMessage
             id="xpack.security.management.apiKeys.table.ownerFilter"

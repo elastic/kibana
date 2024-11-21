@@ -324,6 +324,12 @@ exports[`Error SPAN_SYNC 1`] = `undefined`;
 
 exports[`Error SPAN_TYPE 1`] = `undefined`;
 
+exports[`Error TELEMETRY_SDK_LANGUAGE 1`] = `undefined`;
+
+exports[`Error TELEMETRY_SDK_NAME 1`] = `undefined`;
+
+exports[`Error TELEMETRY_SDK_VERSION 1`] = `undefined`;
+
 exports[`Error TIER 1`] = `undefined`;
 
 exports[`Error TIMESTAMP_US 1`] = `1337`;
@@ -678,6 +684,12 @@ exports[`Span SPAN_SUBTYPE 1`] = `"my subtype"`;
 exports[`Span SPAN_SYNC 1`] = `false`;
 
 exports[`Span SPAN_TYPE 1`] = `"span type"`;
+
+exports[`Span TELEMETRY_SDK_LANGUAGE 1`] = `undefined`;
+
+exports[`Span TELEMETRY_SDK_NAME 1`] = `undefined`;
+
+exports[`Span TELEMETRY_SDK_VERSION 1`] = `undefined`;
 
 exports[`Span TIER 1`] = `undefined`;
 
@@ -1051,6 +1063,12 @@ exports[`Transaction SPAN_SUBTYPE 1`] = `undefined`;
 exports[`Transaction SPAN_SYNC 1`] = `undefined`;
 
 exports[`Transaction SPAN_TYPE 1`] = `undefined`;
+
+exports[`Transaction TELEMETRY_SDK_LANGUAGE 1`] = `undefined`;
+
+exports[`Transaction TELEMETRY_SDK_NAME 1`] = `undefined`;
+
+exports[`Transaction TELEMETRY_SDK_VERSION 1`] = `undefined`;
 
 exports[`Transaction TIER 1`] = `undefined`;
 

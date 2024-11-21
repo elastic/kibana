@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiStat } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
@@ -19,7 +19,13 @@ function title(t?: number) {
   return t ?? '-';
 }
 
-export function OverviewStatus({ titleAppend }: { titleAppend?: React.ReactNode }) {
+export function OverviewStatus({
+  titleAppend,
+  hideTitle,
+}: {
+  titleAppend?: React.ReactNode;
+  hideTitle?: boolean;
+}) {
   const { statusFilter } = useGetUrlParams();
 
   const {
@@ -92,8 +98,12 @@ export function OverviewStatus({ titleAppend }: { titleAppend?: React.ReactNode 
   }, [status, statusFilter]);
 
   return (
-    <EmbeddablePanelWrapper title={headingText} loading={loading} titleAppend={titleAppend}>
-      <EuiSpacer size="m" />
+    <EmbeddablePanelWrapper
+      title={headingText}
+      loading={loading}
+      titleAppend={titleAppend}
+      hideTitle={hideTitle}
+    >
       <EuiFlexGroup gutterSize="xl" justifyContent="spaceAround">
         <EuiFlexItem grow={false}>
           <EuiStat
@@ -142,8 +152,8 @@ export function OverviewStatus({ titleAppend }: { titleAppend?: React.ReactNode 
   );
 }
 
-const headingText = i18n.translate('xpack.synthetics.overview.status.headingText', {
-  defaultMessage: 'Current status',
+const headingText = i18n.translate('xpack.synthetics.overview.monitors.headingText', {
+  defaultMessage: 'Monitors status',
 });
 
 const upDescription = i18n.translate('xpack.synthetics.overview.status.up.description', {

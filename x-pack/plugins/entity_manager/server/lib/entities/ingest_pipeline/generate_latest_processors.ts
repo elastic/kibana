@@ -117,75 +117,36 @@ export function generateLatestProcessors(definition: EntityDefinition) {
     },
     {
       set: {
-        field: 'entity.definitionId',
+        field: 'entity.definition_id',
         value: definition.id,
       },
     },
     {
       set: {
-        field: 'entity.definitionVersion',
+        field: 'entity.definition_version',
         value: definition.version,
       },
     },
     {
       set: {
-        field: 'entity.schemaVersion',
+        field: 'entity.schema_version',
         value: ENTITY_SCHEMA_VERSION_V1,
       },
     },
     {
       set: {
-        field: 'entity.identityFields',
+        field: 'entity.identity_fields',
         value: definition.identityFields.map((identityField) => identityField.field),
       },
     },
     {
-      script: {
-        description: 'Generated the entity.id field',
-        source: cleanScript(`
-        // This function will recursively collect all the values of a HashMap of HashMaps
-        Collection collectValues(HashMap subject) {
-          Collection values = new ArrayList();
-          // Iterate through the values
-          for(Object value: subject.values()) {
-            // If the value is a HashMap, recurse
-            if (value instanceof HashMap) {
-              values.addAll(collectValues((HashMap) value));
-            } else {
-              values.add(String.valueOf(value));
-            }
-          }
-          return values;
-        }
-
-        // Create the string builder
-        StringBuilder entityId = new StringBuilder();
-
-        if (ctx["entity"]["identity"] != null) {
-          // Get the values as a collection
-          Collection values = collectValues(ctx["entity"]["identity"]);
-
-          // Convert to a list and sort
-          List sortedValues = new ArrayList(values);
-          Collections.sort(sortedValues);
-
-          // Create comma delimited string
-          for(String instanceValue: sortedValues) {
-            entityId.append(instanceValue);
-            entityId.append(":");
-          }
-
-            // Assign the entity.id
-          ctx["entity"]["id"] = entityId.length() > 0 ? entityId.substring(0, entityId.length() - 1) : "unknown";
-        }
-       `),
-      },
-    },
-    {
-      fingerprint: {
-        fields: ['entity.id'],
-        target_field: 'entity.id',
-        method: 'MurmurHash3',
+      set: {
+        field: 'entity.id',
+        value: definition.identityFields
+          .map((identityField) => identityField.field)
+          .sort()
+          .map((identityField) => `{{{entity.identity.${identityField}}}}`)
+          .join('-'),
       },
     },
     ...(definition.staticFields != null
@@ -212,7 +173,7 @@ export function generateLatestProcessors(definition: EntityDefinition) {
     // This must happen AFTER we lift the identity fields into the root of the document
     {
       set: {
-        field: 'entity.displayName',
+        field: 'entity.display_name',
         value: definition.displayNameTemplate,
       },
     },

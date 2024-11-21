@@ -8,7 +8,7 @@
 import { updateConnectorRoute } from './update';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../lib/license_state.mock';
-import { mockHandlerArguments } from '../../legacy/_mock_handler_arguments';
+import { mockHandlerArguments } from '../../_mock_handler_arguments';
 import { actionsClientMock } from '../../../actions_client/actions_client.mock';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
 import { updateConnectorBodySchema } from '../../../../common/routes/connector/apis/update';

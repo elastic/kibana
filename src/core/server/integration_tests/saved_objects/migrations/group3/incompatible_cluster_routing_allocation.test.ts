@@ -34,12 +34,7 @@ const { startES } = createTestServers({
   settings: {
     es: {
       license: 'basic',
-      dataArchive: Path.join(
-        __dirname,
-        '..',
-        'archives',
-        '8.0.0_v1_migrations_sample_data_saved_objects.zip'
-      ),
+      dataArchive: Path.join(__dirname, '..', 'archives', '8.4.0_with_sample_data_logs.zip'),
     },
   },
 });
@@ -97,8 +92,7 @@ async function updateRoutingAllocations(
   });
 }
 
-// FLAKY: https://github.com/elastic/kibana/issues/158318
-describe.skip('incompatible_cluster_routing_allocation', () => {
+describe('incompatible_cluster_routing_allocation', () => {
   let client: ElasticsearchClient;
   let root: Root;
 
@@ -127,7 +121,7 @@ describe.skip('incompatible_cluster_routing_allocation', () => {
     await root.preboot();
     await root.setup();
 
-    root.start().catch(() => {
+    const startPromise = root.start().catch(() => {
       // Silent catch because the test might be done and call shutdown before starting is completed, causing unwanted thrown errors.
     });
 
@@ -171,6 +165,7 @@ describe.skip('incompatible_cluster_routing_allocation', () => {
       { retryAttempts: 100, retryDelayMs: 500 }
     );
 
+    await startPromise; // Wait for start phase to complete before shutting down
     await root.shutdown();
   });
 });

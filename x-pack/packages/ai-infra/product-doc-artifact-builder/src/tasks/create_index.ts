@@ -21,10 +21,7 @@ const mappings: MappingTypeMapping = {
     slug: { type: 'keyword' },
     url: { type: 'keyword' },
     version: { type: 'version' },
-    ai_subtitle: {
-      type: 'semantic_text',
-      inference_id: 'kibana-elser2',
-    },
+    ai_subtitle: { type: 'text' },
     ai_summary: {
       type: 'semantic_text',
       inference_id: 'kibana-elser2',

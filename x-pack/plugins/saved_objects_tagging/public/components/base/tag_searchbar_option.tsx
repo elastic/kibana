@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { type FC } from 'react';
 import { EuiHealth, EuiText } from '@elastic/eui';
-import { Tag } from '../../../common';
+import type { Tag } from '../../../common/types';
 import { testSubjFriendly } from '../../utils';
 
 export interface TagSearchBarOptionProps {

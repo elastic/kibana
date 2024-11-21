@@ -700,7 +700,6 @@ describe('validation logic', () => {
       ]);
       testErrorsAndWarnings('from a_index | dissect textField .', [
         "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
-        'Unknown column [textField.]',
       ]);
       testErrorsAndWarnings('from a_index | dissect textField %a', [
         "SyntaxError: mismatched input '%' expecting QUOTED_STRING",
@@ -751,7 +750,6 @@ describe('validation logic', () => {
       ]);
       testErrorsAndWarnings('from a_index | grok textField .', [
         "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
-        'Unknown column [textField.]',
       ]);
       testErrorsAndWarnings('from a_index | grok textField %a', [
         "SyntaxError: mismatched input '%' expecting QUOTED_STRING",
@@ -1129,13 +1127,13 @@ describe('validation logic', () => {
           `from a_index | eval 1 ${op} "1"`,
           ['+', '-'].includes(op)
             ? [`Argument of [${op}] must be [date_period], found value [1] type [integer]`]
-            : [`Argument of [${op}] must be [double], found value [\"1\"] type [string]`]
+            : [`Argument of [${op}] must be [double], found value [\"1\"] type [keyword]`]
         );
         testErrorsAndWarnings(
           `from a_index | eval "1" ${op} 1`,
           ['+', '-'].includes(op)
             ? [`Argument of [${op}] must be [date_period], found value [1] type [integer]`]
-            : [`Argument of [${op}] must be [double], found value [\"1\"] type [string]`]
+            : [`Argument of [${op}] must be [double], found value [\"1\"] type [keyword]`]
         );
         // TODO: enable when https://github.com/elastic/elasticsearch/issues/108432 is complete
         // testErrorsAndWarnings(`from a_index | eval "2022" ${op} 1 day`, []);
@@ -1478,7 +1476,7 @@ describe('validation logic', () => {
       testErrorsAndWarnings(
         'from a_index | eval doubleField = "5"',
         [],
-        ['Column [doubleField] of type double has been overwritten as new type: string']
+        ['Column [doubleField] of type double has been overwritten as new type: keyword']
       );
     });
 
@@ -1532,7 +1530,7 @@ describe('validation logic', () => {
       it(`should not fetch source and fields list when a row command is set`, async () => {
         const callbackMocks = getCallbackMocks();
         await validateQuery(`row a = 1 | eval a`, getAstAndSyntaxErrors, undefined, callbackMocks);
-        expect(callbackMocks.getFieldsFor).not.toHaveBeenCalled();
+        expect(callbackMocks.getColumnsFor).not.toHaveBeenCalled();
         expect(callbackMocks.getSources).not.toHaveBeenCalled();
       });
 
@@ -1545,7 +1543,7 @@ describe('validation logic', () => {
       it(`should not fetch source and fields for empty command`, async () => {
         const callbackMocks = getCallbackMocks();
         await validateQuery(` `, getAstAndSyntaxErrors, undefined, callbackMocks);
-        expect(callbackMocks.getFieldsFor).not.toHaveBeenCalled();
+        expect(callbackMocks.getColumnsFor).not.toHaveBeenCalled();
         expect(callbackMocks.getSources).not.toHaveBeenCalled();
       });
 
@@ -1559,8 +1557,8 @@ describe('validation logic', () => {
         );
         expect(callbackMocks.getSources).not.toHaveBeenCalled();
         expect(callbackMocks.getPolicies).toHaveBeenCalled();
-        expect(callbackMocks.getFieldsFor).toHaveBeenCalledTimes(1);
-        expect(callbackMocks.getFieldsFor).toHaveBeenLastCalledWith({
+        expect(callbackMocks.getColumnsFor).toHaveBeenCalledTimes(1);
+        expect(callbackMocks.getColumnsFor).toHaveBeenLastCalledWith({
           query: `from enrich_index | keep otherField, yetAnotherField`,
         });
       });
@@ -1575,8 +1573,8 @@ describe('validation logic', () => {
         );
         expect(callbackMocks.getSources).not.toHaveBeenCalled();
         expect(callbackMocks.getPolicies).not.toHaveBeenCalled();
-        expect(callbackMocks.getFieldsFor).toHaveBeenCalledTimes(1);
-        expect(callbackMocks.getFieldsFor).toHaveBeenLastCalledWith({
+        expect(callbackMocks.getColumnsFor).toHaveBeenCalledTimes(1);
+        expect(callbackMocks.getColumnsFor).toHaveBeenLastCalledWith({
           query: 'show info',
         });
       });
@@ -1591,8 +1589,8 @@ describe('validation logic', () => {
         );
         expect(callbackMocks.getSources).toHaveBeenCalled();
         expect(callbackMocks.getPolicies).toHaveBeenCalled();
-        expect(callbackMocks.getFieldsFor).toHaveBeenCalledTimes(2);
-        expect(callbackMocks.getFieldsFor).toHaveBeenLastCalledWith({
+        expect(callbackMocks.getColumnsFor).toHaveBeenCalledTimes(2);
+        expect(callbackMocks.getColumnsFor).toHaveBeenLastCalledWith({
           query: `from enrich_index | keep otherField, yetAnotherField`,
         });
       });
@@ -1604,7 +1602,7 @@ describe('validation logic', () => {
             getAstAndSyntaxErrors,
             undefined,
             {
-              getFieldsFor: undefined,
+              getColumnsFor: undefined,
               getSources: undefined,
               getPolicies: undefined,
             }
@@ -1674,11 +1672,11 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from a_index | eval TRIM(23::text)', []);
       testErrorsAndWarnings('from a_index | eval TRIM(23::keyword)', []);
 
-      testErrorsAndWarnings('from a_index | eval true AND "false"::boolean', []);
-      testErrorsAndWarnings('from a_index | eval true AND "false"::bool', []);
-      testErrorsAndWarnings('from a_index | eval true AND "false"', [
+      testErrorsAndWarnings('from a_index | eval true AND 0::boolean', []);
+      testErrorsAndWarnings('from a_index | eval true AND 0::bool', []);
+      testErrorsAndWarnings('from a_index | eval true AND 0', [
         // just a counter-case to make sure the previous tests are meaningful
-        'Argument of [and] must be [boolean], found value ["false"] type [string]',
+        'Argument of [and] must be [boolean], found value [0] type [integer]',
       ]);
 
       // enforces strings for cartesian_point conversion
@@ -1695,6 +1693,16 @@ describe('validation logic', () => {
       testErrorsAndWarnings(
         'from a_index | eval to_lower(to_upper(trim(doubleField)::keyword)::keyword)',
         ['Argument of [trim] must be [keyword], found value [doubleField] type [double]']
+      );
+    });
+
+    describe('unsupported fields', () => {
+      testErrorsAndWarnings(
+        `from a_index | keep unsupportedField`,
+        [],
+        [
+          'Field [unsupportedField] cannot be retrieved, it is unsupported or not indexed; returning null',
+        ]
       );
     });
   });
@@ -1718,7 +1726,7 @@ describe('validation logic', () => {
       const contentByCallback = {
         getSources: /Unknown index/,
         getPolicies: /Unknown policy/,
-        getFieldsFor: /Unknown column|Argument of|it is unsupported or not indexed/,
+        getColumnsFor: /Unknown column|Argument of|it is unsupported or not indexed/,
         getPreferences: /Unknown/,
         getFieldsMetadata: /Unknown/,
       };
@@ -1741,7 +1749,7 @@ describe('validation logic', () => {
     it('should basically work when all callbacks are passed', async () => {
       const allErrors = await Promise.all(
         fixtures.testCases
-          .filter(({ query }) => query === 'from index [METADATA _id, _source2]')
+          .filter(({ query }) => query === 'from index METADATA _id, _source2')
           .map(({ query }) =>
             validateQuery(
               query,
@@ -1753,7 +1761,7 @@ describe('validation logic', () => {
       );
       for (const [index, { errors }] of Object.entries(allErrors)) {
         expect(errors.map((e) => ('severity' in e ? e.message : e.text))).toEqual(
-          fixtures.testCases.filter(({ query }) => query === 'from index [METADATA _id, _source2]')[
+          fixtures.testCases.filter(({ query }) => query === 'from index METADATA _id, _source2')[
             Number(index)
           ].error
         );
@@ -1761,7 +1769,7 @@ describe('validation logic', () => {
     });
 
     // test excluding one callback at the time
-    it.each(['getSources', 'getFieldsFor', 'getPolicies'] as Array<keyof typeof ignoreErrorsMap>)(
+    it.each(['getSources', 'getColumnsFor', 'getPolicies'] as Array<keyof typeof ignoreErrorsMap>)(
       `should not error if %s is missing`,
       async (excludedCallback) => {
         const filteredTestCases = fixtures.testCases.filter((t) =>
@@ -1790,7 +1798,7 @@ describe('validation logic', () => {
     );
 
     it('should work if no callback passed', async () => {
-      const excludedCallbacks = ['getSources', 'getPolicies', 'getFieldsFor'] as Array<
+      const excludedCallbacks = ['getSources', 'getPolicies', 'getColumnsFor'] as Array<
         keyof typeof ignoreErrorsMap
       >;
       for (const testCase of fixtures.testCases.filter((t) =>

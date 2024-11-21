@@ -17,6 +17,12 @@ export function registerRegisterFeatureRoute(
   router.post(
     {
       path: '/internal/licensing/feature_usage/register',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.arrayOf(
           schema.object({

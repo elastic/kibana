@@ -13,4 +13,8 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new SearchPlaygroundPlugin(initializerContext);
 }
 
-export type { SearchPlaygroundPluginSetup, SearchPlaygroundPluginStart } from './types';
+export type {
+  SearchPlaygroundPluginSetup,
+  SearchPlaygroundPluginStart,
+  PlaygroundPageMode,
+} from './types';

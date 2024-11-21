@@ -9,3 +9,4 @@
 
 export * from './get_log_level_color';
 export * from './get_log_level_coalesed_value';
+export * from './get_available_resource_fields';
