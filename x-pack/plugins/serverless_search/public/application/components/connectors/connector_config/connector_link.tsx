@@ -19,6 +19,7 @@ import { ConnectorStatus } from '@kbn/search-connectors';
 import React from 'react';
 import { docLinks } from '../../../../../common/doc_links';
 import { useAssetBasePath } from '../../../hooks/use_asset_base_path';
+import { useElasticsearchUrl } from '../../../hooks/use_elastisearch_url';
 import { ConnectionDetails } from './connection_details_panel';
 
 interface ConnectorLinkElasticsearchProps {
@@ -33,6 +34,12 @@ export const ConnectorLinkElasticsearch: React.FC<ConnectorLinkElasticsearchProp
   status,
 }) => {
   const assetBasePath = useAssetBasePath();
+  const { elasticsearchUrl } = useElasticsearchUrl();
+  // const { codeSnippet } = connectorConfigurationCodeSnippet(
+  //   connectorId,
+  //   serviceType,
+  //   elasticsearchUrl
+  // );
 
   return (
     <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
@@ -88,6 +95,13 @@ export const ConnectorLinkElasticsearch: React.FC<ConnectorLinkElasticsearchProp
         </EuiFlexGroup>
         <EuiSpacer />
         <EuiFlexItem>
+          {/* <ConnectorConfigYaml
+            connectorId={connectorId}
+            serviceType={serviceType}
+            host={elasticsearchUrl}
+          /> */}
+          {/* <CodeBox showTopBar={false} languageType="yaml" codeSnippet /> */}
+          {/* <CodeBox codeSnippet={'blah'} /> */}
           <ConnectionDetails connectorId={connectorId} serviceType={serviceType} status={status} />
         </EuiFlexItem>
         <EuiSpacer />

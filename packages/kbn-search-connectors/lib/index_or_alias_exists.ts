@@ -7,6 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './configuration';
-export * from './creation';
-export * from './sync_jobs';
+import type { IScopedClusterClient } from '@kbn/core/server';
+
+export const indexOrAliasExists = async (
+  client: IScopedClusterClient,
+  index: string
+): Promise<boolean> =>
+  (await client.asCurrentUser.indices.exists({ index })) ||
+  (await client.asCurrentUser.indices.existsAlias({ name: index }));
