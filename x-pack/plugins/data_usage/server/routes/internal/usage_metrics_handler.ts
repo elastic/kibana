@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { chunk } from 'lodash/fp';
 import { RequestHandler } from '@kbn/core/server';
 import {
   MetricTypes,
@@ -30,6 +31,8 @@ export const getUsageMetricsHandler = (
       const core = await context.core;
 
       const esClient = core.elasticsearch.client.asCurrentUser;
+      const getDataStreams = (name: string[]) =>
+        esClient.indices.getDataStream({ name, expand_wildcards: 'all' });
 
       logger.debug(`Retrieving usage metrics`);
       const { from, to, metricTypes, dataStreams: requestDsNames } = request.body;
@@ -43,15 +46,22 @@ export const getUsageMetricsHandler = (
           new CustomHttpRequestError('[request body.dataStreams]: no data streams selected', 400)
         );
       }
-      let dataStreamsResponse;
+
+      let dataStreamsResponse: Array<{ name: string }>;
 
       try {
-        // Attempt to fetch data streams
-        const { data_streams: dataStreams } = await esClient.indices.getDataStream({
-          name: requestDsNames,
-          expand_wildcards: 'all',
-        });
-        dataStreamsResponse = dataStreams;
+        if (requestDsNames.length <= 50) {
+          const { data_streams: dataStreams } = await getDataStreams(requestDsNames);
+          dataStreamsResponse = dataStreams;
+        } else {
+          // Attempt to fetch data streams in chunks of 50
+          const dataStreamsChunks = Math.ceil(requestDsNames.length / 50);
+          const chunkedDsLists = chunk(dataStreamsChunks, requestDsNames);
+          const chunkedDataStreams = await Promise.all(
+            chunkedDsLists.map((dsList) => getDataStreams(dsList))
+          );
+          dataStreamsResponse = chunkedDataStreams.flatMap((ds) => ds.data_streams);
+        }
       } catch (error) {
         return errorHandler(
           logger,
