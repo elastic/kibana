@@ -317,7 +317,6 @@ export class SpacesGridPage extends Component<Props, State> {
         }),
         sortable: true,
         truncateText: true,
-        width: '40%',
       },
     ];
 
@@ -331,7 +330,6 @@ export class SpacesGridPage extends Component<Props, State> {
         render: (solution: Space['solution'], record: Space) => (
           <SpaceSolutionBadge solution={solution} data-test-subj={`${record.id}-solution`} />
         ),
-        width: '10%',
       });
     }
 
