@@ -10,6 +10,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { DeleteByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
+import { i18n } from '@kbn/i18n';
 import { getResourceName } from '.';
 import { knowledgeBaseIngestPipeline } from '../ai_assistant_data_clients/knowledge_base/ingest_pipeline';
 import { GetElser } from '../types';
@@ -107,7 +108,7 @@ export const removeLegacyQuickPrompt = async (esClient: ElasticsearchClient) => 
         must: [
           {
             term: {
-              name: 'ES|QL Query Generation',
+              name: ESQL_QUERY_GENERATION_TITLE,
             },
           },
           {
@@ -126,3 +127,10 @@ export const removeLegacyQuickPrompt = async (esClient: ElasticsearchClient) => 
   };
   return esClient.deleteByQuery(deleteQuery);
 };
+
+const ESQL_QUERY_GENERATION_TITLE = i18n.translate(
+  'xpack.elasticAssistantPlugin.assistant.quickPrompts.esqlQueryGenerationTitle',
+  {
+    defaultMessage: 'ES|QL Query Generation',
+  }
+);
