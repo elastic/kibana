@@ -57,6 +57,5 @@ export interface InvestigateAppRouteCreateOptions {
     timeout?: {
       idleSocket?: number;
     };
-    tags: [];
   };
 }
