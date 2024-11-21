@@ -7,7 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { GridLayout } from './grid/grid_layout';
-export type { GridLayoutData, GridPanelData, GridRowData, GridSettings } from './grid/types';
+export interface DashboardGridData {
+  w: number;
+  h: number;
+  x: number;
+  y: number;
+  i: string;
+}
 
-export { isLayoutEqual } from './grid/utils/equality_checks';
+export interface MockedDashboardPanelMap {
+  [key: string]: { id: string; gridData: DashboardGridData & { row: number } };
+}
+
+export type MockedDashboardRowMap = Array<{ title: string; collapsed: boolean }>;
+
+export interface MockSerializedDashboardState {
+  panels: MockedDashboardPanelMap;
+  rows: MockedDashboardRowMap;
+}

@@ -19,6 +19,5 @@
   "kbn_references": [
     "@kbn/ui-theme",
     "@kbn/i18n",
-    "@kbn/utility-types",
   ]
 }

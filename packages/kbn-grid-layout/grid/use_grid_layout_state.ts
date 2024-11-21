@@ -22,9 +22,11 @@ import {
 } from './types';
 
 export const useGridLayoutState = ({
-  getCreationOptions,
+  layout,
+  gridSettings,
 }: {
-  getCreationOptions: () => { initialLayout: GridLayoutData; gridSettings: GridSettings };
+  layout: GridLayoutData;
+  gridSettings: GridSettings;
 }): {
   gridLayoutStateManager: GridLayoutStateManager;
   setDimensionsRef: (instance: HTMLDivElement | null) => void;
@@ -32,11 +34,8 @@ export const useGridLayoutState = ({
   const rowRefs = useRef<Array<HTMLDivElement | null>>([]);
   const panelRefs = useRef<Array<{ [id: string]: HTMLDivElement | null }>>([]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const { initialLayout, gridSettings } = useMemo(() => getCreationOptions(), []);
-
   const gridLayoutStateManager = useMemo(() => {
-    const gridLayout$ = new BehaviorSubject<GridLayoutData>(initialLayout);
+    const gridLayout$ = new BehaviorSubject<GridLayoutData>(layout);
     const gridDimensions$ = new BehaviorSubject<ObservedSize>({ width: 0, height: 0 });
     const interactionEvent$ = new BehaviorSubject<PanelInteractionEvent | undefined>(undefined);
     const activePanel$ = new BehaviorSubject<ActivePanel | undefined>(undefined);
@@ -45,7 +44,7 @@ export const useGridLayoutState = ({
       columnPixelWidth: 0,
     });
     const panelIds$ = new BehaviorSubject<string[][]>(
-      initialLayout.map(({ panels }) => Object.keys(panels))
+      layout.map(({ panels }) => Object.keys(panels))
     );
 
     return {
