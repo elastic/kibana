@@ -45,9 +45,24 @@ export const buildMutedRulesFilter = (
 
 export const buildEntityFlyoutPreviewQuery = (
   field: string,
-  queryValue?: string,
-  status?: string
+  queryValue: string,
+  value?: string,
+  type?: 'Misconfiguration' | 'Vulnerabilities'
 ) => {
+  let queryFieldValue;
+  if (type === 'Misconfiguration')
+    queryFieldValue = {
+      term: {
+        'result.evaluation': value || '',
+      },
+    };
+  else if (type === 'Vulnerabilities')
+    queryFieldValue = {
+      term: {
+        'vulnerability.severity': value || '',
+      },
+    };
+
   return {
     bool: {
       filter: [
@@ -63,20 +78,57 @@ export const buildEntityFlyoutPreviewQuery = (
             minimum_should_match: 1,
           },
         },
-        status
+        // {
+        //   bool: {
+        //     should: [
+        //       type === 'Misconfiguration'
+        //         ? {
+        //             term: {
+        //               'result.evaluation': value || '',
+        //             },
+        //           }
+        //         : {
+        //             term: {
+        //               'vulnerability.severity': value || '',
+        //             },
+        //           },
+        //     ],
+        //     minimum_should_match: 1,
+        //   },
+        // },
+        value
           ? {
               bool: {
-                should: [
-                  {
-                    term: {
-                      'result.evaluation': status,
-                    },
-                  },
-                ],
+                should: [queryFieldValue],
                 minimum_should_match: 1,
               },
             }
           : undefined,
+        // type === 'Misconfiguration'
+        //   ? {
+        //       bool: {
+        //         should: [
+        //           {
+        //             term: {
+        //               'result.evaluation': value || 'passed',
+        //             },
+        //           },
+        //         ],
+        //         minimum_should_match: 1,
+        //       },
+        //     }
+        //   : {
+        //       bool: {
+        //         should: [
+        //           {
+        //             term: {
+        //               'vulnerability.severity': value || 'low',
+        //             },
+        //           },
+        //         ],
+        //         minimum_should_match: 1,
+        //       },
+        //     },
       ],
     },
   };

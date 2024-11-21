@@ -81,18 +81,13 @@ export const MisconfigurationFindingsDetailsTable = memo(
     const [currentFilter, setCurrentFilter] = useState<string>('');
 
     const { data } = useMisconfigurationFindings({
-      query: buildEntityFlyoutPreviewQuery(fieldName, queryName, currentFilter),
+      query: buildEntityFlyoutPreviewQuery(fieldName, queryName, currentFilter, 'Misconfiguration'),
       sort: [],
       enabled: true,
       pageSize: 1,
     });
 
-    // const passedFindings = data?.count.passed || 0;
-    // const failedFindings = data?.count.failed || 0;
-    const { hasMisconfigurationFindings, passedFindings, failedFindings } = useHasMisconfigurations(
-      fieldName,
-      queryName
-    );
+    const { passedFindings, failedFindings } = useHasMisconfigurations(fieldName, queryName);
 
     const [pageIndex, setPageIndex] = useState(0);
     const [pageSize, setPageSize] = useState(10);
