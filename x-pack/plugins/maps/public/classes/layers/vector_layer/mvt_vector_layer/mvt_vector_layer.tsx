@@ -426,7 +426,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     this._setMbPointsProperties(mbMap, sourceData.tileSourceLayer);
     this._setMbLinePolygonProperties(mbMap, sourceData.tileSourceLayer);
     this._syncTooManyFeaturesProperties(mbMap);
-    this.getSource().syncSourceStyle?.(mbMap, () =>
+    (this.getSource() as IMvtVectorSource).syncSourceStyle?.(mbMap, () =>
       mbMap
         .getStyle()
         .layers.filter((mbLayer) => this.ownsMbLayerId(mbLayer.id))
