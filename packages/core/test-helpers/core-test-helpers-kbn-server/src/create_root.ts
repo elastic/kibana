@@ -83,7 +83,7 @@ export function createRootWithSettings(
    */
   let oss = true;
   if (getFips() === 1) {
-    set(settings, 'xpack.security.experimental.fipsMode.enabled', true);
+    set(settings, 'xpack.security.fipsMode.enabled', true);
     oss = false;
     delete cliArgs.oss;
   }

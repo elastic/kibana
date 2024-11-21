@@ -302,6 +302,24 @@ describe('extend index management', () => {
       expect(extension).toBeDefined();
       expect(extension).toMatchSnapshot();
     });
+
+    test('should return action definition when any index has lifecycle error', () => {
+      const extension = ilmBannerExtension([
+        indexWithoutLifecyclePolicy,
+        indexWithLifecyclePolicy,
+        indexWithLifecycleError,
+      ]);
+      const { requestMethod, successMessage, buttonLabel } =
+        retryLifecycleActionExtension({
+          indices: [indexWithLifecycleError],
+        }) ?? {};
+      expect(extension?.action).toEqual({
+        requestMethod,
+        successMessage,
+        buttonLabel,
+        indexNames: [indexWithLifecycleError.name],
+      });
+    });
   });
 
   describe('ilm summary extension', () => {

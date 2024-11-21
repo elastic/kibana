@@ -13,7 +13,6 @@ import { shallow } from 'enzyme';
 
 import { ErrorStateCallout } from '../../../shared/error_state';
 
-import { SetupGuideCta } from '../setup_guide';
 import { TrialCallout } from '../trial_callout';
 
 import { ElasticsearchProductCard } from './elasticsearch_product_card';
@@ -26,7 +25,6 @@ describe('ProductSelector', () => {
     const wrapper = shallow(<ProductSelector />);
 
     expect(wrapper.find(ElasticsearchProductCard)).toHaveLength(1);
-    expect(wrapper.find(SetupGuideCta)).toHaveLength(1);
   });
 
   it('renders the trial callout', () => {
@@ -62,14 +60,12 @@ describe('ProductSelector', () => {
       const wrapper = shallow(<ProductSelector />);
 
       expect(wrapper.find(ElasticsearchProductCard)).toHaveLength(1);
-      expect(wrapper.find(SetupGuideCta)).toHaveLength(0);
     });
 
     it('does not render EnterpriseSearch card without access', () => {
       const wrapper = shallow(<ProductSelector />);
 
       expect(wrapper.find(ElasticsearchProductCard)).toHaveLength(1);
-      expect(wrapper.find(SetupGuideCta)).toHaveLength(0);
     });
   });
 });
