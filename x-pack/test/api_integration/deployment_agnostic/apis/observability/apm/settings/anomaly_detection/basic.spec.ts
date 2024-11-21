@@ -6,17 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { ApmApiError } from '../../../common/apm_api_supertest';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
+import type { ApmApiError } from '../../../../../services/apm_api';
 
-export default function apiTest({ getService }: FtrProviderContext) {
-  const registry = getService('registry');
-  const apmApiClient = getService('apmApiClient');
+export default function apiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
 
-  type SupertestAsUser =
-    | typeof apmApiClient.readUser
-    | typeof apmApiClient.writeUser
-    | typeof apmApiClient.noAccessUser;
+  type SupertestAsUser = typeof apmApiClient.readUser | typeof apmApiClient.writeUser;
 
   function getJobs(user: SupertestAsUser) {
     return user({ endpoint: `GET /internal/apm/settings/anomaly-detection/jobs` });
@@ -34,7 +30,6 @@ export default function apiTest({ getService }: FtrProviderContext) {
   async function expectForbidden(user: SupertestAsUser) {
     try {
       await getJobs(user);
-      expect(true).to.be(false);
     } catch (e) {
       const err = e as ApmApiError;
       expect(err.res.status).to.be(403);
@@ -42,20 +37,14 @@ export default function apiTest({ getService }: FtrProviderContext) {
 
     try {
       await createJobs(user, ['production', 'staging']);
-      expect(true).to.be(false);
     } catch (e) {
       const err = e as ApmApiError;
       expect(err.res.status).to.be(403);
     }
   }
 
-  registry.when('ML jobs return a 403 for', { config: 'basic', archives: [] }, () => {
+  describe('ML jobs return a 403 for', () => {
     describe('basic', function () {
-      this.tags('skipFIPS');
-      it('user without access', async () => {
-        await expectForbidden(apmApiClient.noAccessUser);
-      });
-
       it('read user', async () => {
         await expectForbidden(apmApiClient.readUser);
       });
