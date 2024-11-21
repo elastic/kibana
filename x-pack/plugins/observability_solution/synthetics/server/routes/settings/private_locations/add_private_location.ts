@@ -40,9 +40,10 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
     },
   },
   handler: async (routeContext) => {
-    await migrateLegacyPrivateLocations(routeContext);
+    const { response, request, savedObjectsClient, syntheticsMonitorClient, server } = routeContext;
+    const internalSOClient = server.coreStart.savedObjects.createInternalRepository();
 
-    const { response, request, savedObjectsClient, syntheticsMonitorClient } = routeContext;
+    await migrateLegacyPrivateLocations(internalSOClient, server.logger);
 
     const location = request.body as PrivateLocationObject;
 

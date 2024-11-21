@@ -27,8 +27,10 @@ export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory<undefined
     },
   },
   handler: async (routeContext) => {
-    await migrateLegacyPrivateLocations(routeContext);
     const { savedObjectsClient, syntheticsMonitorClient, request, response, server } = routeContext;
+    const internalSOClient = server.coreStart.savedObjects.createInternalRepository();
+
+    await migrateLegacyPrivateLocations(internalSOClient, server.logger);
 
     const error = await validatePrivateLocationPermissions(routeContext);
     if (error) {
