@@ -39,7 +39,7 @@ const degradedDocsTooltip = (
 
 const failedDocsColumnTooltip = (
   <FormattedMessage
-    id="xpack.datasetQuality.failedDocsColumnTooltip"
+    id="xpack.datasetQuality.failedDocsSummaryTooltip"
     defaultMessage="The number of documents sent to failure store due to an issue during ingestion."
   />
 );
