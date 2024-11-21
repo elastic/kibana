@@ -125,7 +125,7 @@ describe('StepEditHosts', () => {
     render();
 
     expect(renderResult.getByText('New agent policy name')).toBeInTheDocument();
-    expect(renderResult.queryByRole('tablist')).not.toBeInTheDocument();
+    expect(renderResult.queryByRole('tablist')).toBeInTheDocument();
   });
 
   it('should display new policy button and existing policies when agent policies exist', () => {

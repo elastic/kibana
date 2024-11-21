@@ -123,7 +123,7 @@ describe('StepSelectHosts', () => {
     await waitFor(() => {
       expect(renderResult.getByText('New agent policy name')).toBeInTheDocument();
     });
-    expect(renderResult.queryByRole('tablist')).not.toBeInTheDocument();
+    expect(renderResult.queryByRole('tablist')).toBeInTheDocument();
   });
 
   it('should display tabs with New hosts selected when agent policies exist', async () => {
