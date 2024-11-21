@@ -195,6 +195,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
                 {ilmPolicyLink ? (
                   <EuiLink
                     data-test-subj={'ilmPolicyLink'}
+                    data-href={ilmPolicyLink}
                     onClick={() => core.application.navigateToUrl(ilmPolicyLink)}
                   >
                     <EuiTextColor color="subdued">{ilmPolicyName}</EuiTextColor>
@@ -209,6 +210,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
               {ilmPolicyLink ? (
                 <EuiLink
                   data-test-subj={'ilmPolicyLink'}
+                  data-href={ilmPolicyLink}
                   onClick={() => core.application.navigateToUrl(ilmPolicyLink)}
                 >
                   {ilmPolicyName}
