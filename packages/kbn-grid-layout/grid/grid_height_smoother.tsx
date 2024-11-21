@@ -10,7 +10,11 @@
 import { css } from '@emotion/react';
 import React, { PropsWithChildren, useEffect, useRef } from 'react';
 import { combineLatest } from 'rxjs';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { GridLayoutStateManager } from './types';
+
+const getViewportHeight = () =>
+  window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
 
 export const GridHeightSmoother = ({
   children,
@@ -22,8 +26,25 @@ export const GridHeightSmoother = ({
     const subscription = combineLatest([
       gridLayoutStateManager.gridDimensions$,
       gridLayoutStateManager.interactionEvent$,
-    ]).subscribe(([dimensions, interactionEvent]) => {
+      gridLayoutStateManager.expandedPanelId$,
+    ]).subscribe(([dimensions, interactionEvent, expandedPanelId]) => {
       if (!smoothHeightRef.current) return;
+
+      if (expandedPanelId) {
+        const viewPortHeight = getViewportHeight();
+        const smoothHeightRefY = smoothHeightRef.current.getBoundingClientRect().y;
+
+        // When panel is expanded, ensure the page occupies the full viewport height, no more, no less, so
+        // smoothHeight height = viewport height - smoothHeight position - EuiPanel padding.
+
+        const height = viewPortHeight - smoothHeightRefY - parseFloat(euiThemeVars.euiSizeL);
+        smoothHeightRef.current.style.height = height + 'px';
+        smoothHeightRef.current.style.transition = 'none';
+        return;
+      } else {
+        smoothHeightRef.current.style.transition = '';
+      }
+
       if (!interactionEvent) {
         smoothHeightRef.current.style.height = `${dimensions.height}px`;
         return;

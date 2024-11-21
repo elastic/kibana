@@ -22,6 +22,7 @@ import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 
 import { GridLayoutStateManager, PanelInteractionEvent } from './types';
+import { getKeysInOrder } from './utils/resolve_grid_row';
 
 export const GridPanel = forwardRef<
   HTMLDivElement,
@@ -60,66 +61,103 @@ export const GridPanel = forwardRef<
           gridLayoutStateManager.activePanel$,
           gridLayoutStateManager.gridLayout$,
           gridLayoutStateManager.runtimeSettings$,
+          gridLayoutStateManager.expandedPanelId$,
+          gridLayoutStateManager.isMobileView$,
         ])
           .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
-          .subscribe(([activePanel, gridLayout, runtimeSettings]) => {
-            const ref = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
-            const panel = gridLayout[rowIndex].panels[panelId];
-            if (!ref || !panel) return;
+          .subscribe(
+            ([activePanel, gridLayout, runtimeSettings, expandedPanelId, isMobileView]) => {
+              const ref = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
+              const allPanels = gridLayout[rowIndex].panels;
+              const panel = allPanels[panelId];
+              if (!ref || !panel) return;
 
-            const currentInteractionEvent = gridLayoutStateManager.interactionEvent$.getValue();
-            if (panelId === activePanel?.id) {
-              // if the current panel is active, give it fixed positioning depending on the interaction event
-              const { position: draggingPosition } = activePanel;
+              if (expandedPanelId && expandedPanelId === panelId) {
+                // Translate the expanded panel back to its initial position
+                // since all other GridRow elements have been moved off-screen
+                ref.style.transform = 'translate(9999px, 9999px)';
 
-              ref.style.zIndex = `${euiThemeVars.euiZModal}`;
-              if (currentInteractionEvent?.type === 'resize') {
-                // if the current panel is being resized, ensure it is not shrunk past the size of a single cell
-                ref.style.width = `${Math.max(
-                  draggingPosition.right - draggingPosition.left,
-                  runtimeSettings.columnPixelWidth
-                )}px`;
-                ref.style.height = `${Math.max(
-                  draggingPosition.bottom - draggingPosition.top,
-                  runtimeSettings.rowHeight
-                )}px`;
-
-                // undo any "lock to grid" styles **except** for the top left corner, which stays locked
-                ref.style.gridColumnStart = `${panel.column + 1}`;
-                ref.style.gridRowStart = `${panel.row + 1}`;
-                ref.style.gridColumnEnd = ``;
-                ref.style.gridRowEnd = ``;
+                // Stretch the expanded panel to occupy the remaining available space in the viewport.
+                ref.style.position = `absolute`;
+                ref.style.top = `0`;
+                ref.style.left = `0`;
+                ref.style.width = `100%`;
+                ref.style.height = `100%`;
+                return;
               } else {
-                // if the current panel is being dragged, render it with a fixed position + size
-                ref.style.position = 'fixed';
-                ref.style.left = `${draggingPosition.left}px`;
-                ref.style.top = `${draggingPosition.top}px`;
-                ref.style.width = `${draggingPosition.right - draggingPosition.left}px`;
-                ref.style.height = `${draggingPosition.bottom - draggingPosition.top}px`;
-
-                // undo any "lock to grid" styles
-                ref.style.gridColumnStart = ``;
-                ref.style.gridRowStart = ``;
-                ref.style.gridColumnEnd = ``;
-                ref.style.gridRowEnd = ``;
+                ref.style.transform = '';
               }
-            } else {
-              ref.style.zIndex = '0';
 
-              // if the panel is not being dragged and/or resized, undo any fixed position styles
-              ref.style.position = '';
-              ref.style.left = ``;
-              ref.style.top = ``;
-              ref.style.width = ``;
-              ref.style.height = ``;
+              if (isMobileView) {
+                const sortedKeys = getKeysInOrder(gridLayout[rowIndex]);
+                const currentPanelPosition = sortedKeys.indexOf(panelId);
+                const sortedKeysBefore = sortedKeys.slice(0, currentPanelPosition);
+                const responsiveGridRowStart = sortedKeysBefore.reduce(
+                  (acc, key) => acc + allPanels[key].height,
+                  1
+                );
+                ref.style.gridColumnStart = `1`;
+                ref.style.gridColumnEnd = `-1`;
+                ref.style.gridRowStart = `${responsiveGridRowStart}`;
+                ref.style.gridRowEnd = `${responsiveGridRowStart + panel.height}`;
+                // we shouldn't allow interactions on mobile view so we can return early
+                return;
+              }
 
-              // and render the panel locked to the grid
-              ref.style.gridColumnStart = `${panel.column + 1}`;
-              ref.style.gridColumnEnd = `${panel.column + 1 + panel.width}`;
-              ref.style.gridRowStart = `${panel.row + 1}`;
-              ref.style.gridRowEnd = `${panel.row + 1 + panel.height}`;
+              const currentInteractionEvent = gridLayoutStateManager.interactionEvent$.getValue();
+              if (panelId === activePanel?.id) {
+                // if the current panel is active, give it fixed positioning depending on the interaction event
+                const { position: draggingPosition } = activePanel;
+
+                ref.style.zIndex = `${euiThemeVars.euiZModal}`;
+                if (currentInteractionEvent?.type === 'resize') {
+                  // if the current panel is being resized, ensure it is not shrunk past the size of a single cell
+                  ref.style.width = `${Math.max(
+                    draggingPosition.right - draggingPosition.left,
+                    runtimeSettings.columnPixelWidth
+                  )}px`;
+                  ref.style.height = `${Math.max(
+                    draggingPosition.bottom - draggingPosition.top,
+                    runtimeSettings.rowHeight
+                  )}px`;
+
+                  // undo any "lock to grid" styles **except** for the top left corner, which stays locked
+                  ref.style.gridColumnStart = `${panel.column + 1}`;
+                  ref.style.gridRowStart = `${panel.row + 1}`;
+                  ref.style.gridColumnEnd = ``;
+                  ref.style.gridRowEnd = ``;
+                } else {
+                  // if the current panel is being dragged, render it with a fixed position + size
+                  ref.style.position = 'fixed';
+                  ref.style.left = `${draggingPosition.left}px`;
+                  ref.style.top = `${draggingPosition.top}px`;
+                  ref.style.width = `${draggingPosition.right - draggingPosition.left}px`;
+                  ref.style.height = `${draggingPosition.bottom - draggingPosition.top}px`;
+
+                  // undo any "lock to grid" styles
+                  ref.style.gridColumnStart = ``;
+                  ref.style.gridRowStart = ``;
+                  ref.style.gridColumnEnd = ``;
+                  ref.style.gridRowEnd = ``;
+                }
+              } else {
+                ref.style.zIndex = '0';
+
+                // if the panel is not being dragged and/or resized, undo any fixed position styles
+                ref.style.position = '';
+                ref.style.left = ``;
+                ref.style.top = ``;
+                ref.style.width = ``;
+                ref.style.height = ``;
+
+                // and render the panel locked to the grid
+                ref.style.gridColumnStart = `${panel.column + 1}`;
+                ref.style.gridColumnEnd = `${panel.column + 1 + panel.width}`;
+                ref.style.gridRowStart = `${panel.row + 1}`;
+                ref.style.gridRowEnd = `${panel.row + 1 + panel.height}`;
+              }
             }
-          });
+          );
 
         return () => {
           styleSubscription.unsubscribe();
@@ -150,7 +188,7 @@ export const GridPanel = forwardRef<
           >
             {/* drag handle */}
             <div
-              className="dragHandle"
+              className="kbnGridPanel__dragHandle"
               css={css`
                 opacity: 0;
                 display: flex;
@@ -174,6 +212,10 @@ export const GridPanel = forwardRef<
                   cursor: grabbing;
                   opacity: 1 !important;
                 }
+                .kbnGrid--nonInteractive & {
+                  opacity: 0 !important;
+                  display: none;
+                }
               `}
               onMouseDown={(e) => interactionStart('drag', e)}
               onMouseUp={(e) => interactionStart('drop', e)}
@@ -182,7 +224,7 @@ export const GridPanel = forwardRef<
             </div>
             {/* Resize handle */}
             <div
-              className="resizeHandle"
+              className="kbnGridPanel__resizeHandle"
               onMouseDown={(e) => interactionStart('resize', e)}
               onMouseUp={(e) => interactionStart('drop', e)}
               css={css`
@@ -201,6 +243,10 @@ export const GridPanel = forwardRef<
                   opacity: 1;
                   background-color: ${transparentize(euiThemeVars.euiColorSuccess, 0.05)};
                   cursor: se-resize;
+                }
+                .kbnGrid--nonInteractive & {
+                  opacity: 0 !important;
+                  display: none;
                 }
               `}
             />

@@ -9,7 +9,6 @@
 
 import { useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, debounceTime } from 'rxjs';
-
 import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfilled';
 
 import {
@@ -20,18 +19,24 @@ import {
   PanelInteractionEvent,
   RuntimeGridSettings,
 } from './types';
+import { shouldShowMobileView } from './utils/mobile_view';
 
 export const useGridLayoutState = ({
   layout,
   gridSettings,
+  expandedPanelId$,
+  isResponsive$,
 }: {
   layout: GridLayoutData;
   gridSettings: GridSettings;
+  expandedPanelId$: BehaviorSubject<string | undefined>;
+  isResponsive$: BehaviorSubject<boolean>;
 }): {
   gridLayoutStateManager: GridLayoutStateManager;
   setDimensionsRef: (instance: HTMLDivElement | null) => void;
 } => {
   const rowRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const rowContainerRefs = useRef<Array<HTMLDivElement | null>>([]);
   const panelRefs = useRef<Array<{ [id: string]: HTMLDivElement | null }>>([]);
 
   const gridLayoutStateManager = useMemo(() => {
@@ -49,6 +54,7 @@ export const useGridLayoutState = ({
 
     return {
       rowRefs,
+      rowContainerRefs,
       panelRefs,
       panelIds$,
       gridLayout$,
@@ -56,6 +62,10 @@ export const useGridLayoutState = ({
       gridDimensions$,
       runtimeSettings$,
       interactionEvent$,
+      expandedPanelId$,
+      isMobileView$: new BehaviorSubject<boolean>(
+        isResponsive$.getValue() && shouldShowMobileView()
+      ),
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -73,6 +83,9 @@ export const useGridLayoutState = ({
           gridSettings.columnCount;
 
         gridLayoutStateManager.runtimeSettings$.next({ ...gridSettings, columnPixelWidth });
+        gridLayoutStateManager.isMobileView$.next(
+          isResponsive$.getValue() && shouldShowMobileView()
+        );
       });
 
     return () => {

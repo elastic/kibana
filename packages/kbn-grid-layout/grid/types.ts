@@ -58,6 +58,8 @@ export interface ActivePanel {
 
 export interface GridLayoutStateManager {
   gridLayout$: BehaviorSubject<GridLayoutData>;
+  expandedPanelId$: BehaviorSubject<string | undefined>;
+  isMobileView$: BehaviorSubject<boolean>;
 
   gridDimensions$: BehaviorSubject<ObservedSize>;
   runtimeSettings$: BehaviorSubject<RuntimeGridSettings>;
@@ -65,6 +67,7 @@ export interface GridLayoutStateManager {
   interactionEvent$: BehaviorSubject<PanelInteractionEvent | undefined>;
 
   rowRefs: React.MutableRefObject<Array<HTMLDivElement | null>>;
+  rowContainerRefs: React.MutableRefObject<Array<HTMLDivElement | null>>;
   panelRefs: React.MutableRefObject<Array<{ [id: string]: HTMLDivElement | null }>>;
 }
 

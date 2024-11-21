@@ -78,9 +78,10 @@ export const GridRow = forwardRef<
           gridLayoutStateManager.interactionEvent$,
           gridLayoutStateManager.gridLayout$,
           gridLayoutStateManager.runtimeSettings$,
+          gridLayoutStateManager.expandedPanelId$,
         ])
           .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
-          .subscribe(([interactionEvent, gridLayout, runtimeSettings]) => {
+          .subscribe(([interactionEvent, gridLayout, runtimeSettings, expandedPanelId]) => {
             const rowRef = gridLayoutStateManager.rowRefs.current[rowIndex];
             if (!rowRef) return;
 
@@ -89,6 +90,30 @@ export const GridRow = forwardRef<
             rowRef.style.gridTemplateRows = `repeat(${getRowCount(
               gridLayout[rowIndex]
             )}, ${rowHeight}px)`;
+
+            const rowContainerRef = gridLayoutStateManager.rowContainerRefs.current[rowIndex];
+            if (!rowContainerRef) return;
+
+            if (expandedPanelId) {
+              // If any panel is expanded, move all rows with their panels out of the viewport.
+              // The expanded panel is repositioned to its original location in the GridPanel component
+              // and stretched to fill the viewport.
+
+              rowContainerRef.style.transform = 'translate(-9999px, -9999px)';
+
+              const panelsIds = Object.keys(gridLayout[rowIndex].panels);
+              const includesExpandedPanel = panelsIds.includes(expandedPanelId);
+              if (includesExpandedPanel) {
+                // Stretch the row with the expanded panel to occupy the entire remaining viewport
+                rowContainerRef.style.height = '100%';
+              } else {
+                // Hide the row if it does not contain the expanded panel
+                rowContainerRef.style.height = '0';
+              }
+            } else {
+              rowContainerRef.style.transform = ``;
+              rowContainerRef.style.height = ``;
+            }
 
             const targetRow = interactionEvent?.targetRowIndex;
             if (rowIndex === targetRow && interactionEvent) {
@@ -169,6 +194,11 @@ export const GridRow = forwardRef<
           interactionStart={(type, e) => {
             e.preventDefault();
             e.stopPropagation();
+
+            // Disable interactions when a panel is expanded
+            const isInteractive = gridLayoutStateManager.expandedPanelId$.value === undefined;
+            if (!isInteractive) return;
+
             const panelRef = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
             if (!panelRef) return;
 
@@ -201,7 +231,7 @@ export const GridRow = forwardRef<
     }, [panelIds, rowIndex, gridLayoutStateManager, renderPanelContents, setInteractionEvent]);
 
     return (
-      <>
+      <div ref={(element) => (gridLayoutStateManager.rowContainerRefs.current[rowIndex] = element)}>
         {rowIndex !== 0 && (
           <>
             <EuiSpacer size="s" />
@@ -235,7 +265,7 @@ export const GridRow = forwardRef<
             <DragPreview rowIndex={rowIndex} gridLayoutStateManager={gridLayoutStateManager} />
           </div>
         )}
-      </>
+      </div>
     );
   }
 );

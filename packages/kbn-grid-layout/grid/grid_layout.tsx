@@ -9,8 +9,18 @@
 
 import { cloneDeep } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
-import { combineLatest, distinctUntilChanged, filter, map, pairwise, skip } from 'rxjs';
+import classNames from 'classnames';
+import {
+  BehaviorSubject,
+  combineLatest,
+  distinctUntilChanged,
+  filter,
+  map,
+  pairwise,
+  skip,
+} from 'rxjs';
 
+import { css } from '@emotion/react';
 import { GridHeightSmoother } from './grid_height_smoother';
 import { GridRow } from './grid_row';
 import { GridLayoutData, GridSettings } from './types';
@@ -24,6 +34,8 @@ interface GridLayoutProps {
   gridSettings: GridSettings;
   renderPanelContents: (panelId: string) => React.ReactNode;
   onLayoutChange: (newLayout: GridLayoutData) => void;
+  expandedPanelId?: string;
+  isResponsive?: boolean;
 }
 
 export const GridLayout = ({
@@ -31,10 +43,33 @@ export const GridLayout = ({
   gridSettings,
   renderPanelContents,
   onLayoutChange,
+  expandedPanelId,
+  isResponsive,
 }: GridLayoutProps) => {
+  const expandedPanelId$ = useMemo(
+    () => new BehaviorSubject<string | undefined>(expandedPanelId),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+  useEffect(() => {
+    expandedPanelId$.next(expandedPanelId);
+  }, [expandedPanelId, expandedPanelId$]);
+
+  const isResponsive$ = useMemo(
+    () => new BehaviorSubject<boolean>(Boolean(isResponsive)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  useEffect(() => {
+    isResponsive$.next(Boolean(isResponsive));
+  }, [isResponsive, isResponsive$]);
+
   const { gridLayoutStateManager, setDimensionsRef } = useGridLayoutState({
     layout,
     gridSettings,
+    expandedPanelId$,
+    isResponsive$,
   });
   useGridLayoutEvents({ gridLayoutStateManager });
 
@@ -132,12 +167,20 @@ export const GridLayout = ({
     });
   }, [rowCount, gridLayoutStateManager, renderPanelContents]);
 
+  const gridClassNames = classNames('kbnGrid', {
+    'kbnGrid--nonInteractive': expandedPanelId || isResponsive,
+  });
+
   return (
     <GridHeightSmoother gridLayoutStateManager={gridLayoutStateManager}>
       <div
         ref={(divElement) => {
           setDimensionsRef(divElement);
         }}
+        className={gridClassNames}
+        css={css`
+          height: 100%;
+        `}
       >
         {children}
       </div>
