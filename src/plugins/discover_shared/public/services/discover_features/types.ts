@@ -40,7 +40,8 @@ export interface ObservabilityCreateSLOFeature {
   }) => React.ReactNode;
 }
 
-/** ***************************** Security **********/
+/** **************** Security Solution ****************/
+
 export interface SecuritySolutionCellRendererFeature {
   id: 'security-solution-cell-renderer';
   getRenderer: () => Promise<
@@ -56,6 +57,7 @@ export interface SecuritySolutionAppWrapperFeature {
 export type SecuritySolutionFeature =
   | SecuritySolutionCellRendererFeature
   | SecuritySolutionAppWrapperFeature;
+
 /** ****************************************************************************************/
 
 // This should be a union of all the available client features.

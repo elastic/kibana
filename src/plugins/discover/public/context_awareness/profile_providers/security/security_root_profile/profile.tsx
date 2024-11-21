@@ -8,7 +8,7 @@
  */
 
 import React, { FunctionComponent, PropsWithChildren } from 'react';
-import { CustomCellRenderer, DataGridCellValueElementProps } from '@kbn/unified-data-table';
+import { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { RootProfileProvider, SolutionType } from '../../../profiles';
 import { ProfileProviderServices } from '../../profile_provider_services';
 import { SecurityProfileProviderFactory } from '../types';
@@ -48,19 +48,10 @@ export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
         (prev, { context }) =>
         (params) => {
           const entries = prev(params);
-          const customCellRenderers = [
-            'host.name',
-            'user.name',
-            'source.ip',
-            'destination.ip',
-          ].reduce<CustomCellRenderer>((acc, fieldName) => {
-            acc[fieldName] = context.getCellRenderer?.(fieldName) ?? entries[fieldName];
-            return acc;
-          }, {});
-          return {
-            ...entries,
-            ...customCellRenderers,
-          };
+          ['host.name', 'user.name', 'source.ip', 'destination.ip'].forEach((fieldName) => {
+            entries[fieldName] = context.getCellRenderer?.(fieldName) ?? entries[fieldName];
+          });
+          return entries;
         },
     },
     resolve: async (params) => {
