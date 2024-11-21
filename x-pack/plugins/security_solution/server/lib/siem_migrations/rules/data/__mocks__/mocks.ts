@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleMigrationsDataRulesClient } from '../rule_migrations_data_integrations_client';
+import type { RuleMigrationsDataRulesClient } from '../rule_migrations_data_rules_client';
 
 // Rule migrations data rules client
 export const mockRuleMigrationsDataRulesClient = {

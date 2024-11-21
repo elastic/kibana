@@ -58,9 +58,5 @@ export const integrationsFieldMap: FieldMap = {
   'data_streams.dataset': { type: 'keyword', required: true },
   'data_streams.title': { type: 'text', required: true },
   'data_streams.index_pattern': { type: 'keyword', required: true },
-  elser_embeddings: {
-    type: 'semantic_text',
-    required: true,
-    inference_id: '.elser-2-elasticsearch',
-  },
+  elser_embeddings: { type: 'semantic_text', required: true },
 };
