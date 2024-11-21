@@ -92,3 +92,7 @@ export const CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS = {
 };
 
 export const SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT = 'cloud_posture_page_subscription_not_allowed';
+
+export const COMPLIANCE_SCORE_BAR_UNKNOWN = 'complianceScoreBarUnknown';
+export const COMPLIANCE_SCORE_BAR_FAILED = 'complianceScoreBarFailed';
+export const COMPLIANCE_SCORE_BAR_PASSED = 'complianceScoreBarPassed';

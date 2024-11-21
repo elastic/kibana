@@ -5,23 +5,9 @@
  * 2.0.
  */
 
-import type { AlertWorkflowStatus } from '../../types';
 export { telemetryMiddleware } from './middleware';
 
 export * from './constants';
-export * from './telemetry_client';
 export * from './telemetry_service';
 export * from './track';
 export * from './types';
-
-export const getTelemetryEvent = {
-  groupedAlertsTakeAction: ({
-    tableId,
-    groupNumber,
-    status,
-  }: {
-    tableId: string;
-    groupNumber: number;
-    status: AlertWorkflowStatus;
-  }) => `alerts_table_${tableId}_group-${groupNumber}_mark-${status}`,
-};

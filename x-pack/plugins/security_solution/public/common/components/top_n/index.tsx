@@ -9,8 +9,8 @@ import React, { useMemo } from 'react';
 import type { ConnectedProps } from 'react-redux';
 import { connect } from 'react-redux';
 
-import type { DataViewBase, Filter, Query } from '@kbn/es-query';
-import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import type { Filter, Query } from '@kbn/es-query';
+import { type DataViewSpec, getEsQueryConfig } from '@kbn/data-plugin/common';
 import { isActiveTimeline } from '../../../helpers';
 import { InputsModelId } from '../../store/inputs/constants';
 import { useGlobalTime } from '../../containers/use_global_time';
@@ -77,7 +77,7 @@ const connector = connect(makeMapStateToProps);
 export interface OwnProps {
   browserFields: BrowserFields;
   field: string;
-  indexPattern: DataViewBase;
+  dataViewSpec?: DataViewSpec;
   scopeId?: string;
   toggleTopN: () => void;
   onFilterAdded?: () => void;
@@ -97,7 +97,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
   browserFields,
   dataProviders,
   field,
-  indexPattern,
+  dataViewSpec: indexPattern,
   globalFilters = EMPTY_FILTERS,
   globalQuery = EMPTY_QUERY,
   kqlMode,

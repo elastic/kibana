@@ -328,7 +328,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           }
         >
           <SpaceSelector
-            isDisabled={disabled}
+            isDisabled={disabled || agentPolicy.is_managed === true}
             value={
               'space_ids' in agentPolicy && agentPolicy.space_ids
                 ? agentPolicy.space_ids
@@ -375,8 +375,8 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
       >
         <EuiFormRow
           fullWidth
-          error={touchedFields.namespace && validation.namespace ? validation.namespace : null}
-          isInvalid={Boolean(touchedFields.namespace && validation.namespace)}
+          error={validation.namespace ? validation.namespace : null}
+          isInvalid={Boolean(validation.namespace)}
           isDisabled={disabled}
         >
           <EuiComboBox

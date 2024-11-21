@@ -91,7 +91,8 @@ const getESQLDocumentCountStats = async (
       ` | EVAL _timestamp_= TO_DOUBLE(DATE_TRUNC(${intervalMs} millisecond, ${getSafeESQLName(
         timeFieldName
       )}))
-    | stats rows = count(*) by _timestamp_`
+    | stats rows = count(*) by _timestamp_
+    | LIMIT 1000`
     );
 
     const request = {
@@ -312,7 +313,6 @@ export const useESQLOverallStatsData = (
           { strategy: ESQL_ASYNC_SEARCH_STRATEGY }
         )) as ESQLResponse | undefined;
         setQueryHistoryStatus(false);
-
         const columnInfo = columnsResp?.rawResponse
           ? columnsResp.rawResponse.all_columns ?? columnsResp.rawResponse.columns
           : [];

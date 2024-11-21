@@ -15,7 +15,6 @@ import { i18nTexts } from '../i18n_texts';
 import {
   ifExistsNumberGreaterThanZero,
   ifExistsNumberNonNegative,
-  integerValidator,
   minAgeGreaterThanPreviousPhase,
   rolloverThresholdsValidator,
   downsampleIntervalMultipleOfPreviousOne,
@@ -23,7 +22,7 @@ import {
 
 const rolloverFormPaths = Object.values(ROLLOVER_FORM_PATHS);
 
-const { emptyField, numberGreaterThanField } = fieldValidators;
+const { emptyField, isInteger, numberGreaterThanField } = fieldValidators;
 
 const serializers = {
   stringToNumber: (v: string): any => (v != null ? parseInt(v, 10) : undefined),
@@ -150,7 +149,7 @@ const getMinAgeField = (phase: PhaseWithTiming, defaultValue?: string) => ({
       validator: ifExistsNumberNonNegative,
     },
     {
-      validator: integerValidator,
+      validator: isInteger({ message: i18nTexts.editPolicy.errors.integerRequired }),
     },
     {
       validator: minAgeGreaterThanPreviousPhase(phase),
@@ -192,7 +191,7 @@ const getDownsampleSchema = (phase: PhaseWithDownsample): FormSchema['downsample
           validator: ifExistsNumberGreaterThanZero,
         },
         {
-          validator: integerValidator,
+          validator: isInteger({ message: i18nTexts.editPolicy.errors.integerRequired }),
         },
         {
           validator: downsampleIntervalMultipleOfPreviousOne(phase),
@@ -381,7 +380,7 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
                 validator: ifExistsNumberGreaterThanZero,
               },
               {
-                validator: integerValidator,
+                validator: isInteger({ message: i18nTexts.editPolicy.errors.integerRequired }),
               },
             ],
             fieldsToValidateOnChange: rolloverFormPaths,
@@ -396,7 +395,7 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
                 validator: ifExistsNumberGreaterThanZero,
               },
               {
-                validator: integerValidator,
+                validator: isInteger({ message: i18nTexts.editPolicy.errors.integerRequired }),
               },
             ],
             serializer: serializers.stringToNumber,
@@ -424,7 +423,7 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
                 validator: ifExistsNumberGreaterThanZero,
               },
               {
-                validator: integerValidator,
+                validator: isInteger({ message: i18nTexts.editPolicy.errors.integerRequired }),
               },
             ],
             serializer: serializers.stringToNumber,

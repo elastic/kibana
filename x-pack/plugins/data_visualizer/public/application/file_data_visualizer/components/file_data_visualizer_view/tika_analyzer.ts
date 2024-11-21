@@ -98,6 +98,8 @@ export async function analyzeTikaFile(
               attachment: {
                 field: 'data',
                 remove_binary: true,
+                // unlimited character count
+                indexed_chars: -1,
               },
             },
           ],

@@ -9,6 +9,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { SavedObjectsFindResponse } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
 import { escapeQuotes } from '@kbn/es-query';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { RouteContext } from './types';
 import { MonitorSortFieldSchema } from '../../common/runtime_types/monitor_management/sort_field';
 import { getAllLocations } from '../synthetics_service/get_all_locations';
@@ -110,7 +111,7 @@ export const getMonitors = async (
     sortField: parseMappingKey(sortField),
     sortOrder,
     searchFields: SEARCH_FIELDS,
-    search: query ? `${query}*` : undefined,
+    search: query,
     filter: filtersStr,
     searchAfter,
     fields,
@@ -269,3 +270,26 @@ function parseMappingKey(key: string | undefined) {
       return key;
   }
 }
+
+export const validateRouteSpaceName = async (routeContext: RouteContext) => {
+  const { spaceId, server, request, response } = routeContext;
+  if (spaceId === DEFAULT_SPACE_ID) {
+    // default space is always valid
+    return { spaceId: DEFAULT_SPACE_ID };
+  }
+
+  try {
+    await server.spaces?.spacesService.getActiveSpace(request);
+  } catch (error) {
+    if (error.output?.statusCode === 404) {
+      return {
+        spaceId,
+        invalidResponse: response.notFound({
+          body: { message: `Kibana space '${spaceId}' does not exist` },
+        }),
+      };
+    }
+  }
+
+  return { invalidResponse: undefined };
+};

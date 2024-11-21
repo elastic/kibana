@@ -10,7 +10,7 @@ import { QuerySchema } from '@kbn/slo-schema';
 import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FilterItem } from '@kbn/unified-search-plugin/public';
 import { injectI18n } from '@kbn/i18n-react';
-import { useKibana } from '../../../../utils/kibana_react';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 
 const FilterItemI18n = injectI18n(FilterItem);

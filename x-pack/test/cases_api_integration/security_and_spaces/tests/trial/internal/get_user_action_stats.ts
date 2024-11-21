@@ -64,7 +64,7 @@ export default ({ getService }: FtrProviderContext): void => {
         }),
       ]);
 
-      actionsRemover.add('default', jiraConnector.id, 'action', 'actions');
+      actionsRemover.add('default', jiraConnector.id, 'connector', 'actions');
 
       const theCase = await pushCase({
         supertest,

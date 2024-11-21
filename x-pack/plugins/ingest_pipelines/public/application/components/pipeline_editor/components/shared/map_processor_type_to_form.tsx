@@ -572,7 +572,8 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
       defaultMessage: 'Inference',
     }),
     typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.inference', {
-      defaultMessage: 'Uses a trained model to infer against incoming data.',
+      defaultMessage:
+        'Uses an inference endpoint or a trained model to infer against incoming data.',
     }),
     getDefaultDescription: ({
       model_id: modelId,
@@ -899,6 +900,21 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
         values: {
           field,
         },
+      }),
+  },
+  terminate: {
+    category: processorCategories.PIPELINE_HANDLING,
+    docLinkPath: '/terminate-processor.html',
+    label: i18n.translate('xpack.ingestPipelines.processors.label.terminate', {
+      defaultMessage: 'Terminate',
+    }),
+    typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.terminate', {
+      defaultMessage:
+        'Terminates the current ingest pipeline, causing no further processors to be run.',
+    }),
+    getDefaultDescription: () =>
+      i18n.translate('xpack.ingestPipelines.processors.defaultDescription.terminate', {
+        defaultMessage: 'Terminates the current pipeline',
       }),
   },
   trim: {

@@ -16,10 +16,12 @@ import type {
 import {
   findValueInBuckets,
   getAggregationsBuckets,
+  getAlertsCountsFromBuckets,
   getAttachmentsFrameworkStats,
   getBucketFromAggregation,
   getConnectorsCardinalityAggregationQuery,
   getCountsAggregationQuery,
+  getCountsAndMaxAlertsData,
   getCountsAndMaxData,
   getCountsFromBuckets,
   getCustomFieldsTelemetry,
@@ -28,6 +30,7 @@ import {
   getOnlyConnectorsFilter,
   getReferencesAggregationQuery,
   getSolutionValues,
+  getUniqueAlertCommentsCountQuery,
 } from './utils';
 import { TelemetrySavedObjectsClient } from '../telemetry_saved_objects_client';
 
@@ -814,7 +817,7 @@ describe('utils', () => {
         counts: {
           date_range: {
             field: 'test.attributes.created_at',
-            format: 'dd/MM/YYYY',
+            format: 'dd/MM/yyyy',
             ranges: [
               { from: 'now-1d', to: 'now' },
               { from: 'now-1w', to: 'now' },
@@ -994,6 +997,63 @@ describe('utils', () => {
     });
   });
 
+  describe('getAlertsCountsFromBuckets', () => {
+    it('returns the correct counts', () => {
+      const buckets = [
+        { topAlertsPerBucket: { value: 12 } },
+        { topAlertsPerBucket: { value: 5 } },
+        { topAlertsPerBucket: { value: 3 } },
+      ];
+
+      expect(getAlertsCountsFromBuckets(buckets)).toEqual({
+        daily: 3,
+        weekly: 5,
+        monthly: 12,
+      });
+    });
+
+    it('returns zero counts when the bucket does not have the topAlertsPerBucket field', () => {
+      const buckets = [{}];
+      // @ts-expect-error
+      expect(getAlertsCountsFromBuckets(buckets)).toEqual({
+        daily: 0,
+        weekly: 0,
+        monthly: 0,
+      });
+    });
+
+    it('returns zero counts when the bucket is undefined', () => {
+      // @ts-expect-error
+      expect(getAlertsCountsFromBuckets(undefined)).toEqual({
+        daily: 0,
+        weekly: 0,
+        monthly: 0,
+      });
+    });
+
+    it('returns zero counts when the topAlertsPerBucket field is missing in some buckets', () => {
+      const buckets = [{ doc_count: 1, key: 1, topAlertsPerBucket: { value: 5 } }, {}, {}];
+      // @ts-expect-error
+      expect(getAlertsCountsFromBuckets(buckets)).toEqual({
+        daily: 0,
+        weekly: 0,
+        monthly: 5,
+      });
+    });
+  });
+
+  describe('getUniqueAlertCommentsCountQuery', () => {
+    it('returns the correct query', () => {
+      expect(getUniqueAlertCommentsCountQuery()).toEqual({
+        uniqueAlertCommentsCount: {
+          cardinality: {
+            field: 'cases-comments.attributes.alertId',
+          },
+        },
+      });
+    });
+  });
+
   describe('getCountsAndMaxData', () => {
     const savedObjectsClient = savedObjectsRepositoryMock.create();
     savedObjectsClient.find.mockResolvedValue({
@@ -1072,7 +1132,7 @@ describe('utils', () => {
           counts: {
             date_range: {
               field: 'test.attributes.created_at',
-              format: 'dd/MM/YYYY',
+              format: 'dd/MM/yyyy',
               ranges: [
                 {
                   from: 'now-1d',
@@ -1120,6 +1180,174 @@ describe('utils', () => {
         page: 0,
         perPage: 0,
         type: 'test',
+        namespaces: ['*'],
+      });
+    });
+  });
+
+  describe('getCountsAndMaxAlertsData', () => {
+    const savedObjectsClient = savedObjectsRepositoryMock.create();
+    savedObjectsClient.find.mockResolvedValue({
+      total: 3,
+      saved_objects: [],
+      per_page: 1,
+      page: 1,
+      aggregations: {
+        counts: {
+          buckets: [
+            { doc_count: 1, key: 1, topAlertsPerBucket: { value: 5 } },
+            { doc_count: 2, key: 2, topAlertsPerBucket: { value: 3 } },
+            { doc_count: 3, key: 3, topAlertsPerBucket: { value: 1 } },
+          ],
+        },
+        references: { cases: { max: { value: 1 } } },
+        uniqueAlertCommentsCount: { value: 5 },
+      },
+    });
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('returns the correct counts and max data', async () => {
+      const telemetrySavedObjectsClient = new TelemetrySavedObjectsClient(savedObjectsClient);
+
+      const res = await getCountsAndMaxAlertsData({
+        savedObjectsClient: telemetrySavedObjectsClient,
+      });
+      expect(res).toEqual({
+        all: {
+          total: 5,
+          daily: 1,
+          weekly: 3,
+          monthly: 5,
+          maxOnACase: 1,
+        },
+      });
+    });
+
+    it('returns zero data if the response aggregation is not as expected', async () => {
+      const telemetrySavedObjectsClient = new TelemetrySavedObjectsClient(savedObjectsClient);
+      savedObjectsClient.find.mockResolvedValue({
+        total: 5,
+        saved_objects: [],
+        per_page: 1,
+        page: 1,
+      });
+
+      const res = await getCountsAndMaxAlertsData({
+        savedObjectsClient: telemetrySavedObjectsClient,
+      });
+      expect(res).toEqual({
+        all: {
+          total: 0,
+          daily: 0,
+          weekly: 0,
+          monthly: 0,
+          maxOnACase: 0,
+        },
+      });
+    });
+
+    it('should call find with correct arguments', async () => {
+      const telemetrySavedObjectsClient = new TelemetrySavedObjectsClient(savedObjectsClient);
+
+      await getCountsAndMaxAlertsData({
+        savedObjectsClient: telemetrySavedObjectsClient,
+      });
+
+      expect(savedObjectsClient.find).toBeCalledWith({
+        aggs: {
+          counts: {
+            date_range: {
+              field: 'cases-comments.attributes.created_at',
+              format: 'dd/MM/yyyy',
+              ranges: [
+                {
+                  from: 'now-1d',
+                  to: 'now',
+                },
+                {
+                  from: 'now-1w',
+                  to: 'now',
+                },
+                {
+                  from: 'now-1M',
+                  to: 'now',
+                },
+              ],
+            },
+            aggregations: {
+              topAlertsPerBucket: {
+                cardinality: {
+                  field: 'cases-comments.attributes.alertId',
+                },
+              },
+            },
+          },
+          references: {
+            aggregations: {
+              cases: {
+                aggregations: {
+                  ids: {
+                    terms: {
+                      field: 'cases-comments.references.id',
+                    },
+                    aggregations: {
+                      reverse: {
+                        reverse_nested: {},
+                        aggregations: {
+                          topAlerts: {
+                            cardinality: {
+                              field: 'cases-comments.attributes.alertId',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                  max: {
+                    max_bucket: {
+                      buckets_path: 'ids>reverse.topAlerts',
+                    },
+                  },
+                },
+                filter: {
+                  term: {
+                    'cases-comments.references.type': 'cases',
+                  },
+                },
+              },
+            },
+            nested: {
+              path: 'cases-comments.references',
+            },
+          },
+          uniqueAlertCommentsCount: {
+            cardinality: {
+              field: 'cases-comments.attributes.alertId',
+            },
+          },
+        },
+        filter: {
+          arguments: [
+            {
+              isQuoted: false,
+              type: 'literal',
+              value: 'cases-comments.attributes.type',
+            },
+            {
+              isQuoted: false,
+              type: 'literal',
+              value: 'alert',
+            },
+          ],
+          function: 'is',
+          type: 'function',
+        },
+        page: 0,
+        perPage: 0,
+        type: 'cases-comments',
         namespaces: ['*'],
       });
     });

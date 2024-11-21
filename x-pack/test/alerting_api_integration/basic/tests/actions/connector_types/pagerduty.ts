@@ -11,14 +11,14 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 export default function pagerdutyTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('pagerduty action', () => {
-    it('should return 403 when creating a pagerduty action', async () => {
+  describe('pagerduty connector', () => {
+    it('should return 403 when creating a pagerduty connector', async () => {
       await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'foo')
         .send({
-          name: 'A pagerduty action',
-          actionTypeId: '.pagerduty',
+          name: 'A pagerduty connector',
+          connector_type_id: '.pagerduty',
           config: {
             apiUrl: 'http://localhost',
           },

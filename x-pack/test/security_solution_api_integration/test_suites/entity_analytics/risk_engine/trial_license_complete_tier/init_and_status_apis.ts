@@ -539,6 +539,86 @@ export default ({ getService }: FtrProviderContext) => {
           firstResponse?.saved_objects?.[0]?.id
         );
       });
+
+      it('should update the existing component template and index template without any errors', async () => {
+        const componentTemplateName = '.risk-score-mappings';
+        const indexTemplateName = '.risk-score.risk-score-default-index-template';
+        const newComponentTemplateName = '.risk-score-mappings-default';
+
+        // Call API to put the component template and index template
+
+        await es.cluster.putComponentTemplate({
+          name: componentTemplateName,
+          body: {
+            template: {
+              settings: {
+                number_of_shards: 1,
+              },
+              mappings: {
+                properties: {
+                  timestamp: {
+                    type: 'date',
+                  },
+                  user: {
+                    properties: {
+                      id: {
+                        type: 'keyword',
+                      },
+                      name: {
+                        type: 'text',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            version: 1,
+          },
+        });
+
+        // Call an API to put the index template
+
+        await es.indices.putIndexTemplate({
+          name: indexTemplateName,
+          body: {
+            index_patterns: [indexTemplateName],
+            composed_of: [componentTemplateName],
+            template: {
+              settings: {
+                number_of_shards: 1,
+              },
+              mappings: {
+                properties: {
+                  timestamp: {
+                    type: 'date',
+                  },
+                  user: {
+                    properties: {
+                      id: {
+                        type: 'keyword',
+                      },
+                      name: {
+                        type: 'text',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        const response = await riskEngineRoutes.init();
+        expect(response.status).to.eql(200);
+        expect(response.body.result.errors).to.eql([]);
+
+        const response2 = await es.cluster.getComponentTemplate({
+          name: newComponentTemplateName,
+        });
+        expect(response2.component_templates.length).to.eql(1);
+        expect(response2.component_templates[0].name).to.eql(newComponentTemplateName);
+      });
+
       // Failing: See https://github.com/elastic/kibana/issues/191637
       describe.skip('remove legacy risk score transform', function () {
         this.tags('skipFIPS');
@@ -580,7 +660,9 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('status api', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/196319
+    // FLAKY: https://github.com/elastic/kibana/issues/196166
+    describe.skip('status api', () => {
       it('should disable / enable risk engine', async () => {
         const status1 = await riskEngineRoutes.getStatus();
 

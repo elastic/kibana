@@ -283,6 +283,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
         fieldName={'user.name'}
         name={userName}
         data-test-subj={ENTITIES_USER_OVERVIEW_MISCONFIGURATIONS_TEST_ID}
+        telemetrySuffix={'user-entity-overview'}
       />
     </EuiFlexGroup>
   );

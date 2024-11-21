@@ -319,7 +319,7 @@ export function forecastServiceFactory(mlApi: MlApi) {
       );
   }
   // Runs a forecast
-  function runForecast(jobId: string, duration?: string) {
+  function runForecast(jobId: string, duration?: string, neverExpires?: boolean) {
     // eslint-disable-next-line no-console
     console.log('ML forecast service run forecast with duration:', duration);
     return new Promise((resolve, reject) => {
@@ -327,6 +327,7 @@ export function forecastServiceFactory(mlApi: MlApi) {
         .forecast({
           jobId,
           duration,
+          neverExpires,
         })
         .then((resp) => {
           resolve(resp);

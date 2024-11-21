@@ -11,11 +11,12 @@ import { Positionable } from '../positionable';
 import { ElementContent } from '../element_content';
 
 export const ElementWrapper = (props) => {
-  const { renderable, transformMatrix, width, height, state, handlers } = props;
+  const { renderable, transformMatrix, width, height, state, handlers, id } = props;
 
   return (
     <Positionable transformMatrix={transformMatrix} width={width} height={height}>
       <ElementContent
+        id={id}
         renderable={renderable}
         state={state}
         handlers={handlers}
@@ -35,4 +36,5 @@ ElementWrapper.propTypes = {
   renderable: PropTypes.object,
   state: PropTypes.string,
   handlers: PropTypes.object.isRequired,
+  id: PropTypes.string.isRequired,
 };
