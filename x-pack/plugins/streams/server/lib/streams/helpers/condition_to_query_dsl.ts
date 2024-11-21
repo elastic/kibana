@@ -5,97 +5,59 @@
  * 2.0.
  */
 
-import { isBoolean, isString } from 'lodash';
-import {
-  AndCondition,
-  BinaryFilterCondition,
-  Condition,
-  conditionSchema,
-  FilterCondition,
-  filterConditionSchema,
-  OrCondition,
-  UnaryFilterCondition,
-} from '../../../../common/types';
+import { Condition, FilterCondition } from '../../../../common/types';
+import { isAndCondition, isFilterCondition, isOrCondition } from './condition_guards';
 
-function isFilterCondition(subject: any): subject is FilterCondition {
-  const result = filterConditionSchema.safeParse(subject);
-  return result.success;
-}
-
-function isAndCondition(subject: any): subject is AndCondition {
-  const result = conditionSchema.safeParse(subject);
-  return result.success && subject.and != null;
-}
-
-function isOrCondition(subject: any): subject is OrCondition {
-  const result = conditionSchema.safeParse(subject);
-  return result.success && subject.or != null;
-}
-
-function safePainlessField(condition: FilterCondition) {
-  return `ctx.${condition.field.split('.').join('?.')}`;
-}
-
-function encodeValue(value: string | number | boolean) {
-  if (isString(value)) {
-    return `"${value}"`;
-  }
-  if (isBoolean(value)) {
-    return value ? 'true' : 'false';
-  }
-  return value;
-}
-
-function binaryToPainless(condition: BinaryFilterCondition) {
+function conditionToClause(condition: FilterCondition) {
   switch (condition.operator) {
     case 'neq':
-      return `${safePainlessField(condition)} != ${encodeValue(condition.value)}`;
-    case 'lt':
-      return `${safePainlessField(condition)} < ${encodeValue(condition.value)}`;
-    case 'lte':
-      return `${safePainlessField(condition)} <= ${encodeValue(condition.value)}`;
+      return { bool: { must_not: { match: { [condition.field]: condition.value } } } };
+    case 'eq':
+      return { match: { [condition.field]: condition.value } };
+    case 'exists':
+      return { exists: { field: condition.field } };
     case 'gt':
-      return `${safePainlessField(condition)} > ${encodeValue(condition.value)}`;
+      return { range: { [condition.field]: { gt: condition.value } } };
     case 'gte':
-      return `${safePainlessField(condition)} >= ${encodeValue(condition.value)}`;
-    case 'startsWith':
-      return `${safePainlessField(condition)}.startsWith(${encodeValue(condition.value)})`;
-    case 'endsWith':
-      return `${safePainlessField(condition)}.endsWith(${encodeValue(condition.value)})`;
+      return { range: { [condition.field]: { gte: condition.value } } };
+    case 'lt':
+      return { range: { [condition.field]: { lt: condition.value } } };
+    case 'lte':
+      return { range: { [condition.field]: { lte: condition.value } } };
     case 'contains':
-      return `${safePainlessField(condition)}.contains(${encodeValue(condition.value)})`;
-    default:
-      return `${safePainlessField(condition)} == ${encodeValue(condition.value)}`;
-  }
-}
-
-function unaryToPainless(condition: UnaryFilterCondition) {
-  switch (condition.operator) {
+      return { match_phrase: { [condition.field]: condition.value } };
+    case 'startsWith':
+      return { prefix: { [condition.field]: condition.value } };
+    case 'endsWith':
+      return { wildcard: { [condition.field]: `*${condition.value}` } };
     case 'notExists':
-      return `${safePainlessField(condition)} == null`;
+      return { bool: { must_not: { exists: { field: condition.field } } } };
     default:
-      return `${safePainlessField(condition)} !== null`;
+      return { match_none: {} };
   }
 }
 
-function isUnaryFilterCondition(subject: FilterCondition): subject is UnaryFilterCondition {
-  return !('value' in subject);
-}
-
-export function conditionToPainless(condition: Condition, nested = false): string {
+export function conditionToQueryDsl(condition: Condition): any {
   if (isFilterCondition(condition)) {
-    if (isUnaryFilterCondition(condition)) {
-      return unaryToPainless(condition);
-    }
-    return `(${safePainlessField(condition)} !== null && ${binaryToPainless(condition)})`;
+    return conditionToClause(condition);
   }
   if (isAndCondition(condition)) {
-    const and = condition.and.map((filter) => conditionToPainless(filter, true)).join(' && ');
-    return nested ? `(${and})` : and;
+    const and = condition.and.map((filter) => conditionToQueryDsl(filter));
+    return {
+      bool: {
+        must: and,
+      },
+    };
   }
   if (isOrCondition(condition)) {
-    const or = condition.or.map((filter) => conditionToPainless(filter, true)).join(' || ');
-    return nested ? `(${or})` : or;
+    const or = condition.or.map((filter) => conditionToQueryDsl(filter));
+    return {
+      bool: {
+        should: or,
+      },
+    };
   }
-  return 'false';
+  return {
+    match_none: {},
+  };
 }
