@@ -14,12 +14,11 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/shared-ux-page-kibana-template",
-    "@kbn/react-kibana-context-root",
     "@kbn/core-feature-flags-server",
     "@kbn/core-plugins-server",
     "@kbn/config-schema",
     "@kbn/developer-examples-plugin",
     "@kbn/core-feature-flags-browser",
+    "@kbn/react-kibana-context-render",
   ]
 }
