@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.15.5>>
 * <<release-notes-8.15.4>>
 * <<release-notes-8.15.3>>
 * <<release-notes-8.15.2>>
@@ -75,6 +76,26 @@ Review important information about the {kib} 8.x releases.
 
 --
 
+[[release-notes-8.15.5]]
+== {kib} 8.15.5
+
+The 8.15.5 release includes the following bug fixes.
+
+[float]
+[[fixes-v8.15.5]]
+=== Bug fixes
+Canvas::
+* Fixes an issue with Canvas not rendering maps with queries or filters ({kibana-pull}199339[#199339]).
+Discover::
+* Fixes an issue where the `has_es_data` check was causing {kib} to hang ({kibana-pull}200476[#200476]).
+Elastic Observability solution::
+* Changes the order of the errors shown on Infrastructure applications to be more relevant ({kibana-pull}200531[#200531]).
+* Fixes the summary calculation for a calendar-aligned and occurrences-based SLO ({kibana-pull}199873[#199873]).
+Elastic Security solution::
+For the Elastic Security 8.15.5 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Platform::
+* Fixes an issue with duplicate references to objects when copying saved objects to other spaces ({kibana-pull}200053[#200053]).
+* Fixes button colors in the "Share data view to spaces" flyout ({kibana-pull}196004[#196004]).
 
 [[release-notes-8.15.4]]
 == {kib} 8.15.4
