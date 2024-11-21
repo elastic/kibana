@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
 import type { FormData, FieldConfig, ValidationFuncArg } from '../../../../shared_imports';
-import { UseField, UseMultiFields } from '../../../../shared_imports';
+import { UseMultiFields } from '../../../../shared_imports';
 import type { EqlFieldsComboBoxOptions, EqlOptions } from '../../../../../common/search_strategy';
 import { queryRequiredValidatorFactory } from '../../../rule_creation_ui/validators/query_required_validator_factory';
 import { debounceAsync } from '../../../rule_creation_ui/validators/debounce_async';
@@ -19,7 +19,7 @@ import type { FieldValueQueryBar } from '../../../rule_creation_ui/components/qu
 
 interface EqlQueryEditProps {
   path: string;
-  eqlOptionsPath?: string;
+  eqlOptionsPath: string;
   fieldsToValidateOnChange?: string | string[];
   eqlFieldsComboBoxOptions?: EqlFieldsComboBoxOptions;
   showEqlSizeOption?: boolean;
@@ -119,35 +119,24 @@ export function EqlQueryEdit({
     ]
   );
 
-  if (eqlOptionsPath) {
-    return (
-      <UseMultiFields<{
-        eqlQuery: FieldValueQueryBar;
-        eqlOptions: EqlOptions;
-      }>
-        fields={{
-          eqlQuery: {
-            path,
-            config: fieldConfig,
-          },
-          eqlOptions: {
-            path: eqlOptionsPath,
-          },
-        }}
-      >
-        {({ eqlQuery, eqlOptions }) => (
-          <EqlQueryBar field={eqlQuery} eqlOptionsField={eqlOptions} {...componentProps} />
-        )}
-      </UseMultiFields>
-    );
-  }
-
   return (
-    <UseField
-      path={path}
-      component={EqlQueryBar}
-      componentProps={componentProps}
-      config={fieldConfig}
-    />
+    <UseMultiFields<{
+      eqlQuery: FieldValueQueryBar;
+      eqlOptions: EqlOptions;
+    }>
+      fields={{
+        eqlQuery: {
+          path,
+          config: fieldConfig,
+        },
+        eqlOptions: {
+          path: eqlOptionsPath,
+        },
+      }}
+    >
+      {({ eqlQuery, eqlOptions }) => (
+        <EqlQueryBar field={eqlQuery} eqlOptionsField={eqlOptions} {...componentProps} />
+      )}
+    </UseMultiFields>
   );
 }
