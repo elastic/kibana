@@ -101,9 +101,50 @@ describe('Azure Open AI Utils', () => {
       };
       [chatUrl, completionUrl, completionExtensionsUrl].forEach((url: string) => {
         const sanitizedBodyString = getRequestWithStreamOption(url, JSON.stringify(body), true);
-        expect(sanitizedBodyString).toEqual(
-          `{\"messages\":[{\"role\":\"user\",\"content\":\"This is a test\"}],\"stream\":true}`
-        );
+        expect(JSON.parse(sanitizedBodyString)).toEqual({
+          messages: [{ content: 'This is a test', role: 'user' }],
+          stream: true,
+          stream_options: {
+            include_usage: true,
+          },
+        });
+      });
+    });
+    it('sets stream_options when stream is true', () => {
+      const body = {
+        messages: [
+          {
+            role: 'user',
+            content: 'This is a test',
+          },
+        ],
+      };
+      [chatUrl, completionUrl, completionExtensionsUrl].forEach((url: string) => {
+        const sanitizedBodyString = getRequestWithStreamOption(url, JSON.stringify(body), true);
+        expect(JSON.parse(sanitizedBodyString)).toEqual({
+          messages: [{ content: 'This is a test', role: 'user' }],
+          stream: true,
+          stream_options: {
+            include_usage: true,
+          },
+        });
+      });
+    });
+    it('does not sets stream_options when stream is false', () => {
+      const body = {
+        messages: [
+          {
+            role: 'user',
+            content: 'This is a test',
+          },
+        ],
+      };
+      [chatUrl, completionUrl, completionExtensionsUrl].forEach((url: string) => {
+        const sanitizedBodyString = getRequestWithStreamOption(url, JSON.stringify(body), false);
+        expect(JSON.parse(sanitizedBodyString)).toEqual({
+          messages: [{ content: 'This is a test', role: 'user' }],
+          stream: false,
+        });
       });
     });
     it('overrides stream parameter if defined in body', () => {
