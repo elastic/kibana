@@ -29,6 +29,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { context } from '@kbn/kibana-react-plugin/public';
 import { ML_JOB_AGGREGATION, aggregationTypeTransform } from '@kbn/ml-anomaly-utils';
+import { getBoundsRoundedToInterval } from '@kbn/ml-time-buckets';
 
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
@@ -54,12 +55,12 @@ import { TimeSeriesChartWithTooltips } from '../components/timeseries_chart/time
 import { isMetricDetector } from '../get_function_description';
 import { TimeseriesexplorerChartDataError } from '../components/timeseriesexplorer_chart_data_error';
 import { TimeseriesExplorerCheckbox } from './timeseriesexplorer_checkbox';
-import { timeBucketsServiceFactory } from '../../util/time_buckets_service';
 import { timeSeriesExplorerServiceFactory } from '../../util/time_series_explorer_service';
 import { getTimeseriesexplorerDefaultState } from '../timeseriesexplorer_utils';
 import { mlJobServiceFactory } from '../../services/job_service';
 import { forecastServiceFactory } from '../../services/forecast_service';
-import { SingleMetricViewerTitle } from './timeseriesexplorer_title';
+import { SingleMetricViewerTitleWithFilters } from './timeseriesexplorer_title';
+import { TimeSeriesExplorerEmbeddableControls } from './timeseriesexplorer_embeddable_controls';
 
 export class TimeSeriesExplorerEmbeddableChart extends React.Component {
   static propTypes = {
@@ -102,7 +103,6 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
    */
   static contextType = context;
 
-  getBoundsRoundedToInterval;
   mlTimeSeriesExplorer;
   mlForecastService;
 
@@ -215,7 +215,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
     // Ensure the search bounds align to the bucketing interval so that the first and last buckets are complete.
     // For sum or count detectors, short buckets would hold smaller values, and model bounds would also be affected
     // to some extent with all detector functions if not searching complete buckets.
-    const searchBounds = this.getBoundsRoundedToInterval(bounds, focusAggregationInterval, false);
+    const searchBounds = getBoundsRoundedToInterval(bounds, focusAggregationInterval, false);
 
     return this.mlTimeSeriesExplorer.getFocusData(
       this.getCriteriaFields(selectedDetectorIndex, entityControls),
@@ -465,7 +465,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
         // Ensure the search bounds align to the bucketing interval so that the first and last buckets are complete.
         // For sum or count detectors, short buckets would hold smaller values, and model bounds would also be affected
         // to some extent with all detector functions if not searching complete buckets.
-        const searchBounds = this.getBoundsRoundedToInterval(
+        const searchBounds = getBoundsRoundedToInterval(
           bounds,
           stateUpdate.contextAggregationInterval,
           false
@@ -623,10 +623,6 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
   }
 
   async componentDidMount() {
-    this.getBoundsRoundedToInterval = timeBucketsServiceFactory(
-      this.context.services.uiSettings
-    ).getBoundsRoundedToInterval;
-
     this.mlTimeSeriesExplorer = timeSeriesExplorerServiceFactory(
       this.context.services.uiSettings,
       this.context.services.mlServices.mlApi,
@@ -681,7 +677,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
             // Ensure the search bounds align to the bucketing interval so that the first and last buckets are complete.
             // For sum or count detectors, short buckets would hold smaller values, and model bounds would also be affected
             // to some extent with all detector functions if not searching complete buckets.
-            const searchBounds = this.getBoundsRoundedToInterval(
+            const searchBounds = getBoundsRoundedToInterval(
               bounds,
               this.getFocusAggregationInterval({
                 from: selection.from,
@@ -917,50 +913,23 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
           (fullRefresh === false || loading === false) &&
           hasResults === true && (
             <div>
-              <SingleMetricViewerTitle
+              <SingleMetricViewerTitleWithFilters
                 api={this.props.api}
                 functionLabel={chartDetails.functionLabel}
                 entityData={chartDetails.entityData}
               />
               <EuiFlexGroup style={{ float: 'right' }} alignItems="center">
-                {showModelBoundsCheckbox && (
-                  <TimeseriesExplorerCheckbox
-                    id="toggleModelBoundsCheckbox"
-                    label={i18n.translate('xpack.ml.timeSeriesExplorer.showModelBoundsLabel', {
-                      defaultMessage: 'show model bounds',
-                    })}
-                    checked={showModelBounds}
-                    onChange={this.toggleShowModelBoundsHandler}
-                  />
-                )}
-
-                {showAnnotationsCheckbox && (
-                  <TimeseriesExplorerCheckbox
-                    id="toggleAnnotationsCheckbox"
-                    label={i18n.translate('xpack.ml.timeSeriesExplorer.annotationsLabel', {
-                      defaultMessage: 'annotations',
-                    })}
-                    checked={showAnnotations}
-                    onChange={this.toggleShowAnnotationsHandler}
-                  />
-                )}
-
-                {showForecastCheckbox && (
-                  <EuiFlexItem grow={false}>
-                    <TimeseriesExplorerCheckbox
-                      id="toggleShowForecastCheckbox"
-                      label={
-                        <span data-test-subj={'mlForecastCheckbox'}>
-                          {i18n.translate('xpack.ml.timeSeriesExplorer.showForecastLabel', {
-                            defaultMessage: 'show forecast',
-                          })}
-                        </span>
-                      }
-                      checked={showForecast}
-                      onChange={this.toggleShowForecastHandler}
-                    />
-                  </EuiFlexItem>
-                )}
+                <TimeSeriesExplorerEmbeddableControls
+                  showAnnotations={showAnnotations}
+                  showAnnotationsCheckbox={showAnnotationsCheckbox}
+                  showForecast={showForecast}
+                  showForecastCheckbox={showForecastCheckbox}
+                  showModelBounds={showModelBounds}
+                  showModelBoundsCheckbox={showModelBoundsCheckbox}
+                  onShowAnnotationsChange={this.toggleShowAnnotationsHandler}
+                  onShowForecastChange={this.toggleShowForecastHandler}
+                  onShowModelBoundsChange={this.toggleShowModelBoundsHandler}
+                />
 
                 {arePartitioningFieldsProvided &&
                   selectedJob &&

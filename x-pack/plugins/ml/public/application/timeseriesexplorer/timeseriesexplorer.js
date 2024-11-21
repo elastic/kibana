@@ -34,7 +34,6 @@ import {
   EuiTitle,
   EuiAccordion,
   EuiBadge,
-  EuiTextColor,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -67,7 +66,7 @@ import { toastNotificationServiceProvider } from '../services/toast_notification
 import { ForecastingModal } from './components/forecasting_modal/forecasting_modal';
 import { TimeseriesexplorerNoChartData } from './components/timeseriesexplorer_no_chart_data';
 import { TimeSeriesExplorerPage } from './timeseriesexplorer_page';
-import { TimeSeriesExplorerHelpPopover } from './timeseriesexplorer_help_popover';
+import { SingleMetricViewerTitle } from './components/timeseriesexplorer_title';
 
 import {
   APP_STATE_ACTION,
@@ -88,13 +87,6 @@ import { ExplorerNoJobsSelected } from '../explorer/components';
 import { getDataViewsAndIndicesWithGeoFields } from '../explorer/explorer_utils';
 import { indexServiceFactory } from '../util/index_service';
 import { TimeSeriesExplorerControls } from './components/timeseriesexplorer_controls';
-
-// Used to indicate the chart is being plotted across
-// all partition field values, where the cardinality of the field cannot be
-// obtained as it is not aggregatable e.g. 'all distinct kpi_indicator values'
-const allValuesLabel = i18n.translate('xpack.ml.timeSeriesExplorer.allPartitionValuesLabel', {
-  defaultMessage: 'all',
-});
 
 const containerPadding = 34;
 
@@ -1116,70 +1108,10 @@ export class TimeSeriesExplorer extends React.Component {
           (fullRefresh === false || loading === false) &&
           hasResults === true && (
             <div>
-              <EuiFlexGroup gutterSize="xs" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size={'xs'}>
-                    <h2>
-                      <span>
-                        {i18n.translate(
-                          'xpack.ml.timeSeriesExplorer.singleTimeSeriesAnalysisTitle',
-                          {
-                            defaultMessage: 'Single time series analysis of {functionLabel}',
-                            values: { functionLabel: chartDetails.functionLabel },
-                          }
-                        )}
-                      </span>
-                      &nbsp;
-                      {chartDetails.entityData.count === 1 && (
-                        <EuiTextColor color={'success'} size={'s'} component={'span'}>
-                          {chartDetails.entityData.entities.length > 0 && '('}
-                          {chartDetails.entityData.entities
-                            .map((entity) => {
-                              return `${entity.fieldName}: ${entity.fieldValue}`;
-                            })
-                            .join(', ')}
-                          {chartDetails.entityData.entities.length > 0 && ')'}
-                        </EuiTextColor>
-                      )}
-                      {chartDetails.entityData.count !== 1 && (
-                        <EuiTextColor color={'success'} size={'s'} component={'span'}>
-                          {chartDetails.entityData.entities.map((countData, i) => {
-                            return (
-                              <Fragment key={countData.fieldName}>
-                                {i18n.translate(
-                                  'xpack.ml.timeSeriesExplorer.countDataInChartDetailsDescription',
-                                  {
-                                    defaultMessage:
-                                      '{openBrace}{cardinalityValue} distinct {fieldName} {cardinality, plural, one {} other { values}}{closeBrace}',
-                                    values: {
-                                      openBrace: i === 0 ? '(' : '',
-                                      closeBrace:
-                                        i === chartDetails.entityData.entities.length - 1
-                                          ? ')'
-                                          : '',
-                                      cardinalityValue:
-                                        countData.cardinality === 0
-                                          ? allValuesLabel
-                                          : countData.cardinality,
-                                      cardinality: countData.cardinality,
-                                      fieldName: countData.fieldName,
-                                    },
-                                  }
-                                )}
-                                {i !== chartDetails.entityData.entities.length - 1 ? ', ' : ''}
-                              </Fragment>
-                            );
-                          })}
-                        </EuiTextColor>
-                      )}
-                    </h2>
-                  </EuiTitle>
-                </EuiFlexItem>
-
-                <EuiFlexItem grow={false}>
-                  <TimeSeriesExplorerHelpPopover />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <SingleMetricViewerTitle
+                entityData={chartDetails.entityData}
+                functionLabel={chartDetails.functionLabel}
+              />
 
               <TimeSeriesExplorerControls
                 forecastId={this.props.selectedForecastId}
