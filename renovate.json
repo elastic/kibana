@@ -304,7 +304,8 @@
         "release_note:skip",
         "backport:all-open"
       ],
-      "enabled": true
+      "enabled": true,
+      "minimumReleaseAge": "7 days"
     },
     {
       "groupName": "@elastic/charts",
