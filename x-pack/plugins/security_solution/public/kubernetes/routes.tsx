@@ -25,7 +25,7 @@ export const KubernetesRoutes = () => (
 
 export const routes: SecuritySubPluginRoutes = [
   {
-    path: allowedExperimentalValues.kubernetesEnabled ? KUBERNETES_PATH : ' ',
+    path: allowedExperimentalValues.kubernetesEnabled ? KUBERNETES_PATH : [],
     component: KubernetesRoutes,
   },
 ];
