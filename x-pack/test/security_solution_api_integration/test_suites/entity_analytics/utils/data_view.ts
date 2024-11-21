@@ -10,8 +10,8 @@ export const dataViewRouteHelpersFactory = (
   supertest: SuperTest.Agent,
   namespace: string = 'default'
 ) => ({
-  create: (name: string) => {
-    const { body: existingDataView } = supertest.get(
+  create: async (name: string) => {
+    const { body: existingDataView } = await supertest.get(
       `/s/${namespace}/api/data_views/data_view/${name}-${namespace}`
     );
 
