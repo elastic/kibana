@@ -66,10 +66,7 @@ import type {
 } from '../../../../common/search_strategy/timeline';
 import { TimelineEventsQueries } from '../../../../common/search_strategy/timeline';
 import { timelineDefaults } from '../../../timelines/store/defaults';
-import {
-  omitTypenameInTimeline,
-  formatTimelineResponseToModel,
-} from '../../../timelines/components/open_timeline/helpers';
+import { formatTimelineResponseToModel } from '../../../timelines/components/open_timeline/helpers';
 import { convertKueryToElasticSearchQuery } from '../../../common/lib/kuery';
 import { getField, getFieldKey } from '../../../helpers';
 import {
@@ -981,7 +978,7 @@ export const sendAlertToTimelineAction = async ({
       ]);
       const eventData: TimelineEventsDetailsItem[] = eventDataResp.data ?? [];
       if (!isEmpty(responseTimeline)) {
-        const timelineTemplate = omitTypenameInTimeline(responseTimeline);
+        const timelineTemplate = responseTimeline;
         const { timeline, notes } = formatTimelineResponseToModel(
           timelineTemplate,
           true,

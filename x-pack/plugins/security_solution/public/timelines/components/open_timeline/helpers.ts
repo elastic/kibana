@@ -72,12 +72,6 @@ export const getNotesCount = ({ eventIdToNoteIds, noteIds }: OpenTimelineResult)
 export const isUntitled = ({ title }: OpenTimelineResult): boolean =>
   title == null || title.trim().length === 0;
 
-const omitTypename = (key: string, value: keyof TimelineModel) =>
-  key === '__typename' ? undefined : value;
-
-export const omitTypenameInTimeline = (timeline: TimelineResponse): TimelineResponse =>
-  JSON.parse(JSON.stringify(timeline), omitTypename);
-
 const parseString = (params: string) => {
   try {
     return JSON.parse(params);
@@ -349,10 +343,8 @@ export const useQueryTimelineById = () => {
         .then((result) => {
           if (!result) return;
 
-          const timelineToOpen = omitTypenameInTimeline(result.timeline);
-
           const { timeline, notes } = formatTimelineResponseToModel(
-            timelineToOpen,
+            result.timeline,
             duplicate,
             timelineType
           );

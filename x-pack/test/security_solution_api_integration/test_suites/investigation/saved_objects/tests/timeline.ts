@@ -6,10 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  TimelineResponse,
-  TimelineTypeEnum,
-} from '@kbn/security-solution-plugin/common/api/timeline';
+import { TimelineTypeEnum } from '@kbn/security-solution-plugin/common/api/timeline';
 import { TIMELINE_URL } from '@kbn/security-solution-plugin/common/constants';
 import TestAgent from 'supertest/lib/agent';
 import { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
@@ -151,7 +148,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
           sort,
           title,
           version,
-        } = response.body && omitTypenameInTimeline(response.body);
+        } = response.body;
 
         expect(columns.map((col: { id: string }) => col.id)).to.eql(
           timelineObject.columns.map((col) => col.id)
@@ -383,9 +380,3 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     });
   });
 }
-
-const omitTypename = (key: string, value: keyof TimelineResponse) =>
-  key === '__typename' ? undefined : value;
-
-const omitTypenameInTimeline = (timeline: TimelineResponse) =>
-  JSON.parse(JSON.stringify(timeline), omitTypename);

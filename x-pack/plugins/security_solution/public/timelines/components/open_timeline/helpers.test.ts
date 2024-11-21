@@ -9,7 +9,7 @@ import { cloneDeep, omit } from 'lodash/fp';
 import { renderHook } from '@testing-library/react-hooks';
 import { waitFor } from '@testing-library/react';
 
-import { mockTimelineResults, mockGetOneTimelineResult } from '../../../common/mock';
+import { mockTimelineResults } from '../../../common/mock';
 import { timelineDefaults } from '../../store/defaults';
 import type { QueryTimelineById } from './helpers';
 import {
@@ -17,7 +17,6 @@ import {
   getNotesCount,
   getPinnedEventCount,
   isUntitled,
-  omitTypenameInTimeline,
   useQueryTimelineById,
   formatTimelineResponseToModel,
 } from './helpers';
@@ -655,7 +654,7 @@ describe('helpers', () => {
 
       test('Do not override daterange if TimelineStatus is active', () => {
         const { timeline } = formatTimelineResponseToModel(
-          omitTypenameInTimeline(selectedTimeline.timeline),
+          selectedTimeline.timeline,
           args.duplicate,
           args.timelineType
         );
@@ -692,7 +691,7 @@ describe('helpers', () => {
 
         // expect(resolveTimeline).toHaveBeenCalled();
         const { timeline } = formatTimelineResponseToModel(
-          omitTypenameInTimeline(selectedTimeline.timeline),
+          selectedTimeline.timeline,
           args.duplicate,
           args.timelineType
         );
@@ -826,7 +825,7 @@ describe('helpers', () => {
 
       test('override daterange if TimelineStatus is immutable', () => {
         const { timeline } = formatTimelineResponseToModel(
-          omitTypenameInTimeline(template.timeline),
+          template.timeline,
           args.duplicate,
           args.timelineType
         );
@@ -838,28 +837,6 @@ describe('helpers', () => {
           },
         });
       });
-    });
-  });
-
-  describe('omitTypenameInTimeline', () => {
-    test('should not modify the passed in timeline if no __typename exists', () => {
-      const result = omitTypenameInTimeline(mockGetOneTimelineResult);
-
-      expect(result).toEqual(mockGetOneTimelineResult);
-    });
-
-    test('should return timeline with __typename removed when it exists', () => {
-      const mockTimeline = {
-        ...mockGetOneTimelineResult,
-        __typename: 'something, something',
-      };
-      const result = omitTypenameInTimeline(mockTimeline);
-      const expectedTimeline = {
-        ...mockTimeline,
-        __typename: undefined,
-      };
-
-      expect(result).toEqual(expectedTimeline);
     });
   });
 });
