@@ -298,13 +298,19 @@ export const getDraftTimeline = async (
   return getAllSavedTimeline(request, options);
 };
 
+interface InternalPersistFavoriteResponse {
+  code: number;
+  message: string;
+  favoriteTimeline: FavoriteTimelineResponse;
+}
+
 export const persistFavorite = async (
   request: FrameworkRequest,
   timelineId: string | null,
   templateTimelineId: string | null,
   templateTimelineVersion: number | null,
   timelineType: TimelineType
-): Promise<FavoriteTimelineResponse> => {
+): Promise<InternalPersistFavoriteResponse> => {
   const userName = request.user?.username ?? UNAUTHENTICATED_USER;
   const fullName = request.user?.full_name ?? '';
   let timeline: SavedTimeline = {};
@@ -352,15 +358,19 @@ export const persistFavorite = async (
     timelineType,
   });
   return {
-    savedObjectId: persistResponse.timeline.savedObjectId,
-    version: persistResponse.timeline.version,
-    favorite:
-      persistResponse.timeline.favorite != null
-        ? persistResponse.timeline.favorite.filter((fav) => fav.userName === userName)
-        : [],
-    templateTimelineId,
-    templateTimelineVersion,
-    timelineType,
+    favoriteTimeline: {
+      savedObjectId: persistResponse.timeline.savedObjectId,
+      version: persistResponse.timeline.version,
+      favorite:
+        persistResponse.timeline.favorite != null
+          ? persistResponse.timeline.favorite.filter((fav) => fav.userName === userName)
+          : [],
+      templateTimelineId,
+      templateTimelineVersion,
+      timelineType,
+    },
+    code: persistResponse.code,
+    message: persistResponse.message,
   };
 };
 
