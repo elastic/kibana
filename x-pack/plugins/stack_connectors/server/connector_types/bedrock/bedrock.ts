@@ -563,11 +563,15 @@ function extractRegionId(url: string) {
   }
 }
 
+/**
+ * Splits an async iterator into two independent async iterators which can be independently read from at different speeds.
+ * @param asyncIterator The async iterator returned from Bedrock to split
+ */
 function tee<T>(
-  aIterator: SmithyMessageDecoderStream<T>
+  asyncIterator: SmithyMessageDecoderStream<T>
 ): [SmithyMessageDecoderStream<T>, SmithyMessageDecoderStream<T>] {
   // @ts-ignore options is private, but we need it to create the new streams
-  const streamOptions = aIterator.options;
+  const streamOptions = asyncIterator.options;
 
   const streamLeft = new SmithyMessageDecoderStream<T>(streamOptions);
   const streamRight = new SmithyMessageDecoderStream<T>(streamOptions);
@@ -581,7 +585,7 @@ function tee<T>(
   let rightPending: ((chunk: T | null) => void) | null = null;
 
   const distribute = async () => {
-    for await (const chunk of aIterator) {
+    for await (const chunk of asyncIterator) {
       // Push the chunk into both queues
       if (leftPending) {
         leftPending(chunk);
