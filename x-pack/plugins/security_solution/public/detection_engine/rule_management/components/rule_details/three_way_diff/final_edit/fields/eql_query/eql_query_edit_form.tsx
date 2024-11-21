@@ -7,6 +7,7 @@
 
 import React from 'react';
 import type { Filter } from '@kbn/es-query';
+import type { EqlOptions } from '@kbn/timelines-plugin/common';
 import type { FormData, FormSchema } from '../../../../../../../../shared_imports';
 import { RuleFieldEditFormWrapper } from '../rule_field_edit_form_wrapper';
 import type { FieldValueQueryBar } from '../../../../../../../rule_creation_ui/components/query_bar';
@@ -37,6 +38,7 @@ function deserializer(
   finalDiffableRule: DiffableRule
 ): {
   eqlQuery: FieldValueQueryBar;
+  eqlOptions: EqlOptions;
 } {
   const parsedEqlQuery =
     'eql_query' in finalDiffableRule
@@ -58,19 +60,27 @@ function deserializer(
       filters: parsedEqlQuery.filters as Filter[],
       saved_id: null,
     },
+    eqlOptions: {
+      eventCategoryField: parsedEqlQuery.event_category_override,
+      timestampField: parsedEqlQuery.timestamp_field,
+      tiebreakerField: parsedEqlQuery.tiebreaker_field,
+    },
   };
 }
 
 function serializer(formData: FormData): {
   eql_query: RuleEqlQuery;
 } {
-  const formValue = formData as { eqlQuery: FieldValueQueryBar };
+  const formValue = formData as { eqlQuery: FieldValueQueryBar; eqlOptions: EqlOptions };
 
   return {
     eql_query: {
       query: formValue.eqlQuery.query.query as string,
       language: QueryLanguageEnum.eql,
       filters: formValue.eqlQuery.filters,
+      event_category_override: formValue.eqlOptions.eventCategoryField,
+      timestamp_field: formValue.eqlOptions.timestampField,
+      tiebreaker_field: formValue.eqlOptions.tiebreakerField,
     },
   };
 }
