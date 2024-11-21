@@ -9,7 +9,6 @@ import type { TypeOf } from '@kbn/config-schema';
 
 import type { FleetRequestHandler } from '../../types';
 
-import { defaultFleetErrorHandler } from '../../errors';
 import { appContextService } from '../../services';
 import type { RotateKeyPairSchema } from '../../types/rest_spec/message_signing_service';
 
@@ -41,6 +40,6 @@ export const rotateKeyPairHandler: FleetRequestHandler<
     });
   } catch (error) {
     logger.error(error);
-    return defaultFleetErrorHandler({ error: new Error('Failed to rotate key pair!'), response });
+    throw new Error('Failed to rotate key pair!');
   }
 };
