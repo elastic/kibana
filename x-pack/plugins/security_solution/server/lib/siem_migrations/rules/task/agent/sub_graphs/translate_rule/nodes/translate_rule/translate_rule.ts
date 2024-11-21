@@ -9,7 +9,6 @@ import type { Logger } from '@kbn/core/server';
 import type { InferenceClient } from '@kbn/inference-plugin/server';
 import { SiemMigrationRuleTranslationResult } from '../../../../../../../../../../common/siem_migrations/constants';
 import type { ChatModel } from '../../../../../util/actions_client_chat';
-import type { IntegrationRetriever } from '../../../../../util/integration_retriever';
 import type { RuleResourceRetriever } from '../../../../../util/rule_resource_retriever';
 import type { GraphNode } from '../../types';
 import { getEsqlKnowledgeBase } from './esql_knowledge_base_caller';
@@ -19,7 +18,6 @@ interface GetTranslateRuleNodeParams {
   model: ChatModel;
   inferenceClient: InferenceClient;
   resourceRetriever: RuleResourceRetriever;
-  integrationRetriever: IntegrationRetriever;
   connectorId: string;
   logger: Logger;
 }

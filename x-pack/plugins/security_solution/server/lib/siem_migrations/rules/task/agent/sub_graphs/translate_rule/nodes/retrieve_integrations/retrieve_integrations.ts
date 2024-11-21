@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import type { ChatModel } from '../../../../../util/actions_client_chat';
 import type { IntegrationRetriever } from '../../../../../util/integration_retriever';
@@ -15,7 +14,6 @@ import { CREATE_SEMANTIC_QUERY_PROMPT } from './prompts';
 interface GetRetrieveIntegrationsNodeParams {
   model: ChatModel;
   integrationRetriever: IntegrationRetriever;
-  logger: Logger;
 }
 
 interface GetSemanticQueryResponse {
@@ -25,7 +23,6 @@ interface GetSemanticQueryResponse {
 export const getRetrieveIntegrationsNode = ({
   model,
   integrationRetriever,
-  logger,
 }: GetRetrieveIntegrationsNodeParams): GraphNode => {
   const jsonParser = new JsonOutputParser();
   const semanticQueryChain = CREATE_SEMANTIC_QUERY_PROMPT.pipe(model).pipe(jsonParser);

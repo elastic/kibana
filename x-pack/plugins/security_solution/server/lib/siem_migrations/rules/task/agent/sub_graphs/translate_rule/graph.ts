@@ -24,19 +24,16 @@ export function getTranslateRuleGraph({
     model,
     inferenceClient,
     resourceRetriever,
-    integrationRetriever,
     connectorId,
     logger,
   });
   const processQueryNode = getProcessQueryNode({
     model,
     resourceRetriever,
-    logger,
   });
   const retrieveIntegrationsNode = getRetrieveIntegrationsNode({
     model,
     integrationRetriever,
-    logger,
   });
 
   const translateRuleGraph = new StateGraph(translateRuleState)
