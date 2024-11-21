@@ -13,6 +13,7 @@ import { NavigationProvider } from '@kbn/security-solution-navigation';
 import type { CoreStart } from '@kbn/core/public';
 import type { SecuritySolutionAppWrapperFeature } from '@kbn/discover-shared-plugin/public';
 import type { DiscoverServices } from '@kbn/discover-plugin/public';
+import { CellActionsProvider } from '@kbn/cell-actions';
 import { APP_ID } from '../../../common';
 import { SecuritySolutionFlyout } from '../../flyout';
 import { StatefulEventContext } from '../../common/components/events_viewer/stateful_event_context';
@@ -86,29 +87,36 @@ export const createSecuritySolutionDiscoverAppWrapperGetter = ({
                 <UserPrivilegesProvider kibanaCapabilities={services.application.capabilities}>
                   {/* ^_^ Needed for notes addition */}
                   <NavigationProvider core={core}>
-                    <UpsellingProvider upsellingService={services.upselling}>
-                      {/* ^_^ Needed for Alert Preview from Expanded Section of Entity Flyout */}
-                      <ReduxStoreProvider store={store}>
-                        <ReactQueryClientProvider>
-                          <ConsoleManager>
-                            {/* ^_^ Needed for AlertPreview -> Alert Details Flyout Action */}
-                            <AssistantProvider>
+                    <CellActionsProvider
+                      getTriggerCompatibleActions={services.uiActions.getTriggerCompatibleActions}
+                    >
+                      {/* ^_^ Needed for Cell Actions since it gives errors when CellActionsContext is used */}
+                      <UpsellingProvider upsellingService={services.upselling}>
+                        {/* ^_^ Needed for Alert Preview from Expanded Section of Entity Flyout */}
+                        <ReduxStoreProvider store={store}>
+                          <ReactQueryClientProvider>
+                            <ConsoleManager>
                               {/* ^_^ Needed for AlertPreview -> Alert Details Flyout Action */}
-                              <DiscoverInTimelineContextProvider>
-                                {/* ^_^ Needed for Add to Timeline action by `useRiskInputActions`*/}
-                                <ExpandableFlyoutProvider>
-                                  <SecuritySolutionFlyout />
-                                  {/* vv below context should not be here and should be removed */}
-                                  <StatefulEventContext.Provider value={statefulEventContextValue}>
-                                    {children}
-                                  </StatefulEventContext.Provider>
-                                </ExpandableFlyoutProvider>
-                              </DiscoverInTimelineContextProvider>
-                            </AssistantProvider>
-                          </ConsoleManager>
-                        </ReactQueryClientProvider>
-                      </ReduxStoreProvider>
-                    </UpsellingProvider>
+                              <AssistantProvider>
+                                {/* ^_^ Needed for AlertPreview -> Alert Details Flyout Action */}
+                                <DiscoverInTimelineContextProvider>
+                                  {/* ^_^ Needed for Add to Timeline action by `useRiskInputActions`*/}
+                                  <ExpandableFlyoutProvider>
+                                    <SecuritySolutionFlyout />
+                                    {/* vv below context should not be here and should be removed */}
+                                    <StatefulEventContext.Provider
+                                      value={statefulEventContextValue}
+                                    >
+                                      {children}
+                                    </StatefulEventContext.Provider>
+                                  </ExpandableFlyoutProvider>
+                                </DiscoverInTimelineContextProvider>
+                              </AssistantProvider>
+                            </ConsoleManager>
+                          </ReactQueryClientProvider>
+                        </ReduxStoreProvider>
+                      </UpsellingProvider>
+                    </CellActionsProvider>
                   </NavigationProvider>
                 </UserPrivilegesProvider>
               </CasesContext>

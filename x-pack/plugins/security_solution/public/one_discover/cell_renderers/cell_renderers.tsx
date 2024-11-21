@@ -53,11 +53,11 @@ export const getCellRendererForGivenRecord: SecuritySolutionRowCellRendererGette
         header={header}
         isDetails={props.isDetails}
         isDraggable={false}
-        isTimeline={true}
+        isTimeline={false}
         linkValues={undefined}
         rowRenderers={undefined}
         scopeId={ONE_DISCOVER_SCOPE_ID}
-        asPlainText={undefined}
+        asPlainText={false}
         context={undefined}
         isExpandable={props.isExpandable}
         rowIndex={props.rowIndex}

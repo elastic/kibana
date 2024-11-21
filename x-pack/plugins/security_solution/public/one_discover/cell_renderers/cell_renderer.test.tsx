@@ -70,7 +70,7 @@ describe('getCellRendererForGivenRecord', () => {
     expect(mockDefaultCellRenderer).toHaveBeenCalledWith(
       {
         isDraggable: false,
-        isTimeline: true,
+        isTimeline: false,
         isDetails: false,
         data: [
           { field: 'host.name', value: ['host1'] },
@@ -84,7 +84,7 @@ describe('getCellRendererForGivenRecord', () => {
           columnHeaderType: 'not-filtered',
           type: 'string',
         },
-        asPlainText: undefined,
+        asPlainText: false,
         context: undefined,
         rowRenderers: undefined,
         ecsData: undefined,
