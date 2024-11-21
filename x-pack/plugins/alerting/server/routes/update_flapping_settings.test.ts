@@ -48,9 +48,6 @@ describe('updateFlappingSettingsRoute', () => {
     expect(config.options).toMatchInlineSnapshot(`
       Object {
         "access": "internal",
-        "tags": Array [
-          "access:write-flapping-settings",
-        ],
       }
     `);
 

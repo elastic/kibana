@@ -32,7 +32,7 @@ export const getLensVisMock = async ({
   breakdownField,
   dataView,
   allSuggestions,
-  hasHistogramSuggestionForESQL,
+  isTransformationalESQL,
   table,
 }: {
   filters: QueryParams['filters'];
@@ -44,7 +44,7 @@ export const getLensVisMock = async ({
   timeRange?: TimeRange | null;
   breakdownField: DataViewField | undefined;
   allSuggestions?: Suggestion[];
-  hasHistogramSuggestionForESQL?: boolean;
+  isTransformationalESQL?: boolean;
   table?: Datatable;
 }): Promise<{
   lensService: LensVisService;
@@ -60,7 +60,9 @@ export const getLensVisMock = async ({
           if ('query' in context && context.query === query) {
             return allSuggestions;
           }
-          return hasHistogramSuggestionForESQL ? [histogramESQLSuggestionMock] : [];
+          return !isTransformationalESQL && dataView.isTimeBased()
+            ? [histogramESQLSuggestionMock]
+            : [];
         }
       : lensApi.suggestions,
   });

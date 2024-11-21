@@ -33,7 +33,7 @@ export class RuleMigrationsDataBaseClient {
     return hits.map(({ _id, _source }) => {
       assert(_id, 'document should have _id');
       assert(_source, 'document should have _source');
-      return { ..._source, ...override, _id };
+      return { ..._source, ...override, id: _id };
     });
   }
 
