@@ -23,20 +23,15 @@ type StorageMappingPropertyType = AllMappingPropertyType &
     | 'long'
   );
 
-interface Metadata {
-  [x: string]: any;
-}
-
-type WithMeta<T extends MappingProperty> = T extends any
-  ? Omit<T, 'meta'> & {
-      meta?: Metadata;
+type WithOptions<T extends MappingProperty> = T extends any
+  ? T & {
       required?: boolean;
       multi_value?: boolean;
       enum?: string[];
     }
   : never;
 
-export type StorageMappingProperty = WithMeta<
+export type StorageMappingProperty = WithOptions<
   Extract<MappingProperty, { type: StorageMappingPropertyType }>
 >;
 

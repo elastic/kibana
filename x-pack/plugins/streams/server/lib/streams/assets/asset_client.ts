@@ -8,12 +8,48 @@ import pLimit from 'p-limit';
 import { StorageClient } from '@kbn/observability-utils-server/es/storage';
 import { termQuery } from '@kbn/observability-utils-server/es/queries/term_query';
 import { RulesClient } from '@kbn/alerting-plugin/server';
-import { SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { keyBy } from 'lodash';
 import objectHash from 'object-hash';
+import { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { AssetStorageSettings } from './storage_settings';
 import { ASSET_TYPES, Asset, AssetType } from '../../../../common/assets';
 import { ASSET_ENTITY_ID, ASSET_ENTITY_TYPE } from './fields';
+
+function sloSavedObjectToAsset(
+  sloId: string,
+  savedObject: SavedObject<{ name: string; tags: string[] }>
+): Asset {
+  return {
+    assetId: sloId,
+    label: savedObject.attributes.name,
+    tags: savedObject.attributes.tags.concat(
+      savedObject.references.filter((ref) => ref.type === 'tag').map((ref) => ref.id)
+    ),
+    type: 'slo',
+  };
+}
+
+function dashboardSavedObjectToAsset(
+  dashboardId: string,
+  savedObject: SavedObject<{ title: string }>
+): Asset {
+  return {
+    assetId: dashboardId,
+    label: savedObject.attributes.title,
+    tags: savedObject.references.filter((ref) => ref.type === 'tag').map((ref) => ref.id),
+    type: 'dashboard',
+  };
+}
+
+function ruleToAsset(ruleId: string, rule: SanitizedRule): Asset {
+  return {
+    type: 'rule',
+    assetId: ruleId,
+    label: rule.name,
+    tags: rule.tags,
+  };
+}
 
 export class AssetClient {
   constructor(
@@ -112,7 +148,7 @@ export class AssetClient {
     const [dashboards, rules, slos] = await Promise.all([
       idsByType.dashboard.length
         ? this.clients.soClient
-            .bulkGet<{ title: string; tags: string[] }>(
+            .bulkGet<{ title: string }>(
               idsByType.dashboard.map((dashboardId) => ({ type: 'dashboard', id: dashboardId }))
             )
             .then((response) => {
@@ -121,14 +157,7 @@ export class AssetClient {
               return idsByType.dashboard.flatMap((dashboardId): Asset[] => {
                 const dashboard = dashboardsById[dashboardId];
                 if (dashboard) {
-                  return [
-                    {
-                      assetId: dashboardId,
-                      label: dashboard.attributes.title,
-                      tags: [],
-                      type: 'dashboard',
-                    },
-                  ];
+                  return [dashboardSavedObjectToAsset(dashboardId, dashboard)];
                 }
                 return [];
               });
@@ -138,12 +167,7 @@ export class AssetClient {
         idsByType.rule.map((ruleId) => {
           return limiter(() =>
             this.clients.rulesClient.get({ id: ruleId }).then((rule): Asset => {
-              return {
-                type: 'rule',
-                assetId: ruleId,
-                label: rule.name,
-                tags: rule.tags,
-              };
+              return ruleToAsset(ruleId, rule);
             })
           );
         })
@@ -152,7 +176,9 @@ export class AssetClient {
         ? this.clients.soClient
             .find<{ name: string; tags: string[] }>({
               type: 'slo',
-              filter: `slo.attributes.id:(${idsByType.slo.join(' OR ')})`,
+              filter: `slo.attributes.id:(${idsByType.slo
+                .map((sloId) => `"${sloId}"`)
+                .join(' OR ')})`,
               perPage: idsByType.slo.length,
             })
             .then((soResponse) => {
@@ -161,14 +187,7 @@ export class AssetClient {
               return idsByType.slo.flatMap((sloId): Asset[] => {
                 const sloDefinition = sloDefinitionsById[sloId];
                 if (sloDefinition) {
-                  return [
-                    {
-                      assetId: sloId,
-                      label: sloDefinition.attributes.name,
-                      tags: sloDefinition.attributes.tags,
-                      type: 'slo',
-                    },
-                  ];
+                  return [sloSavedObjectToAsset(sloId, sloDefinition)];
                 }
                 return [];
               });
@@ -177,5 +196,42 @@ export class AssetClient {
     ]);
 
     return [...dashboards, ...rules, ...slos];
+  }
+
+  async getSuggestions({
+    entityId,
+    entityType,
+    query,
+  }: {
+    entityId: string;
+    entityType: string;
+    query: string;
+  }): Promise<Array<{ asset: Asset }>> {
+    const [suggestionsFromSlosAndDashboards, ruleResponse] = await Promise.all([
+      this.clients.soClient
+        .find({
+          type: ['dashboard', 'slo'],
+          search: query,
+        })
+        .then((results) => {
+          return results.saved_objects.map((savedObject) => {
+            if (savedObject.type === 'slo') {
+              const sloSavedObject = savedObject as SavedObject<{
+                id: string;
+                name: string;
+                tags: string[];
+              }>;
+              return sloSavedObjectToAsset(sloSavedObject.attributes.id, sloSavedObject);
+            }
+
+            const dashboardSavedObject = savedObject as SavedObject<{ title: string }>;
+
+            return dashboardSavedObjectToAsset(dashboardSavedObject.id, dashboardSavedObject);
+          });
+        }),
+      [],
+    ]);
+
+    return suggestionsFromSlosAndDashboards.map((asset) => ({ asset }));
   }
 }

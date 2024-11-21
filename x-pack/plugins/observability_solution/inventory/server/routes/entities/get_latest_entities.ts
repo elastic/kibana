@@ -62,33 +62,40 @@ export async function getLatestEntities({
 
   const query = [from, ...where, sort, limit].join(' | ');
 
-  const latestEntitiesEsqlResponse = await inventoryEsClient.esql<{
-    'entity.id': string;
-    'entity.type': string;
-    'entity.definition_id': string;
-    'entity.display_name': string;
-    'entity.identity_fields': string | string[];
-    'entity.last_seen_timestamp': string;
-    'entity.definition_version': string;
-    'entity.schema_version': string;
-  }>('get_latest_entities', {
-    query,
-    filter: esQuery,
-    params,
-  });
+  const latestEntitiesEsqlResponse = await inventoryEsClient.esql<
+    {
+      'entity.id': string;
+      'entity.type': string;
+      'entity.definition_id': string;
+      'entity.display_name': string;
+      'entity.identity_fields': string | string[];
+      'entity.last_seen_timestamp': string;
+      'entity.definition_version': string;
+      'entity.schema_version': string;
+    },
+    { transform: 'unflatten' }
+  >(
+    'get_latest_entities',
+    {
+      query,
+      filter: esQuery,
+      params,
+    },
+    { transform: 'unflatten' }
+  );
 
   return latestEntitiesEsqlResponse.hits.map((latestEntity) => {
     const { entity, ...metadata } = unflattenObject(latestEntity);
 
     return {
-      entityId: latestEntity['entity.id'],
-      entityType: latestEntity['entity.type'],
-      entityDefinitionId: latestEntity['entity.definition_id'],
-      entityDisplayName: latestEntity['entity.display_name'],
-      entityIdentityFields: latestEntity['entity.identity_fields'],
-      entityLastSeenTimestamp: latestEntity['entity.last_seen_timestamp'],
-      entityDefinitionVersion: latestEntity['entity.definition_version'],
-      entitySchemaVersion: latestEntity['entity.schema_version'],
+      entityId: entity.id,
+      entityType: entity.type,
+      entityDefinitionId: entity.definition_id,
+      entityDisplayName: entity.display_name,
+      entityIdentityFields: entity.identity_fields,
+      entityLastSeenTimestamp: entity.last_seen_timestamp,
+      entityDefinitionVersion: entity.definition_version,
+      entitySchemaVersion: entity.schema_version,
       ...metadata,
     };
   });

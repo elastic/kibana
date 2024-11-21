@@ -9,16 +9,22 @@ import { z } from '@kbn/zod';
 import { ASSET_TYPES, Asset } from '../../../common/assets';
 import { createServerRoute } from '../create_server_route';
 
-interface ListAssetsResponse {
+export interface ListAssetsResponse {
   assets: Asset[];
 }
 
-interface LinkAssetResponse {
+export interface LinkAssetResponse {
   acknowledged: boolean;
 }
 
-interface UnlinkAssetResponse {
+export interface UnlinkAssetResponse {
   acknowledged: boolean;
+}
+
+export interface SuggestAssetsResponse {
+  suggestions: Array<{
+    asset: Asset;
+  }>;
 }
 
 const assetTypeSchema = z.union([
@@ -117,8 +123,42 @@ export const unlinkAssetRoute = createServerRoute({
   },
 });
 
+export const suggestAssetsRoute = createServerRoute({
+  endpoint: 'GET /api/streams/{id}/assets/_suggestions',
+  options: {
+    access: 'internal',
+  },
+  params: z.object({
+    path: z.object({
+      id: z.string(),
+    }),
+    query: z.object({
+      query: z.string(),
+    }),
+  }),
+  handler: async ({ params, request, assets }): Promise<SuggestAssetsResponse> => {
+    const assetsClient = await assets.getClientWithRequest({ request });
+
+    const {
+      path: { id: streamId },
+      query: { query },
+    } = params;
+
+    const suggestions = await assetsClient.getSuggestions({
+      entityId: streamId,
+      entityType: 'stream',
+      query,
+    });
+
+    return {
+      suggestions,
+    };
+  },
+});
+
 export const assetsRoutes = {
   ...listAssetsRoute,
   ...linkAssetRoute,
   ...unlinkAssetRoute,
+  ...suggestAssetsRoute,
 };

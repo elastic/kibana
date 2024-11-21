@@ -7,7 +7,7 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../..',
+  rootDir: '../../..',
   roots: [
     '<rootDir>/x-pack/plugins/streams_app/public',
     '<rootDir>/x-pack/plugins/streams_app/common',

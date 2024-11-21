@@ -31,10 +31,14 @@ export async function getEntityGroupsBy({
   const limit = `LIMIT ${MAX_NUMBER_OF_ENTITIES}`;
   const query = [from, ...where, group, sort, limit].join(' | ');
 
-  const { hits } = await inventoryEsClient.esql<EntityGroup>('get_entities_groups', {
-    query,
-    filter: esQuery,
-  });
+  const { hits } = await inventoryEsClient.esql<EntityGroup, { transform: 'plain' }>(
+    'get_entities_groups',
+    {
+      query,
+      filter: esQuery,
+    },
+    { transform: 'plain' }
+  );
 
   return hits;
 }

@@ -8,8 +8,8 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { IStorageAdapter, StorageDocumentOf, StorageSettings } from '.';
 import {
+  ObservabilityESSearchRequest,
   ObservabilityElasticsearchClient,
-  ObservabilitySearchRequest,
   createObservabilityEsClient,
 } from '../client/create_observability_es_client';
 
@@ -18,7 +18,7 @@ export class StorageClient<TStorageSettings extends StorageSettings> {
   constructor(
     private readonly storage: IStorageAdapter<TStorageSettings>,
     esClient: ElasticsearchClient,
-    private readonly logger: Logger
+    logger: Logger
   ) {
     this.esClient = createObservabilityEsClient({
       client: esClient,
@@ -26,7 +26,7 @@ export class StorageClient<TStorageSettings extends StorageSettings> {
     });
   }
 
-  search<TSearchRequest extends Omit<ObservabilitySearchRequest, 'index'>>(
+  search<TSearchRequest extends Omit<ObservabilityESSearchRequest, 'index'>>(
     operationName: string,
     request: TSearchRequest
   ) {

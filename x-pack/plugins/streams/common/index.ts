@@ -6,3 +6,4 @@
  */
 
 export type { StreamDefinition } from './types';
+export type { Asset, AssetType } from './assets';
