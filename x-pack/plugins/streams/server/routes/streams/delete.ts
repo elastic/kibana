@@ -63,6 +63,7 @@ export const deleteStreamRoute = createServerRoute({
         e instanceof ForkConditionMissing ||
         e instanceof MalformedStreamId
       ) {
+        logger.error(e);
         return response.customError({ body: e, statusCode: 400 });
       }
 
