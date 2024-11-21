@@ -19,6 +19,7 @@ import type { DataSourceContext } from './data_source_profile';
 export enum DocumentType {
   Log = 'log',
   Default = 'default',
+  Alert = 'alert',
 }
 
 /**
