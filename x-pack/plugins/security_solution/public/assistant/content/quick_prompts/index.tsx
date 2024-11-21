@@ -12,7 +12,6 @@ import {
 import { APP_UI_ID } from '../../../../common';
 import * as i18n from './translations';
 import {
-  KNOWLEDGE_BASE_CATEGORY,
   PROMPT_CONTEXT_ALERT_CATEGORY,
   PROMPT_CONTEXT_DETECTION_RULES_CATEGORY,
   PROMPT_CONTEXT_EVENT_CATEGORY,
@@ -31,16 +30,6 @@ export const BASE_SECURITY_QUICK_PROMPTS: PromptResponse[] = [
     categories: [PROMPT_CONTEXT_ALERT_CATEGORY],
     isDefault: true,
     id: i18n.ALERT_SUMMARIZATION_TITLE,
-    promptType: PromptTypeEnum.quick,
-    consumer: APP_UI_ID,
-  },
-  {
-    name: i18n.ESQL_QUERY_GENERATION_TITLE,
-    content: i18n.ESQL_QUERY_GENERATION_PROMPT,
-    color: '#9170B8',
-    categories: [KNOWLEDGE_BASE_CATEGORY],
-    isDefault: true,
-    id: i18n.ESQL_QUERY_GENERATION_TITLE,
     promptType: PromptTypeEnum.quick,
     consumer: APP_UI_ID,
   },
