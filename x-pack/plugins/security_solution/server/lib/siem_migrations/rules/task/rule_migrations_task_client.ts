@@ -90,7 +90,7 @@ export class RuleMigrationsTaskClient {
   }: RuleMigrationTaskPrepareParams): Promise<MigrationAgent> {
     const prebuiltRulesMap = await retrievePrebuiltRulesMap({ soClient, rulesClient });
     const resourceRetriever = new RuleResourceRetriever(migrationId, this.data);
-    const integrationRetriever = new IntegrationRetriever(migrationId, this.data);
+    const integrationRetriever = new IntegrationRetriever(this.data);
 
     const actionsClientChat = new ActionsClientChat(connectorId, actionsClient, this.logger);
     const model = await actionsClientChat.createModel({

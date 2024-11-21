@@ -9,10 +9,7 @@ import type { RuleMigrationsDataClient } from '../../data/rule_migrations_data_c
 import type { Integration } from '../../types';
 
 export class IntegrationRetriever {
-  constructor(
-    private readonly migrationId: string,
-    private readonly dataClient: RuleMigrationsDataClient
-  ) {}
+  constructor(private readonly dataClient: RuleMigrationsDataClient) {}
 
   public async getIntegrations(semanticString: string): Promise<Integration[]> {
     return this.integrationRetriever(semanticString);
