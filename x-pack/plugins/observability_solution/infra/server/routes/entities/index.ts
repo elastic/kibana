@@ -36,8 +36,11 @@ export const initEntitiesConfigurationRoutes = (libs: InfraBackendLibs) => {
     },
     async (requestContext, request, response) => {
       const { entityId, entityType } = request.params;
-      const coreContext = await requestContext.core;
-      const infraContext = await requestContext.infra;
+      const [coreContext, infraContext] = await Promise.all([
+        requestContext.core,
+        requestContext.infra,
+      ]);
+
       const entityManagerClient = await infraContext.entityManager.getScopedClient({ request });
       const infraMetricsClient = await getInfraMetricsClient({
         request,
@@ -63,6 +66,7 @@ export const initEntitiesConfigurationRoutes = (libs: InfraBackendLibs) => {
           entityType,
           infraMetricsClient,
           obsEsClient,
+          logger,
         });
 
         return response.ok({

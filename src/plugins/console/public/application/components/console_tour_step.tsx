@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactNode, ReactElement } from 'react';
+import React, { ReactNode, ReactElement, useState, useEffect } from 'react';
 import { EuiTourStep, PopoverAnchorPosition } from '@elastic/eui';
+import { WELCOME_TOUR_DELAY } from '../../../common/constants';
 
 export interface ConsoleTourStepProps {
   step: number;
@@ -44,11 +45,31 @@ export const ConsoleTourStep = ({ tourStepProps, children }: Props) => {
     css,
   } = tourStepProps;
 
+  const [popoverVisible, setPopoverVisible] = useState(false);
+
+  useEffect(() => {
+    let timeoutId: any;
+
+    if (isStepOpen) {
+      timeoutId = setTimeout(() => {
+        setPopoverVisible(true);
+      }, WELCOME_TOUR_DELAY);
+    } else {
+      setPopoverVisible(false);
+    }
+
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [isStepOpen]);
+
   return (
     <EuiTourStep
       step={step}
       stepsTotal={stepsTotal}
-      isStepOpen={isStepOpen}
+      isStepOpen={popoverVisible}
       title={title}
       content={content}
       onFinish={onFinish}

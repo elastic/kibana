@@ -11,6 +11,7 @@ import {
   METRIC_TYPE_API_VALUES_TO_UI_OPTIONS_MAP,
   METRIC_TYPE_VALUES,
 } from '../../../common/rest_types';
+import { DEFAULT_SELECTED_OPTIONS } from '../../../common';
 import { FILTER_NAMES } from '../translations';
 import { useDataUsageMetricsUrlParams } from './use_charts_url_params';
 import { formatBytes } from '../../utils/format_bytes';
@@ -77,7 +78,7 @@ export const useChartsFilter = ({
           'data-test-subj': `${filterOptions.filterName}-filter-option`,
         }))
       : isDataStreamsFilter && !!filterOptions.options.length
-      ? filterOptions.options?.map((filterOption) => ({
+      ? filterOptions.options?.map((filterOption, i) => ({
           key: filterOption,
           label: filterOption,
           append: formatBytes(filterOptions.appendOptions?.[filterOption] ?? 0),
@@ -85,7 +86,9 @@ export const useChartsFilter = ({
             ? selectedDataStreamsFromUrl.includes(filterOption)
               ? 'on'
               : undefined
-            : 'on',
+            : i < DEFAULT_SELECTED_OPTIONS
+            ? 'on'
+            : undefined,
           'data-test-subj': `${filterOptions.filterName}-filter-option`,
         }))
       : []
