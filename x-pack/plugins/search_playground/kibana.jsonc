@@ -19,6 +19,7 @@
       "data",
       "encryptedSavedObjects",
       "ml",
+      "features",
       "navigation",
       "share",
       "security",
