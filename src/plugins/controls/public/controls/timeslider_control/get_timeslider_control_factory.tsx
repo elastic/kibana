@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { BehaviorSubject, debounceTime, distinctUntilChanged, first, map } from 'rxjs';
+import { BehaviorSubject, debounceTime, first, map } from 'rxjs';
 
 import { EuiInputPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -58,6 +58,7 @@ export const getTimesliderControlFactory = (): ControlFactory<
       const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
       const isAnchored$ = new BehaviorSubject<boolean | undefined>(initialState.isAnchored);
       const isPopoverOpen$ = new BehaviorSubject(false);
+      const hasTimeSliceSelection$ = new BehaviorSubject<boolean>(Boolean(timeslice$));
 
       const timeRangePercentage = initTimeRangePercentage(
         initialState,
@@ -103,6 +104,7 @@ export const getTimesliderControlFactory = (): ControlFactory<
       }
 
       function onChange(timeslice?: Timeslice) {
+        hasTimeSliceSelection$.next(Boolean(timeslice));
         setTimeslice(timeslice);
         const nextSelectedRange = timeslice
           ? timeslice[TO_INDEX] - timeslice[FROM_INDEX]
@@ -207,13 +209,6 @@ export const getTimesliderControlFactory = (): ControlFactory<
         })
       );
 
-      const hasTimeSliceSelection$ = new BehaviorSubject<boolean>(false);
-      const hasSelectionsSubscription = timeslice$
-        .pipe(distinctUntilChanged())
-        .subscribe((hasSelections) => {
-          hasTimeSliceSelection$.next(Boolean(hasSelections));
-        });
-
       const api = buildApi(
         {
           ...defaultControl.api,
@@ -232,6 +227,7 @@ export const getTimesliderControlFactory = (): ControlFactory<
           },
           clearSelections: () => {
             setTimeslice(undefined);
+            hasTimeSliceSelection$.next(false);
           },
           hasSelections$: hasTimeSliceSelection$ as PublishingSubject<boolean | undefined>,
           CustomPrependComponent: () => {
@@ -279,7 +275,6 @@ export const getTimesliderControlFactory = (): ControlFactory<
             return () => {
               cleanupTimeRangeSubscription();
               timeRangeMetaSubscription.unsubscribe();
-              hasSelectionsSubscription.unsubscribe();
             };
           }, []);
 
