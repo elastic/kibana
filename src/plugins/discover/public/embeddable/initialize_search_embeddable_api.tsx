@@ -145,7 +145,7 @@ export const initializeSearchEmbeddableApi = async (
   );
 
   /** APIs for updating search source properties */
-  const setDataViews = async (nextDataViews: DataView[]) => {
+  const setDataViews = (nextDataViews: DataView[]) => {
     searchSource.setField('index', nextDataViews[0]);
     dataViews.next(nextDataViews);
     searchSource$.next(searchSource);

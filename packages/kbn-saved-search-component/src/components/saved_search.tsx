@@ -17,6 +17,7 @@ import type {
 } from '@kbn/discover-plugin/public';
 import { SerializedPanelState } from '@kbn/presentation-containers';
 import { SavedSearchComponentProps } from '../types';
+import { SavedSearchComponentErrorContent } from './error';
 
 const TIMESTAMP_FIELD = '@timestamp';
 
@@ -26,7 +27,20 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
   const [initialSerializedState, setInitialSerializedState] =
     useState<SerializedPanelState<SearchEmbeddableSerializedState>>();
 
-  const { dependencies, timeRange, query, filters, index, timestampField, height } = props;
+  const [error, setError] = useState<Error | undefined>();
+
+  const {
+    dependencies: { dataViews, searchSource: searchSourceService },
+    timeRange,
+    query,
+    filters,
+    index,
+    timestampField,
+    height,
+  } = props;
+
+  const { enableFlyout: flyoutEnabled = true, enableFilters: filtersEnabled = true } =
+    props.displayOptions ?? {};
 
   useEffect(() => {
     // Ensure we get a stabilised set of initial state incase dependencies change, as
@@ -34,38 +48,39 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
     const abortController = new AbortController();
 
     async function createInitialSerializedState() {
-      const { dataViews, searchSource: searchSourceService } = dependencies;
-      const { enableFlyout: flyoutEnabled = true, enableFilters: filtersEnabled = true } =
-        props.displayOptions ?? {};
-      // Ad-hoc data view
-      const dataView = await dataViews.create({
-        title: index,
-        timeFieldName: timestampField ?? TIMESTAMP_FIELD,
-      });
-      if (!abortController.signal.aborted) {
-        // Search source
-        const searchSource = searchSourceService.createEmpty();
-        searchSource.setField('index', dataView);
-        searchSource.setField('query', query);
-        searchSource.setField('filter', filters);
-        const { searchSourceJSON, references } = searchSource.serialize();
-        // By-value saved object structure
-        const attributes = {
-          kibanaSavedObjectMeta: {
-            searchSourceJSON,
-          },
-        };
-        setInitialSerializedState({
-          rawState: {
-            attributes: { ...attributes, references },
-            timeRange,
-            nonPersistedDisplayOptions: {
-              enableFlyout: flyoutEnabled,
-              enableFilters: filtersEnabled,
-            },
-          } as SearchEmbeddableSerializedState,
-          references,
+      try {
+        // Ad-hoc data view
+        const dataView = await dataViews.create({
+          title: index,
+          timeFieldName: timestampField ?? TIMESTAMP_FIELD,
         });
+        if (!abortController.signal.aborted) {
+          // Search source
+          const searchSource = searchSourceService.createEmpty();
+          searchSource.setField('index', dataView);
+          searchSource.setField('query', query);
+          searchSource.setField('filter', filters);
+          const { searchSourceJSON, references } = searchSource.serialize();
+          // By-value saved object structure
+          const attributes = {
+            kibanaSavedObjectMeta: {
+              searchSourceJSON,
+            },
+          };
+          setInitialSerializedState({
+            rawState: {
+              attributes: { ...attributes, references },
+              timeRange,
+              nonPersistedDisplayOptions: {
+                enableFlyout: flyoutEnabled,
+                enableFilters: filtersEnabled,
+              },
+            } as SearchEmbeddableSerializedState,
+            references,
+          });
+        }
+      } catch (e) {
+        setError(e);
       }
     }
 
@@ -74,7 +89,21 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
     return () => {
       abortController.abort();
     };
-  }, [dependencies, filters, index, props.displayOptions, query, timeRange, timestampField]);
+  }, [
+    dataViews,
+    filters,
+    filtersEnabled,
+    flyoutEnabled,
+    index,
+    query,
+    searchSourceService,
+    timeRange,
+    timestampField,
+  ]);
+
+  if (error) {
+    return <SavedSearchComponentErrorContent error={error} />;
+  }
 
   return initialSerializedState ? (
     <div style={{ height: height ?? '100%' }}>
@@ -84,10 +113,19 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
 };
 
 const SavedSearchComponentTable: React.FC<
-  SavedSearchComponentProps & { initialSerializedState: any }
+  SavedSearchComponentProps & {
+    initialSerializedState: SerializedPanelState<SearchEmbeddableSerializedState>;
+  }
 > = (props) => {
-  const { dependencies, initialSerializedState, filters, query, timeRange, timestampField, index } =
-    props;
+  const {
+    dependencies: { dataViews },
+    initialSerializedState,
+    filters,
+    query,
+    timeRange,
+    timestampField,
+    index,
+  } = props;
   const embeddableApi = useRef<SearchEmbeddableApi | undefined>(undefined);
 
   const parentApi = useMemo(() => {
@@ -104,25 +142,24 @@ const SavedSearchComponentTable: React.FC<
 
       const abortController = new AbortController();
 
-      async function updateDataView(indexPattern: string) {
-        const { dataViews } = dependencies;
+      async function updateDataView() {
         // Ad-hoc data view
         const dataView = await dataViews.create({
           title: index,
           timeFieldName: timestampField ?? TIMESTAMP_FIELD,
         });
         if (!abortController.signal.aborted) {
-          embeddableApi?.current?.setDataViews([dataView]);
+          embeddableApi.current?.setDataViews([dataView]);
         }
       }
 
-      updateDataView(index);
+      updateDataView();
 
       return () => {
         abortController.abort();
       };
     },
-    [dependencies, index, timestampField]
+    [dataViews, index, timestampField]
   );
 
   useEffect(

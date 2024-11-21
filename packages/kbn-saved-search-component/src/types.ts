@@ -11,6 +11,7 @@ import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { DataViewsContract, ISearchStartSearchSource } from '@kbn/data-plugin/public';
 import type { NonPersistedDisplayOptions } from '@kbn/discover-plugin/public';
+import { CSSProperties } from 'react';
 
 export interface SavedSearchComponentDependencies {
   embeddable: EmbeddableStart;
@@ -25,6 +26,6 @@ export interface SavedSearchComponentProps {
   query?: Query;
   filters?: Filter[];
   timestampField?: string;
-  height?: string | number;
+  height?: CSSProperties['height'];
   displayOptions?: NonPersistedDisplayOptions;
 }

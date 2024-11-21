@@ -41,7 +41,6 @@ export function ClassicServiceLogsStream() {
         services: { logSourcesService },
       },
       embeddable,
-      savedSearch,
       dataViews,
       data: {
         search: { searchSource },
@@ -78,21 +77,22 @@ export function ClassicServiceLogsStream() {
 
   const logSources = useAsync(logSourcesService.getFlattenedLogSources);
 
-  const dependencies = useMemo(() => {
-    return { embeddable, savedSearch, searchSource, dataViews };
-  }, [dataViews, embeddable, savedSearch, searchSource]);
-
   const timeRange = useMemo(() => ({ from: start, to: end }), [start, end]);
+
+  const query = useMemo(
+    () => ({
+      language: 'kuery',
+      query: getInfrastructureKQLFilter({ data, serviceName, environment }),
+    }),
+    [data, serviceName, environment]
+  );
 
   return logSources.value ? (
     <LazySavedSearchComponent
-      dependencies={dependencies}
+      dependencies={{ embeddable, searchSource, dataViews }}
       index={logSources.value}
       timeRange={timeRange}
-      query={{
-        language: 'kuery',
-        query: getInfrastructureKQLFilter({ data, serviceName, environment }),
-      }}
+      query={query}
       height={'60vh'}
       displayOptions={{
         enableFlyout: true,
