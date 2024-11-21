@@ -119,6 +119,7 @@ describe('<ManagePrivateLocations />', () => {
       const privateLocationName = 'Test private location';
       jest.spyOn(settingsHooks, 'useSyntheticsSettingsContext').mockReturnValue({
         canSave,
+        canManagePrivateLocations: true,
       } as SyntheticsSettingsContextValues);
 
       jest.spyOn(locationHooks, 'usePrivateLocationsAPI').mockReturnValue({
