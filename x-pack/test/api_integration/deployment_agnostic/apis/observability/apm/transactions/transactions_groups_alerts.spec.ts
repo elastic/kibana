@@ -13,26 +13,26 @@ import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { AggregationType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { ApmRuleType } from '@kbn/rule-data-utils';
-import { waitForAlertsForRule } from '../alerts/helpers/wait_for_alerts_for_rule';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { createApmRule, runRuleSoon, ApmAlertFields } from '../alerts/helpers/alerting_api_helper';
-import { waitForActiveRule } from '../alerts/helpers/wait_for_active_rule';
-import { cleanupRuleAndAlertState } from '../alerts/helpers/cleanup_rule_and_alert_state';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+import { APM_ACTION_VARIABLE_INDEX, APM_ALERTS_INDEX } from '../alerts/helpers/alerting_helper';
 
 type TransactionsGroupsMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const registry = getService('registry');
-  const apmApiClient = getService('apmApiClient');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
-  const supertest = getService('supertest');
-  const es = getService('es');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
+  const synthtrace = getService('synthtrace');
+  const alertingApi = getService('alertingApi');
+  const samlAuth = getService('samlAuth');
+
   const serviceName = 'synth-go';
   const dayInMs = 24 * 60 * 60 * 1000;
   const start = Date.now() - dayInMs;
   const end = Date.now() + dayInMs;
-  const logger = getService('log');
+
+  type Alerts = Awaited<ReturnType<typeof alertingApi.waitForAlertInIndex>>;
 
   async function getTransactionGroups(overrides?: {
     path?: {
@@ -69,12 +69,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       },
     });
     expect(response.status).to.be(200);
+
     return response.body as TransactionsGroupsMainStatistics;
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177617
-  registry.when('when data is loaded', { config: 'basic', archives: [] }, () => {
-    describe('Alerts', () => {
+  describe('Transaction groups alerts', () => {
+    describe('when data is loaded', () => {
       const transactions = [
         {
           name: 'GET /api/task/avg',
@@ -102,7 +102,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           type: 'request',
         },
       ];
+      let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+      let roleAuthc: RoleCredentials;
+
       before(async () => {
+        roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
         const serviceGoProdInstance = apm
           .service({ name: serviceName, environment: 'production', agentName: 'go' })
           .instance('instance-a');
@@ -135,16 +140,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ]);
       });
 
-      after(() => apmSynthtraceEsClient.clean());
+      after(async () => {
+        await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+        await apmSynthtraceEsClient.clean();
+      });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/198866
-      describe.skip('Transaction groups with avg transaction duration alerts', () => {
+      describe('with avg transaction duration alerts', () => {
         let ruleId: string;
-        let alerts: ApmAlertFields[];
+        let alerts: Alerts;
 
         before(async () => {
-          const createdRule = await createApmRule({
-            supertest,
+          const createdRule = await alertingApi.createRule({
             name: `Latency threshold | ${serviceName}`,
             params: {
               serviceName,
@@ -163,30 +169,42 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               ],
             },
             ruleTypeId: ApmRuleType.TransactionDuration,
+            consumer: 'apm',
+            roleAuthc,
           });
           ruleId = createdRule.id;
-          alerts = await waitForAlertsForRule({ es, ruleId });
+          alerts = await alertingApi.waitForAlertInIndex({
+            ruleId,
+            indexName: APM_ALERTS_INDEX,
+          });
         });
 
         after(async () => {
-          await cleanupRuleAndAlertState({ es, supertest, logger });
+          await alertingApi.cleanUpAlerts({
+            ruleId,
+            alertIndexName: APM_ALERTS_INDEX,
+            connectorIndexName: APM_ACTION_VARIABLE_INDEX,
+            consumer: 'apm',
+            roleAuthc,
+          });
         });
 
         it('checks if rule is active', async () => {
-          const ruleStatus = await waitForActiveRule({ ruleId, supertest });
+          const ruleStatus = await alertingApi.waitForRuleStatus({
+            ruleId,
+            expectedStatus: 'active',
+            roleAuthc,
+          });
           expect(ruleStatus).to.be('active');
         });
 
         it('should successfully run the rule', async () => {
-          const response = await runRuleSoon({
-            ruleId,
-            supertest,
-          });
+          const response = await alertingApi.runRule(roleAuthc, ruleId);
           expect(response.status).to.be(204);
         });
 
         it('indexes alert document', async () => {
-          expect(alerts.length).to.be(1);
+          expect(alerts.hits.hits.length).to.be(1);
         });
 
         it('returns the correct number of alert counts', async () => {
@@ -210,13 +228,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
       });
 
-      describe('Transaction groups with p99 transaction duration alerts', () => {
+      describe('with p99 transaction duration alerts', () => {
         let ruleId: string;
-        let alerts: ApmAlertFields[];
+        let alerts: Alerts;
 
         before(async () => {
-          const createdRule = await createApmRule({
-            supertest,
+          const createdRule = await alertingApi.createRule({
             name: `Latency threshold | ${serviceName}`,
             params: {
               serviceName,
@@ -235,31 +252,43 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               ],
             },
             ruleTypeId: ApmRuleType.TransactionDuration,
+            consumer: 'apm',
+            roleAuthc,
           });
 
           ruleId = createdRule.id;
-          alerts = await waitForAlertsForRule({ es, ruleId });
+          alerts = await alertingApi.waitForAlertInIndex({
+            ruleId,
+            indexName: APM_ALERTS_INDEX,
+          });
         });
 
         after(async () => {
-          await cleanupRuleAndAlertState({ es, supertest, logger });
+          await alertingApi.cleanUpAlerts({
+            ruleId,
+            alertIndexName: APM_ALERTS_INDEX,
+            connectorIndexName: APM_ACTION_VARIABLE_INDEX,
+            consumer: 'apm',
+            roleAuthc,
+          });
         });
 
         it('checks if rule is active', async () => {
-          const ruleStatus = await waitForActiveRule({ ruleId, supertest });
+          const ruleStatus = await alertingApi.waitForRuleStatus({
+            ruleId,
+            expectedStatus: 'active',
+            roleAuthc,
+          });
           expect(ruleStatus).to.be('active');
         });
 
         it('should successfully run the rule', async () => {
-          const response = await runRuleSoon({
-            ruleId,
-            supertest,
-          });
+          const response = await alertingApi.runRule(roleAuthc, ruleId);
           expect(response.status).to.be(204);
         });
 
         it('indexes alert document', async () => {
-          expect(alerts.length).to.be(1);
+          expect(alerts.hits.hits.length).to.be(1);
         });
 
         it('returns the correct number of alert counts', async () => {
@@ -286,13 +315,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
       });
 
-      describe('Transaction groups with error rate alerts', () => {
+      describe('with error rate alerts', () => {
         let ruleId: string;
-        let alerts: ApmAlertFields[];
+        let alerts: Alerts;
 
         before(async () => {
-          const createdRule = await createApmRule({
-            supertest,
+          const createdRule = await alertingApi.createRule({
             name: `Error rate | ${serviceName}`,
             params: {
               serviceName,
@@ -310,30 +338,43 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               ],
             },
             ruleTypeId: ApmRuleType.TransactionErrorRate,
+            consumer: 'apm',
+            roleAuthc,
           });
+
           ruleId = createdRule.id;
-          alerts = await waitForAlertsForRule({ es, ruleId });
+          alerts = await alertingApi.waitForAlertInIndex({
+            ruleId,
+            indexName: APM_ALERTS_INDEX,
+          });
         });
 
         after(async () => {
-          await cleanupRuleAndAlertState({ es, supertest, logger });
+          await alertingApi.cleanUpAlerts({
+            ruleId,
+            alertIndexName: APM_ALERTS_INDEX,
+            connectorIndexName: APM_ACTION_VARIABLE_INDEX,
+            consumer: 'apm',
+            roleAuthc,
+          });
         });
 
         it('checks if rule is active', async () => {
-          const ruleStatus = await waitForActiveRule({ ruleId, supertest });
+          const ruleStatus = await alertingApi.waitForRuleStatus({
+            ruleId,
+            expectedStatus: 'active',
+            roleAuthc,
+          });
           expect(ruleStatus).to.be('active');
         });
 
         it('should successfully run the rule', async () => {
-          const response = await runRuleSoon({
-            ruleId,
-            supertest,
-          });
+          const response = await alertingApi.runRule(roleAuthc, ruleId);
           expect(response.status).to.be(204);
         });
 
         it('indexes alert document', async () => {
-          expect(alerts.length).to.be(1);
+          expect(alerts.hits.hits.length).to.be(1);
         });
 
         it('returns the correct number of alert counts', async () => {
@@ -360,7 +401,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
       });
 
-      describe('Transaction groups without alerts', () => {
+      describe('without alerts', () => {
         it('returns the correct number of alert counts', async () => {
           const txGroupsTypeTask = await getTransactionGroups({
             query: { transactionType: 'task' },

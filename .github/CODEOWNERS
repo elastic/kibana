@@ -1278,6 +1278,8 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test/common/utils/synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team # Assigned per https://github.com/elastic/kibana/blob/main/packages/kbn-apm-synthtrace/kibana.jsonc#L5
 
 # Infra Monitoring tests
+/x-pack/test/common/services/infra_synthtrace_kibana_client.ts @elastic/obs-ux-infra_services-team
+/x-pack/test/common/services/infra_log_views.ts @elastic/obs-ux-infra_services-team # Assigned per https://github.com/elastic/kibana/pull/188204
 /x-pack/test/api_integration/apis/infra @elastic/obs-ux-infra_services-team
 /x-pack/test/functional/apps/infra @elastic/obs-ux-infra_services-team
 /x-pack/test/functional/apps/infra/logs @elastic/obs-ux-logs-team
@@ -1316,6 +1318,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test/accessibility/apps/group3/stack_monitoring.ts @elastic/stack-monitoring
 
 # Fleet
+/x-pack/test/functional/es_archives/fleet @elastic/fleet
 /x-pack/test/api_integration/services/fleet_and_agents.ts @elastic/fleet
 /x-pack/test/fleet_api_integration @elastic/fleet
 /x-pack/test/fleet_packages @elastic/fleet
@@ -1378,6 +1381,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test/api_integration/apis/logs_shared @elastic/obs-ux-logs-team
 
 # Observability-ui
+/x-pack/test_serverless/functional/test_suites/observability @elastic/observability-ui
 /x-pack/test_serverless/api_integration/test_suites/observability/index.ts @elastic/observability-ui
 /x-pack/test/functional_solution_sidenav/tests/observability_sidenav.ts @elastic/observability-ui
 /x-pack/test/functional/page_objects/observability_page.ts @elastic/observability-ui
@@ -1393,6 +1397,12 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 ### END Observability Plugins
 
 # Presentation
+/x-pack/test/functional/fixtures/kbn_archiver/maps.json @elastic/kibana-presentation
+/x-pack/test/functional/fixtures/kbn_archiver/canvas @elastic/kibana-presentation
+/x-pack/test/functional/es_archives/dashboard/async_search @elastic/kibana-presentation
+/test/functional/fixtures/kbn_archiver/dashboard @elastic/kibana-presentation
+/test/functional/fixtures/kbn_archiver/canvas @elastic/kibana-presentation
+/test/api_integration/apis/dashboards @elastic/kibana-presentation
 /test/interpreter_functional/snapshots @elastic/kibana-presentation # Assigned per https://github.com/elastic/kibana/pull/54342
 /test/functional/services/inspector.ts @elastic/kibana-presentation
 /x-pack/test/functional/services/canvas_element.ts @elastic/kibana-presentation
