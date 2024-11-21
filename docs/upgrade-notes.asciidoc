@@ -66,7 +66,6 @@ Deprecated endpoints will fail with a 404 status code starting from version 9.0.
 *Action* +
 Remove references to `GET /api/cases/status` endpoint.
 Replace references to endpoints listed as deprecated by it's replacement. See `Details` section 
-
 ====
 
 [[breaking-199656]]
@@ -92,7 +91,6 @@ Third party OIDC and SAML identity providers configured with `v1` endpoints will
 *Action* +
 Update any OIDC and SAML identity providers to reference the corresponding replacement endpoint listed above.
 Remove references to the `/api/security/v1/me` endpoint from any automations, applications, tooling, and scripts.
-
 ====
 
 [discrete]
