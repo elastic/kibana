@@ -62,7 +62,7 @@ export function createTestConfig({
           ...testConfig.kbnTestServer.serverArgs,
           '--status.allowAnonymous=false',
           '--server.xsrf.disableProtection=true',
-          `--plugin-path=${path.resolve(__dirname, '../common/plugins/spaces_test_plugin')}`,
+          // `--plugin-path=${path.resolve(__dirname, '../common/plugins/spaces_test_plugin')}`,
         ],
       },
     };
