@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { mockGlobalState, TestProviders, createMockStore } from '../../../../common/mock';
 import { useManagedUserItems } from './use_managed_user_items';
 import { mockEntraUserFields, mockOktaUserFields } from '../mocks';

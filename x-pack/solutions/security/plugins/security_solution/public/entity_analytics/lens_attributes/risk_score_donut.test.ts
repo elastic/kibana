@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { wrapper } from '../../common/components/visualization_actions/mocks';
 import { useLensAttributes } from '../../common/components/visualization_actions/use_lens_attributes';
 
