@@ -14,6 +14,8 @@ import { SecurityPageName } from '../app/types';
 import { KUBERNETES_PATH } from '../../common/constants';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 
+const HIDE_K8S: boolean = true;
+
 export const KubernetesRoutes = () => (
   <PluginTemplateWrapper>
     <TrackApplicationView viewId={SecurityPageName.kubernetes}>
@@ -24,7 +26,7 @@ export const KubernetesRoutes = () => (
 
 export const routes: SecuritySubPluginRoutes = [
   {
-    path: KUBERNETES_PATH,
+    path: HIDE_K8S ? ' ' : KUBERNETES_PATH,
     component: KubernetesRoutes,
   },
 ];
