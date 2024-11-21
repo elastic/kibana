@@ -10,7 +10,12 @@ import { waitFor, act, fireEvent, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { noop } from 'lodash/fp';
 
-import { noCreateCasesPermissions, TestProviders, createAppMockRenderer } from '../../common/mock';
+import {
+  onlyCreateCommentPermissions,
+  noCreateCommentCasesPermissions,
+  TestProviders,
+  createAppMockRenderer,
+} from '../../common/mock';
 
 import { AttachmentType } from '../../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER, MAX_COMMENT_LENGTH } from '../../../common/constants';
@@ -93,19 +98,36 @@ describe('AddComment ', () => {
     expect(screen.getByTestId('submit-comment')).toHaveAttribute('disabled');
   });
 
-  it('should hide the component when the user does not have create permissions', () => {
+  it('should hide the component when the user does not have createComment permissions', () => {
     createAttachmentsMock.mockImplementation(() => ({
       ...defaultResponse,
       isLoading: true,
     }));
 
     appMockRender.render(
-      <TestProviders permissions={noCreateCasesPermissions()}>
+      <TestProviders permissions={noCreateCommentCasesPermissions()}>
         <AddComment {...{ ...addCommentProps }} />
       </TestProviders>
     );
 
     expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('add-comment-form-wrapper')).not.toBeInTheDocument();
+  });
+
+  it('should show the component when the user does not have create permissions, but has createComment permissions', () => {
+    createAttachmentsMock.mockImplementation(() => ({
+      ...defaultResponse,
+      isLoading: true,
+    }));
+
+    appMockRender.render(
+      <TestProviders permissions={onlyCreateCommentPermissions()}>
+        <AddComment {...{ ...addCommentProps }} />
+      </TestProviders>
+    );
+
+    expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('add-comment-form-wrapper')).toBeInTheDocument();
   });
 
   it('should post comment on submit click', async () => {

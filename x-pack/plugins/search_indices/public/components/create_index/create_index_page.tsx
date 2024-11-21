@@ -13,7 +13,6 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { useKibana } from '../../hooks/use_kibana';
 import { useIndicesStatusQuery } from '../../hooks/api/use_indices_status';
-import { useUserPrivilegesQuery } from '../../hooks/api/use_user_permissions';
 import { LoadIndicesStatusError } from '../shared/load_indices_status_error';
 
 import { CreateIndex } from './create_index';
@@ -32,7 +31,6 @@ export const CreateIndexPage = () => {
     isError: hasIndicesStatusFetchError,
     error: indicesFetchError,
   } = useIndicesStatusQuery();
-  const { data: userPrivileges } = useUserPrivilegesQuery();
 
   const embeddableConsole = useMemo(
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
@@ -51,7 +49,7 @@ export const CreateIndexPage = () => {
         {isInitialLoading && <EuiLoadingLogo />}
         {hasIndicesStatusFetchError && <LoadIndicesStatusError error={indicesFetchError} />}
         {!isInitialLoading && !hasIndicesStatusFetchError && (
-          <CreateIndex indicesData={indicesData} userPrivileges={userPrivileges} />
+          <CreateIndex indicesData={indicesData} />
         )}
       </KibanaPageTemplate.Section>
       {embeddableConsole}
