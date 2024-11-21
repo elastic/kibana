@@ -21,7 +21,7 @@ export const builtInKubernetesPodEcsEntityDefinition: EntityDefinition =
       'This definition extracts Kubernetes pod entities from the Kubernetes integration data streams',
     type: 'k8s.pod.ecs',
     indexPatterns: commonEcsIndexPatterns,
-    identityFields: ['kubernetes.pod.name'],
+    identityFields: ['kubernetes.pod.uid'],
     displayNameTemplate: '{{kubernetes.pod.name}}',
     latest: {
       timestampField: '@timestamp',

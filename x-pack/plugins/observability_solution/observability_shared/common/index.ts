@@ -219,4 +219,4 @@ export {
 
 export { COMMON_OBSERVABILITY_GROUPING } from './embeddable_grouping';
 
-export { ENTITY_TYPES, EntityDataStreamType } from './entity';
+export { BUILT_IN_ENTITY_TYPES, EntityDataStreamType } from './entity';

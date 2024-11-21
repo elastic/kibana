@@ -19,7 +19,7 @@ export const builtInKubernetesReplicaSetSemConvEntityDefinition: EntityDefinitio
     name: 'Kubernetes ReplicaSet from SemConv data',
     description:
       'This definition extracts Kubernetes replica set entities using data collected with OpenTelemetry',
-    type: 'kubernetes_replica_set_semconv',
+    type: 'k8s.replicaset.otel',
     indexPatterns: commonOtelIndexPatterns,
     identityFields: ['k8s.replicaset.name'],
     displayNameTemplate: '{{k8s.replicaset.name}}',
