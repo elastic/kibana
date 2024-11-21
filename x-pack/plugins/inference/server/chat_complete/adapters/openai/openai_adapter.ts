@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import OpenAI from 'openai';
+import type OpenAI from 'openai';
 import type {
   ChatCompletionAssistantMessageParam,
   ChatCompletionMessageParam,
@@ -13,22 +13,33 @@ import type {
   ChatCompletionToolMessageParam,
   ChatCompletionUserMessageParam,
 } from 'openai/resources';
-import { filter, from, map, switchMap, tap, throwError, identity } from 'rxjs';
-import { Readable, isReadable } from 'stream';
+import {
+  filter,
+  from,
+  identity,
+  map,
+  mergeMap,
+  Observable,
+  switchMap,
+  tap,
+  throwError,
+} from 'rxjs';
+import { isReadable, Readable } from 'stream';
 import {
   ChatCompletionChunkEvent,
   ChatCompletionEventType,
+  ChatCompletionTokenCountEvent,
+  createInferenceInternalError,
   Message,
   MessageRole,
   ToolOptions,
-  createInferenceInternalError,
 } from '@kbn/inference-common';
 import { createTokenLimitReachedError } from '../../errors';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
 import type { InferenceConnectorAdapter } from '../../types';
 import {
-  wrapWithSimulatedFunctionCalling,
   parseInlineFunctionCalls,
+  wrapWithSimulatedFunctionCalling,
 } from '../../simulated_function_calling';
 
 export const openAIAdapter: InferenceConnectorAdapter = {
@@ -92,33 +103,56 @@ export const openAIAdapter: InferenceConnectorAdapter = {
           throw createTokenLimitReachedError();
         }
       }),
-      filter(
-        (line): line is OpenAI.ChatCompletionChunk =>
-          'object' in line && line.object === 'chat.completion.chunk' && line.choices.length > 0
-      ),
-      map((chunk): ChatCompletionChunkEvent => {
-        const delta = chunk.choices[0].delta;
-
-        return {
-          type: ChatCompletionEventType.ChatCompletionChunk,
-          content: delta.content ?? '',
-          tool_calls:
-            delta.tool_calls?.map((toolCall) => {
-              return {
-                function: {
-                  name: toolCall.function?.name ?? '',
-                  arguments: toolCall.function?.arguments ?? '',
-                },
-                toolCallId: toolCall.id ?? '',
-                index: toolCall.index,
-              };
-            }) ?? [],
-        };
+      filter((line): line is OpenAI.ChatCompletionChunk => {
+        return 'object' in line && line.object === 'chat.completion.chunk';
+      }),
+      mergeMap((chunk): Observable<ChatCompletionChunkEvent | ChatCompletionTokenCountEvent> => {
+        const events: Array<ChatCompletionChunkEvent | ChatCompletionTokenCountEvent> = [];
+        if (chunk.usage) {
+          events.push(tokenCountFromOpenAI(chunk.usage));
+        }
+        if (chunk.choices?.length) {
+          events.push(chunkFromOpenAI(chunk));
+        }
+        return from(events);
       }),
       simulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : identity
     );
   },
 };
+
+function chunkFromOpenAI(chunk: OpenAI.ChatCompletionChunk): ChatCompletionChunkEvent {
+  const delta = chunk.choices[0].delta;
+
+  return {
+    type: ChatCompletionEventType.ChatCompletionChunk,
+    content: delta.content ?? '',
+    tool_calls:
+      delta.tool_calls?.map((toolCall) => {
+        return {
+          function: {
+            name: toolCall.function?.name ?? '',
+            arguments: toolCall.function?.arguments ?? '',
+          },
+          toolCallId: toolCall.id ?? '',
+          index: toolCall.index,
+        };
+      }) ?? [],
+  };
+}
+
+function tokenCountFromOpenAI(
+  completionUsage: OpenAI.CompletionUsage
+): ChatCompletionTokenCountEvent {
+  return {
+    type: ChatCompletionEventType.ChatCompletionTokenCount,
+    tokens: {
+      completion: completionUsage.completion_tokens,
+      prompt: completionUsage.prompt_tokens,
+      total: completionUsage.total_tokens,
+    },
+  };
+}
 
 function toolsToOpenAI(tools: ToolOptions['tools']): OpenAI.ChatCompletionCreateParams['tools'] {
   return tools

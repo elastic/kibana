@@ -1,5 +1,5 @@
 {
-    "type": "shared-common",
+    "type": "shared-browser",
     "id": "@kbn/security-ui-components",
     "owner": "@elastic/kibana-security"
 }
