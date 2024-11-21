@@ -124,11 +124,11 @@ const CompletionParamsFields: React.FunctionComponent<{
   errors: RuleFormParamsErrors;
   editSubActionParams: (params: Partial<InferenceActionParams['subActionParams']>) => void;
 }> = ({ subActionParams, editSubActionParams, errors }) => {
-  const { input } = subActionParams;
+  const { messages, n, tools, temperature, tool_choice, metadata, } = subActionParams;
 
   return (
     <InferenceInput
-      input={input}
+      input={''}
       editSubActionParams={editSubActionParams}
       inputError={errors.input as string}
     />

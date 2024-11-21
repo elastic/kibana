@@ -19,7 +19,7 @@ export const SecretsSchema = schema.object({
   providerSecrets: schema.object({}, { unknowns: 'allow', defaultValue: {} }),
 });
 
-// subset of ChatCompletionMessageParam
+// subset of OpenAI.ChatCompletionMessageParam https://github.com/openai/openai-node/blob/master/src/resources/chat/completions.ts
 const AIMessage = schema.object({
   role: schema.string(),
   content: schema.maybe(schema.string()),
@@ -48,6 +48,7 @@ const AITool = schema.object({
   }),
 });
 
+// subset of OpenAI.ChatCompletionCreateParamsBase https://github.com/openai/openai-node/blob/master/src/resources/chat/completions.ts
 export const ChatCompleteParamsSchema = schema.object({
   messages: schema.arrayOf(AIMessage),
   model: schema.maybe(schema.string()),

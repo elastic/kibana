@@ -45,12 +45,11 @@ export const useLoadActionTypes = ({
         bedrock: '.bedrock',
         openai: '.gen-ai',
         gemini: '.gemini',
+        inference: '.inference',
       };
 
       const sortedData = queryResult
-        .filter((p) =>
-          [actionTypeKey.bedrock, actionTypeKey.openai, actionTypeKey.gemini].includes(p.id)
-        )
+        .filter((p) => [actionTypeKey.inference].includes(p.id))
         .sort((a, b) => a.name.localeCompare(b.name));
       return sortedData;
     },

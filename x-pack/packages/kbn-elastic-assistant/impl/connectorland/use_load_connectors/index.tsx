@@ -31,6 +31,7 @@ const actionTypeKey = {
   bedrock: '.bedrock',
   openai: '.gen-ai',
   gemini: '.gemini',
+  inference: '.inference',
 };
 
 export const useLoadConnectors = ({
@@ -45,9 +46,7 @@ export const useLoadConnectors = ({
         (acc: AIConnector[], connector) => [
           ...acc,
           ...(!connector.isMissingSecrets &&
-          [actionTypeKey.bedrock, actionTypeKey.openai, actionTypeKey.gemini].includes(
-            connector.actionTypeId
-          )
+          [actionTypeKey.inference].includes(connector.actionTypeId)
             ? [
                 {
                   ...connector,
