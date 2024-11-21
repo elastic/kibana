@@ -394,9 +394,10 @@ groups:
           
           [source,yaml]
           ----
-          # If applicable, include the subdomain in the hostname
           xpack.actions.proxyBypassHosts: [ "events.pagerduty.com" ]
           ----
+          
+          If applicable, include the subdomain in the hostname
 
 
       - setting: xpack.actions.proxyOnlyHosts
@@ -422,9 +423,10 @@ groups:
           
           [source,yaml]
           ----
-          # If applicable, include the subdomain in the hostname
           xpack.actions.proxyOnlyHosts: [ "events.pagerduty.com" ]
           ----
+
+          If applicable, include the subdomain in the hostname
 
       - setting: xpack.actions.proxyHeaders
         # id:

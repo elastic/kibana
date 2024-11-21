@@ -26,7 +26,10 @@ groups:
      - [Optional] (asciidoc in quotes) - The description content that appears below the group title.
      - [Optional] (asciidoc in quotes) - Paragraph 2
      - [Optional] (asciidoc in quotes) - Paragraph 3
-    example: Any complex Asciidoc such as tables, lists, code examples, etc.
+    example: |
+      These lines are interpreted as literal strings.
+      Include any complex Asciidoc such as tables, lists, code examples, etc.
+      Note that comments marked by # are ignored
 
     settings:
       - setting: [Required] (string) - Setting name, e.g. xpack.encryptedSavedObjects.encryptionKey
@@ -52,7 +55,10 @@ groups:
           - [Optional] - one of cloud/serverless/self-managed
           - [Optional] - one of cloud/serverless/self-managed
           - [Optional] - one of cloud/serverless/self-managed
-        example: Any complex Asciidoc such as tables, lists, code examples, etc.
+        example: |
+          These lines are interpreted as literal strings.
+          Include any complex Asciidoc such as tables, lists, code examples, etc.
+          Note that comments marked by # are ignored
 ```
 
 
@@ -87,5 +93,5 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-{setting-name}.asciidoc
+        # example: |
 ```
