@@ -18,6 +18,7 @@ export interface UserPrivilegesState {
   detectionEnginePrivileges: ReturnType<typeof useFetchDetectionEnginePrivileges>;
   endpointPrivileges: EndpointPrivileges;
   kibanaSecuritySolutionsPrivileges: { crud: boolean; read: boolean };
+  timelinePrivileges: { crud: boolean; read: boolean };
 }
 
 export const initialUserPrivilegesState = (): UserPrivilegesState => ({
@@ -25,6 +26,7 @@ export const initialUserPrivilegesState = (): UserPrivilegesState => ({
   detectionEnginePrivileges: { loading: false, error: undefined, result: undefined },
   endpointPrivileges: getEndpointPrivilegesInitialState(),
   kibanaSecuritySolutionsPrivileges: { crud: false, read: false },
+  timelinePrivileges: { crud: false, read: false },
 });
 export const UserPrivilegesContext = createContext<UserPrivilegesState>(
   initialUserPrivilegesState()
@@ -50,6 +52,22 @@ export const UserPrivilegesProvider = ({
   const detectionEnginePrivileges = useFetchDetectionEnginePrivileges(read);
   const endpointPrivileges = useEndpointPrivileges();
 
+  const [timelinePrivileges, setTimelinePrivileges] = useState({
+    crud: kibanaCapabilities.securitySolutionTimeline.crud === true,
+    read: kibanaCapabilities.securitySolutionTimeline.read === true,
+  });
+
+  useEffect(() => {
+    setTimelinePrivileges((currPrivileges) => {
+      const timelineCrud = kibanaCapabilities.securitySolutionTimeline.crud === true;
+      const timelineRead = kibanaCapabilities.securitySolutionTimeline.read === true;
+      if (currPrivileges.read !== timelineRead || currPrivileges.crud !== timelineCrud) {
+        return { read: timelineRead, crud: timelineCrud };
+      }
+      return currPrivileges;
+    });
+  }, [kibanaCapabilities.securitySolutionTimeline]);
+
   useEffect(() => {
     setKibanaSecuritySolutionsPrivileges((currPrivileges) => {
       if (currPrivileges.read !== read || currPrivileges.crud !== crud) {
@@ -66,6 +84,7 @@ export const UserPrivilegesProvider = ({
         detectionEnginePrivileges,
         endpointPrivileges,
         kibanaSecuritySolutionsPrivileges,
+        timelinePrivileges,
       }}
     >
       {children}

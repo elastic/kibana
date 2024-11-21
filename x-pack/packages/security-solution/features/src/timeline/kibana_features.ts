@@ -33,14 +33,16 @@ export const getTimelineBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
         all: [],
         read: [],
       },
-      ui: [],
+      ui: ['read', 'crud'],
     },
     read: {
+      app: [TIMELINE_FEATURE_ID, 'kibana'],
+      catalogue: [APP_ID],
       savedObject: {
         all: [],
         read: [],
       },
-      ui: [],
+      ui: ['read'],
     },
   },
 });
