@@ -768,7 +768,7 @@ describe('LensVisService attributes', () => {
       columns: [],
       isPlainRecord: true,
       allSuggestions: [], // none available
-      hasHistogramSuggestionForESQL: true,
+      isTransformationalESQL: false,
     });
     expect(lensVis.visContext?.attributes.state.query).toStrictEqual(histogramQuery);
   });
