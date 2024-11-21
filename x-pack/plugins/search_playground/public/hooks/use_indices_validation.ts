@@ -15,7 +15,7 @@ export const useIndicesValidation = (unvalidatedIndices: string[]) => {
 
   useEffect(() => {
     if (isIndicesLoaded) {
-      setValidIndices(indices.filter<string>((index) => unvalidatedIndices.includes(index)));
+      setValidIndices(indices.filter((index) => unvalidatedIndices.includes(index)));
       setIsValidated(true);
     }
   }, [unvalidatedIndices, indices, isIndicesLoaded]);
