@@ -212,7 +212,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         },
       });
 
-      // await for the model to be deployed 
+      // await for the model to be deployed
       await this.isInferenceEndpointExists();
     } catch (error) {
       this.options.logger.error(
