@@ -109,6 +109,9 @@ describe('Service inventory', () => {
       cy.contains('h1', 'opbeans-node');
       cy.go('back');
 
+      cy.url().should('include', '/apm/services');
+      cy.wait(mainAliasNames);
+
       // It navigates to Inventory plugin.
       cy.contains('Try our new Inventory').click();
       cy.url().should('include', '/inventory');
