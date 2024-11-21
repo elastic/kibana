@@ -23,5 +23,8 @@
     "@kbn/core-base-common",
     "@kbn/core-analytics-browser",
     "@kbn/core-analytics-browser-mocks",
+    "@kbn/core-execution-context-browser",
+    "@kbn/core-execution-context-browser-mocks",
+    "@kbn/shared-ux-router",
   ]
 }

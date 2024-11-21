@@ -8,7 +8,6 @@
  */
 
 import { Observable } from 'rxjs';
-import type { ExecutionContextStart } from '@kbn/core-execution-context-browser';
 import { createContext, useContext } from 'react';
 import { SharedUXExecutionContext } from './types';
 
@@ -50,7 +49,8 @@ export interface SharedUXExecutionContextSetup {
  * https://github.com/Microsoft/web-build-tools/issues/1237
  */
 export interface SharedUXExecutionContextSetup {
-  executionContext: ExecutionContextStart;
+  /** {@link SharedUXExecutionContextSetup} */
+  executionContext?: SharedUXExecutionContextStart;
 }
 
 export type KibanaServices = Partial<SharedUXExecutionContextSetup>;
