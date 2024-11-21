@@ -38,6 +38,11 @@ export const getRequestWithStreamOption = (
     if (jsonBody) {
       if (APIS_ALLOWING_STREAMING.has(url)) {
         jsonBody.stream = stream;
+        if (stream) {
+          jsonBody.stream_options = {
+            include_usage: true,
+          };
+        }
       }
       jsonBody.model = jsonBody.model || defaultModel;
     }
