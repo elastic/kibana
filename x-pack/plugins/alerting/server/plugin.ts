@@ -330,6 +330,7 @@ export class AlertingPlugin {
             .getStartServices()
             .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
           elasticsearchAndSOAvailability$,
+          isServerless: !!plugins.serverless,
         });
       }
     }

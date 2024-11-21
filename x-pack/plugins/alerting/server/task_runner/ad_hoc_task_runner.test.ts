@@ -459,7 +459,7 @@ describe('Ad Hoc Task Runner', () => {
 
     expect(clusterClient.bulk).toHaveBeenCalledWith({
       index: '.alerts-test.alerts-default',
-      refresh: true,
+      refresh: 'wait_for',
       require_alias: !useDataStreamForAlerts,
       body: [
         {
