@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { waitFor, act, renderHook } from '@testing-library/react';
 import { of } from 'rxjs';
 import { siemGuideId } from '../../../../common/guided_onboarding/siem_guide_config';
 import { TourContextProvider, useTourContext } from './tour';
@@ -66,14 +66,14 @@ describe('useTourContext', () => {
       expect(result.current.isTourShown(tourId)).toBe(true);
     });
     it('endTourStep calls completeGuideStep with correct tourId', async () => {
-      await act(async () => {
-        const { result, waitForNextUpdate } = renderHook(() => useTourContext(), {
-          wrapper: TourContextProvider,
-        });
-        await waitForNextUpdate();
-        result.current.endTourStep(tourId);
-        expect(mockCompleteGuideStep).toHaveBeenCalledWith(siemGuideId, tourId);
+      const { result } = renderHook(() => useTourContext(), {
+        wrapper: TourContextProvider,
       });
+      await waitFor(() => new Promise((resolve) => resolve(null)));
+      act(() => {
+        result.current.endTourStep(tourId);
+      });
+      expect(mockCompleteGuideStep).toHaveBeenCalledWith(siemGuideId, tourId);
     });
     it('activeStep is initially 1', () => {
       const { result } = renderHook(() => useTourContext(), {
@@ -82,43 +82,46 @@ describe('useTourContext', () => {
       expect(result.current.activeStep).toBe(1);
     });
     it('incrementStep properly increments for each tourId, and if attempted to increment beyond length of tour config steps resets activeStep to 1', async () => {
-      await act(async () => {
-        const { result, waitForNextUpdate } = renderHook(() => useTourContext(), {
-          wrapper: TourContextProvider,
-        });
-        await waitForNextUpdate();
-        const stepCount = securityTourConfig[tourId].length;
+      const { result } = renderHook(() => useTourContext(), {
+        wrapper: TourContextProvider,
+      });
+      await waitFor(() => new Promise((resolve) => resolve(null)));
+      const stepCount = securityTourConfig[tourId].length;
+      act(() => {
         for (let i = 0; i < stepCount - 1; i++) {
           result.current.incrementStep(tourId);
         }
-        const lastStep = stepCount ? stepCount : 1;
-        expect(result.current.activeStep).toBe(lastStep);
-        result.current.incrementStep(tourId);
-        expect(result.current.activeStep).toBe(1);
       });
+      const lastStep = stepCount ? stepCount : 1;
+      expect(result.current.activeStep).toBe(lastStep);
+      act(() => {
+        result.current.incrementStep(tourId);
+      });
+      expect(result.current.activeStep).toBe(1);
     });
 
     it('setStep sets activeStep to step number argument', async () => {
-      await act(async () => {
-        const { result, waitForNextUpdate } = renderHook(() => useTourContext(), {
-          wrapper: TourContextProvider,
-        });
-        await waitForNextUpdate();
-        result.current.setStep(tourId, 6);
-        expect(result.current.activeStep).toBe(6);
+      const { result } = renderHook(() => useTourContext(), {
+        wrapper: TourContextProvider,
       });
+      await waitFor(() => new Promise((resolve) => resolve(null)));
+      act(() => {
+        result.current.setStep(tourId, 6);
+      });
+      expect(result.current.activeStep).toBe(6);
     });
 
     it('does not setStep sets activeStep to non-existing step number', async () => {
-      await act(async () => {
-        const { result, waitForNextUpdate } = renderHook(() => useTourContext(), {
-          wrapper: TourContextProvider,
-        });
-        await waitForNextUpdate();
+      const { result } = renderHook(() => useTourContext(), {
+        wrapper: TourContextProvider,
+      });
+      await waitFor(() => new Promise((resolve) => resolve(null)));
+
+      act(() => {
         // @ts-expect-error testing invalid step
         result.current.setStep(tourId, 88);
-        expect(result.current.activeStep).toBe(1);
       });
+      expect(result.current.activeStep).toBe(1);
     });
   });
 });

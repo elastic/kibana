@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { useUncommonProcesses } from '.';
 import { HostsType } from '../../store/model';

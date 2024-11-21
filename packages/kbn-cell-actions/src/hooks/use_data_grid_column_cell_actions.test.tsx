@@ -11,8 +11,7 @@ import type { JSXElementConstructor, MutableRefObject } from 'react';
 import React from 'react';
 import type { EuiDataGridColumnCellActionProps, EuiDataGridRefProps } from '@elastic/eui';
 import { EuiButtonEmpty, type EuiDataGridColumnCellAction } from '@elastic/eui';
-import { render, waitFor } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { render, waitFor, renderHook } from '@testing-library/react';
 import { makeAction } from '../mocks/helpers';
 import type { UseDataGridColumnsCellActionsProps } from './use_data_grid_column_cell_actions';
 import { useDataGridColumnsCellActions } from './use_data_grid_column_cell_actions';
@@ -72,24 +71,24 @@ describe('useDataGridColumnsCellActions', () => {
   });
 
   it('should return array with actions for each columns', async () => {
-    const { result, waitForNextUpdate } = renderHook(useDataGridColumnsCellActions, {
+    const { result } = renderHook(useDataGridColumnsCellActions, {
       initialProps: useDataGridColumnsCellActionsProps,
     });
 
     expect(result.current).toHaveLength(0);
 
-    await waitForNextUpdate();
-
-    expect(result.current).toHaveLength(columns.length);
-    expect(result.current[0]).toHaveLength(actions.length);
+    await waitFor(() => {
+      expect(result.current).toHaveLength(columns.length);
+      expect(result.current[0]).toHaveLength(actions.length);
+    });
   });
 
   it('should call getCellValue with the proper params', async () => {
-    const { result, waitForNextUpdate } = renderHook(useDataGridColumnsCellActions, {
+    const { result } = renderHook(useDataGridColumnsCellActions, {
       initialProps: useDataGridColumnsCellActionsProps,
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     renderCellAction(result.current[0][0], { rowIndex: 0 });
     renderCellAction(result.current[0][1], { rowIndex: 1 });
@@ -104,11 +103,11 @@ describe('useDataGridColumnsCellActions', () => {
   });
 
   it('should render the cell actions', async () => {
-    const { result, waitForNextUpdate } = renderHook(useDataGridColumnsCellActions, {
+    const { result } = renderHook(useDataGridColumnsCellActions, {
       initialProps: useDataGridColumnsCellActionsProps,
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const cellAction1 = renderCellAction(result.current[0][0]);
 
@@ -122,25 +121,25 @@ describe('useDataGridColumnsCellActions', () => {
   });
 
   it('should execute the action on click', async () => {
-    const { result, waitForNextUpdate } = renderHook(useDataGridColumnsCellActions, {
+    const { result } = renderHook(useDataGridColumnsCellActions, {
       initialProps: useDataGridColumnsCellActionsProps,
     });
-    await waitForNextUpdate();
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const cellAction = renderCellAction(result.current[0][0]);
 
     cellAction.getByTestId(`dataGridColumnCellAction-${action1.id}`).click();
 
-    waitFor(() => {
+    await waitFor(() => {
       expect(action1.execute).toHaveBeenCalled();
     });
   });
 
   it('should execute the action with correct context', async () => {
-    const { result, waitForNextUpdate } = renderHook(useDataGridColumnsCellActions, {
+    const { result } = renderHook(useDataGridColumnsCellActions, {
       initialProps: useDataGridColumnsCellActionsProps,
     });
-    await waitForNextUpdate();
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const cellAction1 = renderCellAction(result.current[0][0], { rowIndex: 1 });
 
@@ -194,10 +193,10 @@ describe('useDataGridColumnsCellActions', () => {
   });
 
   it('should execute the action with correct page value', async () => {
-    const { result, waitForNextUpdate } = renderHook(useDataGridColumnsCellActions, {
+    const { result } = renderHook(useDataGridColumnsCellActions, {
       initialProps: useDataGridColumnsCellActionsProps,
     });
-    await waitForNextUpdate();
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const cellAction = renderCellAction(result.current[0][0], { rowIndex: 25 });
 
@@ -225,10 +224,10 @@ describe('useDataGridColumnsCellActions', () => {
   });
 
   it('should close popover then action executed', async () => {
-    const { result, waitForNextUpdate } = renderHook(useDataGridColumnsCellActions, {
+    const { result } = renderHook(useDataGridColumnsCellActions, {
       initialProps: useDataGridColumnsCellActionsProps,
     });
-    await waitForNextUpdate();
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const cellAction = renderCellAction(result.current[0][0], { rowIndex: 25 });
 
@@ -240,28 +239,28 @@ describe('useDataGridColumnsCellActions', () => {
   });
 
   it('should return empty array of actions when list of fields is empty', async () => {
-    const { result, waitForNextUpdate } = renderHook(useDataGridColumnsCellActions, {
+    const { result } = renderHook(useDataGridColumnsCellActions, {
       initialProps: {
         ...useDataGridColumnsCellActionsProps,
         fields: [],
       },
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(result.current).toBeInstanceOf(Array);
     expect(result.current.length).toBe(0);
   });
 
   it('should return empty array of actions when list of fields is undefined', async () => {
-    const { result, waitForNextUpdate } = renderHook(useDataGridColumnsCellActions, {
+    const { result } = renderHook(useDataGridColumnsCellActions, {
       initialProps: {
         ...useDataGridColumnsCellActionsProps,
         fields: undefined,
       },
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(result.current).toBeInstanceOf(Array);
     expect(result.current.length).toBe(0);

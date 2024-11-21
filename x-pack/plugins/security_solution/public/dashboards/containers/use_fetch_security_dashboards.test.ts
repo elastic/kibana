@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { HttpStart } from '@kbn/core/public';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { waitFor, renderHook } from '@testing-library/react';
 import { DashboardContextProvider } from '../context/dashboard_context';
 import { useFetchSecurityDashboards } from './use_fetch_security_dashboards';
 import { getTagsByName } from '../../common/containers/tags/api';
@@ -28,9 +28,9 @@ const renderUseFetchSecurityDashboards = () =>
 
 const asyncRenderUseFetchSecurityDashboards = async () => {
   const renderedHook = renderUseFetchSecurityDashboards();
-  await act(async () => {
-    await renderedHook.waitForNextUpdate();
-  });
+
+  await waitFor(() => new Promise((resolve) => resolve(null)));
+
   return renderedHook;
 };
 
@@ -76,7 +76,9 @@ describe('useFetchSecurityDashboards', () => {
   it('should return Security Solution dashboards', async () => {
     const { result } = await asyncRenderUseFetchSecurityDashboards();
 
-    expect(result.current.isLoading).toEqual(false);
-    expect(result.current.dashboards).toEqual(DEFAULT_DASHBOARDS_RESPONSE);
+    await waitFor(() => {
+      expect(result.current.isLoading).toEqual(false);
+      expect(result.current.dashboards).toEqual(DEFAULT_DASHBOARDS_RESPONSE);
+    });
   });
 });

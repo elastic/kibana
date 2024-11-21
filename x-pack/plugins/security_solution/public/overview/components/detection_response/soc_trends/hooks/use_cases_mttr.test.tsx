@@ -8,7 +8,7 @@
 import React from 'react';
 import type { UseCasesMttr } from './use_cases_mttr';
 import { useCasesMttr } from './use_cases_mttr';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, waitFor, renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
 import { useKibana as useKibanaMock } from '../../../../../common/lib/kibana/__mocks__';
 import * as i18n from '../translations';
@@ -53,34 +53,32 @@ describe('useCasesMttr', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
+
   it('loads initial state', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useCasesMttr(props), {
-        wrapper: wrapperContainer,
-      });
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        stat: '-',
-        isLoading: true,
-        percentage: {
-          percent: null,
-          color: 'hollow',
-          note: i18n.NO_DATA('case'),
-        },
-        ...basicData,
-      });
+    const { result } = renderHook(() => useCasesMttr(props), {
+      wrapper: wrapperContainer,
+    });
+
+    expect(result.current).toEqual({
+      stat: '-',
+      isLoading: true,
+      percentage: {
+        percent: null,
+        color: 'hollow',
+        note: i18n.NO_DATA('case'),
+      },
+      ...basicData,
     });
   });
+
   it('finds positive percentage change', async () => {
     useKibanaMock().services.cases.api.cases.getCasesMetrics = mockGetCasesMetrics
       .mockReturnValueOnce({ mttr: 10000 })
       .mockReturnValue({ mttr: 5000 });
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useCasesMttr(props), {
-        wrapper: wrapperContainer,
-      });
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+    const { result } = renderHook(() => useCasesMttr(props), {
+      wrapper: wrapperContainer,
+    });
+    await waitFor(() =>
       expect(result.current).toEqual({
         stat: '2h',
         isLoading: false,
@@ -95,19 +93,17 @@ describe('useCasesMttr', () => {
           }),
         },
         ...basicData,
-      });
-    });
+      })
+    );
   });
   it('finds negative percentage change', async () => {
     useKibanaMock().services.cases.api.cases.getCasesMetrics = mockGetCasesMetrics
       .mockReturnValueOnce({ mttr: 5000 })
       .mockReturnValue({ mttr: 10000 });
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useCasesMttr(props), {
-        wrapper: wrapperContainer,
-      });
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+    const { result } = renderHook(() => useCasesMttr(props), {
+      wrapper: wrapperContainer,
+    });
+    await waitFor(() =>
       expect(result.current).toEqual({
         stat: '1h',
         isLoading: false,
@@ -122,19 +118,17 @@ describe('useCasesMttr', () => {
           }),
         },
         ...basicData,
-      });
-    });
+      })
+    );
   });
   it('finds zero percentage change', async () => {
     useKibanaMock().services.cases.api.cases.getCasesMetrics = mockGetCasesMetrics.mockReturnValue({
       mttr: 10000,
     });
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useCasesMttr(props), {
-        wrapper: wrapperContainer,
-      });
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+    const { result } = renderHook(() => useCasesMttr(props), {
+      wrapper: wrapperContainer,
+    });
+    await waitFor(() =>
       expect(result.current).toEqual({
         stat: '2h',
         isLoading: false,
@@ -144,19 +138,17 @@ describe('useCasesMttr', () => {
           note: i18n.NO_CHANGE('case resolution time'),
         },
         ...basicData,
-      });
-    });
+      })
+    );
   });
   it('handles null mttr - current time range', async () => {
     useKibanaMock().services.cases.api.cases.getCasesMetrics = mockGetCasesMetrics
       .mockReturnValueOnce({ mttr: null })
       .mockReturnValue({ mttr: 10000 });
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useCasesMttr(props), {
-        wrapper: wrapperContainer,
-      });
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+    const { result } = renderHook(() => useCasesMttr(props), {
+      wrapper: wrapperContainer,
+    });
+    await waitFor(() =>
       expect(result.current).toEqual({
         stat: '-',
         isLoading: false,
@@ -166,19 +158,17 @@ describe('useCasesMttr', () => {
           note: i18n.NO_DATA_CURRENT('case'),
         },
         ...basicData,
-      });
-    });
+      })
+    );
   });
   it('handles null mttr - compare time range', async () => {
     useKibanaMock().services.cases.api.cases.getCasesMetrics = mockGetCasesMetrics
       .mockReturnValueOnce({ mttr: 10000 })
       .mockReturnValue({ mttr: null });
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useCasesMttr(props), {
-        wrapper: wrapperContainer,
-      });
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+    const { result } = renderHook(() => useCasesMttr(props), {
+      wrapper: wrapperContainer,
+    });
+    await waitFor(() =>
       expect(result.current).toEqual({
         stat: '2h',
         isLoading: false,
@@ -188,8 +178,8 @@ describe('useCasesMttr', () => {
           note: i18n.NO_DATA_COMPARE('case'),
         },
         ...basicData,
-      });
-    });
+      })
+    );
   });
   it('handles null mttr - current & compare time range', async () => {
     useKibanaMock().services.cases.api.cases.getCasesMetrics = mockGetCasesMetrics
@@ -198,13 +188,11 @@ describe('useCasesMttr', () => {
       .mockReturnValue({
         mttr: null,
       });
-    await act(async () => {
-      let ourProps = props;
-      const { result, rerender, waitForNextUpdate } = renderHook(() => useCasesMttr(ourProps), {
-        wrapper: wrapperContainer,
-      });
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+    let ourProps = props;
+    const { result, rerender } = renderHook(() => useCasesMttr(ourProps), {
+      wrapper: wrapperContainer,
+    });
+    await waitFor(() =>
       expect(result.current).toEqual({
         stat: '2h',
         isLoading: false,
@@ -214,14 +202,16 @@ describe('useCasesMttr', () => {
           note: i18n.NO_CHANGE('case resolution time'),
         },
         ...basicData,
-      });
-      ourProps = {
-        ...props,
-        from: '2020-07-08T08:20:18.966Z',
-        to: '2020-07-09T08:20:18.966Z',
-      };
-      rerender();
-      await waitForNextUpdate();
+      })
+    );
+
+    ourProps = {
+      ...props,
+      from: '2020-07-08T08:20:18.966Z',
+      to: '2020-07-09T08:20:18.966Z',
+    };
+    rerender();
+    await waitFor(() =>
       expect(result.current).toEqual({
         stat: '-',
         isLoading: false,
@@ -231,8 +221,8 @@ describe('useCasesMttr', () => {
           note: i18n.NO_DATA('case'),
         },
         ...basicData,
-      });
-    });
+      })
+    );
   });
   it('handles undefined mttr - current & compare time range', async () => {
     useKibanaMock().services.cases.api.cases.getCasesMetrics = mockGetCasesMetrics
@@ -241,13 +231,12 @@ describe('useCasesMttr', () => {
       .mockReturnValue({
         mttr: undefined,
       });
-    await act(async () => {
-      let ourProps = props;
-      const { result, rerender, waitForNextUpdate } = renderHook(() => useCasesMttr(ourProps), {
-        wrapper: wrapperContainer,
-      });
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+    let ourProps = props;
+    const { result, rerender } = renderHook(() => useCasesMttr(ourProps), {
+      wrapper: wrapperContainer,
+    });
+
+    await waitFor(() =>
       expect(result.current).toEqual({
         stat: '2h',
         isLoading: false,
@@ -257,15 +246,21 @@ describe('useCasesMttr', () => {
           note: i18n.NO_CHANGE('case resolution time'),
         },
         ...basicData,
-      });
-      ourProps = {
-        ...props,
-        from: '2020-07-08T08:20:18.966Z',
-        to: '2020-07-09T08:20:18.966Z',
-      };
+      })
+    );
+
+    ourProps = {
+      ...props,
+      from: '2020-07-08T08:20:18.966Z',
+      to: '2020-07-09T08:20:18.966Z',
+    };
+
+    act(() => {
       rerender();
       rerender();
-      await waitForNextUpdate();
+    });
+
+    await waitFor(() =>
       expect(result.current).toEqual({
         stat: '-',
         isLoading: false,
@@ -275,7 +270,7 @@ describe('useCasesMttr', () => {
           note: i18n.NO_DATA('case'),
         },
         ...basicData,
-      });
-    });
+      })
+    );
   });
 });

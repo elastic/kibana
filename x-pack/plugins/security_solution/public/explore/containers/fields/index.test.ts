@@ -6,7 +6,7 @@
  */
 import { useKibana } from '../../../common/lib/kibana';
 import { useIsFieldInIndexPattern } from '.';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { getRequiredMapsFields } from '../../network/components/embeddables/map_config';
 
 jest.mock('../../../common/lib/kibana');

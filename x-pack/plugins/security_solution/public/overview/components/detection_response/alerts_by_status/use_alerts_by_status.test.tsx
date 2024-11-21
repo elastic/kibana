@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { PropsWithChildren } from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { ALERTS_QUERY_NAMES } from '../../../../detections/containers/detection_engine/alerts/constants';
 import { from, mockAlertsData, alertsByStatusQuery, parsedMockAlertsData, to } from './mock_data';
-import type { UseAlertsByStatus, UseAlertsByStatusProps } from './use_alerts_by_status';
+import type { UseAlertsByStatusProps } from './use_alerts_by_status';
 import { useAlertsByStatus } from './use_alerts_by_status';
 
 const dateNow = new Date('2022-04-08T12:00:00.000Z').valueOf();
@@ -43,7 +42,7 @@ jest.mock('../../../../common/containers/use_global_time', () => {
 
 // helper function to render the hook
 const renderUseAlertsByStatus = (props: Partial<UseAlertsByStatusProps> = {}) =>
-  renderHook<PropsWithChildren<UseAlertsByStatusProps>, ReturnType<UseAlertsByStatus>>(
+  renderHook(
     () =>
       useAlertsByStatus({
         queryId: 'test',
