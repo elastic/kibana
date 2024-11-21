@@ -6,7 +6,7 @@
     "@elastic/security-solution"
   ],
   "group": "platform",
-  "visibility": "shared",
+  "visibility": "private",
   "plugin": {
     "id": "dataUsage",
     "server": true,
