@@ -182,6 +182,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
           key: `${perDeploymentStat.deployment_id}_${nodeName}`,
           ...perDeploymentStat,
           ...modelSizeStats,
+          // @ts-expect-error `throughput_last_minute` is not declared in ES Types
           node: {
             ...pick(n, [
               'average_inference_time_ms',

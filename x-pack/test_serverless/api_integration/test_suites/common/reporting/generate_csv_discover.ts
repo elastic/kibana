@@ -79,7 +79,9 @@ export default function ({ getService }: FtrProviderContext) {
     this.timeout(12 * 60 * 1000);
 
     before(async () => {
-      cookieCredentials = await samlAuth.getM2MApiCookieCredentialsWithRoleScope('admin');
+      cookieCredentials = await samlAuth.getM2MApiCookieCredentialsWithRoleScope('admin', {
+        forceNewSession: true,
+      });
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
 

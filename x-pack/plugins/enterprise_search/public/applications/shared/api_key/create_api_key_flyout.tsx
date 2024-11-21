@@ -210,6 +210,7 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({ onClose 
                   defaultMessage: 'Store this API key',
                 })}
                 titleSize="xs"
+                role="alert"
               >
                 <EuiText>
                   {i18n.translate('xpack.enterpriseSearch.apiKey.apiKeyStepDescription', {

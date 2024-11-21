@@ -17,12 +17,12 @@ steps:
   - wait
 
   - command: .buildkite/scripts/steps/on_merge_build_and_metrics.sh
-    label: Build Kibana Distribution and Plugins
+    label: Build Kibana Distribution
     agents:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2-standard-16
+      machineType: n2-standard-8
       preemptible: true
     key: build
     timeout_in_minutes: 60
@@ -38,6 +38,20 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-highcpu-8
+      preemptible: true
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  - command: .buildkite/scripts/steps/checks.sh
+    label: 'Checks'
+    agents:
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
       preemptible: true
     timeout_in_minutes: 60
     retry:
@@ -83,6 +97,20 @@ steps:
       diskType: 'hyperdisk-balanced'
       preemptible: true
       spotZones: us-central1-a,us-central1-b,us-central1-c
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  - command: .buildkite/scripts/steps/checks/capture_oas_snapshot.sh
+    label: 'Check OAS Snapshot'
+    agents:
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-4
+      preemptible: true
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -418,8 +446,6 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       enableNestedVirtualization: true
-      localSsds: 1
-      localSsdInterface: nvme
       machineType: n2-standard-4
     timeout_in_minutes: 60
     parallelism: 20
@@ -435,8 +461,6 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       enableNestedVirtualization: true
-      localSsds: 1
-      localSsdInterface: nvme
       machineType: n2-standard-4
     timeout_in_minutes: 60
     parallelism: 14
@@ -454,34 +478,6 @@ steps:
       provider: gcp
       machineType: n2-standard-2
 
-  - command: .buildkite/scripts/steps/checks.sh
-    label: 'Checks'
-    agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-      preemptible: true
-    timeout_in_minutes: 60
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
-
-  - command: .buildkite/scripts/steps/checks/capture_oas_snapshot.sh
-    label: 'Check OAS Snapshot'
-    agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-4
-      preemptible: true
-    timeout_in_minutes: 60
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
-
   - command: .buildkite/scripts/steps/storybooks/build_and_upload.sh
     label: 'Build Storybooks'
     agents:
@@ -492,6 +488,21 @@ steps:
       preemptible: true
     key: storybooks
     timeout_in_minutes: 80
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  - command: .buildkite/scripts/steps/openapi_publishing/publish_oas_docs.sh
+    label: 'Publish OAS docs to bump.sh'
+    agents:
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
+      preemptible: true
+    timeout_in_minutes: 60
+    soft_fail: true
     retry:
       automatic:
         - exit_status: '-1'

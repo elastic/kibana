@@ -30,8 +30,6 @@ const defaultActionsConfig: ActionsConfig = {
   enabledActionTypes: [],
   preconfiguredAlertHistoryEsIndex: false,
   preconfigured: {},
-  proxyRejectUnauthorizedCertificates: true, // legacy
-  rejectUnauthorized: true, // legacy
   maxResponseContentLength: new ByteSizeValue(1000000),
   responseTimeout: moment.duration(60000),
   ssl: {
@@ -316,25 +314,6 @@ describe('getProxySettings', () => {
     };
     const proxySettings = getActionsConfigurationUtilities(config).getProxySettings();
     expect(proxySettings?.proxyUrl).toBe(config.proxyUrl);
-  });
-
-  test('returns proper verificationMode values, beased on the legacy config option proxyRejectUnauthorizedCertificates', () => {
-    const configTrue: ActionsConfig = {
-      ...defaultActionsConfig,
-      proxyUrl: 'https://proxy.elastic.co',
-      proxyRejectUnauthorizedCertificates: true,
-    };
-    let proxySettings = getActionsConfigurationUtilities(configTrue).getProxySettings();
-    expect(proxySettings?.proxySSLSettings.verificationMode).toBe('full');
-
-    const configFalse: ActionsConfig = {
-      ...defaultActionsConfig,
-      proxyUrl: 'https://proxy.elastic.co',
-      proxyRejectUnauthorizedCertificates: false,
-      ssl: {},
-    };
-    proxySettings = getActionsConfigurationUtilities(configFalse).getProxySettings();
-    expect(proxySettings?.proxySSLSettings.verificationMode).toBe('none');
   });
 
   test('returns proper verificationMode value, based on the SSL proxy configuration', () => {

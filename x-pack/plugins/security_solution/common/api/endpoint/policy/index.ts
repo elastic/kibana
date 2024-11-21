@@ -6,6 +6,4 @@
  */
 
 export * from './policy_response';
-export * from './deprecated_agent_policy_summary';
 export * from './policy_response.gen';
-export * from './deprecated_agent_policy_summary.gen';

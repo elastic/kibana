@@ -26,35 +26,7 @@ interface I18nStrings {
   };
 }
 
-export const getI18nStrings = (
-  apiClient: ReportingAPIClient
-): Record<'download' | 'generate', I18nStrings> => ({
-  download: {
-    displayName: i18n.translate('reporting.share.panelAction.downloadCsvPanelTitle', {
-      defaultMessage: 'Download CSV',
-    }),
-    toasts: {
-      error: {
-        title: i18n.translate('reporting.share.panelAction.failedCsvReportTitle', {
-          defaultMessage: `CSV download failed`,
-        }),
-        body: i18n.translate('reporting.share.panelAction.failedCsvReportMessage', {
-          defaultMessage: `We couldn't download your CSV at this time.`,
-        }),
-      },
-      success: {
-        title: i18n.translate('reporting.share.panelAction.csvDownloadStartedTitle', {
-          defaultMessage: `CSV download started`,
-        }),
-        body: (
-          <FormattedMessage
-            id="reporting.share.panelAction.csvDownloadStartedMessage"
-            defaultMessage="Your CSV will download momentarily."
-          />
-        ),
-      },
-    },
-  },
+export const getI18nStrings = (apiClient: ReportingAPIClient): Record<'generate', I18nStrings> => ({
   generate: {
     displayName: i18n.translate('reporting.share.panelAction.generateCsvPanelTitle', {
       defaultMessage: 'Generate CSV report',

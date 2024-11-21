@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-export type { OutputAPI, OutputResponse } from './api';
+export type {
+  OutputAPI,
+  OutputOptions,
+  OutputCompositeResponse,
+  OutputResponse,
+  OutputStreamResponse,
+} from './api';
+export type { BoundOutputAPI, BoundOutputOptions, UnboundOutputOptions } from './bound_api';
 export {
   OutputEventType,
   type OutputCompleteEvent,

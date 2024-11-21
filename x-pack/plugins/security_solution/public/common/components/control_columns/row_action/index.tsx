@@ -19,12 +19,13 @@ import type {
   SetEventsLoading,
   ControlColumnProps,
 } from '../../../../../common/types';
-import { getMappedNonEcsValue } from '../../../../timelines/components/timeline/body/data_driven_columns';
 import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
 import type { ColumnHeaderOptions, OnRowSelected } from '../../../../../common/types/timeline';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import { useTourContext } from '../../guided_onboarding_tour';
 import { AlertsCasesTourSteps, SecurityStepId } from '../../guided_onboarding_tour/tour_config';
+import { NotesEventTypes, DocumentEventTypes } from '../../../lib/telemetry';
+import { getMappedNonEcsValue } from '../../../utils/get_mapped_non_ecs_value';
 
 export type RowActionProps = EuiDataGridCellValueElementProps & {
   columnHeaders: ColumnHeaderOptions[];
@@ -109,7 +110,7 @@ const RowActionComponent = ({
         },
       },
     });
-    telemetry.reportDetailsFlyoutOpened({
+    telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
       location: tableId,
       panel: 'right',
     });
@@ -137,10 +138,10 @@ const RowActionComponent = ({
         },
       },
     });
-    telemetry.reportOpenNoteInExpandableFlyoutClicked({
+    telemetry.reportEvent(NotesEventTypes.OpenNoteInExpandableFlyoutClicked, {
       location: tableId,
     });
-    telemetry.reportDetailsFlyoutOpened({
+    telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
       location: tableId,
       panel: 'left',
     });
