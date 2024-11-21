@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const isEndpointPreconfigured = (endpoint: string) => endpoint.startsWith('.');
+export { bindChatComplete } from './bind_chat_complete';
