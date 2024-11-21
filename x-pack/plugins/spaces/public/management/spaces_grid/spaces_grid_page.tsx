@@ -34,7 +34,7 @@ import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
 import { addSpaceIdToPath, type Space } from '../../../common';
 import { isReservedSpace } from '../../../common';
-import { DEFAULT_SPACE_ID, ENTER_SPACE_PATH } from '../../../common/constants';
+import { ENTER_SPACE_PATH } from '../../../common/constants';
 import { getSpacesFeatureDescription } from '../../constants';
 import { getSpaceAvatarComponent } from '../../space_avatar';
 import { SpaceSolutionBadge } from '../../space_solution_badge';
@@ -320,20 +320,6 @@ export class SpacesGridPage extends Component<Props, State> {
         width: '40%',
       },
     ];
-
-    config.push({
-      field: 'id',
-      name: i18n.translate('xpack.spaces.management.spacesGridPage.identifierColumnName', {
-        defaultMessage: 'Identifier',
-      }),
-      sortable: true,
-      render(id: string) {
-        if (id === DEFAULT_SPACE_ID) {
-          return '';
-        }
-        return id;
-      },
-    });
 
     if (this.props.allowSolutionVisibility) {
       config.push({
