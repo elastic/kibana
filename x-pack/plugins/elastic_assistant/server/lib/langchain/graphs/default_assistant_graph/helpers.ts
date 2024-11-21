@@ -103,8 +103,10 @@ export const streamGraph = async ({
         : undefined
     );
 
-    for await (const { event, data, tags } of stream) {
+    for await (const gay of stream) {
+      const { event, data, tags } = gay;
       if ((tags || []).includes(AGENT_NODE_TAG)) {
+        console.log('gayEvent', JSON.stringify(gay, null, 2));
         if (event === 'on_chat_model_stream') {
           const msg = data.chunk as AIMessageChunk;
           if (!didEnd && !msg.tool_call_chunks?.length && msg.content.length) {

@@ -14,10 +14,10 @@ import {
   ConverseStreamResponse,
 } from '@aws-sdk/client-bedrock-runtime';
 import { constructStack } from '@smithy/middleware-stack';
+import { HttpHandlerOptions } from '@smithy/types';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 
-import { HttpHandlerOptions } from '@smithy/types/dist-types/http';
 import { prepareMessages } from '../../utils/bedrock';
 
 export interface CustomChatModelInput extends BedrockRuntimeClientConfig {
@@ -66,6 +66,7 @@ export class BedrockRuntimeClient extends _BedrockRuntimeClient {
       message?: string;
       serviceMessage?: string;
     };
+    console.log('ActionsClient BedrockRuntimeClient: action result:', data);
 
     if (data.status === 'error') {
       throw new Error(

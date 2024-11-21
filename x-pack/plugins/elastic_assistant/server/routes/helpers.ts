@@ -114,6 +114,7 @@ export const getMessageFromRawResponse = ({
       traceData,
     };
   } else {
+    console.log('getMessageFromRawResponse');
     return {
       role: 'assistant',
       content: 'Error: Response from LLM API is empty or undefined.',
