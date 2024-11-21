@@ -10,10 +10,10 @@ import { readFileSync } from 'fs';
 import * as path from 'path';
 import { cloneDeep, merge } from 'lodash';
 import { FeaturesPrivileges, Role, RoleIndexPrivilege } from '@kbn/security-plugin/common';
+import { SERVERLESS_ROLES_ROOT_PATH } from '@kbn/es';
 import { ServerlessRoleName } from '../types';
 
-const ROLES_YAML_FILE_PATH = path.join(__dirname, 'project_controller_security_roles.yml');
-
+const ROLES_YAML_FILE_PATH = path.join(SERVERLESS_ROLES_ROOT_PATH, 'security', 'roles.yml');
 const ROLE_NAMES = Object.values(ServerlessRoleName);
 
 interface IApplication {
