@@ -8,7 +8,7 @@
 import Fs from 'fs/promises';
 import Path from 'path';
 import fastGlob from 'fast-glob';
-import $, { load, Cheerio, AnyNode } from 'cheerio';
+import { load, Cheerio, AcceptedElems } from 'cheerio';
 import { partition } from 'lodash';
 import { ToolingLog } from '@kbn/tooling-log';
 import pLimit from 'p-limit';
@@ -244,7 +244,7 @@ async function processCommands({
   output.commands.push(...markdownFiles);
 }
 
-function getSimpleText($element: Cheerio<AnyNode>) {
+function getSimpleText($element: Cheerio<AcceptedElems<any>>) {
   $element.remove('.navfooter');
   $element.remove('#sticky_content');
   $element.remove('.edit_me');
@@ -258,7 +258,7 @@ function getSimpleText($element: Cheerio<AnyNode>) {
     .replaceAll(/([\n]\s*){2,}/g, '\n');
 }
 
-export function extractSections(cheerio: Cheerio<AnyNode>) {
+export function extractSections(cheerio: Cheerio<AcceptedElems<any>>) {
   const sections: Array<{
     title: string;
     content: string;

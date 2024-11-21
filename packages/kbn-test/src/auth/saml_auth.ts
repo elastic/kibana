@@ -11,7 +11,7 @@ import { createSAMLResponse as createMockedSAMLResponse } from '@kbn/mock-idp-ut
 import { ToolingLog } from '@kbn/tooling-log';
 import axios, { AxiosResponse } from 'axios';
 import util from 'util';
-import * as cheerio from 'cheerio';
+import cheerio from 'cheerio';
 import { Cookie, parse as parseCookie } from 'tough-cookie';
 import Url from 'url';
 import { isValidHostname, isValidUrl } from './helper';
