@@ -265,17 +265,6 @@ export class EntityStoreDataClient {
     }
   }
 
-  // [x] TS types and openAPI
-  // [x] check if this change should be part of another API
-  // [x] fix UI types
-  // [x] refactor UI
-  // TODO test for error state
-  // TODO API tests
-  // TODO Unit tests?
-  // TODO create openAPI doc and defines returned types  interface EntityState {}
-  // TODO does calling `GET kbn:/api/entity_store/engines/user` on a clean cluster kill Kibana?
-  // TODO investigate why we list engines for user without saved object privileges (see message from Mark)
-
   public async init(
     entityType: EntityType,
     { indexPattern = '', filter = '', fieldHistoryLength = 10 }: InitEntityEngineRequestBody,
