@@ -72,6 +72,7 @@ export const useBreadcrumbs = (pageDeepLink: MaintenanceWindowDeepLinkIds) => {
     services: {
       chrome: { docTitle, setBreadcrumbs },
       application: { navigateToUrl },
+      serverless,
     },
   } = useKibana();
   const setTitle = docTitle.change;
@@ -79,12 +80,6 @@ export const useBreadcrumbs = (pageDeepLink: MaintenanceWindowDeepLinkIds) => {
 
   useEffect(() => {
     const breadcrumbs = [
-      {
-        text: i18n.translate('xpack.alerting.breadcrumbs.stackManagementLinkText', {
-          defaultMessage: 'Stack Management',
-        }),
-        href: getAppUrl(),
-      },
       ...(topLevelBreadcrumb[pageDeepLink]
         ? [
             {
@@ -98,11 +93,14 @@ export const useBreadcrumbs = (pageDeepLink: MaintenanceWindowDeepLinkIds) => {
       },
     ];
 
-    if (setBreadcrumbs) {
+    if (serverless && serverless.setBreadcrumbs) {
+      serverless.setBreadcrumbs(breadcrumbs);
+    } else {
       setBreadcrumbs(addClickHandlers(breadcrumbs, navigateToUrl));
     }
+
     if (setTitle) {
       setTitle(getTitleFromBreadCrumbs(breadcrumbs));
     }
-  }, [pageDeepLink, getAppUrl, navigateToUrl, setBreadcrumbs, setTitle]);
+  }, [pageDeepLink, getAppUrl, navigateToUrl, setBreadcrumbs, setTitle, serverless]);
 };
