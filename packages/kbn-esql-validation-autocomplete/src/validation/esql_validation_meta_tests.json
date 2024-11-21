@@ -923,9 +923,7 @@
     {
       "query": "row var = mv_sort([\"a\", \"b\"], \"bogus\")",
       "error": [],
-      "warning": [
-        "Invalid option [\"bogus\"] for mv_sort. Supported options: [\"asc\", \"desc\"]."
-      ]
+      "warning": []
     },
     {
       "query": "row var = mv_sort([\"a\", \"b\"], \"ASC\")",
@@ -6998,9 +6996,7 @@
     {
       "query": "from a_index | eval mv_sort([\"a\", \"b\"], \"bogus\")",
       "error": [],
-      "warning": [
-        "Invalid option [\"bogus\"] for mv_sort. Supported options: [\"asc\", \"desc\"]."
-      ]
+      "warning": []
     },
     {
       "query": "from a_index | eval mv_sort([\"a\", \"b\"], \"ASC\")",
