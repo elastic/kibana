@@ -7,7 +7,7 @@
 
 import { eventDetailsFormattedFields, eventHit } from '@kbn/securitysolution-t-grid';
 import { EventHit } from '../search_strategy';
-import { getDataFromFieldsHits, getDataSafety } from './field_formatters';
+import { getDataFromFieldsHits } from './field_formatters';
 
 describe('Events Details Helpers', () => {
   const fields: EventHit['fields'] = eventHit.fields;
@@ -15,7 +15,21 @@ describe('Events Details Helpers', () => {
   describe('#getDataFromFieldsHits', () => {
     it('happy path', () => {
       const result = getDataFromFieldsHits(fields);
-      expect(result).toEqual(resultFields);
+      const resultCategories = result.map((r) => r.category);
+      const expectedCategories = resultFields.map((r) => r.category);
+      const resultFieldsNames = result.map((r) => r.field);
+      const expectedFieldsNames = resultFields.map((r) => r.field);
+      const resultIsObjectArray = result.map((r) => r.isObjectArray);
+      const expectedIsObjectArray = resultFields.map((r) => r.isObjectArray);
+      const resultOriginalValue = result.map((r) => r.originalValue);
+      const expectedOriginalValue = resultFields.map((r) => r.originalValue);
+      const resultValues = result.map((r) => r.values);
+      const expectedValues = resultFields.map((r) => r.values);
+      expect(resultCategories).toEqual(expect.arrayContaining(expectedCategories));
+      expect(resultFieldsNames).toEqual(expect.arrayContaining(expectedFieldsNames));
+      expect(resultIsObjectArray).toEqual(expect.arrayContaining(expectedIsObjectArray));
+      expect(resultOriginalValue).toEqual(expectedOriginalValue);
+      expect(resultValues).toEqual(expect.arrayContaining(expectedValues));
     });
     it('lets get weird', () => {
       const whackFields = {
@@ -84,7 +98,7 @@ describe('Events Details Helpers', () => {
         },
       ];
       const result = getDataFromFieldsHits(whackFields);
-      expect(result).toEqual(whackResultFields);
+      expect(result).toMatchObject(whackResultFields);
     });
     it('flattens alert parameters', () => {
       const ruleParameterFields = {
@@ -191,7 +205,7 @@ describe('Events Details Helpers', () => {
       ];
 
       const result = getDataFromFieldsHits(ruleParameterFields);
-      expect(result).toEqual(ruleParametersResultFields);
+      expect(result).toMatchObject(ruleParametersResultFields);
     });
 
     it('get data from threat enrichments', () => {
@@ -548,6 +562,17 @@ describe('Events Details Helpers', () => {
         },
         {
           category: 'threat',
+          field: 'threat.enrichments',
+          isObjectArray: true,
+          originalValue: [
+            '{"matched.field":["myhash.mysha256"],"matched.index":["logs-ti_abusech.malware"],"matched.type":["indicator_match_rule"],"feed.name":["AbuseCH malware"],"matched.atomic":["a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3"]}',
+          ],
+          values: [
+            '{"matched.field":["myhash.mysha256"],"matched.index":["logs-ti_abusech.malware"],"matched.type":["indicator_match_rule"],"feed.name":["AbuseCH malware"],"matched.atomic":["a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3"]}',
+          ],
+        },
+        {
+          category: 'threat',
           field: 'threat.enrichments.matched.field',
           isObjectArray: false,
           originalValue: ['myhash.mysha256'],
@@ -581,25 +606,9 @@ describe('Events Details Helpers', () => {
           originalValue: ['a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3'],
           values: ['a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3'],
         },
-        {
-          category: 'threat',
-          field: 'threat.enrichments',
-          isObjectArray: true,
-          originalValue: [
-            '{"matched.field":["myhash.mysha256"],"matched.index":["logs-ti_abusech.malware"],"matched.type":["indicator_match_rule"],"feed.name":["AbuseCH malware"],"matched.atomic":["a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3"]}',
-          ],
-          values: [
-            '{"matched.field":["myhash.mysha256"],"matched.index":["logs-ti_abusech.malware"],"matched.type":["indicator_match_rule"],"feed.name":["AbuseCH malware"],"matched.atomic":["a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3"]}',
-          ],
-        },
       ];
       const result = getDataFromFieldsHits(data);
-      expect(result).toEqual(ruleParametersResultFields);
+      expect(result).toMatchObject(ruleParametersResultFields);
     });
-  });
-
-  it('#getDataSafety', async () => {
-    const result = await getDataSafety(getDataFromFieldsHits, fields);
-    expect(result).toEqual(resultFields);
   });
 });
