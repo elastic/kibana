@@ -51,7 +51,8 @@ describe('TransformManager', () => {
           scopedClusterClientMock,
           loggerMock,
           spaceId,
-          dataViewsService
+          dataViewsService,
+          false
         );
 
         await expect(
@@ -69,7 +70,8 @@ describe('TransformManager', () => {
           scopedClusterClientMock,
           loggerMock,
           spaceId,
-          dataViewsService
+          dataViewsService,
+          false
         );
 
         await expect(
@@ -90,7 +92,8 @@ describe('TransformManager', () => {
         scopedClusterClientMock,
         loggerMock,
         spaceId,
-        dataViewsService
+        dataViewsService,
+        false
       );
       const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
 
@@ -114,7 +117,8 @@ describe('TransformManager', () => {
         scopedClusterClientMock,
         loggerMock,
         spaceId,
-        dataViewsService
+        dataViewsService,
+        false
       );
 
       await transformManager.preview('slo-transform-id');
@@ -136,7 +140,8 @@ describe('TransformManager', () => {
         scopedClusterClientMock,
         loggerMock,
         spaceId,
-        dataViewsService
+        dataViewsService,
+        false
       );
 
       await transformManager.start('slo-transform-id');
@@ -158,7 +163,8 @@ describe('TransformManager', () => {
         scopedClusterClientMock,
         loggerMock,
         spaceId,
-        dataViewsService
+        dataViewsService,
+        false
       );
 
       await transformManager.stop('slo-transform-id');
@@ -180,7 +186,8 @@ describe('TransformManager', () => {
         scopedClusterClientMock,
         loggerMock,
         spaceId,
-        dataViewsService
+        dataViewsService,
+        false
       );
 
       await transformManager.uninstall('slo-transform-id');
@@ -203,7 +210,8 @@ describe('TransformManager', () => {
         scopedClusterClientMock,
         loggerMock,
         spaceId,
-        dataViewsService
+        dataViewsService,
+        false
       );
 
       await transformManager.uninstall('slo-transform-id');

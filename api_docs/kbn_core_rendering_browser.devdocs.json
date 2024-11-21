@@ -1,0 +1,61 @@
+{
+  "id": "@kbn/core-rendering-browser",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-rendering-browser",
+        "id": "def-public.useAppFixedViewport",
+        "type": "Function",
+        "tags": [],
+        "label": "useAppFixedViewport",
+        "description": [],
+        "signature": [
+          "() => HTMLElement | undefined"
+        ],
+        "path": "packages/core/rendering/core-rendering-browser/src/use_app_fixed_viewport.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-rendering-browser",
+        "id": "def-public.APP_FIXED_VIEWPORT_ID",
+        "type": "string",
+        "tags": [],
+        "label": "APP_FIXED_VIEWPORT_ID",
+        "description": [],
+        "signature": [
+          "\"app-fixed-viewport\""
+        ],
+        "path": "packages/core/rendering/core-rendering-browser/src/use_app_fixed_viewport.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
