@@ -1,7 +1,7 @@
 [
   {
     "title": "Containerd",
-    "_id": "containerd",
+    "id": "containerd",
     "description": "Collect metrics from containerd containers.",
     "data_streams": [
       {
@@ -24,7 +24,7 @@
   },
   {
     "title": "Google Santa",
-    "_id": "santa",
+    "id": "santa",
     "description": "Collect logs from Google Santa with Elastic Agent.",
     "data_streams": [
       {
@@ -37,7 +37,7 @@
   },
   {
     "title": "Keycloak",
-    "_id": "keycloak",
+    "id": "keycloak",
     "description": "Collect logs from Keycloak with Elastic Agent.",
     "data_streams": [
       {
@@ -50,7 +50,7 @@
   },
   {
     "title": "Infoblox NIOS",
-    "_id": "infoblox_nios",
+    "id": "infoblox_nios",
     "description": "Collect logs from Infoblox NIOS with Elastic Agent.",
     "data_streams": [
       {
@@ -63,7 +63,7 @@
   },
   {
     "title": "LastPass",
-    "_id": "lastpass",
+    "id": "lastpass",
     "description": "Collect logs from LastPass with Elastic Agent.",
     "data_streams": [
       {
@@ -86,7 +86,7 @@
   },
   {
     "title": "IBM MQ",
-    "_id": "ibmmq",
+    "id": "ibmmq",
     "description": "Collect logs and metrics from IBM MQ with Elastic Agent.",
     "data_streams": [
       {
@@ -104,7 +104,7 @@
   },
   {
     "title": "Jamf Protect",
-    "_id": "jamf_protect",
+    "id": "jamf_protect",
     "description": "Receives events from Jamf Protect with Elastic Agent.",
     "data_streams": [
       {
@@ -137,7 +137,7 @@
   },
   {
     "title": "Sysmon for Linux",
-    "_id": "sysmon_linux",
+    "id": "sysmon_linux",
     "description": "Collect Sysmon Linux logs with Elastic Agent.",
     "data_streams": [
       {
@@ -150,7 +150,7 @@
   },
   {
     "title": "Trend Micro Deep Security",
-    "_id": "trendmicro",
+    "id": "trendmicro",
     "description": "Collect logs from Trend Micro Deep Security with Elastic Agent.",
     "data_streams": [
       {
@@ -163,7 +163,7 @@
   },
   {
     "title": "HAProxy",
-    "_id": "haproxy",
+    "id": "haproxy",
     "description": "Collect logs and metrics from HAProxy servers with Elastic Agent.",
     "data_streams": [
       {
@@ -186,7 +186,7 @@
   },
   {
     "title": "ESET Threat Intelligence",
-    "_id": "ti_eset",
+    "id": "ti_eset",
     "description": "Ingest threat intelligence indicators from ESET Threat Intelligence with Elastic Agent.",
     "data_streams": [
       {
@@ -229,7 +229,7 @@
   },
   {
     "title": "Lyve Cloud",
-    "_id": "lyve_cloud",
+    "id": "lyve_cloud",
     "description": "Collect S3 API audit log from Lyve Cloud with Elastic Agent.",
     "data_streams": [
       {
@@ -242,7 +242,7 @@
   },
   {
     "title": "Tanium",
-    "_id": "tanium",
+    "id": "tanium",
     "description": "This Elastic integration collects logs from Tanium with Elastic Agent.",
     "data_streams": [
       {
@@ -280,7 +280,7 @@
   },
   {
     "title": "SonicWall Firewall",
-    "_id": "sonicwall_firewall",
+    "id": "sonicwall_firewall",
     "description": "Integration for SonicWall firewall logs",
     "data_streams": [
       {
@@ -293,7 +293,7 @@
   },
   {
     "title": "STAN",
-    "_id": "stan",
+    "id": "stan",
     "description": "Collect logs and metrics from STAN servers with Elastic Agent.",
     "data_streams": [
       {
@@ -320,26 +320,26 @@
     "elser_embedding": "STAN - Collect logs and metrics from STAN servers with Elastic Agent. - Stan stats metrics Stan subscriptions metrics Stan channels metrics STAN logs"
   },
   {
-    "title": "AWS Bedrock",
-    "_id": "aws_bedrock",
-    "description": "Collect AWS Bedrock model invocation logs and runtime metrics with Elastic Agent.",
+    "title": "Amazon Bedrock",
+    "id": "aws_bedrock",
+    "description": "Collect Amazon Bedrock model invocation logs and runtime metrics with Elastic Agent.",
     "data_streams": [
       {
         "dataset": "runtime",
         "index_pattern": "logs-aws_bedrock.runtime-*",
-        "title": "AWS Bedrock Runtime Metrics"
+        "title": "Amazon Bedrock Runtime Metrics"
       },
       {
         "dataset": "invocation",
         "index_pattern": "logs-aws_bedrock.invocation-*",
-        "title": "AWS Bedrock model invocation logs"
+        "title": "Amazon Bedrock model invocation logs"
       }
     ],
-    "elser_embedding": "AWS Bedrock - Collect AWS Bedrock model invocation logs and runtime metrics with Elastic Agent. - AWS Bedrock Runtime Metrics AWS Bedrock model invocation logs"
+    "elser_embedding": "Amazon Bedrock - Collect Amazon Bedrock model invocation logs and runtime metrics with Elastic Agent. - Amazon Bedrock Runtime Metrics Amazon Bedrock model invocation logs"
   },
   {
     "title": "Microsoft M365 Defender",
-    "_id": "m365_defender",
+    "id": "m365_defender",
     "description": "Collect logs from Microsoft M365 Defender with Elastic Agent.",
     "data_streams": [
       {
@@ -367,7 +367,7 @@
   },
   {
     "title": "NATS",
-    "_id": "nats",
+    "id": "nats",
     "description": "Collect logs and metrics from NATS servers with Elastic Agent.",
     "data_streams": [
       {
@@ -410,7 +410,7 @@
   },
   {
     "title": "GoFlow2 logs",
-    "_id": "goflow2",
+    "id": "goflow2",
     "description": "Collect logs from goflow2 with Elastic Agent.",
     "data_streams": [
       {
@@ -423,7 +423,7 @@
   },
   {
     "title": "Microsoft Defender for Cloud",
-    "_id": "microsoft_defender_cloud",
+    "id": "microsoft_defender_cloud",
     "description": "Collect logs from Microsoft Defender for Cloud with Elastic Agent.",
     "data_streams": [
       {
@@ -436,7 +436,7 @@
   },
   {
     "title": "RabbitMQ Logs and Metrics",
-    "_id": "rabbitmq",
+    "id": "rabbitmq",
     "description": "Collect and parse logs from RabbitMQ servers with Elastic Agent.",
     "data_streams": [
       {
@@ -469,7 +469,7 @@
   },
   {
     "title": "Apache Tomcat",
-    "_id": "apache_tomcat",
+    "id": "apache_tomcat",
     "description": "Collect and parse logs and metrics from Apache Tomcat servers with Elastic Agent.",
     "data_streams": [
       {
@@ -522,7 +522,7 @@
   },
   {
     "title": "CylanceProtect Logs",
-    "_id": "cylance",
+    "id": "cylance",
     "description": "Collect logs from CylanceProtect devices with Elastic Agent.",
     "data_streams": [
       {
@@ -535,7 +535,7 @@
   },
   {
     "title": "Rapid7 InsightVM",
-    "_id": "rapid7_insightvm",
+    "id": "rapid7_insightvm",
     "description": "Collect logs from Rapid7 InsightVM with Elastic Agent.",
     "data_streams": [
       {
@@ -553,7 +553,7 @@
   },
   {
     "title": "Symantec EDR Cloud",
-    "_id": "symantec_edr_cloud",
+    "id": "symantec_edr_cloud",
     "description": "Collect logs from Symantec EDR Cloud with Elastic Agent.",
     "data_streams": [
       {
@@ -565,8 +565,15 @@
     "elser_embedding": "Symantec EDR Cloud - Collect logs from Symantec EDR Cloud with Elastic Agent. - Collect Incident logs from Symantec EDR Cloud"
   },
   {
+    "title": "Nginx Ingress Controller OpenTelemetry Logs",
+    "id": "nginx_ingress_controller_otel",
+    "description": "Collect Nginx Ingress Controller logs using the OpenTelemetry collector.",
+    "data_streams": [],
+    "elser_embedding": "Nginx Ingress Controller OpenTelemetry Logs - Collect Nginx Ingress Controller logs using the OpenTelemetry collector. - "
+  },
+  {
     "title": "OpenCTI",
-    "_id": "ti_opencti",
+    "id": "ti_opencti",
     "description": "Ingest threat intelligence indicators from OpenCTI with Elastic Agent.",
     "data_streams": [
       {
@@ -579,7 +586,7 @@
   },
   {
     "title": "Windows",
-    "_id": "windows",
+    "id": "windows",
     "description": "Collect logs and metrics from Windows OS and services with Elastic Agent.",
     "data_streams": [
       {
@@ -642,7 +649,7 @@
   },
   {
     "title": "CouchDB",
-    "_id": "couchdb",
+    "id": "couchdb",
     "description": "Collect metrics from CouchDB with Elastic Agent.",
     "data_streams": [
       {
@@ -655,7 +662,7 @@
   },
   {
     "title": "Custom UDP Logs",
-    "_id": "udp",
+    "id": "udp",
     "description": "Collect raw UDP data from listening UDP port with Elastic Agent.",
     "data_streams": [
       {
@@ -668,7 +675,7 @@
   },
   {
     "title": "Cassandra",
-    "_id": "cassandra",
+    "id": "cassandra",
     "description": "This Elastic integration collects logs and metrics from cassandra.",
     "data_streams": [
       {
@@ -685,8 +692,21 @@
     "elser_embedding": "Cassandra - This Elastic integration collects logs and metrics from cassandra. - Cassandra System Logs Metrics"
   },
   {
+    "title": "Gigamon",
+    "id": "gigamon",
+    "description": "Collect logs from Gigamon with Elastic Agent.",
+    "data_streams": [
+      {
+        "dataset": "ami",
+        "index_pattern": "logs-gigamon.ami-*",
+        "title": "Gigamon Application Metadata Intelligence (AMI) Logs"
+      }
+    ],
+    "elser_embedding": "Gigamon - Collect logs from Gigamon with Elastic Agent. - Gigamon Application Metadata Intelligence (AMI) Logs"
+  },
+  {
     "title": "Hashicorp Vault",
-    "_id": "hashicorp_vault",
+    "id": "hashicorp_vault",
     "description": "Collect logs and metrics from Hashicorp Vault with Elastic Agent.",
     "data_streams": [
       {
@@ -709,7 +729,7 @@
   },
   {
     "title": "Okta",
-    "_id": "okta",
+    "id": "okta",
     "description": "Collect and parse event logs from Okta API with Elastic Agent.",
     "data_streams": [
       {
@@ -722,7 +742,7 @@
   },
   {
     "title": "Recorded Future",
-    "_id": "ti_recordedfuture",
+    "id": "ti_recordedfuture",
     "description": "Ingest threat intelligence indicators from Recorded Future risk lists with Elastic Agent.",
     "data_streams": [
       {
@@ -735,7 +755,7 @@
   },
   {
     "title": "IIS",
-    "_id": "iis",
+    "id": "iis",
     "description": "Collect logs and metrics from Internet Information Services (IIS) servers with Elastic Agent.",
     "data_streams": [
       {
@@ -768,7 +788,7 @@
   },
   {
     "title": "Golang",
-    "_id": "golang",
+    "id": "golang",
     "description": "This Elastic integration collects metrics from Golang applications.",
     "data_streams": [
       {
@@ -786,7 +806,7 @@
   },
   {
     "title": "MongoDB",
-    "_id": "mongodb",
+    "id": "mongodb",
     "description": "Collect logs and metrics from MongoDB instances with Elastic Agent.",
     "data_streams": [
       {
@@ -823,8 +843,31 @@
     "elser_embedding": "MongoDB - Collect logs and metrics from MongoDB instances with Elastic Agent. - MongoDB replstatus metrics mongodb log logs MongoDB metrics MongoDB status metrics MongoDB dbstats metrics MongoDB collstats metrics"
   },
   {
+    "title": "Sublime Security",
+    "id": "sublime_security",
+    "description": "Collect logs from Sublime Security with Elastic Agent.",
+    "data_streams": [
+      {
+        "dataset": "audit",
+        "index_pattern": "logs-sublime_security.audit-*",
+        "title": "Sublime Security Audit logs"
+      },
+      {
+        "dataset": "email_message",
+        "index_pattern": "logs-sublime_security.email_message-*",
+        "title": "Sublime Security Email Message logs"
+      },
+      {
+        "dataset": "message_event",
+        "index_pattern": "logs-sublime_security.message_event-*",
+        "title": "Sublime Security Message Event logs"
+      }
+    ],
+    "elser_embedding": "Sublime Security - Collect logs from Sublime Security with Elastic Agent. - Sublime Security Audit logs Sublime Security Email Message logs Sublime Security Message Event logs"
+  },
+  {
     "title": "Nginx",
-    "_id": "nginx",
+    "id": "nginx",
     "description": "Collect logs and metrics from Nginx HTTP servers with Elastic Agent.",
     "data_streams": [
       {
@@ -847,7 +890,7 @@
   },
   {
     "title": "Apache Spark",
-    "_id": "apache_spark",
+    "id": "apache_spark",
     "description": "Collect metrics from Apache Spark with Elastic Agent.",
     "data_streams": [
       {
@@ -875,7 +918,7 @@
   },
   {
     "title": "Rapid7 Threat Command",
-    "_id": "ti_rapid7_threat_command",
+    "id": "ti_rapid7_threat_command",
     "description": "Collect threat intelligence from Threat Command API with Elastic Agent.",
     "data_streams": [
       {
@@ -898,7 +941,7 @@
   },
   {
     "title": "Fortinet FortiEDR Logs",
-    "_id": "fortinet_fortiedr",
+    "id": "fortinet_fortiedr",
     "description": "Collect logs from Fortinet FortiEDR instances with Elastic Agent.",
     "data_streams": [
       {
@@ -911,7 +954,7 @@
   },
   {
     "title": "ThreatQuotient",
-    "_id": "ti_threatq",
+    "id": "ti_threatq",
     "description": "Ingest threat intelligence indicators from ThreatQuotient with Elastic Agent.",
     "data_streams": [
       {
@@ -924,7 +967,7 @@
   },
   {
     "title": "BBOT (Bighuge BLS OSINT Tool)",
-    "_id": "bbot",
+    "id": "bbot",
     "description": "BBOT is a recursive internet scanner inspired by Spiderfoot, but designed to be faster, more reliable, and friendlier to pentesters, bug bounty hunters, and developers. ",
     "data_streams": [
       {
@@ -937,7 +980,7 @@
   },
   {
     "title": "Microsoft SQL Server",
-    "_id": "microsoft_sqlserver",
+    "id": "microsoft_sqlserver",
     "description": "Collect events from Microsoft SQL Server with Elastic Agent",
     "data_streams": [
       {
@@ -964,8 +1007,31 @@
     "elser_embedding": "Microsoft SQL Server - Collect events from Microsoft SQL Server with Elastic Agent - Microsoft SQL Server performance metrics SQL Server audit events Microsoft SQL Server error logs Microsoft SQL Server transaction_log metrics"
   },
   {
+    "title": "Claroty CTD",
+    "id": "claroty_ctd",
+    "description": "Collect logs from Claroty CTD using Elastic Agent.",
+    "data_streams": [
+      {
+        "dataset": "baseline",
+        "index_pattern": "logs-claroty_ctd.baseline-*",
+        "title": "Baseline logs"
+      },
+      {
+        "dataset": "event",
+        "index_pattern": "logs-claroty_ctd.event-*",
+        "title": "Event logs"
+      },
+      {
+        "dataset": "asset",
+        "index_pattern": "logs-claroty_ctd.asset-*",
+        "title": "Asset logs"
+      }
+    ],
+    "elser_embedding": "Claroty CTD - Collect logs from Claroty CTD using Elastic Agent. - Baseline logs Event logs Asset logs"
+  },
+  {
     "title": "ZeroFox",
-    "_id": "zerofox",
+    "id": "zerofox",
     "description": "Collect logs from ZeroFox with Elastic Agent.",
     "data_streams": [
       {
@@ -978,7 +1044,7 @@
   },
   {
     "title": "Darktrace",
-    "_id": "darktrace",
+    "id": "darktrace",
     "description": "Collect logs from Darktrace with Elastic Agent.",
     "data_streams": [
       {
@@ -1001,7 +1067,7 @@
   },
   {
     "title": "Cybersixgill",
-    "_id": "ti_cybersixgill",
+    "id": "ti_cybersixgill",
     "description": "Ingest threat intelligence indicators from Cybersixgill with Elastic Agent.",
     "data_streams": [
       {
@@ -1014,7 +1080,7 @@
   },
   {
     "title": "Trend Micro Vision One",
-    "_id": "trend_micro_vision_one",
+    "id": "trend_micro_vision_one",
     "description": "Collect logs from Trend Micro Vision One with Elastic Agent.",
     "data_streams": [
       {
@@ -1037,7 +1103,7 @@
   },
   {
     "title": "Traefik",
-    "_id": "traefik",
+    "id": "traefik",
     "description": "Collect logs from Traefik servers with Elastic Agent.",
     "data_streams": [
       {
@@ -1055,7 +1121,7 @@
   },
   {
     "title": "F5 BIG-IP",
-    "_id": "f5_bigip",
+    "id": "f5_bigip",
     "description": "Collect logs from F5 BIG-IP with Elastic Agent.",
     "data_streams": [
       {
@@ -1068,7 +1134,7 @@
   },
   {
     "title": "Custom Kafka Logs",
-    "_id": "kafka_log",
+    "id": "kafka_log",
     "description": "Collect data from kafka topic with Elastic Agent.",
     "data_streams": [
       {
@@ -1081,20 +1147,25 @@
   },
   {
     "title": "CyberArk Privileged Access Security",
-    "_id": "cyberarkpas",
+    "id": "cyberarkpas",
     "description": "Collect logs from CyberArk Privileged Access Security with Elastic Agent.",
     "data_streams": [
       {
         "dataset": "audit",
         "index_pattern": "logs-cyberarkpas.audit-*",
         "title": "CyberArk PAS audit logs"
+      },
+      {
+        "dataset": "monitor",
+        "index_pattern": "logs-cyberarkpas.monitor-*",
+        "title": "CyberArk PAS monitor Events"
       }
     ],
-    "elser_embedding": "CyberArk Privileged Access Security - Collect logs from CyberArk Privileged Access Security with Elastic Agent. - CyberArk PAS audit logs"
+    "elser_embedding": "CyberArk Privileged Access Security - Collect logs from CyberArk Privileged Access Security with Elastic Agent. - CyberArk PAS audit logs CyberArk PAS monitor Events"
   },
   {
     "title": "Palo Alto Prisma Cloud",
-    "_id": "prisma_cloud",
+    "id": "prisma_cloud",
     "description": "Collect logs from Prisma Cloud with Elastic Agent.",
     "data_streams": [
       {
@@ -1126,8 +1197,21 @@
     "elser_embedding": "Palo Alto Prisma Cloud - Collect logs from Prisma Cloud with Elastic Agent. - Collect Host Profile logs from Prisma Cloud Workload Protection. Collect Host logs from Prisma Cloud Workload Protection. Collect Audit logs from Prisma Cloud Security Posture Management. Collect Alert logs from Prisma Cloud Security Posture Management. Collect Incident Audit logs from Prisma Cloud Workload Protection."
   },
   {
+    "title": "Cilium Tetragon",
+    "id": "cilium_tetragon",
+    "description": "Collect Cilium Tetragon logs from Kubernetes environments.",
+    "data_streams": [
+      {
+        "dataset": "log",
+        "index_pattern": "logs-cilium_tetragon.log-*",
+        "title": "log\n"
+      }
+    ],
+    "elser_embedding": "Cilium Tetragon - Collect Cilium Tetragon logs from Kubernetes environments. - log\n"
+  },
+  {
     "title": "Qualys VMDR",
-    "_id": "qualys_vmdr",
+    "id": "qualys_vmdr",
     "description": "Collect data from Qualys VMDR platform with Elastic Agent.",
     "data_streams": [
       {
@@ -1150,7 +1234,7 @@
   },
   {
     "title": "Elastic Agent",
-    "_id": "elastic_agent",
+    "id": "elastic_agent",
     "description": "Collect logs and metrics from Elastic Agents.",
     "data_streams": [
       {
@@ -1297,8 +1381,21 @@
     "elser_embedding": "Elastic Agent - Collect logs and metrics from Elastic Agents. - Elastic Agent Elastic Agent Elastic Agent Elastic Agent Elastic Agent Elastic Agent Elastic Agent Elastic Agent Auditbeat Metrics Elastic Agent Elastic Agent Elastic Agent Elastic Agent Elastic Agent Elastic Agent Elastic Agent Elastic Agent Elastic Agent Elastic Agent Elastic Agent Elastic Agent Elastic Agent Elastic Agent Elastic Agent Elastic Agent Elastic Agent Elastic Agent Elastic Agent Elastic Agent"
   },
   {
+    "title": "Custom Filestream Logs",
+    "id": "filestream",
+    "description": "Collect log data using filestream with Elastic Agent.",
+    "data_streams": [
+      {
+        "dataset": "generic",
+        "index_pattern": "logs-filestream.generic-*",
+        "title": "Custom Filestream Logs"
+      }
+    ],
+    "elser_embedding": "Custom Filestream Logs - Collect log data using filestream with Elastic Agent. - Custom Filestream Logs"
+  },
+  {
     "title": "OpenCanary",
-    "_id": "opencanary",
+    "id": "opencanary",
     "description": "This integration collects and parses logs from OpenCanary honeypots.",
     "data_streams": [
       {
@@ -1311,7 +1408,7 @@
   },
   {
     "title": "Palo Alto Cortex XDR",
-    "_id": "panw_cortex_xdr",
+    "id": "panw_cortex_xdr",
     "description": "Collect logs from Palo Alto Cortex XDR with Elastic Agent.",
     "data_streams": [
       {
@@ -1329,7 +1426,7 @@
   },
   {
     "title": "Cisco Nexus",
-    "_id": "cisco_nexus",
+    "id": "cisco_nexus",
     "description": "Collect logs from Cisco Nexus with Elastic Agent.",
     "data_streams": [
       {
@@ -1342,7 +1439,7 @@
   },
   {
     "title": "JumpCloud",
-    "_id": "jumpcloud",
+    "id": "jumpcloud",
     "description": "Collect logs from JumpCloud Directory as a Service",
     "data_streams": [
       {
@@ -1355,7 +1452,7 @@
   },
   {
     "title": "Microsoft Defender for Endpoint",
-    "_id": "microsoft_defender_endpoint",
+    "id": "microsoft_defender_endpoint",
     "description": "Collect logs from Microsoft Defender for Endpoint with Elastic Agent.",
     "data_streams": [
       {
@@ -1368,7 +1465,7 @@
   },
   {
     "title": "ActiveMQ",
-    "_id": "activemq",
+    "id": "activemq",
     "description": "Collect logs and metrics from ActiveMQ instances with Elastic Agent.",
     "data_streams": [
       {
@@ -1401,7 +1498,7 @@
   },
   {
     "title": "AbuseCH",
-    "_id": "ti_abusech",
+    "id": "ti_abusech",
     "description": "Ingest threat intelligence indicators from URL Haus, Malware Bazaar, and Threat Fox feeds with Elastic Agent.",
     "data_streams": [
       {
@@ -1429,7 +1526,7 @@
   },
   {
     "title": "Infoblox BloxOne DDI",
-    "_id": "infoblox_bloxone_ddi",
+    "id": "infoblox_bloxone_ddi",
     "description": "Collect logs from Infoblox BloxOne DDI with Elastic Agent.",
     "data_streams": [
       {
@@ -1452,7 +1549,7 @@
   },
   {
     "title": "Google Security Command Center",
-    "_id": "google_scc",
+    "id": "google_scc",
     "description": "Collect logs from Google Security Command Center with Elastic Agent.",
     "data_streams": [
       {
@@ -1480,7 +1577,7 @@
   },
   {
     "title": "CoreDNS",
-    "_id": "coredns",
+    "id": "coredns",
     "description": "Collect logs from CoreDNS instances with Elastic Agent.",
     "data_streams": [
       {
@@ -1493,7 +1590,7 @@
   },
   {
     "title": "NetFlow Records",
-    "_id": "netflow",
+    "id": "netflow",
     "description": "Collect flow records from NetFlow and IPFIX exporters with Elastic Agent.",
     "data_streams": [
       {
@@ -1506,7 +1603,7 @@
   },
   {
     "title": "Forcepoint Web Security",
-    "_id": "forcepoint_web",
+    "id": "forcepoint_web",
     "description": "Forcepoint Web Security",
     "data_streams": [
       {
@@ -1519,7 +1616,7 @@
   },
   {
     "title": "Trellix EDR Cloud",
-    "_id": "trellix_edr_cloud",
+    "id": "trellix_edr_cloud",
     "description": "Collect logs from Trellix EDR Cloud with Elastic Agent.",
     "data_streams": [
       {
@@ -1532,7 +1629,7 @@
   },
   {
     "title": "Slack Logs",
-    "_id": "slack",
+    "id": "slack",
     "description": "Slack Logs Integration",
     "data_streams": [
       {
@@ -1545,7 +1642,7 @@
   },
   {
     "title": "Cisco FTD",
-    "_id": "cisco_ftd",
+    "id": "cisco_ftd",
     "description": "Collect logs from Cisco FTD with Elastic Agent.",
     "data_streams": [
       {
@@ -1558,7 +1655,7 @@
   },
   {
     "title": "Microsoft DNS Server",
-    "_id": "microsoft_dnsserver",
+    "id": "microsoft_dnsserver",
     "description": "Collect logs from Microsoft DNS Server with Elastic Agent.",
     "data_streams": [
       {
@@ -1576,7 +1673,7 @@
   },
   {
     "title": "Mandiant Advantage",
-    "_id": "ti_mandiant_advantage",
+    "id": "ti_mandiant_advantage",
     "description": "Collect Threat Intelligence from products within the Mandiant Advantage platform.",
     "data_streams": [
       {
@@ -1589,7 +1686,7 @@
   },
   {
     "title": "Fortinet FortiClient Logs",
-    "_id": "fortinet_forticlient",
+    "id": "fortinet_forticlient",
     "description": "Collect logs from Fortinet FortiClient instances with Elastic Agent.",
     "data_streams": [
       {
@@ -1602,7 +1699,7 @@
   },
   {
     "title": "AWS Fargate (for ECS clusters)",
-    "_id": "awsfargate",
+    "id": "awsfargate",
     "description": "Collects metrics from containers and tasks running on Amazon ECS clusters with Elastic Agent.",
     "data_streams": [
       {
@@ -1615,7 +1712,7 @@
   },
   {
     "title": "Azure Network Watcher VNet",
-    "_id": "azure_network_watcher_vnet",
+    "id": "azure_network_watcher_vnet",
     "description": "Collect logs from Azure Network Watcher VNet with Elastic Agent.",
     "data_streams": [
       {
@@ -1628,7 +1725,7 @@
   },
   {
     "title": "Osquery Logs",
-    "_id": "osquery",
+    "id": "osquery",
     "description": "Collect logs from Osquery with Elastic Agent.",
     "data_streams": [
       {
@@ -1641,7 +1738,7 @@
   },
   {
     "title": "Pleasant Password Server",
-    "_id": "pps",
+    "id": "pps",
     "description": "Integration for Pleasant Password Server Syslog Messages",
     "data_streams": [
       {
@@ -1654,7 +1751,7 @@
   },
   {
     "title": "Bravura Monitor",
-    "_id": "hid_bravura_monitor",
+    "id": "hid_bravura_monitor",
     "description": "Collect logs from Bravura Security Fabric with Elastic Agent.",
     "data_streams": [
       {
@@ -1672,7 +1769,7 @@
   },
   {
     "title": "MISP",
-    "_id": "ti_misp",
+    "id": "ti_misp",
     "description": "Ingest threat intelligence indicators from MISP platform with Elastic Agent.",
     "data_streams": [
       {
@@ -1690,7 +1787,7 @@
   },
   {
     "title": "Redis Enterprise",
-    "_id": "redisenterprise",
+    "id": "redisenterprise",
     "description": "Collect metrics from Redis Enterprise Cluster",
     "data_streams": [
       {
@@ -1708,7 +1805,7 @@
   },
   {
     "title": "Network Packet Capture",
-    "_id": "network_traffic",
+    "id": "network_traffic",
     "description": "Capture and analyze network traffic from a host with Elastic Agent.",
     "data_streams": [
       {
@@ -1796,7 +1893,7 @@
   },
   {
     "title": "MySQL Enterprise",
-    "_id": "mysql_enterprise",
+    "id": "mysql_enterprise",
     "description": "Collect audit logs from MySQL Enterprise with Elastic Agent.",
     "data_streams": [
       {
@@ -1809,7 +1906,7 @@
   },
   {
     "title": "GitHub",
-    "_id": "github",
+    "id": "github",
     "description": "Collect logs from GitHub with Elastic Agent.",
     "data_streams": [
       {
@@ -1842,7 +1939,7 @@
   },
   {
     "title": "Microsoft Entra ID Entity Analytics",
-    "_id": "entityanalytics_entra_id",
+    "id": "entityanalytics_entra_id",
     "description": "Collect identities from Microsoft Entra ID (formerly Azure Active Directory) with Elastic Agent.",
     "data_streams": [
       {
@@ -1865,7 +1962,7 @@
   },
   {
     "title": "ThreatConnect",
-    "_id": "ti_threatconnect",
+    "id": "ti_threatconnect",
     "description": "Collects Indicators from ThreatConnect using the Elastic Agent and saves them as logs inside Elastic",
     "data_streams": [
       {
@@ -1877,8 +1974,31 @@
     "elser_embedding": "ThreatConnect - Collects Indicators from ThreatConnect using the Elastic Agent and saves them as logs inside Elastic - Collect Indicators from ThreatConnect."
   },
   {
+    "title": "Microsoft Sentinel",
+    "id": "microsoft_sentinel",
+    "description": "Collect logs from Microsoft Sentinel with Elastic Agent.",
+    "data_streams": [
+      {
+        "dataset": "alert",
+        "index_pattern": "logs-microsoft_sentinel.alert-*",
+        "title": "Microsoft Sentinel Alert logs"
+      },
+      {
+        "dataset": "incident",
+        "index_pattern": "logs-microsoft_sentinel.incident-*",
+        "title": "Microsoft Sentinel Incident logs"
+      },
+      {
+        "dataset": "event",
+        "index_pattern": "logs-microsoft_sentinel.event-*",
+        "title": "Collect Events from Microsoft Sentinel."
+      }
+    ],
+    "elser_embedding": "Microsoft Sentinel - Collect logs from Microsoft Sentinel with Elastic Agent. - Microsoft Sentinel Alert logs Microsoft Sentinel Incident logs Collect Events from Microsoft Sentinel."
+  },
+  {
     "title": "Check Point",
-    "_id": "checkpoint",
+    "id": "checkpoint",
     "description": "Collect logs from Check Point with Elastic Agent.",
     "data_streams": [
       {
@@ -1891,7 +2011,7 @@
   },
   {
     "title": "WatchGuard Firebox",
-    "_id": "watchguard_firebox",
+    "id": "watchguard_firebox",
     "description": "Collect logs from WatchGuard Firebox with Elastic Agent.",
     "data_streams": [
       {
@@ -1904,7 +2024,7 @@
   },
   {
     "title": "Nagios XI",
-    "_id": "nagios_xi",
+    "id": "nagios_xi",
     "description": "Collect Logs and Metrics from Nagios XI with Elastic Agent.",
     "data_streams": [
       {
@@ -1927,7 +2047,7 @@
   },
   {
     "title": "Atlassian Jira",
-    "_id": "atlassian_jira",
+    "id": "atlassian_jira",
     "description": "Collect logs from Atlassian Jira with Elastic Agent.",
     "data_streams": [
       {
@@ -1940,7 +2060,7 @@
   },
   {
     "title": "Snyk",
-    "_id": "snyk",
+    "id": "snyk",
     "description": "Collect logs from Snyk with Elastic Agent.",
     "data_streams": [
       {
@@ -1968,7 +2088,7 @@
   },
   {
     "title": "Google Cloud Platform",
-    "_id": "gcp",
+    "id": "gcp",
     "description": "Collect logs and metrics from Google Cloud Platform with Elastic Agent.",
     "data_streams": [
       {
@@ -2066,7 +2186,7 @@
   },
   {
     "title": "Logstash",
-    "_id": "logstash",
+    "id": "logstash",
     "description": "Collect logs and metrics from Logstash with Elastic Agent.",
     "data_streams": [
       {
@@ -2109,7 +2229,7 @@
   },
   {
     "title": "Palo Alto Prisma Access",
-    "_id": "prisma_access",
+    "id": "prisma_access",
     "description": "Collect logs from Palo Alto Prisma Access with Elastic Agent.",
     "data_streams": [
       {
@@ -2122,7 +2242,7 @@
   },
   {
     "title": "Barracuda CloudGen Firewall Logs",
-    "_id": "barracuda_cloudgen_firewall",
+    "id": "barracuda_cloudgen_firewall",
     "description": "Collect logs from Barracuda CloudGen Firewall devices with Elastic Agent.",
     "data_streams": [
       {
@@ -2134,8 +2254,26 @@
     "elser_embedding": "Barracuda CloudGen Firewall Logs - Collect logs from Barracuda CloudGen Firewall devices with Elastic Agent. - Barracuda CloudGen Firewall Logs"
   },
   {
+    "title": "Jamf Pro",
+    "id": "jamf_pro",
+    "description": "Collect logs and inventory data from Jamf Pro with Elastic Agent",
+    "data_streams": [
+      {
+        "dataset": "inventory",
+        "index_pattern": "logs-jamf_pro.inventory-*",
+        "title": "Inventory data"
+      },
+      {
+        "dataset": "events",
+        "index_pattern": "logs-jamf_pro.events-*",
+        "title": "Jamf Pro Events"
+      }
+    ],
+    "elser_embedding": "Jamf Pro - Collect logs and inventory data from Jamf Pro with Elastic Agent - Inventory data Jamf Pro Events"
+  },
+  {
     "title": "Fortinet FortiManager Logs",
-    "_id": "fortinet_fortimanager",
+    "id": "fortinet_fortimanager",
     "description": "Collect logs from Fortinet FortiManager instances with Elastic Agent.",
     "data_streams": [
       {
@@ -2148,14 +2286,14 @@
   },
   {
     "title": "Elastic APM",
-    "_id": "apm",
+    "id": "apm",
     "description": "Monitor, detect, and diagnose complex application performance issues.",
     "data_streams": [],
     "elser_embedding": "Elastic APM - Monitor, detect, and diagnose complex application performance issues. - "
   },
   {
     "title": "AlienVault OTX",
-    "_id": "ti_otx",
+    "id": "ti_otx",
     "description": "Ingest threat intelligence indicators from AlienVault Open Threat Exchange (OTX) with Elastic Agent.",
     "data_streams": [
       {
@@ -2173,7 +2311,7 @@
   },
   {
     "title": "Check Point",
-    "_id": "checkpoint",
+    "id": "checkpoint",
     "description": "Collect logs from Check Point with Elastic Agent.",
     "data_streams": [
       {
@@ -2185,8 +2323,15 @@
     "elser_embedding": "Check Point - Collect logs from Check Point with Elastic Agent. - Check Point firewall logs"
   },
   {
+    "title": "Kubernetes OpenTelemetry Assets",
+    "id": "kubernetes_otel",
+    "description": "Utilise the pre-built dashboard for OTel-native metrics and events collected from a Kubernetes cluster",
+    "data_streams": [],
+    "elser_embedding": "Kubernetes OpenTelemetry Assets - Utilise the pre-built dashboard for OTel-native metrics and events collected from a Kubernetes cluster - "
+  },
+  {
     "title": "EclecticIQ",
-    "_id": "ti_eclecticiq",
+    "id": "ti_eclecticiq",
     "description": "Ingest threat intelligence from EclecticIQ with Elastic Agent",
     "data_streams": [
       {
@@ -2199,7 +2344,7 @@
   },
   {
     "title": "Lumos",
-    "_id": "lumos",
+    "id": "lumos",
     "description": "An integration with Lumos to ship your Activity logs to your Elastic instance.",
     "data_streams": [
       {
@@ -2212,27 +2357,45 @@
   },
   {
     "title": "Anomali",
-    "_id": "ti_anomali",
+    "id": "ti_anomali",
     "description": "Ingest threat intelligence indicators from Anomali with Elastic Agent.",
     "data_streams": [
       {
         "dataset": "threatstream",
         "index_pattern": "logs-ti_anomali.threatstream-*",
-        "title": "Anomali Threatstream"
+        "title": "Anomali ThreatStream"
+      },
+      {
+        "dataset": "intelligence",
+        "index_pattern": "logs-ti_anomali.intelligence-*",
+        "title": "Anomali ThreatStream"
       }
     ],
-    "elser_embedding": "Anomali - Ingest threat intelligence indicators from Anomali with Elastic Agent. - Anomali Threatstream"
+    "elser_embedding": "Anomali - Ingest threat intelligence indicators from Anomali with Elastic Agent. - Anomali ThreatStream Anomali ThreatStream"
   },
   {
     "title": "Jolokia Input",
-    "_id": "jolokia",
+    "id": "jolokia",
     "description": "Collects Metrics from Jolokia Agents",
     "data_streams": [],
     "elser_embedding": "Jolokia Input - Collects Metrics from Jolokia Agents - "
   },
   {
+    "title": "Sysdig",
+    "id": "sysdig",
+    "description": "Collect alerts from Sysdig using Elastic Agent.",
+    "data_streams": [
+      {
+        "dataset": "alerts",
+        "index_pattern": "logs-sysdig.alerts-*",
+        "title": "Sysdig"
+      }
+    ],
+    "elser_embedding": "Sysdig - Collect alerts from Sysdig using Elastic Agent. - Sysdig"
+  },
+  {
     "title": "Pulse Connect Secure",
-    "_id": "pulse_connect_secure",
+    "id": "pulse_connect_secure",
     "description": "Collect logs from Pulse Connect Secure with Elastic Agent.",
     "data_streams": [
       {
@@ -2245,7 +2408,7 @@
   },
   {
     "title": "Zeek",
-    "_id": "zeek",
+    "id": "zeek",
     "description": "Collect logs from Zeek with Elastic Agent.",
     "data_streams": [
       {
@@ -2468,7 +2631,7 @@
   },
   {
     "title": "CrowdStrike",
-    "_id": "crowdstrike",
+    "id": "crowdstrike",
     "description": "Collect logs from Crowdstrike with Elastic Agent.",
     "data_streams": [
       {
@@ -2496,7 +2659,7 @@
   },
   {
     "title": "Fortinet FortiGate Firewall Logs",
-    "_id": "fortinet_fortigate",
+    "id": "fortinet_fortigate",
     "description": "Collect logs from Fortinet FortiGate firewalls with Elastic Agent.",
     "data_streams": [
       {
@@ -2509,7 +2672,7 @@
   },
   {
     "title": "Active Directory Entity Analytics",
-    "_id": "entityanalytics_ad",
+    "id": "entityanalytics_ad",
     "description": "Collect User Identities from Active Directory Entity with Elastic Agent.",
     "data_streams": [
       {
@@ -2522,7 +2685,7 @@
   },
   {
     "title": "Arista NG Firewall",
-    "_id": "arista_ngfw",
+    "id": "arista_ngfw",
     "description": "Collect logs and metrics from Arista NG Firewall.",
     "data_streams": [
       {
@@ -2535,7 +2698,7 @@
   },
   {
     "title": "Proofpoint TAP",
-    "_id": "proofpoint_tap",
+    "id": "proofpoint_tap",
     "description": "Collect logs from Proofpoint TAP with Elastic Agent.",
     "data_streams": [
       {
@@ -2563,7 +2726,7 @@
   },
   {
     "title": "BitDefender",
-    "_id": "bitdefender",
+    "id": "bitdefender",
     "description": "Ingest BitDefender GravityZone logs and data",
     "data_streams": [
       {
@@ -2586,7 +2749,7 @@
   },
   {
     "title": "Redis",
-    "_id": "redis",
+    "id": "redis",
     "description": "Collect logs and metrics from Redis servers with Elastic Agent.",
     "data_streams": [
       {
@@ -2619,7 +2782,7 @@
   },
   {
     "title": "Cisco Duo",
-    "_id": "cisco_duo",
+    "id": "cisco_duo",
     "description": "Collect logs from Cisco Duo with Elastic Agent.",
     "data_streams": [
       {
@@ -2635,6 +2798,11 @@
       {
         "dataset": "telephony",
         "index_pattern": "logs-cisco_duo.telephony-*",
+        "title": "Cisco Duo telephony logs (legacy)"
+      },
+      {
+        "dataset": "telephony_v2",
+        "index_pattern": "logs-cisco_duo.telephony_v2-*",
         "title": "Cisco Duo telephony logs"
       },
       {
@@ -2643,16 +2811,26 @@
         "title": "Cisco Duo authentication logs"
       },
       {
+        "dataset": "trust_monitor",
+        "index_pattern": "logs-cisco_duo.trust_monitor-*",
+        "title": "Cisco Duo trust monitor logs"
+      },
+      {
+        "dataset": "activity",
+        "index_pattern": "logs-cisco_duo.activity-*",
+        "title": "Cisco Duo activity logs"
+      },
+      {
         "dataset": "offline_enrollment",
         "index_pattern": "logs-cisco_duo.offline_enrollment-*",
         "title": "Cisco Duo offline enrollment logs"
       }
     ],
-    "elser_embedding": "Cisco Duo - Collect logs from Cisco Duo with Elastic Agent. - Cisco Duo summary logs Cisco Duo administrator logs Cisco Duo telephony logs Cisco Duo authentication logs Cisco Duo offline enrollment logs"
+    "elser_embedding": "Cisco Duo - Collect logs from Cisco Duo with Elastic Agent. - Cisco Duo summary logs Cisco Duo administrator logs Cisco Duo telephony logs (legacy) Cisco Duo telephony logs Cisco Duo authentication logs Cisco Duo trust monitor logs Cisco Duo activity logs Cisco Duo offline enrollment logs"
   },
   {
     "title": "Elasticsearch",
-    "_id": "elasticsearch",
+    "id": "elasticsearch",
     "description": "Elasticsearch Integration",
     "data_streams": [
       {
@@ -2745,14 +2923,27 @@
   },
   {
     "title": "Universal Profiling Agent",
-    "_id": "profiler_agent",
+    "id": "profiler_agent",
     "description": "Fleet-wide, whole-system, continuous profiling with zero instrumentation.",
     "data_streams": [],
     "elser_embedding": "Universal Profiling Agent - Fleet-wide, whole-system, continuous profiling with zero instrumentation. - "
   },
   {
+    "title": "Check Point Harmony Email & Collaboration",
+    "id": "checkpoint_email",
+    "description": "Collect logs from Check Point Harmony Email & Collaboration with Elastic Agent.",
+    "data_streams": [
+      {
+        "dataset": "event",
+        "index_pattern": "logs-checkpoint_email.event-*",
+        "title": "Check Point Harmony Email & Collaboration Event logs"
+      }
+    ],
+    "elser_embedding": "Check Point Harmony Email & Collaboration - Collect logs from Check Point Harmony Email & Collaboration with Elastic Agent. - Check Point Harmony Email & Collaboration Event logs"
+  },
+  {
     "title": "Apache HTTP Server",
-    "_id": "apache",
+    "id": "apache",
     "description": "Collect logs and metrics from Apache servers with Elastic Agent.",
     "data_streams": [
       {
@@ -2775,7 +2966,7 @@
   },
   {
     "title": "Istio",
-    "_id": "istio",
+    "id": "istio",
     "description": "Collect logs and metrics from the service mesh Istio with Elastic Agent.",
     "data_streams": [
       {
@@ -2798,14 +2989,14 @@
   },
   {
     "title": "GCP Metrics Input",
-    "_id": "gcp_metrics",
+    "id": "gcp_metrics",
     "description": "GCP Metrics Input",
     "data_streams": [],
     "elser_embedding": "GCP Metrics Input - GCP Metrics Input - "
   },
   {
     "title": "Fortinet FortiMail",
-    "_id": "fortinet_fortimail",
+    "id": "fortinet_fortimail",
     "description": "Collect logs from Fortinet FortiMail instances with Elastic Agent.",
     "data_streams": [
       {
@@ -2818,7 +3009,7 @@
   },
   {
     "title": "Spring Boot",
-    "_id": "spring_boot",
+    "id": "spring_boot",
     "description": "This Elastic integration collects logs and metrics from Spring Boot integration.",
     "data_streams": [
       {
@@ -2851,7 +3042,7 @@
   },
   {
     "title": "Jamf Compliance Reporter",
-    "_id": "jamf_compliance_reporter",
+    "id": "jamf_compliance_reporter",
     "description": "Collect logs from Jamf Compliance Reporter with Elastic Agent.",
     "data_streams": [
       {
@@ -2864,7 +3055,7 @@
   },
   {
     "title": "SentinelOne",
-    "_id": "sentinel_one",
+    "id": "sentinel_one",
     "description": "Collect logs from SentinelOne with Elastic Agent.",
     "data_streams": [
       {
@@ -2897,7 +3088,7 @@
   },
   {
     "title": "Enterprise Search",
-    "_id": "enterprisesearch",
+    "id": "enterprisesearch",
     "description": "Enterprise Search Integration",
     "data_streams": [
       {
@@ -2915,7 +3106,7 @@
   },
   {
     "title": "Microsoft Exchange Online Message Trace",
-    "_id": "microsoft_exchange_online_message_trace",
+    "id": "microsoft_exchange_online_message_trace",
     "description": "Microsoft Exchange Online Message Trace Integration",
     "data_streams": [
       {
@@ -2928,7 +3119,7 @@
   },
   {
     "title": "CrowdStrike Falcon Intelligence",
-    "_id": "ti_crowdstrike",
+    "id": "ti_crowdstrike",
     "description": "Collect logs from CrowdStrike Falcon Intelligence with Elastic Agent.",
     "data_streams": [
       {
@@ -2946,7 +3137,7 @@
   },
   {
     "title": "Auditd Manager",
-    "_id": "auditd_manager",
+    "id": "auditd_manager",
     "description": "The Auditd Manager Integration receives audit events from the Linux Audit Framework that is a part of the Linux kernel.",
     "data_streams": [
       {
@@ -2959,7 +3150,7 @@
   },
   {
     "title": "Oracle",
-    "_id": "oracle",
+    "id": "oracle",
     "description": "Collect Oracle Audit Log, Performance metrics, Tablespace metrics, Sysmetrics metrics, System statistics metrics, memory metrics from Oracle database.",
     "data_streams": [
       {
@@ -2997,7 +3188,7 @@
   },
   {
     "title": "Akamai",
-    "_id": "akamai",
+    "id": "akamai",
     "description": "Collect logs from Akamai with Elastic Agent.",
     "data_streams": [
       {
@@ -3010,28 +3201,28 @@
   },
   {
     "title": "Custom Journald logs",
-    "_id": "journald",
+    "id": "journald",
     "description": "Collect logs from journald with Elastic Agent.",
     "data_streams": [],
     "elser_embedding": "Custom Journald logs - Collect logs from journald with Elastic Agent. - "
   },
   {
     "title": "Universal Profiling Collector",
-    "_id": "profiler_collector",
+    "id": "profiler_collector",
     "description": "Fleet-wide, whole-system, continuous profiling with zero instrumentation.",
     "data_streams": [],
     "elser_embedding": "Universal Profiling Collector - Fleet-wide, whole-system, continuous profiling with zero instrumentation. - "
   },
   {
     "title": "Custom API using Common Expression Language",
-    "_id": "cel",
+    "id": "cel",
     "description": "Collect custom events from an API with Elastic agent",
     "data_streams": [],
     "elser_embedding": "Custom API using Common Expression Language - Collect custom events from an API with Elastic agent - "
   },
   {
     "title": "etcd",
-    "_id": "etcd",
+    "id": "etcd",
     "description": "Collect metrics from etcd instances with Elastic Agent.",
     "data_streams": [
       {
@@ -3059,7 +3250,7 @@
   },
   {
     "title": "Citrix Web App Firewall",
-    "_id": "citrix_waf",
+    "id": "citrix_waf",
     "description": "Ingest events from Citrix Systems Web App Firewall.",
     "data_streams": [
       {
@@ -3072,7 +3263,7 @@
   },
   {
     "title": "Azure OpenAI",
-    "_id": "azure_openai",
+    "id": "azure_openai",
     "description": "Collects Azure OpenAI Logs and Metrics",
     "data_streams": [
       {
@@ -3090,7 +3281,7 @@
   },
   {
     "title": "Cisco ISE",
-    "_id": "cisco_ise",
+    "id": "cisco_ise",
     "description": "Collect logs from Cisco ISE with Elastic Agent.",
     "data_streams": [
       {
@@ -3103,7 +3294,7 @@
   },
   {
     "title": "Citrix ADC",
-    "_id": "citrix_adc",
+    "id": "citrix_adc",
     "description": "This Elastic integration collects logs and metrics from Citrix ADC product.",
     "data_streams": [
       {
@@ -3141,7 +3332,7 @@
   },
   {
     "title": "Box Events",
-    "_id": "box_events",
+    "id": "box_events",
     "description": "Collect logs from Box with Elastic Agent",
     "data_streams": [
       {
@@ -3154,7 +3345,7 @@
   },
   {
     "title": "Prometheus",
-    "_id": "prometheus",
+    "id": "prometheus",
     "description": "Collect metrics from Prometheus servers with Elastic Agent.",
     "data_streams": [
       {
@@ -3177,7 +3368,7 @@
   },
   {
     "title": "Kubernetes",
-    "_id": "kubernetes",
+    "id": "kubernetes",
     "description": "Collect logs and metrics from Kubernetes clusters with Elastic Agent.",
     "data_streams": [
       {
@@ -3320,7 +3511,7 @@
   },
   {
     "title": "Okta Entity Analytics",
-    "_id": "entityanalytics_okta",
+    "id": "entityanalytics_okta",
     "description": "Collect User Identities from Okta with Elastic Agent.",
     "data_streams": [
       {
@@ -3332,8 +3523,34 @@
     "elser_embedding": "Okta Entity Analytics - Collect User Identities from Okta with Elastic Agent. - Collect User Identities logs from Okta"
   },
   {
+    "title": "GCP Vertex AI",
+    "id": "gcp_vertexai",
+    "description": "Collect GCP Vertex AI metrics with Elastic Agent",
+    "data_streams": [
+      {
+        "dataset": "metrics",
+        "index_pattern": "logs-gcp_vertexai.metrics-*",
+        "title": "GCP Vertex AI Metrics"
+      }
+    ],
+    "elser_embedding": "GCP Vertex AI - Collect GCP Vertex AI metrics with Elastic Agent - GCP Vertex AI Metrics"
+  },
+  {
+    "title": "First EPSS",
+    "id": "first_epss",
+    "description": "Collect exploit prediction score data from the First EPSS API with Elastic Agent.",
+    "data_streams": [
+      {
+        "dataset": "vulnerability",
+        "index_pattern": "logs-first_epss.vulnerability-*",
+        "title": "Collect EPSS data from First API."
+      }
+    ],
+    "elser_embedding": "First EPSS - Collect exploit prediction score data from the First EPSS API with Elastic Agent. - Collect EPSS data from First API."
+  },
+  {
     "title": "Snort",
-    "_id": "snort",
+    "id": "snort",
     "description": "Collect logs from Snort with Elastic Agent.",
     "data_streams": [
       {
@@ -3346,7 +3563,7 @@
   },
   {
     "title": "Azure Functions",
-    "_id": "azure_functions",
+    "id": "azure_functions",
     "description": "Get metrics and logs from Azure Functions",
     "data_streams": [
       {
@@ -3364,7 +3581,7 @@
   },
   {
     "title": "SentinelOne Cloud Funnel",
-    "_id": "sentinel_one_cloud_funnel",
+    "id": "sentinel_one_cloud_funnel",
     "description": "Collect logs from SentinelOne Cloud Funnel with Elastic Agent.",
     "data_streams": [
       {
@@ -3442,7 +3659,7 @@
   },
   {
     "title": "Cisco Meraki",
-    "_id": "cisco_meraki",
+    "id": "cisco_meraki",
     "description": "Collect logs from Cisco Meraki with Elastic Agent.",
     "data_streams": [
       {
@@ -3460,7 +3677,7 @@
   },
   {
     "title": "Osquery Manager",
-    "_id": "osquery_manager",
+    "id": "osquery_manager",
     "description": "Deploy Osquery with Elastic Agent, then run and schedule queries in Kibana",
     "data_streams": [
       {
@@ -3478,7 +3695,7 @@
   },
   {
     "title": "ModSecurity Audit",
-    "_id": "modsecurity",
+    "id": "modsecurity",
     "description": "Collect logs from ModSecurity with Elastic Agent",
     "data_streams": [
       {
@@ -3491,7 +3708,7 @@
   },
   {
     "title": "pfSense",
-    "_id": "pfsense",
+    "id": "pfsense",
     "description": "Collect logs from pfSense and OPNsense with Elastic Agent.",
     "data_streams": [
       {
@@ -3504,7 +3721,7 @@
   },
   {
     "title": "Ceph",
-    "_id": "ceph",
+    "id": "ceph",
     "description": "This Elastic integration collects metrics from Ceph instance.",
     "data_streams": [
       {
@@ -3547,7 +3764,7 @@
   },
   {
     "title": "Maltiverse",
-    "_id": "ti_maltiverse",
+    "id": "ti_maltiverse",
     "description": "Ingest threat intelligence indicators from Maltiverse feeds with Elastic Agent",
     "data_streams": [
       {
@@ -3560,7 +3777,7 @@
   },
   {
     "title": "Imperva",
-    "_id": "imperva",
+    "id": "imperva",
     "description": "Collect logs from Imperva devices with Elastic Agent.",
     "data_streams": [
       {
@@ -3573,7 +3790,7 @@
   },
   {
     "title": "Linux Metrics",
-    "_id": "linux",
+    "id": "linux",
     "description": "Collect metrics from Linux servers with Elastic Agent.",
     "data_streams": [
       {
@@ -3636,7 +3853,7 @@
   },
   {
     "title": "Cybereason",
-    "_id": "cybereason",
+    "id": "cybereason",
     "description": "Collect logs from Cybereason with Elastic Agent.",
     "data_streams": [
       {
@@ -3674,7 +3891,7 @@
   },
   {
     "title": "Kafka",
-    "_id": "kafka",
+    "id": "kafka",
     "description": "Collect logs and metrics from Kafka servers with Elastic Agent.",
     "data_streams": [
       {
@@ -3702,7 +3919,7 @@
   },
   {
     "title": "Sophos Central",
-    "_id": "sophos_central",
+    "id": "sophos_central",
     "description": "This Elastic integration collects logs from Sophos Central with Elastic Agent.",
     "data_streams": [
       {
@@ -3720,7 +3937,7 @@
   },
   {
     "title": "PostgreSQL",
-    "_id": "postgresql",
+    "id": "postgresql",
     "description": "Collect logs and metrics from PostgreSQL servers with Elastic Agent.",
     "data_streams": [
       {
@@ -3752,15 +3969,22 @@
     "elser_embedding": "PostgreSQL - Collect logs and metrics from PostgreSQL servers with Elastic Agent. - PostgreSQL bgwriter metrics PostgreSQL database metrics PostgreSQL logs PostgreSQL statement metrics PostgreSQL activity metrics"
   },
   {
+    "title": "Corelight",
+    "id": "corelight",
+    "description": "Collect logs from Corelight with Elastic Agent.",
+    "data_streams": [],
+    "elser_embedding": "Corelight - Collect logs from Corelight with Elastic Agent. - "
+  },
+  {
     "title": "Threat Intelligence Utilities",
-    "_id": "ti_util",
+    "id": "ti_util",
     "description": "Prebuilt Threat Intelligence dashboard for Elastic Security",
     "data_streams": [],
     "elser_embedding": "Threat Intelligence Utilities - Prebuilt Threat Intelligence dashboard for Elastic Security - "
   },
   {
     "title": "Imperva Cloud WAF",
-    "_id": "imperva_cloud_waf",
+    "id": "imperva_cloud_waf",
     "description": "Collect logs from Imperva Cloud WAF with Elastic Agent.",
     "data_streams": [
       {
@@ -3773,7 +3997,7 @@
   },
   {
     "title": "File Integrity Monitoring",
-    "_id": "fim",
+    "id": "fim",
     "description": "The File Integrity Monitoring integration reports filesystem changes in real time.",
     "data_streams": [
       {
@@ -3786,14 +4010,14 @@
   },
   {
     "title": "Custom Websocket logs",
-    "_id": "websocket",
+    "id": "websocket",
     "description": "Collect custom events from a socket server with Elastic agent.",
     "data_streams": [],
     "elser_embedding": "Custom Websocket logs - Collect custom events from a socket server with Elastic agent. - "
   },
   {
     "title": "SpyCloud Enterprise Protection",
-    "_id": "spycloud",
+    "id": "spycloud",
     "description": "Collect data from SpyCloud Enterprise Protection with Elastic Agent.",
     "data_streams": [
       {
@@ -3816,7 +4040,7 @@
   },
   {
     "title": "Canva",
-    "_id": "canva",
+    "id": "canva",
     "description": "Collect logs from Canva with Elastic Agent.",
     "data_streams": [
       {
@@ -3829,7 +4053,7 @@
   },
   {
     "title": "Microsoft Office 365",
-    "_id": "o365",
+    "id": "o365",
     "description": "Collect logs from Microsoft Office 365 with Elastic Agent.",
     "data_streams": [
       {
@@ -3842,7 +4066,7 @@
   },
   {
     "title": "AWS",
-    "_id": "aws",
+    "id": "aws",
     "description": "Collect logs and metrics from Amazon Web Services (AWS) with Elastic Agent.",
     "data_streams": [
       {
@@ -4060,7 +4284,7 @@
   },
   {
     "title": "Nginx Ingress Controller Logs",
-    "_id": "nginx_ingress_controller",
+    "id": "nginx_ingress_controller",
     "description": "Collect Nginx Ingress Controller logs.",
     "data_streams": [
       {
@@ -4078,7 +4302,7 @@
   },
   {
     "title": "Cisco Umbrella",
-    "_id": "cisco_umbrella",
+    "id": "cisco_umbrella",
     "description": "Collect logs from Cisco Umbrella with Elastic Agent.",
     "data_streams": [
       {
@@ -4091,7 +4315,7 @@
   },
   {
     "title": "Cloudflare Logpush",
-    "_id": "cloudflare_logpush",
+    "id": "cloudflare_logpush",
     "description": "Collect and parse logs from Cloudflare API with Elastic Agent.",
     "data_streams": [
       {
@@ -4189,7 +4413,7 @@
   },
   {
     "title": "Microsoft DHCP",
-    "_id": "microsoft_dhcp",
+    "id": "microsoft_dhcp",
     "description": "Collect logs from Microsoft DHCP with Elastic Agent.",
     "data_streams": [
       {
@@ -4202,7 +4426,7 @@
   },
   {
     "title": "Netskope",
-    "_id": "netskope",
+    "id": "netskope",
     "description": "Collect logs from Netskope with Elastic Agent.",
     "data_streams": [
       {
@@ -4220,7 +4444,7 @@
   },
   {
     "title": "Suricata",
-    "_id": "suricata",
+    "id": "suricata",
     "description": "Collect logs from Suricata with Elastic Agent.",
     "data_streams": [
       {
@@ -4232,8 +4456,15 @@
     "elser_embedding": "Suricata - Collect logs from Suricata with Elastic Agent. - Suricata eve logs"
   },
   {
+    "title": "Custom Azure Logs",
+    "id": "azure_logs",
+    "description": "Collect log events from Azure Event Hubs with Elastic Agent",
+    "data_streams": [],
+    "elser_embedding": "Custom Azure Logs - Collect log events from Azure Event Hubs with Elastic Agent - "
+  },
+  {
     "title": "Zscaler Private Access",
-    "_id": "zscaler_zpa",
+    "id": "zscaler_zpa",
     "description": "Collect logs from Zscaler Private Access (ZPA) with Elastic Agent.",
     "data_streams": [
       {
@@ -4266,7 +4497,7 @@
   },
   {
     "title": "Cisco Aironet",
-    "_id": "cisco_aironet",
+    "id": "cisco_aironet",
     "description": "Integration for Cisco Aironet WLC Logs",
     "data_streams": [
       {
@@ -4279,7 +4510,7 @@
   },
   {
     "title": "Collective Intelligence Framework v3",
-    "_id": "ti_cif3",
+    "id": "ti_cif3",
     "description": "Ingest threat indicators from a Collective Intelligence Framework v3 instance with Elastic Agent.",
     "data_streams": [
       {
@@ -4292,7 +4523,7 @@
   },
   {
     "title": "Bitwarden",
-    "_id": "bitwarden",
+    "id": "bitwarden",
     "description": "Collect logs from Bitwarden with Elastic Agent.",
     "data_streams": [
       {
@@ -4325,7 +4556,7 @@
   },
   {
     "title": "Kibana",
-    "_id": "kibana",
+    "id": "kibana",
     "description": "Collect logs and metrics from Kibana with Elastic Agent.",
     "data_streams": [
       {
@@ -4383,7 +4614,7 @@
   },
   {
     "title": "Digital Guardian",
-    "_id": "digital_guardian",
+    "id": "digital_guardian",
     "description": "Collect logs from Digital Guardian with Elastic Agent.",
     "data_streams": [
       {
@@ -4396,7 +4627,7 @@
   },
   {
     "title": "MySQL",
-    "_id": "mysql",
+    "id": "mysql",
     "description": "Collect logs and metrics from MySQL servers with Elastic Agent.",
     "data_streams": [
       {
@@ -4434,7 +4665,7 @@
   },
   {
     "title": "CISA Known Exploited Vulnerabilities",
-    "_id": "cisa_kevs",
+    "id": "cisa_kevs",
     "description": "This package allows the ingest of known exploited vulnerabilities according to the Cybersecurity and Infrastructure Security Agency of the United States of America. This information could be used to enrich or track exisiting vulnerabilities that are known to be exploited in the wild.",
     "data_streams": [
       {
@@ -4447,7 +4678,7 @@
   },
   {
     "title": "StormShield SNS",
-    "_id": "stormshield",
+    "id": "stormshield",
     "description": "Stormshield SNS integration.",
     "data_streams": [
       {
@@ -4460,7 +4691,7 @@
   },
   {
     "title": "1Password",
-    "_id": "1password",
+    "id": "1password",
     "description": "Collect logs from 1Password with Elastic Agent.",
     "data_streams": [
       {
@@ -4483,7 +4714,7 @@
   },
   {
     "title": "Azure Network Watcher NSG",
-    "_id": "azure_network_watcher_nsg",
+    "id": "azure_network_watcher_nsg",
     "description": "Collect logs from Azure Network Watcher NSG with Elastic Agent.",
     "data_streams": [
       {
@@ -4496,7 +4727,7 @@
   },
   {
     "title": "WebSphere Application Server",
-    "_id": "websphere_application_server",
+    "id": "websphere_application_server",
     "description": "Collects metrics from IBM WebSphere Application Server with Elastic Agent.",
     "data_streams": [
       {
@@ -4524,9 +4755,14 @@
   },
   {
     "title": "GitLab",
-    "_id": "gitlab",
+    "id": "gitlab",
     "description": "Collect logs from GitLab with Elastic Agent.",
     "data_streams": [
+      {
+        "dataset": "sidekiq",
+        "index_pattern": "logs-gitlab.sidekiq-*",
+        "title": "GitLab Sidekiq logs"
+      },
       {
         "dataset": "audit",
         "index_pattern": "logs-gitlab.audit-*",
@@ -4543,6 +4779,11 @@
         "title": "Application"
       },
       {
+        "dataset": "pages",
+        "index_pattern": "logs-gitlab.pages-*",
+        "title": "GitLab Pages logs"
+      },
+      {
         "dataset": "production",
         "index_pattern": "logs-gitlab.production-*",
         "title": "GitLab Production logs"
@@ -4553,18 +4794,18 @@
         "title": "GitLab API logs"
       }
     ],
-    "elser_embedding": "GitLab - Collect logs from GitLab with Elastic Agent. - Audit Auth Application GitLab Production logs GitLab API logs"
+    "elser_embedding": "GitLab - Collect logs from GitLab with Elastic Agent. - GitLab Sidekiq logs Audit Auth Application GitLab Pages logs GitLab Production logs GitLab API logs"
   },
   {
     "title": "Custom Logs",
-    "_id": "log",
+    "id": "log",
     "description": "Collect custom logs with Elastic Agent.",
     "data_streams": [],
     "elser_embedding": "Custom Logs - Collect custom logs with Elastic Agent. - "
   },
   {
     "title": "Tenable Vulnerability Management",
-    "_id": "tenable_io",
+    "id": "tenable_io",
     "description": "Collect logs from Tenable Vulnerability Management with Elastic Agent.",
     "data_streams": [
       {
@@ -4592,7 +4833,7 @@
   },
   {
     "title": "Falco",
-    "_id": "falco",
+    "id": "falco",
     "description": "Collect events and alerts from Falco using Elastic Agent",
     "data_streams": [
       {
@@ -4605,7 +4846,7 @@
   },
   {
     "title": "Docker",
-    "_id": "docker",
+    "id": "docker",
     "description": "Collect metrics and logs from Docker instances with Elastic Agent.",
     "data_streams": [
       {
@@ -4663,14 +4904,14 @@
   },
   {
     "title": "Elastic Synthetics Dashboards",
-    "_id": "synthetics_dashboards",
+    "id": "synthetics_dashboards",
     "description": "Explore Elastic Synthetics metrics with these dashboards.",
     "data_streams": [],
     "elser_embedding": "Elastic Synthetics Dashboards - Explore Elastic Synthetics metrics with these dashboards. - "
   },
   {
     "title": "Azure Billing Metrics",
-    "_id": "azure_billing",
+    "id": "azure_billing",
     "description": "Collect billing metrics with Elastic Agent.",
     "data_streams": [
       {
@@ -4683,7 +4924,7 @@
   },
   {
     "title": "Couchbase",
-    "_id": "couchbase",
+    "id": "couchbase",
     "description": "Collect metrics from Couchbase databases with Elastic Agent.",
     "data_streams": [
       {
@@ -4741,7 +4982,7 @@
   },
   {
     "title": "VMware Carbon Black Cloud",
-    "_id": "carbon_black_cloud",
+    "id": "carbon_black_cloud",
     "description": "Collect logs from VMWare Carbon Black Cloud with Elastic Agent.",
     "data_streams": [
       {
@@ -4779,14 +5020,14 @@
   },
   {
     "title": "Universal Profiling Symbolizer",
-    "_id": "profiler_symbolizer",
+    "id": "profiler_symbolizer",
     "description": "Fleet-wide, whole-system, continuous profiling with zero instrumentation.",
     "data_streams": [],
     "elser_embedding": "Universal Profiling Symbolizer - Fleet-wide, whole-system, continuous profiling with zero instrumentation. - "
   },
   {
     "title": "Fortinet FortiProxy",
-    "_id": "fortinet_fortiproxy",
+    "id": "fortinet_fortiproxy",
     "description": "Collect logs from Fortinet FortiProxy with Elastic Agent.",
     "data_streams": [
       {
@@ -4799,13 +5040,18 @@
   },
   {
     "title": "MongoDB Atlas",
-    "_id": "mongodb_atlas",
+    "id": "mongodb_atlas",
     "description": "This Elastic integration collects logs and metrics from MongoDB Atlas instance.",
     "data_streams": [
       {
         "dataset": "mongod_database",
         "index_pattern": "logs-mongodb_atlas.mongod_database-*",
         "title": "Collect Mongod Database logs from MongoDB Atlas"
+      },
+      {
+        "dataset": "disk",
+        "index_pattern": "logs-mongodb_atlas.disk-*",
+        "title": "Collect Disk metrics from MongoDB Atlas"
       },
       {
         "dataset": "project",
@@ -4838,11 +5084,11 @@
         "title": "Collect Hardware metrics from MongoDB Atlas"
       }
     ],
-    "elser_embedding": "MongoDB Atlas - This Elastic integration collects logs and metrics from MongoDB Atlas instance. - Collect Mongod Database logs from MongoDB Atlas Collect Project logs from MongoDB Atlas Collect Process metrics from MongoDB Atlas Collect Alert logs from MongoDB Atlas Collect Mongod Audit logs from MongoDB Atlas Collect Organization logs from MongoDB Atlas Collect Hardware metrics from MongoDB Atlas"
+    "elser_embedding": "MongoDB Atlas - This Elastic integration collects logs and metrics from MongoDB Atlas instance. - Collect Mongod Database logs from MongoDB Atlas Collect Disk metrics from MongoDB Atlas Collect Project logs from MongoDB Atlas Collect Process metrics from MongoDB Atlas Collect Alert logs from MongoDB Atlas Collect Mongod Audit logs from MongoDB Atlas Collect Organization logs from MongoDB Atlas Collect Hardware metrics from MongoDB Atlas"
   },
   {
     "title": "Zero Networks",
-    "_id": "zeronetworks",
+    "id": "zeronetworks",
     "description": "Zero Networks Logs integration",
     "data_streams": [
       {
@@ -4855,7 +5101,7 @@
   },
   {
     "title": "CockroachDB Metrics",
-    "_id": "cockroachdb",
+    "id": "cockroachdb",
     "description": "Collect metrics from CockroachDB servers with Elastic Agent.",
     "data_streams": [
       {
@@ -4868,7 +5114,7 @@
   },
   {
     "title": "Microsoft Exchange Server",
-    "_id": "microsoft_exchange_server",
+    "id": "microsoft_exchange_server",
     "description": "Collect logs from Microsoft Exchange Server with Elastic Agent.",
     "data_streams": [
       {
@@ -4896,7 +5142,7 @@
   },
   {
     "title": "Cisco Secure Email Gateway",
-    "_id": "cisco_secure_email_gateway",
+    "id": "cisco_secure_email_gateway",
     "description": "Collect logs from Cisco Secure Email Gateway with Elastic Agent.",
     "data_streams": [
       {
@@ -4909,14 +5155,14 @@
   },
   {
     "title": "Prometheus Input",
-    "_id": "prometheus_input",
+    "id": "prometheus_input",
     "description": "Collects metrics from Prometheus exporter.",
     "data_streams": [],
     "elser_embedding": "Prometheus Input - Collects metrics from Prometheus exporter. - "
   },
   {
     "title": "PingOne",
-    "_id": "ping_one",
+    "id": "ping_one",
     "description": "Collect logs from PingOne with Elastic-Agent.",
     "data_streams": [
       {
@@ -4928,8 +5174,8 @@
     "elser_embedding": "PingOne - Collect logs from PingOne with Elastic-Agent. - Collect Audit logs from PingOne"
   },
   {
-    "title": "Squid Logs",
-    "_id": "squid",
+    "title": "Squid Proxy",
+    "id": "squid",
     "description": "Collect and parse logs from Squid devices with Elastic Agent.",
     "data_streams": [
       {
@@ -4938,11 +5184,11 @@
         "title": "Squid logs"
       }
     ],
-    "elser_embedding": "Squid Logs - Collect and parse logs from Squid devices with Elastic Agent. - Squid logs"
+    "elser_embedding": "Squid Proxy - Collect and parse logs from Squid devices with Elastic Agent. - Squid logs"
   },
   {
     "title": "Zoom",
-    "_id": "zoom",
+    "id": "zoom",
     "description": "Collect logs from Zoom with Elastic Agent.",
     "data_streams": [
       {
@@ -4955,7 +5201,7 @@
   },
   {
     "title": "Auth0",
-    "_id": "auth0",
+    "id": "auth0",
     "description": "Collect logs from Auth0 with Elastic Agent.",
     "data_streams": [
       {
@@ -4968,7 +5214,7 @@
   },
   {
     "title": "Tomcat NetWitness Logs",
-    "_id": "tomcat",
+    "id": "tomcat",
     "description": "Collect and parse logs from Apache Tomcat servers with Elastic Agent.",
     "data_streams": [
       {
@@ -4981,7 +5227,7 @@
   },
   {
     "title": "Auditd Logs",
-    "_id": "auditd",
+    "id": "auditd",
     "description": "Collect logs from Linux audit daemon with Elastic Agent.",
     "data_streams": [
       {
@@ -4994,14 +5240,14 @@
   },
   {
     "title": "SQL Input",
-    "_id": "sql",
+    "id": "sql",
     "description": "Collects Metrics by Quering on SQL Databases",
     "data_streams": [],
     "elser_embedding": "SQL Input - Collects Metrics by Quering on SQL Databases - "
   },
   {
     "title": "Azure Frontdoor",
-    "_id": "azure_frontdoor",
+    "id": "azure_frontdoor",
     "description": "This Elastic integration collects logs from Azure Frontdoor.",
     "data_streams": [
       {
@@ -5019,7 +5265,7 @@
   },
   {
     "title": "Amazon Data Firehose",
-    "_id": "awsfirehose",
+    "id": "awsfirehose",
     "description": "Stream logs and metrics from Amazon Data Firehose into Elastic Cloud.",
     "data_streams": [
       {
@@ -5037,7 +5283,7 @@
   },
   {
     "title": "Zscaler Internet Access",
-    "_id": "zscaler_zia",
+    "id": "zscaler_zia",
     "description": "Collect logs from Zscaler Internet Access (ZIA) with Elastic Agent.",
     "data_streams": [
       {
@@ -5084,8 +5330,21 @@
     "elser_embedding": "Zscaler Internet Access - Collect logs from Zscaler Internet Access (ZIA) with Elastic Agent. - Sandbox Report Logs Tunnel Logs Audit Logs DNS logs Web Logs Endpoint DLP Logs Alerts Firewall Logs"
   },
   {
+    "title": "Broadcom ProxySG",
+    "id": "proxysg",
+    "description": "Collect access logs from Broadcom ProxySG with Elastic Agent.",
+    "data_streams": [
+      {
+        "dataset": "log",
+        "index_pattern": "logs-proxysg.log-*",
+        "title": "ProxySG Access Logs"
+      }
+    ],
+    "elser_embedding": "Broadcom ProxySG - Collect access logs from Broadcom ProxySG with Elastic Agent. - ProxySG Access Logs"
+  },
+  {
     "title": "Juniper SRX",
-    "_id": "juniper_srx",
+    "id": "juniper_srx",
     "description": "Collect logs from Juniper SRX devices with Elastic Agent.",
     "data_streams": [
       {
@@ -5097,8 +5356,21 @@
     "elser_embedding": "Juniper SRX - Collect logs from Juniper SRX devices with Elastic Agent. - Juniper SRX logs"
   },
   {
+    "title": "ServiceNow",
+    "id": "servicenow",
+    "description": "Collect logs from ServiceNow with Elastic Agent.",
+    "data_streams": [
+      {
+        "dataset": "event",
+        "index_pattern": "logs-servicenow.event-*",
+        "title": "Event"
+      }
+    ],
+    "elser_embedding": "ServiceNow - Collect logs from ServiceNow with Elastic Agent. - Event"
+  },
+  {
     "title": "Defend for Containers",
-    "_id": "cloud_defend",
+    "id": "cloud_defend",
     "description": "Elastic Defend for Containers (BETA) provides cloud-native runtime protections for containerized environments.",
     "data_streams": [
       {
@@ -5130,8 +5402,31 @@
     "elser_embedding": "Defend for Containers - Elastic Defend for Containers (BETA) provides cloud-native runtime protections for containerized environments. - Cloud Defend Liveness Heartbeat File telemetry Process telemetry Cloud defend metrics alerts"
   },
   {
+    "title": "authentik",
+    "id": "authentik",
+    "description": "Collect logs from authentik with Elastic Agent.",
+    "data_streams": [
+      {
+        "dataset": "group",
+        "index_pattern": "logs-authentik.group-*",
+        "title": "authentik group logs"
+      },
+      {
+        "dataset": "event",
+        "index_pattern": "logs-authentik.event-*",
+        "title": "authentik event logs"
+      },
+      {
+        "dataset": "user",
+        "index_pattern": "logs-authentik.user-*",
+        "title": "authentik user logs"
+      }
+    ],
+    "elser_embedding": "authentik - Collect logs from authentik with Elastic Agent. - authentik group logs authentik event logs authentik user logs"
+  },
+  {
     "title": "Wiz",
-    "_id": "wiz",
+    "id": "wiz",
     "description": "Collect logs from Wiz with Elastic Agent.",
     "data_streams": [
       {
@@ -5148,13 +5443,18 @@
         "dataset": "audit",
         "index_pattern": "logs-wiz.audit-*",
         "title": "Collect Audit logs from Wiz."
+      },
+      {
+        "dataset": "cloud_configuration_finding",
+        "index_pattern": "logs-wiz.cloud_configuration_finding-*",
+        "title": "Collet Cloud Configuration Finding logs from Wiz."
       }
     ],
-    "elser_embedding": "Wiz - Collect logs from Wiz with Elastic Agent. - Collect Issue logs from Wiz. Collect Vulnerability logs from Wiz. Collect Audit logs from Wiz."
+    "elser_embedding": "Wiz - Collect logs from Wiz with Elastic Agent. - Collect Issue logs from Wiz. Collect Vulnerability logs from Wiz. Collect Audit logs from Wiz. Collet Cloud Configuration Finding logs from Wiz."
   },
   {
     "title": "Mattermost",
-    "_id": "mattermost",
+    "id": "mattermost",
     "description": "Collect logs from Mattermost with Elastic Agent.",
     "data_streams": [
       {
@@ -5167,7 +5467,7 @@
   },
   {
     "title": "Teleport",
-    "_id": "teleport",
+    "id": "teleport",
     "description": "Collect logs from Teleport with Elastic Agent.",
     "data_streams": [
       {
@@ -5180,7 +5480,7 @@
   },
   {
     "title": "Fleet Server",
-    "_id": "fleet_server",
+    "id": "fleet_server",
     "description": "Centrally manage Elastic Agents with the Fleet Server integration.",
     "data_streams": [
       {
@@ -5203,7 +5503,7 @@
   },
   {
     "title": "Cisco Secure Endpoint",
-    "_id": "cisco_secure_endpoint",
+    "id": "cisco_secure_endpoint",
     "description": "Collect logs from Cisco Secure Endpoint (AMP) with Elastic Agent.",
     "data_streams": [
       {
@@ -5216,7 +5516,7 @@
   },
   {
     "title": "Iptables",
-    "_id": "iptables",
+    "id": "iptables",
     "description": "Collect logs from Iptables with Elastic Agent.",
     "data_streams": [
       {
@@ -5229,7 +5529,7 @@
   },
   {
     "title": "Google Workspace",
-    "_id": "google_workspace",
+    "id": "google_workspace",
     "description": "Collect logs from Google Workspace with Elastic Agent.",
     "data_streams": [
       {
@@ -5307,7 +5607,7 @@
   },
   {
     "title": "VMware Carbon Black EDR",
-    "_id": "carbonblack_edr",
+    "id": "carbonblack_edr",
     "description": "Collect logs from VMware Carbon Black EDR with Elastic Agent.",
     "data_streams": [
       {
@@ -5320,7 +5620,7 @@
   },
   {
     "title": "Mimecast",
-    "_id": "mimecast",
+    "id": "mimecast",
     "description": "Collect logs from Mimecast with Elastic Agent.",
     "data_streams": [
       {
@@ -5378,7 +5678,7 @@
   },
   {
     "title": "Oracle WebLogic",
-    "_id": "oracle_weblogic",
+    "id": "oracle_weblogic",
     "description": "Collect logs and metrics from Oracle WebLogic with Elastic Agent.",
     "data_streams": [
       {
@@ -5416,7 +5716,7 @@
   },
   {
     "title": "System Audit",
-    "_id": "system_audit",
+    "id": "system_audit",
     "description": "Collect various logs & metrics from System Audit modules with Elastic Agent.",
     "data_streams": [
       {
@@ -5429,8 +5729,8 @@
   },
   {
     "title": "Salesforce",
-    "_id": "salesforce",
-    "description": "Collect logs from Salesforce instances using the Elastic Agent. This integration allows you to monitor and analyze various Salesforce logs, including Login, Logout, Setup Audit Trail, and Apex logs.\n",
+    "id": "salesforce",
+    "description": "Collect logs from Salesforce instances using the Elastic Agent. This integration enables monitoring and analysis of various Salesforce logs, including Login, Logout, Setup Audit Trail, and Apex execution logs. Gain insights into user activity, security events, and application performance.\n",
     "data_streams": [
       {
         "dataset": "setupaudittrail",
@@ -5453,11 +5753,11 @@
         "title": "Salesforce Apex logs"
       }
     ],
-    "elser_embedding": "Salesforce - Collect logs from Salesforce instances using the Elastic Agent. This integration allows you to monitor and analyze various Salesforce logs, including Login, Logout, Setup Audit Trail, and Apex logs.\n - Salesforce setupaudittrail logs Salesforce login logs Salesforce logout logs Salesforce Apex logs"
+    "elser_embedding": "Salesforce - Collect logs from Salesforce instances using the Elastic Agent. This integration enables monitoring and analysis of various Salesforce logs, including Login, Logout, Setup Audit Trail, and Apex execution logs. Gain insights into user activity, security events, and application performance.\n - Salesforce setupaudittrail logs Salesforce login logs Salesforce logout logs Salesforce Apex logs"
   },
   {
     "title": "Azure Application Insights Metrics Overview",
-    "_id": "azure_application_insights",
+    "id": "azure_application_insights",
     "description": "Collect application insights metrics from Azure Monitor with Elastic Agent.",
     "data_streams": [
       {
@@ -5475,7 +5775,7 @@
   },
   {
     "title": "ForgeRock",
-    "_id": "forgerock",
+    "id": "forgerock",
     "description": "Collect audit logs from ForgeRock with Elastic Agent.",
     "data_streams": [
       {
@@ -5538,7 +5838,7 @@
   },
   {
     "title": "Tenable.sc",
-    "_id": "tenable_sc",
+    "id": "tenable_sc",
     "description": "Collect logs from Tenable.sc with Elastic Agent.\n",
     "data_streams": [
       {
@@ -5561,7 +5861,7 @@
   },
   {
     "title": "Cisco IOS",
-    "_id": "cisco_ios",
+    "id": "cisco_ios",
     "description": "Collect logs from Cisco IOS with Elastic Agent.",
     "data_streams": [
       {
@@ -5574,7 +5874,7 @@
   },
   {
     "title": "ZooKeeper Metrics",
-    "_id": "zookeeper",
+    "id": "zookeeper",
     "description": "Collect metrics from ZooKeeper service with Elastic Agent.",
     "data_streams": [
       {
@@ -5597,7 +5897,7 @@
   },
   {
     "title": "Palo Alto Next-Gen Firewall",
-    "_id": "panw",
+    "id": "panw",
     "description": "Collect logs from Palo Alto next-gen firewalls with Elastic Agent.",
     "data_streams": [
       {
@@ -5610,7 +5910,7 @@
   },
   {
     "title": "Hadoop",
-    "_id": "hadoop",
+    "id": "hadoop",
     "description": "Collect metrics from Apache Hadoop with Elastic Agent.",
     "data_streams": [
       {
@@ -5643,7 +5943,7 @@
   },
   {
     "title": "InfluxDb",
-    "_id": "influxdb",
+    "id": "influxdb",
     "description": "Collect metrics from Influxdb database",
     "data_streams": [
       {
@@ -5661,7 +5961,7 @@
   },
   {
     "title": "Sophos",
-    "_id": "sophos",
+    "id": "sophos",
     "description": "Collect logs from Sophos with Elastic Agent.",
     "data_streams": [
       {
@@ -5679,7 +5979,7 @@
   },
   {
     "title": "Menlo Security",
-    "_id": "menlo",
+    "id": "menlo",
     "description": "Collect logs from Menlo Security products with Elastic Agent",
     "data_streams": [
       {
@@ -5697,7 +5997,7 @@
   },
   {
     "title": "Barracuda Web Application Firewall",
-    "_id": "barracuda",
+    "id": "barracuda",
     "description": "Collect logs from Barracuda Web Application Firewall with Elastic Agent.",
     "data_streams": [
       {
@@ -5710,7 +6010,7 @@
   },
   {
     "title": "FireEye Network Security",
-    "_id": "fireeye",
+    "id": "fireeye",
     "description": "Collect logs from FireEye NX with Elastic Agent.",
     "data_streams": [
       {
@@ -5723,7 +6023,7 @@
   },
   {
     "title": "Tines",
-    "_id": "tines",
+    "id": "tines",
     "description": "Tines Logs & Time Saved Reports",
     "data_streams": [
       {
@@ -5740,10 +6040,33 @@
     "elser_embedding": "Tines - Tines Logs & Time Saved Reports - Tines Time Saved Reports Tines Audit Logs"
   },
   {
+    "title": "Cisco Meraki Metrics",
+    "id": "cisco_meraki_metrics",
+    "description": "Collect metrics from Cisco Meraki with Elastic Agent.",
+    "data_streams": [
+      {
+        "dataset": "device_health",
+        "index_pattern": "logs-cisco_meraki_metrics.device_health-*",
+        "title": "Cisco Meraki Device Health Metrics"
+      }
+    ],
+    "elser_embedding": "Cisco Meraki Metrics - Collect metrics from Cisco Meraki with Elastic Agent. - Cisco Meraki Device Health Metrics"
+  },
+  {
     "title": "VMware vSphere",
-    "_id": "vsphere",
+    "id": "vsphere",
     "description": "This Elastic integration collects metrics and logs from vSphere/vCenter servers",
     "data_streams": [
+      {
+        "dataset": "network",
+        "index_pattern": "logs-vsphere.network-*",
+        "title": "vSphere network metrics"
+      },
+      {
+        "dataset": "resourcepool",
+        "index_pattern": "logs-vsphere.resourcepool-*",
+        "title": "vSphere resourcepool metrics"
+      },
       {
         "dataset": "datastore",
         "index_pattern": "logs-vsphere.datastore-*",
@@ -5760,16 +6083,26 @@
         "title": "vSphere host metrics"
       },
       {
+        "dataset": "datastorecluster",
+        "index_pattern": "logs-vsphere.datastorecluster-*",
+        "title": "vSphere DatastoreCluster metrics"
+      },
+      {
         "dataset": "log",
         "index_pattern": "logs-vsphere.log-*",
         "title": "vSphere Logs"
+      },
+      {
+        "dataset": "cluster",
+        "index_pattern": "logs-vsphere.cluster-*",
+        "title": "vSphere cluster metrics"
       }
     ],
-    "elser_embedding": "VMware vSphere - This Elastic integration collects metrics and logs from vSphere/vCenter servers - vSphere datastore metrics vSphere virtual machine metrics vSphere host metrics vSphere Logs"
+    "elser_embedding": "VMware vSphere - This Elastic integration collects metrics and logs from vSphere/vCenter servers - vSphere network metrics vSphere resourcepool metrics vSphere datastore metrics vSphere virtual machine metrics vSphere host metrics vSphere DatastoreCluster metrics vSphere Logs vSphere cluster metrics"
   },
   {
     "title": "Platform Observability",
-    "_id": "platform_observability",
+    "id": "platform_observability",
     "description": "Collect stack component logs with Elastic Agent",
     "data_streams": [
       {
@@ -5787,7 +6120,7 @@
   },
   {
     "title": "System",
-    "_id": "system",
+    "id": "system",
     "description": "Collect system logs and metrics from your servers with Elastic Agent.",
     "data_streams": [
       {
@@ -5880,7 +6213,7 @@
   },
   {
     "title": "Airflow",
-    "_id": "airflow",
+    "id": "airflow",
     "description": "Airflow Integration.",
     "data_streams": [
       {
@@ -5893,21 +6226,21 @@
   },
   {
     "title": "Custom Google Pub/Sub Logs",
-    "_id": "gcp_pubsub",
+    "id": "gcp_pubsub",
     "description": "Collect Logs from Google Pub/Sub topics",
     "data_streams": [],
     "elser_embedding": "Custom Google Pub/Sub Logs - Collect Logs from Google Pub/Sub topics - "
   },
   {
     "title": "Beat",
-    "_id": "beat",
+    "id": "beat",
     "description": "Beat Integration",
     "data_streams": [],
     "elser_embedding": "Beat - Beat Integration - "
   },
   {
     "title": "Cyberark Privileged Threat Analytics",
-    "_id": "cyberark_pta",
+    "id": "cyberark_pta",
     "description": "Collect security logs from Cyberark PTA integration.",
     "data_streams": [
       {
@@ -5920,7 +6253,7 @@
   },
   {
     "title": "Trellix ePO Cloud",
-    "_id": "trellix_epo_cloud",
+    "id": "trellix_epo_cloud",
     "description": "Collect logs from Trellix ePO Cloud with Elastic Agent.",
     "data_streams": [
       {
@@ -5943,7 +6276,7 @@
   },
   {
     "title": "Vectra Detect",
-    "_id": "vectra_detect",
+    "id": "vectra_detect",
     "description": "Collect logs from Vectra Detect with Elastic Agent.",
     "data_streams": [
       {
@@ -5956,7 +6289,7 @@
   },
   {
     "title": "Atlassian Confluence",
-    "_id": "atlassian_confluence",
+    "id": "atlassian_confluence",
     "description": "Collect logs from Atlassian Confluence with Elastic Agent.",
     "data_streams": [
       {
@@ -5969,7 +6302,7 @@
   },
   {
     "title": "QNAP NAS",
-    "_id": "qnap_nas",
+    "id": "qnap_nas",
     "description": "Collect logs from QNAP NAS devices with Elastic Agent.",
     "data_streams": [
       {
@@ -5982,7 +6315,7 @@
   },
   {
     "title": "Memcached",
-    "_id": "memcached",
+    "id": "memcached",
     "description": "Memcached Integration",
     "data_streams": [
       {
@@ -5995,7 +6328,7 @@
   },
   {
     "title": "Azure Resource Metrics",
-    "_id": "azure_metrics",
+    "id": "azure_metrics",
     "description": "Collect metrics from Azure resources with Elastic Agent.",
     "data_streams": [
       {
@@ -6042,15 +6375,22 @@
     "elser_embedding": "Azure Resource Metrics - Collect metrics from Azure resources with Elastic Agent. - Container Service Container Instance Compute VM Monitor Storage Account Compute VM Scaleset Database Account Container Registry"
   },
   {
+    "title": "Elastic Connectors",
+    "id": "elastic_connectors",
+    "description": "Sync data from source to the Elasticsearch index.",
+    "data_streams": [],
+    "elser_embedding": "Elastic Connectors - Sync data from source to the Elasticsearch index. - "
+  },
+  {
     "title": "StatsD Input",
-    "_id": "statsd_input",
+    "id": "statsd_input",
     "description": "StatsD Input Package",
     "data_streams": [],
     "elser_embedding": "StatsD Input - StatsD Input Package - "
   },
   {
     "title": "Cloudflare",
-    "_id": "cloudflare",
+    "id": "cloudflare",
     "description": "Collect logs from Cloudflare with Elastic Agent.",
     "data_streams": [
       {
@@ -6068,7 +6408,7 @@
   },
   {
     "title": "Cribl",
-    "_id": "cribl",
+    "id": "cribl",
     "description": "Stream logs from Cribl into Elastic.",
     "data_streams": [
       {
@@ -6081,7 +6421,7 @@
   },
   {
     "title": "PHP-FPM",
-    "_id": "php_fpm",
+    "id": "php_fpm",
     "description": "This Elastic integration collects metrics from PHP-FPM.",
     "data_streams": [
       {
@@ -6099,7 +6439,7 @@
   },
   {
     "title": "Azure Logs",
-    "_id": "azure",
+    "id": "azure",
     "description": "This Elastic integration collects logs from Azure",
     "data_streams": [
       {
@@ -6161,8 +6501,92 @@
     "elser_embedding": "Azure Logs - This Elastic integration collects logs from Azure - Azure Platform Logs Azure Audit Logs Azure Spring Apps Logs Azure Signin Logs Collect Network rule logs from Azure Firewall Microsoft Graph Activity Logs Azure Application Gateway logs Azure Event Hub Input Microsoft Entra ID Provisioning Logs Azure Activity Logs Microsoft Entra ID Identity Protection Logs"
   },
   {
+    "title": "Palo Alto Networks Metrics",
+    "id": "panw_metrics",
+    "description": "Collect metrics from Palo Alto Networks with Elastic Agent.",
+    "data_streams": [
+      {
+        "dataset": "vpn",
+        "index_pattern": "logs-panw_metrics.vpn-*",
+        "title": "Palo Alto Networks VPN metrics"
+      },
+      {
+        "dataset": "interfaces",
+        "index_pattern": "logs-panw_metrics.interfaces-*",
+        "title": "Palo Alto Networks Interfaces metrics"
+      },
+      {
+        "dataset": "system",
+        "index_pattern": "logs-panw_metrics.system-*",
+        "title": "Palo Alto Networks System metrics"
+      },
+      {
+        "dataset": "routing",
+        "index_pattern": "logs-panw_metrics.routing-*",
+        "title": "Palo Alto Networks Routing metrics"
+      }
+    ],
+    "elser_embedding": "Palo Alto Networks Metrics - Collect metrics from Palo Alto Networks with Elastic Agent. - Palo Alto Networks VPN metrics Palo Alto Networks Interfaces metrics Palo Alto Networks System metrics Palo Alto Networks Routing metrics"
+  },
+  {
+    "title": "Custom Threat Intelligence",
+    "id": "ti_custom",
+    "description": "Ingest threat intelligence data in STIX 2.1 format with Elastic Agent",
+    "data_streams": [
+      {
+        "dataset": "indicator",
+        "index_pattern": "logs-ti_custom.indicator-*",
+        "title": "STIX 2.1 indicators"
+      }
+    ],
+    "elser_embedding": "Custom Threat Intelligence - Ingest threat intelligence data in STIX 2.1 format with Elastic Agent - STIX 2.1 indicators"
+  },
+  {
+    "title": "Check Point Harmony Endpoint",
+    "id": "checkpoint_harmony_endpoint",
+    "description": "Collect logs from Check Point Harmony Endpoint",
+    "data_streams": [
+      {
+        "dataset": "urlfiltering",
+        "index_pattern": "logs-checkpoint_harmony_endpoint.urlfiltering-*",
+        "title": "URL Filtering"
+      },
+      {
+        "dataset": "forensics",
+        "index_pattern": "logs-checkpoint_harmony_endpoint.forensics-*",
+        "title": "Forensics"
+      },
+      {
+        "dataset": "antibot",
+        "index_pattern": "logs-checkpoint_harmony_endpoint.antibot-*",
+        "title": "Anti-Bot"
+      },
+      {
+        "dataset": "threatemulation",
+        "index_pattern": "logs-checkpoint_harmony_endpoint.threatemulation-*",
+        "title": "Threat Emulation"
+      },
+      {
+        "dataset": "threatextraction",
+        "index_pattern": "logs-checkpoint_harmony_endpoint.threatextraction-*",
+        "title": "Threat Extraction"
+      },
+      {
+        "dataset": "zerophishing",
+        "index_pattern": "logs-checkpoint_harmony_endpoint.zerophishing-*",
+        "title": "Zero Phishing"
+      },
+      {
+        "dataset": "antimalware",
+        "index_pattern": "logs-checkpoint_harmony_endpoint.antimalware-*",
+        "title": "Anti-Malware"
+      }
+    ],
+    "elser_embedding": "Check Point Harmony Endpoint - Collect logs from Check Point Harmony Endpoint - URL Filtering Forensics Anti-Bot Threat Emulation Threat Extraction Zero Phishing Anti-Malware"
+  },
+  {
     "title": "Thycotic Secret Server",
-    "_id": "thycotic_ss",
+    "id": "thycotic_ss",
     "description": "Thycotic Secret Server logs",
     "data_streams": [
       {
@@ -6175,14 +6599,14 @@
   },
   {
     "title": "Custom HTTP Endpoint Logs",
-    "_id": "http_endpoint",
+    "id": "http_endpoint",
     "description": "Collect JSON data from listening HTTP port with Elastic Agent.",
     "data_streams": [],
     "elser_embedding": "Custom HTTP Endpoint Logs - Collect JSON data from listening HTTP port with Elastic Agent. - "
   },
   {
     "title": "Atlassian Bitbucket",
-    "_id": "atlassian_bitbucket",
+    "id": "atlassian_bitbucket",
     "description": "Collect logs from Atlassian Bitbucket with Elastic Agent.",
     "data_streams": [
       {
@@ -6194,8 +6618,111 @@
     "elser_embedding": "Atlassian Bitbucket - Collect logs from Atlassian Bitbucket with Elastic Agent. - Bitbucket Audit Logs"
   },
   {
+    "title": "TYCHON Agentless",
+    "id": "tychon",
+    "description": "Collect complete master endpoint datasets including vulnerability and STIG to comply with DISA endpoint requirements and C2C without adding services to your endpoints.",
+    "data_streams": [
+      {
+        "dataset": "systemcerts",
+        "index_pattern": "logs-tychon.systemcerts-*",
+        "title": "System Certificates"
+      },
+      {
+        "dataset": "stig",
+        "index_pattern": "logs-tychon.stig-*",
+        "title": "Endpoint STIG Results"
+      },
+      {
+        "dataset": "softwareinventory",
+        "index_pattern": "logs-tychon.softwareinventory-*",
+        "title": "Endpoint Software Inventory Info"
+      },
+      {
+        "dataset": "coams",
+        "index_pattern": "logs-tychon.coams-*",
+        "title": "Endpoint Operational Attributes (Requires DATT)"
+      },
+      {
+        "dataset": "harddrive",
+        "index_pattern": "logs-tychon.harddrive-*",
+        "title": "Endpoint Harddrive Info"
+      },
+      {
+        "dataset": "host",
+        "index_pattern": "logs-tychon.host-*",
+        "title": "Host Operating System Info"
+      },
+      {
+        "dataset": "cve",
+        "index_pattern": "logs-tychon.cve-*",
+        "title": "Vulnerabilites"
+      },
+      {
+        "dataset": "externaldevicecontrol",
+        "index_pattern": "logs-tychon.externaldevicecontrol-*",
+        "title": "Endpoint External Device Control"
+      },
+      {
+        "dataset": "cmrs",
+        "index_pattern": "logs-tychon.cmrs-*",
+        "title": "DISA Continuous Monitoring and Risk Scoring Data"
+      },
+      {
+        "dataset": "arp",
+        "index_pattern": "logs-tychon.arp-*",
+        "title": "Endpoint Arp Table Information"
+      },
+      {
+        "dataset": "ciphers",
+        "index_pattern": "logs-tychon.ciphers-*",
+        "title": "Certificate Ciphers"
+      },
+      {
+        "dataset": "features",
+        "index_pattern": "logs-tychon.features-*",
+        "title": "Features Info"
+      },
+      {
+        "dataset": "epp",
+        "index_pattern": "logs-tychon.epp-*",
+        "title": "Endpoint Protection Platform Info"
+      },
+      {
+        "dataset": "cpu",
+        "index_pattern": "logs-tychon.cpu-*",
+        "title": "Endpoint CPU Info"
+      },
+      {
+        "dataset": "browser",
+        "index_pattern": "logs-tychon.browser-*",
+        "title": "Endpoint Browser Configurations"
+      },
+      {
+        "dataset": "exposedservice",
+        "index_pattern": "logs-tychon.exposedservice-*",
+        "title": "Endpoint Exposed Services"
+      },
+      {
+        "dataset": "volume",
+        "index_pattern": "logs-tychon.volume-*",
+        "title": "Endpoint Volumes Info"
+      },
+      {
+        "dataset": "hardware",
+        "index_pattern": "logs-tychon.hardware-*",
+        "title": "Hardware Info"
+      },
+      {
+        "dataset": "networkadapter",
+        "index_pattern": "logs-tychon.networkadapter-*",
+        "title": "Network Adapters"
+      }
+    ],
+    "elser_embedding": "TYCHON Agentless - Collect complete master endpoint datasets including vulnerability and STIG to comply with DISA endpoint requirements and C2C without adding services to your endpoints. - System Certificates Endpoint STIG Results Endpoint Software Inventory Info Endpoint Operational Attributes (Requires DATT) Endpoint Harddrive Info Host Operating System Info Vulnerabilites Endpoint External Device Control DISA Continuous Monitoring and Risk Scoring Data Endpoint Arp Table Information Certificate Ciphers Features Info Endpoint Protection Platform Info Endpoint CPU Info Endpoint Browser Configurations Endpoint Exposed Services Endpoint Volumes Info Hardware Info Network Adapters"
+  },
+  {
     "title": "Proofpoint On Demand",
-    "_id": "proofpoint_on_demand",
+    "id": "proofpoint_on_demand",
     "description": "Collect logs from Proofpoint On Demand with Elastic Agent.",
     "data_streams": [
       {
@@ -6218,7 +6745,7 @@
   },
   {
     "title": "Cisco ASA",
-    "_id": "cisco_asa",
+    "id": "cisco_asa",
     "description": "Collect logs from Cisco ASA with Elastic Agent.",
     "data_streams": [
       {
@@ -6231,7 +6758,7 @@
   },
   {
     "title": "Amazon Security Lake",
-    "_id": "amazon_security_lake",
+    "id": "amazon_security_lake",
     "description": "Collect logs from Amazon Security Lake with Elastic Agent.",
     "data_streams": [
       {
@@ -6274,8 +6801,8 @@
   },
   {
     "title": "Azure App Service",
-    "_id": "azure_app_service",
-    "description": "Collect logs and metrics from Azure App Service with Elastic Agent.",
+    "id": "azure_app_service",
+    "description": "Collect logs from Azure App Service with Elastic Agent.",
     "data_streams": [
       {
         "dataset": "app_service_logs",
@@ -6283,11 +6810,11 @@
         "title": "Collect App Service logs from Azure"
       }
     ],
-    "elser_embedding": "Azure App Service - Collect logs and metrics from Azure App Service with Elastic Agent. - Collect App Service logs from Azure"
+    "elser_embedding": "Azure App Service - Collect logs from Azure App Service with Elastic Agent. - Collect App Service logs from Azure"
   },
   {
     "title": "ESET PROTECT",
-    "_id": "eset_protect",
+    "id": "eset_protect",
     "description": "Collect logs from ESET PROTECT with Elastic Agent.",
     "data_streams": [
       {
@@ -6309,7 +6836,7 @@
     "elser_embedding": "ESET PROTECT - Collect logs from ESET PROTECT with Elastic Agent. - Collect Device Task logs from ESET PROTECT Collect Detection logs from ESET PROTECT Collect Event logs from ESET PROTECT"
   },
   {
-    "_id": "endpoint",
+    "id": "endpoint",
     "title": "Elastic Defend",
     "description": "windows linux osx dns network process suspicious user registry host host-based endpoint analysis commandline cli command exfiltration ransomware detection system os operating traffic prevention file user modification integrity obfuscation powershell anomaly edr xdr",
     "data_streams": [

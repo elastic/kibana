@@ -17,7 +17,7 @@ export type StoredRuleMigrationResource = Stored<RuleMigrationResource>;
 
 export interface Integration {
   title: string;
-  _id: string;
+  id: string;
   description: string;
   data_streams: Array<{ dataset: string; title: string; index_pattern: string }>;
   elser_embedding: string;

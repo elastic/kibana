@@ -34,7 +34,7 @@ export const getTranslateRuleNode = ({
     const indexPatterns = state.integrations.flatMap((integration) =>
       integration.data_streams.map((dataStream) => dataStream.index_pattern)
     );
-    const integrationIds = state.integrations.map((integration) => integration._id);
+    const integrationIds = state.integrations.map((integration) => integration.id);
 
     const prompt = getEsqlTranslationPrompt(state, query, indexPatterns.join(' '));
     const response = await esqlKnowledgeBaseCaller(prompt);

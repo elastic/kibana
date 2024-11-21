@@ -21,10 +21,6 @@ export const translateRuleState = Annotation.Root({
     default: () => [],
   }),
   original_rule: Annotation<OriginalRule>(),
-  index_patterns: Annotation<string[]>({
-    reducer: (current, value) => value ?? current,
-    default: () => [],
-  }),
   integrations: Annotation<Integration[]>({
     reducer: (current, value) => value ?? current,
     default: () => [],
