@@ -6,25 +6,31 @@
  */
 
 import React from 'react';
-import { type AppMockRenderer, createAppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer, noCasesPermissions } from '../../common/mock';
 import type { AddObservableProps } from './add_observable';
 import { AddObservable } from './add_observable';
 import { mockCase } from '../../containers/mock';
 
 describe('AddObservable', () => {
-  let appMock: AppMockRenderer;
   const props: AddObservableProps = {
     caseData: mockCase,
   };
 
   beforeEach(() => {
-    appMock = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
-  it('renders correctly', async () => {
+  it('renders the button when permissions are sufficient', async () => {
+    const appMock = createAppMockRenderer();
     const result = appMock.render(<AddObservable {...props} />);
 
     expect(result.getByTestId('cases-observables-add')).toBeInTheDocument();
+  });
+
+  it('does not render the button with insufficient permissions', async () => {
+    const appMock = createAppMockRenderer({ permissions: noCasesPermissions() });
+    const result = appMock.render(<AddObservable {...props} />);
+
+    expect(result.queryByTestId('cases-observables-add')).not.toBeInTheDocument();
   });
 });

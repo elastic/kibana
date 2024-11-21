@@ -19,6 +19,7 @@ export const ObservablePatch = rt.strict({
 });
 
 export type ObservablePatchType = rt.TypeOf<typeof ObservablePatch>;
+export type ObservablePostType = rt.TypeOf<typeof ObservablePost>;
 
 export const AddObservableRequestRt = rt.strict({
   observable: ObservablePost,

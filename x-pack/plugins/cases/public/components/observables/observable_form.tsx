@@ -16,7 +16,7 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
 
 import { OBSERVABLE_TYPES_BUILTIN } from '../../../common/constants';
-import type { ObservablePatchType } from '../../../common/types/api';
+import type { ObservablePatchType, ObservablePostType } from '../../../common/types/api';
 import type { Observable } from '../../../common/types/domain';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import * as i18n from './translations';
@@ -62,7 +62,7 @@ ObservableFormFields.displayName = 'ObservableFormFields';
 
 export interface ObservableFormProps {
   isLoading: boolean;
-  onSubmit: (observable: ObservablePatchType) => Promise<void>;
+  onSubmit: (observable: ObservablePatchType | ObservablePostType) => Promise<void>;
   observable?: Observable;
   onCancel: VoidFunction;
 }

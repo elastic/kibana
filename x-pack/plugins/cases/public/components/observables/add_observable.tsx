@@ -15,13 +15,13 @@ import {
 } from '@elastic/eui';
 import React, { useState, useCallback } from 'react';
 
-import type { ObservablePatchType } from '../../../common/types/api/observable/v1';
+import type { ObservablePostType } from '../../../common/types/api/observable/v1';
 import type { CaseUI } from '../../../common';
 import { useCasesToast } from '../../common/use_cases_toast';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import * as i18n from './translations';
 import { usePostObservable } from '../../containers/use_post_observables';
-import { ObservableForm } from './observable_form';
+import { ObservableForm, type ObservableFormProps } from './observable_form';
 import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
 import { useCasesFeatures } from '../../common/use_cases_features';
 
@@ -41,7 +41,7 @@ const AddObservableComponent: React.FC<AddObservableProps> = ({ caseData }) => {
   const showModal = () => setIsModalVisible(true);
 
   const handleCreateObservable = useCallback(
-    async (observable: ObservablePatchType) => {
+    async (observable: ObservablePostType) => {
       await postObservables(
         {
           observable,
@@ -75,7 +75,7 @@ const AddObservableComponent: React.FC<AddObservableProps> = ({ caseData }) => {
           <EuiModalBody>
             <ObservableForm
               isLoading={isLoading}
-              onSubmit={handleCreateObservable}
+              onSubmit={handleCreateObservable as ObservableFormProps['onSubmit']}
               onCancel={closeModal}
             />
           </EuiModalBody>

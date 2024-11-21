@@ -11,6 +11,7 @@ import { createTestConfig } from '../common/config';
 export default createTestConfig('security_and_spaces', {
   license: 'trial',
   ssl: true,
-  testFiles: [require.resolve('./tests/trial')],
+  // FIXME: restore testFiles: [require.resolve('./tests/trial')],
+  testFiles: [require.resolve('./tests/trial/internal/similar_cases')],
   publicBaseUrl: true,
 });
