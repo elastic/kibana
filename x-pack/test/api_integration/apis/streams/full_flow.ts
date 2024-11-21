@@ -23,14 +23,14 @@ export default function ({ getService }: FtrProviderContext) {
   const retryService = getService('retry');
   const logger = getService('log');
 
-  describe('flow', () => {
+  describe('Basic functionality', () => {
     after(async () => {
       await deleteStream(supertest, 'logs.nginx');
       await cleanUpRootStream(esClient);
     });
 
     // Note: Each step is dependent on the previous
-    describe('full', () => {
+    describe('Full flow', () => {
       it('Enable streams', async () => {
         await enableStreams(supertest);
       });
