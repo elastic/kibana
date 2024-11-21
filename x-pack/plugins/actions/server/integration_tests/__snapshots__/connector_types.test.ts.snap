@@ -1391,21 +1391,15 @@ Object {
     },
     "error": [Function],
     "presence": "optional",
-    "unknown": true,
   },
   "keys": Object {
     "command": Object {
       "flags": Object {
-        "default": [Function],
         "error": [Function],
-        "presence": "optional",
       },
       "metas": Array [
         Object {
           "x-oas-any-type": true,
-        },
-        Object {
-          "x-oas-optional": true,
         },
       ],
       "type": "any",
@@ -1425,11 +1419,6 @@ Object {
         },
       ],
       "type": "any",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
