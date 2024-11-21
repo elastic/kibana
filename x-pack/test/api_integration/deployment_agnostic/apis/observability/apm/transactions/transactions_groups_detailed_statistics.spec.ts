@@ -12,16 +12,16 @@ import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregati
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { ApmDocumentType, ApmTransactionDocumentType } from '@kbn/apm-plugin/common/document_type';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { roundNumber } from '../../utils';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { roundNumber } from '../../../../../../apm_api_integration/utils';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
 type TransactionsGroupsDetailedStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics'>;
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const registry = getService('registry');
-  const apmApiClient = getService('apmApiClient');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
+  const synthtrace = getService('synthtrace');
 
   const serviceName = 'synth-go';
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
@@ -71,23 +71,21 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     return response.body;
   }
 
-  registry.when(
-    'Transaction groups detailed statistics when data is not loaded',
-    { config: 'basic', archives: [] },
-    () => {
+  describe('Transactions groups detailed statistics', () => {
+    describe('when data is not loaded', () => {
       it('handles the empty state', async () => {
         const response = await callApi();
         expect(response).to.be.eql({ currentPeriod: {}, previousPeriod: {} });
       });
-    }
-  );
+    });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177619
-  registry.when('data is loaded', { config: 'basic', archives: [] }, () => {
-    describe('transactions groups detailed stats', () => {
+    describe('when data is loaded', () => {
       const GO_PROD_RATE = 75;
       const GO_PROD_ERROR_RATE = 25;
+      let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+
       before(async () => {
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
         const serviceGoProdInstance = apm
           .service({ name: serviceName, environment: 'production', agentName: 'go' })
           .instance('instance-a');
