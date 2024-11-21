@@ -94,9 +94,6 @@ export class RuleMigrationsTaskClient {
     const resourceRetriever = new RuleResourceRetriever(migrationId, this.data);
     const integrationRetriever = new IntegrationRetriever(migrationId, this.data);
 
-    // Current temp implementation to populate initial list of integrations
-    integrationRetriever.populateIntegrations();
-
     const actionsClientChat = new ActionsClientChat(connectorId, actionsClient, this.logger);
     const model = await actionsClientChat.createModel({
       signal: abortController.signal,

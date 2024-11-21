@@ -14,10 +14,6 @@ export class IntegrationRetriever {
     private readonly dataClient: RuleMigrationsDataClient
   ) {}
 
-  public async populateIntegrations(): Promise<void> {
-    this.dataClient.integrations.create();
-  }
-
   public async getIntegrations(semanticString: string): Promise<Integration[]> {
     return this.integrationRetriever(semanticString);
   }
