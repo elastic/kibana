@@ -108,6 +108,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   from,
   queryParamsPolicyId,
   prerelease,
+  onNext,
 }) => {
   const {
     agents: { enabled: isFleetEnabled },
@@ -192,6 +193,16 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     integrationToEnable: integrationInfo?.name,
     hasFleetAddAgentsPrivileges,
   });
+
+  const handleNavigateAddAgent = useCallback(() => {
+    if (onNext) {
+      onNext({ selectedAgentPolicies: agentPolicies });
+    } else {
+      if (savedPackagePolicy) {
+        navigateAddAgent(savedPackagePolicy);
+      }
+    }
+  }, [onNext, agentPolicies, savedPackagePolicy, navigateAddAgent]);
 
   const setPolicyValidation = useCallback(
     (selectedTab: SelectedPolicyTab, updatedAgentPolicy: NewAgentPolicy) => {
@@ -518,7 +529,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
               savedPackagePolicy && (
                 <PostInstallAddAgentModal
                   packageInfo={packageInfo}
-                  onConfirm={() => navigateAddAgent(savedPackagePolicy)}
+                  onConfirm={handleNavigateAddAgent}
                   onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
                 />
               )}
@@ -528,7 +539,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                 <PostInstallAzureArmTemplateModal
                   agentPolicy={agentPolicies[0]}
                   packagePolicy={savedPackagePolicy}
-                  onConfirm={() => navigateAddAgent(savedPackagePolicy)}
+                  onConfirm={handleNavigateAddAgent}
                   onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
                 />
               )}
@@ -538,7 +549,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                 <PostInstallCloudFormationModal
                   agentPolicy={agentPolicies[0]}
                   packagePolicy={savedPackagePolicy}
-                  onConfirm={() => navigateAddAgent(savedPackagePolicy)}
+                  onConfirm={handleNavigateAddAgent}
                   onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
                 />
               )}
@@ -548,7 +559,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                 <PostInstallGoogleCloudShellModal
                   agentPolicy={agentPolicies[0]}
                   packagePolicy={savedPackagePolicy}
-                  onConfirm={() => navigateAddAgent(savedPackagePolicy)}
+                  onConfirm={handleNavigateAddAgent}
                   onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
                 />
               )}

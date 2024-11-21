@@ -97,18 +97,10 @@ export const UseIntegrationsState = () => {
   return import('./applications/integrations/hooks/use_integrations_state');
 };
 
-export const UsePackageInstall = () => {
-  return import('./applications/integrations/hooks/use_package_install');
-};
-
-export const FleetStatusProvider = () => {
-  return import('./hooks/use_fleet_status');
-};
-
-export const UIExtensionsContextProvider = () => {
-  return import('./hooks/use_ui_extension');
-};
-
 export const CreatePackagePolicyPage = () => {
   return import('./applications/fleet/sections/agent_policy/create_package_policy_page');
+};
+
+export const FleetIntegrationsStateContextProvider = () => {
+  return import('./applications/integrations/hooks/use_fleet_integration_context');
 };

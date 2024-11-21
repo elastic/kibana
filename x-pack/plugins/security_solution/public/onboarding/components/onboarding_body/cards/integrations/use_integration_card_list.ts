@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { useMemo } from 'react';
-import type { FleetSetup, FleetStart, IntegrationCardItem } from '@kbn/fleet-plugin/public';
+import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { SECURITY_UI_APP_ID } from '@kbn/security-solution-navigation';
-import { useKibana, useNavigation } from '../../../../../common/lib/kibana';
+import { useNavigation } from '../../../../../common/lib/kibana';
 import {
   APP_INTEGRATIONS_PATH,
   APP_UI_ID,
@@ -16,7 +16,6 @@ import {
 import {
   CARD_DESCRIPTION_LINE_CLAMP,
   CARD_TITLE_LINE_CLAMP,
-  INTEGRATION_APP_ID,
   MAX_CARD_HEIGHT_IN_PX,
   ONBOARDING_APP_ID,
   ONBOARDING_LINK,
@@ -24,7 +23,6 @@ import {
 } from './constants';
 import type { GetAppUrl, NavigateTo } from '../../../../../common/lib/kibana';
 import { trackOnboardingLinkClick } from '../../../../common/lib/telemetry';
-import { useOnboardingContext } from '../../../onboarding_context';
 
 const addPathParamToUrl = (url: string, onboardingLink: string) => {
   const encoded = encodeURIComponent(onboardingLink);
@@ -52,16 +50,13 @@ const getFilteredCards = ({
   integrationsList,
   navigateTo,
   onCardClicked,
-  fleet,
-  application,
 }: {
   featuredCardIds?: string[];
   getAppUrl: GetAppUrl;
   installedIntegrationList?: IntegrationCardItem[];
   integrationsList: IntegrationCardItem[];
   navigateTo: NavigateTo;
-  onCardClicked?: () => void;
-  fleet: FleetSetup | undefined;
+  onCardClicked?: (integrationName: string) => void;
 }) => {
   const securityIntegrationsList = integrationsList.map((card) =>
     addSecuritySpecificProps({
@@ -70,8 +65,6 @@ const getFilteredCards = ({
       card,
       installedIntegrationList,
       onCardClicked,
-      fleet,
-      application,
     })
   );
   if (!featuredCardIds) {
@@ -89,18 +82,14 @@ const addSecuritySpecificProps = ({
   getAppUrl,
   card,
   onCardClicked,
-  fleet,
-  application,
 }: {
   navigateTo: NavigateTo;
   getAppUrl: GetAppUrl;
   card: IntegrationCardItem;
   installedIntegrationList?: IntegrationCardItem[];
-  onCardClicked?: () => void;
-  fleet: FleetStart | undefined;
+  onCardClicked?: (integrationName: string) => void;
 }): IntegrationCardItem => {
   const onboardingLink = getAppUrl({ appId: SECURITY_UI_APP_ID, path: ONBOARDING_PATH });
-  const integrationRootUrl = getAppUrl({ appId: INTEGRATION_APP_ID });
 
   const url =
     card.url.indexOf(APP_INTEGRATIONS_PATH) >= 0 && onboardingLink
@@ -108,12 +97,14 @@ const addSecuritySpecificProps = ({
       : card.url;
 
   const state = {
-    onCancelNavigateTo: [APP_UI_ID, { path: ONBOARDING_PATH }],
+    onCancelNavigateTo: [
+      APP_UI_ID,
+      { path: ONBOARDING_PATH, state: { pkgkey: card.pkgkey, onCancelUrl: onboardingLink } },
+    ],
     onCancelUrl: onboardingLink,
-    onSaveNavigateTo: [APP_UI_ID, { path: ONBOARDING_PATH }],
+    onSaveNavigateTo: [APP_UI_ID, { path: ONBOARDING_PATH, state: { pkgkey: card.pkgkey } }],
     pkgkey: card.pkgkey,
-    panel: 'overview',
-    fleet: { auth: fleet?.authz, config: fleet?.config },
+    panel: 'overview', // Default to the overview tab on modal opened
   };
 
   return {
@@ -128,18 +119,12 @@ const addSecuritySpecificProps = ({
       trackOnboardingLinkClick(trackId);
 
       if (url.startsWith(APP_INTEGRATIONS_PATH)) {
-        onCardClicked?.();
+        onCardClicked?.(card.name); // fix me: type error
 
         navigateTo({
           path: `${addPathParamToUrl(ONBOARDING_PATH, onboardingLink)}#integrations`,
           state,
         });
-
-        // navigateTo({
-        //   appId: INTEGRATION_APP_ID,
-        //   path: url.slice(integrationRootUrl.length),
-        //   state,
-        // });
       } else if (url.startsWith('http') || url.startsWith('https')) {
         window.open(url, '_blank');
       } else {
@@ -156,13 +141,10 @@ export const useIntegrationCardList = ({
 }: {
   integrationsList: IntegrationCardItem[];
   featuredCardIds?: string[] | undefined;
-  onCardClicked?: () => void;
+  onCardClicked?: (integrationName: string) => void;
 }): IntegrationCardItem[] => {
   const { navigateTo, getAppUrl } = useNavigation();
-  // const { fleet } = useOnboardingContext();
-  const {
-    services: { application, fleet },
-  } = useKibana();
+
   const { featuredCards, integrationCards } = useMemo(
     () =>
       getFilteredCards({
@@ -171,10 +153,8 @@ export const useIntegrationCardList = ({
         integrationsList,
         featuredCardIds,
         onCardClicked,
-        fleet,
-        application,
       }),
-    [navigateTo, getAppUrl, integrationsList, featuredCardIds, onCardClicked, fleet, application]
+    [navigateTo, getAppUrl, integrationsList, featuredCardIds, onCardClicked]
   );
 
   if (featuredCardIds && featuredCardIds.length > 0) {

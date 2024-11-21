@@ -131,11 +131,13 @@ function Breadcrumbs({ packageTitle }: { packageTitle: string }) {
 }
 
 export function Detail({
+  originFrom,
   routesEnabled = true,
-  onAddElasticDefendClicked,
+  onAddIntegrationPolicyClick,
 }: {
+  originFrom?: string;
   routesEnabled?: boolean;
-  onAddElasticDefendClicked?: () => void;
+  onAddIntegrationPolicyClick?: () => void;
 }) {
   const { getId: getAgentPolicyId } = useAgentPolicyContext();
   const {
@@ -409,70 +411,72 @@ export function Detail({
     [integrationInfo, isLoading, packageInfo, href, queryParams]
   );
 
-  // const handleAddIntegrationPolicyClick = useCallback<ReactEventHandler>(
-  //   (ev) => {
-  //     ev.preventDefault();
-  //     // The object below, given to `createHref` is explicitly accessing keys of `location` in order
-  //     // to ensure that dependencies to this `useCallback` is set correctly (because `location` is mutable)
-  //     const currentPath = history.createHref({
-  //       pathname,
-  //       search,
-  //       hash,
-  //     });
+  const handleAddIntegrationPolicyClick = useCallback<ReactEventHandler>(
+    (ev) => {
+      ev.preventDefault();
+      // The object below, given to `createHref` is explicitly accessing keys of `location` in order
+      // to ensure that dependencies to this `useCallback` is set correctly (because `location` is mutable)
+      if (onAddIntegrationPolicyClick) {
+        onAddIntegrationPolicyClick();
+        return;
+      }
 
-  //     const defaultNavigateOptions: InstallPkgRouteOptions = getInstallPkgRouteOptions({
-  //       agentPolicyId: agentPolicyIdFromContext,
-  //       currentPath,
-  //       integration,
-  //       isCloud,
-  //       isExperimentalAddIntegrationPageEnabled,
-  //       isFirstTimeAgentUser,
-  //       isGuidedOnboardingActive,
-  //       pkgkey,
-  //     });
+      const currentPath = history.createHref({
+        pathname,
+        search,
+        hash,
+      });
 
-  //     /** Users from Security Solution onboarding page will have onboardingLink and onboardingAppId in the query params
-  //      ** to redirect back to the onboarding page after adding an integration
-  //      */
-  //     const navigateOptions: InstallPkgRouteOptions =
-  //       onboardingAppId && onboardingLink
-  //         ? [
-  //             defaultNavigateOptions[0],
-  //             {
-  //               ...defaultNavigateOptions[1],
-  //               state: {
-  //                 ...(defaultNavigateOptions[1]?.state ?? {}),
-  //                 onCancelNavigateTo: [onboardingAppId, { path: onboardingLink }],
-  //                 onCancelUrl: onboardingLink,
-  //                 onSaveNavigateTo: [onboardingAppId, { path: onboardingLink }],
-  //               },
-  //             },
-  //           ]
-  //         : defaultNavigateOptions;
+      const defaultNavigateOptions: InstallPkgRouteOptions = getInstallPkgRouteOptions({
+        agentPolicyId: agentPolicyIdFromContext,
+        currentPath,
+        integration,
+        isCloud,
+        isExperimentalAddIntegrationPageEnabled,
+        isFirstTimeAgentUser,
+        isGuidedOnboardingActive,
+        pkgkey,
+      });
 
-  //     services.application.navigateToApp(...navigateOptions);
-  //   },
-  //   [
-  //     agentPolicyIdFromContext,
-  //     hash,
-  //     history,
-  //     integration,
-  //     isCloud,
-  //     isExperimentalAddIntegrationPageEnabled,
-  //     isFirstTimeAgentUser,
-  //     isGuidedOnboardingActive,
-  //     onboardingAppId,
-  //     onboardingLink,
-  //     pathname,
-  //     pkgkey,
-  //     search,
-  //     services.application,
-  //   ]
-  // );
+      /** Users from Security Solution onboarding page will have onboardingLink and onboardingAppId in the query params
+       ** to redirect back to the onboarding page after adding an integration
+       */
+      const navigateOptions: InstallPkgRouteOptions =
+        onboardingAppId && onboardingLink
+          ? [
+              defaultNavigateOptions[0],
+              {
+                ...defaultNavigateOptions[1],
+                state: {
+                  ...(defaultNavigateOptions[1]?.state ?? {}),
+                  onCancelNavigateTo: [onboardingAppId, { path: onboardingLink }],
+                  onCancelUrl: onboardingLink,
+                  onSaveNavigateTo: [onboardingAppId, { path: onboardingLink }],
+                },
+              },
+            ]
+          : defaultNavigateOptions;
 
-  const handleAddIntegrationPolicyClick = useCallback<ReactEventHandler>(() => {
-    !routesEnabled && onAddElasticDefendClicked?.();
-  }, [routesEnabled, onAddElasticDefendClicked]);
+      services.application.navigateToApp(...navigateOptions);
+    },
+    [
+      agentPolicyIdFromContext,
+      hash,
+      history,
+      integration,
+      isCloud,
+      isExperimentalAddIntegrationPageEnabled,
+      isFirstTimeAgentUser,
+      isGuidedOnboardingActive,
+      onAddIntegrationPolicyClick,
+      onboardingAppId,
+      onboardingLink,
+      pathname,
+      pkgkey,
+      search,
+      services.application,
+    ]
+  );
 
   const showVersionSelect = useMemo(
     () =>
@@ -576,14 +580,17 @@ export function Detail({
                         >
                           <AddIntegrationButton
                             userCanInstallPackages={userCanInstallPackages}
-                            // show href only when routsEnabled is true
-                            // href={getHref('add_integration_to_policy', {
-                            //   pkgkey,
-                            //   ...(integration ? { integration } : {}),
-                            //   ...(agentPolicyIdFromContext
-                            //     ? { agentPolicyId: agentPolicyIdFromContext }
-                            //     : {}),
-                            // })}
+                            href={
+                              onAddIntegrationPolicyClick
+                                ? undefined
+                                : getHref('add_integration_to_policy', {
+                                    pkgkey,
+                                    ...(integration ? { integration } : {}),
+                                    ...(agentPolicyIdFromContext
+                                      ? { agentPolicyId: agentPolicyIdFromContext }
+                                      : {}),
+                                  })
+                            }
                             missingSecurityConfiguration={missingSecurityConfiguration}
                             packageName={integrationInfo?.title || packageInfo.title}
                             onClick={handleAddIntegrationPolicyClick}
@@ -611,12 +618,16 @@ export function Detail({
       ) : undefined,
     [
       packageInfo,
+      showVersionSelect,
+      versionLabel,
+      versionOptions,
       updateAvailable,
       isInstalled,
       pkgkey,
       isOverviewPage,
       isGuidedOnboardingActive,
       userCanInstallPackages,
+      onAddIntegrationPolicyClick,
       getHref,
       integration,
       agentPolicyIdFromContext,
@@ -624,9 +635,6 @@ export function Detail({
       integrationInfo?.title,
       handleAddIntegrationPolicyClick,
       onVersionChange,
-      showVersionSelect,
-      versionLabel,
-      versionOptions,
     ]
   );
 
@@ -647,12 +655,13 @@ export function Detail({
         ),
         isSelected: panel === 'overview',
         'data-test-subj': `tab-overview`,
-        href: routesEnabled
-          ? getHref('integration_details_overview', {
-              pkgkey: packageInfoKey,
-              ...(integration ? { integration } : {}),
-            })
-          : undefined,
+        href:
+          originFrom !== 'onboarding-integration'
+            ? getHref('integration_details_overview', {
+                pkgkey: packageInfoKey,
+                ...(integration ? { integration } : {}),
+              })
+            : undefined,
         onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
           e.preventDefault();
           setSelectedPanel('overview');
@@ -814,7 +823,7 @@ export function Detail({
   }, [
     packageInfo,
     panel,
-    routesEnabled,
+    originFrom,
     getHref,
     integration,
     canReadIntegrationPolicies,
@@ -824,6 +833,7 @@ export function Detail({
     showConfigTab,
     showCustomTab,
     showDocumentationTab,
+    routesEnabled,
     numOfDeferredInstallations,
   ]);
 

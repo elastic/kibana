@@ -8,19 +8,13 @@ import React, { lazy, Suspense, useMemo, useCallback, useEffect, useRef, useStat
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import {
-  EuiButton,
   EuiButtonGroup,
-  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiModal,
   EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
   EuiPortal,
   EuiSkeletonText,
-  EuiSpacer,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { AvailablePackagesHookType, IntegrationCardItem } from '@kbn/fleet-plugin/public';
@@ -28,7 +22,6 @@ import { noop } from 'lodash';
 
 import { css } from '@emotion/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useLocation } from 'react-router-dom';
 import { withLazyHook } from '../../../../../common/components/with_lazy_hook';
 import {
   useStoredIntegrationSearchTerm,
@@ -70,40 +63,25 @@ const Detail = lazy(async () => ({
     .then((pkg) => pkg.Detail),
 }));
 
-const IntegrationsStateContextProvider = lazy(async () => ({
-  default: await import('@kbn/fleet-plugin/public')
-    .then((module) => module.UseIntegrationsState())
-    .then((pkg) => pkg.IntegrationsStateContextProvider),
-}));
-
-const PackageInstallProvider = lazy(async () => ({
-  default: await import('@kbn/fleet-plugin/public')
-    .then((module) => module.UsePackageInstall())
-    .then((pkg) => pkg.packageInstallContainer[0]),
-}));
-
-const FleetStatusProvider = lazy(async () => ({
-  default: await import('@kbn/fleet-plugin/public')
-    .then((module) => module.FleetStatusProvider())
-    .then((pkg) => pkg.FleetStatusProvider),
-}));
-
-const UIExtensionsContextProvider = lazy(async () => ({
-  default: await import('@kbn/fleet-plugin/public')
-    .then((module) => module.UIExtensionsContextProvider())
-    .then((pkg) => pkg.UIExtensionsContextProvider),
-}));
-
 const CreatePackagePolicyPage = lazy(async () => ({
   default: await import('@kbn/fleet-plugin/public')
     .then((module) => module.CreatePackagePolicyPage())
     .then((pkg) => pkg.CreatePackagePolicyPage),
 }));
 
+const FleetIntegrationsStateContextProvider = lazy(async () => ({
+  default: await import('@kbn/fleet-plugin/public')
+    .then((module) => module.FleetIntegrationsStateContextProvider())
+    .then((pkg) => pkg.FleetIntegrationsStateContextProvider),
+}));
+
 export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGridTabsProps>(
   ({ installedIntegrationsCount, isAgentRequired, useAvailablePackages }) => {
     const { spaceId } = useOnboardingContext();
     const startServices = useKibana().services;
+    const {
+      services: { fleet },
+    } = useKibana();
     const scrollElement = useRef<HTMLDivElement>(null);
     const [toggleIdSelected, setSelectedTabIdToStorage] = useStoredIntegrationTabId(
       spaceId,
@@ -122,19 +100,22 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
     );
 
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const [integrationName, setIntegrationName] = useState();
     const [modalView, setModalView] = useState<'overview' | 'configure-integration' | 'add-agent'>(
       'overview'
     );
-    const onAddElasticDefendClicked = useCallback(() => {
+    const onAddIntegrationPolicyClick = useCallback(() => {
       setModalView('configure-integration');
     }, []);
     const closeModal = useCallback(() => {
       setIsModalVisible(false);
       setModalView('overview');
     }, []);
-    const showModal = useCallback(() => setIsModalVisible(true), []);
+    const onCardClicked = useCallback((name: string) => {
+      setIsModalVisible(true);
+      setIntegrationName(name);
+    }, []);
     const ref = useRef<HTMLDivElement | null>(null);
-    let bottomBar;
     const modalTitleId = useGeneratedHtmlId();
     const {
       filteredCards,
@@ -148,7 +129,6 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
     });
 
     const selectedTab = useMemo(() => INTEGRATION_TABS_BY_ID[toggleIdSelected], [toggleIdSelected]);
-    console.log('=ref===', ref);
     const onSearchTermChanged = useCallback(
       (searchQuery: string) => {
         setSearchTerm(searchQuery);
@@ -190,7 +170,7 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
     const list: IntegrationCardItem[] = useIntegrationCardList({
       integrationsList: filteredCards,
       featuredCardIds: selectedTab.featuredCardIds,
-      onCardClicked: showModal,
+      onCardClicked,
     });
 
     if (isLoading) {
@@ -266,7 +246,7 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
             </Suspense>
           </EuiFlexItem>
         </EuiFlexGroup>
-        {isModalVisible && startServices && (
+        {isModalVisible && fleet && (
           <EuiPortal>
             <EuiModal
               aria-labelledby={modalTitleId}
@@ -276,25 +256,26 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
               `}
               maxWidth="90%"
             >
-              {modalView !== 'overview' && (
-                <EuiModalHeader>"Step indicator placeholder"</EuiModalHeader>
-              )}
               <EuiModalBody>
-                <UIExtensionsContextProvider values={{}}>
-                  <FleetStatusProvider>
-                    <PackageInstallProvider startServices={startServices}>
-                      <IntegrationsStateContextProvider>
-                        {modalView === 'overview' && (
-                          <Detail
-                            routesEnabled={false}
-                            onAddElasticDefendClicked={onAddElasticDefendClicked}
-                          />
-                        )}
-                        {modalView === 'configure-integration' && <CreatePackagePolicyPage />}
-                      </IntegrationsStateContextProvider>
-                    </PackageInstallProvider>
-                  </FleetStatusProvider>
-                </UIExtensionsContextProvider>
+                <FleetIntegrationsStateContextProvider
+                  values={{ startServices, useMultiPageLayoutProp: true }}
+                >
+                  {modalView === 'overview' && (
+                    <Detail
+                      onAddIntegrationPolicyClick={onAddIntegrationPolicyClick}
+                      originFrom="onboarding-integration"
+                      routesEnabled={false}
+                    />
+                  )}
+                  {modalView === 'configure-integration' && (
+                    <CreatePackagePolicyPage
+                      useMultiPageLayoutProp={true}
+                      originFrom="onboarding-integration"
+                      propPolicyId=""
+                      integrationName={integrationName}
+                    />
+                  )}
+                </FleetIntegrationsStateContextProvider>
               </EuiModalBody>
             </EuiModal>
           </EuiPortal>

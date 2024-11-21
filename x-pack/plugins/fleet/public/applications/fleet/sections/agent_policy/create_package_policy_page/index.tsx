@@ -15,11 +15,19 @@ import type { AddToPolicyParams, EditPackagePolicyFrom } from './types';
 import { CreatePackagePolicySinglePage } from './single_page_layout';
 import { CreatePackagePolicyMultiPage } from './multi_page_layout';
 
-export const CreatePackagePolicyPage: React.FC<{}> = () => {
+export const CreatePackagePolicyPage: React.FC<{
+  useMultiPageLayoutProp?: boolean;
+  originFrom?: EditPackagePolicyFrom;
+  propPolicyId?: string;
+  integrationName?: string;
+}> = ({ useMultiPageLayoutProp, originFrom, propPolicyId, integrationName }) => {
   const { search } = useLocation();
   const { params } = useRouteMatch<AddToPolicyParams>();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
-  const useMultiPageLayout = useMemo(() => queryParams.has('useMultiPageLayout'), [queryParams]);
+  const useMultiPageLayout = useMemo(
+    () => useMultiPageLayoutProp ?? queryParams.has('useMultiPageLayout'),
+    [queryParams, useMultiPageLayoutProp]
+  );
   const queryParamsPolicyId = useMemo(
     () => queryParams.get('policyId') ?? undefined,
     [queryParams]
@@ -47,11 +55,13 @@ export const CreatePackagePolicyPage: React.FC<{}> = () => {
    * creation possible if a user has not chosen one from the packages UI.
    */
   const from: EditPackagePolicyFrom =
-    'policyId' in params || queryParamsPolicyId ? 'policy' : 'package';
+    originFrom ?? ('policyId' in params || queryParamsPolicyId ? 'policy' : 'package');
 
   const pageParams = {
     from,
     queryParamsPolicyId,
+    propPolicyId,
+    integrationName,
     prerelease,
   };
 
