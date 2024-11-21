@@ -7,24 +7,26 @@
 
 import { i18n } from '@kbn/i18n';
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
-import { CasesSubFeatureId } from '../product_features_keys';
-import { APP_ID } from '../constants';
-import type { CasesFeatureParams } from './types';
+import { CasesSubFeatureId } from '../../product_features_keys';
+import { APP_ID } from '../../constants';
+import type { CasesFeatureParams } from '../types';
 
 /**
  * Sub-features that will always be available for Security Cases
  * regardless of the product type.
  */
-export const getCasesBaseKibanaSubFeatureIds = (): CasesSubFeatureId[] => [
+export const getCasesBaseKibanaSubFeatureIdsV2 = (): CasesSubFeatureId[] => [
   CasesSubFeatureId.deleteCases,
   CasesSubFeatureId.casesSettings,
+  CasesSubFeatureId.createComment,
+  CasesSubFeatureId.reopenCase,
 ];
 
 /**
- * Defines all the Security Assistant subFeatures available.
+ * Defines all the Security Solution Cases subFeatures available.
  * The order of the subFeatures is the order they will be displayed
  */
-export const getCasesSubFeaturesMap = ({
+export const getCasesSubFeaturesMapV2 = ({
   uiCapabilities,
   apiTags,
   savedObjects,
@@ -95,8 +97,81 @@ export const getCasesSubFeaturesMap = ({
     ],
   };
 
+  /* The below sub features were newly added in v2 (8.17) */
+
+  const casesAddCommentsCasesSubFeature: SubFeatureConfig = {
+    name: i18n.translate(
+      'securitySolutionPackages.features.featureRegistry.addCommentsSubFeatureName',
+      {
+        defaultMessage: 'Create comments & attachments',
+      }
+    ),
+    privilegeGroups: [
+      {
+        groupType: 'independent',
+        privileges: [
+          {
+            api: apiTags.createComment,
+            id: 'create_comment',
+            name: i18n.translate(
+              'securitySolutionPackages.features.featureRegistry.addCommentsSubFeatureDetails',
+              {
+                defaultMessage: 'Add comments to cases',
+              }
+            ),
+            includeIn: 'all',
+            savedObject: {
+              all: [...savedObjects.files],
+              read: [...savedObjects.files],
+            },
+            cases: {
+              createComment: [APP_ID],
+            },
+            ui: uiCapabilities.createComment,
+          },
+        ],
+      },
+    ],
+  };
+  const casesreopenCaseSubFeature: SubFeatureConfig = {
+    name: i18n.translate(
+      'securitySolutionPackages.features.featureRegistry.reopenCaseSubFeatureName',
+      {
+        defaultMessage: 'Re-open',
+      }
+    ),
+    privilegeGroups: [
+      {
+        groupType: 'independent',
+        privileges: [
+          {
+            id: 'case_reopen',
+            name: i18n.translate(
+              'securitySolutionPackages.features.featureRegistry.reopenCaseSubFeatureDetails',
+              {
+                defaultMessage: 'Re-open closed cases',
+              }
+            ),
+            includeIn: 'all',
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            cases: {
+              reopenCase: [APP_ID],
+            },
+            ui: uiCapabilities.reopenCase,
+          },
+        ],
+      },
+    ],
+  };
+
   return new Map<CasesSubFeatureId, SubFeatureConfig>([
     [CasesSubFeatureId.deleteCases, deleteCasesSubFeature],
     [CasesSubFeatureId.casesSettings, casesSettingsCasesSubFeature],
+    /* The below sub features were newly added in v2 (8.17) */
+    [CasesSubFeatureId.createComment, casesAddCommentsCasesSubFeature],
+    [CasesSubFeatureId.reopenCase, casesreopenCaseSubFeature],
   ]);
 };
