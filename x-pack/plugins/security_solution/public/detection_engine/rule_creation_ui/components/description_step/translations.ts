@@ -127,9 +127,16 @@ export const THRESHOLD_RESULTS_AGGREGATED_BY = i18n.translate(
 );
 
 export const THRESHOLD_CARDINALITY = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDescription.thresholdResultsAggregatedByDescription',
+  'xpack.securitySolution.detectionEngine.ruleDescription.thresholdResultsCardinalityDescription',
   {
     defaultMessage: 'when unique value count of',
+  }
+);
+
+export const THRESHOLD_AND_JOINER = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.thresholdResultsAndJoiner',
+  {
+    defaultMessage: 'and',
   }
 );
 

@@ -190,7 +190,9 @@ export const Threshold = ({ threshold }: ThresholdProps) => {
       (cardinality) =>
         `${descriptionStepI18n.THRESHOLD_CARDINALITY} ${cardinality.field} >= ${cardinality.value}`
     );
-    thresholdDescription = `${thresholdDescription} ${cardinalityDescriptions.join(' and ')}`;
+    thresholdDescription = `${thresholdDescription} ${cardinalityDescriptions.join(
+      ` ${descriptionStepI18n.THRESHOLD_AND_JOINER} `
+    )}`;
   }
   return (
     <div data-test-subj="thresholdPropertyValue">
