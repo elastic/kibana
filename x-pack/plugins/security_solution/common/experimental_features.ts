@@ -240,7 +240,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Defend Insights feature
    */
-  defendInsights: true,
+  defendInsights: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

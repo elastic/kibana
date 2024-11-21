@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import styled from 'styled-components';
 import {
   EuiButtonIcon,
   EuiCallOut,
@@ -21,6 +22,12 @@ import { ENDPOINT_INSIGHTS } from '../../../translations';
 interface EndpointInsightsResultsProps {
   results: boolean;
 }
+
+const CustomEuiCallOut = styled(EuiCallOut)`
+  & .euiButtonIcon {
+    margin-top: 5px; /* Lower the close button */
+  }
+`;
 
 export const EndpointInsightsResults = ({ results }: EndpointInsightsResultsProps) => {
   const [showEmptyResultsCallout, setShowEmptyResultsCallout] = useState(true);
@@ -63,9 +70,9 @@ export const EndpointInsightsResults = ({ results }: EndpointInsightsResultsProp
         </EuiFlexGroup>
       </EuiPanel>
       {showEmptyResultsCallout && (
-        <EuiCallOut onDismiss={hideEmptyStateCallout} color={'success'}>
+        <CustomEuiCallOut onDismiss={hideEmptyStateCallout} color={'success'}>
           {ENDPOINT_INSIGHTS.issues.emptyResults}
-        </EuiCallOut>
+        </CustomEuiCallOut>
       )}
     </>
   );
