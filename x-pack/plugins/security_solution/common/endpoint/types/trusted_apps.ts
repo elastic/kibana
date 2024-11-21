@@ -36,21 +36,30 @@ export interface TrustedAppConditionEntry<T extends ConditionEntryField = Condit
   value: string;
 }
 
-export type MacosLinuxConditionEntry = TrustedAppConditionEntry<
+export type LinuxConditionEntry = TrustedAppConditionEntry<
   ConditionEntryField.HASH | ConditionEntryField.PATH
 >;
 export type WindowsConditionEntry = TrustedAppConditionEntry<
   ConditionEntryField.HASH | ConditionEntryField.PATH | ConditionEntryField.SIGNER
 >;
 
-export interface MacosLinuxConditionEntries {
-  os: OperatingSystem.LINUX | OperatingSystem.MAC;
-  entries: MacosLinuxConditionEntry[];
+export type MacosConditionEntry = TrustedAppConditionEntry<
+  ConditionEntryField.HASH | ConditionEntryField.PATH | ConditionEntryField.SIGNER_MAC
+>;
+
+interface LinuxConditionEntries {
+  os: OperatingSystem.LINUX;
+  entries: LinuxConditionEntry[];
 }
 
-export interface WindowsConditionEntries {
+interface WindowsConditionEntries {
   os: OperatingSystem.WINDOWS;
   entries: WindowsConditionEntry[];
+}
+
+interface MacosConditionEntries {
+  os: OperatingSystem.MAC;
+  entries: MacosConditionEntry[];
 }
 
 export interface GlobalEffectScope {
@@ -70,7 +79,7 @@ export type NewTrustedApp = {
   name: string;
   description?: string;
   effectScope: EffectScope;
-} & (MacosLinuxConditionEntries | WindowsConditionEntries);
+} & (LinuxConditionEntries | WindowsConditionEntries | MacosConditionEntries);
 
 /** A trusted app entry */
 export type TrustedApp = NewTrustedApp & {
