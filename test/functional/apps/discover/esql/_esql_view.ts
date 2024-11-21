@@ -143,9 +143,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should perform test query correctly', async function () {
         await timePicker.setDefaultAbsoluteRange();
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
         await discover.selectTextBaseLang();
-        const testQuery = `from logstash-* | limit 10 | stats countB = count(bytes) by geo.dest | sort countB`;
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
 
+        const testQuery = `from logstash-* | sort @timestamp | limit 10 | stats countB = count(bytes) by geo.dest | sort countB`;
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
         await header.waitUntilLoadingHasFinished();
@@ -159,7 +163,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should render when switching to a time range with no data, then back to a time range with data', async () => {
         await discover.selectTextBaseLang();
-        const testQuery = `from logstash-* | limit 10 | stats countB = count(bytes) by geo.dest | sort countB`;
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        const testQuery = `from logstash-* | sort @timestamp | limit 10 | stats countB = count(bytes) by geo.dest | sort countB`;
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
         await header.waitUntilLoadingHasFinished();
@@ -182,8 +189,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should query an index pattern that doesnt translate to a dataview correctly', async function () {
         await discover.selectTextBaseLang();
-        const testQuery = `from logstash* | limit 10 | stats countB = count(bytes) by geo.dest | sort countB`;
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
 
+        const testQuery = `from logstash* | sort @timestamp | limit 10 | stats countB = count(bytes) by geo.dest | sort countB`;
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
         await header.waitUntilLoadingHasFinished();
@@ -297,6 +306,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
         await discover.saveSearch('esql_test2');
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
         const testQuery = 'from logstash-* | limit 100 | drop @timestamp';
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
