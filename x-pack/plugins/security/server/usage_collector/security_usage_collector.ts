@@ -16,6 +16,7 @@ interface Usage {
   accessAgreementEnabled: boolean;
   authProviderCount: number;
   enabledAuthProviders: string[];
+  fipsModeEnabled: boolean;
   httpAuthSchemes: string[];
   sessionIdleTimeoutInMinutes: number;
   sessionLifespanInMinutes: number;
@@ -154,7 +155,7 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
           accessAgreementEnabled: false,
           authProviderCount: 0,
           enabledAuthProviders: [],
-          allowFips: false,
+          fipsModeEnabled: false,
           httpAuthSchemes: [],
           sessionIdleTimeoutInMinutes: 0,
           sessionLifespanInMinutes: 0,
