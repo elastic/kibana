@@ -122,12 +122,67 @@ describe('Open AI Utils', () => {
         const sanitizedBodyString = getRequestWithStreamOption(
           url,
           JSON.stringify(body),
+          false,
+          DEFAULT_OPENAI_MODEL
+        );
+        expect(JSON.parse(sanitizedBodyString)).toEqual({
+          messages: [{ content: 'This is a test', role: 'user' }],
+          model: 'gpt-4',
+          stream: false,
+        });
+      });
+    });
+    it('sets stream_options when stream is true', () => {
+      const body = {
+        model: 'gpt-4',
+        messages: [
+          {
+            role: 'user',
+            content: 'This is a test',
+          },
+        ],
+      };
+
+      [OPENAI_CHAT_URL, OPENAI_LEGACY_COMPLETION_URL].forEach((url: string) => {
+        const sanitizedBodyString = getRequestWithStreamOption(
+          url,
+          JSON.stringify(body),
           true,
           DEFAULT_OPENAI_MODEL
         );
-        expect(sanitizedBodyString).toEqual(
-          `{\"model\":\"gpt-4\",\"messages\":[{\"role\":\"user\",\"content\":\"This is a test\"}],\"stream\":true}`
+        expect(JSON.parse(sanitizedBodyString)).toEqual({
+          messages: [{ content: 'This is a test', role: 'user' }],
+          model: 'gpt-4',
+          stream: true,
+          stream_options: {
+            include_usage: true,
+          },
+        });
+      });
+    });
+    it('does not set stream_options when stream is false', () => {
+      const body = {
+        model: 'gpt-4',
+        messages: [
+          {
+            role: 'user',
+            content: 'This is a test',
+          },
+        ],
+      };
+
+      [OPENAI_CHAT_URL, OPENAI_LEGACY_COMPLETION_URL].forEach((url: string) => {
+        const sanitizedBodyString = getRequestWithStreamOption(
+          url,
+          JSON.stringify(body),
+          false,
+          DEFAULT_OPENAI_MODEL
         );
+        expect(JSON.parse(sanitizedBodyString)).toEqual({
+          messages: [{ content: 'This is a test', role: 'user' }],
+          model: 'gpt-4',
+          stream: false,
+        });
       });
     });
 
@@ -182,6 +237,7 @@ describe('Open AI Utils', () => {
       expect(sanitizedBodyString).toEqual(bodyString);
     });
   });
+
   describe('removeEndpointFromUrl', () => {
     test('removes "/chat/completions" from the end of the URL', () => {
       const originalUrl = 'https://api.openai.com/v1/chat/completions';
