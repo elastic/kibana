@@ -6,12 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type {
-  RuleMigration,
-  RuleMigrationTaskStats,
-} from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { RuleMigrationsDataIntegrationsClient } from './rule_migrations_data_integrations_client';
-import { RuleMigrationsDataRulesClient } from './rule_migrations_data_rules_client';
 import { RuleMigrationsDataResourcesClient } from './rule_migrations_data_resources_client';
 import { RuleMigrationsDataRulesClient } from './rule_migrations_data_rules_client';
 import type { AdapterId } from './rule_migrations_data_service';
