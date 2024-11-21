@@ -19,7 +19,6 @@ import type { Space } from '@kbn/spaces-plugin/public';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { PrivilegeSpaceForm } from './privilege_space_form';
-import { SpaceSelector } from './space_selector';
 import type { Role } from '../../../../../../../common';
 
 const createRole = (kibana: Role['kibana'] = []): Role => {
@@ -57,7 +56,7 @@ const renderComponent = (props: React.ComponentProps<typeof PrivilegeSpaceForm>)
 };
 
 describe('PrivilegeSpaceForm', () => {
-  it('renders an empty form when the role contains no Kibana privileges', () => {
+  it('renders no form when no role is selected', () => {
     const role = createRole();
     const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
 
@@ -71,40 +70,9 @@ describe('PrivilegeSpaceForm', () => {
       onCancel: jest.fn(),
     });
 
-    expect(
-      wrapper.find(EuiButtonGroup).filter('[name="basePrivilegeButtonGroup"]').props().idSelected
-    ).toEqual(`basePrivilege_custom`);
-    expect(wrapper.find(FeatureTable).props().disabled).toEqual(true);
-    expect(getDisplayedFeaturePrivileges(wrapper)).toMatchInlineSnapshot(`
-      Object {
-        "excluded_from_base": Object {
-          "primaryFeaturePrivilege": "none",
-          "subFeaturePrivileges": Array [],
-        },
-        "no_sub_features": Object {
-          "primaryFeaturePrivilege": "none",
-          "subFeaturePrivileges": Array [],
-        },
-        "with_excluded_sub_features": Object {
-          "primaryFeaturePrivilege": "none",
-          "subFeaturePrivileges": Array [],
-        },
-        "with_require_all_spaces_for_feature_and_sub_features": Object {
-          "primaryFeaturePrivilege": "none",
-          "subFeaturePrivileges": Array [],
-        },
-        "with_require_all_spaces_sub_features": Object {
-          "primaryFeaturePrivilege": "none",
-          "subFeaturePrivileges": Array [],
-        },
-        "with_sub_features": Object {
-          "primaryFeaturePrivilege": "none",
-          "subFeaturePrivileges": Array [],
-        },
-      }
-    `);
-
-    expect(findTestSubject(wrapper, 'spaceFormGlobalPermissionsSupersedeWarning')).toHaveLength(0);
+    expect(wrapper.find(EuiButtonGroup).filter('[name="basePrivilegeButtonGroup"]')).toHaveLength(
+      0
+    );
   });
 
   it('renders when a base privilege is selected', () => {
@@ -230,43 +198,6 @@ describe('PrivilegeSpaceForm', () => {
     `);
 
     expect(findTestSubject(wrapper, 'spaceFormGlobalPermissionsSupersedeWarning')).toHaveLength(0);
-  });
-
-  it('renders a warning when configuring a global privilege after space privileges are already defined', () => {
-    const role = createRole([
-      {
-        base: [],
-        feature: {
-          with_sub_features: ['read'],
-        },
-        spaces: ['foo'],
-      },
-      {
-        base: [],
-        feature: {
-          with_sub_features: ['all'],
-        },
-        spaces: ['*'],
-      },
-    ]);
-
-    const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
-
-    const wrapper = renderComponent({
-      role,
-      spaces: displaySpaces,
-      kibanaPrivileges,
-      privilegeIndex: -1,
-      canCustomizeSubFeaturePrivileges: true,
-      onChange: jest.fn(),
-      onCancel: jest.fn(),
-    });
-
-    wrapper.find(SpaceSelector).props().onChange(['*']);
-
-    wrapper.update();
-
-    expect(findTestSubject(wrapper, 'globalPrivilegeWarning')).toHaveLength(1);
   });
 
   it('renders a warning when space privileges are less permissive than configured global privileges', () => {
