@@ -111,7 +111,7 @@ export const getMonitors = async (
     sortField: parseMappingKey(sortField),
     sortOrder,
     searchFields: SEARCH_FIELDS,
-    search: query ? `${query}*` : undefined,
+    search: query,
     filter: filtersStr,
     searchAfter,
     fields,
