@@ -117,6 +117,7 @@
     "@kbn/core-application-browser",
     "@kbn/core-chrome-browser",
     "@kbn/core-capabilities-common",
+    "@kbn/presentation-panel-plugin",
   ],
   "exclude": ["target/**/*"]
 }
