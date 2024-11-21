@@ -50,14 +50,14 @@ const i18nTexts = {
     noMatches: i18n.translate(
       'xpack.idxMgmt.enrichPolicyCreate.indicesSelector.dataStream.noMatchingOption',
       {
-        defaultMessage: 'No data stream match your search criteria.',
+        defaultMessage: 'No data streams match your search criteria.',
       }
     ),
   },
   sourcePlaceholder: i18n.translate(
     'xpack.idxMgmt.enrichPolicyCreate.indicesSelector.placeholder',
     {
-      defaultMessage: 'Select source indices and/or data streams.',
+      defaultMessage: 'Select source indices and data streams.',
     }
   ),
 };
