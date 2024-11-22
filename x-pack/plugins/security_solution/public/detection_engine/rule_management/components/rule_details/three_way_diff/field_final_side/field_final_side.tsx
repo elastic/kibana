@@ -6,16 +6,16 @@
  */
 
 import React from 'react';
-import { EuiTitle } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { SideHeader } from '../components/side_header';
 import { FinalSideHelpInfo } from './final_side_help_info';
-import * as i18n from './translations';
 import { FieldFinalReadOnly } from '../final_readonly/field_final_readonly';
 import { FieldFinalEdit } from '../final_edit/field_final_edit';
 import { FinalSideMode } from './final_side_mode';
 import type { UpgradeableDiffableFields } from '../../../../model/prebuilt_rule_upgrade/fields';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { FinalSideContextProvider, useFinalSideContext } from './final_side_context';
+import * as i18n from './translations';
 
 interface FieldFinalSideProps {
   fieldName: UpgradeableDiffableFields;
@@ -26,12 +26,23 @@ export function FieldFinalSide({ fieldName, initialMode }: FieldFinalSideProps):
   return (
     <>
       <SideHeader>
-        <EuiTitle size="xxs">
-          <h3>
-            {i18n.FINAL_UPDATE}
-            <FinalSideHelpInfo />
-          </h3>
-        </EuiTitle>
+        <EuiFlexGroup alignItems="stretch" justifyContent="center">
+          <EuiFlexItem>
+            <EuiFlexGroup alignItems="center">
+              <EuiTitle size="xxs">
+                <h3>
+                  {i18n.FINAL_UPDATE}
+                  <FinalSideHelpInfo />
+                </h3>
+              </EuiTitle>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton iconType="checkInCircleFilled" size="s" onClick={() => {}}>
+              {i18n.SAVE}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </SideHeader>
       <FinalSideContextProvider fieldName={fieldName} initialMode={initialMode}>
         <FieldFinalSideContent />
