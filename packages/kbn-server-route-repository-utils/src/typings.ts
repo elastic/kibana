@@ -8,7 +8,7 @@
  */
 
 import type { HttpFetchOptions } from '@kbn/core-http-browser';
-import type { IKibanaResponse } from '@kbn/core-http-server';
+import type { IKibanaResponse, RouteSecurity } from '@kbn/core-http-server';
 import type {
   KibanaRequest,
   KibanaResponseFactory,
@@ -138,6 +138,7 @@ export type CreateServerRouteFactory<
     endpoint: ValidateEndpoint<TEndpoint> extends true ? TEndpoint : never;
     handler: ServerRouteHandler<TRouteHandlerResources, TRouteParamsRT, TReturnType>;
     params?: TRouteParamsRT;
+    security?: RouteSecurity;
   } & TRouteCreateOptions
 ) => Record<
   TEndpoint,
@@ -159,6 +160,7 @@ export type ServerRoute<
 > = {
   endpoint: TEndpoint;
   handler: ServerRouteHandler<TRouteHandlerResources, TRouteParamsRT, TReturnType>;
+  security?: RouteSecurity;
 } & TRouteCreateOptions &
   (TRouteParamsRT extends RouteParamsRT ? { params: TRouteParamsRT } : {});
 

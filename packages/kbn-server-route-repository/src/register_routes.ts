@@ -52,7 +52,7 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
   const router = core.http.createRouter();
 
   routes.forEach((route) => {
-    const { params, endpoint, options, handler } = route;
+    const { params, endpoint, options, security, handler } = route;
 
     const { method, pathname, version } = parseEndpoint(endpoint);
 
@@ -137,15 +137,13 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
       validationObject = passThroughValidationObject;
     }
 
-    const { security, ...restOptions } = options ?? {};
-
     if (!version) {
       router[method](
         {
           path: pathname,
-          security,
-          options: restOptions,
           validate: validationObject,
+          options,
+          security,
         },
         wrappedHandler
       );
@@ -153,7 +151,7 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
       router.versioned[method]({
         path: pathname,
         access: pathname.startsWith('/internal/') ? 'internal' : 'public',
-        options: restOptions,
+        options,
         security,
       }).addVersion(
         {

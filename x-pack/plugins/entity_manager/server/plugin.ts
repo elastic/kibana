@@ -8,6 +8,7 @@
 import {
   CoreSetup,
   CoreStart,
+  DEFAULT_APP_CATEGORIES,
   KibanaRequest,
   Logger,
   Plugin,
@@ -29,6 +30,12 @@ import {
   EntityManagerPluginStartDependencies,
   EntityManagerServerSetup,
 } from './types';
+import { setupEntityDefinitionsIndex } from './lib/v2/setup_entity_definitions_index';
+import {
+  CREATE_ENTITY_TYPE_DEFINITION_PRIVILEGE,
+  READ_ENTITY_TYPE_DEFINITION_PRIVILEGE,
+  CREATE_ENTITY_SOURCE_DEFINITION_PRIVILEGE,
+} from './lib/v2/constants';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EntityManagerServerPluginSetup {}
@@ -63,6 +70,39 @@ export class EntityManagerServerPlugin
     core: CoreSetup,
     plugins: EntityManagerPluginSetupDependencies
   ): EntityManagerServerPluginSetup {
+    const ENTITY_MANAGER_FEATURE_ID = 'ENTITY_MANAGER';
+    plugins.features.registerKibanaFeature({
+      id: ENTITY_MANAGER_FEATURE_ID,
+      name: 'Entity Manager',
+      description: 'All features related to the Elastic Entity model',
+      category: DEFAULT_APP_CATEGORIES.management,
+      app: [ENTITY_MANAGER_FEATURE_ID],
+      privileges: {
+        all: {
+          app: [ENTITY_MANAGER_FEATURE_ID],
+          api: [
+            CREATE_ENTITY_TYPE_DEFINITION_PRIVILEGE,
+            READ_ENTITY_TYPE_DEFINITION_PRIVILEGE,
+            CREATE_ENTITY_SOURCE_DEFINITION_PRIVILEGE,
+          ],
+          ui: [],
+          savedObject: {
+            all: [],
+            read: [],
+          },
+        },
+        read: {
+          app: [ENTITY_MANAGER_FEATURE_ID],
+          api: [READ_ENTITY_TYPE_DEFINITION_PRIVILEGE],
+          ui: [],
+          savedObject: {
+            all: [],
+            read: [],
+          },
+        },
+      },
+    });
+
     core.savedObjects.registerType(entityDefinition);
     core.savedObjects.registerType(EntityDiscoveryApiKeyType);
     plugins.encryptedSavedObjects.registerType({
@@ -132,6 +172,10 @@ export class EntityManagerServerPlugin
         }
       })
       .catch((err) => this.logger.error(err));
+
+    setupEntityDefinitionsIndex(core.elasticsearch.client, this.logger).catch((error) => {
+      this.logger.error(error);
+    });
 
     return {
       getScopedClient: async ({ request }: { request: KibanaRequest }) => {
