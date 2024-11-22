@@ -50,18 +50,22 @@ export const TrainedModelHealthPopover: React.FC<InferencePipeline> = (pipeline)
 
   const { pipelineName } = pipeline;
 
-  const actionButton = (
+  const wrapperButton = (
     <EuiButtonEmpty
+      data-test-subj="enterpriseSearchTrainedModelHealthPopoverButton"
       iconSide="right"
       flush="both"
       iconType="boxesHorizontal"
       onClick={() => setIsPopOverOpen(!isPopOverOpen)}
-    >
-      <TrainedModelHealth
-        modelState={pipeline.modelState}
-        modelStateReason={pipeline.modelStateReason}
-      />
-    </EuiButtonEmpty>
+    />
+  );
+
+  const actionButton = (
+    <TrainedModelHealth
+      modelState={pipeline.modelState}
+      modelStateReason={pipeline.modelStateReason}
+      wrapperElement={wrapperButton}
+    />
   );
 
   const showConfirmDeleteModal = () => {
@@ -81,6 +85,7 @@ export const TrainedModelHealthPopover: React.FC<InferencePipeline> = (pipeline)
             <EuiFlexItem>
               <span>
                 <EuiButtonEmpty
+                  data-test-subj="enterpriseSearchTrainedModelHealthPopoverFixIssueInTrainedModelsButton"
                   data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-fixIssueInTrainedModels`}
                   size="s"
                   flush="both"
@@ -101,6 +106,7 @@ export const TrainedModelHealthPopover: React.FC<InferencePipeline> = (pipeline)
           <EuiFlexItem>
             <span>
               <EuiButtonEmpty
+                data-test-subj="enterpriseSearchTrainedModelHealthPopoverViewInStackManagementButton"
                 data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-stackManagement`}
                 size="s"
                 flush="both"
@@ -119,6 +125,7 @@ export const TrainedModelHealthPopover: React.FC<InferencePipeline> = (pipeline)
           <EuiFlexItem>
             <span>
               <EuiButtonEmpty
+                data-test-subj="enterpriseSearchTrainedModelHealthPopoverDetachPipelineButton"
                 data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-detachPipeline`}
                 size="s"
                 flush="both"

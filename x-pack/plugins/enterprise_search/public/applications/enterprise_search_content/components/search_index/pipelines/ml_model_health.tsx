@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { ReactElement } from 'react';
 
 import { EuiHealth, EuiToolTip } from '@elastic/eui';
 
@@ -113,12 +113,14 @@ export interface TrainedModelHealthProps {
   modelState: TrainedModelState | MlModelDeploymentState;
   modelStateReason?: string;
   isDownloadable?: boolean;
+  wrapperElement?: ReactElement<unknown>;
 }
 
 export const TrainedModelHealth: React.FC<TrainedModelHealthProps> = ({
   modelState,
   modelStateReason,
   isDownloadable,
+  wrapperElement,
 }) => {
   let modelHealth: {
     healthColor: string;
@@ -207,7 +209,15 @@ export const TrainedModelHealth: React.FC<TrainedModelHealthProps> = ({
   }
   return (
     <EuiToolTip content={modelHealth.tooltipText}>
-      <EuiHealth color={modelHealth.healthColor}>{modelHealth.healthText}</EuiHealth>
+      {wrapperElement ? (
+        React.cloneElement(
+          wrapperElement,
+          {},
+          <EuiHealth color={modelHealth.healthColor}>{modelHealth.healthText}</EuiHealth>
+        )
+      ) : (
+        <EuiHealth color={modelHealth.healthColor}>{modelHealth.healthText}</EuiHealth>
+      )}
     </EuiToolTip>
   );
 };
