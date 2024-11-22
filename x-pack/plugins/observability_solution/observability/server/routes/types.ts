@@ -26,10 +26,8 @@ export interface ObservabilityRouteHandlerResources {
 }
 
 export interface ObservabilityRouteCreateOptions {
-  options: {
-    tags: string[];
-    access?: 'public' | 'internal';
-  };
+  tags: string[];
+  access?: 'public' | 'internal';
 }
 
 export type AbstractObservabilityServerRouteRepository = ServerRouteRepository;
