@@ -149,6 +149,10 @@ Cypress.Commands.add('withHidden', (selector, callback) => {
   cy.get(selector).invoke('attr', 'style', '');
 });
 
+Cypress.Commands.add('waitUntilPageContentIsLoaded', () => {
+  cy.getByTestSubj('kbnAppWrapper visibleChrome').find('[aria-busy=false]').should('be.visible');
+});
+
 // A11y configuration
 
 const axeConfig = {
