@@ -6,8 +6,8 @@
  */
 import { withApmSpan } from '@kbn/apm-data-access-plugin/server/utils/with_apm_span';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { KibanaResponse } from '@kbn/core-http-router-server-internal';
 import { isEmpty } from 'lodash';
+import { isKibanaResponse } from '@kbn/core-http-server';
 import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
 import { isTestUser, SyntheticsEsClient } from './lib';
 import { SYNTHETICS_INDEX_PATTERN } from '../common/constants';
@@ -55,20 +55,20 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
 
       const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
-      try {
-        const res = await syntheticsRoute.handler({
-          syntheticsEsClient,
-          savedObjectsClient,
-          context,
-          request,
-          response,
-          server,
-          spaceId,
-          syntheticsMonitorClient,
-        });
-        if (res instanceof KibanaResponse) {
-          return res;
-        }
+    try {
+      const res = await syntheticsRoute.handler({
+        syntheticsEsClient,
+        savedObjectsClient,
+        context,
+        request,
+        response,
+        server,
+        spaceId,
+        syntheticsMonitorClient,
+      });
+      if (isKibanaResponse(res)) {
+        return res;
+      }
 
         const inspectData = await syntheticsEsClient.getInspectData(syntheticsRoute.path);
 
