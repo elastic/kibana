@@ -24,7 +24,6 @@
     "@kbn/observability-plugin",
     "@kbn/observability-shared-plugin",
     "@kbn/kibana-react-plugin",
-    "@kbn/react-kibana-context-theme",
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/kibana-utils-plugin",
     "@kbn/slo-schema",
