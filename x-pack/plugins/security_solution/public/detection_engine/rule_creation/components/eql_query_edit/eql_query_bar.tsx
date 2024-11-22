@@ -17,16 +17,13 @@ import { FilterManager } from '@kbn/data-plugin/public';
 import type { FieldHook } from '../../../../shared_imports';
 import { FilterBar } from '../../../../common/components/filter_bar';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
-import * as i18n from './translations';
+import type { EqlOptions } from '../../../../../common/search_strategy';
+import { useKibana } from '../../../../common/lib/kibana';
+import type { FieldValueQueryBar } from '../../../rule_creation_ui/components/query_bar';
+import type { EqlQueryBarFooterProps } from './footer';
 import { EqlQueryBarFooter } from './footer';
 import { getValidationResults } from './validators';
-import type {
-  EqlOptionsData,
-  EqlOptionsSelected,
-  FieldsEqlOptions,
-} from '../../../../../common/search_strategy';
-import { useKibana } from '../../../../common/lib/kibana';
+import * as i18n from './translations';
 
 const TextArea = styled(EuiTextArea)`
   display: block;
@@ -60,32 +57,28 @@ const StyledFormRow = styled(EuiFormRow)`
 
 export interface EqlQueryBarProps {
   dataTestSubj: string;
-  field: FieldHook<DefineStepRule['queryBar']>;
-  isLoading: boolean;
+  field: FieldHook<FieldValueQueryBar>;
+  eqlOptionsField?: FieldHook<EqlOptions>;
+  isLoading?: boolean;
   indexPattern: DataViewBase;
   showFilterBar?: boolean;
   idAria?: string;
-  optionsData?: EqlOptionsData;
-  optionsSelected?: EqlOptionsSelected;
   isSizeOptionDisabled?: boolean;
-  onOptionsChange?: (field: FieldsEqlOptions, newValue: string | undefined) => void;
   onValidityChange?: (arg: boolean) => void;
-  onValiditingChange?: (arg: boolean) => void;
+  onValidatingChange?: (arg: boolean) => void;
 }
 
 export const EqlQueryBar: FC<EqlQueryBarProps> = ({
   dataTestSubj,
   field,
+  eqlOptionsField,
   isLoading = false,
   indexPattern,
   showFilterBar,
   idAria,
-  optionsData,
-  optionsSelected,
   isSizeOptionDisabled,
-  onOptionsChange,
   onValidityChange,
-  onValiditingChange,
+  onValidatingChange,
 }) => {
   const { addError } = useAppToasts();
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
@@ -115,10 +108,10 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
   }, [error, addError]);
 
   useEffect(() => {
-    if (onValiditingChange) {
-      onValiditingChange(isValidating);
+    if (onValidatingChange) {
+      onValidatingChange(isValidating);
     }
-  }, [isValidating, onValiditingChange]);
+  }, [isValidating, onValidatingChange]);
 
   useEffect(() => {
     let isSubscribed = true;
@@ -156,8 +149,8 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLTextAreaElement>) => {
       const newQuery = e.target.value;
-      if (onValiditingChange) {
-        onValiditingChange(true);
+      if (onValidatingChange) {
+        onValidatingChange(true);
       }
       setErrorMessages([]);
       setFieldValue({
@@ -169,7 +162,19 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
         saved_id: null,
       });
     },
-    [fieldValue, setFieldValue, onValiditingChange]
+    [fieldValue, setFieldValue, onValidatingChange]
+  );
+
+  const handleEqlOptionsChange = useCallback<
+    NonNullable<EqlQueryBarFooterProps['onEqlOptionsChange']>
+  >(
+    (eqlOptionsFieldName, value) => {
+      eqlOptionsField?.setValue((prevEqlOptions) => ({
+        ...prevEqlOptions,
+        [eqlOptionsFieldName]: value,
+      }));
+    },
+    [eqlOptionsField]
   );
 
   return (
@@ -195,9 +200,9 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
           errors={errorMessages}
           isLoading={isValidating}
           isSizeOptionDisabled={isSizeOptionDisabled}
-          optionsData={optionsData}
-          optionsSelected={optionsSelected}
-          onOptionsChange={onOptionsChange}
+          dataView={indexPattern}
+          eqlOptions={eqlOptionsField?.value}
+          onEqlOptionsChange={handleEqlOptionsChange}
         />
         {showFilterBar && (
           <>
