@@ -28,6 +28,7 @@ export const RectangleNode: React.FC<NodeProps> = memo((props: NodeProps) => {
   const { id, color, icon, label, interactive, expandButtonClick, nodeClick } =
     props.data as EntityNodeViewModel;
   const { euiTheme } = useEuiTheme();
+  const fillColor = (color === 'danger' ? 'primary' : color) ?? 'primary';
   return (
     <>
       <NodeShapeContainer>
@@ -50,7 +51,7 @@ export const RectangleNode: React.FC<NodeProps> = memo((props: NodeProps) => {
           xmlns="http://www.w3.org/2000/svg"
         >
           <RectangleShape
-            fill={useEuiBackgroundColor(color ?? 'primary')}
+            fill={useEuiBackgroundColor(fillColor)}
             stroke={euiTheme.colors[color ?? 'primary']}
           />
           {icon && <NodeIcon x="8" y="7" icon={icon} color={color} />}
@@ -80,7 +81,7 @@ export const RectangleNode: React.FC<NodeProps> = memo((props: NodeProps) => {
           style={HandleStyleOverride}
         />
       </NodeShapeContainer>
-      <NodeLabel>{Boolean(label) ? label : id}</NodeLabel>
+      <NodeLabel text={Boolean(label) ? label : id} />
     </>
   );
 });

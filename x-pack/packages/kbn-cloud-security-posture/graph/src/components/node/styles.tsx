@@ -20,11 +20,12 @@ import { rgba } from 'polished';
 import { getSpanIcon } from './get_span_icon';
 import type { NodeExpandButtonProps } from './node_expand_button';
 
+export { NodeLabel } from './node_label';
+
 export const LABEL_PADDING_X = 15;
 export const LABEL_BORDER_WIDTH = 1;
 export const NODE_WIDTH = 90;
 export const NODE_HEIGHT = 90;
-const NODE_LABEL_WIDTH = 120;
 
 export const LabelNodeContainer = styled.div`
   text-wrap: nowrap;
@@ -33,7 +34,10 @@ export const LabelNodeContainer = styled.div`
 `;
 
 export const LabelShape = styled(EuiText)`
-  background: ${(props) => useEuiBackgroundColor(props.color as _EuiBackgroundColor)};
+  background: ${({ color }) => {
+    const fillColor = (color === 'danger' ? 'primary' : color) ?? 'primary';
+    return useEuiBackgroundColor(fillColor as _EuiBackgroundColor);
+  }};
   border: ${(props) => {
     const { euiTheme } = useEuiTheme();
     return `solid ${
@@ -183,19 +187,6 @@ export const NodeIcon = ({ icon, color, x, y }: NodeIconProps) => {
       </div>
     </foreignObject>
   );
-};
-
-export const NodeLabel = styled(EuiText)`
-  width: ${NODE_LABEL_WIDTH}px;
-  margin-left: ${-(NODE_LABEL_WIDTH - NODE_WIDTH) / 2}px;
-  text-overflow: ellipsis;
-  // white-space: nowrap;
-  overflow: hidden;
-`;
-
-NodeLabel.defaultProps = {
-  size: 'xs',
-  textAlign: 'center',
 };
 
 export const ExpandButtonSize = 18;
