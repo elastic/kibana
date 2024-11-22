@@ -28,7 +28,7 @@ import {
 } from '@elastic/eui';
 import { AppMountParameters } from '@kbn/core-application-browser';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { GridLayout, GridLayoutData } from '@kbn/grid-layout';
+import { GridLayout, GridLayoutData, GridAccessMode } from '@kbn/grid-layout';
 import { i18n } from '@kbn/i18n';
 
 import { getPanelId } from './get_panel_id';
@@ -49,7 +49,7 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
   const savedState = useRef<MockSerializedDashboardState>(getSerializedDashboardState());
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
   const [expandedPanelId, setExpandedPanelId] = useState<string | undefined>();
-  const [isResponsive, setIsResponsive] = useState<boolean>(true);
+  const [accessMode, setAccessMode] = useState<GridAccessMode>('VIEW');
   const [currentLayout, setCurrentLayout] = useState<GridLayoutData>(
     dashboardInputToGridLayout(savedState.current)
   );
@@ -175,24 +175,24 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
                     })}
                     options={[
                       {
-                        id: 'responsive',
-                        label: i18n.translate('examples.gridExample.responsiveLayoutOption', {
-                          defaultMessage: 'Responsive layout',
+                        id: 'VIEW',
+                        label: i18n.translate('examples.gridExample.viewOption', {
+                          defaultMessage: 'View',
                         }),
                         toolTipContent:
                           'The layout adjusts when the window is resized. Panel interactivity, such as moving and resizing within the grid, is disabled.',
                       },
                       {
-                        id: 'fixed',
-                        label: i18n.translate('examples.gridExample.fixedLayoutOption', {
-                          defaultMessage: 'Fixed layout',
+                        id: 'EDIT',
+                        label: i18n.translate('examples.gridExample.editOption', {
+                          defaultMessage: 'Edit',
                         }),
                         toolTipContent: 'The layout does not adjust when the window is resized.',
                       },
                     ]}
-                    idSelected={isResponsive ? 'responsive' : 'fixed'}
+                    idSelected={accessMode}
                     onChange={(id) => {
-                      setIsResponsive(id === 'responsive');
+                      setAccessMode(id as GridAccessMode);
                     }}
                   />
                 </EuiFlexItem>
@@ -240,7 +240,7 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
           </EuiFlexGroup>
           <EuiSpacer size="m" />
           <GridLayout
-            isResponsive={isResponsive}
+            accessMode={accessMode}
             expandedPanelId={expandedPanelId}
             layout={currentLayout}
             gridSettings={{

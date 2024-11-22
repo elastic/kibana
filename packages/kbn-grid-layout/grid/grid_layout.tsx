@@ -23,7 +23,7 @@ import {
 import { css } from '@emotion/react';
 import { GridHeightSmoother } from './grid_height_smoother';
 import { GridRow } from './grid_row';
-import { GridLayoutData, GridSettings } from './types';
+import { GridAccessMode, GridLayoutData, GridSettings } from './types';
 import { useGridLayoutEvents } from './use_grid_layout_events';
 import { useGridLayoutState } from './use_grid_layout_state';
 import { isLayoutEqual } from './utils/equality_checks';
@@ -35,7 +35,7 @@ interface GridLayoutProps {
   renderPanelContents: (panelId: string) => React.ReactNode;
   onLayoutChange: (newLayout: GridLayoutData) => void;
   expandedPanelId?: string;
-  isResponsive?: boolean;
+  accessMode?: GridAccessMode;
 }
 
 export const GridLayout = ({
@@ -44,32 +44,13 @@ export const GridLayout = ({
   renderPanelContents,
   onLayoutChange,
   expandedPanelId,
-  isResponsive,
+  accessMode = 'EDIT',
 }: GridLayoutProps) => {
-  const expandedPanelId$ = useMemo(
-    () => new BehaviorSubject<string | undefined>(expandedPanelId),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
-  useEffect(() => {
-    expandedPanelId$.next(expandedPanelId);
-  }, [expandedPanelId, expandedPanelId$]);
-
-  const isResponsive$ = useMemo(
-    () => new BehaviorSubject<boolean>(Boolean(isResponsive)),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
-
-  useEffect(() => {
-    isResponsive$.next(Boolean(isResponsive));
-  }, [isResponsive, isResponsive$]);
-
   const { gridLayoutStateManager, setDimensionsRef } = useGridLayoutState({
     layout,
     gridSettings,
-    expandedPanelId$,
-    isResponsive$,
+    expandedPanelId,
+    accessMode,
   });
   useGridLayoutEvents({ gridLayoutStateManager });
 
@@ -168,7 +149,7 @@ export const GridLayout = ({
   }, [rowCount, gridLayoutStateManager, renderPanelContents]);
 
   const gridClassNames = classNames('kbnGrid', {
-    'kbnGrid--nonInteractive': expandedPanelId || isResponsive,
+    'kbnGrid--nonInteractive': expandedPanelId || accessMode === 'VIEW',
   });
 
   return (

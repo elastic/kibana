@@ -13,6 +13,7 @@ import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfi
 
 import {
   ActivePanel,
+  GridAccessMode,
   GridLayoutData,
   GridLayoutStateManager,
   GridSettings,
@@ -24,13 +25,13 @@ import { shouldShowMobileView } from './utils/mobile_view';
 export const useGridLayoutState = ({
   layout,
   gridSettings,
-  expandedPanelId$,
-  isResponsive$,
+  expandedPanelId,
+  accessMode,
 }: {
   layout: GridLayoutData;
   gridSettings: GridSettings;
-  expandedPanelId$: BehaviorSubject<string | undefined>;
-  isResponsive$: BehaviorSubject<boolean>;
+  expandedPanelId?: string;
+  accessMode: GridAccessMode;
 }): {
   gridLayoutStateManager: GridLayoutStateManager;
   setDimensionsRef: (instance: HTMLDivElement | null) => void;
@@ -38,6 +39,25 @@ export const useGridLayoutState = ({
   const rowRefs = useRef<Array<HTMLDivElement | null>>([]);
   const rowContainerRefs = useRef<Array<HTMLDivElement | null>>([]);
   const panelRefs = useRef<Array<{ [id: string]: HTMLDivElement | null }>>([]);
+
+  const expandedPanelId$ = useMemo(
+    () => new BehaviorSubject<string | undefined>(expandedPanelId),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+  useEffect(() => {
+    expandedPanelId$.next(expandedPanelId);
+  }, [expandedPanelId, expandedPanelId$]);
+
+  const accessMode$ = useMemo(
+    () => new BehaviorSubject<GridAccessMode>(accessMode),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  useEffect(() => {
+    accessMode$.next(accessMode);
+  }, [accessMode, accessMode$]);
 
   const gridLayoutStateManager = useMemo(() => {
     const gridLayout$ = new BehaviorSubject<GridLayoutData>(layout);
@@ -64,7 +84,7 @@ export const useGridLayoutState = ({
       interactionEvent$,
       expandedPanelId$,
       isMobileView$: new BehaviorSubject<boolean>(
-        isResponsive$.getValue() && shouldShowMobileView()
+        accessMode$.getValue() === 'VIEW' && shouldShowMobileView()
       ),
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -84,7 +104,7 @@ export const useGridLayoutState = ({
 
         gridLayoutStateManager.runtimeSettings$.next({ ...gridSettings, columnPixelWidth });
         gridLayoutStateManager.isMobileView$.next(
-          isResponsive$.getValue() && shouldShowMobileView()
+          accessMode$.getValue() === 'VIEW' && shouldShowMobileView()
         );
       });
 
