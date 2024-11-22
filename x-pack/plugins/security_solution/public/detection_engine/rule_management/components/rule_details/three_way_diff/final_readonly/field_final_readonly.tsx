@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty } from '@elastic/eui';
 import React from 'react';
+import { EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
 import { useFinalSideContext } from '../field_final_side';
 import * as i18n from '../translations';
 import { FieldReadOnly } from './field_readonly';
@@ -16,9 +16,11 @@ export function FieldFinalReadOnly(): JSX.Element {
 
   return (
     <>
-      <EuiButtonEmpty iconType="pencil" onClick={setEditMode}>
-        {i18n.EDIT_BUTTON_LABEL}
-      </EuiButtonEmpty>
+      <EuiFlexGroup justifyContent="flexEnd">
+        <EuiButtonEmpty iconType="pencil" onClick={setEditMode}>
+          {i18n.EDIT_BUTTON_LABEL}
+        </EuiButtonEmpty>
+      </EuiFlexGroup>
       <FieldReadOnly fieldName={fieldName} />
     </>
   );

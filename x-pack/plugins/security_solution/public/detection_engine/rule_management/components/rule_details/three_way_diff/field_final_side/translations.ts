@@ -13,3 +13,24 @@ export const FINAL_UPDATE = i18n.translate(
     defaultMessage: 'Final update',
   }
 );
+
+export const SAVE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.field.save',
+  {
+    defaultMessage: 'Save',
+  }
+);
+
+export const ACCEPT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.field.accept',
+  {
+    defaultMessage: 'Accept',
+  }
+);
+
+export const SAVE_AND_ACCEPT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.field.saveAndAccept',
+  {
+    defaultMessage: 'Save and accept',
+  }
+);
