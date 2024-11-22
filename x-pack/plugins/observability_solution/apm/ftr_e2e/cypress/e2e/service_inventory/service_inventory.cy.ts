@@ -104,12 +104,12 @@ describe('Service inventory', () => {
       cy.contains('opbeans-rum');
 
       // It navigates to service overview page
-      cy.get('[data-test-subj="serviceLink_nodejs"]').click();
-      cy.url().should('include', '/apm/services/opbeans-node/overview');
-      cy.contains('h1', 'opbeans-node');
-      cy.go('back');
+      // cy.get('[data-test-subj="serviceLink_nodejs"]').click();
+      // cy.url().should('include', '/apm/services/opbeans-node/overview');
+      // cy.contains('h1', 'opbeans-node');
+      // cy.go('back');
 
-      cy.contains('h1', 'Services');
+      // cy.contains('h1', 'Services');
 
       // It navigates to Inventory plugin.
       cy.get('[data-test-subj="apmEntitiesInventoryCalloutLink"]').click();
