@@ -29,6 +29,7 @@ Go through the relevant title, description and data sources from the above query
 - The query should be short and concise.
 - Include keywords that are relevant to the use case.
 - Add related keywords you detected from the above query, like one or more vendor, product, cloud provider, OS platform etc.
+- Always reply with a JSON object with the key "query" and the value as the semantic search query inside three backticks as shown in the below example.
 </guidelines>
 
 <example>
@@ -38,7 +39,7 @@ Description: This search looks for processes launching netsh.exe to execute vari
 Data Sources:
 </query>
 A: Please find the query keywords JSON object below:
-\`\`\`
+\`\`\`json
 {{"query": "windows host endpoint netsh.exe process creation command-line utility network configuration persistence proxy dll execution sysmon event id 1"}}
 \`\`\`
 </example>`,
