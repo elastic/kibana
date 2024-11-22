@@ -1,3 +1,6 @@
+FROM kibana_sample_data_logs
+| STATS count = COUNT(*) BY agent
+
 function(props) {
   const [initalized, setInitialized] = React.useState(false);
   const wrapperRef = React.useRef(null);
@@ -9,7 +12,7 @@ function(props) {
     const data = [
       ...props.data.map((d, i) => ({
         ...d,
-        count: d.count - (props.crossfilter.find(d2 => d2.response === d.response)?.count ?? 0),
+        count: d.count - (props.crossfilter.find(d2 => d2.agent === d.agent)?.count ?? 0),
         type: '02_context'
       })),
       ...props.crossfilter.map(d => ({
@@ -17,7 +20,7 @@ function(props) {
         type: '01_filter'
       }))
     ];
-    console.log('data response code', data);
+    console.log('data agent', data);
     return data;
   }, [props.data, props.crossfilter]);
 
@@ -49,10 +52,10 @@ function(props) {
         // initialize tooltip handler
         view.tooltip(new vegaTooltip.Handler().call);
 
-        view.addSignalListener('response', function(event, item) {
+        view.addSignalListener('agent', function(event, item) {
             console.log('item',item);
-            if (item.response) {
-              props.dispatch(`WHERE response == "${item.response[0]}"`);
+            if (item.agent) {
+              props.dispatch(`WHERE agent == "${item.agent[0]}"`);
             } else {
               props.dispatch('');
             }
@@ -67,7 +70,7 @@ function(props) {
     // register vega and vega-lite with the API
     vl.register(vega, vegaLite, options);
 
-    const click = vl.selectMulti().encodings('y').name('response');
+    const click = vl.selectMulti().encodings('y').name('agent');
 
     // now you can use the API!
     const spec = vl.markBar({ tooltip: true })
@@ -75,13 +78,15 @@ function(props) {
       .encode(
         // https://vega.github.io/vega-lite/docs/timeunit.html
         vl.x().sum("count"),
-        vl.y().fieldN('response'),
-        vl.color().fieldN('type').scale({ range: ['steelblue', 'lightgrey'] }).legend({disable: true}),
-        vl.tooltip([vl.fieldN("response"), vl.fieldQ("count")])
+        vl.y().fieldN('agent').sort('-x'),
+        vl.color().fieldN('type').scale({ range: ['#00a69b', '#ddd'] }).legend({disable: true}),
+        vl.opacity().condition({test:"datum['type'] == '02_context'",value:0.3}).value(1),
+        vl.tooltip([vl.fieldN("agent"), vl.fieldQ("count")])
       )
       .width(props.width)
       .height(props.height)
       .autosize({ type: 'fit-x'})
+      .config({view:{stroke:null}})
       .params(click)
 
       spec.render()
