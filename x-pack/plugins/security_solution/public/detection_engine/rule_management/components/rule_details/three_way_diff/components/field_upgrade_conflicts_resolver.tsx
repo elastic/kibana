@@ -17,7 +17,7 @@ import type {
 import { ThreeWayDiffConflict } from '../../../../../../../common/api/detection_engine';
 import type { FieldUpgradeState } from '../../../../model/prebuilt_rule_upgrade';
 import { ComparisonSide } from '../comparison_side/comparison_side';
-import { FinalSide } from '../final_side/final_side';
+import { FieldFinalSide } from '../field_final_side/field_final_side';
 import { FieldUpgradeConflictsResolverHeader } from './field_upgrade_conflicts_resolver_header';
 import { useDiffableRuleContext } from '../diffable_rule_context';
 import type { UpgradeableDiffableFields } from '../../../../model/prebuilt_rule_upgrade/fields';
@@ -66,7 +66,7 @@ export function FieldUpgradeConflictsResolver<FieldName extends UpgradeableDiffa
             `}
           />
           <EuiFlexItem grow={1}>
-            <FinalSide fieldName={fieldName} />
+            <FieldFinalSide fieldName={fieldName} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </SplitAccordion>
