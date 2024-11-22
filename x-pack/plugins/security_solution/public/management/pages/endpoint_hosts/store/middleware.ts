@@ -14,7 +14,7 @@ import type {
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
 } from '@kbn/timelines-plugin/common';
-import { canFetchAgentPolicies } from '../../../../../common/endpoint/service/authz/authz';
+import { canFetchPackageAndAgentPolicies } from '../../../../../common/endpoint/service/authz/authz';
 import type {
   IsolationRouteRequestBody,
   UnisolationRouteRequestBody,
@@ -321,7 +321,7 @@ async function endpointListMiddleware({
       payload: endpointResponse,
     });
 
-    fetchNonExistingPolicies({ http: coreStart.http, hosts: endpointResponse.data, store });
+    fetchNonExistingPolicies({ coreStart, hosts: endpointResponse.data, store });
   } catch (error) {
     dispatch({
       type: 'serverFailedToReturnEndpointList',
@@ -367,7 +367,7 @@ async function endpointListMiddleware({
       payload: false,
     });
 
-    if (canFetchAgentPolicies(coreStart.application.capabilities)) {
+    if (canFetchPackageAndAgentPolicies(coreStart.application.capabilities)) {
       try {
         const policyDataResponse: GetPolicyListResponse =
           await sendGetEndpointSpecificPackagePolicies(http, {
@@ -447,16 +447,20 @@ export async function handleLoadMetadataTransformStats(http: HttpStart, store: E
 async function fetchNonExistingPolicies({
   store,
   hosts,
-  http,
+  coreStart,
 }: {
   store: EndpointPageStore;
   hosts: HostResultList['hosts'];
-  http: HttpStart;
+  coreStart: CoreStart;
 }) {
+  if (!canFetchPackageAndAgentPolicies(coreStart.application.capabilities)) {
+    return;
+  }
+
   const { getState, dispatch } = store;
   try {
     const missingPolicies = await getNonExistingPoliciesForEndpointList(
-      http,
+      coreStart.http,
       hosts,
       nonExistingPolicies(getState())
     );

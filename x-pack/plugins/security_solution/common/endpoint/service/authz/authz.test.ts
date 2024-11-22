@@ -7,7 +7,7 @@
 
 import {
   calculateEndpointAuthz,
-  canFetchAgentPolicies,
+  canFetchPackageAndAgentPolicies,
   getEndpointAuthzInitialState,
 } from './authz';
 import type { FleetAuthz } from '@kbn/fleet-plugin/common';
@@ -355,7 +355,7 @@ describe('Endpoint Authz service', () => {
     });
   });
 
-  describe('canFetchAgentPolicies()', () => {
+  describe('canFetchPackageAndAgentPolicies()', () => {
     describe('without granular Fleet permissions', () => {
       it.each`
         readFleet | readIntegrations | readPolicyManagement | result
@@ -376,7 +376,7 @@ describe('Endpoint Authz service', () => {
             fleet: { read: readIntegrations },
           };
 
-          expect(canFetchAgentPolicies(capabilities as Capabilities)).toBe(result);
+          expect(canFetchPackageAndAgentPolicies(capabilities as Capabilities)).toBe(result);
         }
       );
     });
@@ -409,7 +409,7 @@ describe('Endpoint Authz service', () => {
             fleet: { read: readIntegrations },
           };
 
-          expect(canFetchAgentPolicies(capabilities as Capabilities)).toBe(result);
+          expect(canFetchPackageAndAgentPolicies(capabilities as Capabilities)).toBe(result);
         }
       );
     });

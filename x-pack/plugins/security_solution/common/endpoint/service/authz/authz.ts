@@ -218,7 +218,7 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
  *
  * @param capabilities Capabilities from coreStart.application
  */
-export const canFetchAgentPolicies = (capabilities: Capabilities): boolean => {
+export const canFetchPackageAndAgentPolicies = (capabilities: Capabilities): boolean => {
   const canReadPolicyManagement = (capabilities.siem?.readPolicyManagement ?? false) as boolean;
 
   const fleetv2 = capabilities.fleetv2;
