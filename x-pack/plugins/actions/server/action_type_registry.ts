@@ -11,7 +11,12 @@ import { RunContext, TaskManagerSetupContract, TaskCost } from '@kbn/task-manage
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { ActionType as CommonActionType, areValidFeatures } from '../common';
 import { ActionsConfigurationUtilities } from './actions_config';
-import { getActionTypeFeatureUsageName, TaskRunnerFactory, ILicenseState } from './lib';
+import {
+  getActionTypeFeatureUsageName,
+  TaskRunnerFactory,
+  ILicenseState,
+  ActionExecutionSourceType,
+} from './lib';
 import {
   ActionType,
   InMemoryConnector,
@@ -117,15 +122,15 @@ export class ActionTypeRegistry {
    */
   public getActionKibanaPrivileges<Params extends ActionTypeParams = ActionTypeParams>(
     actionTypeId: string,
-    params?: Params
+    params?: Params,
+    source?: ActionExecutionSourceType
   ): string[] {
     const actionType = this.actionTypes.get(actionTypeId);
 
     if (!actionType?.isSystemActionType && !actionType?.isEdrActionType) {
       return [];
     }
-
-    return actionType?.getKibanaPrivileges?.({ params }) ?? [];
+    return actionType?.getKibanaPrivileges?.({ params, source }) ?? [];
   }
 
   /**

@@ -40,7 +40,7 @@ export const ACTIONS_FEATURE = {
   privileges: {
     all: {
       app: [],
-      api: [CONNECTORS_EDR_EXECUTE_PRIVILEGE_API_TAG, CONNECTORS_BASIC_EXECUTE_PRIVILEGE_API_TAG],
+      api: [CONNECTORS_BASIC_EXECUTE_PRIVILEGE_API_TAG],
       catalogue: [],
       management: {
         insightsAndAlerting: ['triggersActions', 'triggersActionsConnectors'],
@@ -70,31 +70,4 @@ export const ACTIONS_FEATURE = {
       ui: ['show', 'execute'],
     },
   },
-  subFeatures: [
-    {
-      name: i18n.translate('xpack.actions.featureRegistry.edrSubFeatureName', {
-        defaultMessage: 'EDR Connectors',
-      }),
-      privilegeGroups: [
-        {
-          groupType: 'independent',
-          privileges: [
-            {
-              api: [CONNECTORS_EDR_EXECUTE_PRIVILEGE_API_TAG],
-              id: 'executeEdrConnectors',
-              name: i18n.translate('xpack.actions.featureRegistry.edrSubFeatureDetails', {
-                defaultMessage: 'Execute advanced EDR connectors',
-              }),
-              includeIn: 'all',
-              savedObject: {
-                all: [ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE, CONNECTOR_TOKEN_SAVED_OBJECT_TYPE],
-                read: [ACTION_SAVED_OBJECT_TYPE],
-              },
-              ui: ['executeEdr'],
-            },
-          ],
-        },
-      ],
-    },
-  ],
 };

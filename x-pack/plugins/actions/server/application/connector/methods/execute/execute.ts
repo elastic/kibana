@@ -20,7 +20,7 @@ export async function execute(
 ): Promise<ActionTypeExecutorResult<unknown>> {
   const log = context.logger;
   const { actionId, params, source, relatedSavedObjects } = connectorExecuteParams;
-  const additionalPrivileges = getActionKibanaPrivileges(context, actionId, params);
+  const additionalPrivileges = getActionKibanaPrivileges(context, actionId, params, source?.type);
   let actionTypeId: string | undefined;
 
   try {
