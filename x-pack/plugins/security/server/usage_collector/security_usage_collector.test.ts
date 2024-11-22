@@ -107,9 +107,9 @@ describe('Security UsageCollector', () => {
     expect(usage).toEqual({
       auditLoggingEnabled: false,
       accessAgreementEnabled: false,
-      allowFips: false,
       authProviderCount: 0,
       enabledAuthProviders: [],
+      fipsModeEnabled: false,
       loginSelectorEnabled: false,
       httpAuthSchemes: [],
       sessionIdleTimeoutInMinutes: 0,
