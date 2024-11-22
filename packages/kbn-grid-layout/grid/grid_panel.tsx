@@ -72,21 +72,22 @@ export const GridPanel = forwardRef<
               const panel = allPanels[panelId];
               if (!ref || !panel) return;
 
-              if (expandedPanelId && expandedPanelId === panelId) {
-                // Translate the expanded panel back to its initial position
-                // since all other GridRow elements have been moved off-screen
-                ref.style.transform = 'translate(9999px, 9999px)';
-
-                // Stretch the expanded panel to occupy the remaining available space in the viewport.
-                ref.style.position = `absolute`;
-                ref.style.top = `0`;
-                ref.style.left = `0`;
-                ref.style.width = `100%`;
-                ref.style.height = `100%`;
-                return;
+              if (expandedPanelId) {
+                if (expandedPanelId === panelId) {
+                  // Stretch the expanded panel to occupy the remaining available space in the viewport.
+                  ref.style.display = 'block';
+                  ref.style.position = `absolute`;
+                  ref.style.top = `0`;
+                  ref.style.left = `0`;
+                  ref.style.width = `100%`;
+                  ref.style.height = `100%`;
+                  return;
+                } else {
+                  ref.style.display = 'none';
+                }
               } else {
+                ref.style.display = ``;
                 ref.style.position = ``;
-                ref.style.transform = ``;
               }
 
               if (isMobileView) {

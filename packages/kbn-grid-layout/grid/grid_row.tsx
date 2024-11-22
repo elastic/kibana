@@ -95,24 +95,17 @@ export const GridRow = forwardRef<
             if (!rowContainerRef) return;
 
             if (expandedPanelId) {
-              // If any panel is expanded, move all rows with their panels out of the viewport.
-              // The expanded panel is repositioned to its original location in the GridPanel component
-              // and stretched to fill the viewport.
-
-              rowContainerRef.style.transform = 'translate(-9999px, -9999px)';
-
               const panelsIds = Object.keys(gridLayout[rowIndex].panels);
               const includesExpandedPanel = panelsIds.includes(expandedPanelId);
               if (includesExpandedPanel) {
                 // Stretch the row with the expanded panel to occupy the entire remaining viewport
                 rowContainerRef.style.height = '100%';
               } else {
-                // Hide the row if it does not contain the expanded panel
-                rowContainerRef.style.height = '0';
+                rowContainerRef.style.display = 'none';
               }
             } else {
-              rowContainerRef.style.transform = ``;
-              rowContainerRef.style.height = ``;
+              rowContainerRef.style.display = '';
+              rowContainerRef.style.height = '';
             }
 
             const targetRow = interactionEvent?.targetRowIndex;
@@ -231,7 +224,13 @@ export const GridRow = forwardRef<
     }, [panelIds, rowIndex, gridLayoutStateManager, renderPanelContents, setInteractionEvent]);
 
     return (
-      <div ref={(element) => (gridLayoutStateManager.rowContainerRefs.current[rowIndex] = element)}>
+      <div
+        ref={(element) => (gridLayoutStateManager.rowContainerRefs.current[rowIndex] = element)}
+        css={css`
+          position: relative;
+          transition: height 500ms linear;
+        `}
+      >
         {rowIndex !== 0 && (
           <>
             <EuiSpacer size="s" />
