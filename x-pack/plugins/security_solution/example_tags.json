@@ -1,0 +1,10 @@
+[
+  "Domain: Endpoint",
+  "OS: Windows",
+  "Use Case: Threat Detection",
+  "Tactic: Persistence",
+  "Tactic: Defense Evasion",
+  "Data Source: Elastic Endgame",
+  "Data Source: Elastic Defend",
+  "Data Source: Sysmon"
+]
