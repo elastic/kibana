@@ -66,9 +66,7 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/GetNotesResult'
-                  - type: object
+                $ref: '#/components/schemas/GetNotesResult'
 
 components:
   schemas:

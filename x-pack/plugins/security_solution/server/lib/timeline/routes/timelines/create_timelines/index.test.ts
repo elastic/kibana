@@ -69,8 +69,8 @@ describe('create timelines', () => {
       beforeEach(async () => {
         jest.doMock('../../../saved_object/timelines', () => {
           return {
-            getTimeline: mockGetTimeline.mockReturnValue(null),
             persistTimeline: mockPersistTimeline.mockReturnValue({
+              code: 200,
               timeline: createTimelineWithTimelineId,
             }),
           };
@@ -173,6 +173,7 @@ describe('create timelines', () => {
           return {
             getTimelineTemplateOrNull: mockGetTimeline.mockReturnValue(null),
             persistTimeline: mockPersistTimeline.mockReturnValue({
+              code: 200,
               timeline: createTemplateTimelineWithTimelineId,
             }),
           };
