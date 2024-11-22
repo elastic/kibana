@@ -82,7 +82,7 @@ export async function runKibanaServer(options: {
             ? []
             : [
                 '--node.roles=["ui"]',
-                `--path.data=${Path.resolve(Os.tmpdir(), `ftr-ui-${uuidv4()}`)}`,
+                `--path.data=${Path.resolve(Os.tmpdir(), `scout-ui-${uuidv4()}`)}`,
               ]),
         ]),
       ],

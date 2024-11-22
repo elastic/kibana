@@ -77,7 +77,7 @@ export async function runElasticsearch(
 
   const node = await startEsNode({
     log,
-    name: name ?? 'ftr',
+    name: name ?? 'scout',
     logsDir,
     config,
   });

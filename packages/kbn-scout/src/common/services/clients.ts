@@ -20,7 +20,7 @@ interface ClientOptions {
   log: ToolingLog;
 }
 
-function createClientWithAuth({ serviceName, url, username, password, log }: ClientOptions) {
+function createClientUrlWithAuth({ serviceName, url, username, password, log }: ClientOptions) {
   const clientUrl = new URL(url);
   clientUrl.username = username;
   clientUrl.password = password;
@@ -31,7 +31,7 @@ function createClientWithAuth({ serviceName, url, username, password, log }: Cli
 
 export function createEsClient(config: ScoutServerConfig, log: ToolingLog) {
   const { username, password } = config.auth;
-  const elasticsearchUrl = createClientWithAuth({
+  const elasticsearchUrl = createClientUrlWithAuth({
     serviceName: 'Es',
     url: config.hosts.elasticsearch,
     username,
@@ -46,7 +46,7 @@ export function createEsClient(config: ScoutServerConfig, log: ToolingLog) {
 }
 
 export function createKbnClient(config: ScoutServerConfig, log: ToolingLog) {
-  const kibanaUrl = createClientWithAuth({
+  const kibanaUrl = createClientUrlWithAuth({
     serviceName: 'Kbn',
     url: config.hosts.kibana,
     username: config.auth.username,
