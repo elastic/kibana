@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import type { MigrateRuleState } from '../../../types';
+import type { TranslateRuleState } from '../../types';
 
-export const getEsqlTranslationPrompt = (state: MigrateRuleState, query: string): string => {
+export const getEsqlTranslationPrompt = (
+  state: TranslateRuleState,
+  indexPatterns: string
+): string => {
   return `You are a helpful cybersecurity (SIEM) expert agent. Your task is to migrate "detection rules" from Splunk to Elastic Security.
 Your goal is to translate the SPL query into an equivalent Elastic Security Query Language (ES|QL) query.
 
@@ -19,7 +22,7 @@ Your goal is to translate the SPL query into an equivalent Elastic Security Quer
 ## Guidelines:
 - Analyze the SPL query and identify the key components.
 - Translate the SPL query into an equivalent ES|QL query using ECS (Elastic Common Schema) field names.
-- Always use logs* index pattern for the ES|QL translated query.
+- Always start the generated ES|QL query by filtering FROM using these index patterns in the translated query: ${indexPatterns}.
 - If, in the SPL query, you find a lookup list or macro call, mention it in the summary and add a placeholder in the query with the format [macro:<macro_name>(argumentCount)] or [lookup:<lookup_name>] including the [] keys, 
   - Examples: 
     - \`get_duration(firstDate,secondDate)\` -> [macro:get_duration(2)]
@@ -40,7 +43,7 @@ ${state.original_rule.description}
 <</DESCRIPTION>>
 
 <<SPL_QUERY>>
-${query}
+${state.inline_query}
 <</SPL_QUERY>>
 `;
 };
