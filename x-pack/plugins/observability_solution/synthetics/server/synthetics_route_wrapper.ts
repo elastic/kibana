@@ -20,8 +20,12 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
 ) => ({
   ...uptimeRoute,
   options: {
-    tags: ['access:uptime-read', ...(uptimeRoute?.writeAccess ? ['access:uptime-write'] : [])],
     ...(uptimeRoute.options ?? {}),
+  },
+  security: {
+    authz: {
+      requiredPrivileges: ['uptime-read', ...(uptimeRoute?.writeAccess ? ['uptime-write'] : [])],
+    },
   },
   handler: async (context, request, response) => {
     const { elasticsearch, savedObjects, uiSettings } = await context.core;

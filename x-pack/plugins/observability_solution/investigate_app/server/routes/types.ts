@@ -53,9 +53,7 @@ export interface InvestigateAppRouteHandlerResources {
 }
 
 export interface InvestigateAppRouteCreateOptions {
-  options: {
-    timeout?: {
-      idleSocket?: number;
-    };
+  timeout?: {
+    idleSocket?: number;
   };
 }

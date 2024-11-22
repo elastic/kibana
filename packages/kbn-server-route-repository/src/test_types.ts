@@ -107,9 +107,9 @@ createServerRouteFactory<{}, { tags: string[] }>()({
 createServerRouteFactory<{}, { tags: string[] }>()({
   endpoint: 'GET /api/endpoint_with_params',
   options: {
+    tags: [],
     access: 'internal',
   },
-  tags: [],
   handler: async (resources) => {},
 });
 
@@ -122,7 +122,9 @@ createServerRouteFactory<{}, { tags: string[] }>()({
 
 createServerRouteFactory<{}, { tags: string[] }>()({
   endpoint: 'GET /api/endpoint_with_params 2023-10-31',
-  tags: [],
+  options: {
+    tags: [],
+  },
   handler: async (resources) => {},
 });
 

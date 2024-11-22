@@ -8,7 +8,7 @@
  */
 
 import type { HttpFetchOptions } from '@kbn/core-http-browser';
-import type { IKibanaResponse, RouteAccess } from '@kbn/core-http-server';
+import type { IKibanaResponse, RouteAccess, RouteSecurity } from '@kbn/core-http-server';
 import type {
   KibanaRequest,
   KibanaResponseFactory,
@@ -22,7 +22,7 @@ import { z } from '@kbn/zod';
 import * as t from 'io-ts';
 import { Observable } from 'rxjs';
 import { Readable } from 'stream';
-import { RequiredKeys, ValuesType } from 'utility-types';
+import { Required, RequiredKeys, ValuesType } from 'utility-types';
 
 type MaybeOptional<T extends { params?: Record<string, any> }> = RequiredKeys<
   T['params']
@@ -50,11 +50,6 @@ export type ZodParamsObject = z.ZodObject<{
 export type IoTsParamsObject = WithoutIncompatibleMethods<t.Type<RouteParams>>;
 
 export type RouteParamsRT = IoTsParamsObject | ZodParamsObject;
-
-export interface RouteState {
-  [endpoint: string]: ServerRoute<any, any, any, any, any>;
-}
-
 export type ServerRouteHandlerResources = Record<string, any>;
 
 export interface ServerRouteCreateOptions {
@@ -145,7 +140,7 @@ type ServerRouteHandler<
 
 export type CreateServerRouteFactory<
   TRouteHandlerResources extends ServerRouteHandlerResources,
-  TRouteCreateOptions extends ServerRouteCreateOptions
+  TRouteCreateOptions extends DefaultRouteCreateOptions | undefined
 > = <
   TEndpoint extends string,
   TReturnType extends ServerRouteHandlerReturnType,
@@ -156,10 +151,16 @@ export type CreateServerRouteFactory<
     endpoint: ValidateEndpoint<TEndpoint, TRouteAccess> extends true ? TEndpoint : never;
     handler: ServerRouteHandler<TRouteHandlerResources, TRouteParamsRT, TReturnType>;
     params?: TRouteParamsRT;
-    options?: RouteConfigOptions<RouteMethodOf<TEndpoint>> & {
-      access?: TRouteAccess;
-    };
-  } & TRouteCreateOptions
+    security?: RouteSecurity;
+  } & Required<
+    {
+      options?: (TRouteCreateOptions extends DefaultRouteCreateOptions ? TRouteCreateOptions : {}) &
+        RouteConfigOptions<RouteMethodOf<TEndpoint>> & {
+          access?: TRouteAccess;
+        };
+    },
+    RequiredKeys<TRouteCreateOptions> extends never ? never : 'options'
+  >
 ) => Record<
   TEndpoint,
   ServerRoute<
@@ -176,11 +177,13 @@ export type ServerRoute<
   TRouteParamsRT extends RouteParamsRT | undefined,
   TRouteHandlerResources extends ServerRouteHandlerResources,
   TReturnType extends ServerRouteHandlerReturnType,
-  TRouteCreateOptions extends ServerRouteCreateOptions | undefined
-> = TRouteCreateOptions & {
+  TRouteCreateOptions extends DefaultRouteCreateOptions | undefined
+> = {
   endpoint: TEndpoint;
   handler: ServerRouteHandler<TRouteHandlerResources, TRouteParamsRT, TReturnType>;
-} & (TRouteParamsRT extends RouteParamsRT ? { params: TRouteParamsRT } : {});
+  security?: RouteSecurity;
+} & (TRouteParamsRT extends RouteParamsRT ? { params: TRouteParamsRT } : {}) &
+  (TRouteCreateOptions extends DefaultRouteCreateOptions ? { options: TRouteCreateOptions } : {});
 
 export type ServerRouteRepository = Record<
   string,
@@ -215,13 +218,7 @@ export type EndpointOf<TServerRouteRepository extends ServerRouteRepository> =
 export type ReturnOf<
   TServerRouteRepository extends ServerRouteRepository,
   TEndpoint extends keyof TServerRouteRepository
-> = TServerRouteRepository[TEndpoint] extends ServerRoute<
-  any,
-  any,
-  any,
-  infer TReturnType,
-  ServerRouteCreateOptions
->
+> = TServerRouteRepository[TEndpoint] extends ServerRoute<any, any, any, infer TReturnType, any>
   ? TReturnType extends IKibanaResponse<infer TWrappedResponseType>
     ? TWrappedResponseType
     : TReturnType
@@ -230,13 +227,7 @@ export type ReturnOf<
 export type DecodedRequestParamsOf<
   TServerRouteRepository extends ServerRouteRepository,
   TEndpoint extends keyof TServerRouteRepository
-> = TServerRouteRepository[TEndpoint] extends ServerRoute<
-  any,
-  infer TRouteParamsRT,
-  any,
-  any,
-  ServerRouteCreateOptions
->
+> = TServerRouteRepository[TEndpoint] extends ServerRoute<any, infer TRouteParamsRT, any, any, any>
   ? TRouteParamsRT extends RouteParamsRT
     ? DecodedRequestParamsOfType<TRouteParamsRT>
     : {}
@@ -301,6 +292,4 @@ export interface DefaultRouteHandlerResources extends CoreRouteHandlerResources 
   logger: Logger;
 }
 
-export interface DefaultRouteCreateOptions {
-  options?: RouteConfigOptions<RouteMethod>;
-}
+export type DefaultRouteCreateOptions = RouteConfigOptions<Exclude<RouteMethod, 'options'>>;

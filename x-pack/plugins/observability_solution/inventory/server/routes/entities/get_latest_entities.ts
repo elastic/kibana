@@ -12,7 +12,6 @@ import {
   ENTITY_TYPE,
 } from '@kbn/observability-shared-plugin/common';
 import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
-import { unflattenObject } from '@kbn/observability-utils-common/object/unflatten_object';
 import {
   ENTITIES_LATEST_ALIAS,
   InventoryEntity,
@@ -85,7 +84,7 @@ export async function getLatestEntities({
   );
 
   return latestEntitiesEsqlResponse.hits.map((latestEntity) => {
-    const { entity, ...metadata } = unflattenObject(latestEntity);
+    const { entity, ...metadata } = latestEntity;
 
     return {
       entityId: entity.id,
