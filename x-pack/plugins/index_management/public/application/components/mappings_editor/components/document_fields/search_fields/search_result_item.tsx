@@ -7,7 +7,14 @@
 
 import React from 'react';
 import classNames from 'classnames';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiBadge, EuiToolTip } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
+  EuiBadge,
+  EuiToolTip,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { SearchResult } from '../../../types';
@@ -108,6 +115,7 @@ export const SearchResultItem = React.memo(function FieldListItemFlatComponent({
               'mappingsEditor__fieldsListItem__content--toggle': hasChildFields || hasMultiFields,
               'mappingsEditor__fieldsListItem__content--multiField': isMultiField,
             })}
+            tabindex={0}
           >
             <EuiFlexItem
               grow={false}
