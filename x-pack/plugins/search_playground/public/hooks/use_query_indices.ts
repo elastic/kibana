@@ -18,10 +18,10 @@ export const useQueryIndices = (
     query?: string;
     exact?: boolean;
   } = { query: '', exact: false }
-): { indices: IndexName[]; isLoading: boolean; isFetched: boolean; isError: boolean } => {
+): { indices: IndexName[]; isLoading: boolean; isFetched: boolean } => {
   const { services } = useKibana();
 
-  const { data, isLoading, isFetched, isError } = useQuery({
+  const { data, isLoading, isFetched } = useQuery({
     queryKey: ['indices', query],
     queryFn: async () => {
       try {
@@ -47,5 +47,5 @@ export const useQueryIndices = (
     initialData: [],
   });
 
-  return { indices: data, isLoading, isFetched, isError };
+  return { indices: data, isLoading, isFetched };
 };
