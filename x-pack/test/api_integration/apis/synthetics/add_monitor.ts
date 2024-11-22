@@ -304,7 +304,9 @@ export default function ({ getService }: FtrProviderContext) {
             .send(httpMonitorJson);
 
           expect(apiResponse.status).eql(403);
-          expect(apiResponse.body.message).eql('Forbidden');
+          expect(apiResponse.body.message).eql(
+            'API [POST /api/synthetics/monitors] is unauthorized for user, this action is granted by the Kibana privileges [uptime-write]'
+          );
         });
     });
 
