@@ -83,18 +83,16 @@ export const getUsageMetricsHandler = (
 export function transformMetricsData(
   data: UsageMetricsAutoOpsResponseSchemaBody
 ): UsageMetricsResponseSchemaBody {
-  return {
-    metrics: Object.fromEntries(
-      Object.entries(data.metrics).map(([metricType, series]) => [
-        metricType,
-        series.map((metricSeries) => ({
-          name: metricSeries.name,
-          data: (metricSeries.data as Array<[number, number]>).map(([timestamp, value]) => ({
-            x: timestamp,
-            y: value,
-          })),
+  return Object.fromEntries(
+    Object.entries(data).map(([metricType, series]) => [
+      metricType,
+      series.map((metricSeries) => ({
+        name: metricSeries.name,
+        data: (metricSeries.data as Array<[number, number]>).map(([timestamp, value]) => ({
+          x: timestamp,
+          y: value,
         })),
-      ])
-    ),
-  };
+      })),
+    ])
+  ) as UsageMetricsResponseSchemaBody;
 }
