@@ -12,6 +12,7 @@ import type { ContentManagementServerSetup } from '@kbn/content-management-plugi
 import type { HttpServiceSetup } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger } from '@kbn/logging';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/server';
 
 import { CONTENT_ID } from '../../common/content_management';
 import {
@@ -20,10 +21,10 @@ import {
   PUBLIC_API_CONTENT_MANAGEMENT_VERSION,
 } from './constants';
 import {
-  dashboardAttributesSchema,
-  dashboardGetResultSchema,
-  dashboardCreateResultSchema,
-  dashboardSearchResultsSchema,
+  getDashboardAttributesSchema,
+  getDashboardGetResultSchema,
+  getDashboardCreateResultSchema,
+  getDashboardSearchResultsSchema,
   referenceSchema,
 } from '../content_management/v3';
 
@@ -32,6 +33,7 @@ interface RegisterAPIRoutesArgs {
   contentManagement: ContentManagementServerSetup;
   restCounter?: UsageCounter;
   logger: Logger;
+  embeddable: EmbeddableStart;
 }
 
 const TECHNICAL_PREVIEW_WARNING =
@@ -40,6 +42,7 @@ const TECHNICAL_PREVIEW_WARNING =
 export function registerAPIRoutes({
   http,
   contentManagement,
+  embeddable,
   restCounter,
   logger,
 }: RegisterAPIRoutesArgs) {
@@ -65,14 +68,14 @@ export function registerAPIRoutes({
             id: schema.maybe(schema.string()),
           }),
           body: schema.object({
-            attributes: dashboardAttributesSchema,
+            attributes: getDashboardAttributesSchema(embeddable),
             references: schema.maybe(schema.arrayOf(referenceSchema)),
             spaces: schema.maybe(schema.arrayOf(schema.string())),
           }),
         },
         response: {
           200: {
-            body: () => dashboardCreateResultSchema,
+            body: () => getDashboardCreateResultSchema(embeddable),
           },
         },
       },
@@ -131,13 +134,13 @@ export function registerAPIRoutes({
             id: schema.string(),
           }),
           body: schema.object({
-            attributes: dashboardAttributesSchema,
+            attributes: getDashboardAttributesSchema(embeddable),
             references: schema.maybe(schema.arrayOf(referenceSchema)),
           }),
         },
         response: {
           200: {
-            body: () => dashboardCreateResultSchema,
+            body: () => getDashboardCreateResultSchema(embeddable),
           },
         },
       },
@@ -193,7 +196,7 @@ export function registerAPIRoutes({
           200: {
             body: () =>
               schema.object({
-                items: schema.arrayOf(dashboardSearchResultsSchema),
+                items: schema.arrayOf(getDashboardSearchResultsSchema(embeddable)),
                 total: schema.number(),
               }),
           },
@@ -247,7 +250,7 @@ export function registerAPIRoutes({
         },
         response: {
           200: {
-            body: () => dashboardGetResultSchema,
+            body: () => getDashboardGetResultSchema(embeddable),
           },
         },
       },

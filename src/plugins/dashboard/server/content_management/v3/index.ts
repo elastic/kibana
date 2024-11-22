@@ -27,12 +27,12 @@ export type {
   DashboardOptions,
 } from './types';
 export {
-  serviceDefinition,
-  dashboardAttributesSchema,
-  dashboardGetResultSchema,
-  dashboardCreateResultSchema,
-  dashboardItemSchema,
-  dashboardSearchResultsSchema,
+  getServiceDefinition,
+  getDashboardAttributesSchema,
+  getDashboardGetResultSchema,
+  getDashboardCreateResultSchema,
+  getDashboardItemSchema,
+  getDashboardSearchResultsSchema,
   referenceSchema,
 } from './cm_services';
 export {
