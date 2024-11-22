@@ -1,0 +1,85 @@
+FROM kibana_sample_data_logs
+  | LIMIT 100
+
+function(props) {
+  const [response, setResponse] = React.useState('');
+  const [error, setError] = React.useState(null);
+
+  const logs = React.useMemo(() => props.crossfilter.map(d => d.message).join('\n'), [props.crossfilter]);
+
+  // Function to call the OpenAI API
+  const getOpenAIResponse = async () => {
+    const apiKey = 'API-KEY'; // Replace with your actual OpenAI API key
+    const prompt = `
+    You are an SRE. Your response will render inside a crossfilter dashboard panel, output maximum length 1000 characters. Analyse the following logs for observability or security related issues:\n\n
+    ${logs}`;
+
+    try {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o',
+          messages: [{ role: 'user', content: prompt }],
+          max_tokens: 1000,
+          stream: true,
+        })
+      });
+
+      // Check if the response body is readable
+      if (!response.body) {
+        throw new Error('Readable stream not supported.');
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let done = false;
+
+      setResponse('');
+
+      while (!done) {
+        const { value, done: readerDone } = await reader.read();
+        done = readerDone;
+
+        // Decode the chunk into a string
+        const chunk = decoder.decode(value || new Uint8Array(), { stream: true });
+
+        // Parse the streamed content (OpenAI sends chunked data with 'data: {content}')
+        const lines = chunk.split('\n');
+        const parsedLines = lines.map((line) => line.replace(/^data: /, '').trim()); // Clean 'data: ' part
+        const contentLines = parsedLines.filter((line) => line && line !== '[DONE]'); // Filter empty and done
+
+        // Append the actual content to the response state
+        contentLines.forEach((content) => {
+          try {
+            const parsed = JSON.parse(content); // Parse the JSON content
+            if (parsed.choices && parsed.choices[0].delta && parsed.choices[0].delta.content) {
+              setResponse((prev) => prev + parsed.choices[0].delta.content); // Append the content
+            }
+          } catch (error) {
+            console.error('Failed to parse JSON:', error);
+          }
+        });
+      }
+    } catch (error) {
+      setError('Error fetching OpenAI API: ' + error.message);
+    }
+  };
+
+  // Fetch the OpenAI response when the component mounts
+  React.useEffect(() => {
+   // getOpenAIResponse();
+  }, [logs]); // Empty dependency array to run once on mount
+
+  return (
+    <div>
+      <button onClick={() => getOpenAIResponse()}>Analyse</button>
+      {error ? <p style={{ color: 'red' }}>{error}</p> : <div style={{ fontFamily: 'sans-serif' }}
+      dangerouslySetInnerHTML={{__html: marked.parse(response)}}
+    />}
+    </div>
+  );
+};
