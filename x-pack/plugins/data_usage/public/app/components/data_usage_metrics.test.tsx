@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { TestProvider } from '../../../common/test_utils';
+import { TestProvider } from '../../test_utils';
 import { render, waitFor, within, type RenderResult } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { DataUsageMetrics } from './data_usage_metrics';
