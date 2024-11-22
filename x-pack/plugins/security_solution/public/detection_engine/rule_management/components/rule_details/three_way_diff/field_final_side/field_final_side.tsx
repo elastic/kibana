@@ -10,18 +10,18 @@ import { EuiTitle } from '@elastic/eui';
 import { SideHeader } from '../components/side_header';
 import { FinalSideHelpInfo } from './final_side_help_info';
 import * as i18n from './translations';
-import { FinalReadOnly } from '../final_readonly/final_readonly';
-import { FinalEdit } from '../final_edit/final_edit';
+import { FieldFinalReadOnly } from '../final_readonly/field_final_readonly';
+import { FieldFinalEdit } from '../final_edit/field_final_edit';
 import { FinalSideMode } from './constants';
 import type { UpgradeableDiffableFields } from '../../../../model/prebuilt_rule_upgrade/fields';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { FinalSideContextProvider, useFinalSideContext } from './final_side_context';
 
-interface FinalSideProps {
+interface FieldFinalSideProps {
   fieldName: UpgradeableDiffableFields;
 }
 
-export function FinalSide({ fieldName }: FinalSideProps): JSX.Element {
+export function FieldFinalSide({ fieldName }: FieldFinalSideProps): JSX.Element {
   return (
     <>
       <SideHeader>
@@ -33,20 +33,20 @@ export function FinalSide({ fieldName }: FinalSideProps): JSX.Element {
         </EuiTitle>
       </SideHeader>
       <FinalSideContextProvider fieldName={fieldName}>
-        <FinalSideContent />
+        <FieldFinalSideContent />
       </FinalSideContextProvider>
     </>
   );
 }
 
-function FinalSideContent(): JSX.Element {
+function FieldFinalSideContent(): JSX.Element {
   const { mode } = useFinalSideContext();
 
   switch (mode) {
     case FinalSideMode.READONLY:
-      return <FinalReadOnly />;
+      return <FieldFinalReadOnly />;
     case FinalSideMode.EDIT:
-      return <FinalEdit />;
+      return <FieldFinalEdit />;
     default:
       return assertUnreachable(mode);
   }

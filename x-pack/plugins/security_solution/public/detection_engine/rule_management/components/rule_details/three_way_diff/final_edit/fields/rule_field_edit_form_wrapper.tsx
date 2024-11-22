@@ -16,7 +16,7 @@ import type {
   DiffableAllFields,
   DiffableRule,
 } from '../../../../../../../../common/api/detection_engine';
-import { useFinalSideContext } from '../../final_side/final_side_context';
+import { useFinalSideContext } from '../../field_final_side/final_side_context';
 import { useDiffableRuleContext } from '../../diffable_rule_context';
 import * as i18n from '../../translations';
 import type { RuleFieldEditComponentProps } from './rule_field_edit_component_props';
