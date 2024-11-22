@@ -30,8 +30,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'x-pack/test/functional/fixtures/kbn_archiver/lens/reporting'
       );
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await security.role.create('test_lens_user', {
+        elasticsearch: { cluster: [], indices: [], run_as: [] },
+        kibana: [
+          {
+            spaces: ['*'],
+            base: [],
+            feature: { visualize: ['read', 'generate_report'] },
+          },
+        ],
+      });
       await security.testUser.setRoles(
-        ['test_logstash_reader', 'global_dashboard_read', 'global_visualize_all', 'reporting_user'],
+        ['test_logstash_reader', 'global_dashboard_read', 'global_visualize_all', 'test_lens_user'],
         { skipBrowserRefresh: true }
       );
     });

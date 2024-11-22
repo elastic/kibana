@@ -27,11 +27,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           {
             spaces: ['*'],
             base: [],
-            feature: { canvas: ['read'] },
+            feature: { canvas: ['read', 'generate_report'] },
           },
         ],
       });
-      await security.testUser.setRoles(['test_canvas_user', 'reporting_user']);
+      await security.testUser.setRoles(['test_canvas_user']);
       await kibanaServer.importExport.load(archive);
       await browser.setWindowSize(1600, 850);
     });

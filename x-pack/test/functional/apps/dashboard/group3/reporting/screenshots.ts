@@ -62,12 +62,12 @@ export default function ({
           {
             spaces: ['*'],
             base: [],
-            feature: { dashboard: ['minimal_all'] },
+            feature: { dashboard: ['minimal_all', 'generate_report'] },
           },
         ],
       });
 
-      await security.testUser.setRoles(['test_dashboard_user', 'reporting_user']);
+      await security.testUser.setRoles(['test_dashboard_user']);
     });
     after('clean up archives', async () => {
       await share.closeShareModal();
