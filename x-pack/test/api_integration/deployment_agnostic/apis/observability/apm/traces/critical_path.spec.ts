@@ -10,13 +10,13 @@ import expect from '@kbn/expect';
 import { Assign } from '@kbn/utility-types';
 import { compact, invert, sortBy, uniq } from 'lodash';
 import { Readable } from 'stream';
-import { SupertestReturnType } from '../../common/apm_api_supertest';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { SupertestReturnType } from '../../../../services/apm_api';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const registry = getService('registry');
-  const apmApiClient = getService('apmApiClient');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
+  const synthtrace = getService('synthtrace');
 
   const start = new Date('2022-01-01T00:00:00.000Z').getTime();
   const end = new Date('2022-01-01T00:15:00.000Z').getTime() - 1;
@@ -33,79 +33,86 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     children: FormattedNode[];
   }
 
-  // format tree in somewhat concise format for easier testing
-  function formatTree(nodes: HydratedNode[]): FormattedNode[] {
-    return sortBy(
-      nodes.map((node) => {
-        const name =
-          node.metadata?.['processor.event'] === 'transaction'
-            ? node.metadata['transaction.name']
-            : node.metadata?.['span.name'] || 'root';
-        return { name, value: node.countExclusive, children: formatTree(node.children) };
-      }),
-      (node) => node.name
-    );
-  }
+  describe('Aggregated critical path', () => {
+    let apmSynthtraceEsClient: ApmSynthtraceEsClient;
 
-  async function fetchAndBuildCriticalPathTree(
-    options: { fn: () => SynthtraceGenerator<ApmFields> } & (
-      | { serviceName: string; transactionName: string }
-      | {}
-    )
-  ) {
-    const { fn } = options;
+    // format tree in somewhat concise format for easier testing
+    function formatTree(nodes: HydratedNode[]): FormattedNode[] {
+      return sortBy(
+        nodes.map((node) => {
+          const name =
+            node.metadata?.['processor.event'] === 'transaction'
+              ? node.metadata['transaction.name']
+              : node.metadata?.['span.name'] || 'root';
+          return { name, value: node.countExclusive, children: formatTree(node.children) };
+        }),
+        (node) => node.name
+      );
+    }
 
-    const generator = fn();
+    async function fetchAndBuildCriticalPathTree(
+      options: { fn: () => SynthtraceGenerator<ApmFields> } & (
+        | { serviceName: string; transactionName: string }
+        | {}
+      )
+    ) {
+      const { fn } = options;
 
-    const unserialized = Array.from(generator);
+      const generator = fn();
 
-    const serialized = unserialized.flatMap((event) => event.serialize());
+      const unserialized = Array.from(generator);
 
-    const traceIds = compact(uniq(serialized.map((event) => event['trace.id'])));
+      const serialized = unserialized.flatMap((event) => event.serialize());
 
-    await apmSynthtraceEsClient.index(Readable.from(unserialized));
+      const traceIds = compact(uniq(serialized.map((event) => event['trace.id'])));
 
-    return apmApiClient
-      .readUser({
-        endpoint: 'POST /internal/apm/traces/aggregated_critical_path',
-        params: {
-          body: {
-            start: new Date(start).toISOString(),
-            end: new Date(end).toISOString(),
-            traceIds,
-            serviceName: 'serviceName' in options ? options.serviceName : null,
-            transactionName: 'transactionName' in options ? options.transactionName : null,
+      await apmSynthtraceEsClient.index(Readable.from(unserialized));
+
+      return apmApiClient
+        .readUser({
+          endpoint: 'POST /internal/apm/traces/aggregated_critical_path',
+          params: {
+            body: {
+              start: new Date(start).toISOString(),
+              end: new Date(end).toISOString(),
+              traceIds,
+              serviceName: 'serviceName' in options ? options.serviceName : null,
+              transactionName: 'transactionName' in options ? options.transactionName : null,
+            },
           },
-        },
-      })
-      .then((response) => {
-        const criticalPath = response.body.criticalPath!;
+        })
+        .then((response) => {
+          const criticalPath = response.body.criticalPath!;
 
-        const nodeIdByOperationId = invert(criticalPath.operationIdByNodeId);
+          const nodeIdByOperationId = invert(criticalPath.operationIdByNodeId);
 
-        const { rootNodes, maxDepth } = getAggregatedCriticalPathRootNodes({
-          criticalPath,
-        });
+          const { rootNodes, maxDepth } = getAggregatedCriticalPathRootNodes({
+            criticalPath,
+          });
 
-        function hydrateNode(node: Node): HydratedNode {
+          function hydrateNode(node: Node): HydratedNode {
+            return {
+              ...node,
+              metadata: criticalPath.metadata[criticalPath.operationIdByNodeId[node.nodeId]],
+              children: node.children.map(hydrateNode),
+            };
+          }
+
           return {
-            ...node,
-            metadata: criticalPath.metadata[criticalPath.operationIdByNodeId[node.nodeId]],
-            children: node.children.map(hydrateNode),
+            rootNodes: rootNodes.map(hydrateNode),
+            maxDepth,
+            criticalPath,
+            nodeIdByOperationId,
           };
-        }
+        });
+    }
 
-        return {
-          rootNodes: rootNodes.map(hydrateNode),
-          maxDepth,
-          criticalPath,
-          nodeIdByOperationId,
-        };
-      });
-  }
+    before(async () => {
+      apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+    });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177542
-  registry.when('Aggregated critical path', { config: 'basic', archives: [] }, () => {
+    after(() => apmSynthtraceEsClient.clean());
+
     it('builds up the correct tree for a single transaction', async () => {
       const java = apm
         .service({ name: 'java', environment: 'production', agentName: 'java' })
@@ -427,7 +434,5 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         },
       ]);
     });
-
-    after(() => apmSynthtraceEsClient.clean());
   });
 }
