@@ -10,15 +10,7 @@
 import { cloneDeep } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 import classNames from 'classnames';
-import {
-  BehaviorSubject,
-  combineLatest,
-  distinctUntilChanged,
-  filter,
-  map,
-  pairwise,
-  skip,
-} from 'rxjs';
+import { combineLatest, distinctUntilChanged, filter, map, pairwise, skip } from 'rxjs';
 
 import { css } from '@emotion/react';
 import { GridHeightSmoother } from './grid_height_smoother';
