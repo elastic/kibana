@@ -6,7 +6,7 @@
  */
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ApmServiceTransactionDocumentType } from '../../../common/document_type';
-import { HOST_HOSTNAME, SERVICE_NAME } from '../../../common/es_fields/apm';
+import { HOST_HOSTNAME, HOST_NAME, SERVICE_NAME } from '../../../common/es_fields/apm';
 import { RollupInterval } from '../../../common/rollup';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
@@ -45,9 +45,15 @@ export async function getServiceHostNames({
         },
       },
       aggs: {
-        hostNames: {
+        hostHostNames: {
           terms: {
             field: HOST_HOSTNAME,
+            size: 500,
+          },
+        },
+        hostNames: {
+          terms: {
+            field: HOST_NAME,
             size: 500,
           },
         },
@@ -55,5 +61,11 @@ export async function getServiceHostNames({
     },
   });
 
-  return response.aggregations?.hostNames.buckets.map((bucket) => bucket.key as string) || [];
+  const allHostNames = [
+    ...(response.aggregations?.hostHostNames.buckets.map((bucket) => bucket.key as string) || []),
+    ...(response.aggregations?.hostNames.buckets.map((bucket) => bucket.key as string) || []),
+  ];
+  const hostNames = new Set<string>(allHostNames);
+
+  return Array.from(hostNames);
 }
