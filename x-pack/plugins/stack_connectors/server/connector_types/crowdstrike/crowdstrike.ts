@@ -10,6 +10,7 @@ import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import { ExperimentalFeatures } from '../../../common/experimental_features';
 import { isAggregateError, NodeSystemError } from './types';
 import type {
   CrowdstrikeConfig,
@@ -20,6 +21,7 @@ import type {
   CrowdstrikeGetTokenResponse,
   CrowdstrikeGetAgentOnlineStatusResponse,
   RelaxedCrowdstrikeBaseApiResponse,
+  CrowdstrikeInitRTRParams,
 } from '../../../common/crowdstrike/types';
 import {
   CrowdstrikeHostActionsParamsSchema,
@@ -27,6 +29,8 @@ import {
   CrowdstrikeGetTokenResponseSchema,
   CrowdstrikeHostActionsResponseSchema,
   RelaxedCrowdstrikeBaseApiResponseSchema,
+  CrowdstrikeInitRTRParamsSchema,
+  CrowdstrikeInitRTRResponseSchema,
 } from '../../../common/crowdstrike/schema';
 import { SUB_ACTION } from '../../../common/crowdstrike/constants';
 import { CrowdstrikeError } from './error';
@@ -51,21 +55,31 @@ export class CrowdstrikeConnector extends SubActionConnector<
 > {
   private static token: string | null;
   private static tokenExpiryTimeout: NodeJS.Timeout;
+  // @ts-expect-error not used at the moment, will be used in a follow up PR
+  private static currentBatchId: string | undefined;
   private static base64encodedToken: string;
+  private experimentalFeatures: ExperimentalFeatures;
+
   private urls: {
     getToken: string;
     agents: string;
     hostAction: string;
     agentStatus: string;
+    batchInitRTRSession: string;
   };
 
-  constructor(params: ServiceParams<CrowdstrikeConfig, CrowdstrikeSecrets>) {
+  constructor(
+    params: ServiceParams<CrowdstrikeConfig, CrowdstrikeSecrets>,
+    experimentalFeatures: ExperimentalFeatures
+  ) {
     super(params);
+    this.experimentalFeatures = experimentalFeatures;
     this.urls = {
       getToken: `${this.config.url}/oauth2/token`,
       hostAction: `${this.config.url}/devices/entities/devices-actions/v2`,
       agents: `${this.config.url}/devices/entities/devices/v2`,
       agentStatus: `${this.config.url}/devices/entities/online-state/v1`,
+      batchInitRTRSession: `${this.config.url}/real-time-response/combined/batch-init-session/v1`,
     };
 
     if (!CrowdstrikeConnector.base64encodedToken) {
@@ -95,6 +109,13 @@ export class CrowdstrikeConnector extends SubActionConnector<
       method: 'getAgentOnlineStatus',
       schema: CrowdstrikeGetAgentsParamsSchema,
     });
+    if (this.experimentalFeatures.crowdstrikeConnectorRTROn) {
+      this.registerSubAction({
+        name: SUB_ACTION.BATCH_INIT_RTR_SESSION,
+        method: 'batchInitRTRSession',
+        schema: CrowdstrikeInitRTRParamsSchema,
+      });
+    }
   }
 
   public async executeHostActions(
@@ -222,6 +243,26 @@ export class CrowdstrikeConnector extends SubActionConnector<
       }
       throw new CrowdstrikeError(error.message);
     }
+  }
+
+  public async batchInitRTRSession(
+    payload: CrowdstrikeInitRTRParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ) {
+    const response = await this.crowdstrikeApiRequest(
+      {
+        url: this.urls.batchInitRTRSession,
+        method: 'post',
+        data: {
+          host_ids: payload.endpoint_ids,
+        },
+        paramsSerializer,
+        responseSchema: CrowdstrikeInitRTRResponseSchema,
+      },
+      connectorUsageCollector
+    );
+
+    CrowdstrikeConnector.currentBatchId = response.batch_id;
   }
 
   protected getResponseErrorMessage(
