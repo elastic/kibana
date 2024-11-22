@@ -61,7 +61,6 @@ import type { PluginSetup as UnifiedSearchServerPluginSetup } from '@kbn/unified
 import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import { SharePluginStart } from '@kbn/share-plugin/server';
-import { ServerlessPluginSetup } from '@kbn/serverless/server';
 
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
