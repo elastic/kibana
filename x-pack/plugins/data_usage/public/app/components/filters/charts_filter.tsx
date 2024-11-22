@@ -85,6 +85,11 @@ export const ChartsFilter = memo<ChartsFilterProps>(
       },
     });
 
+    const addHeightToPopover = useMemo(
+      () => isDataStreamsFilter && numFilters + numActiveFilters > 15,
+      [isDataStreamsFilter, numFilters, numActiveFilters]
+    );
+
     // track popover state to pin selected options
     const wasPopoverOpen = useRef(isPopoverOpen);
 
@@ -230,6 +235,7 @@ export const ChartsFilter = memo<ChartsFilterProps>(
         <EuiSelectable
           aria-label={`${filterName}`}
           emptyMessage={UX_LABELS.filterEmptyMessage(filterName)}
+          height={addHeightToPopover ? 380 : undefined}
           isLoading={isFilterLoading}
           onChange={onOptionsChange}
           options={sortedDataStreamsFilterOptions}
