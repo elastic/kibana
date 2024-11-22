@@ -5,31 +5,34 @@
  * 2.0.
  */
 
-import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { RecursivePartial } from '@elastic/charts';
-import type { SerializableRecord } from '@kbn/utility-types';
-import type { LocatorDefinition } from '@kbn/share-plugin/public';
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { sloEditLocatorID } from '@kbn/observability-plugin/common';
-import type { CreateSLOForm } from '../pages/slo_edit/types';
+import type { LocatorDefinition } from '@kbn/share-plugin/public';
+import { CreateSLOInput } from '@kbn/slo-schema';
 import { SLO_CREATE_PATH } from '../../common/locators/paths';
 
-export type SloEditParams = RecursivePartial<CreateSLOForm>;
-
-export interface SloEditLocatorParams extends SloEditParams, SerializableRecord {}
+export type SloEditLocatorParams = RecursivePartial<CreateSLOInput>;
 
 export class SloEditLocatorDefinition implements LocatorDefinition<SloEditLocatorParams> {
   public readonly id = sloEditLocatorID;
 
   public readonly getLocation = async (slo: SloEditLocatorParams) => {
+    if (!!slo.id) {
+      return {
+        app: 'slo',
+        path: `/edit/${encodeURIComponent(slo.id)}`,
+        state: {},
+      };
+    }
+
     return {
       app: 'slo',
-      path: setStateToKbnUrl<SloEditParams>(
+      path: setStateToKbnUrl<RecursivePartial<CreateSLOInput>>(
         '_a',
-        {
-          ...slo,
-        },
+        slo,
         { useHash: false, storeInHashQuery: false },
-        slo.id ? `/edit/${encodeURIComponent(String(slo.id))}` : `${SLO_CREATE_PATH}`
+        SLO_CREATE_PATH
       ),
       state: {},
     };
