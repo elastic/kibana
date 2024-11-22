@@ -137,11 +137,14 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
       validationObject = passThroughValidationObject;
     }
 
+    const { security, ...restOptions } = options ?? {};
+
     if (!version) {
       router[method](
         {
           path: pathname,
-          options,
+          security,
+          options: restOptions,
           validate: validationObject,
         },
         wrappedHandler
@@ -150,7 +153,8 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
       router.versioned[method]({
         path: pathname,
         access: pathname.startsWith('/internal/') ? 'internal' : 'public',
-        options,
+        options: restOptions,
+        security,
       }).addVersion(
         {
           version,
