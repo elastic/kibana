@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { waitFor, renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
 import { INSTALLATION_STATUS, THREAT_INTELLIGENCE_CATEGORY } from '../utils/filter_integrations';
 
@@ -25,9 +25,7 @@ const renderUseQuery = (result: { items: any[] }) =>
 describe('useIntegrations', () => {
   it('should have undefined data during loading state', async () => {
     const mockIntegrations = { items: [] };
-    const { result, waitFor } = renderUseQuery(mockIntegrations);
-
-    await waitFor(() => result.current.isLoading);
+    const { result } = renderUseQuery(mockIntegrations);
 
     expect(result.current.isLoading).toBeTruthy();
     expect(result.current.data).toBeUndefined();
@@ -43,9 +41,9 @@ describe('useIntegrations', () => {
         },
       ],
     };
-    const { result, waitFor } = renderUseQuery(mockIntegrations);
+    const { result } = renderUseQuery(mockIntegrations);
 
-    await waitFor(() => result.current.isSuccess);
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(result.current.isLoading).toBeFalsy();
     expect(result.current.data).toEqual(mockIntegrations);
