@@ -29,13 +29,16 @@ export class RuleMigrationsDataIntegrationsClient extends RuleMigrationsDataBase
       .bulk({
         refresh: 'wait_for',
         operations: INTEGRATIONS.flatMap((integration) => [
-          { index: { _index: index, _id: integration.id } },
+          { update: { _index: index, _id: integration.id } },
           {
-            title: integration.title,
-            description: integration.description,
-            data_streams: integration.data_streams,
-            elser_embedding: integration.elser_embedding,
-            '@timestamp': new Date().toISOString(),
+            doc: {
+              title: integration.title,
+              description: integration.description,
+              data_streams: integration.data_streams,
+              elser_embedding: integration.elser_embedding,
+              '@timestamp': new Date().toISOString(),
+            },
+            doc_as_upsert: true,
           },
         ]),
       })
