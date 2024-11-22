@@ -37,12 +37,6 @@ export function DefaultEdge({
     targetPosition,
     borderRadius: 15,
     offset: 0,
-    curvature:
-      0.1 *
-      (data?.sourceShape === 'group' ||
-      (data?.sourceShape === 'label' && data?.targetShape === 'group')
-        ? -1 // We flip direction when the edge is between parent node to child nodes (groups always contain children in our graph)
-        : 1),
   });
 
   return (
