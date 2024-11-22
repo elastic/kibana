@@ -5,9 +5,11 @@
  * 2.0.
  */
 import {
+  EuiBottomBar,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiDataGrid,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,6 +24,7 @@ import {
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
+import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import { StreamDefinition } from '@kbn/streams-plugin/common';
 import React, { useMemo } from 'react';
@@ -30,10 +33,17 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { ConditionEditor } from '../condition_editor';
-import { conditionToESQL } from '../../util/condition_to_esql';
+import { useDebounced } from '../../util/use_debounce';
 
-export function StreamDetailRouting({ definition }: { definition?: StreamDefinition }) {
+export function StreamDetailRouting({
+  definition,
+  refreshDefinition,
+}: {
+  definition?: StreamDefinition;
+  refreshDefinition: () => void;
+}) {
   const {
+    core: { notifications },
     dependencies: {
       start: {
         data,
@@ -51,59 +61,35 @@ export function StreamDetailRouting({ definition }: { definition?: StreamDefinit
 
   const dataStream = definition?.id;
 
-  const indexPatterns = useMemo(() => {
-    if (!definition?.id) {
-      return undefined;
-    }
-
-    const isRoot = definition.id.indexOf('.') === -1;
-
-    const dataStreamOfDefinition = definition.id;
-
-    return isRoot
-      ? [dataStreamOfDefinition, `${dataStreamOfDefinition}.*`]
-      : [`${dataStreamOfDefinition}*`];
-  }, [definition?.id]);
-
   const [childUnderEdit, setChildUnderEdit] = React.useState<
     { isNew: boolean; child: StreamChild } | undefined
   >();
 
-  const query = useMemo(() => {
-    if (!indexPatterns || !childUnderEdit) {
-      return undefined;
-    }
+  const debouncedChildUnderEdit = useDebounced(childUnderEdit, 300);
 
-    return `FROM ${indexPatterns.join(', ')} | WHERE ${conditionToESQL(
-      childUnderEdit?.child.condition
-    )}`;
-  }, [childUnderEdit, indexPatterns]);
+  const updateAbortController = useAbortController();
 
   const previewSampleFetch = useStreamsAppFetch(
-    async ({ signal }) => {
-      if (!query || !indexPatterns) {
-        return undefined;
+    ({ signal }) => {
+      if (!definition || !debouncedChildUnderEdit || !debouncedChildUnderEdit.isNew) {
+        return Promise.resolve({ documents: [] });
       }
-
-      const existingIndices = await dataViews.getExistingIndices(indexPatterns);
-
-      if (existingIndices.length === 0) {
-        return undefined;
-      }
-
-      return streamsRepositoryClient.fetch('POST /internal/streams/esql', {
+      return streamsRepositoryClient.fetch('POST /api/streams/{id}/_sample', {
+        signal,
         params: {
+          path: {
+            id: definition.id,
+          },
           body: {
-            operationName: 'get_sample',
-            query,
-            start,
-            end,
+            condition: debouncedChildUnderEdit.child.condition,
+            start: start?.valueOf(),
+            end: end?.valueOf(),
+            number: 100,
           },
         },
-        signal,
       });
     },
-    [query, indexPatterns, dataViews, streamsRepositoryClient, start, end]
+    [definition, debouncedChildUnderEdit, streamsRepositoryClient, start, end]
   );
 
   const dataViewsFetch = useAbortableAsync(() => {
@@ -207,6 +193,7 @@ export function StreamDetailRouting({ definition }: { definition?: StreamDefinit
                         )}
                         <EuiButtonEmpty
                           data-test-subj="streamsAppStreamDetailRoutingAddRuleButton"
+                          disabled={childUnderEdit?.isNew}
                           onClick={() => {
                             setChildUnderEdit({
                               isNew: true,
@@ -235,6 +222,10 @@ export function StreamDetailRouting({ definition }: { definition?: StreamDefinit
                       minSize="200px"
                       tabIndex={0}
                       paddingSize="xs"
+                      className={css`
+                        display: flex;
+                        flex-direction: column;
+                      `}
                     >
                       <EuiText>
                         <div>
@@ -252,19 +243,9 @@ export function StreamDetailRouting({ definition }: { definition?: StreamDefinit
                         </EuiText>
                       )}
                       {previewSampleFetch.value && (
-                        <>
-                          <EuiText>
-                            {i18n.translate('xpack.streams.streamDetail.preview.count', {
-                              defaultMessage: 'Preview count: {count}',
-                              values: {
-                                count: previewSampleFetch.value?.values.length,
-                              },
-                            })}
-                          </EuiText>
-                          {previewSampleFetch.value?.values.map((value, i) => (
-                            <EuiText key={i}>{JSON.stringify(value)}</EuiText>
-                          ))}
-                        </>
+                        <EuiFlexItem grow>
+                          <PreviewTable documents={previewSampleFetch.value?.documents ?? []} />
+                        </EuiFlexItem>
                       )}
                     </EuiResizablePanel>
                   </>
@@ -274,26 +255,161 @@ export function StreamDetailRouting({ definition }: { definition?: StreamDefinit
           </EuiPanel>
         </EuiFlexItem>
         {childUnderEdit && (
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup justifyContent="flexEnd">
+          <EuiBottomBar paddingSize="s">
+            <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+              <EuiButtonEmpty
+                size="s"
+                data-test-subj="streamsAppRoutingStreamEntryRemoveButton"
+                onClick={() => {
+                  setChildUnderEdit(undefined);
+                }}
+              >
+                {i18n.translate('xpack.streams.streamDetailRouting.remove', {
+                  defaultMessage: 'Cancel',
+                })}
+              </EuiButtonEmpty>
               {childUnderEdit.isNew ? (
-                <EuiButton data-test-subj="streamsAppStreamDetailRoutingSaveButton">
+                <EuiButton
+                  onClick={async () => {
+                    try {
+                      await streamsRepositoryClient.fetch('POST /api/streams/{id}/_fork', {
+                        signal: updateAbortController.signal,
+                        params: {
+                          path: {
+                            id: definition.id,
+                          },
+                          body: {
+                            condition: childUnderEdit.child.condition,
+                            stream: {
+                              id: childUnderEdit.child.id,
+                              processing: [],
+                              fields: [],
+                            },
+                          },
+                        },
+                      });
+                      notifications.toasts.addSuccess({
+                        title: i18n.translate('xpack.streams.streamDetailRouting.saved', {
+                          defaultMessage: 'Stream saved',
+                        }),
+                      });
+                      setChildUnderEdit(undefined);
+                      refreshDefinition();
+                    } catch (error) {
+                      notifications.toasts.addError(error, {
+                        title: i18n.translate('xpack.streams.failedToSave', {
+                          defaultMessage: 'Failed to create sub stream for {id}',
+                          values: {
+                            id: definition.id,
+                          },
+                        }),
+                      });
+                    }
+                  }}
+                  data-test-subj="streamsAppStreamDetailRoutingSaveButton"
+                >
                   {i18n.translate('xpack.streams.streamDetailRouting.add', {
                     defaultMessage: 'Save',
                   })}
                 </EuiButton>
               ) : (
-                <EuiButton data-test-subj="streamsAppStreamDetailRoutingChangeStreamButton">
+                <EuiButton
+                  onClick={async () => {
+                    try {
+                      const { inheritedFields, id, ...definitionToUpdate } = definition;
+                      await streamsRepositoryClient.fetch('PUT /api/streams/{id}', {
+                        signal: updateAbortController.signal,
+                        params: {
+                          path: {
+                            id: definition.id,
+                          },
+                          body: {
+                            ...definitionToUpdate,
+                            children: definition.children.map((child) =>
+                              child.id === childUnderEdit.child.id ? childUnderEdit.child : child
+                            ),
+                          },
+                        },
+                      });
+                      notifications.toasts.addSuccess({
+                        title: i18n.translate('xpack.streams.streamDetailRouting.saved', {
+                          defaultMessage: 'Stream saved',
+                        }),
+                      });
+                      setChildUnderEdit(undefined);
+                      refreshDefinition();
+                    } catch (error) {
+                      notifications.toasts.addError(error, {
+                        title: i18n.translate('xpack.streams.failedToSave', {
+                          defaultMessage: 'Failed to update stream {id}',
+                          values: {
+                            id: definition.id,
+                          },
+                        }),
+                      });
+                    }
+                  }}
+                  data-test-subj="streamsAppStreamDetailRoutingChangeStreamButton"
+                >
                   {i18n.translate('xpack.streams.streamDetailRouting.change', {
                     defaultMessage: 'Change routing',
                   })}
                 </EuiButton>
               )}
             </EuiFlexGroup>
-          </EuiFlexItem>
+          </EuiBottomBar>
         )}
       </EuiFlexGroup>
     </EuiFlexItem>
+  );
+}
+
+function PreviewTable({ documents }: { documents: unknown[] }) {
+  // grid columns are all the keys that have at least one change
+  const columns = useMemo(() => {
+    const cols = new Set<string>();
+    documents.forEach((doc) => {
+      if (!doc || typeof doc !== 'object') {
+        return;
+      }
+      Object.keys(doc).forEach((key) => {
+        cols.add(key);
+      });
+    });
+    return Array.from(cols);
+  }, [documents]);
+
+  const gridColumns = useMemo(() => {
+    return Array.from(columns).map((column) => ({
+      id: column,
+      displayAsText: column,
+    }));
+  }, [columns]);
+
+  return (
+    <EuiDataGrid
+      aria-label={i18n.translate('xpack.streams.resultPanel.euiDataGrid.previewLabel', {
+        defaultMessage: 'Preview',
+      })}
+      columns={gridColumns}
+      columnVisibility={{ visibleColumns: columns, setVisibleColumns: () => {} }}
+      rowCount={documents.length}
+      height="100%"
+      renderCellValue={({ rowIndex, columnId }) => {
+        const doc = documents[rowIndex];
+        if (!doc || typeof doc !== 'object') {
+          return '';
+        }
+        const value = (doc as Record<string, unknown>)[columnId];
+        if (value === undefined || value === null) {
+          return '';
+        }
+        if (typeof value === 'object') {
+          return JSON.stringify(value);
+        }
+        return String(value);
+      }}
+    />
   );
 }
 
@@ -417,19 +533,6 @@ function NewRoutingStreamEntry({
             })}
           </EuiText>
         )}
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiButtonEmpty
-            size="s"
-            data-test-subj="streamsAppRoutingStreamEntryRemoveButton"
-            onClick={() => {
-              onChildChange(undefined);
-            }}
-          >
-            {i18n.translate('xpack.streams.streamDetailRouting.remove', {
-              defaultMessage: 'Cancel',
-            })}
-          </EuiButtonEmpty>
-        </EuiFlexGroup>
       </EuiFlexGroup>
     </EuiPanel>
   );

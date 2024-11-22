@@ -10,13 +10,12 @@ import { notFound, internal } from '@hapi/boom';
 import { conditionSchema } from '../../../common/types';
 import { createServerRoute } from '../create_server_route';
 import { DefinitionNotFound } from '../../lib/streams/errors';
-import { readAncestors, readStream } from '../../lib/streams/stream_crud';
-import { StreamDefinition } from '../../../common';
+import { checkReadAccess } from '../../lib/streams/stream_crud';
 import { conditionToQueryDsl } from '../../lib/streams/helpers/condition_to_query_dsl';
-import { getFields } from '../../lib/streams/helpers/condition_fields';
+import { getFields, isComplete } from '../../lib/streams/helpers/condition_fields';
 
-export const readStreamRoute = createServerRoute({
-  endpoint: 'GET /api/streams/{id}/_sample',
+export const sampleStreamRoute = createServerRoute({
+  endpoint: 'POST /api/streams/{id}/_sample',
   options: {
     access: 'internal',
     security: {
@@ -36,39 +35,60 @@ export const readStreamRoute = createServerRoute({
       number: z.optional(z.number()),
     }),
   }),
-  handler: async ({ response, params, request, logger, getScopedClients }): Promise<unknown[]> => {
+  handler: async ({
+    response,
+    params,
+    request,
+    logger,
+    getScopedClients,
+  }): Promise<{ documents: unknown[] }> => {
     try {
       const { scopedClusterClient } = await getScopedClients({ request });
-      const streamEntity = await readStream({
-        scopedClusterClient,
-        id: params.path.id,
-      });
-      const results = await scopedClusterClient.asCurrentUser.search({
-        index: params.path.id,
-        body: {
-          query: {
-            bool: {
-              must: [
-                conditionToQueryDsl(params.body.condition),
-                {
-                  range: {
-                    '@timestamp': {
-                      gte: params.body.start,
-                      lte: params.body.end,
-                    },
+
+      const hasAccess = await checkReadAccess({ id: params.path.id, scopedClusterClient });
+      if (!hasAccess) {
+        throw new DefinitionNotFound(`Stream definition for ${params.path.id} not found.`);
+      }
+      const searchBody = {
+        query: {
+          bool: {
+            must: [
+              isComplete(params.body.condition)
+                ? conditionToQueryDsl(params.body.condition)
+                : { match_all: {} },
+              {
+                range: {
+                  '@timestamp': {
+                    gte: params.body.start,
+                    lte: params.body.end,
+                    format: 'epoch_millis',
                   },
                 },
-              ],
+              },
+            ],
+          },
+        },
+        runtime_mappings: Object.fromEntries(
+          getFields(params.body.condition).map((field) => [
+            field.name,
+            { type: field.type === 'string' ? 'keyword' : 'double' },
+          ])
+        ),
+        sort: [
+          {
+            '@timestamp': {
+              order: 'desc',
             },
           },
-          runtime_mappings: Object.fromEntries(
-            getFields(params.body.condition).map((field) => [field, { type: 'keyword' }])
-          ),
-          size: params.body.number,
-        },
+        ],
+        size: params.body.number,
+      };
+      const results = await scopedClusterClient.asCurrentUser.search({
+        index: params.path.id,
+        ...searchBody,
       });
 
-      return results.hits.hits.map((hit) => hit._source);
+      return { documents: results.hits.hits.map((hit) => hit._source) };
     } catch (e) {
       if (e instanceof DefinitionNotFound) {
         throw notFound(e);

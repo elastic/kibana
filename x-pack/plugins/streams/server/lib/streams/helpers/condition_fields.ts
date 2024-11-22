@@ -5,18 +5,73 @@
  * 2.0.
  */
 
-import { Condition } from '../../../../common/types';
+import { Condition, FilterCondition } from '../../../../common/types';
 import { isAndCondition, isFilterCondition, isOrCondition } from './condition_guards';
 
-export function getFields(condition: Condition): string[] {
+export function isComplete(condition: Condition): boolean {
   if (isFilterCondition(condition)) {
-    return [condition.field];
+    return condition.field !== undefined && condition.field !== '';
   }
   if (isAndCondition(condition)) {
-    return condition.and.flatMap(getFields);
+    return condition.and.every(isComplete);
   }
   if (isOrCondition(condition)) {
-    return condition.or.flatMap(getFields);
+    return condition.or.every(isComplete);
+  }
+  return false;
+}
+
+export function getFields(
+  condition: Condition
+): Array<{ name: string; type: 'number' | 'string' }> {
+  const fields = collectFields(condition);
+  // deduplicate fields, if mapped as string and number, keep as number
+
+  const uniqueFields = new Map<string, 'number' | 'string'>();
+  fields.forEach((field) => {
+    const existing = uniqueFields.get(field.name);
+    if (existing === 'number') {
+      return;
+    }
+    if (existing === 'string' && field.type === 'number') {
+      uniqueFields.set(field.name, 'number');
+      return;
+    }
+    uniqueFields.set(field.name, field.type);
+  });
+
+  return Array.from(uniqueFields).map(([name, type]) => ({ name, type }));
+}
+
+function collectFields(condition: Condition): Array<{ name: string; type: 'number' | 'string' }> {
+  if (isFilterCondition(condition)) {
+    return [{ name: condition.field, type: getFieldTypeForFilterCondition(condition) }];
+  }
+  if (isAndCondition(condition)) {
+    return condition.and.flatMap(collectFields);
+  }
+  if (isOrCondition(condition)) {
+    return condition.or.flatMap(collectFields);
   }
   return [];
+}
+
+function getFieldTypeForFilterCondition(condition: FilterCondition): 'number' | 'string' {
+  switch (condition.operator) {
+    case 'gt':
+    case 'gte':
+    case 'lt':
+    case 'lte':
+      return 'number';
+    case 'neq':
+    case 'eq':
+    case 'exists':
+    case 'contains':
+    case 'startsWith':
+    case 'endsWith':
+    case 'notExists':
+      return 'string';
+    default:
+      return 'string';
+  }
 }

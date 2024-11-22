@@ -26,7 +26,7 @@ export function StreamDetailView() {
     },
   } = useKibana();
 
-  const { value: streamEntity } = useStreamsAppFetch(
+  const { value: streamEntity, refresh } = useStreamsAppFetch(
     ({ signal }) => {
       return streamsRepositoryClient.fetch('GET /api/streams/{id}', {
         signal,
@@ -55,7 +55,7 @@ export function StreamDetailView() {
     },
     {
       name: 'routing',
-      content: <StreamDetailRouting definition={streamEntity} />,
+      content: <StreamDetailRouting definition={streamEntity} refreshDefinition={refresh} />,
       label: i18n.translate('xpack.streams.streamDetailView.routingTab', {
         defaultMessage: 'Routing',
       }),

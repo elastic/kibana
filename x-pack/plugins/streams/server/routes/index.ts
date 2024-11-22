@@ -14,6 +14,7 @@ import { forkStreamsRoute } from './streams/fork';
 import { listStreamsRoute } from './streams/list';
 import { readStreamRoute } from './streams/read';
 import { resyncStreamsRoute } from './streams/resync';
+import { sampleStreamRoute } from './streams/sample';
 import { streamsStatusRoutes } from './streams/settings';
 
 export const StreamsRouteRepository = {
@@ -27,6 +28,7 @@ export const StreamsRouteRepository = {
   ...streamsStatusRoutes,
   ...esqlRoutes,
   ...disableStreamsRoute,
+  ...sampleStreamRoute,
 };
 
 export type StreamsRouteRepository = typeof StreamsRouteRepository;

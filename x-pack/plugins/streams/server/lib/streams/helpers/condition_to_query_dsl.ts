@@ -25,7 +25,7 @@ function conditionToClause(condition: FilterCondition) {
     case 'lte':
       return { range: { [condition.field]: { lte: condition.value } } };
     case 'contains':
-      return { match_phrase: { [condition.field]: condition.value } };
+      return { wildcard: { [condition.field]: `*${condition.value}*` } };
     case 'startsWith':
       return { prefix: { [condition.field]: condition.value } };
     case 'endsWith':
