@@ -7,24 +7,36 @@
 
 import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { type SetStateAction } from 'react';
 import { useBoolean } from '@kbn/react-hooks';
+import type { Dispatch } from '@kbn/kibana-utils-plugin/common';
+import type { InventoryEntity } from '../../../common/entities';
+import { useDiscoverRedirect } from '../../hooks/use_discover_redirect';
 
 interface Props {
-  discoverUrl: string;
-  entityIdentifyingValue?: string;
+  entity: InventoryEntity;
+  setShowActions: Dispatch<SetStateAction<boolean>>;
 }
 
-export const EntityActions = ({ discoverUrl, entityIdentifyingValue }: Props) => {
+export const EntityActions = ({ entity, setShowActions }: Props) => {
   const [isPopoverOpen, { toggle: togglePopover, off: closePopover }] = useBoolean(false);
-  const actionButtonTestSubject = entityIdentifyingValue
-    ? `inventoryEntityActionsButton-${entityIdentifyingValue}`
+  const actionButtonTestSubject = entity.identifyingValue
+    ? `inventoryEntityActionsButton-${entity.identifyingValue}`
     : 'inventoryEntityActionsButton';
+
+  const { getDiscoverEntitiesRedirectUrl } = useDiscoverRedirect(entity);
+
+  const discoverUrl = getDiscoverEntitiesRedirectUrl();
+
+  if (!discoverUrl) {
+    setShowActions(false);
+    return null;
+  }
 
   const actions = [
     <EuiContextMenuItem
       data-test-subj="inventoryEntityActionOpenInDiscover"
-      key={`openInDiscover-${entityIdentifyingValue}`}
+      key={`openInDiscover-${entity.identifyingValue}`}
       color="text"
       icon="discoverApp"
       href={discoverUrl}
@@ -36,27 +48,25 @@ export const EntityActions = ({ discoverUrl, entityIdentifyingValue }: Props) =>
   ];
 
   return (
-    <>
-      <EuiPopover
-        isOpen={isPopoverOpen}
-        panelPaddingSize="none"
-        anchorPosition="upCenter"
-        button={
-          <EuiButtonIcon
-            data-test-subj={actionButtonTestSubject}
-            aria-label={i18n.translate(
-              'xpack.inventory.entityActions.euiButtonIcon.showActionsLabel',
-              { defaultMessage: 'Show actions' }
-            )}
-            iconType="boxesHorizontal"
-            color="text"
-            onClick={togglePopover}
-          />
-        }
-        closePopover={closePopover}
-      >
-        <EuiContextMenuPanel items={actions} size="s" />
-      </EuiPopover>
-    </>
+    <EuiPopover
+      isOpen={isPopoverOpen}
+      panelPaddingSize="none"
+      anchorPosition="upCenter"
+      button={
+        <EuiButtonIcon
+          data-test-subj={actionButtonTestSubject}
+          aria-label={i18n.translate(
+            'xpack.inventory.entityActions.euiButtonIcon.showActionsLabel',
+            { defaultMessage: 'Show actions' }
+          )}
+          iconType="boxesHorizontal"
+          color="text"
+          onClick={togglePopover}
+        />
+      }
+      closePopover={closePopover}
+    >
+      <EuiContextMenuPanel items={actions} size="s" />
+    </EuiPopover>
   );
 };
