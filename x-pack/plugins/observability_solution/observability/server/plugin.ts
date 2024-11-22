@@ -146,7 +146,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
           all: {
             app: [observabilityFeatureId],
             catalogue: [observabilityFeatureId],
-            api: ['rac'],
+            api: ['rac', 'observability'],
             savedObject: {
               all: [],
               read: [],
@@ -164,7 +164,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
           read: {
             app: [observabilityFeatureId],
             catalogue: [observabilityFeatureId],
-            api: ['rac'],
+            api: ['rac', 'observability'],
             savedObject: {
               all: [],
               read: [],

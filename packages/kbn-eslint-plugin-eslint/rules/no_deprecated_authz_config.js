@@ -309,10 +309,11 @@ module.exports = {
         }
 
         if (
-          callee.type === 'MemberExpression' &&
-          callee.object &&
-          callee.object.name === 'router' &&
-          routeMethods.includes(callee.property.name)
+          (callee.type === 'MemberExpression' &&
+            callee.object &&
+            callee.object.name === 'router' &&
+            routeMethods.includes(callee.property.name)) ||
+          (callee.type === 'Identifier' && callee.name === 'createObservabilityServerRoute')
         ) {
           if (process.env.MIGRATE_ENABLED_AUTHZ === 'false') {
             maybeReportDisabledSecurityConfig(node, context, false);
