@@ -78,11 +78,6 @@ components:
           items:
             type: string
           description: The Elastic integration IDs related to the rule.
-        index_patterns:
-          type: array
-          items:
-            type: string
-          description: The index patterns used by the integrations related to the rule.
         id:
           description: The Elastic rule id installed as a result.
           $ref: './common.schema.yaml#/components/schemas/NonEmptyString'

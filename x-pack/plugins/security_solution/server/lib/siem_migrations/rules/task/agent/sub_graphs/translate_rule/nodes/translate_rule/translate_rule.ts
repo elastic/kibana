@@ -29,14 +29,12 @@ export const getTranslateRuleNode = ({
 }: GetTranslateRuleNodeParams): GraphNode => {
   const esqlKnowledgeBaseCaller = getEsqlKnowledgeBase({ inferenceClient, connectorId, logger });
   return async (state) => {
-    const query = state.original_rule.query;
-
     const indexPatterns = state.integrations.flatMap((integration) =>
       integration.data_streams.map((dataStream) => dataStream.index_pattern)
     );
     const integrationIds = state.integrations.map((integration) => integration.id);
 
-    const prompt = getEsqlTranslationPrompt(state, query, indexPatterns.join(' '));
+    const prompt = getEsqlTranslationPrompt(state, indexPatterns.join(' '));
     const response = await esqlKnowledgeBaseCaller(prompt);
 
     const esqlQuery = response.match(/```esql\n([\s\S]*?)\n```/)?.[1] ?? '';
@@ -51,7 +49,6 @@ export const getTranslateRuleNode = ({
       elastic_rule: {
         title: state.original_rule.title,
         integration_ids: integrationIds,
-        index_patterns: indexPatterns,
         description: state.original_rule.description,
         severity: 'low',
         query: esqlQuery,
