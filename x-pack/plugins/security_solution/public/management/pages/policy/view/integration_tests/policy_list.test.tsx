@@ -18,6 +18,10 @@ import { APP_UI_ID } from '../../../../../../common/constants';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import {
+  mockEndpointResultList,
+  setEndpointListApiMockImplementation,
+} from '../../../endpoint_hosts/store/mock_endpoint_result_list';
 
 jest.mock('../../../../services/policies/policies');
 jest.mock('../../../../../common/components/user_privileges');
@@ -25,11 +29,11 @@ jest.mock('../../../../../common/components/user_privileges');
 const getPackagePolicies = sendGetEndpointSpecificPackagePolicies as jest.Mock;
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
 
-// Failing: See https://github.com/elastic/kibana/issues/169133
-describe.skip('When on the policy list page', () => {
+describe('When on the policy list page', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let history: AppContextTestRender['history'];
+  let coreStart: AppContextTestRender['coreStart'];
   let mockedContext: AppContextTestRender;
 
   beforeEach(() => {
@@ -38,7 +42,7 @@ describe.skip('When on the policy list page', () => {
     });
 
     mockedContext = createAppRootMockRenderer();
-    ({ history } = mockedContext);
+    ({ history, coreStart } = mockedContext);
     render = () => (renderResult = mockedContext.render(<PolicyList />));
   });
 
@@ -88,7 +92,7 @@ describe.skip('When on the policy list page', () => {
       await waitFor(() => {
         expect(
           renderResult.getByText(
-            'From this page, you’ll be able to view and manage the Elastic Defend Integration policies in your environment running Elastic Defend.'
+            'From this page, you can view and manage the Elastic Defend integration policies in your environment running Elastic Defend.'
           )
         ).toBeTruthy();
 
@@ -158,6 +162,10 @@ describe.skip('When on the policy list page', () => {
           href: '/app/security/administration/policy',
         },
       };
+      setEndpointListApiMockImplementation(coreStart.http, {
+        endpointsResults: mockEndpointResultList().data,
+      });
+
       const endpointCount = renderResult.getAllByTestId('policyEndpointCountLink')[0];
       await userEvent.click(endpointCount);
 
