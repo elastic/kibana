@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -186,7 +187,9 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
       display="block"
     >
       <div
-        style={{ width: `${isMobile ? MOBILE_WIDTH : DESKTOP_WIDTH}px` }}
+        css={css`
+          width: ${isMobile ? `${MOBILE_WIDTH}px` : `${DESKTOP_WIDTH}px`};
+        `}
         data-test-subj="chooseDataViewPopoverContent"
       >
         <EuiPopoverTitle>
