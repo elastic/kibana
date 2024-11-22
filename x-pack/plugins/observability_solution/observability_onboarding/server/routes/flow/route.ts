@@ -14,7 +14,7 @@ import {
 } from '@kbn/fleet-plugin/server';
 import { dump } from 'js-yaml';
 import { PackageDataStreamTypes, Output } from '@kbn/fleet-plugin/common/types';
-import { transformOutputToFullPolicyOutput } from '@kbn/fleet-plugin/server';
+import { transformOutputToFullPolicyOutput } from '@kbn/fleet-plugin/server/services/output_client';
 import { getObservabilityOnboardingFlow, saveObservabilityOnboardingFlow } from '../../lib/state';
 import type { SavedObservabilityOnboardingFlow } from '../../saved_objects/observability_onboarding_status';
 import { ObservabilityOnboardingFlow } from '../../saved_objects/observability_onboarding_status';

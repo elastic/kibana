@@ -39,7 +39,6 @@ export type { FleetConfigType } from './config';
 export type { PackagePolicyClient } from './services/package_policy_service';
 
 export { relativeDownloadUrlFromArtifact } from './services/artifacts/mappings';
-export { transformOutputToFullPolicyOutput } from './services/agent_policies/full_agent_policy';
 
 export type {
   FleetFromHostFileClientInterface,

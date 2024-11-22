@@ -14,6 +14,8 @@ import type { Output } from '../types';
 
 import { outputService } from './output';
 
+export { transformOutputToFullPolicyOutput } from './agent_policies/full_agent_policy';
+
 export interface OutputClientInterface {
   getDefaultDataOutputId(): Promise<string | null>;
   get(outputId: string): Promise<Output>;
