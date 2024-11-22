@@ -10,7 +10,7 @@ import { IndexManagementLocatorParams } from '@kbn/index-management-shared-types
 import { DatasetQualityLink } from './dataset_quality_link';
 import { useKibanaContextForPlugin } from '../../utils/use_kibana';
 import { LegendActionItem } from './legend_action_item';
-import { UX_LABELS } from '../translations';
+import { UX_LABELS } from '../../translations';
 
 interface LegendActionProps {
   idx: number;

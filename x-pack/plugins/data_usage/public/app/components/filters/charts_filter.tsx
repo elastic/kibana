@@ -11,7 +11,7 @@ import { EuiPopoverTitle, EuiSelectable, EuiFlexGroup, EuiFlexItem } from '@elas
 
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { METRIC_TYPE_API_VALUES_TO_UI_OPTIONS_MAP } from '../../../../common';
-import { UX_LABELS } from '../../translations';
+import { UX_LABELS } from '../../../translations';
 import { ChartsFilterPopover } from './charts_filter_popover';
 import { ToggleAllButton } from './toggle_all_button';
 import { FilterItems, FilterName, useChartsFilter } from '../../hooks';

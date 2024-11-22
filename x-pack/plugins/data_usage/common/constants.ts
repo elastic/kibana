@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
 export const PLUGIN_ID = 'data_usage';
-export const PLUGIN_NAME = i18n.translate('xpack.dataUsage.name', {
-  defaultMessage: 'Data Usage',
-});
 
 export const DEFAULT_SELECTED_OPTIONS = 50 as const;
 

@@ -12,7 +12,7 @@ import {
   METRIC_TYPE_VALUES,
   DEFAULT_SELECTED_OPTIONS,
 } from '../../../common';
-import { FILTER_NAMES } from '../translations';
+import { FILTER_NAMES } from '../../translations';
 import { useDataUsageMetricsUrlParams } from './use_charts_url_params';
 import { formatBytes } from '../../utils/format_bytes';
 import { ChartsFilterProps } from '../components/filters/charts_filter';

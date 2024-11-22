@@ -13,7 +13,7 @@ import {
 import { useKibanaContextForPlugin } from '../../utils/use_kibana';
 import { useDateRangePicker } from '../hooks/use_date_picker';
 import { LegendActionItem } from './legend_action_item';
-import { UX_LABELS } from '../translations';
+import { UX_LABELS } from '../../translations';
 
 interface DatasetQualityLinkProps {
   dataStreamName: string;
