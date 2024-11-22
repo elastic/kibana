@@ -85,7 +85,8 @@ export const GridPanel = forwardRef<
                 ref.style.height = `100%`;
                 return;
               } else {
-                ref.style.transform = '';
+                ref.style.position = ``;
+                ref.style.transform = ``;
               }
 
               if (isMobileView) {
@@ -128,7 +129,7 @@ export const GridPanel = forwardRef<
                   ref.style.gridRowEnd = ``;
                 } else {
                   // if the current panel is being dragged, render it with a fixed position + size
-                  ref.style.position = 'fixed';
+                  ref.style.position = `fixed`;
                   ref.style.left = `${draggingPosition.left}px`;
                   ref.style.top = `${draggingPosition.top}px`;
                   ref.style.width = `${draggingPosition.right - draggingPosition.left}px`;
