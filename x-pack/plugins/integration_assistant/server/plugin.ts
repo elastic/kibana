@@ -16,6 +16,7 @@ import type {
 import type { PluginStartContract as ActionsPluginsStart } from '@kbn/actions-plugin/server/plugin';
 import { MINIMUM_LICENSE_TYPE } from '../common/constants';
 import { registerRoutes } from './routes';
+
 import type {
   IntegrationAssistantPluginSetup,
   IntegrationAssistantPluginStart,
@@ -23,6 +24,8 @@ import type {
 } from './types';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { IntegrationAssistantConfigType } from './config';
+import { IntegrationAssistantPluginSetupDependencies } from '../public/types';
+import { ValidateCelTask } from './graphs/cel/validation/validate_task';
 
 export type IntegrationAssistantRouteHandlerContext = CustomRequestHandlerContext<{
   integrationAssistant: {
@@ -35,12 +38,18 @@ export type IntegrationAssistantRouteHandlerContext = CustomRequestHandlerContex
 }>;
 
 export class IntegrationAssistantPlugin
-  implements Plugin<IntegrationAssistantPluginSetup, IntegrationAssistantPluginStart>
+  implements
+    Plugin<
+      IntegrationAssistantPluginSetup,
+      IntegrationAssistantPluginStart,
+      IntegrationAssistantPluginSetupDependencies
+    >
 {
   private readonly logger: Logger;
   private readonly config: IntegrationAssistantConfigType;
   private isAvailable: boolean;
   private hasLicense: boolean;
+  private validateCelTask: ValidateCelTask | undefined;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -52,7 +61,8 @@ export class IntegrationAssistantPlugin
   public setup(
     core: CoreSetup<{
       actions: ActionsPluginsStart;
-    }>
+    }>,
+    dependencies: IntegrationAssistantPluginSetupDependencies
   ): IntegrationAssistantPluginSetup {
     core.http.registerRouteHandlerContext<
       IntegrationAssistantRouteHandlerContext,
@@ -62,13 +72,16 @@ export class IntegrationAssistantPlugin
       isAvailable: () => this.isAvailable && this.hasLicense,
       logger: this.logger,
     }));
+    console.log('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$');
     const router = core.http.createRouter<IntegrationAssistantRouteHandlerContext>();
     const experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental ?? []);
+    this.validateCelTask = new ValidateCelTask({ taskManager: dependencies.taskManager });
 
-    this.logger.debug('integrationAssistant api: Setup');
+    this.logger.info(
+      '**********************************************integrationAssistant api: Setup'
+    );
 
-    registerRoutes(router, experimentalFeatures);
-
+    registerRoutes(router, this.validateCelTask, experimentalFeatures);
     return {
       setIsAvailable: (isAvailable: boolean) => {
         if (!isAvailable) {
@@ -79,15 +92,22 @@ export class IntegrationAssistantPlugin
   }
 
   public start(
-    _: CoreStart,
+    coreStart: CoreStart,
     dependencies: IntegrationAssistantPluginStartDependencies
   ): IntegrationAssistantPluginStart {
-    this.logger.debug('integrationAssistant api: Started');
+    this.logger.info(
+      '*************************************************integrationAssistant api: Started'
+    );
     const { licensing } = dependencies;
 
     licensing.license$.subscribe((license) => {
       this.hasLicense = license.hasAtLeast(MINIMUM_LICENSE_TYPE);
     });
+
+    const esClient = coreStart.elasticsearch.client.asInternalUser;
+
+    // Load the TaskManagerStartContract to the ValidateCelTask
+    this.validateCelTask?.startTaskManager(dependencies.taskManager, esClient);
 
     return {};
   }

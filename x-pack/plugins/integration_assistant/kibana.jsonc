@@ -16,6 +16,7 @@
     "requiredPlugins": [
       "kibanaReact",
       "licensing",
+      "taskManager",
       "triggersActionsUi",
       "actions",
       "stackConnectors",

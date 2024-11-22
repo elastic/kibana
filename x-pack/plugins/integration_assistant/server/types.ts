@@ -12,7 +12,12 @@ import {
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import { ESProcessorItem, SamplesFormat } from '../common';
+import { ValidateCelTask } from './graphs/cel/validation/validate_task';
 
 export interface IntegrationAssistantPluginSetup {
   setIsAvailable: (isAvailable: boolean) => void;
@@ -22,9 +27,11 @@ export interface IntegrationAssistantPluginStart {}
 
 export interface IntegrationAssistantPluginSetupDependencies {
   licensing: LicensingPluginSetup;
+  taskManager: TaskManagerSetupContract;
 }
 export interface IntegrationAssistantPluginStartDependencies {
   licensing: LicensingPluginStart;
+  taskManager: TaskManagerStartContract;
 }
 
 export interface SimplifiedProcessor {
@@ -77,6 +84,7 @@ export interface CelInputState {
   stateSettings: object;
   redactVars: string[];
   results: object;
+  validateCelTask: ValidateCelTask;
 }
 
 export interface EcsMappingState {

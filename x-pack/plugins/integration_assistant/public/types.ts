@@ -9,6 +9,10 @@ import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import type { CreateIntegrationComponent } from './components/create_integration/types';
 import type { CreateIntegrationCardButtonComponent } from './components/create_integration_card_button/types';
 import type { RenderUpselling } from './services';
@@ -38,9 +42,11 @@ export interface IntegrationAssistantPluginStart {
 export interface IntegrationAssistantPluginSetupDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   licensing: LicensingPluginSetup;
+  taskManager: TaskManagerSetupContract;
 }
 
 export interface IntegrationAssistantPluginStartDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   licensing: LicensingPluginStart;
+  taskManager: TaskManagerStartContract;
 }
