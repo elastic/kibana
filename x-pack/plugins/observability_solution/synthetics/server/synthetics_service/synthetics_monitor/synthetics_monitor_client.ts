@@ -52,7 +52,6 @@ export class SyntheticsMonitorClient {
     allPrivateLocations: SyntheticsPrivateLocations,
     spaceId: string
   ) {
-    console.log('args', monitors, allPrivateLocations, spaceId);
     const privateConfigs: PrivateConfig[] = [];
     const publicConfigs: ConfigData[] = [];
 
@@ -81,7 +80,6 @@ export class SyntheticsMonitorClient {
       spaceId
     );
 
-    console.log('policies to add', JSON.stringify(newPolicies, null, 2));
     const syncErrors = this.syntheticsService.addConfigs(publicConfigs);
 
     return await Promise.all([newPolicies, syncErrors]);

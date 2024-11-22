@@ -60,7 +60,6 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
           encryptedSavedObjectsClient,
           spaceId,
         });
-        console.log('monitor', monitor);
         return { ...mapSavedObjectToMonitor({ monitor, internal }), spaceId };
       } else {
         return {

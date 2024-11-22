@@ -32,7 +32,6 @@ export const getSyntheticsMonitor = async ({
           namespace: spaceId,
         }
       );
-    console.log('decryptedMonitor', decryptedMonitor);
     return normalizeSecrets(decryptedMonitor);
   } catch (e) {
     throw e;

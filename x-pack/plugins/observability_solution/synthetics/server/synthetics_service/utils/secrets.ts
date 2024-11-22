@@ -19,7 +19,6 @@ export function formatSecrets(monitor: SyntheticsMonitor): SyntheticsMonitorWith
   const monitorWithoutSecrets = omit(monitor, secretKeys) as SyntheticsMonitorWithSecretsAttributes;
   const secrets = pick(monitor, secretKeys);
 
-  console.log('format secrets', secrets, monitorWithoutSecrets);
   return {
     ...monitorWithoutSecrets,
     secrets: JSON.stringify(secrets),
