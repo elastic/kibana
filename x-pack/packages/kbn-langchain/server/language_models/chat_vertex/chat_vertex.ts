@@ -130,7 +130,12 @@ export class ActionsClientChatVertexAI extends ChatVertexAI {
         partialStreamChunk += nextChunk;
       }
 
-      if (parsedStreamChunk !== null && !parsedStreamChunk.candidates?.[0]?.finishReason) {
+      if (parsedStreamChunk !== null) {
+        const errorMessage = convertResponseBadFinishReasonToErrorMsg(parsedStreamChunk);
+        if (errorMessage != null) {
+          throw new Error(errorMessage);
+        }
+
         const response = {
           ...parsedStreamChunk,
           functionCalls: () =>
@@ -177,12 +182,6 @@ export class ActionsClientChatVertexAI extends ChatVertexAI {
         if (chunk) {
           yield chunk;
           await runManager?.handleLLMNewToken(chunk.text ?? '');
-        }
-      } else if (parsedStreamChunk) {
-        // handle bad finish reason
-        const errorMessage = convertResponseBadFinishReasonToErrorMsg(parsedStreamChunk);
-        if (errorMessage != null) {
-          throw new Error(errorMessage);
         }
       }
     }
