@@ -25,7 +25,10 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
   },
   security: {
     authz: {
-      requiredPrivileges: ['uptime-read', ...(syntheticsRoute?.writeAccess ? ['uptime-write'] : [])],
+      requiredPrivileges: [
+        'uptime-read',
+        ...(syntheticsRoute?.writeAccess ? ['uptime-write'] : []),
+      ],
     },
   },
   handler: async (context, request, response) => {
@@ -55,20 +58,20 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
 
       const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
-    try {
-      const res = await syntheticsRoute.handler({
-        syntheticsEsClient,
-        savedObjectsClient,
-        context,
-        request,
-        response,
-        server,
-        spaceId,
-        syntheticsMonitorClient,
-      });
-      if (isKibanaResponse(res)) {
-        return res;
-      }
+      try {
+        const res = await syntheticsRoute.handler({
+          syntheticsEsClient,
+          savedObjectsClient,
+          context,
+          request,
+          response,
+          server,
+          spaceId,
+          syntheticsMonitorClient,
+        });
+        if (isKibanaResponse(res)) {
+          return res;
+        }
 
         const inspectData = await syntheticsEsClient.getInspectData(syntheticsRoute.path);
 
