@@ -57,10 +57,9 @@ export const {
 export const DiscoverMainProvider = ({
   value,
   children,
-}: {
+}: React.PropsWithChildren<{
   value: DiscoverStateContainer;
-  children: React.ReactElement;
-}) => {
+}>) => {
   return (
     <DiscoverStateProvider value={value}>
       <DiscoverAppStateProvider value={value.appState}>
