@@ -31,7 +31,6 @@ import { CaseBaseOptionalFieldsRequestRt } from '../case/v1';
 import {
   CaseCustomFieldTextWithValidationValueRt,
   CaseCustomFieldNumberWithValidationValueRt,
-  CaseCustomFieldListWithValidationValueRt,
 } from '../custom_field/v1';
 
 export const CustomFieldConfigurationWithoutTypeRt = rt.strict({
@@ -91,7 +90,9 @@ export const ListCustomFieldConfigurationRt = rt.intersection([
   }),
   rt.exact(
     rt.partial({
-      defaultValue: rt.union([CaseCustomFieldListWithValidationValueRt('value'), rt.null]),
+      // Do NOT use CaseCustomFieldListWithValidationValueRt here, as the defaultValue should be the key of the option
+      // Key gets transformed to the display value in the UI
+      defaultValue: rt.union([rt.string, rt.null]),
     })
   ),
 ]);
