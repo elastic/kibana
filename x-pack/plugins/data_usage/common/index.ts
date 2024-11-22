@@ -12,7 +12,7 @@ export {
   DATA_USAGE_METRICS_API_ROUTE,
   DATA_USAGE_DATA_STREAMS_API_ROUTE,
 } from './constants';
-export { dateParser } from './utils';
+export { dateParser, momentDateParser } from './utils';
 
 export {
   DataUsageQueryClient,

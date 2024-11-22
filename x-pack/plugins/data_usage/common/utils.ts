@@ -7,3 +7,4 @@
 
 import dateMath from '@kbn/datemath';
 export const dateParser = (date: string) => dateMath.parse(date)?.toISOString();
+export const momentDateParser = (date: string) => dateMath.parse(date);

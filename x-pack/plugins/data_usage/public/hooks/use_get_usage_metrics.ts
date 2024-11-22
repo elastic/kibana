@@ -12,6 +12,7 @@ import {
   type UsageMetricsRequestBody,
   type UsageMetricsResponseSchemaBody,
   DATA_USAGE_METRICS_API_ROUTE,
+  dateParser,
 } from '../../common';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 
@@ -36,8 +37,8 @@ export const useGetDataUsageMetrics = (
           signal,
           version: '1',
           body: JSON.stringify({
-            from: body.from,
-            to: body.to,
+            from: dateParser(body.from),
+            to: dateParser(body.to),
             metricTypes: body.metricTypes,
             dataStreams: body.dataStreams,
           }),
