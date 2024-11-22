@@ -29,6 +29,7 @@ Object {
     "frequency": 1,
     "preventInitialBackfill": false,
     "syncDelay": 1,
+    "syncField": null,
   },
   "tags": Array [],
   "timeWindow": Object {
@@ -79,6 +80,7 @@ Object {
     "frequency": 1,
     "preventInitialBackfill": false,
     "syncDelay": 1,
+    "syncField": null,
   },
   "tags": Array [],
   "timeWindow": Object {
@@ -111,6 +113,7 @@ Object {
     "frequency": 1,
     "preventInitialBackfill": false,
     "syncDelay": 1,
+    "syncField": null,
   },
   "tags": Array [],
   "timeWindow": Object {
@@ -155,6 +158,7 @@ Object {
     "frequency": 1,
     "preventInitialBackfill": false,
     "syncDelay": 1,
+    "syncField": null,
   },
   "tags": Array [],
   "timeWindow": Object {
@@ -189,6 +193,7 @@ Object {
     "frequency": 1,
     "preventInitialBackfill": false,
     "syncDelay": 1,
+    "syncField": null,
   },
   "tags": Array [],
   "timeWindow": Object {
@@ -221,6 +226,7 @@ Object {
     "frequency": 1,
     "preventInitialBackfill": false,
     "syncDelay": 1,
+    "syncField": null,
   },
   "tags": Array [],
   "timeWindow": Object {
@@ -286,6 +292,7 @@ Object {
     "frequency": 1,
     "preventInitialBackfill": false,
     "syncDelay": 12,
+    "syncField": null,
   },
   "tags": Array [],
   "timeWindow": Object {
@@ -318,6 +325,7 @@ Object {
     "frequency": 1,
     "preventInitialBackfill": true,
     "syncDelay": 180,
+    "syncField": null,
   },
   "tags": Array [],
   "timeWindow": Object {
@@ -351,6 +359,7 @@ Object {
     "frequency": 1,
     "preventInitialBackfill": false,
     "syncDelay": 1,
+    "syncField": null,
   },
   "tags": Array [],
   "timeWindow": Object {
@@ -385,6 +394,7 @@ Object {
     "frequency": 1,
     "preventInitialBackfill": false,
     "syncDelay": 1,
+    "syncField": null,
   },
   "tags": Array [],
   "timeWindow": Object {
@@ -417,6 +427,7 @@ Object {
     "frequency": 1,
     "preventInitialBackfill": false,
     "syncDelay": 1,
+    "syncField": null,
   },
   "tags": Array [],
   "timeWindow": Object {
@@ -449,6 +460,7 @@ Object {
     "frequency": 1,
     "preventInitialBackfill": false,
     "syncDelay": 1,
+    "syncField": null,
   },
   "tags": Array [],
   "timeWindow": Object {

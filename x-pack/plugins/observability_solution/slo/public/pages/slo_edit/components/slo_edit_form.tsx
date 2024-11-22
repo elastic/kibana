@@ -44,7 +44,9 @@ export function SloEditForm({ slo, initialValues, onSave }: Props) {
   const form = useForm<CreateSLOForm>({
     defaultValues: isFlyoutMode
       ? sloFormValuesFromFlyoutState
-      : sloFormValuesFromUrlState ?? SLO_EDIT_FORM_DEFAULT_VALUES,
+      : sloFormValuesFromUrlState
+      ? sloFormValuesFromUrlState
+      : sloFormValuesFromSloResponse ?? SLO_EDIT_FORM_DEFAULT_VALUES,
     values: isFlyoutMode
       ? sloFormValuesFromFlyoutState
       : sloFormValuesFromUrlState
