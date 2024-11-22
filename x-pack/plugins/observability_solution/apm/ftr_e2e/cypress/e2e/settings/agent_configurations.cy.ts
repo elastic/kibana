@@ -122,16 +122,13 @@ describe('Agent configuration', () => {
       cy.contains('Create configuration').should('not.be.disabled');
     });
 
-    it.skip('persists service environment when clicking on edit button', () => {
+    it.only('persists service environment when clicking on edit button', () => {
       cy.intercept('GET', '/api/apm/settings/agent-configuration/environments?*').as(
         'serviceEnvironmentApi'
       );
       cy.contains('Create configuration').click();
       cy.getByTestSubj('serviceNameComboBox').find('input').click();
       cy.getByTestSubj('serviceNameComboBox').type('opbeans-node{enter}');
-      cy.getByTestSubj('comboBoxOptionsList serviceNameComboBox-optionsList').should('be.visible');
-
-      cy.contains('opbeans-node').click();
       cy.wait('@serviceEnvironmentApi');
 
       cy.getByTestSubj('serviceEnviromentComboBox').find('input').click();
