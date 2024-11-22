@@ -13,6 +13,8 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
+import { i18n } from '@kbn/i18n';
+
 import { SetVectorSearchChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchPageTemplateWrapper } from '../../../shared/layout';
 import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
@@ -23,12 +25,14 @@ describe('EnterpriseSearchVectorSearchPageTemplate', () => {
   it('renders', () => {
     const wrapper = shallow(
       <EnterpriseSearchVectorSearchPageTemplate>
-        <div className="hello">world</div>
+        <div className="hello">
+          {i18n.translate('xpack.enterpriseSearch..div.worldLabel', { defaultMessage: 'world' })}
+        </div>
       </EnterpriseSearchVectorSearchPageTemplate>
     );
 
     expect(wrapper.type()).toEqual(EnterpriseSearchPageTemplateWrapper);
-    expect(wrapper.prop('solutionNav')).toEqual({ items: [], name: 'Search' });
+    expect(wrapper.prop('solutionNav')).toEqual({ items: [], name: 'Elasticsearch' });
     expect(wrapper.find('.hello').text()).toEqual('world');
   });
 

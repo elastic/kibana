@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { registerSiemRuleMigrationsCreateRoute } from './create';
+import { registerSiemRuleMigrationsUpdateRoute } from './update';
 import { registerSiemRuleMigrationsGetRoute } from './get';
 import { registerSiemRuleMigrationsStartRoute } from './start';
 import { registerSiemRuleMigrationsStatsRoute } from './stats';
@@ -22,6 +23,7 @@ export const registerSiemRuleMigrationsRoutes = (
   logger: Logger
 ) => {
   registerSiemRuleMigrationsCreateRoute(router, logger);
+  registerSiemRuleMigrationsUpdateRoute(router, logger);
   registerSiemRuleMigrationsStatsAllRoute(router, logger);
   registerSiemRuleMigrationsGetRoute(router, logger);
   registerSiemRuleMigrationsStartRoute(router, logger);
