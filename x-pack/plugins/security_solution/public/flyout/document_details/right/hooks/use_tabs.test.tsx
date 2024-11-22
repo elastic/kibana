@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import type { UseTabsParams, UseTabsResult } from './use_tabs';
 import { allThreeTabs, twoTabs, useTabs } from './use_tabs';
 
@@ -26,7 +26,7 @@ jest.mock('../../../../common/lib/kibana', () => {
 });
 
 describe('useTabs', () => {
-  let hookResult: RenderHookResult<UseTabsParams, UseTabsResult>;
+  let hookResult: RenderHookResult<UseTabsResult, UseTabsParams>;
 
   it('should return 3 tabs to render and the one from path as selected', () => {
     const initialProps: UseTabsParams = {
