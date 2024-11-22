@@ -122,7 +122,7 @@ describe('Agent configuration', () => {
       cy.contains('Create configuration').should('not.be.disabled');
     });
 
-    it.only('persists service environment when clicking on edit button', () => {
+    it('persists service environment when clicking on edit button', () => {
       cy.intercept('GET', '/api/apm/settings/agent-configuration/environments?*').as(
         'serviceEnvironmentApi'
       );
