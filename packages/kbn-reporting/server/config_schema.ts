@@ -96,8 +96,8 @@ const EncryptionKeySchema = schema.conditional(
 
 const RolesSchema = schema.maybe(
   schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
-    allow: schema.arrayOf(schema.string(), { defaultValue: [] }),
+    enabled: schema.boolean(),
+    allow: schema.arrayOf(schema.string()),
   })
 ); // unused as of 9.0
 
