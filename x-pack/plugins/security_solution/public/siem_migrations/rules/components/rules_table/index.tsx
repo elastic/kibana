@@ -14,7 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 
 import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import {
@@ -55,15 +55,12 @@ const RulesTableComponent: React.FC<RulesTableComponentProps> = ({
 
   const [filterOptions, setFilterOptions] = useState<TableFilterOptions>({
     filter: '',
-    tags: [],
   });
 
   const filteredRuleMigrations = useFilterRulesToInstall({
     filterOptions,
     ruleMigrations: ruleMigrations ?? [],
   });
-
-  const tags = useMemo<string[]>(() => [], []);
 
   const shouldShowProgress = isLoading;
 
@@ -96,11 +93,7 @@ const RulesTableComponent: React.FC<RulesTableComponentProps> = ({
             <>
               <EuiFlexGroup direction="column">
                 <EuiFlexItem grow={false}>
-                  <Filters
-                    filterOptions={filterOptions}
-                    tags={tags}
-                    setFilterOptions={setFilterOptions}
-                  />
+                  <Filters filterOptions={filterOptions} setFilterOptions={setFilterOptions} />
                 </EuiFlexItem>
               </EuiFlexGroup>
 

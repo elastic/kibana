@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { isEqual } from 'lodash/fp';
+import { EuiFlexGroup } from '@elastic/eui';
 import type { Dispatch, SetStateAction } from 'react';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import * as i18n from './translations';
-import { TagsFilterPopover } from '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table_filters/tags_filter_popover';
 import { RuleSearchField } from '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table_filters/rule_search_field';
 import type { TableFilterOptions } from '../../hooks/use_filter_rules_to_install';
 
@@ -26,11 +24,6 @@ export interface FiltersComponentProps {
   filterOptions: TableFilterOptions;
 
   /**
-   * All unique tags for all rule translations
-   */
-  tags: string[];
-
-  /**
    * Handles filter options changes
    */
   setFilterOptions: Dispatch<SetStateAction<TableFilterOptions>>;
@@ -40,13 +33,7 @@ export interface FiltersComponentProps {
  * Collection of filters for filtering data within the SIEM Rules Migrations table.
  * Contains search bar and tag selection
  */
-const FiltersComponent: React.FC<FiltersComponentProps> = ({
-  filterOptions,
-  tags,
-  setFilterOptions,
-}) => {
-  const { tags: selectedTags } = filterOptions;
-
+const FiltersComponent: React.FC<FiltersComponentProps> = ({ filterOptions, setFilterOptions }) => {
   const handleOnSearch = useCallback(
     (filterString: string) => {
       setFilterOptions((filters) => ({
@@ -57,18 +44,6 @@ const FiltersComponent: React.FC<FiltersComponentProps> = ({
     [setFilterOptions]
   );
 
-  const handleSelectedTags = useCallback(
-    (newTags: string[]) => {
-      if (!isEqual(newTags, selectedTags)) {
-        setFilterOptions((filters) => ({
-          ...filters,
-          tags: newTags,
-        }));
-      }
-    },
-    [selectedTags, setFilterOptions]
-  );
-
   return (
     <FilterWrapper gutterSize="m" justifyContent="flexEnd" wrap>
       <RuleSearchField
@@ -76,16 +51,6 @@ const FiltersComponent: React.FC<FiltersComponentProps> = ({
         onSearch={handleOnSearch}
         placeholder={i18n.SEARCH_PLACEHOLDER}
       />
-      <EuiFlexItem grow={false}>
-        <EuiFilterGroup>
-          <TagsFilterPopover
-            onSelectedTagsChanged={handleSelectedTags}
-            selectedTags={selectedTags}
-            tags={tags}
-            data-test-subj="allRulesTagPopover"
-          />
-        </EuiFilterGroup>
-      </EuiFlexItem>
     </FilterWrapper>
   );
 };

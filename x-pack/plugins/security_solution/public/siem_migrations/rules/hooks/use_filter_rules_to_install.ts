@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import type { RuleMigration } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import type { FilterOptions } from '../../../detection_engine/rule_management/logic/types';
 
-export type TableFilterOptions = Pick<FilterOptions, 'filter' | 'tags'>;
+export type TableFilterOptions = Pick<FilterOptions, 'filter'>;
 
 export const useFilterRulesToInstall = ({
   ruleMigrations,
@@ -19,18 +19,12 @@ export const useFilterRulesToInstall = ({
   filterOptions: TableFilterOptions;
 }) => {
   const filteredRules = useMemo(() => {
-    const { filter, tags } = filterOptions;
+    const { filter } = filterOptions;
     return ruleMigrations.filter((migration) => {
       const name = migration.elastic_rule?.title ?? migration.original_rule.title;
       if (filter && !name.toLowerCase().includes(filter.toLowerCase())) {
         return false;
       }
-
-      if (tags && tags.length > 0) {
-        // TODO: Uncomment this once tags are available for rule migrations
-        // return tags.every((tag) => migration.tags.includes(tag));
-      }
-
       return true;
     });
   }, [filterOptions, ruleMigrations]);
