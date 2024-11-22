@@ -34,6 +34,7 @@ const docs = [
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
   const PageObjects = getPageObjects(['observabilityLogsExplorer', 'svlCommonPage']);
 
   describe('Flyout content customization', () => {
@@ -45,7 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         NAMESPACE
       );
       await PageObjects.observabilityLogsExplorer.ingestLogEntries(DATA_STREAM_NAME, docs);
-      await PageObjects.svlCommonPage.loginWithRole('viewer');
+      await PageObjects.svlCommonPage.loginAsViewer();
     });
 
     beforeEach(async () => {
@@ -61,14 +62,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after('clean up archives', async () => {
-      await PageObjects.svlCommonPage.forceLogout();
       if (cleanupDataStreamSetup) {
-        cleanupDataStreamSetup();
+        await cleanupDataStreamSetup();
       }
     });
 
     it('should display the logs overview tab', async () => {
-      await dataGrid.clickRowToggle({ columnIndex: 1 });
+      await retry.try(async () => {
+        await dataGrid.clickRowToggle();
+      });
       await testSubjects.existOrFail('docViewerTab-doc_view_logs_overview');
     });
   });

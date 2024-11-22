@@ -30,9 +30,9 @@
           "({ provider, settings, path, }: { provider: ",
           {
             "pluginId": "@kbn/config",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnConfigPluginApi",
-            "section": "def-common.ConfigDeprecationProvider",
+            "section": "def-server.ConfigDeprecationProvider",
             "text": "ConfigDeprecationProvider"
           },
           "; settings?: Record<string, any> | undefined; path: string; }) => { messages: string[]; levels: string[]; migrated: Record<string, any>; }"
@@ -63,17 +63,17 @@
                   "(factory: ",
                   {
                     "pluginId": "@kbn/config",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnConfigPluginApi",
-                    "section": "def-common.ConfigDeprecationFactory",
+                    "section": "def-server.ConfigDeprecationFactory",
                     "text": "ConfigDeprecationFactory"
                   },
                   ") => ",
                   {
                     "pluginId": "@kbn/config",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnConfigPluginApi",
-                    "section": "def-common.ConfigDeprecation",
+                    "section": "def-server.ConfigDeprecation",
                     "text": "ConfigDeprecation"
                   },
                   "[]"
@@ -93,9 +93,9 @@
                     "signature": [
                       {
                         "pluginId": "@kbn/config",
-                        "scope": "common",
+                        "scope": "server",
                         "docId": "kibKbnConfigPluginApi",
-                        "section": "def-common.ConfigDeprecationFactory",
+                        "section": "def-server.ConfigDeprecationFactory",
                         "text": "ConfigDeprecationFactory"
                       }
                     ],
@@ -147,9 +147,9 @@
           "({ provider, settings, }: { provider: ",
           {
             "pluginId": "@kbn/config",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnConfigPluginApi",
-            "section": "def-common.ConfigDeprecationProvider",
+            "section": "def-server.ConfigDeprecationProvider",
             "text": "ConfigDeprecationProvider"
           },
           "; settings?: Record<string, any> | undefined; }) => { messages: string[]; levels: string[]; migrated: Record<string, any>; }"
@@ -180,17 +180,17 @@
                   "(factory: ",
                   {
                     "pluginId": "@kbn/config",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnConfigPluginApi",
-                    "section": "def-common.ConfigDeprecationFactory",
+                    "section": "def-server.ConfigDeprecationFactory",
                     "text": "ConfigDeprecationFactory"
                   },
                   ") => ",
                   {
                     "pluginId": "@kbn/config",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnConfigPluginApi",
-                    "section": "def-common.ConfigDeprecation",
+                    "section": "def-server.ConfigDeprecation",
                     "text": "ConfigDeprecation"
                   },
                   "[]"
@@ -210,9 +210,9 @@
                     "signature": [
                       {
                         "pluginId": "@kbn/config",
-                        "scope": "common",
+                        "scope": "server",
                         "docId": "kibKbnConfigPluginApi",
-                        "section": "def-common.ConfigDeprecationFactory",
+                        "section": "def-server.ConfigDeprecationFactory",
                         "text": "ConfigDeprecationFactory"
                       }
                     ],

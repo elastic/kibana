@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
@@ -21,15 +22,12 @@ import {
   type UnifiedFieldListSidebarContainerApi,
   FieldsGroupNames,
 } from '@kbn/unified-field-list';
+import { calcFieldCounts } from '@kbn/discover-utils/src/utils/calc_field_counts';
+import { Filter } from '@kbn/es-query';
 import { PLUGIN_ID } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import {
-  AvailableFields$,
-  DataDocuments$,
-} from '../../state_management/discover_data_state_container';
-import { calcFieldCounts } from '../../utils/calc_field_counts';
+import { DataDocuments$ } from '../../state_management/discover_data_state_container';
 import { FetchStatus, SidebarToggleState } from '../../../types';
-import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
 import {
   discoverSidebarReducer,
   getInitialState,
@@ -50,11 +48,6 @@ const getCreationOptions: UnifiedFieldListSidebarContainerProps['getCreationOpti
     showSidebarToggleButton: true,
     disableFieldsExistenceAutoFetching: true,
     buttonAddFieldVariant: 'toolbar',
-    buttonPropsToTriggerFlyout: {
-      contentProps: {
-        id: DISCOVER_TOUR_STEP_ANCHOR_IDS.addFields,
-      },
-    },
     buttonAddFieldToWorkspaceProps: {
       'aria-label': i18n.translate('discover.fieldChooser.discoverField.addFieldTooltip', {
         defaultMessage: 'Add field as column',
@@ -95,6 +88,10 @@ export interface DiscoverSidebarResponsiveProps {
    */
   documents$: DataDocuments$;
   /**
+   * Callback to update breakdown field
+   */
+  onAddBreakdownField?: (breakdownField: DataViewField | undefined) => void;
+  /**
    * Callback function when selecting a field
    */
   onAddField: (fieldName: string) => void;
@@ -130,15 +127,15 @@ export interface DiscoverSidebarResponsiveProps {
    */
   onDataViewCreated: (dataView: DataView) => void;
   /**
-   * list of available fields fetched from ES
-   */
-  availableFields$: AvailableFields$;
-  /**
    * For customization and testing purposes
    */
   fieldListVariant?: UnifiedFieldListSidebarContainerProps['variant'];
 
   sidebarToggleState$: BehaviorSubject<SidebarToggleState>;
+  /**
+   * Custom filters to apply for the field list, ex: namespace custom filter
+   */
+  additionalFilters?: Filter[];
 }
 
 /**
@@ -146,6 +143,7 @@ export interface DiscoverSidebarResponsiveProps {
  * Desktop: Sidebar view, all elements are visible
  * Mobile: Data view selector is visible and a button to trigger a flyout with all elements
  */
+
 export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps) {
   const [unifiedFieldListSidebarContainerApi, setUnifiedFieldListSidebarContainerApi] =
     useState<UnifiedFieldListSidebarContainerApi | null>(null);
@@ -157,6 +155,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     selectedDataView,
     columns,
     trackUiMetric,
+    onAddBreakdownField,
     onAddFilter,
     onFieldEdited,
     onDataViewCreated,
@@ -164,6 +163,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     onAddField,
     onRemoveField,
     sidebarToggleState$,
+    additionalFilters,
   } = props;
   const [sidebarState, dispatchSidebarStateAction] = useReducer(
     discoverSidebarReducer,
@@ -257,7 +257,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   // As unifiedFieldListSidebarContainerRef ref can be empty in the beginning,
   // we need to fetch the data once API becomes available and after documents are fetched
   const initializeUnifiedFieldListSidebarContainerApi = useCallback(
-    (api) => {
+    (api: UnifiedFieldListSidebarContainerApi) => {
       if (!api) {
         return;
       }
@@ -291,20 +291,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   }, []);
 
   const { dataViewEditor } = services;
-  const { availableFields$ } = props;
-
-  useEffect(() => {
-    // For an external embeddable like the Field stats
-    // it is useful to know what fields are populated in the docs fetched
-    // or what fields are selected by the user
-
-    const availableFields =
-      props.columns.length > 0 ? props.columns : Object.keys(sidebarState.fieldCounts || {});
-    availableFields$.next({
-      fetchStatus: FetchStatus.COMPLETE,
-      fields: availableFields,
-    });
-  }, [selectedDataView, sidebarState.fieldCounts, props.columns, availableFields$]);
 
   const canEditDataView =
     Boolean(dataViewEditor?.userPermissions.editDataView()) ||
@@ -386,27 +372,30 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       css={css`
         height: 100%;
         display: ${isSidebarCollapsed ? 'none' : 'flex'};
+        background-color: ${euiTheme.colors.body};
       `}
     >
       <EuiFlexItem>
         {selectedDataView ? (
           <UnifiedFieldListSidebarContainer
-            ref={initializeUnifiedFieldListSidebarContainerApi}
-            variant={fieldListVariant}
-            getCreationOptions={getCreationOptions}
-            services={services}
-            dataView={selectedDataView}
-            trackUiMetric={trackUiMetric}
+            additionalFieldGroups={additionalFieldGroups}
+            additionalFilters={additionalFilters}
             allFields={sidebarState.allFields}
-            showFieldList={showFieldList}
-            workspaceSelectedFieldNames={columns}
+            dataView={selectedDataView}
             fullWidth
+            getCreationOptions={getCreationOptions}
+            onAddBreakdownField={onAddBreakdownField}
             onAddFieldToWorkspace={onAddFieldToWorkspace}
-            onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
             onAddFilter={onAddFilter}
             onFieldEdited={onFieldEdited}
+            onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
             prependInFlyout={prependDataViewPickerForMobile}
-            additionalFieldGroups={additionalFieldGroups}
+            ref={initializeUnifiedFieldListSidebarContainerApi}
+            services={services}
+            showFieldList={showFieldList}
+            trackUiMetric={trackUiMetric}
+            variant={fieldListVariant}
+            workspaceSelectedFieldNames={columns}
           />
         ) : null}
       </EuiFlexItem>

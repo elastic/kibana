@@ -5,139 +5,48 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-
-import { css } from '@emotion/react';
-import { isEmpty } from 'lodash/fp';
-import { useAssistantContext } from '../../../assistant_context';
-import { Conversation } from '../../../..';
-import * as i18n from './translations';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { SelectSystemPrompt } from './select_system_prompt';
 
 interface Props {
-  conversation: Conversation | undefined;
-  editingSystemPromptId: string | undefined;
+  allSystemPrompts: PromptResponse[];
+  currentSystemPromptId: string | undefined;
   isSettingsModalVisible: boolean;
   onSystemPromptSelectionChange: (systemPromptId: string | undefined) => void;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  isFlyoutMode: boolean;
 }
 
 const SystemPromptComponent: React.FC<Props> = ({
-  conversation,
-  editingSystemPromptId,
+  allSystemPrompts,
+  currentSystemPromptId,
   isSettingsModalVisible,
   onSystemPromptSelectionChange,
   setIsSettingsModalVisible,
-  isFlyoutMode,
 }) => {
-  const { allSystemPrompts } = useAssistantContext();
-
-  const selectedPrompt = useMemo(() => {
-    if (editingSystemPromptId !== undefined) {
-      return (
-        allSystemPrompts?.find((p) => p.id === editingSystemPromptId) ??
-        allSystemPrompts?.find((p) => p.id === conversation?.apiConfig?.defaultSystemPromptId)
-      );
-    } else {
-      return undefined;
-    }
-  }, [allSystemPrompts, conversation?.apiConfig?.defaultSystemPromptId, editingSystemPromptId]);
-
-  const [isEditing, setIsEditing] = React.useState<boolean>(false);
+  const selectedPrompt = useMemo(
+    () =>
+      currentSystemPromptId !== undefined
+        ? allSystemPrompts.find((p) => p.id === currentSystemPromptId)
+        : undefined,
+    [allSystemPrompts, currentSystemPromptId]
+  );
 
   const handleClearSystemPrompt = useCallback(() => {
-    if (conversation) {
-      onSystemPromptSelectionChange(undefined);
-    }
-  }, [conversation, onSystemPromptSelectionChange]);
-
-  const handleEditSystemPrompt = useCallback(() => setIsEditing(true), []);
-
-  if (isFlyoutMode) {
-    return (
-      <SelectSystemPrompt
-        allSystemPrompts={allSystemPrompts}
-        clearSelectedSystemPrompt={handleClearSystemPrompt}
-        conversation={conversation}
-        data-test-subj="systemPrompt"
-        isClearable={true}
-        isEditing={true}
-        setIsEditing={setIsEditing}
-        isSettingsModalVisible={isSettingsModalVisible}
-        onSystemPromptSelectionChange={onSystemPromptSelectionChange}
-        selectedPrompt={selectedPrompt}
-        setIsSettingsModalVisible={setIsSettingsModalVisible}
-        isFlyoutMode={isFlyoutMode}
-      />
-    );
-  }
+    onSystemPromptSelectionChange(undefined);
+  }, [onSystemPromptSelectionChange]);
 
   return (
-    <div>
-      {selectedPrompt == null || isEditing ? (
-        <SelectSystemPrompt
-          allSystemPrompts={allSystemPrompts}
-          clearSelectedSystemPrompt={handleClearSystemPrompt}
-          conversation={conversation}
-          data-test-subj="systemPrompt"
-          isClearable={true}
-          isEditing={isEditing}
-          isOpen={isEditing}
-          isSettingsModalVisible={isSettingsModalVisible}
-          onSystemPromptSelectionChange={onSystemPromptSelectionChange}
-          selectedPrompt={selectedPrompt}
-          setIsEditing={setIsEditing}
-          setIsSettingsModalVisible={setIsSettingsModalVisible}
-          isFlyoutMode={isFlyoutMode}
-        />
-      ) : (
-        <EuiFlexGroup alignItems="flexStart" gutterSize="none">
-          <EuiFlexItem grow>
-            <EuiText
-              color="subdued"
-              data-test-subj="systemPromptText"
-              onClick={handleEditSystemPrompt}
-              css={css`
-                white-space: pre-line;
-                &:hover {
-                  cursor: pointer;
-                  text-decoration: underline;
-                }
-              `}
-            >
-              {isEmpty(selectedPrompt?.content) ? i18n.EMPTY_PROMPT : selectedPrompt?.content}
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="none">
-              <EuiFlexItem grow={false}>
-                <EuiToolTip content={i18n.SELECT_A_SYSTEM_PROMPT}>
-                  <EuiButtonIcon
-                    aria-label={i18n.SELECT_A_SYSTEM_PROMPT}
-                    data-test-subj="edit"
-                    iconType="documentEdit"
-                    onClick={handleEditSystemPrompt}
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-
-              <EuiFlexItem grow={false}>
-                <EuiToolTip content={i18n.CLEAR_SYSTEM_PROMPT}>
-                  <EuiButtonIcon
-                    aria-label={i18n.CLEAR_SYSTEM_PROMPT}
-                    data-test-subj="clear"
-                    iconType="cross"
-                    onClick={handleClearSystemPrompt}
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
-    </div>
+    <SelectSystemPrompt
+      allPrompts={allSystemPrompts}
+      clearSelectedSystemPrompt={handleClearSystemPrompt}
+      data-test-subj="systemPrompt"
+      isClearable={true}
+      isSettingsModalVisible={isSettingsModalVisible}
+      onSystemPromptSelectionChange={onSystemPromptSelectionChange}
+      selectedPrompt={selectedPrompt}
+      setIsSettingsModalVisible={setIsSettingsModalVisible}
+    />
   );
 };
 

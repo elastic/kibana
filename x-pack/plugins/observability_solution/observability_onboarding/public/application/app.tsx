@@ -12,12 +12,11 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { Router } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../common/telemetry_events';
-import { ConfigSchema } from '..';
+import { AppContext, ConfigSchema, ObservabilityOnboardingAppServices } from '..';
 import { ObservabilityOnboardingHeaderActionMenu } from './shared/header_action_menu';
 import {
   ObservabilityOnboardingPluginSetupDeps,
@@ -40,16 +39,19 @@ export const breadcrumbsApp = {
 export function ObservabilityOnboardingAppRoot({
   appMountParameters,
   core,
-  deps,
-  corePlugins: { observability, data },
+  corePlugins,
   config,
+  context,
 }: {
   appMountParameters: AppMountParameters;
 } & RenderAppProps) {
   const { history, setHeaderActionMenu, theme$ } = appMountParameters;
-  const plugins = { ...deps };
-
-  const renderFeedbackLinkAsPortal = !config.serverless.enabled;
+  const services: ObservabilityOnboardingAppServices = {
+    ...core,
+    ...corePlugins,
+    config,
+    context,
+  };
 
   core.analytics.reportEvent(OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT.eventType, {
     uses_legacy_onboarding_page: false,
@@ -63,15 +65,7 @@ export function ObservabilityOnboardingAppRoot({
             application: core.application,
           }}
         >
-          <KibanaContextProvider
-            services={{
-              ...core,
-              ...plugins,
-              observability,
-              data,
-              config,
-            }}
-          >
+          <KibanaContextProvider services={services}>
             <KibanaThemeProvider
               theme={{ theme$ }}
               modify={{
@@ -83,11 +77,10 @@ export function ObservabilityOnboardingAppRoot({
             >
               <Router history={history}>
                 <EuiErrorBoundary>
-                  {renderFeedbackLinkAsPortal && (
-                    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
-                      <ObservabilityOnboardingHeaderActionMenu />
-                    </HeaderMenuPortal>
-                  )}
+                  <ObservabilityOnboardingHeaderActionMenu
+                    setHeaderActionMenu={setHeaderActionMenu}
+                    theme$={theme$}
+                  />
                   <ObservabilityOnboardingFlow />
                 </EuiErrorBoundary>
               </Router>
@@ -109,6 +102,7 @@ interface RenderAppProps {
   appMountParameters: AppMountParameters;
   corePlugins: ObservabilityOnboardingPluginStartDeps;
   config: ConfigSchema;
+  context: AppContext;
 }
 
 export const renderApp = (props: RenderAppProps) => {

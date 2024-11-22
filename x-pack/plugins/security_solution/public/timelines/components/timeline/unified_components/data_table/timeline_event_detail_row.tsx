@@ -60,7 +60,7 @@ export const TimelineEventDetailRow: React.FC<TimelineEventDetailRowProps> = mem
     useEffect(() => {
       setCellProps?.({
         className: ctx.expanded?.id === event._id ? 'unifiedDataTable__cell--expanded' : '',
-        style: { width: '100%', height: 'auto' },
+        style: { width: '100%', height: undefined, overflowX: 'auto' },
       });
     }, [ctx.expanded?.id, setCellProps, rowIndex, event._id]);
 
@@ -72,7 +72,7 @@ export const TimelineEventDetailRow: React.FC<TimelineEventDetailRowProps> = mem
         alignItems="center"
         data-test-subj={`timeline-row-renderer-${rowIndex}`}
       >
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={true}>
           <EventsTrSupplement>
             <StatefulRowRenderer
               ariaRowindex={rowIndex + ARIA_ROW_INDEX_OFFSET}

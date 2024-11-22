@@ -1,0 +1,440 @@
+{
+  "id": "@kbn/security-authorization-core",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/security-authorization-core",
+        "id": "def-server.Actions",
+        "type": "Class",
+        "tags": [],
+        "label": "Actions",
+        "description": [
+          "Actions are used to create the \"actions\" that are associated with Elasticsearch's\napplication privileges, and are used to perform the authorization checks implemented\nby the various `checkPrivilegesWithRequest` derivatives."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/security-authorization-core",
+            "scope": "server",
+            "docId": "kibKbnSecurityAuthorizationCorePluginApi",
+            "section": "def-server.Actions",
+            "text": "Actions"
+          },
+          " implements ",
+          {
+            "pluginId": "@kbn/security-plugin-types-server",
+            "scope": "server",
+            "docId": "kibKbnSecurityPluginTypesServerPluginApi",
+            "section": "def-server.Actions",
+            "text": "Actions"
+          }
+        ],
+        "path": "x-pack/packages/security/authorization_core/src/actions/actions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-authorization-core",
+            "id": "def-server.Actions.api",
+            "type": "Object",
+            "tags": [],
+            "label": "api",
+            "description": [],
+            "signature": [
+              "ApiActions"
+            ],
+            "path": "x-pack/packages/security/authorization_core/src/actions/actions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-authorization-core",
+            "id": "def-server.Actions.app",
+            "type": "Object",
+            "tags": [],
+            "label": "app",
+            "description": [],
+            "signature": [
+              "AppActions"
+            ],
+            "path": "x-pack/packages/security/authorization_core/src/actions/actions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-authorization-core",
+            "id": "def-server.Actions.cases",
+            "type": "Object",
+            "tags": [],
+            "label": "cases",
+            "description": [],
+            "signature": [
+              "CasesActions"
+            ],
+            "path": "x-pack/packages/security/authorization_core/src/actions/actions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-authorization-core",
+            "id": "def-server.Actions.login",
+            "type": "string",
+            "tags": [],
+            "label": "login",
+            "description": [],
+            "path": "x-pack/packages/security/authorization_core/src/actions/actions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-authorization-core",
+            "id": "def-server.Actions.savedObject",
+            "type": "Object",
+            "tags": [],
+            "label": "savedObject",
+            "description": [],
+            "signature": [
+              "SavedObjectActions"
+            ],
+            "path": "x-pack/packages/security/authorization_core/src/actions/actions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-authorization-core",
+            "id": "def-server.Actions.alerting",
+            "type": "Object",
+            "tags": [],
+            "label": "alerting",
+            "description": [],
+            "signature": [
+              "AlertingActions"
+            ],
+            "path": "x-pack/packages/security/authorization_core/src/actions/actions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-authorization-core",
+            "id": "def-server.Actions.space",
+            "type": "Object",
+            "tags": [],
+            "label": "space",
+            "description": [],
+            "signature": [
+              "SpaceActions"
+            ],
+            "path": "x-pack/packages/security/authorization_core/src/actions/actions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-authorization-core",
+            "id": "def-server.Actions.ui",
+            "type": "Object",
+            "tags": [],
+            "label": "ui",
+            "description": [],
+            "signature": [
+              "UIActions"
+            ],
+            "path": "x-pack/packages/security/authorization_core/src/actions/actions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-authorization-core",
+            "id": "def-server.Actions.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/packages/security/authorization_core/src/actions/actions.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/security-authorization-core",
+        "id": "def-server.getReplacedByForPrivilege",
+        "type": "Function",
+        "tags": [],
+        "label": "getReplacedByForPrivilege",
+        "description": [
+          "\nReturns a list of privileges that replace the given privilege, if any. Works for both top-level\nand sub-feature privileges."
+        ],
+        "signature": [
+          "(privilegeId: string, privilege: ",
+          {
+            "pluginId": "features",
+            "scope": "common",
+            "docId": "kibFeaturesPluginApi",
+            "section": "def-common.FeatureKibanaPrivileges",
+            "text": "FeatureKibanaPrivileges"
+          },
+          ") => readonly ",
+          {
+            "pluginId": "features",
+            "scope": "common",
+            "docId": "kibFeaturesPluginApi",
+            "section": "def-common.FeatureKibanaPrivilegesReference",
+            "text": "FeatureKibanaPrivilegesReference"
+          },
+          "[] | undefined"
+        ],
+        "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-authorization-core",
+            "id": "def-server.getReplacedByForPrivilege.$1",
+            "type": "string",
+            "tags": [],
+            "label": "privilegeId",
+            "description": [
+              "The ID of the privilege to get replacements for."
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/security-authorization-core",
+            "id": "def-server.getReplacedByForPrivilege.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "privilege",
+            "description": [
+              "The privilege definition to get replacements for."
+            ],
+            "signature": [
+              {
+                "pluginId": "features",
+                "scope": "common",
+                "docId": "kibFeaturesPluginApi",
+                "section": "def-common.FeatureKibanaPrivileges",
+                "text": "FeatureKibanaPrivileges"
+              }
+            ],
+            "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-authorization-core",
+        "id": "def-server.privilegesFactory",
+        "type": "Function",
+        "tags": [],
+        "label": "privilegesFactory",
+        "description": [],
+        "signature": [
+          "(actions: ",
+          {
+            "pluginId": "@kbn/security-authorization-core",
+            "scope": "server",
+            "docId": "kibKbnSecurityAuthorizationCorePluginApi",
+            "section": "def-server.Actions",
+            "text": "Actions"
+          },
+          ", featuresService: ",
+          {
+            "pluginId": "features",
+            "scope": "server",
+            "docId": "kibFeaturesPluginApi",
+            "section": "def-server.FeaturesPluginSetup",
+            "text": "FeaturesPluginSetup"
+          },
+          ", licenseService: Pick<",
+          {
+            "pluginId": "@kbn/security-plugin-types-common",
+            "scope": "common",
+            "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+            "section": "def-common.SecurityLicense",
+            "text": "SecurityLicense"
+          },
+          ", \"getFeatures\" | \"hasAtLeast\">) => { get(respectLicenseLevel?: boolean): { features: Record<string, Record<string, string[]>>; global: { all: string[]; read: string[]; }; space: { all: string[]; read: string[]; }; reserved: Record<string, string[]>; }; }"
+        ],
+        "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-authorization-core",
+            "id": "def-server.privilegesFactory.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "actions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-authorization-core",
+                "scope": "server",
+                "docId": "kibKbnSecurityAuthorizationCorePluginApi",
+                "section": "def-server.Actions",
+                "text": "Actions"
+              }
+            ],
+            "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/security-authorization-core",
+            "id": "def-server.privilegesFactory.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "featuresService",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "features",
+                "scope": "server",
+                "docId": "kibFeaturesPluginApi",
+                "section": "def-server.FeaturesPluginSetup",
+                "text": "FeaturesPluginSetup"
+              }
+            ],
+            "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/security-authorization-core",
+            "id": "def-server.privilegesFactory.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "licenseService",
+            "description": [],
+            "signature": [
+              "Pick<",
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.SecurityLicense",
+                "text": "SecurityLicense"
+              },
+              ", \"getFeatures\" | \"hasAtLeast\">"
+            ],
+            "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/security-authorization-core",
+        "id": "def-server.PrivilegesService",
+        "type": "Interface",
+        "tags": [],
+        "label": "PrivilegesService",
+        "description": [],
+        "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-authorization-core",
+            "id": "def-server.PrivilegesService.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [],
+            "signature": [
+              "(respectLicenseLevel?: boolean | undefined) => ",
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.RawKibanaPrivileges",
+                "text": "RawKibanaPrivileges"
+              }
+            ],
+            "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-authorization-core",
+                "id": "def-server.PrivilegesService.get.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "respectLicenseLevel",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/security-authorization-core",
+        "id": "def-server.CasesSupportedOperations",
+        "type": "Type",
+        "tags": [],
+        "label": "CasesSupportedOperations",
+        "description": [],
+        "signature": [
+          "\"getTags\" | \"createComment\" | \"reopenCase\" | \"pushCase\" | \"createCase\" | \"getCase\" | \"getComment\" | \"getReporters\" | \"getUserActions\" | \"findConfigurations\" | \"updateCase\" | \"updateComment\" | \"deleteCase\" | \"deleteComment\" | \"createConfiguration\" | \"updateConfiguration\""
+        ],
+        "path": "x-pack/packages/security/authorization_core/src/privileges/feature_privilege_builder/cases.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

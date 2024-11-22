@@ -18,6 +18,11 @@ export const OUTPUT_MESSAGES = Object.freeze({
       defaultMessage: `{command} completed successfully`,
       values: { command },
     }),
+  submittedSuccessfully: (command: string) =>
+    i18n.translate('xpack.securitySolution.responseActionsList.list.item.submittedSuccessfully', {
+      defaultMessage: `{command} submitted successfully`,
+      values: { command },
+    }),
   isPending: (command: string) =>
     i18n.translate('xpack.securitySolution.responseActionsList.list.item.isPending', {
       defaultMessage: `{command} is pending`,

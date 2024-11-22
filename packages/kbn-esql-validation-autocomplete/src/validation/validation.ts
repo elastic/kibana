@@ -1,40 +1,42 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import uniqBy from 'lodash/uniqBy';
-import type {
+import {
   AstProviderFn,
+  ESQLAst,
   ESQLAstItem,
+  ESQLAstMetricsCommand,
   ESQLColumn,
   ESQLCommand,
   ESQLCommandMode,
   ESQLCommandOption,
   ESQLFunction,
   ESQLMessage,
-  ESQLSingleAstItem,
   ESQLSource,
+  walk,
 } from '@kbn/esql-ast';
+import type { ESQLAstField, ESQLIdentifier } from '@kbn/esql-ast/src/types';
 import {
   CommandModeDefinition,
   CommandOptionsDefinition,
-  FunctionArgSignature,
-  FunctionDefinition,
-  SignatureArgType,
+  FunctionParameter,
 } from '../definitions/types';
 import {
   areFieldAndVariableTypesCompatible,
   extractSingularType,
-  getColumnHit,
+  getColumnForASTNode,
   getCommandDefinition,
   getFunctionDefinition,
   isArrayType,
   isColumnItem,
-  isEqualType,
+  checkFunctionArgMatchesDefinition,
   isFunctionItem,
   isLiteralItem,
   isOptionItem,
@@ -42,18 +44,24 @@ import {
   isSupportedFunction,
   isTimeIntervalItem,
   inKnownTimeInterval,
-  printFunctionSignature,
   sourceExists,
-  columnExists,
+  getColumnExists,
   hasWildcard,
-  hasCCSSource,
   isSettingItem,
   isAssignment,
   isVariable,
   isValidLiteralOption,
+  isAggFunction,
+  getQuotedColumnName,
+  isInlineCastItem,
+  getSignaturesWithMatchingArity,
+  isIdentifier,
+  isFunctionOperatorParam,
+  isMaybeAggFunction,
+  isParametrized,
 } from '../shared/helpers';
 import { collectVariables } from '../shared/variables';
-import { getMessageFromId, getUnknownTypeLabel } from './errors';
+import { getMessageFromId, errors } from './errors';
 import type {
   ErrorTypes,
   ESQLRealField,
@@ -71,21 +79,27 @@ import {
   retrieveFieldsFromStringSources,
 } from './resources';
 import { collapseWrongArgumentTypeMessages, getMaxMinNumberOfParams } from './helpers';
-import { getParamAtPosition } from '../autocomplete/helper';
-import { METADATA_FIELDS } from '../shared/constants';
+import { getParamAtPosition } from '../shared/helpers';
+import {
+  METADATA_FIELDS,
+  UNSUPPORTED_COMMANDS_BEFORE_MATCH,
+  UNSUPPORTED_COMMANDS_BEFORE_QSTR,
+} from '../shared/constants';
+import { compareTypesWithLiterals } from '../shared/esql_types';
 
+const NO_MESSAGE: ESQLMessage[] = [];
 function validateFunctionLiteralArg(
   astFunction: ESQLFunction,
   actualArg: ESQLAstItem,
-  argDef: FunctionArgSignature,
+  argDef: FunctionParameter,
   references: ReferenceMaps,
   parentCommand: string
 ) {
   const messages: ESQLMessage[] = [];
   if (isLiteralItem(actualArg)) {
     if (
-      actualArg.literalType === 'string' &&
-      argDef.literalOptions &&
+      actualArg.literalType === 'keyword' &&
+      argDef.acceptedValues &&
       isValidLiteralOption(actualArg, argDef)
     ) {
       messages.push(
@@ -94,21 +108,21 @@ function validateFunctionLiteralArg(
           values: {
             name: astFunction.name,
             value: actualArg.value,
-            supportedOptions: argDef.literalOptions?.map((option) => `"${option}"`).join(', '),
+            supportedOptions: argDef.acceptedValues?.map((option) => `"${option}"`).join(', '),
           },
           locations: actualArg.location,
         })
       );
     }
 
-    if (!isEqualType(actualArg, argDef, references, parentCommand)) {
+    if (!checkFunctionArgMatchesDefinition(actualArg, argDef, references, parentCommand)) {
       messages.push(
         getMessageFromId({
           messageId: 'wrongArgumentType',
           values: {
             name: astFunction.name,
-            argType: argDef.type,
-            value: actualArg.value,
+            argType: argDef.type as string,
+            value: actualArg.text,
             givenType: actualArg.literalType,
           },
           locations: actualArg.location,
@@ -129,13 +143,13 @@ function validateFunctionLiteralArg(
         })
       );
     } else {
-      if (!isEqualType(actualArg, argDef, references, parentCommand)) {
+      if (!checkFunctionArgMatchesDefinition(actualArg, argDef, references, parentCommand)) {
         messages.push(
           getMessageFromId({
             messageId: 'wrongArgumentType',
             values: {
               name: astFunction.name,
-              argType: argDef.type,
+              argType: argDef.type as string,
               value: actualArg.name,
               givenType: 'duration',
             },
@@ -148,10 +162,39 @@ function validateFunctionLiteralArg(
   return messages;
 }
 
+function validateInlineCastArg(
+  astFunction: ESQLFunction,
+  arg: ESQLAstItem,
+  parameterDefinition: FunctionParameter,
+  references: ReferenceMaps,
+  parentCommand: string
+) {
+  if (!isInlineCastItem(arg)) {
+    return [];
+  }
+
+  if (!checkFunctionArgMatchesDefinition(arg, parameterDefinition, references, parentCommand)) {
+    return [
+      getMessageFromId({
+        messageId: 'wrongArgumentType',
+        values: {
+          name: astFunction.name,
+          argType: parameterDefinition.type as string,
+          value: arg.text,
+          givenType: arg.castType,
+        },
+        locations: arg.location,
+      }),
+    ];
+  }
+
+  return [];
+}
+
 function validateNestedFunctionArg(
   astFunction: ESQLFunction,
   actualArg: ESQLAstItem,
-  argDef: SignatureArgType,
+  parameterDefinition: FunctionParameter,
   references: ReferenceMaps,
   parentCommand: string
 ) {
@@ -165,24 +208,26 @@ function validateNestedFunctionArg(
     const argFn = getFunctionDefinition(actualArg.name)!;
     const fnDef = getFunctionDefinition(astFunction.name)!;
     // no nestying criteria should be enforced only for same type function
-    if ('noNestingFunctions' in argDef && argDef.noNestingFunctions && fnDef.type === argFn.type) {
+    if (fnDef.type === 'agg' && argFn.type === 'agg') {
       messages.push(
         getMessageFromId({
           messageId: 'noNestedArgumentSupport',
-          values: { name: actualArg.text, argType: argFn.signatures[0].returnType },
+          values: { name: actualArg.text, argType: argFn.signatures[0].returnType as string },
           locations: actualArg.location,
         })
       );
     }
-    if (!isEqualType(actualArg, argDef, references, parentCommand)) {
+    if (
+      !checkFunctionArgMatchesDefinition(actualArg, parameterDefinition, references, parentCommand)
+    ) {
       messages.push(
         getMessageFromId({
           messageId: 'wrongArgumentType',
           values: {
             name: astFunction.name,
-            argType: argDef.type,
-            value: printFunctionSignature(actualArg) || actualArg.name,
-            givenType: argFn.signatures[0].returnType,
+            argType: parameterDefinition.type as string,
+            value: actualArg.text,
+            givenType: argFn.signatures[0].returnType as string,
           },
           locations: actualArg.location,
         })
@@ -195,131 +240,235 @@ function validateNestedFunctionArg(
 function validateFunctionColumnArg(
   astFunction: ESQLFunction,
   actualArg: ESQLAstItem,
-  argDef: SignatureArgType,
+  parameterDefinition: FunctionParameter,
   references: ReferenceMaps,
   parentCommand: string
 ) {
   const messages: ESQLMessage[] = [];
-  if (isColumnItem(actualArg)) {
-    if (actualArg.name) {
-      const { hit: columnCheck, nameHit } = columnExists(actualArg, references);
-      if (!columnCheck) {
-        if (argDef.constantOnly) {
-          messages.push(
-            getMessageFromId({
-              messageId: 'expectedConstant',
-              values: {
-                fn: astFunction.name,
-                given: getUnknownTypeLabel(),
-              },
-              locations: actualArg.location,
-            })
-          );
-        } else {
-          messages.push(
-            getMessageFromId({
-              messageId: 'unknownColumn',
-              values: {
-                name: actualArg.name,
-              },
-              locations: actualArg.location,
-            })
-          );
-        }
-      } else {
-        if (argDef.constantOnly) {
-          messages.push(
-            getMessageFromId({
-              messageId: 'expectedConstant',
-              values: {
-                fn: astFunction.name,
-                given: actualArg.name,
-              },
-              locations: actualArg.location,
-            })
-          );
-        }
-        if (actualArg.name === '*') {
-          // if function does not support wildcards return a specific error
-          if (!('supportsWildcard' in argDef) || !argDef.supportsWildcard) {
-            messages.push(
-              getMessageFromId({
-                messageId: 'noWildcardSupportAsArg',
-                values: {
-                  name: astFunction.name,
-                },
-                locations: actualArg.location,
-              })
-            );
-          }
-          // do not validate any further for now, only count() accepts wildcard as args...
-        } else {
-          if (!isEqualType(actualArg, argDef, references, parentCommand, nameHit)) {
-            // guaranteed by the check above
-            const columnHit = getColumnHit(nameHit!, references);
-            messages.push(
-              getMessageFromId({
-                messageId: 'wrongArgumentType',
-                values: {
-                  name: astFunction.name,
-                  argType: argDef.type,
-                  value: actualArg.name,
-                  givenType: columnHit!.type,
-                },
-                locations: actualArg.location,
-              })
-            );
-          }
-        }
-      }
-    }
-  }
-  return messages;
-}
-
-function extractCompatibleSignaturesForFunction(
-  fnDef: FunctionDefinition,
-  astFunction: ESQLFunction
-) {
-  return fnDef.signatures.filter((def) => {
-    if (def.minParams) {
-      return astFunction.args.length >= def.minParams;
-    }
-    return (
-      astFunction.args.length >= def.params.filter(({ optional }) => !optional).length &&
-      astFunction.args.length <= def.params.length
-    );
-  });
-}
-
-function validateFunction(
-  astFunction: ESQLFunction,
-  parentCommand: string,
-  parentOption: string | undefined,
-  references: ReferenceMaps,
-  forceConstantOnly: boolean = false,
-  isNested?: boolean
-): ESQLMessage[] {
-  const messages: ESQLMessage[] = [];
-
-  if (astFunction.incomplete) {
+  if (!(isColumnItem(actualArg) || isIdentifier(actualArg))) {
     return messages;
   }
-  const fnDefinition = getFunctionDefinition(astFunction.name)!;
 
-  const isFnSupported = isSupportedFunction(astFunction.name, parentCommand, parentOption);
+  const columnName = getQuotedColumnName(actualArg);
+  const columnExists = getColumnExists(actualArg, references);
 
-  if (!isFnSupported.supported) {
-    if (isFnSupported.reason === 'unknownFunction') {
+  if (parameterDefinition.constantOnly) {
+    messages.push(
+      getMessageFromId({
+        messageId: 'expectedConstant',
+        values: {
+          fn: astFunction.name,
+          given: columnName,
+        },
+        locations: actualArg.location,
+      })
+    );
+
+    return messages;
+  }
+
+  if (!columnExists) {
+    messages.push(
+      getMessageFromId({
+        messageId: 'unknownColumn',
+        values: {
+          name: actualArg.name,
+        },
+        locations: actualArg.location,
+      })
+    );
+
+    return messages;
+  }
+
+  if (actualArg.name === '*') {
+    // if function does not support wildcards return a specific error
+    if (!('supportsWildcard' in parameterDefinition) || !parameterDefinition.supportsWildcard) {
       messages.push(
         getMessageFromId({
-          messageId: 'unknownFunction',
+          messageId: 'noWildcardSupportAsArg',
           values: {
             name: astFunction.name,
           },
-          locations: astFunction.location,
+          locations: actualArg.location,
         })
       );
+    }
+
+    return messages;
+  }
+
+  if (
+    !checkFunctionArgMatchesDefinition(actualArg, parameterDefinition, references, parentCommand)
+  ) {
+    const columnHit = getColumnForASTNode(actualArg, references);
+    messages.push(
+      getMessageFromId({
+        messageId: 'wrongArgumentType',
+        values: {
+          name: astFunction.name,
+          argType: parameterDefinition.type as string,
+          value: actualArg.name,
+          givenType: columnHit!.type,
+        },
+        locations: actualArg.location,
+      })
+    );
+  }
+
+  return messages;
+}
+
+function removeInlineCasts(arg: ESQLAstItem): ESQLAstItem {
+  if (isInlineCastItem(arg)) {
+    return removeInlineCasts(arg.value);
+  }
+  return arg;
+}
+
+function validateIfHasUnsupportedCommandPrior(
+  fn: ESQLFunction,
+  parentAst: ESQLCommand[] = [],
+  unsupportedCommands: Set<string>,
+  currentCommandIndex?: number
+) {
+  if (currentCommandIndex === undefined) {
+    return NO_MESSAGE;
+  }
+  const unsupportedCommandsPrior = parentAst.filter(
+    (cmd, idx) => idx <= currentCommandIndex && unsupportedCommands.has(cmd.name)
+  );
+
+  if (unsupportedCommandsPrior.length > 0) {
+    return [
+      getMessageFromId({
+        messageId: 'fnUnsupportedAfterCommand',
+        values: {
+          function: fn.name.toUpperCase(),
+          command: unsupportedCommandsPrior[0].name.toUpperCase(),
+        },
+        locations: fn.location,
+      }),
+    ];
+  }
+  return NO_MESSAGE;
+}
+
+const validateMatchFunction: FunctionValidator = ({
+  fn,
+  parentCommand,
+  parentOption,
+  references,
+  forceConstantOnly = false,
+  isNested,
+  parentAst,
+  currentCommandIndex,
+}) => {
+  if (fn.name === 'match') {
+    if (parentCommand !== 'where') {
+      return [
+        getMessageFromId({
+          messageId: 'onlyWhereCommandSupported',
+          values: { fn: fn.name },
+          locations: fn.location,
+        }),
+      ];
+    }
+    return validateIfHasUnsupportedCommandPrior(
+      fn,
+      parentAst,
+      UNSUPPORTED_COMMANDS_BEFORE_MATCH,
+      currentCommandIndex
+    );
+  }
+  return NO_MESSAGE;
+};
+
+type FunctionValidator = (args: {
+  fn: ESQLFunction;
+  parentCommand: string;
+  parentOption?: string;
+  references: ReferenceMaps;
+  forceConstantOnly?: boolean;
+  isNested?: boolean;
+  parentAst?: ESQLCommand[];
+  currentCommandIndex?: number;
+}) => ESQLMessage[];
+
+const validateQSTRFunction: FunctionValidator = ({
+  fn,
+  parentCommand,
+  parentOption,
+  references,
+  forceConstantOnly = false,
+  isNested,
+  parentAst,
+  currentCommandIndex,
+}) => {
+  if (fn.name === 'qstr') {
+    return validateIfHasUnsupportedCommandPrior(
+      fn,
+      parentAst,
+      UNSUPPORTED_COMMANDS_BEFORE_QSTR,
+      currentCommandIndex
+    );
+  }
+  return NO_MESSAGE;
+};
+
+const textSearchFunctionsValidators: Record<string, FunctionValidator> = {
+  match: validateMatchFunction,
+  qstr: validateQSTRFunction,
+};
+
+function validateFunction({
+  fn,
+  parentCommand,
+  parentOption,
+  references,
+  forceConstantOnly = false,
+  isNested,
+  parentAst,
+  currentCommandIndex,
+}: {
+  fn: ESQLFunction;
+  parentCommand: string;
+  parentOption?: string;
+  references: ReferenceMaps;
+  forceConstantOnly?: boolean;
+  isNested?: boolean;
+  parentAst?: ESQLCommand[];
+  currentCommandIndex?: number;
+}): ESQLMessage[] {
+  const messages: ESQLMessage[] = [];
+
+  if (fn.incomplete) {
+    return messages;
+  }
+  if (isFunctionOperatorParam(fn)) {
+    return messages;
+  }
+  const fnDefinition = getFunctionDefinition(fn.name)!;
+
+  const isFnSupported = isSupportedFunction(fn.name, parentCommand, parentOption);
+
+  if (typeof textSearchFunctionsValidators[fn.name] === 'function') {
+    const validator = textSearchFunctionsValidators[fn.name];
+    messages.push(
+      ...validator({
+        fn,
+        parentCommand,
+        parentOption,
+        references,
+        isNested,
+        parentAst,
+        currentCommandIndex,
+      })
+    );
+  }
+  if (!isFnSupported.supported) {
+    if (isFnSupported.reason === 'unknownFunction') {
+      messages.push(errors.unknownFunction(fn));
     }
     // for nested functions skip this check and make the nested check fail later on
     if (isFnSupported.reason === 'unsupportedFunction' && !isNested) {
@@ -328,16 +477,16 @@ function validateFunction(
           ? getMessageFromId({
               messageId: 'unsupportedFunctionForCommandOption',
               values: {
-                name: astFunction.name,
+                name: fn.name,
                 command: parentCommand.toUpperCase(),
                 option: parentOption.toUpperCase(),
               },
-              locations: astFunction.location,
+              locations: fn.location,
             })
           : getMessageFromId({
               messageId: 'unsupportedFunctionForCommand',
-              values: { name: astFunction.name, command: parentCommand.toUpperCase() },
-              locations: astFunction.location,
+              values: { name: fn.name, command: parentCommand.toUpperCase() },
+              locations: fn.location,
             })
       );
     }
@@ -345,7 +494,7 @@ function validateFunction(
       return messages;
     }
   }
-  const matchingSignatures = extractCompatibleSignaturesForFunction(fnDefinition, astFunction);
+  const matchingSignatures = getSignaturesWithMatchingArity(fnDefinition, fn);
   if (!matchingSignatures.length) {
     const { max, min } = getMaxMinNumberOfParams(fnDefinition);
     if (max === min) {
@@ -353,24 +502,24 @@ function validateFunction(
         getMessageFromId({
           messageId: 'wrongArgumentNumber',
           values: {
-            fn: astFunction.name,
+            fn: fn.name,
             numArgs: max,
-            passedArgs: astFunction.args.length,
+            passedArgs: fn.args.length,
           },
-          locations: astFunction.location,
+          locations: fn.location,
         })
       );
-    } else if (astFunction.args.length > max) {
+    } else if (fn.args.length > max) {
       messages.push(
         getMessageFromId({
           messageId: 'wrongArgumentNumberTooMany',
           values: {
-            fn: astFunction.name,
+            fn: fn.name,
             numArgs: max,
-            passedArgs: astFunction.args.length,
-            extraArgs: astFunction.args.length - max,
+            passedArgs: fn.args.length,
+            extraArgs: fn.args.length - max,
           },
-          locations: astFunction.location,
+          locations: fn.location,
         })
       );
     } else {
@@ -378,28 +527,36 @@ function validateFunction(
         getMessageFromId({
           messageId: 'wrongArgumentNumberTooFew',
           values: {
-            fn: astFunction.name,
+            fn: fn.name,
             numArgs: min,
-            passedArgs: astFunction.args.length,
-            missingArgs: min - astFunction.args.length,
+            passedArgs: fn.args.length,
+            missingArgs: min - fn.args.length,
           },
-          locations: astFunction.location,
+          locations: fn.location,
         })
       );
     }
   }
   // now perform the same check on all functions args
-  for (let i = 0; i < astFunction.args.length; i++) {
-    const arg = astFunction.args[i];
+  for (let i = 0; i < fn.args.length; i++) {
+    const arg = fn.args[i];
 
     const allMatchingArgDefinitionsAreConstantOnly = matchingSignatures.every((signature) => {
       return signature.params[i]?.constantOnly;
     });
     const wrappedArray = Array.isArray(arg) ? arg : [arg];
-    for (const subArg of wrappedArray) {
+    for (const _subArg of wrappedArray) {
+      /**
+       * we need to remove the inline casts
+       * to see if there's a function under there
+       *
+       * e.g. for ABS(CEIL(numberField)::int), we need to validate CEIL(numberField)
+       */
+      const subArg = removeInlineCasts(_subArg);
+
       if (isFunctionItem(subArg)) {
-        const messagesFromArg = validateFunction(
-          subArg,
+        const messagesFromArg = validateFunction({
+          fn: subArg,
           parentCommand,
           parentOption,
           references,
@@ -418,17 +575,20 @@ function validateFunction(
            * Because of this, the abs function's arguments inherit the constraint
            * and each should be validated as if each were constantOnly.
            */
-          allMatchingArgDefinitionsAreConstantOnly || forceConstantOnly,
-          // use the nesting flag for now just for stats
+          forceConstantOnly: allMatchingArgDefinitionsAreConstantOnly || forceConstantOnly,
+          // use the nesting flag for now just for stats and metrics
           // TODO: revisit this part later on to make it more generic
-          parentCommand === 'stats' ? isNested || !isAssignment(astFunction) : false
-        );
+          isNested: ['stats', 'inlinestats', 'metrics'].includes(parentCommand)
+            ? isNested || !isAssignment(fn)
+            : false,
+          parentAst,
+        });
 
         if (messagesFromArg.some(({ code }) => code === 'expectedConstant')) {
           const consolidatedMessage = getMessageFromId({
             messageId: 'expectedConstant',
             values: {
-              fn: astFunction.name,
+              fn: fn.name,
               given: subArg.text,
             },
             locations: subArg.location,
@@ -446,7 +606,7 @@ function validateFunction(
   }
   // check if the definition has some specific validation to apply:
   if (fnDefinition.validate) {
-    const payloads = fnDefinition.validate(astFunction);
+    const payloads = fnDefinition.validate(fn);
     if (payloads.length) {
       messages.push(...payloads);
     }
@@ -455,7 +615,7 @@ function validateFunction(
   const failingSignatures: ESQLMessage[][] = [];
   for (const signature of matchingSignatures) {
     const failingSignature: ESQLMessage[] = [];
-    astFunction.args.forEach((outerArg, index) => {
+    fn.args.forEach((outerArg, index) => {
       const argDef = getParamAtPosition(signature, index);
       if ((!outerArg && argDef?.optional) || !argDef) {
         // that's ok, just skip it
@@ -473,9 +633,10 @@ function validateFunction(
           validateFunctionLiteralArg,
           validateNestedFunctionArg,
           validateFunctionColumnArg,
+          validateInlineCastArg,
         ].flatMap((validateFn) => {
           return validateFn(
-            astFunction,
+            fn,
             arg,
             {
               ...argDef,
@@ -488,14 +649,14 @@ function validateFunction(
         });
       });
 
-      const shouldCollapseMessages = isArrayType(argDef.type) && hasMultipleElements;
+      const shouldCollapseMessages = isArrayType(argDef.type as string) && hasMultipleElements;
       failingSignature.push(
         ...(shouldCollapseMessages
           ? collapseWrongArgumentTypeMessages(
               messagesFromAllArgElements,
               outerArg,
-              astFunction.name,
-              argDef.type,
+              fn.name,
+              argDef.type as string,
               parentCommand,
               references
             )
@@ -567,6 +728,168 @@ function validateSetting(
   return messages;
 }
 
+/**
+ * Validate that a function is an aggregate function or that all children
+ * recursively terminate at either a literal or an aggregate function.
+ */
+const isFunctionAggClosed = (fn: ESQLFunction): boolean =>
+  isMaybeAggFunction(fn) || areFunctionArgsAggClosed(fn);
+
+const areFunctionArgsAggClosed = (fn: ESQLFunction): boolean =>
+  fn.args.every((arg) => isLiteralItem(arg) || (isFunctionItem(arg) && isFunctionAggClosed(arg))) ||
+  isFunctionOperatorParam(fn);
+
+/**
+ * Looks for first nested aggregate function in an aggregate function, recursively.
+ */
+const findNestedAggFunctionInAggFunction = (agg: ESQLFunction): ESQLFunction | undefined => {
+  for (const arg of agg.args) {
+    if (isFunctionItem(arg)) {
+      return isMaybeAggFunction(arg) ? arg : findNestedAggFunctionInAggFunction(arg);
+    }
+  }
+};
+
+/**
+ * Looks for first nested aggregate function in another aggregate a function,
+ * recursively.
+ *
+ * @param fn Function to check for nested aggregate functions.
+ * @param parentIsAgg Whether the parent function of `fn` is an aggregate function.
+ * @returns The first nested aggregate function in `fn`, or `undefined` if none is found.
+ */
+const findNestedAggFunction = (
+  fn: ESQLFunction,
+  parentIsAgg: boolean = false
+): ESQLFunction | undefined => {
+  if (isMaybeAggFunction(fn)) {
+    return parentIsAgg ? fn : findNestedAggFunctionInAggFunction(fn);
+  }
+
+  for (const arg of fn.args) {
+    if (isFunctionItem(arg)) {
+      const nestedAgg = findNestedAggFunction(arg, parentIsAgg || isAggFunction(fn));
+      if (nestedAgg) return nestedAgg;
+    }
+  }
+};
+
+/**
+ * Validates aggregates fields: `... <aggregates> ...`.
+ */
+const validateAggregates = (
+  command: ESQLCommand,
+  aggregates: ESQLAstField[],
+  references: ReferenceMaps
+) => {
+  const messages: ESQLMessage[] = [];
+
+  // Should never happen.
+  if (!aggregates.length) {
+    messages.push(errors.unexpected(command.location));
+    return messages;
+  }
+
+  let hasMissingAggregationFunctionError = false;
+
+  for (const aggregate of aggregates) {
+    if (isFunctionItem(aggregate)) {
+      messages.push(
+        ...validateFunction({
+          fn: aggregate,
+          parentCommand: command.name,
+          parentOption: undefined,
+          references,
+        })
+      );
+
+      let hasAggregationFunction = false;
+
+      walk(aggregate, {
+        visitFunction: (fn) => {
+          const definition = getFunctionDefinition(fn.name);
+          if (!definition) return;
+          if (definition.type === 'agg') hasAggregationFunction = true;
+        },
+      });
+
+      if (!hasAggregationFunction) {
+        hasMissingAggregationFunctionError = true;
+        messages.push(errors.noAggFunction(command, aggregate));
+      }
+    } else if (isColumnItem(aggregate) || isIdentifier(aggregate)) {
+      messages.push(errors.unknownAggFunction(aggregate));
+    } else {
+      // Should never happen.
+    }
+  }
+
+  if (hasMissingAggregationFunctionError) {
+    return messages;
+  }
+
+  for (const aggregate of aggregates) {
+    if (isFunctionItem(aggregate)) {
+      const fn = isAssignment(aggregate) ? aggregate.args[1] : aggregate;
+      if (isFunctionItem(fn) && !isFunctionAggClosed(fn)) {
+        messages.push(errors.expressionNotAggClosed(command, fn));
+      }
+    }
+  }
+
+  if (messages.length) {
+    return messages;
+  }
+
+  for (const aggregate of aggregates) {
+    if (isFunctionItem(aggregate)) {
+      const aggInAggFunction = findNestedAggFunction(aggregate);
+      if (aggInAggFunction) {
+        messages.push(errors.aggInAggFunction(aggInAggFunction));
+        break;
+      }
+    }
+  }
+
+  return messages;
+};
+
+/**
+ * Validates grouping fields of the BY clause: `... BY <grouping>`.
+ */
+const validateByGrouping = (
+  fields: ESQLAstItem[],
+  commandName: string,
+  referenceMaps: ReferenceMaps,
+  multipleParams: boolean
+): ESQLMessage[] => {
+  const messages: ESQLMessage[] = [];
+  for (const field of fields) {
+    if (!Array.isArray(field)) {
+      if (!multipleParams) {
+        if (isColumnItem(field)) {
+          messages.push(...validateColumnForCommand(field, commandName, referenceMaps));
+        }
+      } else {
+        if (isColumnItem(field)) {
+          messages.push(...validateColumnForCommand(field, commandName, referenceMaps));
+        }
+        if (isFunctionItem(field)) {
+          messages.push(
+            ...validateFunction({
+              fn: field,
+              parentCommand: commandName,
+              parentOption: 'by',
+              references: referenceMaps,
+            })
+          );
+        }
+      }
+    }
+  }
+  return messages;
+};
+
 function validateOption(
   option: ESQLCommandOption,
   optionDef: CommandOptionsDefinition | undefined,
@@ -605,7 +928,14 @@ function validateOption(
             messages.push(...validateColumnForCommand(arg, command.name, referenceMaps));
           }
           if (isFunctionItem(arg)) {
-            messages.push(...validateFunction(arg, command.name, option.name, referenceMaps));
+            messages.push(
+              ...validateFunction({
+                fn: arg,
+                parentCommand: command.name,
+                parentOption: option.name,
+                references: referenceMaps,
+              })
+            );
           }
         }
       }
@@ -624,38 +954,35 @@ function validateSource(
   if (source.incomplete) {
     return messages;
   }
+
   const commandDef = getCommandDefinition(commandName);
-  // give up on validate if CCS for now
-  const hasCCS = hasCCSSource(source.name);
-  if (!hasCCS) {
-    const isWildcardAndNotSupported =
-      hasWildcard(source.name) && !commandDef.signature.params.some(({ wildcards }) => wildcards);
-    if (isWildcardAndNotSupported) {
+  const isWildcardAndNotSupported =
+    hasWildcard(source.name) && !commandDef.signature.params.some(({ wildcards }) => wildcards);
+  if (isWildcardAndNotSupported) {
+    messages.push(
+      getMessageFromId({
+        messageId: 'wildcardNotSupportedForCommand',
+        values: { command: commandName.toUpperCase(), value: source.name },
+        locations: source.location,
+      })
+    );
+  } else {
+    if (source.sourceType === 'index' && !sourceExists(source.name, sources)) {
       messages.push(
         getMessageFromId({
-          messageId: 'wildcardNotSupportedForCommand',
-          values: { command: commandName.toUpperCase(), value: source.name },
+          messageId: 'unknownIndex',
+          values: { name: source.name },
           locations: source.location,
         })
       );
-    } else {
-      if (source.sourceType === 'index' && !sourceExists(source.name, sources)) {
-        messages.push(
-          getMessageFromId({
-            messageId: 'unknownIndex',
-            values: { name: source.name },
-            locations: source.location,
-          })
-        );
-      } else if (source.sourceType === 'policy' && !policies.has(source.name)) {
-        messages.push(
-          getMessageFromId({
-            messageId: 'unknownPolicy',
-            values: { name: source.name },
-            locations: source.location,
-          })
-        );
-      }
+    } else if (source.sourceType === 'policy' && !policies.has(source.name)) {
+      messages.push(
+        getMessageFromId({
+          messageId: 'unknownPolicy',
+          values: { name: source.name },
+          locations: source.location,
+        })
+      );
     }
   }
 
@@ -663,40 +990,37 @@ function validateSource(
 }
 
 function validateColumnForCommand(
-  column: ESQLColumn,
+  column: ESQLColumn | ESQLIdentifier,
   commandName: string,
   references: ReferenceMaps
 ): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
-
   if (commandName === 'row') {
-    if (!references.variables.has(column.name)) {
-      messages.push(
-        getMessageFromId({
-          messageId: 'unknownColumn',
-          values: {
-            name: column.name,
-          },
-          locations: column.location,
-        })
-      );
+    if (!references.variables.has(column.name) && !isParametrized(column)) {
+      messages.push(errors.unknownColumn(column));
     }
   } else {
-    const { hit: columnCheck, nameHit } = columnExists(column, references);
-    if (columnCheck && nameHit) {
+    const columnName = getQuotedColumnName(column);
+    if (getColumnExists(column, references)) {
       const commandDef = getCommandDefinition(commandName);
       const columnParamsWithInnerTypes = commandDef.signature.params.filter(
-        ({ type, innerType }) => type === 'column' && innerType
+        ({ type, innerTypes }) => type === 'column' && innerTypes
       );
       // this should be guaranteed by the columnCheck above
-      const columnRef = getColumnHit(nameHit, references)!;
+      const columnRef = getColumnForASTNode(column, references)!;
 
       if (columnParamsWithInnerTypes.length) {
-        const hasSomeWrongInnerTypes = columnParamsWithInnerTypes.every(({ innerType }) => {
-          return innerType !== 'any' && innerType !== columnRef.type;
-        });
+        const hasSomeWrongInnerTypes = columnParamsWithInnerTypes.every(
+          ({ innerTypes }) =>
+            innerTypes &&
+            !innerTypes.includes('any') &&
+            !innerTypes.some((type) => compareTypesWithLiterals(type, columnRef.type))
+        );
         if (hasSomeWrongInnerTypes) {
-          const supportedTypes = columnParamsWithInnerTypes.map(({ innerType }) => innerType);
+          const supportedTypes: string[] = columnParamsWithInnerTypes
+            .map(({ innerTypes }) => innerTypes)
+            .flat()
+            .filter((type) => type !== undefined) as string[];
 
           messages.push(
             getMessageFromId({
@@ -706,7 +1030,7 @@ function validateColumnForCommand(
                 type: supportedTypes.join(', '),
                 typeCount: supportedTypes.length,
                 givenType: columnRef.type,
-                column: nameHit,
+                column: columnName,
               },
               locations: column.location,
             })
@@ -714,7 +1038,7 @@ function validateColumnForCommand(
         }
       }
       if (
-        hasWildcard(nameHit) &&
+        hasWildcard(columnName) &&
         !isVariable(columnRef) &&
         !commandDef.signature.params.some(({ type, wildcards }) => type === 'column' && wildcards)
       ) {
@@ -723,7 +1047,7 @@ function validateColumnForCommand(
             messageId: 'wildcardNotSupportedForCommand',
             values: {
               command: commandName.toUpperCase(),
-              value: nameHit,
+              value: columnName,
             },
             locations: column.location,
           })
@@ -731,22 +1055,61 @@ function validateColumnForCommand(
       }
     } else {
       if (column.name) {
-        messages.push(
-          getMessageFromId({
-            messageId: 'unknownColumn',
-            values: {
-              name: column.name,
-            },
-            locations: column.location,
-          })
-        );
+        messages.push(errors.unknownColumn(column));
       }
     }
   }
   return messages;
 }
 
-function validateCommand(command: ESQLCommand, references: ReferenceMaps): ESQLMessage[] {
+export function validateSources(
+  command: ESQLCommand,
+  sources: ESQLSource[],
+  references: ReferenceMaps
+): ESQLMessage[] {
+  const messages: ESQLMessage[] = [];
+
+  for (const source of sources) {
+    messages.push(...validateSource(source, command.name, references));
+  }
+
+  return messages;
+}
+
+/**
+ * Validates the METRICS source command:
+ *
+ *     METRICS <sources> [ <aggregates> [ BY <grouping> ]]
+ */
+const validateMetricsCommand = (
+  command: ESQLAstMetricsCommand,
+  references: ReferenceMaps
+): ESQLMessage[] => {
+  const messages: ESQLMessage[] = [];
+  const { sources, aggregates, grouping } = command;
+
+  // METRICS <sources> ...
+  messages.push(...validateSources(command, sources, references));
+
+  // ... <aggregates> ...
+  if (aggregates && aggregates.length) {
+    messages.push(...validateAggregates(command, aggregates, references));
+
+    // ... BY <grouping>
+    if (grouping && grouping.length) {
+      messages.push(...validateByGrouping(grouping, 'metrics', references, true));
+    }
+  }
+
+  return messages;
+};
+
+function validateCommand(
+  command: ESQLCommand,
+  references: ReferenceMaps,
+  ast: ESQLAst,
+  currentCommandIndex: number
+): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
   if (command.incomplete) {
     return messages;
@@ -758,62 +1121,72 @@ function validateCommand(command: ESQLCommand, references: ReferenceMaps): ESQLM
     messages.push(...commandDef.validate(command));
   }
 
-  // Now validate arguments
-  for (const commandArg of command.args) {
-    const wrappedArg = Array.isArray(commandArg) ? commandArg : [commandArg];
-    for (const arg of wrappedArg) {
-      if (isFunctionItem(arg)) {
-        messages.push(...validateFunction(arg, command.name, undefined, references));
-      }
+  switch (commandDef.name) {
+    case 'metrics': {
+      const metrics = command as ESQLAstMetricsCommand;
+      messages.push(...validateMetricsCommand(metrics, references));
+      break;
+    }
+    default: {
+      // Now validate arguments
+      for (const commandArg of command.args) {
+        const wrappedArg = Array.isArray(commandArg) ? commandArg : [commandArg];
+        for (const arg of wrappedArg) {
+          if (isFunctionItem(arg)) {
+            messages.push(
+              ...validateFunction({
+                fn: arg,
+                parentCommand: command.name,
+                parentOption: undefined,
+                references,
+                parentAst: ast,
+                currentCommandIndex,
+              })
+            );
+          }
 
-      if (isSettingItem(arg)) {
-        messages.push(...validateSetting(arg, commandDef.modes[0], command, references));
-      }
+          if (isSettingItem(arg)) {
+            messages.push(...validateSetting(arg, commandDef.modes[0], command, references));
+          }
 
-      if (isOptionItem(arg)) {
-        messages.push(
-          ...validateOption(
-            arg,
-            commandDef.options.find(({ name }) => name === arg.name),
-            command,
-            references
-          )
-        );
-      }
-      if (isColumnItem(arg)) {
-        if (command.name === 'stats') {
-          messages.push(
-            getMessageFromId({
-              messageId: 'unknownAggregateFunction',
-              values: {
-                value: (arg as ESQLSingleAstItem).name,
-                type: 'FieldAttribute',
-              },
-              locations: (arg as ESQLSingleAstItem).location,
-            })
-          );
-        } else {
-          messages.push(...validateColumnForCommand(arg, command.name, references));
+          if (isOptionItem(arg)) {
+            messages.push(
+              ...validateOption(
+                arg,
+                commandDef.options.find(({ name }) => name === arg.name),
+                command,
+                references
+              )
+            );
+          }
+          if (isColumnItem(arg) || isIdentifier(arg)) {
+            if (command.name === 'stats' || command.name === 'inlinestats') {
+              messages.push(errors.unknownAggFunction(arg));
+            } else {
+              messages.push(...validateColumnForCommand(arg, command.name, references));
+            }
+          }
+          if (isTimeIntervalItem(arg)) {
+            messages.push(
+              getMessageFromId({
+                messageId: 'unsupportedTypeForCommand',
+                values: {
+                  command: command.name.toUpperCase(),
+                  type: 'date_period',
+                  value: arg.name,
+                },
+                locations: arg.location,
+              })
+            );
+          }
+          if (isSourceItem(arg)) {
+            messages.push(...validateSource(arg, command.name, references));
+          }
         }
-      }
-      if (isTimeIntervalItem(arg)) {
-        messages.push(
-          getMessageFromId({
-            messageId: 'unsupportedTypeForCommand',
-            values: {
-              command: command.name.toUpperCase(),
-              type: 'date_period',
-              value: arg.name,
-            },
-            locations: arg.location,
-          })
-        );
-      }
-      if (isSourceItem(arg)) {
-        messages.push(...validateSource(arg, command.name, references));
       }
     }
   }
+
   // no need to check for mandatory options passed
   // as they are already validated at syntax level
   return messages;
@@ -846,18 +1219,24 @@ function validateFieldsShadowing(
       }
     }
   }
+
   return messages;
 }
 
-function validateUnsupportedTypeFields(fields: Map<string, ESQLRealField>) {
+function validateUnsupportedTypeFields(fields: Map<string, ESQLRealField>, ast: ESQLAst) {
+  const usedColumnsInQuery: string[] = [];
+
+  walk(ast, {
+    visitColumn: (node) => usedColumnsInQuery.push(node.name),
+  });
   const messages: ESQLMessage[] = [];
-  for (const field of fields.values()) {
-    if (field.type === 'unsupported') {
+  for (const column of usedColumnsInQuery) {
+    if (fields.has(column) && fields.get(column)!.type === 'unsupported') {
       messages.push(
         getMessageFromId({
           messageId: 'unsupportedFieldType',
           values: {
-            field: field.name,
+            field: column,
           },
           locations: { min: 1, max: 1 },
         })
@@ -868,9 +1247,11 @@ function validateUnsupportedTypeFields(fields: Map<string, ESQLRealField>) {
 }
 
 export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
-  getFieldsFor: ['unknownColumn', 'wrongArgumentType', 'unsupportedFieldType'],
+  getColumnsFor: ['unknownColumn', 'wrongArgumentType', 'unsupportedFieldType'],
   getSources: ['unknownIndex'],
   getPolicies: ['unknownPolicy'],
+  getPreferences: [],
+  getFieldsMetadata: [],
 };
 
 /**
@@ -891,7 +1272,6 @@ export async function validateQuery(
   if (!options.ignoreOnMissingCallbacks) {
     return result;
   }
-  const { errors, warnings } = result;
   const finalCallbacks = callbacks || {};
   const errorTypoesToIgnore = Object.entries(ignoreErrorsMap).reduce((acc, [key, errorCodes]) => {
     if (
@@ -904,7 +1284,7 @@ export async function validateQuery(
     }
     return acc;
   }, {} as Partial<Record<ErrorTypes, boolean>>);
-  const filteredErrors = errors
+  const filteredErrors = result.errors
     .filter((error) => {
       if ('severity' in error) {
         return true;
@@ -921,7 +1301,7 @@ export async function validateQuery(
           }
         : error
     );
-  return { errors: filteredErrors, warnings };
+  return { errors: filteredErrors, warnings: result.warnings };
 }
 
 /**
@@ -937,7 +1317,9 @@ async function validateAst(
 ): Promise<ValidationResult> {
   const messages: ESQLMessage[] = [];
 
-  const { ast, errors } = await astProvider(queryString);
+  const parsingResult = await astProvider(queryString);
+
+  const { ast } = parsingResult;
 
   const [sources, availableFields, availablePolicies] = await Promise.all([
     // retrieve the list of available sources
@@ -971,21 +1353,22 @@ async function validateAst(
   const variables = collectVariables(ast, availableFields, queryString);
   // notify if the user is rewriting a column as variable with another type
   messages.push(...validateFieldsShadowing(availableFields, variables));
-  messages.push(...validateUnsupportedTypeFields(availableFields));
+  messages.push(...validateUnsupportedTypeFields(availableFields, ast));
 
-  for (const command of ast) {
-    const commandMessages = validateCommand(command, {
+  for (const [index, command] of ast.entries()) {
+    const references: ReferenceMaps = {
       sources,
       fields: availableFields,
       policies: availablePolicies,
       variables,
       query: queryString,
-    });
+    };
+    const commandMessages = validateCommand(command, references, ast, index);
     messages.push(...commandMessages);
   }
 
   return {
-    errors: [...errors, ...messages.filter(({ type }) => type === 'error')],
+    errors: [...parsingResult.errors, ...messages.filter(({ type }) => type === 'error')],
     warnings: messages.filter(({ type }) => type === 'warning'),
   };
 }

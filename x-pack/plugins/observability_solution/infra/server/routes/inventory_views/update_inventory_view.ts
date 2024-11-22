@@ -6,7 +6,7 @@
  */
 
 import { isBoom } from '@hapi/boom';
-import { createValidationFunction } from '../../../common/runtime_types';
+import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import {
   inventoryViewRequestParamsRT,
   inventoryViewRequestQueryRT,
@@ -25,9 +25,9 @@ export const initUpdateInventoryViewRoute = ({
       method: 'put',
       path: INVENTORY_VIEW_URL_ENTITY,
       validate: {
-        params: createValidationFunction(inventoryViewRequestParamsRT),
-        query: createValidationFunction(inventoryViewRequestQueryRT),
-        body: createValidationFunction(updateInventoryViewRequestPayloadRT),
+        params: createRouteValidationFunction(inventoryViewRequestParamsRT),
+        query: createRouteValidationFunction(inventoryViewRequestQueryRT),
+        body: createRouteValidationFunction(updateInventoryViewRequestPayloadRT),
       },
     },
     async (_requestContext, request, response) => {

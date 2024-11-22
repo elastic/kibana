@@ -28,12 +28,8 @@ import {
   type PrimitiveOrArrayOfPrimitives,
 } from '../../../common/lib/kuery';
 import type { DataProvider, DataProvidersAnd } from './data_providers/data_provider';
-import {
-  DataProviderType,
-  EXISTS_OPERATOR,
-  IS_ONE_OF_OPERATOR,
-  IS_OPERATOR,
-} from './data_providers/data_provider';
+import { EXISTS_OPERATOR, IS_ONE_OF_OPERATOR, IS_OPERATOR } from './data_providers/data_provider';
+import { type DataProviderType, DataProviderTypeEnum } from '../../../../common/api/timeline';
 import { EVENTS_TABLE_CLASS_NAME } from './styles';
 
 const buildQueryMatch = (
@@ -211,7 +207,7 @@ export const handleIsOperator = ({
 }) => {
   if (!isPrimitiveArray(value)) {
     return `${isExcluded}${
-      type !== DataProviderType.template
+      type !== DataProviderTypeEnum.template
         ? buildIsQueryMatch({ browserFields, field, isFieldTypeNested, value })
         : buildExistsQueryMatch({ browserFields, field, isFieldTypeNested })
     }`;
@@ -286,3 +282,14 @@ export const TIMELINE_FILTER_DROP_AREA = 'timeline-filter-drop-area';
 
 export const getNonDropAreaFilters = (filters: Filter[] = []) =>
   filters.filter((f: Filter) => f.meta.controlledBy !== TIMELINE_FILTER_DROP_AREA);
+
+export const isFullScreen = ({
+  globalFullScreen,
+  isActiveTimelines,
+  timelineFullScreen,
+}: {
+  globalFullScreen: boolean;
+  isActiveTimelines: boolean;
+  timelineFullScreen: boolean;
+}) =>
+  (isActiveTimelines && timelineFullScreen) || (isActiveTimelines === false && globalFullScreen);

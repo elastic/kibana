@@ -63,7 +63,11 @@ export function CriticalPathFlamegraphTooltip({
               alignItems="center"
             >
               <EuiFlexItem grow={false}>
-                <SpanIcon type={metadata[SPAN_TYPE]} subtype={metadata[SPAN_SUBTYPE]} />
+                <SpanIcon
+                  type={metadata[SPAN_TYPE]}
+                  subtype={metadata[SPAN_SUBTYPE]}
+                  role="presentation"
+                />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>{metadata[SPAN_NAME]}</EuiFlexItem>
             </EuiFlexGroup>
@@ -75,7 +79,7 @@ export function CriticalPathFlamegraphTooltip({
         <EuiFlexItem>
           <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
-              <AgentIcon agentName={metadata[AGENT_NAME]} size="l" />
+              <AgentIcon agentName={metadata[AGENT_NAME]} size="l" role="presentation" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>{metadata[SERVICE_NAME]}</EuiFlexItem>
           </EuiFlexGroup>

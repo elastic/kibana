@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { render, screen, within, waitForElementToBeRemoved } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { WithServices } from './tests.helpers';
 import { TableListViewTable, type TableListViewTableProps } from '../table_list_view_table';
@@ -124,18 +125,18 @@ describe('created_by filter', () => {
     // 5 items in the list
     expect(screen.getAllByTestId(/userContentListingTitleLink/)).toHaveLength(4);
 
-    userEvent.click(screen.getByTestId('userFilterPopoverButton'));
+    await userEvent.click(screen.getByTestId('userFilterPopoverButton'));
 
     const userSelectablePopover = screen.getByTestId('userSelectableList');
     const popover = within(userSelectablePopover);
     expect(await popover.findAllByTestId(/userProfileSelectableOption/)).toHaveLength(3);
 
-    userEvent.click(popover.getByTestId('userProfileSelectableOption-user1'));
+    await userEvent.click(popover.getByTestId('userProfileSelectableOption-user1'));
 
     // 1 item in the list
     expect(screen.getAllByTestId(/userContentListingTitleLink/)).toHaveLength(1);
 
-    userEvent.click(popover.getByTestId('userProfileSelectableOption-user2'));
+    await userEvent.click(popover.getByTestId('userProfileSelectableOption-user2'));
 
     // 2 items in the list
     expect(screen.getAllByTestId(/userContentListingTitleLink/)).toHaveLength(2);
@@ -147,14 +148,14 @@ describe('created_by filter', () => {
     // wait until first render
     expect(await screen.findByTestId('itemsInMemTable')).toBeVisible();
 
-    // 5 items in the list
+    // 4 items in the list
     expect(screen.getAllByTestId(/userContentListingTitleLink/)).toHaveLength(4);
 
-    userEvent.click(screen.getByTestId('userFilterPopoverButton'));
+    await userEvent.click(screen.getByTestId('userFilterPopoverButton'));
 
     const userSelectablePopover = screen.getByTestId('userSelectableList');
     const popover = within(userSelectablePopover);
-    userEvent.click(await popover.findByTestId('userProfileSelectableOption-null'));
+    await userEvent.click(await popover.findByTestId('userProfileSelectableOption-null'));
 
     // just 1 item in the list
     expect(screen.getAllByTestId(/userContentListingTitleLink/)).toHaveLength(1);
@@ -177,7 +178,7 @@ describe('created_by filter', () => {
     // 3 items in the list
     expect(screen.getAllByTestId(/userContentListingTitleLink/)).toHaveLength(3);
 
-    userEvent.click(screen.getByTestId('userFilterPopoverButton'));
+    await userEvent.click(screen.getByTestId('userFilterPopoverButton'));
 
     const userSelectablePopover = screen.getByTestId('userSelectableList');
     const popover = within(userSelectablePopover);
@@ -202,11 +203,11 @@ describe('created_by filter', () => {
     // 1 item in the list
     expect(screen.getAllByTestId(/userContentListingTitleLink/)).toHaveLength(1);
 
-    userEvent.click(screen.getByTestId('userFilterPopoverButton'));
+    await userEvent.click(screen.getByTestId('userFilterPopoverButton'));
 
     const userSelectablePopover = screen.getByTestId('userSelectableList');
     const popover = within(userSelectablePopover);
-    await waitForElementToBeRemoved(() => popover.getByRole('progressbar'));
+    expect(popover.queryByRole('progressbar')).not.toBeInTheDocument();
     expect(popover.getAllByTestId('userFilterEmptyMessage')[1]).toBeVisible();
   });
 });

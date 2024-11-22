@@ -29,12 +29,17 @@ import {
   ALERT_END,
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_RULE_EXECUTION_TIMESTAMP,
+  ALERT_PREVIOUS_ACTION_GROUP,
+  ALERT_SEVERITY_IMPROVING,
+  ALERT_RULE_EXECUTION_UUID,
 } from '@kbn/rule-data-utils';
 import {
   alertRule,
   existingFlattenedActiveAlert,
   existingExpandedActiveAlert,
+  rule,
 } from './test_fixtures';
+import { omit } from 'lodash';
 
 for (const flattened of [true, false]) {
   const existingAlert = flattened ? existingFlattenedActiveAlert : existingExpandedActiveAlert;
@@ -61,14 +66,17 @@ for (const flattened of [true, false]) {
           kibanaVersion: '8.9.0',
         })
       ).toEqual({
-        ...alertRule,
         [TIMESTAMP]: '2023-03-29T12:27:28.159Z',
         [ALERT_RULE_EXECUTION_TIMESTAMP]: '2023-03-29T12:27:28.159Z',
+        // @ts-ignore
+        [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
         [EVENT_ACTION]: 'close',
         [ALERT_ACTION_GROUP]: 'recovered',
         [ALERT_CONSECUTIVE_MATCHES]: 0,
         [ALERT_FLAPPING]: false,
         [ALERT_FLAPPING_HISTORY]: [],
+        [ALERT_SEVERITY_IMPROVING]: true,
+        [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
         [ALERT_STATUS]: 'recovered',
         [ALERT_WORKFLOW_STATUS]: 'open',
@@ -76,11 +84,13 @@ for (const flattened of [true, false]) {
         [ALERT_START]: '2023-03-28T12:27:28.159Z',
         [ALERT_END]: '2023-03-30T12:27:28.159Z',
         [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z', lte: '2023-03-30T12:27:28.159Z' },
+        // @ts-ignore
         [SPACE_IDS]: ['default'],
         [VERSION]: '8.9.0',
         [TAGS]: ['rule-', '-tags'],
         ...(flattened
           ? {
+              ...alertRule,
               [EVENT_KIND]: 'signal',
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_UUID]: 'abcdefg',
@@ -92,6 +102,7 @@ for (const flattened of [true, false]) {
               kibana: {
                 alert: {
                   instance: { id: 'alert-A' },
+                  rule: omit(rule, 'execution'),
                   uuid: 'abcdefg',
                 },
               },
@@ -99,7 +110,7 @@ for (const flattened of [true, false]) {
       });
     });
 
-    test('should return alert document with recovery status and updated rule data if rule definition has changed', () => {
+    test('should return alert document with recovery status and but not update rule data if rule definition has changed', () => {
       const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A', {
         meta: { uuid: 'abcdefg' },
       });
@@ -127,14 +138,17 @@ for (const flattened of [true, false]) {
           kibanaVersion: '8.9.0',
         })
       ).toEqual({
-        ...updatedRule,
         [TIMESTAMP]: '2023-03-29T12:27:28.159Z',
         [ALERT_RULE_EXECUTION_TIMESTAMP]: '2023-03-29T12:27:28.159Z',
+        // @ts-ignore
+        [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
         [EVENT_ACTION]: 'close',
         [ALERT_ACTION_GROUP]: 'NoLongerActive',
         [ALERT_CONSECUTIVE_MATCHES]: 0,
         [ALERT_FLAPPING]: false,
         [ALERT_FLAPPING_HISTORY]: [],
+        [ALERT_SEVERITY_IMPROVING]: true,
+        [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-1', 'maint-321'],
         [ALERT_STATUS]: 'recovered',
         [ALERT_WORKFLOW_STATUS]: 'open',
@@ -142,11 +156,13 @@ for (const flattened of [true, false]) {
         [ALERT_START]: '2023-03-28T12:27:28.159Z',
         [ALERT_END]: '2023-03-30T12:27:28.159Z',
         [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z', lte: '2023-03-30T12:27:28.159Z' },
+        // @ts-ignore
         [SPACE_IDS]: ['default'],
         [VERSION]: '8.9.0',
         [TAGS]: ['rule-', '-tags'],
         ...(flattened
           ? {
+              ...alertRule,
               [EVENT_KIND]: 'signal',
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_UUID]: 'abcdefg',
@@ -158,6 +174,7 @@ for (const flattened of [true, false]) {
               kibana: {
                 alert: {
                   instance: { id: 'alert-A' },
+                  rule: omit(rule, 'execution'),
                   uuid: 'abcdefg',
                 },
               },
@@ -220,17 +237,20 @@ for (const flattened of [true, false]) {
           kibanaVersion: '8.9.0',
         })
       ).toEqual({
-        ...alertRule,
         count: 2,
         url: `https://url2`,
         'kibana.alert.nested_field': 2,
         [TIMESTAMP]: '2023-03-29T12:27:28.159Z',
         [ALERT_RULE_EXECUTION_TIMESTAMP]: '2023-03-29T12:27:28.159Z',
+        // @ts-ignore
+        [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
         [EVENT_ACTION]: 'close',
         [ALERT_ACTION_GROUP]: 'NoLongerActive',
         [ALERT_CONSECUTIVE_MATCHES]: 0,
         [ALERT_FLAPPING]: false,
         [ALERT_FLAPPING_HISTORY]: [],
+        [ALERT_SEVERITY_IMPROVING]: true,
+        [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-1', 'maint-321'],
         [ALERT_STATUS]: 'recovered',
         [ALERT_WORKFLOW_STATUS]: 'open',
@@ -238,11 +258,13 @@ for (const flattened of [true, false]) {
         [ALERT_START]: '2023-03-28T12:27:28.159Z',
         [ALERT_END]: '2023-03-30T12:27:28.159Z',
         [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z', lte: '2023-03-30T12:27:28.159Z' },
+        // @ts-ignore
         [SPACE_IDS]: ['default'],
         [VERSION]: '8.9.0',
         [TAGS]: ['rule-', '-tags'],
         ...(flattened
           ? {
+              ...alertRule,
               [EVENT_KIND]: 'signal',
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_UUID]: 'abcdefg',
@@ -254,6 +276,7 @@ for (const flattened of [true, false]) {
               kibana: {
                 alert: {
                   instance: { id: 'alert-A' },
+                  rule: omit(rule, 'execution'),
                   uuid: 'abcdefg',
                 },
               },
@@ -283,14 +306,17 @@ for (const flattened of [true, false]) {
           kibanaVersion: '8.9.0',
         })
       ).toEqual({
-        ...alertRule,
         [TIMESTAMP]: '2023-03-29T12:27:28.159Z',
         [ALERT_RULE_EXECUTION_TIMESTAMP]: '2030-12-15T02:44:13.124Z',
+        // @ts-ignore
+        [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
         [EVENT_ACTION]: 'close',
         [ALERT_ACTION_GROUP]: 'recovered',
         [ALERT_CONSECUTIVE_MATCHES]: 0,
         [ALERT_FLAPPING]: false,
         [ALERT_FLAPPING_HISTORY]: [],
+        [ALERT_SEVERITY_IMPROVING]: true,
+        [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
         [ALERT_STATUS]: 'recovered',
         [ALERT_WORKFLOW_STATUS]: 'open',
@@ -298,11 +324,13 @@ for (const flattened of [true, false]) {
         [ALERT_START]: '2023-03-28T12:27:28.159Z',
         [ALERT_END]: '2023-03-30T12:27:28.159Z',
         [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z', lte: '2023-03-30T12:27:28.159Z' },
+        // @ts-ignore
         [SPACE_IDS]: ['default'],
         [VERSION]: '8.9.0',
         [TAGS]: ['rule-', '-tags'],
         ...(flattened
           ? {
+              ...alertRule,
               [EVENT_KIND]: 'signal',
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_UUID]: 'abcdefg',
@@ -314,6 +342,7 @@ for (const flattened of [true, false]) {
               kibana: {
                 alert: {
                   instance: { id: 'alert-A' },
+                  rule: omit(rule, 'execution'),
                   uuid: 'abcdefg',
                 },
               },
@@ -384,17 +413,20 @@ for (const flattened of [true, false]) {
           kibanaVersion: '8.9.0',
         })
       ).toEqual({
-        ...alertRule,
         count: 2,
         url: `https://url2`,
         'kibana.alert.nested_field': 2,
         [TIMESTAMP]: '2023-03-29T12:27:28.159Z',
         [ALERT_RULE_EXECUTION_TIMESTAMP]: '2023-03-29T12:27:28.159Z',
+        // @ts-ignore
+        [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
         [EVENT_ACTION]: 'close',
         [ALERT_ACTION_GROUP]: 'NoLongerActive',
         [ALERT_CONSECUTIVE_MATCHES]: 0,
         [ALERT_FLAPPING]: false,
         [ALERT_FLAPPING_HISTORY]: [],
+        [ALERT_SEVERITY_IMPROVING]: true,
+        [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-1', 'maint-321'],
         [ALERT_STATUS]: 'recovered',
         [ALERT_WORKFLOW_STATUS]: 'open',
@@ -402,11 +434,13 @@ for (const flattened of [true, false]) {
         [ALERT_START]: '2023-03-28T12:27:28.159Z',
         [ALERT_END]: '2023-03-30T12:27:28.159Z',
         [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z', lte: '2023-03-30T12:27:28.159Z' },
+        // @ts-ignore
         [SPACE_IDS]: ['default'],
         [VERSION]: '8.9.0',
         [TAGS]: ['-tags', 'reported-recovery-tag', 'active-alert-tag', 'rule-'],
         ...(flattened
           ? {
+              ...alertRule,
               [EVENT_KIND]: 'signal',
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_UUID]: 'abcdefg',
@@ -418,6 +452,7 @@ for (const flattened of [true, false]) {
               kibana: {
                 alert: {
                   instance: { id: 'alert-A' },
+                  rule: omit(rule, 'execution'),
                   uuid: 'abcdefg',
                 },
               },
@@ -486,17 +521,20 @@ for (const flattened of [true, false]) {
           kibanaVersion: '8.9.0',
         })
       ).toEqual({
-        ...alertRule,
         count: 2,
         url: `https://url2`,
         'kibana.alert.nested_field': 2,
         [TIMESTAMP]: '2023-03-29T12:27:28.159Z',
         [ALERT_RULE_EXECUTION_TIMESTAMP]: '2023-03-29T12:27:28.159Z',
+        // @ts-ignore
+        [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
         [EVENT_ACTION]: 'close',
         [ALERT_ACTION_GROUP]: 'NoLongerActive',
         [ALERT_CONSECUTIVE_MATCHES]: 0,
         [ALERT_FLAPPING]: false,
         [ALERT_FLAPPING_HISTORY]: [],
+        [ALERT_SEVERITY_IMPROVING]: true,
+        [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-1', 'maint-321'],
         [ALERT_STATUS]: 'recovered',
         [ALERT_WORKFLOW_STATUS]: 'open',
@@ -504,11 +542,13 @@ for (const flattened of [true, false]) {
         [ALERT_START]: '2023-03-28T12:27:28.159Z',
         [ALERT_END]: '2023-03-30T12:27:28.159Z',
         [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z', lte: '2023-03-30T12:27:28.159Z' },
+        // @ts-ignore
         [SPACE_IDS]: ['default'],
         [VERSION]: '8.9.0',
         [TAGS]: ['rule-', '-tags'],
         ...(flattened
           ? {
+              ...alertRule,
               [EVENT_KIND]: 'signal',
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_UUID]: 'abcdefg',
@@ -520,6 +560,7 @@ for (const flattened of [true, false]) {
               kibana: {
                 alert: {
                   instance: { id: 'alert-A' },
+                  rule: omit(rule, 'execution'),
                   uuid: 'abcdefg',
                 },
               },
@@ -587,17 +628,20 @@ for (const flattened of [true, false]) {
           },
         })
       ).toEqual({
-        ...alertRule,
         count: 2,
         url: `https://url2`,
         'kibana.alert.deeply.nested_field': 2,
         [TIMESTAMP]: '2023-03-29T12:27:28.159Z',
         [ALERT_RULE_EXECUTION_TIMESTAMP]: '2023-03-29T12:27:28.159Z',
+        // @ts-ignore
+        [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
         [EVENT_ACTION]: 'close',
         [ALERT_ACTION_GROUP]: 'NoLongerActive',
         [ALERT_CONSECUTIVE_MATCHES]: 0,
         [ALERT_FLAPPING]: false,
         [ALERT_FLAPPING_HISTORY]: [],
+        [ALERT_SEVERITY_IMPROVING]: true,
+        [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
         [ALERT_STATUS]: 'recovered',
         [ALERT_WORKFLOW_STATUS]: 'custom_status',
@@ -605,11 +649,13 @@ for (const flattened of [true, false]) {
         [ALERT_START]: '2023-03-28T12:27:28.159Z',
         [ALERT_END]: '2023-03-30T12:27:28.159Z',
         [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z', lte: '2023-03-30T12:27:28.159Z' },
+        // @ts-ignore
         [SPACE_IDS]: ['default'],
         [VERSION]: '8.9.0',
         [TAGS]: ['rule-', '-tags'],
         ...(flattened
           ? {
+              ...alertRule,
               [EVENT_KIND]: 'signal',
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_UUID]: 'abcdefg',
@@ -621,6 +667,7 @@ for (const flattened of [true, false]) {
               kibana: {
                 alert: {
                   instance: { id: 'alert-A' },
+                  rule: omit(rule, 'execution'),
                   uuid: 'abcdefg',
                 },
               },

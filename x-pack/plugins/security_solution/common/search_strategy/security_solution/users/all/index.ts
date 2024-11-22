@@ -14,6 +14,7 @@ export interface User {
   lastSeen: string;
   domain: string;
   risk?: RiskSeverity;
+  criticality?: string;
 }
 
 export interface UsersStrategyResponse extends IEsSearchResponse {

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
-import { RiskScoresPreviewRequest } from '../../../../../common/api/entity_analytics/risk_engine/preview_route.gen';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import type { RiskScoresPreviewResponse } from '../../../../../common/api/entity_analytics';
+import { RiskScoresPreviewRequest } from '../../../../../common/api/entity_analytics';
 import {
   APP_ID,
   DEFAULT_RISK_SCORE_PAGE_SIZE,
   RISK_SCORE_PREVIEW_URL,
 } from '../../../../../common/constants';
-import { buildRouteValidationWithZod } from '../../../../utils/build_validation/route_validation';
 import { getRiskInputsIndex } from '../get_risk_inputs_index';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { RiskScoreAuditActions } from '../audit';
@@ -30,8 +30,10 @@ export const riskScorePreviewRoute = (
     .post({
       access: 'internal',
       path: RISK_SCORE_PREVIEW_URL,
-      options: {
-        tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
+        },
       },
     })
     .addVersion(
@@ -41,7 +43,7 @@ export const riskScorePreviewRoute = (
           request: { body: buildRouteValidationWithZod(RiskScoresPreviewRequest) },
         },
       },
-      async (context, request, response) => {
+      async (context, request, response): Promise<IKibanaResponse<RiskScoresPreviewResponse>> => {
         const siemResponse = buildSiemResponse(response);
         const securityContext = await context.securitySolution;
         const coreContext = await context.core;
@@ -63,6 +65,7 @@ export const riskScorePreviewRoute = (
           filter,
           range: userRange,
           weights,
+          excludeAlertStatuses,
         } = request.body;
 
         const entityAnalyticsConfig = await riskScoreService.getConfigurationWithDefaults(
@@ -93,6 +96,7 @@ export const riskScorePreviewRoute = (
             runtimeMappings,
             weights,
             alertSampleSizePerShard,
+            excludeAlertStatuses,
           });
 
           securityContext.getAuditLogger()?.log({

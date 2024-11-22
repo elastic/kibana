@@ -8,8 +8,8 @@
 import * as rt from 'io-ts';
 import type { HttpHandler } from '@kbn/core/public';
 
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { getJobId, jobCustomSettingsRT } from '../../../../common/infra_ml';
-import { decodeOrThrow } from '../../../../common/runtime_types';
 
 interface RequestArgs<JobType extends string> {
   spaceId: string;

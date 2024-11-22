@@ -9,7 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { RequestHandler } from '@kbn/core/server';
 
-import { type GetTransformStatsQuerySchema } from '../../../../common/api_schemas/transforms_stats';
+import { type GetTransformStatsQuerySchema } from '../../api_schemas/transforms_stats';
 
 import type { TransformRequestHandlerContext } from '../../../services/license';
 

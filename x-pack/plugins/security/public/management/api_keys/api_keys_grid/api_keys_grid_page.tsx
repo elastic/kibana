@@ -17,20 +17,23 @@ import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
+import type { CreateAPIKeyResult, QueryApiKeySortOptions } from '@kbn/security-api-key-management';
+import {
+  ApiKeyCreatedCallout,
+  ApiKeyFlyout,
+  APIKeysAPIClient,
+} from '@kbn/security-api-key-management';
+import type { CategorizedApiKey } from '@kbn/security-plugin-types-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { Route } from '@kbn/shared-ux-router';
 
-import { ApiKeyFlyout } from './api_key_flyout';
 import { ApiKeysEmptyPrompt } from './api_keys_empty_prompt';
 import { ApiKeysTable, MAX_PAGINATED_ITEMS } from './api_keys_table';
-import type { CategorizedApiKey, QueryFilters } from './api_keys_table';
+import type { QueryFilters } from './api_keys_table';
 import { InvalidateProvider } from './invalidate_provider';
 import { Breadcrumb } from '../../../components/breadcrumb';
-import { SelectableTokenField } from '../../../components/token_field';
 import { useCapabilities } from '../../../components/use_capabilities';
 import { useAuthentication } from '../../../components/use_current_user';
-import type { CreateAPIKeyResult, QueryApiKeySortOptions } from '../api_keys_api_client';
-import { APIKeysAPIClient } from '../api_keys_api_client';
 
 interface ApiKeysTableState {
   query: Query;
@@ -187,6 +190,9 @@ export const APIKeysGridPage: FunctionComponent = () => {
             }}
             onCancel={() => history.push({ pathname: '/' })}
             canManageCrossClusterApiKeys={canManageCrossClusterApiKeys}
+            currentUser={currentUser}
+            isLoadingCurrentUser={state.loading}
+            readOnly={readOnly}
           />
         </Breadcrumb>
       </Route>
@@ -208,6 +214,9 @@ export const APIKeysGridPage: FunctionComponent = () => {
           onCancel={() => setOpenedApiKey(undefined)}
           apiKey={openedApiKey}
           readOnly={readOnly}
+          canManageCrossClusterApiKeys={canManageCrossClusterApiKeys}
+          currentUser={currentUser}
+          isLoadingCurrentUser={state.loading}
         />
       )}
       {totalKeys === 0 ? (
@@ -322,69 +331,5 @@ export const APIKeysGridPage: FunctionComponent = () => {
         </>
       )}
     </>
-  );
-};
-
-export interface ApiKeyCreatedCalloutProps {
-  createdApiKey: CreateAPIKeyResult;
-}
-
-export const ApiKeyCreatedCallout: FunctionComponent<ApiKeyCreatedCalloutProps> = ({
-  createdApiKey,
-}) => {
-  const concatenated = `${createdApiKey.id}:${createdApiKey.api_key}`;
-  return (
-    <EuiCallOut
-      color="success"
-      iconType="check"
-      title={i18n.translate('xpack.security.management.apiKeys.createSuccessMessage', {
-        defaultMessage: "Created API key ''{name}''",
-        values: { name: createdApiKey.name },
-      })}
-    >
-      <p>
-        <FormattedMessage
-          id="xpack.security.management.apiKeys.successDescription"
-          defaultMessage="Copy this key now. You will not be able to view it again."
-        />
-      </p>
-      <SelectableTokenField
-        options={[
-          {
-            key: 'encoded',
-            value: createdApiKey.encoded,
-            icon: 'empty',
-            label: i18n.translate('xpack.security.management.apiKeys.encodedLabel', {
-              defaultMessage: 'Encoded',
-            }),
-            description: i18n.translate('xpack.security.management.apiKeys.encodedDescription', {
-              defaultMessage: 'Format used to make requests to Elasticsearch REST API.',
-            }),
-          },
-          {
-            key: 'beats',
-            value: concatenated,
-            icon: 'logoBeats',
-            label: i18n.translate('xpack.security.management.apiKeys.beatsLabel', {
-              defaultMessage: 'Beats',
-            }),
-            description: i18n.translate('xpack.security.management.apiKeys.beatsDescription', {
-              defaultMessage: 'Format used to configure Beats.',
-            }),
-          },
-          {
-            key: 'logstash',
-            value: concatenated,
-            icon: 'logoLogstash',
-            label: i18n.translate('xpack.security.management.apiKeys.logstashLabel', {
-              defaultMessage: 'Logstash',
-            }),
-            description: i18n.translate('xpack.security.management.apiKeys.logstashDescription', {
-              defaultMessage: 'Format used to configure Logstash.',
-            }),
-          },
-        ]}
-      />
-    </EuiCallOut>
   );
 };

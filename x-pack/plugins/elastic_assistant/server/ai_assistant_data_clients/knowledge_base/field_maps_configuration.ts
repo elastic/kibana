@@ -6,7 +6,10 @@
  */
 import { FieldMap } from '@kbn/data-stream-adapter';
 
+export const ASSISTANT_ELSER_INFERENCE_ID = 'elastic-security-ai-assistant-elser2';
+
 export const knowledgeBaseFieldMap: FieldMap = {
+  // Base fields
   '@timestamp': {
     type: 'date',
     array: false,
@@ -52,22 +55,29 @@ export const knowledgeBaseFieldMap: FieldMap = {
     array: false,
     required: false,
   },
-  metadata: {
-    type: 'object',
-    array: false,
-    required: false,
-  },
-  'metadata.kbResource': {
+  name: {
     type: 'keyword',
     array: false,
     required: false,
   },
-  'metadata.required': {
+  // Discriminator: 'document' | 'index'
+  type: {
+    type: 'keyword',
+    array: false,
+    required: true,
+  },
+  // Document Entry fields
+  kb_resource: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  required: {
     type: 'boolean',
     array: false,
     required: false,
   },
-  'metadata.source': {
+  source: {
     type: 'keyword',
     array: false,
     required: false,
@@ -75,7 +85,14 @@ export const knowledgeBaseFieldMap: FieldMap = {
   text: {
     type: 'text',
     array: false,
-    required: true,
+    required: false,
+  },
+  // Embeddings field
+  semantic_text: {
+    type: 'semantic_text',
+    array: false,
+    required: false,
+    inference_id: ASSISTANT_ELSER_INFERENCE_ID,
   },
   vector: {
     type: 'object',
@@ -85,6 +102,52 @@ export const knowledgeBaseFieldMap: FieldMap = {
   'vector.tokens': {
     type: 'rank_features',
     array: false,
+    required: false,
+  },
+  // Index Entry fields
+  index: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  field: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  description: {
+    type: 'text',
+    array: false,
+    required: false,
+  },
+  query_description: {
+    type: 'text',
+    array: false,
+    required: false,
+  },
+  input_schema: {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'input_schema.field_name': {
+    type: 'keyword',
+    array: false,
+    required: true,
+  },
+  'input_schema.field_type': {
+    type: 'keyword',
+    array: false,
+    required: true,
+  },
+  'input_schema.description': {
+    type: 'text',
+    array: false,
+    required: true,
+  },
+  output_fields: {
+    type: 'keyword',
+    array: true,
     required: false,
   },
 } as const;

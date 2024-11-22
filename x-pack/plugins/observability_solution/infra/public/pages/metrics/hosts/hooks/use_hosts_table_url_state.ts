@@ -12,7 +12,7 @@ import { constant, identity } from 'fp-ts/lib/function';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import deepEqual from 'fast-deep-equal';
 import { useReducer } from 'react';
-import { useUrlState } from '../../../../utils/use_url_state';
+import { useUrlState } from '@kbn/observability-shared-plugin/public';
 import { DEFAULT_PAGE_SIZE, LOCAL_STORAGE_PAGE_SIZE_KEY } from '../constants';
 
 export const GET_DEFAULT_TABLE_PROPERTIES: TableProperties = {

@@ -8,13 +8,14 @@
 import type { TimeRange } from '@kbn/es-query';
 import { Filter } from '@kbn/es-query';
 import { EmbeddableInput as Input } from '@kbn/embeddable-plugin/common';
-import {
+import type {
   HasAppContext,
   HasDisableTriggers,
+  HasType,
   PublishesViewMode,
   PublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
-import { CanAddNewPanel, HasSerializedChildState } from '@kbn/presentation-containers';
+import type { CanAddNewPanel, HasSerializedChildState } from '@kbn/presentation-containers';
 
 export type EmbeddableInput = Input & {
   timeRange?: TimeRange;
@@ -25,5 +26,6 @@ export type EmbeddableInput = Input & {
 export type CanvasContainerApi = PublishesViewMode &
   CanAddNewPanel &
   HasDisableTriggers &
+  HasType &
   HasSerializedChildState &
   Partial<HasAppContext & PublishesUnifiedSearch>;

@@ -8,8 +8,10 @@
 import type { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { isProcessesAction } from '../service/response_actions/type_guards';
 import { ENDPOINT_ACTION_RESPONSES_DS, ENDPOINT_ACTIONS_DS } from '../constants';
 import { BaseDataGenerator } from './base_data_generator';
+import type { GetProcessesActionOutputContent } from '../types';
 import {
   type ActionDetails,
   type ActionResponseOutput,
@@ -27,7 +29,7 @@ import {
   type ResponseActionGetFileParameters,
   type ResponseActionScanOutputContent,
   type ResponseActionsExecuteParameters,
-  type ResponseActionsScanParameters,
+  type ResponseActionScanParameters,
   type ResponseActionUploadOutputContent,
   type ResponseActionUploadParameters,
   type WithAllKeys,
@@ -211,16 +213,27 @@ export class EndpointActionGenerator extends BaseDataGenerator {
   generateActionDetails<
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
-  >(
-    overrides: DeepPartial<ActionDetails<TOutputContent, TParameters>> = {}
-  ): ActionDetails<TOutputContent, TParameters> {
+  >({
+    agents: overrideAgents,
+    command: overrideCommand,
+    ...overrides
+  }: DeepPartial<ActionDetails<TOutputContent, TParameters>> = {}): ActionDetails<
+    TOutputContent,
+    TParameters
+  > {
+    const agents = overrideAgents ? [...(overrideAgents as string[])] : ['agent-a'];
+    const command = overrideCommand ?? 'isolate';
+
     const details: WithAllKeys<ActionDetails> = {
       action: '123',
-      agents: ['agent-a'],
+      agents,
       agentType: 'endpoint',
-      command: 'isolate',
+      command,
       completedAt: '2022-04-30T16:08:47.449Z',
-      hosts: { 'agent-a': { name: 'Host-agent-a' } },
+      hosts: agents.reduce((acc, agentId) => {
+        acc[agentId] = { name: `Host-${agentId}` };
+        return acc;
+      }, {} as ActionDetails['hosts']),
       id: '123',
       isCompleted: true,
       isExpired: false,
@@ -231,21 +244,20 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       comment: 'thisisacomment',
       createdBy: 'auserid',
       parameters: undefined,
-      outputs: {},
-      agentState: {
-        'agent-a': {
+      outputs: undefined,
+      agentState: agents.reduce((acc, agentId) => {
+        acc[agentId] = {
           errors: undefined,
           isCompleted: true,
           completedAt: '2022-04-30T16:08:47.449Z',
           wasSuccessful: true,
-        },
-      },
+        };
+        return acc;
+      }, {} as ActionDetails['agentState']),
       alertIds: undefined,
       ruleId: undefined,
       ruleName: undefined,
     };
-
-    const command = overrides.command ?? details.command;
 
     if (command === 'get-file') {
       if (!details.parameters) {
@@ -265,8 +277,13 @@ export class EndpointActionGenerator extends BaseDataGenerator {
             ResponseActionGetFileOutputContent,
             ResponseActionGetFileParameters
           >
-        ).outputs = {
-          [details.agents[0]]: {
+        ).outputs = details.agents.reduce<
+          ActionDetails<
+            ResponseActionGetFileOutputContent,
+            ResponseActionGetFileParameters
+          >['outputs']
+        >((acc = {}, agentId) => {
+          acc[agentId] = {
             type: 'json',
             content: {
               code: 'ra_get-file_success',
@@ -281,8 +298,9 @@ export class EndpointActionGenerator extends BaseDataGenerator {
                 },
               ],
             },
-          },
-        };
+          };
+          return acc;
+        }, {});
       }
     }
 
@@ -291,7 +309,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         (
           details as unknown as ActionDetails<
             ResponseActionScanOutputContent,
-            ResponseActionsScanParameters
+            ResponseActionScanParameters
           >
         ).parameters = {
           path: '/some/folder/to/scan',
@@ -302,16 +320,20 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         (
           details as unknown as ActionDetails<
             ResponseActionScanOutputContent,
-            ResponseActionsScanParameters
+            ResponseActionScanParameters
           >
-        ).outputs = {
-          [details.agents[0]]: {
+        ).outputs = details.agents.reduce<
+          ActionDetails<ResponseActionScanOutputContent, ResponseActionScanParameters>['outputs']
+        >((acc = {}, agentId) => {
+          acc[agentId] = {
             type: 'json',
             content: {
-              code: 'ra_scan_success_done',
+              code: 'ra_scan_success',
             },
-          },
-        };
+          };
+
+          return acc;
+        }, {});
       }
     }
 
@@ -336,14 +358,20 @@ export class EndpointActionGenerator extends BaseDataGenerator {
             ResponseActionExecuteOutputContent,
             ResponseActionsExecuteParameters
           >
-        ).outputs = {
-          [details.agents[0]]: this.generateExecuteActionResponseOutput({
+        ).outputs = details.agents.reduce<
+          ActionDetails<
+            ResponseActionExecuteOutputContent,
+            ResponseActionsExecuteParameters
+          >['outputs']
+        >((acc = {}, agentId) => {
+          acc[agentId] = this.generateExecuteActionResponseOutput({
             content: {
               output_file_id: getFileDownloadId(details, details.agents[0]),
               ...(overrides.outputs?.[details.agents[0]]?.content ?? {}),
             },
-          }),
-        };
+          });
+          return acc;
+        }, {});
       }
     }
 
@@ -360,16 +388,33 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         file_sha256: 'file-hash-sha-256',
       };
 
-      uploadActionDetails.outputs = {
-        'agent-a': {
+      uploadActionDetails.outputs = details.agents.reduce<
+        ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters>['outputs']
+      >((acc = {}, agentId) => {
+        acc[agentId] = {
           type: 'json',
           content: {
             code: 'ra_upload_file-success',
             path: '/path/to/uploaded/file',
             disk_free_space: 1234567,
           },
-        },
-      };
+        };
+        return acc;
+      }, {});
+    }
+
+    if (isProcessesAction(details)) {
+      details.outputs = agents.reduce((acc, agentId) => {
+        acc[agentId] = {
+          type: 'json',
+          content: {
+            code: 'success',
+            entries: this.randomResponseActionProcesses(),
+          },
+        };
+
+        return acc;
+      }, {} as Required<ActionDetails<GetProcessesActionOutputContent>>['outputs']);
     }
 
     return merge(details, overrides as ActionDetails) as unknown as ActionDetails<

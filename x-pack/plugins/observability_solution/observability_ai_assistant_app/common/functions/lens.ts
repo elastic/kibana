@@ -118,4 +118,4 @@ export const lensFunctionDefinition = {
   } as const,
 };
 
-export type LensFunctionArguments = FromSchema<typeof lensFunctionDefinition['parameters']>;
+export type LensFunctionArguments = FromSchema<(typeof lensFunctionDefinition)['parameters']>;

@@ -5,29 +5,31 @@
  * 2.0.
  */
 
-import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_URL } from '@kbn/securitysolution-list-constants';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { ReadListRequestQuery, ReadListResponse } from '@kbn/securitysolution-lists-common/api';
 
 import type { ListsPluginRouter } from '../../types';
-import { readListRequestQuery, readListResponse } from '../../../common/api';
-import { buildRouteValidation, buildSiemResponse } from '../utils';
+import { buildSiemResponse } from '../utils';
 import { getListClient } from '..';
 
 export const readListRoute = (router: ListsPluginRouter): void => {
   router.versioned
     .get({
       access: 'public',
-      options: {
-        tags: ['access:lists-read'],
-      },
       path: LIST_URL,
+      security: {
+        authz: {
+          requiredPrivileges: ['lists-read'],
+        },
+      },
     })
     .addVersion(
       {
         validate: {
           request: {
-            query: buildRouteValidation(readListRequestQuery),
+            query: buildRouteValidationWithZod(ReadListRequestQuery),
           },
         },
         version: '2023-10-31',
@@ -38,19 +40,15 @@ export const readListRoute = (router: ListsPluginRouter): void => {
           const { id } = request.query;
           const lists = await getListClient(context);
           const list = await lists.getList({ id });
+
           if (list == null) {
             return siemResponse.error({
               body: `list id: "${id}" does not exist`,
               statusCode: 404,
             });
-          } else {
-            const [validated, errors] = validate(list, readListResponse);
-            if (errors != null) {
-              return siemResponse.error({ body: errors, statusCode: 500 });
-            } else {
-              return response.ok({ body: validated ?? {} });
-            }
           }
+
+          return response.ok({ body: ReadListResponse.parse(list) });
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

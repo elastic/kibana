@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { ComponentType, ReactNode } from 'react';
@@ -11,7 +12,7 @@ import type { RuleActionParam, ActionVariable } from '@kbn/alerting-types';
 import { IconType, RecursivePartial } from '@elastic/eui';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { TypeRegistry } from '../type_registry';
-import { RuleFormErrors } from '.';
+import { RuleFormParamsErrors } from './rule_types';
 
 export interface GenericValidationResult<T> {
   errors: Record<Extract<keyof T, string>, string[] | unknown>;
@@ -77,7 +78,7 @@ export interface ActionParamsProps<TParams> {
   actionParams: Partial<TParams>;
   index: number;
   editAction: (key: string, value: RuleActionParam, index: number) => void;
-  errors: RuleFormErrors;
+  errors: RuleFormParamsErrors;
   ruleTypeId?: string;
   messageVariables?: ActionVariable[];
   defaultMessage?: string;
@@ -90,6 +91,7 @@ export interface ActionParamsProps<TParams> {
   executionMode?: ActionConnectorMode;
   onBlur?: (field?: string) => void;
   producerId?: string;
+  featureId?: string;
 }
 
 export interface ActionReadOnlyElementProps {

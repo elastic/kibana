@@ -1,5 +1,9 @@
 {
   "type": "shared-common",
   "id": "@kbn/deeplinks-observability",
-  "owner": "@elastic/obs-ux-logs-team"
+  "owner": [
+    "@elastic/obs-ux-management-team"
+  ],
+  "group": "platform",
+  "visibility": "shared"
 }

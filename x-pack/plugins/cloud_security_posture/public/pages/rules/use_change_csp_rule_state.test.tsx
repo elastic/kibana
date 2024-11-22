@@ -5,9 +5,10 @@
  * 2.0.
  */
 import React from 'react';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, waitFor, renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { RuleStateAttributes } from '@kbn/cloud-security-posture-common/schema/rules/v4';
 import {
   useChangeCspRuleState,
   createRulesWithUpdatedState,
@@ -17,7 +18,6 @@ import { CSP_RULES_STATES_QUERY_KEY } from './use_csp_rules_state';
 import { BENCHMARK_INTEGRATION_QUERY_KEY_V2 } from '../benchmarks/use_csp_benchmark_integrations';
 import { CSPM_STATS_QUERY_KEY, KSPM_STATS_QUERY_KEY } from '../../common/api';
 import { CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH } from '../../../common/constants';
-import { RuleStateAttributes } from '../../../common/types/rules/v4';
 
 const initialRules = {
   rule_1: {
@@ -87,7 +87,7 @@ describe('use_change_csp_rule_state', () => {
     const appMockRender = testWrapper();
     const httpPostSpy = jest.spyOn(useKibana().services.http!, 'post');
 
-    const { result, waitForNextUpdate } = await renderHook(() => useChangeCspRuleState(), {
+    const { result } = await renderHook(() => useChangeCspRuleState(), {
       wrapper: appMockRender.wrapper,
     });
 
@@ -107,22 +107,22 @@ describe('use_change_csp_rule_state', () => {
       result.current.mutate(mockRuleStateUpdateRequest);
     });
 
-    await waitForNextUpdate();
-
-    expect(httpPostSpy).toHaveBeenCalledWith(CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH, {
-      version: '1',
-      body: JSON.stringify({
-        action: 'mute',
-        rules: [
-          {
-            benchmark_id: 'benchmark_id',
-            benchmark_version: 'benchmark_version',
-            rule_number: '1',
-            rule_id: 'rule_1',
-          },
-        ],
-      }),
-    });
+    await waitFor(() =>
+      expect(httpPostSpy).toHaveBeenCalledWith(CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH, {
+        version: '1',
+        body: JSON.stringify({
+          action: 'mute',
+          rules: [
+            {
+              benchmark_id: 'benchmark_id',
+              benchmark_version: 'benchmark_version',
+              rule_number: '1',
+              rule_id: 'rule_1',
+            },
+          ],
+        }),
+      })
+    );
   });
 
   it('should cancel queries and update query data onMutate', async () => {
@@ -131,7 +131,7 @@ describe('use_change_csp_rule_state', () => {
     const queryClientGetSpy = jest.spyOn(appMockRender.queryClient, 'getQueryData');
     const mockSetQueryDataSpy = jest.spyOn(appMockRender.queryClient, 'setQueryData');
 
-    const { result, waitForNextUpdate } = await renderHook(() => useChangeCspRuleState(), {
+    const { result } = await renderHook(() => useChangeCspRuleState(), {
       wrapper: appMockRender.wrapper,
     });
 
@@ -151,24 +151,24 @@ describe('use_change_csp_rule_state', () => {
       result.current.mutate(mockRuleStateUpdateRequest);
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => {
+      const expectedMutatedRules = {
+        ...initialRules,
+        rule_1: { ...initialRules.rule_1, muted: true },
+      };
 
-    const expectedMutatedRules = {
-      ...initialRules,
-      rule_1: { ...initialRules.rule_1, muted: true },
-    };
-
-    expect(queryClientSpy).toHaveBeenCalled();
-    expect(queryClientGetSpy).toHaveBeenCalled();
-    expect(mockSetQueryDataSpy).toHaveBeenCalled();
-    expect(mockSetQueryDataSpy).toHaveReturnedWith(expectedMutatedRules);
+      expect(queryClientSpy).toHaveBeenCalled();
+      expect(queryClientGetSpy).toHaveBeenCalled();
+      expect(mockSetQueryDataSpy).toHaveBeenCalled();
+      expect(mockSetQueryDataSpy).toHaveReturnedWith(expectedMutatedRules);
+    });
   });
 
   it('should invalidate queries onSettled', async () => {
     const appMockRender = testWrapper();
     const mockInvalidateQueriesSpy = jest.spyOn(appMockRender.queryClient, 'invalidateQueries');
 
-    const { result, waitForNextUpdate } = await renderHook(() => useChangeCspRuleState(), {
+    const { result } = await renderHook(() => useChangeCspRuleState(), {
       wrapper: appMockRender.wrapper,
     });
 
@@ -188,19 +188,19 @@ describe('use_change_csp_rule_state', () => {
       result.current.mutate(mockRuleStateUpdateRequest);
     });
 
-    await waitForNextUpdate();
-
-    expect(mockInvalidateQueriesSpy).toHaveBeenCalledWith(BENCHMARK_INTEGRATION_QUERY_KEY_V2);
-    expect(mockInvalidateQueriesSpy).toHaveBeenCalledWith(CSPM_STATS_QUERY_KEY);
-    expect(mockInvalidateQueriesSpy).toHaveBeenCalledWith(KSPM_STATS_QUERY_KEY);
-    expect(mockInvalidateQueriesSpy).toHaveBeenCalledWith(CSP_RULES_STATES_QUERY_KEY);
+    await waitFor(() => {
+      expect(mockInvalidateQueriesSpy).toHaveBeenCalledWith(BENCHMARK_INTEGRATION_QUERY_KEY_V2);
+      expect(mockInvalidateQueriesSpy).toHaveBeenCalledWith(CSPM_STATS_QUERY_KEY);
+      expect(mockInvalidateQueriesSpy).toHaveBeenCalledWith(KSPM_STATS_QUERY_KEY);
+      expect(mockInvalidateQueriesSpy).toHaveBeenCalledWith(CSP_RULES_STATES_QUERY_KEY);
+    });
   });
 
   it('should restore previous query data onError', async () => {
     const appMockRender = testWrapper();
     const mockSetQueryDataSpy = jest.spyOn(appMockRender.queryClient, 'setQueryData');
 
-    const { result, waitForNextUpdate } = await renderHook(() => useChangeCspRuleState(), {
+    const { result } = await renderHook(() => useChangeCspRuleState(), {
       wrapper: appMockRender.wrapper,
     });
 
@@ -221,13 +221,13 @@ describe('use_change_csp_rule_state', () => {
       result.current.mutate(mockRuleStateUpdateRequest);
     });
 
-    await waitForNextUpdate();
-
-    expect(mockSetQueryDataSpy).toHaveBeenCalled();
-    expect(mockSetQueryDataSpy).toHaveReturnedWith(initialRules);
+    await waitFor(() => {
+      expect(mockSetQueryDataSpy).toHaveBeenCalled();
+      expect(mockSetQueryDataSpy).toHaveReturnedWith(initialRules);
+    });
   });
 
-  it('creates the new set of cache rules in a muted state when calling createRulesWithUpdatedState', async () => {
+  it('creates the new set of cache rules in a muted state when calling createRulesWithUpdatedState', () => {
     const request: RuleStateUpdateRequest = {
       newState: 'mute',
       ruleIds: [
@@ -267,7 +267,7 @@ describe('use_change_csp_rule_state', () => {
     expect(newRulesState).toEqual({ ...initialRules, ...updateRules });
   });
 
-  it('creates the new cache with rules in a unmute state', async () => {
+  it('creates the new cache with rules in a unmute state', () => {
     const initialMutedRules: Record<string, RuleStateAttributes> = {
       rule_1: {
         benchmark_id: 'benchmark_id',

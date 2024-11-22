@@ -23,6 +23,7 @@ import {
   allowAutoCreateRadioIds,
   INVALID_INDEX_PATTERN_CHARS,
   INVALID_TEMPLATE_NAME_CHARS,
+  STANDARD_INDEX_MODE,
 } from '../../../../common/constants';
 
 const {
@@ -129,6 +130,18 @@ export const schemas: Record<string, FormSchema> = {
           type: VALIDATION_TYPES.ARRAY_ITEM,
           isBlocking: false,
         },
+        {
+          validator: startsWithField({
+            char: '.',
+            message: i18n.translate(
+              'xpack.idxMgmt.templateValidation.indexPatternDotPrefixedError',
+              {
+                defaultMessage: 'Index patterns cannot match dot-prefixed indices.',
+              }
+            ),
+          }),
+          type: VALIDATION_TYPES.ARRAY_ITEM,
+        },
       ],
     },
     doCreateDataStream: {
@@ -137,6 +150,13 @@ export const schemas: Record<string, FormSchema> = {
         defaultMessage: 'Create data stream',
       }),
       defaultValue: false,
+    },
+    indexMode: {
+      type: FIELD_TYPES.SUPER_SELECT,
+      defaultValue: STANDARD_INDEX_MODE,
+      label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.fieldIndexModeLabel', {
+        defaultMessage: 'Index mode',
+      }),
     },
     order: {
       type: FIELD_TYPES.NUMBER,

@@ -11,7 +11,7 @@ import { maintenanceWindowSchema } from '../schemas';
 
 export type MaintenanceWindow = TypeOf<typeof maintenanceWindowSchema>;
 export type MaintenanceWindowStatus =
-  typeof maintenanceWindowStatus[keyof typeof maintenanceWindowStatus];
+  (typeof maintenanceWindowStatus)[keyof typeof maintenanceWindowStatus];
 
 export type MaintenanceWindowWithoutComputedProperties = Omit<
   MaintenanceWindow,

@@ -5,42 +5,44 @@
  * 2.0.
  */
 
-import { EuiCommentProps } from '@elastic/eui';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { omit } from 'lodash/fp';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useRef } from 'react';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
-import { useLocalStorage, useSessionStorage } from 'react-use';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { AssistantFeatures, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
+import { NavigateToAppOptions, UserProfileService } from '@kbn/core/public';
+import { useQuery } from '@tanstack/react-query';
 import { updatePromptContexts } from './helpers';
 import type {
   PromptContext,
   RegisterPromptContext,
   UnRegisterPromptContext,
 } from '../assistant/prompt_context/types';
-import type { Conversation } from './types';
+import {
+  AssistantAvailability,
+  AssistantTelemetry,
+  Conversation,
+  GetAssistantMessages,
+} from './types';
 import { DEFAULT_ASSISTANT_TITLE } from '../assistant/translations';
 import { CodeBlockDetails } from '../assistant/use_conversation/helpers';
 import { PromptContextTemplate } from '../assistant/prompt_context/types';
-import { QuickPrompt } from '../assistant/quick_prompts/types';
-import { KnowledgeBaseConfig, Prompt, TraceOptions } from '../assistant/types';
-import { BASE_SYSTEM_PROMPTS } from '../content/prompts/system';
+import { KnowledgeBaseConfig, TraceOptions } from '../assistant/types';
 import {
   DEFAULT_ASSISTANT_NAMESPACE,
   DEFAULT_KNOWLEDGE_BASE_SETTINGS,
   KNOWLEDGE_BASE_LOCAL_STORAGE_KEY,
   LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY,
-  QUICK_PROMPT_LOCAL_STORAGE_KEY,
   STREAMING_LOCAL_STORAGE_KEY,
-  SYSTEM_PROMPT_LOCAL_STORAGE_KEY,
   TRACE_OPTIONS_SESSION_STORAGE_KEY,
 } from './constants';
-import { CONVERSATIONS_TAB, SettingsTabs } from '../assistant/settings/assistant_settings';
-import { AssistantAvailability, AssistantTelemetry } from './types';
 import { useCapabilities } from '../assistant/api/capabilities/use_capabilities';
 import { WELCOME_CONVERSATION_TITLE } from '../assistant/use_conversation/translations';
+import { SettingsTabs } from '../assistant/settings/types';
 
 export interface ShowAssistantOverlayProps {
   showOverlay: boolean;
@@ -64,27 +66,17 @@ export interface AssistantProviderProps {
   ) => CodeBlockDetails[][];
   basePath: string;
   basePromptContexts?: PromptContextTemplate[];
-  baseQuickPrompts?: QuickPrompt[];
-  baseSystemPrompts?: Prompt[];
   docLinks: Omit<DocLinksStart, 'links'>;
   children: React.ReactNode;
-  getComments: (commentArgs: {
-    abortStream: () => void;
-    currentConversation?: Conversation;
-    isEnabledLangChain: boolean;
-    isFetchingResponse: boolean;
-    refetchCurrentConversation: () => void;
-    regenerateMessage: (conversationId: string) => void;
-    showAnonymizedValues: boolean;
-    setIsStreaming: (isStreaming: boolean) => void;
-    currentUserAvatar?: UserAvatar;
-    isFlyoutMode: boolean;
-  }) => EuiCommentProps[];
+  getComments: GetAssistantMessages;
   http: HttpSetup;
   baseConversations: Record<string, Conversation>;
   nameSpace?: string;
+  navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>;
   title?: string;
   toasts?: IToasts;
+  currentAppId: string;
+  userProfileService: UserProfileService;
 }
 
 export interface UserAvatar {
@@ -104,39 +96,23 @@ export interface UseAssistantContext {
     currentConversation: Conversation,
     showAnonymizedValues: boolean
   ) => CodeBlockDetails[][];
-  allQuickPrompts: QuickPrompt[];
-  allSystemPrompts: Prompt[];
   docLinks: Omit<DocLinksStart, 'links'>;
   basePath: string;
-  basePromptContexts: PromptContextTemplate[];
-  baseQuickPrompts: QuickPrompt[];
-  baseSystemPrompts: Prompt[];
   baseConversations: Record<string, Conversation>;
-  getComments: (commentArgs: {
-    abortStream: () => void;
-    currentConversation?: Conversation;
-    isEnabledLangChain: boolean;
-    isFetchingResponse: boolean;
-    refetchCurrentConversation: () => void;
-    regenerateMessage: () => void;
-    showAnonymizedValues: boolean;
-    currentUserAvatar?: UserAvatar;
-    setIsStreaming: (isStreaming: boolean) => void;
-    isFlyoutMode: boolean;
-  }) => EuiCommentProps[];
+  currentUserAvatar?: UserAvatar;
+  getComments: GetAssistantMessages;
   http: HttpSetup;
   knowledgeBase: KnowledgeBaseConfig;
   getLastConversationId: (conversationTitle?: string) => string;
   promptContexts: Record<string, PromptContext>;
+  navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>;
   nameSpace: string;
   registerPromptContext: RegisterPromptContext;
-  selectedSettingsTab: SettingsTabs;
-  setAllQuickPrompts: React.Dispatch<React.SetStateAction<QuickPrompt[] | undefined>>;
-  setAllSystemPrompts: React.Dispatch<React.SetStateAction<Prompt[] | undefined>>;
+  selectedSettingsTab: SettingsTabs | null;
   setAssistantStreamingEnabled: React.Dispatch<React.SetStateAction<boolean | undefined>>;
   setKnowledgeBase: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig | undefined>>;
   setLastConversationId: React.Dispatch<React.SetStateAction<string | undefined>>;
-  setSelectedSettingsTab: React.Dispatch<React.SetStateAction<SettingsTabs>>;
+  setSelectedSettingsTab: React.Dispatch<React.SetStateAction<SettingsTabs | null>>;
   setShowAssistantOverlay: (showAssistantOverlay: ShowAssistantOverlay) => void;
   showAssistantOverlay: ShowAssistantOverlay;
   setTraceOptions: (traceOptions: {
@@ -147,7 +123,11 @@ export interface UseAssistantContext {
   title: string;
   toasts: IToasts | undefined;
   traceOptions: TraceOptions;
+  basePromptContexts: PromptContextTemplate[];
   unRegisterPromptContext: UnRegisterPromptContext;
+  currentAppId: string;
+  codeBlockRef: React.MutableRefObject<(codeBlock: string) => void>;
+  userProfileService: UserProfileService;
 }
 
 const AssistantContext = React.createContext<UseAssistantContext | undefined>(undefined);
@@ -161,15 +141,16 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   docLinks,
   basePath,
   basePromptContexts = [],
-  baseQuickPrompts = [],
-  baseSystemPrompts = BASE_SYSTEM_PROMPTS,
   children,
   getComments,
   http,
   baseConversations,
+  navigateToApp,
   nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
   title = DEFAULT_ASSISTANT_TITLE,
   toasts,
+  currentAppId,
+  userProfileService,
 }) => {
   /**
    * Session storage for traceOptions, including APM URL and LangSmith Project/API Key
@@ -184,22 +165,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       `${nameSpace}.${TRACE_OPTIONS_SESSION_STORAGE_KEY}`,
       defaultTraceOptions
     );
-
-  /**
-   * Local storage for all quick prompts, prefixed by assistant nameSpace
-   */
-  const [localStorageQuickPrompts, setLocalStorageQuickPrompts] = useLocalStorage(
-    `${nameSpace}.${QUICK_PROMPT_LOCAL_STORAGE_KEY}`,
-    baseQuickPrompts
-  );
-
-  /**
-   * Local storage for all system prompts, prefixed by assistant nameSpace
-   */
-  const [localStorageSystemPrompts, setLocalStorageSystemPrompts] = useLocalStorage(
-    `${nameSpace}.${SYSTEM_PROMPT_LOCAL_STORAGE_KEY}`,
-    baseSystemPrompts
-  );
 
   const [localStorageLastConversationId, setLocalStorageLastConversationId] =
     useLocalStorage<string>(`${nameSpace}.${LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY}`);
@@ -257,14 +222,33 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   /**
    * Global Assistant Overlay actions
    */
-  const [showAssistantOverlay, setShowAssistantOverlay] = useState<ShowAssistantOverlay>(
-    (showAssistant) => {}
-  );
+  const [showAssistantOverlay, setShowAssistantOverlay] = useState<ShowAssistantOverlay>(() => {});
+
+  /**
+   * Current User Avatar
+   */
+  const { data: currentUserAvatar } = useQuery({
+    queryKey: ['currentUserAvatar'],
+    queryFn: async () =>
+      userProfileService.getCurrent<{ avatar: UserAvatar }>({
+        dataPath: 'avatar',
+      }),
+    select: (data) => {
+      return data.data.avatar;
+    },
+    keepPreviousData: true,
+    refetchOnWindowFocus: false,
+  });
 
   /**
    * Settings State
    */
-  const [selectedSettingsTab, setSelectedSettingsTab] = useState<SettingsTabs>(CONVERSATIONS_TAB);
+  const [selectedSettingsTab, setSelectedSettingsTab] = useState<SettingsTabs | null>(null);
+
+  /**
+   * Setting code block ref that can be used to store callback from parent components
+   */
+  const codeBlockRef = useRef(() => {});
 
   const getLastConversationId = useCallback(
     // if a conversationId has been provided, use that
@@ -286,25 +270,24 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       assistantFeatures: assistantFeatures ?? defaultAssistantFeatures,
       assistantTelemetry,
       augmentMessageCodeBlocks,
-      allQuickPrompts: localStorageQuickPrompts ?? [],
-      allSystemPrompts: localStorageSystemPrompts ?? [],
       basePath,
       basePromptContexts,
-      baseQuickPrompts,
-      baseSystemPrompts,
+      currentUserAvatar,
       docLinks,
       getComments,
       http,
-      knowledgeBase: { ...DEFAULT_KNOWLEDGE_BASE_SETTINGS, ...localStorageKnowledgeBase },
+      knowledgeBase: {
+        ...DEFAULT_KNOWLEDGE_BASE_SETTINGS,
+        ...localStorageKnowledgeBase,
+      },
       promptContexts,
+      navigateToApp,
       nameSpace,
       registerPromptContext,
       selectedSettingsTab,
       // can be undefined from localStorage, if not defined, default to true
       assistantStreamingEnabled: localStorageStreaming ?? true,
       setAssistantStreamingEnabled: setLocalStorageStreaming,
-      setAllQuickPrompts: setLocalStorageQuickPrompts,
-      setAllSystemPrompts: setLocalStorageSystemPrompts,
       setKnowledgeBase: setLocalStorageKnowledgeBase,
       setSelectedSettingsTab,
       setShowAssistantOverlay,
@@ -317,6 +300,9 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       getLastConversationId,
       setLastConversationId: setLocalStorageLastConversationId,
       baseConversations,
+      currentAppId,
+      codeBlockRef,
+      userProfileService,
     }),
     [
       actionTypeRegistry,
@@ -325,24 +311,20 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       assistantFeatures,
       assistantTelemetry,
       augmentMessageCodeBlocks,
-      localStorageQuickPrompts,
-      localStorageSystemPrompts,
       basePath,
       basePromptContexts,
-      baseQuickPrompts,
-      baseSystemPrompts,
+      currentUserAvatar,
       docLinks,
       getComments,
       http,
       localStorageKnowledgeBase,
       promptContexts,
+      navigateToApp,
       nameSpace,
       registerPromptContext,
       selectedSettingsTab,
       localStorageStreaming,
       setLocalStorageStreaming,
-      setLocalStorageQuickPrompts,
-      setLocalStorageSystemPrompts,
       setLocalStorageKnowledgeBase,
       setSessionStorageTraceOptions,
       showAssistantOverlay,
@@ -353,6 +335,9 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       getLastConversationId,
       setLocalStorageLastConversationId,
       baseConversations,
+      currentAppId,
+      codeBlockRef,
+      userProfileService,
     ]
   );
 

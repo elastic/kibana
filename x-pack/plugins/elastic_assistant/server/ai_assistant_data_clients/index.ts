@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
-import { AuthenticatedUser } from '@kbn/security-plugin/server';
 import { estypes } from '@elastic/elasticsearch';
 import { IIndexPatternString } from '../types';
 import { getIndexTemplateAndPattern } from '../lib/data_stream/helpers';
@@ -100,6 +99,8 @@ export class AIAssistantDataClient {
     sortOrder,
     filter,
     fields,
+    aggs,
+    mSearch,
   }: {
     perPage: number;
     page: number;
@@ -107,6 +108,11 @@ export class AIAssistantDataClient {
     sortOrder?: string;
     filter?: string;
     fields?: string[];
+    aggs?: Record<string, estypes.AggregationsAggregationContainer>;
+    mSearch?: {
+      filter: string;
+      perPage: number;
+    };
   }): Promise<Promise<FindResponse<TSearchSchema>>> => {
     const esClient = await this.options.elasticsearchClientPromise;
     return findDocuments<TSearchSchema>({
@@ -119,6 +125,8 @@ export class AIAssistantDataClient {
       index: this.indexTemplateAndPattern.alias,
       sortOrder: sortOrder as estypes.SortOrder,
       logger: this.options.logger,
+      aggs,
+      mSearch,
     });
   };
 }

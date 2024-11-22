@@ -41,6 +41,7 @@ export const mockKibanaProps: KibanaLogicProps = {
   charts: chartPluginMock.createStartContract(),
   cloud: {
     ...cloudMock.createSetup(),
+    ...cloudMock.createStart(),
     isCloudEnabled: false,
   },
   config: {
@@ -57,6 +58,7 @@ export const mockKibanaProps: KibanaLogicProps = {
     elasticsearch_host: 'https://your_deployment_url',
   },
   getChromeStyle$: jest.fn().mockReturnValue(of('classic')),
+  getNavLinks: jest.fn().mockReturnValue([]),
   guidedOnboarding: {},
   history: mockHistory,
   indexMappingComponent: () => {
@@ -114,7 +116,7 @@ interface TestHelper {
   defaultMockValues: typeof DEFAULT_VALUES;
   mountLogic: (logicFile: LogicFile, props?: object) => void;
   prepare: (options?: PrepareOptions) => void;
-  render: (children: JSX.Element) => void;
+  render: (children: JSX.Element) => ReturnType<typeof testingLibraryRender>;
 }
 
 export const TestHelper: TestHelper = {
@@ -147,7 +149,7 @@ export const TestHelper: TestHelper = {
     TestHelper.actionsToRun.forEach((action) => {
       action();
     });
-    testingLibraryRender(
+    return testingLibraryRender(
       <I18nProvider>
         <Provider>{children}</Provider>
       </I18nProvider>

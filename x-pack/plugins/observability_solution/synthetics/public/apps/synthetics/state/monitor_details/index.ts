@@ -6,7 +6,7 @@
  */
 
 import { createReducer } from '@reduxjs/toolkit';
-import { EncryptedSyntheticsSavedMonitor, Ping } from '../../../../../common/runtime_types';
+import { Ping, SyntheticsMonitorWithId } from '../../../../../common/runtime_types';
 import { checkIsStalePing } from '../../utils/monitor_test_result/check_pings';
 import { enableMonitorAlertAction } from '../monitor_list/actions';
 
@@ -34,7 +34,8 @@ export interface MonitorDetailsState {
     loaded: boolean;
   };
   syntheticsMonitorLoading: boolean;
-  syntheticsMonitor: EncryptedSyntheticsSavedMonitor | null;
+  syntheticsMonitor: SyntheticsMonitorWithId | null;
+  syntheticsMonitorError?: IHttpSerializedFetchError | null;
   syntheticsMonitorDispatchedAt: number;
   error: IHttpSerializedFetchError | null;
   selectedLocationId: string | null;
@@ -97,15 +98,15 @@ export const monitorDetailsReducer = createReducer(initialState, (builder) => {
     .addCase(getMonitorAction.get, (state, action) => {
       state.syntheticsMonitorDispatchedAt = action.meta.dispatchedAt;
       state.syntheticsMonitorLoading = true;
-      state.error = null;
+      state.syntheticsMonitorError = null;
     })
     .addCase(getMonitorAction.success, (state, action) => {
       state.syntheticsMonitor = action.payload;
       state.syntheticsMonitorLoading = false;
-      state.error = null;
+      state.syntheticsMonitorError = null;
     })
     .addCase(getMonitorAction.fail, (state, action) => {
-      state.error = action.payload;
+      state.syntheticsMonitorError = action.payload;
       state.syntheticsMonitorLoading = false;
     })
     .addCase(enableMonitorAlertAction.success, (state, action) => {

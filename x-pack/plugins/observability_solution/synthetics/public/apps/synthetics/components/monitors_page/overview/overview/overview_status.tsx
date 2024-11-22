@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiStat, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { EmbeddablePanelWrapper } from '../../../common/components/embeddable_panel_wrapper';
 import { clearOverviewStatusErrorAction } from '../../../../state/overview_status';
 import { kibanaService } from '../../../../../../utils/kibana_service';
 import { useGetUrlParams } from '../../../../hooks/use_url_params';
@@ -18,10 +19,20 @@ function title(t?: number) {
   return t ?? '-';
 }
 
-export function OverviewStatus() {
+export function OverviewStatus({
+  titleAppend,
+  hideTitle,
+}: {
+  titleAppend?: React.ReactNode;
+  hideTitle?: boolean;
+}) {
   const { statusFilter } = useGetUrlParams();
 
-  const { status, error: statusError } = useOverviewStatus({ scopeStatusByLocation: true });
+  const {
+    status,
+    error: statusError,
+    loading,
+  } = useOverviewStatus({ scopeStatusByLocation: true });
   const dispatch = useDispatch();
   const [statusConfig, setStatusConfig] = useState({
     up: status?.up,
@@ -87,15 +98,16 @@ export function OverviewStatus() {
   }, [status, statusFilter]);
 
   return (
-    <EuiPanel hasShadow={false} hasBorder>
-      <EuiTitle size="xs">
-        <h3>{headingText}</h3>
-      </EuiTitle>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="xl">
+    <EmbeddablePanelWrapper
+      title={headingText}
+      loading={loading}
+      titleAppend={titleAppend}
+      hideTitle={hideTitle}
+    >
+      <EuiFlexGroup gutterSize="xl" justifyContent="spaceAround">
         <EuiFlexItem grow={false}>
           <EuiStat
-            data-test-subj="xpack.uptime.synthetics.overview.status.up"
+            data-test-subj="syntheticsOverviewUp"
             description={upDescription}
             reverse
             title={title(statusConfig?.up)}
@@ -105,7 +117,7 @@ export function OverviewStatus() {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiStat
-            data-test-subj="xpack.uptime.synthetics.overview.status.down"
+            data-test-subj="syntheticsOverviewDown"
             description={downDescription}
             reverse
             title={title(statusConfig?.down)}
@@ -136,12 +148,12 @@ export function OverviewStatus() {
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-    </EuiPanel>
+    </EmbeddablePanelWrapper>
   );
 }
 
-const headingText = i18n.translate('xpack.synthetics.overview.status.headingText', {
-  defaultMessage: 'Current status',
+const headingText = i18n.translate('xpack.synthetics.overview.monitors.headingText', {
+  defaultMessage: 'Monitors status',
 });
 
 const upDescription = i18n.translate('xpack.synthetics.overview.status.up.description', {

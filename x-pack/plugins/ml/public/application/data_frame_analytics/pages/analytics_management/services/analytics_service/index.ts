@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-export { getAnalyticsFactory } from './get_analytics';
-export { deleteAnalytics, deleteAnalyticsAndDestIndex, canDeleteIndex } from './delete_analytics';
-export { startAnalytics } from './start_analytics';
-export { stopAnalytics } from './stop_analytics';
+export { useGetAnalytics } from './get_analytics';
+export {
+  useDeleteAnalytics,
+  useDeleteAnalyticsAndDestIndex,
+  useCanDeleteIndex,
+} from './delete_analytics';
+export { useStartAnalytics } from './start_analytics';
+export { useStopAnalytics } from './stop_analytics';

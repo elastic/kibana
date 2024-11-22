@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import type { IRouter } from '@kbn/core/server';
+import type { IKibanaResponse, IRouter } from '@kbn/core/server';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
-import {
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
-} from '@kbn/langchain/server/language_models';
-import { RELATED_GRAPH_PATH } from '../../common';
-import type { RelatedApiRequest, RelatedApiResponse } from '../../common/types';
+import { APMTracer } from '@kbn/langchain/server/tracers/apm';
+import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
+import { RELATED_GRAPH_PATH, RelatedRequestBody, RelatedResponse } from '../../common';
 import { ROUTE_HANDLER_TIMEOUT } from '../constants';
 import { getRelatedGraph } from '../graphs/related';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
+import { getLLMClass, getLLMType } from '../util/llm';
+import { buildRouteValidationWithZod } from '../util/route_validation';
+import { withAvailability } from './with_availability';
+import { isErrorThatHandlesItsOwnResponse } from '../lib/errors';
+import { handleCustomErrors } from './routes_util';
+import { GenerationErrorCode } from '../../common/constants';
 
 export function registerRelatedRoutes(router: IRouter<IntegrationAssistantRouteHandlerContext>) {
   router.versioned
@@ -32,67 +34,83 @@ export function registerRelatedRoutes(router: IRouter<IntegrationAssistantRouteH
     .addVersion(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'This route is opted out from authorization because the privileges are not defined yet.',
+          },
+        },
         validate: {
           request: {
-            body: schema.object({
-              packageName: schema.string(),
-              dataStreamName: schema.string(),
-              rawSamples: schema.arrayOf(schema.string()),
-              // TODO: This is a single nested object of any key or shape, any better schema?
-              currentPipeline: schema.maybe(schema.any()),
-              connectorId: schema.maybe(schema.string()),
-              region: schema.maybe(schema.string()),
-              model: schema.maybe(schema.string()),
-            }),
+            body: buildRouteValidationWithZod(RelatedRequestBody),
           },
         },
       },
-      async (context, req, res) => {
-        const { packageName, dataStreamName, rawSamples, currentPipeline } =
-          req.body as RelatedApiRequest;
-
+      withAvailability(async (context, req, res): Promise<IKibanaResponse<RelatedResponse>> => {
+        const {
+          packageName,
+          dataStreamName,
+          rawSamples,
+          samplesFormat,
+          currentPipeline,
+          langSmithOptions,
+        } = req.body;
         const services = await context.resolve(['core']);
         const { client } = services.core.elasticsearch;
         const { getStartServices, logger } = await context.integrationAssistant;
         const [, { actions: actionsPlugin }] = await getStartServices();
-        const actionsClient = await actionsPlugin.getActionsClientWithRequest(req);
-        const connector = req.body.connectorId
-          ? await actionsClient.get({ id: req.body.connectorId })
-          : (await actionsClient.getAll()).filter(
-              (connectorItem) => connectorItem.actionTypeId === '.bedrock'
-            )[0];
-
-        const isOpenAI = connector.actionTypeId === '.gen-ai';
-        const llmClass = isOpenAI ? ActionsClientChatOpenAI : ActionsClientSimpleChatModel;
-        const abortSignal = getRequestAbortedSignal(req.events.aborted$);
-
-        const model = new llmClass({
-          actions: actionsPlugin,
-          connectorId: connector.id,
-          request: req,
-          logger,
-          llmType: isOpenAI ? 'openai' : 'bedrock',
-          model: req.body.model || connector.config?.defaultModel,
-          temperature: 0.05,
-          maxTokens: 4096,
-          signal: abortSignal,
-          streaming: false,
-        });
-
-        const graph = await getRelatedGraph(client, model);
-        let results = { results: { docs: {}, pipeline: {} } };
         try {
-          results = (await graph.invoke({
+          const actionsClient = await actionsPlugin.getActionsClientWithRequest(req);
+          const connector = await actionsClient.get({ id: req.body.connectorId });
+
+          const abortSignal = getRequestAbortedSignal(req.events.aborted$);
+
+          const actionTypeId = connector.actionTypeId;
+          const llmType = getLLMType(actionTypeId);
+          const llmClass = getLLMClass(llmType);
+
+          const model = new llmClass({
+            actionsClient,
+            connectorId: connector.id,
+            logger,
+            llmType,
+            model: connector.config?.defaultModel,
+            temperature: 0.05,
+            maxTokens: 4096,
+            signal: abortSignal,
+            streaming: false,
+          });
+
+          const parameters = {
             packageName,
             dataStreamName,
             rawSamples,
             currentPipeline,
-          })) as RelatedApiResponse;
-        } catch (e) {
-          return res.badRequest({ body: e });
-        }
+            samplesFormat,
+          };
+          const options = {
+            callbacks: [
+              new APMTracer({ projectName: langSmithOptions?.projectName ?? 'default' }, logger),
+              ...getLangSmithTracer({ ...langSmithOptions, logger }),
+            ],
+          };
 
-        return res.ok({ body: results });
-      }
+          const graph = await getRelatedGraph({ client, model });
+          const results = await graph
+            .withConfig({ runName: 'Related' })
+            .invoke(parameters, options);
+          return res.ok({ body: RelatedResponse.parse(results) });
+        } catch (err) {
+          try {
+            handleCustomErrors(err, GenerationErrorCode.RECURSION_LIMIT);
+          } catch (e) {
+            if (isErrorThatHandlesItsOwnResponse(e)) {
+              return e.sendResponse(res);
+            }
+          }
+          return res.badRequest({ body: err });
+        }
+      })
     );
 }

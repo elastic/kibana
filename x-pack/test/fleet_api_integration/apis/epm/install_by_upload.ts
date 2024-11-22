@@ -13,7 +13,6 @@ import { HTTPError } from 'superagent';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
 import { testUsers } from '../test_users';
 
 /*
@@ -26,6 +25,7 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esClient = getService('es');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   const testPkgArchiveTgz = path.join(
     path.dirname(__filename),
@@ -69,9 +69,12 @@ export default function (providerContext: FtrProviderContext) {
     await supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
   };
 
-  describe('Installs packages from direct upload', async () => {
+  describe('Installs packages from direct upload', () => {
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
+
+    before(async () => {
+      await fleetAndAgents.setup();
+    });
 
     afterEach(async () => {
       if (isDockerRegistryEnabledOrSkipped(providerContext)) {
@@ -94,7 +97,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should install a tar archive correctly', async function () {
       const res = await uploadPackage();
-      expect(res.body.items.length).to.be(30);
+      expect(res.body.items.length).to.be(32);
     });
 
     it('should upgrade when uploading a newer zip archive', async () => {
@@ -108,7 +111,7 @@ export default function (providerContext: FtrProviderContext) {
         .type('application/zip')
         .send(buf)
         .expect(200);
-      expect(res.body.items.length).to.be(30);
+      expect(res.body.items.length).to.be(32);
       expect(res.body.items.some((item: any) => item.id.includes(testPkgNewVersion)));
 
       await deletePackage(testPkgName, testPkgNewVersion);
@@ -179,7 +182,7 @@ export default function (providerContext: FtrProviderContext) {
         .type('application/zip')
         .send(buf)
         .expect(200);
-      expect(res.body.items.length).to.be(30);
+      expect(res.body.items.length).to.be(32);
     });
 
     it('should throw an error if the archive is zip but content type is gzip', async function () {
@@ -192,7 +195,7 @@ export default function (providerContext: FtrProviderContext) {
         .send(buf)
         .expect(400);
       expect((res.error as HTTPError).text).to.equal(
-        '{"statusCode":400,"error":"Bad Request","message":"Archive seems empty. Assumed content type was application/gzip, check if this matches the archive type."}'
+        '{"statusCode":400,"error":"Bad Request","message":"Manifest file manifest.yml not found in paths."}'
       );
     });
 
@@ -248,7 +251,7 @@ export default function (providerContext: FtrProviderContext) {
         .send(buf)
         .expect(400);
       expect((res.error as HTTPError).text).to.equal(
-        '{"statusCode":400,"error":"Bad Request","message":"Could not parse top-level package manifest at top-level directory apache-0.1.4: YAMLException: bad indentation of a mapping entry at line 2, column 7:\\n      name: apache\\n          ^."}'
+        '{"statusCode":400,"error":"Bad Request","message":"Could not parse top-level package manifest at top-level directory apache-0.1.4: YAMLException: bad indentation of a mapping entry (2:7)\\n\\n 1 | format_version: 1.0.0\\n 2 |   name: apache\\n-----------^\\n 3 | title: Apache\\n 4 | version: 0.1.4."}'
       );
     });
 
@@ -262,7 +265,7 @@ export default function (providerContext: FtrProviderContext) {
         .send(buf)
         .expect(400);
       expect((res.error as HTTPError).text).to.equal(
-        '{"statusCode":400,"error":"Bad Request","message":"Invalid top-level package manifest at top-level directory apache-0.1.4 (package name: apache): one or more fields missing of name, version, description, title, format_version, owner."}'
+        '{"statusCode":400,"error":"Bad Request","message":"Invalid top-level package manifest at top-level directory apache-0.1.4 (package name: apache): one or more fields missing of name, version, title, owner."}'
       );
     });
 

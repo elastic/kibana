@@ -12,7 +12,7 @@ import {
 import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
-import { RiskSummary } from './risk_summary';
+import { FlyoutRiskSummary } from './risk_summary';
 import type {
   LensAttributes,
   VisualizationEmbeddableProps,
@@ -27,56 +27,15 @@ jest.mock('../../../common/components/visualization_actions/visualization_embedd
     mockVisualizationEmbeddable(props),
 }));
 
-const mockUseUiSetting = jest.fn().mockReturnValue([false]);
-
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
-  return {
-    ...original,
-    useUiSetting$: () => mockUseUiSetting(),
-  };
-});
-
-describe('RiskSummary', () => {
+describe('FlyoutRiskSummary', () => {
   beforeEach(() => {
     mockVisualizationEmbeddable.mockClear();
   });
 
-  it('renders risk summary table with alerts only', () => {
-    const { getByTestId, queryByTestId } = render(
-      <TestProviders>
-        <RiskSummary
-          riskScoreData={mockHostRiskScoreState}
-          queryId={'testQuery'}
-          openDetailsPanel={() => {}}
-          recalculatingScore={false}
-        />
-      </TestProviders>
-    );
-
-    expect(getByTestId('risk-summary-table')).toBeInTheDocument();
-
-    // Alerts
-    expect(getByTestId('risk-summary-table')).toHaveTextContent(
-      `${mockHostRiskScoreState.data?.[0].host.risk.category_1_count}`
-    );
-
-    // Context
-    expect(getByTestId('risk-summary-table')).not.toHaveTextContent(
-      `${mockHostRiskScoreState.data?.[0].host.risk.category_2_count}`
-    );
-
-    // Result row doesn't exist if alerts are the only category
-    expect(queryByTestId('risk-summary-result-count')).not.toBeInTheDocument();
-    expect(queryByTestId('risk-summary-result-score')).not.toBeInTheDocument();
-  });
-
   it('renders risk summary table with context and totals', () => {
-    mockUseUiSetting.mockReturnValue([true]);
-
     const { getByTestId } = render(
       <TestProviders>
-        <RiskSummary
+        <FlyoutRiskSummary
           riskScoreData={mockHostRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
@@ -108,7 +67,7 @@ describe('RiskSummary', () => {
   it('renders risk summary table when riskScoreData is empty', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <RiskSummary
+        <FlyoutRiskSummary
           riskScoreData={{ ...mockHostRiskScoreState, data: undefined }}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
@@ -122,7 +81,7 @@ describe('RiskSummary', () => {
   it('risk summary header does not render link when riskScoreData is loading', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <RiskSummary
+        <FlyoutRiskSummary
           riskScoreData={{ ...mockHostRiskScoreState, data: undefined, loading: true }}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
@@ -134,10 +93,27 @@ describe('RiskSummary', () => {
     expect(queryByTestId('riskInputsTitleLink')).not.toBeInTheDocument();
   });
 
+  it('risk summary header does not render expand icon when in preview mode', () => {
+    const { queryByTestId } = render(
+      <TestProviders>
+        <FlyoutRiskSummary
+          riskScoreData={{ ...mockHostRiskScoreState, data: undefined, loading: true }}
+          queryId={'testQuery'}
+          openDetailsPanel={() => {}}
+          recalculatingScore={false}
+          isPreviewMode
+        />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('riskInputsTitleLink')).not.toBeInTheDocument();
+    expect(queryByTestId('riskInputsTitleIcon')).not.toBeInTheDocument();
+  });
+
   it('renders visualization embeddable', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <RiskSummary
+        <FlyoutRiskSummary
           riskScoreData={mockHostRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
@@ -152,7 +128,7 @@ describe('RiskSummary', () => {
   it('renders updated at', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <RiskSummary
+        <FlyoutRiskSummary
           riskScoreData={mockHostRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
@@ -167,7 +143,7 @@ describe('RiskSummary', () => {
   it('builds lens attributes for host risk score', () => {
     render(
       <TestProviders>
-        <RiskSummary
+        <FlyoutRiskSummary
           riskScoreData={mockHostRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
@@ -194,7 +170,7 @@ describe('RiskSummary', () => {
   it('builds lens cases attachment metadata for host risk score', () => {
     render(
       <TestProviders>
-        <RiskSummary
+        <FlyoutRiskSummary
           riskScoreData={mockHostRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
@@ -216,7 +192,7 @@ describe('RiskSummary', () => {
   it('builds lens cases attachment metadata for user risk score', () => {
     render(
       <TestProviders>
-        <RiskSummary
+        <FlyoutRiskSummary
           riskScoreData={mockUserRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
@@ -238,7 +214,7 @@ describe('RiskSummary', () => {
   it('builds lens attributes for user risk score', () => {
     render(
       <TestProviders>
-        <RiskSummary
+        <FlyoutRiskSummary
           riskScoreData={mockUserRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}

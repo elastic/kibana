@@ -9,20 +9,27 @@ import objectHash from 'object-hash';
 
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
-import type { RuleWithInMemorySuppression, SignalSourceHit } from '../types';
+import type { SignalSourceHit } from '../types';
 
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import type { ConfigType } from '../../../../config';
-import type { CompleteRule } from '../../rule_schema';
+import type {
+  CompleteRule,
+  EqlRuleParams,
+  MachineLearningRuleParams,
+  ThreatRuleParams,
+} from '../../rule_schema';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
-import { buildBulkBody } from '../factories/utils/build_bulk_body';
+import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';
 import { getSuppressionAlertFields, getSuppressionTerms } from './suppression_utils';
 import { generateId } from './utils';
 
 import type { BuildReasonMessage } from './reason_formatters';
+
+type RuleWithInMemorySuppression = ThreatRuleParams | EqlRuleParams | MachineLearningRuleParams;
 
 /**
  * wraps suppressed alerts
@@ -41,6 +48,7 @@ export const wrapSuppressedAlerts = ({
   publicBaseUrl,
   primaryTimestamp,
   secondaryTimestamp,
+  intendedTimestamp,
 }: {
   events: SignalSourceHit[];
   spaceId: string;
@@ -53,6 +61,7 @@ export const wrapSuppressedAlerts = ({
   publicBaseUrl: string | undefined;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
+  intendedTimestamp: Date | undefined;
 }): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
   return events.map((event) => {
     const suppressionTerms = getSuppressionTerms({
@@ -62,27 +71,30 @@ export const wrapSuppressedAlerts = ({
 
     const id = generateId(
       event._index,
-      event._id,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      event._id!,
       String(event._version),
       `${spaceId}:${completeRule.alertId}`
     );
 
     const instanceId = objectHash([suppressionTerms, completeRule.alertId, spaceId]);
 
-    const baseAlert: BaseFieldsLatest = buildBulkBody(
+    const baseAlert: BaseFieldsLatest = transformHitToAlert({
       spaceId,
       completeRule,
-      event,
+      doc: event,
       mergeStrategy,
-      [],
-      true,
+      ignoreFields: {},
+      ignoreFieldsRegexes: [],
+      applyOverrides: true,
       buildReasonMessage,
       indicesToQuery,
       alertTimestampOverride,
       ruleExecutionLogger,
-      id,
-      publicBaseUrl
-    );
+      alertUuid: id,
+      publicBaseUrl,
+      intendedTimestamp,
+    });
 
     return {
       _id: id,

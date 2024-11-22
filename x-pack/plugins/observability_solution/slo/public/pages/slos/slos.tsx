@@ -15,8 +15,9 @@ import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { SloOutdatedCallout } from '../../components/slo/slo_outdated_callout';
 import { useFetchSloList } from '../../hooks/use_fetch_slo_list';
 import { useLicense } from '../../hooks/use_license';
+import { usePermissions } from '../../hooks/use_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useKibana } from '../../utils/kibana_react';
+import { useKibana } from '../../hooks/use_kibana';
 import { CreateSloBtn } from './components/common/create_slo_btn';
 import { FeedbackButton } from './components/common/feedback_button';
 import { SloList } from './components/slo_list';
@@ -28,34 +29,37 @@ export function SlosPage() {
   const {
     application: { navigateToUrl },
     http: { basePath },
+    serverless,
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const { hasAtLeast } = useLicense();
+  const { data: permissions } = usePermissions();
 
-  const {
-    isLoading,
-    isError,
-    data: sloList,
-  } = useFetchSloList({
-    perPage: 0,
-  });
+  const { isLoading, isError, data: sloList } = useFetchSloList({ perPage: 0 });
   const { total } = sloList ?? { total: 0 };
 
-  useBreadcrumbs([
-    {
-      href: basePath.prepend(paths.slos),
-      text: i18n.translate('xpack.slo.breadcrumbs.slosLinkText', {
-        defaultMessage: 'SLOs',
-      }),
-      deepLinkId: 'slo',
-    },
-  ]);
+  useBreadcrumbs(
+    [
+      {
+        href: basePath.prepend(paths.slos),
+        text: i18n.translate('xpack.slo.breadcrumbs.slosLinkText', {
+          defaultMessage: 'SLOs',
+        }),
+        deepLinkId: 'slo',
+      },
+    ],
+    { serverless }
+  );
 
   useEffect(() => {
     if ((!isLoading && total === 0) || hasAtLeast('platinum') === false || isError) {
       navigateToUrl(basePath.prepend(paths.slosWelcome));
     }
-  }, [basePath, hasAtLeast, isError, isLoading, navigateToUrl, total]);
+
+    if (permissions?.hasAllReadRequested === false) {
+      navigateToUrl(basePath.prepend(paths.slosWelcome));
+    }
+  }, [basePath, hasAtLeast, isError, isLoading, navigateToUrl, total, permissions]);
 
   return (
     <ObservabilityPageTemplate

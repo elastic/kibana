@@ -5,66 +5,99 @@ info:
 paths:
   /internal/osquery/fleet_wrapper/agents:
     get:
+      x-labels: [serverless, ess]
+      x-codegen-enabled: true
+      operationId: GetAgents
       summary: Get agents
       parameters:
-          - $ref: './get_agents.schema.yaml#/components/parameters/GetAgentsRequestQueryParameter'
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: object
+            additionalProperties: true
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: './get_agents.schema.yaml#/components/schemas/SuccessResponse'
+                type: object
+                properties: {}
+                # Define properties for the success response if needed
 
   /internal/osquery/fleet_wrapper/agents/{id}:
     get:
+      x-labels: [serverless, ess]
+      x-codegen-enabled: true
+      operationId: GetAgentDetails
       summary: Get Agent details
       parameters:
-          - $ref: './get_agent_details.schema.yaml#/components/parameters/GetAgentDetailsRequestQueryParameter'
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Id'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: './get_agent_details.schema.yaml#/components/schemas/SuccessResponse'
+                type: object
+                properties: {}
+                # Define properties for the success response if needed
 
   /internal/osquery/fleet_wrapper/agent_policies:
     get:
+      x-labels: [serverless, ess]
+      x-codegen-enabled: true
+      operationId: GetAgentPolicies
       summary: Get Agent policies
-      parameters:
-          - $ref: './get_agent_policies.schema.yaml#/components/parameters/GetAgentPoliciesRequestParameter'
-          - $ref: './get_agent_policies.schema.yaml#/components/parameters/GetAgentPoliciesRequestQueryParameter'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: './get_agent_policies.schema.yaml#/components/schemas/SuccessResponse'
+                type: object
+                properties: {}
+                # Define properties for the success response if needed
 
   /internal/osquery/fleet_wrapper/agent_policies/{id}:
     get:
+      x-labels: [serverless, ess]
+      x-codegen-enabled: true
+      operationId: GetAgentPolicy
       summary: Get Agent policy
       parameters:
-          - $ref: './get_agent_policy.schema.yaml#/components/parameters/GetAgentPolicyRequestParameter'
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Id'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: './get_agent_policy.schema.yaml#/components/schemas/SuccessResponse'
+                type: object
+                properties: {}
+                # Define properties for the success response if needed
 
   /internal/osquery/fleet_wrapper/package_policies:
     get:
+      x-labels: [serverless, ess]
+      x-codegen-enabled: true
+      operationId: GetAgentPackagePolicies
       summary: Get Agent policy
-      parameters:
-          - $ref: './get_package_policies.schema.yaml#/components/parameters/GetPackagePoliciesRequestQueryParameter'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: './get_package_policies.schema.yaml#/components/schemas/SuccessResponse'
+                type: object
+                properties: {}
+                # Define properties for the success response if needed

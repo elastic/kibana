@@ -1,0 +1,51 @@
+openapi: 3.0.0
+info:
+  title: Endpoint Protection Updates Note Schema
+  version: '2023-10-31'
+paths:
+  /api/endpoint/protection_updates_note/{package_policy_id}:
+    get:
+      summary: Get a protection updates note
+      operationId: GetProtectionUpdatesNote
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      parameters:
+        - name: package_policy_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '../model/schema/common.schema.yaml#/components/schemas/ProtectionUpdatesNoteResponse'
+    post:
+      summary: Create or update a protection updates note
+      operationId: CreateUpdateProtectionUpdatesNote
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                note:
+                  type: string
+      parameters:
+        - name: package_policy_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+               $ref: '../model/schema/common.schema.yaml#/components/schemas/ProtectionUpdatesNoteResponse'

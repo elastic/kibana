@@ -8,16 +8,17 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiInMemoryTable, EuiBasicTableColumn, EuiInMemoryTableProps } from '@elastic/eui';
-import { ApiKey } from '@kbn/security-plugin/common/model';
+import { ApiKey } from '@kbn/security-plugin-types-common';
 import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
 import { ConfirmDeleteModal } from './confirm_delete_modal';
 
 interface Props {
   agentKeys: ApiKey[];
   onKeyDelete: () => void;
+  canManage: boolean;
 }
 
-export function AgentKeysTable({ agentKeys, onKeyDelete }: Props) {
+export function AgentKeysTable({ agentKeys, onKeyDelete, canManage }: Props) {
   const [agentKeyToBeDeleted, setAgentKeyToBeDeleted] = useState<ApiKey>();
 
   const columns: Array<EuiBasicTableColumn<ApiKey>> = [
@@ -54,7 +55,10 @@ export function AgentKeysTable({ agentKeys, onKeyDelete }: Props) {
       },
       render: (date: number) => <TimestampTooltip time={date} />,
     },
-    {
+  ];
+
+  if (canManage) {
+    columns.push({
       actions: [
         {
           name: i18n.translate('xpack.apm.settings.agentKeys.table.deleteActionTitle', {
@@ -72,8 +76,8 @@ export function AgentKeysTable({ agentKeys, onKeyDelete }: Props) {
           onClick: (agentKey: ApiKey) => setAgentKeyToBeDeleted(agentKey),
         },
       ],
-    },
-  ];
+    });
+  }
 
   const search: EuiInMemoryTableProps<ApiKey>['search'] = {
     box: {

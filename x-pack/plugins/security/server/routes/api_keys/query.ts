@@ -6,9 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { QueryApiKeyResult } from '@kbn/security-plugin-types-common';
 
 import type { RouteDefinitionParams } from '..';
-import type { QueryApiKeyResult } from '../../../common/model';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
@@ -25,6 +25,12 @@ export function defineQueryApiKeysAndAggregationsRoute({
     // on behalf of the user making the request and governed by the user's own cluster privileges.
     {
       path: '/internal/security/api_key/_query',
+      security: {
+        authz: {
+          enabled: false,
+          reason: `This route delegates authorization to the scoped ES cluster client of the internal authentication service, and to Core's ES client`,
+        },
+      },
       validate: {
         body: schema.object({
           query: schema.maybe(schema.object({}, { unknowns: 'allow' })),

@@ -13,6 +13,7 @@ import type {
 } from '@kbn/core/server';
 import type { SearchRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { EntityManagerServerPluginStart } from '@kbn/entityManager-plugin/server';
 import { InfraServerPluginStartDeps } from './lib/adapters/framework';
 import { InventoryViewsServiceSetup, InventoryViewsServiceStart } from './services/inventory_views';
 import {
@@ -44,6 +45,8 @@ export interface InfraRequestHandlerContext {
   spaceId: string;
   savedObjectsClient: SavedObjectsClientContract;
   uiSettingsClient: IUiSettingsClient;
+  getMetricsIndices: () => Promise<string>;
+  entityManager: EntityManagerServerPluginStart;
 }
 
 /**

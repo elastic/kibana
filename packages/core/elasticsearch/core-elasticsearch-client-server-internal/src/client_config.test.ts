@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { duration } from 'moment';
+import { ByteSizeValue } from '@kbn/config-schema';
 import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
 import { parseClientOptions } from './client_config';
 import { getDefaultHeaders } from './headers';
@@ -19,6 +21,7 @@ const createConfig = (
     compression: false,
     maxSockets: Infinity,
     maxIdleSockets: 300,
+    maxResponseSize: undefined,
     idleSocketTimeout: duration(30, 'seconds'),
     sniffOnStart: false,
     sniffOnConnectionFault: false,
@@ -78,7 +81,7 @@ describe('parseClientOptions', () => {
     it('`customHeaders` take precedence to default kibana headers', () => {
       const customHeader: Record<string, string> = {};
       for (const header in defaultHeaders) {
-        if (defaultHeaders.hasOwnProperty(header)) {
+        if (Object.hasOwn(defaultHeaders, header)) {
           customHeader[header] = 'foo';
         }
       }
@@ -149,6 +152,28 @@ describe('parseClientOptions', () => {
           kibanaVersion
         );
         expect(options.agent).toHaveProperty('timeout', 1_000_000);
+      });
+    });
+
+    describe('`maxResponseSize` option', () => {
+      it('does not set the values on client options when undefined', () => {
+        const options = parseClientOptions(
+          createConfig({ maxResponseSize: undefined }),
+          false,
+          kibanaVersion
+        );
+        expect(options.maxResponseSize).toBe(undefined);
+        expect(options.maxCompressedResponseSize).toBe(undefined);
+      });
+
+      it('sets the right values on client options when defined', () => {
+        const options = parseClientOptions(
+          createConfig({ maxResponseSize: ByteSizeValue.parse('2kb') }),
+          false,
+          kibanaVersion
+        );
+        expect(options.maxResponseSize).toBe(2048);
+        expect(options.maxCompressedResponseSize).toBe(2048);
       });
     });
 

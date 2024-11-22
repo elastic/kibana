@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { ApiVersion } from '@kbn/core-http-common';
@@ -12,6 +13,7 @@ import type {
   RequestHandler,
   RouteConfig,
   VersionedRouteValidation,
+  RouteSecurity,
 } from '@kbn/core-http-server';
 import { Router } from '../router';
 import { createFooValidation } from '../router.test.util';
@@ -21,6 +23,7 @@ import { passThroughValidation } from './core_versioned_route';
 import { Method } from './types';
 import { createRequest } from './core_versioned_route.test.util';
 import { isConfigSchema } from '@kbn/config-schema';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 describe('Versioned route', () => {
   let router: Router;
@@ -47,6 +50,46 @@ describe('Versioned route', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('#getRoutes', () => {
+    it('returns the expected metadata', () => {
+      const versionedRouter = CoreVersionedRouter.from({ router });
+      versionedRouter
+        .get({
+          path: '/test/{id}',
+          access: 'public',
+          options: {
+            httpResource: true,
+            availability: {
+              since: '1.0.0',
+              stability: 'experimental',
+            },
+            excludeFromOAS: true,
+            tags: ['1', '2', '3'],
+          },
+          description: 'test',
+          summary: 'test',
+          enableQueryVersion: false,
+        })
+        .addVersion({ version: '2023-10-31', validate: false }, handlerFn);
+
+      expect(versionedRouter.getRoutes()[0].options).toMatchObject({
+        access: 'public',
+        enableQueryVersion: false,
+        description: 'test',
+        summary: 'test',
+        options: {
+          httpResource: true,
+          availability: {
+            since: '1.0.0',
+            stability: 'experimental',
+          },
+          excludeFromOAS: true,
+          tags: ['1', '2', '3'],
+        },
+      });
+    });
   });
 
   it('can register multiple handlers', () => {
@@ -130,11 +173,15 @@ describe('Versioned route', () => {
     const opts: Parameters<typeof versionedRouter.post>[0] = {
       path: '/test/{id}',
       access: 'internal',
+      summary: 'test',
+      description: 'test',
       options: {
         authRequired: true,
         tags: ['access:test'],
         timeout: { payload: 60_000, idleSocket: 10_000 },
         xsrfRequired: false,
+        excludeFromOAS: true,
+        httpResource: true,
       },
     };
 
@@ -151,7 +198,7 @@ describe('Versioned route', () => {
     expect(router.post).toHaveBeenCalledWith(
       expect.objectContaining(expectedRouteConfig),
       expect.any(Function),
-      { isVersioned: true }
+      { isVersioned: true, events: false }
     );
   });
 
@@ -241,12 +288,12 @@ describe('Versioned route', () => {
       ] = route.handlers;
 
       const res200 = (validate as () => VersionedRouteValidation<unknown, unknown, unknown>)()
-        .response![200].body;
+        .response![200].body!;
 
       expect(isConfigSchema(unwrapVersionedResponseBodyValidation(res200))).toBe(true);
 
       const res404 = (validate as () => VersionedRouteValidation<unknown, unknown, unknown>)()
-        .response![404].body;
+        .response![404].body!;
 
       expect(isConfigSchema(unwrapVersionedResponseBodyValidation(res404))).toBe(true);
 
@@ -299,6 +346,33 @@ describe('Versioned route', () => {
       expect(validateParamsFn).toHaveBeenCalledTimes(1);
       expect(validateQueryFn).toHaveBeenCalledTimes(1);
       expect(validateOutputFn).toHaveBeenCalledTimes(1);
+    });
+
+    it('handles "undefined" response schemas', async () => {
+      let handler: RequestHandler;
+
+      (router.post as jest.Mock).mockImplementation((opts: unknown, fn) => (handler = fn));
+      const versionedRouter = CoreVersionedRouter.from({ router, isDev: true });
+      versionedRouter.post({ path: '/test/{id}', access: 'internal' }).addVersion(
+        {
+          version: '1',
+          validate: { response: { 500: { description: 'jest description', body: undefined } } },
+        },
+        async (ctx, req, res) => res.custom({ statusCode: 500 })
+      );
+
+      await expect(
+        handler!(
+          {} as any,
+          createRequest({
+            version: '1',
+            body: { foo: 1 },
+            params: { foo: 1 },
+            query: { foo: 1 },
+          }),
+          responseFactory
+        )
+      ).resolves.not.toThrow();
     });
 
     it('runs custom response validations', async () => {
@@ -400,5 +474,199 @@ describe('Versioned route', () => {
     expect(doNotBypassResponse1.payload).toMatch('Please specify a version');
     expect(doNotBypassResponse2.status).toBe(400);
     expect(doNotBypassResponse2.payload).toMatch('Please specify a version');
+  });
+
+  it('can register multiple handlers with different security configurations', () => {
+    const versionedRouter = CoreVersionedRouter.from({ router });
+    const securityConfig1: RouteSecurity = {
+      authz: {
+        requiredPrivileges: ['foo'],
+      },
+      authc: {
+        enabled: 'optional',
+      },
+    };
+    const securityConfig2: RouteSecurity = {
+      authz: {
+        requiredPrivileges: ['foo', 'bar'],
+      },
+      authc: {
+        enabled: true,
+      },
+    };
+    const securityConfig3: RouteSecurity = {
+      authz: {
+        requiredPrivileges: ['foo', 'bar', 'baz'],
+      },
+    };
+    versionedRouter
+      .get({ path: '/test/{id}', access: 'internal' })
+      .addVersion(
+        {
+          version: '1',
+          validate: false,
+          security: securityConfig1,
+        },
+        handlerFn
+      )
+      .addVersion(
+        {
+          version: '2',
+          validate: false,
+          security: securityConfig2,
+        },
+        handlerFn
+      )
+      .addVersion(
+        {
+          version: '3',
+          validate: false,
+          security: securityConfig3,
+        },
+        handlerFn
+      );
+    const routes = versionedRouter.getRoutes();
+    expect(routes).toHaveLength(1);
+    const [route] = routes;
+    expect(route.handlers).toHaveLength(3);
+
+    expect(route.handlers[0].options.security).toStrictEqual(securityConfig1);
+    expect(route.handlers[1].options.security).toStrictEqual(securityConfig2);
+    expect(route.handlers[2].options.security).toStrictEqual(securityConfig3);
+    expect(router.get).toHaveBeenCalledTimes(1);
+  });
+
+  it('falls back to default security configuration if it is not specified for specific version', () => {
+    const versionedRouter = CoreVersionedRouter.from({ router });
+    const securityConfigDefault: RouteSecurity = {
+      authz: {
+        requiredPrivileges: ['foo', 'bar', 'baz'],
+      },
+    };
+    const securityConfig1: RouteSecurity = {
+      authz: {
+        requiredPrivileges: ['foo'],
+      },
+      authc: {
+        enabled: 'optional',
+      },
+    };
+    const securityConfig2: RouteSecurity = {
+      authz: {
+        requiredPrivileges: ['foo', 'bar'],
+      },
+      authc: {
+        enabled: true,
+      },
+    };
+    const versionedRoute = versionedRouter
+      .get({ path: '/test/{id}', access: 'internal', security: securityConfigDefault })
+      .addVersion(
+        {
+          version: '1',
+          validate: false,
+          security: securityConfig1,
+        },
+        handlerFn
+      )
+      .addVersion(
+        {
+          version: '2',
+          validate: false,
+          security: securityConfig2,
+        },
+        handlerFn
+      )
+      .addVersion(
+        {
+          version: '3',
+          validate: false,
+        },
+        handlerFn
+      );
+    const routes = versionedRouter.getRoutes();
+    expect(routes).toHaveLength(1);
+    const [route] = routes;
+    expect(route.handlers).toHaveLength(3);
+
+    expect(
+      // @ts-expect-error
+      versionedRoute.getSecurity({
+        headers: { [ELASTIC_HTTP_VERSION_HEADER]: '99' },
+      })
+    ).toStrictEqual(securityConfigDefault);
+
+    expect(
+      // @ts-expect-error
+      versionedRoute.getSecurity({
+        headers: { [ELASTIC_HTTP_VERSION_HEADER]: '1' },
+      })
+    ).toStrictEqual(securityConfig1);
+
+    expect(
+      // @ts-expect-error
+      versionedRoute.getSecurity({
+        headers: { [ELASTIC_HTTP_VERSION_HEADER]: '2' },
+      })
+    ).toStrictEqual(securityConfig2);
+
+    expect(
+      // @ts-expect-error
+      versionedRoute.getSecurity({
+        headers: { [ELASTIC_HTTP_VERSION_HEADER]: '99' },
+      })
+    ).toStrictEqual(securityConfigDefault);
+    expect(router.get).toHaveBeenCalledTimes(1);
+  });
+
+  it('validates security configuration', () => {
+    const versionedRouter = CoreVersionedRouter.from({ router });
+    const validSecurityConfig: RouteSecurity = {
+      authz: {
+        requiredPrivileges: ['foo'],
+      },
+      authc: {
+        enabled: 'optional',
+      },
+    };
+
+    expect(() =>
+      versionedRouter.get({
+        path: '/test/{id}',
+        access: 'internal',
+        security: {
+          authz: {
+            requiredPrivileges: [],
+          },
+        },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[authz.requiredPrivileges]: array size is [0], but cannot be smaller than [1]"`
+    );
+
+    const route = versionedRouter.get({
+      path: '/test/{id}',
+      access: 'internal',
+      security: validSecurityConfig,
+    });
+
+    expect(() =>
+      route.addVersion(
+        {
+          version: '1',
+          validate: false,
+          security: {
+            authz: {
+              requiredPrivileges: [{ allRequired: ['foo'], anyRequired: ['bar'] }],
+            },
+          },
+        },
+        handlerFn
+      )
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[authz.requiredPrivileges.0]: types that failed validation:
+      - [authz.requiredPrivileges.0.0.anyRequired]: array size is [1], but cannot be smaller than [2]
+      - [authz.requiredPrivileges.0.1]: expected value of type [string] but got [Object]"
+    `);
   });
 });

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -22,11 +23,12 @@ export const markdownVisDefinition: VisTypeDefinition<MarkdownVisParams> = {
   icon: 'visText',
   group: VisGroups.TOOLS,
   titleInWizard: i18n.translate('visTypeMarkdown.markdownTitleInWizard', {
-    defaultMessage: 'Text',
+    defaultMessage: 'Markdown text',
   }),
   description: i18n.translate('visTypeMarkdown.markdownDescription', {
-    defaultMessage: 'Add text and images to your dashboard.',
+    defaultMessage: 'Add custom text or images to dashboards.',
   }),
+  order: 30,
   toExpressionAst,
   visConfig: {
     defaults: {

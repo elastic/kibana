@@ -26,10 +26,3 @@ export const ELASTIC_AI_ASSISTANT_TITLE = i18n.translate(
     defaultMessage: 'Elastic AI Assistant',
   }
 );
-
-export const ELASTIC_AI_ASSISTANT = i18n.translate(
-  'xpack.elasticAssistant.assistant.useConversation.elasticAiAssistantName',
-  {
-    defaultMessage: 'Assistant',
-  }
-);

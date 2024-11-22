@@ -13,8 +13,8 @@ import type { GroupingAggregation } from '@kbn/grouping';
 import { isNoneGroup } from '@kbn/grouping';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { DynamicGroupingProps } from '@kbn/grouping/src';
-import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
 import { parseGroupingQuery } from '@kbn/grouping/src';
+import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
 import type { RunTimeMappings } from '../../../sourcerer/store/model';
 import { combineQueries } from '../../../common/lib/kuery';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
@@ -91,15 +91,15 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   const {
     services: { uiSettings },
   } = useKibana();
-  const { browserFields, indexPattern } = useSourcererDataView(SourcererScopeName.detections);
+  const { browserFields, sourcererDataView } = useSourcererDataView(SourcererScopeName.detections);
 
   const getGlobalQuery = useCallback(
     (customFilters: Filter[]) => {
-      if (browserFields != null && indexPattern != null) {
+      if (browserFields != null && sourcererDataView) {
         return combineQueries({
           config: getEsQueryConfig(uiSettings),
           dataProviders: [],
-          indexPattern,
+          indexPattern: sourcererDataView,
           browserFields,
           filters: [
             ...(defaultFilters ?? []),
@@ -120,10 +120,10 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
       from,
       globalFilters,
       globalQuery,
-      indexPattern,
       parentGroupingFilter,
       to,
       uiSettings,
+      sourcererDataView,
     ]
   );
 

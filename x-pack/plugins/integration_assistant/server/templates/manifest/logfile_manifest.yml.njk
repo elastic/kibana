@@ -1,7 +1,9 @@
 - input: logfile
   template_path: logfile.yml.hbs
-  title: {{ data_stream_title }}
-  description: {{ data_stream_description }}
+  title: |
+    {{ data_stream_title }}
+  description: |
+    {{ data_stream_description }}
   vars:
     - name: paths
       type: text

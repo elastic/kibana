@@ -5,14 +5,19 @@
  * 2.0.
  */
 
-import { KibanaResponse } from '@kbn/core-http-router-server-internal';
-import { UMKibanaRouteWrapper } from './types';
+import { isKibanaResponse } from '@kbn/core-http-server';
+import type { UMKibanaRouteWrapper } from './types';
 import { UptimeEsClient } from '../lib/lib';
 
 export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) => ({
   ...uptimeRoute,
   options: {
-    tags: ['access:uptime-read', ...(uptimeRoute?.writeAccess ? ['access:uptime-write'] : [])],
+    tags: ['oas-tag:uptime'],
+  },
+  security: {
+    authz: {
+      requiredPrivileges: ['uptime-read', ...(uptimeRoute?.writeAccess ? ['uptime-write'] : [])],
+    },
   },
   handler: async (context, request, response) => {
     const coreContext = await context.core;
@@ -37,7 +42,7 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) =>
       server,
     });
 
-    if (res instanceof KibanaResponse) {
+    if (isKibanaResponse(res)) {
       return res;
     }
 

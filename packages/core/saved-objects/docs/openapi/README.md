@@ -14,14 +14,8 @@ A guide about the openApi specification can be found at [https://swagger.io/docs
 
 To validate and bundle the docs, you can use [Redocly](https://redocly.com/docs/cli/) and [Swagger/OpenAPI CLI](https://www.npmjs.com/package/swagger-cli).
 
-For example, run the following commands from the `packages/core/saved-objects/docs/openapi/` folder:
 
-```bash
-npx swagger-cli validate entrypoint.yaml
-npx swagger-cli validate entrypoint-serverless.yaml
-```
-
-Then you can generate the `bundled` files by running the following commands:
+Generate the `bundled` files by running the following commands:
 
 ```bash
 npx @redocly/cli bundle entrypoint.yaml --output bundled.yaml --ext yaml
@@ -30,9 +24,4 @@ npx @redocly/cli bundle entrypoint_serverless.yaml --output bundled_serverless.y
 npx @redocly/cli bundle entrypoint_serverless.yaml --output bundled_serverless.json --ext json
 ```
 
-After generating the json bundle ensure that it is also valid by running the following command:
-
-```bash
-npx @redocly/cli lint bundled.json
-npx @redocly/cli lint bundled_serverless.json
-```
+Then join these files with the rest of the Kibana APIs per `oas_docs/README.md`

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { RootSchema } from '@kbn/analytics-client';
-import type { AnalyticsServiceSetup } from '@kbn/core/public';
+import type { AnalyticsServiceSetup, RootSchema } from '@kbn/core/public';
 
 export interface TelemetryServiceSetupParams {
   analytics: AnalyticsServiceSetup;
@@ -22,17 +21,35 @@ export interface SearchQuerySubmittedParams {
   action: SearchQueryActions;
 }
 
-export type TelemetryEventParams = SearchQuerySubmittedParams;
+export interface EntityInventoryAddDataParams {
+  view: 'empty_state' | 'add_data_button' | 'add_apm_cta' | 'add_apm_n/a';
+  journey?: 'add_apm_agent' | 'associate_existing_service_logs' | 'collect_new_service_logs';
+}
+
+export interface EmptyStateClickParams {
+  view: Extract<EntityInventoryAddDataParams['view'], 'add_apm_cta'>;
+}
+
+export type TelemetryEventParams =
+  | SearchQuerySubmittedParams
+  | EntityInventoryAddDataParams
+  | EmptyStateClickParams;
 
 export interface ITelemetryClient {
   reportSearchQuerySubmitted(params: SearchQuerySubmittedParams): void;
+  reportEntityInventoryAddData(params: EntityInventoryAddDataParams): void;
+  reportTryItClick(params: EmptyStateClickParams): void;
+  reportLearnMoreClick(params: EmptyStateClickParams): void;
 }
 
 export enum TelemetryEventTypes {
   SEARCH_QUERY_SUBMITTED = 'Search Query Submitted',
+  ENTITY_INVENTORY_ADD_DATA = 'entity_inventory_add_data',
+  TRY_IT_CLICK = 'try_it_click',
+  LEARN_MORE_CLICK = 'learn_more_click',
 }
 
 export interface TelemetryEvent {
-  eventType: TelemetryEventTypes.SEARCH_QUERY_SUBMITTED;
-  schema: RootSchema<SearchQuerySubmittedParams>;
+  eventType: TelemetryEventTypes;
+  schema: RootSchema<TelemetryEventParams>;
 }

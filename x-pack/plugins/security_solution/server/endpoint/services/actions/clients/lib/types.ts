@@ -8,9 +8,8 @@
 import type { Readable } from 'stream';
 import type {
   ActionDetails,
-  KillOrSuspendProcessRequestBody,
   KillProcessActionOutputContent,
-  ResponseActionParametersWithPidOrEntityId,
+  ResponseActionParametersWithProcessData,
   SuspendProcessActionOutputContent,
   GetProcessesActionOutputContent,
   ResponseActionGetFileOutputContent,
@@ -23,16 +22,19 @@ import type {
   LogsEndpointActionResponse,
   UploadedFileInfo,
   ResponseActionScanOutputContent,
-  ResponseActionsScanParameters,
+  ResponseActionScanParameters,
 } from '../../../../../../common/endpoint/types';
 import type {
   IsolationRouteRequestBody,
+  UnisolationRouteRequestBody,
   GetProcessesRequestBody,
   ResponseActionGetFileRequestBody,
   ExecuteActionRequestBody,
   UploadActionApiRequestBody,
   BaseActionRequestBody,
   ScanActionRequestBody,
+  KillProcessRequestBody,
+  SuspendProcessRequestBody,
 } from '../../../../../../common/api/endpoint';
 
 type OmitUnsupportedAttributes<T extends BaseActionRequestBody> = Omit<
@@ -83,22 +85,22 @@ export interface ResponseActionsClient {
   ) => Promise<ActionDetails>;
 
   release: (
-    actionRequest: OmitUnsupportedAttributes<IsolationRouteRequestBody>,
+    actionRequest: OmitUnsupportedAttributes<UnisolationRouteRequestBody>,
     options?: CommonResponseActionMethodOptions
   ) => Promise<ActionDetails>;
 
   killProcess: (
-    actionRequest: OmitUnsupportedAttributes<KillOrSuspendProcessRequestBody>,
+    actionRequest: OmitUnsupportedAttributes<KillProcessRequestBody>,
     options?: CommonResponseActionMethodOptions
   ) => Promise<
-    ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
+    ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithProcessData>
   >;
 
   suspendProcess: (
-    actionRequest: OmitUnsupportedAttributes<KillOrSuspendProcessRequestBody>,
+    actionRequest: OmitUnsupportedAttributes<SuspendProcessRequestBody>,
     options?: CommonResponseActionMethodOptions
   ) => Promise<
-    ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
+    ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithProcessData>
   >;
 
   runningProcesses: (
@@ -152,5 +154,5 @@ export interface ResponseActionsClient {
   scan: (
     actionRequest: OmitUnsupportedAttributes<ScanActionRequestBody>,
     options?: CommonResponseActionMethodOptions
-  ) => Promise<ActionDetails<ResponseActionScanOutputContent, ResponseActionsScanParameters>>;
+  ) => Promise<ActionDetails<ResponseActionScanOutputContent, ResponseActionScanParameters>>;
 }

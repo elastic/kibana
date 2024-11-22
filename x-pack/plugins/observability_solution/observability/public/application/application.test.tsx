@@ -74,14 +74,13 @@ describe('renderApp', () => {
     theme$: themeServiceMock.createTheme$(),
   } as unknown as AppMountParameters;
 
-  const config = {
+  const config: ConfigSchema = {
     unsafe: {
       alertDetails: {
-        metrics: { enabled: false },
         uptime: { enabled: false },
       },
     },
-  } as ConfigSchema;
+  };
 
   it('renders', async () => {
     expect(() => {

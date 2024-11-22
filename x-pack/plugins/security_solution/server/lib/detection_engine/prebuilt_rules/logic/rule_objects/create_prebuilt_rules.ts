@@ -21,7 +21,7 @@ export const createPrebuiltRules = (
       items: rules,
       executor: async (rule) => {
         return detectionRulesClient.createPrebuiltRule({
-          ruleAsset: rule,
+          params: rule,
         });
       },
     });

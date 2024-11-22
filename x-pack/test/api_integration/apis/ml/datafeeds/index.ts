@@ -12,5 +12,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./get_with_spaces'));
     loadTestFile(require.resolve('./get_stats_with_spaces'));
     loadTestFile(require.resolve('./update'));
+    loadTestFile(require.resolve('./preview'));
   });
 }

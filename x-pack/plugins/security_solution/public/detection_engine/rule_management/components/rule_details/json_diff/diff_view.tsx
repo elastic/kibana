@@ -25,6 +25,7 @@ import type {
   HunkTokens,
 } from 'react-diff-view';
 import unidiff from 'unidiff';
+import type { Change } from 'diff';
 import { useEuiTheme, COLOR_MODES_STANDARD } from '@elastic/eui';
 import { Hunks } from './hunks';
 import { markEdits, DiffMethod } from './mark_edits';
@@ -111,15 +112,32 @@ const renderGutter: RenderGutter = ({ change }) => {
   return null;
 };
 
+/**
+ * Converts an array of Change objects into a "unified diff" string.
+ *
+ * Takes an array of changes (as provided by the jsdiff library) and converts it into a "unified diff" string.
+ *
+ * @param {Change[]} changes - An array of changes between two strings.
+ * @returns {string} A unified diff string representing the changes.
+ */
+const convertChangesToUnifiedDiffString = (changes: Change[]): string => {
+  const unifiedDiff: string = unidiff.formatLines(changes, {
+    context: 3,
+  });
+
+  return unifiedDiff;
+};
+
 const convertToDiffFile = (oldSource: string, newSource: string) => {
   /*
     "diffLines" call converts two strings of text into an array of Change objects.
   */
-  const changes = unidiff.diffLines(oldSource, newSource);
+  const changes: Change[] = unidiff.diffLines(oldSource, newSource);
 
   /*
-    Then "formatLines" takes an array of Change objects and turns it into a single "unified diff" string.
-    More info about the "unified diff" format: https://en.wikipedia.org/wiki/Diff_utility#Unified_format
+    "convertChangesToUnifiedDiffString" converts an array of Change objects into a single "unified diff" string.
+    More info about the "unified diff" format: https://en.wikipedia.org/wiki/Diff#Unified_format
+
     Unified diff is a string with change markers added. Looks something like:
     `
       @@ -3,16 +3,15 @@
@@ -129,9 +147,7 @@ const convertToDiffFile = (oldSource: string, newSource: string) => {
          "history_window_start": "now-14d",
     `
   */
-  const unifiedDiff: string = unidiff.formatLines(changes, {
-    context: 3,
-  });
+  const unifiedDiff: string = convertChangesToUnifiedDiffString(changes);
 
   /*
     "parseDiff" converts a unified diff string into a gitdiff-parser File object.
@@ -154,8 +170,20 @@ const CustomStyles: FC<PropsWithChildren<unknown>> = ({ children }) => {
       padding: 0 ${euiTheme.size.l} 0 ${euiTheme.size.m};
     }
 
+    /* Gutter - a narrow column on the left-hand side that displays either a "+" or a "-" */
     .${TABLE_CLASS_NAME} .diff-gutter-col {
       width: ${euiTheme.size.xl};
+    }
+
+    /*
+      Hide the redundant second gutter column in "unified" view.
+      Hiding it with "display: none" would break the layout, so we set its width to 0 and make its content invisible.
+    */
+    .${TABLE_CLASS_NAME}.diff-unified .diff-gutter-col + .diff-gutter-col {
+      width: 0;
+    }
+    .${TABLE_CLASS_NAME}.diff-unified .diff-gutter + .diff-gutter {
+      visibility: hidden;
     }
 
     /* Vertical line separating two sides of the diff view */
@@ -163,9 +191,13 @@ const CustomStyles: FC<PropsWithChildren<unknown>> = ({ children }) => {
       border-left: 1px solid ${euiTheme.colors.mediumShade};
     }
 
+    .${GUTTER_CLASS_NAME}.diff-gutter-delete, .${GUTTER_CLASS_NAME}.diff-gutter-insert {
+      font-weight: bold;
+      text-align: center;
+    }
+
     /* Gutter of a line with deletions */
     .${GUTTER_CLASS_NAME}.diff-gutter-delete {
-      font-weight: bold;
       background: ${COLORS.light.gutterBackground.deletion};
     }
     .${DARK_THEME_CLASS_NAME} .${GUTTER_CLASS_NAME}.diff-gutter-delete {
@@ -174,7 +206,6 @@ const CustomStyles: FC<PropsWithChildren<unknown>> = ({ children }) => {
 
     /* Gutter of a line with insertions */
     .${GUTTER_CLASS_NAME}.diff-gutter-insert {
-      font-weight: bold;
       background: ${COLORS.light.gutterBackground.insertion};
     }
     .${DARK_THEME_CLASS_NAME} .${GUTTER_CLASS_NAME}.diff-gutter-insert {
@@ -228,12 +259,14 @@ interface DiffViewProps extends Partial<DiffProps> {
   oldSource: string;
   newSource: string;
   diffMethod?: DiffMethod;
+  viewType?: 'split' | 'unified';
 }
 
 export const DiffView = ({
   oldSource,
   newSource,
   diffMethod = DiffMethod.WORDS,
+  viewType = 'split',
 }: DiffViewProps) => {
   /*
     "react-diff-view" components consume diffs not as a strings, but as something they call "hunks".
@@ -272,6 +305,7 @@ export const DiffView = ({
           Passing 'add' or 'delete' would skip rendering one of the sides in split view.
         */
         diffType={diffFile.type}
+        viewType={viewType}
         hunks={hunks}
         renderGutter={renderGutter}
         tokens={tokens}

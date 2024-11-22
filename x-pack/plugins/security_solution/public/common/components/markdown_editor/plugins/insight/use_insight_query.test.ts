@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import type { QueryOperator } from '@kbn/timelines-plugin/common';
-import { DataProviderType } from '../../../../../../common/api/timeline';
+import { DataProviderTypeEnum } from '../../../../../../common/api/timeline';
 import { useInsightQuery } from './use_insight_query';
 import { TestProviders } from '../../../../mock';
-import type { UseInsightQuery, UseInsightQueryResult } from './use_insight_query';
 import { IS_OPERATOR } from '../../../../../timelines/components/timeline/data_providers/data_provider';
 
 const mockProvider = {
@@ -19,7 +18,7 @@ const mockProvider = {
   name: 'test',
   excluded: false,
   kqlQuery: '',
-  type: DataProviderType.default,
+  type: DataProviderTypeEnum.default,
   queryMatch: {
     field: 'event.id',
     value: '*',
@@ -29,7 +28,7 @@ const mockProvider = {
 
 describe('useInsightQuery', () => {
   it('should return renderable defaults', () => {
-    const { result } = renderHook<UseInsightQuery, UseInsightQueryResult>(
+    const { result } = renderHook(
       () =>
         useInsightQuery({
           dataProviders: [mockProvider],

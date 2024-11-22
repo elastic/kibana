@@ -5,26 +5,10 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
     "misc": [
       {
         "parentPluginId": "@kbn/core-application-browser-mocks",
-        "id": "def-common.ScopedHistoryMock",
+        "id": "def-public.ScopedHistoryMock",
         "type": "Type",
         "tags": [],
         "label": "ScopedHistoryMock",
@@ -33,9 +17,9 @@
           "{ createSubHistory: jest.MockInstance<",
           {
             "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.ScopedHistory",
+            "section": "def-public.ScopedHistory",
             "text": "ScopedHistory"
           },
           "<unknown>, [basePath: string], unknown>; createHref: jest.MockInstance<string, [location: ",
@@ -59,9 +43,9 @@
           "<unknown>], unknown>; } & ",
           {
             "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.ScopedHistory",
+            "section": "def-public.ScopedHistory",
             "text": "ScopedHistory"
           },
           "<unknown>"
@@ -75,7 +59,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/core-application-browser-mocks",
-        "id": "def-common.applicationServiceMock",
+        "id": "def-public.applicationServiceMock",
         "type": "Object",
         "tags": [],
         "label": "applicationServiceMock",
@@ -86,7 +70,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser-mocks",
-            "id": "def-common.applicationServiceMock.create",
+            "id": "def-public.applicationServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -102,7 +86,7 @@
           },
           {
             "parentPluginId": "@kbn/core-application-browser-mocks",
-            "id": "def-common.applicationServiceMock.createSetupContract",
+            "id": "def-public.applicationServiceMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
@@ -111,9 +95,9 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.ApplicationSetup",
+                "section": "def-public.ApplicationSetup",
                 "text": "ApplicationSetup"
               },
               ">"
@@ -126,7 +110,7 @@
           },
           {
             "parentPluginId": "@kbn/core-application-browser-mocks",
-            "id": "def-common.applicationServiceMock.createStartContract",
+            "id": "def-public.applicationServiceMock.createStartContract",
             "type": "Function",
             "tags": [],
             "label": "createStartContract",
@@ -135,9 +119,9 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.ApplicationStart",
+                "section": "def-public.ApplicationStart",
                 "text": "ApplicationStart"
               },
               ">"
@@ -150,7 +134,7 @@
           },
           {
             "parentPluginId": "@kbn/core-application-browser-mocks",
-            "id": "def-common.applicationServiceMock.createInternalSetupContract",
+            "id": "def-public.applicationServiceMock.createInternalSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createInternalSetupContract",
@@ -168,7 +152,7 @@
           },
           {
             "parentPluginId": "@kbn/core-application-browser-mocks",
-            "id": "def-common.applicationServiceMock.createInternalStartContract",
+            "id": "def-public.applicationServiceMock.createInternalStartContract",
             "type": "Function",
             "tags": [],
             "label": "createInternalStartContract",
@@ -185,7 +169,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-application-browser-mocks",
-                "id": "def-common.applicationServiceMock.createInternalStartContract.$1",
+                "id": "def-public.applicationServiceMock.createInternalStartContract.$1",
                 "type": "string",
                 "tags": [],
                 "label": "currentAppId",
@@ -201,7 +185,7 @@
           },
           {
             "parentPluginId": "@kbn/core-application-browser-mocks",
-            "id": "def-common.applicationServiceMock.createAppMountParameters",
+            "id": "def-public.applicationServiceMock.createAppMountParameters",
             "type": "Function",
             "tags": [],
             "label": "createAppMountParameters",
@@ -210,17 +194,17 @@
               "(parts?: Partial<",
               {
                 "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.AppMountParameters",
+                "section": "def-public.AppMountParameters",
                 "text": "AppMountParameters"
               },
               "<unknown>>) => ",
               {
                 "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.AppMountParameters",
+                "section": "def-public.AppMountParameters",
                 "text": "AppMountParameters"
               },
               "<unknown>"
@@ -232,7 +216,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-application-browser-mocks",
-                "id": "def-common.applicationServiceMock.createAppMountParameters.$1",
+                "id": "def-public.applicationServiceMock.createAppMountParameters.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "parts",
@@ -241,25 +225,25 @@
                   "{ element?: HTMLElement | undefined; history?: ",
                   {
                     "pluginId": "@kbn/core-application-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                    "section": "def-common.ScopedHistory",
+                    "section": "def-public.ScopedHistory",
                     "text": "ScopedHistory"
                   },
                   "<unknown> | undefined; appBasePath?: string | undefined; onAppLeave?: ((handler: ",
                   {
                     "pluginId": "@kbn/core-application-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                    "section": "def-common.AppLeaveHandler",
+                    "section": "def-public.AppLeaveHandler",
                     "text": "AppLeaveHandler"
                   },
                   ") => void) | undefined; setHeaderActionMenu?: ((menuMount: ",
                   {
                     "pluginId": "@kbn/core-mount-utils-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                    "section": "def-common.MountPoint",
+                    "section": "def-public.MountPoint",
                     "text": "MountPoint"
                   },
                   "<HTMLElement> | undefined) => void) | undefined; theme$?: ",
@@ -267,9 +251,9 @@
                   "<",
                   {
                     "pluginId": "@kbn/core-theme-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreThemeBrowserPluginApi",
-                    "section": "def-common.CoreTheme",
+                    "section": "def-public.CoreTheme",
                     "text": "CoreTheme"
                   },
                   "> | undefined; }"
@@ -285,7 +269,7 @@
       },
       {
         "parentPluginId": "@kbn/core-application-browser-mocks",
-        "id": "def-common.scopedHistoryMock",
+        "id": "def-public.scopedHistoryMock",
         "type": "Object",
         "tags": [],
         "label": "scopedHistoryMock",
@@ -296,7 +280,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser-mocks",
-            "id": "def-common.scopedHistoryMock.create",
+            "id": "def-public.scopedHistoryMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -307,9 +291,9 @@
               "<unknown>>) => ",
               {
                 "pluginId": "@kbn/core-application-browser-mocks",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreApplicationBrowserMocksPluginApi",
-                "section": "def-common.ScopedHistoryMock",
+                "section": "def-public.ScopedHistoryMock",
                 "text": "ScopedHistoryMock"
               }
             ],
@@ -320,7 +304,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-application-browser-mocks",
-                "id": "def-common.scopedHistoryMock.create.$1",
+                "id": "def-public.scopedHistoryMock.create.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "__0",
@@ -338,5 +322,21 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

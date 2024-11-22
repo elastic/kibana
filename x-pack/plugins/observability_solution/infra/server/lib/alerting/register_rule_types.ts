@@ -10,7 +10,7 @@ import { type IRuleTypeAlerts, PluginSetupContract } from '@kbn/alerting-plugin/
 import { registerMetricThresholdRuleType } from './metric_threshold/register_metric_threshold_rule_type';
 import { registerInventoryThresholdRuleType } from './inventory_metric_threshold/register_inventory_metric_threshold_rule_type';
 import { registerLogThresholdRuleType } from './log_threshold/register_log_threshold_rule_type';
-import { InfraBackendLibs } from '../infra_types';
+import { InfraBackendLibs, InfraLocators } from '../infra_types';
 import type { InfraConfig } from '../../types';
 import { MetricThresholdAlert } from './metric_threshold/metric_threshold_executor';
 import { LogThresholdAlert } from './log_threshold/log_threshold_executor';
@@ -38,7 +38,8 @@ export const MetricsRulesTypeAlertDefinition: IRuleTypeAlerts<MetricThresholdAle
 const registerRuleTypes = (
   alertingPlugin: PluginSetupContract,
   libs: InfraBackendLibs,
-  config: InfraConfig
+  config: InfraConfig,
+  locators: InfraLocators
 ) => {
   if (alertingPlugin) {
     const registerFns = [
@@ -47,7 +48,7 @@ const registerRuleTypes = (
       registerMetricThresholdRuleType,
     ];
     registerFns.forEach((fn) => {
-      fn(alertingPlugin, libs, config);
+      fn(alertingPlugin, libs, config, locators);
     });
   }
 };

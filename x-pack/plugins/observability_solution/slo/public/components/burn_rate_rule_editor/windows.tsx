@@ -34,6 +34,7 @@ import {
 } from '../../../common/constants';
 import { WindowResult } from './validation';
 import { BudgetConsumed } from './budget_consumed';
+import { ShortWindowDuration } from './short_window_duration';
 
 interface WindowProps extends WindowSchema {
   slo?: SLODefinitionResponse;
@@ -75,14 +76,23 @@ function Window({
   budgetMode = true,
 }: WindowProps) {
   const onLongWindowDurationChange = (duration: Duration) => {
-    const longWindowDurationInMinutes = toMinutes(duration);
-    const shortWindowDurationValue = Math.floor(longWindowDurationInMinutes / 12);
     onChange({
       id,
       burnRateThreshold,
       maxBurnRateThreshold,
       longWindow: duration,
-      shortWindow: { value: shortWindowDurationValue, unit: 'm' },
+      shortWindow,
+      actionGroup,
+    });
+  };
+
+  const onShortWindowDurationChange = (duration: Duration) => {
+    onChange({
+      id,
+      burnRateThreshold,
+      maxBurnRateThreshold,
+      longWindow,
+      shortWindow: duration,
       actionGroup,
     });
   };
@@ -135,13 +145,20 @@ function Window({
 
   return (
     <>
-      <EuiFlexGroup direction="row" alignItems="center">
+      <EuiFlexGroup direction="row" alignItems="flexEnd">
         <EuiFlexItem>
           <LongWindowDuration
             initialDuration={longWindow}
-            shortWindowDuration={shortWindow}
             onChange={onLongWindowDurationChange}
             errors={errors.longWindow}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <ShortWindowDuration
+            longWindowDuration={longWindow}
+            initialDuration={shortWindow}
+            onChange={onShortWindowDurationChange}
+            errors={errors.shortWindow}
           />
         </EuiFlexItem>
         {!budgetMode && (
@@ -300,6 +317,7 @@ export function Windows({ slo, windows, errors, onChange, totalNumberOfWindows }
       {windows.map((windowDef, index) => {
         const windowErrors = errors[index] || {
           longWindow: new Array<string>(),
+          shortWindow: new Array<string>(),
           burnRateThreshold: new Array<string>(),
         };
         return (

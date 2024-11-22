@@ -8,6 +8,7 @@
 import { useEffect, useMemo } from 'react';
 
 import { EuiSelectableOption } from '@elastic/eui';
+import { cloneDeep } from 'lodash';
 import {
   DocumentFieldsStatus,
   Field,
@@ -25,9 +26,9 @@ import {
   deNormalizeRuntimeFields,
   getAllFieldTypesFromState,
   getFieldsFromState,
+  getTypeLabelFromField,
 } from './lib';
 import { useMappingsState, useDispatch } from './mappings_state_context';
-import { TYPE_DEFINITION } from './constants';
 
 interface Args {
   onChange?: OnUpdateHandler;
@@ -55,7 +56,7 @@ export const useMappingsStateListener = ({ onChange, value, status }: Args) => {
     const allFieldsTypes = getAllFieldTypesFromState(deNormalize(normalize(mappedFields)));
     return allFieldsTypes.map((dataType) => ({
       checked: undefined,
-      label: TYPE_DEFINITION[dataType].label,
+      label: getTypeLabelFromField({ type: dataType }),
       'data-test-subj': `indexDetailsMappingsSelectFilter-${dataType}`,
     }));
   }, [mappedFields]);
@@ -180,6 +181,12 @@ export const useMappingsStateListener = ({ onChange, value, status }: Args) => {
           filteredFields: getFieldsFromState(parsedFieldsDefaultValue),
           selectedDataTypes: [],
         },
+      },
+    });
+    dispatch({
+      type: 'editor.replaceViewMappings',
+      value: {
+        fields: cloneDeep(parsedFieldsDefaultValue),
       },
     });
   }, [

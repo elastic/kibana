@@ -9,7 +9,6 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { encode } from '@kbn/rison';
 
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import {
   RULE_FROM_EQL_URL_PARAM,
   RULE_FROM_TIMELINE_URL_PARAM,
@@ -24,8 +23,6 @@ import { timelineSelectors } from '../../store';
 import { createTimeline as dispatchCreateNewTimeline } from '../../store/actions';
 
 import { useGetAllTimeline } from '../../containers/all';
-
-import { defaultHeaders } from '../timeline/body/column_headers/default_headers';
 
 import { OpenTimeline } from './open_timeline';
 import { OPEN_TIMELINE_CLASS_NAME, useQueryTimelineById } from './helpers';
@@ -56,7 +53,8 @@ import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useStartTransaction } from '../../../common/lib/apm/use_start_transaction';
 import { TIMELINE_ACTIONS } from '../../../common/lib/apm/user_actions';
-import { defaultUdtHeaders } from '../timeline/unified_components/default_headers';
+import { defaultUdtHeaders } from '../timeline/body/column_headers/default_headers';
+import { timelineDefaults } from '../../store/defaults';
 
 interface OwnProps<TCache = object> {
   /** Displays open timeline in modal */
@@ -151,7 +149,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     /** The requested sort direction of the query results */
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(DEFAULT_SORT_DIRECTION);
     /** The requested field to sort on */
-    const [sortField, setSortField] = useState(DEFAULT_SORT_FIELD);
+    const [sortField, setSortField] = useState<SortFieldTimeline>(DEFAULT_SORT_FIELD);
 
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
     const timelineSavedObjectId = useShallowEqualSelector(
@@ -159,9 +157,6 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     );
 
     const { dataViewId, selectedPatterns } = useSourcererDataView(SourcererScopeName.timeline);
-    const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
-      'unifiedComponentsInTimelineEnabled'
-    );
 
     const {
       customTemplateTimelineCount,
@@ -192,7 +187,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         },
         search,
         sort: {
-          sortField: sortField as SortFieldTimeline,
+          sortField,
           sortOrder: sortDirection as Direction,
         },
         onlyUserFavorite: onlyFavorites,
@@ -250,10 +245,11 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
           dispatch(
             dispatchCreateNewTimeline({
               id: TimelineId.active,
-              columns: unifiedComponentsInTimelineEnabled ? defaultUdtHeaders : defaultHeaders,
+              columns: defaultUdtHeaders,
               dataViewId,
               indexNames: selectedPatterns,
               show: false,
+              excludedRowRendererIds: timelineDefaults.excludedRowRendererIds,
             })
           );
         }
@@ -261,15 +257,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         await deleteTimelinesByIds(timelineIds, searchIds);
         refetch();
       },
-      [
-        startTransaction,
-        timelineSavedObjectId,
-        refetch,
-        dispatch,
-        dataViewId,
-        selectedPatterns,
-        unifiedComponentsInTimelineEnabled,
-      ]
+      [startTransaction, timelineSavedObjectId, refetch, dispatch, dataViewId, selectedPatterns]
     );
 
     const onDeleteOneTimeline: OnDeleteOneTimeline = useCallback(
@@ -305,12 +293,16 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
 
     /** Invoked by the EUI table implementation when the user interacts with the table (i.e. to update sorting) */
     const onTableChange: OnTableChange = useCallback(({ page, sort }: OnTableChangeParams) => {
-      const { index, size } = page;
-      const { field, direction } = sort;
-      setPageIndex(index);
-      setPageSize(size);
-      setSortDirection(direction);
-      setSortField(field);
+      if (page != null) {
+        const { index, size } = page;
+        setPageIndex(index);
+        setPageSize(size);
+      }
+      if (sort != null) {
+        const { field, direction } = sort;
+        setSortDirection(direction);
+        setSortField(field as SortFieldTimeline);
+      }
     }, []);
 
     /** Invoked when the user toggles the option to only view favorite timelines */
@@ -366,7 +358,6 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
           onOpenTimeline,
           timelineId,
           timelineType: timelineTypeToOpen,
-          unifiedComponentsInTimelineEnabled,
         });
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -430,7 +421,6 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         hideActions={hideActions}
         isLoading={loading}
         itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
-        onAddTimelinesToFavorites={undefined}
         onlyFavorites={onlyFavorites}
         onOpenTimeline={openTimeline}
         onQueryChange={onQueryChange}
@@ -442,7 +432,6 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         pageSize={pageSize}
         query={search}
         searchResults={timelines}
-        selectedItems={selectedItems}
         sortDirection={sortDirection}
         sortField={sortField}
         templateTimelineFilter={templateTimelineFilter}

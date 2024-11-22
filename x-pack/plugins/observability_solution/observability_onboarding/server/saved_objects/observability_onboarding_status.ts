@@ -19,13 +19,9 @@ export interface LogFilesState {
   namespace: string;
 }
 
-export interface SystemLogsState {
-  namespace: string;
-}
+type ObservabilityOnboardingFlowState = LogFilesState | undefined;
 
-export type ObservabilityOnboardingType = 'logFiles' | 'systemLogs';
-
-type ObservabilityOnboardingFlowState = LogFilesState | SystemLogsState | undefined;
+type ObservabilityOnboardingType = 'logFiles' | 'autoDetect' | 'kubernetes';
 
 export interface ObservabilityOnboardingFlow {
   type: ObservabilityOnboardingType;
@@ -64,8 +60,28 @@ const ElasticAgentStepPayloadSchema = schema.object({
 export const InstallIntegrationsStepPayloadSchema = schema.arrayOf(
   schema.object({
     pkgName: schema.string(),
-    installSource: schema.string(),
-    logFilePaths: schema.maybe(schema.arrayOf(schema.string())),
+    pkgVersion: schema.string(),
+    installSource: schema.oneOf([schema.literal('registry'), schema.literal('custom')]),
+    inputs: schema.arrayOf(schema.any()),
+    dataStreams: schema.arrayOf(
+      schema.object({
+        type: schema.string(),
+        dataset: schema.string(),
+      })
+    ),
+    kibanaAssets: schema.arrayOf(
+      schema.object({
+        type: schema.string(),
+        id: schema.string(),
+      })
+    ),
+    metadata: schema.maybe(
+      schema.oneOf([
+        schema.object({
+          hostname: schema.string(),
+        }),
+      ])
+    ),
   })
 );
 

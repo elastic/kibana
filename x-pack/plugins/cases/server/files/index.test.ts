@@ -109,6 +109,15 @@ describe('server files', () => {
       });
     });
 
+    describe('hashing algorithms', () => {
+      it('excludes md5 when fips is enabled', () => {
+        const schema = ConfigSchema.validate({});
+        registerCaseFileKinds(schema.files, mockFilesSetup, true);
+
+        expect(mockFilesSetup.registerFileKind.mock.calls[0][0].hashes).not.toContain('md5');
+      });
+    });
+
     describe('allowed mime types', () => {
       describe('image png', () => {
         const schema = ConfigSchema.validate({ files: { allowedMimeTypes: ['image/png'] } });

@@ -29,6 +29,7 @@ export function SloSelector({ initialSlos, onSelected, hasError, singleSelection
       label: slo.instanceId !== ALL_VALUE ? `${slo.name} (${slo.instanceId})` : slo.name,
       value: `${slo.id}-${slo.instanceId}`,
     })) ?? [];
+
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
     mapSlosToOptions(initialSlos)
@@ -68,7 +69,14 @@ export function SloSelector({ initialSlos, onSelected, hasError, singleSelection
   );
 
   return (
-    <EuiFormRow fullWidth isInvalid={hasError} error={hasError ? SLO_REQUIRED : undefined}>
+    <EuiFormRow
+      fullWidth
+      isInvalid={hasError}
+      error={hasError ? SLO_REQUIRED : undefined}
+      label={i18n.translate('xpack.slo.embeddable.sloSelectorLabel', {
+        defaultMessage: 'SLO',
+      })}
+    >
       <EuiComboBox
         aria-label={i18n.translate('xpack.slo.sloEmbeddable.config.sloSelector.ariaLabel', {
           defaultMessage: 'SLO',

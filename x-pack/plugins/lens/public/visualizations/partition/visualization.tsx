@@ -45,7 +45,7 @@ import {
   PieChartTypes,
 } from '../../../common/constants';
 import { suggestions } from './suggestions';
-import { PartitionChartsMeta } from './partition_charts_meta';
+import { PartitionChartsMeta, visualizationTypes } from './partition_charts_meta';
 import { PieToolbar } from './toolbar';
 import { DimensionDataExtraEditor, DimensionEditor } from './dimension_editor';
 import { LayerSettings } from './layer_settings';
@@ -131,17 +131,9 @@ export const getPieVisualization = ({
   kibanaTheme: ThemeServiceStart;
 }): Visualization<PieVisualizationState, PersistedPieVisualizationState> => ({
   id: 'lnsPie',
-
-  visualizationTypes: Object.entries(PartitionChartsMeta).map(([key, meta]) => ({
-    id: key,
-    icon: meta.icon,
-    label: meta.label,
-    groupLabel: meta.groupLabel,
-    showExperimentalBadge: meta.isExperimental,
-  })),
-
+  visualizationTypes,
   getVisualizationTypeId(state) {
-    return state.shape;
+    return state.shape === 'donut' ? 'pie' : state.shape;
   },
 
   getLayerIds(state) {
@@ -502,7 +494,10 @@ export const getPieVisualization = ({
     };
   },
   DimensionEditorComponent(props) {
-    const isDarkMode = useObservable(kibanaTheme.theme$, { darkMode: false }).darkMode;
+    const isDarkMode = useObservable(kibanaTheme.theme$, {
+      darkMode: false,
+      name: 'amsterdam',
+    }).darkMode;
     return <DimensionEditor {...props} paletteService={paletteService} isDarkMode={isDarkMode} />;
   },
   DimensionEditorDataExtraComponent(props) {

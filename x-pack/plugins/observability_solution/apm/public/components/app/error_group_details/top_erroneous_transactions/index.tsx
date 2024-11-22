@@ -154,6 +154,7 @@ export function TopErroneousTransactions({ serviceName }: Props) {
       <EuiBasicTable
         items={data.topErroneousTransactions}
         columns={columns}
+        rowHeader="transactionName"
         loading={loading}
         data-test-subj="topErroneousTransactionsTable"
         error={

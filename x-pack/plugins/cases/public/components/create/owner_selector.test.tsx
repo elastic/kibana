@@ -6,111 +6,75 @@
  */
 
 import React from 'react';
-import { waitFor, screen } from '@testing-library/react';
+import { waitFor, screen, render } from '@testing-library/react';
 
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import { OBSERVABILITY_OWNER, OWNER_INFO } from '../../../common/constants';
 import { CreateCaseOwnerSelector } from './owner_selector';
-import { FormTestComponent } from '../../common/test_utils';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
 import userEvent from '@testing-library/user-event';
 
 describe('Case Owner Selection', () => {
-  const onSubmit = jest.fn();
-  let appMockRender: AppMockRenderer;
+  const onOwnerChange = jest.fn();
+  const selectedOwner = SECURITY_SOLUTION_OWNER;
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
-  });
-
-  it('renders', async () => {
-    appMockRender.render(
-      <FormTestComponent onSubmit={onSubmit}>
-        <CreateCaseOwnerSelector availableOwners={[SECURITY_SOLUTION_OWNER]} isLoading={false} />
-      </FormTestComponent>
+  it('renders all options', async () => {
+    render(
+      <CreateCaseOwnerSelector
+        availableOwners={[SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER]}
+        isLoading={false}
+        onOwnerChange={onOwnerChange}
+        selectedOwner={selectedOwner}
+      />
     );
 
     expect(await screen.findByTestId('caseOwnerSelector')).toBeInTheDocument();
+
+    await userEvent.click(await screen.findByTestId('caseOwnerSuperSelect'));
+
+    const options = await screen.findAllByRole('option');
+    expect(options[0]).toHaveTextContent(OWNER_INFO[SECURITY_SOLUTION_OWNER].label);
+    expect(options[1]).toHaveTextContent(OWNER_INFO[OBSERVABILITY_OWNER].label);
   });
 
-  it.each([
-    [OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER],
-    [SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER],
-  ])('disables %s button if user only has %j', async (disabledButton, permission) => {
-    appMockRender.render(
-      <FormTestComponent onSubmit={onSubmit}>
-        <CreateCaseOwnerSelector availableOwners={[permission]} isLoading={false} />
-      </FormTestComponent>
-    );
-
-    expect(await screen.findByLabelText(OWNER_INFO[disabledButton].label)).toBeDisabled();
-    expect(await screen.findByLabelText(OWNER_INFO[permission].label)).not.toBeDisabled();
-  });
-
-  it('defaults to security Solution', async () => {
-    appMockRender.render(
-      <FormTestComponent onSubmit={onSubmit}>
+  it.each([[SECURITY_SOLUTION_OWNER], [OBSERVABILITY_OWNER]])(
+    'only displays %s option if available',
+    async (available) => {
+      render(
         <CreateCaseOwnerSelector
-          availableOwners={[OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER]}
+          availableOwners={[available]}
           isLoading={false}
+          onOwnerChange={onOwnerChange}
+          selectedOwner={available}
         />
-      </FormTestComponent>
-    );
+      );
 
-    expect(await screen.findByLabelText('Observability')).not.toBeChecked();
-    expect(await screen.findByLabelText('Security')).toBeChecked();
+      expect(await screen.findByText(OWNER_INFO[available].label)).toBeInTheDocument();
 
-    userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
+      await userEvent.click(await screen.findByTestId('caseOwnerSuperSelect'));
 
-    await waitFor(() => {
-      // data, isValid
-      expect(onSubmit).toBeCalledWith({ selectedOwner: 'securitySolution' }, true);
-    });
-  });
-
-  it('defaults to security Solution with empty owners', async () => {
-    appMockRender.render(
-      <FormTestComponent onSubmit={onSubmit}>
-        <CreateCaseOwnerSelector availableOwners={[]} isLoading={false} />
-      </FormTestComponent>
-    );
-
-    expect(await screen.findByLabelText('Observability')).not.toBeChecked();
-    expect(await screen.findByLabelText('Security')).toBeChecked();
-
-    userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
-
-    await waitFor(() => {
-      // data, isValid
-      expect(onSubmit).toBeCalledWith({ selectedOwner: 'securitySolution' }, true);
-    });
-  });
+      expect((await screen.findAllByRole('option')).length).toBe(1);
+    }
+  );
 
   it('changes the selection', async () => {
-    appMockRender.render(
-      <FormTestComponent onSubmit={onSubmit}>
-        <CreateCaseOwnerSelector
-          availableOwners={[OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER]}
-          isLoading={false}
-        />
-      </FormTestComponent>
+    render(
+      <CreateCaseOwnerSelector
+        availableOwners={[OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER]}
+        isLoading={false}
+        onOwnerChange={onOwnerChange}
+        selectedOwner={selectedOwner}
+      />
     );
 
-    expect(await screen.findByLabelText('Security')).toBeChecked();
-    expect(await screen.findByLabelText('Observability')).not.toBeChecked();
+    expect(await screen.findByText('Security')).toBeInTheDocument();
+    expect(screen.queryByText('Observability')).not.toBeInTheDocument();
 
-    userEvent.click(await screen.findByLabelText('Observability'));
-
-    expect(await screen.findByLabelText('Observability')).toBeChecked();
-    expect(await screen.findByLabelText('Security')).not.toBeChecked();
-
-    userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
+    await userEvent.click(await screen.findByTestId('caseOwnerSuperSelect'));
+    await userEvent.click(await screen.findByText('Observability'), { pointerEventsCheck: 0 });
 
     await waitFor(() => {
       // data, isValid
-      expect(onSubmit).toBeCalledWith({ selectedOwner: 'observability' }, true);
+      expect(onOwnerChange).toBeCalledWith('observability');
     });
   });
 });

@@ -6,6 +6,7 @@
  */
 
 import { isObjectLike } from 'lodash/fp';
+import { isPlainObject } from 'lodash';
 import type { SearchTypes } from '../../../../../../../common/detection_engine/types';
 
 /**
@@ -22,4 +23,8 @@ export const isObjectLikeOrArrayOfObjectLikes = (
   } else {
     return isObjectLike(valueInMergedDocument);
   }
+};
+
+export const isObjectTypeGuard = (value: SearchTypes): value is Record<string, SearchTypes> => {
+  return isPlainObject(value);
 };

@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useEffect, useState, useRef } from 'react';
+import { debounce } from 'lodash';
 import { EuiResizableButton, useEuiTheme, keys, EuiThemeComputed } from '@elastic/eui';
+import { WELCOME_TOUR_DELAY } from '../../../../common/constants';
 
 const CONSOLE_MIN_HEIGHT = 200;
 
@@ -59,6 +62,21 @@ export const EmbeddedConsoleResizeButton = ({
   const [maxConsoleHeight, setMaxConsoleHeight] = useState<number>(800);
   const initialConsoleHeight = useRef(consoleHeight);
   const initialMouseY = useRef(0);
+
+  // When the height changes, simulate a window resize to prompt
+  // the current onboarding tour step to adjust its layouts
+  useEffect(() => {
+    const debouncedResize = debounce(() => {
+      window.dispatchEvent(new Event('resize'));
+    }, WELCOME_TOUR_DELAY);
+
+    debouncedResize();
+
+    // Cleanup the debounce instance on unmount or dependency change
+    return () => {
+      debouncedResize.cancel();
+    };
+  }, [consoleHeight]);
 
   useEffect(() => {
     function handleResize() {

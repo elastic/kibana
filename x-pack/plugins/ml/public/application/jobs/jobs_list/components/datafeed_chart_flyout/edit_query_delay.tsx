@@ -18,7 +18,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import { useMlApiContext } from '../../../../contexts/kibana';
+import { useMlApi } from '../../../../contexts/kibana';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
 import type { Datafeed } from '../../../../../../common/types/anomaly_detection_jobs';
 
@@ -38,7 +38,7 @@ export const EditQueryDelay: FC<{
   const [currentQueryDelay, setCurrentQueryDelay] = useState(queryDelay);
   const [newQueryDelay, setNewQueryDelay] = useState<string | undefined>();
   const [isEditing, setIsEditing] = useState<boolean>(false);
-  const { updateDatafeed } = useMlApiContext();
+  const { updateDatafeed } = useMlApi();
   const { displaySuccessToast, displayErrorToast } = useToastNotificationService();
 
   const updateQueryDelay = useCallback(async () => {

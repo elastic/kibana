@@ -6,31 +6,30 @@
  */
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
+import { DataViewsService } from '@kbn/data-views-plugin/common';
 import {
   HistogramIndicator,
   histogramIndicatorSchema,
   timeslicesBudgetingMethodSchema,
 } from '@kbn/slo-schema';
-
-import { DataViewsService } from '@kbn/data-views-plugin/common';
-import { InvalidTransformError } from '../../errors';
-import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
-import { getElasticsearchQueryOrThrow, parseIndex, TransformGenerator } from '.';
+import { TransformGenerator, getElasticsearchQueryOrThrow, parseIndex } from '.';
 import {
-  getSLOTransformId,
   SLO_DESTINATION_INDEX_NAME,
-  SLO_INGEST_PIPELINE_NAME,
+  getSLOPipelineId,
+  getSLOTransformId,
 } from '../../../common/constants';
+import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
 import { SLODefinition } from '../../domain/models';
+import { InvalidTransformError } from '../../errors';
 import { GetHistogramIndicatorAggregation } from '../aggregations';
-import { getTimesliceTargetComparator, getFilterRange } from './common';
+import { getFilterRange, getTimesliceTargetComparator } from './common';
 
 export class HistogramTransformGenerator extends TransformGenerator {
-  public async getTransformParams(
-    slo: SLODefinition,
-    spaceId: string,
-    dataViewService: DataViewsService
-  ): Promise<TransformPutTransformRequest> {
+  constructor(spaceId: string, dataViewService: DataViewsService) {
+    super(spaceId, dataViewService);
+  }
+
+  public async getTransformParams(slo: SLODefinition): Promise<TransformPutTransformRequest> {
     if (!histogramIndicatorSchema.is(slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
@@ -38,8 +37,8 @@ export class HistogramTransformGenerator extends TransformGenerator {
     return getSLOTransformTemplate(
       this.buildTransformId(slo),
       this.buildDescription(slo),
-      await this.buildSource(slo, slo.indicator, dataViewService),
-      this.buildDestination(),
+      await this.buildSource(slo, slo.indicator),
+      this.buildDestination(slo),
       this.buildCommonGroupBy(slo, slo.indicator.params.timestampField),
       this.buildAggregations(slo, slo.indicator),
       this.buildSettings(slo, slo.indicator.params.timestampField),
@@ -51,19 +50,12 @@ export class HistogramTransformGenerator extends TransformGenerator {
     return getSLOTransformId(slo.id, slo.revision);
   }
 
-  private async buildSource(
-    slo: SLODefinition,
-    indicator: HistogramIndicator,
-    dataViewService: DataViewsService
-  ) {
-    const dataView = await this.getIndicatorDataView({
-      dataViewService,
-      dataViewId: indicator.params.index,
-    });
+  private async buildSource(slo: SLODefinition, indicator: HistogramIndicator) {
+    const dataView = await this.getIndicatorDataView(indicator.params.dataViewId);
 
     return {
       index: parseIndex(indicator.params.index),
-      runtime_mappings: this.buildCommonRuntimeMappings(slo, dataView),
+      runtime_mappings: this.buildCommonRuntimeMappings(dataView),
       query: {
         bool: {
           filter: [
@@ -75,9 +67,9 @@ export class HistogramTransformGenerator extends TransformGenerator {
     };
   }
 
-  private buildDestination() {
+  private buildDestination(slo: SLODefinition) {
     return {
-      pipeline: SLO_INGEST_PIPELINE_NAME,
+      pipeline: getSLOPipelineId(slo.id, slo.revision),
       index: SLO_DESTINATION_INDEX_NAME,
     };
   }
@@ -101,9 +93,9 @@ export class HistogramTransformGenerator extends TransformGenerator {
               goodEvents: 'slo.numerator>value',
               totalEvents: 'slo.denominator>value',
             },
-            script: `params.goodEvents / params.totalEvents ${getTimesliceTargetComparator(
+            script: `if (params.totalEvents == 0) { return 1 } else { return params.goodEvents / params.totalEvents ${getTimesliceTargetComparator(
               slo.objective.timesliceTarget!
-            )} ${slo.objective.timesliceTarget} ? 1 : 0`,
+            )} ${slo.objective.timesliceTarget} ? 1 : 0 }`,
           },
         },
       }),

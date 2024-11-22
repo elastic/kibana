@@ -57,6 +57,7 @@ describe.each([
           pageIndex: 0,
         },
         'data-test-subj': 'testGrid',
+        CardDecorator: undefined,
         ...props,
       };
 

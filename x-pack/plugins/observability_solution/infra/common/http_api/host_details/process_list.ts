@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { MetricsAPISeriesRT, MetricsAPIRow } from '../metrics_api';
+import { MetricsAPISeriesRT, type MetricsAPIRow } from '@kbn/metrics-data-access-plugin/common';
 
 const AggValueRT = rt.type({
   value: rt.number,
@@ -14,7 +14,7 @@ const AggValueRT = rt.type({
 
 export const ProcessListAPIRequestRT = rt.type({
   hostTerm: rt.record(rt.string, rt.string),
-  indexPattern: rt.string,
+  sourceId: rt.string,
   to: rt.number,
   sortBy: rt.type({
     name: rt.string,

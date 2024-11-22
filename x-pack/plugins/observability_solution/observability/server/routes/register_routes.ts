@@ -8,18 +8,19 @@ import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import { CoreSetup, KibanaRequest, Logger, RouteRegistrar } from '@kbn/core/server';
+import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 import {
+  IoTsParamsObject,
   decodeRequestParams,
   parseEndpoint,
-  routeValidationObject,
+  passThroughValidationObject,
+  stripNullishRequestParameters,
 } from '@kbn/server-route-repository';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import axios from 'axios';
 import * as t from 'io-ts';
-import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { ObservabilityConfig } from '..';
-import { getHTTPResponseCode, ObservabilityError } from '../errors';
 import { AlertDetailsContextualInsightsService } from '../services';
 import { ObservabilityRequestHandlerContext } from '../types';
 import { AbstractObservabilityServerRouteRepository } from './types';
@@ -57,18 +58,18 @@ export function registerRoutes({ config, repository, core, logger, dependencies 
     (router[method] as RouteRegistrar<typeof method, ObservabilityRequestHandlerContext>)(
       {
         path: pathname,
-        validate: routeValidationObject,
+        validate: passThroughValidationObject,
         options,
       },
       async (context, request, response) => {
         try {
           const decodedParams = decodeRequestParams(
-            {
+            stripNullishRequestParameters({
               params: request.params,
               body: request.body,
               query: request.query,
-            },
-            params ?? t.strict({})
+            }),
+            (params as IoTsParamsObject) ?? t.strict({})
           );
 
           const data = await handler({
@@ -86,16 +87,6 @@ export function registerRoutes({ config, repository, core, logger, dependencies 
 
           return response.ok({ body: data });
         } catch (error) {
-          if (error instanceof ObservabilityError) {
-            logger.error(error.message);
-            return response.customError({
-              statusCode: getHTTPResponseCode(error),
-              body: {
-                message: error.message,
-              },
-            });
-          }
-
           if (axios.isAxiosError(error)) {
             logger.error(error);
             return response.customError({

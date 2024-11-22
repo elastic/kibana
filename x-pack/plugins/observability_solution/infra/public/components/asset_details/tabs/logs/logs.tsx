@@ -9,7 +9,7 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { LogStream } from '@kbn/logs-shared-plugin/public';
 import {
   DEFAULT_LOG_VIEW,
@@ -17,6 +17,7 @@ import {
   LogViewReference,
 } from '@kbn/logs-shared-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
+import { OpenInLogsExplorerButton } from '@kbn/logs-shared-plugin/public';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { InfraLoadingPanel } from '../../../loading';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
@@ -60,7 +61,7 @@ export const Logs = () => {
 
   const filter = useMemo(() => {
     const query = [
-      `${findInventoryFields(asset.type).id}: "${asset.name}"`,
+      `${findInventoryFields(asset.type).id}: "${asset.id}"`,
       ...(textQueryDebounced !== '' ? [textQueryDebounced] : []),
     ].join(' and ');
 
@@ -68,7 +69,7 @@ export const Logs = () => {
       language: 'kuery',
       query,
     };
-  }, [asset.type, asset.name, textQueryDebounced]);
+  }, [asset.type, asset.id, textQueryDebounced]);
 
   const onQueryChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setTextQuery(e.target.value);
@@ -82,12 +83,12 @@ export const Logs = () => {
   const logsUrl = useMemo(() => {
     return nodeLogsLocator.getRedirectUrl({
       nodeField: findInventoryFields(asset.type).id,
-      nodeId: asset.name,
+      nodeId: asset.id,
       time: state.startTimestamp,
       filter: textQueryDebounced,
       logView,
     });
-  }, [nodeLogsLocator, asset.name, asset.type, state.startTimestamp, textQueryDebounced, logView]);
+  }, [nodeLogsLocator, asset.id, asset.type, state.startTimestamp, textQueryDebounced, logView]);
 
   return (
     <EuiFlexGroup direction="column" ref={ref}>
@@ -106,18 +107,12 @@ export const Logs = () => {
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="infraAssetDetailsLogsTabOpenInLogsButton"
+            <OpenInLogsExplorerButton
+              href={logsUrl}
+              testSubject={'infraAssetDetailsLogsTabOpenInLogsButton'}
               size="xs"
               flush="both"
-              iconType="popout"
-              href={logsUrl}
-            >
-              <FormattedMessage
-                id="xpack.infra.nodeDetails.logs.openLogsLink"
-                defaultMessage="Open in Logs"
-              />
-            </EuiButtonEmpty>
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

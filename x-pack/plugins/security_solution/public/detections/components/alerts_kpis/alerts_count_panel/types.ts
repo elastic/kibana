@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RawBucket } from '../../../../common/components/alerts_treemap/types';
+import type { RawBucket } from '../alerts_treemap_panel/alerts_treemap/types';
 
 export interface AlertsCountAggregation {
   stackByField0: {

@@ -7,7 +7,7 @@
 
 import { Filter } from '@kbn/es-query';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { Group } from '../types';
+import type { Group } from '../../typings';
 
 /*
  * groupFieldName

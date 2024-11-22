@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { IdFormat } from '../../../common/http_api/latest';
-import { decodeOrThrow } from '../../../common/runtime_types';
 import {
   logRateModelPlotResponseRT,
   createLogEntryRateQuery,

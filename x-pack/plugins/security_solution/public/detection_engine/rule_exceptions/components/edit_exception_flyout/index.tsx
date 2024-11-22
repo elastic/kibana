@@ -9,16 +9,10 @@ import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import styled, { css } from 'styled-components';
 import {
-  EuiButton,
-  EuiButtonEmpty,
   EuiHorizontalRule,
-  EuiSpacer,
-  EuiFlyoutHeader,
   EuiFlyoutBody,
-  EuiFlexGroup,
   EuiTitle,
   EuiFlyout,
-  EuiFlyoutFooter,
   EuiSkeletonText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -32,10 +26,16 @@ import {
   ExceptionListTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import { hasWrongOperatorWithWildcard } from '@kbn/securitysolution-list-utils';
+import {
+  hasWrongOperatorWithWildcard,
+  hasPartialCodeSignatureEntry,
+} from '@kbn/securitysolution-list-utils';
 import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
 
-import { WildCardWithWrongOperatorCallout } from '@kbn/securitysolution-exception-list-components';
+import {
+  WildCardWithWrongOperatorCallout,
+  PartialCodeSignatureCallout,
+} from '@kbn/securitysolution-exception-list-components';
 
 import type { Moment } from 'moment';
 import moment from 'moment';
@@ -65,6 +65,8 @@ import { RULE_EXCEPTION, ENDPOINT_EXCEPTION } from '../../utils/translations';
 import { ExceptionsExpireTime } from '../flyout_components/expire_time';
 import { CONFIRM_WARNING_MODAL_LABELS } from '../../../../management/common/translations';
 import { ArtifactConfirmModal } from '../../../../management/components/artifact_list_page/components/artifact_confirm_modal';
+import { ExceptionFlyoutFooter } from '../flyout_components/footer';
+import { ExceptionFlyoutHeader } from '../flyout_components/header';
 
 interface EditExceptionFlyoutProps {
   list: ExceptionListSchema;
@@ -76,23 +78,11 @@ interface EditExceptionFlyoutProps {
   onConfirm: (arg: boolean) => void;
 }
 
-const FlyoutHeader = styled(EuiFlyoutHeader)`
-  ${({ theme }) => css`
-    border-bottom: 1px solid ${theme.eui.euiColorLightShade};
-  `}
-`;
-
 const FlyoutBodySection = styled(EuiFlyoutBody)`
   ${() => css`
     &.builder-section {
       overflow-y: scroll;
     }
-  `}
-`;
-
-const FlyoutFooterGroup = styled(EuiFlexGroup)`
-  ${({ theme }) => css`
-    padding: ${theme.eui.euiSizeS};
   `}
 `;
 
@@ -132,6 +122,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       expireTime,
       expireErrorExists,
       wildcardWarningExists,
+      partialCodeSignatureWarningExists,
     },
     dispatch,
   ] = useReducer(createExceptionItemsReducer(), {
@@ -146,6 +137,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     expireTime: itemToEdit.expire_time !== undefined ? moment(itemToEdit.expire_time) : undefined,
     expireErrorExists: false,
     wildcardWarningExists: false,
+    partialCodeSignatureWarningExists: false,
   });
 
   const allowLargeValueLists = useMemo((): boolean => {
@@ -185,6 +177,10 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       dispatch({
         type: 'setWildcardWithWrongOperator',
         warningExists: hasWrongOperatorWithWildcard(items),
+      });
+      dispatch({
+        type: 'setPartialCodeSignature',
+        warningExists: hasPartialCodeSignatureEntry(items),
       });
       dispatch({
         type: 'setExceptionItems',
@@ -357,14 +353,6 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     }
   }, [wildcardWarningExists, handleSubmitException]);
 
-  const editExceptionMessage = useMemo(
-    () =>
-      listType === ExceptionListTypeEnum.ENDPOINT
-        ? i18n.EDIT_ENDPOINT_EXCEPTION_TITLE
-        : i18n.EDIT_EXCEPTION_TITLE,
-    [listType]
-  );
-
   const isSubmitButtonDisabled = useMemo(
     () =>
       isSubmitting ||
@@ -414,14 +402,11 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       data-test-subj="editExceptionFlyout"
       aria-labelledby={exceptionFlyoutTitleId}
     >
-      <FlyoutHeader>
-        <EuiTitle>
-          <h2 id={exceptionFlyoutTitleId} data-test-subj="exceptionFlyoutTitle">
-            {editExceptionMessage}
-          </h2>
-        </EuiTitle>
-        <EuiSpacer size="m" />
-      </FlyoutHeader>
+      <ExceptionFlyoutHeader
+        listType={listType}
+        titleId={exceptionFlyoutTitleId}
+        dataTestSubjId={'exceptionFlyoutTitle'}
+      />
       <FlyoutBodySection className="builder-section">
         {isLoading && <EuiSkeletonText data-test-subj="loadingEditExceptionFlyout" lines={4} />}
         <ExceptionsFlyoutMeta
@@ -444,6 +429,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
           getExtendedFields={getExtendedFields}
         />
         {wildcardWarningExists && <WildCardWithWrongOperatorCallout />}
+        {partialCodeSignatureWarningExists && <PartialCodeSignatureCallout />}
         {!openedFromListDetailPage && listType === ExceptionListTypeEnum.DETECTION && (
           <>
             <EuiHorizontalRule />
@@ -499,22 +485,14 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
           </>
         )}
       </FlyoutBodySection>
-      <EuiFlyoutFooter>
-        <FlyoutFooterGroup justifyContent="spaceBetween">
-          <EuiButtonEmpty data-test-subj="cancelExceptionEditButton" onClick={handleCloseFlyout}>
-            {i18n.CANCEL}
-          </EuiButtonEmpty>
-
-          <EuiButton
-            data-test-subj="editExceptionConfirmButton"
-            onClick={handleOnSubmit}
-            isDisabled={isSubmitButtonDisabled}
-            fill
-          >
-            {editExceptionMessage}
-          </EuiButton>
-        </FlyoutFooterGroup>
-      </EuiFlyoutFooter>
+      <ExceptionFlyoutFooter
+        listType={listType}
+        isSubmitButtonDisabled={isSubmitButtonDisabled}
+        cancelButtonDataTestSubjId={'cancelExceptionEditButton'}
+        submitButtonDataTestSubjId={'editExceptionConfirmButton'}
+        handleOnSubmit={handleOnSubmit}
+        handleCloseFlyout={handleCloseFlyout}
+      />
       {showConfirmModal && confirmModal}
     </EuiFlyout>
   );

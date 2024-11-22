@@ -10,6 +10,7 @@ import type {
   HasType,
   PublishesUnifiedSearch,
   PublishesPanelTitle,
+  PublishingSubject,
 } from '@kbn/presentation-publishing';
 import {
   apiIsOfType,
@@ -20,22 +21,24 @@ import { LensSavedObjectAttributes, ViewUnderlyingDataArgs } from '../embeddable
 
 export type HasLensConfig = HasType<'lens'> & {
   getSavedVis: () => Readonly<LensSavedObjectAttributes | undefined>;
-  canViewUnderlyingData: () => Promise<boolean>;
+  canViewUnderlyingData$: PublishingSubject<boolean>;
   getViewUnderlyingDataArgs: () => ViewUnderlyingDataArgs;
+  getFullAttributes: () => LensSavedObjectAttributes | undefined;
 };
 
 export type LensApi = HasLensConfig &
   PublishesPanelTitle &
   PublishesUnifiedSearch &
-  Partial<HasParentApi<unknown>>;
+  Partial<HasParentApi<Partial<PublishesUnifiedSearch>>>;
 
 export const isLensApi = (api: unknown): api is LensApi => {
   return Boolean(
     api &&
       apiIsOfType(api, 'lens') &&
       typeof (api as HasLensConfig).getSavedVis === 'function' &&
-      typeof (api as HasLensConfig).canViewUnderlyingData === 'function' &&
+      (api as HasLensConfig).canViewUnderlyingData$ &&
       typeof (api as HasLensConfig).getViewUnderlyingDataArgs === 'function' &&
+      typeof (api as HasLensConfig).getFullAttributes === 'function' &&
       apiPublishesPanelTitle(api) &&
       apiPublishesUnifiedSearch(api)
   );

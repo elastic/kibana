@@ -11,7 +11,7 @@ import { EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { JobCreatorContext } from '../../../job_creator_context';
 import type { CategorizationJobCreator } from '../../../../../common/job_creator';
-import { newJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
+import { useNewJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { CategorizationPerPartitionFieldSelect } from './categorization_per_partition_input';
 
 export const CategorizationPerPartitionFieldDropdown = ({
@@ -25,7 +25,7 @@ export const CategorizationPerPartitionFieldDropdown = ({
   const [categorizationPartitionFieldName, setCategorizationPartitionFieldName] = useState<
     string | null
   >(jobCreator.categorizationPerPartitionField);
-  const { categoryFields } = newJobCapsService;
+  const { categoryFields } = useNewJobCapsService();
 
   const filteredCategories = useMemo(
     () => categoryFields.filter((c) => c.id !== jobCreator.categorizationFieldName),

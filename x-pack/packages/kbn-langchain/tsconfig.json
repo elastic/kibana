@@ -18,6 +18,7 @@
     "@kbn/logging",
     "@kbn/actions-plugin",
     "@kbn/logging-mocks",
-    "@kbn/core-http-server"
+    "@kbn/utility-types",
+    "@kbn/tooling-log"
   ]
 }

@@ -1,42 +1,52 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { getActions } from './actions';
 import { validateQuery } from '../validation/validation';
 import { getAllFunctions } from '../shared/helpers';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
-import { CodeActionOptions } from './types';
+import type { CodeActionOptions } from './types';
+import type { ESQLRealField } from '../validation/types';
+import type { FieldType } from '../definitions/types';
+import type { ESQLCallbacks, PartialFieldsMetadataClient } from '../shared/types';
+import { FULL_TEXT_SEARCH_FUNCTIONS } from '../shared/constants';
 
-function getCallbackMocks() {
+function getCallbackMocks(): jest.Mocked<ESQLCallbacks> {
   return {
-    getFieldsFor: jest.fn(async ({ query }) =>
-      /enrich/.test(query)
-        ? [
-            { name: 'otherField', type: 'string' },
-            { name: 'yetAnotherField', type: 'number' },
-          ]
-        : /unsupported_index/.test(query)
-        ? [{ name: 'unsupported_field', type: 'unsupported' }]
-        : [
-            ...['string', 'number', 'date', 'boolean', 'ip'].map((type) => ({
-              name: `${type}Field`,
-              type,
-            })),
-            { name: 'geoPointField', type: 'geo_point' },
-            { name: 'any#Char$Field', type: 'number' },
-            { name: 'kubernetes.something.something', type: 'number' },
-            {
-              name: `listField`,
-              type: `list`,
-            },
-            { name: '@timestamp', type: 'date' },
-          ]
-    ),
+    getColumnsFor: jest.fn<Promise<ESQLRealField[]>, any>(async ({ query }) => {
+      if (/enrich/.test(query)) {
+        const fields: ESQLRealField[] = [
+          { name: 'otherField', type: 'keyword' },
+          { name: 'yetAnotherField', type: 'double' },
+        ];
+        return fields;
+      }
+
+      if (/unsupported_index/.test(query)) {
+        const fields: ESQLRealField[] = [{ name: 'unsupported_field', type: 'unsupported' }];
+        return fields;
+      }
+
+      const localDataTypes: FieldType[] = ['keyword', 'double', 'date', 'boolean', 'ip'];
+      const fields: ESQLRealField[] = [
+        ...localDataTypes.map((type) => ({
+          name: `${type}Field`,
+          type,
+        })),
+        { name: 'geoPointField', type: 'geo_point' },
+        { name: 'any#Char$Field', type: 'double' },
+        { name: 'kubernetes.something.something', type: 'double' },
+        { name: '@timestamp', type: 'date' },
+      ];
+
+      return fields;
+    }),
     getSources: jest.fn(async () =>
       ['index', '.secretIndex', 'my-index'].map((name) => ({
         name,
@@ -57,6 +67,11 @@ function getCallbackMocks() {
         enrichFields: ['other-field', 'yetAnotherField'],
       },
     ]),
+    getFieldsMetadata: jest.fn(async () => ({
+      find: jest.fn(async () => ({
+        fields: {},
+      })),
+    })) as unknown as Promise<PartialFieldsMetadataClient>,
   };
 }
 
@@ -162,29 +177,29 @@ describe('quick fixes logic', () => {
       { relaxOnMissingCallbacks: false },
     ]) {
       for (const command of ['KEEP', 'DROP', 'EVAL']) {
-        testQuickFixes(`FROM index | ${command} stringField`, [], options);
-        // strongField => stringField
-        testQuickFixes(`FROM index | ${command} strongField`, ['stringField'], options);
+        testQuickFixes(`FROM index | ${command} keywordField`, [], options);
+        // koywordField => keywordField
+        testQuickFixes(`FROM index | ${command} koywordField`, ['keywordField'], options);
         testQuickFixes(
-          `FROM index | ${command} numberField, strongField`,
-          ['stringField'],
+          `FROM index | ${command} numberField, koywordField`,
+          ['keywordField'],
           options
         );
       }
-      testQuickFixes(`FROM index | EVAL round(strongField)`, ['stringField'], options);
-      testQuickFixes(`FROM index | EVAL var0 = round(strongField)`, ['stringField'], options);
-      testQuickFixes(`FROM index | WHERE round(strongField) > 0`, ['stringField'], options);
-      testQuickFixes(`FROM index | WHERE 0 < round(strongField)`, ['stringField'], options);
-      testQuickFixes(`FROM index | RENAME strongField as newField`, ['stringField'], options);
+      testQuickFixes(`FROM index | EVAL round(koywordField)`, ['keywordField'], options);
+      testQuickFixes(`FROM index | EVAL var0 = round(koywordField)`, ['keywordField'], options);
+      testQuickFixes(`FROM index | WHERE round(koywordField) > 0`, ['keywordField'], options);
+      testQuickFixes(`FROM index | WHERE 0 < round(koywordField)`, ['keywordField'], options);
+      testQuickFixes(`FROM index | RENAME koywordField as newField`, ['keywordField'], options);
       // This levarage the knowledge of the enrich policy fields to suggest the right field
       testQuickFixes(
         `FROM index | ENRICH policy | KEEP yetAnotherField2`,
         ['yetAnotherField'],
         options
       );
-      testQuickFixes(`FROM index | ENRICH policy ON strongField`, ['stringField'], options);
+      testQuickFixes(`FROM index | ENRICH policy ON koywordField`, ['keywordField'], options);
       testQuickFixes(
-        `FROM index | ENRICH policy ON stringField WITH yetAnotherField2`,
+        `FROM index | ENRICH policy ON keywordField WITH yetAnotherField2`,
         ['yetAnotherField'],
         options
       );
@@ -209,29 +224,29 @@ describe('quick fixes logic', () => {
       { relaxOnMissingCallbacks: false },
     ]) {
       for (const command of ['KEEP', 'DROP', 'EVAL']) {
-        testQuickFixes(`FROM index | ${command} stringField`, [], options);
-        // strongField => stringField
-        testQuickFixes(`FROM index | ${command} strongField`, ['stringField'], options);
+        testQuickFixes(`FROM index | ${command} keywordField`, [], options);
+        // koywordField => keywordField
+        testQuickFixes(`FROM index | ${command} koywordField`, ['keywordField'], options);
         testQuickFixes(
-          `FROM index | ${command} numberField, strongField`,
-          ['stringField'],
+          `FROM index | ${command} numberField, koywordField`,
+          ['keywordField'],
           options
         );
       }
-      testQuickFixes(`FROM index | EVAL round(strongField)`, ['stringField'], options);
-      testQuickFixes(`FROM index | EVAL var0 = round(strongField)`, ['stringField'], options);
-      testQuickFixes(`FROM index | WHERE round(strongField) > 0`, ['stringField'], options);
-      testQuickFixes(`FROM index | WHERE 0 < round(strongField)`, ['stringField'], options);
-      testQuickFixes(`FROM index | RENAME strongField as newField`, ['stringField'], options);
+      testQuickFixes(`FROM index | EVAL round(koywordField)`, ['keywordField'], options);
+      testQuickFixes(`FROM index | EVAL var0 = round(koywordField)`, ['keywordField'], options);
+      testQuickFixes(`FROM index | WHERE round(koywordField) > 0`, ['keywordField'], options);
+      testQuickFixes(`FROM index | WHERE 0 < round(koywordField)`, ['keywordField'], options);
+      testQuickFixes(`FROM index | RENAME koywordField as newField`, ['keywordField'], options);
       // This levarage the knowledge of the enrich policy fields to suggest the right field
       testQuickFixes(
         `FROM index | ENRICH policy | KEEP yetAnotherField2`,
         ['yetAnotherField'],
         options
       );
-      testQuickFixes(`FROM index | ENRICH policy ON strongField`, ['stringField'], options);
+      testQuickFixes(`FROM index | ENRICH policy ON koywordField`, ['keywordField'], options);
       testQuickFixes(
-        `FROM index | ENRICH policy ON stringField WITH yetAnotherField2`,
+        `FROM index | ENRICH policy ON keywordField WITH yetAnotherField2`,
         ['yetAnotherField'],
         options
       );
@@ -271,6 +286,16 @@ describe('quick fixes logic', () => {
       { relaxOnMissingCallbacks: false },
     ]) {
       for (const fn of getAllFunctions({ type: 'eval' })) {
+        if (FULL_TEXT_SEARCH_FUNCTIONS.includes(fn.name)) {
+          testQuickFixes(
+            `FROM index | WHERE ${BROKEN_PREFIX}${fn.name}()`,
+            [fn.name].map(toFunctionSignature),
+            { equalityCheck: 'include', ...options }
+          );
+        }
+      }
+      for (const fn of getAllFunctions({ type: 'eval' })) {
+        if (FULL_TEXT_SEARCH_FUNCTIONS.includes(fn.name)) continue;
         // add an A to the function name to make it invalid
         testQuickFixes(
           `FROM index | EVAL ${BROKEN_PREFIX}${fn.name}()`,
@@ -299,6 +324,8 @@ describe('quick fixes logic', () => {
         );
       }
       for (const fn of getAllFunctions({ type: 'agg' })) {
+        if (FULL_TEXT_SEARCH_FUNCTIONS.includes(fn.name)) continue;
+
         // add an A to the function name to make it invalid
         testQuickFixes(
           `FROM index | STATS ${BROKEN_PREFIX}${fn.name}()`,
@@ -329,8 +356,8 @@ describe('quick fixes logic', () => {
       { relaxOnMissingCallbacks: false },
       { relaxOnMissingCallbacks: false },
     ]) {
-      testQuickFixes(`FROM index | WHERE stringField like 'asda'`, ['"asda"'], options);
-      testQuickFixes(`FROM index | WHERE stringField not like 'asda'`, ['"asda"'], options);
+      testQuickFixes(`FROM index | WHERE keywordField like 'asda'`, ['"asda"'], options);
+      testQuickFixes(`FROM index | WHERE keywordField not like 'asda'`, ['"asda"'], options);
     }
   });
 
@@ -361,11 +388,11 @@ describe('quick fixes logic', () => {
           const statement = `FROM index | DROP any#Char$Field`;
           const { errors } = await validateQuery(statement, getAstAndSyntaxErrors, undefined, {
             ...callbackMocks,
-            getFieldsFor: undefined,
+            getColumnsFor: undefined,
           });
           const edits = await getActions(statement, errors, getAstAndSyntaxErrors, undefined, {
             ...callbackMocks,
-            getFieldsFor: undefined,
+            getColumnsFor: undefined,
           });
           expect(edits.length).toBe(0);
         });
@@ -386,7 +413,8 @@ describe('quick fixes logic', () => {
           const statement = `FROM index | DROP any#Char$Field`;
           const { errors } = await validateQuery(statement, getAstAndSyntaxErrors, undefined, {
             ...callbackMocks,
-            getFieldsFor: undefined,
+            getColumnsFor: undefined,
+            getFieldsMetadata: undefined,
           });
           const actions = await getActions(
             statement,
@@ -395,7 +423,11 @@ describe('quick fixes logic', () => {
             {
               relaxOnMissingCallbacks: true,
             },
-            { ...callbackMocks, getFieldsFor: undefined }
+            {
+              ...callbackMocks,
+              getColumnsFor: undefined,
+              getFieldsMetadata: undefined,
+            }
           );
           const edits = actions.map(({ edits: actionEdits }) => actionEdits[0].text);
           expect(edits).toEqual(['`any#Char$Field`']);
@@ -407,7 +439,7 @@ describe('quick fixes logic', () => {
   describe('callbacks', () => {
     it('should not crash if specific callback functions are not passed', async () => {
       const callbackMocks = getCallbackMocks();
-      const statement = `from a | eval b  = a | enrich policy | dissect stringField "%{firstWord}"`;
+      const statement = `from a | eval b  = a | enrich policy | dissect keywordField "%{firstWord}"`;
       const { errors } = await validateQuery(
         statement,
         getAstAndSyntaxErrors,
@@ -416,7 +448,7 @@ describe('quick fixes logic', () => {
       );
       try {
         await getActions(statement, errors, getAstAndSyntaxErrors, undefined, {
-          getFieldsFor: undefined,
+          getColumnsFor: undefined,
           getSources: undefined,
           getPolicies: undefined,
         });
@@ -427,7 +459,7 @@ describe('quick fixes logic', () => {
 
     it('should not crash if specific callback functions are not passed with relaxed option', async () => {
       const callbackMocks = getCallbackMocks();
-      const statement = `from a | eval b  = a | enrich policy | dissect stringField "%{firstWord}"`;
+      const statement = `from a | eval b  = a | enrich policy | dissect keywordField "%{firstWord}"`;
       const { errors } = await validateQuery(
         statement,
         getAstAndSyntaxErrors,
@@ -441,9 +473,10 @@ describe('quick fixes logic', () => {
           getAstAndSyntaxErrors,
           { relaxOnMissingCallbacks: true },
           {
-            getFieldsFor: undefined,
+            getColumnsFor: undefined,
             getSources: undefined,
             getPolicies: undefined,
+            getFieldsMetadata: undefined,
           }
         );
       } catch {
@@ -453,7 +486,7 @@ describe('quick fixes logic', () => {
 
     it('should not crash no callbacks are passed', async () => {
       const callbackMocks = getCallbackMocks();
-      const statement = `from a | eval b  = a | enrich policy | dissect stringField "%{firstWord}"`;
+      const statement = `from a | eval b  = a | enrich policy | dissect keywordField "%{firstWord}"`;
       const { errors } = await validateQuery(
         statement,
         getAstAndSyntaxErrors,
@@ -469,7 +502,7 @@ describe('quick fixes logic', () => {
 
     it('should not crash no callbacks are passed with relaxed option', async () => {
       const callbackMocks = getCallbackMocks();
-      const statement = `from a | eval b  = a | enrich policy | dissect stringField "%{firstWord}"`;
+      const statement = `from a | eval b  = a | enrich policy | dissect keywordField "%{firstWord}"`;
       const { errors } = await validateQuery(
         statement,
         getAstAndSyntaxErrors,

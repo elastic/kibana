@@ -23,6 +23,10 @@ import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 
 jest.mock('../../../../common/lib/kibana');
 
+jest.mock('../../../../common/get_experimental_features', () => ({
+  getIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
+}));
+
 jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_ui_config', () => ({
   fetchUiConfig: jest
     .fn()
@@ -163,33 +167,43 @@ describe('rule_details', () => {
           paddingSize="s"
           panelRef={null}
         >
+          <p
+            className="euiCallOutHeader__title"
+          >
+            <EuiIcon
+              aria-hidden="true"
+              color="inherit"
+              css="unknown styles"
+              size="m"
+              type="error"
+            />
+            Cannot run rule
+          </p>
+          <EuiSpacer
+            size="s"
+          />
           <EuiText
             color="default"
             size="xs"
           >
-            <p>
-              <EuiIcon
-                color="danger"
-                type="warning"
-              />
-               
-              <b>
-                Cannot run rule
-              </b>
-              , 
+            <EuiText
+              size="xs"
+            >
               test
-               
-              <EuiLink
-                color="primary"
-                href="/app/management/stack/license_management"
-                target="_blank"
-              >
-                <MemoizedFormattedMessage
-                  defaultMessage="Manage license"
-                  id="xpack.triggersActionsUI.sections.ruleDetails.manageLicensePlanBannerLinkTitle"
-                />
-              </EuiLink>
-            </p>
+            </EuiText>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiLink
+              color="primary"
+              href="/app/management/stack/license_management"
+              target="_blank"
+            >
+              <MemoizedFormattedMessage
+                defaultMessage="Manage license"
+                id="xpack.triggersActionsUI.sections.ruleDetails.manageLicensePlanBannerLinkTitle"
+              />
+            </EuiLink>
           </EuiText>
         </EuiPanel>
       `);

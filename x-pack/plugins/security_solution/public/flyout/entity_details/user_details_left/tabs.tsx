@@ -8,7 +8,10 @@
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { getRiskInputTab } from '../../../entity_analytics/components/entity_details_flyout';
+import {
+  getInsightsInputTab,
+  getRiskInputTab,
+} from '../../../entity_analytics/components/entity_details_flyout';
 import { UserAssetTableType } from '../../../explore/users/store/model';
 import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
 import type {
@@ -17,7 +20,7 @@ import type {
 } from '../../../../common/search_strategy/security_solution/users/managed_details';
 import { ENTRA_TAB_TEST_ID, OKTA_TAB_TEST_ID } from './test_ids';
 import { AssetDocumentTab } from './tabs/asset_document';
-import { RightPanelProvider } from '../../document_details/right/context';
+import { DocumentDetailsProvider } from '../../document_details/shared/context';
 import { RiskScoreEntity } from '../../../../common/search_strategy';
 import type { LeftPanelTabsType } from '../shared/components/left_panel/left_panel_header';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
@@ -25,7 +28,10 @@ import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_
 export const useTabs = (
   managedUser: ManagedUserHits,
   name: string,
-  isRiskScoreExist: boolean
+  isRiskScoreExist: boolean,
+  scopeId: string,
+  hasMisconfigurationFindings?: boolean,
+  hasNonClosedAlerts?: boolean
 ): LeftPanelTabsType =>
   useMemo(() => {
     const tabs: LeftPanelTabsType = [];
@@ -37,6 +43,7 @@ export const useTabs = (
         getRiskInputTab({
           entityName: name,
           entityType: RiskScoreEntity.user,
+          scopeId,
         })
       );
     }
@@ -49,8 +56,19 @@ export const useTabs = (
       tabs.push(getEntraTab(entraManagedUser));
     }
 
+    if (hasMisconfigurationFindings || hasNonClosedAlerts) {
+      tabs.push(getInsightsInputTab({ name, fieldName: 'user.name' }));
+    }
+
     return tabs;
-  }, [isRiskScoreExist, managedUser, name]);
+  }, [
+    hasMisconfigurationFindings,
+    hasNonClosedAlerts,
+    isRiskScoreExist,
+    managedUser,
+    name,
+    scopeId,
+  ]);
 
 const getOktaTab = (oktaManagedUser: ManagedUserHit) => ({
   id: EntityDetailsLeftPanelTab.OKTA,
@@ -62,13 +80,13 @@ const getOktaTab = (oktaManagedUser: ManagedUserHit) => ({
     />
   ),
   content: (
-    <RightPanelProvider
+    <DocumentDetailsProvider
       id={oktaManagedUser._id}
       indexName={oktaManagedUser._index}
       scopeId={UserAssetTableType.assetOkta}
     >
       <AssetDocumentTab />
-    </RightPanelProvider>
+    </DocumentDetailsProvider>
   ),
 });
 
@@ -83,13 +101,13 @@ const getEntraTab = (entraManagedUser: ManagedUserHit) => {
       />
     ),
     content: (
-      <RightPanelProvider
+      <DocumentDetailsProvider
         id={entraManagedUser._id}
         indexName={entraManagedUser._index}
         scopeId={UserAssetTableType.assetEntra}
       >
         <AssetDocumentTab />
-      </RightPanelProvider>
+      </DocumentDetailsProvider>
     ),
   };
 };

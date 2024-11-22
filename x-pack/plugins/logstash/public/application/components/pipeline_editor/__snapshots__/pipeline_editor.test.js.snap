@@ -27,18 +27,13 @@ exports[`PipelineEditor component includes required error message for falsy pipe
     isInvalid={true}
   >
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
       fullWidth={true}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
         <Memo(MemoizedFormattedMessage)
           defaultMessage="Pipeline ID"
           id="xpack.logstash.pipelineEditor.pipelineIdFormRowLabel"
         />
       }
-      labelType="label"
     >
       <EuiFieldText
         data-test-subj="inputId"
@@ -51,18 +46,13 @@ exports[`PipelineEditor component includes required error message for falsy pipe
       />
     </EuiFormRow>
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
       fullWidth={true}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
         <Memo(MemoizedFormattedMessage)
           defaultMessage="Description"
           id="xpack.logstash.pipelineEditor.descriptionFormRowLabel"
         />
       }
-      labelType="label"
     >
       <EuiFieldText
         data-test-subj="inputDescription"
@@ -73,18 +63,13 @@ exports[`PipelineEditor component includes required error message for falsy pipe
       />
     </EuiFormRow>
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
       fullWidth={true}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
         <Memo(MemoizedFormattedMessage)
           defaultMessage="Pipeline"
           id="xpack.logstash.pipelineEditor.pipelineFormRowLabel"
         />
       }
-      labelType="label"
     >
       <div
         data-test-subj="pipelineField"
@@ -106,10 +91,6 @@ exports[`PipelineEditor component includes required error message for falsy pipe
       </div>
     </EuiFormRow>
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
         <FormLabelWithIconTip
           formRowLabelText="Pipeline workers"
@@ -118,7 +99,6 @@ exports[`PipelineEditor component includes required error message for falsy pipe
 Default value: Number of the host’s CPU cores"
         />
       }
-      labelType="label"
     >
       <EuiFieldNumber
         data-test-subj="inputWorkers"
@@ -309,18 +289,13 @@ exports[`PipelineEditor component invalidates form for invalid pipeline id input
     isInvalid={true}
   >
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
       fullWidth={true}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
         <Memo(MemoizedFormattedMessage)
           defaultMessage="Pipeline ID"
           id="xpack.logstash.pipelineEditor.pipelineIdFormRowLabel"
         />
       }
-      labelType="label"
     >
       <EuiFieldText
         data-test-subj="inputId"
@@ -333,18 +308,13 @@ exports[`PipelineEditor component invalidates form for invalid pipeline id input
       />
     </EuiFormRow>
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
       fullWidth={true}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
         <Memo(MemoizedFormattedMessage)
           defaultMessage="Description"
           id="xpack.logstash.pipelineEditor.descriptionFormRowLabel"
         />
       }
-      labelType="label"
     >
       <EuiFieldText
         data-test-subj="inputDescription"
@@ -355,18 +325,13 @@ exports[`PipelineEditor component invalidates form for invalid pipeline id input
       />
     </EuiFormRow>
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
       fullWidth={true}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
         <Memo(MemoizedFormattedMessage)
           defaultMessage="Pipeline"
           id="xpack.logstash.pipelineEditor.pipelineFormRowLabel"
         />
       }
-      labelType="label"
     >
       <div
         data-test-subj="pipelineField"
@@ -388,10 +353,6 @@ exports[`PipelineEditor component invalidates form for invalid pipeline id input
       </div>
     </EuiFormRow>
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
         <FormLabelWithIconTip
           formRowLabelText="Pipeline workers"
@@ -400,7 +361,6 @@ exports[`PipelineEditor component invalidates form for invalid pipeline id input
 Default value: Number of the host’s CPU cores"
         />
       }
-      labelType="label"
     >
       <EuiFieldNumber
         data-test-subj="inputWorkers"
@@ -591,18 +551,13 @@ exports[`PipelineEditor component invalidates form for pipeline id with spaces 1
     isInvalid={true}
   >
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
       fullWidth={true}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
         <Memo(MemoizedFormattedMessage)
           defaultMessage="Pipeline ID"
           id="xpack.logstash.pipelineEditor.pipelineIdFormRowLabel"
         />
       }
-      labelType="label"
     >
       <EuiFieldText
         data-test-subj="inputId"
@@ -615,18 +570,13 @@ exports[`PipelineEditor component invalidates form for pipeline id with spaces 1
       />
     </EuiFormRow>
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
       fullWidth={true}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
         <Memo(MemoizedFormattedMessage)
           defaultMessage="Description"
           id="xpack.logstash.pipelineEditor.descriptionFormRowLabel"
         />
       }
-      labelType="label"
     >
       <EuiFieldText
         data-test-subj="inputDescription"
@@ -637,18 +587,13 @@ exports[`PipelineEditor component invalidates form for pipeline id with spaces 1
       />
     </EuiFormRow>
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
       fullWidth={true}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
         <Memo(MemoizedFormattedMessage)
           defaultMessage="Pipeline"
           id="xpack.logstash.pipelineEditor.pipelineFormRowLabel"
         />
       }
-      labelType="label"
     >
       <div
         data-test-subj="pipelineField"
@@ -670,10 +615,6 @@ exports[`PipelineEditor component invalidates form for pipeline id with spaces 1
       </div>
     </EuiFormRow>
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
         <FormLabelWithIconTip
           formRowLabelText="Pipeline workers"
@@ -682,7 +623,6 @@ exports[`PipelineEditor component invalidates form for pipeline id with spaces 1
 Default value: Number of the host’s CPU cores"
         />
       }
-      labelType="label"
     >
       <EuiFieldNumber
         data-test-subj="inputWorkers"
@@ -869,18 +809,13 @@ exports[`PipelineEditor component matches snapshot for clone pipeline 1`] = `
     isInvalid={false}
   >
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
       fullWidth={true}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
         <Memo(MemoizedFormattedMessage)
           defaultMessage="Description"
           id="xpack.logstash.pipelineEditor.descriptionFormRowLabel"
         />
       }
-      labelType="label"
     >
       <EuiFieldText
         data-test-subj="inputDescription"
@@ -891,18 +826,13 @@ exports[`PipelineEditor component matches snapshot for clone pipeline 1`] = `
       />
     </EuiFormRow>
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
       fullWidth={true}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
         <Memo(MemoizedFormattedMessage)
           defaultMessage="Pipeline"
           id="xpack.logstash.pipelineEditor.pipelineFormRowLabel"
         />
       }
-      labelType="label"
     >
       <div
         data-test-subj="pipelineField"
@@ -924,10 +854,6 @@ exports[`PipelineEditor component matches snapshot for clone pipeline 1`] = `
       </div>
     </EuiFormRow>
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
         <FormLabelWithIconTip
           formRowLabelText="Pipeline workers"
@@ -936,7 +862,6 @@ exports[`PipelineEditor component matches snapshot for clone pipeline 1`] = `
 Default value: Number of the host’s CPU cores"
         />
       }
-      labelType="label"
     >
       <EuiFieldNumber
         data-test-subj="inputWorkers"
@@ -1137,18 +1062,13 @@ exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
     isInvalid={false}
   >
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
       fullWidth={true}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
         <Memo(MemoizedFormattedMessage)
           defaultMessage="Pipeline ID"
           id="xpack.logstash.pipelineEditor.pipelineIdFormRowLabel"
         />
       }
-      labelType="label"
     >
       <EuiFieldText
         data-test-subj="inputId"
@@ -1161,18 +1081,13 @@ exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
       />
     </EuiFormRow>
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
       fullWidth={true}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
         <Memo(MemoizedFormattedMessage)
           defaultMessage="Description"
           id="xpack.logstash.pipelineEditor.descriptionFormRowLabel"
         />
       }
-      labelType="label"
     >
       <EuiFieldText
         data-test-subj="inputDescription"
@@ -1183,18 +1098,13 @@ exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
       />
     </EuiFormRow>
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
       fullWidth={true}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
         <Memo(MemoizedFormattedMessage)
           defaultMessage="Pipeline"
           id="xpack.logstash.pipelineEditor.pipelineFormRowLabel"
         />
       }
-      labelType="label"
     >
       <div
         data-test-subj="pipelineField"
@@ -1216,10 +1126,6 @@ exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
       </div>
     </EuiFormRow>
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
         <FormLabelWithIconTip
           formRowLabelText="Pipeline workers"
@@ -1228,7 +1134,6 @@ exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
 Default value: Number of the host’s CPU cores"
         />
       }
-      labelType="label"
     >
       <EuiFieldNumber
         data-test-subj="inputWorkers"
@@ -1415,18 +1320,13 @@ exports[`PipelineEditor component matches snapshot for edit pipeline 1`] = `
     isInvalid={false}
   >
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
       fullWidth={true}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
         <Memo(MemoizedFormattedMessage)
           defaultMessage="Description"
           id="xpack.logstash.pipelineEditor.descriptionFormRowLabel"
         />
       }
-      labelType="label"
     >
       <EuiFieldText
         data-test-subj="inputDescription"
@@ -1437,18 +1337,13 @@ exports[`PipelineEditor component matches snapshot for edit pipeline 1`] = `
       />
     </EuiFormRow>
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
       fullWidth={true}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
         <Memo(MemoizedFormattedMessage)
           defaultMessage="Pipeline"
           id="xpack.logstash.pipelineEditor.pipelineFormRowLabel"
         />
       }
-      labelType="label"
     >
       <div
         data-test-subj="pipelineField"
@@ -1470,10 +1365,6 @@ exports[`PipelineEditor component matches snapshot for edit pipeline 1`] = `
       </div>
     </EuiFormRow>
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
         <FormLabelWithIconTip
           formRowLabelText="Pipeline workers"
@@ -1482,7 +1373,6 @@ exports[`PipelineEditor component matches snapshot for edit pipeline 1`] = `
 Default value: Number of the host’s CPU cores"
         />
       }
-      labelType="label"
     >
       <EuiFieldNumber
         data-test-subj="inputWorkers"

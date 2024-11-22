@@ -19,10 +19,11 @@ import {
   Visualization,
 } from '../../types';
 import { GROUP_ID } from './constants';
-import { getMetricVisualization, MetricVisualizationState } from './visualization';
+import { getMetricVisualization } from './visualization';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 import { Ast } from '@kbn/interpreter';
 import { LayoutDirection } from '@elastic/charts';
+import { MetricVisualizationState } from './types';
 
 const paletteService = chartPluginMock.createPaletteRegistry();
 const theme = themeServiceMock.createStartContract();
@@ -76,6 +77,10 @@ describe('metric visualization', () => {
     color: 'static-color',
     palette,
     showBar: false,
+    titlesTextAlign: 'left',
+    valuesTextAlign: 'right',
+    iconAlign: 'left',
+    valueFontMode: 'default',
   };
 
   const fullStateWTrend: Required<MetricVisualizationState> = {
@@ -313,8 +318,8 @@ describe('metric visualization', () => {
                 "color": Array [
                   "static-color",
                 ],
-                "icon": Array [
-                  "empty",
+                "iconAlign": Array [
+                  "left",
                 ],
                 "inspectorTableId": Array [
                   "first",
@@ -353,7 +358,16 @@ describe('metric visualization', () => {
                 "subtitle": Array [
                   "subtitle",
                 ],
+                "titlesTextAlign": Array [
+                  "left",
+                ],
                 "trendline": Array [],
+                "valueFontSize": Array [
+                  "default",
+                ],
+                "valuesTextAlign": Array [
+                  "right",
+                ],
               },
               "function": "metricVis",
               "type": "function",
@@ -377,8 +391,8 @@ describe('metric visualization', () => {
                 "color": Array [
                   "static-color",
                 ],
-                "icon": Array [
-                  "empty",
+                "iconAlign": Array [
+                  "left",
                 ],
                 "inspectorTableId": Array [
                   "first",
@@ -420,7 +434,16 @@ describe('metric visualization', () => {
                 "subtitle": Array [
                   "subtitle",
                 ],
+                "titlesTextAlign": Array [
+                  "left",
+                ],
                 "trendline": Array [],
+                "valueFontSize": Array [
+                  "default",
+                ],
+                "valuesTextAlign": Array [
+                  "right",
+                ],
               },
               "function": "metricVis",
               "type": "function",
@@ -778,8 +801,12 @@ describe('metric visualization', () => {
     expect(visualization.clearLayer(fullState, 'some-id', 'indexPattern1')).toMatchInlineSnapshot(`
       Object {
         "icon": "empty",
+        "iconAlign": "left",
         "layerId": "first",
         "layerType": "data",
+        "titlesTextAlign": "left",
+        "valueFontMode": "default",
+        "valuesTextAlign": "right",
       }
     `);
   });
@@ -988,7 +1015,7 @@ describe('metric visualization', () => {
     const columnId = 'col-id';
 
     const cases: Array<{
-      groupId: typeof GROUP_ID[keyof typeof GROUP_ID];
+      groupId: (typeof GROUP_ID)[keyof typeof GROUP_ID];
       accessor: keyof MetricVisualizationState;
     }> = [
       { groupId: GROUP_ID.METRIC, accessor: 'metricAccessor' },

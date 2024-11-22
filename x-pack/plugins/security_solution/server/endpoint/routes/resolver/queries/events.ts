@@ -19,14 +19,22 @@ import type { ResolverQueryParams } from '../tree/queries/base';
  */
 export class EventsQuery extends BaseResolverQuery {
   readonly pagination: PaginationBuilder;
+
   constructor({
     indexPatterns,
     timeRange,
     isInternalRequest,
     pagination,
     shouldExcludeColdAndFrozenTiers,
+    agentId,
   }: ResolverQueryParams & { pagination: PaginationBuilder }) {
-    super({ indexPatterns, timeRange, isInternalRequest, shouldExcludeColdAndFrozenTiers });
+    super({
+      indexPatterns,
+      timeRange,
+      isInternalRequest,
+      shouldExcludeColdAndFrozenTiers,
+      agentId,
+    });
     this.pagination = pagination;
   }
 
@@ -66,7 +74,10 @@ export class EventsQuery extends BaseResolverQuery {
     };
   }
 
-  private alertsForProcessQuery(id?: JsonValue): { query: object; index: string } {
+  private alertsForProcessQuery(
+    id?: JsonValue,
+    agentId?: string
+  ): { query: object; index: string } {
     return {
       query: {
         bool: {
@@ -74,6 +85,7 @@ export class EventsQuery extends BaseResolverQuery {
             {
               term: { 'process.entity_id': id },
             },
+            ...(this.schema.agentId && agentId ? [{ term: { 'agent.id': agentId } }] : []),
             ...this.getRangeFilter(),
           ],
         },
@@ -108,7 +120,7 @@ export class EventsQuery extends BaseResolverQuery {
    */
   async search(
     client: IScopedClusterClient,
-    body: { filter?: string; eventID?: string; entityType?: string },
+    body: { filter?: string; eventID?: string; entityType?: string; agentId?: string },
     alertsClient: AlertsClient
   ): Promise<SafeResolverEvent[]> {
     if (body.filter) {
@@ -116,18 +128,29 @@ export class EventsQuery extends BaseResolverQuery {
       const response = await client.asCurrentUser.search<SafeResolverEvent>(
         this.buildSearch(parsedFilters)
       );
-      // @ts-expect-error @elastic/elasticsearch _source is optional
-      return response.hits.hits.map((hit) => hit._source);
+      return response.hits.hits.map((hit) => ({
+        ...hit._source,
+        _id: hit._id,
+        _index: hit._index,
+      }));
     } else {
-      const { eventID, entityType } = body;
+      const { eventID, entityType, agentId } = body;
       if (entityType === 'alertDetail') {
         const response = await alertsClient.find(this.alertDetailQuery(eventID));
         // @ts-expect-error @elastic/elasticsearch _source is optional
-        return response.hits.hits.map((hit) => hit._source);
+        return response.hits.hits.map((hit) => ({
+          ...hit._source,
+          _id: hit._id,
+          _index: hit._index,
+        }));
       } else {
-        const response = await alertsClient.find(this.alertsForProcessQuery(eventID));
+        const response = await alertsClient.find(this.alertsForProcessQuery(eventID, agentId));
         // @ts-expect-error @elastic/elasticsearch _source is optional
-        return response.hits.hits.map((hit) => hit._source);
+        return response.hits.hits.map((hit) => ({
+          ...hit._source,
+          _id: hit._id,
+          _index: hit._index,
+        }));
       }
     }
   }

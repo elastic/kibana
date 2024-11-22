@@ -14,7 +14,6 @@ import { OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID } from '@kbn/manageme
 import type { LogsExplorerCustomizations, LogsExplorerPublicEvent } from '../../../controller';
 import { ControlPanelRT } from '../../../../common/control_panels';
 import {
-  AllDatasetSelection,
   isDataSourceSelection,
   isDataViewSelection,
 } from '../../../../common/data_source_selection';
@@ -271,7 +270,7 @@ export const createPureLogsExplorerControllerStateMachine = (
     {
       actions: {
         storeDefaultSelection: actions.assign((_context) => ({
-          dataSourceSelection: AllDatasetSelection.create(),
+          dataSourceSelection: _context.allSelection,
         })),
         storeDataSourceSelection: actions.assign((_context, event) =>
           'data' in event && isDataSourceSelection(event.data)

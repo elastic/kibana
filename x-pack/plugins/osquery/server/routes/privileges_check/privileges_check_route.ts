@@ -15,8 +15,10 @@ export const privilegesCheckRoute = (router: IRouter, osqueryContext: OsqueryApp
     .get({
       access: 'internal',
       path: '/internal/osquery/privileges_check',
-      options: {
-        tags: [`access:${PLUGIN_ID}-readLiveQueries`],
+      security: {
+        authz: {
+          requiredPrivileges: [`${PLUGIN_ID}-readLiveQueries`],
+        },
       },
     })
     .addVersion(

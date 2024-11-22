@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -12,6 +13,7 @@ import {
   canImportVisContext,
   exportVisContext,
   isSuggestionShapeAndVisContextCompatible,
+  injectESQLQueryIntoLensLayers,
 } from './external_vis_context';
 import { getLensVisMock } from '../__mocks__/lens_vis';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
@@ -159,6 +161,65 @@ describe('external_vis_context', () => {
           } as UnifiedHistogramVisContext
         )
       ).toBe(true);
+    });
+  });
+
+  describe('injectESQLQueryIntoLensLayers', () => {
+    it('should return the Lens attributes as they are for unknown datasourceId', async () => {
+      const attributes = {
+        visualizationType: 'lnsXY',
+        state: {
+          visualization: { preferredSeriesType: 'line' },
+          datasourceStates: { unknownId: { layers: {} } },
+        },
+      } as unknown as UnifiedHistogramVisContext['attributes'];
+      expect(injectESQLQueryIntoLensLayers(attributes, { esql: 'from foo' })).toStrictEqual(
+        attributes
+      );
+    });
+
+    it('should return the Lens attributes as they are for DSL config (formbased)', async () => {
+      const attributes = {
+        visualizationType: 'lnsXY',
+        state: {
+          visualization: { preferredSeriesType: 'line' },
+          datasourceStates: { formBased: { layers: {} } },
+        },
+      } as UnifiedHistogramVisContext['attributes'];
+      expect(injectESQLQueryIntoLensLayers(attributes, { esql: 'from foo' })).toStrictEqual(
+        attributes
+      );
+    });
+
+    it('should inject the query to the Lens attributes for ES|QL config (textbased)', async () => {
+      const attributes = {
+        visualizationType: 'lnsXY',
+        state: {
+          visualization: { preferredSeriesType: 'line' },
+          datasourceStates: { textBased: { layers: { layer1: { query: { esql: 'from foo' } } } } },
+        },
+      } as unknown as UnifiedHistogramVisContext['attributes'];
+
+      const expectedAttributes = {
+        ...attributes,
+        state: {
+          ...attributes.state,
+          datasourceStates: {
+            ...attributes.state.datasourceStates,
+            textBased: {
+              ...attributes.state.datasourceStates.textBased,
+              layers: {
+                layer1: {
+                  query: { esql: 'from foo | stats count(*)' },
+                },
+              },
+            },
+          },
+        },
+      } as unknown as UnifiedHistogramVisContext['attributes'];
+      expect(
+        injectESQLQueryIntoLensLayers(attributes, { esql: 'from foo | stats count(*)' })
+      ).toStrictEqual(expectedAttributes);
     });
   });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { decodeOrThrow } from '../../../common/runtime_types';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 const TIMESTAMP_FIELD = '@timestamp';
 import { MetricsAPIRequest, MetricsAPIResponse } from '../../../common/http_api/metrics_api';
 import {

@@ -9,6 +9,7 @@ import {
   ALERT_DURATION,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  ALERT_GROUP,
   ALERT_INSTANCE_ID,
   ALERT_REASON,
   ALERT_RULE_CATEGORY,
@@ -27,6 +28,7 @@ import {
   EVENT_ACTION,
   EVENT_KIND,
   SPACE_IDS,
+  TAGS,
   TIMESTAMP,
   VERSION,
 } from '@kbn/rule-data-utils';
@@ -75,18 +77,23 @@ export const alertDetail: AlertData = {
   ) as unknown as AlertData['raw'],
 };
 
-export const alertWithTags: TopAlert = {
+export const alertWithGroupsAndTags: TopAlert = {
   ...alert,
   fields: {
     ...alert.fields,
+    [ALERT_GROUP]: [
+      { field: 'host.name', value: 'host-0' },
+      { field: 'container.id', value: 'container-0' },
+    ],
     [ALERT_RULE_TAGS]: tags,
+    [TAGS]: tags,
   },
 };
 
 export const untrackedAlert: TopAlert = {
-  ...alertWithTags,
+  ...alertWithGroupsAndTags,
   fields: {
-    ...alertWithTags.fields,
+    ...alertWithGroupsAndTags.fields,
     [ALERT_STATUS]: ALERT_STATUS_UNTRACKED,
   },
 };

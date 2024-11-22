@@ -8,9 +8,9 @@
 /* eslint-disable no-console */
 
 import { difference, union } from 'lodash';
+import type { SecurityService } from '@kbn/ftr-common-functional-ui-services';
 import { Elasticsearch, Kibana } from '..';
 import { callKibana, isAxiosError } from './call_kibana';
-import { SecurityService } from '../../../../../../test/common/services/security/security';
 
 interface User {
   username: string;
@@ -37,11 +37,11 @@ export async function createOrUpdateUser({
     username: user.username,
   });
   if (!existingUser) {
-    createUser({ elasticsearch, newUser: user, securityService });
+    await createUser({ elasticsearch, newUser: user, securityService });
     return;
   }
 
-  updateUser({
+  await updateUser({
     existingUser,
     newUser: user,
     securityService,

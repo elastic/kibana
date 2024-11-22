@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { IncomingHttpHeaders } from 'http';
@@ -41,6 +42,20 @@ export const createTransport = ({
 
     async request(params: TransportRequestParams, options?: TransportRequestOptions) {
       const opts: TransportRequestOptions = options ? { ...options } : {};
+      // sync override of maxResponseSize and maxCompressedResponseSize
+      if (options) {
+        if (
+          options.maxResponseSize !== undefined &&
+          options.maxCompressedResponseSize === undefined
+        ) {
+          opts.maxCompressedResponseSize = options.maxResponseSize;
+        } else if (
+          options.maxCompressedResponseSize !== undefined &&
+          options.maxResponseSize === undefined
+        ) {
+          opts.maxResponseSize = options.maxCompressedResponseSize;
+        }
+      }
       const opaqueId = getExecutionContext();
       if (opaqueId && !opts.opaqueId) {
         // rewrites headers['x-opaque-id'] if it presents

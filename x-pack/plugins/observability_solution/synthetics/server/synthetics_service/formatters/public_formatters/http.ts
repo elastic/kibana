@@ -38,6 +38,7 @@ export const httpFormatters: HTTPFormatMap = {
   [ConfigKey.RESPONSE_HEADERS_CHECK]: objectFormatter,
   [ConfigKey.RESPONSE_STATUS_CHECK]: arrayFormatter,
   [ConfigKey.REQUEST_HEADERS_CHECK]: objectFormatter,
+  // @ts-expect-error upgrade typescript v5.1.6
   [ConfigKey.REQUEST_BODY_CHECK]: (fields) => fields[ConfigKey.REQUEST_BODY_CHECK]?.value || null,
   [ConfigKey.PROXY_HEADERS]: objectFormatter,
 };

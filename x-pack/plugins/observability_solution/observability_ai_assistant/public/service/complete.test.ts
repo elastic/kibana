@@ -101,8 +101,8 @@ describe('complete', () => {
         persist: false,
         disableFunctions: false,
         signal: new AbortController().signal,
-        responseLanguage: 'orcish',
         ...params,
+        scopes: ['all'],
       },
       requestCallback
     );

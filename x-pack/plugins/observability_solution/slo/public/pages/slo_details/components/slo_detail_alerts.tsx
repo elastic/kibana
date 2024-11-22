@@ -10,7 +10,7 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
-import { useKibana } from '../../../utils/kibana_react';
+import { useKibana } from '../../../hooks/use_kibana';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
@@ -19,6 +19,7 @@ export interface Props {
 export function SloDetailsAlerts({ slo }: Props) {
   const {
     triggersActionsUi: { alertsTableConfigurationRegistry, getAlertsStateTable: AlertsStateTable },
+    observability: { observabilityRuleTypeRegistry },
   } = useKibana().services;
 
   return (
@@ -41,7 +42,8 @@ export function SloDetailsAlerts({ slo }: Props) {
               },
             }}
             showAlertStatusWithFlapping
-            pageSize={100}
+            initialPageSize={100}
+            cellContext={{ observabilityRuleTypeRegistry }}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

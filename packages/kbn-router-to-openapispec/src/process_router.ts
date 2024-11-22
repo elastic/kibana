@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Router } from '@kbn/core-http-router-server-internal';
@@ -12,6 +13,7 @@ import { ALLOWED_PUBLIC_VERSION as SERVERLESS_VERSION_2023_10_31 } from '@kbn/co
 import type { OpenAPIV3 } from 'openapi-types';
 import type { OasConverter } from './oas_converter';
 import {
+  getXsrfHeaderForMethod,
   assignToPaths,
   extractContentType,
   extractTags,
@@ -19,15 +21,19 @@ import {
   getPathParameters,
   getVersionedContentTypeString,
   getVersionedHeaderParam,
+  mergeResponseContent,
   prepareRoutes,
+  setXState,
+  GetOpId,
 } from './util';
-import type { OperationIdCounter } from './operation_id_counter';
 import type { GenerateOpenApiDocumentOptionsFilters } from './generate_oas';
+import type { CustomOperationObject, InternalRouterRoute } from './type';
+import { extractAuthzDescription } from './extract_authz_description';
 
 export const processRouter = (
   appRouter: Router,
   converter: OasConverter,
-  getOpId: OperationIdCounter,
+  getOpId: GetOpId,
   filters?: GenerateOpenApiDocumentOptionsFilters
 ) => {
   const paths: OpenAPIV3.PathsObject = {};
@@ -40,7 +46,10 @@ export const processRouter = (
       const validationSchemas = extractValidationSchemaFromRoute(route);
       const contentType = extractContentType(route.options?.body);
 
-      let parameters: undefined | OpenAPIV3.ParameterObject[] = [];
+      const parameters: OpenAPIV3.ParameterObject[] = [
+        getVersionedHeaderParam(SERVERLESS_VERSION_2023_10_31, [SERVERLESS_VERSION_2023_10_31]),
+        ...getXsrfHeaderForMethod(route.method, route.options),
+      ];
       if (validationSchemas) {
         let pathObjects: OpenAPIV3.ParameterObject[] = [];
         let queryObjects: OpenAPIV3.ParameterObject[] = [];
@@ -52,17 +61,26 @@ export const processRouter = (
         if (reqQuery) {
           queryObjects = converter.convertQuery(reqQuery);
         }
-        parameters = [
-          getVersionedHeaderParam(SERVERLESS_VERSION_2023_10_31, [SERVERLESS_VERSION_2023_10_31]),
-          ...pathObjects,
-          ...queryObjects,
-        ];
+        parameters.push(...pathObjects, ...queryObjects);
       }
 
-      const operation: OpenAPIV3.OperationObject = {
+      let description = `${route.options.description ?? ''}`;
+      if (route.security) {
+        const authzDescription = extractAuthzDescription(route.security);
+
+        description += `${route.options.description && authzDescription ? `<br/><br/>` : ''}${
+          authzDescription ?? ''
+        }`;
+      }
+
+      const hasDeprecations = !!route.options.deprecated;
+
+      const operation: CustomOperationObject = {
         summary: route.options.summary ?? '',
-        description: route.options.description,
         tags: route.options.tags ? extractTags(route.options.tags) : [],
+        ...(description ? { description } : {}),
+        ...(hasDeprecations ? { deprecated: true } : {}),
+        ...(route.options.discontinued ? { 'x-discontinued': route.options.discontinued } : {}),
         requestBody: !!validationSchemas?.body
           ? {
               content: {
@@ -74,8 +92,10 @@ export const processRouter = (
           : undefined,
         responses: extractResponses(route, converter),
         parameters,
-        operationId: getOpId(route.path),
+        operationId: getOpId({ path: route.path, method: route.method }),
       };
+
+      setXState(route.options.availability, operation);
 
       const path: OpenAPIV3.PathItemObject = {
         [route.method]: operation,
@@ -90,7 +110,6 @@ export const processRouter = (
   return { paths };
 };
 
-export type InternalRouterRoute = ReturnType<Router['getRoutes']>[0];
 export const extractResponses = (route: InternalRouterRoute, converter: OasConverter) => {
   const responses: OpenAPIV3.ResponsesObject = {};
   if (!route.validationSchemas) return responses;
@@ -101,18 +120,23 @@ export const extractResponses = (route: InternalRouterRoute, converter: OasConve
     const contentType = extractContentType(route.options?.body);
     return Object.entries(validationSchemas).reduce<OpenAPIV3.ResponsesObject>(
       (acc, [statusCode, schema]) => {
-        const oasSchema = converter.convert(schema.body());
+        const newContent = schema.body
+          ? {
+              [getVersionedContentTypeString(
+                SERVERLESS_VERSION_2023_10_31,
+                schema.bodyContentType ? [schema.bodyContentType] : contentType
+              )]: {
+                schema: converter.convert(schema.body()),
+              },
+            }
+          : undefined;
         acc[statusCode] = {
           ...acc[statusCode],
-          content: {
-            ...((acc[statusCode] ?? {}) as OpenAPIV3.ResponseObject).content,
-            [getVersionedContentTypeString(
-              SERVERLESS_VERSION_2023_10_31,
-              schema.bodyContentType ? [schema.bodyContentType] : contentType
-            )]: {
-              schema: oasSchema,
-            },
-          },
+          description: schema.description!,
+          ...mergeResponseContent(
+            ((acc[statusCode] ?? {}) as OpenAPIV3.ResponseObject).content,
+            newContent
+          ),
         };
         return acc;
       },

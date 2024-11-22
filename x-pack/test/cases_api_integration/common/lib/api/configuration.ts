@@ -43,6 +43,7 @@ export const getConfigurationRequest = ({
     closure_type: 'close-by-user',
     owner: 'securitySolutionFixture',
     customFields: [],
+    templates: [],
     ...overrides,
   };
 };
@@ -68,7 +69,7 @@ export const createConfiguration = async (
 ): Promise<Configuration> => {
   const apiCall = supertest.post(`${getSpaceUrlPrefix(auth?.space)}${CASE_CONFIGURE_URL}`);
 
-  setupAuth({ apiCall, headers, auth });
+  void setupAuth({ apiCall, headers, auth });
 
   const { body: configuration } = await apiCall
     .set('kbn-xsrf', 'true')
@@ -111,7 +112,7 @@ export const updateConfiguration = async (
 ): Promise<Configuration> => {
   const apiCall = supertest.patch(`${getSpaceUrlPrefix(auth?.space)}${CASE_CONFIGURE_URL}/${id}`);
 
-  setupAuth({ apiCall, headers, auth });
+  void setupAuth({ apiCall, headers, auth });
 
   const { body: configuration } = await apiCall
     .set('kbn-xsrf', 'true')

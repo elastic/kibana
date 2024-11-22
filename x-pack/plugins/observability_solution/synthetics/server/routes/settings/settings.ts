@@ -14,8 +14,8 @@ export const getIndexSizesRoute: SyntheticsRestApiRouteFactory<{
   method: 'GET',
   path: SYNTHETICS_API_URLS.INDEX_SIZE,
   validate: {},
-  handler: async ({ uptimeEsClient, server }) => {
-    const data = await uptimeEsClient.baseESClient.cat.indices({
+  handler: async ({ syntheticsEsClient, server }) => {
+    const data = await syntheticsEsClient.baseESClient.cat.indices({
       index: 'synthetics-*',
       format: 'json',
       bytes: 'b',

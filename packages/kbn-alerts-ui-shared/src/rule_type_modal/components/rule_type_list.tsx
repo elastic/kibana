@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useMemo, useCallback } from 'react';
@@ -19,6 +20,7 @@ import {
   EuiEmptyPrompt,
   EuiButton,
   useEuiTheme,
+  EuiToolTip,
 } from '@elastic/eui';
 import { omit } from 'lodash';
 import { PRODUCER_DISPLAY_NAMES } from '../../common/i18n';
@@ -85,6 +87,28 @@ export const RuleTypeList: React.FC<RuleTypeListProps> = ({
 
   const onClickAll = useCallback(() => onFilterByProducer(null), [onFilterByProducer]);
 
+  const ruleCard = (rule: RuleTypeWithDescription) => (
+    <EuiCard
+      titleSize="xs"
+      textAlign="left"
+      hasBorder
+      title={rule.name}
+      onClick={() => onSelectRuleType(rule.id)}
+      description={rule.description}
+      style={{ marginRight: '8px', flexGrow: 0 }}
+      data-test-subj={`${rule.id}-SelectOption`}
+      isDisabled={!rule.enabledInLicense}
+    >
+      <EuiText
+        color="subdued"
+        size="xs"
+        style={{ textTransform: 'uppercase', fontWeight: euiTheme.font.weight.bold }}
+      >
+        {producerToDisplayName(rule.producer)}
+      </EuiText>
+    </EuiCard>
+  );
+
   return (
     <EuiFlexGroup
       style={{
@@ -96,6 +120,8 @@ export const RuleTypeList: React.FC<RuleTypeListProps> = ({
           grow={1}
           style={{
             paddingTop: euiTheme.size.base /* Match drop shadow padding in the right column */,
+            paddingRight: euiTheme.size.base,
+            overflowY: 'auto',
           }}
         >
           <EuiFacetGroup>
@@ -148,29 +174,24 @@ export const RuleTypeList: React.FC<RuleTypeListProps> = ({
         )}
         {ruleTypesList.map((rule) => (
           <React.Fragment key={rule.id}>
-            <EuiCard
-              titleSize="xs"
-              textAlign="left"
-              hasBorder
-              title={rule.name}
-              onClick={() => onSelectRuleType(rule.id)}
-              description={
-                <>
-                  {rule.description}
-                  {rule.description && <EuiSpacer size="s" />}
-                  <EuiText
-                    color="subdued"
-                    size="xs"
-                    style={{ textTransform: 'uppercase', fontWeight: euiTheme.font.weight.bold }}
-                  >
-                    {producerToDisplayName(rule.producer)}
-                  </EuiText>
-                </>
-              }
-              style={{ marginRight: '8px', flexGrow: 0 }}
-              data-test-subj={`${rule.id}-SelectOption`}
-              isDisabled={rule.enabledInLicense === false}
-            />
+            {rule.enabledInLicense ? (
+              ruleCard(rule)
+            ) : (
+              <EuiToolTip
+                position="top"
+                content={i18n.translate(
+                  'alertsUIShared.components.ruleTypeModal.minimumRequiredLicenseMessage',
+                  {
+                    defaultMessage: 'This rule requires a {minimumLicenseRequired} license.',
+                    values: {
+                      minimumLicenseRequired: rule.minimumLicenseRequired,
+                    },
+                  }
+                )}
+              >
+                <>{ruleCard(rule)} </>
+              </EuiToolTip>
+            )}
             <EuiSpacer size="s" />
           </React.Fragment>
         ))}

@@ -27,7 +27,7 @@ const MIN_PROFILES_SIZE = 0;
 
 interface UserProfileOptions {
   securityPluginSetup: SecurityPluginSetup;
-  securityPluginStart: SecurityPluginStart;
+  securityPluginStart: SecurityPluginStart; // TODO: Use core's UserProfileService
   spaces?: SpacesPluginStart;
   licensingPluginStart: LicensingPluginStart;
 }
@@ -58,6 +58,7 @@ export class UserProfileService {
     size?: number;
     owners: string[];
   }) {
+    // TODO: Use core's UserProfileService
     return securityPluginStart.userProfiles.suggest({
       name: searchTerm,
       size,

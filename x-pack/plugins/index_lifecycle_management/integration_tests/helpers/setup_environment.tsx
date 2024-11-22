@@ -17,6 +17,10 @@ import {
   fatalErrorsServiceMock,
   docLinksServiceMock,
   executionContextServiceMock,
+  overlayServiceMock,
+  applicationServiceMock,
+  httpServiceMock,
+  scopedHistoryMock,
 } from '@kbn/core/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { init as initHttp } from '../../public/application/services/http';
@@ -31,8 +35,12 @@ const appContextMock = {
   breadcrumbService,
   license: licensingMock.createLicense({ license: { type: 'enterprise' } }),
   docLinks: docLinksServiceMock.createStartContract(),
-  getUrlForApp: () => {},
+  getUrlForApp: applicationServiceMock.createStartContract().getUrlForApp,
   executionContext: executionContextServiceMock.createSetupContract(),
+  navigateToUrl: applicationServiceMock.createStartContract().navigateToUrl,
+  overlays: overlayServiceMock.createStartContract(),
+  http: httpServiceMock.createSetupContract(),
+  history: scopedHistoryMock.create(),
 };
 
 export const WithAppDependencies =

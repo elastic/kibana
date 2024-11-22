@@ -241,8 +241,8 @@ export class ExecuteReportTask implements ReportingTask {
     eventTracker?.claimJob({ timeSinceCreation });
 
     const resp = await store.setReportClaimed(claimedReport, doc);
-    claimedReport._seq_no = resp._seq_no;
-    claimedReport._primary_term = resp._primary_term;
+    claimedReport._seq_no = resp._seq_no!;
+    claimedReport._primary_term = resp._primary_term!;
     return claimedReport;
   }
 
@@ -366,8 +366,8 @@ export class ExecuteReportTask implements ReportingTask {
     const resp = await store.setReportCompleted(report, doc);
 
     this.logger.info(`Saved ${report.jobtype} job ${docId}`);
-    report._seq_no = resp._seq_no;
-    report._primary_term = resp._primary_term;
+    report._seq_no = resp._seq_no!;
+    report._primary_term = resp._primary_term!;
 
     // event tracking of completed job
     const eventTracker = this.getEventTracker(report);

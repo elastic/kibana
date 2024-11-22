@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import type { BuildFlavor } from '@kbn/config';
 import { AppClient } from './client';
 import type { ConfigType } from '../config';
 import { invariant } from '../../common/utils/invariant';
@@ -15,6 +16,7 @@ interface SetupDependencies {
   config: ConfigType;
   kibanaVersion: string;
   kibanaBranch: string;
+  buildFlavor: BuildFlavor;
 }
 
 export class AppClientFactory {
@@ -22,12 +24,20 @@ export class AppClientFactory {
   private config?: SetupDependencies['config'];
   private kibanaVersion?: string;
   private kibanaBranch?: string;
+  private buildFlavor?: BuildFlavor;
 
-  public setup({ getSpaceId, config, kibanaBranch, kibanaVersion }: SetupDependencies) {
+  public setup({
+    getSpaceId,
+    config,
+    kibanaBranch,
+    kibanaVersion,
+    buildFlavor,
+  }: SetupDependencies) {
     this.getSpaceId = getSpaceId;
     this.config = config;
     this.kibanaVersion = kibanaVersion;
     this.kibanaBranch = kibanaBranch;
+    this.buildFlavor = buildFlavor;
   }
 
   public create(request: KibanaRequest): AppClient {
@@ -43,8 +53,18 @@ export class AppClientFactory {
       this.kibanaBranch != null,
       'Cannot create AppClient as kibanaBranch is not present. Did you forget to call setup()?'
     );
+    invariant(
+      this.buildFlavor != null,
+      'Cannot create AppClient as buildFlavor is not present. Did you forget to call setup()?'
+    );
 
     const spaceId = this.getSpaceId?.(request) ?? 'default';
-    return new AppClient(spaceId, this.config, this.kibanaVersion, this.kibanaBranch);
+    return new AppClient(
+      spaceId,
+      this.config,
+      this.kibanaVersion,
+      this.kibanaBranch,
+      this.buildFlavor
+    );
   }
 }

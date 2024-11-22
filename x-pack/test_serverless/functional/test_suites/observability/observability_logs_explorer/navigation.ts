@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await synthtrace.index(generateLogsData({ to }));
-      await PageObjects.svlCommonPage.loginWithRole('viewer');
+      await PageObjects.svlCommonPage.loginAsViewer();
       await navigateToLogsExplorer();
     });
 
@@ -57,7 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
 
         expect(await menuEntries[0].getVisibleText()).to.be('synth');
-        menuEntries[0].click();
+        await menuEntries[0].click();
       });
 
       // Assert selection is loaded correctly

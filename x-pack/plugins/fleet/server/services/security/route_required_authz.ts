@@ -164,7 +164,7 @@ const ROUTE_AUTHZ_REQUIREMENTS = deepFreeze<Record<string, FleetRouteRequiredAut
       },
     },
   },
-  [`get:${EPM_API_ROUTES.INFO_PATTERN_DEPRECATED}`]: {
+  [`get:${EPM_API_ROUTES.INFO_WITHOUT_VERSION_PATTERN}`]: {
     any: {
       integrations: {
         readPackageInfo: true,

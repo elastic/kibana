@@ -149,6 +149,7 @@ export interface ResolverNode {
   parent?: string | number;
   name?: string;
   stats: EventStats;
+  agentId?: string;
 }
 
 /**
@@ -374,6 +375,7 @@ export type AlertEvent = Partial<{
         sid: ECSField<string>;
         integrity_level: ECSField<number>;
         integrity_level_name: ECSField<string>;
+        elevation_level: ECSField<string>;
         // Using ECSField as the outer because the object is expected to be an array
         privileges: ECSField<
           Partial<{
@@ -405,6 +407,8 @@ export type AlertEvent = Partial<{
     Ext: Partial<{
       malware_classification: MalwareClassification;
       temp_file_path: ECSField<string>;
+      quarantine_result: ECSField<boolean>;
+      quarantine_message: ECSField<string>;
       // Using ECSField as the outer because the object is expected to be an array
       code_signature: ECSField<
         Partial<{
@@ -534,6 +538,7 @@ export interface HostMetadataInterface {
     status: EndpointStatus;
     policy: {
       applied: {
+        /** The Endpoint integration policy UUID */
         id: string;
         status: HostPolicyResponseActionStatus;
         name: string;
@@ -701,6 +706,8 @@ export type WinlogEvent = Partial<{
  * Safer version of ResolverEvent. Please use this going forward.
  */
 export type SafeEndpointEvent = Partial<{
+  _id: ECSField<string>;
+  _index: ECSField<string>;
   '@timestamp': ECSField<number>;
   agent: Partial<{
     id: ECSField<string>;
@@ -811,6 +818,8 @@ export type SafeEndpointEvent = Partial<{
 }>;
 
 export interface SafeLegacyEndpointEvent {
+  _id: ECSField<string>;
+  _index: ECSField<string>;
   '@timestamp'?: ECSField<number>;
   /**
    * 'legacy' events must have an `endgame` key.
@@ -864,6 +873,11 @@ export interface ResolverSchema {
    * parent represents the field that is the edge between two nodes.
    */
   parent: string;
+
+  /**
+   * agent id is required for endpoint because entity_id might not include agent.id soon
+   */
+  agentId?: string;
 }
 
 /**
@@ -883,6 +897,11 @@ export type ResolverEntityIndex = Array<{
    * Unique ID value for the requested document using the `_id` field passed to the /entity route
    */
   id: string;
+
+  /**
+   * Agent id is required for endpoint because entity_id might not include agent.id soon
+   */
+  agentId?: string;
 }>;
 
 /**
@@ -949,6 +968,7 @@ export interface PolicyConfig {
     cluster_uuid: string;
     cluster_name: string;
     serverless: boolean;
+    billable?: boolean;
     heartbeatinterval?: number;
   };
   global_manifest_version: 'latest' | string;
@@ -1213,6 +1233,9 @@ export interface HostPolicyResponseAppliedAction {
 export type HostPolicyResponseConfiguration =
   HostPolicyResponse['Endpoint']['policy']['applied']['response']['configurations'];
 
+export type HostPolicyResponseArtifacts =
+  HostPolicyResponse['Endpoint']['policy']['applied']['artifacts'];
+
 interface HostPolicyResponseConfigurationStatus {
   status: HostPolicyResponseActionStatus;
   concerned_actions: HostPolicyActionName[];
@@ -1221,7 +1244,7 @@ interface HostPolicyResponseConfigurationStatus {
 /**
  * Host Policy Response Applied Artifact
  */
-interface HostPolicyResponseAppliedArtifact {
+export interface HostPolicyResponseAppliedArtifact {
   name: string;
   sha256: string;
 }
@@ -1307,17 +1330,6 @@ export interface HostPolicyResponse {
  */
 export interface GetHostPolicyResponse {
   policy_response: HostPolicyResponse;
-}
-
-/**
- * REST API response for retrieving agent summary
- */
-export interface GetAgentSummaryResponse {
-  summary_response: {
-    package: string;
-    policy_id?: string;
-    versions_count: { [key: string]: number };
-  };
 }
 
 /**

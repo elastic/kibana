@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { CoreSetup, Plugin } from '@kbn/core/public';
-import ReactDOM from 'react-dom';
 import React from 'react';
-import { debounce, filter, first } from 'rxjs';
-import { timer } from 'rxjs';
-import { SecurityPluginStart } from '@kbn/security-plugin/public';
+import ReactDOM from 'react-dom';
+import { debounce, filter, first, timer } from 'rxjs';
+
+import type { CoreSetup, Plugin } from '@kbn/core/public';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 
 export interface PluginStartDependencies {
   security: SecurityPluginStart;

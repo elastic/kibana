@@ -10,9 +10,8 @@ import type { Readable } from 'stream';
 import { v4 as uuidv4 } from 'uuid';
 import { createPromiseFromStreams } from '@kbn/utils';
 
-import { validate } from '@kbn/securitysolution-io-ts-utils';
-import type { ImportTimelineResultSchema } from '../../../../../../common/api/timeline';
-import { importTimelineResultSchema, TimelineStatus } from '../../../../../../common/api/timeline';
+import { stringifyZodError } from '@kbn/zod-helpers';
+import { ImportTimelineResult, TimelineStatusEnum } from '../../../../../../common/api/timeline';
 
 import type { BulkError } from '../../../../detection_engine/routes/utils';
 import { createBulkErrorObject } from '../../../../detection_engine/routes/utils';
@@ -70,9 +69,9 @@ export const setTimeline = (
   return {
     ...parsedTimelineObject,
     status:
-      parsedTimeline.status === TimelineStatus.draft
-        ? TimelineStatus.active
-        : parsedTimeline.status ?? TimelineStatus.active,
+      parsedTimeline.status === TimelineStatusEnum.draft
+        ? TimelineStatusEnum.active
+        : parsedTimeline.status ?? TimelineStatusEnum.active,
     templateTimelineVersion: isTemplateTimeline
       ? parsedTimeline.templateTimelineVersion ?? 1
       : null,
@@ -85,7 +84,7 @@ export const importTimelines = async (
   maxTimelineImportExportSize: number,
   frameworkRequest: FrameworkRequest,
   isImmutable?: boolean
-): Promise<ImportTimelineResultSchema | Error> => {
+): Promise<ImportTimelineResult | Error> => {
   const readStream = createTimelinesStreamFromNdJson(maxTimelineImportExportSize);
 
   const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([file, ...readStream]);
@@ -259,17 +258,17 @@ export const importTimelines = async (
   const timelinesUpdated = importTimelineResponse.filter(
     (resp) => isImportRegular(resp) && resp.action === 'updateViaImport'
   );
-  const importTimelinesRes: ImportTimelineResultSchema = {
+  const importTimelinesRes: ImportTimelineResult = {
     success: errorsResp.length === 0,
     success_count: successes.length,
     errors: errorsResp,
     timelines_installed: timelinesInstalled.length ?? 0,
     timelines_updated: timelinesUpdated.length ?? 0,
   };
-  const [validated, errors] = validate(importTimelinesRes, importTimelineResultSchema);
-  if (errors != null || validated == null) {
-    return new Error(errors || 'Import timeline error');
+  const parseResult = ImportTimelineResult.safeParse(importTimelinesRes);
+  if (parseResult.success && parseResult.data) {
+    return parseResult.data;
   } else {
-    return validated;
+    return new Error(stringifyZodError(parseResult.error) || 'Import timeline error');
   }
 };

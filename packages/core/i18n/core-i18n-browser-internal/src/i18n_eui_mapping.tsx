@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -85,6 +86,9 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiBasicTable.noItemsMessage': i18n.translate('core.euiBasicTable.noItemsMessage', {
       defaultMessage: 'No items found',
     }),
+    'euiBasicTable.deselectRows': i18n.translate('core.euiBasicTable.deselectRows', {
+      defaultMessage: 'Deselect rows',
+    }),
     'euiBottomBar.customScreenReaderAnnouncement': ({ landmarkHeading }: EuiValues) =>
       i18n.translate('core.euiBottomBar.customScreenReaderAnnouncement', {
         defaultMessage:
@@ -159,12 +163,18 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         description: 'ARIA label for a button that enters fullscreen view',
       }
     ),
-    'euiCollapsedItemActions.allActions': i18n.translate(
-      'core.euiCollapsedItemActions.allActions',
+    'euiCollapsedItemActions.allActions': ({ index }: EuiValues) =>
+      i18n.translate('core.euiCollapsedItemActions.allActions', {
+        defaultMessage: 'All actions, row {index}',
+        values: { index },
+        description:
+          'ARIA label for a button that is rendered on multiple table rows, that expands an actions menu',
+      }),
+    'euiCollapsedItemActions.allActionsTooltip': i18n.translate(
+      'core.euiCollapsedItemActions.allActionsTooltip',
       {
         defaultMessage: 'All actions',
-        description:
-          'ARIA label and tooltip content describing a button that expands an actions menu',
+        description: 'Tooltip content describing a button that expands an actions menu',
       }
     ),
     'euiCollapsedItemActions.allActionsDisabled': i18n.translate(
@@ -245,6 +255,11 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiColumnActions.sort': ({ schemaLabel }: EuiValues) =>
       i18n.translate('core.euiColumnActions.sort', {
         defaultMessage: 'Sort {schemaLabel}',
+        values: { schemaLabel },
+      }),
+    'euiColumnActions.unsort': ({ schemaLabel }: EuiValues) =>
+      i18n.translate('core.euiColumnActions.unsort', {
+        defaultMessage: 'Unsort {schemaLabel}',
         values: { schemaLabel },
       }),
     'euiColumnActions.moveLeft': i18n.translate('core.euiColumnActions.moveLeft', {
@@ -525,10 +540,10 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         values: { page, pageCount },
         description: 'Screen reader text to describe the size of the data grid',
       }),
-    'euiDataGridCell.position': ({ columnId, row, col }: EuiValues) =>
+    'euiDataGridCell.position': ({ columnName, columnIndex, rowIndex }: EuiValues) =>
       i18n.translate('core.euiDataGridCell.position', {
-        defaultMessage: '{columnId}, column {col}, row {row}',
-        values: { columnId, row, col },
+        defaultMessage: '{columnName}, column {columnIndex}, row {rowIndex}',
+        values: { columnName, columnIndex, rowIndex },
       }),
     'euiDataGridCell.expansionEnterPrompt': i18n.translate(
       'core.euiDataGridCell.expansionEnterPrompt',
@@ -538,16 +553,25 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       'core.euiDataGridCell.focusTrapEnterPrompt',
       { defaultMessage: "Press the Enter key to interact with this cell's contents." }
     ),
+    'euiDataGridCell.focusTrapExitPrompt': i18n.translate(
+      'core.euiDataGridCell.focusTrapExitPrompt',
+      { defaultMessage: 'Exited cell content.' }
+    ),
     'euiDataGridCellActions.expandButtonTitle': i18n.translate(
       'core.euiDataGridCellActions.expandButtonTitle',
       {
         defaultMessage: 'Click or hit enter to interact with cell content',
       }
     ),
-    'euiDataGridHeaderCell.headerActions': i18n.translate(
-      'core.euiDataGridHeaderCell.headerActions',
+    'euiDataGridHeaderCell.actionsButtonAriaLabel': ({ title }: EuiValues) =>
+      i18n.translate('core.euiDataGridHeaderCell.actionsButtonAriaLabel', {
+        defaultMessage: '{title}. Click to view column header actions.',
+        values: { title },
+      }),
+    'euiDataGridHeaderCell.actionsEnterKeyInstructions': i18n.translate(
+      'core.euiDataGridHeaderCell.actionsEnterKeyInstructions',
       {
-        defaultMessage: 'Click to view column header actions',
+        defaultMessage: "Press the Enter key to view this column's actions",
       }
     ),
     'euiDataGridHeaderCell.sortedByAscendingSingle': i18n.translate(
@@ -700,19 +724,16 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiDisplaySelector.labelExpanded': i18n.translate('core.euiDisplaySelector.labelExpanded', {
       defaultMessage: 'Expanded',
     }),
-    'euiDisplaySelector.labelSingle': i18n.translate('core.euiDisplaySelector.labelSingle', {
-      defaultMessage: 'Single',
-    }),
     'euiDisplaySelector.labelAuto': i18n.translate('core.euiDisplaySelector.labelAuto', {
-      defaultMessage: 'Auto fit',
+      defaultMessage: 'Auto',
     }),
-    'euiDisplaySelector.labelCustom': i18n.translate('core.euiDisplaySelector.labelCustom', {
-      defaultMessage: 'Custom',
+    'euiDisplaySelector.labelStatic': i18n.translate('core.euiDisplaySelector.labelStatic', {
+      defaultMessage: 'Static',
+    }),
+    'euiDisplaySelector.labelMax': i18n.translate('core.euiDisplaySelector.labelMax', {
+      defaultMessage: 'Max',
     }),
     'euiDisplaySelector.rowHeightLabel': i18n.translate('core.euiDisplaySelector.rowHeightLabel', {
-      defaultMessage: 'Row height',
-    }),
-    'euiDisplaySelector.lineCountLabel': i18n.translate('core.euiDisplaySelector.lineCountLabel', {
       defaultMessage: 'Lines per row',
     }),
     'euiFieldPassword.showPassword': i18n.translate('core.euiFieldPassword.showPassword', {
@@ -722,9 +743,16 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiFieldPassword.maskPassword': i18n.translate('core.euiFieldPassword.maskPassword', {
       defaultMessage: 'Mask password',
     }),
-    'euiFilePicker.clearSelectedFiles': i18n.translate('core.euiFilePicker.clearSelectedFiles', {
-      defaultMessage: 'Clear selected files',
-    }),
+    'euiFieldSearch.clearSearchButtonLabel': i18n.translate(
+      'core.euiFieldSearch.clearSearchButtonLabel',
+      { defaultMessage: 'Clear search input' }
+    ),
+    'euiFilePicker.removeSelectedAriaLabel': i18n.translate(
+      'core.euiFilePicker.removeSelectedAriaLabel',
+      {
+        defaultMessage: 'Remove selected files',
+      }
+    ),
     'euiFilePicker.filesSelected': ({ fileCount }: EuiValues) =>
       i18n.translate('core.euiFilePicker.filesSelected', {
         defaultMessage: '{fileCount} files selected',
@@ -829,13 +857,16 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       'core.euiInlineEditForm.saveButtonAriaLabel',
       { defaultMessage: 'Save edit' }
     ),
-    'euiExternalLinkIcon.ariaLabel': i18n.translate('core.euiExternalLinkIcon.ariaLabel', {
-      defaultMessage: 'External link',
-    }),
+    'euiExternalLinkIcon.externalTarget.screenReaderOnlyText': i18n.translate(
+      'core.euiExternalLinkIcon.externalTarget.screenReaderOnlyText',
+      {
+        defaultMessage: '(external)',
+      }
+    ),
     'euiExternalLinkIcon.newTarget.screenReaderOnlyText': i18n.translate(
       'core.euiExternalLinkIcon.newTarget.screenReaderOnlyText',
       {
-        defaultMessage: '(opens in a new tab or window)',
+        defaultMessage: '(external, opens in a new tab or window)',
       }
     ),
     'euiLoadingStrings.ariaLabel': i18n.translate('core.euiLoadingStrings.ariaLabel', {
@@ -1306,9 +1337,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Currently set to {timeTense} {timeValue} {timeUnit}.',
         values: { timeTense, timeValue, timeUnit },
       }),
-    'euiQuickSelect.legendText': i18n.translate('core.euiQuickSelect.legendText', {
-      defaultMessage: 'Quick select a time range',
-    }),
     'euiQuickSelect.nextLabel': i18n.translate('core.euiQuickSelect.nextLabel', {
       defaultMessage: 'Next time window',
     }),
@@ -1333,8 +1361,20 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiRecentlyUsed.legend': i18n.translate('core.euiRecentlyUsed.legend', {
       defaultMessage: 'Recently used date ranges',
     }),
-    'euiRefreshInterval.legend': i18n.translate('core.euiRefreshInterval.legend', {
+    'euiRefreshInterval.toggleLabel': i18n.translate('core.euiRefreshInterval.toggleLabel', {
       defaultMessage: 'Refresh every',
+    }),
+    'euiRefreshInterval.toggleAriaLabel': i18n.translate(
+      'core.euiRefreshInterval.toggleAriaLabel',
+      {
+        defaultMessage: 'Toggle refresh',
+      }
+    ),
+    'euiRefreshInterval.valueAriaLabel': i18n.translate('core.euiRefreshInterval.valueAriaLabel', {
+      defaultMessage: 'Refresh interval value',
+    }),
+    'euiRefreshInterval.unitsAriaLabel': i18n.translate('core.euiRefreshInterval.unitsAriaLabel', {
+      defaultMessage: 'Refresh interval units',
     }),
     'euiRefreshInterval.fullDescriptionOff': ({ optionValue, optionText }: EuiValues) =>
       i18n.translate('core.euiRefreshInterval.fullDescriptionOff', {

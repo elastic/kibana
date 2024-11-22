@@ -51,7 +51,15 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
   const euiTheme = useEuiTheme();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
 
-  const allSignificantItems = useAppSelector((s) => s.logRateAnalysisResults.significantItems);
+  const allItems = useAppSelector((s) => s.logRateAnalysisResults.significantItems);
+
+  const allSignificantItems = useMemo(() => {
+    return allItems.map((item) => ({
+      ...item,
+      logRateChangeSort:
+        item.bg_count > 0 ? item.doc_count / item.bg_count : Number.POSITIVE_INFINITY,
+    }));
+  }, [allItems]);
 
   const significantItems = useMemo(() => {
     if (!groupFilter) {
@@ -75,17 +83,14 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
   }, [allSignificantItems, groupFilter]);
 
   const zeroDocsFallback = useAppSelector((s) => s.logRateAnalysisResults.zeroDocsFallback);
-  const pinnedGroup = useAppSelector((s) => s.logRateAnalysisTableRow.pinnedGroup);
-  const selectedGroup = useAppSelector((s) => s.logRateAnalysisTableRow.selectedGroup);
-  const pinnedSignificantItem = useAppSelector(
-    (s) => s.logRateAnalysisTableRow.pinnedSignificantItem
-  );
+  const pinnedGroup = useAppSelector((s) => s.logRateAnalysisTable.pinnedGroup);
+  const selectedGroup = useAppSelector((s) => s.logRateAnalysisTable.selectedGroup);
+  const pinnedSignificantItem = useAppSelector((s) => s.logRateAnalysisTable.pinnedSignificantItem);
   const selectedSignificantItem = useAppSelector(
-    (s) => s.logRateAnalysisTableRow.selectedSignificantItem
+    (s) => s.logRateAnalysisTable.selectedSignificantItem
   );
 
   const dispatch = useAppDispatch();
-
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [sortField, setSortField] = useState<keyof SignificantItem>(
@@ -104,7 +109,7 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
     groupFilter !== undefined
   );
 
-  const onChange = useCallback((tableSettings) => {
+  const onChange = useCallback((tableSettings: any) => {
     if (tableSettings.page) {
       const { index, size } = tableSettings.page;
       setPageIndex(index);
@@ -135,8 +140,8 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
     ];
     const sortDirections = [sortDirection];
 
-    // Only if the table is sorted by p-value, add a secondary sort by doc count.
-    if (sortField === 'pValue') {
+    // If the table is sorted by p-value or log rate change, add a secondary sort by doc count.
+    if (sortField === 'pValue' || sortField === 'logRateChangeSort') {
       sortIteratees.push((item: SignificantItem) => item.doc_count);
       sortDirections.push(sortDirection);
     }
@@ -242,12 +247,12 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
     <EuiBasicTable
       data-test-subj="aiopsLogRateAnalysisResultsTable"
       compressed
-      columns={columns}
       items={pageOfItems}
-      onChange={onChange}
+      columns={columns}
       pagination={pagination.totalItemCount > pagination.pageSize ? pagination : undefined}
-      loading={false}
       sorting={sorting as EuiTableSortingType<SignificantItem>}
+      loading={false}
+      onChange={onChange}
       rowProps={(significantItem) => {
         return {
           'data-test-subj': `aiopsLogRateAnalysisResultsTableRow row-${significantItem.fieldName}-${significantItem.fieldValue}`,

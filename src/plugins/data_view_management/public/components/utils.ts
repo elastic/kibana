@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -14,18 +15,12 @@ import {
   DataViewType,
 } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { ROLLUP_DEPRECATION_BADGE_LABEL } from '@kbn/rollup';
 
 const defaultIndexPatternListName = i18n.translate(
   'indexPatternManagement.editIndexPattern.list.defaultIndexPatternListName',
   {
     defaultMessage: 'Default',
-  }
-);
-
-const rollupIndexPatternListName = i18n.translate(
-  'indexPatternManagement.editIndexPattern.list.rollupIndexPatternListName',
-  {
-    defaultMessage: 'Rollup',
   }
 );
 
@@ -85,7 +80,7 @@ export const getTags = (
   if (isRollup(indexPattern.type) && rollupsEnabled) {
     tags.push({
       key: DataViewType.ROLLUP,
-      name: rollupIndexPatternListName,
+      name: ROLLUP_DEPRECATION_BADGE_LABEL,
       'data-test-subj': 'rollup-tag',
     });
   }

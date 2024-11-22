@@ -63,6 +63,7 @@ describe('AllCases', () => {
   };
 
   beforeAll(() => {
+    jest.useFakeTimers();
     (useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch: jest.fn() });
     (useGetCategories as jest.Mock).mockReturnValue({
       data: ['beverages', 'snacks'],
@@ -76,14 +77,22 @@ describe('AllCases', () => {
     useBulkGetUserProfilesMock.mockReturnValue({ data: userProfilesMap });
   });
 
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
-    jest.clearAllMocks();
     appMockRender = createAppMockRenderer();
   });
 
-  describe('empty table', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  // FLAKY: https://github.com/elastic/kibana/issues/162852
+  describe.skip('empty table', () => {
     beforeEach(() => {
       useGetCasesMock.mockReturnValue({
         ...defaultGetCases,

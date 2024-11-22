@@ -22,6 +22,7 @@ import {
   tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
+import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useLicense } from '../../../common/hooks/use_license';
 import { VIEW_SELECTION } from '../../../../common/constants';
@@ -48,8 +49,13 @@ import type { State } from '../../../common/store';
 import * as i18n from './translations';
 import { eventRenderedViewColumns } from '../../configurations/security_solution_detections/columns';
 import { getAlertsDefaultModel } from './default_config';
+import { useFetchNotes } from '../../../notes/hooks/use_fetch_notes';
 
 const { updateIsLoading, updateTotalCount } = dataTableActions;
+
+const DEFAULT_DATA_GRID_HEIGHT = 600;
+
+const ALERT_TABLE_FEATURE_ID: AlertsTableStateProps['featureIds'] = ['siem'];
 
 // Highlight rows with building block alerts
 const shouldHighlightRow = (alert: Alert) => !!alert[ALERT_BUILDING_BLOCK_TYPE];
@@ -123,11 +129,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     enableIpDetailsFlyout: true,
     onRuleChange,
   });
-  const {
-    browserFields,
-    indexPattern: indexPatterns,
-    runtimeMappings,
-  } = useSourcererDataView(sourcererScope);
+  const { browserFields, sourcererDataView } = useSourcererDataView(sourcererScope);
   const license = useLicense();
 
   const getGlobalFiltersQuerySelector = useMemo(
@@ -156,15 +158,16 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       sessionViewConfig,
       viewMode: tableView = eventsDefaultModel.viewMode,
       columns,
+      totalCount: count,
     } = getAlertsDefaultModel(license),
   } = useShallowEqualSelector((state: State) => eventsViewerSelector(state, tableId));
 
   const combinedQuery = useMemo(() => {
-    if (browserFields != null && indexPatterns != null) {
+    if (browserFields != null && sourcererDataView) {
       return combineQueries({
         config: getEsQueryConfig(uiSettings),
         dataProviders: [],
-        indexPattern: indexPatterns,
+        indexPattern: sourcererDataView,
         browserFields,
         filters: [...allFilters],
         kqlQuery: globalQuery,
@@ -172,7 +175,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       });
     }
     return null;
-  }, [browserFields, globalQuery, indexPatterns, uiSettings, allFilters]);
+  }, [browserFields, globalQuery, sourcererDataView, uiSettings, allFilters]);
 
   useInvalidFilterQuery({
     id: tableId,
@@ -227,7 +230,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     [alertColumns, isEventRenderedView]
   );
 
-  const onAlertTableUpdate: AlertsTableStateProps['onUpdate'] = useCallback(
+  const onAlertTableUpdate = useCallback<NonNullable<AlertsTableStateProps['onUpdate']>>(
     ({ isLoading: isAlertTableLoading, totalCount, refresh }) => {
       dispatch(
         updateIsLoading({
@@ -265,13 +268,22 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     };
   }, []);
 
+  const { onLoad } = useFetchNotes();
+
+  const toolbarVisibility = useMemo(() => {
+    return {
+      showColumnSelector: !isEventRenderedView,
+      showSortSelector: !isEventRenderedView,
+    };
+  }, [isEventRenderedView]);
+
   const alertStateProps: AlertsTableStateProps = useMemo(
     () => ({
       alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
       configurationId: configId,
-      // stores saperate configuration based on the view of the table
+      // stores separate configuration based on the view of the table
       id: `detection-engine-alert-table-${configId}-${tableView}`,
-      featureIds: ['siem'],
+      featureIds: ALERT_TABLE_FEATURE_ID,
       query: finalBoolQuery,
       gridStyle,
       shouldHighlightRow,
@@ -280,12 +292,14 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       browserFields: finalBrowserFields,
       onUpdate: onAlertTableUpdate,
       cellContext,
-      runtimeMappings,
-      toolbarVisibility: {
-        showColumnSelector: !isEventRenderedView,
-        showSortSelector: !isEventRenderedView,
-      },
-      dynamicRowHeight: isEventRenderedView,
+      onLoaded: onLoad,
+      toolbarVisibility,
+      // if records are too less, we don't want table to be of fixed height.
+      // it should shrink to the content height.
+      // Height setting enables/disables virtualization depending on fixed/undefined height values respectively.
+      height: count >= 20 ? `${DEFAULT_DATA_GRID_HEIGHT}px` : undefined,
+      initialPageSize: 50,
+      runtimeMappings: sourcererDataView.runtimeFieldMap as RunTimeMappings,
     }),
     [
       triggersActionsUi.alertsTableConfigurationRegistry,
@@ -297,9 +311,11 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       finalColumns,
       finalBrowserFields,
       onAlertTableUpdate,
-      runtimeMappings,
-      isEventRenderedView,
       cellContext,
+      onLoad,
+      toolbarVisibility,
+      count,
+      sourcererDataView.runtimeFieldMap,
     ]
   );
 
@@ -326,8 +342,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     scopeId: tableId,
   });
 
-  const { DetailsPanel, SessionView } = useSessionView({
-    entityType: 'events',
+  const { SessionView } = useSessionView({
     scopeId: tableId,
   });
 
@@ -351,7 +366,6 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
           <EuiDataGridContainer hideLastPage={false}>{AlertTable}</EuiDataGridContainer>
         </StatefulEventContext.Provider>
       </FullWidthFlexGroupTable>
-      {DetailsPanel}
     </div>
   );
 };

@@ -21,10 +21,8 @@ import {
 import { App } from './app';
 import { BreadcrumbService } from './services/breadcrumbs';
 
-type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
-
 export const renderApp = (
-  startServices: StartServices,
+  startServices: CoreStart,
   element: Element,
   history: ScopedHistory,
   application: ApplicationStart,
@@ -34,7 +32,9 @@ export const renderApp = (
   executionContext: ExecutionContextStart,
   cloud?: CloudSetup
 ): UnmountCallback => {
-  const { getUrlForApp } = application;
+  const { navigateToUrl, getUrlForApp, capabilities } = application;
+  const { overlays, http } = startServices;
+
   render(
     <KibanaRenderContextProvider {...startServices}>
       <div className={APP_WRAPPER_CLASS}>
@@ -51,6 +51,11 @@ export const renderApp = (
               getUrlForApp,
               docLinks,
               executionContext,
+              navigateToUrl,
+              overlays,
+              http,
+              history,
+              capabilities,
             }}
           >
             <App history={history} />

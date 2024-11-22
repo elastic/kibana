@@ -6,7 +6,6 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
-import { getSentinelOneAgentStatus } from '../../services/agent/agent_status';
 import { errorHandler } from '../error_handler';
 import type { EndpointAgentStatusRequestQueryParams } from '../../../../common/api/endpoint/agent/get_agent_status_route';
 import { EndpointAgentStatusRequestSchema } from '../../../../common/api/endpoint/agent/get_agent_status_route';
@@ -28,7 +27,12 @@ export const registerAgentStatusRoute = (
     .get({
       access: 'internal',
       path: AGENT_STATUS_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -59,6 +63,10 @@ export const getAgentStatusRouteHandler = (
     const { agentType = 'endpoint', agentIds: _agentIds } = request.query;
     const agentIds = Array.isArray(_agentIds) ? _agentIds : [_agentIds];
 
+    logger.debug(
+      `Retrieving status for: agentType [${agentType}], agentIds: [${agentIds.join(', ')}]`
+    );
+
     // Note: because our API schemas are defined as module static variables (as opposed to a
     //        `getter` function), we need to include this additional validation here, since
     //        `agent_type` is included in the schema independent of the feature flag
@@ -75,38 +83,30 @@ export const getAgentStatusRouteHandler = (
       );
     }
 
-    const esClient = (await context.core).elasticsearch.client.asInternalUser;
-    const soClient = (await context.core).savedObjects.client;
-    const agentStatusClient = getAgentStatusClient(agentType, {
-      esClient,
-      soClient,
-      endpointService: endpointContext.service,
-      connectorActionsClient:
-        agentType === 'crowdstrike' ? (await context.actions).getActionsClient() : undefined,
-    });
-
-    // 8.15: use the new `agentStatusClientEnabled` FF enabled
-    const data = endpointContext.experimentalFeatures.agentStatusClientEnabled
-      ? await agentStatusClient.getAgentStatuses(agentIds)
-      : agentType === 'sentinel_one'
-      ? await getSentinelOneAgentStatus({
-          agentType,
-          agentIds,
-          logger,
-          connectorActionsClient: (await context.actions).getActionsClient(),
-        })
-      : [];
-
-    logger.debug(
-      `Retrieving status for: agentType [${agentType}], agentIds: [${agentIds.join(', ')}]`
-    );
-
     try {
-      return response.ok({
-        body: {
-          data,
-        },
+      const [securitySolutionPlugin, corePlugin, actionsPlugin] = await Promise.all([
+        context.securitySolution,
+        context.core,
+        context.actions,
+      ]);
+      const esClient = corePlugin.elasticsearch.client.asInternalUser;
+      const spaceId = endpointContext.service.experimentalFeatures
+        .endpointManagementSpaceAwarenessEnabled
+        ? securitySolutionPlugin.getSpaceId()
+        : undefined;
+      const soClient = endpointContext.service.savedObjects.createInternalScopedSoClient({
+        spaceId,
       });
+      const connectorActionsClient = actionsPlugin.getActionsClient();
+      const agentStatusClient = getAgentStatusClient(agentType, {
+        esClient,
+        soClient,
+        connectorActionsClient,
+        endpointService: endpointContext.service,
+      });
+      const data = await agentStatusClient.getAgentStatuses(agentIds);
+
+      return response.ok({ body: { data } });
     } catch (e) {
       return errorHandler(logger, response, e);
     }

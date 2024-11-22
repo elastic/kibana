@@ -6,8 +6,6 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_TOOLTIP } from '../../common/translations';
 import { useLicense } from '../../common/hooks/use_license';
 import type { MaybeImmutable } from '../../../common/endpoint/types';
 import type { EndpointCapabilities } from '../../../common/endpoint/service/response_actions/constants';
@@ -18,13 +16,11 @@ import { useUserPrivileges } from '../../common/components/user_privileges';
 import {
   ActionLogButton,
   getEndpointConsoleCommands,
-  HeaderEndpointInfo,
   OfflineCallout,
 } from '../components/endpoint_responder';
 import { useConsoleManager } from '../components/console';
 import { MissingEncryptionKeyCallout } from '../components/missing_encryption_key_callout';
 import { RESPONDER_PAGE_TITLE } from './translations';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 type ShowResponseActionsConsole = (props: ResponderInfoProps) => void;
 
@@ -48,20 +44,10 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
   const consoleManager = useConsoleManager();
   const endpointPrivileges = useUserPrivileges().endpointPrivileges;
   const isEnterpriseLicense = useLicense().isEnterprise();
-  const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
-    'responseActionsSentinelOneV1Enabled'
-  );
-  const responseActionsCrowdstrikeManualHostIsolationEnabled = useIsExperimentalFeatureEnabled(
-    'responseActionsCrowdstrikeManualHostIsolationEnabled'
-  );
-  const agentStatusClientEnabled = useIsExperimentalFeatureEnabled('agentStatusClientEnabled');
 
   return useCallback(
     (props: ResponderInfoProps) => {
       const { agentId, agentType, capabilities, hostName, platform } = props;
-      const isExternalEdr =
-        (isSentinelOneV1Enabled && agentType === 'sentinel_one') ||
-        (responseActionsCrowdstrikeManualHostIsolationEnabled && agentType === 'crowdstrike');
 
       // If no authz, just exit and log something to the console
       if (agentType === 'endpoint' && !endpointPrivileges.canAccessResponseConsole) {
@@ -89,22 +75,14 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
           'data-test-subj': `${agentType}ResponseActionsConsole`,
           storagePrefix: 'xpack.securitySolution.Responder',
           TitleComponent: () => {
-            if (agentStatusClientEnabled || agentType !== 'endpoint') {
-              return (
-                <AgentInfo
-                  agentId={agentId}
-                  agentType={agentType}
-                  hostName={hostName}
-                  platform={platform}
-                />
-              );
-            }
-            // TODO: 8.15 remove this if block when agentStatusClientEnabled is enabled/removed
-            if (agentType === 'endpoint') {
-              return <HeaderEndpointInfo endpointId={agentId} />;
-            }
-
-            return null;
+            return (
+              <AgentInfo
+                agentId={agentId}
+                agentType={agentType}
+                hostName={hostName}
+                platform={platform}
+              />
+            );
           },
         };
 
@@ -119,19 +97,6 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
             },
             consoleProps,
             PageTitleComponent: () => {
-              if (isExternalEdr) {
-                return (
-                  <EuiFlexGroup>
-                    <EuiFlexItem>{RESPONDER_PAGE_TITLE}</EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiBetaBadge
-                        label={TECHNICAL_PREVIEW}
-                        tooltipContent={TECHNICAL_PREVIEW_TOOLTIP}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                );
-              }
               return <>{RESPONDER_PAGE_TITLE}</>;
             },
             ActionComponents: endpointPrivileges.canReadActionsLogManagement
@@ -151,13 +116,6 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
           .show();
       }
     },
-    [
-      isSentinelOneV1Enabled,
-      responseActionsCrowdstrikeManualHostIsolationEnabled,
-      endpointPrivileges,
-      isEnterpriseLicense,
-      consoleManager,
-      agentStatusClientEnabled,
-    ]
+    [endpointPrivileges, isEnterpriseLicense, consoleManager]
   );
 };

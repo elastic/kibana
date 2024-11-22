@@ -18,6 +18,7 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BASE_SECURITY_CONVERSATIONS } from '../../../../assistant/content/conversations';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -28,11 +29,13 @@ const MESSAGE = 'This rule is attempting to query data but...';
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const mockGetComments = jest.fn(() => []);
 const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
+const mockNavigationToApp = jest.fn();
 const mockAssistantAvailability: AssistantAvailability = {
   hasAssistantPrivilege: false,
   hasConnectorsAllPrivilege: true,
   hasConnectorsReadPrivilege: true,
   hasUpdateAIAssistantAnonymization: true,
+  hasManageGlobalKnowledgeBase: true,
   isAssistantEnabled: true,
 };
 const queryClient = new QueryClient({
@@ -61,7 +64,10 @@ const ContextWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
       }}
       getComments={mockGetComments}
       http={mockHttp}
+      navigateToApp={mockNavigationToApp}
       baseConversations={BASE_SECURITY_CONVERSATIONS}
+      currentAppId={'security'}
+      userProfileService={jest.fn() as unknown as UserProfileService}
     >
       {children}
     </AssistantProvider>

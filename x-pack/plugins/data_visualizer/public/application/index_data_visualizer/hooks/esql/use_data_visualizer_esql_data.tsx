@@ -20,6 +20,7 @@ import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import { buildEsQuery } from '@kbn/es-query';
+import usePrevious from 'react-use/lib/usePrevious';
 import type { FieldVisConfig } from '../../../../../common/types/field_vis_config';
 import type { SupportedFieldType } from '../../../../../common/types/job_field_type';
 import type { ItemIdToExpandedRowMap } from '../../../common/components/stats_table';
@@ -43,6 +44,7 @@ import type {
 } from '../../embeddables/grid_embeddable/types';
 import { getDefaultPageState } from '../../constants/index_data_visualizer_viewer';
 import { DEFAULT_ESQL_LIMIT } from '../../constants/esql_constants';
+import { getReasonIfFieldStatsUnavailableForQuery } from '../../utils/get_reason_fieldstats_unavailable_for_esql_query';
 
 type AnyQuery = Query | AggregateQuery;
 
@@ -51,14 +53,14 @@ const defaultSearchQuery = {
 };
 
 const FALLBACK_ESQL_QUERY: ESQLQuery = { esql: '' };
-const DEFAULT_LIMIT_SIZE = '10000';
+const DEFAULT_LIMIT_SIZE = '5000';
 const defaults = getDefaultPageState();
 
 export const getDefaultESQLDataVisualizerListState = (
   overrides?: Partial<ESQLDataVisualizerIndexBasedAppState>
 ): Required<ESQLDataVisualizerIndexBasedAppState> => ({
   pageIndex: 0,
-  pageSize: 25,
+  pageSize: 10,
   sortField: 'fieldName',
   sortDirection: 'asc',
   visibleFieldTypes: [],
@@ -68,7 +70,7 @@ export const getDefaultESQLDataVisualizerListState = (
   searchQuery: defaultSearchQuery,
   searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
   filters: [],
-  showDistributions: true,
+  showDistributions: false,
   showAllFields: false,
   showEmptyFields: false,
   probability: null,
@@ -82,7 +84,7 @@ export const useESQLDataVisualizerData = (
 ) => {
   const [lastRefresh, setLastRefresh] = useState(0);
   const { services } = useDataVisualizerKibana();
-  const { uiSettings, fieldFormats, executionContext } = services;
+  const { uiSettings, executionContext, data } = services;
 
   const parentExecutionContext = useObservable(executionContext?.context$);
 
@@ -107,17 +109,20 @@ export const useESQLDataVisualizerData = (
     autoRefreshSelector: true,
   });
 
+  const [delayedESQLQuery, setDelayedESQLQuery] = useState<ESQLQuery | undefined>(input?.esqlQuery);
+  const previousQuery = usePrevious(delayedESQLQuery);
+
   const { currentDataView, parentQuery, parentFilters, query, visibleFieldNames, indexPattern } =
     useMemo(() => {
       let q = FALLBACK_ESQL_QUERY;
-
       if (input?.query && isESQLQuery(input?.query)) q = input.query;
+      if (delayedESQLQuery && isESQLQuery(delayedESQLQuery)) q = delayedESQLQuery;
       if (input?.savedSearch && isESQLQuery(input.savedSearch.searchSource.getField('query'))) {
         q = input.savedSearch.searchSource.getField('query') as ESQLQuery;
       }
       return {
         currentDataView: input.dataView,
-        query: q ?? FALLBACK_ESQL_QUERY,
+        query: q,
         // It's possible that in a dashboard setting, we will have additional filters and queries
         parentQuery: input?.query,
         parentFilters: input?.filters,
@@ -131,6 +136,7 @@ export const useESQLDataVisualizerData = (
       input?.filters,
       input?.visibleFieldNames,
       input?.indexPattern,
+      delayedESQLQuery,
     ]);
 
   const restorableDefaults = useMemo(
@@ -155,9 +161,17 @@ export const useESQLDataVisualizerData = (
 
       const tf = timefilter;
 
-      if (!buckets || !tf || (isESQLQuery(query) && query.esql === '')) return;
-      const activeBounds = tf.getActiveBounds();
+      if (!buckets || !tf || query.esql === '') return;
 
+      // Safeguard to not ever run query if not supported
+      if (isESQLQuery(query)) {
+        const unsupportedReasonForQuery = getReasonIfFieldStatsUnavailableForQuery(query);
+        if (unsupportedReasonForQuery) {
+          return;
+        }
+      }
+
+      const activeBounds = tf.getActiveBounds();
       let earliest: number | undefined;
       let latest: number | undefined;
       if (activeBounds !== undefined && currentDataView?.timeFieldName !== undefined) {
@@ -181,6 +195,7 @@ export const useESQLDataVisualizerData = (
         (Array.isArray(parentQuery) ? parentQuery : [parentQuery]) as AnyQuery | AnyQuery[],
         parentFilters ?? []
       );
+      const timeRange = input.timeRange ? input.timeRange : timefilter.getTime();
 
       if (currentDataView?.timeFieldName) {
         if (Array.isArray(filter?.bool?.filter)) {
@@ -188,8 +203,8 @@ export const useESQLDataVisualizerData = (
             range: {
               [currentDataView.timeFieldName]: {
                 format: 'strict_date_optional_time',
-                gte: timefilter.getTime().from,
-                lte: timefilter.getTime().to,
+                gte: timeRange.from,
+                lte: timeRange.to,
               },
             },
           });
@@ -202,8 +217,8 @@ export const useESQLDataVisualizerData = (
                   range: {
                     [currentDataView.timeFieldName]: {
                       format: 'strict_date_optional_time',
-                      gte: timefilter.getTime().from,
-                      lte: timefilter.getTime().to,
+                      gte: timeRange.from,
+                      lte: timeRange.to,
                     },
                   },
                 },
@@ -214,7 +229,23 @@ export const useESQLDataVisualizerData = (
           } as QueryDslQueryContainer;
         }
       }
+
+      // Ensure that we don't query frozen data
+      if (filter.bool === undefined) {
+        filter.bool = Object.create(null);
+      }
+
+      if (filter.bool && filter.bool.must_not === undefined) {
+        filter.bool.must_not = [];
+      }
+
+      if (filter.bool && Array.isArray(filter?.bool?.must_not)) {
+        filter.bool.must_not!.push({
+          term: { _tier: 'data_frozen' },
+        });
+      }
       return {
+        id: input.id,
         earliest,
         latest,
         aggInterval,
@@ -227,18 +258,20 @@ export const useESQLDataVisualizerData = (
         runtimeFieldMap: currentDataView?.getRuntimeMappings(),
         lastRefresh,
         filter,
+        timeRange,
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       _timeBuckets,
       timefilter,
-      currentDataView?.id,
       // eslint-disable-next-line react-hooks/exhaustive-deps
       JSON.stringify({ query, parentQuery, parentFilters }),
-      indexPattern,
+      currentDataView?.timeFieldName,
       lastRefresh,
       limitSize,
+      input.timeRange?.from,
+      input.timeRange?.to,
     ]
   );
 
@@ -314,9 +347,25 @@ export const useESQLDataVisualizerData = (
 
   const visibleFieldTypes =
     dataVisualizerListState.visibleFieldTypes ?? restorableDefaults.visibleFieldTypes;
+  const [expandedRows, setExpandedRows] = useState<string[]>([]);
+
+  const onVisibilityChange = useCallback((visible: boolean, item: FieldVisConfig) => {
+    if (visible) {
+      setExpandedRows((prev) => [...prev, item.fieldName]);
+    } else {
+      setExpandedRows((prev) => prev.filter((fieldName) => fieldName !== item.fieldName));
+    }
+  }, []);
+
+  const hasExpandedRows = useMemo(() => expandedRows.length > 0, [expandedRows]);
 
   useEffect(
     function updateFieldStatFieldsToFetch() {
+      if (dataVisualizerListState?.showDistributions === false && !hasExpandedRows) {
+        setFieldStatFieldsToFetch(undefined);
+        return;
+      }
+
       const { sortField, sortDirection } = dataVisualizerListState;
 
       // Otherwise, sort the list of fields by the initial sort field and sort direction
@@ -358,6 +407,8 @@ export const useESQLDataVisualizerData = (
       dataVisualizerListState.sortDirection,
       nonMetricConfigs,
       metricConfigs,
+      dataVisualizerListState?.showDistributions,
+      hasExpandedRows,
     ]
   );
 
@@ -366,6 +417,7 @@ export const useESQLDataVisualizerData = (
     columns: fieldStatFieldsToFetch,
     filter: fieldStatsRequest?.filter,
     limit: fieldStatsRequest?.limit ?? DEFAULT_ESQL_LIMIT,
+    timeRange: fieldStatsRequest?.timeRange,
   });
 
   useEffect(
@@ -420,7 +472,7 @@ export const useESQLDataVisualizerData = (
           ...field,
           ...fieldData,
           loading: fieldData?.existsInDocs ?? true,
-          fieldFormat: fieldFormats.deserialize({ id: field.secondaryType }),
+          fieldFormat: data.fieldFormats.deserialize({ id: field.secondaryType }),
           aggregatable: true,
           deletable: false,
           type: getFieldType(field) as SupportedFieldType,
@@ -493,7 +545,7 @@ export const useESQLDataVisualizerData = (
           secondaryType: getFieldType(field) as SupportedFieldType,
           loading: fieldData?.existsInDocs ?? true,
           deletable: false,
-          fieldFormat: fieldFormats.deserialize({ id: field.secondaryType }),
+          fieldFormat: data.fieldFormats.deserialize({ id: field.secondaryType }),
         };
 
         // Map the field type from the Kibana index pattern to the field type
@@ -598,13 +650,16 @@ export const useESQLDataVisualizerData = (
               totalDocuments={totalCount}
               typeAccessor="secondaryType"
               timeFieldName={timeFieldName}
+              onAddFilter={input.onAddFilter}
+              onVisibilityChange={onVisibilityChange}
             />
           );
         }
         return map;
       }, {} as ItemIdToExpandedRowMap);
     },
-    [currentDataView, totalCount, query.esql, timeFieldName]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [currentDataView, totalCount, query.esql, timeFieldName, onVisibilityChange]
   );
 
   const combinedProgress = useMemo(
@@ -632,6 +687,14 @@ export const useESQLDataVisualizerData = (
     },
     [cancelFieldStatsRequest, cancelOverallStatsRequest]
   );
+
+  useEffect(() => {
+    if (previousQuery?.esql !== input?.esqlQuery?.esql) {
+      resetData();
+      setDelayedESQLQuery(input?.esqlQuery);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [input?.esqlQuery?.esql, resetData]);
 
   return {
     totalCount,

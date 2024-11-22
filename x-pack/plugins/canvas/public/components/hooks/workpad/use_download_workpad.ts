@@ -8,9 +8,10 @@
 import { useCallback } from 'react';
 import fileSaver from 'file-saver';
 import { i18n } from '@kbn/i18n';
-import { useNotifyService, useWorkpadService } from '../../../services';
+import { useNotifyService } from '../../../services';
 import { CanvasWorkpad } from '../../../../types';
 import type { CanvasRenderedWorkpad } from '../../../../shareable_runtime/types';
+import { getCanvasWorkpadService } from '../../../services/canvas_workpad_service';
 
 const strings = {
   getDownloadFailureErrorMessage: () =>
@@ -28,12 +29,12 @@ const strings = {
 
 export const useDownloadWorkpad = () => {
   const notifyService = useNotifyService();
-  const workpadService = useWorkpadService();
   const download = useDownloadWorkpadBlob();
 
   return useCallback(
     async (workpadId: string) => {
       try {
+        const workpadService = getCanvasWorkpadService();
         const workpad = await workpadService.get(workpadId);
 
         download(workpad, `canvas-workpad-${workpad.name}-${workpad.id}`);
@@ -41,7 +42,7 @@ export const useDownloadWorkpad = () => {
         notifyService.error(err, { title: strings.getDownloadFailureErrorMessage() });
       }
     },
-    [workpadService, notifyService, download]
+    [notifyService, download]
   );
 };
 

@@ -10,13 +10,13 @@ import { screen, fireEvent, waitFor, act } from '@testing-library/react';
 
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
-import type { CustomFieldFormState } from './form';
 import { CustomFieldsForm } from './form';
 import type { CustomFieldConfiguration } from '../../../common/types/domain';
 import { CustomFieldTypes } from '../../../common/types/domain';
 import * as i18n from './translations';
 import userEvent from '@testing-library/user-event';
 import { customFieldsConfigurationMock } from '../../containers/mock';
+import type { FormState } from '../configure_cases/flyout';
 
 describe('CustomFieldsForm ', () => {
   let appMockRender: AppMockRenderer;
@@ -68,9 +68,9 @@ describe('CustomFieldsForm ', () => {
   });
 
   it('serializes the data correctly if required is selected', async () => {
-    let formState: CustomFieldFormState;
+    let formState: FormState<CustomFieldConfiguration>;
 
-    const onChangeState = (state: CustomFieldFormState) => (formState = state);
+    const onChangeState = (state: FormState<CustomFieldConfiguration>) => (formState = state);
 
     appMockRender.render(<CustomFieldsForm onChange={onChangeState} initialValue={null} />);
 
@@ -78,9 +78,11 @@ describe('CustomFieldsForm ', () => {
       expect(formState).not.toBeUndefined();
     });
 
-    userEvent.paste(await screen.findByTestId('custom-field-label-input'), 'Summary');
-    userEvent.click(await screen.findByTestId('text-custom-field-required'));
-    userEvent.paste(await screen.findByTestId('text-custom-field-default-value'), 'Default value');
+    await userEvent.click(await screen.findByTestId('custom-field-label-input'));
+    await userEvent.paste('Summary');
+    await userEvent.click(await screen.findByTestId('text-custom-field-required'));
+    await userEvent.click(await screen.findByTestId('text-custom-field-default-value'));
+    await userEvent.paste('Default value');
 
     await act(async () => {
       const { data } = await formState!.submit();
@@ -96,9 +98,9 @@ describe('CustomFieldsForm ', () => {
   });
 
   it('serializes the data correctly if required is selected and the text default value is not filled', async () => {
-    let formState: CustomFieldFormState;
+    let formState: FormState<CustomFieldConfiguration>;
 
-    const onChangeState = (state: CustomFieldFormState) => (formState = state);
+    const onChangeState = (state: FormState<CustomFieldConfiguration>) => (formState = state);
 
     appMockRender.render(<CustomFieldsForm onChange={onChangeState} initialValue={null} />);
 
@@ -106,8 +108,9 @@ describe('CustomFieldsForm ', () => {
       expect(formState).not.toBeUndefined();
     });
 
-    userEvent.paste(await screen.findByTestId('custom-field-label-input'), 'Summary');
-    userEvent.click(await screen.findByTestId('text-custom-field-required'));
+    await userEvent.click(await screen.findByTestId('custom-field-label-input'));
+    await userEvent.paste('Summary');
+    await userEvent.click(await screen.findByTestId('text-custom-field-required'));
 
     await act(async () => {
       const { data } = await formState!.submit();
@@ -122,9 +125,9 @@ describe('CustomFieldsForm ', () => {
   });
 
   it('serializes the data correctly if required is selected and the text default value is an empty string', async () => {
-    let formState: CustomFieldFormState;
+    let formState: FormState<CustomFieldConfiguration>;
 
-    const onChangeState = (state: CustomFieldFormState) => (formState = state);
+    const onChangeState = (state: FormState<CustomFieldConfiguration>) => (formState = state);
 
     appMockRender.render(<CustomFieldsForm onChange={onChangeState} initialValue={null} />);
 
@@ -132,9 +135,11 @@ describe('CustomFieldsForm ', () => {
       expect(formState).not.toBeUndefined();
     });
 
-    userEvent.paste(await screen.findByTestId('custom-field-label-input'), 'Summary');
-    userEvent.click(await screen.findByTestId('text-custom-field-required'));
-    userEvent.paste(await screen.findByTestId('text-custom-field-default-value'), ' ');
+    await userEvent.click(await screen.findByTestId('custom-field-label-input'));
+    await userEvent.paste('Summary');
+    await userEvent.click(await screen.findByTestId('text-custom-field-required'));
+    await userEvent.click(await screen.findByTestId('text-custom-field-default-value'));
+    await userEvent.paste(' ');
 
     await act(async () => {
       const { data } = await formState!.submit();
@@ -149,9 +154,9 @@ describe('CustomFieldsForm ', () => {
   });
 
   it('serializes the data correctly if the initial default value is null', async () => {
-    let formState: CustomFieldFormState;
+    let formState: FormState<CustomFieldConfiguration>;
 
-    const onChangeState = (state: CustomFieldFormState) => (formState = state);
+    const onChangeState = (state: FormState<CustomFieldConfiguration>) => (formState = state);
 
     const initialValue = {
       required: true,
@@ -176,7 +181,8 @@ describe('CustomFieldsForm ', () => {
       expect(formState).not.toBeUndefined();
     });
 
-    userEvent.paste(await screen.findByTestId('custom-field-label-input'), ' New');
+    await userEvent.click(await screen.findByTestId('custom-field-label-input'));
+    await userEvent.paste(' New');
 
     await act(async () => {
       const { data } = await formState!.submit();
@@ -190,9 +196,9 @@ describe('CustomFieldsForm ', () => {
   });
 
   it('serializes the data correctly if required is not selected', async () => {
-    let formState: CustomFieldFormState;
+    let formState: FormState<CustomFieldConfiguration>;
 
-    const onChangeState = (state: CustomFieldFormState) => (formState = state);
+    const onChangeState = (state: FormState<CustomFieldConfiguration>) => (formState = state);
 
     appMockRender.render(<CustomFieldsForm onChange={onChangeState} initialValue={null} />);
 
@@ -200,7 +206,8 @@ describe('CustomFieldsForm ', () => {
       expect(formState).not.toBeUndefined();
     });
 
-    userEvent.paste(await screen.findByTestId('custom-field-label-input'), 'Summary');
+    await userEvent.click(await screen.findByTestId('custom-field-label-input'));
+    await userEvent.paste('Summary');
 
     await act(async () => {
       const { data } = await formState!.submit();
@@ -215,9 +222,9 @@ describe('CustomFieldsForm ', () => {
   });
 
   it('deserializes the "type: text" custom field data correctly', async () => {
-    let formState: CustomFieldFormState;
+    let formState: FormState<CustomFieldConfiguration>;
 
-    const onChangeState = (state: CustomFieldFormState) => (formState = state);
+    const onChangeState = (state: FormState<CustomFieldConfiguration>) => (formState = state);
 
     appMockRender.render(
       <CustomFieldsForm onChange={onChangeState} initialValue={customFieldsConfigurationMock[0]} />
@@ -247,9 +254,9 @@ describe('CustomFieldsForm ', () => {
   });
 
   it('deserializes the "type: toggle" custom field data correctly', async () => {
-    let formState: CustomFieldFormState;
+    let formState: FormState<CustomFieldConfiguration>;
 
-    const onChangeState = (state: CustomFieldFormState) => (formState = state);
+    const onChangeState = (state: FormState<CustomFieldConfiguration>) => (formState = state);
 
     appMockRender.render(
       <CustomFieldsForm onChange={onChangeState} initialValue={customFieldsConfigurationMock[1]} />

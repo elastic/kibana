@@ -22,6 +22,13 @@ export enum EntityDetailsLeftPanelTab {
   RISK_INPUTS = 'risk_inputs',
   OKTA = 'okta_document',
   ENTRA = 'entra_document',
+  CSP_INSIGHTS = 'csp_insights',
+}
+
+export enum CspInsightLeftPanelSubTab {
+  MISCONFIGURATIONS = 'misconfigurationTabId',
+  VULNERABILITIES = 'vulnerabilitiesTabId',
+  ALERTS = 'alertsTabId',
 }
 
 export interface PanelHeaderProps {
@@ -65,9 +72,7 @@ export const LeftPanelHeader: VFC<PanelHeaderProps> = memo(
           border-block-end: none !important;
         `}
       >
-        <EuiTabs size="l" expand>
-          {renderTabs}
-        </EuiTabs>
+        <EuiTabs size="l">{renderTabs}</EuiTabs>
       </FlyoutHeader>
     );
   }

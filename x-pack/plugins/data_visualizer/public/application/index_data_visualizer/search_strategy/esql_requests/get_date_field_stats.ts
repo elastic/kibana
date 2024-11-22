@@ -7,8 +7,9 @@
 
 import type { UseCancellableSearch } from '@kbn/ml-cancellable-search';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
+import type { TimeRange } from '@kbn/es-query';
 import { ESQL_ASYNC_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
-import { appendToESQLQuery } from '@kbn/esql-utils';
+import { appendToESQLQuery, getStartEndParams } from '@kbn/esql-utils';
 import type { Column } from '../../hooks/esql/use_esql_overall_stats_data';
 import { getSafeESQLName } from '../requests/esql_utils';
 import type { DateFieldStats, FieldStatsError } from '../../../../../common/types/field_stats';
@@ -18,6 +19,7 @@ interface Params {
   columns: Column[];
   esqlBaseQuery: string;
   filter?: QueryDslQueryContainer;
+  timeRange?: TimeRange;
 }
 
 export const getESQLDateFieldStats = async ({
@@ -25,6 +27,7 @@ export const getESQLDateFieldStats = async ({
   columns,
   esqlBaseQuery,
   filter,
+  timeRange,
 }: Params) => {
   const dateFields = columns.map((field) => {
     return {
@@ -36,12 +39,14 @@ export const getESQLDateFieldStats = async ({
   });
 
   if (dateFields.length > 0) {
+    const namedParams = getStartEndParams(esqlBaseQuery, timeRange);
     const dateStatsQuery = ' | STATS ' + dateFields.map(({ query }) => query).join(',');
     const query = appendToESQLQuery(esqlBaseQuery, dateStatsQuery);
     const request = {
       params: {
         query,
         ...(filter ? { filter } : {}),
+        ...(namedParams.length ? { params: namedParams } : {}),
       },
     };
     try {

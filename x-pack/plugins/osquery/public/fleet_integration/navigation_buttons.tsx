@@ -14,39 +14,43 @@ import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kiba
 
 interface NavigationButtonsProps {
   isDisabled?: boolean;
-  agentPolicyId?: string | undefined;
+  agentPolicyIds?: string[];
 }
 
 const NavigationButtonsComponent: React.FC<NavigationButtonsProps> = ({
   isDisabled = false,
-  agentPolicyId,
+  agentPolicyIds,
 }) => {
   const {
     application: { getUrlForApp, navigateToApp },
   } = useKibana().services;
 
+  const agentPolicyIdsQueryParam = useMemo(
+    () => agentPolicyIds?.map((id) => `agentPolicyId=${id}`).join('&'),
+    [agentPolicyIds]
+  );
   const liveQueryHref = useMemo(
     () =>
       getUrlForApp(PLUGIN_ID, {
-        path: agentPolicyId
-          ? `/live_queries/new?agentPolicyId=${agentPolicyId}`
+        path: agentPolicyIds?.length
+          ? `/live_queries/new?${agentPolicyIdsQueryParam}`
           : '/live_queries/new',
       }),
-    [agentPolicyId, getUrlForApp]
+    [agentPolicyIdsQueryParam, agentPolicyIds?.length, getUrlForApp]
   );
 
   const liveQueryClick = useCallback(
-    (event) => {
+    (event: any) => {
       if (!isModifiedEvent(event) && isLeftClickEvent(event)) {
         event.preventDefault();
         navigateToApp(PLUGIN_ID, {
-          path: agentPolicyId
-            ? `/live_queries/new?agentPolicyId=${agentPolicyId}`
+          path: agentPolicyIds?.length
+            ? `/live_queries/new?${agentPolicyIdsQueryParam}`
             : '/live_queries/new',
         });
       }
     },
-    [agentPolicyId, navigateToApp]
+    [agentPolicyIdsQueryParam, agentPolicyIds?.length, navigateToApp]
   );
 
   const packsHref = getUrlForApp(PLUGIN_ID, {
@@ -54,7 +58,7 @@ const NavigationButtonsComponent: React.FC<NavigationButtonsProps> = ({
   });
 
   const packsClick = useCallback(
-    (event) => {
+    (event: any) => {
       if (!isModifiedEvent(event) && isLeftClickEvent(event)) {
         event.preventDefault();
         navigateToApp(PLUGIN_ID, {

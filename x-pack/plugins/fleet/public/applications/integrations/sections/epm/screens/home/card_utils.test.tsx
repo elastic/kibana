@@ -25,7 +25,7 @@ const getHref = (k: string) => k;
 describe('Card utils', () => {
   describe('mapToCard', () => {
     beforeEach(() => {
-      ExperimentalFeaturesService.init({});
+      ExperimentalFeaturesService.init({} as any);
     });
 
     it('should use the installed version if available, without prelease', () => {
@@ -83,6 +83,51 @@ describe('Card utils', () => {
         release: 'preview',
         version: '2.0.0-preview-1',
         isUpdateAvailable: false,
+      });
+    });
+
+    it('should return installStatus if the item is an integration', () => {
+      const cardItem = mapToCard({
+        item: {
+          id: 'test',
+          version: '2.0.0-preview-1',
+          type: 'integration',
+          installationInfo: {
+            version: '1.0.0',
+            install_status: 'install_failed',
+          },
+        },
+        addBasePath,
+        getHref,
+      } as any);
+
+      expect(cardItem).toMatchObject({
+        release: 'ga',
+        version: '1.0.0',
+        isUpdateAvailable: true,
+        installStatus: 'install_failed',
+      });
+    });
+
+    it('should not return installStatus if the item is not an integration', () => {
+      const cardItem = mapToCard({
+        item: {
+          id: 'test',
+          version: '2.0.0-preview-1',
+          type: 'xxx',
+          installationInfo: {
+            version: '1.0.0',
+            install_status: 'install_failed',
+          },
+        },
+        addBasePath,
+        getHref,
+      } as any);
+
+      expect(cardItem).toMatchObject({
+        release: 'ga',
+        version: '1.0.0',
+        isUpdateAvailable: true,
       });
     });
   });

@@ -24,7 +24,7 @@ import { useTimefilterService } from '../../../hooks/use_timefilter_service';
 
 import {
   useContainer,
-  defaultState,
+  DEFAULT_STATE,
   AlertSearchBarStateContainer,
   AlertSearchBarContainerState,
 } from './state_container';
@@ -42,12 +42,13 @@ export const alertSearchBarState = t.partial({
 
 export function useAlertSearchBarStateContainer(
   urlStorageKey: string,
-  { replace }: { replace?: boolean } = {}
+  { replace }: { replace?: boolean } = {},
+  defaultState: AlertSearchBarContainerState = DEFAULT_STATE
 ) {
   const [savedQuery, setSavedQuery] = useState<SavedQuery>();
   const stateContainer = useContainer();
 
-  useUrlStateSyncEffect(stateContainer, urlStorageKey, replace);
+  useUrlStateSyncEffect(stateContainer, urlStorageKey, replace, defaultState);
 
   const { setRangeFrom, setRangeTo, setKuery, setStatus, setFilters, setSavedQueryId } =
     stateContainer.transitions;
@@ -105,7 +106,8 @@ export function useAlertSearchBarStateContainer(
 function useUrlStateSyncEffect(
   stateContainer: AlertSearchBarStateContainer,
   urlStorageKey: string,
-  replace: boolean = true
+  replace: boolean = true,
+  defaultState: AlertSearchBarContainerState = DEFAULT_STATE
 ) {
   const history = useHistory();
   const timefilterService = useTimefilterService();
@@ -123,17 +125,18 @@ function useUrlStateSyncEffect(
       replace
     );
 
-    start();
-
-    syncUrlStateWithInitialContainerState(
+    initializeUrlAndStateContainer(
       timefilterService,
       stateContainer,
       urlStateStorage,
       urlStorageKey,
-      replace
+      defaultState
     );
 
+    start();
+
     return stop;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stateContainer, history, timefilterService, urlStorageKey, replace]);
 }
 
@@ -141,7 +144,8 @@ function setupUrlStateSync(
   stateContainer: AlertSearchBarStateContainer,
   urlStateStorage: IKbnUrlStateStorage,
   urlStorageKey: string,
-  replace: boolean = true
+  replace: boolean = true,
+  defaultState: AlertSearchBarContainerState = DEFAULT_STATE
 ) {
   // This handles filling the state when an incomplete URL set is provided
   const setWithDefaults = (changedState: Partial<AlertSearchBarContainerState> | null) => {
@@ -162,43 +166,34 @@ function setupUrlStateSync(
   });
 }
 
-function syncUrlStateWithInitialContainerState(
+function initializeUrlAndStateContainer(
   timefilterService: TimefilterContract,
   stateContainer: AlertSearchBarStateContainer,
   urlStateStorage: IKbnUrlStateStorage,
   urlStorageKey: string,
-  replace: boolean = true
+  defaultState: AlertSearchBarContainerState
 ) {
   const urlState = alertSearchBarState.decode(
     urlStateStorage.get<Partial<AlertSearchBarContainerState>>(urlStorageKey)
   );
+  const validUrlState = isRight(urlState) ? pipe(urlState).right : {};
+  const timeFilterTime = timefilterService.getTime();
+  const timeFilterState = timefilterService.isTimeTouched()
+    ? {
+        rangeFrom: timeFilterTime.from,
+        rangeTo: timeFilterTime.to,
+      }
+    : {};
 
-  if (isRight(urlState)) {
-    const newState = {
-      ...defaultState,
-      ...pipe(urlState).right,
-    };
+  const currentState = {
+    ...defaultState,
+    ...timeFilterState,
+    ...validUrlState,
+  };
 
-    stateContainer.set(newState);
-    urlStateStorage.set(urlStorageKey, stateContainer.get(), {
-      replace: true,
-    });
-    return;
-  } else if (timefilterService.isTimeTouched()) {
-    const { from, to } = timefilterService.getTime();
-    const newState = {
-      ...defaultState,
-      rangeFrom: from,
-      rangeTo: to,
-    };
-    stateContainer.set(newState);
-  } else {
-    // Reset the state container when no URL state or timefilter range is set to avoid accidentally
-    // re-using state set on a previous visit to the page in the same session
-    stateContainer.set(defaultState);
-  }
-
-  urlStateStorage.set(urlStorageKey, stateContainer.get(), {
-    replace,
+  stateContainer.set(currentState);
+  urlStateStorage.set(urlStorageKey, currentState, {
+    replace: true,
   });
+  urlStateStorage.kbnUrlControls.flush();
 }

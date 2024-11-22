@@ -128,9 +128,7 @@ export class SyntheticsRunner {
             dir: '.journeys/videos',
           },
         },
-        grepOpts: {
-          match: match === 'undefined' ? '' : match,
-        },
+        grepOpts: { match: match === 'undefined' ? '' : match },
         pauseOnError,
         screenshots: 'only-on-failure',
         reporter: TestReporter,

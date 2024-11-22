@@ -6,7 +6,7 @@
  */
 
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import { TimelineType } from '../../../../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../../../../common/api/timeline';
 
 import {
   serverMock,
@@ -81,7 +81,7 @@ describe('get draft timelines', () => {
         mockGetDraftTimeline.mockResolvedValue({
           timeline: [],
         });
-        const req = getDraftTimelinesRequest(TimelineType.default);
+        const req = getDraftTimelinesRequest(TimelineTypeEnum.default);
         const response = await server.inject(req, requestContextMock.convertContext(context));
         expect(mockPersistTimeline).toHaveBeenCalled();
         expect(mockPersistTimeline.mock.calls[0][3]).toEqual({
@@ -90,13 +90,7 @@ describe('get draft timelines', () => {
         });
 
         expect(response.status).toEqual(200);
-        expect(response.body).toEqual({
-          data: {
-            persistTimeline: {
-              timeline: createTimelineWithTimelineId,
-            },
-          },
-        });
+        expect(response.body).toEqual(createTimelineWithTimelineId);
       });
 
       test('should return an existing draft if available', async () => {
@@ -105,18 +99,12 @@ describe('get draft timelines', () => {
         });
 
         const response = await server.inject(
-          getDraftTimelinesRequest(TimelineType.default),
+          getDraftTimelinesRequest(TimelineTypeEnum.default),
           requestContextMock.convertContext(context)
         );
         expect(mockPersistTimeline).not.toHaveBeenCalled();
         expect(response.status).toEqual(200);
-        expect(response.body).toEqual({
-          data: {
-            persistTimeline: {
-              timeline: mockGetDraftTimelineValue,
-            },
-          },
-        });
+        expect(response.body).toEqual(mockGetDraftTimelineValue);
       });
     });
   });

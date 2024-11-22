@@ -18,6 +18,7 @@ import {
   updateConversation,
 } from '../api/conversations';
 import { WELCOME_CONVERSATION } from './sample_conversations';
+import { useFetchPrompts } from '../api/prompts/use_fetch_prompts';
 
 export const DEFAULT_CONVERSATION_STATE: Conversation = {
   id: '',
@@ -32,7 +33,6 @@ interface CreateConversationProps {
   messages?: ClientMessage[];
   conversationIds?: string[];
   apiConfig?: Conversation['apiConfig'];
-  isFlyoutMode: boolean;
 }
 
 interface SetApiConfigProps {
@@ -45,7 +45,7 @@ interface UpdateConversationTitleProps {
   updatedTitle: string;
 }
 
-interface UseConversation {
+export interface UseConversation {
   clearConversation: (conversation: Conversation) => Promise<Conversation | undefined>;
   getDefaultConversation: ({ cTitle, messages }: CreateConversationProps) => Conversation;
   deleteConversation: (conversationId: string) => void;
@@ -63,7 +63,10 @@ interface UseConversation {
 }
 
 export const useConversation = (): UseConversation => {
-  const { allSystemPrompts, http, toasts } = useAssistantContext();
+  const { http, toasts } = useAssistantContext();
+  const {
+    data: { data: allPrompts },
+  } = useFetchPrompts();
 
   const getConversation = useCallback(
     async (conversationId: string, silent?: boolean) => {
@@ -101,7 +104,7 @@ export const useConversation = (): UseConversation => {
     async (conversation: Conversation) => {
       if (conversation.apiConfig) {
         const defaultSystemPromptId = getDefaultSystemPrompt({
-          allSystemPrompts,
+          allSystemPrompts: allPrompts,
           conversation,
         })?.id;
 
@@ -115,26 +118,24 @@ export const useConversation = (): UseConversation => {
         });
       }
     },
-    [allSystemPrompts, http, toasts]
+    [allPrompts, http, toasts]
   );
 
   /**
    * Create a new conversation with the given conversationId, and optionally add messages
    */
   const getDefaultConversation = useCallback(
-    ({ cTitle, messages, isFlyoutMode }: CreateConversationProps): Conversation => {
+    ({ cTitle, messages }: CreateConversationProps): Conversation => {
       const newConversation: Conversation =
         cTitle === i18n.WELCOME_CONVERSATION_TITLE
-          ? {
-              ...WELCOME_CONVERSATION,
-              messages: !isFlyoutMode ? WELCOME_CONVERSATION.messages : [],
-            }
+          ? WELCOME_CONVERSATION
           : {
               ...DEFAULT_CONVERSATION_STATE,
               id: '',
               title: cTitle,
               messages: messages != null ? messages : [],
             };
+
       return newConversation;
     },
     []

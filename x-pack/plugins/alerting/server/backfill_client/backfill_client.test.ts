@@ -279,7 +279,7 @@ describe('BackfillClient', () => {
         unsecuredSavedObjectsClient,
       });
 
-      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith([
+      const bulkCreateParams = [
         {
           type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
           attributes: mockAttributes1,
@@ -290,7 +290,9 @@ describe('BackfillClient', () => {
           attributes: mockAttributes2,
           references: [{ id: rule2.id, name: 'rule', type: RULE_SAVED_OBJECT_TYPE }],
         },
-      ]);
+      ];
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(bulkCreateParams);
       expect(auditLogger.log).toHaveBeenCalledTimes(2);
       expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
         event: {
@@ -328,7 +330,11 @@ describe('BackfillClient', () => {
           params: { adHocRunParamsId: 'def', spaceId: 'default' },
         },
       ]);
-      expect(result).toEqual(bulkCreateResult.saved_objects.map(transformAdHocRunToBackfillResult));
+      expect(result).toEqual(
+        bulkCreateResult.saved_objects.map((so, index) =>
+          transformAdHocRunToBackfillResult(so, bulkCreateParams?.[index])
+        )
+      );
     });
 
     test('should successfully create multiple backfill saved objects for a single rule', async () => {
@@ -385,7 +391,7 @@ describe('BackfillClient', () => {
         unsecuredSavedObjectsClient,
       });
 
-      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith([
+      const bulkCreateParams = [
         {
           type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
           attributes: mockAttributes1,
@@ -396,7 +402,9 @@ describe('BackfillClient', () => {
           attributes: mockAttributes2,
           references: [{ id: rule1.id, name: 'rule', type: RULE_SAVED_OBJECT_TYPE }],
         },
-      ]);
+      ];
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(bulkCreateParams);
       expect(auditLogger.log).toHaveBeenCalledTimes(2);
       expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
         event: {
@@ -432,7 +440,11 @@ describe('BackfillClient', () => {
           params: { adHocRunParamsId: 'def', spaceId: 'default' },
         },
       ]);
-      expect(result).toEqual(bulkCreateResult.saved_objects.map(transformAdHocRunToBackfillResult));
+      expect(result).toEqual(
+        bulkCreateResult.saved_objects.map((so, index) =>
+          transformAdHocRunToBackfillResult(so, bulkCreateParams?.[index])
+        )
+      );
     });
 
     test('should log warning if no rule found for backfill job', async () => {
@@ -472,13 +484,14 @@ describe('BackfillClient', () => {
         unsecuredSavedObjectsClient,
       });
 
-      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith([
+      const bulkCreateParams = [
         {
           type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
           attributes: mockAttributes1,
           references: [{ id: rule1.id, name: 'rule', type: RULE_SAVED_OBJECT_TYPE }],
         },
-      ]);
+      ];
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(bulkCreateParams);
       expect(auditLogger.log).toHaveBeenCalledTimes(1);
       expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
         event: {
@@ -502,11 +515,13 @@ describe('BackfillClient', () => {
         },
       ]);
       expect(result).toEqual([
-        ...bulkCreateResult.saved_objects.map(transformAdHocRunToBackfillResult),
+        ...bulkCreateResult.saved_objects.map((so, index) =>
+          transformAdHocRunToBackfillResult(so, bulkCreateParams?.[0])
+        ),
         {
           error: {
-            error: 'Not Found',
             message: 'Saved object [alert/2] not found',
+            rule: { id: '2' },
           },
         },
       ]);
@@ -546,7 +561,7 @@ describe('BackfillClient', () => {
         getMockData({ ruleId: '6' }), // this should return error due to disabled rule
         getMockData({ ruleId: '7' }), // this should return error due to null api key
       ];
-      const rule1 = getMockRule();
+      const rule1 = getMockRule({ id: '1' });
       const rule3 = getMockRule({ id: '3' });
       const rule4 = getMockRule({ id: '4' });
       const rule5 = getMockRule({ id: '5' });
@@ -666,8 +681,8 @@ describe('BackfillClient', () => {
       expect(result).toEqual([
         {
           error: {
-            error: 'Bad Request',
             message: 'Rule type "myType" for rule 1 is not supported',
+            rule: { id: '1', name: 'my rule name' },
           },
         },
         {
@@ -676,8 +691,8 @@ describe('BackfillClient', () => {
         },
         {
           error: {
-            error: 'Not Found',
             message: 'Saved object [alert/2] not found',
+            rule: { id: '2' },
           },
         },
         {
@@ -690,8 +705,8 @@ describe('BackfillClient', () => {
         },
         {
           error: {
-            error: 'my error',
             message: 'Unable to create',
+            rule: { id: '4', name: 'my rule name' },
           },
         },
         {
@@ -700,14 +715,14 @@ describe('BackfillClient', () => {
         },
         {
           error: {
-            error: 'Bad Request',
             message: 'Rule 6 is disabled',
+            rule: { id: '6', name: 'my rule name' },
           },
         },
         {
           error: {
-            error: 'Bad Request',
             message: 'Rule 7 has no API key',
+            rule: { id: '7', name: 'my rule name' },
           },
         },
       ]);
@@ -738,38 +753,38 @@ describe('BackfillClient', () => {
       expect(result).toEqual([
         {
           error: {
-            error: 'Not Found',
             message: 'Saved object [alert/1] not found',
+            rule: { id: '1' },
           },
         },
         {
           error: {
-            error: 'Not Found',
             message: 'Saved object [alert/2] not found',
+            rule: { id: '2' },
           },
         },
         {
           error: {
-            error: 'Not Found',
             message: 'Saved object [alert/3] not found',
+            rule: { id: '3' },
           },
         },
         {
           error: {
-            error: 'Not Found',
             message: 'Saved object [alert/1] not found',
+            rule: { id: '1' },
           },
         },
         {
           error: {
-            error: 'Not Found',
             message: 'Saved object [alert/4] not found',
+            rule: { id: '4' },
           },
         },
         {
           error: {
-            error: 'Not Found',
             message: 'Saved object [alert/5] not found',
+            rule: { id: '5' },
           },
         },
       ]);
@@ -839,32 +854,32 @@ describe('BackfillClient', () => {
       expect(result).toEqual([
         {
           error: {
-            error: 'Bad Request',
             message: 'Rule type "myType" for rule 1 is not supported',
+            rule: { id: '1', name: 'my rule name' },
           },
         },
         {
           error: {
-            error: 'Not Found',
             message: 'Saved object [alert/2] not found',
+            rule: { id: '2' },
           },
         },
         {
           error: {
-            error: 'my error',
             message: 'Unable to create',
+            rule: { id: '4', name: 'my rule name' },
           },
         },
         {
           error: {
-            error: 'Bad Request',
             message: 'Rule 6 is disabled',
+            rule: { id: '6', name: 'my rule name' },
           },
         },
         {
           error: {
-            error: 'Bad Request',
             message: 'Rule 7 has no API key',
+            rule: { id: '7', name: 'my rule name' },
           },
         },
       ]);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EventTypeOpts } from '@kbn/analytics-client';
+import type { EventTypeOpts } from '@kbn/core/server';
 
 export const NLP_CLEANUP_TASK_EVENT: EventTypeOpts<{
   failedToDeleteCount: number;

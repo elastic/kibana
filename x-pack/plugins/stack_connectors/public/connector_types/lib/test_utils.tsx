@@ -52,6 +52,21 @@ const ConnectorFormTestProviderComponent: React.FC<ConnectorFormTestProviderProp
 ConnectorFormTestProviderComponent.displayName = 'ConnectorFormTestProvider';
 export const ConnectorFormTestProvider = React.memo(ConnectorFormTestProviderComponent);
 
+const AuthFormTestProviderComponent: React.FC<FormTestProviderProps> = ({
+  children,
+  defaultValue,
+  onSubmit,
+}) => {
+  return (
+    <FormTestProviderComponent onSubmit={onSubmit} defaultValue={defaultValue}>
+      {children}
+    </FormTestProviderComponent>
+  );
+};
+
+AuthFormTestProviderComponent.displayName = 'AuthFormTestProvider';
+export const AuthFormTestProvider = React.memo(AuthFormTestProviderComponent);
+
 const FormTestProviderComponent: React.FC<FormTestProviderProps> = ({
   children,
   defaultValue,
@@ -92,7 +107,7 @@ export interface AppMockRenderer {
 export const createAppMockRenderer = (): AppMockRenderer => {
   const services = createStartServicesMock();
 
-  const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
+  const AppWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
     <I18nProvider>
       <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
     </I18nProvider>

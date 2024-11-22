@@ -5,15 +5,24 @@
  * 2.0.
  */
 
-import { AlertingConnectorFeatureId, UptimeConnectorFeatureId } from '@kbn/actions-plugin/common';
+import {
+  AlertingConnectorFeatureId,
+  UptimeConnectorFeatureId,
+  SecurityConnectorFeatureId,
+} from '@kbn/actions-plugin/common';
 import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ConnectorAdapter } from '@kbn/alerting-plugin/server';
-import type { Owner } from '../../../common/constants/types';
 import { CasesConnector } from './cases_connector';
 import { DEFAULT_MAX_OPEN_CASES } from './constants';
-import { CASES_CONNECTOR_ID, CASES_CONNECTOR_TITLE, OWNER_INFO } from '../../../common/constants';
+import {
+  CASES_CONNECTOR_ID,
+  CASES_CONNECTOR_TITLE,
+  SECURITY_SOLUTION_OWNER,
+} from '../../../common/constants';
+import { getOwnerFromRuleConsumerProducer } from '../../../common/utils/owner';
+
 import type {
   CasesConnectorConfig,
   CasesConnectorParams,
@@ -35,12 +44,14 @@ interface GetCasesConnectorTypeArgs {
     savedObjectTypes: string[]
   ) => Promise<SavedObjectsClientContract>;
   getSpaceId: (request?: KibanaRequest) => string;
+  isServerlessSecurity?: boolean;
 }
 
 export const getCasesConnectorType = ({
   getCasesClient,
   getSpaceId,
   getUnsecuredSavedObjectsClient,
+  isServerlessSecurity,
 }: GetCasesConnectorTypeArgs): SubActionConnectorType<
   CasesConnectorConfig,
   CasesConnectorSecrets
@@ -56,31 +67,42 @@ export const getCasesConnectorType = ({
     config: CasesConnectorConfigSchema,
     secrets: CasesConnectorSecretsSchema,
   },
-  supportedFeatureIds: [UptimeConnectorFeatureId, AlertingConnectorFeatureId],
+  supportedFeatureIds: [
+    UptimeConnectorFeatureId,
+    AlertingConnectorFeatureId,
+    SecurityConnectorFeatureId,
+  ],
   minimumLicenseRequired: 'platinum' as const,
   isSystemActionType: true,
   getKibanaPrivileges: ({ params } = { params: { subAction: 'run', subActionParams: {} } }) => {
-    const owner = params?.subActionParams?.owner as string;
-
-    if (!owner) {
+    if (!params?.subActionParams?.owner) {
       throw new Error('Cannot authorize cases. Owner is not defined in the subActionParams.');
     }
+
+    const owner = isServerlessSecurity
+      ? SECURITY_SOLUTION_OWNER
+      : (params?.subActionParams?.owner as string);
 
     return constructRequiredKibanaPrivileges(owner);
   },
 });
 
-export const getCasesConnectorAdapter = (): ConnectorAdapter<
-  CasesConnectorRuleActionParams,
-  CasesConnectorParams
-> => {
+export const getCasesConnectorAdapter = ({
+  isServerlessSecurity,
+}: {
+  isServerlessSecurity?: boolean;
+}): ConnectorAdapter<CasesConnectorRuleActionParams, CasesConnectorParams> => {
   return {
     connectorTypeId: CASES_CONNECTOR_ID,
     ruleActionParamsSchema: CasesConnectorRuleActionParamsSchema,
     buildActionParams: ({ alerts, rule, params, spaceId, ruleUrl }) => {
       const caseAlerts = [...alerts.new.data, ...alerts.ongoing.data];
 
-      const owner = getOwnerFromRuleConsumerProducer(rule.consumer, rule.producer);
+      const owner = getOwnerFromRuleConsumerProducer({
+        consumer: rule.consumer,
+        producer: rule.producer,
+        isServerlessSecurity,
+      });
 
       const subActionParams = {
         alerts: caseAlerts,
@@ -90,27 +112,14 @@ export const getCasesConnectorAdapter = (): ConnectorAdapter<
         reopenClosedCases: params.subActionParams.reopenClosedCases,
         timeWindow: params.subActionParams.timeWindow,
         maximumCasesToOpen: DEFAULT_MAX_OPEN_CASES,
+        templateId: params.subActionParams.templateId,
       };
 
       return { subAction: 'run', subActionParams };
     },
     getKibanaPrivileges: ({ consumer, producer }) => {
-      const owner = getOwnerFromRuleConsumerProducer(consumer, producer);
+      const owner = getOwnerFromRuleConsumerProducer({ consumer, producer, isServerlessSecurity });
       return constructRequiredKibanaPrivileges(owner);
     },
   };
-};
-
-const getOwnerFromRuleConsumerProducer = (consumer: string, producer: string): Owner => {
-  for (const value of Object.values(OWNER_INFO)) {
-    const foundedConsumer = value.validRuleConsumers?.find(
-      (validConsumer) => validConsumer === consumer || validConsumer === producer
-    );
-
-    if (foundedConsumer) {
-      return value.id;
-    }
-  }
-
-  return OWNER_INFO.cases.id;
 };

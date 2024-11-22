@@ -11,9 +11,8 @@ import type {
   BulkResponseItem,
   Script,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import type { AuthenticatedUser, Logger, ElasticsearchClient } from '@kbn/core/server';
 import { UUID } from '@kbn/elastic-assistant-common';
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 
 export interface BulkOperationError {
   message: string;
@@ -23,7 +22,7 @@ export interface BulkOperationError {
   };
 }
 
-interface WriterBulkResponse {
+export interface WriterBulkResponse {
   errors: BulkOperationError[];
   docs_created: string[];
   docs_deleted: string[];
@@ -35,7 +34,10 @@ interface BulkParams<TUpdateParams extends { id: string }, TCreateParams> {
   documentsToCreate?: TCreateParams[];
   documentsToUpdate?: TUpdateParams[];
   documentsToDelete?: string[];
-  getUpdateScript?: (document: TUpdateParams, updatedAt: string) => Script;
+  getUpdateScript?: (
+    document: TUpdateParams,
+    updatedAt: string
+  ) => { script?: Script; doc?: TUpdateParams };
   authenticatedUser?: AuthenticatedUser;
 }
 
@@ -68,10 +70,16 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
         return { errors: [], docs_created: [], docs_deleted: [], docs_updated: [], took: 0 };
       }
 
-      const { errors, items, took } = await this.options.esClient.bulk({
-        refresh: 'wait_for',
-        body: await this.buildBulkOperations(params),
-      });
+      const { errors, items, took } = await this.options.esClient.bulk(
+        {
+          refresh: 'wait_for',
+          body: await this.buildBulkOperations(params),
+        },
+        {
+          // Increasing timeout to 2min as KB docs were failing to load after 30s
+          requestTimeout: 120000,
+        }
+      );
 
       return {
         errors: errors ? this.formatErrorsResponse(items) : [],
@@ -112,8 +120,13 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
           {
             bool: {
               must_not: {
-                exists: {
-                  field: 'users',
+                nested: {
+                  path: 'users',
+                  query: {
+                    exists: {
+                      field: 'users',
+                    },
+                  },
                 },
               },
             },
@@ -141,7 +154,10 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
 
   private getUpdateDocumentsQuery = async <TUpdateParams extends { id: string }>(
     documentsToUpdate: TUpdateParams[],
-    getUpdateScript: (document: TUpdateParams, updatedAt: string) => Script,
+    getUpdateScript: (
+      document: TUpdateParams,
+      updatedAt: string
+    ) => { script?: Script; doc?: TUpdateParams },
     authenticatedUser?: AuthenticatedUser
   ) => {
     const updatedAt = new Date().toISOString();
@@ -186,10 +202,7 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
           _source: true,
         },
       },
-      {
-        script: getUpdateScript(document, updatedAt),
-        upsert: { counter: 1 },
-      },
+      getUpdateScript(document, updatedAt),
     ]);
   };
 

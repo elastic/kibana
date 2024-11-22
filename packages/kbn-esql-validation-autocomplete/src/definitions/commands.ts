@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -19,6 +20,7 @@ import {
   isAssignment,
   isColumnItem,
   isFunctionItem,
+  isFunctionOperatorParam,
   isLiteralItem,
 } from '../shared/helpers';
 import { ENRICH_MODES } from './settings';
@@ -31,8 +33,128 @@ import {
   withOption,
 } from './options';
 import type { CommandDefinition } from './types';
+import { suggest as suggestForSort } from '../autocomplete/commands/sort';
+import { suggest as suggestForKeep } from '../autocomplete/commands/keep';
+import { suggest as suggestForDrop } from '../autocomplete/commands/drop';
+import { suggest as suggestForStats } from '../autocomplete/commands/stats';
+import { suggest as suggestForWhere } from '../autocomplete/commands/where';
 
-export const commandDefinitions: CommandDefinition[] = [
+const statsValidator = (command: ESQLCommand) => {
+  const messages: ESQLMessage[] = [];
+  const commandName = command.name.toUpperCase();
+  if (!command.args.length) {
+    messages.push({
+      location: command.location,
+      text: i18n.translate('kbn-esql-validation-autocomplete.esql.validation.statsNoArguments', {
+        defaultMessage:
+          'At least one aggregation or grouping expression required in [{commandName}]',
+        values: { commandName },
+      }),
+      type: 'error',
+      code: 'statsNoArguments',
+    });
+  }
+
+  // now that all functions are supported, there's a specific check to perform
+  // unfortunately the logic here is a bit complex as it needs to dig deeper into the args
+  // until an agg function is detected
+  // in the long run this might be integrated into the validation function
+  const statsArg = command.args
+    .flatMap((arg) => (isAssignment(arg) ? arg.args[1] : arg))
+    .filter(isFunctionItem);
+
+  if (statsArg.length) {
+    function isAggFunction(arg: ESQLAstItem): arg is ESQLFunction {
+      return isFunctionItem(arg) && getFunctionDefinition(arg.name)?.type === 'agg';
+    }
+    function isOtherFunction(arg: ESQLAstItem): arg is ESQLFunction {
+      return isFunctionItem(arg) && getFunctionDefinition(arg.name)?.type !== 'agg';
+    }
+
+    function checkAggExistence(arg: ESQLFunction): boolean {
+      // TODO the grouping function check may not
+      // hold true for all future cases
+      if (isAggFunction(arg) || isFunctionOperatorParam(arg)) {
+        return true;
+      }
+      if (isOtherFunction(arg)) {
+        return (arg as ESQLFunction).args.filter(isFunctionItem).some(checkAggExistence);
+      }
+      return false;
+    }
+    // first check: is there an agg function somewhere?
+    const noAggsExpressions = statsArg.filter((arg) => !checkAggExistence(arg));
+
+    if (noAggsExpressions.length) {
+      messages.push(
+        ...noAggsExpressions.map((fn) => ({
+          location: fn.location,
+          text: i18n.translate(
+            'kbn-esql-validation-autocomplete.esql.validation.statsNoAggFunction',
+            {
+              defaultMessage:
+                'At least one aggregation function required in [{commandName}], found [{expression}]',
+              values: {
+                expression: fn.text,
+                commandName,
+              },
+            }
+          ),
+          type: 'error' as const,
+          code: 'statsNoAggFunction',
+        }))
+      );
+    } else {
+      function isConstantOrAggFn(arg: ESQLAstItem): boolean {
+        return isLiteralItem(arg) || isAggFunction(arg);
+      }
+      // now check that:
+      // * the agg function is at root level
+      // * or if it's a builtin function, then all operands are agg functions or literals
+      // * or if it's a eval function then all arguments are agg functions or literals
+      function checkFunctionContent(arg: ESQLFunction) {
+        // TODO the grouping function check may not
+        // hold true for all future cases
+        if (isAggFunction(arg)) {
+          return true;
+        }
+        return (arg as ESQLFunction).args.every(
+          (subArg): boolean =>
+            isConstantOrAggFn(subArg) ||
+            (isOtherFunction(subArg) ? checkFunctionContent(subArg) : false)
+        );
+      }
+      // @TODO: improve here the check to get the last instance of the invalidExpression
+      // to provide a better location for the error message
+      // i.e. STATS round(round(round( a + sum(b) )))
+      // should return the location of the + node, just before the agg one
+      const invalidExpressions = statsArg.filter((arg) => !checkFunctionContent(arg));
+
+      if (invalidExpressions.length) {
+        messages.push(
+          ...invalidExpressions.map((fn) => ({
+            location: fn.location,
+            text: i18n.translate(
+              'kbn-esql-validation-autocomplete.esql.validation.noCombinationOfAggAndNonAggValues',
+              {
+                defaultMessage:
+                  'Cannot combine aggregation and non-aggregation values in [{commandName}], found [{expression}]',
+                values: {
+                  expression: fn.text,
+                  commandName,
+                },
+              }
+            ),
+            type: 'error' as const,
+            code: 'statsNoCombinationOfAggAndNonAggValues',
+          }))
+        );
+      }
+    }
+  }
+  return messages;
+};
+export const commandDefinitions: Array<CommandDefinition<any>> = [
   {
     name: 'row',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.rowDoc', {
@@ -57,22 +179,10 @@ export const commandDefinitions: CommandDefinition[] = [
     examples: ['from logs', 'from logs-*', 'from logs_*, events-*'],
     options: [metadataOption],
     modes: [],
+    hasRecommendedQueries: true,
     signature: {
       multipleParams: true,
       params: [{ name: 'index', type: 'source', wildcards: true }],
-    },
-  },
-  {
-    name: 'meta',
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.metaDoc', {
-      defaultMessage: 'Returns information about the ES|QL environment',
-    }),
-    examples: ['meta functions'],
-    options: [],
-    modes: [],
-    signature: {
-      multipleParams: false,
-      params: [{ name: 'functions', type: 'function' }],
     },
   },
   {
@@ -89,6 +199,37 @@ export const commandDefinitions: CommandDefinition[] = [
     },
   },
   {
+    name: 'metrics',
+    hidden: true,
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.metricsDoc', {
+      defaultMessage:
+        'A metrics-specific source command, use this command to load data from TSDB indices. ' +
+        'Similar to STATS command on can calculate aggregate statistics, such as average, count, and sum, over the incoming search results set. ' +
+        'When used without a BY clause, only one row is returned, which is the aggregation over the entire incoming search results set. ' +
+        'When you use a BY clause, one row is returned for each distinct value in the field specified in the BY clause. ' +
+        'The command returns only the fields in the aggregation, and you can use a wide range of statistical functions with the stats command. ' +
+        'When you perform more than one aggregation, separate each aggregation with a comma.',
+    }),
+    examples: [
+      'metrics index',
+      'metrics index, index2',
+      'metrics index avg = avg(a)',
+      'metrics index sum(b) by b',
+      'metrics index, index2 sum(b) by b % 2',
+      'metrics <sources> [ <aggregates> [ by <grouping> ]]',
+      'metrics src1, src2 agg1, agg2 by field1, field2',
+    ],
+    options: [],
+    modes: [],
+    signature: {
+      multipleParams: true,
+      params: [
+        { name: 'index', type: 'source', wildcards: true },
+        { name: 'expression', type: 'function', optional: true },
+      ],
+    },
+  },
+  {
     name: 'stats',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.statsDoc', {
       defaultMessage:
@@ -101,120 +242,30 @@ export const commandDefinitions: CommandDefinition[] = [
     },
     options: [byOption],
     modes: [],
-    validate: (command: ESQLCommand) => {
-      const messages: ESQLMessage[] = [];
-      if (!command.args.length) {
-        messages.push({
-          location: command.location,
-          text: i18n.translate(
-            'kbn-esql-validation-autocomplete.esql.validation.statsNoArguments',
-            {
-              defaultMessage: 'At least one aggregation or grouping expression required in [STATS]',
-            }
-          ),
-          type: 'error',
-          code: 'statsNoArguments',
-        });
-      }
-
-      // now that all functions are supported, there's a specific check to perform
-      // unfortunately the logic here is a bit complex as it needs to dig deeper into the args
-      // until an agg function is detected
-      // in the long run this might be integrated into the validation function
-      const statsArg = command.args
-        .flatMap((arg) => (isAssignment(arg) ? arg.args[1] : arg))
-        .filter(isFunctionItem);
-
-      if (statsArg.length) {
-        function isAggFunction(arg: ESQLAstItem): arg is ESQLFunction {
-          return isFunctionItem(arg) && getFunctionDefinition(arg.name)?.type === 'agg';
-        }
-        function isOtherFunction(arg: ESQLAstItem): arg is ESQLFunction {
-          return isFunctionItem(arg) && getFunctionDefinition(arg.name)?.type !== 'agg';
-        }
-
-        function checkAggExistence(arg: ESQLFunction): boolean {
-          // TODO the grouping function check may not
-          // hold true for all future cases
-          if (isAggFunction(arg)) {
-            return true;
-          }
-          if (isOtherFunction(arg)) {
-            return (arg as ESQLFunction).args.filter(isFunctionItem).some(checkAggExistence);
-          }
-          return false;
-        }
-        // first check: is there an agg function somewhere?
-        const noAggsExpressions = statsArg.filter((arg) => !checkAggExistence(arg));
-
-        if (noAggsExpressions.length) {
-          messages.push(
-            ...noAggsExpressions.map((fn) => ({
-              location: fn.location,
-              text: i18n.translate(
-                'kbn-esql-validation-autocomplete.esql.validation.statsNoAggFunction',
-                {
-                  defaultMessage:
-                    'At least one aggregation function required in [STATS], found [{expression}]',
-                  values: {
-                    expression: fn.text,
-                  },
-                }
-              ),
-              type: 'error' as const,
-              code: 'statsNoAggFunction',
-            }))
-          );
-        } else {
-          function isConstantOrAggFn(arg: ESQLAstItem): boolean {
-            return isLiteralItem(arg) || isAggFunction(arg);
-          }
-          // now check that:
-          // * the agg function is at root level
-          // * or if it's a builtin function, then all operands are agg functions or literals
-          // * or if it's a eval function then all arguments are agg functions or literals
-          function checkFunctionContent(arg: ESQLFunction) {
-            // TODO the grouping function check may not
-            // hold true for all future cases
-            if (isAggFunction(arg)) {
-              return true;
-            }
-            return (arg as ESQLFunction).args.every(
-              (subArg): boolean =>
-                isConstantOrAggFn(subArg) ||
-                (isOtherFunction(subArg) ? checkFunctionContent(subArg) : false)
-            );
-          }
-          // @TODO: improve here the check to get the last instance of the invalidExpression
-          // to provide a better location for the error message
-          // i.e. STATS round(round(round( a + sum(b) )))
-          // should return the location of the + node, just before the agg one
-          const invalidExpressions = statsArg.filter((arg) => !checkFunctionContent(arg));
-
-          if (invalidExpressions.length) {
-            messages.push(
-              ...invalidExpressions.map((fn) => ({
-                location: fn.location,
-                text: i18n.translate(
-                  'kbn-esql-validation-autocomplete.esql.validation.noCombinationOfAggAndNonAggValues',
-                  {
-                    defaultMessage:
-                      'Cannot combine aggregation and non-aggregation values in [STATS], found [{expression}]',
-                    values: {
-                      expression: fn.text,
-                    },
-                  }
-                ),
-                type: 'error' as const,
-                code: 'statsNoCombinationOfAggAndNonAggValues',
-              }))
-            );
-          }
-        }
-      }
-      return messages;
-    },
+    validate: statsValidator,
+    suggest: suggestForStats,
   },
+  {
+    name: 'inlinestats',
+    hidden: true,
+    description: i18n.translate(
+      'kbn-esql-validation-autocomplete.esql.definitions.inlineStatsDoc',
+      {
+        defaultMessage:
+          'Calculates an aggregate result and merges that result back into the stream of input data. Without the optional `BY` clause this will produce a single result which is appended to each row. With a `BY` clause this will produce one result per grouping and merge the result into the stream based on matching group keys.',
+      }
+    ),
+    examples: ['… | EVAL bar = a * b | INLINESTATS m = MAX(bar) BY b'],
+    signature: {
+      multipleParams: true,
+      params: [{ name: 'expression', type: 'function', optional: true }],
+    },
+    options: [byOption],
+    modes: [],
+    // Reusing the same validation logic as stats command
+    validate: statsValidator,
+  },
+
   {
     name: 'eval',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.evalDoc', {
@@ -256,7 +307,7 @@ export const commandDefinitions: CommandDefinition[] = [
     examples: ['… | limit 100', '… | limit 0'],
     signature: {
       multipleParams: false,
-      params: [{ name: 'size', type: 'number', constantOnly: true }],
+      params: [{ name: 'size', type: 'integer', constantOnly: true }],
     },
     options: [],
     modes: [],
@@ -264,9 +315,11 @@ export const commandDefinitions: CommandDefinition[] = [
   {
     name: 'keep',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.keepDoc', {
-      defaultMessage: 'Rearranges fields in the input table by applying the keep clauses in fields',
+      defaultMessage:
+        'Rearranges fields in the Results table by applying the keep clauses in fields',
     }),
     examples: ['… | keep a', '… | keep a,b'],
+    suggest: suggestForKeep,
     options: [],
     modes: [],
     signature: {
@@ -286,6 +339,7 @@ export const commandDefinitions: CommandDefinition[] = [
       multipleParams: true,
       params: [{ name: 'column', type: 'column', wildcards: true }],
     },
+    suggest: suggestForDrop,
     validate: (command: ESQLCommand) => {
       const messages: ESQLMessage[] = [];
       const wildcardItems = command.args.filter((arg) => isColumnItem(arg) && arg.name === '*');
@@ -340,13 +394,11 @@ export const commandDefinitions: CommandDefinition[] = [
     modes: [],
     signature: {
       multipleParams: true,
-      params: [
-        { name: 'expression', type: 'any' },
-        { name: 'direction', type: 'string', optional: true, values: ['asc', 'desc'] },
-        { name: 'nulls', type: 'string', optional: true, values: ['nulls first', 'nulls last'] },
-      ],
+      params: [{ name: 'expression', type: 'any' }],
     },
+    suggest: suggestForSort,
   },
+
   {
     name: 'where',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.whereDoc', {
@@ -360,6 +412,7 @@ export const commandDefinitions: CommandDefinition[] = [
     },
     options: [],
     modes: [],
+    suggest: suggestForWhere,
   },
   {
     name: 'dissect',
@@ -373,7 +426,7 @@ export const commandDefinitions: CommandDefinition[] = [
     signature: {
       multipleParams: false,
       params: [
-        { name: 'column', type: 'column', innerType: 'string' },
+        { name: 'column', type: 'column', innerTypes: ['keyword', 'text'] },
         { name: 'pattern', type: 'string', constantOnly: true },
       ],
     },
@@ -390,7 +443,7 @@ export const commandDefinitions: CommandDefinition[] = [
     signature: {
       multipleParams: false,
       params: [
-        { name: 'column', type: 'column', innerType: 'string' },
+        { name: 'column', type: 'column', innerTypes: ['keyword', 'text'] },
         { name: 'pattern', type: 'string', constantOnly: true },
       ],
     },
@@ -405,7 +458,7 @@ export const commandDefinitions: CommandDefinition[] = [
     modes: [],
     signature: {
       multipleParams: false,
-      params: [{ name: 'column', type: 'column', innerType: 'any' }],
+      params: [{ name: 'column', type: 'column', innerTypes: ['any'] }],
     },
   },
   {
@@ -423,7 +476,19 @@ export const commandDefinitions: CommandDefinition[] = [
     modes: [ENRICH_MODES],
     signature: {
       multipleParams: false,
-      params: [{ name: 'policyName', type: 'source', innerType: 'policy' }],
+      params: [{ name: 'policyName', type: 'source', innerTypes: ['policy'] }],
+    },
+  },
+  {
+    name: 'hidden_command',
+    description: 'A test fixture to test hidden-ness',
+    hidden: true,
+    examples: [],
+    modes: [],
+    options: [],
+    signature: {
+      params: [],
+      multipleParams: false,
     },
   },
 ];

@@ -72,13 +72,18 @@
     "@kbn/search-playground",
     "@kbn/search-inference-endpoints",
     "@kbn/utility-types",
-    "@kbn/index-management",
+    "@kbn/index-management-shared-types",
     "@kbn/deeplinks-search",
     "@kbn/react-kibana-context-theme",
     "@kbn/search-types",
     "@kbn/cloud",
     "@kbn/try-in-console",
     "@kbn/core-chrome-browser",
-    "@kbn/navigation-plugin"
+    "@kbn/navigation-plugin",
+    "@kbn/security-plugin-types-common",
+    "@kbn/core-security-server",
+    "@kbn/core-security-server-mocks",
+    "@kbn/unsaved-changes-prompt",
+    "@kbn/search-navigation",
   ]
 }

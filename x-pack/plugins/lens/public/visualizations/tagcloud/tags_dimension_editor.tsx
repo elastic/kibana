@@ -11,7 +11,7 @@ import {
   CategoricalColorMapping,
   DEFAULT_COLOR_MAPPING_CONFIG,
   ColorMapping,
-  SPECIAL_TOKENS_STRING_CONVERTION,
+  SPECIAL_TOKENS_STRING_CONVERSION,
   PaletteOutput,
   AVAILABLE_PALETTES,
   getColorsFromMapping,
@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiFormRow, EuiText, EuiBadge } from '@elastic/eui';
 import { useState, MutableRefObject, useCallback } from 'react';
-import { useDebouncedValue } from '@kbn/visualization-ui-components';
+import { useDebouncedValue } from '@kbn/visualization-utils';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import type { TagcloudState } from './types';
 import { PalettePanelContainer, PalettePicker } from '../../shared_components';
@@ -82,7 +82,7 @@ export function TagsDimensionEditor({
   return (
     <EuiFormRow
       display="columnCompressed"
-      label={i18n.translate('xpack.lens.colorMapping.editColorMappingSectionlabel', {
+      label={i18n.translate('xpack.lens.colorMapping.editColorMappingSectionLabel', {
         defaultMessage: 'Color mapping',
       })}
       style={{ alignItems: 'center' }}
@@ -94,7 +94,7 @@ export function TagsDimensionEditor({
         title={
           useNewColorMapping
             ? i18n.translate('xpack.lens.colorMapping.editColorMappingTitle', {
-                defaultMessage: 'Edit colors by term mapping',
+                defaultMessage: 'Assign colors to terms',
               })
             : i18n.translate('xpack.lens.colorMapping.editColorsTitle', {
                 defaultMessage: 'Edit colors',
@@ -141,7 +141,7 @@ export function TagsDimensionEditor({
                     type: 'categories',
                     categories: splitCategories,
                   }}
-                  specialTokens={SPECIAL_TOKENS_STRING_CONVERTION}
+                  specialTokens={SPECIAL_TOKENS_STRING_CONVERSION}
                 />
               ) : (
                 <PalettePicker

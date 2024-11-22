@@ -8,7 +8,7 @@
 import { SearchResponse, AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
+import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
 import { Aggregators, MetricExpressionParams } from '../../../../../common/alerting/metrics';
@@ -277,10 +277,10 @@ export const getData = async (
       fieldsExisted
     ),
   };
-  logger.trace(`Request: ${JSON.stringify(request)}`);
+  logger.trace(() => `Request: ${JSON.stringify(request)}`);
   const body = await esClient.search<undefined, ResponseAggregations>(request);
   const { aggregations, _shards } = body;
-  logger.trace(`Response: ${JSON.stringify(body)}`);
+  logger.trace(() => `Response: ${JSON.stringify(body)}`);
   if (aggregations) {
     return handleResponse(aggregations, previousResults, _shards.successful);
   } else if (_shards.successful) {

@@ -51,7 +51,7 @@ const RuleActivityFilterComponent = ({
   const options = populateSelected(ruleActivityFilterDefaultOptions, selected);
 
   const handleSelectableOnChange = useCallback(
-    (newOptions) => {
+    (newOptions: Array<EuiSelectableOption<{ label: CoverageOverviewRuleActivity }>>) => {
       const formattedOptions = extractSelected<CoverageOverviewRuleActivity>(newOptions);
       onChange(formattedOptions);
     },
@@ -95,7 +95,7 @@ const RuleActivityFilterComponent = ({
         panelPaddingSize="none"
       >
         <EuiPopoverTitle paddingSize="s">{i18n.CoverageOverviewFilterPopoverTitle}</EuiPopoverTitle>
-        <EuiSelectable
+        <EuiSelectable<{ label: CoverageOverviewRuleActivity }>
           data-test-subj="coverageOverviewFilterList"
           options={options}
           onChange={handleSelectableOnChange}

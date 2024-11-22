@@ -5,16 +5,9 @@
  * 2.0.
  */
 
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
-
-import {
-  serverMock,
-  requestContextMock,
-  createMockConfig,
-} from '../../../../detection_engine/routes/__mocks__';
+import { serverMock, requestContextMock } from '../../../../detection_engine/routes/__mocks__';
 import { getTimelineOrNull, getTimelineTemplateOrNull } from '../../../saved_object/timelines';
 
-import { mockGetCurrentUser } from '../../../__mocks__/import_timelines';
 import { getTimelineRequest } from '../../../__mocks__/request_responses';
 
 import { getTimelineRoute } from '.';
@@ -27,7 +20,6 @@ jest.mock('../../../saved_object/timelines', () => ({
 
 describe('get timeline', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let securitySetup: SecurityPluginSetup;
   let { context } = requestContextMock.createTools();
 
   beforeEach(() => {
@@ -37,14 +29,7 @@ describe('get timeline', () => {
     server = serverMock.create();
     context = requestContextMock.createTools().context;
 
-    securitySetup = {
-      authc: {
-        getCurrentUser: jest.fn().mockReturnValue(mockGetCurrentUser),
-      },
-      authz: {},
-    } as unknown as SecurityPluginSetup;
-
-    getTimelineRoute(server.router, createMockConfig(), securitySetup);
+    getTimelineRoute(server.router);
   });
 
   test('should call getTimelineTemplateOrNull if templateTimelineId is given', async () => {

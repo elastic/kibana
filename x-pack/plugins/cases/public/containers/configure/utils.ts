@@ -16,6 +16,7 @@ export const initialConfiguration: CasesConfigurationUI = {
     type: ConnectorTypes.none,
   },
   customFields: [],
+  templates: [],
   mappings: [],
   version: '',
   id: '',

@@ -74,7 +74,7 @@ const RESPONSE_ACTIONS_SUPPORT_MAP: SupportMap = {
     },
     manual: {
       endpoint: true,
-      sentinel_one: false,
+      sentinel_one: true,
       crowdstrike: false,
     },
   },
@@ -110,7 +110,7 @@ const RESPONSE_ACTIONS_SUPPORT_MAP: SupportMap = {
     },
     manual: {
       endpoint: true,
-      sentinel_one: false,
+      sentinel_one: true,
       crowdstrike: false,
     },
   },

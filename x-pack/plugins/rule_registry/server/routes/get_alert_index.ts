@@ -27,8 +27,13 @@ export const getAlertsIndexRoute = (router: IRouter<RacRequestHandlerContext>) =
           )
         ),
       },
+      security: {
+        authz: {
+          requiredPrivileges: ['rac'],
+        },
+      },
       options: {
-        tags: ['access:rac'],
+        access: 'internal',
       },
     },
     async (context, request, response) => {

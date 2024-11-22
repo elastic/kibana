@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 export type IdField = z.infer<typeof IdField>;
 export const IdField = z.enum(['host.name', 'user.name']);
@@ -50,25 +50,40 @@ export type CreateAssetCriticalityRecord = z.infer<typeof CreateAssetCriticality
 export const CreateAssetCriticalityRecord = AssetCriticalityRecordIdParts.merge(
   z.object({
     criticality_level: AssetCriticalityLevel,
-    /**
-     * If 'wait_for' the request will wait for the index refresh.
-     */
-    refresh: z.literal('wait_for').optional(),
   })
 );
 
-export type DeleteAssetCriticalityRecord = z.infer<typeof DeleteAssetCriticalityRecord>;
-export const DeleteAssetCriticalityRecord = AssetCriticalityRecordIdParts.merge(
-  z.object({
-    /**
-     * If 'wait_for' the request will wait for the index refresh.
-     */
-    refresh: z.literal('wait_for').optional(),
-  })
-);
+export type AssetCriticalityRecordEcsParts = z.infer<typeof AssetCriticalityRecordEcsParts>;
+export const AssetCriticalityRecordEcsParts = z.object({
+  asset: z.object({
+    criticality: AssetCriticalityLevel.optional(),
+  }),
+  host: z
+    .object({
+      name: z.string(),
+      asset: z
+        .object({
+          criticality: AssetCriticalityLevel,
+        })
+        .optional(),
+    })
+    .optional(),
+  user: z
+    .object({
+      name: z.string(),
+      asset: z
+        .object({
+          criticality: AssetCriticalityLevel,
+        })
+        .optional(),
+    })
+    .optional(),
+});
 
 export type AssetCriticalityRecord = z.infer<typeof AssetCriticalityRecord>;
 export const AssetCriticalityRecord = CreateAssetCriticalityRecord.merge(
+  AssetCriticalityRecordEcsParts
+).merge(
   z.object({
     /**
      * The time the record was created or updated.

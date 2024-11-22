@@ -9,16 +9,13 @@ import { Logger } from '@kbn/core/server';
 import { PackageClient } from '@kbn/fleet-plugin/server';
 import { PackageNotFoundError } from '@kbn/fleet-plugin/server/errors';
 import { PackageListItem, RegistryDataStream } from '@kbn/fleet-plugin/common';
-import { DEFAULT_DATASET_TYPE } from '../../../common/constants';
-import { DataStreamType } from '../../../common/types';
-import { Integration } from '../../../common/api_types';
+import { IntegrationType } from '../../../common/api_types';
 
 export async function getIntegrations(options: {
   packageClient: PackageClient;
   logger: Logger;
-  type?: DataStreamType;
-}): Promise<Integration[]> {
-  const { packageClient, logger, type = DEFAULT_DATASET_TYPE } = options;
+}): Promise<IntegrationType[]> {
+  const { packageClient, logger } = options;
 
   const packages = await packageClient.getPackages();
   const installedPackages = packages.filter((p) => p.status === 'installed');
@@ -29,7 +26,7 @@ export async function getIntegrations(options: {
       title: p.title,
       version: p.version,
       icons: p.icons,
-      datasets: await getDatasets({ packageClient, logger, pkg: p, type }),
+      datasets: await getDatasets({ packageClient, logger, pkg: p }),
     }))
   );
 
@@ -40,9 +37,8 @@ const getDatasets = async (options: {
   packageClient: PackageClient;
   logger: Logger;
   pkg: PackageListItem;
-  type: DataStreamType;
 }) => {
-  const { packageClient, logger, pkg, type } = options;
+  const { packageClient, logger, pkg } = options;
 
   return (
     (await fetchDatasets({
@@ -50,7 +46,6 @@ const getDatasets = async (options: {
       logger,
       name: pkg.name,
       version: pkg.version,
-      type,
     })) ?? getDatasetsReadableName(pkg.data_streams ?? [])
   );
 };
@@ -60,16 +55,13 @@ const fetchDatasets = async (options: {
   logger: Logger;
   name: string;
   version: string;
-  type: DataStreamType;
 }) => {
   try {
-    const { packageClient, name, version, type } = options;
+    const { packageClient, name, version } = options;
 
     const pkg = await packageClient.getPackage(name, version);
 
-    return getDatasetsReadableName(
-      (pkg.packageInfo.data_streams ?? []).filter((ds) => ds.type === type)
-    );
+    return getDatasetsReadableName(pkg.packageInfo.data_streams ?? []);
   } catch (error) {
     // Custom integration
     if (error instanceof PackageNotFoundError) {

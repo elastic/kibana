@@ -8,12 +8,18 @@ import { EuiPanel, EuiSelectableOption, EuiText } from '@elastic/eui';
 import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { useGetSettings } from '../../slo_settings/use_get_settings';
+import { useGetSettings } from '../../slo_settings/hooks/use_get_settings';
 import type { SearchState } from '../hooks/use_url_search_state';
 import type { Option } from './slo_context_menu';
 import { ContextMenuItem, SLOContextMenu } from './slo_context_menu';
 
-export type GroupByField = 'ungrouped' | 'slo.tags' | 'status' | 'slo.indicator.type' | '_index';
+export type GroupByField =
+  | 'ungrouped'
+  | 'slo.tags'
+  | 'status'
+  | 'slo.indicator.type'
+  | 'slo.instanceId'
+  | '_index';
 export interface Props {
   onStateChange: (newState: Partial<SearchState>) => void;
   state: SearchState;
@@ -78,6 +84,16 @@ export function SloGroupBy({ onStateChange, state, loading }: Props) {
       value: 'slo.indicator.type',
       onClick: () => {
         handleChangeGroupBy('slo.indicator.type');
+      },
+    },
+    {
+      label: i18n.translate('xpack.slo.list.groupBy.sloInstanceId', {
+        defaultMessage: 'SLO instance id',
+      }),
+      checked: groupBy === 'slo.instanceId',
+      value: 'slo.instanceId',
+      onClick: () => {
+        handleChangeGroupBy('slo.instanceId');
       },
     },
   ];

@@ -1,6 +1,6 @@
 # Fields Metadata Plugin
 
-The `@kbn/fields-metadata-plugin` is designed to provide a centralized and asynchronous way to consume field metadata across Kibana. This plugin addresses the need for on-demand retrieval of field metadata from static ECS definitions and integration manifests, with the flexibility to extend to additional resolution sources in the future.
+The `@kbn/fields-metadata-plugin` is designed to provide a centralized and asynchronous way to consume field metadata across Kibana. This plugin addresses the need for on-demand retrieval of field metadata from static ECS/Metadata definitions and integration manifests, with the flexibility to extend to additional resolution sources in the future.
 
 ## Components and Mechanisms
 
@@ -54,6 +54,8 @@ const fields = await client.find({
 }
 */
 ```
+
+> The service will try to extract the integration and dataset name as they are conventionally named in their static definition, providing a much simpler usage of this API for integration fields.
 
 > N.B. Passing the `dataset` name parameter to `.find` helps narrowing the scope of the integration assets that need to be fetched, increasing the performance of the request. 
 In case the exact dataset for a field is unknown, is it still possible to pass a `*` value as `dataset` parameter to access all the integration datasets' fields. 

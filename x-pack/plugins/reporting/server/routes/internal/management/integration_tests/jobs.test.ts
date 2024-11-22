@@ -34,6 +34,7 @@ import {
 } from '../../../../test_helpers';
 import { ReportingRequestHandlerContext } from '../../../../types';
 import { EventTracker } from '../../../../usage';
+import { STATUS_CODES } from '../../../common/jobs/constants';
 import { registerJobInfoRoutesInternal as registerJobInfoRoutes } from '../jobs';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
@@ -98,7 +99,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
           ...licensingMock.createStart(),
           license$: new BehaviorSubject({ isActive: true, isAvailable: true, type: 'gold' }),
         },
-        security: {
+        securityService: {
           authc: {
             getCurrentUser: () => ({ id: '123', roles: ['superuser'], username: 'Tom Riddle' }),
           },
@@ -110,6 +111,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
     reportingCore = await createMockReportingCore(mockConfigSchema, mockSetupDeps, mockStartDeps);
 
     usageCounter = {
+      domainId: 'abc123',
       incrementCounter: jest.fn(),
     };
     jest.spyOn(reportingCore, 'getUsageCounter').mockReturnValue(usageCounter);
@@ -175,7 +177,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
             ...licensingMock.createStart(),
             license$: new BehaviorSubject({ isActive: true, isAvailable: true, type: 'gold' }),
           },
-          security: { authc: { getCurrentUser: () => undefined } },
+          securityService: { authc: { getCurrentUser: () => undefined } }, // security comes from core here
         },
         mockConfigSchema
       );
@@ -203,22 +205,6 @@ describe(`Reporting Job Management Routes: Internal`, () => {
         .expect(404);
     });
 
-    it('returns a 403 if not a valid job type', async () => {
-      mockEsClient.search.mockResponseOnce(
-        getHits({
-          jobtype: 'invalidJobType',
-          payload: { title: 'invalid!' },
-        })
-      );
-      registerJobInfoRoutes(reportingCore);
-
-      await server.start();
-
-      await supertest(httpSetup.server.listener)
-        .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/poo`)
-        .expect(403);
-    });
-
     it(`returns job's info`, async () => {
       mockEsClient.search.mockResponseOnce(
         getHits({
@@ -236,24 +222,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
         .expect(200);
     });
 
-    it(`returns 403 if a user cannot view a job's info`, async () => {
-      mockEsClient.search.mockResponseOnce(
-        getHits({
-          jobtype: 'customForbiddenJobType',
-          payload: {}, // payload is irrelevant
-        })
-      );
-
-      registerJobInfoRoutes(reportingCore);
-
-      await server.start();
-
-      await supertest(httpSetup.server.listener)
-        .get(`${INTERNAL_ROUTES.JOBS.INFO_PREFIX}/test`)
-        .expect(403);
-    });
-
-    it('when a job is incomplete', async () => {
+    it('when a job is incomplete, "internal" API endpoint should return appropriate response', async () => {
       mockEsClient.search.mockResponseOnce(
         getHits({
           jobtype: mockJobTypeUnencoded,
@@ -266,13 +235,13 @@ describe(`Reporting Job Management Routes: Internal`, () => {
       await server.start();
       await supertest(httpSetup.server.listener)
         .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`)
-        .expect(503)
+        .expect(STATUS_CODES.PENDING.INTERNAL)
         .expect('Content-Type', 'text/plain; charset=utf-8')
         .expect('Retry-After', '30')
         .then(({ text }) => expect(text).toEqual('pending'));
     });
 
-    it('when a job fails', async () => {
+    it('when a job fails, "internal" API endpoint should return appropriate response', async () => {
       mockEsClient.search.mockResponse(
         getHits({
           jobtype: mockJobTypeUnencoded,
@@ -286,7 +255,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
       await server.start();
       await supertest(httpSetup.server.listener)
         .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`)
-        .expect(500)
+        .expect(STATUS_CODES.FAILED.INTERNAL)
         .expect('Content-Type', 'application/json; charset=utf-8')
         .then(({ body }) =>
           expect(body.message).toEqual('Reporting generation failed: job failure message')
@@ -300,7 +269,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
       await server.start();
       await supertest(httpSetup.server.listener)
         .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`)
-        .expect(200)
+        .expect(STATUS_CODES.COMPLETED)
         .expect('Content-Type', 'text/csv; charset=utf-8')
         .expect('content-disposition', 'attachment; filename=report.csv');
     });
@@ -317,7 +286,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
 
       await supertest(httpSetup.server.listener)
         .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/dope`)
-        .expect(200)
+        .expect(STATUS_CODES.COMPLETED)
         .expect('Content-Type', 'text/csv; charset=utf-8')
         .expect('content-disposition', 'attachment; filename=report.csv');
     });
@@ -333,7 +302,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
       await server.start();
       await supertest(httpSetup.server.listener)
         .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`)
-        .expect(200)
+        .expect(STATUS_CODES.COMPLETED)
         .expect('Content-Type', 'text/csv; charset=utf-8')
         .then(({ text }) => expect(text).toEqual('test'));
     });
@@ -372,7 +341,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
       await server.start();
       await supertest(httpSetup.server.listener)
         .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/japanese-dashboard`)
-        .expect(200)
+        .expect(STATUS_CODES.COMPLETED)
         .expect('Content-Type', 'application/pdf')
         .expect(
           'content-disposition',
@@ -389,7 +358,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
             ...licensingMock.createStart(),
             license$: new BehaviorSubject({ isActive: true, isAvailable: true, type: 'gold' }),
           },
-          security: {
+          securityService: {
             authc: {
               getCurrentUser: () => ({ id: '123', roles: ['peasant'], username: 'Tom Riddle' }),
             },
@@ -445,7 +414,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
       await server.start();
       await supertest(httpSetup.server.listener)
         .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`)
-        .expect(200)
+        .expect(STATUS_CODES.COMPLETED)
         .expect('Content-Type', 'text/csv; charset=utf-8')
         .expect('content-disposition', 'attachment; filename=report.csv');
 

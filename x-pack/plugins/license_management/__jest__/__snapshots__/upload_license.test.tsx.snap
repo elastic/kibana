@@ -37,33 +37,29 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
         class="euiForm"
       >
         <div
-          class="euiFilePicker euiFilePicker--large euiFilePicker--fullWidth"
+          class="euiFilePicker emotion-euiFilePicker-fullWidth"
         >
+          <input
+            aria-describedby="licenseFile-filePicker__prompt"
+            class="euiFilePicker__input emotion-euiFilePicker__input-largeInteractive"
+            id="licenseFile"
+            type="file"
+          />
           <div
-            class="euiFilePicker__wrap"
+            class="euiFilePicker__prompt emotion-euiFilePicker__prompt-large"
+            id="licenseFile-filePicker__prompt"
           >
-            <input
-              aria-describedby="licenseFile-filePicker__prompt"
-              class="euiFilePicker__input"
-              id="licenseFile"
-              type="file"
+            <span
+              aria-hidden="true"
+              class="euiFilePicker__icon emotion-euiFilePicker__icon-large"
+              color="primary"
+              data-euiicon-type="importAction"
             />
-            <div
-              class="euiFilePicker__prompt"
-              id="licenseFile-filePicker__prompt"
+            <span
+              class="euiFilePicker__promptText"
             >
-              <span
-                aria-hidden="true"
-                class="euiFilePicker__icon"
-                color="primary"
-                data-euiicon-type="importAction"
-              />
-              <div
-                class="euiFilePicker__promptText"
-              >
-                Select or drag your license file
-              </div>
-            </div>
+              Select or drag your license file
+            </span>
           </div>
         </div>
         <div
@@ -180,33 +176,32 @@ exports[`UploadLicense should display an error when ES says license is expired 1
           </div>
         </div>
         <div
-          class="euiFilePicker euiFilePicker--large euiFilePicker--fullWidth"
+          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+        />
+        <div
+          class="euiFilePicker emotion-euiFilePicker-fullWidth"
         >
+          <input
+            aria-describedby="licenseFile-filePicker__prompt"
+            class="euiFilePicker__input emotion-euiFilePicker__input-largeInteractive"
+            id="licenseFile"
+            type="file"
+          />
           <div
-            class="euiFilePicker__wrap"
+            class="euiFilePicker__prompt emotion-euiFilePicker__prompt-large"
+            id="licenseFile-filePicker__prompt"
           >
-            <input
-              aria-describedby="licenseFile-filePicker__prompt"
-              class="euiFilePicker__input"
-              id="licenseFile"
-              type="file"
+            <span
+              aria-hidden="true"
+              class="euiFilePicker__icon emotion-euiFilePicker__icon-large"
+              color="primary"
+              data-euiicon-type="importAction"
             />
-            <div
-              class="euiFilePicker__prompt"
-              id="licenseFile-filePicker__prompt"
+            <span
+              class="euiFilePicker__promptText"
             >
-              <span
-                aria-hidden="true"
-                class="euiFilePicker__icon"
-                color="primary"
-                data-euiicon-type="importAction"
-              />
-              <div
-                class="euiFilePicker__promptText"
-              >
-                Select or drag your license file
-              </div>
-            </div>
+              Select or drag your license file
+            </span>
           </div>
         </div>
         <div
@@ -323,33 +318,32 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
           </div>
         </div>
         <div
-          class="euiFilePicker euiFilePicker--large euiFilePicker--fullWidth"
+          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+        />
+        <div
+          class="euiFilePicker emotion-euiFilePicker-fullWidth"
         >
+          <input
+            aria-describedby="licenseFile-filePicker__prompt"
+            class="euiFilePicker__input emotion-euiFilePicker__input-largeInteractive"
+            id="licenseFile"
+            type="file"
+          />
           <div
-            class="euiFilePicker__wrap"
+            class="euiFilePicker__prompt emotion-euiFilePicker__prompt-large"
+            id="licenseFile-filePicker__prompt"
           >
-            <input
-              aria-describedby="licenseFile-filePicker__prompt"
-              class="euiFilePicker__input"
-              id="licenseFile"
-              type="file"
+            <span
+              aria-hidden="true"
+              class="euiFilePicker__icon emotion-euiFilePicker__icon-large"
+              color="primary"
+              data-euiicon-type="importAction"
             />
-            <div
-              class="euiFilePicker__prompt"
-              id="licenseFile-filePicker__prompt"
+            <span
+              class="euiFilePicker__promptText"
             >
-              <span
-                aria-hidden="true"
-                class="euiFilePicker__icon"
-                color="primary"
-                data-euiicon-type="importAction"
-              />
-              <div
-                class="euiFilePicker__promptText"
-              >
-                Select or drag your license file
-              </div>
-            </div>
+              Select or drag your license file
+            </span>
           </div>
         </div>
         <div
@@ -466,33 +460,32 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
           </div>
         </div>
         <div
-          class="euiFilePicker euiFilePicker--large euiFilePicker--fullWidth"
+          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+        />
+        <div
+          class="euiFilePicker emotion-euiFilePicker-fullWidth"
         >
+          <input
+            aria-describedby="licenseFile-filePicker__prompt"
+            class="euiFilePicker__input emotion-euiFilePicker__input-largeInteractive"
+            id="licenseFile"
+            type="file"
+          />
           <div
-            class="euiFilePicker__wrap"
+            class="euiFilePicker__prompt emotion-euiFilePicker__prompt-large"
+            id="licenseFile-filePicker__prompt"
           >
-            <input
-              aria-describedby="licenseFile-filePicker__prompt"
-              class="euiFilePicker__input"
-              id="licenseFile"
-              type="file"
+            <span
+              aria-hidden="true"
+              class="euiFilePicker__icon emotion-euiFilePicker__icon-large"
+              color="primary"
+              data-euiicon-type="importAction"
             />
-            <div
-              class="euiFilePicker__prompt"
-              id="licenseFile-filePicker__prompt"
+            <span
+              class="euiFilePicker__promptText"
             >
-              <span
-                aria-hidden="true"
-                class="euiFilePicker__icon"
-                color="primary"
-                data-euiicon-type="importAction"
-              />
-              <div
-                class="euiFilePicker__promptText"
-              >
-                Select or drag your license file
-              </div>
-            </div>
+              Select or drag your license file
+            </span>
           </div>
         </div>
         <div
@@ -609,33 +602,32 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
           </div>
         </div>
         <div
-          class="euiFilePicker euiFilePicker--large euiFilePicker--fullWidth"
+          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+        />
+        <div
+          class="euiFilePicker emotion-euiFilePicker-fullWidth"
         >
+          <input
+            aria-describedby="licenseFile-filePicker__prompt"
+            class="euiFilePicker__input emotion-euiFilePicker__input-largeInteractive"
+            id="licenseFile"
+            type="file"
+          />
           <div
-            class="euiFilePicker__wrap"
+            class="euiFilePicker__prompt emotion-euiFilePicker__prompt-large"
+            id="licenseFile-filePicker__prompt"
           >
-            <input
-              aria-describedby="licenseFile-filePicker__prompt"
-              class="euiFilePicker__input"
-              id="licenseFile"
-              type="file"
+            <span
+              aria-hidden="true"
+              class="euiFilePicker__icon emotion-euiFilePicker__icon-large"
+              color="primary"
+              data-euiicon-type="importAction"
             />
-            <div
-              class="euiFilePicker__prompt"
-              id="licenseFile-filePicker__prompt"
+            <span
+              class="euiFilePicker__promptText"
             >
-              <span
-                aria-hidden="true"
-                class="euiFilePicker__icon"
-                color="primary"
-                data-euiicon-type="importAction"
-              />
-              <div
-                class="euiFilePicker__promptText"
-              >
-                Select or drag your license file
-              </div>
-            </div>
+              Select or drag your license file
+            </span>
           </div>
         </div>
         <div

@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { i18n } from '@kbn/i18n';
-import levenshtein from 'js-levenshtein';
+import { distance } from 'fastest-levenshtein';
 import type { AstProviderFn, ESQLAst, EditorError, ESQLMessage } from '@kbn/esql-ast';
 import { uniqBy } from 'lodash';
 import {
@@ -18,6 +20,7 @@ import {
   getAllFunctions,
   getCommandDefinition,
   isColumnItem,
+  isIdentifier,
   isSourceItem,
   shouldBeQuotedText,
 } from '../shared/helpers';
@@ -90,8 +93,7 @@ function createAction(title: string, solution: string, error: EditorError): Code
 async function getSpellingPossibilities(fn: () => Promise<string[]>, errorText: string) {
   const allPossibilities = await fn();
   const allSolutions = allPossibilities.reduce((solutions, item) => {
-    const distance = levenshtein(item, errorText);
-    if (distance < 3) {
+    if (distance(item, errorText) < 3) {
       solutions.push(item);
     }
     return solutions;
@@ -113,7 +115,7 @@ async function getSpellingActionForColumns(
   }
   // @TODO add variables support
   const possibleFields = await getSpellingPossibilities(async () => {
-    const availableFields = await getFieldsByType('any');
+    const availableFields = (await getFieldsByType('any')).map(({ name }) => name);
     const enrichPolicies = ast.filter(({ name }) => name === 'enrich');
     if (enrichPolicies.length) {
       const enrichPolicyNames = enrichPolicies.flatMap(({ args }) =>
@@ -137,7 +139,7 @@ function extractUnquotedFieldText(
   if (errorType === 'syntaxError') {
     // scope it down to column items for now
     const { node } = getAstContext(query, ast, possibleStart - 1);
-    if (node && isColumnItem(node)) {
+    if (node && (isColumnItem(node) || isIdentifier(node))) {
       return {
         start: node.location.min + 1,
         name: query.substring(node.location.min, end).trimEnd(),
@@ -210,7 +212,7 @@ async function getQuotableActionForColumns(
         )
       );
     } else {
-      const availableFields = new Set(await getFieldsByType('any'));
+      const availableFields = new Set((await getFieldsByType('any')).map(({ name }) => name));
       if (availableFields.has(errorText) || availableFields.has(solution)) {
         actions.push(
           createAction(
@@ -306,8 +308,8 @@ async function getSpellingActionForMetadata(
 ) {
   const errorText = queryString.substring(error.startColumn - 1, error.endColumn - 1);
   const allSolutions = METADATA_FIELDS.reduce((solutions, item) => {
-    const distance = levenshtein(item, errorText);
-    if (distance < 3) {
+    const dist = distance(item, errorText);
+    if (dist < 3) {
       solutions.push(item);
     }
     return solutions;
@@ -378,7 +380,7 @@ function inferCodeFromError(
   if (error.message.startsWith('SyntaxError: token recognition error at:')) {
     // scope it down to column items for now
     const { node } = getAstContext(rawText, ast, error.startColumn - 2);
-    return node && isColumnItem(node) ? 'quotableFields' : undefined;
+    return node && (isColumnItem(node) || isIdentifier(node)) ? 'quotableFields' : undefined;
   }
 }
 
@@ -402,7 +404,7 @@ export async function getActions(
   const { getPolicies, getPolicyFields } = getPolicyRetriever(resourceRetriever);
 
   const callbacks = {
-    getFieldsByType: resourceRetriever?.getFieldsFor ? getFieldsByType : undefined,
+    getFieldsByType: resourceRetriever?.getColumnsFor ? getFieldsByType : undefined,
     getSources: resourceRetriever?.getSources ? getSources : undefined,
     getPolicies: resourceRetriever?.getPolicies ? getPolicies : undefined,
     getPolicyFields: resourceRetriever?.getPolicies ? getPolicyFields : undefined,

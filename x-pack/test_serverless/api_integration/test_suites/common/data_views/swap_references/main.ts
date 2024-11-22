@@ -30,7 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('main', () => {
     const kibanaServer = getService('kibanaServer');
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
       const result = await supertestWithoutAuth
         .post(DATA_VIEW_PATH)
@@ -46,7 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
         .set(internalReqHeader)
         .set(roleAuthc.apiKeyHeader);
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
     beforeEach(async () => {
       await kibanaServer.importExport.load(

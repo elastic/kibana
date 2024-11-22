@@ -38,9 +38,16 @@ import type { ThreeVersionsOf } from '../../../../../../../common/api/detection_
 import { MissingVersion } from '../../../../../../../common/api/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_diff';
 import { calculateFieldsDiffFor } from './diff_calculation_helpers';
 import {
+  dataSourceDiffAlgorithm,
+  multiLineStringDiffAlgorithm,
   numberDiffAlgorithm,
+  scalarArrayDiffAlgorithm,
   simpleDiffAlgorithm,
   singleLineStringDiffAlgorithm,
+  kqlQueryDiffAlgorithm,
+  eqlQueryDiffAlgorithm,
+  esqlQueryDiffAlgorithm,
+  ruleTypeDiffAlgorithm,
 } from './algorithms';
 
 const BASE_TYPE_ERROR = `Base version can't be of different rule type`;
@@ -173,32 +180,27 @@ const calculateCommonFieldsDiff = (
 const commonFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableCommonFields> = {
   rule_id: simpleDiffAlgorithm,
   version: numberDiffAlgorithm,
-  meta: simpleDiffAlgorithm,
   name: singleLineStringDiffAlgorithm,
-  tags: simpleDiffAlgorithm,
-  description: simpleDiffAlgorithm,
+  tags: scalarArrayDiffAlgorithm,
+  description: multiLineStringDiffAlgorithm,
   severity: singleLineStringDiffAlgorithm,
   severity_mapping: simpleDiffAlgorithm,
   risk_score: numberDiffAlgorithm,
   risk_score_mapping: simpleDiffAlgorithm,
-  references: simpleDiffAlgorithm,
+  references: scalarArrayDiffAlgorithm,
   false_positives: simpleDiffAlgorithm,
   threat: simpleDiffAlgorithm,
-  note: simpleDiffAlgorithm,
-  setup: simpleDiffAlgorithm,
+  note: multiLineStringDiffAlgorithm,
+  setup: multiLineStringDiffAlgorithm,
   related_integrations: simpleDiffAlgorithm,
   required_fields: simpleDiffAlgorithm,
-  author: simpleDiffAlgorithm,
-  license: singleLineStringDiffAlgorithm,
   rule_schedule: simpleDiffAlgorithm,
-  actions: simpleDiffAlgorithm,
-  throttle: simpleDiffAlgorithm,
-  exceptions_list: simpleDiffAlgorithm,
   max_signals: numberDiffAlgorithm,
   rule_name_override: simpleDiffAlgorithm,
   timestamp_override: simpleDiffAlgorithm,
   timeline_template: simpleDiffAlgorithm,
   building_block: simpleDiffAlgorithm,
+  investigation_fields: simpleDiffAlgorithm,
 };
 
 const calculateCustomQueryFieldsDiff = (
@@ -208,9 +210,9 @@ const calculateCustomQueryFieldsDiff = (
 };
 
 const customQueryFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableCustomQueryFields> = {
-  type: simpleDiffAlgorithm,
-  kql_query: simpleDiffAlgorithm,
-  data_source: simpleDiffAlgorithm,
+  type: ruleTypeDiffAlgorithm,
+  kql_query: kqlQueryDiffAlgorithm,
+  data_source: dataSourceDiffAlgorithm,
   alert_suppression: simpleDiffAlgorithm,
 };
 
@@ -221,9 +223,9 @@ const calculateSavedQueryFieldsDiff = (
 };
 
 const savedQueryFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableSavedQueryFields> = {
-  type: simpleDiffAlgorithm,
-  kql_query: simpleDiffAlgorithm,
-  data_source: simpleDiffAlgorithm,
+  type: ruleTypeDiffAlgorithm,
+  kql_query: kqlQueryDiffAlgorithm,
+  data_source: dataSourceDiffAlgorithm,
   alert_suppression: simpleDiffAlgorithm,
 };
 
@@ -234,12 +236,10 @@ const calculateEqlFieldsDiff = (
 };
 
 const eqlFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableEqlFields> = {
-  type: simpleDiffAlgorithm,
-  eql_query: simpleDiffAlgorithm,
-  data_source: simpleDiffAlgorithm,
-  event_category_override: singleLineStringDiffAlgorithm,
-  timestamp_field: singleLineStringDiffAlgorithm,
-  tiebreaker_field: singleLineStringDiffAlgorithm,
+  type: ruleTypeDiffAlgorithm,
+  eql_query: eqlQueryDiffAlgorithm,
+  data_source: dataSourceDiffAlgorithm,
+  alert_suppression: simpleDiffAlgorithm,
 };
 
 const calculateEsqlFieldsDiff = (
@@ -249,8 +249,9 @@ const calculateEsqlFieldsDiff = (
 };
 
 const esqlFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableEsqlFields> = {
-  type: simpleDiffAlgorithm,
-  esql_query: simpleDiffAlgorithm,
+  type: ruleTypeDiffAlgorithm,
+  esql_query: esqlQueryDiffAlgorithm,
+  alert_suppression: simpleDiffAlgorithm,
 };
 
 const calculateThreatMatchFieldsDiff = (
@@ -260,15 +261,15 @@ const calculateThreatMatchFieldsDiff = (
 };
 
 const threatMatchFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableThreatMatchFields> = {
-  type: simpleDiffAlgorithm,
-  kql_query: simpleDiffAlgorithm,
-  data_source: simpleDiffAlgorithm,
-  threat_query: simpleDiffAlgorithm,
-  threat_index: simpleDiffAlgorithm,
+  type: ruleTypeDiffAlgorithm,
+  kql_query: kqlQueryDiffAlgorithm,
+  data_source: dataSourceDiffAlgorithm,
+  threat_query: kqlQueryDiffAlgorithm,
+  threat_index: scalarArrayDiffAlgorithm,
   threat_mapping: simpleDiffAlgorithm,
   threat_indicator_path: singleLineStringDiffAlgorithm,
-  concurrent_searches: simpleDiffAlgorithm,
-  items_per_search: simpleDiffAlgorithm,
+  threat_language: simpleDiffAlgorithm,
+  alert_suppression: simpleDiffAlgorithm,
 };
 
 const calculateThresholdFieldsDiff = (
@@ -278,10 +279,11 @@ const calculateThresholdFieldsDiff = (
 };
 
 const thresholdFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableThresholdFields> = {
-  type: simpleDiffAlgorithm,
-  kql_query: simpleDiffAlgorithm,
-  data_source: simpleDiffAlgorithm,
+  type: ruleTypeDiffAlgorithm,
+  kql_query: kqlQueryDiffAlgorithm,
+  data_source: dataSourceDiffAlgorithm,
   threshold: simpleDiffAlgorithm,
+  alert_suppression: simpleDiffAlgorithm,
 };
 
 const calculateMachineLearningFieldsDiff = (
@@ -292,9 +294,10 @@ const calculateMachineLearningFieldsDiff = (
 
 const machineLearningFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableMachineLearningFields> =
   {
-    type: simpleDiffAlgorithm,
+    type: ruleTypeDiffAlgorithm,
     machine_learning_job_id: simpleDiffAlgorithm,
     anomaly_threshold: numberDiffAlgorithm,
+    alert_suppression: simpleDiffAlgorithm,
   };
 
 const calculateNewTermsFieldsDiff = (
@@ -304,11 +307,12 @@ const calculateNewTermsFieldsDiff = (
 };
 
 const newTermsFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableNewTermsFields> = {
-  type: simpleDiffAlgorithm,
-  kql_query: simpleDiffAlgorithm,
-  data_source: simpleDiffAlgorithm,
-  new_terms_fields: simpleDiffAlgorithm,
+  type: ruleTypeDiffAlgorithm,
+  kql_query: kqlQueryDiffAlgorithm,
+  data_source: dataSourceDiffAlgorithm,
+  new_terms_fields: scalarArrayDiffAlgorithm,
   history_window_start: singleLineStringDiffAlgorithm,
+  alert_suppression: simpleDiffAlgorithm,
 };
 
 const calculateAllFieldsDiff = (
@@ -327,5 +331,5 @@ const allFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableAllFields> = {
   ...thresholdFieldsDiffAlgorithms,
   ...machineLearningFieldsDiffAlgorithms,
   ...newTermsFieldsDiffAlgorithms,
-  type: simpleDiffAlgorithm,
+  type: ruleTypeDiffAlgorithm,
 };

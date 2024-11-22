@@ -14,7 +14,6 @@ import type { EuiBreadcrumb, EuiBasicTableColumn, EuiSearchBarProps } from '@ela
 import { EuiSpacer, EuiText, EuiInMemoryTable } from '@elastic/eui';
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
-import { StyledPanel } from '../styles';
 import { BoldCode, StyledTime } from './styles';
 import { GeneratedText } from '../generated_text';
 import {
@@ -73,9 +72,7 @@ export const EventDetail = memo(function EventDetail({
   );
 
   return isLoading ? (
-    <StyledPanel hasBorder>
-      <PanelLoading id={id} />
-    </StyledPanel>
+    <PanelLoading id={id} />
   ) : event ? (
     <EventDetailContents
       id={id}
@@ -85,9 +82,7 @@ export const EventDetail = memo(function EventDetail({
       eventType={eventType}
     />
   ) : (
-    <StyledPanel hasBorder>
-      <PanelContentError id={id} translatedErrorMessage={eventDetailRequestError} />
-    </StyledPanel>
+    <PanelContentError id={id} translatedErrorMessage={eventDetailRequestError} />
   );
 });
 
@@ -122,7 +117,7 @@ const EventDetailContents = memo(function ({
   const nodeName = processEvent ? eventModel.processNameSafeVersion(processEvent) : null;
 
   return (
-    <StyledPanel hasBorder data-test-subj="resolver:panel:event-detail">
+    <div data-test-subj="resolver:panel:event-detail">
       <EventDetailBreadcrumbs
         id={id}
         nodeID={nodeID}
@@ -158,7 +153,7 @@ const EventDetailContents = memo(function ({
       </StyledDescriptiveName>
       <EuiSpacer size="l" />
       <EventDetailFields event={event} id={id} />
-    </StyledPanel>
+    </div>
   );
 });
 

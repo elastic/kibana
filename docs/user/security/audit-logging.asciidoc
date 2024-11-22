@@ -17,20 +17,20 @@ by cluster-wide privileges. For more information on enabling audit logging in
 Audit logs are **disabled** by default. To enable this functionality, you must
 set `xpack.security.audit.enabled` to `true` in `kibana.yml`.
 
-You can optionally configure audit logs location, file/rolling file appenders and 
+You can optionally configure audit logs location, file/rolling file appenders and
 ignore filters using <<audit-logging-settings>>.
 ============================================================================
 
 [[xpack-security-ecs-audit-logging]]
 ==== Audit events
 
-Refer to the table of events that can be logged for auditing purposes. 
+Refer to the table of events that can be logged for auditing purposes.
 
 Each event is broken down into <<field-event-category, category>>, <<field-event-type, type>>, <<field-event-action, action>> and
 <<field-event-outcome, outcome>> fields to make it easy to filter, query and aggregate the resulting logs. The <<field-trace-id, trace.id>>
 field can be used to correlate multiple events that originate from the same request.
 
-Refer to <<xpack-security-ecs-audit-schema>> for a table of fields that get logged with audit event. 
+Refer to <<xpack-security-ecs-audit-schema>> for a table of fields that get logged with audit event.
 
 [NOTE]
 ============================================================================
@@ -115,6 +115,41 @@ Refer to the corresponding {es} logs for potential write errors.
 
 .1+| `case_user_action_create_case`
 | `success` | User has created a case.
+
+.2+| `ml_put_ad_job`
+| `success` | Creating anomaly detection job.
+| `failure` | Failed to create anomaly detection job.
+
+.2+| `ml_put_ad_datafeed`
+| `success` | Creating anomaly detection datafeed.
+| `failure` | Failed to create anomaly detection datafeed.
+
+.2+| `ml_put_calendar`
+| `success` | Creating calendar.
+| `failure` | Failed to create calendar.
+
+.2+| `ml_post_calendar_events`
+| `success` | Adding events to calendar.
+| `failure` | Failed to add events to calendar.
+
+.2+| `ml_forecast`
+| `success` | Creating anomaly detection forecast.
+| `failure` | Failed to create anomaly detection forecast.
+
+.2+| `ml_put_filter`
+| `success` | Creating filter.
+| `failure` | Failed to create filter.
+
+.2+| `ml_put_dfa_job`
+| `success` | Creating data frame analytics job.
+| `failure` | Failed to create data frame analytics job.
+
+.2+| `ml_put_trained_model`
+| `success` | Creating trained model.
+| `failure` | Failed to create trained model.
+
+.1+| `product_documentation_create`
+| `unknown` | User requested to install the product documentation for use in AI Assistants.
 
 3+a|
 ====== Type: change
@@ -234,6 +269,77 @@ Refer to the corresponding {es} logs for potential write errors.
 .1+| `case_user_action_update_case_title`
 | `success` | User has updated the case title.
 
+.2+| `ml_open_ad_job`
+| `success` | Opening anomaly detection job.
+| `failure` | Failed to open anomaly detection job.
+
+.2+| `ml_close_ad_job`
+| `success` | Closing anomaly detection job.
+| `failure` | Failed to close anomaly detection job.
+
+.2+| `ml_start_ad_datafeed`
+| `success` | Starting anomaly detection datafeed.
+| `failure` | Failed to start anomaly detection datafeed.
+
+.2+| `ml_stop_ad_datafeed`
+| `success` | Stopping anomaly detection datafeed.
+| `failure` | Failed to stop anomaly detection datafeed.
+
+.2+| `ml_update_ad_job`
+| `success` | Updating anomaly detection job.
+| `failure` | Failed to update anomaly detection job.
+
+.2+| `ml_reset_ad_job`
+| `success` | Resetting anomaly detection job.
+| `failure` | Failed to reset anomaly detection job.
+
+.2+| `ml_revert_ad_snapshot`
+| `success` | Reverting anomaly detection snapshot.
+| `failure` | Failed to revert anomaly detection snapshot.
+
+.2+| `ml_update_ad_datafeed`
+| `success` | Updating anomaly detection datafeed.
+| `failure` | Failed to update anomaly detection datafeed.
+
+.2+| `ml_put_calendar_job`
+| `success` | Adding job to calendar.
+| `failure` | Failed to add job to calendar.
+
+.2+| `ml_delete_calendar_job`
+| `success` | Removing job from calendar.
+| `failure` | Failed to remove job from calendar.
+
+.2+| `ml_update_filter`
+| `success` | Updating filter.
+| `failure` | Failed to update filter.
+
+.2+| `ml_start_dfa_job`
+| `success` | Starting data frame analytics job.
+| `failure` | Failed to start data frame analytics job.
+
+.2+| `ml_stop_dfa_job`
+| `success` | Stopping data frame analytics job.
+| `failure` | Failed to stop data frame analytics job.
+
+.2+| `ml_update_dfa_job`
+| `success` | Updating data frame analytics job.
+| `failure` | Failed to update data frame analytics job.
+
+.2+| `ml_start_trained_model_deployment`
+| `success` | Starting trained model deployment.
+| `failure` | Failed to start trained model deployment.
+
+.2+| `ml_stop_trained_model_deployment`
+| `success` | Stopping trained model deployment.
+| `failure` | Failed to stop trained model deployment.
+
+.2+| `ml_update_trained_model_deployment`
+| `success` | Updating trained model deployment.
+| `failure` | Failed to update trained model deployment.
+
+.1+| `product_documentation_update`
+| `unknown` | User requested to update the product documentation for use in AI Assistants.
+
 3+a|
 ====== Type: deletion
 
@@ -288,6 +394,45 @@ Refer to the corresponding {es} logs for potential write errors.
 
 .1+| `case_user_action_delete_case_tags`
 | `success` | User has removed tags from a case.
+
+.2+| `ml_delete_ad_job`
+| `success` | Deleting anomaly detection job.
+| `failure` | Failed to delete anomaly detection job.
+
+.2+| `ml_delete_model_snapshot`
+| `success` | Deleting model snapshot.
+| `failure` | Failed to delete model snapshot.
+
+.2+| `ml_delete_ad_datafeed`
+| `success` | Deleting anomaly detection datafeed.
+| `failure` | Failed to delete anomaly detection datafeed.
+
+.2+| `ml_delete_calendar`
+| `success` | Deleting calendar.
+| `failure` | Failed to delete calendar.
+
+.2+| `ml_delete_calendar_event`
+| `success` | Deleting calendar event.
+| `failure` | Failed to delete calendar event.
+
+.2+| `ml_delete_filter`
+| `success` | Deleting filter.
+| `failure` | Failed to delete filter.
+
+.2+| `ml_delete_forecast`
+| `success` | Deleting forecast.
+| `failure` | Failed to delete forecast.
+
+.2+| `ml_delete_dfa_job`
+| `success` | Deleting data frame analytics job.
+| `failure` | Failed to delete data frame analytics job.
+
+.2+| `ml_delete_trained_model`
+| `success` | Deleting trained model.
+| `failure` | Failed to delete trained model.
+
+.1+| `product_documentation_delete`
+| `unknown` | User requested to delete the product documentation for use in AI Assistants.
 
 3+a|
 ====== Type: access
@@ -448,6 +593,10 @@ Refer to the corresponding {es} logs for potential write errors.
 | `success` | User has accessed the connectors of a case.
 | `failure` | User is not authorized to access the connectors of a case.
 
+.2+| `ml_infer_trained_model`
+| `success` | Inferring using trained model.
+| `failure` | Failed to infer using trained model.
+
 3+a|
 ===== Category: web
 
@@ -474,12 +623,12 @@ Audit logs are written in JSON using https://www.elastic.co/guide/en/ecs/1.6/ind
 | *Description*
 
 | `@timestamp`
-| Time when the event was generated. 
+| Time when the event was generated.
 
 Example: `2016-05-23T08:05:34.853Z`
 
 | `message`
-| Human readable description of the event. 
+| Human readable description of the event.
 
 2+a| ===== Event Fields
 
@@ -489,7 +638,7 @@ Example: `2016-05-23T08:05:34.853Z`
 | [[field-event-action]] `event.action`
 | The action captured by the event.
 
-Refer to <<xpack-security-ecs-audit-logging>> for a table of possible actions. 
+Refer to <<xpack-security-ecs-audit-logging>> for a table of possible actions.
 
 | [[field-event-category]] `event.category`
 | High level category associated with the event.
@@ -513,7 +662,7 @@ Possible values:
 `deletion`
 
 | [[field-event-outcome]] `event.outcome`
-a| Denotes whether the event represents a success or failure: 
+a| Denotes whether the event represents a success or failure:
 
 * Any actions that the user is not authorized to perform are logged with outcome:  `failure`
 * Authorized read operations are only logged after successfully fetching the data from {es} with outcome: `success`
@@ -553,7 +702,7 @@ Example: `[kibana_admin, reporting_user]`
 Example: `default`
 
 | `kibana.session_id`
-| ID of the user session associated with the event. 
+| ID of the user session associated with the event.
 
 Each login attempt results in a unique session id.
 
@@ -604,7 +753,7 @@ Example: `[marketing]`
 | Error code describing the error.
 
 | `error.message`
-| Error message. 
+| Error message.
 
 2+a| ===== HTTP and URL Fields
 

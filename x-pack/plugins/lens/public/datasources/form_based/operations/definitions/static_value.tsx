@@ -7,7 +7,7 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
-import { useDebouncedValue } from '@kbn/visualization-ui-components';
+import { useDebouncedValue } from '@kbn/visualization-utils';
 import { OperationDefinition } from '.';
 import {
   ReferenceBasedIndexPatternColumn,
@@ -167,7 +167,7 @@ export const staticValueOperation: OperationDefinition<
     paramEditorCustomProps,
   }) {
     const onChange = useCallback(
-      (newValue) => {
+      (newValue?: string) => {
         // even if debounced it's triggering for empty string with the previous valid value
         if (
           currentColumn.params.value === newValue ||

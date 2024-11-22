@@ -6,10 +6,10 @@
  */
 
 import { join as joinPath } from 'path';
-import type { InputTypes } from '../../common';
-import { ensureDirSync, createSync, readSync } from '../util';
+import type { InputType } from '../../common';
+import { createSync, ensureDirSync, readSync } from '../util';
 
-export function createAgentInput(specificDataStreamDir: string, inputTypes: InputTypes[]): void {
+export function createAgentInput(specificDataStreamDir: string, inputTypes: InputType[]): void {
   const agentDir = joinPath(specificDataStreamDir, 'agent', 'stream');
   const agentTemplatesDir = joinPath(__dirname, '../templates/agent');
   ensureDirSync(agentDir);

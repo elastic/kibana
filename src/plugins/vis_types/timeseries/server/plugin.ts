@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -26,7 +27,7 @@ import type { PluginStart as DataViewsPublicPluginStart } from '@kbn/data-views-
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import type { VisualizationsServerSetup } from '@kbn/visualizations-plugin/server';
 import { VIS_TYPE } from '../common/constants';
-import { VisTypeTimeseriesConfig } from '../config';
+import { VisTypeTimeseriesConfig } from './config';
 import { getVisData } from './lib/get_vis_data';
 import { visDataRoutes } from './routes/vis';
 import { fieldsRoutes } from './routes/fields';

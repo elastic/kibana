@@ -5,20 +5,12 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
-import { ReactWrapper } from 'enzyme';
+import React from 'react';
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { EditorFrame, EditorFrameProps } from './editor_frame';
-import {
-  DatasourceMap,
-  DatasourcePublicAPI,
-  DatasourceSuggestion,
-  Visualization,
-  VisualizationMap,
-} from '../../types';
-import { act } from '@testing-library/react';
+import { DatasourceMap, DatasourcePublicAPI, Visualization, VisualizationMap } from '../../types';
 import { coreMock } from '@kbn/core/public/mocks';
 import {
   createMockVisualization,
@@ -29,29 +21,15 @@ import {
   renderWithReduxStore,
 } from '../../mocks';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
-import { Droppable, useDragDropContext } from '@kbn/dom-drag-drop';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
-import { mockDataPlugin, mountWithProvider } from '../../mocks';
+import { mockDataPlugin } from '../../mocks';
 import { LensAppState, setState } from '../../state_management';
 import { getLensInspectorService } from '../../lens_inspector_service';
 import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-
-function generateSuggestion(state = {}): DatasourceSuggestion {
-  return {
-    state,
-    table: {
-      columns: [],
-      isMultiRow: true,
-      layerId: 'first',
-      changeType: 'unchanged',
-    },
-    keptLayerIds: ['first'],
-  };
-}
 
 function wrapDataViewsContract() {
   const dataViewsContract = dataViewPluginMocks.createStartContract();
@@ -424,7 +402,7 @@ describe('editor_frame', () => {
       };
 
       renderEditorFrame();
-      userEvent.click(screen.getByLabelText(/Suggestion1/i));
+      await userEvent.click(screen.getByLabelText(/Suggestion1/i));
 
       expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
@@ -436,227 +414,6 @@ describe('editor_frame', () => {
           state: newDatasourceState,
         })
       );
-    });
-    describe('legacy tests', () => {
-      let instance: ReactWrapper;
-
-      afterEach(() => {
-        instance.unmount();
-      });
-
-      // this test doesn't test anything, it's buggy and should be rewritten when we find a way to user test drag and drop
-      it.skip('should switch to best suggested visualization on field drop', async () => {
-        const suggestionVisState = {};
-
-        visualizationMap = {
-          testVis: {
-            ...mockVisualization,
-            getSuggestions: () => [
-              {
-                score: 0.2,
-                state: {},
-                title: 'Suggestion1',
-                previewIcon: 'empty',
-              },
-              {
-                score: 0.8,
-                state: suggestionVisState,
-                title: 'Suggestion2',
-                previewIcon: 'empty',
-              },
-            ],
-          },
-          testVis2: mockVisualization2,
-        };
-        datasourceMap = {
-          testDatasource: {
-            ...mockDatasource,
-            getDatasourceSuggestionsForField: () => [generateSuggestion()],
-            getDatasourceSuggestionsFromCurrentState: () => [generateSuggestion()],
-            getDatasourceSuggestionsForVisualizeField: () => [generateSuggestion()],
-          },
-        };
-        renderEditorFrame();
-
-        mockVisualization.getConfiguration.mockClear();
-        act(() => {
-          instance.find('[data-test-subj="lnsWorkspace"]').last().simulate('drop');
-        });
-
-        expect(mockVisualization.getConfiguration).toHaveBeenCalledWith(
-          expect.objectContaining({
-            state: {},
-          })
-        );
-      });
-
-      it('should use the currently selected visualization if possible on field drop', async () => {
-        mockDatasource.getLayers.mockReturnValue(['first', 'second', 'third']);
-        const suggestionVisState = {};
-        const props = {
-          ...getDefaultProps(),
-          visualizationMap: {
-            testVis: {
-              ...mockVisualization,
-              getSuggestions: () => [
-                {
-                  score: 0.2,
-                  state: {},
-                  title: 'Suggestion1',
-                  previewIcon: 'empty',
-                },
-                {
-                  score: 0.6,
-                  state: suggestionVisState,
-                  title: 'Suggestion2',
-                  previewIcon: 'empty',
-                },
-              ],
-            },
-            testVis2: {
-              ...mockVisualization2,
-              getSuggestions: () => [
-                {
-                  score: 0.8,
-                  state: {},
-                  title: 'Suggestion3',
-                  previewIcon: 'empty',
-                },
-              ],
-            },
-          },
-          datasourceMap: {
-            testDatasource: {
-              ...mockDatasource,
-              getDatasourceSuggestionsForField: () => [generateSuggestion()],
-              getDatasourceSuggestionsFromCurrentState: () => [generateSuggestion()],
-              getDatasourceSuggestionsForVisualizeField: () => [generateSuggestion()],
-              DataPanelComponent: jest.fn().mockImplementation(() => <div />),
-            },
-          },
-        } as EditorFrameProps;
-        instance = (
-          await mountWithProvider(<EditorFrame {...props} />, {
-            preloadedState: {
-              datasourceStates: {
-                testDatasource: {
-                  isLoading: false,
-                  state: {
-                    internalState1: '',
-                  },
-                },
-              },
-            },
-          })
-        ).instance;
-
-        instance.update();
-
-        act(() => {
-          instance.find('[data-test-subj="mockVisA"]').find(Droppable).prop('onDrop')!(
-            {
-              indexPatternId: '1',
-              field: {},
-              id: '1',
-              humanData: { label: 'draggedField' },
-            },
-            'field_add'
-          );
-        });
-
-        expect(mockVisualization.getConfiguration).toHaveBeenCalledWith(
-          expect.objectContaining({
-            state: suggestionVisState,
-          })
-        );
-      });
-
-      it('should use the highest priority suggestion available', async () => {
-        mockDatasource.getLayers.mockReturnValue(['first', 'second', 'third']);
-        const suggestionVisState = {};
-        const mockVisualization3 = {
-          ...createMockVisualization('testVis3', ['third']),
-          getSuggestions: () => [
-            {
-              score: 0.9,
-              state: suggestionVisState,
-              title: 'Suggestion3',
-              previewIcon: 'empty',
-            },
-            {
-              score: 0.7,
-              state: {},
-              title: 'Suggestion4',
-              previewIcon: 'empty',
-            },
-          ],
-        };
-
-        const props = {
-          ...getDefaultProps(),
-          visualizationMap: {
-            testVis: {
-              ...mockVisualization,
-              // do not return suggestions for the currently active vis, otherwise it will be chosen
-              getSuggestions: () => [],
-            },
-            testVis2: {
-              ...mockVisualization2,
-              getSuggestions: () => [],
-            },
-            testVis3: {
-              ...mockVisualization3,
-            },
-          },
-          datasourceMap: {
-            testDatasource: {
-              ...mockDatasource,
-              getDatasourceSuggestionsForField: () => [generateSuggestion()],
-              getDatasourceSuggestionsFromCurrentState: () => [generateSuggestion()],
-              getDatasourceSuggestionsForVisualizeField: () => [generateSuggestion()],
-              DataPanelComponent: jest.fn().mockImplementation(() => {
-                const [, dndDispatch] = useDragDropContext();
-                useEffect(() => {
-                  dndDispatch({
-                    type: 'startDragging',
-                    payload: {
-                      dragging: {
-                        id: 'draggedField',
-                        humanData: { label: '1' },
-                      },
-                    },
-                  });
-                }, [dndDispatch]);
-                return <div />;
-              }),
-            },
-          },
-        } as EditorFrameProps;
-
-        instance = (await mountWithProvider(<EditorFrame {...props} />)).instance;
-
-        instance.update();
-
-        act(() => {
-          instance.find(Droppable).filter('[dataTestSubj="lnsWorkspace"]').prop('onDrop')!(
-            {
-              indexPatternId: '1',
-              field: {},
-              id: '1',
-              humanData: {
-                label: 'label',
-              },
-            },
-            'field_add'
-          );
-        });
-
-        expect(mockVisualization3.getConfiguration).toHaveBeenCalledWith(
-          expect.objectContaining({
-            state: suggestionVisState,
-          })
-        );
-      });
     });
   });
 });

@@ -61,4 +61,16 @@ describe('Policy form SettingCard component', () => {
     expect(renderResult.getByTestId('test-rightCornerContainer')).not.toBeEmptyDOMElement();
     expect(renderResult.getByTestId('test-rightContent'));
   });
+
+  it('should show right corner content in viewport width greater than 1600px', () => {
+    // Set the viewport above xxl breakpoint
+    window.innerWidth = 1601;
+    window.dispatchEvent(new Event('resize'));
+
+    formProps.rightCorner = <div data-test-subj="test-rightContent">{'foo'}</div>;
+    render();
+
+    const rightContent = renderResult.getByTestId('test-rightContent');
+    expect(rightContent).toBeVisible();
+  });
 });

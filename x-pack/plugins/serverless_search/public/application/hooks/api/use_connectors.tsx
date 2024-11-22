@@ -14,6 +14,10 @@ export const useConnectors = () => {
   return useQuery({
     queryKey: ['fetchConnectors'],
     queryFn: () =>
-      http.fetch<{ connectors: Connector[] }>('/internal/serverless_search/connectors'),
+      http.fetch<{
+        connectors: Connector[];
+        canManageConnectors: boolean;
+        canReadConnectors: boolean;
+      }>('/internal/serverless_search/connectors'),
   });
 };

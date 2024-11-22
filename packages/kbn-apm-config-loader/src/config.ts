@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { join } from 'path';
@@ -13,6 +14,7 @@ import { getDataPath } from '@kbn/utils';
 import { readFileSync } from 'fs';
 import type { AgentConfigOptions } from 'elastic-apm-node';
 import type { AgentConfigOptions as RUMAgentConfigOptions } from '@elastic/apm-rum';
+import { getFlattenedObject } from '@kbn/std';
 import type { ApmConfigSchema } from './apm_config';
 
 // https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html
@@ -128,6 +130,15 @@ export class ApmConfiguration {
         this.baseConfig.serverUrl === centralizedConfig.serverUrl
       ) {
         this.baseConfig = merge(this.baseConfig, centralizedConfig);
+      }
+
+      if (this.baseConfig?.globalLabels) {
+        // Global Labels need to be a key/value pair...
+        // Dotted names will be renamed to underscored ones by the agent, but we need to provide key/value pairs
+        // https://github.com/elastic/apm-agent-nodejs/issues/4096#issuecomment-2181621221
+        this.baseConfig.globalLabels = getFlattenedObject(
+          this.baseConfig.globalLabels as Record<string, unknown>
+        );
       }
     }
 

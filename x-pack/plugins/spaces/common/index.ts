@@ -11,6 +11,7 @@ export {
   SPACE_SEARCH_COUNT_THRESHOLD,
   ENTER_SPACE_PATH,
   DEFAULT_SPACE_ID,
+  API_VERSIONS,
 } from './constants';
 export { addSpaceIdToPath, getSpaceIdFromPath } from './lib/spaces_url_parser';
 export type {
@@ -18,5 +19,6 @@ export type {
   GetAllSpacesOptions,
   GetAllSpacesPurpose,
   GetSpaceResult,
+  SolutionView,
 } from './types/latest';
 export { spaceV1 } from './types';

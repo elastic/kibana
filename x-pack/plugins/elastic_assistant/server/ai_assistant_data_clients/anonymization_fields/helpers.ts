@@ -11,7 +11,7 @@ import {
   AnonymizationFieldResponse,
   AnonymizationFieldUpdateProps,
 } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+import { AuthenticatedUser } from '@kbn/core-security-common';
 import {
   CreateAnonymizationFieldSchema,
   EsAnonymizationFieldsSchema,
@@ -53,7 +53,8 @@ export const transformESSearchToAnonymizationFields = (
         anonymized: anonymizationFieldSchema.anonymized,
         updatedAt: anonymizationFieldSchema.updated_at,
         namespace: anonymizationFieldSchema.namespace,
-        id: hit._id,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        id: hit._id!,
       };
 
       return anonymizationField;
@@ -98,7 +99,8 @@ export const getUpdateScript = ({
   isPatch?: boolean;
 }) => {
   return {
-    source: `
+    script: {
+      source: `
     if (params.assignEmpty == true || params.containsKey('allowed')) {
       ctx._source.allowed = params.allowed;
     }
@@ -107,11 +109,12 @@ export const getUpdateScript = ({
     }
     ctx._source.updated_at = params.updated_at;
   `,
-    lang: 'painless',
-    params: {
-      ...anonymizationField, // when assigning undefined in painless, it will remove property and wil set it to null
-      // for patch we don't want to remove unspecified value in payload
-      assignEmpty: !(isPatch ?? true),
+      lang: 'painless',
+      params: {
+        ...anonymizationField, // when assigning undefined in painless, it will remove property and wil set it to null
+        // for patch we don't want to remove unspecified value in payload
+        assignEmpty: !(isPatch ?? true),
+      },
     },
   };
 };

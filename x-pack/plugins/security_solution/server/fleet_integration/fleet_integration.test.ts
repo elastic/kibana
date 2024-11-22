@@ -7,10 +7,10 @@
 
 import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
+import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import {
   elasticsearchServiceMock,
   httpServerMock,
-  loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 import {
@@ -39,7 +39,10 @@ import {
 import { requestContextMock } from '../lib/detection_engine/routes/__mocks__';
 import { requestContextFactoryMock } from '../request_context_factory.mock';
 import type { EndpointAppContextServiceStartContract } from '../endpoint/endpoint_app_context_services';
-import { createMockEndpointAppContextServiceStartContract } from '../endpoint/mocks';
+import {
+  createMockEndpointAppContextService,
+  createMockEndpointAppContextServiceStartContract,
+} from '../endpoint/mocks';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { LicenseService } from '../../common/license';
 import { Subject } from 'rxjs';
@@ -67,21 +70,38 @@ import type {
 import { createMockPolicyData } from '../endpoint/services/feature_usage/mocks';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../common/endpoint/service/artifacts/constants';
 import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import * as PolicyConfigHelpers from '../../common/endpoint/models/policy_config_helpers';
 import { disableProtections } from '../../common/endpoint/models/policy_config_helpers';
 import type { ProductFeaturesService } from '../lib/product_features_service/product_features_service';
 import { createProductFeaturesServiceMock } from '../lib/product_features_service/mocks';
 import * as moment from 'moment';
 import type {
   PostAgentPolicyCreateCallback,
+  PostPackagePolicyPostCreateCallback,
   PutPackagePolicyUpdateCallback,
 } from '@kbn/fleet-plugin/server/types';
+import type { EndpointMetadataService } from '../endpoint/services/metadata';
+import { createEndpointMetadataServiceTestContextMock } from '../endpoint/services/metadata/mocks';
+import { createPolicyDataStreamsIfNeeded as _createPolicyDataStreamsIfNeeded } from './handlers/create_policy_datastreams';
 
 jest.mock('uuid', () => ({
   v4: (): string => 'NEW_UUID',
 }));
 
-describe('ingest_integration tests ', () => {
-  let endpointAppContextMock: EndpointAppContextServiceStartContract;
+jest.mock('./handlers/create_policy_datastreams', () => {
+  const actualModule = jest.requireActual('./handlers/create_policy_datastreams');
+
+  return {
+    ...actualModule,
+    createPolicyDataStreamsIfNeeded: jest.fn(async () => {}),
+  };
+});
+
+const createPolicyDataStreamsIfNeededMock =
+  _createPolicyDataStreamsIfNeeded as unknown as jest.Mock;
+
+describe('Fleet integrations', () => {
+  let endpointAppContextStartContract: EndpointAppContextServiceStartContract;
   let req: KibanaRequest;
   let ctx: ReturnType<typeof requestContextMock.create>;
   const exceptionListClient: ExceptionListClient = getExceptionListClientMock();
@@ -99,18 +119,24 @@ describe('ingest_integration tests ', () => {
   const generator = new EndpointDocGenerator();
   const cloudService = cloudMock.createSetup();
   let productFeaturesService: ProductFeaturesService;
+  let endpointMetadataService: EndpointMetadataService;
+  let logger: Logger;
 
   beforeEach(() => {
-    endpointAppContextMock = createMockEndpointAppContextServiceStartContract();
+    endpointAppContextStartContract = createMockEndpointAppContextServiceStartContract();
     ctx = requestContextMock.createTools().context;
     req = httpServerMock.createKibanaRequest();
     licenseEmitter = new Subject();
     licenseService = new LicenseService();
     licenseService.start(licenseEmitter);
-    productFeaturesService = endpointAppContextMock.productFeaturesService;
+    productFeaturesService = endpointAppContextStartContract.productFeaturesService;
+
+    const metadataMocks = createEndpointMetadataServiceTestContextMock();
+    logger = metadataMocks.logger;
+    endpointMetadataService = metadataMocks.endpointMetadataService;
 
     jest
-      .spyOn(endpointAppContextMock.endpointMetadataService, 'getFleetEndpointPackagePolicy')
+      .spyOn(endpointMetadataService, 'getFleetEndpointPackagePolicy')
       .mockResolvedValue(createMockPolicyData());
   });
 
@@ -155,12 +181,11 @@ describe('ingest_integration tests ', () => {
     });
 
     const invokeCallback = async (manifestManager: ManifestManager): Promise<NewPackagePolicy> => {
-      const logger = loggingSystemMock.create().get('ingest_integration.test');
       const callback = getPackagePolicyCreateCallback(
         logger,
         manifestManager,
         requestContextFactoryMock.create(),
-        endpointAppContextMock.alerting,
+        endpointAppContextStartContract.alerting,
         licenseService,
         exceptionListClient,
         cloudService,
@@ -322,14 +347,41 @@ describe('ingest_integration tests ', () => {
       expect(manifestManager.pushArtifacts).not.toHaveBeenCalled();
       expect(manifestManager.commit).not.toHaveBeenCalled();
     });
+
+    it('should correctly set meta.billable', async () => {
+      const isBillablePolicySpy = jest.spyOn(PolicyConfigHelpers, 'isBillablePolicy');
+      isBillablePolicySpy.mockReturnValue(false);
+      const manifestManager = buildManifestManagerMock();
+
+      let packagePolicy = await invokeCallback(manifestManager);
+      expect(isBillablePolicySpy).toHaveBeenCalled();
+      expect(packagePolicy.inputs[0].config!.policy.value.meta.billable).toBe(false);
+
+      isBillablePolicySpy.mockReset();
+      isBillablePolicySpy.mockReturnValue(true);
+      packagePolicy = await invokeCallback(manifestManager);
+      expect(isBillablePolicySpy).toHaveBeenCalled();
+      expect(packagePolicy.inputs[0].config!.policy.value.meta.billable).toBe(true);
+
+      isBillablePolicySpy.mockRestore();
+    });
   });
 
   describe('package policy post create callback', () => {
-    const soClient = savedObjectsClientMock.create();
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    const logger = loggingSystemMock.create().get('ingest_integration.test');
-    const callback = getPackagePolicyPostCreateCallback(logger, exceptionListClient);
-    const policyConfig = generator.generatePolicyPackagePolicy() as PackagePolicy;
+    let soClient: ReturnType<typeof savedObjectsClientMock.create>;
+    let esClient: ElasticsearchClientMock;
+    let callback: PostPackagePolicyPostCreateCallback;
+    let policyConfig: PackagePolicy;
+    let endpointAppContextServiceMock: ReturnType<typeof createMockEndpointAppContextService>;
+
+    beforeEach(() => {
+      soClient = savedObjectsClientMock.create();
+      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      endpointAppContextServiceMock = createMockEndpointAppContextService();
+      endpointAppContextServiceMock.getExceptionListsClient.mockReturnValue(exceptionListClient);
+      callback = getPackagePolicyPostCreateCallback(endpointAppContextServiceMock);
+      policyConfig = generator.generatePolicyPackagePolicy() as PackagePolicy;
+    });
 
     it('should create the Endpoint Event Filters List and add the correct Event Filters List Item attached to the policy given nonInteractiveSession parameter on integration config eventFilters', async () => {
       const integrationConfig = {
@@ -350,11 +402,11 @@ describe('ingest_integration tests ', () => {
         req
       );
 
-      expect(await exceptionListClient.createExceptionList).toHaveBeenCalledWith(
+      expect(exceptionListClient.createExceptionList).toHaveBeenCalledWith(
         expect.objectContaining({ listId: ENDPOINT_EVENT_FILTERS_LIST_ID })
       );
 
-      expect(await exceptionListClient.createExceptionListItem).toHaveBeenCalledWith(
+      expect(exceptionListClient.createExceptionListItem).toHaveBeenCalledWith(
         expect.objectContaining({
           listId: ENDPOINT_EVENT_FILTERS_LIST_ID,
           tags: [`policy:${postCreatedPolicyConfig.id}`],
@@ -389,20 +441,24 @@ describe('ingest_integration tests ', () => {
         req
       );
 
-      expect(await exceptionListClient.createExceptionList).not.toHaveBeenCalled();
+      expect(exceptionListClient.createExceptionList).not.toHaveBeenCalled();
 
-      expect(await exceptionListClient.createExceptionListItem).not.toHaveBeenCalled();
+      expect(exceptionListClient.createExceptionListItem).not.toHaveBeenCalled();
 
       expect(postCreatedPolicyConfig.inputs[0]!.config!.integration_config.value).toEqual(
         integrationConfig
       );
     });
+
+    it('should call `createPolicyDatastreamsIfNeeded`', async () => {
+      await callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req);
+
+      expect(createPolicyDataStreamsIfNeededMock).toHaveBeenCalled();
+    });
   });
 
   describe('agent policy update callback', () => {
     it('ProductFeature disabled - returns an error if higher tier features are turned on in the policy', async () => {
-      const logger = loggingSystemMock.create().get('ingest_integration.test');
-
       productFeaturesService = createProductFeaturesServiceMock(
         ALL_PRODUCT_FEATURE_KEYS.filter(
           (key) => key !== ProductFeatureSecurityKey.endpointAgentTamperProtection
@@ -418,8 +474,6 @@ describe('ingest_integration tests ', () => {
       );
     });
     it('ProductFeature disabled - returns agent policy if higher tier features are turned off in the policy', async () => {
-      const logger = loggingSystemMock.create().get('ingest_integration.test');
-
       productFeaturesService = createProductFeaturesServiceMock(
         ALL_PRODUCT_FEATURE_KEYS.filter(
           (key) => key !== ProductFeatureSecurityKey.endpointAgentTamperProtection
@@ -434,8 +488,6 @@ describe('ingest_integration tests ', () => {
       expect(updatedPolicyConfig).toEqual(policyConfig);
     });
     it('ProductFeature enabled - returns agent policy if higher tier features are turned on in the policy', async () => {
-      const logger = loggingSystemMock.create().get('ingest_integration.test');
-
       const callback = getAgentPolicyUpdateCallback(logger, productFeaturesService);
 
       const policyConfig = generator.generateAgentPolicy();
@@ -446,8 +498,6 @@ describe('ingest_integration tests ', () => {
       expect(updatedPolicyConfig).toEqual(policyConfig);
     });
     it('ProductFeature enabled - returns agent policy if higher tier features are turned off in the policy', async () => {
-      const logger = loggingSystemMock.create().get('ingest_integration.test');
-
       const callback = getAgentPolicyUpdateCallback(logger, productFeaturesService);
       const policyConfig = generator.generateAgentPolicy();
 
@@ -458,12 +508,10 @@ describe('ingest_integration tests ', () => {
   });
 
   describe('agent policy create callback', () => {
-    let logger: Logger;
     let callback: PostAgentPolicyCreateCallback;
     let policyConfig: GetAgentPoliciesResponseItem;
 
     beforeEach(() => {
-      logger = loggingSystemMock.create().get('ingest_integration.test');
       callback = getAgentPolicyCreateCallback(logger, productFeaturesService);
       policyConfig = generator.generateAgentPolicy();
     });
@@ -518,12 +566,11 @@ describe('ingest_integration tests ', () => {
       });
       it('returns an error if paid features are turned on in the policy', async () => {
         const mockPolicy = policyFactory(); // defaults with paid features on
-        const logger = loggingSystemMock.create().get('ingest_integration.test');
         const callback = getPackagePolicyUpdateCallback(
           logger,
           licenseService,
-          endpointAppContextMock.featureUsageService,
-          endpointAppContextMock.endpointMetadataService,
+          endpointAppContextStartContract.featureUsageService,
+          endpointMetadataService,
           cloudService,
           esClient,
           productFeaturesService
@@ -539,12 +586,11 @@ describe('ingest_integration tests ', () => {
       it('updates successfully if no paid features are turned on in the policy', async () => {
         const mockPolicy = policyFactoryWithoutPaidFeatures();
         mockPolicy.windows.malware.mode = ProtectionModes.detect;
-        const logger = loggingSystemMock.create().get('ingest_integration.test');
         const callback = getPackagePolicyUpdateCallback(
           logger,
           licenseService,
-          endpointAppContextMock.featureUsageService,
-          endpointAppContextMock.endpointMetadataService,
+          endpointAppContextStartContract.featureUsageService,
+          endpointMetadataService,
           cloudService,
           esClient,
           productFeaturesService
@@ -575,10 +621,10 @@ describe('ingest_integration tests ', () => {
           ALL_PRODUCT_FEATURE_KEYS.filter((key) => key !== 'endpoint_protection_updates')
         );
         const callback = getPackagePolicyUpdateCallback(
-          endpointAppContextMock.logger,
+          logger,
           licenseService,
-          endpointAppContextMock.featureUsageService,
-          endpointAppContextMock.endpointMetadataService,
+          endpointAppContextStartContract.featureUsageService,
+          endpointMetadataService,
           cloudService,
           esClient,
           productFeaturesService
@@ -588,7 +634,29 @@ describe('ingest_integration tests ', () => {
         await expect(() =>
           callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
         ).rejects.toThrow(
-          'To modify protection updates, you must add at least Endpoint Complete to your project.'
+          'To modify protection updates, you must add Endpoint Complete to your project.'
+        );
+      });
+
+      it('should throw if endpointCustomNotification productFeature is disabled and user modifies popup.[protection].message', async () => {
+        productFeaturesService = createProductFeaturesServiceMock(
+          ALL_PRODUCT_FEATURE_KEYS.filter((key) => key !== 'endpoint_custom_notification')
+        );
+        const callback = getPackagePolicyUpdateCallback(
+          logger,
+          licenseService,
+          endpointAppContextStartContract.featureUsageService,
+          endpointMetadataService,
+          cloudService,
+          esClient,
+          productFeaturesService
+        );
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value.windows.popup.ransomware.message = 'foo';
+        await expect(() =>
+          callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
+        ).rejects.toThrow(
+          'To customize the user notification, you must add Endpoint Protection Complete to your project.'
         );
       });
 
@@ -630,12 +698,11 @@ describe('ingest_integration tests ', () => {
         'should return bad request for invalid endpoint package policy global manifest values',
         async ({ date, message }) => {
           const mockPolicy = policyFactory(); // defaults with paid features on
-          const logger = loggingSystemMock.create().get('ingest_integration.test');
           const callback = getPackagePolicyUpdateCallback(
             logger,
             licenseService,
-            endpointAppContextMock.featureUsageService,
-            endpointAppContextMock.endpointMetadataService,
+            endpointAppContextStartContract.featureUsageService,
+            endpointMetadataService,
             cloudService,
             esClient,
             productFeaturesService
@@ -696,12 +763,11 @@ describe('ingest_integration tests ', () => {
         'should return bad request for invalid endpoint package policy global manifest values',
         async ({ date, message }) => {
           const mockPolicy = policyFactory(); // defaults with paid features on
-          const logger = loggingSystemMock.create().get('ingest_integration.test');
           const callback = getPackagePolicyUpdateCallback(
             logger,
             licenseService,
-            endpointAppContextMock.featureUsageService,
-            endpointAppContextMock.endpointMetadataService,
+            endpointAppContextStartContract.featureUsageService,
+            endpointMetadataService,
             cloudService,
             esClient,
             productFeaturesService
@@ -740,12 +806,11 @@ describe('ingest_integration tests ', () => {
       it('updates successfully when paid features are turned on', async () => {
         const mockPolicy = policyFactory();
         mockPolicy.windows.popup.malware.message = 'paid feature';
-        const logger = loggingSystemMock.create().get('ingest_integration.test');
         const callback = getPackagePolicyUpdateCallback(
           logger,
           licenseService,
-          endpointAppContextMock.featureUsageService,
-          endpointAppContextMock.endpointMetadataService,
+          endpointAppContextStartContract.featureUsageService,
+          endpointMetadataService,
           cloudService,
           esClient,
           productFeaturesService
@@ -767,10 +832,10 @@ describe('ingest_integration tests ', () => {
           ALL_PRODUCT_FEATURE_KEYS.filter((key) => key !== 'endpoint_policy_protections')
         );
         const callback = getPackagePolicyUpdateCallback(
-          endpointAppContextMock.logger,
+          logger,
           licenseService,
-          endpointAppContextMock.featureUsageService,
-          endpointAppContextMock.endpointMetadataService,
+          endpointAppContextStartContract.featureUsageService,
+          endpointMetadataService,
           cloudService,
           esClient,
           productFeaturesService
@@ -844,12 +909,12 @@ describe('ingest_integration tests ', () => {
         mockPolicy.meta.cluster_uuid = 'updated-uuid';
         mockPolicy.meta.license_uuid = 'updated-uid';
         mockPolicy.meta.serverless = false;
-        const logger = loggingSystemMock.create().get('ingest_integration.test');
+        mockPolicy.meta.billable = false;
         const callback = getPackagePolicyUpdateCallback(
           logger,
           licenseService,
-          endpointAppContextMock.featureUsageService,
-          endpointAppContextMock.endpointMetadataService,
+          endpointAppContextStartContract.featureUsageService,
+          endpointMetadataService,
           cloudService,
           esClient,
           productFeaturesService
@@ -863,6 +928,7 @@ describe('ingest_integration tests ', () => {
         policyConfig.inputs[0]!.config!.policy.value.meta.cluster_uuid = 'original-uuid';
         policyConfig.inputs[0]!.config!.policy.value.meta.license_uuid = 'original-uid';
         policyConfig.inputs[0]!.config!.policy.value.meta.serverless = true;
+        policyConfig.inputs[0]!.config!.policy.value.meta.billable = true;
         const updatedPolicyConfig = await callback(
           policyConfig,
           soClient,
@@ -881,12 +947,12 @@ describe('ingest_integration tests ', () => {
         mockPolicy.meta.cluster_uuid = 'updated-uuid';
         mockPolicy.meta.license_uuid = 'updated-uid';
         mockPolicy.meta.serverless = false;
-        const logger = loggingSystemMock.create().get('ingest_integration.test');
+        mockPolicy.meta.billable = false;
         const callback = getPackagePolicyUpdateCallback(
           logger,
           licenseService,
-          endpointAppContextMock.featureUsageService,
-          endpointAppContextMock.endpointMetadataService,
+          endpointAppContextStartContract.featureUsageService,
+          endpointMetadataService,
           cloudService,
           esClient,
           productFeaturesService
@@ -899,6 +965,7 @@ describe('ingest_integration tests ', () => {
         policyConfig.inputs[0]!.config!.policy.value.meta.cluster_uuid = 'updated-uuid';
         policyConfig.inputs[0]!.config!.policy.value.meta.license_uuid = 'updated-uid';
         policyConfig.inputs[0]!.config!.policy.value.meta.serverless = false;
+        policyConfig.inputs[0]!.config!.policy.value.meta.billable = false;
         const updatedPolicyConfig = await callback(
           policyConfig,
           soClient,
@@ -913,7 +980,6 @@ describe('ingest_integration tests ', () => {
     describe('when `antivirus_registration.mode` is changed', () => {
       const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      const logger = loggingSystemMock.create().get('ingest_integration.test');
       let callback: PutPackagePolicyUpdateCallback;
       let inputPolicyConfig: PolicyData;
       let inputWindowsConfig: PolicyConfig['windows'];
@@ -927,8 +993,8 @@ describe('ingest_integration tests ', () => {
         callback = getPackagePolicyUpdateCallback(
           logger,
           licenseService,
-          endpointAppContextMock.featureUsageService,
-          endpointAppContextMock.endpointMetadataService,
+          endpointAppContextStartContract.featureUsageService,
+          endpointMetadataService,
           cloudService,
           esClient,
           productFeaturesService
@@ -1014,6 +1080,50 @@ describe('ingest_integration tests ', () => {
 
         expect(antivirusRegistrationIn(updatedPolicyConfig)).toBe(false);
       });
+    });
+
+    it('should correctly set meta.billable', async () => {
+      const isBillablePolicySpy = jest.spyOn(PolicyConfigHelpers, 'isBillablePolicy');
+
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      licenseEmitter.next(Enterprise);
+
+      const callback = getPackagePolicyUpdateCallback(
+        logger,
+        licenseService,
+        endpointAppContextStartContract.featureUsageService,
+        endpointMetadataService,
+        cloudService,
+        esClient,
+        productFeaturesService
+      );
+      const policyConfig = generator.generatePolicyPackagePolicy();
+
+      isBillablePolicySpy.mockReturnValue(false);
+      let updatedPolicyConfig = await callback(
+        policyConfig,
+        soClient,
+        esClient,
+        requestContextMock.convertContext(ctx),
+        req
+      );
+      expect(isBillablePolicySpy).toHaveBeenCalled();
+      expect(updatedPolicyConfig.inputs[0]!.config!.policy.value.meta.billable).toEqual(false);
+
+      isBillablePolicySpy.mockReset();
+      isBillablePolicySpy.mockReturnValue(true);
+      updatedPolicyConfig = await callback(
+        policyConfig,
+        soClient,
+        esClient,
+        requestContextMock.convertContext(ctx),
+        req
+      );
+      expect(isBillablePolicySpy).toHaveBeenCalled();
+      expect(updatedPolicyConfig.inputs[0]!.config!.policy.value.meta.billable).toEqual(true);
+
+      isBillablePolicySpy.mockRestore();
     });
   });
 

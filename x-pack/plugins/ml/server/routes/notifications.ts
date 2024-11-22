@@ -19,24 +19,21 @@ export function notificationsRoutes({
   routeGuard,
   getEnabledFeatures,
 }: RouteInitialization) {
-  /**
-   * @apiGroup Notifications
-   *
-   * @api {get} /internal/ml/notifications Get notifications
-   * @apiName GetNotifications
-   * @apiDescription Retrieves notifications based on provided criteria.
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/notifications`,
       access: 'internal',
-      options: {
-        tags: [
-          'access:ml:canGetJobs',
-          'access:ml:canGetDataFrameAnalytics',
-          'access:ml:canGetTrainedModels',
-        ],
+      security: {
+        authz: {
+          requiredPrivileges: [
+            'ml:canGetJobs',
+            'ml:canGetDataFrameAnalytics',
+            'ml:canGetTrainedModels',
+          ],
+        },
       },
+      summary: 'Get notifications',
+      description: 'Retrieves notifications based on provided criteria.',
     })
     .addVersion(
       {
@@ -68,24 +65,21 @@ export function notificationsRoutes({
       )
     );
 
-  /**
-   * @apiGroup Notifications
-   *
-   * @api {get} /internal/ml/notifications/count Get notification counts
-   * @apiName GetNotificationCounts
-   * @apiDescription Counts notifications by level.
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/notifications/count`,
       access: 'internal',
-      options: {
-        tags: [
-          'access:ml:canGetJobs',
-          'access:ml:canGetDataFrameAnalytics',
-          'access:ml:canGetTrainedModels',
-        ],
+      security: {
+        authz: {
+          requiredPrivileges: [
+            'ml:canGetJobs',
+            'ml:canGetDataFrameAnalytics',
+            'ml:canGetTrainedModels',
+          ],
+        },
       },
+      summary: 'Get notification counts',
+      description: 'Counts notifications by level.',
     })
     .addVersion(
       {

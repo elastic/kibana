@@ -17,6 +17,7 @@ import type {
   IClusterClient,
   SavedObjectsServiceStart,
   UiSettingsServiceStart,
+  CoreAuditService,
 } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
@@ -25,9 +26,9 @@ import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { CasesServerSetup } from '@kbn/cases-plugin/server';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import type { PluginsSetup, PluginsStart, RouteInitialization } from './types';
 import type { MlCapabilities } from '../common/types/capabilities';
-import { jsonSchemaRoutes } from './routes/json_schema';
 import { notificationsRoutes } from './routes/notifications';
 import {
   type MlFeatures,
@@ -94,6 +95,7 @@ export class MlServerPlugin
   private home: HomeServerPluginSetup | null = null;
   private cases: CasesServerSetup | null | undefined = null;
   private dataViews: DataViewsPluginStart | null = null;
+  private auditService: CoreAuditService | null = null;
   private isMlReady: Promise<void>;
   private setMlReady: () => void = () => {};
   private savedObjectsSyncService: SavedObjectsSyncService;
@@ -130,6 +132,7 @@ export class MlServerPlugin
       }),
       order: 500,
       category: DEFAULT_APP_CATEGORIES.kibana,
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: [PLUGIN_ID, 'kibana'],
       catalogue: [PLUGIN_ID, `${PLUGIN_ID}_file_data_visualizer`],
       privilegesTooltip: i18n.translate('xpack.ml.featureRegistry.privilegesTooltip', {
@@ -217,6 +220,7 @@ export class MlServerPlugin
       () => this.uiSettings,
       () => this.fieldsFormat,
       getDataViews,
+      () => this.auditService,
       () => this.isMlReady,
       this.compatibleModuleType
     );
@@ -277,7 +281,6 @@ export class MlServerPlugin
       resolveMlCapabilities,
     });
     notificationsRoutes(routeInit);
-    jsonSchemaRoutes(routeInit);
     alertingRoutes(routeInit, sharedServicesProviders);
 
     initMlServerLog({ log: this.log });
@@ -313,6 +316,7 @@ export class MlServerPlugin
     this.capabilities = coreStart.capabilities;
     this.clusterClient = coreStart.elasticsearch.client;
     this.savedObjectsStart = coreStart.savedObjects;
+    this.auditService = coreStart.security.audit;
     this.dataViews = plugins.dataViews;
 
     this.mlLicense.setup(plugins.licensing.license$, async (mlLicense: MlLicense) => {

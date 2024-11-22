@@ -45,6 +45,7 @@ export const initializeSingleMetricViewerDataFetcher = (
     jobIds: api.jobIds,
     selectedDetectorIndex: api.selectedDetectorIndex,
     selectedEntities: api.selectedEntities,
+    forecastId: api.forecastId,
     functionDescription: api.functionDescription,
   });
 

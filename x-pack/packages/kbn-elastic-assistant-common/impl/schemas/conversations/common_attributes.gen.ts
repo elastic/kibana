@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { NonEmptyString, User } from '../common_attributes.gen';
 
@@ -46,7 +46,7 @@ export const Reader = z.object({}).catchall(z.unknown());
  * Provider
  */
 export type Provider = z.infer<typeof Provider>;
-export const Provider = z.enum(['OpenAI', 'Azure OpenAI']);
+export const Provider = z.enum(['OpenAI', 'Azure OpenAI', 'Other']);
 export type ProviderEnum = typeof Provider.enum;
 export const ProviderEnum = Provider.enum;
 
@@ -108,11 +108,11 @@ export const Message = z.object({
 export type ApiConfig = z.infer<typeof ApiConfig>;
 export const ApiConfig = z.object({
   /**
-   * connector Id
+   * connector id
    */
   connectorId: z.string(),
   /**
-   * action type Id
+   * action type id
    */
   actionTypeId: z.string(),
   /**

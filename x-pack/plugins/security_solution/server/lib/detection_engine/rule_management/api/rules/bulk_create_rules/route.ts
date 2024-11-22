@@ -8,6 +8,7 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { DETECTION_ENGINE_RULES_BULK_CREATE } from '../../../../../../../common/constants';
 import {
   BulkCreateRulesRequestBody,
@@ -18,8 +19,6 @@ import {
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { readRules } from '../../../logic/detection_rules_client/read_rules';
 import { getDuplicates } from './get_duplicates';
-import { transformValidateBulkError } from '../../../utils/validate';
-import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
 import { validateRulesWithDuplicatedDefaultExceptionsList } from '../../../logic/exceptions/validate_rules_with_duplicated_default_exceptions_list';
 import { RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS } from '../../timeouts';
@@ -32,14 +31,20 @@ import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from '../.
 
 /**
  * @deprecated since version 8.2.0. Use the detection_engine/rules/_bulk_action API instead
+ *
+ * TODO: https://github.com/elastic/kibana/issues/193184 Delete this route and clean up the code
  */
 export const bulkCreateRulesRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.versioned
     .post({
       access: 'public',
       path: DETECTION_ENGINE_RULES_BULK_CREATE,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
       options: {
-        tags: ['access:securitySolution'],
         timeout: {
           idleSocket: RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS,
         },
@@ -113,7 +118,7 @@ export const bulkCreateRulesRoute = (router: SecuritySolutionPluginRouter, logge
                     params: payloadRule,
                   });
 
-                  return transformValidateBulkError(createdRule.params.ruleId, createdRule);
+                  return createdRule;
                 } catch (err) {
                   return transformBulkError(
                     payloadRule.rule_id,
@@ -122,6 +127,7 @@ export const bulkCreateRulesRoute = (router: SecuritySolutionPluginRouter, logge
                 }
               })
           );
+
           const rulesBulk = [
             ...rules,
             ...dupes.map((ruleId) =>

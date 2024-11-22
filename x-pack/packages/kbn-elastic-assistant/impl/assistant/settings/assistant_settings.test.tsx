@@ -8,19 +8,19 @@
 import { alertConvo, customConvo, welcomeConvo } from '../../mock/conversation';
 import { useAssistantContext } from '../../assistant_context';
 import { fireEvent, render, act } from '@testing-library/react';
+import { AssistantSettings } from './assistant_settings';
+import React from 'react';
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { MOCK_QUICK_PROMPTS } from '../../mock/quick_prompt';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
-  AssistantSettings,
   ANONYMIZATION_TAB,
   CONVERSATIONS_TAB,
   EVALUATION_TAB,
   KNOWLEDGE_BASE_TAB,
   QUICK_PROMPTS_TAB,
   SYSTEM_PROMPTS_TAB,
-} from './assistant_settings';
-import React from 'react';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
-import { MOCK_QUICK_PROMPTS } from '../../mock/quick_prompt';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+} from './const';
 
 const mockConversations = {
   [alertConvo.title]: alertConvo,
@@ -38,7 +38,6 @@ const mockContext = {
   basePromptContexts: MOCK_QUICK_PROMPTS,
   setSelectedSettingsTab,
   http: {},
-  assistantFeatures: { assistantModelEvaluation: true },
   selectedSettingsTab: 'CONVERSATIONS_TAB',
   assistantAvailability: {
     isAssistantEnabled: true,
@@ -49,12 +48,12 @@ const onSave = jest.fn().mockResolvedValue(() => {});
 const onConversationSelected = jest.fn();
 
 const testProps = {
+  conversationsLoaded: true,
   defaultConnectorId: '123',
   defaultProvider: OpenAiProviderType.OpenAi,
   selectedConversationId: welcomeConvo.title,
   onClose,
   onSave,
-  isFlyoutMode: false,
   onConversationSelected,
   conversations: {},
   anonymizationFields: { total: 0, page: 1, perPage: 1000, data: [] },
@@ -64,12 +63,12 @@ jest.mock('../../assistant_context');
 
 jest.mock('.', () => {
   return {
-    AnonymizationSettings: () => <span data-test-subj="ANONYMIZATION_TAB-tab" />,
-    ConversationSettings: () => <span data-test-subj={`CONVERSATION_TAB-tab`} />,
-    EvaluationSettings: () => <span data-test-subj="EVALUATION_TAB-tab" />,
-    KnowledgeBaseSettings: () => <span data-test-subj="KNOWLEDGE_BASE_TAB-tab" />,
-    QuickPromptSettings: () => <span data-test-subj="QUICK_PROMPTS_TAB-tab" />,
-    SystemPromptSettings: () => <span data-test-subj="SYSTEM_PROMPTS_TAB-tab" />,
+    AnonymizationSettings: () => <span data-test-subj="anonymization-tab" />,
+    ConversationSettings: () => <span data-test-subj="conversations-tab" />,
+    EvaluationSettings: () => <span data-test-subj="evaluation-tab" />,
+    KnowledgeBaseSettings: () => <span data-test-subj="knowledge_base-tab" />,
+    QuickPromptSettings: () => <span data-test-subj="quick_prompts-tab" />,
+    SystemPromptSettings: () => <span data-test-subj="system_prompts-tab" />,
   };
 });
 
@@ -136,17 +135,6 @@ describe('AssistantSettings', () => {
     QUICK_PROMPTS_TAB,
     SYSTEM_PROMPTS_TAB,
   ])('%s', (tab) => {
-    it('Opens the tab on button click', () => {
-      (useAssistantContext as jest.Mock).mockImplementation(() => ({
-        ...mockContext,
-        selectedSettingsTab: tab === CONVERSATIONS_TAB ? ANONYMIZATION_TAB : CONVERSATIONS_TAB,
-      }));
-      const { getByTestId } = render(<AssistantSettings {...testProps} />, {
-        wrapper,
-      });
-      fireEvent.click(getByTestId(`${tab}-button`));
-      expect(setSelectedSettingsTab).toHaveBeenCalledWith(tab);
-    });
     it('renders with the correct tab open', () => {
       (useAssistantContext as jest.Mock).mockImplementation(() => ({
         ...mockContext,

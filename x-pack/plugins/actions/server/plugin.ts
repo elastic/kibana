@@ -32,7 +32,7 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { SpacesPluginStart, SpacesPluginSetup } from '@kbn/spaces-plugin/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
   IEventLogClientService,
@@ -42,8 +42,10 @@ import {
 import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 
 import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { ActionsConfig, AllowedHosts, EnabledConnectorTypes, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
+import { events } from './lib/event_based_telemetry';
 import { ActionsClient } from './actions_client/actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
 import {
@@ -83,10 +85,6 @@ import { setupSavedObjects } from './saved_objects';
 import { ACTIONS_FEATURE } from './feature';
 import { ActionsAuthorization } from './authorization/actions_authorization';
 import { ActionExecutionSource } from './lib/action_execution_source';
-import {
-  getAuthorizationModeBySource,
-  AuthorizationMode,
-} from './authorization/get_authorization_mode_by_source';
 import { ensureSufficientLicense } from './lib/ensure_sufficient_license';
 import { renderMustacheObject } from './lib/mustache_renderer';
 import { getAlertHistoryEsIndex } from './preconfigured_connectors/alert_history_es_index/alert_history_es_index';
@@ -111,6 +109,7 @@ import type { IUnsecuredActionsClient } from './unsecured_actions_client/unsecur
 import { UnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
 import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured_execute_function';
 import { createSystemConnectors } from './create_system_actions';
+import { ConnectorUsageReportingTask } from './usage/connector_usage_reporting_task';
 
 export interface PluginSetupContract {
   registerType<
@@ -183,6 +182,7 @@ export interface ActionsPluginsSetup {
   spaces?: SpacesPluginSetup;
   monitoringCollection?: MonitoringCollectionSetup;
   serverless?: ServerlessPluginSetup;
+  cloud: CloudSetup;
 }
 
 export interface ActionsPluginsStart {
@@ -217,6 +217,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
   private readonly telemetryLogger: Logger;
   private inMemoryConnectors: InMemoryConnector[];
   private inMemoryMetrics: InMemoryMetrics;
+  private connectorUsageReportingTask: ConnectorUsageReportingTask | undefined;
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get();
@@ -249,7 +250,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     this.eventLogger = plugins.eventLog.getLogger({
       event: { provider: EVENT_LOG_PROVIDER },
     });
-
+    events.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
     const actionExecutor = new ActionExecutor({
       isESOCanEncrypt: this.isESOCanEncrypt,
     });
@@ -326,6 +327,15 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         this.getInMemoryConnectors,
         eventLogIndex
       );
+
+      this.connectorUsageReportingTask = new ConnectorUsageReportingTask({
+        logger: this.logger,
+        eventLogIndex,
+        core,
+        taskManager: plugins.taskManager,
+        projectId: plugins.cloud.serverless.projectId,
+        config: this.actionsConfig.usage,
+      });
     }
 
     // Usage counter for telemetry
@@ -466,10 +476,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         scopedClusterClient: core.elasticsearch.client.asScoped(request),
         inMemoryConnectors: this.inMemoryConnectors,
         request,
-        authorization: instantiateAuthorization(
-          request,
-          await getAuthorizationModeBySource(unsecuredSavedObjectsClient, authorizationContext)
-        ),
+        authorization: instantiateAuthorization(request),
         actionExecutor: actionExecutor!,
         ephemeralExecutionEnqueuer: createEphemeralExecutionEnqueuerFunction({
           taskManager: plugins.taskManager,
@@ -477,6 +484,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           isESOCanEncrypt: isESOCanEncrypt!,
           inMemoryConnectors: this.inMemoryConnectors,
           configurationUtilities: actionsConfigUtils,
+          logger,
         }),
         bulkExecutionEnqueuer: createBulkExecutionEnqueuerFunction({
           taskManager: plugins.taskManager,
@@ -484,13 +492,14 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           isESOCanEncrypt: isESOCanEncrypt!,
           inMemoryConnectors: this.inMemoryConnectors,
           configurationUtilities: actionsConfigUtils,
+          logger,
         }),
         auditLogger: this.security?.audit.asScoped(request),
         usageCounter: this.usageCounter,
         connectorTokenClient: new ConnectorTokenClient({
           unsecuredSavedObjectsClient,
           encryptedSavedObjectsClient,
-          logger: this.logger,
+          logger,
         }),
         async getEventLogClient() {
           return plugins.eventLog.getClient(request);
@@ -520,9 +529,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       });
     };
 
-    // Ensure the public API cannot be used to circumvent authorization
-    // using our legacy exemption mechanism by passing in a legacy SO
-    // as authorizationContext which would then set a Legacy AuthorizationMode
     const secureGetActionsClientWithRequest = (request: KibanaRequest) =>
       getActionsClientWithRequest(request);
 
@@ -552,7 +558,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       logger,
       eventLogger: this.eventLogger!,
       spaces: plugins.spaces?.spacesService,
-      security: plugins.security,
+      security: core.security,
       getServices: this.getServicesFactory(
         getScopedSavedObjectsClientWithoutAccessToActions,
         core.elasticsearch,
@@ -571,6 +577,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       getActionsAuthorizationWithRequest(request: KibanaRequest) {
         return instantiateAuthorization(request);
       },
+      analyticsService: core.analytics,
     });
 
     taskRunnerFactory!.initialize({
@@ -598,6 +605,8 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     }
 
     this.validateEnabledConnectorTypes(plugins);
+
+    this.connectorUsageReportingTask?.start(plugins.taskManager).catch(() => {});
 
     return {
       isActionTypeEnabled: (id, options = { notifyUsage: false }) => {
@@ -637,15 +646,10 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       includedHiddenTypes,
     });
 
-  private instantiateAuthorization = (
-    request: KibanaRequest,
-    authorizationMode?: AuthorizationMode
-  ) => {
+  private instantiateAuthorization = (request: KibanaRequest) => {
     return new ActionsAuthorization({
       request,
-      authorizationMode,
       authorization: this.security?.authz,
-      authentication: this.security?.authc,
     });
   };
 
@@ -753,6 +757,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
               isESOCanEncrypt: isESOCanEncrypt!,
               inMemoryConnectors,
               configurationUtilities: actionsConfigUtils,
+              logger,
             }),
             bulkExecutionEnqueuer: createBulkExecutionEnqueuerFunction({
               taskManager,
@@ -760,6 +765,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
               isESOCanEncrypt: isESOCanEncrypt!,
               inMemoryConnectors,
               configurationUtilities: actionsConfigUtils,
+              logger,
             }),
             auditLogger: security?.audit.asScoped(request),
             usageCounter,

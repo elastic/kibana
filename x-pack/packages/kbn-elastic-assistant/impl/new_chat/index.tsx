@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import { EuiButtonEmpty, EuiLink } from '@elastic/eui';
+import React, { useCallback, useMemo, useEffect } from 'react';
+import { useAssistantContext } from '../..';
 
 import { PromptContext } from '../assistant/prompt_context/types';
 import { useAssistantOverlay } from '../assistant/use_assistant_overlay';
@@ -17,7 +18,7 @@ export type Props = Omit<PromptContext, 'id'> & {
   children?: React.ReactNode;
   /** Optionally automatically add this context to a conversation when the assistant is shown */
   conversationId?: string;
-  /** Defaults to `discuss`. If null, the button will not have an icon */
+  /** Defaults to `discuss`. If null, the button will not have an icon. Not available for link */
   iconType?: string | null;
   /** Optionally specify a well known ID, or default to a UUID */
   promptContextId?: string;
@@ -25,6 +26,12 @@ export type Props = Omit<PromptContext, 'id'> & {
   color?: 'text' | 'accent' | 'primary' | 'success' | 'warning' | 'danger';
   /** Required to identify the availability of the Assistant for the current license level */
   isAssistantEnabled: boolean;
+  /** Optionally render new chat as a link */
+  asLink?: boolean;
+  /** Optional callback when overlay shows */
+  onShowOverlay?: () => void;
+  /** Optional callback that returns copied code block */
+  onExportCodeBlock?: (codeBlock: string) => void;
 };
 
 const NewChatComponent: React.FC<Props> = ({
@@ -39,6 +46,9 @@ const NewChatComponent: React.FC<Props> = ({
   suggestedUserPrompt,
   tooltip,
   isAssistantEnabled,
+  asLink = false,
+  onShowOverlay,
+  onExportCodeBlock,
 }) => {
   const { showAssistantOverlay } = useAssistantOverlay(
     category,
@@ -50,10 +60,24 @@ const NewChatComponent: React.FC<Props> = ({
     tooltip,
     isAssistantEnabled
   );
+  const { codeBlockRef } = useAssistantContext();
 
   const showOverlay = useCallback(() => {
     showAssistantOverlay(true);
-  }, [showAssistantOverlay]);
+    onShowOverlay?.();
+  }, [showAssistantOverlay, onShowOverlay]);
+
+  useEffect(() => {
+    if (onExportCodeBlock) {
+      codeBlockRef.current = onExportCodeBlock;
+    }
+
+    return () => {
+      if (onExportCodeBlock) {
+        codeBlockRef.current = () => {};
+      }
+    };
+  }, [codeBlockRef, onExportCodeBlock]);
 
   const icon = useMemo(() => {
     if (iconType === null) {
@@ -64,12 +88,22 @@ const NewChatComponent: React.FC<Props> = ({
   }, [iconType]);
 
   return useMemo(
-    () => (
-      <EuiButtonEmpty color={color} data-test-subj="newChat" onClick={showOverlay} iconType={icon}>
-        {children}
-      </EuiButtonEmpty>
-    ),
-    [children, icon, showOverlay, color]
+    () =>
+      asLink ? (
+        <EuiLink color={color} data-test-subj="newChatLink" onClick={showOverlay}>
+          {children}
+        </EuiLink>
+      ) : (
+        <EuiButtonEmpty
+          color={color}
+          data-test-subj="newChat"
+          onClick={showOverlay}
+          iconType={icon}
+        >
+          {children}
+        </EuiButtonEmpty>
+      ),
+    [children, icon, showOverlay, color, asLink]
   );
 };
 

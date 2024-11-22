@@ -6,26 +6,10 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-injected-metadata-browser-mocks",
-        "id": "def-common.injectedMetadataServiceMock",
+        "id": "def-public.injectedMetadataServiceMock",
         "type": "Object",
         "tags": [],
         "label": "injectedMetadataServiceMock",
@@ -36,7 +20,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-injected-metadata-browser-mocks",
-            "id": "def-common.injectedMetadataServiceMock.create",
+            "id": "def-public.injectedMetadataServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -52,7 +36,7 @@
           },
           {
             "parentPluginId": "@kbn/core-injected-metadata-browser-mocks",
-            "id": "def-common.injectedMetadataServiceMock.createSetupContract",
+            "id": "def-public.injectedMetadataServiceMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
@@ -70,7 +54,7 @@
           },
           {
             "parentPluginId": "@kbn/core-injected-metadata-browser-mocks",
-            "id": "def-common.injectedMetadataServiceMock.createStartContract",
+            "id": "def-public.injectedMetadataServiceMock.createStartContract",
             "type": "Function",
             "tags": [],
             "label": "createStartContract",
@@ -90,5 +74,21 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

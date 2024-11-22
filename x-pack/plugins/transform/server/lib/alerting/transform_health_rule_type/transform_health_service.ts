@@ -122,6 +122,7 @@ export function transformHealthServiceProvider({
             await esClient.transform.getTransformStats({
               // @ts-expect-error `basic` query option not yet in @elastic/elasticsearch
               basic: true,
+              transform_id: '_all',
             })
           ).transforms as TransformStats[]
         ).filter((t) => transformIds.has(t.id));

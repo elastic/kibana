@@ -11,16 +11,22 @@ import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
 export const Breadcrumb = ({
   title,
   href,
+  omitOnServerless = false,
   children,
 }: {
   title: string;
   href: string;
+  omitOnServerless?: boolean;
   children: React.ReactElement;
 }) => {
   const { core } = useApmPluginContext();
+
   useBreadcrumb(
     () => ({ title, href: core.http.basePath.prepend('/app/apm' + href) }),
-    [core.http.basePath, href, title]
+    [core.http.basePath, href, title],
+    {
+      omitOnServerless,
+    }
   );
 
   return children;

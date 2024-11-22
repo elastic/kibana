@@ -14,16 +14,16 @@ import { allCasesPermissions, TestProviders } from '../../mock';
 describe('hooks', () => {
   describe('useApplicationCapabilities', () => {
     it('should return the correct capabilities', async () => {
-      const { result } = renderHook<{}, ReturnType<typeof useApplicationCapabilities>>(
-        () => useApplicationCapabilities(),
-        {
-          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-        }
-      );
+      const { result } = renderHook<
+        React.PropsWithChildren<{}>,
+        ReturnType<typeof useApplicationCapabilities>
+      >(() => useApplicationCapabilities(), {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      });
 
       expect(result.current).toEqual({
         actions: { crud: true, read: true },
-        generalCases: allCasesPermissions(),
+        generalCasesV2: allCasesPermissions(),
         visualize: { crud: true, read: true },
         dashboard: { crud: true, read: true },
       });

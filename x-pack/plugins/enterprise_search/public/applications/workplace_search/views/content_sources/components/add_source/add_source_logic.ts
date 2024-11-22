@@ -189,18 +189,21 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       addSourceCurrentStep: [
         null,
         {
+          // @ts-expect-error upgrade typescript v5.1.6
           setAddSourceStep: (_, addSourceCurrentStep) => addSourceCurrentStep,
         },
       ],
       sourceConfigData: [
         {} as SourceConfigData,
         {
+          // @ts-expect-error upgrade typescript v5.1.6
           setSourceConfigData: (_, sourceConfigData) => sourceConfigData,
         },
       ],
       sourceConnectData: [
         {} as SourceConnectData,
         {
+          // @ts-expect-error upgrade typescript v5.1.6
           setSourceConnectData: (_, sourceConnectData) => sourceConnectData,
         },
       ],
@@ -235,6 +238,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       loginValue: [
         '',
         {
+          // @ts-expect-error upgrade typescript v5.1.6
           setSourceLoginValue: (_, loginValue) => loginValue,
           resetSourceState: () => '',
         },
@@ -242,6 +246,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       passwordValue: [
         '',
         {
+          // @ts-expect-error upgrade typescript v5.1.6
           setSourcePasswordValue: (_, passwordValue) => passwordValue,
           resetSourceState: () => '',
         },
@@ -249,6 +254,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       subdomainValue: [
         '',
         {
+          // @ts-expect-error upgrade typescript v5.1.6
           setSourceSubdomainValue: (_, subdomainValue) => subdomainValue,
           resetSourceState: () => '',
         },
@@ -256,6 +262,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       indexPermissionsValue: [
         false,
         {
+          // @ts-expect-error upgrade typescript v5.1.6
           setSourceIndexPermissionsValue: (_, indexPermissionsValue) => indexPermissionsValue,
           resetSourceState: () => false,
         },
@@ -263,6 +270,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       githubOrganizations: [
         [],
         {
+          // @ts-expect-error upgrade typescript v5.1.6
           setPreContentSourceConfigData: (_, { githubOrganizations }) => githubOrganizations,
           resetSourceState: () => [],
         },
@@ -270,6 +278,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       selectedGithubOrganizationsMap: [
         {} as OrganizationsMap,
         {
+          // @ts-expect-error upgrade typescript v5.1.6
           setSelectedGithubOrganizations: (state, option) => ({
             ...state,
             ...{ [option]: !state[option] },
@@ -280,6 +289,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       preContentSourceId: [
         '',
         {
+          // @ts-expect-error upgrade typescript v5.1.6
           setPreContentSourceId: (_, preContentSourceId) => preContentSourceId,
           setPreContentSourceConfigData: () => '',
           resetSourceState: () => '',
@@ -295,7 +305,9 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       configuredFields: [
         {},
         {
+          // @ts-expect-error upgrade typescript v5.1.6
           setSourceConfigData: (_, { configuredFields }) => configuredFields,
+          // @ts-expect-error upgrade typescript v5.1.6
           setConfiguredField: (configuredFields, { key, value }) => ({
             ...configuredFields,
             [key]: value,

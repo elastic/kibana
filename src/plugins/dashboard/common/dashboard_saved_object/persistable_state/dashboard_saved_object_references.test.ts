@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -17,7 +18,8 @@ import {
   createInject,
 } from '../../dashboard_container/persistable_state/dashboard_container_references';
 import { createEmbeddablePersistableStateServiceMock } from '@kbn/embeddable-plugin/common/mocks';
-import { DashboardAttributes } from '../../content_management';
+import type { DashboardAttributes, DashboardItem } from '../../../server/content_management';
+import { DashboardAttributesAndReferences } from '../../types';
 
 const embeddablePersistableStateServiceMock = createEmbeddablePersistableStateServiceMock();
 const dashboardInject = createInject(embeddablePersistableStateServiceMock);
@@ -43,28 +45,37 @@ const deps: InjectExtractDeps = {
 };
 
 const commonAttributes: DashboardAttributes = {
-  kibanaSavedObjectMeta: { searchSourceJSON: '' },
+  kibanaSavedObjectMeta: { searchSource: {} },
   timeRestore: false,
-  panelsJSON: '',
   version: 1,
+  options: {
+    hidePanelTitles: false,
+    useMargins: true,
+    syncColors: true,
+    syncCursor: true,
+    syncTooltips: true,
+  },
+  panels: [],
   description: '',
   title: '',
 };
 
 describe('extractReferences', () => {
-  test('extracts references from panelsJSON', () => {
+  test('extracts references from panels', () => {
     const doc = {
       id: '1',
       attributes: {
         ...commonAttributes,
         foo: true,
-        panelsJSON: JSON.stringify([
+        panels: [
           {
             panelIndex: 'panel-1',
             type: 'visualization',
             id: '1',
             title: 'Title 1',
             version: '7.9.1',
+            gridData: { x: 0, y: 0, w: 1, h: 1, i: 'panel-1' },
+            panelConfig: {},
           },
           {
             panelIndex: 'panel-2',
@@ -72,8 +83,10 @@ describe('extractReferences', () => {
             id: '2',
             title: 'Title 2',
             version: '7.9.1',
+            gridData: { x: 1, y: 1, w: 2, h: 2, i: 'panel-2' },
+            panelConfig: {},
           },
-        ]),
+        ],
       },
       references: [],
     };
@@ -85,9 +98,47 @@ describe('extractReferences', () => {
           "description": "",
           "foo": true,
           "kibanaSavedObjectMeta": Object {
-            "searchSourceJSON": "",
+            "searchSource": Object {},
           },
-          "panelsJSON": "[{\\"version\\":\\"7.9.1\\",\\"type\\":\\"visualization\\",\\"panelIndex\\":\\"panel-1\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 1\\",\\"panelRefName\\":\\"panel_panel-1\\"},{\\"version\\":\\"7.9.1\\",\\"type\\":\\"visualization\\",\\"panelIndex\\":\\"panel-2\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 2\\",\\"panelRefName\\":\\"panel_panel-2\\"}]",
+          "options": Object {
+            "hidePanelTitles": false,
+            "syncColors": true,
+            "syncCursor": true,
+            "syncTooltips": true,
+            "useMargins": true,
+          },
+          "panels": Array [
+            Object {
+              "gridData": Object {
+                "h": 1,
+                "i": "panel-1",
+                "w": 1,
+                "x": 0,
+                "y": 0,
+              },
+              "panelConfig": Object {},
+              "panelIndex": "panel-1",
+              "panelRefName": "panel_panel-1",
+              "title": "Title 1",
+              "type": "visualization",
+              "version": "7.9.1",
+            },
+            Object {
+              "gridData": Object {
+                "h": 2,
+                "i": "panel-2",
+                "w": 2,
+                "x": 1,
+                "y": 1,
+              },
+              "panelConfig": Object {},
+              "panelIndex": "panel-2",
+              "panelRefName": "panel_panel-2",
+              "title": "Title 2",
+              "type": "visualization",
+              "version": "7.9.1",
+            },
+          ],
           "timeRestore": false,
           "title": "",
           "version": 1,
@@ -114,18 +165,18 @@ describe('extractReferences', () => {
       attributes: {
         ...commonAttributes,
         foo: true,
-        panelsJSON: JSON.stringify([
+        panels: [
           {
             id: '1',
             title: 'Title 1',
             version: '7.9.1',
           },
-        ]),
+        ],
       },
       references: [],
-    };
+    } as unknown as DashboardAttributesAndReferences;
     expect(() => extractReferences(doc, deps)).toThrowErrorMatchingInlineSnapshot(
-      `"\\"type\\" attribute is missing from panel \\"undefined\\""`
+      `"\\"type\\" attribute is missing from panel \\"0\\""`
     );
   });
 
@@ -135,25 +186,49 @@ describe('extractReferences', () => {
       attributes: {
         ...commonAttributes,
         foo: true,
-        panelsJSON: JSON.stringify([
+        panels: [
           {
             type: 'visualization',
             title: 'Title 1',
             version: '7.9.1',
+            gridData: { x: 0, y: 0, w: 1, h: 1, i: 'panel-1' },
+            panelConfig: {},
           },
-        ]),
+        ],
       },
       references: [],
     };
-    expect(extractReferences(doc, deps)).toMatchInlineSnapshot(`
+    expect(extractReferences(doc as unknown as DashboardItem, deps)).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
           "description": "",
           "foo": true,
           "kibanaSavedObjectMeta": Object {
-            "searchSourceJSON": "",
+            "searchSource": Object {},
           },
-          "panelsJSON": "[{\\"version\\":\\"7.9.1\\",\\"type\\":\\"visualization\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 1\\"}]",
+          "options": Object {
+            "hidePanelTitles": false,
+            "syncColors": true,
+            "syncCursor": true,
+            "syncTooltips": true,
+            "useMargins": true,
+          },
+          "panels": Array [
+            Object {
+              "gridData": Object {
+                "h": 1,
+                "i": "panel-1",
+                "w": 1,
+                "x": 0,
+                "y": 0,
+              },
+              "panelConfig": Object {},
+              "panelIndex": "0",
+              "title": "Title 1",
+              "type": "visualization",
+              "version": "7.9.1",
+            },
+          ],
           "timeRestore": false,
           "title": "",
           "version": 1,
@@ -170,18 +245,26 @@ describe('injectReferences', () => {
       ...commonAttributes,
       id: '1',
       title: 'test',
-      panelsJSON: JSON.stringify([
+      panels: [
         {
+          type: 'visualization',
           panelRefName: 'panel_0',
+          panelIndex: '0',
           title: 'Title 1',
           version: '7.9.0',
+          gridData: { x: 0, y: 0, w: 1, h: 1, i: '0' },
+          panelConfig: {},
         },
         {
+          type: 'visualization',
           panelRefName: 'panel_1',
+          panelIndex: '1',
           title: 'Title 2',
           version: '7.9.0',
+          gridData: { x: 1, y: 1, w: 2, h: 2, i: '1' },
+          panelConfig: {},
         },
-      ]),
+      ],
     };
     const references = [
       {
@@ -202,9 +285,47 @@ describe('injectReferences', () => {
         "description": "",
         "id": "1",
         "kibanaSavedObjectMeta": Object {
-          "searchSourceJSON": "",
+          "searchSource": Object {},
         },
-        "panelsJSON": "[{\\"version\\":\\"7.9.0\\",\\"type\\":\\"visualization\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 1\\",\\"id\\":\\"1\\"},{\\"version\\":\\"7.9.0\\",\\"type\\":\\"visualization\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 2\\",\\"id\\":\\"2\\"}]",
+        "options": Object {
+          "hidePanelTitles": false,
+          "syncColors": true,
+          "syncCursor": true,
+          "syncTooltips": true,
+          "useMargins": true,
+        },
+        "panels": Array [
+          Object {
+            "gridData": Object {
+              "h": 1,
+              "i": "0",
+              "w": 1,
+              "x": 0,
+              "y": 0,
+            },
+            "id": "1",
+            "panelConfig": Object {},
+            "panelIndex": "0",
+            "title": "Title 1",
+            "type": "visualization",
+            "version": "7.9.0",
+          },
+          Object {
+            "gridData": Object {
+              "h": 2,
+              "i": "1",
+              "w": 2,
+              "x": 1,
+              "y": 1,
+            },
+            "id": "2",
+            "panelConfig": Object {},
+            "panelIndex": "1",
+            "title": "Title 2",
+            "type": "visualization",
+            "version": "7.9.0",
+          },
+        ],
         "timeRestore": false,
         "title": "test",
         "version": 1,
@@ -212,7 +333,7 @@ describe('injectReferences', () => {
     `);
   });
 
-  test('skips when panelsJSON is missing', () => {
+  test('skips when panels is missing', () => {
     const attributes = {
       id: '1',
       title: 'test',
@@ -221,31 +342,8 @@ describe('injectReferences', () => {
     expect(newAttributes).toMatchInlineSnapshot(`
       Object {
         "id": "1",
-        "panelsJSON": "[]",
+        "panels": Array [],
         "title": "test",
-      }
-    `);
-  });
-
-  test('skips when panelsJSON is not an array', () => {
-    const attributes = {
-      ...commonAttributes,
-      id: '1',
-      panelsJSON: '{}',
-      title: 'test',
-    };
-    const newAttributes = injectReferences({ attributes, references: [] }, deps);
-    expect(newAttributes).toMatchInlineSnapshot(`
-      Object {
-        "description": "",
-        "id": "1",
-        "kibanaSavedObjectMeta": Object {
-          "searchSourceJSON": "",
-        },
-        "panelsJSON": "[]",
-        "timeRestore": false,
-        "title": "test",
-        "version": 1,
       }
     `);
   });
@@ -255,15 +353,23 @@ describe('injectReferences', () => {
       ...commonAttributes,
       id: '1',
       title: 'test',
-      panelsJSON: JSON.stringify([
+      panels: [
         {
+          type: 'visualization',
           panelRefName: 'panel_0',
+          panelIndex: '0',
           title: 'Title 1',
+          gridData: { x: 0, y: 0, w: 1, h: 1, i: '0' },
+          panelConfig: {},
         },
         {
+          type: 'visualization',
+          panelIndex: '1',
           title: 'Title 2',
+          gridData: { x: 1, y: 1, w: 2, h: 2, i: '1' },
+          panelConfig: {},
         },
-      ]),
+      ],
     };
     const references = [
       {
@@ -278,9 +384,46 @@ describe('injectReferences', () => {
         "description": "",
         "id": "1",
         "kibanaSavedObjectMeta": Object {
-          "searchSourceJSON": "",
+          "searchSource": Object {},
         },
-        "panelsJSON": "[{\\"type\\":\\"visualization\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 1\\",\\"id\\":\\"1\\"},{\\"embeddableConfig\\":{},\\"title\\":\\"Title 2\\"}]",
+        "options": Object {
+          "hidePanelTitles": false,
+          "syncColors": true,
+          "syncCursor": true,
+          "syncTooltips": true,
+          "useMargins": true,
+        },
+        "panels": Array [
+          Object {
+            "gridData": Object {
+              "h": 1,
+              "i": "0",
+              "w": 1,
+              "x": 0,
+              "y": 0,
+            },
+            "id": "1",
+            "panelConfig": Object {},
+            "panelIndex": "0",
+            "title": "Title 1",
+            "type": "visualization",
+            "version": undefined,
+          },
+          Object {
+            "gridData": Object {
+              "h": 2,
+              "i": "1",
+              "w": 2,
+              "x": 1,
+              "y": 1,
+            },
+            "panelConfig": Object {},
+            "panelIndex": "1",
+            "title": "Title 2",
+            "type": "visualization",
+            "version": undefined,
+          },
+        ],
         "timeRestore": false,
         "title": "test",
         "version": 1,
@@ -293,12 +436,16 @@ describe('injectReferences', () => {
       ...commonAttributes,
       id: '1',
       title: 'test',
-      panelsJSON: JSON.stringify([
+      panels: [
         {
+          panelIndex: '0',
           panelRefName: 'panel_0',
           title: 'Title 1',
+          type: 'visualization',
+          gridData: { x: 0, y: 0, w: 1, h: 1, i: '0' },
+          panelConfig: {},
         },
-      ]),
+      ],
     };
     expect(() =>
       injectReferences({ attributes, references: [] }, deps)

@@ -1,5 +1,5 @@
 post:
-  summary: Enables an SLO
+  summary: Enable an SLO
   operationId: enableSloOp
   description: >
     You must have the `write` privileges for the **SLOs** feature in the

@@ -1536,7 +1536,7 @@
             "section": "def-common.BaseFlameGraph",
             "text": "BaseFlameGraph"
           },
-          ", \"AnnualCO2TonsExclusive\" | \"AnnualCO2TonsInclusive\" | \"SelfAnnualCO2Tons\" | \"TotalAnnualCO2Tons\" | \"AnnualCostsUSDInclusive\" | \"AnnualCostsUSDExclusive\">"
+          ", \"AnnualCO2TonsExclusive\" | \"AnnualCO2TonsInclusive\" | \"AnnualCostsUSDInclusive\" | \"AnnualCostsUSDExclusive\" | \"SelfAnnualCO2Tons\" | \"TotalAnnualCO2Tons\">"
         ],
         "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
         "deprecated": false,

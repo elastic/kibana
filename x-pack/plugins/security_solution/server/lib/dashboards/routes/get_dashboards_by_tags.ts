@@ -7,27 +7,24 @@
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 
-import type { DashboardAttributes } from '@kbn/dashboard-plugin/common';
+import type { DashboardSavedObjectAttributes } from '@kbn/dashboard-plugin/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { INTERNAL_DASHBOARDS_URL } from '../../../../common/constants';
-import type { SetupPlugins } from '../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import { buildSiemResponse } from '../../detection_engine/routes/utils';
 import { buildFrameworkRequest } from '../../timeline/utils/common';
 import { getDashboardsRequest } from '../../../../common/api/tags';
 import { buildRouteValidationWithExcess } from '../../../utils/build_validation/route_validation';
 
-export const getDashboardsByTagsRoute = (
-  router: SecuritySolutionPluginRouter,
-  logger: Logger,
-  security: SetupPlugins['security']
-) => {
+export const getDashboardsByTagsRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.versioned
     .post({
       path: INTERNAL_DASHBOARDS_URL,
       access: 'internal',
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(
@@ -36,12 +33,12 @@ export const getDashboardsByTagsRoute = (
         validate: { request: { body: buildRouteValidationWithExcess(getDashboardsRequest) } },
       },
       async (context, request, response) => {
-        const frameworkRequest = await buildFrameworkRequest(context, security, request);
+        const frameworkRequest = await buildFrameworkRequest(context, request);
         const savedObjectsClient = (await frameworkRequest.context.core).savedObjects.client;
         const { tagIds } = request.body;
 
         try {
-          const dashboardsResponse = await savedObjectsClient.find<DashboardAttributes>({
+          const dashboardsResponse = await savedObjectsClient.find<DashboardSavedObjectAttributes>({
             type: 'dashboard',
             hasReference: tagIds.map((id) => ({ id, type: 'tag' })),
           });

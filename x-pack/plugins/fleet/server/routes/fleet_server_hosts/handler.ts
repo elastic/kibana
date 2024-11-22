@@ -12,7 +12,7 @@ import { isEqual } from 'lodash';
 
 import { SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID } from '../../constants';
 
-import { defaultFleetErrorHandler, FleetServerHostUnauthorizedError } from '../../errors';
+import { FleetServerHostUnauthorizedError } from '../../errors';
 import { agentPolicyService, appContextService } from '../../services';
 
 import {
@@ -58,28 +58,24 @@ export const postFleetServerHost: RequestHandler<
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
 
-  try {
-    // In serverless, allow create fleet server host if host url is same as default.
-    await checkFleetServerHostsWriteAPIsAllowed(soClient, request.body.host_urls);
+  // In serverless, allow create fleet server host if host url is same as default.
+  await checkFleetServerHostsWriteAPIsAllowed(soClient, request.body.host_urls);
 
-    const { id, ...data } = request.body;
-    const FleetServerHost = await createFleetServerHost(
-      soClient,
-      { ...data, is_preconfigured: false },
-      { id }
-    );
-    if (FleetServerHost.is_default) {
-      await agentPolicyService.bumpAllAgentPolicies(esClient);
-    }
-
-    const body = {
-      item: FleetServerHost,
-    };
-
-    return response.ok({ body });
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
+  const { id, ...data } = request.body;
+  const FleetServerHost = await createFleetServerHost(
+    soClient,
+    { ...data, is_preconfigured: false },
+    { id }
+  );
+  if (FleetServerHost.is_default) {
+    await agentPolicyService.bumpAllAgentPolicies(esClient);
   }
+
+  const body = {
+    item: FleetServerHost,
+  };
+
+  return response.ok({ body });
 };
 
 export const getFleetServerHostHandler: RequestHandler<
@@ -100,7 +96,7 @@ export const getFleetServerHostHandler: RequestHandler<
       });
     }
 
-    return defaultFleetErrorHandler({ error, response });
+    throw error;
   }
 };
 
@@ -125,7 +121,7 @@ export const deleteFleetServerHostHandler: RequestHandler<
       });
     }
 
-    return defaultFleetErrorHandler({ error, response });
+    throw error;
   }
 };
 
@@ -135,7 +131,7 @@ export const putFleetServerHostHandler: RequestHandler<
   TypeOf<typeof PutFleetServerHostRequestSchema.body>
 > = async (context, request, response) => {
   try {
-    const coreContext = await await context.core;
+    const coreContext = await context.core;
     const esClient = coreContext.elasticsearch.client.asInternalUser;
     const soClient = coreContext.savedObjects.client;
 
@@ -163,23 +159,19 @@ export const putFleetServerHostHandler: RequestHandler<
       });
     }
 
-    return defaultFleetErrorHandler({ error, response });
+    throw error;
   }
 };
 
 export const getAllFleetServerHostsHandler: RequestHandler = async (context, request, response) => {
   const soClient = (await context.core).savedObjects.client;
-  try {
-    const res = await listFleetServerHosts(soClient);
-    const body = {
-      items: res.items,
-      page: res.page,
-      perPage: res.perPage,
-      total: res.total,
-    };
+  const res = await listFleetServerHosts(soClient);
+  const body = {
+    items: res.items,
+    page: res.page,
+    perPage: res.perPage,
+    total: res.total,
+  };
 
-    return response.ok({ body });
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
-  }
+  return response.ok({ body });
 };

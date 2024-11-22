@@ -1,5 +1,5 @@
 post:
-  summary: Resets an SLO.
+  summary: Reset an SLO
   operationId: resetSloOp
   description: >
     You must have the `write` privileges for the **SLOs** feature in the
@@ -11,7 +11,7 @@ post:
     - $ref: ../components/parameters/space_id.yaml
     - $ref: ../components/parameters/slo_id.yaml
   responses:
-    '204':
+    '200':
       description: Successful request
       content:
         application/json:

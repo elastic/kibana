@@ -11,7 +11,7 @@ const ReadOnlyContext = createContext<{ isReadOnly: boolean; setIsReadOnly: (v: 
   { isReadOnly: false, setIsReadOnly: () => {} }
 );
 
-export const ReadOnlyContextProvider: React.FC = ({ children }) => {
+export const ReadOnlyContextProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
   const [isReadOnly, setIsReadOnly] = useState(false);
   return (
     <ReadOnlyContext.Provider
@@ -33,7 +33,7 @@ export function useIsReadOnly() {
 export function useSetIsReadOnly(isReadOnly: boolean) {
   const context = useContext(ReadOnlyContext);
   useEffect(() => {
-    context.setIsReadOnly(true);
+    context.setIsReadOnly(isReadOnly);
     return () => context.setIsReadOnly(false);
-  }, [context]);
+  }, [context, isReadOnly]);
 }

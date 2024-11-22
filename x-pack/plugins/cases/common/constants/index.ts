@@ -62,6 +62,8 @@ export const CASE_FIND_USER_ACTIONS_URL = `${CASE_USER_ACTIONS_URL}/_find` as co
 export const CASE_ALERTS_URL = `${CASES_URL}/alerts/{alert_id}` as const;
 export const CASE_DETAILS_ALERTS_URL = `${CASE_DETAILS_URL}/alerts` as const;
 
+export const CASE_FILES_URL = `${CASE_DETAILS_URL}/files` as const;
+
 /**
  * Internal routes
  */
@@ -133,6 +135,13 @@ export const MAX_CUSTOM_FIELDS_PER_CASE = 10 as const;
 export const MAX_CUSTOM_FIELD_KEY_LENGTH = 36 as const; // uuidv4 length
 export const MAX_CUSTOM_FIELD_LABEL_LENGTH = 50 as const;
 export const MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH = 160 as const;
+export const MAX_TEMPLATE_KEY_LENGTH = 36 as const; // uuidv4 length
+export const MAX_TEMPLATE_NAME_LENGTH = 50 as const;
+export const MAX_TEMPLATE_DESCRIPTION_LENGTH = 1000 as const;
+export const MAX_TEMPLATES_LENGTH = 10 as const;
+export const MAX_TEMPLATE_TAG_LENGTH = 50 as const;
+export const MAX_TAGS_PER_TEMPLATE = 10 as const;
+export const MAX_FILENAME_LENGTH = 160 as const;
 
 /**
  * Cases features
@@ -165,6 +174,8 @@ export const DELETE_CASES_CAPABILITY = 'delete_cases' as const;
 export const PUSH_CASES_CAPABILITY = 'push_cases' as const;
 export const CASES_SETTINGS_CAPABILITY = 'cases_settings' as const;
 export const CASES_CONNECTORS_CAPABILITY = 'cases_connectors' as const;
+export const CASES_REOPEN_CAPABILITY = 'case_reopen' as const;
+export const CREATE_COMMENT_CAPABILITY = 'create_comment' as const;
 
 /**
  * Cases API Tags

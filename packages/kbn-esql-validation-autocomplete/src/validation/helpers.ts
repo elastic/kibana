@@ -1,12 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAst, ESQLAstItem, ESQLMessage, ESQLSingleAstItem } from '@kbn/esql-ast';
+import type {
+  ESQLAst,
+  ESQLAstItem,
+  ESQLAstMetricsCommand,
+  ESQLMessage,
+  ESQLSingleAstItem,
+} from '@kbn/esql-ast';
 import { FunctionDefinition } from '../definitions/types';
 import { getAllArrayTypes, getAllArrayValues } from '../shared/helpers';
 import { getMessageFromId } from './errors';
@@ -14,8 +21,10 @@ import type { ESQLPolicy, ReferenceMaps } from './types';
 
 export function buildQueryForFieldsFromSource(queryString: string, ast: ESQLAst) {
   const firstCommand = ast[0];
-  if (firstCommand == null) {
-    return '';
+  if (!firstCommand) return '';
+  if (firstCommand.name === 'metrics') {
+    const metrics = firstCommand as ESQLAstMetricsCommand;
+    return `FROM ${metrics.sources.map((source) => source.name).join(', ')}`;
   }
   return queryString.substring(0, firstCommand.location.max + 1);
 }

@@ -6,6 +6,7 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
+import { ruleParamsSchema } from '@kbn/response-ops-rule-params';
 import {
   ruleNotifyWhen,
   ruleLastRunOutcomeValues,
@@ -14,7 +15,6 @@ import {
   ruleExecutionStatusWarningReason,
 } from '../constants';
 import {
-  ruleParamsSchema,
   snoozeScheduleSchema,
   ruleExecutionStatusSchema,
   ruleLastRunSchema,
@@ -23,15 +23,15 @@ import {
   ruleDomainSchema,
 } from '../schemas';
 
-export type RuleNotifyWhen = typeof ruleNotifyWhen[keyof typeof ruleNotifyWhen];
+export type RuleNotifyWhen = (typeof ruleNotifyWhen)[keyof typeof ruleNotifyWhen];
 export type RuleLastRunOutcomeValues =
-  typeof ruleLastRunOutcomeValues[keyof typeof ruleLastRunOutcomeValues];
+  (typeof ruleLastRunOutcomeValues)[keyof typeof ruleLastRunOutcomeValues];
 export type RuleExecutionStatusValues =
-  typeof ruleExecutionStatusValues[keyof typeof ruleExecutionStatusValues];
+  (typeof ruleExecutionStatusValues)[keyof typeof ruleExecutionStatusValues];
 export type RuleExecutionStatusErrorReason =
-  typeof ruleExecutionStatusErrorReason[keyof typeof ruleExecutionStatusErrorReason];
+  (typeof ruleExecutionStatusErrorReason)[keyof typeof ruleExecutionStatusErrorReason];
 export type RuleExecutionStatusWarningReason =
-  typeof ruleExecutionStatusWarningReason[keyof typeof ruleExecutionStatusWarningReason];
+  (typeof ruleExecutionStatusWarningReason)[keyof typeof ruleExecutionStatusWarningReason];
 
 export type RuleParams = TypeOf<typeof ruleParamsSchema>;
 export type RuleSnoozeSchedule = TypeOf<typeof snoozeScheduleSchema>;
@@ -84,6 +84,7 @@ export interface Rule<Params extends RuleParams = never> {
   viewInAppRelativeUrl?: RuleSchemaType['viewInAppRelativeUrl'];
   alertDelay?: RuleSchemaType['alertDelay'];
   legacyId?: RuleSchemaType['legacyId'];
+  flapping?: RuleSchemaType['flapping'];
 }
 
 export interface RuleDomain<Params extends RuleParams = never> {
@@ -122,4 +123,5 @@ export interface RuleDomain<Params extends RuleParams = never> {
   viewInAppRelativeUrl?: RuleDomainSchemaType['viewInAppRelativeUrl'];
   alertDelay?: RuleSchemaType['alertDelay'];
   legacyId?: RuleSchemaType['legacyId'];
+  flapping?: RuleSchemaType['flapping'];
 }

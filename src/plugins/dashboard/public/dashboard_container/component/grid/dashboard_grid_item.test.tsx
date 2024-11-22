@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -13,7 +14,8 @@ import { CONTACT_CARD_EMBEDDABLE } from '@kbn/embeddable-plugin/public/lib/test_
 
 import { buildMockDashboard } from '../../../mocks';
 import { Item, Props as DashboardGridItemProps } from './dashboard_grid_item';
-import { DashboardContainerContext } from '../../embeddable/dashboard_container';
+import { DashboardContext } from '../../../dashboard_api/use_dashboard_api';
+import { DashboardApi } from '../../../dashboard_api/types';
 
 jest.mock('@kbn/embeddable-plugin/public', () => {
   const original = jest.requireActual('@kbn/embeddable-plugin/public');
@@ -43,14 +45,14 @@ const createAndMountDashboardGridItem = (props: DashboardGridItemProps) => {
       explicitInput: { id: '2' },
     },
   };
-  const dashboardContainer = buildMockDashboard({ overrides: { panels } });
+  const dashboardApi = buildMockDashboard({ overrides: { panels } }) as DashboardApi;
 
   const component = mountWithIntl(
-    <DashboardContainerContext.Provider value={dashboardContainer}>
+    <DashboardContext.Provider value={dashboardApi}>
       <Item {...props} />
-    </DashboardContainerContext.Provider>
+    </DashboardContext.Provider>
   );
-  return { dashboardContainer, component };
+  return { dashboardApi, component };
 };
 
 test('renders Item', async () => {

@@ -26,6 +26,8 @@ import {
 } from '@elastic/eui';
 import { isEmpty, partition, some } from 'lodash';
 import { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
+import { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
+import { transformActionVariables } from '@kbn/alerts-ui-shared/src/action_variables/transforms';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import {
   IErrorObject,
@@ -36,8 +38,7 @@ import {
   ActionTypeRegistryContract,
   ActionConnectorMode,
 } from '../../../types';
-import { ActionAccordionFormProps, ActionGroupWithMessageVariables } from './action_form';
-import { transformActionVariables } from '../../lib/action_variables';
+import { ActionAccordionFormProps } from './action_form';
 import { useKibana } from '../../../common/lib/kibana';
 import { validateParamsForWarnings } from '../../lib/validate_params_for_warnings';
 import { useRuleTypeAadTemplateFields } from '../../hooks/use_rule_aad_template_fields';
@@ -196,6 +197,7 @@ export const SystemActionTypeForm = ({
                     executionMode={ActionConnectorMode.ActionForm}
                     ruleTypeId={ruleTypeId}
                     producerId={producerId}
+                    featureId={featureId}
                   />
                   {warning ? (
                     <>

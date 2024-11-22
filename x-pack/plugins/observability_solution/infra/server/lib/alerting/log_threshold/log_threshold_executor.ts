@@ -12,6 +12,7 @@ import {
   ALERT_CONTEXT,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  ALERT_GROUP,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import { ElasticsearchClient, IBasePath } from '@kbn/core/server';
@@ -30,8 +31,10 @@ import {
   PublicAlertsClient,
   RecoveredAlertData,
 } from '@kbn/alerting-plugin/server/alerts_client/types';
+import { getEcsGroups, type Group } from '@kbn/observability-alerting-rule-utils';
 
 import { ecsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { getChartGroupNames } from '../../../../common/utils/get_chart_group_names';
 import {
   RuleParams,
@@ -54,7 +57,6 @@ import {
   ExecutionTimeRange,
   Criterion,
 } from '../../../../common/alerting/logs/log_threshold';
-import { decodeOrThrow } from '../../../../common/runtime_types';
 import { getLogsAppAlertUrl } from '../../../../common/formatters/alert_link';
 import { InfraBackendLibs } from '../../infra_types';
 import {
@@ -82,9 +84,13 @@ export type LogThresholdRuleTypeState = RuleTypeState; // no specific state used
 export type LogThresholdAlertState = AlertState; // no specific state used
 export type LogThresholdAlertContext = AlertContext; // no specific instance context used
 
-export type LogThresholdAlert = Omit<ObservabilityLogsAlert, 'kibana.alert.evaluation.values'> & {
+export type LogThresholdAlert = Omit<
+  ObservabilityLogsAlert,
+  'kibana.alert.evaluation.values' | 'kibana.alert.group'
+> & {
   // Defining a custom type for this because the schema generation script doesn't allow explicit null values
   'kibana.alert.evaluation.values'?: Array<number | null>;
+  [ALERT_GROUP]?: Group[];
 };
 
 export type LogThresholdAlertReporter = (
@@ -169,12 +175,23 @@ export const createLogThresholdExecutor =
             alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, uuid),
           };
 
+          const instances = alertInstanceId.split(',');
+          const groups =
+            alertInstanceId !== '*'
+              ? params.groupBy?.reduce<Group[]>((resultGroups, groupByItem, index) => {
+                  resultGroups.push({ field: groupByItem, value: instances[index].trim() });
+                  return resultGroups;
+                }, [])
+              : undefined;
+
           const payload = {
             [ALERT_EVALUATION_THRESHOLD]: threshold,
             [ALERT_EVALUATION_VALUE]: value,
             [ALERT_REASON]: reason,
             [ALERT_CONTEXT]: alertContext,
+            [ALERT_GROUP]: groups,
             ...flattenAdditionalContext(rootLevelContext),
+            ...getEcsGroups(groups),
           };
 
           alertsClient.setAlertData({
@@ -186,13 +203,16 @@ export const createLogThresholdExecutor =
       }
     };
 
-    const [, { logsShared }] = await libs.getStartServices();
+    const [, { logsShared, logsDataAccess }] = await libs.getStartServices();
 
     try {
       const validatedParams = decodeOrThrow(ruleParamsRT)(params);
 
+      const logSourcesService =
+        logsDataAccess.services.logSourcesServiceFactory.getLogSourcesService(savedObjectsClient);
+
       const { indices, timestampField, runtimeMappings } = await logsShared.logViews
-        .getClient(savedObjectsClient, scopedClusterClient.asCurrentUser)
+        .getClient(savedObjectsClient, scopedClusterClient.asCurrentUser, logSourcesService)
         .getResolvedLogView(validatedParams.logView);
 
       if (!isRatioRuleParams(validatedParams)) {

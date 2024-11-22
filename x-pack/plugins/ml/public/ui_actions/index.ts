@@ -8,7 +8,7 @@
 import type { CoreSetup } from '@kbn/core/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER } from '@kbn/ml-ui-actions';
-import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
+import { type UiActionsSetup, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import type { MlPluginStart, MlStartDependencies } from '../plugin';
 import { createApplyEntityFieldFiltersAction } from './apply_entity_filters_action';
 import { createApplyInfluencerFiltersAction } from './apply_influencer_filters_action';
@@ -28,6 +28,8 @@ import {
   EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER,
   SWIM_LANE_SELECTION_TRIGGER,
   swimLaneSelectionTrigger,
+  smvEntityFieldSelectionTrigger,
+  SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER,
 } from './triggers';
 import { createAddAnomalyChartsPanelAction } from './create_anomaly_chart';
 export { APPLY_INFLUENCER_FILTERS_ACTION } from './apply_influencer_filters_action';
@@ -35,6 +37,7 @@ export { APPLY_TIME_RANGE_SELECTION_ACTION } from './apply_time_range_action';
 export { OPEN_IN_ANOMALY_EXPLORER_ACTION } from './open_in_anomaly_explorer_action';
 export { CREATE_LENS_VIS_TO_ML_AD_JOB_ACTION } from './open_vis_in_ml_action';
 export { SWIM_LANE_SELECTION_TRIGGER };
+import { CONTROLLED_BY_SINGLE_METRIC_VIEWER_FILTER } from './constants';
 /**
  * Register ML UI actions
  */
@@ -53,6 +56,10 @@ export function registerMlUiActions(
   );
   const applyInfluencerFiltersAction = createApplyInfluencerFiltersAction(core.getStartServices);
   const applyEntityFieldFilterAction = createApplyEntityFieldFiltersAction(core.getStartServices);
+  const smvApplyEntityFieldFilterAction = createApplyEntityFieldFiltersAction(
+    core.getStartServices,
+    CONTROLLED_BY_SINGLE_METRIC_VIEWER_FILTER
+  );
   const applyTimeRangeSelectionAction = createApplyTimeRangeSelectionAction(core.getStartServices);
   const clearSelectionAction = createClearSelectionAction(core.getStartServices);
   const visToAdJobAction = createVisToADJobAction(core.getStartServices);
@@ -62,20 +69,22 @@ export function registerMlUiActions(
 
   // Register actions
   uiActions.registerAction(applyEntityFieldFilterAction);
+  uiActions.registerAction(smvApplyEntityFieldFilterAction);
   uiActions.registerAction(applyTimeRangeSelectionAction);
   uiActions.registerAction(categorizationADJobAction);
   uiActions.registerAction(addAnomalyChartsPanelAction);
 
   // Assign triggers
-  uiActions.addTriggerAction('ADD_PANEL_TRIGGER', addSingleMetricViewerPanelAction);
-  uiActions.addTriggerAction('ADD_PANEL_TRIGGER', addSwimlanePanelAction);
-  uiActions.addTriggerAction('ADD_PANEL_TRIGGER', addAnomalyChartsPanelAction);
+  uiActions.addTriggerAction(ADD_PANEL_TRIGGER, addSingleMetricViewerPanelAction);
+  uiActions.addTriggerAction(ADD_PANEL_TRIGGER, addSwimlanePanelAction);
+  uiActions.addTriggerAction(ADD_PANEL_TRIGGER, addAnomalyChartsPanelAction);
 
   uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, openInExplorerAction);
   uiActions.attachAction(CONTEXT_MENU_TRIGGER, openInSingleMetricViewerAction.id);
 
   uiActions.registerTrigger(swimLaneSelectionTrigger);
   uiActions.registerTrigger(entityFieldSelectionTrigger);
+  uiActions.registerTrigger(smvEntityFieldSelectionTrigger);
   uiActions.registerTrigger(createCategorizationADJobTrigger);
 
   uiActions.addTriggerAction(SWIM_LANE_SELECTION_TRIGGER, applyInfluencerFiltersAction);
@@ -84,6 +93,10 @@ export function registerMlUiActions(
   uiActions.addTriggerAction(SWIM_LANE_SELECTION_TRIGGER, openInSingleMetricViewerAction);
   uiActions.addTriggerAction(SWIM_LANE_SELECTION_TRIGGER, clearSelectionAction);
   uiActions.addTriggerAction(EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER, applyEntityFieldFilterAction);
+  uiActions.addTriggerAction(
+    SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER,
+    smvApplyEntityFieldFilterAction
+  );
   uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, visToAdJobAction);
   uiActions.addTriggerAction(
     CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER,

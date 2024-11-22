@@ -16,7 +16,8 @@ import type { ISearchOptions } from '@kbn/search-types';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { Logger } from '@kbn/logging';
-import { z } from 'zod';
+import { z } from '@kbn/zod';
+
 import { searchStrategyRequestSchema } from '../../../common/api/search_strategy';
 import {
   TimelineFactoryQueryTypes,
@@ -30,7 +31,7 @@ import { isAggCardinalityAggregate } from './factory/helpers/is_agg_cardinality_
 export const timelineSearchStrategyProvider = (
   data: PluginStart,
   logger: Logger,
-  security?: SecurityPluginSetup
+  _security?: SecurityPluginSetup
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): ISearchStrategy<z.input<typeof searchStrategyRequestSchema>, any> => {
   const es = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
@@ -83,6 +84,9 @@ const timelineSearchStrategy = <T extends TimelineFactoryQueryTypes>({
   queryFactory: TimelineFactory<T>;
   logger: Logger;
 }) => {
+  // NOTE: without this parameter, .hits.hits can be empty
+  options.retrieveResults = true;
+
   const dsl = queryFactory.buildDsl(request);
   return es.search({ ...request, params: dsl }, options, deps).pipe(
     map((response) => {
@@ -108,6 +112,8 @@ const timelineSessionsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
   deps: SearchStrategyDependencies;
   queryFactory: TimelineFactory<T>;
 }) => {
+  // NOTE: without this parameter, .hits.hits can be empty
+  options.retrieveResults = true;
   const indices = request.defaultIndex ?? request.indexType;
 
   const requestSessionLeaders = {

@@ -34,8 +34,9 @@ export interface LogRateAnalysisState {
   autoRunAnalysis: boolean;
   initialAnalysisStart: InitialAnalysisStart;
   isBrushCleared: boolean;
+  groupResults: boolean;
   stickyHistogram: boolean;
-  windowParameters?: WindowParameters;
+  chartWindowParameters?: WindowParameters;
   earliest?: number;
   latest?: number;
   intervalMs?: number;
@@ -48,6 +49,7 @@ function getDefaultState(): LogRateAnalysisState {
     autoRunAnalysis: true,
     initialAnalysisStart: undefined,
     isBrushCleared: true,
+    groupResults: false,
     documentStats: {
       sampleProbability: 1,
       totalCount: 0,
@@ -66,7 +68,7 @@ export const logRateAnalysisSlice = createSlice({
       action: PayloadAction<BrushSelectionUpdatePayload>
     ) => {
       if (!state.isBrushCleared || action.payload.force) {
-        state.windowParameters = action.payload.windowParameters;
+        state.chartWindowParameters = action.payload.windowParameters;
       }
       if (action.payload.force) {
         state.isBrushCleared = false;
@@ -74,7 +76,7 @@ export const logRateAnalysisSlice = createSlice({
       state.analysisType = action.payload.analysisType;
     },
     clearSelection: (state: LogRateAnalysisState) => {
-      state.windowParameters = undefined;
+      state.chartWindowParameters = undefined;
       state.isBrushCleared = true;
       state.initialAnalysisStart = undefined;
     },
@@ -98,6 +100,9 @@ export const logRateAnalysisSlice = createSlice({
       state.intervalMs = action.payload.intervalMs;
       state.documentStats = action.payload.documentStats;
     },
+    setGroupResults: (state: LogRateAnalysisState, action: PayloadAction<boolean>) => {
+      state.groupResults = action.payload;
+    },
     setInitialAnalysisStart: (
       state: LogRateAnalysisState,
       action: PayloadAction<InitialAnalysisStart>
@@ -110,11 +115,11 @@ export const logRateAnalysisSlice = createSlice({
     setStickyHistogram: (state: LogRateAnalysisState, action: PayloadAction<boolean>) => {
       state.stickyHistogram = action.payload;
     },
-    setWindowParameters: (
+    setChartWindowParameters: (
       state: LogRateAnalysisState,
       action: PayloadAction<WindowParameters | undefined>
     ) => {
-      state.windowParameters = action.payload;
+      state.chartWindowParameters = action.payload;
       state.isBrushCleared = action.payload === undefined;
     },
   },
@@ -127,8 +132,9 @@ export const {
   setAnalysisType,
   setAutoRunAnalysis,
   setDocumentCountChartData,
+  setGroupResults,
   setInitialAnalysisStart,
   setIsBrushCleared,
   setStickyHistogram,
-  setWindowParameters,
+  setChartWindowParameters,
 } = logRateAnalysisSlice.actions;

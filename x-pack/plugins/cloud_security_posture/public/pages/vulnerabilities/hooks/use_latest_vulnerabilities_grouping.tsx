@@ -8,23 +8,24 @@ import { getGroupingQuery } from '@kbn/grouping';
 import {
   GroupingAggregation,
   GroupPanelRenderer,
-  GroupStatsRenderer,
+  GetGroupStats,
   isNoneGroup,
   NamedAggregation,
   parseGroupingQuery,
 } from '@kbn/grouping/src';
 import { useMemo } from 'react';
+import {
+  CDR_3RD_PARTY_RETENTION_POLICY,
+  VULNERABILITIES_SEVERITY,
+} from '@kbn/cloud-security-posture-common';
 import { buildEsQuery, Filter } from '@kbn/es-query';
 import {
   LOCAL_STORAGE_VULNERABILITIES_GROUPING_KEY,
   VULNERABILITY_GROUPING_OPTIONS,
   VULNERABILITY_FIELDS,
+  CDR_VULNERABILITY_GROUPING_RUNTIME_MAPPING_FIELDS,
 } from '../../../common/constants';
 import { useDataViewContext } from '../../../common/contexts/data_view_context';
-import {
-  LATEST_VULNERABILITIES_RETENTION_POLICY,
-  VULNERABILITIES_SEVERITY,
-} from '../../../../common/constants';
 import {
   VulnerabilitiesGroupingAggregation,
   VulnerabilitiesRootGroupingAggregation,
@@ -95,6 +96,28 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
 };
 
 /**
+ * Get runtime mappings for the given group field
+ * Some fields require additional runtime mappings to aggregate additional information
+ * Fallback to keyword type to support custom fields grouping
+ */
+const getRuntimeMappingsByGroupField = (
+  field: string
+): Record<string, { type: 'keyword' }> | undefined => {
+  if (CDR_VULNERABILITY_GROUPING_RUNTIME_MAPPING_FIELDS?.[field]) {
+    return CDR_VULNERABILITY_GROUPING_RUNTIME_MAPPING_FIELDS[field].reduce(
+      (acc, runtimeField) => ({
+        ...acc,
+        [runtimeField]: {
+          type: 'keyword',
+        },
+      }),
+      {}
+    );
+  }
+  return {};
+};
+
+/**
  * Type Guard for checking if the given source is a VulnerabilitiesRootGroupingAggregation
  */
 export const isVulnerabilitiesRootGroupingAggregation = (
@@ -109,13 +132,13 @@ export const isVulnerabilitiesRootGroupingAggregation = (
  */
 export const useLatestVulnerabilitiesGrouping = ({
   groupPanelRenderer,
-  groupStatsRenderer,
+  getGroupStats,
   groupingLevel = 0,
   groupFilters = [],
   selectedGroup,
 }: {
   groupPanelRenderer?: GroupPanelRenderer<VulnerabilitiesGroupingAggregation>;
-  groupStatsRenderer?: GroupStatsRenderer<VulnerabilitiesGroupingAggregation>;
+  getGroupStats?: GetGroupStats<VulnerabilitiesGroupingAggregation>;
   groupingLevel?: number;
   groupFilters?: Filter[];
   selectedGroup?: string;
@@ -129,6 +152,7 @@ export const useLatestVulnerabilitiesGrouping = ({
     query,
     onChangeGroupsItemsPerPage,
     onChangeGroupsPage,
+    urlQuery,
     setUrlQuery,
     uniqueValue,
     isNoneSelected,
@@ -143,7 +167,7 @@ export const useLatestVulnerabilitiesGrouping = ({
     getDefaultQuery,
     unit: VULNERABILITIES_UNIT,
     groupPanelRenderer,
-    groupStatsRenderer,
+    getGroupStats,
     groupingLocalStorageKey: LOCAL_STORAGE_VULNERABILITIES_GROUPING_KEY,
     groupingLevel,
     groupsUnit: VULNERABILITIES_GROUPS_UNIT,
@@ -156,12 +180,13 @@ export const useLatestVulnerabilitiesGrouping = ({
     additionalFilters: query ? [query, additionalFilters] : [additionalFilters],
     groupByField: currentSelectedGroup,
     uniqueValue,
-    from: `now-${LATEST_VULNERABILITIES_RETENTION_POLICY}`,
+    from: `now-${CDR_3RD_PARTY_RETENTION_POLICY}`,
     to: 'now',
     pageNumber: activePageIndex * pageSize,
     size: pageSize,
     sort: [{ groupByField: { order: 'desc' } }],
     statsAggregations: getAggregationsByGroupField(currentSelectedGroup),
+    runtimeMappings: getRuntimeMappingsByGroupField(currentSelectedGroup),
   });
 
   const { data, isFetching } = useGroupedVulnerabilities({
@@ -194,6 +219,7 @@ export const useLatestVulnerabilitiesGrouping = ({
     selectedGroup,
     onChangeGroupsItemsPerPage,
     onChangeGroupsPage,
+    urlQuery,
     setUrlQuery,
     isGroupSelected: !isNoneSelected,
     isGroupLoading: !data,

@@ -59,6 +59,7 @@ function getExpressionForLayer(
       function: 'lens_map_to_columns',
       arguments: {
         idMap: [JSON.stringify(idMapper)],
+        isTextBased: [true],
       },
     });
     return textBasedQueryToAst;

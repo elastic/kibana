@@ -48,6 +48,7 @@ import type {
 } from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import moment from 'moment';
+import { DEFAULT_DIAGNOSTIC_INDEX_PATTERN } from '../../../common/endpoint/constants';
 import type { ExperimentalFeatures } from '../../../common';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import {
@@ -85,7 +86,6 @@ import type {
 import { telemetryConfiguration } from './configuration';
 import { ENDPOINT_METRICS_INDEX } from '../../../common/constants';
 import { PREBUILT_RULES_PACKAGE_NAME } from '../../../common/detection_engine/constants';
-import { DEFAULT_DIAGNOSTIC_INDEX } from './constants';
 import type { TelemetryLogger } from './telemetry_logger';
 
 export interface ITelemetryReceiver {
@@ -101,6 +101,8 @@ export interface ITelemetryReceiver {
   getClusterInfo(): Nullable<ESClusterInfo>;
 
   fetchClusterInfo(): Promise<ESClusterInfo>;
+
+  getLicenseInfo(): Nullable<ESLicense>;
 
   fetchLicenseInfo(): Promise<Nullable<ESLicense>>;
 
@@ -204,6 +206,7 @@ export interface ITelemetryReceiver {
   }>;
 
   fetchPrebuiltRuleAlertsBatch(
+    index: string,
     executeFrom: string,
     executeTo: string
   ): AsyncGenerator<TelemetryEvent[], void, unknown>;
@@ -218,7 +221,8 @@ export interface ITelemetryReceiver {
     entityId: string,
     resolverSchema: ResolverSchema,
     startOfDay: string,
-    endOfDay: string
+    endOfDay: string,
+    agentId: string
   ): TreeResponse;
 
   fetchTimelineEvents(
@@ -232,6 +236,7 @@ export interface ITelemetryReceiver {
   getExperimentalFeatures(): ExperimentalFeatures | undefined;
 
   setMaxPageSizeBytes(bytes: number): void;
+
   setNumDocsToSample(n: number): void;
 }
 
@@ -245,6 +250,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   private getIndexForType?: (type: string) => string;
   private alertsIndex?: string;
   private clusterInfo?: ESClusterInfo;
+  private licenseInfo?: Nullable<ESLicense>;
   private processTreeFetcher?: Fetcher;
   private packageService?: PackageService;
   private experimentalFeatures: ExperimentalFeatures | undefined;
@@ -277,6 +283,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     this.soClient =
       core?.savedObjects.createInternalRepository() as unknown as SavedObjectsClientContract;
     this.clusterInfo = await this.fetchClusterInfo();
+    this.licenseInfo = await this.fetchLicenseInfo();
     this.experimentalFeatures = endpointContextService?.experimentalFeatures;
     const elasticsearch = core?.elasticsearch.client as unknown as IScopedClusterClient;
     this.processTreeFetcher = new Fetcher(elasticsearch);
@@ -286,6 +293,10 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
   public getClusterInfo(): ESClusterInfo | undefined {
     return this.clusterInfo;
+  }
+
+  public getLicenseInfo(): Nullable<ESLicense> {
+    return this.licenseInfo;
   }
 
   public getAlertsIndex(): string | undefined {
@@ -310,6 +321,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         ?.listAgents({
           perPage: this.maxRecords,
           showInactive: true,
+          kuery: 'status:*', // include unenrolled agents
           sortField: 'enrolled_at',
           sortOrder: 'desc',
         })
@@ -534,7 +546,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       to: executeTo,
     } as LogMeta);
 
-    let pitId = await this.openPointInTime(DEFAULT_DIAGNOSTIC_INDEX);
+    let pitId = await this.openPointInTime(DEFAULT_DIAGNOSTIC_INDEX_PATTERN);
     let fetchMore = true;
     let searchAfter: SortResults | undefined;
 
@@ -744,13 +756,17 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     };
   }
 
-  public async *fetchPrebuiltRuleAlertsBatch(executeFrom: string, executeTo: string) {
+  public async *fetchPrebuiltRuleAlertsBatch(
+    index: string,
+    executeFrom: string,
+    executeTo: string
+  ) {
     this.logger.debug('Searching prebuilt rule alerts from', {
       executeFrom,
       executeTo,
     } as LogMeta);
 
-    let pitId = await this.openPointInTime(DEFAULT_DIAGNOSTIC_INDEX);
+    let pitId = await this.openPointInTime(index);
     let fetchMore = true;
     let searchAfter: SortResults | undefined;
 
@@ -1034,7 +1050,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     entityId: string,
     resolverSchema: ResolverSchema,
     startOfDay: string,
-    endOfDay: string
+    endOfDay: string,
+    agentId: string
   ): TreeResponse {
     if (this.processTreeFetcher === undefined || this.processTreeFetcher === null) {
       throw Error(
@@ -1053,6 +1070,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       nodes: [entityId],
       indexPatterns: [`${this.alertsIndex}*`, 'logs-*'],
       descendantLevels: 20,
+      agentId,
     };
 
     return this.processTreeFetcher.tree(request, true);

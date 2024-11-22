@@ -30,7 +30,6 @@ import { SendEnterpriseSearchTelemetry as SendTelemetry } from '../../../shared/
 import headerImage from '../../assets/search_header.png';
 
 import { EnterpriseSearchOverviewPageTemplate } from '../layout';
-import { SetupGuideCta } from '../setup_guide';
 import { TrialCallout } from '../trial_callout';
 
 import { ElasticsearchProductCard } from './elasticsearch_product_card';
@@ -62,11 +61,11 @@ export const ProductSelector: React.FC = () => {
           <ApiKeyPanel />
           <EuiSpacer size="xl" />
           <EuiTitle>
-            <h4>
+            <h2>
               {i18n.translate('xpack.enterpriseSearch.productSelector.overview.title', {
                 defaultMessage: 'Ingest your content',
               })}
-            </h4>
+            </h2>
           </EuiTitle>
           <EuiSpacer size="l" />
           <EuiText>
@@ -121,11 +120,6 @@ export const ProductSelector: React.FC = () => {
             <EuiFlexItem>
               <SearchLabsBanner />
             </EuiFlexItem>
-            {!config.host && config.canDeployEntSearch && (
-              <EuiFlexItem>
-                <SetupGuideCta />
-              </EuiFlexItem>
-            )}
           </EuiFlexGroup>
         </EuiPageTemplate.Section>
       </EnterpriseSearchOverviewPageTemplate>

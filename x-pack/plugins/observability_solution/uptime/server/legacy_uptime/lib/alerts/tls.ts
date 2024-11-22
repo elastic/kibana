@@ -20,6 +20,7 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 import { ALERT_REASON, ALERT_UUID } from '@kbn/rule-data-utils';
 import { asyncForEach } from '@kbn/std';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { uptimeRuleFieldMap } from '../../../../common/rules/uptime_rule_field_map';
 import { formatFilterString } from './status_check';
 import { UptimeAlertTypeFactory } from './types';
 import {
@@ -259,6 +260,7 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
     return { state: updateState(state, foundCerts) };
   },
   alerts: UptimeRuleTypeAlertDefinition,
+  fieldsForAAD: Object.keys(uptimeRuleFieldMap),
   getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
     observabilityPaths.ruleDetails(rule.id),
 });

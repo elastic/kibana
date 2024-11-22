@@ -5,26 +5,28 @@
  * 2.0.
  */
 
-import type { RuleCreateProps } from '../../../../../../common/api/detection_engine/model/rule_schema';
-import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
 import type {
+  RuleCreateProps,
   RuleUpdateProps,
   RulePatchProps,
   RuleObjectId,
+  RuleResponse,
   RuleToImport,
+  RuleSource,
 } from '../../../../../../common/api/detection_engine';
-import type { RuleAlertType } from '../../../rule_schema';
+import type { IRuleSourceImporter } from '../import/rule_source_importer';
+import type { RuleImportErrorObject } from '../import/errors';
+import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
 
 export interface IDetectionRulesClient {
-  createCustomRule: (createCustomRulePayload: CreateCustomRuleArgs) => Promise<RuleAlertType>;
-  createPrebuiltRule: (createPrebuiltRulePayload: CreatePrebuiltRuleArgs) => Promise<RuleAlertType>;
-  updateRule: (updateRulePayload: UpdateRuleArgs) => Promise<RuleAlertType>;
-  patchRule: (patchRulePayload: PatchRuleArgs) => Promise<RuleAlertType>;
-  deleteRule: (deleteRulePayload: DeleteRuleArgs) => Promise<void>;
-  upgradePrebuiltRule: (
-    upgradePrebuiltRulePayload: UpgradePrebuiltRuleArgs
-  ) => Promise<RuleAlertType>;
-  importRule: (importRulePayload: ImportRuleArgs) => Promise<RuleAlertType>;
+  createCustomRule: (args: CreateCustomRuleArgs) => Promise<RuleResponse>;
+  createPrebuiltRule: (args: CreatePrebuiltRuleArgs) => Promise<RuleResponse>;
+  updateRule: (args: UpdateRuleArgs) => Promise<RuleResponse>;
+  patchRule: (args: PatchRuleArgs) => Promise<RuleResponse>;
+  deleteRule: (args: DeleteRuleArgs) => Promise<void>;
+  upgradePrebuiltRule: (args: UpgradePrebuiltRuleArgs) => Promise<RuleResponse>;
+  importRule: (args: ImportRuleArgs) => Promise<RuleResponse>;
+  importRules: (args: ImportRulesArgs) => Promise<Array<RuleResponse | RuleImportErrorObject>>;
 }
 
 export interface CreateCustomRuleArgs {
@@ -32,7 +34,7 @@ export interface CreateCustomRuleArgs {
 }
 
 export interface CreatePrebuiltRuleArgs {
-  ruleAsset: PrebuiltRuleAsset;
+  params: RuleCreateProps;
 }
 
 export interface UpdateRuleArgs {
@@ -40,7 +42,7 @@ export interface UpdateRuleArgs {
 }
 
 export interface PatchRuleArgs {
-  nextParams: RulePatchProps;
+  rulePatch: RulePatchProps;
 }
 
 export interface DeleteRuleArgs {
@@ -53,6 +55,14 @@ export interface UpgradePrebuiltRuleArgs {
 
 export interface ImportRuleArgs {
   ruleToImport: RuleToImport;
+  overrideFields?: { rule_source: RuleSource; immutable: boolean };
   overwriteRules?: boolean;
+  allowMissingConnectorSecrets?: boolean;
+}
+
+export interface ImportRulesArgs {
+  rules: RuleToImport[];
+  overwriteRules: boolean;
+  ruleSourceImporter: IRuleSourceImporter;
   allowMissingConnectorSecrets?: boolean;
 }

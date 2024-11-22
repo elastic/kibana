@@ -25,6 +25,7 @@ import {
   testIndexEditableSettingsAll,
   testIndexEditableSettingsLimited,
   testIndexMappings,
+  testIndexMappingsWithSemanticText,
   testIndexMock,
   testIndexName,
   testIndexSettings,
@@ -69,6 +70,7 @@ describe('<IndexDetailsPage />', () => {
     httpRequestsMockHelpers.setLoadIndexStatsResponse(testIndexName, testIndexStats);
     httpRequestsMockHelpers.setLoadIndexMappingResponse(testIndexName, testIndexMappings);
     httpRequestsMockHelpers.setLoadIndexSettingsResponse(testIndexName, testIndexSettings);
+    httpRequestsMockHelpers.setInferenceModels([]);
 
     await act(async () => {
       testBed = await setup({
@@ -102,8 +104,8 @@ describe('<IndexDetailsPage />', () => {
     });
 
     it('resends a request when reload button is clicked', async () => {
-      // already sent 2 requests while setting up the component
-      const numberOfRequests = 2;
+      // already sent 4 requests while setting up the component
+      const numberOfRequests = 4;
       expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
       await testBed.actions.errorSection.clickReloadButton();
       expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
@@ -111,7 +113,7 @@ describe('<IndexDetailsPage />', () => {
 
     it('renders an error section when no index name is provided', async () => {
       // already sent 2 requests while setting up the component
-      const numberOfRequests = 2;
+      const numberOfRequests = 4;
       expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
       await act(async () => {
         testBed = await setup({ httpSetup, initialEntry: '/indices/index_details' });
@@ -120,6 +122,80 @@ describe('<IndexDetailsPage />', () => {
       expect(testBed.actions.errorSection.noIndexNameMessageIsDisplayed()).toBe(true);
       // no extra http request was sent
       expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
+    });
+  });
+
+  describe('Semantic text index errors', () => {
+    it('does not render an error callout by default', () => {
+      expect(testBed.actions.overview.indexErrorCalloutExists()).toBe(false);
+    });
+    it('renders an error callout when the mapping contains semantic text errors', async () => {
+      httpRequestsMockHelpers.setLoadIndexMappingResponse(
+        testIndexName,
+        testIndexMappingsWithSemanticText.mappings
+      );
+      await act(async () => {
+        testBed = await setup({
+          httpSetup,
+          dependencies: {
+            docLinks: {
+              links: {
+                ml: '',
+                enterpriseSearch: '',
+              },
+            },
+            core: {
+              application: { capabilities: { ml: { canGetTrainedModels: true } } },
+            },
+            plugins: {
+              ml: {
+                mlApi: {
+                  trainedModels: {
+                    getModelsDownloadStatus: jest.fn().mockResolvedValue({}),
+                    getTrainedModels: jest.fn().mockResolvedValue([
+                      {
+                        model_id: '.elser_model_2',
+                        model_type: 'pytorch',
+                        model_package: {
+                          packaged_model_id: '.elser_model_2',
+                          model_repository: 'https://ml-models.elastic.co',
+                          minimum_version: '11.0.0',
+                          size: 438123914,
+                          sha256: '',
+                          metadata: {},
+                          tags: [],
+                          vocabulary_file: 'elser_model_2.vocab.json',
+                        },
+                        description: 'Elastic Learned Sparse EncodeR v2',
+                        tags: ['elastic'],
+                      },
+                    ]),
+                    getTrainedModelStats: jest.fn().mockResolvedValue({
+                      count: 1,
+                      trained_model_stats: [
+                        {
+                          model_id: '.elser_model_2',
+
+                          deployment_stats: {
+                            deployment_id: '.elser_model_2',
+                            model_id: '.elser_model_2',
+                            threads_per_allocation: 1,
+                            number_of_allocations: 1,
+                            queue_capacity: 1024,
+                            state: 'started',
+                          },
+                        },
+                      ],
+                    }),
+                  },
+                },
+              },
+            },
+          },
+        });
+      });
+      testBed.component.update();
+      expect(testBed.actions.overview.indexErrorCalloutExists()).toBe(true);
     });
   });
 
@@ -208,8 +284,8 @@ describe('<IndexDetailsPage />', () => {
       });
 
       it('resends a request when reload button is clicked', async () => {
-        // already sent 3 requests while setting up the component
-        const numberOfRequests = 3;
+        // already sent 7 requests while setting up the component
+        const numberOfRequests = 7;
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
         await testBed.actions.stats.clickErrorReloadButton();
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
@@ -218,7 +294,7 @@ describe('<IndexDetailsPage />', () => {
   });
 
   it('loads index details from the API', async () => {
-    expect(httpSetup.get).toHaveBeenLastCalledWith(
+    expect(httpSetup.get).toHaveBeenCalledWith(
       `${INTERNAL_API_BASE_PATH}/indices/${testIndexName}`,
       requestOptions
     );
@@ -381,8 +457,8 @@ describe('<IndexDetailsPage />', () => {
           `Data streamUnable to load data stream detailsReloadLast update`
         );
 
-        // already sent 3 requests while setting up the component
-        const numberOfRequests = 3;
+        // already sent 7 requests while setting up the component
+        const numberOfRequests = 7;
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
         await testBed.actions.overview.reloadDataStreamDetails();
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
@@ -611,7 +687,7 @@ describe('<IndexDetailsPage />', () => {
           body: '{"name":{"type":"text"}}',
         });
 
-        expect(httpSetup.get).toHaveBeenCalledTimes(5);
+        expect(httpSetup.get).toHaveBeenCalledTimes(9);
         expect(httpSetup.get).toHaveBeenLastCalledWith(
           `${API_BASE_PATH}/mapping/${testIndexName}`,
           requestOptions
@@ -647,11 +723,15 @@ describe('<IndexDetailsPage />', () => {
       });
       describe('Add Semantic text field', () => {
         const customInferenceModel = 'my-elser-model';
+        const mockLicense = {
+          isActive: true,
+          hasAtLeast: jest.fn((type) => true),
+        };
         beforeEach(async () => {
           httpRequestsMockHelpers.setInferenceModels({
             data: [
               {
-                model_id: customInferenceModel,
+                inference_id: customInferenceModel,
                 task_type: 'sparse_embedding',
                 service: 'elser',
                 service_settings: {
@@ -667,17 +747,28 @@ describe('<IndexDetailsPage />', () => {
             testBed = await setup({
               httpSetup,
               dependencies: {
-                config: { enableSemanticText: true },
                 docLinks: {
                   links: {
                     ml: '',
                     enterpriseSearch: '',
                   },
                 },
+                core: {
+                  application: { capabilities: { ml: { canGetTrainedModels: true } } },
+                },
                 plugins: {
+                  licensing: {
+                    license$: {
+                      subscribe: jest.fn((callback) => {
+                        callback(mockLicense);
+                        return { unsubscribe: jest.fn() };
+                      }),
+                    },
+                  },
                   ml: {
                     mlApi: {
                       trainedModels: {
+                        getModelsDownloadStatus: jest.fn().mockResolvedValue({}),
                         getTrainedModels: jest.fn().mockResolvedValue([
                           {
                             model_id: '.elser_model_2',
@@ -745,7 +836,6 @@ describe('<IndexDetailsPage />', () => {
           testBed.actions.mappings.isReferenceFieldVisible();
           testBed.actions.mappings.selectInferenceIdButtonExists();
           testBed.actions.mappings.openSelectInferencePopover();
-          testBed.actions.mappings.expectDefaultInferenceModelToExists();
           testBed.actions.mappings.expectCustomInferenceModelToExists(
             `custom-inference_${customInferenceModel}`
           );
@@ -776,8 +866,8 @@ describe('<IndexDetailsPage />', () => {
       });
 
       it('resends a request when reload button is clicked', async () => {
-        // already sent 4 requests while setting up the component
-        const numberOfRequests = 4;
+        // already sent 8 requests while setting up the component
+        const numberOfRequests = 8;
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
         await testBed.actions.mappings.clickErrorReloadButton();
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
@@ -874,8 +964,8 @@ describe('<IndexDetailsPage />', () => {
       });
 
       it('resends a request when reload button is clicked', async () => {
-        // already sent 3 requests while setting up the component
-        const numberOfRequests = 3;
+        // already sent 7 requests while setting up the component
+        const numberOfRequests = 7;
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
         await testBed.actions.settings.clickErrorReloadButton();
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
@@ -926,7 +1016,7 @@ describe('<IndexDetailsPage />', () => {
       });
 
       it('reloads the settings after an update', async () => {
-        const numberOfRequests = 2;
+        const numberOfRequests = 4;
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
         const updatedSettings = { ...testIndexEditableSettingsAll, 'index.priority': '2' };
         await testBed.actions.settings.updateCodeEditorContent(JSON.stringify(updatedSettings));
@@ -988,8 +1078,8 @@ describe('<IndexDetailsPage />', () => {
     });
 
     it('closes an index', async () => {
-      // already sent 1 request while setting up the component
-      const numberOfRequests = 1;
+      // already sent 3 requests while setting up the component
+      const numberOfRequests = 3;
       expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
 
       await testBed.actions.contextMenu.clickManageIndexButton();
@@ -1011,8 +1101,8 @@ describe('<IndexDetailsPage />', () => {
       });
       testBed.component.update();
 
-      // already sent 2 requests while setting up the component
-      const numberOfRequests = 2;
+      // already sent 6 requests while setting up the component
+      const numberOfRequests = 6;
       expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
 
       await testBed.actions.contextMenu.clickManageIndexButton();
@@ -1024,8 +1114,8 @@ describe('<IndexDetailsPage />', () => {
     });
 
     it('forcemerges an index', async () => {
-      // already sent 1 request while setting up the component
-      const numberOfRequests = 1;
+      // already sent 3 request while setting up the component
+      const numberOfRequests = 3;
       expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
 
       await testBed.actions.contextMenu.clickManageIndexButton();
@@ -1038,8 +1128,8 @@ describe('<IndexDetailsPage />', () => {
     });
 
     it('refreshes an index', async () => {
-      // already sent 1 request while setting up the component
-      const numberOfRequests = 1;
+      // already sent 3 request while setting up the component
+      const numberOfRequests = 3;
       expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
 
       await testBed.actions.contextMenu.clickManageIndexButton();
@@ -1051,8 +1141,8 @@ describe('<IndexDetailsPage />', () => {
     });
 
     it(`clears an index's cache`, async () => {
-      // already sent 1 request while setting up the component
-      const numberOfRequests = 1;
+      // already sent 3 request while setting up the component
+      const numberOfRequests = 3;
       expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
 
       await testBed.actions.contextMenu.clickManageIndexButton();
@@ -1064,8 +1154,8 @@ describe('<IndexDetailsPage />', () => {
     });
 
     it(`flushes an index`, async () => {
-      // already sent 1 request while setting up the component
-      const numberOfRequests = 1;
+      // already sent 3 requests while setting up the component
+      const numberOfRequests = 3;
       expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
 
       await testBed.actions.contextMenu.clickManageIndexButton();
@@ -1079,7 +1169,7 @@ describe('<IndexDetailsPage />', () => {
     it(`deletes an index`, async () => {
       jest.spyOn(testBed.routerMock.history, 'push');
       // already sent 1 request while setting up the component
-      const numberOfRequests = 1;
+      const numberOfRequests = 3;
       expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
 
       await testBed.actions.contextMenu.clickManageIndexButton();
@@ -1104,8 +1194,8 @@ describe('<IndexDetailsPage />', () => {
       });
       testBed.component.update();
 
-      // already sent 1 request while setting up the component
-      const numberOfRequests = 2;
+      // already sent 6 requests while setting up the component
+      const numberOfRequests = 6;
       expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
 
       await testBed.actions.contextMenu.clickManageIndexButton();
@@ -1138,7 +1228,7 @@ describe('<IndexDetailsPage />', () => {
       testBed.component.update();
     });
     it('loads the index details with the encoded index name', () => {
-      expect(httpSetup.get).toHaveBeenLastCalledWith(
+      expect(httpSetup.get).toHaveBeenCalledWith(
         `${INTERNAL_API_BASE_PATH}/indices/${encodeURIComponent(percentSignName)}`,
         requestOptions
       );

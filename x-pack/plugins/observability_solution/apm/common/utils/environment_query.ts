@@ -10,16 +10,19 @@ import { SERVICE_ENVIRONMENT, SERVICE_NODE_NAME } from '../es_fields/apm';
 import { ENVIRONMENT_ALL, ENVIRONMENT_NOT_DEFINED } from '../environment_filter_values';
 import { SERVICE_NODE_NAME_MISSING } from '../service_nodes';
 
-export function environmentQuery(environment: string | undefined): QueryDslQueryContainer[] {
+export function environmentQuery(
+  environment: string | undefined,
+  field: string = SERVICE_ENVIRONMENT
+): QueryDslQueryContainer[] {
   if (!environment || environment === ENVIRONMENT_ALL.value) {
     return [];
   }
 
   if (environment === ENVIRONMENT_NOT_DEFINED.value) {
-    return [{ bool: { must_not: { exists: { field: SERVICE_ENVIRONMENT } } } }];
+    return [{ bool: { must_not: { exists: { field } } } }];
   }
 
-  return [{ term: { [SERVICE_ENVIRONMENT]: environment } }];
+  return [{ term: { [field]: environment } }];
 }
 
 export function serviceNodeNameQuery(serviceNodeName?: string): QueryDslQueryContainer[] {

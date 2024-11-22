@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
@@ -19,12 +20,12 @@ interface InspectorDataGridProps extends VegaRuntimeData {
 export const InspectorDataGrid = ({ columns, data, dataGridAriaLabel }: InspectorDataGridProps) => {
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: DEFAULT_PAGE_SIZE });
   const onChangeItemsPerPage = useCallback(
-    (pageSize) => setPagination((p) => ({ ...p, pageSize, pageIndex: 0 })),
+    (pageSize: number) => setPagination((p) => ({ ...p, pageSize, pageIndex: 0 })),
     [setPagination]
   );
 
   const onChangePage = useCallback(
-    (pageIndex) => setPagination((p) => ({ ...p, pageIndex })),
+    (pageIndex: number) => setPagination((p) => ({ ...p, pageIndex })),
     [setPagination]
   );
 
@@ -75,7 +76,7 @@ export const InspectorDataGrid = ({ columns, data, dataGridAriaLabel }: Inspecto
       // then the row index must be adjusted as `data` has already been pruned to the page size
       adjustedRowIndex = rowIndex - pagination.pageIndex * pagination.pageSize;
 
-      return gridData.hasOwnProperty(adjustedRowIndex)
+      return Object.hasOwn(gridData, adjustedRowIndex)
         ? gridData[adjustedRowIndex][columnId] || null
         : null;
     }) as EuiDataGridProps['renderCellValue'];

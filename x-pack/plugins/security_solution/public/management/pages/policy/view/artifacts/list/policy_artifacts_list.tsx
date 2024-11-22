@@ -9,8 +9,10 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { Pagination } from '@elastic/eui';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ArtifactEntryCardDecoratorProps } from '../../../../../components/artifact_entry_card';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../../common/constants';
+import type { SearchExceptionsProps } from '../../../../../components/search_exceptions';
 import { SearchExceptions } from '../../../../../components/search_exceptions';
 import { useEndpointPoliciesToArtifactPolicies } from '../../../../../components/artifact_entry_card/hooks/use_endpoint_policies_to_artifact_policies';
 import { useUrlParams } from '../../../../../hooks/use_url_params';
@@ -29,7 +31,7 @@ import { useListArtifact } from '../../../../../hooks/artifacts';
 import type { POLICY_ARTIFACT_LIST_LABELS } from './translations';
 import type { ArtifactListPageUrlParams } from '../../../../../components/artifact_list_page';
 
-interface PolicyArtifactsListProps {
+export interface PolicyArtifactsListProps {
   policy: ImmutableObject<PolicyData>;
   apiClient: ExceptionsListApiClient;
   searchableFields: string[];
@@ -38,6 +40,7 @@ interface PolicyArtifactsListProps {
   labels: typeof POLICY_ARTIFACT_LIST_LABELS;
   onDeleteActionCallback: (item: ExceptionListItemSchema) => void;
   canWriteArtifact?: boolean;
+  CardDecorator: React.ComponentType<ArtifactEntryCardDecoratorProps> | undefined;
 }
 
 export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
@@ -50,6 +53,7 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
     labels,
     onDeleteActionCallback,
     canWriteArtifact = false,
+    CardDecorator,
   }) => {
     useOldUrlSearchPaginationReplace();
     const { getAppUrl } = useAppUrl();
@@ -88,7 +92,7 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
       [artifacts?.total, pageSizeOptions, urlPagination.page, urlPagination.pageSize]
     );
 
-    const handleOnSearch = useCallback(
+    const handleOnSearch = useCallback<SearchExceptionsProps['onSearch']>(
       (filter) => {
         navigateCallback({ filter });
       },
@@ -120,7 +124,7 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
     }, [artifacts?.data.length, labels]);
 
     const artifactCardPolicies = useEndpointPoliciesToArtifactPolicies(policiesRequest.data?.items);
-    const provideCardProps = useCallback(
+    const provideCardProps = useCallback<NonNullable<ArtifactCardGridProps['cardComponentProps']>>(
       (artifact) => {
         const viewUrlPath = getArtifactPath({
           filter: (artifact as ExceptionListItemSchema).item_id,
@@ -192,6 +196,7 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
           pagination={artifacts ? pagination : undefined}
           loading={isLoadingArtifacts || isRefetchingArtifacts}
           data-test-subj={'artifacts-collapsed-list'}
+          CardDecorator={CardDecorator}
         />
       </>
     );

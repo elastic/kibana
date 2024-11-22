@@ -70,6 +70,18 @@ export const transformUpdateBodySystemActions = (
   });
 };
 
+const transformUpdateBodyFlapping = <Params extends RuleParams = never>(
+  flapping: UpdateRuleRequestBodyV1<Params>['flapping']
+) => {
+  if (!flapping) {
+    return flapping;
+  }
+  return {
+    lookBackWindow: flapping.look_back_window,
+    statusChangeThreshold: flapping.status_change_threshold,
+  };
+};
+
 export const transformUpdateBody = <Params extends RuleParams = never>({
   updateBody,
   actions,
@@ -89,5 +101,8 @@ export const transformUpdateBody = <Params extends RuleParams = never>({
     systemActions: transformUpdateBodySystemActions(systemActions),
     ...(updateBody.notify_when ? { notifyWhen: updateBody.notify_when } : {}),
     ...(updateBody.alert_delay ? { alertDelay: updateBody.alert_delay } : {}),
+    ...(updateBody.flapping !== undefined
+      ? { flapping: transformUpdateBodyFlapping(updateBody.flapping) }
+      : {}),
   };
 };

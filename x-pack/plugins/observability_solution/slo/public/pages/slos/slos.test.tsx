@@ -7,7 +7,9 @@
 
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
+import { HeaderMenuPortal, TagsList } from '@kbn/observability-shared-plugin/public';
 import { encode } from '@kbn/rison';
 import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
@@ -15,19 +17,18 @@ import Router from 'react-router-dom';
 import { paths } from '../../../common/locators/paths';
 import { historicalSummaryData } from '../../data/slo/historical_summary_data';
 import { emptySloList, sloList } from '../../data/slo/slo';
-import { useCapabilities } from '../../hooks/use_capabilities';
+import { useCreateDataView } from '../../hooks/use_create_data_view';
 import { useCreateSlo } from '../../hooks/use_create_slo';
 import { useDeleteSlo } from '../../hooks/use_delete_slo';
 import { useDeleteSloInstance } from '../../hooks/use_delete_slo_instance';
 import { useFetchHistoricalSummary } from '../../hooks/use_fetch_historical_summary';
 import { useFetchSloList } from '../../hooks/use_fetch_slo_list';
 import { useLicense } from '../../hooks/use_license';
-import { HeaderMenuPortal, TagsList } from '@kbn/observability-shared-plugin/public';
-import { useKibana } from '../../utils/kibana_react';
+import { usePermissions } from '../../hooks/use_permissions';
+import { useKibana } from '../../hooks/use_kibana';
 import { render } from '../../utils/test_helper';
+import { useGetSettings } from '../slo_settings/hooks/use_get_settings';
 import { SlosPage } from './slos';
-import { useGetSettings } from '../slo_settings/use_get_settings';
-import { useCreateDataView } from '../../hooks/use_create_data_view';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -35,16 +36,18 @@ jest.mock('react-router-dom', () => ({
 }));
 
 jest.mock('@kbn/observability-shared-plugin/public');
-jest.mock('../../utils/kibana_react');
+jest.mock('../../hooks/use_kibana');
 jest.mock('../../hooks/use_license');
 jest.mock('../../hooks/use_fetch_slo_list');
 jest.mock('../../hooks/use_create_slo');
-jest.mock('../slo_settings/use_get_settings');
+jest.mock('../slo_settings/hooks/use_get_settings');
 jest.mock('../../hooks/use_delete_slo');
 jest.mock('../../hooks/use_delete_slo_instance');
 jest.mock('../../hooks/use_fetch_historical_summary');
+jest.mock('../../hooks/use_permissions');
 jest.mock('../../hooks/use_capabilities');
 jest.mock('../../hooks/use_create_data_view');
+jest.mock('@kbn/ebt-tools');
 
 const useGetSettingsMock = useGetSettings as jest.Mock;
 const useKibanaMock = useKibana as jest.Mock;
@@ -54,12 +57,13 @@ const useCreateSloMock = useCreateSlo as jest.Mock;
 const useDeleteSloMock = useDeleteSlo as jest.Mock;
 const useDeleteSloInstanceMock = useDeleteSloInstance as jest.Mock;
 const useFetchHistoricalSummaryMock = useFetchHistoricalSummary as jest.Mock;
-const useCapabilitiesMock = useCapabilities as jest.Mock;
+const usePermissionsMock = usePermissions as jest.Mock;
 const useCreateDataViewMock = useCreateDataView as jest.Mock;
 const TagsListMock = TagsList as jest.Mock;
+const usePerformanceContextMock = usePerformanceContext as jest.Mock;
 
+usePerformanceContextMock.mockReturnValue({ onPageReady: jest.fn() });
 TagsListMock.mockReturnValue(<div>Tags list</div>);
-
 const HeaderMenuPortalMock = HeaderMenuPortal as jest.Mock;
 HeaderMenuPortalMock.mockReturnValue(<div>Portal node</div>);
 
@@ -157,7 +161,10 @@ describe('SLOs Page', () => {
         selectedRemoteClusters: [],
       },
     });
-    useCapabilitiesMock.mockReturnValue({ hasWriteCapabilities: true, hasReadCapabilities: true });
+    usePermissionsMock.mockReturnValue({
+      isLoading: false,
+      data: { hasAllReadRequested: true, hasAllWriteRequested: true },
+    });
     jest
       .spyOn(Router, 'useLocation')
       .mockReturnValue({ pathname: '/slos', search: '', state: '', hash: '' });
@@ -175,6 +182,7 @@ describe('SLOs Page', () => {
         data: {},
       });
     });
+
     it('navigates to the SLOs Welcome Page', async () => {
       await act(async () => {
         render(<SlosPage />);
@@ -207,9 +215,28 @@ describe('SLOs Page', () => {
       });
     });
 
+    it('navigates to the SLOs Welcome Page when the user has not the request read permissions', async () => {
+      useFetchSloListMock.mockReturnValue({ isLoading: false, data: sloList });
+      useFetchHistoricalSummaryMock.mockReturnValue({
+        isLoading: false,
+        data: historicalSummaryData,
+      });
+      usePermissionsMock.mockReturnValue({
+        isLoading: false,
+        data: { hasAllReadRequested: false, hasAllWriteRequested: false },
+      });
+
+      await act(async () => {
+        render(<SlosPage />);
+      });
+
+      await waitFor(() => {
+        expect(mockNavigate).toBeCalledWith(paths.slosWelcome);
+      });
+    });
+
     it('should have a create new SLO button', async () => {
       useFetchSloListMock.mockReturnValue({ isLoading: false, data: sloList });
-
       useFetchHistoricalSummaryMock.mockReturnValue({
         isLoading: false,
         data: historicalSummaryData,
@@ -258,7 +285,7 @@ describe('SLOs Page', () => {
         expect(await screen.findByTestId('compactView')).toBeTruthy();
         fireEvent.click(screen.getByTestId('compactView'));
 
-        (await screen.findAllByLabelText('All actions')).at(0)?.click();
+        (await screen.findByLabelText('All actions, row 1')).click();
 
         await waitForEuiPopoverOpen();
 
@@ -284,7 +311,7 @@ describe('SLOs Page', () => {
         });
         expect(await screen.findByTestId('compactView')).toBeTruthy();
         fireEvent.click(screen.getByTestId('compactView'));
-        screen.getAllByLabelText('All actions').at(0)?.click();
+        screen.getByLabelText('All actions, row 1').click();
 
         await waitForEuiPopoverOpen();
 
@@ -310,7 +337,7 @@ describe('SLOs Page', () => {
         });
         expect(await screen.findByTestId('compactView')).toBeTruthy();
         fireEvent.click(screen.getByTestId('compactView'));
-        screen.getAllByLabelText('All actions').at(0)?.click();
+        screen.getByLabelText('All actions, row 1').click();
 
         await waitForEuiPopoverOpen();
 
@@ -337,7 +364,7 @@ describe('SLOs Page', () => {
 
         expect(await screen.findByTestId('compactView')).toBeTruthy();
         fireEvent.click(screen.getByTestId('compactView'));
-        (await screen.findAllByLabelText('All actions')).at(0)?.click();
+        screen.getByLabelText('All actions, row 1').click();
 
         await waitForEuiPopoverOpen();
 
@@ -369,7 +396,7 @@ describe('SLOs Page', () => {
 
         expect(await screen.findByTestId('compactView')).toBeTruthy();
         fireEvent.click(screen.getByTestId('compactView'));
-        screen.getAllByLabelText('All actions').at(0)?.click();
+        screen.getByLabelText('All actions, row 1').click();
 
         await waitForEuiPopoverOpen();
 

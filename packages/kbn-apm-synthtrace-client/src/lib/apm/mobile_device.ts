@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Entity } from '../entity';
@@ -229,7 +230,7 @@ export class MobileDevice extends Entity<ApmFields> {
       spanSubtype: 'http',
       'http.request.method': httpMethod,
       'url.original': httpUrl,
-      'transaction.type': 'mobile',
+      'processor.event': 'span',
     };
 
     if (this.networkConnection) {
@@ -261,7 +262,6 @@ export class MobileDevice extends Entity<ApmFields> {
       'error.type': 'crash',
       'error.id': generateLongIdWithSeed(message),
       'error.exception': [{ message, ...{ type: 'crash' } }],
-      'error.grouping_name': groupingName || message,
     });
   }
 }

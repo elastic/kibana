@@ -82,10 +82,10 @@ describe('NotificationsList', () => {
 
     await waitFor(() => {
       expect(
-        useMlKibana().services.mlServices.mlApiServices.notifications.findMessages
+        useMlKibana().services.mlServices.mlApi.notifications.findMessages
       ).toHaveBeenCalledTimes(1);
       expect(
-        useMlKibana().services.mlServices.mlApiServices.notifications.findMessages
+        useMlKibana().services.mlServices.mlApi.notifications.findMessages
       ).toHaveBeenCalledWith({
         earliest: '',
         latest: '',

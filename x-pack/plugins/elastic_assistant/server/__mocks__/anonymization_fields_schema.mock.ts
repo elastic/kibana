@@ -10,7 +10,7 @@ import {
   AnonymizationFieldCreateProps,
   AnonymizationFieldResponse,
   AnonymizationFieldUpdateProps,
-  PerformBulkActionRequestBody,
+  PerformAnonymizationFieldsBulkActionRequestBody,
 } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { EsAnonymizationFieldsSchema } from '../ai_assistant_data_clients/anonymization_fields/types';
 
@@ -95,10 +95,11 @@ export const getQueryAnonymizationFieldParams = (
       };
 };
 
-export const getPerformBulkActionSchemaMock = (): PerformBulkActionRequestBody => ({
-  create: [getQueryAnonymizationFieldParams(false) as AnonymizationFieldCreateProps],
-  delete: {
-    ids: ['99403909-ca9b-49ba-9d7a-7e5320e68d05'],
-  },
-  update: [getQueryAnonymizationFieldParams(true) as AnonymizationFieldUpdateProps],
-});
+export const getPerformBulkActionSchemaMock =
+  (): PerformAnonymizationFieldsBulkActionRequestBody => ({
+    create: [getQueryAnonymizationFieldParams(false) as AnonymizationFieldCreateProps],
+    delete: {
+      ids: ['99403909-ca9b-49ba-9d7a-7e5320e68d05'],
+    },
+    update: [getQueryAnonymizationFieldParams(true) as AnonymizationFieldUpdateProps],
+  });

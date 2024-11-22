@@ -24,8 +24,8 @@ export function registerContextFunction({
   client,
   functions,
   resources,
-  isKnowledgeBaseAvailable,
-}: FunctionRegistrationParameters & { isKnowledgeBaseAvailable: boolean }) {
+  isKnowledgeBaseReady,
+}: FunctionRegistrationParameters & { isKnowledgeBaseReady: boolean }) {
   functions.registerFunction(
     {
       name: CONTEXT_FUNCTION_NAME,
@@ -54,7 +54,7 @@ export function registerContextFunction({
           ...(dataWithinTokenLimit.length ? { data_on_screen: dataWithinTokenLimit } : {}),
         };
 
-        if (!isKnowledgeBaseAvailable) {
+        if (!isKnowledgeBaseReady) {
           return { content };
         }
 
@@ -98,7 +98,21 @@ export function registerContextFunction({
             subscriber.complete();
           })
           .catch((error) => {
-            subscriber.error(error);
+            resources.logger.error('Error in context function');
+            resources.logger.error(error);
+
+            subscriber.next(
+              createFunctionResponseMessage({
+                name: CONTEXT_FUNCTION_NAME,
+                content: `Error in context function: ${error.message}`,
+                data: {
+                  error: {
+                    message: error.message,
+                  },
+                },
+              })
+            );
+            subscriber.complete();
           });
       });
     }

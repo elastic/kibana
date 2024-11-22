@@ -18,6 +18,8 @@ export type {
   RoleRemoteIndexPrivilege,
   RoleRemoteClusterPrivilege,
   FeaturesPrivileges,
+  RawKibanaFeaturePrivileges,
+  RawKibanaPrivileges,
 } from './src/authorization';
 export type { SecurityLicense, SecurityLicenseFeatures, LoginLayout } from './src/licensing';
 export type {
@@ -28,3 +30,17 @@ export type {
   UserProfileWithSecurity,
   UserProfileUserInfoWithSecurity,
 } from './src/user_profile';
+
+export type {
+  ApiKey,
+  RestApiKey,
+  CrossClusterApiKey,
+  BaseApiKey,
+  CrossClusterApiKeyAccess,
+  ManagedApiKey,
+  ApiKeyRoleDescriptors,
+  ApiKeyToInvalidate,
+  QueryApiKeyResult,
+  CategorizedApiKey,
+  ApiKeyAggregations,
+} from './src/api_keys/api_key';

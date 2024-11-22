@@ -5,29 +5,31 @@
  * 2.0.
  */
 
-import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_URL } from '@kbn/securitysolution-list-constants';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { PatchListRequestBody, PatchListResponse } from '@kbn/securitysolution-lists-common/api';
 
 import type { ListsPluginRouter } from '../../types';
-import { patchListRequest, patchListResponse } from '../../../common/api';
-import { buildRouteValidation, buildSiemResponse } from '../utils';
+import { buildSiemResponse } from '../utils';
 import { getListClient } from '..';
 
 export const patchListRoute = (router: ListsPluginRouter): void => {
   router.versioned
     .patch({
       access: 'public',
-      options: {
-        tags: ['access:lists-all'],
-      },
       path: LIST_URL,
+      security: {
+        authz: {
+          requiredPrivileges: ['lists-all'],
+        },
+      },
     })
     .addVersion(
       {
         validate: {
           request: {
-            body: buildRouteValidation(patchListRequest),
+            body: buildRouteValidationWithZod(PatchListRequestBody),
           },
         },
         version: '2023-10-31',
@@ -48,19 +50,15 @@ export const patchListRoute = (router: ListsPluginRouter): void => {
           }
 
           const list = await lists.patchList({ _version, description, id, meta, name, version });
+
           if (list == null) {
             return siemResponse.error({
               body: `list id: "${id}" not found`,
               statusCode: 404,
             });
-          } else {
-            const [validated, errors] = validate(list, patchListResponse);
-            if (errors != null) {
-              return siemResponse.error({ body: errors, statusCode: 500 });
-            } else {
-              return response.ok({ body: validated ?? {} });
-            }
           }
+
+          return response.ok({ body: PatchListResponse.parse(list) });
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import _ from 'lodash';
-import React, { Component } from 'react';
-import { Observable, Subscription } from 'rxjs';
-import { distinctUntilChanged } from 'rxjs';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
+import React, { useEffect, useState } from 'react';
+import { Observable, switchMap, tap } from 'rxjs';
+
 import {
-  type ControlGroupInput,
-  type ControlGroupInputBuilder,
-  type AwaitingControlGroupAPI,
   ControlGroupRenderer,
+  ControlGroupRendererApi,
+  type ControlGroupRuntimeState,
+  type ControlGroupStateBuilder,
 } from '@kbn/controls-plugin/public';
-import { first } from 'rxjs';
 import type { TimeRange } from '@kbn/es-query';
+
 import { Timeslice } from '../../../common/descriptor_types';
 
 export interface Props {
@@ -26,54 +24,23 @@ export interface Props {
   waitForTimesliceToLoad$: Observable<void>;
 }
 
-export class Timeslider extends Component<Props, {}> {
-  private _isMounted: boolean = false;
-  private readonly _subscriptions = new Subscription();
+export function Timeslider({ setTimeslice, timeRange, waitForTimesliceToLoad$ }: Props) {
+  const [dataLoading, setDataLoading] = useState(false);
+  const [api, setApi] = useState<ControlGroupRendererApi | undefined>();
 
-  componentWillUnmount() {
-    this._isMounted = false;
-    this._subscriptions.unsubscribe();
-  }
-
-  componentDidMount() {
-    this._isMounted = true;
-  }
-
-  _getCreationOptions = async (
-    initialInput: Partial<ControlGroupInput>,
-    builder: ControlGroupInputBuilder
-  ) => {
-    builder.addTimeSliderControl(initialInput);
-    return {
-      initialInput: {
-        ...initialInput,
-        viewMode: ViewMode.VIEW,
-        timeRange: this.props.timeRange,
-      },
-    };
-  };
-
-  _onLoadComplete = (controlGroup: AwaitingControlGroupAPI) => {
-    if (!this._isMounted || !controlGroup) {
+  useEffect(() => {
+    if (!api) {
       return;
     }
 
-    this._subscriptions.add(
-      controlGroup
-        .getOutput$()
-        .pipe(
-          distinctUntilChanged(({ timeslice: timesliceA }, { timeslice: timesliceB }) =>
-            _.isEqual(timesliceA, timesliceB)
-          )
-        )
-        .subscribe(({ timeslice }) => {
-          // use waitForTimesliceToLoad$ observable to wait until next frame loaded
-          // .pipe(first()) waits until the first value is emitted from an observable and then automatically unsubscribes
-          this.props.waitForTimesliceToLoad$.pipe(first()).subscribe(() => {
-            controlGroup.anyControlOutputConsumerLoading$.next(false);
-          });
-
-          this.props.setTimeslice(
+    let canceled = false;
+    const subscription = api.timeslice$
+      .pipe(
+        tap(() => {
+          if (!canceled) setDataLoading(true);
+        }),
+        switchMap((timeslice) => {
+          setTimeslice(
             timeslice === undefined
               ? undefined
               : {
@@ -81,19 +48,37 @@ export class Timeslider extends Component<Props, {}> {
                   to: timeslice[1],
                 }
           );
+          return waitForTimesliceToLoad$;
         })
-    );
-  };
+      )
+      .subscribe(() => {
+        if (!canceled) setDataLoading(false);
+      });
 
-  render() {
-    return (
-      <div className="mapTimeslider mapTimeslider--animation">
-        <ControlGroupRenderer
-          ref={this._onLoadComplete}
-          getCreationOptions={this._getCreationOptions}
-          timeRange={this.props.timeRange}
-        />
-      </div>
-    );
-  }
+    return () => {
+      subscription?.unsubscribe();
+      canceled = true;
+    };
+  }, [api, setTimeslice, waitForTimesliceToLoad$]);
+
+  return (
+    <div className="mapTimeslider mapTimeslider--animation">
+      <ControlGroupRenderer
+        onApiAvailable={(nextApi: ControlGroupRendererApi) => {
+          setApi(nextApi);
+        }}
+        dataLoading={dataLoading}
+        getCreationOptions={async (
+          initialState: Partial<ControlGroupRuntimeState>,
+          builder: ControlGroupStateBuilder
+        ) => {
+          builder.addTimeSliderControl(initialState);
+          return {
+            initialState,
+          };
+        }}
+        timeRange={timeRange}
+      />
+    </div>
+  );
 }

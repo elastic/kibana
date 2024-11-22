@@ -35,7 +35,7 @@ interface DeleteModelsModalProps {
 
 export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose }) => {
   const trainedModelsApiService = useTrainedModelsApiService();
-  const { displayErrorToast, displaySuccessToast } = useToastNotificationService();
+  const { displayErrorToast } = useToastNotificationService();
 
   const [canDeleteModel, setCanDeleteModel] = useState(false);
   const [deletePipelines, setDeletePipelines] = useState<boolean>(false);
@@ -49,7 +49,7 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
   const modelsWithInferenceAPIs = models.filter((m) => m.hasInferenceServices);
 
   const inferenceAPIsIDs: string[] = modelsWithInferenceAPIs.flatMap((model) => {
-    return (model.inference_apis ?? []).map((inference) => inference.model_id);
+    return (model.inference_apis ?? []).map((inference) => inference.inference_id);
   });
 
   const pipelinesCount = modelsWithPipelines.reduce((acc, curr) => {
@@ -65,16 +65,6 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
             force: pipelinesCount > 0,
           })
         )
-      );
-      displaySuccessToast(
-        i18n.translate('xpack.ml.trainedModels.modelsList.successfullyDeletedMessage', {
-          defaultMessage:
-            '{modelsCount, plural, one {Model {modelIds}} other {# models}} {modelsCount, plural, one {has} other {have}} been successfully deleted',
-          values: {
-            modelsCount: modelIds.length,
-            modelIds: modelIds.join(', '),
-          },
-        })
       );
     } catch (error) {
       displayErrorToast(

@@ -9,15 +9,12 @@
     "public/**/*",
     "typings/**/*",
     "public/**/*.json",
-    "server/**/*"
-  ],
+    "server/**/*", ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/logging",
     "@kbn/config-schema",
-    "@kbn/observability-ai-assistant-plugin",
     "@kbn/es-query",
-    "@kbn/interpreter",
   ],
   "exclude": ["target/**/*"]
 }

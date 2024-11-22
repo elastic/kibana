@@ -84,17 +84,14 @@ export function useTimeline(
       accountId,
       region,
       includeTimeseries: true,
-      sendRequestImmediately: false,
     },
-    {
-      abortable: true,
-    }
+    { sendRequestImmediately: false }
   );
 
   useEffect(() => {
-    (async () => {
-      if (shouldReload) return reload();
-    })();
+    if (shouldReload) {
+      reload();
+    }
   }, [reload, shouldReload]);
 
   const timeseries = nodes ? first(nodes.map((node) => first(node.metrics)?.timeseries)) : null;

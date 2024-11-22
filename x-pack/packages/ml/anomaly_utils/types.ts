@@ -343,7 +343,7 @@ export interface MlAnomaliesTableRecord {
   /**
    * Returns true if the job has the model plot enabled
    */
-  modelPlotEnabled: boolean;
+  modelPlotEnabled?: boolean;
 }
 
 /**
@@ -365,7 +365,7 @@ export interface MlAnomaliesTableRecordExtended extends MlAnomaliesTableRecord {
 /**
  * Union type for partitiion field types.
  */
-export type MlPartitionFieldsType = typeof ML_PARTITION_FIELDS[number];
+export type MlPartitionFieldsType = (typeof ML_PARTITION_FIELDS)[number];
 
 /**
  * Anomaly record document for categorizer stats.
@@ -453,4 +453,4 @@ export type MlEntityFieldType = 'partition_field' | 'over_field' | 'by_field';
  * The type of the anomaly result, such as bucket, influencer or record.
  */
 export type MlAnomalyResultType =
-  typeof ML_ANOMALY_RESULT_TYPE[keyof typeof ML_ANOMALY_RESULT_TYPE];
+  (typeof ML_ANOMALY_RESULT_TYPE)[keyof typeof ML_ANOMALY_RESULT_TYPE];

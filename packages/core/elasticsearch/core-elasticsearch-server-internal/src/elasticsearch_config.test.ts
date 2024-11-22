@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { getDeprecationsFor } from '@kbn/core-test-helpers-deprecations-getters';
@@ -42,9 +43,11 @@ test('set correct defaults', () => {
       "idleSocketTimeout": "PT1M",
       "ignoreVersionMismatch": false,
       "maxIdleSockets": 256,
+      "maxResponseSize": undefined,
       "maxSockets": 800,
       "password": undefined,
       "pingTimeout": "PT30S",
+      "publicBaseUrl": undefined,
       "requestHeadersWhitelist": Array [
         "authorization",
         "es-client-authentication",
@@ -124,6 +127,20 @@ describe('#maxSockets', () => {
     expect(() => {
       config.schema.validate({ maxSockets: Infinity });
     }).toThrowErrorMatchingInlineSnapshot('"[maxSockets]: \\"maxSockets\\" cannot be infinity"');
+  });
+});
+
+describe('#maxResponseSize', () => {
+  test('accepts `false` value', () => {
+    const configValue = new ElasticsearchConfig(config.schema.validate({ maxResponseSize: false }));
+    expect(configValue.maxResponseSize).toBe(undefined);
+  });
+
+  test('accepts bytesize value', () => {
+    const configValue = new ElasticsearchConfig(
+      config.schema.validate({ maxResponseSize: '200b' })
+    );
+    expect(configValue.maxResponseSize!.getValueInBytes()).toBe(200);
   });
 });
 

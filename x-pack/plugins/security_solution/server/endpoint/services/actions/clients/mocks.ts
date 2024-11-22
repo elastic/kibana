@@ -106,7 +106,10 @@ const createConstructorOptionsMock = (): Required<ResponseActionsClientOptionsMo
   );
 
   endpointService.setup(createMockEndpointAppContextServiceSetupContract());
-  endpointService.start(createMockEndpointAppContextServiceStartContract());
+  endpointService.start({
+    ...createMockEndpointAppContextServiceStartContract(),
+    esClient,
+  });
 
   return {
     esClient,
@@ -172,11 +175,10 @@ const createNoParamsResponseActionOptionsMock = (
 const createKillOrSuspendProcessOptionsMock = (
   overrides: Partial<KillOrSuspendProcessRequestBody> = {}
 ): KillOrSuspendProcessRequestBody => {
+  const parameters = overrides.parameters ?? { pid: 999 };
   const options: KillOrSuspendProcessRequestBody = {
     ...createNoParamsResponseActionOptionsMock(),
-    parameters: {
-      pid: 999,
-    },
+    parameters,
   };
   return merge(options, overrides);
 };

@@ -35,7 +35,7 @@ export const useEsql = ({ dataSourceSelection }: EsqlContextDeps): UseEsqlResult
 
   const discoverLinkParams = {
     query: {
-      esql: `from ${esqlPattern} | limit 10`,
+      esql: `FROM ${esqlPattern} | LIMIT 10`,
     },
   };
 

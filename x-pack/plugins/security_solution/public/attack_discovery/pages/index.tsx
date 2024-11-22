@@ -5,48 +5,36 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingLogo, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import {
   ATTACK_DISCOVERY_STORAGE_KEY,
   DEFAULT_ASSISTANT_NAMESPACE,
+  DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
+  MAX_ALERTS_LOCAL_STORAGE_KEY,
   useAssistantContext,
   useLoadConnectors,
 } from '@kbn/elastic-assistant';
-import type { Replacements } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveries, Replacements } from '@kbn/elastic-assistant-common';
 import { uniq } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useLocalStorage } from 'react-use';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 
-import { SecurityRoutePageWrapper } from '../../common/components/security_route_page_wrapper';
 import { SecurityPageName } from '../../../common/constants';
 import { HeaderPage } from '../../common/components/header_page';
 import { useSpaceId } from '../../common/hooks/use_space_id';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { Header } from './header';
-import {
-  CONNECTOR_ID_LOCAL_STORAGE_KEY,
-  getInitialIsOpen,
-  showLoading,
-  showSummary,
-} from './helpers';
-import { AttackDiscoveryPanel } from '../attack_discovery_panel';
-import { EmptyStates } from './empty_states';
+import { CONNECTOR_ID_LOCAL_STORAGE_KEY, getSize, showLoading } from './helpers';
 import { LoadingCallout } from './loading_callout';
 import { PageTitle } from './page_title';
-import { Summary } from './summary';
-import { Upgrade } from './upgrade';
-import { useAttackDiscovery } from '../use_attack_discovery';
-import type { AttackDiscovery } from '../types';
+import { Results } from './results';
+import { useAttackDiscovery } from './use_attack_discovery';
 
 const AttackDiscoveryPageComponent: React.FC = () => {
   const spaceId = useSpaceId() ?? 'default';
 
-  const {
-    assistantAvailability: { isAssistantEnabled },
-    http,
-    knowledgeBase,
-  } = useAssistantContext();
+  const { http } = useAssistantContext();
   const { data: aiConnectors } = useLoadConnectors({
     http,
   });
@@ -61,6 +49,12 @@ const AttackDiscoveryPageComponent: React.FC = () => {
       `${DEFAULT_ASSISTANT_NAMESPACE}.${ATTACK_DISCOVERY_STORAGE_KEY}.${spaceId}.${CONNECTOR_ID_LOCAL_STORAGE_KEY}`
     );
 
+  const [localStorageAttackDiscoveryMaxAlerts, setLocalStorageAttackDiscoveryMaxAlerts] =
+    useLocalStorage<string>(
+      `${DEFAULT_ASSISTANT_NAMESPACE}.${ATTACK_DISCOVERY_STORAGE_KEY}.${spaceId}.${MAX_ALERTS_LOCAL_STORAGE_KEY}`,
+      `${DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS}`
+    );
+
   const [connectorId, setConnectorId] = React.useState<string | undefined>(
     localStorageAttackDiscoveryConnectorId
   );
@@ -72,31 +66,37 @@ const AttackDiscoveryPageComponent: React.FC = () => {
     alertsContextCount,
     approximateFutureTime,
     attackDiscoveries,
-    cachedAttackDiscoveries,
+    didInitialFetch,
+    failureReason,
     fetchAttackDiscoveries,
     generationIntervals,
+    onCancel,
     isLoading,
+    isLoadingPost,
     lastUpdated,
     replacements,
+    stats,
   } = useAttackDiscovery({
     connectorId,
-    setConnectorId,
     setLoadingConnectorId,
+    size: getSize({
+      defaultMaxAlerts: DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
+      localStorageAttackDiscoveryMaxAlerts,
+    }),
   });
 
   // get last updated from the cached attack discoveries if it exists:
   const [selectedConnectorLastUpdated, setSelectedConnectorLastUpdated] = useState<Date | null>(
-    cachedAttackDiscoveries[connectorId ?? '']?.updated ?? null
+    lastUpdated ?? null
   );
 
   // get cached attack discoveries if they exist:
-  const [selectedConnectorAttackDiscoveries, setSelectedConnectorAttackDiscoveries] = useState<
-    AttackDiscovery[]
-  >(cachedAttackDiscoveries[connectorId ?? '']?.attackDiscoveries ?? []);
+  const [selectedConnectorAttackDiscoveries, setSelectedConnectorAttackDiscoveries] =
+    useState<AttackDiscoveries>(attackDiscoveries ?? []);
 
   // get replacements from the cached attack discoveries if they exist:
   const [selectedConnectorReplacements, setSelectedConnectorReplacements] = useState<Replacements>(
-    cachedAttackDiscoveries[connectorId ?? '']?.replacements ?? {}
+    replacements ?? {}
   );
 
   // the number of unique alerts in the attack discoveries:
@@ -114,27 +114,12 @@ const AttackDiscoveryPageComponent: React.FC = () => {
       // update the connector ID in local storage:
       setConnectorId(selectedConnectorId);
       setLocalStorageAttackDiscoveryConnectorId(selectedConnectorId);
-
-      // get the cached attack discoveries for the selected connector:
-      const cached = cachedAttackDiscoveries[selectedConnectorId];
-      if (cached != null) {
-        setSelectedConnectorReplacements(cached.replacements ?? {});
-        setSelectedConnectorAttackDiscoveries(cached.attackDiscoveries ?? []);
-        setSelectedConnectorLastUpdated(cached.updated ?? null);
-      } else {
-        setSelectedConnectorReplacements({});
-        setSelectedConnectorAttackDiscoveries([]);
-        setSelectedConnectorLastUpdated(null);
-      }
     },
-    [cachedAttackDiscoveries, setLocalStorageAttackDiscoveryConnectorId]
+    [setLocalStorageAttackDiscoveryConnectorId]
   );
 
   // get connector intervals from generation intervals:
-  const connectorIntervals = useMemo(
-    () => generationIntervals?.[connectorId ?? ''] ?? [],
-    [connectorId, generationIntervals]
-  );
+  const connectorIntervals = useMemo(() => generationIntervals ?? [], [generationIntervals]);
 
   const pageTitle = useMemo(() => <PageTitle />, []);
 
@@ -150,19 +135,17 @@ const AttackDiscoveryPageComponent: React.FC = () => {
     // If there is only one connector, set it as the selected connector
     if (aiConnectors != null && aiConnectors.length === 1) {
       setConnectorId(aiConnectors[0].id);
+    } else if (aiConnectors != null && aiConnectors.length === 0) {
+      // connectors have been removed, reset the connectorId and cached Attack discoveries
+      setConnectorId(undefined);
+      setSelectedConnectorAttackDiscoveries([]);
     }
-  }, [aiConnectors, setConnectorId]);
+  }, [aiConnectors]);
 
+  const animatedLogo = useMemo(() => <EuiLoadingLogo logo="logoSecurity" size="xl" />, []);
+
+  const connectorsAreConfigured = aiConnectors != null && aiConnectors.length > 0;
   const attackDiscoveriesCount = selectedConnectorAttackDiscoveries.length;
-
-  if (!isAssistantEnabled) {
-    return (
-      <>
-        <EuiSpacer size="xxl" />
-        <Upgrade />
-      </>
-    );
-  }
 
   return (
     <div
@@ -173,84 +156,62 @@ const AttackDiscoveryPageComponent: React.FC = () => {
       `}
       data-test-subj="fullHeightContainer"
     >
-      <SecurityRoutePageWrapper
-        data-test-subj="attackDiscoveryPage"
-        pageName={SecurityPageName.attackDiscovery}
-      >
+      <div data-test-subj="attackDiscoveryPage">
         <HeaderPage border title={pageTitle}>
           <Header
             connectorId={connectorId}
-            connectorsAreConfigured={aiConnectors != null && aiConnectors.length > 0}
+            connectorsAreConfigured={connectorsAreConfigured}
             isLoading={isLoading}
+            // disable header actions before post request has completed
+            isDisabledActions={isLoadingPost}
+            localStorageAttackDiscoveryMaxAlerts={localStorageAttackDiscoveryMaxAlerts}
             onConnectorIdSelected={onConnectorIdSelected}
             onGenerate={onGenerate}
+            onCancel={onCancel}
+            setLocalStorageAttackDiscoveryMaxAlerts={setLocalStorageAttackDiscoveryMaxAlerts}
+            stats={stats}
           />
           <EuiSpacer size="m" />
         </HeaderPage>
-
-        {showSummary({
-          attackDiscoveriesCount,
-          connectorId,
-          loadingConnectorId,
-        }) && (
-          <Summary
-            alertsCount={alertsCount}
-            attackDiscoveriesCount={attackDiscoveriesCount}
-            lastUpdated={selectedConnectorLastUpdated}
-            onToggleShowAnonymized={onToggleShowAnonymized}
-            showAnonymized={showAnonymized}
-          />
+        {connectorsAreConfigured && connectorId != null && !didInitialFetch ? (
+          <EuiEmptyPrompt data-test-subj="animatedLogo" icon={animatedLogo} />
+        ) : (
+          <>
+            {showLoading({
+              attackDiscoveriesCount,
+              connectorId,
+              isLoading: isLoading || isLoadingPost,
+              loadingConnectorId,
+            }) ? (
+              <LoadingCallout
+                alertsContextCount={alertsContextCount}
+                localStorageAttackDiscoveryMaxAlerts={localStorageAttackDiscoveryMaxAlerts}
+                approximateFutureTime={approximateFutureTime}
+                connectorIntervals={connectorIntervals}
+              />
+            ) : (
+              <Results
+                aiConnectorsCount={aiConnectors?.length ?? null}
+                alertsContextCount={alertsContextCount}
+                alertsCount={alertsCount}
+                attackDiscoveriesCount={attackDiscoveriesCount}
+                connectorId={connectorId}
+                failureReason={failureReason}
+                isLoading={isLoading}
+                isLoadingPost={isLoadingPost}
+                localStorageAttackDiscoveryMaxAlerts={localStorageAttackDiscoveryMaxAlerts}
+                onGenerate={onGenerate}
+                onToggleShowAnonymized={onToggleShowAnonymized}
+                selectedConnectorAttackDiscoveries={selectedConnectorAttackDiscoveries}
+                selectedConnectorLastUpdated={selectedConnectorLastUpdated}
+                selectedConnectorReplacements={selectedConnectorReplacements}
+                showAnonymized={showAnonymized}
+              />
+            )}
+          </>
         )}
-
-        <>
-          {showLoading({
-            attackDiscoveriesCount,
-            connectorId,
-            isLoading,
-            loadingConnectorId,
-          }) ? (
-            <LoadingCallout
-              alertsCount={knowledgeBase.latestAlerts}
-              approximateFutureTime={approximateFutureTime}
-              connectorIntervals={connectorIntervals}
-            />
-          ) : (
-            selectedConnectorAttackDiscoveries.map((attackDiscovery, i) => (
-              <React.Fragment key={attackDiscovery.id}>
-                <AttackDiscoveryPanel
-                  attackDiscovery={attackDiscovery}
-                  initialIsOpen={getInitialIsOpen(i)}
-                  showAnonymized={showAnonymized}
-                  replacements={selectedConnectorReplacements}
-                />
-                <EuiSpacer size="l" />
-              </React.Fragment>
-            ))
-          )}
-        </>
-        <EuiFlexGroup
-          css={css`
-            max-height: 100%;
-            min-height: 100%;
-          `}
-          direction="column"
-          gutterSize="none"
-        >
-          <EuiSpacer size="xxl" />
-          <EuiFlexItem grow={false}>
-            <EmptyStates
-              aiConnectorsCount={aiConnectors?.length ?? null}
-              alertsContextCount={alertsContextCount}
-              alertsCount={knowledgeBase.latestAlerts}
-              attackDiscoveriesCount={attackDiscoveriesCount}
-              connectorId={connectorId}
-              isLoading={isLoading}
-              onGenerate={onGenerate}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
         <SpyRoute pageName={SecurityPageName.attackDiscovery} />
-      </SecurityRoutePageWrapper>
+      </div>
     </div>
   );
 };

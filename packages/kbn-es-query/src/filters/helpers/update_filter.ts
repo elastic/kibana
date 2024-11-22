@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { get } from 'lodash';
@@ -16,7 +17,7 @@ export const updateFilter = (
   operator?: FilterMeta,
   params?: Filter['meta']['params'],
   fieldType?: string
-) => {
+): Filter => {
   if (!field || !operator) {
     return updateField(filter, field);
   }
@@ -34,7 +35,7 @@ export const updateFilter = (
   return updateWithIsOperator(filter, operator, params, fieldType);
 };
 
-function updateField(filter: Filter, field?: string) {
+function updateField(filter: Filter, field?: string): Filter {
   return {
     ...filter,
     meta: {
@@ -47,7 +48,7 @@ function updateField(filter: Filter, field?: string) {
       type: undefined,
     },
     query: undefined,
-  };
+  } as Filter; // need the casting because `field` shouldn't be there
 }
 
 function updateWithExistsOperator(filter: Filter, operator?: FilterMeta) {
@@ -103,7 +104,7 @@ function updateWithRangeOperator(
   operator: FilterMeta,
   rawParams: Filter['meta']['params'] | undefined,
   field: string
-) {
+): Filter {
   if (isRangeFilterParams(rawParams)) {
     const { from, to } = rawParams;
     const params = {
@@ -147,7 +148,7 @@ function updateWithRangeOperator(
         },
       },
     };
-    return updatedFilter;
+    return updatedFilter as Filter; // need the casting because it doesn't like the types of `params.gte|lt`
   }
 }
 

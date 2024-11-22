@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiCode } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export const contentLabel = i18n.translate('xpack.logsExplorer.dataTable.header.popover.content', {
@@ -18,17 +17,6 @@ export const resourceLabel = i18n.translate(
   'xpack.logsExplorer.dataTable.header.popover.resource',
   {
     defaultMessage: 'Resource',
-  }
-);
-
-export const actionsLabel = i18n.translate('xpack.logsExplorer.dataTable.header.popover.actions', {
-  defaultMessage: 'Actions',
-});
-
-export const actionsLabelLowerCase = i18n.translate(
-  'xpack.logsExplorer.dataTable.header.popover.actions.lowercase',
-  {
-    defaultMessage: 'actions',
   }
 );
 
@@ -106,65 +94,5 @@ export const resourceHeaderTooltipParagraph = i18n.translate(
   'xpack.logsExplorer.dataTable.header.resource.tooltip.paragraph',
   {
     defaultMessage: "Fields that provide information on the document's source, such as:",
-  }
-);
-
-export const actionsHeaderTooltipParagraph = i18n.translate(
-  'xpack.logsExplorer.dataTable.header.actions.tooltip.paragraph',
-  {
-    defaultMessage: 'Fields that provide actionable information, such as:',
-  }
-);
-
-export const actionsHeaderTooltipExpandAction = i18n.translate(
-  'xpack.logsExplorer.dataTable.header.actions.tooltip.expand',
-  { defaultMessage: 'Expand log details' }
-);
-
-export const actionsHeaderTooltipDegradedAction = (
-  <FormattedMessage
-    id="xpack.logsExplorer.dataTable.controlColumn.actions.button.degradedDoc"
-    defaultMessage="Access to degraded doc with {ignoredProperty} field"
-    values={{
-      ignoredProperty: (
-        <EuiCode language="json" transparentBackground>
-          _ignored
-        </EuiCode>
-      ),
-    }}
-  />
-);
-
-export const actionsHeaderTooltipStacktraceAction = i18n.translate(
-  'xpack.logsExplorer.dataTable.header.actions.tooltip.stacktrace',
-  { defaultMessage: 'Access to available stacktraces based on:' }
-);
-
-export const degradedDocButtonLabelWhenPresent = i18n.translate(
-  'xpack.logsExplorer.dataTable.controlColumn.actions.button.degradedDocPresent',
-  {
-    defaultMessage:
-      "This document couldn't be parsed correctly. Not all fields are properly populated",
-  }
-);
-
-export const degradedDocButtonLabelWhenNotPresent = i18n.translate(
-  'xpack.logsExplorer.dataTable.controlColumn.actions.button.degradedDocNotPresent',
-  {
-    defaultMessage: 'All fields in this document were parsed correctly',
-  }
-);
-
-export const stacktraceAvailableControlButton = i18n.translate(
-  'xpack.logsExplorer.dataTable.controlColumn.actions.button.stacktrace.available',
-  {
-    defaultMessage: 'Stacktraces available',
-  }
-);
-
-export const stacktraceNotAvailableControlButton = i18n.translate(
-  'xpack.logsExplorer.dataTable.controlColumn.actions.button.stacktrace.notAvailable',
-  {
-    defaultMessage: 'Stacktraces not available',
   }
 );

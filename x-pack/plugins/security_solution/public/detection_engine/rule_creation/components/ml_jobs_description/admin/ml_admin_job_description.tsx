@@ -10,6 +10,7 @@ import React, { useCallback, useMemo, memo } from 'react';
 
 import { useEnableDataFeed } from '../../../../../common/components/ml_popover/hooks/use_enable_data_feed';
 import type { SecurityJob } from '../../../../../common/components/ml_popover/types';
+import type { JobSwitchProps } from '../../../../../common/components/ml_popover/jobs_table/job_switch';
 import { JobSwitch } from '../../../../../common/components/ml_popover/jobs_table/job_switch';
 
 import { MlJobItem } from '../ml_job_item';
@@ -31,8 +32,8 @@ const MlAdminJobDescriptionComponent: FC<MlAdminJobDescriptionProps> = ({
     isLoading: isLoadingEnableDataFeed,
   } = useEnableDataFeed();
 
-  const handleJobStateChange = useCallback(
-    async (_, latestTimestampMs: number, enable: boolean) => {
+  const handleJobStateChange = useCallback<JobSwitchProps['onJobStateChange']>(
+    async (_, latestTimestampMs, enable) => {
       if (enable) {
         await enableDatafeed(job, latestTimestampMs);
       } else {

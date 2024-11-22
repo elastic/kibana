@@ -4,42 +4,43 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/core/server';
+import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { schema } from '@kbn/config-schema';
 import Papa from 'papaparse';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { AssetCriticalityCsvUploadResponse } from '../../../../../common/api/entity_analytics';
+import type { UploadAssetCriticalityRecordsResponse } from '../../../../../common/api/entity_analytics';
 import { CRITICALITY_CSV_MAX_SIZE_BYTES_WITH_TOLERANCE } from '../../../../../common/entity_analytics/asset_criticality';
 import type { ConfigType } from '../../../../config';
 import type { HapiReadableStream } from '../../../../types';
 import {
-  ASSET_CRITICALITY_CSV_UPLOAD_URL,
+  ASSET_CRITICALITY_PUBLIC_CSV_UPLOAD_URL,
   APP_ID,
-  ENABLE_ASSET_CRITICALITY_SETTING,
+  API_VERSIONS,
 } from '../../../../../common/constants';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
 import { transformCSVToUpsertRecords } from '../transform_csv_to_upsert_records';
 import { createAssetCriticalityProcessedFileEvent } from '../../../telemetry/event_based/events';
-import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { AssetCriticalityAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 
-export const assetCriticalityCSVUploadRoute = (
+export const assetCriticalityPublicCSVUploadRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger,
   config: ConfigType,
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
 ) => {
-  const { errorRetries, maxBulkRequestBodySizeBytes } =
-    config.entityAnalytics.assetCriticality.csvUpload;
   router.versioned
     .post({
-      access: 'internal',
-      path: ASSET_CRITICALITY_CSV_UPLOAD_URL,
+      access: 'public',
+      path: ASSET_CRITICALITY_PUBLIC_CSV_UPLOAD_URL,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
+        },
+      },
       options: {
-        tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
         body: {
           output: 'stream',
           accepts: 'multipart/form-data',
@@ -49,7 +50,7 @@ export const assetCriticalityCSVUploadRoute = (
     })
     .addVersion(
       {
-        version: '1',
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             body: schema.object({
@@ -58,7 +59,14 @@ export const assetCriticalityCSVUploadRoute = (
           },
         },
       },
-      async (context, request, response) => {
+      async (
+        context,
+        request,
+        response
+      ): Promise<IKibanaResponse<UploadAssetCriticalityRecordsResponse>> => {
+        const { errorRetries, maxBulkRequestBodySizeBytes } =
+          config.entityAnalytics.assetCriticality.csvUpload;
+
         const securitySolution = await context.securitySolution;
         securitySolution.getAuditLogger()?.log({
           message: 'User attempted to assign many asset criticalities via file upload',
@@ -76,7 +84,6 @@ export const assetCriticalityCSVUploadRoute = (
         const telemetry = coreStart.analytics;
 
         try {
-          await assertAdvancedSettingsEnabled(await context.core, ENABLE_ASSET_CRITICALITY_SETTING);
           await checkAndInitAssetCriticalityResources(context, logger);
           const assetCriticalityClient = securitySolution.getAssetCriticalityDataClient();
           const fileStream = request.body.file as HapiReadableStream;
@@ -95,16 +102,17 @@ export const assetCriticalityCSVUploadRoute = (
             recordsStream,
             retries: errorRetries,
             flushBytes: maxBulkRequestBodySizeBytes,
+            streamIndexStart: 1, // It is the first line number
           });
           const end = new Date();
 
           const tookMs = end.getTime() - start.getTime();
           logger.debug(
-            `Asset criticality CSV upload completed in ${tookMs}ms ${JSON.stringify(stats)}`
+            () => `Asset criticality CSV upload completed in ${tookMs}ms ${JSON.stringify(stats)}`
           );
 
           // type assignment here to ensure that the response body stays in sync with the API schema
-          const resBody: AssetCriticalityCsvUploadResponse = { errors, stats };
+          const resBody: UploadAssetCriticalityRecordsResponse = { errors, stats };
 
           const [eventType, event] = createAssetCriticalityProcessedFileEvent({
             startTime: start,

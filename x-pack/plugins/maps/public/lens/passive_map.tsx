@@ -12,7 +12,7 @@ import { ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public
 import type { LayerDescriptor } from '../../common/descriptor_types';
 import { INITIAL_LOCATION, MAP_SAVED_OBJECT_TYPE } from '../../common';
 import { createBasemapLayerDescriptor } from '../classes/layers/create_basemap_layer_descriptor';
-import { MapApi, MapSerializedState } from '../react_embeddable/types';
+import { MapApi, MapRuntimeState, MapSerializedState } from '../react_embeddable/types';
 
 export interface Props {
   passiveLayer: LayerDescriptor;
@@ -50,9 +50,10 @@ export function PassiveMap(props: Props) {
 
   return (
     <div className="mapEmbeddableContainer">
-      <ReactEmbeddableRenderer<MapSerializedState, MapApi>
+      <ReactEmbeddableRenderer<MapSerializedState, MapRuntimeState, MapApi>
         type={MAP_SAVED_OBJECT_TYPE}
         getParentApi={() => ({
+          hideFilterActions: true,
           getSerializedStateForChild: () => {
             const basemapLayerDescriptor = createBasemapLayerDescriptor();
             const intialLayers = basemapLayerDescriptor ? [basemapLayerDescriptor] : [];
@@ -66,7 +67,6 @@ export function PassiveMap(props: Props) {
                 hidePanelTitles: true,
                 viewMode: ViewMode.VIEW,
                 isLayerTOCOpen: false,
-                hideFilterActions: true,
                 mapSettings: {
                   disableInteractive: false,
                   hideToolbarOverlay: false,

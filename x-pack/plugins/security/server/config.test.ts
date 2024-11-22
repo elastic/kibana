@@ -8,6 +8,7 @@
 jest.mock('crypto', () => ({
   randomBytes: jest.fn(),
   constants: jest.requireActual('crypto').constants,
+  createHash: jest.requireActual('crypto').createHash,
 }));
 
 jest.mock('@kbn/utils', () => ({
@@ -61,6 +62,9 @@ describe('config schema', () => {
         },
         "cookieName": "sid",
         "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "fipsMode": Object {
+          "enabled": false,
+        },
         "loginAssistanceMessage": "",
         "public": Object {},
         "secureCookies": false,
@@ -115,6 +119,9 @@ describe('config schema', () => {
         },
         "cookieName": "sid",
         "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "fipsMode": Object {
+          "enabled": false,
+        },
         "loginAssistanceMessage": "",
         "public": Object {},
         "secureCookies": false,
@@ -168,6 +175,9 @@ describe('config schema', () => {
           "selector": Object {},
         },
         "cookieName": "sid",
+        "fipsMode": Object {
+          "enabled": false,
+        },
         "loginAssistanceMessage": "",
         "public": Object {},
         "secureCookies": false,
@@ -224,9 +234,12 @@ describe('config schema', () => {
           "selector": Object {},
         },
         "cookieName": "sid",
+        "fipsMode": Object {
+          "enabled": false,
+        },
         "loginAssistanceMessage": "",
         "public": Object {},
-        "roleManagementEnabled": false,
+        "roleManagementEnabled": true,
         "secureCookies": false,
         "session": Object {
           "cleanupInterval": "PT1H",

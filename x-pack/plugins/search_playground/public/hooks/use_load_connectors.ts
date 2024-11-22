@@ -16,6 +16,7 @@ import {
   OPENAI_CONNECTOR_ID,
   OpenAiProviderType,
   BEDROCK_CONNECTOR_ID,
+  GEMINI_CONNECTOR_ID,
 } from '@kbn/stack-connectors-plugin/public/common';
 import { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useKibana } from './use_kibana';
@@ -39,7 +40,7 @@ const connectorTypeToLLM: Array<{
     actionProvider: OpenAiProviderType.AzureAi,
     match: (connector) =>
       connector.actionTypeId === OPENAI_CONNECTOR_ID &&
-      (connector as OpenAIConnector).config.apiProvider === OpenAiProviderType.AzureAi,
+      (connector as OpenAIConnector)?.config?.apiProvider === OpenAiProviderType.AzureAi,
     transform: (connector) => ({
       ...connector,
       title: i18n.translate('xpack.searchPlayground.openAIAzureConnectorTitle', {
@@ -52,13 +53,28 @@ const connectorTypeToLLM: Array<{
     actionId: OPENAI_CONNECTOR_ID,
     match: (connector) =>
       connector.actionTypeId === OPENAI_CONNECTOR_ID &&
-      (connector as OpenAIConnector).config.apiProvider === OpenAiProviderType.OpenAi,
+      ((connector as OpenAIConnector)?.config?.apiProvider === OpenAiProviderType.OpenAi ||
+        !!connector.isPreconfigured),
     transform: (connector) => ({
       ...connector,
       title: i18n.translate('xpack.searchPlayground.openAIConnectorTitle', {
         defaultMessage: 'OpenAI',
       }),
       type: LLMs.openai,
+    }),
+  },
+  {
+    actionId: OPENAI_CONNECTOR_ID,
+    actionProvider: OpenAiProviderType.Other,
+    match: (connector) =>
+      connector.actionTypeId === OPENAI_CONNECTOR_ID &&
+      (connector as OpenAIConnector)?.config?.apiProvider === OpenAiProviderType.Other,
+    transform: (connector) => ({
+      ...connector,
+      title: i18n.translate('xpack.searchPlayground.openAIOtherConnectorTitle', {
+        defaultMessage: 'OpenAI Other',
+      }),
+      type: LLMs.openai_other,
     }),
   },
   {
@@ -70,6 +86,17 @@ const connectorTypeToLLM: Array<{
         defaultMessage: 'Bedrock',
       }),
       type: LLMs.bedrock,
+    }),
+  },
+  {
+    actionId: GEMINI_CONNECTOR_ID,
+    match: (connector) => connector.actionTypeId === GEMINI_CONNECTOR_ID,
+    transform: (connector) => ({
+      ...connector,
+      title: i18n.translate('xpack.searchPlayground.geminiConnectorTitle', {
+        defaultMessage: 'Gemini',
+      }),
+      type: LLMs.gemini,
     }),
   },
 ];

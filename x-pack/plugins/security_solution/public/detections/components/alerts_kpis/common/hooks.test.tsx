@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
-import type { BrowserField } from '@kbn/timelines-plugin/common';
+import { renderHook } from '@testing-library/react';
+import type { FieldSpec } from '@kbn/data-plugin/common';
 
 import type { GetAggregatableFields, UseInspectButtonParams } from './hooks';
 import { getAggregatableFields, useInspectButton, useStackByFields } from './hooks';
@@ -57,7 +57,7 @@ describe('getAggregatableFields', () => {
 
       expect(
         getAggregatableFields(
-          { [field]: mockBrowserFields?.destination?.fields?.[field] as Partial<BrowserField> },
+          { [field]: mockBrowserFields?.destination?.fields?.[field] as Partial<FieldSpec> },
           useLensCompatibleFields
         )
       ).toHaveLength(1);
@@ -120,7 +120,7 @@ describe('hooks', () => {
       jest.clearAllMocks();
     });
     it('returns only aggregateable fields', () => {
-      const wrapper = ({ children }: { children: JSX.Element }) => (
+      const wrapper = ({ children }: React.PropsWithChildren) => (
         <TestProviders>{children}</TestProviders>
       );
       const { result, unmount } = renderHook(() => useStackByFields(), { wrapper });
@@ -137,7 +137,7 @@ describe('hooks', () => {
         browserFields: { base: mockBrowserFields.base },
       });
 
-      const wrapper = ({ children }: { children: JSX.Element }) => (
+      const wrapper = ({ children }: React.PropsWithChildren) => (
         <TestProviders>{children}</TestProviders>
       );
       const useLensCompatibleFields = true;
@@ -155,7 +155,7 @@ describe('hooks', () => {
         browserFields: { nestedField: mockBrowserFields.nestedField },
       });
 
-      const wrapper = ({ children }: { children: JSX.Element }) => (
+      const wrapper = ({ children }: React.PropsWithChildren) => (
         <TestProviders>{children}</TestProviders>
       );
       const useLensCompatibleFields = true;

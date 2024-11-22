@@ -20,6 +20,7 @@ import type {
   DataVisualizerSetupDependencies,
   DataVisualizerStartDependencies,
 } from './application/common/types/data_visualizer_plugin';
+import { registerEmbeddables } from './application/index_data_visualizer/embeddables/field_stats';
 export type DataVisualizerPluginSetup = ReturnType<DataVisualizerPlugin['setup']>;
 export type DataVisualizerPluginStart = ReturnType<DataVisualizerPlugin['start']>;
 
@@ -50,7 +51,11 @@ export class DataVisualizerPlugin
     }
   }
 
-  public setup(core: DataVisualizerCoreSetup, plugins: DataVisualizerSetupDependencies) {
+  public async setup(core: DataVisualizerCoreSetup, plugins: DataVisualizerSetupDependencies) {
+    if (plugins.embeddable) {
+      registerEmbeddables(plugins.embeddable, core);
+    }
+
     if (plugins.home) {
       registerHomeAddData(plugins.home, this.resultsLinks);
       registerHomeFeatureCatalogue(plugins.home);
@@ -72,10 +77,16 @@ export class DataVisualizerPlugin
       getIndexDataVisualizerComponent,
       getDataDriftComponent,
       getMaxBytesFormatted,
+      FieldStatsUnavailableMessage: dynamic(
+        async () =>
+          import(
+            './application/index_data_visualizer/embeddables/grid_embeddable/embeddable_error_msg'
+          )
+      ),
       FieldStatisticsTable: dynamic(
         async () =>
           import(
-            './application/index_data_visualizer/embeddables/grid_embeddable/field_stats_embeddable_wrapper'
+            './application/index_data_visualizer/embeddables/grid_embeddable/field_stats_wrapper'
           )
       ),
     };

@@ -8,6 +8,8 @@ import Boom from '@hapi/boom';
 
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { KibanaFeature } from '@kbn/features-plugin/common';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import type { LicenseCheck } from '@kbn/licensing-plugin/server';
 
 import { defineGetAllRolesBySpaceRoutes } from './get_all_by_space';
@@ -23,6 +25,119 @@ interface TestOptions {
   spaceId?: string;
 }
 
+const features: KibanaFeature[] = [
+  new KibanaFeature({
+    deprecated: { notice: 'It is deprecated, sorry.' },
+    id: 'alpha',
+    name: 'Feature Alpha',
+    app: [],
+    category: { id: 'alpha', label: 'alpha' },
+    privileges: {
+      all: {
+        savedObject: {
+          all: ['all-alpha-all-so'],
+          read: ['all-alpha-read-so'],
+        },
+        ui: ['all-alpha-ui'],
+        app: ['all-alpha-app'],
+        api: ['all-alpha-api'],
+        replacedBy: [{ feature: 'beta', privileges: ['all'] }],
+      },
+      read: {
+        savedObject: {
+          all: ['read-alpha-all-so'],
+          read: ['read-alpha-read-so'],
+        },
+        ui: ['read-alpha-ui'],
+        app: ['read-alpha-app'],
+        api: ['read-alpha-api'],
+        replacedBy: {
+          default: [{ feature: 'beta', privileges: ['read', 'sub_beta'] }],
+          minimal: [{ feature: 'beta', privileges: ['minimal_read'] }],
+        },
+      },
+    },
+    subFeatures: [
+      {
+        name: 'sub-feature-alpha',
+        privilegeGroups: [
+          {
+            groupType: 'independent',
+            privileges: [
+              {
+                id: 'sub_alpha',
+                name: 'Sub Feature Alpha',
+                includeIn: 'all',
+                savedObject: {
+                  all: ['sub-alpha-all-so'],
+                  read: ['sub-alpha-read-so'],
+                },
+                ui: ['sub-alpha-ui'],
+                app: ['sub-alpha-app'],
+                api: ['sub-alpha-api'],
+                replacedBy: [
+                  { feature: 'beta', privileges: ['minimal_read'] },
+                  { feature: 'beta', privileges: ['sub_beta'] },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  }),
+  new KibanaFeature({
+    id: 'beta',
+    name: 'Feature Beta',
+    app: [],
+    category: { id: 'beta', label: 'beta' },
+    privileges: {
+      all: {
+        savedObject: {
+          all: ['all-beta-all-so'],
+          read: ['all-beta-read-so'],
+        },
+        ui: ['all-beta-ui'],
+        app: ['all-beta-app'],
+        api: ['all-beta-api'],
+      },
+      read: {
+        savedObject: {
+          all: ['read-beta-all-so'],
+          read: ['read-beta-read-so'],
+        },
+        ui: ['read-beta-ui'],
+        app: ['read-beta-app'],
+        api: ['read-beta-api'],
+      },
+    },
+    subFeatures: [
+      {
+        name: 'sub-feature-beta',
+        privilegeGroups: [
+          {
+            groupType: 'independent',
+            privileges: [
+              {
+                id: 'sub_beta',
+                name: 'Sub Feature Beta',
+                includeIn: 'all',
+                savedObject: {
+                  all: ['sub-beta-all-so'],
+                  read: ['sub-beta-read-so'],
+                },
+                ui: ['sub-beta-ui'],
+                app: ['sub-beta-app'],
+                api: ['sub-beta-api'],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  }),
+];
+
 describe('GET all roles by space id', () => {
   it('correctly defines route.', () => {
     const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
@@ -34,7 +149,7 @@ describe('GET all roles by space id', () => {
 
     const paramsSchema = (config.validate as any).params;
 
-    expect(config.options).toEqual({ tags: ['access:manageSpaces'] });
+    expect(config.security?.authz).toEqual({ requiredPrivileges: ['manage_spaces'] });
     expect(() => paramsSchema.validate({})).toThrowErrorMatchingInlineSnapshot(
       `"[spaceId]: expected value of type [string] but got [undefined]"`
     );
@@ -50,7 +165,9 @@ describe('GET all roles by space id', () => {
     test(description, async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
       mockRouteDefinitionParams.authz.applicationName = application;
-      mockRouteDefinitionParams.getFeatures = jest.fn().mockResolvedValue([]);
+      mockRouteDefinitionParams.getFeatures = jest.fn().mockResolvedValue(features);
+      mockRouteDefinitionParams.subFeaturePrivilegeIterator =
+        featuresPluginMock.createSetup().subFeaturePrivilegeIterator;
 
       const mockCoreContext = coreMock.createRequestHandlerContext();
       const mockLicensingContext = {
@@ -320,5 +437,114 @@ describe('GET all roles by space id', () => {
         ],
       },
     });
+
+    getRolesTest(`filters roles with reserved only privileges`, {
+      apiResponse: () => ({
+        first_role: {
+          description: 'first role description',
+          cluster: [],
+          indices: [],
+          applications: [],
+          run_as: [],
+          metadata: {
+            _reserved: true,
+          },
+          transient_metadata: {
+            enabled: true,
+          },
+        },
+        second_role: {
+          cluster: [],
+          indices: [],
+          applications: [
+            {
+              application,
+              privileges: ['space_all', 'space_read'],
+              resources: ['space:marketing', 'space:sales'],
+            },
+          ],
+          run_as: [],
+          metadata: {
+            _reserved: true,
+          },
+          transient_metadata: {
+            enabled: true,
+          },
+        },
+        third_role: {
+          cluster: [],
+          indices: [],
+          applications: [],
+          run_as: [],
+          transient_metadata: {
+            enabled: true,
+          },
+        },
+      }),
+      spaceId: 'marketing',
+      asserts: {
+        statusCode: 200,
+        result: [
+          {
+            _transform_error: [],
+            _unrecognized_applications: [],
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              remote_cluster: undefined,
+              remote_indices: undefined,
+              run_as: [],
+            },
+            kibana: [
+              {
+                base: ['all', 'read'],
+                feature: {},
+                spaces: ['marketing', 'sales'],
+              },
+            ],
+            metadata: {
+              _reserved: true,
+            },
+            name: 'second_role',
+            transient_metadata: {
+              enabled: true,
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  getRolesTest(`replaces privileges of deprecated features by default`, {
+    apiResponse: () => ({
+      first_role: {
+        cluster: [],
+        indices: [],
+        applications: [
+          {
+            application,
+            privileges: ['feature_alpha.read'],
+            resources: ['*'],
+          },
+        ],
+        run_as: [],
+        metadata: { _reserved: true },
+        transient_metadata: { enabled: true },
+      },
+    }),
+    asserts: {
+      statusCode: 200,
+      result: [
+        {
+          name: 'first_role',
+          metadata: { _reserved: true },
+          transient_metadata: { enabled: true },
+          elasticsearch: { cluster: [], indices: [], run_as: [] },
+          kibana: [{ base: [], feature: { beta: ['read', 'sub_beta'] }, spaces: ['*'] }],
+          _transform_error: [],
+          _unrecognized_applications: [],
+        },
+      ],
+    },
   });
 });

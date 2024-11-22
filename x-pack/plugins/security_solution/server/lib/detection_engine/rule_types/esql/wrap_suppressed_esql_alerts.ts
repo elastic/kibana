@@ -19,7 +19,7 @@ import type { ConfigType } from '../../../../config';
 import type { CompleteRule, EsqlRuleParams } from '../../rule_schema';
 import { buildReasonMessageForNewTermsAlert } from '../utils/reason_formatters';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
-import { buildBulkBody } from '../factories/utils/build_bulk_body';
+import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';
 import type { SignalSource } from '../types';
 import { getSuppressionAlertFields, getSuppressionTerms } from '../utils';
 import { generateAlertId } from './utils';
@@ -36,6 +36,7 @@ export const wrapSuppressedEsqlAlerts = ({
   isRuleAggregating,
   primaryTimestamp,
   secondaryTimestamp,
+  intendedTimestamp,
 }: {
   isRuleAggregating: boolean;
   events: Array<estypes.SearchHit<SignalSource>>;
@@ -52,6 +53,7 @@ export const wrapSuppressedEsqlAlerts = ({
   };
   primaryTimestamp: string;
   secondaryTimestamp?: string;
+  intendedTimestamp: Date | undefined;
 }): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
   const wrapped = events.map<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>>(
     (event, i) => {
@@ -73,20 +75,22 @@ export const wrapSuppressedEsqlAlerts = ({
 
       const instanceId = objectHash([suppressionTerms, completeRule.alertId, spaceId]);
 
-      const baseAlert: BaseFieldsLatest = buildBulkBody(
+      const baseAlert: BaseFieldsLatest = transformHitToAlert({
         spaceId,
         completeRule,
-        event,
+        doc: event,
         mergeStrategy,
-        [],
-        true,
-        buildReasonMessageForNewTermsAlert,
-        [],
+        ignoreFields: {},
+        ignoreFieldsRegexes: [],
+        applyOverrides: true,
+        buildReasonMessage: buildReasonMessageForNewTermsAlert,
+        indicesToQuery: [],
         alertTimestampOverride,
         ruleExecutionLogger,
-        id,
-        publicBaseUrl
-      );
+        alertUuid: id,
+        publicBaseUrl,
+        intendedTimestamp,
+      });
 
       return {
         _id: id,

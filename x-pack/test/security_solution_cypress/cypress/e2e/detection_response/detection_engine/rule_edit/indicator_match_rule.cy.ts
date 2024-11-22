@@ -9,14 +9,14 @@ import { getNewThreatIndicatorRule } from '../../../../objects/rule';
 
 import {
   SUPPRESS_FOR_DETAILS,
-  DETAILS_TITLE,
   SUPPRESS_BY_DETAILS,
   SUPPRESS_MISSING_FIELD,
   DEFINITION_DETAILS,
 } from '../../../../screens/rule_details';
 
 import {
-  ALERT_SUPPRESSION_DURATION_INPUT,
+  ALERT_SUPPRESSION_DURATION_UNIT_INPUT,
+  ALERT_SUPPRESSION_DURATION_VALUE_INPUT,
   ALERT_SUPPRESSION_FIELDS,
   ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS,
 } from '../../../../screens/create_new_rule';
@@ -44,10 +44,11 @@ const SUPPRESS_BY_FIELDS = ['myhash.mysha256', 'source.ip.keyword'];
 
 const rule = getNewThreatIndicatorRule();
 
+// Skipping in MKI due to flake
 describe(
   'Detection rules, Indicator Match, Edit',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
   () => {
     beforeEach(() => {
@@ -56,7 +57,10 @@ describe(
       login();
       deleteAlertsAndRules();
     });
-    describe('without suppression', () => {
+
+    // https://github.com/elastic/kibana/issues/187621
+    // FLAKY: https://github.com/elastic/kibana/issues/196711
+    describe.skip('without suppression', { tags: ['@skipInServerlessMKI'] }, () => {
       beforeEach(() => {
         createRule(rule);
       });
@@ -78,9 +82,6 @@ describe(
             'have.text',
             'Suppress and group alerts for events with missing fields'
           );
-
-          // suppression functionality should be under Tech Preview
-          cy.contains(DETAILS_TITLE, SUPPRESS_FOR_DETAILS).contains('Technical Preview');
         });
       });
     });
@@ -113,12 +114,10 @@ describe(
         goToRuleEditSettings();
 
         // check saved suppression settings
-        cy.get(ALERT_SUPPRESSION_DURATION_INPUT)
-          .eq(0)
+        cy.get(ALERT_SUPPRESSION_DURATION_VALUE_INPUT)
           .should('be.enabled')
           .should('have.value', 360);
-        cy.get(ALERT_SUPPRESSION_DURATION_INPUT)
-          .eq(1)
+        cy.get(ALERT_SUPPRESSION_DURATION_UNIT_INPUT)
           .should('be.enabled')
           .should('have.value', 's');
 

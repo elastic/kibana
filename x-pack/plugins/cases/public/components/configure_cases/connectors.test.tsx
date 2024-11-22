@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { ReactWrapper } from 'enzyme';
+import type { ComponentType, ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import { render, screen } from '@testing-library/react';
 
@@ -21,12 +21,20 @@ import {
 import { ConnectorsDropdown } from './connectors_dropdown';
 import { connectors, actionTypes } from './__mock__';
 import { ConnectorTypes } from '../../../common/types/domain';
+import userEvent from '@testing-library/user-event';
+import { useApplicationCapabilities } from '../../common/lib/kibana';
+
+const useApplicationCapabilitiesMock = useApplicationCapabilities as jest.Mocked<
+  typeof useApplicationCapabilities
+>;
+jest.mock('../../common/lib/kibana');
 
 describe('Connectors', () => {
   let wrapper: ReactWrapper;
   let appMockRender: AppMockRenderer;
   const onChangeConnector = jest.fn();
   const handleShowEditFlyout = jest.fn();
+  const onAddNewConnector = jest.fn();
 
   const props: Props = {
     actionTypes,
@@ -38,10 +46,13 @@ describe('Connectors', () => {
     onChangeConnector,
     selectedConnector: { id: 'none', type: ConnectorTypes.none },
     updateConnectorDisabled: false,
+    onAddNewConnector,
   };
 
   beforeAll(() => {
-    wrapper = mount(<Connectors {...props} />, { wrappingComponent: TestProviders });
+    wrapper = mount(<Connectors {...props} />, {
+      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
+    });
   });
 
   beforeEach(() => {
@@ -90,7 +101,7 @@ describe('Connectors', () => {
         selectedConnector={{ id: 'servicenow-1', type: ConnectorTypes.serviceNowITSM }}
       />,
       {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
       }
     );
 
@@ -102,12 +113,16 @@ describe('Connectors', () => {
   });
 
   it('shows the add connector button', () => {
-    wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
-    wrapper.update();
+    appMockRender.render(<Connectors {...props} />);
 
-    expect(
-      wrapper.find('button[data-test-subj="dropdown-connector-add-connector"]').exists()
-    ).toBeTruthy();
+    expect(screen.getByTestId('add-new-connector')).toBeInTheDocument();
+  });
+
+  it('shows the add connector flyout when the button is clicked', async () => {
+    appMockRender.render(<Connectors {...props} />);
+
+    await userEvent.click(await screen.findByTestId('add-new-connector'));
+    expect(onAddNewConnector).toHaveBeenCalled();
   });
 
   it('the text of the update button is shown correctly', () => {
@@ -117,7 +132,7 @@ describe('Connectors', () => {
         selectedConnector={{ id: 'servicenow-1', type: ConnectorTypes.serviceNowITSM }}
       />,
       {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
       }
     );
 
@@ -154,16 +169,14 @@ describe('Connectors', () => {
   });
 
   it('shows the actions permission message if the user does not have read access to actions', async () => {
-    appMockRender.coreStart.application.capabilities = {
-      ...appMockRender.coreStart.application.capabilities,
-      actions: { save: false, show: false },
-    };
+    useApplicationCapabilitiesMock().actions = { crud: false, read: false };
 
-    const result = appMockRender.render(<Connectors {...props} />);
+    appMockRender.render(<Connectors {...props} />);
+
     expect(
-      result.getByTestId('configure-case-connector-permissions-error-msg')
+      await screen.findByTestId('configure-case-connector-permissions-error-msg')
     ).toBeInTheDocument();
-    expect(result.queryByTestId('case-connectors-dropdown')).toBe(null);
+    expect(screen.queryByTestId('case-connectors-dropdown')).not.toBeInTheDocument();
   });
 
   it('shows the actions permission message if the user does not have access to case connector', async () => {
@@ -174,5 +187,13 @@ describe('Connectors', () => {
       result.getByTestId('configure-case-connector-permissions-error-msg')
     ).toBeInTheDocument();
     expect(result.queryByTestId('case-connectors-dropdown')).toBe(null);
+  });
+
+  it('it should hide the "Add Connector" button when the user lacks the capability to add a new connector', () => {
+    useApplicationCapabilitiesMock().actions = { crud: false, read: true };
+
+    appMockRender.render(<Connectors {...props} />);
+
+    expect(screen.queryByTestId('add-new-connector')).not.toBeInTheDocument();
   });
 });

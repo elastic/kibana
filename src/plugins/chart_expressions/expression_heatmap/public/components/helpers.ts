@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -17,6 +18,7 @@ import {
   DEFAULT_MAX_STOP,
   DEFAULT_MIN_STOP,
 } from '@kbn/coloring';
+import { getOriginalId } from '@kbn/transpose-utils';
 
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
 import { FormatFactory, IFieldFormat } from '@kbn/field-formats-plugin/common';
@@ -82,10 +84,6 @@ export function applyPaletteParams<T extends PaletteOutput<CustomPaletteParams>>
   return displayStops;
 }
 
-function getId(id: string) {
-  return id;
-}
-
 export function getNumericValue(rowValue: number | number[] | undefined) {
   if (rowValue == null || Array.isArray(rowValue)) {
     return;
@@ -93,11 +91,7 @@ export function getNumericValue(rowValue: number | number[] | undefined) {
   return rowValue;
 }
 
-export const findMinMaxByColumnId = (
-  columnIds: string[],
-  table: Datatable | undefined,
-  getOriginalId: (id: string) => string = getId
-) => {
+export const findMinMaxByColumnId = (columnIds: string[], table: Datatable | undefined) => {
   const minMax: Record<string, { min: number; max: number; fallback?: boolean }> = {};
 
   if (table != null) {

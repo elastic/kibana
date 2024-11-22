@@ -6,8 +6,22 @@
  */
 
 import * as t from 'io-ts';
+import { Either } from 'fp-ts/Either';
 import { AlertConfigsCodec } from './alert_config';
 import { ScreenshotOptionCodec } from './monitor_configs';
+
+const ProjectMonitorSchedule = new t.Type<string | number, string | number, unknown>(
+  'ProjectMonitorSchedule',
+  t.string.is,
+  (input, context): Either<t.Errors, string | number> => {
+    if (typeof input === 'number' || input === '10s' || input === '30s') {
+      return t.success(input);
+    } else {
+      return t.failure(input, context);
+    }
+  },
+  t.identity
+);
 
 export const ProjectMonitorThrottlingConfigCodec = t.union([
   t.interface({
@@ -23,7 +37,7 @@ export const ProjectMonitorCodec = t.intersection([
     type: t.string,
     id: t.string,
     name: t.string,
-    schedule: t.number,
+    schedule: ProjectMonitorSchedule,
   }),
   t.partial({
     content: t.string,
@@ -48,6 +62,7 @@ export const ProjectMonitorCodec = t.intersection([
     hash: t.string,
     namespace: t.string,
     retestOnFailure: t.boolean,
+    fields: t.record(t.string, t.string),
   }),
 ]);
 
@@ -76,14 +91,10 @@ export const ProjectMonitorsResponseCodec = t.intersection([
   }),
 ]);
 
-export type ProjectMonitorThrottlingConfig = t.TypeOf<typeof ProjectMonitorThrottlingConfigCodec>;
-
 export type ProjectMonitor = t.TypeOf<typeof ProjectMonitorCodec>;
 
 export type LegacyProjectMonitorsRequest = t.TypeOf<typeof LegacyProjectMonitorsRequestCodec>;
 
 export type ProjectMonitorsRequest = t.TypeOf<typeof ProjectMonitorsRequestCodec>;
-
-export type ProjectMonitorsResponse = t.TypeOf<typeof ProjectMonitorsResponseCodec>;
 
 export type ProjectMonitorMetaData = t.TypeOf<typeof ProjectMonitorMetaDataCodec>;

@@ -34,6 +34,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await security.testUser.setRoles(['alerts_and_actions_role']);
       });
 
+      after(async () => {
+        await security.testUser.restoreDefaults();
+      });
+
       it('Loads the page', async () => {
         await pageObjects.common.navigateToUrl(
           'management',
@@ -46,35 +50,43 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(headingText).to.be('Alerts');
       });
 
-      it('Shows only allowed feature filters', async () => {
-        await pageObjects.common.navigateToUrl(
-          'management',
-          'insightsAndAlerting/triggersActionsAlerts',
-          {
-            shouldUseHashForSubUrl: false,
-          }
-        );
+      describe('feature filters', function () {
+        this.tags('skipFIPS');
+        it('Shows only allowed feature filters', async () => {
+          await pageObjects.common.navigateToUrl(
+            'management',
+            'insightsAndAlerting/triggersActionsAlerts',
+            {
+              shouldUseHashForSubUrl: false,
+            }
+          );
 
-        await pageObjects.header.waitUntilLoadingHasFinished();
+          await pageObjects.header.waitUntilLoadingHasFinished();
 
-        await retry.try(async () => {
-          if (!(await testSubjects.exists('queryBarMenuPanel'))) {
-            await pageObjects.triggersActionsUI.clickAlertsPageShowQueryMenuButton();
-          }
-          const quickFilters = await pageObjects.triggersActionsUI.getAlertsPageQuickFilters();
-          const solutionFilters = getSolutionNamesFromFilters(quickFilters);
-          expect(solutionFilters).to.have.length(2);
-          expect(solutionFilters[0]).to.equal('Stack');
-          // Observability is included because of multi-consumer rules
-          expect(solutionFilters[1]).to.equal('Observability');
+          await retry.try(async () => {
+            if (!(await testSubjects.exists('queryBarMenuPanel'))) {
+              await pageObjects.triggersActionsUI.clickAlertsPageShowQueryMenuButton();
+            }
+            const quickFilters = await pageObjects.triggersActionsUI.getAlertsPageQuickFilters();
+            const solutionFilters = getSolutionNamesFromFilters(quickFilters);
+            expect(solutionFilters).to.have.length(2);
+            expect(solutionFilters[0]).to.equal('Stack');
+            // Observability is included because of multi-consumer rules
+            expect(solutionFilters[1]).to.equal('Observability');
+          });
         });
       });
     });
 
-    describe('Loads the page with actions but not alerting privilege', () => {
+    describe('Loads the page with actions but not alerting privilege', function () {
+      this.tags('skipFIPS');
       beforeEach(async () => {
         await security.testUser.restoreDefaults();
         await security.testUser.setRoles(['only_actions_role']);
+      });
+
+      after(async () => {
+        await security.testUser.restoreDefaults();
       });
 
       it('Loads the page but shows missing permission prompt', async () => {
@@ -102,6 +114,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         );
       });
 
+      after(async () => {
+        await security.testUser.restoreDefaults();
+      });
+
       it('Loads the page', async () => {
         log.debug('Checking for section heading to say Alerts.');
 
@@ -111,62 +127,96 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('Shows all solution quick filters', async () => {
         await pageObjects.triggersActionsUI.clickAlertsPageShowQueryMenuButton();
-        const quickFilters = await pageObjects.triggersActionsUI.getAlertsPageQuickFilters();
-        const solutionFilters = getSolutionNamesFromFilters(quickFilters);
-        expect(FILTERABLE_SOLUTIONS.every((s) => solutionFilters.includes(s)));
+
+        await retry.try(async () => {
+          const quickFilters = await pageObjects.triggersActionsUI.getAlertsPageQuickFilters();
+          const solutionFilters = getSolutionNamesFromFilters(quickFilters);
+          expect(FILTERABLE_SOLUTIONS.every((s) => solutionFilters.includes(s)));
+        });
       });
 
       it('Applies the correct quick filter', async () => {
         await pageObjects.triggersActionsUI.clickAlertsPageShowQueryMenuButton();
-        const quickFilters = await pageObjects.triggersActionsUI.getAlertsPageQuickFilters();
-        const firstSolutionFilter = quickFilters
-          .filter((_: number, f: any) => f.attribs['data-test-subj'].endsWith('rule types'))
-          .first();
-        expect(firstSolutionFilter).to.not.be(null);
-        await testSubjects.click(firstSolutionFilter!.attr('data-test-subj'));
-        const appliedFilters = await pageObjects.triggersActionsUI.getAlertsPageAppliedFilters();
-        expect(appliedFilters).to.have.length(1);
-        expect(await appliedFilters[0].getVisibleText()).to.contain(firstSolutionFilter!.text());
+
+        let firstSolutionFilter: any;
+        await retry.try(async () => {
+          const quickFilters = await pageObjects.triggersActionsUI.getAlertsPageQuickFilters();
+          firstSolutionFilter = quickFilters
+            .filter((_: number, f: any) => f.attribs['data-test-subj'].endsWith('rule types'))
+            .first();
+
+          expect(typeof firstSolutionFilter?.attr('data-test-subj')).to.be('string');
+        });
+
+        await testSubjects.click(firstSolutionFilter.attr('data-test-subj'));
+
+        await retry.try(async () => {
+          const appliedFilters = await pageObjects.triggersActionsUI.getAlertsPageAppliedFilters();
+          expect(appliedFilters).to.have.length(1);
+          expect(await appliedFilters[0].getVisibleText()).to.contain(firstSolutionFilter!.text());
+        });
       });
 
       it('Disables all other solution filters when SIEM is applied', async () => {
         await pageObjects.triggersActionsUI.clickAlertsPageShowQueryMenuButton();
-        let quickFilters = await pageObjects.triggersActionsUI.getAlertsPageQuickFilters();
-        const filter = quickFilters
-          .filter((_: number, f: any) =>
-            f.attribs['data-test-subj'].includes('Security rule types')
-          )
-          .first();
-        await testSubjects.click(filter!.attr('data-test-subj'));
-        quickFilters = await pageObjects.triggersActionsUI.getAlertsPageQuickFilters();
-        const nonSiemSolutionFilters = quickFilters.filter((_: number, f: any) => {
-          const testSubj = f.attribs['data-test-subj'];
-          return (
-            testSubj.endsWith('rule types') &&
-            !testSubj.includes('Security') &&
-            !('disabled' in f.attribs)
-          );
+
+        let quickFilters: any;
+        let filter: any;
+        await retry.try(async () => {
+          quickFilters = await pageObjects.triggersActionsUI.getAlertsPageQuickFilters();
+          filter = quickFilters
+            .filter((_: number, f: any) =>
+              f.attribs['data-test-subj'].includes('Security rule types')
+            )
+            .first();
+
+          expect(typeof filter?.attr('data-test-subj')).to.be('string');
         });
-        expect(nonSiemSolutionFilters).to.have.length(0);
+
+        await testSubjects.click(filter.attr('data-test-subj'));
+
+        await retry.try(async () => {
+          quickFilters = await pageObjects.triggersActionsUI.getAlertsPageQuickFilters();
+          const nonSiemSolutionFilters = quickFilters.filter((_: number, f: any) => {
+            const testSubj = f.attribs['data-test-subj'];
+            return (
+              testSubj.endsWith('rule types') &&
+              !testSubj.includes('Security') &&
+              !('disabled' in f.attribs)
+            );
+          });
+          expect(nonSiemSolutionFilters).to.have.length(0);
+        });
       });
 
       it('Disables the SIEM solution filter when any other is applied', async () => {
         await pageObjects.triggersActionsUI.clickAlertsPageShowQueryMenuButton();
-        let quickFilters = await pageObjects.triggersActionsUI.getAlertsPageQuickFilters();
-        const filter = quickFilters
-          .filter((_: number, f: any) => {
-            const testSubj = f.attribs['data-test-subj'];
-            return testSubj.includes('rule types') && !testSubj.includes('Security');
-          })
-          .first();
-        await testSubjects.click(filter!.attr('data-test-subj'));
-        quickFilters = await pageObjects.triggersActionsUI.getAlertsPageQuickFilters();
-        const siemSolutionFilter = quickFilters
-          .filter((_: number, f: any) =>
-            f.attribs['data-test-subj'].includes('Security rule types')
-          )
-          .first();
-        expect(siemSolutionFilter.attr('disabled')).to.not.be(null);
+
+        let quickFilters: any;
+        let filter: any;
+        await retry.try(async () => {
+          quickFilters = await pageObjects.triggersActionsUI.getAlertsPageQuickFilters();
+          filter = quickFilters
+            .filter((_: number, f: any) => {
+              const testSubj = f.attribs['data-test-subj'];
+              return testSubj.includes('rule types') && !testSubj.includes('Security');
+            })
+            .first();
+
+          expect(typeof filter?.attr('data-test-subj')).to.be('string');
+        });
+
+        await testSubjects.click(filter.attr('data-test-subj'));
+
+        await retry.try(async () => {
+          quickFilters = await pageObjects.triggersActionsUI.getAlertsPageQuickFilters();
+          const siemSolutionFilter = quickFilters
+            .filter((_: number, f: any) =>
+              f.attribs['data-test-subj'].includes('Security rule types')
+            )
+            .first();
+          expect(siemSolutionFilter.attr('disabled')).to.not.be(null);
+        });
       });
     });
   });

@@ -60,7 +60,6 @@ export const migrateLegacyTimelinesToSecurityDataTable = (legacyTimelineTables: 
         sort: timelineModel.sort,
         selectedEventIds: timelineModel.selectedEventIds,
         deletedEventIds: timelineModel.deletedEventIds,
-        expandedDetail: timelineModel.expandedDetail,
         totalCount: timelineModel.totalCount || 0,
         viewMode: VIEW_SELECTION.gridView,
         additionalFilters: {

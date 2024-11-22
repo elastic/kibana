@@ -96,6 +96,10 @@ export class RouterMock implements IRouter {
     return get(this.contextMock.core.elasticsearch.client.asCurrentUser, path);
   }
 
+  getMockESApiFnAsSecondaryAuthUser(path: string): jest.Mock {
+    return get(this.contextMock.core.elasticsearch.client.asSecondaryAuthUser, path);
+  }
+
   runRequest({ method, path, ...mockRequest }: RequestMock) {
     const handler = this.cacheHandlers[method][path];
 

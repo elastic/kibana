@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import type { Logger } from '@kbn/core/server';
@@ -19,14 +19,18 @@ import {
 
 import { appContextService } from './app_context';
 
-import { migrateSettingsToFleetServerHost } from './fleet_server_host';
+import { deleteFleetServerHost, migrateSettingsToFleetServerHost } from './fleet_server_host';
+import { agentPolicyService } from './agent_policy';
 
 jest.mock('./app_context');
+jest.mock('./agent_policy');
 
 const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
 }));
+
+mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
 
 let mockedLogger: jest.Mocked<Logger>;
 
@@ -113,6 +117,47 @@ describe('migrateSettingsToFleetServerHost', () => {
       expect.objectContaining({
         id: DEFAULT_FLEET_SERVER_HOST_ID,
       })
+    );
+  });
+});
+
+describe('deleteFleetServerHost', () => {
+  it('should removeFleetServerHostFromAll agent policies without force if not deleted from preconfiguration', async () => {
+    const soMock = savedObjectsClientMock.create();
+
+    soMock.get.mockResolvedValue({
+      id: 'test1',
+      attributes: {},
+    } as any);
+    const esMock = elasticsearchServiceMock.createInternalClient();
+    await deleteFleetServerHost(soMock, esMock, 'test1', {});
+
+    expect(jest.mocked(agentPolicyService.removeFleetServerHostFromAll)).toBeCalledWith(
+      esMock,
+      'test1',
+      {
+        force: undefined,
+      }
+    );
+  });
+  it('should removeFleetServerHostFromAll agent policies with force if deleted from preconfiguration', async () => {
+    const soMock = savedObjectsClientMock.create();
+
+    soMock.get.mockResolvedValue({
+      id: 'test1',
+      attributes: {},
+    } as any);
+    const esMock = elasticsearchServiceMock.createInternalClient();
+    await deleteFleetServerHost(soMock, esMock, 'test1', {
+      fromPreconfiguration: true,
+    });
+
+    expect(jest.mocked(agentPolicyService.removeFleetServerHostFromAll)).toBeCalledWith(
+      esMock,
+      'test1',
+      {
+        force: true,
+      }
     );
   });
 });

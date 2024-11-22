@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
-import type { BuildIntegrationApiRequest } from '../../common';
-import { INTEGRATION_BUILDER_PATH } from '../../common';
+import { BuildIntegrationRequestBody, INTEGRATION_BUILDER_PATH } from '../../common';
 import { buildPackage } from '../integration_builder';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
-
+import { buildRouteValidationWithZod } from '../util/route_validation';
+import { withAvailability } from './with_availability';
+import { isErrorThatHandlesItsOwnResponse } from '../lib/errors';
+import { handleCustomErrors } from './routes_util';
+import { GenerationErrorCode } from '../../common/constants';
 export function registerIntegrationBuilderRoutes(
   router: IRouter<IntegrationAssistantRouteHandlerContext>
 ) {
@@ -23,50 +25,38 @@ export function registerIntegrationBuilderRoutes(
     .addVersion(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'This route is opted out from authorization because the privileges are not defined yet.',
+          },
+        },
         validate: {
           request: {
-            body: schema.object({
-              integration: schema.object({
-                name: schema.string(),
-                title: schema.string(),
-                description: schema.string(),
-                logo: schema.maybe(schema.string()),
-                dataStreams: schema.arrayOf(
-                  schema.object({
-                    name: schema.string(),
-                    title: schema.string(),
-                    description: schema.string(),
-                    inputTypes: schema.arrayOf(schema.string()),
-                    rawSamples: schema.arrayOf(schema.string()),
-                    pipeline: schema.object({
-                      name: schema.maybe(schema.string()),
-                      description: schema.maybe(schema.string()),
-                      version: schema.maybe(schema.number()),
-                      processors: schema.arrayOf(
-                        schema.recordOf(schema.string(), schema.object({}, { unknowns: 'allow' }))
-                      ),
-                      on_failure: schema.maybe(
-                        schema.arrayOf(
-                          schema.recordOf(schema.string(), schema.object({}, { unknowns: 'allow' }))
-                        )
-                      ),
-                    }),
-                    docs: schema.arrayOf(schema.object({}, { unknowns: 'allow' })),
-                  })
-                ),
-              }),
-            }),
+            body: buildRouteValidationWithZod(BuildIntegrationRequestBody),
           },
         },
       },
-      async (_, request, response) => {
-        const { integration } = request.body as BuildIntegrationApiRequest;
+      withAvailability(async (_, request, response) => {
+        const { integration } = request.body;
         try {
           const zippedIntegration = await buildPackage(integration);
-          return response.custom({ statusCode: 200, body: zippedIntegration });
-        } catch (e) {
-          return response.customError({ statusCode: 500, body: e });
+          return response.custom({
+            statusCode: 200,
+            body: zippedIntegration,
+            headers: { 'Content-Type': 'application/zip' },
+          });
+        } catch (err) {
+          try {
+            handleCustomErrors(err, GenerationErrorCode.RECURSION_LIMIT);
+          } catch (e) {
+            if (isErrorThatHandlesItsOwnResponse(e)) {
+              return e.sendResponse(response);
+            }
+          }
+          return response.customError({ statusCode: 500, body: err });
         }
-      }
+      })
     );
 }

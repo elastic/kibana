@@ -20,13 +20,21 @@ const paramSchema = schema.object({
 export const getAlertRoute = (
   router: AlertingRouter,
   licenseState: ILicenseState,
-  usageCounter?: UsageCounter
+  usageCounter?: UsageCounter,
+  isServerless?: boolean
 ) => {
   router.get(
     {
       path: `${LEGACY_BASE_ALERT_API_PATH}/alert/{id}`,
       validate: {
         params: paramSchema,
+      },
+      options: {
+        access: isServerless ? 'internal' : 'public',
+        summary: 'Get an alert',
+        tags: ['oas-tag:alerting'],
+        // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
+        deprecated: true,
       },
     },
     router.handleLegacyErrors(async function (context, req, res) {

@@ -8,11 +8,9 @@
     "isolatedModules": false,
   },
   "kbn_references": [
-    { "path": "../../../../test/tsconfig.json" },
-    { "path": "../../../../../test/tsconfig.json" },
     "@kbn/test",
     "@kbn/ftr-common-functional-services",
-    "@kbn/synthetics-plugin/e2e",
     "@kbn/data-forge",
+    "@kbn/synthetics-e2e",
   ]
 }

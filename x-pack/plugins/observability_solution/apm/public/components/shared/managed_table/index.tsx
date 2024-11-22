@@ -43,6 +43,7 @@ export interface TableSearchBar<T> {
   maxCountExceeded: boolean;
   placeholder: string;
   onChangeSearchQuery: (searchQuery: string) => void;
+  techPreview?: boolean;
 }
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
@@ -66,6 +67,7 @@ export const shouldfetchServer = ({
 function UnoptimizedManagedTable<T extends object>(props: {
   items: T[];
   columns: Array<ITableColumn<T>>;
+  rowHeader?: string | false;
   noItemsMessage?: React.ReactNode;
   isLoading?: boolean;
   error?: boolean;
@@ -96,6 +98,7 @@ function UnoptimizedManagedTable<T extends object>(props: {
   const {
     items,
     columns,
+    rowHeader,
     noItemsMessage,
     isLoading = false,
     error = false,
@@ -263,6 +266,7 @@ function UnoptimizedManagedTable<T extends object>(props: {
           placeholder={tableSearchBar.placeholder}
           searchQuery={searchQuery}
           onChangeSearchQuery={onChangeSearchQuery}
+          techPreview={tableSearchBar.techPreview}
         />
       ) : null}
 
@@ -285,6 +289,7 @@ function UnoptimizedManagedTable<T extends object>(props: {
         }
         items={renderedItems}
         columns={columns as unknown as Array<EuiBasicTableColumn<T>>} // EuiBasicTableColumn is stricter than ITableColumn
+        rowHeader={rowHeader === false ? undefined : rowHeader ?? columns[0]?.field}
         sorting={sorting}
         onChange={onTableChange}
         {...(paginationProps ? { pagination: paginationProps } : {})}

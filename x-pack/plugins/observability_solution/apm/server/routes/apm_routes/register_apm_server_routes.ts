@@ -10,12 +10,16 @@ import * as t from 'io-ts';
 import { Logger, KibanaRequest, KibanaResponseFactory, RouteRegistrar } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 import agent from 'elastic-apm-node';
-import { ServerRouteRepository } from '@kbn/server-route-repository';
+import {
+  IoTsParamsObject,
+  ServerRouteRepository,
+  stripNullishRequestParameters,
+} from '@kbn/server-route-repository';
 import { merge } from 'lodash';
 import {
   decodeRequestParams,
   parseEndpoint,
-  routeValidationObject,
+  passThroughValidationObject,
 } from '@kbn/server-route-repository';
 import { jsonRt, mergeRt } from '@kbn/io-ts-utils';
 import { InspectResponse } from '@kbn/observability-plugin/typings/common';
@@ -24,7 +28,6 @@ import { VersionedRouteRegistrar } from '@kbn/core-http-server';
 import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { ApmFeatureFlags } from '../../../common/apm_feature_flags';
-import { pickKeys } from '../../../common/utils/pick_keys';
 import type {
   APMCore,
   MinimalApmPluginRequestHandlerContext,
@@ -94,18 +97,19 @@ export function registerRoutes({
       inspectableEsQueriesMap.set(request, []);
 
       try {
-        const runtimeType = params ? mergeRt(params, inspectRt) : inspectRt;
+        const runtimeType = params ? mergeRt(params as IoTsParamsObject, inspectRt) : inspectRt;
 
         const validatedParams = decodeRequestParams(
-          pickKeys(request, 'params', 'body', 'query'),
+          stripNullishRequestParameters({
+            params: request.params,
+            body: request.body,
+            query: request.query,
+          }),
           runtimeType
         );
 
         const getApmIndices = async () => {
-          const coreContext = await context.core;
-          const apmIndices = await plugins.apmDataAccess.setup.getApmIndices(
-            coreContext.savedObjects.client
-          );
+          const apmIndices = await plugins.apmDataAccess.setup.getApmIndices();
           return apmIndices;
         };
 
@@ -210,7 +214,7 @@ export function registerRoutes({
         {
           path: pathname,
           options,
-          validate: routeValidationObject,
+          validate: passThroughValidationObject,
         },
         wrappedHandler
       );
@@ -228,7 +232,7 @@ export function registerRoutes({
         {
           version,
           validate: {
-            request: routeValidationObject,
+            request: passThroughValidationObject,
           },
         },
         wrappedHandler

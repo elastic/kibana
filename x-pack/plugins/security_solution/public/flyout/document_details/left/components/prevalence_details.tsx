@@ -22,9 +22,10 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { useLicense } from '../../../../common/hooks/use_license';
-import { InvestigateInTimelineButton } from '../../../../common/components/event_details/table/investigate_in_timeline_button';
+import { InvestigateInTimelineButton } from '../../../../common/components/event_details/investigate_in_timeline_button';
 import type { PrevalenceData } from '../../shared/hooks/use_prevalence';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
 import {
@@ -33,19 +34,22 @@ import {
   PREVALENCE_DETAILS_TABLE_HOST_PREVALENCE_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_PREVIEW_LINK_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID,
   PREVALENCE_DETAILS_DATE_PICKER_TEST_ID,
   PREVALENCE_DETAILS_TABLE_TEST_ID,
   PREVALENCE_DETAILS_UPSELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_UPSELL_CELL_TEST_ID,
 } from './test_ids';
-import { useLeftPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 import {
   getDataProvider,
   getDataProviderAnd,
-} from '../../../../common/components/event_details/table/use_action_cell_data_provider';
+} from '../../../../common/components/event_details/use_action_cell_data_provider';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { IS_OPERATOR } from '../../../../../common/types';
+import { hasPreview, PreviewLink } from '../../../shared/components/preview_link';
+import { CellActions } from '../../shared/components/cell_actions';
 
 export const PREVALENCE_TAB_ID = 'prevalence';
 const DEFAULT_FROM = 'now-30d';
@@ -77,6 +81,14 @@ interface PrevalenceDetailsRow extends PrevalenceData {
    * License to drive the rendering of the last 2 prevalence columns
    */
   isPlatinumPlus: boolean;
+  /**
+   * If enabled, clicking host or user should open an entity preview
+   */
+  isPreviewEnabled: boolean;
+  /**
+   * Scope id to pass to the preview link
+   */
+  scopeId: string;
 }
 
 const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
@@ -93,7 +105,6 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
     width: '20%',
   },
   {
-    field: 'values',
     name: (
       <FormattedMessage
         id="xpack.securitySolution.flyout.left.insights.prevalence.valueColumnLabel"
@@ -101,13 +112,33 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
       />
     ),
     'data-test-subj': PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
-    render: (values: string[]) => (
+    render: (data: PrevalenceDetailsRow) => (
       <EuiFlexGroup direction="column" gutterSize="none">
-        {values.map((value) => (
-          <EuiFlexItem key={value}>
-            <EuiText size="xs">{value}</EuiText>
-          </EuiFlexItem>
-        ))}
+        {data.values.map((value) => {
+          if (data.isPreviewEnabled && hasPreview(data.field)) {
+            return (
+              <EuiFlexItem key={value}>
+                <CellActions field={data.field} value={value}>
+                  <PreviewLink
+                    field={data.field}
+                    value={value}
+                    scopeId={data.scopeId}
+                    data-test-subj={PREVALENCE_DETAILS_TABLE_PREVIEW_LINK_CELL_TEST_ID}
+                  >
+                    <EuiText size="xs">{value}</EuiText>
+                  </PreviewLink>
+                </CellActions>
+              </EuiFlexItem>
+            );
+          }
+          return (
+            <EuiFlexItem key={value}>
+              <CellActions field={data.field} value={value}>
+                <EuiText size="xs">{value}</EuiText>
+              </CellActions>
+            </EuiFlexItem>
+          );
+        })}
       </EuiFlexGroup>
     ),
     width: '20%',
@@ -296,9 +327,11 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
  * Prevalence table displayed in the document details expandable flyout left section under the Insights tab
  */
 export const PrevalenceDetails: React.FC = () => {
-  const { dataFormattedForFieldBrowser, investigationFields } = useLeftPanelContext();
+  const { dataFormattedForFieldBrowser, investigationFields, scopeId } =
+    useDocumentDetailsContext();
 
   const isPlatinumPlus = useLicense().isPlatinumPlus();
+  const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
 
   // these two are used by the usePrevalence hook to fetch the data
   const [start, setStart] = useState(DEFAULT_FROM);
@@ -343,8 +376,16 @@ export const PrevalenceDetails: React.FC = () => {
 
   // add timeRange to pass it down to timeline and license to drive the rendering of the last 2 prevalence columns
   const items = useMemo(
-    () => data.map((item) => ({ ...item, from: absoluteStart, to: absoluteEnd, isPlatinumPlus })),
-    [data, absoluteStart, absoluteEnd, isPlatinumPlus]
+    () =>
+      data.map((item) => ({
+        ...item,
+        from: absoluteStart,
+        to: absoluteEnd,
+        isPlatinumPlus,
+        isPreviewEnabled,
+        scopeId,
+      })),
+    [data, absoluteStart, absoluteEnd, isPlatinumPlus, isPreviewEnabled, scopeId]
   );
 
   const upsell = (

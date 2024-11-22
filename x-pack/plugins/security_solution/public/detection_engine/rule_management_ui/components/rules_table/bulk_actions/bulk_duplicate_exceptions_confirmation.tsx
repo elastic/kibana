@@ -27,8 +27,8 @@ const BulkActionDuplicateExceptionsConfirmationComponent = ({
   );
 
   const handleRadioChange = useCallback(
-    (optionId) => {
-      setSelectedDuplicateOption(optionId);
+    (optionId: string) => {
+      setSelectedDuplicateOption(optionId as DuplicateOptions);
     },
     [setSelectedDuplicateOption]
   );

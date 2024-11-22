@@ -8,10 +8,10 @@
 import type { Response } from 'node-fetch';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
-import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 
-import { usageReportingService } from '../common/services';
+import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
+
 import type {
   MeteringCallback,
   SecurityUsageReportingTaskStartContract,
@@ -19,22 +19,23 @@ import type {
   UsageRecord,
 } from '../types';
 import type { ServerlessSecurityConfig } from '../config';
+import type { UsageReportingService } from '../common/services/usage_reporting_service';
 
 import { stateSchemaByVersion, emptyState } from './task_state';
 
 const SCOPE = ['serverlessSecurity'];
-const TIMEOUT = '1m';
 
 export const VERSION = '1.0.0';
 
 export class SecurityUsageReportingTask {
   private wasStarted: boolean = false;
-  private cloudSetup: CloudSetup;
-  private taskType: string;
-  private version: string;
-  private logger: Logger;
   private abortController = new AbortController();
-  private config: ServerlessSecurityConfig;
+  private readonly cloudSetup: CloudSetup;
+  private readonly taskType: string;
+  private readonly version: string;
+  private readonly logger: Logger;
+  private readonly config: ServerlessSecurityConfig;
+  private readonly usageReportingService: UsageReportingService;
 
   constructor(setupContract: SecurityUsageReportingTaskSetupContract) {
     const {
@@ -47,6 +48,7 @@ export class SecurityUsageReportingTask {
       taskTitle,
       version,
       meteringCallback,
+      usageReportingService,
     } = setupContract;
 
     this.cloudSetup = cloudSetup;
@@ -54,12 +56,13 @@ export class SecurityUsageReportingTask {
     this.version = version;
     this.logger = logFactory.get(this.taskId);
     this.config = config;
+    this.usageReportingService = usageReportingService;
 
     try {
       taskManager.registerTaskDefinitions({
         [taskType]: {
           title: taskTitle,
-          timeout: TIMEOUT,
+          timeout: this.config.usageReportingTaskTimeout,
           stateSchemaByVersion,
           createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
             return {
@@ -79,7 +82,7 @@ export class SecurityUsageReportingTask {
 
   public start = async ({ taskManager, interval }: SecurityUsageReportingTaskStartContract) => {
     if (!taskManager) {
-      this.logger.error(`missing required taskmanager service during start of ${this.taskType}`);
+      this.logger.error(`missing required task manager service during start of ${this.taskType}`);
       return;
     }
 
@@ -133,7 +136,7 @@ export class SecurityUsageReportingTask {
     let usageRecords: UsageRecord[] = [];
     let latestRecordTimestamp: Date | undefined;
     let shouldRunAgain = false;
-    // save usage record query time so we can use it to know where
+    // save usage record query time, so we can use it to know where
     // the next query range should start
     const meteringCallbackTime = new Date();
     try {
@@ -156,13 +159,15 @@ export class SecurityUsageReportingTask {
       return { state: taskInstance.state, runAt: new Date() };
     }
 
-    this.logger.debug(`received usage records: ${JSON.stringify(usageRecords)}`);
+    this.logger.debug(() => `received usage records: ${JSON.stringify(usageRecords)}`);
 
     let usageReportResponse: Response | undefined;
 
     if (usageRecords.length !== 0) {
       try {
-        usageReportResponse = await usageReportingService.reportUsage(usageRecords);
+        this.logger.debug(`Sending ${usageRecords.length} usage records to the API`);
+
+        usageReportResponse = await this.usageReportingService.reportUsage(usageRecords);
 
         if (!usageReportResponse.ok) {
           const errorResponse = await usageReportResponse.json();
@@ -170,7 +175,7 @@ export class SecurityUsageReportingTask {
           return { state: taskInstance.state, runAt: new Date() };
         }
 
-        this.logger.info(
+        this.logger.debug(
           `(${
             usageRecords.length
           }) usage records starting from ${lastSuccessfulReport.toISOString()} were sent successfully: ${
@@ -183,7 +188,6 @@ export class SecurityUsageReportingTask {
             usageRecords.length
           }) usage records starting from ${lastSuccessfulReport.toISOString()}: ${err} `
         );
-        shouldRunAgain = true;
       }
     }
 

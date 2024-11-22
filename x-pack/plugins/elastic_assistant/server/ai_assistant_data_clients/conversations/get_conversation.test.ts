@@ -10,9 +10,9 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { getConversation } from './get_conversation';
 import { estypes } from '@elastic/elasticsearch';
 import { EsConversationSchema } from './types';
+import { authenticatedUser } from '../../__mocks__/user';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { ConversationResponse } from '@kbn/elastic-assistant-common';
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 
 export const getConversationResponseMock = (): ConversationResponse => ({
   createdAt: '2020-04-20T15:25:31.830Z',
@@ -44,13 +44,7 @@ export const getConversationResponseMock = (): ConversationResponse => ({
   replacements: undefined,
 });
 
-const mockUser1 = {
-  username: 'my_username',
-  authentication_realm: {
-    type: 'my_realm_type',
-    name: 'my_realm_name',
-  },
-} as AuthenticatedUser;
+const mockUser1 = authenticatedUser;
 
 export const getSearchConversationMock = (): estypes.SearchResponse<EsConversationSchema> => ({
   _scroll_id: '123',

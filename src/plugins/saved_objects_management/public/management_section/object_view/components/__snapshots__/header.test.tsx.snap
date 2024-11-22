@@ -8,10 +8,10 @@ exports[`Intro component renders correctly 1`] = `
     class="euiPageHeaderContent emotion-euiPageHeaderContent-border-l"
   >
     <div
-      class="euiFlexGroup euiPageHeaderContent__top emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+      class="euiFlexGroup euiPageHeaderContent__top emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row-euiPageHeaderContent__top"
     >
       <div
-        class="euiFlexItem emotion-euiFlexItem-grow-1"
+        class="euiFlexItem emotion-euiFlexItem-grow-2-euiPageHeaderContent__leftSideItems"
       >
         <h1
           class="euiTitle emotion-euiTitle-l"
@@ -20,50 +20,46 @@ exports[`Intro component renders correctly 1`] = `
         </h1>
       </div>
       <div
-        class="euiFlexItem emotion-euiFlexItem-growZero"
+        class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
       >
         <div
-          class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row"
+          class="euiFlexItem emotion-euiFlexItem-growZero-euiPageHeaderContent__rightSideItem"
         >
-          <div
-            class="euiFlexItem emotion-euiFlexItem-growZero"
+          <button
+            class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-danger"
+            data-test-subj="savedObjectEditDelete"
+            type="button"
           >
-            <button
-              class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-danger"
-              data-test-subj="savedObjectEditDelete"
-              type="button"
+            <span
+              class="emotion-euiButtonDisplayContent"
             >
               <span
-                class="emotion-euiButtonDisplayContent"
-              >
-                <span
-                  color="inherit"
-                  data-euiicon-type="trash"
-                />
-                Delete
-              </span>
-            </button>
-          </div>
-          <div
-            class="euiFlexItem emotion-euiFlexItem-growZero"
+                color="inherit"
+                data-euiicon-type="trash"
+              />
+              Delete
+            </span>
+          </button>
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero-euiPageHeaderContent__rightSideItem"
+        >
+          <a
+            class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-primary"
+            data-test-subj="savedObjectEditViewInApp"
+            href="/some-url"
+            rel="noreferrer"
           >
-            <a
-              class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-primary"
-              data-test-subj="savedObjectEditViewInApp"
-              href="/some-url"
-              rel="noreferrer"
+            <span
+              class="emotion-euiButtonDisplayContent"
             >
               <span
-                class="emotion-euiButtonDisplayContent"
-              >
-                <span
-                  color="inherit"
-                  data-euiicon-type="eye"
-                />
-                View saved object
-              </span>
-            </a>
-          </div>
+                color="inherit"
+                data-euiicon-type="eye"
+              />
+              View saved object
+            </span>
+          </a>
         </div>
       </div>
     </div>

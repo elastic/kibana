@@ -70,14 +70,8 @@ describe('Timeline note middleware', () => {
 
   it('should persist a timeline note', async () => {
     (persistNote as jest.Mock).mockResolvedValue({
-      data: {
-        persistNote: {
-          code: 200,
-          message: 'success',
-          note: {
-            noteId: testNote.id,
-          },
-        },
+      note: {
+        noteId: testNote.id,
       },
     });
     expect(selectTimelineById(store.getState(), TimelineId.test).noteIds).toEqual([]);
@@ -92,17 +86,14 @@ describe('Timeline note middleware', () => {
 
   it('should persist a note on an event of a timeline', async () => {
     (persistNote as jest.Mock).mockResolvedValue({
-      data: {
-        persistNote: {
-          code: 200,
-          message: 'success',
-          note: {
-            noteId: testNote.id,
-          },
-        },
+      note: {
+        noteId: testNote.id,
       },
     });
-    expect(selectTimelineById(store.getState(), TimelineId.test).eventIdToNoteIds).toEqual({});
+    expect(selectTimelineById(store.getState(), TimelineId.test).eventIdToNoteIds).toEqual({
+      // existing note
+      '1': ['1'],
+    });
     await store.dispatch(updateNote({ note: testNote }));
     await store.dispatch(
       addNoteToEvent({ eventId: testEventId, id: TimelineId.test, noteId: testNote.id })
@@ -120,14 +111,8 @@ describe('Timeline note middleware', () => {
 
   it('should ensure the timeline is saved or in draft mode before creating a note', async () => {
     (persistNote as jest.Mock).mockResolvedValue({
-      data: {
-        persistNote: {
-          code: 200,
-          message: 'success',
-          note: {
-            noteId: testNote.id,
-          },
-        },
+      note: {
+        noteId: testNote.id,
       },
     });
 
@@ -156,15 +141,9 @@ describe('Timeline note middleware', () => {
   it('should pin the event when the event is not pinned yet', async () => {
     const testTimelineId = 'testTimelineId';
     (persistNote as jest.Mock).mockResolvedValue({
-      data: {
-        persistNote: {
-          code: 200,
-          message: 'success',
-          note: {
-            noteId: testNote.id,
-            timelineId: testTimelineId,
-          },
-        },
+      note: {
+        noteId: testNote.id,
+        timelineId: testTimelineId,
       },
     });
 
@@ -204,15 +183,9 @@ describe('Timeline note middleware', () => {
     );
     const testTimelineId = 'testTimelineId';
     (persistNote as jest.Mock).mockResolvedValue({
-      data: {
-        persistNote: {
-          code: 200,
-          message: 'success',
-          note: {
-            noteId: testNote.id,
-            timelineId: testTimelineId,
-          },
-        },
+      note: {
+        noteId: testNote.id,
+        timelineId: testTimelineId,
       },
     });
 
@@ -229,12 +202,8 @@ describe('Timeline note middleware', () => {
   });
 
   it('should show an error message when the call is unauthorized', async () => {
-    (persistNote as jest.Mock).mockResolvedValue({
-      data: {
-        persistNote: {
-          code: 403,
-        },
-      },
+    (persistNote as jest.Mock).mockRejectedValue({
+      body: { status_code: 403 },
     });
 
     await store.dispatch(updateNote({ note: testNote }));

@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 
 import type { IndexMapping, VirtualVersionMap } from '@kbn/core-saved-objects-base-server-internal';
-import { getUpdatedTypes } from '../core/compare_mappings';
+import { getNewAndUpdatedTypes } from '../core/compare_mappings';
 
 /** @internal */
 export interface CheckTargetTypesMappingsParams {
@@ -36,6 +38,12 @@ export interface TypesChanged {
   updatedTypes: string[];
 }
 
+/** @internal */
+export interface TypesAdded {
+  type: 'types_added';
+  newTypes: string[];
+}
+
 export const checkTargetTypesMappings =
   ({
     indexTypes,
@@ -44,7 +52,7 @@ export const checkTargetTypesMappings =
     latestMappingsVersions,
     hashToVersionMap = {},
   }: CheckTargetTypesMappingsParams): TaskEither.TaskEither<
-    IndexMappingsIncomplete | TypesChanged,
+    IndexMappingsIncomplete | TypesChanged | TypesAdded,
     TypesMatch
   > =>
   async () => {
@@ -56,7 +64,7 @@ export const checkTargetTypesMappings =
       return Either.left({ type: 'index_mappings_incomplete' as const });
     }
 
-    const updatedTypes = getUpdatedTypes({
+    const { newTypes, updatedTypes } = getNewAndUpdatedTypes({
       indexTypes,
       indexMeta: indexMappings?._meta,
       latestMappingsVersions,
@@ -67,6 +75,11 @@ export const checkTargetTypesMappings =
       return Either.left({
         type: 'types_changed' as const,
         updatedTypes,
+      });
+    } else if (newTypes.length) {
+      return Either.left({
+        type: 'types_added' as const,
+        newTypes,
       });
     } else {
       return Either.right({ type: 'types_match' as const });

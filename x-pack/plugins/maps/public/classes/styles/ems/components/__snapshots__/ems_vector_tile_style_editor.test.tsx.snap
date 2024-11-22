@@ -2,12 +2,8 @@
 
 exports[`EMSVectorTileStyleEditor is rendered 1`] = `
 <EuiFormRow
-  describedByIds={Array []}
   display="columnCompressed"
-  hasChildLabel={true}
-  hasEmptyLabelSpace={false}
   label="Color blend"
-  labelType="label"
 >
   <EuiColorPicker
     aria-label="Color blend"

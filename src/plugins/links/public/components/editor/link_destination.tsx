@@ -1,14 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useState } from 'react';
-
-import type { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import { EuiFormRow } from '@elastic/eui';
 import {
@@ -24,13 +23,17 @@ import { LinksStrings } from '../links_strings';
 export const LinkDestination = ({
   link,
   setDestination,
-  parentDashboard,
+  parentDashboardId,
   selectedLinkType,
 }: {
   selectedLinkType: LinkType;
-  parentDashboard?: DashboardContainer;
+  parentDashboardId?: string;
   link?: UnorderedLink;
-  setDestination: (destination?: string, defaultLabel?: string) => void;
+  setDestination: (
+    destination?: string,
+    defaultLabel?: string,
+    defaultDescription?: string
+  ) => void;
 }) => {
   const [destinationError, setDestinationError] = useState<string | undefined>();
 
@@ -60,10 +63,14 @@ export const LinkDestination = ({
             setDestination(undefined, undefined);
             if (selectedDashboardId) setDashboardLinkDestination(selectedDashboardId);
           }}
-          parentDashboard={parentDashboard}
+          parentDashboardId={parentDashboardId}
           initialSelection={dashboardLinkDestination}
           onDestinationPicked={(dashboard) =>
-            setDestination(dashboard?.id, dashboard?.attributes.title)
+            setDestination(
+              dashboard?.id,
+              dashboard?.attributes.title,
+              dashboard?.attributes.description
+            )
           }
         />
       ) : (

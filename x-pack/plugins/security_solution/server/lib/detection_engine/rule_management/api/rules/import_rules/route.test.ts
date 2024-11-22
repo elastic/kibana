@@ -12,9 +12,10 @@ import {
   ruleIdsToNdJsonString,
   rulesToNdJsonString,
 } from '../../../../../../../common/api/detection_engine/rule_management/mocks';
+import { getRulesSchemaMock } from '../../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
 
 import type { requestMock } from '../../../../routes/__mocks__';
-import { createMockConfig, requestContextMock, serverMock } from '../../../../routes/__mocks__';
+import { configMock, requestContextMock, serverMock } from '../../../../routes/__mocks__';
 import { buildHapiStream } from '../../../../routes/__mocks__/utils';
 import {
   getImportRulesRequest,
@@ -25,15 +26,22 @@ import {
   getBasicEmptySearchResponse,
 } from '../../../../routes/__mocks__/request_responses';
 
-import * as createRulesAndExceptionsStreamFromNdJson from '../../../logic/import/create_rules_stream_from_ndjson';
+import * as createPromiseFromRuleImportStream from '../../../logic/import/create_promise_from_rule_import_stream';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 import { importRulesRoute } from './route';
 import { HttpAuthzError } from '../../../../../machine_learning/validation';
+import { createPrebuiltRuleAssetsClient as createPrebuiltRuleAssetsClientMock } from '../../../../prebuilt_rules/logic/rule_assets/__mocks__/prebuilt_rule_assets_client';
 
 jest.mock('../../../../../machine_learning/authz');
 
+let mockPrebuiltRuleAssetsClient: ReturnType<typeof createPrebuiltRuleAssetsClientMock>;
+
+jest.mock('../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client', () => ({
+  createPrebuiltRuleAssetsClient: () => mockPrebuiltRuleAssetsClient,
+}));
+
 describe('Import rules route', () => {
-  let config: ReturnType<typeof createMockConfig>;
+  let config: ReturnType<typeof configMock.createDefault>;
   let server: ReturnType<typeof serverMock.create>;
   let request: ReturnType<typeof requestMock.create>;
   let { clients, context } = requestContextMock.createTools();
@@ -41,17 +49,19 @@ describe('Import rules route', () => {
   beforeEach(() => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
-    config = createMockConfig();
+    config = configMock.createDefault();
     const hapiStream = buildHapiStream(ruleIdsToNdJsonString(['rule-1']));
     request = getImportRulesRequest(hapiStream);
 
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult()); // no extant rules
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
-    clients.detectionRulesClient.importRule.mockResolvedValue(getRuleMock(getQueryRuleParams()));
+    clients.detectionRulesClient.createCustomRule.mockResolvedValue(getRulesSchemaMock());
+    clients.detectionRulesClient.importRule.mockResolvedValue(getRulesSchemaMock());
     clients.actionsClient.getAll.mockResolvedValue([]);
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
     );
+    mockPrebuiltRuleAssetsClient = createPrebuiltRuleAssetsClientMock();
     importRulesRoute(server.router, config);
   });
 
@@ -110,9 +120,9 @@ describe('Import rules route', () => {
       });
     });
 
-    test('returns error if createRulesAndExceptionsStreamFromNdJson throws error', async () => {
+    test('returns error if createPromiseFromRuleImportStream throws error', async () => {
       const transformMock = jest
-        .spyOn(createRulesAndExceptionsStreamFromNdJson, 'createRulesAndExceptionsStreamFromNdJson')
+        .spyOn(createPromiseFromRuleImportStream, 'createPromiseFromRuleImportStream')
         .mockImplementation(() => {
           throw new Error('Test error');
         });
@@ -130,6 +140,30 @@ describe('Import rules route', () => {
 
       expect(response.status).toEqual(400);
       expect(response.body).toEqual({ message: 'Invalid file extension .html', status_code: 400 });
+    });
+
+    describe('with prebuilt rules customization enabled', () => {
+      beforeEach(() => {
+        clients.detectionRulesClient.importRules.mockResolvedValueOnce([]);
+        server = serverMock.create(); // old server already registered this route
+        config = configMock.withExperimentalFeature(config, 'prebuiltRulesCustomizationEnabled');
+
+        importRulesRoute(server.router, config);
+      });
+
+      test('returns 500 if importing fails', async () => {
+        clients.detectionRulesClient.importRules
+          .mockReset()
+          .mockRejectedValue(new Error('test error'));
+
+        const response = await server.inject(request, requestContextMock.convertContext(context));
+
+        expect(response.status).toEqual(500);
+        expect(response.body).toMatchObject({
+          message: 'test error',
+          status_code: 500,
+        });
+      });
     });
   });
 

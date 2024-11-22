@@ -9,16 +9,17 @@ exports[`CertificatesSearch renders expected elements for valid props 1`] = `
   class="c0"
 >
   <div
-    class="euiFormControlLayout euiFormControlLayout--fullWidth"
+    class="euiFormControlLayout emotion-euiFormControlLayout-fullWidth"
   >
     <div
-      class="euiFormControlLayout__childrenWrapper"
+      class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+      style="--euiFormControlLeftIconsCount:1"
     >
       <div
-        class="euiFormControlLayoutIcons euiFormControlLayoutIcons--left euiFormControlLayoutIcons--absolute"
+        class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-left"
       >
         <span
-          class="euiFormControlLayoutCustomIcon"
+          class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
         >
           <span
             aria-hidden="true"
@@ -29,7 +30,7 @@ exports[`CertificatesSearch renders expected elements for valid props 1`] = `
       </div>
       <input
         aria-label="Search certificates"
-        class="euiFieldSearch euiFieldSearch--fullWidth"
+        class="euiFieldSearch emotion-euiFieldSearch-fullWidth"
         data-test-subj="uptimeCertSearch"
         placeholder="Search certificates"
         type="search"

@@ -4,11 +4,10 @@ exports[`it renders with custom logo 1`] = `
 <_KibanaPageTemplate
   className="spcSpaceSelector"
   data-test-subj="kibanaSpaceSelector"
-  panelled={true}
 >
   <EuiPortal>
     <div
-      className="spcSelectorBackground"
+      className="spcSelectorBackground spcSelectorBackground__nonMixinAttributes"
       role="presentation"
     />
   </EuiPortal>
@@ -65,11 +64,10 @@ exports[`it renders without crashing 1`] = `
 <_KibanaPageTemplate
   className="spcSpaceSelector"
   data-test-subj="kibanaSpaceSelector"
-  panelled={true}
 >
   <EuiPortal>
     <div
-      className="spcSelectorBackground"
+      className="spcSelectorBackground spcSelectorBackground__nonMixinAttributes"
       role="presentation"
     />
   </EuiPortal>

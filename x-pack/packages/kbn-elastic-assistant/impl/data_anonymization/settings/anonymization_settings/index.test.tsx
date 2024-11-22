@@ -13,7 +13,6 @@ import { AnonymizationSettings } from '.';
 import type { Props } from '.';
 
 const props: Props = {
-  defaultPageSize: 5,
   anonymizationFields: {
     total: 4,
     page: 1,
@@ -78,6 +77,7 @@ const mockUseAssistantContext = {
   ],
   assistantAvailability: {
     hasUpdateAIAssistantAnonymization: true,
+    hasManageGlobalKnowledgeBase: true,
   },
   baseAllow: ['@timestamp', 'event.category', 'user.name'],
   baseAllowReplacement: ['user.name', 'host.ip'],

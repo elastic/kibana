@@ -6,29 +6,25 @@
  */
 
 import * as t from 'io-ts';
-import { Integration, IntegrationDashboards } from '../../../common/api_types';
-import { typeRt } from '../../types/default_api_types';
+import { IntegrationType, IntegrationDashboardsResponse } from '../../../common/api_types';
 import { createDatasetQualityServerRoute } from '../create_datasets_quality_server_route';
 import { getIntegrations } from './get_integrations';
 import { getIntegrationDashboards } from './get_integration_dashboards';
 
 const integrationsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/integrations',
-  params: t.type({
-    query: typeRt,
-  }),
   options: {
     tags: [],
   },
   async handler(resources): Promise<{
-    integrations: Integration[];
+    integrations: IntegrationType[];
   }> {
-    const { params, plugins, logger } = resources;
+    const { plugins, logger } = resources;
 
     const fleetPluginStart = await plugins.fleet.start();
     const packageClient = fleetPluginStart.packageService.asInternalUser;
 
-    const integrations = await getIntegrations({ packageClient, logger, ...params.query });
+    const integrations = await getIntegrations({ packageClient, logger });
 
     return { integrations };
   },
@@ -44,7 +40,7 @@ const integrationDashboardsRoute = createDatasetQualityServerRoute({
   options: {
     tags: [],
   },
-  async handler(resources): Promise<IntegrationDashboards> {
+  async handler(resources): Promise<IntegrationDashboardsResponse> {
     const { context, params, plugins } = resources;
     const { integration } = params.path;
     const { savedObjects } = await context.core;

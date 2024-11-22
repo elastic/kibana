@@ -114,10 +114,12 @@ export const renderApp = (
     data: plugins.data,
     esConfig,
     getChromeStyle$: chrome.getChromeStyle$,
+    getNavLinks: chrome.navLinks.getAll,
     guidedOnboarding,
     history,
     indexMappingComponent,
     isSidebarEnabled,
+    kibanaVersion,
     lens,
     ml,
     navigateToUrl,
@@ -150,7 +152,12 @@ export const renderApp = (
   ReactDOM.render(
     <I18nProvider>
       <KibanaThemeProvider theme={{ theme$: params.theme$ }}>
-        <KibanaContextProvider services={{ ...core, ...plugins }}>
+        <KibanaContextProvider
+          services={{
+            ...core,
+            ...plugins,
+          }}
+        >
           <CloudContext>
             <Provider store={store}>
               <Router history={params.history}>

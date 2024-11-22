@@ -163,15 +163,17 @@ function getWrappedTransportRequestFn(opts: WrapEsClientOpts) {
   ): Promise<TResponse | TransportResult<TResponse, TContext>> {
     // Wrap ES|QL requests with an abort signal
     if (params.method === 'POST' && params.path === '/_query') {
+      let requestOptions: TransportRequestOptions = {};
       try {
-        const requestOptions = options ?? {};
+        requestOptions = options ?? {};
         const start = Date.now();
         opts.logger.debug(
-          `executing ES|QL query for rule ${opts.rule.alertTypeId}:${opts.rule.id} in space ${
-            opts.rule.spaceId
-          } - ${JSON.stringify(params)} - with options ${JSON.stringify(requestOptions)}${
-            requestTimeout ? ` and ${requestTimeout}ms requestTimeout` : ''
-          }`
+          () =>
+            `executing ES|QL query for rule ${opts.rule.alertTypeId}:${opts.rule.id} in space ${
+              opts.rule.spaceId
+            } - ${JSON.stringify(params)} - with options ${JSON.stringify(requestOptions)}${
+              requestTimeout ? ` and ${requestTimeout}ms requestTimeout` : ''
+            }`
         );
         const result = (await originalRequestFn.call(opts.esClient.transport, params, {
           ...requestOptions,
@@ -192,6 +194,14 @@ function getWrappedTransportRequestFn(opts: WrapEsClientOpts) {
         if (opts.abortController.signal.aborted) {
           throw new Error('ES|QL search has been aborted due to cancelled execution');
         }
+
+        opts.logger.warn(
+          `executing ES|QL query for rule ${opts.rule.alertTypeId}:${opts.rule.id} in space ${
+            opts.rule.spaceId
+          } - ${JSON.stringify(params)} - with options ${JSON.stringify(requestOptions)}${
+            requestTimeout ? ` and ${requestTimeout}ms requestTimeout` : ''
+          }`
+        );
         throw e;
       }
     }
@@ -231,15 +241,17 @@ function getWrappedEqlSearchFn(opts: WrapEsClientOpts) {
     params: EqlSearchRequest | EqlSearchRequestWithBody,
     options?: TransportRequestOptions
   ): Promise<EqlSearchResponse<TEvent> | TransportResult<EqlSearchResponse<TEvent>, unknown>> {
+    let searchOptions: TransportRequestOptions = {};
     try {
-      const searchOptions = options ?? {};
+      searchOptions = options ?? {};
       const start = Date.now();
       opts.logger.debug(
-        `executing eql query for rule ${opts.rule.alertTypeId}:${opts.rule.id} in space ${
-          opts.rule.spaceId
-        } - ${JSON.stringify(params)} - with options ${JSON.stringify(searchOptions)}${
-          requestTimeout ? ` and ${requestTimeout}ms requestTimeout` : ''
-        }`
+        () =>
+          `executing eql query for rule ${opts.rule.alertTypeId}:${opts.rule.id} in space ${
+            opts.rule.spaceId
+          } - ${JSON.stringify(params)} - with options ${JSON.stringify(searchOptions)}${
+            requestTimeout ? ` and ${requestTimeout}ms requestTimeout` : ''
+          }`
       );
       const result = (await originalEqlSearch.call(opts.esClient, params, {
         ...searchOptions,
@@ -269,6 +281,14 @@ function getWrappedEqlSearchFn(opts: WrapEsClientOpts) {
       if (opts.abortController.signal.aborted) {
         throw new Error('EQL search has been aborted due to cancelled execution');
       }
+
+      opts.logger.warn(
+        `executing eql query for rule ${opts.rule.alertTypeId}:${opts.rule.id} in space ${
+          opts.rule.spaceId
+        } - ${JSON.stringify(params)} - with options ${JSON.stringify(searchOptions)}${
+          requestTimeout ? ` and ${requestTimeout}ms requestTimeout` : ''
+        }`
+      );
       throw e;
     }
   }
@@ -312,15 +332,17 @@ function getWrappedSearchFn(opts: WrapEsClientOpts) {
     | TransportResult<SearchResponse<TDocument, TAggregations>, unknown>
     | SearchResponse<TDocument, TAggregations>
   > {
+    let searchOptions: TransportRequestOptions = {};
     try {
-      const searchOptions = options ?? {};
+      searchOptions = options ?? {};
       const start = Date.now();
       opts.logger.debug(
-        `executing query for rule ${opts.rule.alertTypeId}:${opts.rule.id} in space ${
-          opts.rule.spaceId
-        } - ${JSON.stringify(params)} - with options ${JSON.stringify(searchOptions)}${
-          requestTimeout ? ` and ${requestTimeout}ms requestTimeout` : ''
-        }`
+        () =>
+          `executing query for rule ${opts.rule.alertTypeId}:${opts.rule.id} in space ${
+            opts.rule.spaceId
+          } - ${JSON.stringify(params)} - with options ${JSON.stringify(searchOptions)}${
+            requestTimeout ? ` and ${requestTimeout}ms requestTimeout` : ''
+          }`
       );
       const result = (await originalSearch.call(opts.esClient, params, {
         ...searchOptions,
@@ -337,22 +359,35 @@ function getWrappedSearchFn(opts: WrapEsClientOpts) {
       const end = Date.now();
       const durationMs = end - start;
 
-      let took = 0;
+      let body: SearchResponse<TDocument, TAggregations>;
       if (searchOptions.meta) {
         // when meta: true, response is TransportResult<SearchResponse<TDocument, TAggregations>, unknown>
-        took = (result as TransportResult<SearchResponse<TDocument, TAggregations>, unknown>).body
-          .took;
+        body = (result as TransportResult<SearchResponse<TDocument, TAggregations>, unknown>).body;
       } else {
         // when meta: false, response is SearchResponse<TDocument, TAggregations>
-        took = (result as SearchResponse<TDocument, TAggregations>).took;
+        body = result as SearchResponse<TDocument, TAggregations>;
       }
 
-      opts.logMetricsFn({ esSearchDuration: took ?? 0, totalSearchDuration: durationMs });
+      opts.logMetricsFn({ esSearchDuration: body?.took ?? 0, totalSearchDuration: durationMs });
+      opts.logger.trace(
+        () =>
+          `result of executing query for rule ${opts.rule.alertTypeId}:${opts.rule.id} in space ${
+            opts.rule.spaceId
+          }: ${JSON.stringify(body)}`
+      );
       return result;
     } catch (e) {
       if (opts.abortController.signal.aborted) {
         throw new Error('Search has been aborted due to cancelled execution');
       }
+
+      opts.logger.warn(
+        `executing query for rule ${opts.rule.alertTypeId}:${opts.rule.id} in space ${
+          opts.rule.spaceId
+        } - ${JSON.stringify(params)} - with options ${JSON.stringify(searchOptions)}${
+          requestTimeout ? ` and ${requestTimeout}ms requestTimeout` : ''
+        }`
+      );
       throw e;
     }
   }

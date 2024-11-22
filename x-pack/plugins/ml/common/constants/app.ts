@@ -11,7 +11,7 @@ export const PLUGIN_ID = 'ml';
 export const PLUGIN_ICON = 'machineLearningApp';
 export const PLUGIN_ICON_SOLUTION = 'logoKibana';
 export const ML_APP_NAME = i18n.translate('xpack.ml.navMenu.mlAppNameText', {
-  defaultMessage: 'Machine Learning',
+  defaultMessage: 'Machine Learning and Analytics',
 });
 export const ML_APP_ROUTE = '/app/ml';
 export const ML_INTERNAL_BASE_PATH = '/internal/ml';
@@ -20,11 +20,29 @@ export const ML_EXTERNAL_BASE_PATH = '/api/ml';
 export type MlFeatures = Record<'ad' | 'dfa' | 'nlp', boolean>;
 export type CompatibleModule = 'security' | 'observability' | 'search';
 export type ExperimentalFeatures = Record<'ruleFormV2', boolean>;
+export interface ModelDeploymentSettings {
+  allowStaticAllocations: boolean;
+  vCPURange: Record<
+    'low' | 'medium' | 'high',
+    {
+      min: number;
+      max: number;
+      static?: number;
+    }
+  >;
+}
+
+export interface NLPSettings {
+  modelDeployment: ModelDeploymentSettings;
+}
 
 export interface ConfigSchema {
   ad?: { enabled: boolean };
   dfa?: { enabled: boolean };
-  nlp?: { enabled: boolean };
+  nlp?: {
+    enabled: boolean;
+    modelDeployment?: ModelDeploymentSettings;
+  };
   compatibleModuleType?: CompatibleModule;
   experimental?: {
     ruleFormV2?: { enabled: boolean };
@@ -49,5 +67,11 @@ export function initExperimentalFeatures(
 ) {
   if (config.experimental?.ruleFormV2?.enabled !== undefined) {
     experimentalFeatures.ruleFormV2 = config.experimental.ruleFormV2.enabled;
+  }
+}
+
+export function initModelDeploymentSettings(nlpSettings: NLPSettings, config: ConfigSchema) {
+  if (config.nlp?.modelDeployment !== undefined) {
+    nlpSettings.modelDeployment = config.nlp.modelDeployment;
   }
 }

@@ -3,7 +3,7 @@
 }
 
 .mlHelpPopover__content {
-  @include euiYScrollWithShadows;
   max-height: 40vh;
   padding: $euiSizeS;
+  @include euiYScrollWithShadows;
 }

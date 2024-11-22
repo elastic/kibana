@@ -42,7 +42,7 @@ export const LatestVulnerabilitiesContainer = () => {
       setActivePageIndex,
     } = useLatestVulnerabilitiesGrouping({
       groupPanelRenderer,
-      groupStatsRenderer,
+      getGroupStats: groupStatsRenderer,
       groupingLevel,
       selectedGroup,
       groupFilters: parentGroupFilters ? JSON.parse(parentGroupFilters) : [],
@@ -137,22 +137,23 @@ export const LatestVulnerabilitiesContainer = () => {
     );
   };
 
-  const { grouping, isFetching, setUrlQuery, onResetFilters, error, isEmptyResults } =
-    useLatestVulnerabilitiesGrouping({ groupPanelRenderer, groupStatsRenderer });
+  const { grouping, isFetching, urlQuery, setUrlQuery, onResetFilters, error, isEmptyResults } =
+    useLatestVulnerabilitiesGrouping({ groupPanelRenderer, getGroupStats: groupStatsRenderer });
 
   if (error || isEmptyResults) {
     return (
       <>
-        <FindingsSearchBar setQuery={setUrlQuery} loading={isFetching} />
+        <FindingsSearchBar query={urlQuery} setQuery={setUrlQuery} loading={isFetching} />
         <EuiSpacer size="m" />
         {error && <ErrorCallout error={error} />}
         {isEmptyResults && <EmptyState onResetFilters={onResetFilters} />}
       </>
     );
   }
+
   return (
     <>
-      <FindingsSearchBar setQuery={setUrlQuery} loading={isFetching} />
+      <FindingsSearchBar query={urlQuery} setQuery={setUrlQuery} loading={isFetching} />
       <EuiSpacer size="m" />
       <div>
         {renderChildComponent({

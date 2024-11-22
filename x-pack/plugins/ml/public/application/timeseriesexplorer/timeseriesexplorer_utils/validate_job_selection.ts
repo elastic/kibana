@@ -13,7 +13,7 @@ import type { ToastsStart } from '@kbn/core/public';
 import type { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 import { isTimeSeriesViewJob } from '../../../../common/util/job_utils';
 
-import { mlJobService } from '../../services/job_service';
+import type { MlJobService } from '../../services/job_service';
 
 import type { GetJobSelection } from '../../contexts/ml/use_job_selection_flyout';
 
@@ -26,6 +26,7 @@ export function validateJobSelection(
   jobsWithTimeRange: MlJobWithTimeRange[],
   selectedJobIds: string[],
   setGlobalState: (...args: any) => void,
+  mlJobService: MlJobService,
   toastNotifications: ToastsStart,
   getJobSelection: GetJobSelection
 ): boolean | string {

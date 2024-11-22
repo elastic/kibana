@@ -40,12 +40,6 @@ const tabs: Tab[] = [
       defaultMessage: 'Anomalies',
     }),
   },
-  {
-    id: ContentTabIds.LINK_TO_APM,
-    name: i18n.translate('xpack.infra.assetDetails.tabs.apmLink', {
-      defaultMessage: 'APM',
-    }),
-  },
 ];
 
 export const assetDetailsProps: AssetDetailsProps = {

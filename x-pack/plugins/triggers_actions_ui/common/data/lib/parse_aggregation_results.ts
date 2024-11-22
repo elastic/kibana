@@ -11,6 +11,7 @@ import {
   SearchHitsMetadata,
   AggregationsSingleMetricAggregateBase,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Group } from '@kbn/observability-alerting-rule-utils';
 
 export const UngroupedGroupId = 'all documents';
 export interface ParsedAggregationGroup {
@@ -18,6 +19,7 @@ export interface ParsedAggregationGroup {
   count: number;
   hits: Array<SearchHit<unknown>>;
   sourceFields: string[];
+  groups?: Group[];
   value?: number;
 }
 
@@ -33,6 +35,7 @@ interface ParseAggregationResultsOpts {
   resultLimit?: number;
   sourceFieldsParams?: Array<{ label: string; searchPath: string }>;
   generateSourceFieldsFromHits?: boolean;
+  termField?: string | string[];
 }
 export const parseAggregationResults = ({
   isCountAgg,
@@ -41,6 +44,7 @@ export const parseAggregationResults = ({
   resultLimit,
   sourceFieldsParams = [],
   generateSourceFieldsFromHits = false,
+  termField,
 }: ParseAggregationResultsOpts): ParsedAggregationResults => {
   const aggregations = esResult?.aggregations || {};
 
@@ -83,14 +87,24 @@ export const parseAggregationResults = ({
     if (resultLimit && results.results.length === resultLimit) break;
 
     const groupName: string = `${groupBucket?.key}`;
+    const groups =
+      termField && groupBucket?.key
+        ? [termField].flat().reduce<Group[]>((resultGroups, groupByItem, groupIndex) => {
+            resultGroups.push({
+              field: groupByItem,
+              value: [groupBucket.key].flat()[groupIndex],
+            });
+            return resultGroups;
+          }, [])
+        : undefined;
     const sourceFields: { [key: string]: string[] } = {};
 
     sourceFieldsParams.forEach((field) => {
       if (generateSourceFieldsFromHits) {
-        const fieldsSet = new Set<string>();
+        const fieldsSet: string[] = [];
         groupBucket.topHitsAgg.hits.hits.forEach((hit: SearchHit<{ [key: string]: string }>) => {
           if (hit._source && hit._source[field.label]) {
-            fieldsSet.add(hit._source[field.label]);
+            fieldsSet.push(hit._source[field.label]);
           }
         });
         sourceFields[field.label] = Array.from(fieldsSet);
@@ -105,6 +119,7 @@ export const parseAggregationResults = ({
 
     const groupResult: any = {
       group: groupName,
+      groups,
       count: groupBucket?.doc_count,
       hits: groupBucket?.topHitsAgg?.hits?.hits ?? [],
       ...(!isCountAgg ? { value: groupBucket?.metricAgg?.value } : {}),

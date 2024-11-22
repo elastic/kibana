@@ -46,7 +46,7 @@ export const LocationForm = ({ privateLocations }: { privateLocations: PrivateLo
           fullWidth
           label={LOCATION_NAME_LABEL}
           isInvalid={Boolean(errors?.label)}
-          error={errors?.label?.message}
+          error={errors?.label?.message as string}
         >
           <FieldText
             data-test-subj="syntheticsLocationFormFieldText"

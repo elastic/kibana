@@ -47,10 +47,10 @@
     "@kbn/reporting-mocks-server",
     "@kbn/core-http-request-handler-context-server",
     "@kbn/reporting-public",
-    "@kbn/analytics-client",
     "@kbn/reporting-csv-share-panel",
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-mount",
+    "@kbn/core-security-common",
   ],
   "exclude": [
     "target/**/*",

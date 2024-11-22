@@ -174,7 +174,6 @@ export const WaterfallFilter = ({
           </EuiFilterGroup>
           <EuiSpacer size="xs" />
           <EuiCheckbox
-            compressed={true}
             disabled={!(query || activeFilters.length > 0)}
             id="onlyHighlighted"
             label={FILTER_COLLAPSE_REQUESTS_LABEL}

@@ -13,7 +13,7 @@ import React, { useState, useMemo } from 'react';
 import { EuiPopover } from '@elastic/eui';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { createWaffleMapNode } from '../lib/nodes_to_wafflemap';
-import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../lib/lib';
+import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../common/inventory/types';
 import { fieldToName } from '../lib/field_to_display_name';
 import { NodeContextMenu } from './waffle/node_context_menu';
 import { SnapshotNode, SnapshotNodePath } from '../../../../../common/http_api/snapshot_api';
@@ -52,7 +52,7 @@ export const TableView = (props: Props) => {
 
   const closePopover = () => setOpenPopoverId(null);
 
-  const columns: Array<EuiBasicTableColumn<typeof items[number]>> = [
+  const columns: Array<EuiBasicTableColumn<(typeof items)[number]>> = [
     {
       field: 'name',
       name: i18n.translate('xpack.infra.tableView.columnName.name', { defaultMessage: 'Name' }),
@@ -82,6 +82,7 @@ export const TableView = (props: Props) => {
             isOpen={openPopoverId === uniqueID}
             closePopover={closePopover}
             anchorPosition="rightCenter"
+            zIndex={0}
           >
             <NodeContextMenu
               node={item.node}
@@ -162,6 +163,12 @@ export const TableView = (props: Props) => {
   );
 
   return (
-    <EuiInMemoryTable pagination={true} sorting={initialSorting} items={items} columns={columns} />
+    <EuiInMemoryTable
+      rowHeader="name"
+      pagination={true}
+      sorting={initialSorting}
+      items={items}
+      columns={columns}
+    />
   );
 };

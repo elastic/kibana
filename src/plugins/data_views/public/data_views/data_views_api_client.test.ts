@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { HttpSetup } from '@kbn/core/public';
@@ -16,6 +17,7 @@ describe('IndexPatternsApiClient', () => {
   let indexPatternsApiClient: DataViewsApiClient;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     fetchSpy = jest.spyOn(http, 'fetch').mockImplementation(() => Promise.resolve({}));
     indexPatternsApiClient = new DataViewsApiClient(http as HttpSetup, () =>
       Promise.resolve(undefined)
@@ -28,9 +30,6 @@ describe('IndexPatternsApiClient', () => {
     expect(fetchSpy).toHaveBeenCalledWith(expectedPath, {
       // not sure what asResponse is but the rest of the results are useful
       asResponse: true,
-      headers: {
-        'user-hash': '',
-      },
       query: {
         allow_hidden: undefined,
         allow_no_index: undefined,
@@ -44,5 +43,16 @@ describe('IndexPatternsApiClient', () => {
       },
       version: '1', // version header
     });
+  });
+
+  test('Correctly formats fieldTypes argument', async function () {
+    const fieldTypes = ['text', 'keyword'];
+    await indexPatternsApiClient.getFieldsForWildcard({
+      pattern: 'blah',
+      fieldTypes,
+      allowHidden: false,
+    });
+
+    expect(fetchSpy.mock.calls[0][1].query.field_types).toEqual(fieldTypes);
   });
 });

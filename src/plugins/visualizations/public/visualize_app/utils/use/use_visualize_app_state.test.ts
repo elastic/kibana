@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, waitFor, renderHook } from '@testing-library/react';
 import { EventEmitter } from 'events';
 import { Observable } from 'rxjs';
 
@@ -158,11 +159,11 @@ describe('useVisualizeAppState', () => {
 
     it('should successfully update vis state and set up app state container', async () => {
       stateContainerGetStateMock.mockImplementation(() => state);
-      const { result, waitForNextUpdate } = renderHook(() =>
+      const { result } = renderHook(() =>
         useVisualizeAppState(mockServices, eventEmitter, savedVisInstance)
       );
 
-      await waitForNextUpdate();
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       const { aggs, ...visState } = stateContainer.getState().vis;
       const expectedNewVisState = {
@@ -182,11 +183,11 @@ describe('useVisualizeAppState', () => {
         ...visualizeAppStateStub,
         query: { query: 'test', language: 'kuery' },
       }));
-      const { result, waitForNextUpdate } = renderHook(() =>
+      const { result } = renderHook(() =>
         useVisualizeAppState(mockServices, eventEmitter, savedVisInstance)
       );
 
-      await waitForNextUpdate();
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       const { aggs, ...visState } = stateContainer.getState().vis;
       const expectedNewVisState = {

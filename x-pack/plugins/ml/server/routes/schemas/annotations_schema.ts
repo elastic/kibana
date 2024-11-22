@@ -6,7 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { Annotations } from '../../../common/types/annotations';
 import { ANNOTATION_TYPE } from '../../../common/constants/annotations';
+import type { JobId } from '../../shared';
 
 export const indexAnnotationSchema = schema.object({
   timestamp: schema.number(),
@@ -67,5 +69,16 @@ export const getAnnotationsSchema = schema.object({
     )
   ),
 });
+
+export const annotationsResponseSchema = () => {
+  return schema.object({
+    success: schema.boolean(),
+    annotations: schema.recordOf<JobId, Annotations>(
+      schema.string(),
+      schema.arrayOf(indexAnnotationSchema)
+    ),
+    totalCount: schema.number(),
+  });
+};
 
 export const deleteAnnotationSchema = schema.object({ annotationId: schema.string() });

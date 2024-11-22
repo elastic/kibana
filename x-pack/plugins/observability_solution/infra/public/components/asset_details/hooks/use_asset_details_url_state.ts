@@ -15,8 +15,8 @@ import {
   ALERT_STATUS_RECOVERED,
   ALERT_STATUS_UNTRACKED,
 } from '@kbn/rule-data-utils';
+import { useUrlState } from '@kbn/observability-shared-plugin/public';
 import { ContentTabIds } from '../types';
-import { useUrlState } from '../../../utils/use_url_state';
 import { ASSET_DETAILS_URL_STATE_KEY } from '../constants';
 import { ALERT_STATUS_ALL } from '../../shared/alerts/constants';
 
@@ -99,6 +99,7 @@ const AssetDetailsUrlStateRT = rt.partial({
   profilingSearch: rt.string,
   alertStatus: AlertStatusRT,
   dashboardId: rt.string,
+  alertMetric: rt.string,
 });
 
 const AssetDetailsUrlRT = rt.union([AssetDetailsUrlStateRT, rt.null]);

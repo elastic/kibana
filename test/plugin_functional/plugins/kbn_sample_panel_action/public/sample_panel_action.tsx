@@ -1,23 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { CoreSetup } from '@kbn/core/public';
 import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import React from 'react';
 
-import { IEmbeddable } from '@kbn/embeddable-plugin/public';
+import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
 export const SAMPLE_PANEL_ACTION = 'samplePanelAction';
 
 export interface SamplePanelActionContext {
-  embeddable: IEmbeddable;
+  embeddable: DefaultEmbeddableApi;
 }
 
 export function createSamplePanelAction(getStartServices: CoreSetup['getStartServices']) {
@@ -37,7 +38,7 @@ export function createSamplePanelAction(getStartServices: CoreSetup['getStartSer
           <React.Fragment>
             <EuiFlyoutHeader>
               <EuiTitle size="m" data-test-subj="samplePanelActionTitle">
-                <h1>{embeddable.getTitle()}</h1>
+                <h1>{embeddable.panelTitle?.value}</h1>
               </EuiTitle>
             </EuiFlyoutHeader>
             <EuiFlyoutBody>

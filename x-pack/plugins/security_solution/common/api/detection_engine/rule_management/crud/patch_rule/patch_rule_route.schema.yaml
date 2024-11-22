@@ -5,9 +5,11 @@ info:
 paths:
   /api/detection_engine/rules:
     patch:
-      operationId: PatchRule
+      x-labels: [ess, serverless]
       x-codegen-enabled: true
-      description: Patch a single rule
+      operationId: PatchRule
+      summary: Patch a detection rule
+      description: Update specific fields of an existing detection rule using the `rule_id` or `id` field.
       tags:
         - Rules API
       requestBody:

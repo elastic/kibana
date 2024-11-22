@@ -27,7 +27,7 @@ const isPolicyEnabled = (packagePolicy: PackagePolicy) => {
 export const storedPackagePolicyToAgentInputs = (
   packagePolicy: PackagePolicy,
   packageInfo?: PackageInfo,
-  outputId: string = DEFAULT_OUTPUT.name,
+  agentPolicyOutputId: string = DEFAULT_OUTPUT.name,
   agentPolicyNamespace?: string,
   addFields?: FullAgentPolicyAddFields
 ): FullAgentPolicyInput[] => {
@@ -62,7 +62,7 @@ export const storedPackagePolicyToAgentInputs = (
       data_stream: {
         namespace: packagePolicy?.namespace || agentPolicyNamespace || 'default', // custom namespace has precedence on agent policy's one
       },
-      use_output: outputId,
+      use_output: packagePolicy.output_id || agentPolicyOutputId,
       package_policy_id: packagePolicy.id,
       ...getFullInputStreams(input),
     };
@@ -112,7 +112,8 @@ export const mergeInputsOverrides = (
 
 export const getFullInputStreams = (
   input: PackagePolicyInput,
-  allStreamEnabled: boolean = false
+  allStreamEnabled: boolean = false,
+  streamsOriginalIdsMap?: Map<string, string> // Map of stream ids <destinationId, originalId>
 ): FullAgentPolicyInputStream => {
   return {
     ...(input.compiled_input || {}),
@@ -121,8 +122,9 @@ export const getFullInputStreams = (
           streams: input.streams
             .filter((stream) => stream.enabled || allStreamEnabled)
             .map((stream) => {
+              const streamId = stream.id;
               const fullStream: FullAgentPolicyInputStream = {
-                id: stream.id,
+                id: streamId,
                 data_stream: stream.data_stream,
                 ...stream.compiled_stream,
                 ...Object.entries(stream.config || {}).reduce((acc, [key, { value }]) => {
@@ -130,6 +132,8 @@ export const getFullInputStreams = (
                   return acc;
                 }, {} as { [k: string]: any }),
               };
+              streamsOriginalIdsMap?.set(fullStream.id, streamId);
+
               return fullStream;
             }),
         }
@@ -140,13 +144,16 @@ export const getFullInputStreams = (
 export const storedPackagePoliciesToAgentInputs = async (
   packagePolicies: PackagePolicy[],
   packageInfoCache: Map<string, PackageInfo>,
-  outputId: string = DEFAULT_OUTPUT.name,
+  agentPolicyOutputId: string = DEFAULT_OUTPUT.name,
   agentPolicyNamespace?: string,
   globalDataTags?: GlobalDataTag[]
 ): Promise<FullAgentPolicyInput[]> => {
   const fullInputs: FullAgentPolicyInput[] = [];
 
-  const addFields = globalDataTags ? globalDataTagsToAddFields(globalDataTags) : undefined;
+  const addFields =
+    globalDataTags && globalDataTags.length > 0
+      ? globalDataTagsToAddFields(globalDataTags)
+      : undefined;
 
   for (const packagePolicy of packagePolicies) {
     if (!isPolicyEnabled(packagePolicy)) {
@@ -161,7 +168,7 @@ export const storedPackagePoliciesToAgentInputs = async (
       ...storedPackagePolicyToAgentInputs(
         packagePolicy,
         packageInfo,
-        outputId,
+        agentPolicyOutputId,
         agentPolicyNamespace,
         addFields
       )

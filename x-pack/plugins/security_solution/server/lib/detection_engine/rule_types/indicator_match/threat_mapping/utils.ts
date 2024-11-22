@@ -189,7 +189,9 @@ export const decodeThreatMatchNamedQuery = (encoded: string): DecodedThreatNamed
 export const extractNamedQueries = (
   hit: SignalSourceHit | ThreatListItem
 ): DecodedThreatNamedQuery[] =>
-  hit.matched_queries?.map((match) => decodeThreatMatchNamedQuery(match)) ?? [];
+  Array.isArray(hit.matched_queries)
+    ? hit.matched_queries.map((match) => decodeThreatMatchNamedQuery(match))
+    : [];
 
 export const buildExecutionIntervalValidator: (interval: string) => () => void = (interval) => {
   const intervalDuration = parseInterval(interval);
@@ -243,7 +245,8 @@ export const getSignalValueMap = ({
       if (!acc[field][fieldValue]) {
         acc[field][fieldValue] = [];
       }
-      acc[field][fieldValue].push(event._id);
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      acc[field][fieldValue].push(event._id!);
     });
     return acc;
   }, {});

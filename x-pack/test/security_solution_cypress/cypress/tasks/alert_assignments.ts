@@ -27,7 +27,7 @@ import {
   ALERT_ASSIGNEES_SELECTABLE_OPTIONS,
 } from '../screens/alerts';
 import { PAGE_TITLE } from '../screens/common/page';
-import { DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES } from '../screens/expandable_flyout/alert_details_right_panel';
+import { DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES_VALUE } from '../screens/expandable_flyout/alert_details_right_panel';
 import { expandFirstAlertActions, selectFirstPageAlerts } from './alerts';
 import { login } from './login';
 import { visitWithTimeRange } from './navigation';
@@ -85,7 +85,7 @@ export const checkEmptyAssigneesStateInAlertsTable = () => {
 };
 
 export const checkEmptyAssigneesStateInAlertDetailsFlyout = () => {
-  cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES).within(() => {
+  cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES_VALUE).within(() => {
     cy.get(ALERT_AVATARS_PANEL).children().should('have.length', 0);
   });
 };
@@ -137,13 +137,13 @@ export const alertsTableShowsAssigneesBadgeForFirstAlert = (users: string[]) => 
 };
 
 export const alertDetailsFlyoutShowsAssignees = (users: string[]) => {
-  cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES).within(() => {
+  cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES_VALUE).within(() => {
     users.forEach((user) => cy.get(`.euiAvatar${ALERT_USER_AVATAR(user)}`).should('exist'));
   });
 };
 
 export const alertDetailsFlyoutShowsAssigneesBadge = (users: string[]) => {
-  cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES).within(() => {
+  cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES_VALUE).within(() => {
     cy.get(ALERT_ASSIGNEES_COUNT_BADGE).contains(users.length);
     users.forEach((user) => cy.get(`.euiAvatar${ALERT_USER_AVATAR(user)}`).should('not.exist'));
   });

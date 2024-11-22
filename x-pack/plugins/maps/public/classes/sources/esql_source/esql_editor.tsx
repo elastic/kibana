@@ -11,7 +11,7 @@ import { isEqual } from 'lodash';
 import useMountedState from 'react-use/lib/useMountedState';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { ESQLColumn } from '@kbn/es-types';
-import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
+import { ESQLLangEditor } from '@kbn/esql/public';
 import { getESQLMeta, verifyGeometryColumn } from './esql_utils';
 
 interface Props {
@@ -41,7 +41,7 @@ export function ESQLEditor(props: Props) {
 
   return (
     <>
-      <TextBasedLangEditor
+      <ESQLLangEditor
         query={localQuery}
         onTextLangQueryChange={setLocalQuery}
         onTextLangQuerySubmit={async (query) => {
@@ -89,11 +89,6 @@ export function ESQLEditor(props: Props) {
         }}
         errors={error ? [error] : undefined}
         warning={warning}
-        expandCodeEditor={(status: boolean) => {
-          // never called because hideMinimizeButton hides UI
-        }}
-        isCodeEditorExpanded
-        hideMinimizeButton
         editorIsInline
         hideRunQueryText
         isLoading={isLoading}

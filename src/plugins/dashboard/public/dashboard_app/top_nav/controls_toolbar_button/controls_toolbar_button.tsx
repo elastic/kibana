@@ -1,27 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 
 import { EuiContextMenuPanel, useEuiTheme } from '@elastic/eui';
 import { ToolbarPopover } from '@kbn/shared-ux-button-toolbar';
-import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 
+import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { getControlButtonTitle } from '../../_dashboard_app_strings';
 import { AddDataControlButton } from './add_data_control_button';
 import { AddTimeSliderControlButton } from './add_time_slider_control_button';
 import { EditControlGroupButton } from './edit_control_group_button';
 
 export function ControlsToolbarButton({
-  controlGroup,
+  controlGroupApi,
   isDisabled,
 }: {
-  controlGroup: ControlGroupContainer;
+  controlGroupApi?: ControlGroupApi;
   isDisabled?: boolean;
 }) {
   const { euiTheme } = useEuiTheme();
@@ -43,17 +44,17 @@ export function ControlsToolbarButton({
           items={[
             <AddDataControlButton
               key="addControl"
-              controlGroup={controlGroup}
+              controlGroupApi={controlGroupApi}
               closePopover={closePopover}
             />,
             <AddTimeSliderControlButton
               key="addTimeSliderControl"
-              controlGroup={controlGroup}
+              controlGroupApi={controlGroupApi}
               closePopover={closePopover}
             />,
             <EditControlGroupButton
               key="manageControls"
-              controlGroup={controlGroup}
+              controlGroupApi={controlGroupApi}
               closePopover={closePopover}
             />,
           ]}

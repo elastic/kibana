@@ -33,6 +33,7 @@ export {
   isIntegrationPolicyTemplate,
   getNormalizedInputs,
   getNormalizedDataStreams,
+  filterPolicyTemplatesTiles,
 } from './policy_template';
 export { doesPackageHaveIntegrations } from './packages_with_integrations';
 export type {
@@ -73,6 +74,7 @@ export {
   policyHasAPMIntegration,
   policyHasEndpointSecurity,
   policyHasSyntheticsIntegration,
+  getInheritedNamespace,
 } from './agent_policies_helpers';
 
 export {
@@ -89,3 +91,5 @@ export {
   getFleetServerVersionMessage,
   isAgentVersionLessThanFleetServer,
 } from './check_fleet_server_versions';
+
+export { removeSOAttributes, getSortConfig } from './agent_utils';

@@ -13,9 +13,8 @@ import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 
-import { useMlKibana } from '../../../../../contexts/kibana';
+import { useMlApi, useMlKibana } from '../../../../../contexts/kibana';
 import type { DeepReadonly } from '../../../../../../../common/types/common';
-import { ml } from '../../../../../services/ml_api_service';
 
 import { useRefreshAnalyticsList } from '../../../../common';
 import { extractCloningConfig, isAdvancedConfig } from '../../components/action_clone';
@@ -50,6 +49,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
       data: { dataViews },
     },
   } = useMlKibana();
+  const mlApi = useMlApi();
   const [state, dispatch] = useReducer(reducer, getInitialState());
   const { refresh } = useRefreshAnalyticsList();
 
@@ -95,7 +95,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     );
 
     try {
-      const creationResp = await ml.dataFrameAnalytics.createDataFrameAnalytics(
+      const creationResp = await mlApi.dataFrameAnalytics.createDataFrameAnalytics(
         jobId,
         analyticsJobConfig,
         createDataView,
@@ -168,7 +168,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
 
   const startAnalyticsJob = async () => {
     try {
-      const response = await ml.dataFrameAnalytics.startDataFrameAnalytics(jobId);
+      const response = await mlApi.dataFrameAnalytics.startDataFrameAnalytics(jobId);
       if (response.acknowledged !== true) {
         throw new Error(response);
       }

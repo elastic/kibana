@@ -99,7 +99,7 @@ const getSingleAgentConfigurationRoute = createApmServerRoute({
 const deleteAgentConfigurationRoute = createApmServerRoute({
   endpoint: 'DELETE /api/apm/settings/agent-configuration 2023-10-31',
   options: {
-    tags: ['access:apm', 'access:apm_write'],
+    tags: ['access:apm', 'access:apm_settings_write'],
   },
   params: t.type({
     body: t.type({
@@ -130,7 +130,7 @@ const deleteAgentConfigurationRoute = createApmServerRoute({
     logger.info(`Deleting config ${service.name}/${service.environment} (${exactConfig.id})`);
 
     const deleteConfigurationResult = await deleteConfiguration({
-      configurationId: exactConfig.id,
+      configurationId: exactConfig.id!,
       internalESClient,
     });
 
@@ -155,7 +155,7 @@ const deleteAgentConfigurationRoute = createApmServerRoute({
 const createOrUpdateAgentConfigurationRoute = createApmServerRoute({
   endpoint: 'PUT /api/apm/settings/agent-configuration 2023-10-31',
   options: {
-    tags: ['access:apm', 'access:apm_write'],
+    tags: ['access:apm', 'access:apm_settings_write'],
   },
   params: t.intersection([
     t.partial({ query: t.partial({ overwrite: toBooleanRt }) }),
@@ -266,7 +266,7 @@ const agentConfigurationSearchRoute = createApmServerRoute({
 
     if (willMarkAsApplied) {
       await markAppliedByAgent({
-        id: configuration._id,
+        id: configuration._id!,
         body: configuration._source,
         internalESClient,
       });

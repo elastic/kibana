@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useMemo, useEffect, useState, type ReactElement, useCallback } from 'react';
@@ -31,7 +32,7 @@ export const DocumentViewModeToggle = ({
   isEsqlMode: boolean;
   prepend?: ReactElement;
   stateContainer: DiscoverStateContainer;
-  setDiscoverViewMode: (viewMode: VIEW_MODE) => void;
+  setDiscoverViewMode: (viewMode: VIEW_MODE) => Promise<VIEW_MODE>;
   patternCount?: number;
   dataView: DataView;
 }) => {
@@ -45,10 +46,16 @@ export const DocumentViewModeToggle = ({
     () => isLegacyTableEnabled({ uiSettings, isEsqlMode }),
     [uiSettings, isEsqlMode]
   );
+
   const [showPatternAnalysisTab, setShowPatternAnalysisTab] = useState<boolean | null>(null);
   const showFieldStatisticsTab = useMemo(
-    () => uiSettings.get(SHOW_FIELD_STATISTICS) && dataVisualizerService !== undefined,
-    [dataVisualizerService, uiSettings]
+    () =>
+      // If user opens saved search with field stats in ES|QL,
+      // we show the toggle with the mode disabled so user can switch to document view
+      // instead of auto-directing
+      (viewMode === VIEW_MODE.AGGREGATED_LEVEL && isEsqlMode) ||
+      (!isEsqlMode && uiSettings.get(SHOW_FIELD_STATISTICS) && dataVisualizerService !== undefined),
+    [dataVisualizerService, uiSettings, isEsqlMode, viewMode]
   );
   const isMounted = useMountedState();
 
@@ -86,8 +93,7 @@ export const DocumentViewModeToggle = ({
     }
   }, [showPatternAnalysisTab, viewMode, setDiscoverViewMode]);
 
-  const includesNormalTabsStyle =
-    viewMode === VIEW_MODE.AGGREGATED_LEVEL || viewMode === VIEW_MODE.PATTERN_LEVEL || isLegacy;
+  const includesNormalTabsStyle = viewMode === VIEW_MODE.AGGREGATED_LEVEL || isLegacy;
 
   const containerPadding = includesNormalTabsStyle ? euiTheme.size.s : 0;
   const containerCss = css`
@@ -99,6 +105,12 @@ export const DocumentViewModeToggle = ({
       line-height: ${euiTheme.size.xl};
     }
   `;
+
+  useEffect(() => {
+    if (viewMode === VIEW_MODE.AGGREGATED_LEVEL && isEsqlMode) {
+      setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL);
+    }
+  }, [viewMode, isEsqlMode, setDiscoverViewMode]);
 
   return (
     <EuiFlexGroup
@@ -130,7 +142,14 @@ export const DocumentViewModeToggle = ({
               onClick={() => setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL)}
               data-test-subj="dscViewModeDocumentButton"
             >
-              <FormattedMessage id="discover.viewModes.document.label" defaultMessage="Documents" />
+              {isEsqlMode ? (
+                <FormattedMessage id="discover.viewModes.esql.label" defaultMessage="Results" />
+              ) : (
+                <FormattedMessage
+                  id="discover.viewModes.document.label"
+                  defaultMessage="Documents"
+                />
+              )}
               <HitsCounter mode={HitsCounterMode.appended} stateContainer={stateContainer} />
             </EuiTab>
 
@@ -150,6 +169,7 @@ export const DocumentViewModeToggle = ({
 
             {showFieldStatisticsTab ? (
               <EuiTab
+                disabled={isEsqlMode}
                 isSelected={viewMode === VIEW_MODE.AGGREGATED_LEVEL}
                 onClick={() => setDiscoverViewMode(VIEW_MODE.AGGREGATED_LEVEL)}
                 data-test-subj="dscViewModeFieldStatsButton"

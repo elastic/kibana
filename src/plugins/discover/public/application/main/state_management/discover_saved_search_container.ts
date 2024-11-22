@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
@@ -341,12 +342,7 @@ export function isEqualSavedSearch(savedSearchPrev: SavedSearch, savedSearchNext
     const prevValue = getSavedSearchFieldForComparison(prevSavedSearch, key);
     const nextValue = getSavedSearchFieldForComparison(nextSavedSearchWithoutSearchSource, key);
 
-    const isSame =
-      isEqual(prevValue, nextValue) ||
-      // By default, viewMode: undefined is equivalent to documents view
-      // So they should be treated as same
-      (key === 'viewMode' &&
-        (prevValue ?? VIEW_MODE.DOCUMENT_LEVEL) === (nextValue ?? VIEW_MODE.DOCUMENT_LEVEL));
+    const isSame = isEqual(prevValue, nextValue);
 
     if (!isSame) {
       addLog('[savedSearch] difference between initial and changed version', {
@@ -410,6 +406,12 @@ function getSavedSearchFieldForComparison(
 
   if (fieldName === 'breakdownField') {
     return savedSearch.breakdownField || ''; // ignore the difference between an empty string and undefined
+  }
+
+  if (fieldName === 'viewMode') {
+    // By default, viewMode: undefined is equivalent to documents view
+    // So they should be treated as same
+    return savedSearch.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
   }
 
   return savedSearch[fieldName];

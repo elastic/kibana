@@ -29,8 +29,13 @@ export const deleteMaintenanceWindowRoute = (
       validate: {
         params: deleteParamsSchemaV1,
       },
+      security: {
+        authz: {
+          requiredPrivileges: [`${MAINTENANCE_WINDOW_API_PRIVILEGES.WRITE_MAINTENANCE_WINDOW}`],
+        },
+      },
       options: {
-        tags: [`access:${MAINTENANCE_WINDOW_API_PRIVILEGES.WRITE_MAINTENANCE_WINDOW}`],
+        access: 'internal',
       },
     },
     router.handleLegacyErrors(

@@ -2,12 +2,8 @@
 
 exports[`HeatmapStyleEditor is rendered 1`] = `
 <EuiFormRow
-  describedByIds={Array []}
   display="rowCompressed"
-  hasChildLabel={true}
-  hasEmptyLabelSpace={false}
   label="Color range"
-  labelType="label"
 >
   <EuiColorPalettePicker
     compressed={true}
@@ -111,9 +107,9 @@ exports[`HeatmapStyleEditor is rendered 1`] = `
             "#84a9cd",
             "#a8bfda",
             "#cad7e8",
-            "#f0d3b0",
-            "#ecb385",
-            "#ea8d69",
+            "#f5d9b1",
+            "#efb785",
+            "#eb8f69",
             "#e7664c",
           ],
           "type": "gradient",

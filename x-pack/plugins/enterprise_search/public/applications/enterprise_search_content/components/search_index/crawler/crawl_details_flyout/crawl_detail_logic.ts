@@ -48,6 +48,7 @@ export const CrawlDetailLogic = kea<MakeLogicType<CrawlDetailValues, CrawlDetail
     crawlRequest: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onRecieveCrawlRequest: (_, { crawlRequestFromServer }) =>
           crawlRequestWithDetailsServerToClient(crawlRequestFromServer),
       },
@@ -55,6 +56,7 @@ export const CrawlDetailLogic = kea<MakeLogicType<CrawlDetailValues, CrawlDetail
     crawlRequestFromServer: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onRecieveCrawlRequest: (_, { crawlRequestFromServer }) => crawlRequestFromServer,
       },
     ],
@@ -75,7 +77,9 @@ export const CrawlDetailLogic = kea<MakeLogicType<CrawlDetailValues, CrawlDetail
     selectedTab: [
       'preview',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         fetchCrawlRequest: () => 'preview',
+        // @ts-expect-error upgrade typescript v5.1.6
         setSelectedTab: (_, { selectedTab }) => selectedTab,
       },
     ],

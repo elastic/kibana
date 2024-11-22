@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useReducer } from 'react';
+import { Dispatch, useReducer } from 'react';
 import deepEqual from 'fast-deep-equal';
 import * as rt from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -14,7 +14,7 @@ import { constant, identity } from 'fp-ts/lib/function';
 import { enumeration } from '@kbn/securitysolution-io-ts-types';
 import { FilterStateStore } from '@kbn/es-query';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { useUrlState } from '../../../../utils/use_url_state';
+import { useUrlState } from '@kbn/observability-shared-plugin/public';
 import {
   useKibanaTimefilterTime,
   useSyncKibanaTimeFilterTime,
@@ -37,16 +37,31 @@ const INITIAL_HOSTS_STATE: HostsState = {
   limit: DEFAULT_HOST_LIMIT,
 };
 
-const reducer = (prevState: HostsState, params: HostsSearchPayload) => {
-  const payload = Object.fromEntries(Object.entries(params).filter(([_, v]) => !!v));
+export type HostsStateAction =
+  | { type: 'SET_DATE_RANGE'; dateRange: StringDateRange }
+  | { type: 'SET_LIMIT'; limit: number }
+  | { type: 'SET_FILTERS'; filters: HostsState['filters'] }
+  | { type: 'SET_QUERY'; query: HostsState['query'] }
+  | { type: 'SET_PANEL_FILTERS'; panelFilters: HostsState['panelFilters'] };
 
-  return {
-    ...prevState,
-    ...payload,
-  };
+const reducer = (state: HostsState, action: HostsStateAction): HostsState => {
+  switch (action.type) {
+    case 'SET_DATE_RANGE':
+      return { ...state, dateRange: action.dateRange };
+    case 'SET_LIMIT':
+      return { ...state, limit: action.limit };
+    case 'SET_FILTERS':
+      return { ...state, filters: action.filters };
+    case 'SET_QUERY':
+      return { ...state, query: action.query };
+    case 'SET_PANEL_FILTERS':
+      return { ...state, panelFilters: action.panelFilters };
+    default:
+      return state;
+  }
 };
 
-export const useHostsUrlState = (): [HostsState, HostsStateUpdater] => {
+export const useHostsUrlState = (): [HostsState, Dispatch<HostsStateAction>] => {
   const [getTime] = useKibanaTimefilterTime(INITIAL_DATE_RANGE);
   const [localStorageHostLimit, setLocalStorageHostLimit] = useLocalStorage<number>(
     LOCAL_STORAGE_HOST_LIMIT_KEY,
@@ -74,7 +89,7 @@ export const useHostsUrlState = (): [HostsState, HostsStateUpdater] => {
   }
 
   useSyncKibanaTimeFilterTime(INITIAL_DATE_RANGE, urlState.dateRange, (dateRange) =>
-    setSearch({ dateRange })
+    setSearch({ type: 'SET_DATE_RANGE', dateRange })
   );
 
   return [search, setSearch];
@@ -130,8 +145,6 @@ const HostsStateRT = rt.type({
 export type HostsState = rt.TypeOf<typeof HostsStateRT>;
 
 export type HostsSearchPayload = Partial<HostsState>;
-
-export type HostsStateUpdater = (params: HostsSearchPayload) => void;
 
 export type StringDateRange = rt.TypeOf<typeof StringDateRangeRT>;
 export interface StringDateRangeTimestamp {

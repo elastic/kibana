@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import type { GetTransformsResponseSchema } from '@kbn/transform-plugin/common/api_schemas/transforms';
+import type { GetTransformsResponseSchema } from '@kbn/transform-plugin/server/routes/api_schemas/transforms';
 import { getCommonRequestHeader } from '../../../functional/services/ml/common_api';
 import { USER } from '../../../functional/services/transform/security_common';
 

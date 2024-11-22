@@ -5,46 +5,50 @@
  * 2.0.
  */
 
+import type { IKibanaResponse } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 
 import { PINNED_EVENT_URL } from '../../../../../common/constants';
 
-import type { SetupPlugins } from '../../../../plugin';
-import { buildRouteValidationWithExcess } from '../../../../utils/build_validation/route_validation';
-import type { ConfigType } from '../../../..';
-
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../utils/common';
-import { persistPinnedEventSchema } from '../../../../../common/api/timeline';
+import {
+  type PersistPinnedEventRouteResponse,
+  PersistPinnedEventRouteRequestBody,
+} from '../../../../../common/api/timeline';
 import { persistPinnedEventOnTimeline } from '../../saved_object/pinned_events';
 
-export const persistPinnedEventRoute = (
-  router: SecuritySolutionPluginRouter,
-  config: ConfigType,
-  security: SetupPlugins['security']
-) => {
+export const persistPinnedEventRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .patch({
       path: PINNED_EVENT_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
       access: 'public',
     })
     .addVersion(
       {
         validate: {
-          request: { body: buildRouteValidationWithExcess(persistPinnedEventSchema) },
+          request: { body: buildRouteValidationWithZod(PersistPinnedEventRouteRequestBody) },
         },
         version: '2023-10-31',
       },
-      async (context, request, response) => {
+      async (
+        context,
+        request,
+        response
+      ): Promise<IKibanaResponse<PersistPinnedEventRouteResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
         try {
-          const frameworkRequest = await buildFrameworkRequest(context, security, request);
+          const frameworkRequest = await buildFrameworkRequest(context, request);
           const { eventId } = request.body;
           const pinnedEventId = request.body?.pinnedEventId ?? null;
           const timelineId = request.body?.timelineId ?? null;
@@ -57,7 +61,7 @@ export const persistPinnedEventRoute = (
           );
 
           return response.ok({
-            body: { data: { persistPinnedEventOnTimeline: res } },
+            body: res,
           });
         } catch (err) {
           const error = transformError(err);

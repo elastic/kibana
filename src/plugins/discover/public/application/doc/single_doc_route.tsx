@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React, { useEffect, useMemo } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { EuiEmptyPrompt } from '@elastic/eui';
@@ -17,6 +19,7 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DiscoverError } from '../../components/common/error_alert';
 import { useDataView } from '../../hooks/use_data_view';
 import { DocHistoryLocationState } from './locator';
+import { useRootProfile } from '../../context_awareness';
 
 export interface DocUrlParams {
   dataViewId: string;
@@ -51,6 +54,8 @@ export const SingleDocRoute = () => {
     index: locationState?.dataViewSpec || decodeURIComponent(dataViewId),
   });
 
+  const rootProfileState = useRootProfile();
+
   if (error) {
     return (
       <EuiEmptyPrompt
@@ -73,7 +78,7 @@ export const SingleDocRoute = () => {
     );
   }
 
-  if (!dataView) {
+  if (!dataView || rootProfileState.rootProfileLoading) {
     return <LoadingIndicator />;
   }
 
@@ -92,5 +97,9 @@ export const SingleDocRoute = () => {
     );
   }
 
-  return <Doc id={id} index={index} dataView={dataView} referrer={locationState?.referrer} />;
+  return (
+    <rootProfileState.AppWrapper>
+      <Doc id={id} index={index} dataView={dataView} referrer={locationState?.referrer} />
+    </rootProfileState.AppWrapper>
+  );
 };

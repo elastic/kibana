@@ -8,7 +8,7 @@
 import type { IKibanaResponse, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import { FleetFileNotFound } from '@kbn/fleet-plugin/server/errors';
 import { CustomHttpRequestError } from '../../utils/custom_http_request_error';
-import { NotFoundError } from '../errors';
+import { EndpointAuthorizationError, NotFoundError } from '../errors';
 import { EndpointHostUnEnrolledError, EndpointHostNotFoundError } from '../services/metadata';
 
 /**
@@ -49,6 +49,10 @@ export const errorHandler = <E extends Error>(
 
   if (error instanceof EndpointHostNotFoundError) {
     return res.notFound({ body: error });
+  }
+
+  if (error instanceof EndpointAuthorizationError) {
+    return res.forbidden({ body: error });
   }
 
   // Kibana CORE will take care of `500` errors when the handler `throw`'s, including logging the error

@@ -940,6 +940,26 @@
         },
         {
           "parentPluginId": "licensing",
+          "id": "def-public.LicensingPluginStart.getLicense",
+          "type": "Function",
+          "tags": [],
+          "label": "getLicense",
+          "description": [
+            "\nRetrieves the {@link ILicense | licensing information}"
+          ],
+          "signature": [
+            "() => Promise<",
+            "ILicense",
+            ">"
+          ],
+          "path": "x-pack/plugins/licensing/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "licensing",
           "id": "def-public.LicensingPluginStart.refresh",
           "type": "Function",
           "tags": [],
@@ -1003,9 +1023,9 @@
           "<P, Q, B, Context, any, ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.KibanaResponseFactory",
+            "section": "def-server.KibanaResponseFactory",
             "text": "KibanaResponseFactory"
           },
           ">) => ",
@@ -1013,9 +1033,9 @@
           "<P, Q, B, Context, any, ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.KibanaResponseFactory",
+            "section": "def-server.KibanaResponseFactory",
             "text": "KibanaResponseFactory"
           },
           ">"
@@ -1057,9 +1077,9 @@
               "<P, Q, B, Context, any, ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaResponseFactory",
+                "section": "def-server.KibanaResponseFactory",
                 "text": "KibanaResponseFactory"
               },
               ">"
@@ -2203,10 +2223,6 @@
               "path": "x-pack/plugins/index_lifecycle_management/server/services/license.ts"
             },
             {
-              "plugin": "mapsEms",
-              "path": "src/plugins/maps_ems/server/plugin.ts"
-            },
-            {
               "plugin": "osquery",
               "path": "x-pack/plugins/osquery/server/handlers/action/create_action_service.ts"
             },
@@ -2312,12 +2328,7 @@
           "deprecated": true,
           "removeBy": "8.8.0",
           "trackAdoption": false,
-          "references": [
-            {
-              "plugin": "mapsEms",
-              "path": "src/plugins/maps_ems/server/plugin.ts"
-            }
-          ],
+          "references": [],
           "children": [],
           "returnComment": []
         },
@@ -2379,6 +2390,26 @@
         },
         {
           "parentPluginId": "licensing",
+          "id": "def-server.LicensingPluginStart.getLicense",
+          "type": "Function",
+          "tags": [],
+          "label": "getLicense",
+          "description": [
+            "\nRetrieves the {@link ILicense | licensing information}"
+          ],
+          "signature": [
+            "() => Promise<",
+            "ILicense",
+            ">"
+          ],
+          "path": "x-pack/plugins/licensing/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "licensing",
           "id": "def-server.LicensingPluginStart.refresh",
           "type": "Function",
           "tags": [],
@@ -2410,9 +2441,9 @@
             "(clusterClient: ",
             {
               "pluginId": "@kbn/core-elasticsearch-server",
-              "scope": "common",
+              "scope": "server",
               "docId": "kibKbnCoreElasticsearchServerPluginApi",
-              "section": "def-common.IClusterClient",
+              "section": "def-server.IClusterClient",
               "text": "IClusterClient"
             },
             ", pollingFrequency: number) => { license$: ",
@@ -2437,9 +2468,9 @@
               "signature": [
                 {
                   "pluginId": "@kbn/core-elasticsearch-server",
-                  "scope": "common",
+                  "scope": "server",
                   "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                  "section": "def-common.IClusterClient",
+                  "section": "def-server.IClusterClient",
                   "text": "IClusterClient"
                 }
               ],

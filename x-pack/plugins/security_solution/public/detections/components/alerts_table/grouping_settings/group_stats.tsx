@@ -7,7 +7,7 @@
 
 import { EuiIcon } from '@elastic/eui';
 import React from 'react';
-import type { RawBucket, StatRenderer } from '@kbn/grouping';
+import type { RawBucket, GroupStatsItem } from '@kbn/grouping';
 import type { AlertsGroupingAggregation } from './types';
 import * as i18n from '../translations';
 
@@ -67,7 +67,7 @@ const multiSeverity = (
 export const getStats = (
   selectedGroup: string,
   bucket: RawBucket<AlertsGroupingAggregation>
-): StatRenderer[] => {
+): GroupStatsItem[] => {
   const singleSeverityComponent =
     bucket.severitiesSubAggregation?.buckets && bucket.severitiesSubAggregation?.buckets?.length
       ? getSeverity(bucket.severitiesSubAggregation?.buckets[0].key.toString())

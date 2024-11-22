@@ -8,6 +8,8 @@
 // @ts-expect-error
 import registerDataSession from 'cypress-data-session/src/plugin';
 import { merge } from 'lodash';
+
+import { transparentApiProxy } from './support/transparent_api_proxy';
 import { samlAuthentication } from './support/saml_authentication';
 import { getVideosForFailedSpecs } from './support/filter_videos';
 import { setupToolingLogLevel } from './support/setup_tooling_log_level';
@@ -75,7 +77,6 @@ export const getCypressBaseConfig = (
         // baseUrl: To override, set Env. variable `CYPRESS_BASE_URL`
         baseUrl: 'http://localhost:5601',
         supportFile: 'public/management/cypress/support/e2e.ts',
-        // TODO: undo before merge
         specPattern: 'public/management/cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
         experimentalRunAllSpecs: true,
         experimentalMemoryManagement: true,
@@ -99,6 +100,8 @@ export const getCypressBaseConfig = (
           samlAuthentication(on, config);
 
           dataLoaders(on, config);
+
+          transparentApiProxy(on, config);
 
           // Data loaders specific to "real" Endpoint testing
           dataLoadersForRealEndpoints(on, config);

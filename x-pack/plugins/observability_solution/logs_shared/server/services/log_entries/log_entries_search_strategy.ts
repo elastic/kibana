@@ -118,7 +118,16 @@ export const logEntriesSearchStrategyProvider = ({
 
         const searchResponse$ = concat(recoveredRequest$, initialRequest$).pipe(
           take(1),
-          concatMap((esRequest) => esSearchStrategy.search(esRequest, options, dependencies))
+          concatMap((esRequest) =>
+            esSearchStrategy.search(
+              esRequest,
+              {
+                ...options,
+                retrieveResults: true, // the subsequent processing requires the actual search results
+              },
+              dependencies
+            )
+          )
         );
 
         return combineLatest([searchResponse$, resolvedLogView$, messageFormattingRules$]).pipe(

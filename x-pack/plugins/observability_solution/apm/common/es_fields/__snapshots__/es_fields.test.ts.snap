@@ -37,6 +37,8 @@ Object {
 
 exports[`Error CLOUD_ACCOUNT_ID 1`] = `undefined`;
 
+exports[`Error CLOUD_ACCOUNT_NAME 1`] = `undefined`;
+
 exports[`Error CLOUD_AVAILABILITY_ZONE 1`] = `"europe-west1-c"`;
 
 exports[`Error CLOUD_INSTANCE_ID 1`] = `undefined`;
@@ -44,6 +46,8 @@ exports[`Error CLOUD_INSTANCE_ID 1`] = `undefined`;
 exports[`Error CLOUD_INSTANCE_NAME 1`] = `undefined`;
 
 exports[`Error CLOUD_MACHINE_TYPE 1`] = `undefined`;
+
+exports[`Error CLOUD_PROJECT_NAME 1`] = `undefined`;
 
 exports[`Error CLOUD_PROVIDER 1`] = `"gcp"`;
 
@@ -56,6 +60,8 @@ exports[`Error CONTAINER 1`] = `undefined`;
 exports[`Error CONTAINER_ID 1`] = `undefined`;
 
 exports[`Error CONTAINER_IMAGE 1`] = `undefined`;
+
+exports[`Error DATA_STEAM_TYPE 1`] = `undefined`;
 
 exports[`Error DESTINATION_ADDRESS 1`] = `undefined`;
 
@@ -91,6 +97,8 @@ exports[`Error ERROR_LOG_LEVEL 1`] = `undefined`;
 exports[`Error ERROR_LOG_MESSAGE 1`] = `undefined`;
 
 exports[`Error ERROR_PAGE_URL 1`] = `undefined`;
+
+exports[`Error ERROR_STACK_TRACE 1`] = `undefined`;
 
 exports[`Error ERROR_TYPE 1`] = `undefined`;
 
@@ -138,6 +146,8 @@ exports[`Error INDEX 1`] = `undefined`;
 
 exports[`Error KUBERNETES 1`] = `undefined`;
 
+exports[`Error KUBERNETES_CONTAINER_ID 1`] = `undefined`;
+
 exports[`Error KUBERNETES_CONTAINER_NAME 1`] = `undefined`;
 
 exports[`Error KUBERNETES_DEPLOYMENT 1`] = `undefined`;
@@ -147,6 +157,8 @@ exports[`Error KUBERNETES_DEPLOYMENT_NAME 1`] = `undefined`;
 exports[`Error KUBERNETES_NAMESPACE 1`] = `undefined`;
 
 exports[`Error KUBERNETES_NAMESPACE_NAME 1`] = `undefined`;
+
+exports[`Error KUBERNETES_NODE_NAME 1`] = `undefined`;
 
 exports[`Error KUBERNETES_POD_NAME 1`] = `undefined`;
 
@@ -165,6 +177,8 @@ exports[`Error LABEL_NAME 1`] = `undefined`;
 exports[`Error LABEL_TELEMETRY_AUTO_VERSION 1`] = `undefined`;
 
 exports[`Error LABEL_TYPE 1`] = `undefined`;
+
+exports[`Error LOG_LEVEL 1`] = `undefined`;
 
 exports[`Error METRIC_CGROUP_MEMORY_LIMIT_BYTES 1`] = `undefined`;
 
@@ -224,9 +238,19 @@ exports[`Error OBSERVER_HOSTNAME 1`] = `undefined`;
 
 exports[`Error OBSERVER_LISTENING 1`] = `undefined`;
 
+exports[`Error OBSERVER_VERSION 1`] = `"whatever"`;
+
+exports[`Error OBSERVER_VERSION_MAJOR 1`] = `8`;
+
 exports[`Error PARENT_ID 1`] = `"parentId"`;
 
+exports[`Error PROCESS_ARGS 1`] = `undefined`;
+
+exports[`Error PROCESS_PID 1`] = `undefined`;
+
 exports[`Error PROCESSOR_EVENT 1`] = `"error"`;
+
+exports[`Error PROCESSOR_NAME 1`] = `"error"`;
 
 exports[`Error SERVICE 1`] = `
 Object {
@@ -292,17 +316,27 @@ exports[`Error SPAN_NAME 1`] = `undefined`;
 
 exports[`Error SPAN_SELF_TIME_SUM 1`] = `undefined`;
 
+exports[`Error SPAN_STACKTRACE 1`] = `undefined`;
+
 exports[`Error SPAN_SUBTYPE 1`] = `undefined`;
 
 exports[`Error SPAN_SYNC 1`] = `undefined`;
 
 exports[`Error SPAN_TYPE 1`] = `undefined`;
 
+exports[`Error TELEMETRY_SDK_LANGUAGE 1`] = `undefined`;
+
+exports[`Error TELEMETRY_SDK_NAME 1`] = `undefined`;
+
+exports[`Error TELEMETRY_SDK_VERSION 1`] = `undefined`;
+
 exports[`Error TIER 1`] = `undefined`;
 
-exports[`Error TIMESTAMP 1`] = `1337`;
+exports[`Error TIMESTAMP_US 1`] = `1337`;
 
 exports[`Error TRACE_ID 1`] = `"trace id"`;
+
+exports[`Error TRANSACTION_AGENT_MARKS 1`] = `undefined`;
 
 exports[`Error TRANSACTION_DURATION 1`] = `undefined`;
 
@@ -381,6 +415,8 @@ Object {
 
 exports[`Span CLOUD_ACCOUNT_ID 1`] = `undefined`;
 
+exports[`Span CLOUD_ACCOUNT_NAME 1`] = `undefined`;
+
 exports[`Span CLOUD_AVAILABILITY_ZONE 1`] = `"europe-west1-c"`;
 
 exports[`Span CLOUD_INSTANCE_ID 1`] = `undefined`;
@@ -388,6 +424,8 @@ exports[`Span CLOUD_INSTANCE_ID 1`] = `undefined`;
 exports[`Span CLOUD_INSTANCE_NAME 1`] = `undefined`;
 
 exports[`Span CLOUD_MACHINE_TYPE 1`] = `undefined`;
+
+exports[`Span CLOUD_PROJECT_NAME 1`] = `undefined`;
 
 exports[`Span CLOUD_PROVIDER 1`] = `"gcp"`;
 
@@ -400,6 +438,8 @@ exports[`Span CONTAINER 1`] = `undefined`;
 exports[`Span CONTAINER_ID 1`] = `undefined`;
 
 exports[`Span CONTAINER_IMAGE 1`] = `undefined`;
+
+exports[`Span DATA_STEAM_TYPE 1`] = `undefined`;
 
 exports[`Span DESTINATION_ADDRESS 1`] = `undefined`;
 
@@ -426,6 +466,8 @@ exports[`Span ERROR_LOG_LEVEL 1`] = `undefined`;
 exports[`Span ERROR_LOG_MESSAGE 1`] = `undefined`;
 
 exports[`Span ERROR_PAGE_URL 1`] = `undefined`;
+
+exports[`Span ERROR_STACK_TRACE 1`] = `undefined`;
 
 exports[`Span ERROR_TYPE 1`] = `undefined`;
 
@@ -469,6 +511,8 @@ exports[`Span INDEX 1`] = `undefined`;
 
 exports[`Span KUBERNETES 1`] = `undefined`;
 
+exports[`Span KUBERNETES_CONTAINER_ID 1`] = `undefined`;
+
 exports[`Span KUBERNETES_CONTAINER_NAME 1`] = `undefined`;
 
 exports[`Span KUBERNETES_DEPLOYMENT 1`] = `undefined`;
@@ -478,6 +522,8 @@ exports[`Span KUBERNETES_DEPLOYMENT_NAME 1`] = `undefined`;
 exports[`Span KUBERNETES_NAMESPACE 1`] = `undefined`;
 
 exports[`Span KUBERNETES_NAMESPACE_NAME 1`] = `undefined`;
+
+exports[`Span KUBERNETES_NODE_NAME 1`] = `undefined`;
 
 exports[`Span KUBERNETES_POD_NAME 1`] = `undefined`;
 
@@ -496,6 +542,8 @@ exports[`Span LABEL_NAME 1`] = `undefined`;
 exports[`Span LABEL_TELEMETRY_AUTO_VERSION 1`] = `undefined`;
 
 exports[`Span LABEL_TYPE 1`] = `undefined`;
+
+exports[`Span LOG_LEVEL 1`] = `undefined`;
 
 exports[`Span METRIC_CGROUP_MEMORY_LIMIT_BYTES 1`] = `undefined`;
 
@@ -555,9 +603,19 @@ exports[`Span OBSERVER_HOSTNAME 1`] = `undefined`;
 
 exports[`Span OBSERVER_LISTENING 1`] = `undefined`;
 
+exports[`Span OBSERVER_VERSION 1`] = `"whatever"`;
+
+exports[`Span OBSERVER_VERSION_MAJOR 1`] = `8`;
+
 exports[`Span PARENT_ID 1`] = `"parentId"`;
 
+exports[`Span PROCESS_ARGS 1`] = `undefined`;
+
+exports[`Span PROCESS_PID 1`] = `undefined`;
+
 exports[`Span PROCESSOR_EVENT 1`] = `"span"`;
+
+exports[`Span PROCESSOR_NAME 1`] = `"transaction"`;
 
 exports[`Span SERVICE 1`] = `
 Object {
@@ -619,17 +677,27 @@ exports[`Span SPAN_NAME 1`] = `"span name"`;
 
 exports[`Span SPAN_SELF_TIME_SUM 1`] = `undefined`;
 
+exports[`Span SPAN_STACKTRACE 1`] = `undefined`;
+
 exports[`Span SPAN_SUBTYPE 1`] = `"my subtype"`;
 
 exports[`Span SPAN_SYNC 1`] = `false`;
 
 exports[`Span SPAN_TYPE 1`] = `"span type"`;
 
+exports[`Span TELEMETRY_SDK_LANGUAGE 1`] = `undefined`;
+
+exports[`Span TELEMETRY_SDK_NAME 1`] = `undefined`;
+
+exports[`Span TELEMETRY_SDK_VERSION 1`] = `undefined`;
+
 exports[`Span TIER 1`] = `undefined`;
 
-exports[`Span TIMESTAMP 1`] = `1337`;
+exports[`Span TIMESTAMP_US 1`] = `1337`;
 
 exports[`Span TRACE_ID 1`] = `"trace id"`;
+
+exports[`Span TRANSACTION_AGENT_MARKS 1`] = `undefined`;
 
 exports[`Span TRANSACTION_DURATION 1`] = `undefined`;
 
@@ -708,6 +776,8 @@ Object {
 
 exports[`Transaction CLOUD_ACCOUNT_ID 1`] = `undefined`;
 
+exports[`Transaction CLOUD_ACCOUNT_NAME 1`] = `undefined`;
+
 exports[`Transaction CLOUD_AVAILABILITY_ZONE 1`] = `"europe-west1-c"`;
 
 exports[`Transaction CLOUD_INSTANCE_ID 1`] = `undefined`;
@@ -715,6 +785,8 @@ exports[`Transaction CLOUD_INSTANCE_ID 1`] = `undefined`;
 exports[`Transaction CLOUD_INSTANCE_NAME 1`] = `undefined`;
 
 exports[`Transaction CLOUD_MACHINE_TYPE 1`] = `undefined`;
+
+exports[`Transaction CLOUD_PROJECT_NAME 1`] = `undefined`;
 
 exports[`Transaction CLOUD_PROVIDER 1`] = `"gcp"`;
 
@@ -731,6 +803,8 @@ Object {
 exports[`Transaction CONTAINER_ID 1`] = `"container1234567890abcdef"`;
 
 exports[`Transaction CONTAINER_IMAGE 1`] = `undefined`;
+
+exports[`Transaction DATA_STEAM_TYPE 1`] = `undefined`;
 
 exports[`Transaction DESTINATION_ADDRESS 1`] = `undefined`;
 
@@ -757,6 +831,8 @@ exports[`Transaction ERROR_LOG_LEVEL 1`] = `undefined`;
 exports[`Transaction ERROR_LOG_MESSAGE 1`] = `undefined`;
 
 exports[`Transaction ERROR_PAGE_URL 1`] = `undefined`;
+
+exports[`Transaction ERROR_STACK_TRACE 1`] = `undefined`;
 
 exports[`Transaction ERROR_TYPE 1`] = `undefined`;
 
@@ -810,6 +886,8 @@ Object {
 }
 `;
 
+exports[`Transaction KUBERNETES_CONTAINER_ID 1`] = `undefined`;
+
 exports[`Transaction KUBERNETES_CONTAINER_NAME 1`] = `undefined`;
 
 exports[`Transaction KUBERNETES_DEPLOYMENT 1`] = `undefined`;
@@ -819,6 +897,8 @@ exports[`Transaction KUBERNETES_DEPLOYMENT_NAME 1`] = `undefined`;
 exports[`Transaction KUBERNETES_NAMESPACE 1`] = `undefined`;
 
 exports[`Transaction KUBERNETES_NAMESPACE_NAME 1`] = `undefined`;
+
+exports[`Transaction KUBERNETES_NODE_NAME 1`] = `undefined`;
 
 exports[`Transaction KUBERNETES_POD_NAME 1`] = `undefined`;
 
@@ -837,6 +917,8 @@ exports[`Transaction LABEL_NAME 1`] = `undefined`;
 exports[`Transaction LABEL_TELEMETRY_AUTO_VERSION 1`] = `undefined`;
 
 exports[`Transaction LABEL_TYPE 1`] = `undefined`;
+
+exports[`Transaction LOG_LEVEL 1`] = `undefined`;
 
 exports[`Transaction METRIC_CGROUP_MEMORY_LIMIT_BYTES 1`] = `undefined`;
 
@@ -896,9 +978,19 @@ exports[`Transaction OBSERVER_HOSTNAME 1`] = `undefined`;
 
 exports[`Transaction OBSERVER_LISTENING 1`] = `undefined`;
 
+exports[`Transaction OBSERVER_VERSION 1`] = `"whatever"`;
+
+exports[`Transaction OBSERVER_VERSION_MAJOR 1`] = `8`;
+
 exports[`Transaction PARENT_ID 1`] = `"parentId"`;
 
+exports[`Transaction PROCESS_ARGS 1`] = `undefined`;
+
+exports[`Transaction PROCESS_PID 1`] = `undefined`;
+
 exports[`Transaction PROCESSOR_EVENT 1`] = `"transaction"`;
+
+exports[`Transaction PROCESSOR_NAME 1`] = `"transaction"`;
 
 exports[`Transaction SERVICE 1`] = `
 Object {
@@ -964,17 +1056,27 @@ exports[`Transaction SPAN_NAME 1`] = `undefined`;
 
 exports[`Transaction SPAN_SELF_TIME_SUM 1`] = `undefined`;
 
+exports[`Transaction SPAN_STACKTRACE 1`] = `undefined`;
+
 exports[`Transaction SPAN_SUBTYPE 1`] = `undefined`;
 
 exports[`Transaction SPAN_SYNC 1`] = `undefined`;
 
 exports[`Transaction SPAN_TYPE 1`] = `undefined`;
 
+exports[`Transaction TELEMETRY_SDK_LANGUAGE 1`] = `undefined`;
+
+exports[`Transaction TELEMETRY_SDK_NAME 1`] = `undefined`;
+
+exports[`Transaction TELEMETRY_SDK_VERSION 1`] = `undefined`;
+
 exports[`Transaction TIER 1`] = `undefined`;
 
-exports[`Transaction TIMESTAMP 1`] = `1337`;
+exports[`Transaction TIMESTAMP_US 1`] = `1337`;
 
 exports[`Transaction TRACE_ID 1`] = `"trace id"`;
+
+exports[`Transaction TRANSACTION_AGENT_MARKS 1`] = `undefined`;
 
 exports[`Transaction TRANSACTION_DURATION 1`] = `1337`;
 

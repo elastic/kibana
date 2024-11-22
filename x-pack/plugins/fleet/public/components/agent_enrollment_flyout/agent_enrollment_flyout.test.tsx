@@ -14,7 +14,7 @@ import type { RenderResult } from '@testing-library/react';
 import { createFleetTestRendererMock } from '../../mock';
 import type { AgentPolicy } from '../../../common';
 import { sendGetOneAgentPolicy } from '../../hooks/use_request';
-import { useAgentEnrollmentFlyoutData, useFleetServerStandalone } from '../../hooks';
+import { useAgentEnrollmentFlyoutData, useAuthz, useFleetServerStandalone } from '../../hooks';
 
 import { useAdvancedForm } from '../../applications/fleet/components/fleet_server_instructions/hooks';
 import { useFleetServerUnhealthy } from '../../applications/fleet/sections/agents/hooks/use_fleet_server_unhealthy';
@@ -47,6 +47,12 @@ describe('<AgentEnrollmentFlyout />', () => {
   let results: RenderResult;
 
   beforeEach(async () => {
+    jest.mocked(useAuthz).mockReturnValue({
+      fleet: {
+        readAgentPolicies: true,
+      },
+      integrations: {},
+    } as any);
     jest.mocked(useFleetServerStandalone).mockReturnValue({ isFleetServerStandalone: false });
 
     (useFleetServerUnhealthy as jest.Mock).mockReturnValue({

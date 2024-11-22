@@ -5,29 +5,34 @@
  * 2.0.
  */
 
-import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import {
+  UpdateListItemRequestBody,
+  UpdateListItemResponse,
+} from '@kbn/securitysolution-lists-common/api';
 
 import type { ListsPluginRouter } from '../../types';
-import { updateListItemRequest, updateListItemResponse } from '../../../common/api';
-import { buildRouteValidation, buildSiemResponse } from '../utils';
+import { buildSiemResponse } from '../utils';
 import { getListClient } from '..';
 
 export const updateListItemRoute = (router: ListsPluginRouter): void => {
   router.versioned
     .put({
       access: 'public',
-      options: {
-        tags: ['access:lists-all'],
-      },
       path: LIST_ITEM_URL,
+      security: {
+        authz: {
+          requiredPrivileges: ['lists-all'],
+        },
+      },
     })
     .addVersion(
       {
         validate: {
           request: {
-            body: buildRouteValidation(updateListItemRequest),
+            body: buildRouteValidationWithZod(UpdateListItemRequestBody),
           },
         },
         version: '2023-10-31',
@@ -53,19 +58,15 @@ export const updateListItemRoute = (router: ListsPluginRouter): void => {
             meta,
             value,
           });
+
           if (listItem == null) {
             return siemResponse.error({
               body: `list item id: "${id}" not found`,
               statusCode: 404,
             });
-          } else {
-            const [validated, errors] = validate(listItem, updateListItemResponse);
-            if (errors != null) {
-              return siemResponse.error({ body: errors, statusCode: 500 });
-            } else {
-              return response.ok({ body: validated ?? {} });
-            }
           }
+
+          return response.ok({ body: UpdateListItemResponse.parse(listItem) });
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

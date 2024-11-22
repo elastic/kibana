@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
+import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 interface AddConnectorValue {
@@ -20,11 +20,17 @@ export interface AddConnectorApiLogicArgs {
   language: string | null;
   name: string;
   serviceType?: string;
+  // Without a proper refactoring there is no good way to chain actions.
+  // This prop is simply passed back with the result to let listeners
+  // know what was the intent of the request. And call the next action
+  // accordingly.
+  uiFlags?: Record<string, boolean>;
 }
 
 export interface AddConnectorApiLogicResponse {
   id: string;
   indexName: string;
+  uiFlags?: Record<string, boolean>;
 }
 
 export const addConnector = async ({
@@ -34,6 +40,7 @@ export const addConnector = async ({
   isNative,
   language,
   serviceType,
+  uiFlags,
 }: AddConnectorApiLogicArgs): Promise<AddConnectorApiLogicResponse> => {
   const route = '/internal/enterprise_search/connectors';
 
@@ -54,7 +61,12 @@ export const addConnector = async ({
   return {
     id: result.id,
     indexName: result.index_name,
+    uiFlags,
   };
 };
 
 export const AddConnectorApiLogic = createApiLogic(['add_connector_api_logic'], addConnector);
+export type AddConnectorApiLogicActions = Actions<
+  AddConnectorApiLogicArgs,
+  AddConnectorApiLogicResponse
+>;

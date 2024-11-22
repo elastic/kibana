@@ -59,7 +59,7 @@ journey(`GlobalParameters`, async ({ page, params }) => {
     await page.click('[placeholder="Search..."]');
     await page.fill('[placeholder="Search..."]', 'username');
     await page.click('text=username');
-    await page.click('[aria-label="Clear input"]');
+    await page.click('[aria-label="Clear search input"]');
     await page.click('[placeholder="Search..."]');
     await page.fill('[placeholder="Search..."]', 'website');
     await page.click('text=website username');
@@ -69,15 +69,15 @@ journey(`GlobalParameters`, async ({ page, params }) => {
     await page.fill('[placeholder="Search..."]', 'extra');
     await page.keyboard.press('Enter');
     await page.click('text=No items found');
-    await page.click('[aria-label="Clear input"]');
+    await page.click('[aria-label="Clear search input"]');
   });
 
   step('Click text=Delete ParameterEdit Parameter >> :nth-match(button, 2)', async () => {
     await page.click('text=Delete ParameterEdit Parameter >> :nth-match(button, 2)');
     await page.click('[aria-label="Key"]');
     await page.fill('[aria-label="Key"]', 'username2');
-    await page.click('[aria-label="Value"]');
-    await page.fill('[aria-label="Value"]', 'elastic2');
+    await page.click('[aria-label="New value"]');
+    await page.fill('[aria-label="New value"]', 'elastic2');
     await page.click('.euiComboBox__inputWrap');
     await page.fill('[aria-label="Tags"]', 'staging');
     await page.press('[aria-label="Tags"]', 'Enter');
@@ -86,7 +86,7 @@ journey(`GlobalParameters`, async ({ page, params }) => {
     await page.click('text=staging');
     await page.click('button:has-text("Tags")');
     await page.click('[aria-label="Tags"] >> text=staging');
-    await page.click('[aria-label="Clear input"]');
+    await page.click('[aria-label="Clear search input"]');
   });
   step('Click text=Delete ParameterEdit Parameter >> button', async () => {
     await page.click('text=Delete ParameterEdit Parameter >> button');

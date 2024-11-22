@@ -16,7 +16,6 @@ import {
   EmbeddableSetup,
   EmbeddableStart,
   IEmbeddable,
-  PANEL_NOTIFICATION_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
 import {
   apiHasUniqueId,
@@ -32,7 +31,6 @@ import {
 } from '@kbn/ui-actions-enhanced-plugin/public';
 import deepEqual from 'react-fast-compare';
 import { BehaviorSubject, distinctUntilChanged } from 'rxjs';
-import { PanelNotificationsAction } from './actions';
 import {
   DynamicActionStorage,
   type DynamicActionStorageApi,
@@ -82,9 +80,6 @@ export class EmbeddableEnhancedPlugin
 
   public setup(core: CoreSetup<StartDependencies>, plugins: SetupDependencies): SetupContract {
     this.setCustomEmbeddableFactoryProvider(plugins);
-    const panelNotificationAction = new PanelNotificationsAction();
-    plugins.uiActionsEnhanced.registerAction(panelNotificationAction);
-    plugins.uiActionsEnhanced.attachAction(PANEL_NOTIFICATION_TRIGGER, panelNotificationAction.id);
 
     return {};
   }
@@ -153,8 +148,8 @@ export class EmbeddableEnhancedPlugin
     );
     const api: DynamicActionStorageApi = {
       dynamicActionsState$,
-      setDynamicActions: (newState) => {
-        dynamicActionsState$.next(newState);
+      setDynamicActions: (enhancements) => {
+        dynamicActionsState$.next(getDynamicActionsState(enhancements));
       },
     };
     const storage = new DynamicActionStorage(uuid, getTitle, api);

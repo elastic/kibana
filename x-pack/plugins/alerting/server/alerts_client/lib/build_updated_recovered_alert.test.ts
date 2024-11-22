@@ -27,6 +27,8 @@ import {
   ALERT_END,
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_CONSECUTIVE_MATCHES,
+  ALERT_PREVIOUS_ACTION_GROUP,
+  ALERT_RULE_EXECUTION_UUID,
 } from '@kbn/rule-data-utils';
 import {
   alertRule,
@@ -70,9 +72,11 @@ describe('buildUpdatedRecoveredAlert', () => {
       [ALERT_TIME_RANGE]: { gte: '2023-03-27T12:27:28.159Z', lte: '2023-03-30T12:27:28.159Z' },
       [ALERT_FLAPPING]: true,
       [ALERT_FLAPPING_HISTORY]: [false, false, true, true],
+      [ALERT_PREVIOUS_ACTION_GROUP]: 'recovered',
       [ALERT_INSTANCE_ID]: 'alert-A',
       [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-x'],
       [ALERT_STATUS]: 'recovered',
+      // @ts-expect-error upgrade typescript v5.1.6
       [ALERT_START]: '2023-03-28T12:27:28.159Z',
       [ALERT_UUID]: 'abcdefg',
       [ALERT_WORKFLOW_STATUS]: 'open',
@@ -119,9 +123,11 @@ describe('buildUpdatedRecoveredAlert', () => {
       [ALERT_TIME_RANGE]: { gte: '2023-03-27T12:27:28.159Z', lte: '2023-03-30T12:27:28.159Z' },
       [ALERT_FLAPPING]: true,
       [ALERT_FLAPPING_HISTORY]: [false, false, true, true],
+      [ALERT_PREVIOUS_ACTION_GROUP]: 'recovered',
       [ALERT_INSTANCE_ID]: 'alert-A',
       [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-x'],
       [ALERT_STATUS]: 'recovered',
+      // @ts-expect-error upgrade typescript v5.1.6
       [ALERT_START]: '2023-03-28T12:27:28.159Z',
       [ALERT_UUID]: 'abcdefg',
       [ALERT_WORKFLOW_STATUS]: 'open',
@@ -156,7 +162,6 @@ describe('buildUpdatedRecoveredAlert', () => {
         timestamp: '2023-03-29T12:27:28.159Z',
       })
     ).toEqual({
-      ...alertRule,
       event: {
         action: 'close',
         kind: 'signal',
@@ -172,6 +177,19 @@ describe('buildUpdatedRecoveredAlert', () => {
             id: 'alert-A',
           },
           maintenance_window_ids: ['maint-x'],
+          rule: {
+            category: 'My test rule',
+            consumer: 'bar',
+            name: 'rule-name',
+            parameters: {
+              bar: true,
+            },
+            producer: 'alerts',
+            revision: 0,
+            rule_type_id: 'test.rule-type',
+            tags: ['rule-', '-tags'],
+            uuid: '1',
+          },
           start: '2023-03-28T12:27:28.159Z',
           time_range: {
             gte: '2023-03-27T12:27:28.159Z',
@@ -180,15 +198,17 @@ describe('buildUpdatedRecoveredAlert', () => {
           uuid: 'abcdefg',
           consecutive_matches: 0,
         },
+        space_ids: ['default'],
         version: '8.8.1',
       },
       [TIMESTAMP]: '2023-03-29T12:27:28.159Z',
       [ALERT_RULE_EXECUTION_TIMESTAMP]: '2023-03-29T12:27:28.159Z',
+      [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
       [ALERT_FLAPPING]: true,
       [ALERT_FLAPPING_HISTORY]: [false, false, true, true],
+      [ALERT_PREVIOUS_ACTION_GROUP]: 'recovered',
       [ALERT_STATUS]: 'recovered',
       [ALERT_WORKFLOW_STATUS]: 'open',
-      [SPACE_IDS]: ['default'],
       [TAGS]: ['rule-', '-tags'],
     });
   });

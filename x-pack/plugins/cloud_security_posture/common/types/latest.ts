@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './rules/v5';
 export * from './benchmarks/v2';

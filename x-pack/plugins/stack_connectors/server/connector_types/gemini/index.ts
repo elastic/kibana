@@ -10,10 +10,14 @@ import {
   SubActionConnectorType,
   ValidatorType,
 } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { GenerativeAIForSecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
+import {
+  GenerativeAIForSearchPlaygroundConnectorFeatureId,
+  GenerativeAIForSecurityConnectorFeatureId,
+} from '@kbn/actions-plugin/common';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 import { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { assertURL } from '@kbn/actions-plugin/server/sub_action_framework/helpers/validators';
+import { GenerativeAIForObservabilityConnectorFeatureId } from '@kbn/actions-plugin/common/connector_feature_config';
 import { GEMINI_CONNECTOR_ID, GEMINI_TITLE } from '../../../common/gemini/constants';
 import { ConfigSchema, SecretsSchema } from '../../../common/gemini/schema';
 import { Config, Secrets } from '../../../common/gemini/types';
@@ -29,7 +33,11 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
     secrets: SecretsSchema,
   },
   validators: [{ type: ValidatorType.CONFIG, validator: configValidator }],
-  supportedFeatureIds: [GenerativeAIForSecurityConnectorFeatureId],
+  supportedFeatureIds: [
+    GenerativeAIForSecurityConnectorFeatureId,
+    GenerativeAIForSearchPlaygroundConnectorFeatureId,
+    GenerativeAIForObservabilityConnectorFeatureId,
+  ],
   minimumLicenseRequired: 'enterprise' as const,
   renderParameterTemplates,
 });

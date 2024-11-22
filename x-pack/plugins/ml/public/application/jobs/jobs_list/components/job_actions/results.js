@@ -75,7 +75,7 @@ export function ResultLinks({ jobs }) {
           >
             <EuiButtonIcon
               href={timeSeriesExplorerLink}
-              iconType="visLine"
+              iconType="singleMetricViewer"
               aria-label={openJobsInSingleMetricViewerText}
               isDisabled={singleMetricEnabled === false || jobActionsDisabled === true}
               data-test-subj="mlOpenJobsInSingleMetricViewerButton"

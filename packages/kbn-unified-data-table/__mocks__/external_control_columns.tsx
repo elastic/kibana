@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useState } from 'react';
@@ -17,6 +18,7 @@ import {
   EuiSpacer,
   EuiDataGridControlColumn,
 } from '@elastic/eui';
+import { RowControlColumn } from '@kbn/discover-utils';
 
 const SelectionHeaderCell = () => {
   return (
@@ -116,3 +118,23 @@ export const testLeadingControlColumn: EuiDataGridControlColumn = {
   rowCellRender: SelectionRowCell,
   width: 100,
 };
+
+export const mockRowAdditionalLeadingControls = ['visBarVerticalStacked', 'heart', 'inspect'].map(
+  (iconType, index): RowControlColumn => ({
+    id: `exampleControl_${iconType}`,
+    headerAriaLabel: `Example Row Control ${iconType}`,
+    renderControl: (Control, rowProps) => {
+      return (
+        <Control
+          data-test-subj={`exampleRowControl-${iconType}`}
+          label={`Example ${iconType}`}
+          tooltipContent={`Example ${iconType}`}
+          iconType={iconType}
+          onClick={() => {
+            alert(`Example "${iconType}" control clicked. Row index: ${rowProps.rowIndex}`);
+          }}
+        />
+      );
+    },
+  })
+);

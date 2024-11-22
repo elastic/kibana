@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { of, Subscription } from 'rxjs';
-import type { AnalyticsClient } from '@kbn/analytics-client';
-import { createAnalytics } from '@kbn/analytics-client';
+import type { AnalyticsClient } from '@elastic/ebt/client';
+import { createAnalytics } from '@elastic/ebt/client';
 import { registerPerformanceMetricEventType } from '@kbn/ebt-tools';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
@@ -32,9 +33,6 @@ export class AnalyticsService {
     this.analyticsClient = createAnalytics({
       isDev: core.env.mode.dev,
       logger: core.logger.get('analytics'),
-      // TODO: We need to be able to edit sendTo once we resolve the telemetry config.
-      //  For now, we are relying on whether it's a distributable or running from source.
-      sendTo: core.env.packageInfo.dist ? 'production' : 'staging',
     });
 
     this.registerBuildInfoAnalyticsContext(core);

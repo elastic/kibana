@@ -8,11 +8,9 @@
 import type { UseMutationOptions, UseMutationResult } from '@tanstack/react-query';
 import { useMutation } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { isolateHost } from '../../../common/lib/endpoint_isolation';
-import type {
-  HostIsolationRequestBody,
-  ResponseActionApiResponse,
-} from '../../../../common/endpoint/types';
+import type { IsolationRouteRequestBody } from '../../../../common/api/endpoint';
+import { isolateHost } from '../../../common/lib/endpoint/endpoint_isolation';
+import type { ResponseActionApiResponse } from '../../../../common/endpoint/types';
 
 /**
  * Create host isolation requests
@@ -22,11 +20,11 @@ export const useSendIsolateEndpointRequest = (
   customOptions?: UseMutationOptions<
     ResponseActionApiResponse,
     IHttpFetchError,
-    HostIsolationRequestBody
+    IsolationRouteRequestBody
   >
-): UseMutationResult<ResponseActionApiResponse, IHttpFetchError, HostIsolationRequestBody> => {
-  return useMutation<ResponseActionApiResponse, IHttpFetchError, HostIsolationRequestBody>(
-    (isolateData: HostIsolationRequestBody) => {
+): UseMutationResult<ResponseActionApiResponse, IHttpFetchError, IsolationRouteRequestBody> => {
+  return useMutation<ResponseActionApiResponse, IHttpFetchError, IsolationRouteRequestBody>(
+    (isolateData: IsolationRouteRequestBody) => {
       return isolateHost(isolateData);
     },
     customOptions

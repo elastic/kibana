@@ -24,7 +24,6 @@
     "@kbn/deeplinks-observability",
     "@kbn/discover-plugin",
     "@kbn/discover-utils",
-    "@kbn/embeddable-plugin",
     "@kbn/es-query",
     "@kbn/field-formats-plugin",
     "@kbn/fleet-plugin",
@@ -44,6 +43,9 @@
     "@kbn/unified-search-plugin",
     "@kbn/xstate-utils",
     "@kbn/esql-utils",
+    "@kbn/data-view-utils",
+    "@kbn/unified-doc-viewer-plugin",
+    "@kbn/discover-shared-plugin",
   ],
   "exclude": [
     "target/**/*"

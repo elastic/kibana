@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { AggregateQuery, Filter } from '@kbn/es-query';
+import type { AggregateQuery, Filter, TimeRange } from '@kbn/es-query';
 import type { Query } from '@kbn/es-query';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import type { BehaviorSubject } from 'rxjs';
-import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { SerializedTitles } from '@kbn/presentation-publishing';
+import type { BehaviorSubject, Observable } from 'rxjs';
+import type { SerializedTimeRange, SerializedTitles } from '@kbn/presentation-publishing';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataVisualizerTableState } from '../../../../../common/types';
 import type { SamplingOption } from '../../../../../common/types/field_stats';
@@ -20,6 +19,7 @@ import type { DataVisualizerIndexBasedAppState } from '../../types/index_data_vi
 import type { DataVisualizerStartDependencies } from '../../../common/types/data_visualizer_plugin';
 import type { ESQLQuery } from '../../search_strategy/requests/esql_utils';
 import type { DataVisualizerTableItem } from '../../../common/components/stats_table/types';
+import type { FieldStatsComponentType } from '../../constants/field_stats_component_type';
 
 export interface FieldStatisticTableEmbeddableProps {
   /**
@@ -54,7 +54,7 @@ export interface FieldStatisticTableEmbeddableProps {
   /**
    * Optional id to identify the embeddable
    */
-  id?: string;
+  id?: FieldStatsComponentType | string;
   /**
    * Callback to add a filter to filter bar
    */
@@ -82,6 +82,8 @@ export interface FieldStatisticTableEmbeddableProps {
    * If esql:true, switch table to ES|QL mode
    */
   esql?: boolean;
+  isEsqlMode?: boolean;
+  esqlQuery?: AggregateQuery;
   /**
    * If esql:true, the index pattern is used to validate time field
    */
@@ -98,6 +100,9 @@ export interface FieldStatisticTableEmbeddableProps {
    */
   overridableServices?: { data: DataPublicPluginStart };
   renderFieldName?: (fieldName: string, item: DataVisualizerTableItem) => JSX.Element;
+  resetData$?: Observable<number>;
+  timeRange?: TimeRange;
+  onRenderComplete?: () => void;
 }
 
 export type ESQLDataVisualizerGridEmbeddableState = Omit<
@@ -105,11 +110,20 @@ export type ESQLDataVisualizerGridEmbeddableState = Omit<
   'query'
 > & { query?: ESQLQuery };
 
-export type FieldStatisticsTableEmbeddableState = FieldStatisticTableEmbeddableProps &
-  SerializedTitles;
-interface FieldStatisticsTableEmbeddableComponentApi {
-  showDistributions$?: BehaviorSubject<boolean>;
+export enum FieldStatsInitializerViewType {
+  DATA_VIEW = 'dataview',
+  ESQL = 'esql',
 }
+
+export interface FieldStatsInitialState {
+  dataViewId?: string;
+  viewType?: FieldStatsInitializerViewType;
+  query?: AggregateQuery;
+  showDistributions?: boolean;
+}
+export type FieldStatisticsTableEmbeddableState = FieldStatsInitialState &
+  SerializedTitles &
+  SerializedTimeRange & {};
 
 export type OnAddFilter = (field: DataViewField | string, value: string, type: '+' | '-') => void;
 export interface FieldStatisticsTableEmbeddableParentApi {
@@ -118,10 +132,6 @@ export interface FieldStatisticsTableEmbeddableParentApi {
   overrideServices?: Partial<DataVisualizerStartDependencies>;
   onAddFilter?: OnAddFilter;
 }
-
-export type FieldStatisticsTableEmbeddableApi =
-  DefaultEmbeddableApi<FieldStatisticsTableEmbeddableState> &
-    FieldStatisticsTableEmbeddableComponentApi;
 
 export type DataVisualizerGridEmbeddableApi = Partial<FieldStatisticsTableEmbeddableState>;
 

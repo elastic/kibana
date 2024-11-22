@@ -5,9 +5,17 @@
  * 2.0.
  */
 
-export { existsSync, ensureDirSync, createSync, copySync, listDirSync, readSync } from './files';
+export {
+  existsSync,
+  ensureDirSync,
+  createSync,
+  copySync,
+  listDirSync,
+  readSync,
+  removeDirSync,
+} from './files';
 
 export { generateFields, mergeSamples } from './samples';
 export { deepCopy, generateUniqueId } from './util';
-export { testPipeline } from './pipeline';
+export { testPipeline, createJSONInput } from './pipeline';
 export { combineProcessors } from './processors';

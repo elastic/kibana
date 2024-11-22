@@ -18,7 +18,130 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/data-view-utils",
+        "id": "def-common.convertDatatableColumnToDataViewFieldSpec",
+        "type": "Function",
+        "tags": [],
+        "label": "convertDatatableColumnToDataViewFieldSpec",
+        "description": [
+          "\nConvert a datatable column to a DataViewFieldSpec"
+        ],
+        "signature": [
+          "(column: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          },
+          ") => ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.FieldSpec",
+            "text": "FieldSpec"
+          }
+        ],
+        "path": "packages/kbn-data-view-utils/src/utils/convert_to_data_view_field_spec.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/data-view-utils",
+            "id": "def-common.convertDatatableColumnToDataViewFieldSpec.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "column",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.DatatableColumn",
+                "text": "DatatableColumn"
+              }
+            ],
+            "path": "packages/kbn-data-view-utils/src/utils/convert_to_data_view_field_spec.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-view-utils",
+        "id": "def-common.createRegExpPatternFrom",
+        "type": "Function",
+        "tags": [],
+        "label": "createRegExpPatternFrom",
+        "description": [],
+        "signature": [
+          "(basePatterns: string | string[]) => RegExp"
+        ],
+        "path": "packages/kbn-data-view-utils/src/utils/create_regexp_pattern_from.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/data-view-utils",
+            "id": "def-common.createRegExpPatternFrom.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "basePatterns",
+            "description": [],
+            "signature": [
+              "string | string[]"
+            ],
+            "path": "packages/kbn-data-view-utils/src/utils/create_regexp_pattern_from.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-view-utils",
+        "id": "def-common.testPatternAgainstAllowedList",
+        "type": "Function",
+        "tags": [],
+        "label": "testPatternAgainstAllowedList",
+        "description": [],
+        "signature": [
+          "(allowedList: (string | RegExp)[]) => (value: string) => boolean"
+        ],
+        "path": "packages/kbn-data-view-utils/src/utils/test_pattern_against_allowed_list.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/data-view-utils",
+            "id": "def-common.testPatternAgainstAllowedList.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "allowedList",
+            "description": [],
+            "signature": [
+              "(string | RegExp)[]"
+            ],
+            "path": "packages/kbn-data-view-utils/src/utils/test_pattern_against_allowed_list.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [],
     "enums": [],
     "misc": [

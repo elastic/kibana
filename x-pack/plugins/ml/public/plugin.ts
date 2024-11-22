@@ -16,6 +16,7 @@ import type {
 import { BehaviorSubject, mergeMap } from 'rxjs';
 import { take } from 'rxjs';
 
+import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { LocatorPublic, SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
@@ -56,7 +57,6 @@ import { getMlSharedServices } from './application/services/get_shared_ml_servic
 import { registerManagementSection } from './application/management';
 import type { MlLocatorParams } from './locator';
 import { MlLocatorDefinition, type MlLocator } from './locator';
-import { setDependencyCache } from './application/util/dependency_cache';
 import { registerHomeFeature } from './register_home_feature';
 import { isFullLicense, isMlEnabled } from '../common/license';
 import {
@@ -68,12 +68,13 @@ import {
   type ConfigSchema,
   type ExperimentalFeatures,
   initExperimentalFeatures,
+  initModelDeploymentSettings,
+  type NLPSettings,
 } from '../common/constants/app';
 import type { ElasticModels } from './application/services/elastic_models_service';
-import type { MlApiServices } from './application/services/ml_api_service';
+import type { MlApi } from './application/services/ml_api_service';
 import type { MlCapabilities } from '../common/types/capabilities';
 import { AnomalySwimLane } from './shared_components';
-import { getMlServices } from './embeddables/single_metric_viewer/get_services';
 
 export interface MlStartDependencies {
   cases?: CasesPublicStart;
@@ -88,6 +89,7 @@ export interface MlStartDependencies {
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
   maps?: MapsStartApi;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   presentationUtil: PresentationUtilPluginStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedSearch: SavedSearchPublicPluginStart;
@@ -135,11 +137,31 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   private experimentalFeatures: ExperimentalFeatures = {
     ruleFormV2: false,
   };
+  private nlpSettings: NLPSettings = {
+    modelDeployment: {
+      allowStaticAllocations: true,
+      vCPURange: {
+        low: {
+          min: 0,
+          max: 2,
+        },
+        medium: {
+          min: 1,
+          max: 16,
+        },
+        high: {
+          min: 1,
+          max: 32,
+        },
+      },
+    },
+  };
 
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
     initEnabledFeatures(this.enabledFeatures, initializerContext.config.get());
     initExperimentalFeatures(this.experimentalFeatures, initializerContext.config.get());
+    initModelDeploymentSettings(this.nlpSettings, initializerContext.config.get());
   }
 
   setup(
@@ -180,6 +202,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             licensing: pluginsStart.licensing,
             management: pluginsSetup.management,
             maps: pluginsStart.maps,
+            observabilityAIAssistant: pluginsStart.observabilityAIAssistant,
             presentationUtil: pluginsStart.presentationUtil,
             savedObjectsManagement: pluginsStart.savedObjectsManagement,
             savedSearch: pluginsStart.savedSearch,
@@ -193,7 +216,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
           params,
           this.isServerless,
           this.enabledFeatures,
-          this.experimentalFeatures
+          this.experimentalFeatures,
+          this.nlpSettings
         );
       },
     });
@@ -266,15 +290,14 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
               );
             }
 
-            if (fullLicense) {
+            if (fullLicense && mlCapabilities.canGetMlInfo) {
               registerMlUiActions(pluginsSetup.uiActions, core);
 
               if (this.enabledFeatures.ad) {
                 registerEmbeddables(pluginsSetup.embeddable, core);
 
                 if (pluginsSetup.cases) {
-                  const mlServices = await getMlServices(coreStart, pluginStart);
-                  registerCasesAttachments(pluginsSetup.cases, coreStart, pluginStart, mlServices);
+                  registerCasesAttachments(pluginsSetup.cases, coreStart, pluginStart);
                 }
 
                 if (pluginsSetup.maps) {
@@ -312,19 +335,13 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   ): {
     locator?: LocatorPublic<MlLocatorParams>;
     elasticModels?: ElasticModels;
-    mlApi?: MlApiServices;
+    mlApi?: MlApi;
     components: { AnomalySwimLane: typeof AnomalySwimLane };
   } {
-    setDependencyCache({
-      docLinks: core.docLinks!,
-      http: core.http,
-      i18n: core.i18n,
-    });
-
     return {
       locator: this.locator,
       elasticModels: this.sharedMlServices?.elasticModels,
-      mlApi: this.sharedMlServices?.mlApiServices,
+      mlApi: this.sharedMlServices?.mlApi,
       components: {
         AnomalySwimLane,
       },

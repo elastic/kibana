@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { RANGE_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
@@ -24,7 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'dashboard',
   ]);
 
-  describe('Time Slider Control', async () => {
+  describe('Time Slider Control', () => {
     before(async () => {
       await security.testUser.setRoles([
         'kibana_admin',
@@ -52,7 +53,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.restoreDefaults();
     });
 
-    describe('create, edit, and delete', async () => {
+    describe('create, edit, and delete', () => {
       before(async () => {
         await dashboard.navigateToApp();
         await dashboard.preserveCrossAppState();
@@ -130,8 +131,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('panel interactions', async () => {
-      describe('saved search', async () => {
+    describe('panel interactions', () => {
+      describe('saved search', () => {
         before(async () => {
           await dashboard.navigateToApp();
           await dashboard.loadSavedDashboard('timeslider and saved search');

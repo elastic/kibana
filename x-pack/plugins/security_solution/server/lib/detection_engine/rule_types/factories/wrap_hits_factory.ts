@@ -10,7 +10,7 @@ import type { ConfigType } from '../../../../config';
 import type { SignalSource, SimpleHit } from '../types';
 import type { CompleteRule, RuleParams } from '../../rule_schema';
 import { generateId } from '../utils/utils';
-import { buildBulkBody } from './utils/build_bulk_body';
+import { transformHitToAlert } from './utils/transform_hit_to_alert';
 import type { BuildReasonMessage } from '../utils/reason_formatters';
 import type {
   BaseFieldsLatest,
@@ -22,21 +22,25 @@ export const wrapHitsFactory =
   ({
     completeRule,
     ignoreFields,
+    ignoreFieldsRegexes,
     mergeStrategy,
     spaceId,
     indicesToQuery,
     alertTimestampOverride,
     publicBaseUrl,
     ruleExecutionLogger,
+    intendedTimestamp,
   }: {
     completeRule: CompleteRule<RuleParams>;
-    ignoreFields: ConfigType['alertIgnoreFields'];
+    ignoreFields: Record<string, boolean>;
+    ignoreFieldsRegexes: string[];
     mergeStrategy: ConfigType['alertMergeStrategy'];
     spaceId: string | null | undefined;
     indicesToQuery: string[];
     alertTimestampOverride: Date | undefined;
     publicBaseUrl: string | undefined;
     ruleExecutionLogger: IRuleExecutionLogForExecutors;
+    intendedTimestamp: Date | undefined;
   }) =>
   (
     events: Array<estypes.SearchHit<SignalSource>>,
@@ -45,25 +49,28 @@ export const wrapHitsFactory =
     const wrappedDocs = events.map((event): WrappedFieldsLatest<BaseFieldsLatest> => {
       const id = generateId(
         event._index,
-        event._id,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        event._id!,
         String(event._version),
         `${spaceId}:${completeRule.alertId}`
       );
 
-      const baseAlert = buildBulkBody(
+      const baseAlert = transformHitToAlert({
         spaceId,
         completeRule,
-        event as SimpleHit,
+        doc: event as SimpleHit,
         mergeStrategy,
         ignoreFields,
-        true,
+        ignoreFieldsRegexes,
+        applyOverrides: true,
         buildReasonMessage,
         indicesToQuery,
         alertTimestampOverride,
         ruleExecutionLogger,
-        id,
-        publicBaseUrl
-      );
+        alertUuid: id,
+        publicBaseUrl,
+        intendedTimestamp,
+      });
 
       return {
         _id: id,

@@ -54,11 +54,15 @@ function getContentsComponent(
     return ResourceContents;
   }
 
-  if (isTraceExplorerEnabled && selectedElementData.source && selectedElementData.target) {
+  if (isTraceExplorerEnabled && selectedElementData.sourceData && selectedElementData.targetData) {
     return EdgeContents;
   }
 
-  return DependencyContents;
+  if (selectedElementData.label) {
+    return DependencyContents;
+  }
+
+  return null;
 }
 
 export interface ContentsProps {
@@ -100,7 +104,6 @@ export function Popover({ focusedServiceName, environment, kuery, start, end }: 
   const x = box ? box.x1 + box.w / 2 : -10000;
   const y = box ? box.y1 + box.h / 2 : -10000;
 
-  const isOpen = !!selectedElement;
   const triggerStyle: CSSProperties = {
     background: 'transparent',
     height: renderedHeight,
@@ -177,6 +180,8 @@ export function Popover({ focusedServiceName, environment, kuery, start, end }: 
 
   const ContentsComponent = getContentsComponent(selectedElementData, isTraceExplorerEnabled);
 
+  const isOpen = !!selectedElement && !!ContentsComponent;
+
   return (
     <EuiPopover
       anchorPosition={'upCenter'}
@@ -205,14 +210,16 @@ export function Popover({ focusedServiceName, environment, kuery, start, end }: 
           </EuiTitle>
           <EuiHorizontalRule margin="xs" />
         </EuiFlexItem>
-        <ContentsComponent
-          onFocusClick={onFocusClick}
-          elementData={selectedElementData}
-          environment={environment}
-          kuery={kuery}
-          start={start}
-          end={end}
-        />
+        {ContentsComponent && (
+          <ContentsComponent
+            onFocusClick={onFocusClick}
+            elementData={selectedElementData}
+            environment={environment}
+            kuery={kuery}
+            start={start}
+            end={end}
+          />
+        )}
       </EuiFlexGroup>
     </EuiPopover>
   );

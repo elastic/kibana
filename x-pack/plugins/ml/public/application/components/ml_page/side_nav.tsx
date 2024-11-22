@@ -152,6 +152,18 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             testSubj: 'mlMainTab settings',
             highlightNestedRoutes: true,
           },
+          {
+            id: 'supplied_cofigurations',
+            name: i18n.translate(
+              'xpack.ml.navMenu.anomalyDetection.suppliedConfigurationsLinkText',
+              {
+                defaultMessage: 'Supplied Configurations',
+              }
+            ),
+            disabled: disableLinks,
+            pathId: ML_PAGES.SUPPLIED_CONFIGURATIONS,
+            testSubj: 'mlMainTab suppliedConfigurations',
+          },
         ],
       },
       {

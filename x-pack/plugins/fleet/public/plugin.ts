@@ -18,6 +18,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { IntegrationAssistantPluginStart } from '@kbn/integration-assistant-plugin/public';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 import type {
@@ -101,6 +102,7 @@ export interface FleetSetup {}
 export interface FleetStart {
   /** Authorization for the current user */
   authz: FleetAuthz;
+  config: FleetConfigType;
   registerExtension: UIExtensionRegistrationCallback;
   isInitialized: () => Promise<true>;
   hooks: {
@@ -130,6 +132,7 @@ export interface FleetStartDeps {
   navigation: NavigationPublicPluginStart;
   customIntegrations: CustomIntegrationsStart;
   share: SharePluginStart;
+  integrationAssistant?: IntegrationAssistantPluginStart;
   cloud?: CloudStart;
   usageCollection?: UsageCollectionStart;
   guidedOnboarding?: GuidedOnboardingPluginStart;
@@ -139,6 +142,7 @@ export interface FleetStartServices extends CoreStart, Exclude<FleetStartDeps, '
   storage: Storage;
   share: SharePluginStart;
   dashboard: DashboardStart;
+  integrationAssistant?: IntegrationAssistantPluginStart;
   cloud?: CloudSetup & CloudStart;
   discover?: DiscoverStart;
   spaces?: SpacesPluginStart;
@@ -353,7 +357,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     //  capabilities.fleetv2 returns fleet privileges and capabilities.fleet returns integrations privileges
     return {
       authz,
-
+      config: this.config,
       isInitialized: once(async () => {
         const permissionsResponse = await getPermissions();
 

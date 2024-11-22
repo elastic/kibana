@@ -86,6 +86,15 @@ describe('GET role mappings feature check', () => {
       expect(response.payload).toEqual(asserts.result);
 
       expect(mockLicensingContext.license.check).toHaveBeenCalledWith('security', 'basic');
+
+      if (canReadSecurity) {
+        expect(
+          mockCoreContext.elasticsearch.client.asInternalUser.transport.request
+        ).toHaveBeenCalledWith({
+          method: 'GET',
+          path: '/_xpack/usage?filter_path=remote_clusters.*,security.realms.*',
+        });
+      }
     });
   };
 

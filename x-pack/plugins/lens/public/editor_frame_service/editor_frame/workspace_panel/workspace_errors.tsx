@@ -6,30 +6,41 @@
  */
 
 import React, { useState } from 'react';
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPagination } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPagination,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import type { UserMessage } from '../../../types';
+import { getLongMessage } from '../../../user_messages_utils';
 
 interface Props {
   errors: Array<string | UserMessage>;
   title: string;
+  onRender?: () => void;
 }
 
-export function WorkspaceErrors(props: Props) {
+export function WorkspaceErrors({ errors, title, onRender }: Props) {
   const [activePage, setActivePage] = useState(0);
 
-  const activeError = props.errors.length ? props.errors[activePage] : '';
+  const activeError = errors.length ? errors[activePage] : '';
+
+  React.useEffect(() => onRender?.(), [onRender]);
 
   return (
     <EuiEmptyPrompt
       actions={
-        props.errors.length > 1 ? (
+        errors.length > 1 ? (
           <EuiFlexGroup
             justifyContent="spaceAround"
             data-test-subj="lnsWorkspaceErrorsPaginationControl"
           >
             <EuiFlexItem grow={false}>
               <EuiPagination
-                pageCount={props.errors.length}
+                pageCount={errors.length}
                 activePage={activePage}
                 onPageClick={setActivePage}
               />
@@ -41,10 +52,22 @@ export function WorkspaceErrors(props: Props) {
       }
       body={
         <div data-test-subj="workspace-error-message">
-          {typeof activeError === 'string' ? activeError : activeError.longMessage}
+          {typeof activeError === 'string' ? (
+            activeError
+          ) : (
+            <div>
+              {activeError.shortMessage}
+              {activeError.longMessage ? (
+                <>
+                  <EuiSpacer />
+                  <EuiText size="s"> {getLongMessage(activeError)}</EuiText>
+                </>
+              ) : null}
+            </div>
+          )}
         </div>
       }
-      title={<h2>{props.title}</h2>}
+      title={<h2>{title}</h2>}
       iconColor="danger"
       iconType="warning"
       data-test-subj="lnsWorkspaceErrors"

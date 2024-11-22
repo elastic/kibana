@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Editor } from 'brace';
 import { ResultTerm } from '../lib/autocomplete/types';
 import { TokensProvider } from './tokens_provider';
 import { Token } from './token';
@@ -93,7 +93,7 @@ export enum LINE_MODE {
 /**
  * The CoreEditor is a component separate from the Editor implementation that provides Console
  * app specific business logic. The CoreEditor is an interface to the lower-level editor implementation
- * being used which is usually vendor code such as Ace or Monaco.
+ * being used which is usually vendor code such as Monaco.
  */
 export interface CoreEditor {
   /**
@@ -259,7 +259,7 @@ export interface CoreEditor {
    */
   registerKeyboardShortcut(opts: {
     keys: string | { win?: string; mac?: string };
-    fn: (editor: Editor) => void;
+    fn: (editor: any) => void;
     name: string;
   }): void;
 

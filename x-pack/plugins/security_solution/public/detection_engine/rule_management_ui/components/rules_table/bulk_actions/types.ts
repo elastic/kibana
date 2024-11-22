@@ -9,11 +9,15 @@ import type { BulkActionsDryRunErrCode } from '../../../../../../common/constant
 import type { BulkActionTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 
 /**
- * Only 2 bulk actions are supported for for confirmation dry run modal:
+ * Only 3 bulk actions are supported for for confirmation dry run modal:
  * * export
  * * edit
+ * * manual rule run
  */
-export type BulkActionForConfirmation = BulkActionTypeEnum['export'] | BulkActionTypeEnum['edit'];
+export type BulkActionForConfirmation =
+  | BulkActionTypeEnum['export']
+  | BulkActionTypeEnum['edit']
+  | BulkActionTypeEnum['run'];
 
 /**
  * transformed results of dry run

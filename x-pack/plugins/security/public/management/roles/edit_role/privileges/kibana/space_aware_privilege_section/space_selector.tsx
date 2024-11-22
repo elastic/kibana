@@ -57,6 +57,9 @@ export class SpaceSelector extends Component<Props, {}> {
         aria-label={i18n.translate('xpack.security.management.editRole.spaceSelectorLabel', {
           defaultMessage: 'Spaces',
         })}
+        placeholder={i18n.translate('xpack.security.management.editRole.spaceSelectorPlaceholder', {
+          defaultMessage: 'Add spaces...',
+        })}
         fullWidth
         options={this.getOptions()}
         renderOption={renderOption}

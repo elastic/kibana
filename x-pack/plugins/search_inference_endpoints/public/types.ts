@@ -34,3 +34,10 @@ export interface AppServicesContext {
   ml?: MlPluginStart;
   console?: ConsolePluginStart;
 }
+
+export interface InferenceUsageResponse {
+  acknowledge: boolean;
+  error_message: string;
+  indexes: string[];
+  pipelines: string[];
+}

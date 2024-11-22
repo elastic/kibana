@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { RuleObjectId, RuleSignatureId } from '../../../model/rule_schema/common_attributes.gen';
 import { BulkCrudRulesResponse } from '../response_schema.gen';
@@ -30,3 +30,15 @@ export type BulkDeleteRulesRequestBodyInput = z.input<typeof BulkDeleteRulesRequ
 
 export type BulkDeleteRulesResponse = z.infer<typeof BulkDeleteRulesResponse>;
 export const BulkDeleteRulesResponse = BulkCrudRulesResponse;
+
+export type BulkDeleteRulesPostRequestBody = z.infer<typeof BulkDeleteRulesPostRequestBody>;
+export const BulkDeleteRulesPostRequestBody = z.array(
+  z.object({
+    id: RuleObjectId.optional(),
+    rule_id: RuleSignatureId.optional(),
+  })
+);
+export type BulkDeleteRulesPostRequestBodyInput = z.input<typeof BulkDeleteRulesPostRequestBody>;
+
+export type BulkDeleteRulesPostResponse = z.infer<typeof BulkDeleteRulesPostResponse>;
+export const BulkDeleteRulesPostResponse = BulkCrudRulesResponse;

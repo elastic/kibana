@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { REMOVED_TYPES } from '@kbn/core-saved-objects-migration-server-internal';
@@ -27,9 +28,11 @@ const previouslyRegisteredTypes = [
   'application_usage_totals',
   'application_usage_transactional',
   'background-session',
+  'background-task-node',
   'canvas-element',
   'canvas-workpad',
   'canvas-workpad-template',
+  'cloud',
   'cloud-security-posture-settings',
   'cases',
   'cases-comments',
@@ -46,22 +49,28 @@ const previouslyRegisteredTypes = [
   'csp-rule-template',
   'csp_rule',
   'dashboard',
+  'dynamic-config-overrides', // Added in 8.16 to persist the dynamic config overrides and share it with other nodes
   'event-annotation-group',
   'endpoint:user-artifact',
   'endpoint:user-artifact-manifest',
   'endpoint:unified-user-artifact-manifest',
   'enterprise_search_telemetry',
+  'entity-definition',
+  'entity-discovery-api-key',
   'epm-packages',
   'epm-packages-assets',
   'event_loop_delays_daily',
   'exception-list',
   'exception-list-agnostic',
+  'favorites',
   'file',
   'fileShare',
   'file-upload-telemetry',
   'file-upload-usage-collection-telemetry',
   'fleet-agent-actions',
   'fleet-agent-events',
+  'fleet-agent-policies',
+  'fleet-package-policies',
   'fleet-agents',
   'fleet-enrollment-api-keys',
   'fleet-fleet-server-host',
@@ -70,6 +79,7 @@ const previouslyRegisteredTypes = [
   'fleet-proxy',
   'fleet-uninstall-tokens',
   'fleet-setup-lock',
+  'fleet-space-settings',
   'graph-workspace',
   'guided-setup-state',
   'guided-onboarding-guide-state',
@@ -106,6 +116,7 @@ const previouslyRegisteredTypes = [
   'osquery-usage-metric',
   'osquery-manager-usage-metric',
   'policy-settings-protection-updates-note',
+  'product-doc-install-status',
   'query',
   'rules-settings',
   'sample-data-telemetry',
@@ -115,6 +126,7 @@ const previouslyRegisteredTypes = [
   'security-rule',
   'security-solution-signals-migration',
   'risk-engine-configuration',
+  'entity-engine-status',
   'server',
   'siem-detection-engine-rule-actions',
   'siem-detection-engine-rule-execution-info',
@@ -129,6 +141,7 @@ const previouslyRegisteredTypes = [
   'synthetics-monitor',
   'synthetics-param',
   'synthetics-privates-locations',
+  'synthetics-private-location',
   'tag',
   'task',
   'telemetry',
@@ -144,7 +157,8 @@ const previouslyRegisteredTypes = [
   'synthetics-dynamic-settings',
   'uptime-synthetics-api-key',
   'url',
-  'usage-counters',
+  'usage-counter', // added in 8.16.0: richer mappings, located in .kibana_usage_counters
+  'usage-counters', // deprecated in favor of 'usage-counter'
   'visualization',
   'workplace_search_telemetry',
 ].sort();

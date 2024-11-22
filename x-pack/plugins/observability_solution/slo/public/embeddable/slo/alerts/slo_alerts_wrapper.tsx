@@ -9,36 +9,33 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
-import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { Subject } from 'rxjs';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
 import { FetchContext } from '@kbn/presentation-publishing';
 import { SloIncludedCount } from './components/slo_included_count';
 import { SloAlertsSummary } from './components/slo_alerts_summary';
 import { SloAlertsTable } from './components/slo_alerts_table';
 import type { SloItem, SloEmbeddableDeps } from './types';
-import { EDIT_SLO_ALERTS_ACTION } from '../../../ui_actions/edit_slo_alerts_panel';
 
 interface Props {
   deps: SloEmbeddableDeps;
   slos: SloItem[];
   timeRange: TimeRange;
-  embeddable: any;
   onRenderComplete?: () => void;
   reloadSubject: Subject<FetchContext>;
   showAllGroupByInstances?: boolean;
+  onEdit: () => void;
 }
 
 export function SloAlertsWrapper({
-  embeddable,
   slos,
   deps,
   timeRange: initialTimeRange,
   onRenderComplete,
   reloadSubject,
   showAllGroupByInstances,
+  onEdit,
 }: Props) {
   const {
     application: { navigateToUrl },
@@ -75,14 +72,10 @@ export function SloAlertsWrapper({
     }
   }, [isSummaryLoaded, isTableLoaded, onRenderComplete]);
   const handleGoToAlertsClick = () => {
-    let kuery = '';
-    slos.map((slo, index) => {
-      const shouldAddOr = index < slos.length - 1;
-      kuery += `(slo.id:"${slo.id}" and slo.instanceId:"${slo.instanceId}")`;
-      if (shouldAddOr) {
-        kuery += ' or ';
-      }
-    });
+    const kuery = slos
+      .map((slo) => `(slo.id:"${slo.id}" and slo.instanceId:"${slo.instanceId}")`)
+      .join(' or ');
+
     navigateToUrl(
       `${basePath.prepend(observabilityPaths.alerts)}?_a=(kuery:'${kuery}',rangeFrom:${
         timeRange.from
@@ -90,23 +83,24 @@ export function SloAlertsWrapper({
     );
   };
   return (
-    <Wrapper>
+    <div
+      css={css`
+        width: 100%;
+        overflow: scroll;
+      `}
+    >
       <EuiFlexGroup
         data-shared-item=""
         justifyContent="flexEnd"
         wrap
-        css={`
+        css={css`
           margin: 0 35px;
         `}
       >
         <EuiFlexItem grow={false}>
           <EuiLink
             onClick={() => {
-              const trigger = deps.uiActions.getTrigger(CONTEXT_MENU_TRIGGER);
-              deps.uiActions.getAction(EDIT_SLO_ALERTS_ACTION).execute({
-                trigger,
-                embeddable,
-              } as ActionExecutionContext);
+              onEdit();
             }}
             data-test-subj="o11ySloAlertsWrapperSlOsIncludedLink"
           >
@@ -157,11 +151,6 @@ export function SloAlertsWrapper({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </Wrapper>
+    </div>
   );
 }
-
-const Wrapper = styled.div`
-  width: 100%;
-  overflow: scroll;
-`;

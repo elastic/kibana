@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { HttpSetup, HttpResponse } from '@kbn/core/public';
@@ -55,6 +56,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
     const userId = await this.getCurrentUserId();
 
     const userHash = userId ? await sha1(userId) : '';
+    const headers = userHash ? { 'user-hash': userHash } : undefined;
 
     const request = body
       ? this.http.post<T>(url, { query, body, version, asResponse })
@@ -63,7 +65,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
           version,
           ...cacheOptions,
           asResponse,
-          headers: { 'user-hash': userHash },
+          headers,
         });
 
     return request.catch((resp) => {
@@ -111,7 +113,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
         allow_no_index: allowNoIndex,
         include_unmapped: includeUnmapped,
         fields,
-        fieldTypes,
+        field_types: fieldTypes,
         // default to undefined to keep value out of URL params and improve caching
         allow_hidden: allowHidden || undefined,
         include_empty_fields: includeEmptyFields,

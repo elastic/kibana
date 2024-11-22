@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { isActionSupportedByAgentType } from '../../../../../common/endpoint/service/response_actions/is_response_action_supported';
+import type { CommandArgDefinition } from '../../console/types';
+import { isAgentTypeAndActionSupported } from '../../../../common/lib/endpoint';
 import { getRbacControl } from '../../../../../common/endpoint/service/response_actions/utils';
 import { UploadActionResult } from '../command_render_components/upload_action';
 import { ArgumentFileSelector } from '../../console_argument_selectors';
@@ -136,9 +137,20 @@ const COMMENT_ARG_ABOUT = i18n.translate(
   { defaultMessage: 'A comment to go along with the action' }
 );
 
+const commandCommentArgument = (): { comment: CommandArgDefinition } => {
+  return {
+    comment: {
+      required: false,
+      allowMultiples: false,
+      about: COMMENT_ARG_ABOUT,
+    },
+  };
+};
+
 export interface GetEndpointConsoleCommandsOptions {
   endpointAgentId: string;
   agentType: ResponseActionAgentType;
+  /** Applicable only for Endpoint Agents */
   endpointCapabilities: ImmutableArray<string>;
   endpointPrivileges: EndpointPrivileges;
 }
@@ -152,7 +164,6 @@ export const getEndpointConsoleCommands = ({
   const featureFlags = ExperimentalFeaturesService.get();
 
   const isUploadEnabled = featureFlags.responseActionUploadEnabled;
-  const isScanEnabled = featureFlags.responseActionScanEnabled;
 
   const doesEndpointSupportCommand = (commandName: ConsoleResponseActionCommands) => {
     // Agent capabilities is only validated for Endpoint agent types
@@ -188,11 +199,7 @@ export const getEndpointConsoleCommands = ({
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
       validate: capabilitiesAndPrivilegesValidator(agentType),
       args: {
-        comment: {
-          required: false,
-          allowMultiples: false,
-          about: COMMENT_ARG_ABOUT,
-        },
+        ...commandCommentArgument(),
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
@@ -218,11 +225,7 @@ export const getEndpointConsoleCommands = ({
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
       validate: capabilitiesAndPrivilegesValidator(agentType),
       args: {
-        comment: {
-          required: false,
-          allowMultiples: false,
-          about: COMMENT_ARG_ABOUT,
-        },
+        ...commandCommentArgument(),
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
@@ -231,7 +234,6 @@ export const getEndpointConsoleCommands = ({
       helpHidden: !getRbacControl({ commandName: 'release', privileges: endpointPrivileges }),
     },
     {
-      //
       name: 'kill-process',
       about: getCommandAboutInfo({
         aboutInfo: CONSOLE_COMMANDS.killProcess.about,
@@ -249,11 +251,7 @@ export const getEndpointConsoleCommands = ({
       validate: capabilitiesAndPrivilegesValidator(agentType),
       mustHaveArgs: true,
       args: {
-        comment: {
-          required: false,
-          allowMultiples: false,
-          about: COMMENT_ARG_ABOUT,
-        },
+        ...commandCommentArgument(),
         pid: {
           required: false,
           allowMultiples: false,
@@ -293,11 +291,7 @@ export const getEndpointConsoleCommands = ({
       validate: capabilitiesAndPrivilegesValidator(agentType),
       mustHaveArgs: true,
       args: {
-        comment: {
-          required: false,
-          allowMultiples: false,
-          about: COMMENT_ARG_ABOUT,
-        },
+        ...commandCommentArgument(),
         pid: {
           required: false,
           allowMultiples: false,
@@ -350,11 +344,7 @@ export const getEndpointConsoleCommands = ({
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
       validate: capabilitiesAndPrivilegesValidator(agentType),
       args: {
-        comment: {
-          required: false,
-          allowMultiples: false,
-          about: COMMENT_ARG_ABOUT,
-        },
+        ...commandCommentArgument(),
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
@@ -388,11 +378,7 @@ export const getEndpointConsoleCommands = ({
             return emptyArgumentValidator(argData);
           },
         },
-        comment: {
-          required: false,
-          allowMultiples: false,
-          about: COMMENT_ARG_ABOUT,
-        },
+        ...commandCommentArgument(),
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
@@ -434,11 +420,7 @@ export const getEndpointConsoleCommands = ({
           mustHaveValue: 'non-empty-string',
           validate: executeTimeoutValidator,
         },
-        comment: {
-          required: false,
-          allowMultiples: false,
-          about: COMMENT_ARG_ABOUT,
-        },
+        ...commandCommentArgument(),
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
@@ -503,47 +485,41 @@ export const getEndpointConsoleCommands = ({
     });
   }
 
-  if (isScanEnabled) {
-    consoleCommands.push({
-      name: 'scan',
-      about: getCommandAboutInfo({
-        aboutInfo: CONSOLE_COMMANDS.scan.about,
-        isSupported: doesEndpointSupportCommand('scan'),
-      }),
-      RenderComponent: ScanActionResult,
-      meta: {
-        agentType,
-        endpointId: endpointAgentId,
-        capabilities: endpointCapabilities,
-        privileges: endpointPrivileges,
+  consoleCommands.push({
+    name: 'scan',
+    about: getCommandAboutInfo({
+      aboutInfo: CONSOLE_COMMANDS.scan.about,
+      isSupported: doesEndpointSupportCommand('scan'),
+    }),
+    RenderComponent: ScanActionResult,
+    meta: {
+      agentType,
+      endpointId: endpointAgentId,
+      capabilities: endpointCapabilities,
+      privileges: endpointPrivileges,
+    },
+    exampleUsage: 'scan --path "/full/path/to/folder" --comment "Scan folder for malware"',
+    exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
+    validate: capabilitiesAndPrivilegesValidator(agentType),
+    mustHaveArgs: true,
+    args: {
+      path: {
+        required: true,
+        allowMultiples: false,
+        mustHaveValue: 'non-empty-string',
+        about: CONSOLE_COMMANDS.scan.args.path.about,
       },
-      exampleUsage: 'scan --path "/full/path/to/folder" --comment "Scan folder for malware"',
-      exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
-      validate: capabilitiesAndPrivilegesValidator(agentType),
-      mustHaveArgs: true,
-      args: {
-        path: {
-          required: true,
-          allowMultiples: false,
-          mustHaveValue: 'non-empty-string',
-          about: CONSOLE_COMMANDS.scan.args.path.about,
-        },
-        comment: {
-          required: false,
-          allowMultiples: false,
-          about: COMMENT_ARG_ABOUT,
-        },
-      },
-      helpGroupLabel: HELP_GROUPS.responseActions.label,
-      helpGroupPosition: HELP_GROUPS.responseActions.position,
-      helpCommandPosition: 8,
-      helpDisabled: !doesEndpointSupportCommand('scan'),
-      helpHidden: !getRbacControl({
-        commandName: 'scan',
-        privileges: endpointPrivileges,
-      }),
-    });
-  }
+      ...commandCommentArgument(),
+    },
+    helpGroupLabel: HELP_GROUPS.responseActions.label,
+    helpGroupPosition: HELP_GROUPS.responseActions.position,
+    helpCommandPosition: 8,
+    helpDisabled: !doesEndpointSupportCommand('scan'),
+    helpHidden: !getRbacControl({
+      commandName: 'scan',
+      privileges: endpointPrivileges,
+    }),
+  });
 
   switch (agentType) {
     case 'sentinel_one':
@@ -557,42 +533,53 @@ export const getEndpointConsoleCommands = ({
 };
 
 /** @private */
+const disableCommand = (command: CommandDefinition, agentType: ResponseActionAgentType) => {
+  command.helpDisabled = true;
+  command.helpHidden = true;
+  command.validate = () =>
+    UPGRADE_AGENT_FOR_RESPONDER(agentType, command.name as ConsoleResponseActionCommands);
+};
+
+/** @private */
 const adjustCommandsForSentinelOne = ({
   commandList,
 }: {
   commandList: CommandDefinition[];
 }): CommandDefinition[] => {
   const featureFlags = ExperimentalFeaturesService.get();
-  const isHostIsolationEnabled = featureFlags.responseActionsSentinelOneV1Enabled;
-  const isGetFileFeatureEnabled = featureFlags.responseActionsSentinelOneGetFileEnabled;
-
-  const disableCommand = (command: CommandDefinition) => {
-    command.helpDisabled = true;
-    command.helpHidden = true;
-    command.validate = () =>
-      UPGRADE_AGENT_FOR_RESPONDER('sentinel_one', command.name as ConsoleResponseActionCommands);
-  };
+  const isKillProcessEnabled = featureFlags.responseActionsSentinelOneKillProcessEnabled;
+  const isProcessesEnabled = featureFlags.responseActionsSentinelOneProcessesEnabled;
 
   return commandList.map((command) => {
-    const agentSupportsResponseAction =
-      command.name === 'status'
-        ? false
-        : isActionSupportedByAgentType(
-            'sentinel_one',
-            RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[
-              command.name as ConsoleResponseActionCommands
-            ],
-            'manual'
-          );
+    // Kill-Process: adjust command to accept only `processName`
+    if (command.name === 'kill-process') {
+      command.args = {
+        ...commandCommentArgument(),
+        processName: {
+          required: true,
+          allowMultiples: false,
+          about: CONSOLE_COMMANDS.killProcess.args.processName.about,
+          mustHaveValue: 'non-empty-string',
+        },
+      };
+      command.exampleUsage = 'kill-process --processName="notepad" --comment="kill malware"';
+      command.exampleInstruction = i18n.translate(
+        'xpack.securitySolution.consoleCommandsDefinition.killProcess.sentinelOne.instructions',
+        { defaultMessage: 'Enter a process name to execute' }
+      );
+    }
 
-    // If command is not supported by SentinelOne - disable it
     if (
-      !agentSupportsResponseAction ||
-      (command.name === 'get-file' && !isGetFileFeatureEnabled) ||
-      (command.name === 'isolate' && !isHostIsolationEnabled) ||
-      (command.name === 'release' && !isHostIsolationEnabled)
+      command.name === 'status' ||
+      (command.name === 'kill-process' && !isKillProcessEnabled) ||
+      (command.name === 'processes' && !isProcessesEnabled) ||
+      !isAgentTypeAndActionSupported(
+        'sentinel_one',
+        RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[command.name as ConsoleResponseActionCommands],
+        'manual'
+      )
     ) {
-      disableCommand(command);
+      disableCommand(command, 'sentinel_one');
     }
 
     return command;
@@ -605,35 +592,16 @@ const adjustCommandsForCrowdstrike = ({
 }: {
   commandList: CommandDefinition[];
 }): CommandDefinition[] => {
-  const featureFlags = ExperimentalFeaturesService.get();
-  const isHostIsolationEnabled = featureFlags.responseActionsCrowdstrikeManualHostIsolationEnabled;
-
-  const disableCommand = (command: CommandDefinition) => {
-    command.helpDisabled = true;
-    command.helpHidden = true;
-    command.validate = () =>
-      UPGRADE_AGENT_FOR_RESPONDER('crowdstrike', command.name as ConsoleResponseActionCommands);
-  };
-
   return commandList.map((command) => {
-    const agentSupportsResponseAction =
-      command.name === 'status'
-        ? false
-        : isActionSupportedByAgentType(
-            'crowdstrike',
-            RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[
-              command.name as ConsoleResponseActionCommands
-            ],
-            'manual'
-          );
-
-    // If command is not supported by Crowdstrike - disable it
     if (
-      !agentSupportsResponseAction ||
-      (command.name === 'isolate' && !isHostIsolationEnabled) ||
-      (command.name === 'release' && !isHostIsolationEnabled)
+      command.name === 'status' ||
+      !isAgentTypeAndActionSupported(
+        'crowdstrike',
+        RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[command.name as ConsoleResponseActionCommands],
+        'manual'
+      )
     ) {
-      disableCommand(command);
+      disableCommand(command, 'crowdstrike');
     }
 
     return command;

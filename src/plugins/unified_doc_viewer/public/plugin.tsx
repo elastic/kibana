@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -17,8 +18,8 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { CoreStart } from '@kbn/core/public';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UnifiedDocViewerServices } from './types';
 
 export const [getUnifiedDocViewerServices, setUnifiedDocViewerServices] =
@@ -30,9 +31,6 @@ const fallback = (
   </EuiDelayRender>
 );
 
-const LazyDocViewerLogsOverview = dynamic(() => import('./components/doc_viewer_logs_overview'), {
-  fallback,
-});
 const LazyDocViewerLegacyTable = dynamic(() => import('./components/doc_viewer_table/legacy'), {
   fallback,
 });
@@ -49,9 +47,9 @@ export interface UnifiedDocViewerStart {
 
 export interface UnifiedDocViewerStartDeps {
   data: DataPublicPluginStart;
-  discoverShared: DiscoverSharedPublicStart;
   fieldFormats: FieldFormatsStart;
   fieldsMetadata: FieldsMetadataPublicStart;
+  share: SharePluginStart;
 }
 
 export class UnifiedDocViewerPublicPlugin
@@ -60,18 +58,6 @@ export class UnifiedDocViewerPublicPlugin
   private docViewsRegistry = new DocViewsRegistry();
 
   public setup(core: CoreSetup<UnifiedDocViewerStartDeps, UnifiedDocViewerStart>) {
-    this.docViewsRegistry.add({
-      id: 'doc_view_logs_overview',
-      title: i18n.translate('unifiedDocViewer.docViews.logsOverview.title', {
-        defaultMessage: 'Overview',
-      }),
-      order: 0,
-      enabled: false, // Disabled doc view by default, can be programmatically enabled using the DocViewsRegistry.prototype.enableById method.
-      component: (props) => {
-        return <LazyDocViewerLogsOverview {...props} />;
-      },
-    });
-
     this.docViewsRegistry.add({
       id: 'doc_view_table',
       title: i18n.translate('unifiedDocViewer.docViews.table.tableTitle', {
@@ -99,7 +85,7 @@ export class UnifiedDocViewerPublicPlugin
         defaultMessage: 'JSON',
       }),
       order: 20,
-      component: ({ hit, dataView, textBasedHits }) => {
+      component: ({ hit, dataView, textBasedHits, decreaseAvailableHeightBy }) => {
         return (
           <LazySourceViewer
             index={hit.raw._index}
@@ -107,6 +93,7 @@ export class UnifiedDocViewerPublicPlugin
             dataView={dataView}
             textBasedHits={textBasedHits}
             hasLineNumbers
+            decreaseAvailableHeightBy={decreaseAvailableHeightBy}
             onRefresh={() => {}}
           />
         );
@@ -120,7 +107,7 @@ export class UnifiedDocViewerPublicPlugin
 
   public start(core: CoreStart, deps: UnifiedDocViewerStartDeps) {
     const { analytics, uiSettings } = core;
-    const { data, discoverShared, fieldFormats, fieldsMetadata } = deps;
+    const { data, fieldFormats, fieldsMetadata, share } = deps;
     const storage = new Storage(localStorage);
     const unifiedDocViewer = {
       registry: this.docViewsRegistry,
@@ -128,12 +115,13 @@ export class UnifiedDocViewerPublicPlugin
     const services = {
       analytics,
       data,
-      discoverShared,
       fieldFormats,
       fieldsMetadata,
       storage,
       uiSettings,
       unifiedDocViewer,
+      share,
+      core,
     };
     setUnifiedDocViewerServices(services);
     return unifiedDocViewer;

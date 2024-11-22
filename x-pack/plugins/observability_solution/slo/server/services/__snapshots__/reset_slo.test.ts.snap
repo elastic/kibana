@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ResetSLO resets all associated resources 1`] = `
+exports[`ResetSLO happy path resets all associated resources 1`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -16,7 +16,7 @@ exports[`ResetSLO resets all associated resources 1`] = `
 }
 `;
 
-exports[`ResetSLO resets all associated resources 2`] = `
+exports[`ResetSLO happy path resets all associated resources 2`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -32,7 +32,7 @@ exports[`ResetSLO resets all associated resources 2`] = `
 }
 `;
 
-exports[`ResetSLO resets all associated resources 3`] = `
+exports[`ResetSLO happy path resets all associated resources 3`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -48,7 +48,7 @@ exports[`ResetSLO resets all associated resources 3`] = `
 }
 `;
 
-exports[`ResetSLO resets all associated resources 4`] = `
+exports[`ResetSLO happy path resets all associated resources 4`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -64,7 +64,7 @@ exports[`ResetSLO resets all associated resources 4`] = `
 }
 `;
 
-exports[`ResetSLO resets all associated resources 5`] = `
+exports[`ResetSLO happy path resets all associated resources 5`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -115,7 +115,7 @@ exports[`ResetSLO resets all associated resources 5`] = `
 }
 `;
 
-exports[`ResetSLO resets all associated resources 6`] = `
+exports[`ResetSLO happy path resets all associated resources 6`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -178,7 +178,7 @@ exports[`ResetSLO resets all associated resources 6`] = `
 }
 `;
 
-exports[`ResetSLO resets all associated resources 7`] = `
+exports[`ResetSLO happy path resets all associated resources 7`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -194,9 +194,81 @@ exports[`ResetSLO resets all associated resources 7`] = `
 }
 `;
 
-exports[`ResetSLO resets all associated resources 8`] = `
+exports[`ResetSLO happy path resets all associated resources 8`] = `
 [MockFunction] {
   "calls": Array [
+    Array [
+      Object {
+        "_meta": Object {
+          "description": "Ingest pipeline for SLO rollup data",
+          "managed": true,
+          "managed_by": "observability",
+          "version": 3.3,
+        },
+        "description": "Ingest pipeline for SLO rollup data [id: irrelevant, revision: 1]",
+        "id": ".slo-observability.sli.pipeline-irrelevant-1",
+        "processors": Array [
+          Object {
+            "set": Object {
+              "field": "_id",
+              "value": "{{{_id}}}-irrelevant-1",
+            },
+          },
+          Object {
+            "set": Object {
+              "field": "event.ingested",
+              "value": "{{{_ingest.timestamp}}}",
+            },
+          },
+          Object {
+            "set": Object {
+              "field": "slo.id",
+              "value": "irrelevant",
+            },
+          },
+          Object {
+            "set": Object {
+              "field": "slo.revision",
+              "value": 1,
+            },
+          },
+          Object {
+            "date_index_name": Object {
+              "date_formats": Array [
+                "UNIX_MS",
+                "ISO8601",
+                "yyyy-MM-dd'T'HH:mm:ss.SSSXX",
+              ],
+              "date_rounding": "M",
+              "field": "@timestamp",
+              "index_name_prefix": ".slo-observability.sli-v3.3.",
+            },
+          },
+          Object {
+            "dot_expander": Object {
+              "field": "*",
+              "if": "ctx.slo.groupings != null",
+              "ignore_failure": true,
+              "path": "slo.groupings",
+            },
+          },
+          Object {
+            "set": Object {
+              "description": "Generated the instanceId field based on the groupings field",
+              "field": "slo.instanceId",
+              "value": "*",
+            },
+          },
+          Object {
+            "pipeline": Object {
+              "ignore_failure": true,
+              "ignore_missing_pipeline": true,
+              "name": "slo-irrelevant@custom",
+            },
+          },
+        ],
+      },
+    ],
     Array [
       Object {
         "_meta": Object {
@@ -462,11 +534,15 @@ exports[`ResetSLO resets all associated resources 8`] = `
       "type": "return",
       "value": Promise {},
     },
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
   ],
 }
 `;
 
-exports[`ResetSLO resets all associated resources 9`] = `
+exports[`ResetSLO happy path resets all associated resources 9`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -529,7 +605,7 @@ exports[`ResetSLO resets all associated resources 9`] = `
 }
 `;
 
-exports[`ResetSLO resets all associated resources 10`] = `
+exports[`ResetSLO happy path resets all associated resources 10`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -545,7 +621,7 @@ exports[`ResetSLO resets all associated resources 10`] = `
 }
 `;
 
-exports[`ResetSLO resets all associated resources 11`] = `
+exports[`ResetSLO happy path resets all associated resources 11`] = `
 [MockFunction] {
   "calls": Array [
     Array [

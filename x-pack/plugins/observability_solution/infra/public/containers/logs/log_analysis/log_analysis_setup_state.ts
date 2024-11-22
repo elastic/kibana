@@ -21,7 +21,7 @@ import {
   ValidationUIError,
 } from '../../../components/logging/log_analysis_setup/initial_configuration_step';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { useTrackedPromise } from '../../../utils/use_tracked_promise';
+import { useTrackedPromise } from '../../../hooks/use_tracked_promise';
 import { ModuleDescriptor, ModuleSourceConfiguration } from './log_analysis_module_types';
 
 type SetupHandler = (

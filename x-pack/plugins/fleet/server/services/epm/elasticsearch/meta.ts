@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { safeLoad, safeDump } from 'js-yaml';
+import { load, dump } from 'js-yaml';
 
 import type { ESAssetMetadata } from '../../../../common/types';
 
@@ -44,12 +44,12 @@ export function appendMetadataToIngestPipeline({
   if (pipeline.extension === 'yml') {
     // Convert the YML content to JSON, append the `_meta` value, then convert it back to
     // YML and return the resulting YML
-    const parsedPipelineContent = safeLoad(pipeline.contentForInstallation);
+    const parsedPipelineContent = load(pipeline.contentForInstallation);
     parsedPipelineContent._meta = meta;
 
     return {
       ...pipeline,
-      contentForInstallation: `---\n${safeDump(parsedPipelineContent)}`,
+      contentForInstallation: `---\n${dump(parsedPipelineContent)}`,
     };
   }
 

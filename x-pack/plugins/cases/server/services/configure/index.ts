@@ -228,12 +228,17 @@ function transformToExternalModel(
     ? []
     : (configuration.attributes.customFields as ConfigurationTransformedAttributes['customFields']);
 
+  const templates = !configuration.attributes.templates
+    ? []
+    : (configuration.attributes.templates as ConfigurationTransformedAttributes['templates']);
+
   return {
     ...configuration,
     attributes: {
       ...castedAttributes,
       connector,
       customFields,
+      templates,
     },
   };
 }

@@ -15,7 +15,7 @@ export type {
   RuleExecutorOptions,
   RuleTypeParams,
 } from '@kbn/alerting-plugin/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
 // this plugin's dependendencies
 export interface StackAlertsDeps {

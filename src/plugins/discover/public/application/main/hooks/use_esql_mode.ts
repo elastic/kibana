@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { isEqual } from 'lodash';
-import { isOfAggregateQueryType, getAggregateQueryMode } from '@kbn/es-query';
-import { hasTransformationalCommand } from '@kbn/esql-utils';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import { hasTransformationalCommand, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { useCallback, useEffect, useRef } from 'react';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { switchMap } from 'rxjs';
@@ -18,6 +19,7 @@ import { getValidViewMode } from '../utils/get_valid_view_mode';
 import { FetchStatus } from '../../types';
 
 const MAX_NUM_OF_COLUMNS = 50;
+
 /**
  * Hook to take care of ES|QL state transformations when a new result is returned
  * If necessary this is setting displayed columns and selected data view
@@ -29,100 +31,122 @@ export function useEsqlMode({
   stateContainer: DiscoverStateContainer;
   dataViews: DataViewsContract;
 }) {
-  const prev = useRef<{
-    query: string;
-    columns: string[];
-  }>({
-    columns: [],
-    query: '',
-  });
-  const initialFetch = useRef<boolean>(true);
   const savedSearch = useSavedSearchInitial();
+  const prev = useRef<{
+    initialFetch: boolean;
+    query: string;
+    allColumns: string[];
+    defaultColumns: string[];
+  }>({
+    initialFetch: true,
+    query: '',
+    allColumns: [],
+    defaultColumns: [],
+  });
 
   const cleanup = useCallback(() => {
-    if (prev.current.query) {
-      // cleanup when it's not an ES|QL query
-      prev.current = {
-        columns: [],
-        query: '',
-      };
+    if (!prev.current.query) {
+      return;
     }
+
+    // cleanup when it's not an ES|QL query
+    prev.current = {
+      initialFetch: true,
+      query: '',
+      allColumns: [],
+      defaultColumns: [],
+    };
   }, []);
 
   useEffect(() => {
     const subscription = stateContainer.dataState.data$.documents$
       .pipe(
         switchMap(async (next) => {
-          const { query } = next;
-          if (!query || next.fetchStatus === FetchStatus.ERROR) {
+          const { query: nextQuery } = next;
+
+          if (!nextQuery || next.fetchStatus === FetchStatus.ERROR) {
             return;
           }
-          const sendComplete = () => {
-            stateContainer.dataState.data$.documents$.next({
-              ...next,
-              fetchStatus: FetchStatus.COMPLETE,
-            });
-          };
-          const { viewMode } = stateContainer.appState.getState();
-          let nextColumns: string[] = [];
-          const isEsqlQuery = isOfAggregateQueryType(query);
-          const hasResults = Boolean(next.result?.length);
-          let queryHasTransformationalCommands = false;
-          if ('esql' in query) {
-            if (hasTransformationalCommand(query.esql)) {
-              queryHasTransformationalCommands = true;
-            }
-          }
 
-          if (isEsqlQuery) {
-            const language = getAggregateQueryMode(query);
-            if (next.fetchStatus !== FetchStatus.PARTIAL) {
-              return;
-            }
-
-            if (hasResults) {
-              // check if state needs to contain column transformation due to a different columns in the resultset
-              const firstRow = next.result![0];
-              const firstRowColumns = Object.keys(firstRow.raw).slice(0, MAX_NUM_OF_COLUMNS);
-              if (!queryHasTransformationalCommands) {
-                nextColumns = [];
-                initialFetch.current = false;
-              } else {
-                nextColumns = firstRowColumns;
-                if (initialFetch.current && !prev.current.columns.length) {
-                  prev.current.columns = firstRowColumns;
-                }
-              }
-            }
-            const addColumnsToState = !isEqual(nextColumns, prev.current.columns);
-            const queryChanged = query[language] !== prev.current.query;
-            const changeViewMode = viewMode !== getValidViewMode({ viewMode, isEsqlMode: true });
-            if (!queryChanged || (!addColumnsToState && !changeViewMode)) {
-              sendComplete();
-              return;
-            }
-
-            if (queryChanged) {
-              prev.current.query = query[language];
-              prev.current.columns = nextColumns;
-            }
-            // just change URL state if necessary
-            if (addColumnsToState || changeViewMode) {
-              const nextState = {
-                ...(addColumnsToState && { columns: nextColumns }),
-                ...(changeViewMode && { viewMode: undefined }),
-              };
-              await stateContainer.appState.replaceUrlState(nextState);
-            }
-
-            sendComplete();
-          } else {
+          if (!isOfAggregateQueryType(nextQuery)) {
             // cleanup for a "regular" query
             cleanup();
+            return;
           }
+
+          if (next.fetchStatus !== FetchStatus.PARTIAL) {
+            return;
+          }
+
+          let nextAllColumns = prev.current.allColumns;
+          let nextDefaultColumns = prev.current.defaultColumns;
+
+          if (next.result?.length) {
+            nextAllColumns = Object.keys(next.result[0].raw);
+
+            if (hasTransformationalCommand(nextQuery.esql)) {
+              nextDefaultColumns = nextAllColumns.slice(0, MAX_NUM_OF_COLUMNS);
+            } else {
+              nextDefaultColumns = [];
+            }
+          }
+
+          if (prev.current.initialFetch) {
+            prev.current.initialFetch = false;
+            prev.current.query = nextQuery.esql;
+            prev.current.allColumns = nextAllColumns;
+            prev.current.defaultColumns = nextDefaultColumns;
+          }
+
+          const indexPatternChanged =
+            getIndexPatternFromESQLQuery(nextQuery.esql) !==
+            getIndexPatternFromESQLQuery(prev.current.query);
+
+          const allColumnsChanged = !isEqual(nextAllColumns, prev.current.allColumns);
+
+          const changeDefaultColumns =
+            indexPatternChanged || !isEqual(nextDefaultColumns, prev.current.defaultColumns);
+
+          const { viewMode } = stateContainer.appState.getState();
+          const changeViewMode = viewMode !== getValidViewMode({ viewMode, isEsqlMode: true });
+
+          if (indexPatternChanged) {
+            stateContainer.internalState.transitions.setResetDefaultProfileState({
+              columns: true,
+              rowHeight: true,
+            });
+          } else if (allColumnsChanged) {
+            stateContainer.internalState.transitions.setResetDefaultProfileState({
+              columns: true,
+              rowHeight: false,
+            });
+          }
+
+          prev.current.allColumns = nextAllColumns;
+
+          if (indexPatternChanged || changeDefaultColumns || changeViewMode) {
+            prev.current.query = nextQuery.esql;
+            prev.current.defaultColumns = nextDefaultColumns;
+
+            // just change URL state if necessary
+            if (changeDefaultColumns || changeViewMode) {
+              const nextState = {
+                ...(changeDefaultColumns && { columns: nextDefaultColumns }),
+                ...(changeViewMode && { viewMode: undefined }),
+              };
+
+              await stateContainer.appState.replaceUrlState(nextState);
+            }
+          }
+
+          stateContainer.dataState.data$.documents$.next({
+            ...next,
+            fetchStatus: FetchStatus.COMPLETE,
+          });
         })
       )
       .subscribe();
+
     return () => {
       // cleanup for e.g. when savedSearch is switched
       cleanup();

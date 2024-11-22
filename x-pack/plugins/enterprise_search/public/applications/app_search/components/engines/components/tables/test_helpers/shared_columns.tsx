@@ -25,6 +25,7 @@ export const runSharedColumnsTests = (
   const simulatedClickEvent = { persist: () => {} }; // Required for EUI action clicks. Can be removed if switching away from Enzyme to RTL
 
   const getTableBody = () =>
+    // @ts-expect-error upgrade typescript v5.1.6
     wrapper.find(EuiBasicTable).dive().find('RenderWithEuiTheme').renderProp('children')();
 
   describe('name column', () => {

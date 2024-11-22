@@ -21,6 +21,7 @@ export enum ConnectorTypes {
   serviceNowITSM = '.servicenow',
   serviceNowSIR = '.servicenow-sir',
   swimlane = '.swimlane',
+  theHive = '.thehive',
 }
 
 const ConnectorCasesWebhookTypeFieldsRt = rt.strict({
@@ -119,6 +120,21 @@ const ConnectorSwimlaneTypeFieldsRt = rt.strict({
 });
 
 /**
+ * Thehive
+ */
+
+export const TheHiveFieldsRt = rt.strict({
+  tlp: rt.union([rt.number, rt.null]),
+});
+
+export type TheHiveFieldsType = rt.TypeOf<typeof TheHiveFieldsRt>;
+
+const ConnectorTheHiveTypeFieldsRt = rt.strict({
+  type: rt.literal(ConnectorTypes.theHive),
+  fields: rt.union([TheHiveFieldsRt, rt.null]),
+});
+
+/**
  * None connector
  */
 
@@ -135,6 +151,7 @@ export const ConnectorTypeFieldsRt = rt.union([
   ConnectorServiceNowITSMTypeFieldsRt,
   ConnectorServiceNowSIRTypeFieldsRt,
   ConnectorSwimlaneTypeFieldsRt,
+  ConnectorTheHiveTypeFieldsRt,
 ]);
 
 /**
@@ -148,6 +165,7 @@ export const CaseUserActionConnectorRt = rt.union([
   rt.intersection([ConnectorServiceNowITSMTypeFieldsRt, rt.strict({ name: rt.string })]),
   rt.intersection([ConnectorServiceNowSIRTypeFieldsRt, rt.strict({ name: rt.string })]),
   rt.intersection([ConnectorSwimlaneTypeFieldsRt, rt.strict({ name: rt.string })]),
+  rt.intersection([ConnectorTheHiveTypeFieldsRt, rt.strict({ name: rt.string })]),
 ]);
 
 export const CaseConnectorRt = rt.intersection([
@@ -205,3 +223,4 @@ export type ConnectorServiceNowITSMTypeFields = rt.TypeOf<
   typeof ConnectorServiceNowITSMTypeFieldsRt
 >;
 export type ConnectorServiceNowSIRTypeFields = rt.TypeOf<typeof ConnectorServiceNowSIRTypeFieldsRt>;
+export type ConnectorTheHiveTypeFields = rt.TypeOf<typeof ConnectorTheHiveTypeFieldsRt>;

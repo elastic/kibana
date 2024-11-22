@@ -39,7 +39,7 @@ import {
   hostIsolationHttpMocks,
   hostIsolationRequestBodyMock,
   hostIsolationResponseMock,
-} from '../../../../common/lib/endpoint_isolation/mocks';
+} from '../../../../common/lib/endpoint/endpoint_isolation/mocks';
 import { endpointPageHttpMock, failedTransformStateMock } from '../mocks';
 import { HOST_METADATA_LIST_ROUTE } from '../../../../../common/endpoint/constants';
 
@@ -138,7 +138,6 @@ describe('endpoint list middleware', () => {
 
     await Promise.all([
       waitForAction('serverReturnedEndpointList'),
-      waitForAction('endpointPendingActionsStateChanged'),
       waitForAction('serverReturnedMetadataPatterns'),
       waitForAction('serverCancelledPolicyItemsLoading'),
       waitForAction('serverReturnedEndpointExistValue'),
@@ -233,42 +232,6 @@ describe('endpoint list middleware', () => {
       const failedAction = (await failedDispatched)
         .payload as FailedResourceState<HostIsolationResponse>;
       expect(failedAction.error).toBe(apiError);
-    });
-  });
-
-  describe('handle Endpoint Pending Actions state actions', () => {
-    let mockedApis: ReturnType<typeof endpointPageHttpMock>;
-
-    beforeEach(() => {
-      mockedApis = endpointPageHttpMock(fakeHttpServices);
-    });
-
-    it('should include all agents ids from the list when calling API', async () => {
-      const loadingPendingActions = waitForAction('endpointPendingActionsStateChanged', {
-        validate: (action) => isLoadedResourceState(action.payload),
-      });
-
-      dispatchUserChangedUrlToEndpointList();
-      await loadingPendingActions;
-
-      expect(mockedApis.responseProvider.pendingActions).toHaveBeenCalledWith({
-        path: expect.any(String),
-        version: '2023-10-31',
-        query: {
-          agent_ids: [
-            '0dc3661d-6e67-46b0-af39-6f12b025fcb0',
-            'fe16dda9-7f34-434c-9824-b4844880f410',
-            'f412728b-929c-48d5-bdb6-5a1298e3e607',
-            'd0405ddc-1e7c-48f0-93d7-d55f954bd745',
-            '46d78dd2-aedf-4d3f-b3a9-da445f1fd25f',
-            '5aafa558-26b8-4bb4-80e2-ac0644d77a3f',
-            'edac2c58-1748-40c3-853c-8fab48c333d7',
-            '06b7223a-bb2a-428a-9021-f1c0d2267ada',
-            'b8daa43b-7f73-4684-9221-dbc8b769405e',
-            'fbc06310-7d41-46b8-a5ea-ceed8a993b1a',
-          ],
-        },
-      });
     });
   });
 

@@ -18,6 +18,7 @@ import { HELP_GROUPS } from '../console_commands_definition';
 import { ExperimentalFeaturesService } from '../../../../../common/experimental_features_service';
 import type { CommandDefinition } from '../../../console';
 import type { HostMetadataInterface } from '../../../../../../common/endpoint/types';
+import { CONSOLE_RESPONSE_ACTION_COMMANDS } from '../../../../../../common/endpoint/service/response_actions/constants';
 
 jest.mock('../../../../../common/experimental_features_service');
 
@@ -43,7 +44,7 @@ describe('When displaying Endpoint Response Actions', () => {
 
   describe('for agent type endpoint', () => {
     beforeEach(() => {
-      (ExperimentalFeaturesService.get as jest.Mock).mockReturnValueOnce({
+      (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
         responseActionUploadEnabled: true,
       });
       commands = getEndpointConsoleCommands({
@@ -71,17 +72,14 @@ describe('When displaying Endpoint Response Actions', () => {
         HELP_GROUPS.responseActions.label
       );
 
-      expect(commandsInPanel).toEqual([
-        'isolate',
-        'release',
-        'status',
-        'processes',
-        'kill-process --pid',
-        'suspend-process --pid',
-        'get-file --path',
-        'execute --command',
-        'upload --file',
-      ]);
+      const expectedCommands: string[] = [...CONSOLE_RESPONSE_ACTION_COMMANDS];
+      // add status to the list of expected commands in that order
+      expectedCommands.splice(2, 0, 'status');
+
+      const helpCommandsString = commandsInPanel.map((command) => command.split(' ')[0]).join(',');
+
+      // verify that the help commands map to the command list in the same order
+      expect(helpCommandsString).toEqual(expectedCommands.join(','));
     });
   });
 

@@ -125,7 +125,7 @@ describe('Endpoints page', { tags: ['@ess', '@serverless'] }, () => {
 
     cy.get<number>('@originalPolicyRevision').then((originalRevision: number) => {
       const revisionRegex = new RegExp(`^rev\\. ${originalRevision + 1}$`);
-      cy.get('@endpointRow').findByTestSubj('policyListRevNo').contains(revisionRegex);
+      cy.get('@endpointRow').findByTestSubj('policyNameCellLink-revision').contains(revisionRegex);
     });
   });
 

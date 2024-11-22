@@ -17,7 +17,7 @@ export const debugTelemetryRoute = createApmServerRoute({
   options: {
     tags: ['access:apm', 'access:apm_write'],
   },
-  handler: async (resources): Promise<APMTelemetry | unknown> => {
+  handler: async (resources): Promise<APMTelemetry> => {
     const { plugins, context } = resources;
     const coreContext = await context.core;
     const taskManagerStart = await plugins.taskManager?.start();
@@ -30,6 +30,6 @@ export const debugTelemetryRoute = createApmServerRoute({
       APM_TELEMETRY_SAVED_OBJECT_ID
     );
 
-    return apmTelemetryObject.attributes;
+    return apmTelemetryObject.attributes as APMTelemetry;
   },
 });

@@ -14,6 +14,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
 import { createRule, CreateRuleBody } from '@kbn/alerts-ui-shared/src/common/apis/create_rule';
 import { fetchUiConfig as triggersActionsUiConfig } from '@kbn/alerts-ui-shared/src/common/apis/fetch_ui_config';
+import { IS_RULE_SPECIFIC_FLAPPING_ENABLED } from '@kbn/alerts-ui-shared/src/common/constants/rule_flapping';
 import {
   Rule,
   RuleTypeParams,
@@ -77,7 +78,7 @@ const RuleAdd = <
 }: RuleAddProps<Params, MetaData>) => {
   const onSaveHandler = onSave ?? reloadRules;
   const [metadata, setMetadata] = useState(initialMetadata);
-  const onChangeMetaData = useCallback((newMetadata) => setMetadata(newMetadata), []);
+  const onChangeMetaData = useCallback((newMetadata: any) => setMetadata(newMetadata), []);
 
   const initialRule: InitialRule = useMemo(() => {
     return {
@@ -253,11 +254,13 @@ const RuleAdd = <
 
   async function onSaveRule(): Promise<Rule | undefined> {
     try {
+      const { flapping, ...restRule } = rule;
       const newRule = await createRule({
         http,
         rule: {
-          ...rule,
+          ...restRule,
           ...(selectableConsumer && selectedConsumer ? { consumer: selectedConsumer } : {}),
+          ...(IS_RULE_SPECIFIC_FLAPPING_ENABLED ? { flapping } : {}),
         } as CreateRuleBody,
       });
       toasts.addSuccess(

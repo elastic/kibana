@@ -8,9 +8,9 @@
 import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import { InfraBackendLibs } from '../../../lib/infra_types';
 
-import { createValidationFunction } from '../../../../common/runtime_types';
 import { logAnalysisValidationV1 } from '../../../../common/http_api';
 
 export const initValidateLogAnalysisDatasetsRoute = ({
@@ -31,7 +31,7 @@ export const initValidateLogAnalysisDatasetsRoute = ({
         version: '1',
         validate: {
           request: {
-            body: createValidationFunction(
+            body: createRouteValidationFunction(
               logAnalysisValidationV1.validateLogEntryDatasetsRequestPayloadRT
             ),
           },

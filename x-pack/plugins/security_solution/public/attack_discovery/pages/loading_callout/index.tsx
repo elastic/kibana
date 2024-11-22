@@ -9,10 +9,10 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, useEuiTheme } from '@elas
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 
+import type { GenerationInterval } from '@kbn/elastic-assistant-common';
 import { useKibana } from '../../../common/lib/kibana';
 import { Countdown } from './countdown';
 import { LoadingMessages } from './loading_messages';
-import type { GenerationInterval } from '../../types';
 
 const BACKGROUND_COLOR_LIGHT = '#E6F1FA';
 const BACKGROUND_COLOR_DARK = '#0B2030';
@@ -20,13 +20,15 @@ const BACKGROUND_COLOR_DARK = '#0B2030';
 const BORDER_COLOR_DARK = '#0B2030';
 
 interface Props {
-  alertsCount: number;
+  alertsContextCount: number | null;
   approximateFutureTime: Date | null;
   connectorIntervals: GenerationInterval[];
+  localStorageAttackDiscoveryMaxAlerts: string | undefined;
 }
 
 const LoadingCalloutComponent: React.FC<Props> = ({
-  alertsCount,
+  alertsContextCount,
+  localStorageAttackDiscoveryMaxAlerts,
   approximateFutureTime,
   connectorIntervals,
 }) => {
@@ -46,11 +48,14 @@ const LoadingCalloutComponent: React.FC<Props> = ({
           `}
           grow={false}
         >
-          <LoadingMessages alertsCount={alertsCount} />
+          <LoadingMessages
+            alertsContextCount={alertsContextCount}
+            localStorageAttackDiscoveryMaxAlerts={localStorageAttackDiscoveryMaxAlerts}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [alertsCount, euiTheme.size.m]
+    [alertsContextCount, euiTheme.size.m, localStorageAttackDiscoveryMaxAlerts]
   );
 
   const isDarkMode = theme.getTheme().darkMode === true;

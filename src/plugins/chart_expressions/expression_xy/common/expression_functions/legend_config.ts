@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { LegendSize } from '@kbn/visualizations-plugin/common/constants';
+import { LegendLayout, LegendSize } from '@kbn/visualizations-plugin/common/constants';
 import { LEGEND_CONFIG } from '../constants';
 import { LegendConfigFn } from '../types';
 
@@ -105,6 +106,26 @@ export const legendConfigFunction: LegendConfigFn = {
       help: i18n.translate('expressionXY.legendConfig.legendStats.help', {
         defaultMessage: 'Specifies the legend stats.',
       }),
+    },
+    title: {
+      types: ['string'],
+      help: i18n.translate('expressionXY.legendConfig.title.help', {
+        defaultMessage: 'Specifies the legend title.',
+      }),
+    },
+    isTitleVisible: {
+      types: ['boolean'],
+      help: i18n.translate('expressionXY.legendConfig.isTitleVisible.help', {
+        defaultMessage: 'Specifies if the legend title is visible.',
+      }),
+    },
+    layout: {
+      types: ['string'],
+      help: i18n.translate('expressionXY.legendConfig.legendLayout.help', {
+        defaultMessage: 'Specifies the legend layout.',
+      }),
+      options: [LegendLayout.Table, LegendLayout.List],
+      strict: true,
     },
   },
   async fn(input, args, handlers) {

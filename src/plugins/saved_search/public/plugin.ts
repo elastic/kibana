@@ -1,42 +1,38 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, CoreStart, Plugin, StartServicesAccessor } from '@kbn/core/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { SpacesApi } from '@kbn/spaces-plugin/public';
-import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
-import { i18n } from '@kbn/i18n';
 import type {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import type { SOWithMetadata } from '@kbn/content-management-utils';
+import { CoreSetup, CoreStart, Plugin, StartServicesAccessor } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import {
-  getSavedSearch,
-  saveSavedSearch,
-  SaveSavedSearchOptions,
-  getNewSavedSearch,
-  SavedSearchUnwrapResult,
-  SearchByValueInput,
-} from './services/saved_searches';
-import { SavedSearch, SavedSearchAttributes } from '../common/types';
-import { SavedSearchType, LATEST_VERSION } from '../common';
-import { SavedSearchesService } from './services/saved_searches/saved_searches_service';
+import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { SpacesApi } from '@kbn/spaces-plugin/public';
+import { LATEST_VERSION, SavedSearchType } from '../common';
 import { kibanaContext } from '../common/expressions';
+import { SavedSearch, SavedSearchAttributes, SerializableSavedSearch } from '../common/types';
 import { getKibanaContext } from './expressions/kibana_context';
 import {
-  type SavedSearchAttributeService,
-  getSavedSearchAttributeService,
-  toSavedSearch,
+  getNewSavedSearch,
+  SavedSearchUnwrapResult,
+  saveSavedSearch,
+  SaveSavedSearchOptions,
+  byValueToSavedSearch,
 } from './services/saved_searches';
-import { savedObjectToEmbeddableAttributes } from './services/saved_searches/saved_search_attribute_service';
+import { checkForDuplicateTitle } from './services/saved_searches/check_for_duplicate_title';
+import { SavedSearchesService } from './services/saved_searches/saved_searches_service';
 
 /**
  * Saved search plugin public Setup contract
@@ -48,20 +44,23 @@ export interface SavedSearchPublicPluginSetup {}
  * Saved search plugin public Setup contract
  */
 export interface SavedSearchPublicPluginStart {
-  get: (savedSearchId: string) => ReturnType<typeof getSavedSearch>;
+  get: <Serialized extends boolean = false>(
+    savedSearchId: string,
+    serialized?: Serialized
+  ) => Promise<Serialized extends true ? SerializableSavedSearch : SavedSearch>;
   getNew: () => ReturnType<typeof getNewSavedSearch>;
   getAll: () => Promise<Array<SOWithMetadata<SavedSearchAttributes>>>;
   save: (
     savedSearch: SavedSearch,
     options?: SaveSavedSearchOptions
   ) => ReturnType<typeof saveSavedSearch>;
-  byValue: {
-    attributeService: SavedSearchAttributeService;
-    toSavedSearch: (
-      id: string | undefined,
-      result: SavedSearchUnwrapResult
-    ) => Promise<SavedSearch>;
-  };
+  checkForDuplicateTitle: (
+    props: Pick<OnSaveProps, 'newTitle' | 'isTitleDuplicateConfirmed' | 'onTitleDuplicate'>
+  ) => Promise<void>;
+  byValueToSavedSearch: <Serialized extends boolean = false>(
+    result: SavedSearchUnwrapResult,
+    serialized?: Serialized
+  ) => Promise<Serialized extends true ? SerializableSavedSearch : SavedSearch>;
 }
 
 /**
@@ -118,19 +117,6 @@ export class SavedSearchPublicPlugin
 
     expressions.registerType(kibanaContext);
 
-    embeddable.registerSavedObjectToPanelMethod<SavedSearchAttributes, SearchByValueInput>(
-      SavedSearchType,
-      (savedObject) => {
-        if (!savedObject.managed) {
-          return { savedObjectId: savedObject.id };
-        }
-
-        return {
-          attributes: savedObjectToEmbeddableAttributes(savedObject),
-        };
-      }
-    );
-
     return {};
   }
 
@@ -148,17 +134,34 @@ export class SavedSearchPublicPlugin
     const service = new SavedSearchesService(deps);
 
     return {
-      get: (savedSearchId: string) => service.get(savedSearchId),
+      get: <Serialized extends boolean = false>(
+        savedSearchId: string,
+        serialized?: Serialized
+      ): Promise<Serialized extends true ? SerializableSavedSearch : SavedSearch> =>
+        service.get(savedSearchId, serialized),
       getAll: () => service.getAll(),
       getNew: () => service.getNew(),
       save: (savedSearch: SavedSearch, options?: SaveSavedSearchOptions) => {
         return service.save(savedSearch, options);
       },
-      byValue: {
-        attributeService: getSavedSearchAttributeService(deps),
-        toSavedSearch: async (id: string | undefined, result: SavedSearchUnwrapResult) => {
-          return toSavedSearch(id, result, deps);
-        },
+      checkForDuplicateTitle: (
+        props: Pick<OnSaveProps, 'newTitle' | 'isTitleDuplicateConfirmed' | 'onTitleDuplicate'>
+      ) => {
+        return checkForDuplicateTitle({
+          title: props.newTitle,
+          isTitleDuplicateConfirmed: props.isTitleDuplicateConfirmed,
+          onTitleDuplicate: props.onTitleDuplicate,
+          contentManagement: deps.contentManagement,
+        });
+      },
+      byValueToSavedSearch: async <
+        Serialized extends boolean = boolean,
+        ReturnType = Serialized extends true ? SerializableSavedSearch : SavedSearch
+      >(
+        result: SavedSearchUnwrapResult,
+        serialized?: Serialized
+      ): Promise<ReturnType> => {
+        return (await byValueToSavedSearch(result, deps, serialized)) as ReturnType;
       },
     };
   }

@@ -49,7 +49,6 @@ components:
         - high_impact
         - extreme_impact
       description: The criticality level of the asset.
-
     CreateAssetCriticalityRecord:
       allOf:
         - $ref: '#/components/schemas/AssetCriticalityRecordIdParts'
@@ -57,24 +56,12 @@ components:
           properties:
             criticality_level:
               $ref: '#/components/schemas/AssetCriticalityLevel'
-            refresh:
-              type: string
-              enum: [wait_for]
-              description: If 'wait_for' the request will wait for the index refresh.
           required:
             - criticality_level
-    DeleteAssetCriticalityRecord:
-      allOf:
-        - $ref: '#/components/schemas/AssetCriticalityRecordIdParts'
-        - type: object
-          properties:
-            refresh:
-              type: string
-              enum: [wait_for]
-              description: If 'wait_for' the request will wait for the index refresh.
     AssetCriticalityRecord:
       allOf:
         - $ref: '#/components/schemas/CreateAssetCriticalityRecord'
+        - $ref: '#/components/schemas/AssetCriticalityRecordEcsParts'
         - type: object
           properties:
             '@timestamp':
@@ -84,3 +71,43 @@ components:
               description: The time the record was created or updated.
           required:
             - '@timestamp'
+    AssetCriticalityRecordEcsParts:
+      type: object
+      properties:
+        'asset':
+          type: object
+          properties:
+            'criticality':
+              $ref: '#/components/schemas/AssetCriticalityLevel'
+          required:
+            - 'asset'
+        'host':
+          type: object
+          properties:
+            'name':
+              type: string
+            'asset':
+              type: object
+              properties:
+                'criticality':
+                  $ref: '#/components/schemas/AssetCriticalityLevel'
+              required:
+                - 'criticality'
+          required:
+            - 'name'
+        'user':
+          type: object
+          properties:
+            'name':
+              type: string
+            'asset':
+              type: object
+              properties:
+                'criticality':
+                  $ref: '#/components/schemas/AssetCriticalityLevel'
+              required:
+                - 'criticality'
+          required:
+            - 'name'
+      required:
+        - 'asset'

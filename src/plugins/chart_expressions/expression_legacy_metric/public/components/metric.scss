@@ -6,7 +6,6 @@
 //   mtrChart__legend-isLoading
 
 .legacyMtrVis {
-  @include euiScrollBar;
   height: 100%;
   width: 100%;
   display: flex;
@@ -15,6 +14,7 @@
   align-items: center;
   flex-wrap: wrap;
   overflow: auto;
+  @include euiScrollBar;
 }
 
 .legacyMtrVis__value {

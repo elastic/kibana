@@ -30,7 +30,11 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
     .put({
       access: 'public',
       path: '/api/osquery/saved_queries/{id}',
-      options: { tags: [`access:${PLUGIN_ID}-writeSavedQueries`] },
+      security: {
+        authz: {
+          requiredPrivileges: [`${PLUGIN_ID}-writeSavedQueries`],
+        },
+      },
     })
     .addVersion(
       {
@@ -51,7 +55,7 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
       async (context, request, response) => {
         const coreContext = await context.core;
         const savedObjectsClient = coreContext.savedObjects.client;
-        const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
+        const currentUser = coreContext.security.authc.getCurrentUser()?.username;
 
         const {
           id,

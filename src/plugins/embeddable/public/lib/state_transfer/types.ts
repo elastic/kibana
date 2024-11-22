@@ -1,12 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import { Reference } from '@kbn/content-management-utils';
 
 export const EMBEDDABLE_EDITOR_STATE_KEY = 'embeddable_editor_state';
 
@@ -39,23 +38,15 @@ export const EMBEDDABLE_PACKAGE_STATE_KEY = 'embeddable_package_state';
  */
 export interface EmbeddablePackageState {
   type: string;
+  /**
+   * For react embeddables, this input must be runtime state.
+   */
   input: object;
   embeddableId?: string;
   size?: {
     width?: number;
     height?: number;
   };
-  /**
-   * Copy dashboard panel transfers serialized panel state for React embeddables.
-   * The rawState will be passed into the input and references are passed separately
-   * so the container can update its references array and the updated references
-   * are correctly passed to the factory's deserialize method.
-   *
-   * Legacy embeddables have already injected the references
-   * into the input state, so they will not pass references.
-   */
-  references?: Reference[];
-
   /**
    * Pass current search session id when navigating to an editor,
    * Editors could use it continue previous search session

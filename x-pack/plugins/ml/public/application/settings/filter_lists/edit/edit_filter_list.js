@@ -30,10 +30,8 @@ import { EditFilterListHeader } from './header';
 import { EditFilterListToolbar } from './toolbar';
 import { ItemsGrid } from '../../../components/items_grid';
 import { isValidFilterListId, saveFilterList } from './utils';
-import { ml } from '../../../services/ml_api_service';
 import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
 import { ML_PAGES } from '../../../../../common/constants/locator';
-import { getDocLinks } from '../../../util/dependency_cache';
 import { HelpMenu } from '../../../components/help_menu';
 
 const DEFAULT_ITEMS_PER_PAGE = 50;
@@ -116,7 +114,8 @@ export class EditFilterListUI extends Component {
   };
 
   loadFilterList = (filterId) => {
-    ml.filters
+    const mlApi = this.props.kibana.services.mlServices.mlApi;
+    mlApi.filters
       .filters({ filterId })
       .then((filter) => {
         this.setLoadedFilterState(filter);
@@ -285,7 +284,14 @@ export class EditFilterListUI extends Component {
 
     const { loadedFilter, newFilterId, description, items } = this.state;
     const filterId = this.props.filterId !== undefined ? this.props.filterId : newFilterId;
-    saveFilterList(filterId, description, items, loadedFilter)
+    saveFilterList(
+      this.props.kibana.services.notifications.toasts,
+      this.props.kibana.services.mlServices.mlApi,
+      filterId,
+      description,
+      items,
+      loadedFilter
+    )
       .then((savedFilter) => {
         this.setLoadedFilterState(savedFilter);
         this.returnToFiltersList();
@@ -321,7 +327,7 @@ export class EditFilterListUI extends Component {
 
     const totalItemCount = items !== undefined ? items.length : 0;
 
-    const helpLink = getDocLinks().links.ml.customRules;
+    const helpLink = this.props.kibana.services.docLinks.links.ml.customRules;
 
     return (
       <>

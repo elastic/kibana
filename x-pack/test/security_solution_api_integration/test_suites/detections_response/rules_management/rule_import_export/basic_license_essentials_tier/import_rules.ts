@@ -17,7 +17,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const securitySolutionApi = getService('securitySolutionApi');
   const log = getService('log');
 
-  describe('@ess @serverless import_rules', () => {
+  describe('@ess @serverless @serverlessQA import_rules', () => {
     describe('importing rules with an index', () => {
       afterEach(async () => {
         await deleteAllRules(supertest, log);

@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 
-import { EuiPanel, useEuiTheme, EuiResizeObserver, EuiSpacer } from '@elastic/eui';
+import { EuiPanel, useEuiTheme, EuiResizeObserver, EuiSpacer, EuiProgress } from '@elastic/eui';
 import { Chart, Settings, Heatmap, ScaleType, Tooltip, LEGACY_LIGHT_THEME } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { usePingStatusesIsLoading } from '../hooks/use_ping_statuses';
 import { MonitorStatusHeader } from './monitor_status_header';
 import { MonitorStatusCellTooltip } from './monitor_status_cell_tooltip';
 import { MonitorStatusLegend } from './monitor_status_legend';
@@ -32,9 +31,9 @@ export const MonitorStatusPanel = ({
   onBrushed,
 }: MonitorStatusPanelProps) => {
   const { euiTheme, colorMode } = useEuiTheme();
-  const { timeBins, handleResize, getTimeBinByXValue, xDomain, intervalByWidth } =
-    useMonitorStatusData({ from, to });
-  const isPingStatusesLoading = usePingStatusesIsLoading();
+  const initialSizeRef = useRef<HTMLDivElement | null>(null);
+  const { loading, timeBins, handleResize, getTimeBinByXValue, xDomain, minsPerBin } =
+    useMonitorStatusData({ from, to, initialSizeRef });
 
   const heatmap = useMemo(() => {
     return getMonitorStatusChartTheme(euiTheme, brushable);
@@ -53,61 +52,66 @@ export const MonitorStatusPanel = ({
 
       <EuiSpacer size="m" />
 
-      <EuiResizeObserver onResize={handleResize}>
-        {(resizeRef) => (
-          <div ref={resizeRef}>
-            <Chart
-              size={{
-                height: 60,
-              }}
-            >
-              <Tooltip
-                customTooltip={({ values }) => (
-                  <MonitorStatusCellTooltip
-                    timeBin={getTimeBinByXValue(values?.[0]?.datum?.x)}
-                    isLoading={isPingStatusesLoading}
+      <div ref={initialSizeRef}>
+        <EuiResizeObserver onResize={(e) => handleResize(e)}>
+          {(resizeRef) => (
+            <div ref={resizeRef}>
+              {minsPerBin && (
+                <Chart
+                  size={{
+                    height: 60,
+                  }}
+                >
+                  <Tooltip
+                    customTooltip={({ values }) => (
+                      <MonitorStatusCellTooltip
+                        timeBin={getTimeBinByXValue(values?.[0]?.datum?.x)}
+                        isLoading={loading}
+                      />
+                    )}
                   />
-                )}
-              />
-              <Settings
-                showLegend={false}
-                xDomain={xDomain}
-                theme={{ heatmap }}
-                // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-                baseTheme={LEGACY_LIGHT_THEME}
-                onBrushEnd={(brushArea) => {
-                  onBrushed?.(getBrushData(brushArea));
-                }}
-                locale={i18n.getLocale()}
-              />
-              <Heatmap
-                id="monitor-details-monitor-status-chart"
-                colorScale={{
-                  type: 'bands',
-                  bands: getColorBands(euiTheme, colorMode),
-                }}
-                data={timeBins}
-                xAccessor={(timeBin) => timeBin.end}
-                yAccessor={() => 'T'}
-                valueAccessor={(timeBin) => timeBin.value}
-                valueFormatter={(d) => d.toFixed(2)}
-                xAxisLabelFormatter={getXAxisLabelFormatter(intervalByWidth)}
-                timeZone="UTC"
-                xScale={{
-                  type: ScaleType.Time,
-                  interval: {
-                    type: 'calendar',
-                    unit: 'm',
-                    value: intervalByWidth,
-                  },
-                }}
-              />
-            </Chart>
-          </div>
-        )}
-      </EuiResizeObserver>
+                  <Settings
+                    showLegend={false}
+                    xDomain={xDomain}
+                    theme={{ heatmap }}
+                    // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+                    baseTheme={LEGACY_LIGHT_THEME}
+                    onBrushEnd={(brushArea) => {
+                      onBrushed?.(getBrushData(brushArea));
+                    }}
+                    locale={i18n.getLocale()}
+                  />
+                  <Heatmap
+                    id="monitor-details-monitor-status-chart"
+                    colorScale={{
+                      type: 'bands',
+                      bands: getColorBands(euiTheme, colorMode),
+                    }}
+                    data={timeBins}
+                    xAccessor={({ end }) => end}
+                    yAccessor={() => 'T'}
+                    valueAccessor={(timeBin) => timeBin.value}
+                    valueFormatter={(d) => d.toFixed(2)}
+                    xAxisLabelFormatter={getXAxisLabelFormatter(minsPerBin)}
+                    timeZone="UTC"
+                    xScale={{
+                      type: ScaleType.Time,
+                      interval: {
+                        type: 'calendar',
+                        unit: 'm',
+                        value: minsPerBin,
+                      },
+                    }}
+                  />
+                </Chart>
+              )}
+            </div>
+          )}
+        </EuiResizeObserver>
+      </div>
 
       <MonitorStatusLegend brushable={brushable} />
+      {loading && <EuiProgress size="xs" color="accent" />}
     </EuiPanel>
   );
 };

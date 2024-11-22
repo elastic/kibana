@@ -5,17 +5,29 @@
  * 2.0.
  */
 
+import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
-  const supertest = getService('supertest');
+  const roleScopedSupertest = getService('roleScopedSupertest');
+  let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
 
   describe('security/features', function () {
+    before(async () => {
+      supertestAdminWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
+        'admin',
+        {
+          useCookieHeader: true,
+          withInternalHeaders: true,
+        }
+      );
+    });
+
     it('route access disabled', async () => {
-      const { body, status } = await supertest
-        .get('/internal/security/_check_security_features')
-        .set(svlCommonApi.getInternalRequestHeader());
+      const { body, status } = await supertestAdminWithCookieCredentials.get(
+        '/internal/security/_check_security_features'
+      );
       svlCommonApi.assertApiNotFound(body, status);
     });
   });

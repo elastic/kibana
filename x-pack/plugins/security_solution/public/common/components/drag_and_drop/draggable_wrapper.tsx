@@ -12,6 +12,7 @@ import type {
   DraggableProvided,
   DraggableStateSnapshot,
   DraggingStyle,
+  DroppableProvided,
   NotDraggingStyle,
 } from '@hello-pangea/dnd';
 import { Draggable, Droppable } from '@hello-pangea/dnd';
@@ -44,7 +45,7 @@ DragEffects.displayName = 'DragEffects';
  * writing, there's no hook equivalent for `componentDidCatch`, per
  * https://reactjs.org/docs/hooks-faq.html#do-hooks-cover-all-use-cases-for-classes
  */
-class DragDropErrorBoundary extends React.PureComponent {
+class DragDropErrorBoundary extends React.PureComponent<React.PropsWithChildren<{}>> {
   componentDidCatch() {
     this.forceUpdate(); // required for recovery
   }
@@ -89,13 +90,13 @@ export const ProviderContentWrapper = styled.span`
   }
 `;
 
-type RenderFunctionProp = (
+export type RenderFunctionProp = (
   props: DataProvider,
   provided: DraggableProvided | null,
   state: DraggableStateSnapshot
 ) => React.ReactNode;
 
-interface Props {
+export interface DraggableWrapperProps {
   dataProvider: DataProvider;
   fieldType?: string;
   isAggregatable?: boolean;
@@ -128,7 +129,7 @@ export const getStyle = (
   };
 };
 
-const DraggableOnWrapper: React.FC<Props> = React.memo(
+const DraggableOnWrapper: React.FC<DraggableWrapperProps> = React.memo(
   ({ dataProvider, render, scopeId, truncate, hideTopN }) => {
     const [providerRegistered, setProviderRegistered] = useState(false);
     const isDisabled = dataProvider.id.includes(`-${ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID}-`);
@@ -156,7 +157,7 @@ const DraggableOnWrapper: React.FC<Props> = React.memo(
     );
 
     const RenderClone = useCallback(
-      (provided, snapshot) => (
+      (provided: DraggableProvided, snapshot: DraggableStateSnapshot) => (
         <ConditionalPortal registerProvider={registerProvider}>
           <div
             {...provided.draggableProps}
@@ -178,7 +179,7 @@ const DraggableOnWrapper: React.FC<Props> = React.memo(
     );
 
     const DraggableContent = useCallback(
-      (provided, snapshot) => (
+      (provided: DraggableProvided, snapshot: DraggableStateSnapshot) => (
         <ProviderContainer
           {...provided.draggableProps}
           {...provided.dragHandleProps}
@@ -215,7 +216,7 @@ const DraggableOnWrapper: React.FC<Props> = React.memo(
     );
 
     const DroppableContent = useCallback(
-      (droppableProvided) => (
+      (droppableProvided: DroppableProvided) => (
         <div ref={droppableProvided.innerRef} {...droppableProvided.droppableProps}>
           <div
             className={DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME}
@@ -265,7 +266,7 @@ const DraggableOnWrapper: React.FC<Props> = React.memo(
 );
 DraggableOnWrapper.displayName = 'DraggableOnWrapper';
 
-export const DraggableWrapper: React.FC<Props> = React.memo(
+export const DraggableWrapper: React.FC<DraggableWrapperProps> = React.memo(
   ({ dataProvider, isDraggable = false, render, scopeId, truncate, hideTopN }) => {
     const content = useMemo(
       () => (

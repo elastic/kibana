@@ -6,19 +6,16 @@
  */
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
-
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   BulkUpdateRulesRequestBody,
   validateUpdateRuleProps,
   BulkCrudRulesResponse,
 } from '../../../../../../../common/api/detection_engine/rule_management';
-
-import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { DETECTION_ENGINE_RULES_BULK_UPDATE } from '../../../../../../../common/constants';
 import { getIdBulkError } from '../../../utils/utils';
-import { transformValidateBulkError } from '../../../utils/validate';
 import {
   transformBulkError,
   buildSiemResponse,
@@ -32,14 +29,20 @@ import { RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS } from '../../timeouts';
 
 /**
  * @deprecated since version 8.2.0. Use the detection_engine/rules/_bulk_action API instead
+ *
+ * TODO: https://github.com/elastic/kibana/issues/193184 Delete this route and clean up the code
  */
 export const bulkUpdateRulesRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.versioned
     .put({
       access: 'public',
       path: DETECTION_ENGINE_RULES_BULK_UPDATE,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
       options: {
-        tags: ['access:securitySolution'],
         timeout: {
           idleSocket: RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS,
         },
@@ -99,11 +102,11 @@ export const bulkUpdateRulesRoute = (router: SecuritySolutionPluginRouter, logge
                   ruleId: payloadRule.id,
                 });
 
-                const rule = await detectionRulesClient.updateRule({
+                const updatedRule = await detectionRulesClient.updateRule({
                   ruleUpdate: payloadRule,
                 });
 
-                return transformValidateBulkError(rule.id, rule);
+                return updatedRule;
               } catch (err) {
                 return transformBulkError(idOrRuleIdOrUnknown, err);
               }

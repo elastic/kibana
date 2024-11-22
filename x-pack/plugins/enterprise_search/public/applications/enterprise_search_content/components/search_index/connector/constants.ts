@@ -34,3 +34,11 @@ export const getConnectorTemplate = ({
     host: "${host || 'http://localhost:9200'}"
     api_key: "${apiKeyData?.encoded || ''}"
 `;
+
+export const getRunFromDockerSnippet = ({ version }: { version: string }) => `docker run \\
+-v "$HOME/elastic-connectors:/config" \\
+--tty \\
+--rm \\
+docker.elastic.co/integrations/elastic-connectors:${version} \\
+/app/bin/elastic-ingest \\
+-c /config/config.yml`;

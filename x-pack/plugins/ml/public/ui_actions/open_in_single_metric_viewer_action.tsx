@@ -42,7 +42,7 @@ export function createOpenInSingleMetricViewerAction(
     type: OPEN_IN_SINGLE_METRIC_VIEWER_ACTION,
     order: 100,
     getIconType(): string {
-      return 'visLine';
+      return 'singleMetricViewer';
     },
     getDisplayName() {
       return i18n.translate('xpack.ml.actions.openInSingleMetricViewerTitle', {
@@ -55,7 +55,7 @@ export function createOpenInSingleMetricViewerAction(
 
       if (isSingleMetricViewerEmbeddableContext(context)) {
         const { embeddable } = context;
-        const { jobIds, selectedEntities, selectedDetectorIndex } = embeddable;
+        const { forecastId, jobIds, selectedEntities, selectedDetectorIndex } = embeddable;
 
         return locator.getUrl(
           {
@@ -72,6 +72,7 @@ export function createOpenInSingleMetricViewerAction(
               query: {},
               entities: selectedEntities?.getValue(),
               detectorIndex: selectedDetectorIndex?.getValue(),
+              forecastId: forecastId?.getValue(),
             },
           },
           { absolute: true }
@@ -84,8 +85,8 @@ export function createOpenInSingleMetricViewerAction(
       }
       const [{ application }] = await getStartServices();
       const singleMetricViewerUrl = await this.getHref!(context);
-      if (singleMetricViewerUrl) {
-        await application.navigateToUrl(singleMetricViewerUrl!);
+      if (singleMetricViewerUrl !== undefined) {
+        await application.navigateToUrl(singleMetricViewerUrl);
       }
     },
     async isCompatible(context: EmbeddableApiContext) {

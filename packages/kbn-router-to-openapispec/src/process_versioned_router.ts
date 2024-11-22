@@ -1,21 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
   type CoreVersionedRouter,
   versionHandlerResolvers,
-  VersionedRouterRoute,
   unwrapVersionedResponseBodyValidation,
 } from '@kbn/core-http-router-server-internal';
+import type { RouteMethod, VersionedRouterRoute } from '@kbn/core-http-server';
 import type { OpenAPIV3 } from 'openapi-types';
+import { extractAuthzDescription } from './extract_authz_description';
 import type { GenerateOpenApiDocumentOptionsFilters } from './generate_oas';
 import type { OasConverter } from './oas_converter';
-import type { OperationIdCounter } from './operation_id_counter';
+import { isReferenceObject } from './oas_converter/common';
 import {
   prepareRoutes,
   getPathParameters,
@@ -24,12 +26,16 @@ import {
   getVersionedHeaderParam,
   getVersionedContentTypeString,
   extractTags,
+  mergeResponseContent,
+  getXsrfHeaderForMethod,
+  setXState,
+  GetOpId,
 } from './util';
 
 export const processVersionedRouter = (
   appRouter: CoreVersionedRouter,
   converter: OasConverter,
-  getOpId: OperationIdCounter,
+  getOpId: GetOpId,
   filters?: GenerateOpenApiDocumentOptionsFilters
 ) => {
   const routes = prepareRoutes(appRouter.getRoutes(), filters);
@@ -77,16 +83,33 @@ export const processVersionedRouter = (
         if (reqQuery) {
           queryObjects = converter.convertQuery(reqQuery);
         }
-        parameters = [getVersionedHeaderParam(version, versions), ...pathObjects, ...queryObjects];
+        parameters = [
+          getVersionedHeaderParam(version, versions),
+          ...getXsrfHeaderForMethod(route.method as RouteMethod, route.options.options),
+          ...pathObjects,
+          ...queryObjects,
+        ];
+      }
+      let description = `${route.options.description ?? ''}`;
+      if (route.options.security) {
+        const authzDescription = extractAuthzDescription(route.options.security);
+
+        description += `${route.options.description && authzDescription ? '<br/><br/>' : ''}${
+          authzDescription ?? ''
+        }`;
       }
 
       const hasBody = Boolean(extractValidationSchemaFromVersionedHandler(handler)?.request?.body);
       const contentType = extractContentType(route.options.options?.body);
       const hasVersionFilter = Boolean(filters?.version);
+      // If any handler is deprecated we show deprecated: true in the spec
+      const hasDeprecations = route.handlers.some(({ options }) => !!options.options?.deprecated);
       const operation: OpenAPIV3.OperationObject = {
         summary: route.options.summary ?? '',
-        description: route.options.description,
         tags: route.options.options?.tags ? extractTags(route.options.options.tags) : [],
+        ...(description ? { description } : {}),
+        ...(hasDeprecations ? { deprecated: true } : {}),
+        ...(route.options.discontinued ? { 'x-discontinued': route.options.discontinued } : {}),
         requestBody: hasBody
           ? {
               content: hasVersionFilter
@@ -98,8 +121,11 @@ export const processVersionedRouter = (
           ? extractVersionedResponse(handler, converter, contentType)
           : extractVersionedResponses(route, converter, contentType),
         parameters,
-        operationId: getOpId(route.path),
+        operationId: getOpId({ path: route.path, method: route.method }),
       };
+
+      setXState(route.options.options?.availability, operation);
+
       const path: OpenAPIV3.PathItemObject = {
         [route.method]: operation,
       };
@@ -152,23 +178,40 @@ export const extractVersionedResponse = (
   const result: OpenAPIV3.ResponsesObject = {};
   const { unsafe, ...responses } = schemas.response;
   for (const [statusCode, responseSchema] of Object.entries(responses)) {
-    const maybeSchema = unwrapVersionedResponseBodyValidation(responseSchema.body);
-    const schema = converter.convert(maybeSchema);
-    const contentTypeString = getVersionedContentTypeString(
-      handler.options.version,
-      responseSchema.bodyContentType ? [responseSchema.bodyContentType] : contentType
-    );
-    result[statusCode] = {
-      ...result[statusCode],
-      content: {
-        ...((result[statusCode] ?? {}) as OpenAPIV3.ResponseObject).content,
+    let newContent: OpenAPIV3.ResponseObject['content'];
+    if (responseSchema.body) {
+      const maybeSchema = unwrapVersionedResponseBodyValidation(responseSchema.body);
+      const schema = converter.convert(maybeSchema);
+      const contentTypeString = getVersionedContentTypeString(
+        handler.options.version,
+        responseSchema.bodyContentType ? [responseSchema.bodyContentType] : contentType
+      );
+      newContent = {
         [contentTypeString]: {
           schema,
         },
-      },
+      };
+    }
+    result[statusCode] = {
+      ...result[statusCode],
+      description: responseSchema.description!,
+      ...mergeResponseContent(
+        ((result[statusCode] ?? {}) as OpenAPIV3.ResponseObject).content,
+        newContent
+      ),
     };
   }
   return result;
+};
+
+const mergeDescriptions = (
+  existing: undefined | string,
+  toAppend: OpenAPIV3.ResponsesObject[string]
+): string | undefined => {
+  if (!isReferenceObject(toAppend) && toAppend.description) {
+    return existing?.length ? `${existing}\n${toAppend.description}` : toAppend.description;
+  }
+  return existing;
 };
 
 const mergeVersionedResponses = (a: OpenAPIV3.ResponsesObject, b: OpenAPIV3.ResponsesObject) => {
@@ -177,6 +220,7 @@ const mergeVersionedResponses = (a: OpenAPIV3.ResponsesObject, b: OpenAPIV3.Resp
     const existing = (result[statusCode] as OpenAPIV3.ResponseObject) ?? {};
     result[statusCode] = {
       ...result[statusCode],
+      description: mergeDescriptions(existing.description, responseContent)!,
       content: Object.assign(
         {},
         existing.content,

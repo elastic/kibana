@@ -25,7 +25,7 @@ const components = [
 ];
 
 export const indexTemplate: IndexTemplateDef = {
-  namespace: 'fake_logs',
+  name: 'logs-fake_logs@template',
   template: { ...template, composed_of: components.map(({ name }) => name) },
   components,
 };

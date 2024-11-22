@@ -6,7 +6,7 @@
  */
 
 import { isBoom } from '@hapi/boom';
-import { createValidationFunction } from '../../../common/runtime_types';
+import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import {
   inventoryViewRequestParamsRT,
   INVENTORY_VIEW_URL_ENTITY,
@@ -22,7 +22,7 @@ export const initDeleteInventoryViewRoute = ({
       method: 'delete',
       path: INVENTORY_VIEW_URL_ENTITY,
       validate: {
-        params: createValidationFunction(inventoryViewRequestParamsRT),
+        params: createRouteValidationFunction(inventoryViewRequestParamsRT),
       },
     },
     async (_requestContext, request, response) => {

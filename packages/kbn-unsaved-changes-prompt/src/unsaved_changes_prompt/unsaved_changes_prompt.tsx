@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { useEffect } from 'react';
@@ -51,6 +52,20 @@ export const useUnsavedChangesPrompt = ({
   confirmButtonText = DEFAULT_CONFIRM_BUTTON,
   cancelButtonText = DEFAULT_CANCEL_BUTTON,
 }: Props) => {
+  useEffect(() => {
+    if (hasUnsavedChanges) {
+      const handler = (event: BeforeUnloadEvent) => {
+        // These 2 lines of code are the recommendation from MDN for triggering a browser prompt for confirming
+        // whether or not a user wants to leave the current site.
+        event.preventDefault();
+        event.returnValue = '';
+      };
+      // Adding this handler will prompt users if they are navigating to a new page, outside of the Kibana SPA
+      window.addEventListener('beforeunload', handler);
+      return () => window.removeEventListener('beforeunload', handler);
+    }
+  }, [hasUnsavedChanges]);
+
   useEffect(() => {
     if (!hasUnsavedChanges) {
       return;

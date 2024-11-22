@@ -29,6 +29,9 @@ export function apmInstanceRoute(server: MonitoringCore) {
       params: validateParams,
       body: validateBody,
     },
+    options: {
+      access: 'internal',
+    },
     async handler(req) {
       const apmUuid = req.params.apmUuid;
       const config = server.config;

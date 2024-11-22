@@ -20,7 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ApiKey } from '@kbn/security-plugin/common';
+import { ApiKey } from '@kbn/security-plugin-types-common';
 
 import { KibanaLogic } from '../../kibana';
 
@@ -61,6 +61,7 @@ export const ApiKeyPanelContent: React.FC<ApiKeyPanelContent> = ({ apiKeys, open
               <EuiFlexGroup direction="row" gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <EuiButton
+                    data-test-subj="enterpriseSearchApiKeyPanelContentButton"
                     key="viewApiKeys"
                     iconType="plusInCircle"
                     onClick={openApiKeyModal}
@@ -78,6 +79,7 @@ export const ApiKeyPanelContent: React.FC<ApiKeyPanelContent> = ({ apiKeys, open
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButton
+                    data-test-subj="enterpriseSearchApiKeyPanelContentButton"
                     key="viewApiKeys"
                     iconType="popout"
                     iconSide="right"
@@ -100,26 +102,18 @@ export const ApiKeyPanelContent: React.FC<ApiKeyPanelContent> = ({ apiKeys, open
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="s">
-                <EuiFlexItem>
-                  <EuiText size="xs" color="subdued">
-                    <FormattedMessage
-                      id="xpack.enterpriseSearch.apiKey.activeKeys"
-                      defaultMessage="{number} active API keys."
-                      values={{
-                        number: (
-                          <EuiBadge
-                            color={(apiKeys?.length || 0) > 0 ? 'success' : 'warning'}
-                            data-test-subj="api-keys-count-badge"
-                          >
-                            {apiKeys?.length || 0}
-                          </EuiBadge>
-                        ),
-                      }}
-                    />
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <EuiBadge
+                color={(apiKeys?.length || 0) > 0 ? 'success' : 'warning'}
+                data-test-subj="api-keys-count-badge"
+              >
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.apiKey.activeKeys"
+                  defaultMessage="{number} active API keys"
+                  values={{
+                    number: apiKeys?.length || 0,
+                  }}
+                />
+              </EuiBadge>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

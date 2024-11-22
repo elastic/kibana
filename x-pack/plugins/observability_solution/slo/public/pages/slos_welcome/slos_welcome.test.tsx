@@ -11,11 +11,10 @@ import React from 'react';
 import Router from 'react-router-dom';
 import { paths } from '../../../common/locators/paths';
 import { emptySloList, sloList } from '../../data/slo/slo';
-import { useCapabilities } from '../../hooks/use_capabilities';
-import { useFetchSloGlobalDiagnosis } from '../../hooks/use_fetch_global_diagnosis';
+import { usePermissions } from '../../hooks/use_permissions';
 import { useFetchSloList } from '../../hooks/use_fetch_slo_list';
 import { useLicense } from '../../hooks/use_license';
-import { useKibana } from '../../utils/kibana_react';
+import { useKibana } from '../../hooks/use_kibana';
 import { render } from '../../utils/test_helper';
 import { SlosWelcomePage } from './slos_welcome';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
@@ -26,11 +25,10 @@ jest.mock('react-router-dom', () => ({
 }));
 
 jest.mock('@kbn/observability-shared-plugin/public');
-jest.mock('../../utils/kibana_react');
+jest.mock('../../hooks/use_kibana');
 jest.mock('../../hooks/use_license');
 jest.mock('../../hooks/use_fetch_slo_list');
-jest.mock('../../hooks/use_capabilities');
-jest.mock('../../hooks/use_fetch_global_diagnosis');
+jest.mock('../../hooks/use_permissions');
 
 const HeaderMenuPortalMock = HeaderMenuPortal as jest.Mock;
 HeaderMenuPortalMock.mockReturnValue(<div>Portal node</div>);
@@ -38,8 +36,7 @@ HeaderMenuPortalMock.mockReturnValue(<div>Portal node</div>);
 const useKibanaMock = useKibana as jest.Mock;
 const useLicenseMock = useLicense as jest.Mock;
 const useFetchSloListMock = useFetchSloList as jest.Mock;
-const useCapabilitiesMock = useCapabilities as jest.Mock;
-const useGlobalDiagnosisMock = useFetchSloGlobalDiagnosis as jest.Mock;
+const usePermissionsMock = usePermissions as jest.Mock;
 
 const mockNavigate = jest.fn();
 
@@ -64,7 +61,6 @@ describe('SLOs Welcome Page', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockKibana();
-    useCapabilitiesMock.mockReturnValue({ hasWriteCapabilities: true, hasReadCapabilities: true });
     jest
       .spyOn(Router, 'useLocation')
       .mockReturnValue({ pathname: '/slos/welcome', search: '', state: '', hash: '' });
@@ -74,9 +70,11 @@ describe('SLOs Welcome Page', () => {
     it('renders the welcome message with subscription buttons', async () => {
       useFetchSloListMock.mockReturnValue({ isLoading: false, data: emptySloList });
       useLicenseMock.mockReturnValue({ hasAtLeast: () => false });
-      useGlobalDiagnosisMock.mockReturnValue({
+      usePermissionsMock.mockReturnValue({
+        isLoading: false,
         data: {
-          userPrivileges: { write: { has_all_requested: true }, read: { has_all_requested: true } },
+          hasAllWriteRequested: true,
+          hasAllReadRequested: true,
         },
       });
 
@@ -91,8 +89,12 @@ describe('SLOs Welcome Page', () => {
   describe('when the correct license is found', () => {
     beforeEach(() => {
       useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
-      useGlobalDiagnosisMock.mockReturnValue({
-        isError: false,
+      usePermissionsMock.mockReturnValue({
+        isLoading: false,
+        data: {
+          hasAllWriteRequested: true,
+          hasAllReadRequested: true,
+        },
       });
     });
 
@@ -102,9 +104,12 @@ describe('SLOs Welcome Page', () => {
       });
 
       it('disables the create slo button when no write capabilities', async () => {
-        useCapabilitiesMock.mockReturnValue({
-          hasWriteCapabilities: false,
-          hasReadCapabilities: true,
+        usePermissionsMock.mockReturnValue({
+          isLoading: false,
+          data: {
+            hasAllWriteRequested: false,
+            hasAllReadRequested: true,
+          },
         });
 
         render(<SlosWelcomePage />);
@@ -117,16 +122,11 @@ describe('SLOs Welcome Page', () => {
       });
 
       it('disables the create slo button when no cluster permissions capabilities', async () => {
-        useCapabilitiesMock.mockReturnValue({
-          hasWriteCapabilities: true,
-          hasReadCapabilities: true,
-        });
-        useGlobalDiagnosisMock.mockReturnValue({
+        usePermissionsMock.mockReturnValue({
+          isLoading: false,
           data: {
-            userPrivileges: {
-              write: { has_all_requested: false },
-              read: { has_all_requested: true },
-            },
+            hasAllWriteRequested: false,
+            hasAllReadRequested: true,
           },
         });
 
@@ -138,12 +138,11 @@ describe('SLOs Welcome Page', () => {
       });
 
       it('should display the welcome message with a Create new SLO button which should navigate to the SLO Creation page', async () => {
-        useGlobalDiagnosisMock.mockReturnValue({
+        usePermissionsMock.mockReturnValue({
+          isLoading: false,
           data: {
-            userPrivileges: {
-              write: { has_all_requested: true },
-              read: { has_all_requested: true },
-            },
+            hasAllWriteRequested: true,
+            hasAllReadRequested: true,
           },
         });
 
@@ -163,12 +162,11 @@ describe('SLOs Welcome Page', () => {
     describe('when loading is done and results are found', () => {
       beforeEach(() => {
         useFetchSloListMock.mockReturnValue({ isLoading: false, data: sloList });
-        useGlobalDiagnosisMock.mockReturnValue({
+        usePermissionsMock.mockReturnValue({
+          isLoading: false,
           data: {
-            userPrivileges: {
-              write: { has_all_requested: true },
-              read: { has_all_requested: true },
-            },
+            hasAllWriteRequested: true,
+            hasAllReadRequested: true,
           },
         });
       });

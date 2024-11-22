@@ -42,6 +42,7 @@ describe('Response Action file info API', () => {
     const actionRequestEsSearchResponse = createActionRequestsEsSearchResultsMock();
 
     actionRequestEsSearchResponse.hits.hits[0]._source!.EndpointActions.action_id = '321-654';
+    actionRequestEsSearchResponse.hits.hits[0]._source!.EndpointActions.data.command = 'get-file';
 
     applyEsClientSearchMock({
       esClientMock,
@@ -69,7 +70,12 @@ describe('Response Action file info API', () => {
     it('should error if user has no authz to api', async () => {
       (
         (await httpHandlerContextMock.securitySolution).getEndpointAuthz as jest.Mock
-      ).mockResolvedValue(getEndpointAuthzInitialStateMock({ canWriteFileOperations: false }));
+      ).mockResolvedValue(
+        getEndpointAuthzInitialStateMock({
+          canWriteFileOperations: false,
+          canWriteExecuteOperations: false,
+        })
+      );
 
       await apiTestSetup
         .getRegisteredVersionedRoute('get', ACTION_AGENT_FILE_INFO_ROUTE, '2023-10-31')

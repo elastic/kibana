@@ -10,7 +10,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   getTransformStatsQuerySchema,
   type GetTransformStatsQuerySchema,
-} from '../../../../common/api_schemas/transforms_stats';
+} from '../../api_schemas/transforms_stats';
 import { addInternalBasePath } from '../../../../common/constants';
 
 import type { RouteDependencies } from '../../../types';
@@ -37,6 +37,13 @@ export function registerRoute({ router, getLicense }: RouteDependencies) {
     >(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'This route is opted out from authorization because permissions will be checked by elasticsearch',
+          },
+        },
         validate: {
           request: {
             query: getTransformStatsQuerySchema,

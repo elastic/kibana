@@ -56,14 +56,14 @@ export const useSimpleMonitor = ({ monitorData }: { monitorData?: SimpleFormData
   }, [monitorData]);
 
   useEffect(() => {
-    const { core, toasts } = kibanaService;
+    const { coreStart, toasts } = kibanaService;
     const newMonitor = data as UpsertMonitorResponse;
     const hasErrors = data && 'attributes' in data && data.attributes.errors?.length > 0;
     if (hasErrors && !loading) {
       showSyncErrors(
         (data as { attributes: { errors: ServiceLocationErrors } })?.attributes.errors ?? [],
         serviceLocations,
-        core
+        coreStart
       );
     }
 

@@ -7,8 +7,11 @@
 
 import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
-import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
+
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING } from '../../../../common/constants';
 import { DocumentDetailsLeftPanelKey } from '../shared/constants/panel_keys';
 import { useKibana } from '../../../common/lib/kibana';
 import { PanelHeader } from './header';
@@ -17,38 +20,43 @@ import type { LeftPanelTabType } from './tabs';
 import * as tabs from './tabs';
 import { getField } from '../shared/utils';
 import { EventKind } from '../shared/constants/event_kinds';
-import { useLeftPanelContext } from './context';
-import { LeftPanelTour } from './components/tour';
+import { useDocumentDetailsContext } from '../shared/context';
+import type { DocumentDetailsProps } from '../shared/types';
+import { DocumentEventTypes } from '../../../common/lib/telemetry/types';
 
-export type LeftPanelPaths = 'visualize' | 'insights' | 'investigation' | 'response';
+export type LeftPanelPaths = 'visualize' | 'insights' | 'investigation' | 'response' | 'notes';
 export const LeftPanelVisualizeTab: LeftPanelPaths = 'visualize';
 export const LeftPanelInsightsTab: LeftPanelPaths = 'insights';
 export const LeftPanelInvestigationTab: LeftPanelPaths = 'investigation';
 export const LeftPanelResponseTab: LeftPanelPaths = 'response';
+export const LeftPanelNotesTab: LeftPanelPaths = 'notes';
 
-export interface LeftPanelProps extends FlyoutPanelProps {
-  key: typeof DocumentDetailsLeftPanelKey;
-  path?: PanelPath;
-  params?: {
-    id: string;
-    indexName: string;
-    scopeId: string;
-  };
-}
-
-export const LeftPanel: FC<Partial<LeftPanelProps>> = memo(({ path }) => {
+export const LeftPanel: FC<Partial<DocumentDetailsProps>> = memo(({ path }) => {
   const { telemetry } = useKibana().services;
   const { openLeftPanel } = useExpandableFlyoutApi();
-  const { eventId, indexName, scopeId, getFieldsData } = useLeftPanelContext();
+  const { eventId, indexName, scopeId, getFieldsData, isPreview } = useDocumentDetailsContext();
   const eventKind = getField(getFieldsData('event.kind'));
+  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesDisabled'
+  );
 
-  const tabsDisplayed = useMemo(
-    () =>
+  const [visualizationInFlyoutEnabled] = useUiSetting$<boolean>(
+    ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING
+  );
+
+  const tabsDisplayed = useMemo(() => {
+    const tabList =
       eventKind === EventKind.signal
         ? [tabs.insightsTab, tabs.investigationTab, tabs.responseTab]
-        : [tabs.insightsTab],
-    [eventKind]
-  );
+        : [tabs.insightsTab];
+    if (!securitySolutionNotesDisabled && !isPreview) {
+      tabList.push(tabs.notesTab);
+    }
+    if (visualizationInFlyoutEnabled && !isPreview) {
+      return [tabs.visualizeTab, ...tabList];
+    }
+    return tabList;
+  }, [eventKind, isPreview, securitySolutionNotesDisabled, visualizationInFlyoutEnabled]);
 
   const selectedTabId = useMemo(() => {
     const defaultTab = tabsDisplayed[0].id;
@@ -68,7 +76,7 @@ export const LeftPanel: FC<Partial<LeftPanelProps>> = memo(({ path }) => {
         scopeId,
       },
     });
-    telemetry.reportDetailsFlyoutTabClicked({
+    telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutTabClicked, {
       location: scopeId,
       panel: 'left',
       tabId,
@@ -77,7 +85,6 @@ export const LeftPanel: FC<Partial<LeftPanelProps>> = memo(({ path }) => {
 
   return (
     <>
-      <LeftPanelTour />
       <PanelHeader
         selectedTabId={selectedTabId}
         setSelectedTabId={setSelectedTabId}

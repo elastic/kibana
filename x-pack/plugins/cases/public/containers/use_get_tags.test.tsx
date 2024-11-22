@@ -25,7 +25,9 @@ describe('useGetTags', () => {
   it('calls getTags api', async () => {
     const spyOnGetTags = jest.spyOn(api, 'getTags');
     const { waitForNextUpdate } = renderHook(() => useGetTags(), {
-      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders>{children}</TestProviders>
+      ),
     });
     await waitForNextUpdate();
     expect(spyOnGetTags).toBeCalledWith({
@@ -42,7 +44,9 @@ describe('useGetTags', () => {
       throw new Error('Something went wrong');
     });
     const { waitForNextUpdate } = renderHook(() => useGetTags(), {
-      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders>{children}</TestProviders>
+      ),
     });
     await waitForNextUpdate();
     expect(addError).toBeCalled();

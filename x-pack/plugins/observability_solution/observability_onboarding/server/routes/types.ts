@@ -52,19 +52,32 @@ export interface ObservabilityOnboardingRouteCreateOptions {
   };
 }
 
-export const IntegrationRT = t.union([
+export const IntegrationRT = t.intersection([
   t.type({
+    installSource: t.union([t.literal('registry'), t.literal('custom')]),
     pkgName: t.string,
-    installSource: t.literal('registry'),
+    pkgVersion: t.string,
+    title: t.string,
+    config: t.string,
+    dataStreams: t.array(
+      t.type({
+        type: t.string,
+        dataset: t.string,
+      })
+    ),
+    kibanaAssets: t.array(
+      t.type({
+        type: t.string,
+        id: t.string,
+      })
+    ),
   }),
-  t.type({
-    pkgName: t.string,
-    installSource: t.literal('custom'),
-    logFilePaths: t.array(t.string),
+  t.partial({
+    metadata: t.type({ hostname: t.string }),
   }),
 ]);
 
-export type Integration = t.TypeOf<typeof IntegrationRT>;
+export type InstalledIntegration = t.TypeOf<typeof IntegrationRT>;
 
 export const ElasticAgentStepPayloadRT = t.type({
   agentId: t.string,

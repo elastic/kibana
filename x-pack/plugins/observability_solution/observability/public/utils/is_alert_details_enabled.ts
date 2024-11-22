@@ -9,6 +9,7 @@ import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import {
   ApmRuleType,
   LOG_THRESHOLD_ALERT_TYPE_ID,
+  METRIC_THRESHOLD_ALERT_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   SLO_BURN_RATE_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
@@ -18,14 +19,17 @@ import type { TopAlert } from '../typings/alerts';
 const ALLOWED_RULE_TYPES = [
   ApmRuleType.TransactionDuration,
   LOG_THRESHOLD_ALERT_TYPE_ID,
+  METRIC_THRESHOLD_ALERT_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   SLO_BURN_RATE_RULE_TYPE_ID,
 ];
 
 const isUnsafeAlertDetailsFlag = (
   subject: string
-): subject is keyof Omit<ConfigSchema['unsafe']['alertDetails'], 'logs' | 'observability'> =>
-  ['uptime', 'metrics'].includes(subject);
+): subject is keyof Omit<
+  ConfigSchema['unsafe']['alertDetails'],
+  'logs' | 'observability' | 'metrics'
+> => ['uptime'].includes(subject);
 
 // We are mapping the ruleTypeId from the feature flag with the ruleTypeId from the alert
 // to know whether the feature flag is enabled or not.

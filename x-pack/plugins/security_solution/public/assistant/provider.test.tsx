@@ -12,6 +12,17 @@ import { createConversations } from './provider';
 import { coreMock } from '@kbn/core/public/mocks';
 import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 
+jest.mock('./use_assistant_availability');
+
+jest.mock('@kbn/elastic-assistant/impl/assistant/api');
+jest.mock('../common/hooks/use_license', () => ({
+  useLicense: () => ({
+    isEnterprise: () => true,
+  }),
+  licenseService: {
+    isEnterprise: () => true,
+  },
+}));
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/constants');
 let http: HttpSetupMock = coreMock.createSetup().http;
 export const mockConnectors = [

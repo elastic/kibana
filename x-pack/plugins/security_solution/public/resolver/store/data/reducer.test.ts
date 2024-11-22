@@ -73,6 +73,7 @@ describe('Resolver Data Middleware', () => {
             databaseDocumentID: '',
             indices: [],
             filters: {},
+            agentId: '',
           },
           detectedBounds,
         })

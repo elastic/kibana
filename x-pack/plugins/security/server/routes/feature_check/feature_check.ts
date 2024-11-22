@@ -43,6 +43,12 @@ export function defineSecurityFeatureCheckRoute({ router, logger }: RouteDefinit
   router.get(
     {
       path: '/internal/security/_check_security_features',
+      security: {
+        authz: {
+          enabled: false,
+          reason: `This route delegates authorization to Core's scoped ES cluster client`,
+        },
+      },
       validate: false,
     },
     createLicensedRouteHandler(async (context, request, response) => {
@@ -88,7 +94,10 @@ async function getEnabledSecurityFeatures(esClient: ElasticsearchClient, logger:
   // `transport.request` is potentially unsafe when combined with untrusted user input.
   // Do not augment with such input.
   const xpackUsagePromise = esClient.transport
-    .request({ method: 'GET', path: '/_xpack/usage' })
+    .request({
+      method: 'GET',
+      path: '/_xpack/usage?filter_path=remote_clusters.*,security.realms.*',
+    })
     .then((body) => body as XPackUsageResponse)
     .catch((error) => {
       // fall back to no external realms configured.
@@ -139,5 +148,5 @@ async function getEnabledSecurityFeatures(esClient: ElasticsearchClient, logger:
 function usesCustomScriptSettings(
   nodeResponse: NodeSettingsResponse | {}
 ): nodeResponse is NodeSettingsResponse {
-  return nodeResponse.hasOwnProperty('nodes');
+  return Object.hasOwn(nodeResponse, 'nodes');
 }

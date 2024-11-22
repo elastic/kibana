@@ -28,6 +28,24 @@ describe('Mappings editor: core', () => {
   let onChangeHandler: jest.Mock = jest.fn();
   let getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
   let testBed: MappingsEditorTestBed;
+  let hasEnterpriseLicense = true;
+  const mockLicenseCheck = jest.fn((type: any) => hasEnterpriseLicense);
+  const appDependencies = {
+    plugins: {
+      ml: { mlApi: {} },
+      licensing: {
+        license$: {
+          subscribe: jest.fn((callback: any) => {
+            callback({
+              isActive: true,
+              hasAtLeast: mockLicenseCheck,
+            });
+            return { unsubscribe: jest.fn() };
+          }),
+        },
+      },
+    },
+  };
 
   beforeAll(() => {
     jest.useFakeTimers({ legacyFakeTimers: true });
@@ -55,7 +73,7 @@ describe('Mappings editor: core', () => {
     };
 
     await act(async () => {
-      testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
+      testBed = setup({ value: defaultMappings, onChange: onChangeHandler }, appDependencies);
     });
 
     const { component } = testBed;
@@ -95,7 +113,7 @@ describe('Mappings editor: core', () => {
       };
 
       await act(async () => {
-        testBed = setup({ onChange: onChangeHandler, value });
+        testBed = setup({ onChange: onChangeHandler, value }, appDependencies);
       });
 
       const { component, exists } = testBed;
@@ -115,7 +133,7 @@ describe('Mappings editor: core', () => {
         },
       };
       await act(async () => {
-        testBed = setup({ onChange: onChangeHandler, value });
+        testBed = setup({ onChange: onChangeHandler, value }, appDependencies);
       });
 
       const { component, exists } = testBed;
@@ -137,6 +155,7 @@ describe('Mappings editor: core', () => {
       config: {
         enableMappingsSourceFieldSection: true,
       },
+      ...appDependencies,
     };
 
     beforeEach(async () => {
@@ -295,6 +314,7 @@ describe('Mappings editor: core', () => {
       config: {
         enableMappingsSourceFieldSection: true,
       },
+      ...appDependencies,
     };
 
     beforeEach(async () => {
@@ -453,12 +473,95 @@ describe('Mappings editor: core', () => {
       updatedMappings = {
         ...updatedMappings,
         dynamic: false,
+        // The "enabled": true is removed as this is the default in Es
+        _source: {
+          includes: defaultMappings._source.includes,
+          excludes: defaultMappings._source.excludes,
+        },
       };
       delete updatedMappings.date_detection;
       delete updatedMappings.dynamic_date_formats;
       delete updatedMappings.numeric_detection;
 
       expect(data).toEqual(updatedMappings);
+    });
+
+    describe('props.indexMode sets the correct default value of _source field', () => {
+      it("defaults to 'stored' with 'standard' index mode prop", async () => {
+        await act(async () => {
+          testBed = setup(
+            {
+              value: { ...defaultMappings, _source: undefined },
+              onChange: onChangeHandler,
+              indexMode: 'standard',
+            },
+            ctx
+          );
+        });
+        testBed.component.update();
+
+        const {
+          actions: { selectTab },
+          find,
+        } = testBed;
+
+        await selectTab('advanced');
+
+        // Check that the stored option is selected
+        expect(find('sourceValueField').prop('value')).toBe('stored');
+      });
+
+      ['logsdb', 'time_series'].forEach((indexMode) => {
+        it(`defaults to 'synthetic' with ${indexMode} index mode prop on enterprise license`, async () => {
+          hasEnterpriseLicense = true;
+          await act(async () => {
+            testBed = setup(
+              {
+                value: { ...defaultMappings, _source: undefined },
+                onChange: onChangeHandler,
+                indexMode,
+              },
+              ctx
+            );
+          });
+          testBed.component.update();
+
+          const {
+            actions: { selectTab },
+            find,
+          } = testBed;
+
+          await selectTab('advanced');
+
+          // Check that the synthetic option is selected
+          expect(find('sourceValueField').prop('value')).toBe('synthetic');
+        });
+
+        it(`defaults to 'standard' with ${indexMode} index mode prop on basic license`, async () => {
+          hasEnterpriseLicense = false;
+          await act(async () => {
+            testBed = setup(
+              {
+                value: { ...defaultMappings, _source: undefined },
+                onChange: onChangeHandler,
+                indexMode,
+              },
+              ctx
+            );
+          });
+          testBed.component.update();
+
+          const {
+            actions: { selectTab },
+            find,
+          } = testBed;
+
+          await selectTab('advanced');
+
+          // Check that the stored option is selected
+          expect(find('sourceValueField').prop('value')).toBe('stored');
+        });
+      });
     });
   });
 
@@ -472,7 +575,7 @@ describe('Mappings editor: core', () => {
         },
       };
       await act(async () => {
-        testBed = setup({ onChange: onChangeHandler, value });
+        testBed = setup({ onChange: onChangeHandler, value }, appDependencies);
       });
 
       const { component, exists } = testBed;
@@ -494,7 +597,7 @@ describe('Mappings editor: core', () => {
         },
       };
       await act(async () => {
-        testBed = setup({ onChange: onChangeHandler, value });
+        testBed = setup({ onChange: onChangeHandler, value }, appDependencies);
       });
 
       const { component } = testBed;

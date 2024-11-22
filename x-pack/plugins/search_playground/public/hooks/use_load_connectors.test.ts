@@ -71,6 +71,12 @@ describe('useLoadConnectors', () => {
         actionTypeId: '.bedrock',
         isMissingSecrets: false,
       },
+      {
+        id: '5',
+        actionTypeId: '.gen-ai',
+        isMissingSecrets: false,
+        config: { apiProvider: OpenAiProviderType.Other },
+      },
     ];
     mockedLoadConnectors.mockResolvedValue(connectors);
 
@@ -105,6 +111,65 @@ describe('useLoadConnectors', () => {
           isMissingSecrets: false,
           title: 'Bedrock',
           type: 'bedrock',
+        },
+        {
+          actionTypeId: '.gen-ai',
+          config: {
+            apiProvider: 'Other',
+          },
+          id: '5',
+          isMissingSecrets: false,
+          title: 'OpenAI Other',
+          type: 'openai_other',
+        },
+      ]);
+    });
+  });
+
+  it('handles pre-configured connectors', async () => {
+    const connectors = [
+      {
+        id: '1',
+        actionTypeId: '.gen-ai',
+        isMissingSecrets: false,
+        isPreconfigured: true,
+        name: 'OpenAI',
+      },
+      {
+        id: '2',
+        actionTypeId: 'slack',
+        isMissingSecrets: false,
+      },
+      {
+        id: '3',
+        actionTypeId: '.gen-ai',
+        isMissingSecrets: false,
+        config: { apiProvider: OpenAiProviderType.AzureAi },
+      },
+    ];
+    mockedLoadConnectors.mockResolvedValue(connectors);
+
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(() => useLoadConnectors());
+      await waitForNextUpdate();
+
+      await expect(result.current).resolves.toStrictEqual([
+        {
+          actionTypeId: '.gen-ai',
+          id: '1',
+          isMissingSecrets: false,
+          isPreconfigured: true,
+          name: 'OpenAI',
+          title: 'OpenAI',
+          type: 'openai',
+        },
+        {
+          actionTypeId: '.gen-ai',
+          config: { apiProvider: 'Azure OpenAI' },
+          id: '3',
+          isMissingSecrets: false,
+          title: 'OpenAI Azure',
+          type: 'openai_azure',
         },
       ]);
     });

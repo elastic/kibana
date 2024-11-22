@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -12,27 +13,20 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
-  const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
 
-  // Failing: See https://github.com/elastic/kibana/issues/138160
-  describe.skip('console app', function testComments() {
+  describe('console app', function testComments() {
     this.tags('includeFirefox');
     before(async () => {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
-      // blocks the close help button for several seconds so just retry until we can click it.
-      await retry.try(async () => {
-        await PageObjects.console.collapseHelp();
-      });
+      await PageObjects.console.skipTourIfExists();
     });
 
-    describe('with comments', async () => {
+    describe('with comments', () => {
       const enterRequest = async (url: string, body: string) => {
-        await PageObjects.console.clearTextArea();
-        await PageObjects.console.enterRequest(url);
-        await PageObjects.console.pressEnter();
-        await PageObjects.console.enterText(body);
+        await PageObjects.console.clearEditorText();
+        await PageObjects.console.enterText(`${url}\n${body}`);
       };
 
       async function runTests(
@@ -47,6 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       }
 
+      // eslint-disable-next-line mocha/no-async-describe
       describe('with single line comments', async () => {
         await runTests(
           [
@@ -56,7 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               description: 'should allow in request url, using //',
             },
             {
-              body: '{\n\t\t"query": {\n\t\t\t// "match_all": {}',
+              body: '{\n\t\t"query": {\n\t\t\t// "match_all": {}\n}\n}',
               description: 'should allow in request body, using //',
             },
             {
@@ -65,33 +60,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               description: 'should allow in request url, using #',
             },
             {
-              body: '{\n\t\t"query": {\n\t\t\t# "match_all": {}',
+              body: '{\n\t\t"query": {\n\t\t\t# "match_all": {}\n}\n}',
               description: 'should allow in request body, using #',
             },
             {
               description: 'should accept as field names, using //',
-              body: '{\n "//": {}',
+              body: '{\n "//": {} }',
             },
             {
               description: 'should accept as field values, using //',
-              body: '{\n "f": "//"',
+              body: '{\n "f": "//" }',
             },
             {
               description: 'should accept as field names, using #',
-              body: '{\n "#": {}',
+              body: '{\n "#": {} }',
             },
             {
               description: 'should accept as field values, using #',
-              body: '{\n "f": "#"',
+              body: '{\n "f": "#" }',
             },
           ],
           async () => {
             expect(await PageObjects.console.hasInvalidSyntax()).to.be(false);
-            expect(await PageObjects.console.hasErrorMarker()).to.be(false);
           }
         );
       });
 
+      // eslint-disable-next-line mocha/no-async-describe
       describe('with multiline comments', async () => {
         await runTests(
           [
@@ -101,25 +96,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               description: 'should allow in request url, using /* */',
             },
             {
-              body: '{\n\t\t"query": {\n\t\t\t/* "match_all": {} */',
+              body: '{\n\t\t"query": {\n\t\t\t/* "match_all": {} */ \n}\n}',
               description: 'should allow in request body, using /* */',
             },
             {
               description: 'should accept as field names, using /*',
-              body: '{\n "/*": {} \n\t\t /* "f": 1 */',
+              body: '{\n "/*": {} \n\t\t /* "f": 1 */ \n}',
             },
             {
               description: 'should accept as field values, using */',
-              body: '{\n /* "f": 1 */ \n"f": "*/"',
+              body: '{\n /* "f": 1 */ \n"f": "*/" \n}',
             },
           ],
           async () => {
             expect(await PageObjects.console.hasInvalidSyntax()).to.be(false);
-            expect(await PageObjects.console.hasErrorMarker()).to.be(false);
           }
         );
       });
 
+      // eslint-disable-next-line mocha/no-async-describe
       describe('with invalid syntax in request body', async () => {
         await runTests(
           [
@@ -135,6 +130,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
       });
 
+      // eslint-disable-next-line mocha/no-async-describe
       describe('with invalid request', async () => {
         await runTests(
           [
@@ -148,7 +144,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             },
           ],
           async () => {
-            expect(await PageObjects.console.hasErrorMarker()).to.be(true);
+            expect(await PageObjects.console.hasInvalidSyntax()).to.be(true);
           }
         );
       });

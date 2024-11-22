@@ -1,14 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useImperativeHandle, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFilePicker, EuiFilePickerProps, EuiImage } from '@elastic/eui';
+import { EuiFilePicker, EuiImage } from '@elastic/eui';
+import type {
+  EuiFilePickerClass,
+  EuiFilePickerProps,
+} from '@elastic/eui/src/components/form/file_picker/file_picker';
 
 import { ResetInputRef } from '@kbn/management-settings-types';
 import { getFieldInputValue, useUpdate } from '@kbn/management-settings-utilities';
@@ -45,7 +50,7 @@ const errorMessage = i18n.translate('management.settings.field.imageChangeErrorM
  */
 export const ImageInput = React.forwardRef<ResetInputRef, ImageInputProps>(
   ({ field, unsavedChange, isSavingEnabled, onInputChange }, ref) => {
-    const inputRef = useRef<EuiFilePicker>(null);
+    const inputRef = useRef<EuiFilePickerClass>(null);
 
     useImperativeHandle(ref, () => ({
       reset: () => inputRef.current?.removeFiles(),
@@ -99,7 +104,7 @@ export const ImageInput = React.forwardRef<ResetInputRef, ImageInputProps>(
           accept=".jpg,.jpeg,.png"
           data-test-subj={`${TEST_SUBJ_PREFIX_FIELD}-${id}`}
           disabled={!isSavingEnabled}
-          ref={inputRef}
+          ref={inputRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
           fullWidth
           {...{ onChange, ...a11yProps }}
         />

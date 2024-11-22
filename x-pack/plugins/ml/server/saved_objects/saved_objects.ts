@@ -6,6 +6,7 @@
  */
 
 import type { SavedObjectsServiceSetup } from '@kbn/core/server';
+import rison from '@kbn/rison';
 import { mlJob, mlTrainedModel, mlModule } from './mappings';
 
 import { migrations } from './migrations';
@@ -14,6 +15,17 @@ import {
   ML_MODULE_SAVED_OBJECT_TYPE,
   ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
 } from '../../common/types/saved_objects';
+
+interface MlModuleAttributes {
+  id: string;
+  title: string;
+  description?: string;
+  type: string;
+  logo?: object;
+  query?: string;
+  jobs: object[];
+  datafeeds: object[];
+}
 
 export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
   savedObjects.registerType({
@@ -30,12 +42,23 @@ export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
     migrations,
     mappings: mlTrainedModel,
   });
-  savedObjects.registerType({
+  savedObjects.registerType<MlModuleAttributes>({
     name: ML_MODULE_SAVED_OBJECT_TYPE,
     hidden: false,
     management: {
       importableAndExportable: true,
       visibleInManagement: false,
+      getTitle(obj) {
+        return obj.attributes.title;
+      },
+      getInAppUrl(obj) {
+        return {
+          path: `/app/ml/supplied_configurations/?_a=${encodeURIComponent(
+            rison.encode({ supplied_configurations: { queryText: obj.attributes.title } })
+          )}`,
+          uiCapabilitiesPath: 'ml.canGetJobs',
+        };
+      },
     },
     namespaceType: 'agnostic',
     migrations,

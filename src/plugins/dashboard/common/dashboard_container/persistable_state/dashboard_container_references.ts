@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Reference } from '@kbn/content-management-utils';
-import { CONTROL_GROUP_TYPE, PersistableControlGroupInput } from '@kbn/controls-plugin/common';
+import type { Reference } from '@kbn/content-management-utils';
 import {
   EmbeddableInput,
   EmbeddablePersistableStateService,
@@ -23,6 +23,10 @@ export const getReferencesForPanelId = (id: string, references: Reference[]): Re
   return filteredReferences;
 };
 
+export const getReferencesForControls = (references: Reference[]): Reference[] => {
+  return references.filter((reference) => reference.name.startsWith(controlGroupReferencePrefix));
+};
+
 export const prefixReferencesFromPanel = (id: string, references: Reference[]): Reference[] => {
   const prefix = `${id}:`;
   return references
@@ -34,7 +38,6 @@ export const prefixReferencesFromPanel = (id: string, references: Reference[]): 
 };
 
 const controlGroupReferencePrefix = 'controlGroup_';
-const controlGroupId = 'dashboard_control_group';
 
 export const createInject = (
   persistableStateService: EmbeddablePersistableStateService
@@ -90,27 +93,6 @@ export const createInject = (
       }
     }
 
-    // since the controlGroup is not part of the panels array, its references need to be injected separately
-    if ('controlGroupInput' in workingState && workingState.controlGroupInput) {
-      const controlGroupReferences = references
-        .filter((reference) => reference.name.indexOf(controlGroupReferencePrefix) === 0)
-        .map((reference) => ({
-          ...reference,
-          name: reference.name.replace(controlGroupReferencePrefix, ''),
-        }));
-
-      const { type, ...injectedControlGroupState } = persistableStateService.inject(
-        {
-          ...workingState.controlGroupInput,
-          type: CONTROL_GROUP_TYPE,
-          id: controlGroupId,
-        },
-        controlGroupReferences
-      );
-      workingState.controlGroupInput =
-        injectedControlGroupState as unknown as PersistableControlGroupInput;
-    }
-
     return workingState as EmbeddableStateWithType;
   };
 };
@@ -158,23 +140,6 @@ export const createExtract = (
         const { type, ...restOfState } = panelState;
         workingState.panels[id].explicitInput = restOfState as EmbeddableInput;
       }
-    }
-
-    // since the controlGroup is not part of the panels array, its references need to be extracted separately
-    if ('controlGroupInput' in workingState && workingState.controlGroupInput) {
-      const { state: extractedControlGroupState, references: controlGroupReferences } =
-        persistableStateService.extract({
-          ...workingState.controlGroupInput,
-          type: CONTROL_GROUP_TYPE,
-          id: controlGroupId,
-        });
-      workingState.controlGroupInput =
-        extractedControlGroupState as unknown as PersistableControlGroupInput;
-      const prefixedControlGroupReferences = controlGroupReferences.map((reference) => ({
-        ...reference,
-        name: `${controlGroupReferencePrefix}${reference.name}`,
-      }));
-      references.push(...prefixedControlGroupReferences);
     }
 
     return { state: workingState as EmbeddableStateWithType, references };

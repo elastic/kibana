@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { set } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import type { PolicyConfig } from '../../../../../../common/endpoint/types';
 import {
   AntivirusRegistrationModes,
@@ -176,7 +176,7 @@ export const getPolicySettingsFormTestSubjects = (
 export const expectIsViewOnly = (elem: HTMLElement): void => {
   elem
     .querySelectorAll(
-      'button:not(.euiLink, [data-test-subj*="advancedSection-showButton"]),input,select,textarea'
+      'button:not(.euiLink, [data-test-subj*="advancedSection-showButton"], [data-test-subj="euiDismissCalloutButton"]),input,select,textarea'
     )
     .forEach((inputElement) => {
       expect(inputElement).toHaveAttribute('disabled');
@@ -201,19 +201,31 @@ export const exactMatchText = (text: string): RegExp => {
  * @param turnOff
  * @param includePopup
  * @param includeSubfeatures
+ * @param includeAntivirus
  */
-export const setMalwareMode = (
-  policy: PolicyConfig,
-  turnOff: boolean = false,
-  includePopup: boolean = true,
-  includeSubfeatures: boolean = true
-) => {
+export const setMalwareMode = ({
+  policy,
+  turnOff = false,
+  includePopup = true,
+  includeSubfeatures = true,
+  includeAntivirus = false,
+}: {
+  policy: PolicyConfig;
+  turnOff?: boolean;
+  includePopup?: boolean;
+  includeSubfeatures?: boolean;
+  includeAntivirus?: boolean;
+}) => {
   const mode = turnOff ? ProtectionModes.off : ProtectionModes.prevent;
   const enableValue = mode !== ProtectionModes.off;
 
   set(policy, 'windows.malware.mode', mode);
   set(policy, 'mac.malware.mode', mode);
   set(policy, 'linux.malware.mode', mode);
+
+  if (includeAntivirus) {
+    set(policy, 'windows.antivirus_registration.enabled', !turnOff);
+  }
 
   if (includePopup) {
     set(policy, 'windows.popup.malware.enabled', enableValue);

@@ -8,14 +8,15 @@
 
 import type { FleetErrorType } from './types';
 
-export class FleetError extends Error {
+export class FleetError<TMeta = unknown> extends Error {
   attributes?: { type: FleetErrorType };
-  constructor(message?: string, public readonly meta?: unknown) {
+  constructor(message?: string, public readonly meta?: TMeta) {
     super(message);
     this.name = this.constructor.name; // for stack traces
   }
 }
 
+export class PolicyNamespaceValidationError extends FleetError {}
 export class PackagePolicyValidationError extends FleetError {}
 
 export class MessageSigningError extends FleetError {}

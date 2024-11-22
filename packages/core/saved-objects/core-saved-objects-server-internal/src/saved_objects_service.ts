@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Subject, Observable, firstValueFrom, of } from 'rxjs';
@@ -12,7 +13,7 @@ import type { Logger } from '@kbn/logging';
 import { stripVersionQualifier } from '@kbn/std';
 import type { ServiceStatus } from '@kbn/core-status-common';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
-import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
+import type { DocLinksServiceSetup, DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type {
@@ -98,6 +99,7 @@ export interface SavedObjectsSetupDeps {
   elasticsearch: InternalElasticsearchServiceSetup;
   coreUsageData: InternalCoreUsageDataSetup;
   deprecations: DeprecationRegistryProvider;
+  docLinks: DocLinksServiceSetup;
 }
 
 /** @internal */
@@ -134,7 +136,7 @@ export class SavedObjectsService
     this.logger.debug('Setting up SavedObjects service');
 
     this.setupDeps = setupDeps;
-    const { http, elasticsearch, coreUsageData, deprecations } = setupDeps;
+    const { http, elasticsearch, coreUsageData, deprecations, docLinks } = setupDeps;
 
     const savedObjectsConfig = await firstValueFrom(
       this.coreContext.configService.atPath<SavedObjectsConfigType>('savedObjects')
@@ -163,6 +165,7 @@ export class SavedObjectsService
       kibanaIndex: MAIN_SAVED_OBJECT_INDEX,
       kibanaVersion: this.kibanaVersion,
       isServerless: this.coreContext.env.packageInfo.buildFlavor === 'serverless',
+      docLinks,
     });
 
     registerCoreObjectTypes(this.typeRegistry);
@@ -375,6 +378,7 @@ export class SavedObjectsService
           savedObjectsClient,
           typeRegistry: this.typeRegistry,
           importSizeLimit: options?.importSizeLimit ?? this.config!.maxImportExportSize,
+          logger: this.logger.get('importer'),
         }),
       getTypeRegistry: () => this.typeRegistry,
       getDefaultIndex: () => MAIN_SAVED_OBJECT_INDEX,

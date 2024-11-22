@@ -6,22 +6,30 @@
  */
 
 import {
-  DatasetQualityUsername,
-  DATASET_QUALITY_TEST_PASSWORD,
-} from '@kbn/dataset-quality-plugin/server/test_helpers/create_dataset_quality_users/authentication';
+  LogLevel,
+  LogsSynthtraceEsClient,
+  SyntheticsSynthtraceEsClient,
+  createLogger,
+} from '@kbn/apm-synthtrace';
 import { createDatasetQualityUsers } from '@kbn/dataset-quality-plugin/server/test_helpers/create_dataset_quality_users';
-import { FtrConfigProviderContext } from '@kbn/test';
+import {
+  DATASET_QUALITY_TEST_PASSWORD,
+  DatasetQualityUsername,
+} from '@kbn/dataset-quality-plugin/server/test_helpers/create_dataset_quality_users/authentication';
+import { FtrConfigProviderContext, defineDockerServersConfig } from '@kbn/test';
+import path from 'path';
 import supertest from 'supertest';
-import { format, UrlObject } from 'url';
-import { createLogger, LogLevel, LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { UrlObject, format } from 'url';
+import { dockerImage } from '../../fleet_api_integration/config.base';
+import { DatasetQualityFtrConfigName } from '../configs';
+import { createDatasetQualityApiClient } from './dataset_quality_api_supertest';
 import {
   FtrProviderContext,
   InheritedFtrProviderContext,
   InheritedServices,
 } from './ftr_provider_context';
-import { createDatasetQualityApiClient } from './dataset_quality_api_supertest';
+import { PackageService } from './package_service';
 import { RegistryProvider } from './registry';
-import { DatasetQualityFtrConfigName } from '../configs';
 
 export interface DatasetQualityFtrConfig {
   name: DatasetQualityFtrConfigName;
@@ -52,7 +60,7 @@ export type DatasetQualityApiClientKey =
   | 'readUser'
   | 'adminUser'
   | 'writeUser'
-  | 'datasetQualityLogsUser';
+  | 'datasetQualityMonitorUser';
 
 export type DatasetQualityApiClient = Record<
   DatasetQualityApiClientKey,
@@ -69,7 +77,11 @@ export interface CreateTest {
     logSynthtraceEsClient: (
       context: InheritedFtrProviderContext
     ) => Promise<LogsSynthtraceEsClient>;
+    syntheticsSynthtraceEsClient: (
+      context: InheritedFtrProviderContext
+    ) => SyntheticsSynthtraceEsClient;
     datasetQualityApiClient: (context: InheritedFtrProviderContext) => DatasetQualityApiClient;
+    packageService: ({ getService }: FtrProviderContext) => ReturnType<typeof PackageService>;
   };
   junit: { reportName: string };
   esTestCluster: any;
@@ -82,9 +94,12 @@ export function createTestConfig(
   const { license, name, kibanaConfig } = config;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
+    const packageRegistryConfig = path.join(__dirname, './fixtures/package_registry_config.yml');
     const xPackAPITestsConfig = await readConfigFile(
       require.resolve('../../api_integration/config.ts')
     );
+
+    const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
 
     const services = xPackAPITestsConfig.get('services');
     const servers = xPackAPITestsConfig.get('servers');
@@ -92,16 +107,42 @@ export function createTestConfig(
     const kibanaServerUrl = format(kibanaServer);
     const esServer = servers.elasticsearch as UrlObject;
 
+    /**
+     * This is used by CI to set the docker registry port
+     * you can also define this environment variable locally when running tests which
+     * will spin up a local docker package registry locally for you
+     * if this is defined it takes precedence over the `packageRegistryOverride` variable
+     */
+    const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
+
     return {
       testFiles: [require.resolve('../tests')],
       servers,
+      dockerServers: defineDockerServersConfig({
+        registry: {
+          enabled: !!dockerRegistryPort,
+          image: dockerImage,
+          portInContainer: 8080,
+          port: dockerRegistryPort,
+          args: dockerArgs,
+          waitForLogLine: 'package manifests loaded',
+          waitForLogLineTimeoutMs: 60 * 2 * 10000, // 2 minutes
+        },
+      }),
       servicesRequiredForTestAnalysis: ['datasetQualityFtrConfig', 'registry'],
       services: {
         ...services,
+        packageService: PackageService,
         datasetQualityFtrConfig: () => config,
         registry: RegistryProvider,
         logSynthtraceEsClient: (context: InheritedFtrProviderContext) =>
           new LogsSynthtraceEsClient({
+            client: context.getService('es'),
+            logger: createLogger(LogLevel.info),
+            refreshAfterIndex: true,
+          }),
+        syntheticsSynthtraceEsClient: (context: InheritedFtrProviderContext) =>
+          new SyntheticsSynthtraceEsClient({
             client: context.getService('es'),
             logger: createLogger(LogLevel.info),
             refreshAfterIndex: true,
@@ -137,9 +178,9 @@ export function createTestConfig(
               kibanaServer,
               username: DatasetQualityUsername.editorUser,
             }),
-            datasetQualityLogsUser: await getDatasetQualityApiClient({
+            datasetQualityMonitorUser: await getDatasetQualityApiClient({
               kibanaServer,
-              username: DatasetQualityUsername.datasetQualityLogsUser,
+              username: DatasetQualityUsername.datasetQualityMonitorUser,
             }),
           };
         },
@@ -154,6 +195,11 @@ export function createTestConfig(
       kbnTestServer: {
         ...xPackAPITestsConfig.get('kbnTestServer'),
         serverArgs: [
+          `--xpack.fleet.packages.0.name=endpoint`,
+          `--xpack.fleet.packages.0.version=latest`,
+          ...(dockerRegistryPort
+            ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
+            : []),
           ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
           ...(kibanaConfig
             ? Object.entries(kibanaConfig).map(([key, value]) =>

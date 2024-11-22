@@ -32,8 +32,14 @@ interface CategoriesAgg extends AggBucket {
  * Builds a query for retrieving descendants of a node.
  */
 export class StatsQuery extends BaseResolverQuery {
-  constructor({ schema, indexPatterns, timeRange, isInternalRequest }: ResolverQueryParams) {
-    super({ schema, indexPatterns, timeRange, isInternalRequest });
+  constructor({
+    schema,
+    indexPatterns,
+    timeRange,
+    isInternalRequest,
+    agentId,
+  }: ResolverQueryParams) {
+    super({ schema, indexPatterns, timeRange, isInternalRequest, agentId });
   }
 
   private query(nodes: NodeID[]): JsonObject {
@@ -46,6 +52,9 @@ export class StatsQuery extends BaseResolverQuery {
             {
               terms: { [this.schema.id]: nodes },
             },
+            ...(this.schema.agentId && this.agentId
+              ? [{ term: { 'agent.id': this.agentId } }]
+              : []),
             {
               term: { 'event.kind': 'event' },
             },

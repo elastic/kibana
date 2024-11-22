@@ -60,8 +60,13 @@ export const updateFlappingSettingsRoute = (
       validate: {
         body: bodySchema,
       },
+      security: {
+        authz: {
+          requiredPrivileges: [`${API_PRIVILEGES.WRITE_FLAPPING_SETTINGS}`],
+        },
+      },
       options: {
-        tags: [`access:${API_PRIVILEGES.WRITE_FLAPPING_SETTINGS}`],
+        access: 'internal',
       },
     },
     router.handleLegacyErrors(

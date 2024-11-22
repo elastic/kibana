@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { FilterStateStore } from '@kbn/es-query';
@@ -17,6 +18,8 @@ import { QueryService, QueryStart } from './query_service';
 import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 import { TimefilterContract } from './timefilter';
 import { createNowProviderMock } from '../now_provider/mocks';
+
+const minRefreshIntervalDefault = 1000;
 
 const setupMock = coreMock.createSetup();
 const startMock = coreMock.createStart();
@@ -48,6 +51,7 @@ describe('query_service', () => {
       uiSettings: setupMock.uiSettings,
       storage: new Storage(new StubBrowserStorage()),
       nowProvider: createNowProviderMock(),
+      minRefreshInterval: minRefreshIntervalDefault,
     });
     queryServiceStart = queryService.start({
       uiSettings: setupMock.uiSettings,
@@ -82,7 +86,7 @@ describe('query_service', () => {
     const filters = [getFilter(FilterStateStore.GLOBAL_STATE, true, true, 'key1', 'value1')];
     const query = { language: 'kql', query: 'query' };
     const time = { from: new Date().toISOString(), to: new Date().toISOString() };
-    const refreshInterval = { pause: false, value: 10 };
+    const refreshInterval = { pause: false, value: 2000 };
 
     filterManager.setFilters(filters);
     queryStringManager.setQuery(query);

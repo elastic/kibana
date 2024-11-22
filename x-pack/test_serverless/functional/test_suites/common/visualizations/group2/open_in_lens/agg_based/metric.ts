@@ -40,10 +40,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert to Lens', async () => {
-      const visPanel = await panelActions.getPanelHeading('Metric - Basic');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Metric - Basic');
       await lens.waitForVisualization('mtrVis');
 
+      // hovering over dimension button to make sure neither of metrics are hovered so the color is stable
+      await lens.hoverOverDimensionButton();
       const data = await lens.getMetricVisualizationData();
       expect(data.length).to.be.equal(1);
       expect(data).to.eql([
@@ -61,8 +62,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert aggregation with params', async () => {
-      const visPanel = await panelActions.getPanelHeading('Metric - Agg with params');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Metric - Agg with params');
       await lens.waitForVisualization('mtrVis');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -71,6 +71,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(dimensions).to.have.length(1);
       expect(await dimensions[0].getVisibleText()).to.be('Average machine.ram');
 
+      // hovering over dimension button to make sure neither of metrics are hovered so the color is stable
+      await lens.hoverOverDimensionButton();
       const data = await lens.getMetricVisualizationData();
       expect(data.length).to.be.equal(1);
       expect(data).to.eql([
@@ -88,8 +90,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert sibling pipeline aggregation', async () => {
-      const visPanel = await panelActions.getPanelHeading('Metric - Sibling pipeline agg');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Metric - Sibling pipeline agg');
       await lens.waitForVisualization('mtrVis');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -99,6 +100,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await dimensions[0].getVisibleText()).to.be('Overall Max of Count');
       expect(await dimensions[1].getVisibleText()).to.be('@timestamp');
 
+      // hovering over dimension button to make sure neither of metrics are hovered so the color is stable
+      await lens.hoverOverDimensionButton();
       const data = await lens.getMetricVisualizationData();
       expect(data.length).to.be.equal(1);
       expect(data).to.eql([
@@ -116,13 +119,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should not convert aggregation with not supported field type', async () => {
-      const visPanel = await panelActions.getPanelHeading('Metric - Unsupported field type');
-      expect(await panelActions.canConvertToLens(visPanel)).to.eql(false);
+      expect(await panelActions.canConvertToLensByTitle('Metric - Unsupported field type')).to.eql(
+        false
+      );
     });
 
     it('should convert color ranges', async () => {
-      const visPanel = await panelActions.getPanelHeading('Metric - Color ranges');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Metric - Color ranges');
       await lens.waitForVisualization('mtrVis');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -131,6 +134,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(dimensions).to.have.length(2);
       expect(await dimensions[0].getVisibleText()).to.be('Average machine.ram');
       expect(await dimensions[1].getVisibleText()).to.be('machine.os.raw: Descending');
+
+      // hovering over dimension button to make sure neither of metrics are hovered so the color is stable
+      await lens.hoverOverDimensionButton();
+
       const data = await lens.getMetricVisualizationData();
       expect(data.length).to.be.equal(6);
       expect(data).to.eql([

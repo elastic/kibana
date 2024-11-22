@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 
 import { useValues, useActions } from 'kea';
 
@@ -26,11 +26,13 @@ import {
   EuiText,
   EuiSpacer,
   EuiLink,
-  EuiFormLabel,
   EuiCodeBlock,
+  EuiCallOut,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { docLinks } from '../../../../../shared/doc_links';
 
@@ -49,11 +51,19 @@ export const GenerateApiKeyModal: React.FC<GenerateApiKeyModalProps> = ({ indexN
   const { ingestionMethod } = useValues(IndexViewLogic);
   const { setKeyName } = useActions(GenerateApiKeyModalLogic);
   const { makeRequest } = useActions(GenerateApiKeyLogic);
+  const copyApiKeyRef = useRef<HTMLAnchorElement>(null);
+  const modalTitleId = useGeneratedHtmlId();
+
+  useEffect(() => {
+    if (isSuccess) {
+      copyApiKeyRef.current?.focus();
+    }
+  }, [isSuccess]);
 
   return (
-    <EuiModal onClose={onClose}>
+    <EuiModal onClose={onClose} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           {i18n.translate('xpack.enterpriseSearch.content.overview.generateApiKeyModal.title', {
             defaultMessage: 'Generate API Key',
           })}
@@ -68,7 +78,11 @@ export const GenerateApiKeyModal: React.FC<GenerateApiKeyModalProps> = ({ indexN
                   "Before you can start posting documents to your Elasticsearch index you'll need to create at least one API key.",
               })}
               &nbsp;
-              <EuiLink href={docLinks.apiKeys} external>
+              <EuiLink
+                data-test-subj="enterpriseSearchGenerateApiKeyModalLearnMoreAboutApiKeysLink"
+                href={docLinks.apiKeys}
+                external
+              >
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.overview.generateApiKeyModal.learnMore',
                   { defaultMessage: 'Learn more about API keys' }
@@ -77,15 +91,25 @@ export const GenerateApiKeyModal: React.FC<GenerateApiKeyModalProps> = ({ indexN
             </p>
           </EuiText>
           <EuiSpacer />
-          <EuiPanel hasShadow={false} color="primary">
+
+          <EuiPanel hasShadow={false} color={!isSuccess ? 'primary' : 'success'}>
             <EuiFlexGroup direction="column">
               <EuiFlexItem>
                 <EuiFlexGroup direction="row" alignItems="flexEnd">
                   {!isSuccess ? (
                     <>
                       <EuiFlexItem>
-                        <EuiFormRow label="Name your API key" fullWidth>
+                        <EuiFormRow
+                          label={
+                            <FormattedMessage
+                              id="xpack.enterpriseSearch.generateApiKeyModal.euiFormRow.nameYourAPIKeyLabel"
+                              defaultMessage="Name your API key"
+                            />
+                          }
+                          fullWidth
+                        >
                           <EuiFieldText
+                            data-test-subj="enterpriseSearchGenerateApiKeyModalFieldText"
                             data-telemetry-id={`entSearchContent-${ingestionMethod}-overview-generateApiKey-editName`}
                             fullWidth
                             placeholder="Type a name for your API key"
@@ -121,8 +145,20 @@ export const GenerateApiKeyModal: React.FC<GenerateApiKeyModalProps> = ({ indexN
                     </>
                   ) : (
                     <EuiFlexItem>
-                      <EuiFormLabel>{keyName}</EuiFormLabel>
-                      <EuiSpacer size="xs" />
+                      <EuiCallOut
+                        title={
+                          <FormattedMessage
+                            id="xpack.enterpriseSearch.content.overview.generateApiKeyModal.callOutMessage"
+                            defaultMessage="Done! The {name} API key was generated."
+                            values={{
+                              name: <strong>{keyName}</strong>,
+                            }}
+                          />
+                        }
+                        color="success"
+                        iconType="check"
+                        role="alert"
+                      />
                       <EuiFlexGroup alignItems="center">
                         <EuiFlexItem>
                           <EuiCodeBlock
@@ -137,6 +173,8 @@ export const GenerateApiKeyModal: React.FC<GenerateApiKeyModalProps> = ({ indexN
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
                           <EuiButtonIcon
+                            buttonRef={copyApiKeyRef}
+                            data-test-subj="enterpriseSearchGenerateApiKeyModalButton"
                             data-telemetry-id={`entSearchContent-${ingestionMethod}-overview-generateApiKey-download`}
                             aria-label={i18n.translate(
                               'xpack.enterpriseSearch.content.overview.generateApiKeyModal.csvDownloadButton',
@@ -175,6 +213,7 @@ export const GenerateApiKeyModal: React.FC<GenerateApiKeyModalProps> = ({ indexN
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty
+          data-test-subj="enterpriseSearchGenerateApiKeyModalCancelButton"
           data-telemetry-id={`entSearchContent-${ingestionMethod}-overview-generateApiKey-cancel`}
           onClick={onClose}
         >

@@ -36,10 +36,20 @@ const schemaLatest = schema.object(
       // deprecated as unused after index details page has been implemented
       enableIndexDetailsPage: schema.boolean({ defaultValue: false }),
       // deprecate as unused after semantic text is enabled everywhere
-      enableSemanticText: schema.boolean({ defaultValue: false }),
+      enableSemanticText: schema.boolean({ defaultValue: true }),
+    }),
+    enableSizeAndDocCount: offeringBasedSchema({
+      // Size and document count information is enabled in serverless; refer to the serverless.yml file as the source of truth
+      // We take this approach in order to have a central place (serverless.yml) for serverless config across Kibana
+      serverless: schema.boolean({ defaultValue: true }),
     }),
     enableIndexStats: offeringBasedSchema({
       // Index stats information is disabled in serverless; refer to the serverless.yml file as the source of truth
+      // We take this approach in order to have a central place (serverless.yml) for serverless config across Kibana
+      serverless: schema.boolean({ defaultValue: true }),
+    }),
+    enableDataStreamStats: offeringBasedSchema({
+      // Data stream stats information is disabled in serverless; refer to the serverless.yml file as the source of truth
       // We take this approach in order to have a central place (serverless.yml) for serverless config across Kibana
       serverless: schema.boolean({ defaultValue: true }),
     }),
@@ -49,11 +59,6 @@ const schemaLatest = schema.object(
         defaultValue: 'all',
       }),
     }),
-    enableDataStreamsStorageColumn: offeringBasedSchema({
-      // The Storage size column in Data streams is disabled in serverless; refer to the serverless.yml file as the source of truth
-      // We take this approach in order to have a central place (serverless.yml) for serverless config across Kibana
-      serverless: schema.boolean({ defaultValue: true }),
-    }),
     enableMappingsSourceFieldSection: offeringBasedSchema({
       // The _source field in the Mappings editor's advanced options form is disabled in serverless; refer to the serverless.yml file as the source of truth
       // We take this approach in order to have a central place (serverless.yml) for serverless config across Kibana
@@ -61,6 +66,11 @@ const schemaLatest = schema.object(
     }),
     enableTogglingDataRetention: offeringBasedSchema({
       // The toggle for enabling data retention for DSL in data streams UI is disabled in serverless; refer to the serverless.yml file as the source of truth
+      // We take this approach in order to have a central place (serverless.yml) for serverless config across Kibana
+      serverless: schema.boolean({ defaultValue: true }),
+    }),
+    enableProjectLevelRetentionChecks: offeringBasedSchema({
+      // Max project level retention checks is enabled in serverless; refer to the serverless.yml file as the source of truth
       // We take this approach in order to have a central place (serverless.yml) for serverless config across Kibana
       serverless: schema.boolean({ defaultValue: true }),
     }),
@@ -77,10 +87,12 @@ const configLatest: PluginConfigDescriptor<IndexManagementConfig> = {
     enableIndexActions: true,
     enableLegacyTemplates: true,
     enableIndexStats: true,
+    enableDataStreamStats: true,
+    enableSizeAndDocCount: true,
     editableIndexSettings: true,
-    enableDataStreamsStorageColumn: true,
     enableMappingsSourceFieldSection: true,
     enableTogglingDataRetention: true,
+    enableProjectLevelRetentionChecks: true,
   },
   schema: schemaLatest,
   deprecations: ({ unused }) => [unused('dev.enableIndexDetailsPage', { level: 'warning' })],

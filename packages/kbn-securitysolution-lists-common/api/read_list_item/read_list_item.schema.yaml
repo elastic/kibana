@@ -1,0 +1,74 @@
+openapi: 3.0.0
+info:
+  title: Read list item API endpoint
+  version: '2023-10-31'
+paths:
+  /api/lists/items:
+    get:
+      x-labels: [serverless, ess]
+      operationId: ReadListItem
+      x-codegen-enabled: true
+      summary: Get a list item
+      description: Get the details of a list item.
+      parameters:
+        - name: id
+          in: query
+          required: false
+          description: Required if `list_id` and `value` are not specified
+          schema:
+            $ref: '../model/list_common.schema.yaml#/components/schemas/ListId'
+        - name: list_id
+          in: query
+          required: false
+          description: Required if `id` is not specified
+          schema:
+            $ref: '../model/list_common.schema.yaml#/components/schemas/ListId'
+        - name: value
+          in: query
+          required: false
+          description: Required if `id` is not specified
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '../model/list_schemas.schema.yaml#/components/schemas/ListItem'
+                  - type: array
+                    items:
+                      $ref: '../model/list_schemas.schema.yaml#/components/schemas/ListItem'
+        400:
+          description: Invalid input data response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+                  - $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+        401:
+          description: Unsuccessful authentication response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+        403:
+          description: Not enough privileges response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+        404:
+          description: List item not found response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+        500:
+          description: Internal server error response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'

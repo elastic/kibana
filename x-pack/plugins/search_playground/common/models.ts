@@ -9,12 +9,6 @@ import { ModelProvider, LLMs } from './types';
 
 export const MODELS: ModelProvider[] = [
   {
-    name: 'OpenAI GPT-3.5 Turbo',
-    model: 'gpt-3.5-turbo',
-    promptTokenLimit: 16385,
-    provider: LLMs.openai,
-  },
-  {
     name: 'OpenAI GPT-4o',
     model: 'gpt-4o',
     promptTokenLimit: 128000,
@@ -27,15 +21,33 @@ export const MODELS: ModelProvider[] = [
     provider: LLMs.openai,
   },
   {
-    name: 'Claude 3 Haiku',
+    name: 'OpenAI GPT-3.5 Turbo',
+    model: 'gpt-3.5-turbo',
+    promptTokenLimit: 16385,
+    provider: LLMs.openai,
+  },
+  {
+    name: 'Anthropic Claude 3 Haiku',
     model: 'anthropic.claude-3-haiku-20240307-v1:0',
     promptTokenLimit: 200000,
     provider: LLMs.bedrock,
   },
   {
-    name: 'Claude 3 Sonnet',
-    model: 'anthropic.claude-3-haiku-20240307-v1:0',
+    name: 'Anthropic Claude 3.5 Sonnet',
+    model: 'anthropic.claude-3-5-sonnet-20240620-v1:0',
     promptTokenLimit: 200000,
     provider: LLMs.bedrock,
+  },
+  {
+    name: 'Google Gemini 1.5 Pro',
+    model: 'gemini-1.5-pro-002',
+    promptTokenLimit: 2097152,
+    provider: LLMs.gemini,
+  },
+  {
+    name: 'Google Gemini 1.5 Flash',
+    model: 'gemini-1.5-flash-002',
+    promptTokenLimit: 2097152,
+    provider: LLMs.gemini,
   },
 ];

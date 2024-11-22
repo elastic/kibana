@@ -16,6 +16,7 @@ import type {
   ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { asyncForEach } from '@kbn/std';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import {
   createExceptionList,
@@ -23,12 +24,13 @@ import {
   deleteExceptionList,
   deleteExceptionListItem,
 } from '@kbn/lists-plugin/server/services/exception_lists';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
+import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
 
 import { packagePolicyService } from '@kbn/fleet-plugin/server/services';
 
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { DETECTION_TYPE, NAMESPACE_TYPE } from '@kbn/lists-plugin/common/constants.mock';
+import { DEFAULT_DIAGNOSTIC_INDEX_PATTERN } from '../../../common/endpoint/constants';
 import { bulkInsert, updateTimestamps } from './helpers';
 import { TelemetryEventsSender } from '../../lib/telemetry/sender';
 import type {
@@ -39,11 +41,11 @@ import type { SecurityTelemetryTask } from '../../lib/telemetry/task';
 import { Plugin as SecuritySolutionPlugin } from '../../plugin';
 import { AsyncTelemetryEventsSender } from '../../lib/telemetry/async_sender';
 import { type ITelemetryReceiver, TelemetryReceiver } from '../../lib/telemetry/receiver';
-import { DEFAULT_DIAGNOSTIC_INDEX } from '../../lib/telemetry/constants';
 import mockEndpointAlert from '../__mocks__/endpoint-alert.json';
 import mockedRule from '../__mocks__/rule.json';
 import fleetAgents from '../__mocks__/fleet-agents.json';
 import endpointMetrics from '../__mocks__/endpoint-metrics.json';
+import prebuiltRulesEvents from '../__mocks__/prebuilt-rules-events.json';
 import endpointMetadata from '../__mocks__/endpoint-metadata.json';
 import endpointPolicy from '../__mocks__/endpoint-policy.json';
 
@@ -51,6 +53,12 @@ const fleetIndex = '.fleet-agents';
 const endpointMetricsIndex = '.ds-metrics-endpoint.metrics-1';
 const endpointMetricsMetadataIndex = '.ds-metrics-endpoint.metadata-1';
 const endpointMetricsPolicyIndex = '.ds-metrics-endpoint.policy-1';
+const prebuiltRulesIndex = '.alerts-security.alerts';
+
+const logger = new ToolingLog({
+  level: 'info',
+  writeTo: process.stdout,
+});
 
 export function getTelemetryTasks(
   spy: jest.SpyInstance<
@@ -139,7 +147,7 @@ export function getTelemetryTask(
 }
 
 export async function createMockedEndpointAlert(esClient: ElasticsearchClient) {
-  const index = `${DEFAULT_DIAGNOSTIC_INDEX.replace('-*', '')}-001`;
+  const index = `${DEFAULT_DIAGNOSTIC_INDEX_PATTERN.replace('-*', '')}-001`;
 
   await esClient.indices.create({ index, body: { settings: { hidden: true } } });
 
@@ -182,6 +190,10 @@ export async function mockEndpointData(
   await bulkInsert(esClient, endpointMetricsPolicyIndex, updateTimestamps(endpointPolicy));
 }
 
+export async function mockPrebuiltRulesData(esClient: ElasticsearchClient) {
+  await bulkInsert(esClient, prebuiltRulesIndex, updateTimestamps(prebuiltRulesEvents));
+}
+
 export async function initEndpointIndices(esClient: ElasticsearchClient) {
   const mappings: object = {
     dynamic: false,
@@ -211,7 +223,7 @@ export async function dropEndpointIndices(esClient: ElasticsearchClient) {
 }
 
 export async function cleanupMockedEndpointAlerts(esClient: ElasticsearchClient) {
-  const index = `${DEFAULT_DIAGNOSTIC_INDEX.replace('-*', '')}-001`;
+  const index = `${DEFAULT_DIAGNOSTIC_INDEX_PATTERN.replace('-*', '')}-001`;
 
   await esClient.indices.delete({ index }).catch(() => {
     // ignore errors
@@ -253,7 +265,7 @@ export async function createAgentPolicy(
     enabled: true,
     policy_id: 'policy-elastic-agent-on-cloud',
     policy_ids: ['policy-elastic-agent-on-cloud'],
-    package: { name: 'endpoint', title: 'Elastic Endpoint', version: '8.11.1' },
+    package: { name: 'endpoint', title: 'Elastic Endpoint', version: '8.15.1' },
     inputs: [
       {
         config: {
@@ -276,14 +288,28 @@ export async function createAgentPolicy(
     ],
   };
 
-  await soClient.create<unknown>(AGENT_POLICY_SAVED_OBJECT_TYPE, {}, { id }).catch(() => {});
-  await packagePolicyService
-    .create(soClient, esClient, packagePolicy, {
-      id,
-      spaceId: 'default',
-      bumpRevision: false,
-    })
-    .catch(() => {});
+  await soClient.get<unknown>(LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, id).catch(async (e) => {
+    try {
+      return await soClient.create<unknown>(LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, {}, { id });
+    } catch {
+      logger.error(`>> Error searching for agent: ${e}`);
+      throw Error(`>> Error searching for agent: ${e}`);
+    }
+  });
+
+  await packagePolicyService.get(soClient, id).catch(async () => {
+    try {
+      return await packagePolicyService.create(soClient, esClient, packagePolicy, {
+        id,
+        spaceId: 'default',
+        bumpRevision: false,
+        force: true,
+      });
+    } catch (e) {
+      logger.error(`>> Error creating package policy: ${e}`);
+      throw Error(`>> Error creating package policy: ${e}`);
+    }
+  });
 }
 
 export async function createMockedExceptionList(so: SavedObjectsServiceStart) {

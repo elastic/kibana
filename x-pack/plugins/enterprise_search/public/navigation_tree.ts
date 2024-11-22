@@ -21,15 +21,17 @@ import { SEARCH_APPLICATIONS_PATH } from './applications/applications/routes';
 import { SEARCH_INDICES_PATH } from './applications/enterprise_search_content/routes';
 
 export interface DynamicSideNavItems {
+  appSearch?: Array<EuiSideNavItemType<unknown>>;
   collections?: Array<EuiSideNavItemType<unknown>>;
   indices?: Array<EuiSideNavItemType<unknown>>;
   searchApps?: Array<EuiSideNavItemType<unknown>>;
+  workplaceSearch?: Array<EuiSideNavItemType<unknown>>;
 }
 
 const title = i18n.translate(
   'xpack.enterpriseSearch.searchNav.headerSolutionSwitcher.searchSolutionTitle',
   {
-    defaultMessage: 'Search',
+    defaultMessage: 'Elasticsearch',
   }
 );
 const icon = 'logoElasticsearch';
@@ -77,7 +79,7 @@ export const getNavigationTreeDefinition = ({
     id: 'es',
     navigationTree$: dynamicItems$.pipe(
       debounceTime(10),
-      map(({ indices, searchApps, collections }) => {
+      map(({ appSearch, indices, searchApps, collections, workplaceSearch }) => {
         const navTree: NavigationTreeDefinition = {
           body: [
             {
@@ -91,7 +93,7 @@ export const getNavigationTreeDefinition = ({
                     return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
                   },
                   id: 'dev_tools',
-                  link: 'dev_tools:console',
+                  link: 'dev_tools',
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.devTools', {
                     defaultMessage: 'Dev Tools',
                   }),
@@ -207,7 +209,7 @@ export const getNavigationTreeDefinition = ({
                   }),
                 },
                 {
-                  children: [{ link: 'searchInferenceEndpoints' }],
+                  children: [{ link: 'searchInferenceEndpoints:inferenceEndpoints' }],
                   id: 'relevance',
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.relevance', {
                     defaultMessage: 'Relevance',
@@ -228,14 +230,41 @@ export const getNavigationTreeDefinition = ({
                           defaultMessage: 'App Search',
                         }
                       ),
+                      ...(appSearch
+                        ? {
+                            children: appSearch.map(euiItemTypeToNodeDefinition),
+                            isCollapsible: false,
+                            renderAs: 'accordion',
+                          }
+                        : {}),
                     },
                     {
+                      getIsActive: ({ pathNameSerialized, prepend }) => {
+                        return pathNameSerialized.startsWith(
+                          prepend('/app/enterprise_search/workplace_search')
+                        );
+                      },
                       link: 'workplaceSearch',
+                      ...(workplaceSearch
+                        ? {
+                            children: workplaceSearch.map(euiItemTypeToNodeDefinition),
+                            isCollapsible: false,
+                            renderAs: 'accordion',
+                          }
+                        : {}),
                     },
                   ],
                   id: 'entsearch',
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.entsearch', {
                     defaultMessage: 'Enterprise Search',
+                  }),
+                },
+                {
+                  children: [{ link: 'maps' }, { link: 'canvas' }, { link: 'graph' }],
+                  id: 'otherTools',
+                  renderAs: 'accordion',
+                  title: i18n.translate('xpack.enterpriseSearch.searchNav.otherTools', {
+                    defaultMessage: 'Other tools',
                   }),
                 },
               ],
@@ -325,6 +354,7 @@ export const getNavigationTreeDefinition = ({
                       title: 'Stack',
                     },
                   ],
+                  id: 'stack_management', // This id can't be changed as we use it to open the panel programmatically
                   link: 'management',
                   renderAs: 'panelOpener',
                   spaceBefore: null,

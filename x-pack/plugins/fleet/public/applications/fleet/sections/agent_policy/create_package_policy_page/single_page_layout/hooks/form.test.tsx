@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { act } from '@testing-library/react-hooks';
-import type { RenderHookResult } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
 
 import type { TestRenderer } from '../../../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../../../mock';
 import type { PackageInfo } from '../../../../../types';
 
-import { sendGetPackagePolicies } from '../../../../../hooks';
+import { sendGetPackagePolicies, useConfig } from '../../../../../hooks';
 
 import { SelectedPolicyTab } from '../../components';
 
 import { useOnSubmit } from './form';
+
+type MockFn = jest.MockedFunction<any>;
 
 jest.mock('../../../../../hooks', () => {
   return {
@@ -31,6 +33,7 @@ jest.mock('../../../../../hooks', () => {
     sendGetStatus: jest
       .fn()
       .mockResolvedValue({ data: { isReady: true, missing_requirements: [] } }),
+    useConfig: jest.fn(),
   };
 });
 
@@ -68,11 +71,11 @@ describe('useOnSubmit', () => {
 
   let testRenderer: TestRenderer;
   let renderResult: RenderHookResult<
-    Parameters<typeof useOnSubmit>,
-    ReturnType<typeof useOnSubmit>
+    ReturnType<typeof useOnSubmit>,
+    Parameters<typeof useOnSubmit>
   >;
-  const render = ({ isUpdate } = { isUpdate: false }) =>
-    (renderResult = testRenderer.renderHook(() =>
+  const render = async ({ isUpdate } = { isUpdate: false }) => {
+    renderResult = testRenderer.renderHook(() =>
       useOnSubmit({
         agentCount: 0,
         packageInfo,
@@ -82,17 +85,23 @@ describe('useOnSubmit', () => {
         queryParamsPolicyId: undefined,
         hasFleetAddAgentsPrivileges: true,
       })
-    ));
+    );
+
+    await waitFor(() => new Promise((resolve) => resolve(null)));
+
+    return renderResult;
+  };
 
   beforeEach(() => {
     testRenderer = createFleetTestRendererMock();
+    (useConfig as MockFn).mockReturnValue({
+      agentless: undefined,
+    } as any);
   });
 
   describe('default API response', () => {
-    beforeEach(() => {
-      act(() => {
-        render();
-      });
+    beforeEach(async () => {
+      await render();
     });
 
     it('should set new values when package policy changes', () => {

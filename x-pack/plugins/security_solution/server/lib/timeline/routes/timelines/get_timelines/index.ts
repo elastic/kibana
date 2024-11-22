@@ -5,61 +5,53 @@
  * 2.0.
  */
 
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
+import type { IKibanaResponse } from '@kbn/core-http-server';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { TIMELINES_URL } from '../../../../../../common/constants';
 
-import type { ConfigType } from '../../../../..';
-import type { SetupPlugins } from '../../../../../plugin';
-
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
-import { CustomHttpRequestError } from '../../../../../utils/custom_http_request_error';
-import { buildFrameworkRequest, escapeHatch, throwErrors } from '../../../utils/common';
+import { buildFrameworkRequest } from '../../../utils/common';
 import { getAllTimeline } from '../../../saved_object/timelines';
-import { getTimelinesQuerySchema } from '../../../../../../common/api/timeline';
+import {
+  GetTimelinesRequestQuery,
+  type GetTimelinesResponse,
+} from '../../../../../../common/api/timeline';
 
-export const getTimelinesRoute = (
-  router: SecuritySolutionPluginRouter,
-  _: ConfigType,
-  security: SetupPlugins['security']
-) => {
+export const getTimelinesRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .get({
       path: TIMELINES_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
       access: 'public',
     })
     .addVersion(
       {
         validate: {
-          request: { query: escapeHatch },
+          request: { query: buildRouteValidationWithZod(GetTimelinesRequestQuery) },
         },
         version: '2023-10-31',
       },
-      async (context, request, response) => {
-        const customHttpRequestError = (message: string) =>
-          new CustomHttpRequestError(message, 400);
+      async (context, request, response): Promise<IKibanaResponse<GetTimelinesResponse>> => {
         try {
-          const frameworkRequest = await buildFrameworkRequest(context, security, request);
-          const queryParams = pipe(
-            getTimelinesQuerySchema.decode(request.query),
-            fold(throwErrors(customHttpRequestError), identity)
-          );
-          const onlyUserFavorite = queryParams?.only_user_favorite === 'true' ? true : false;
-          const pageSize = queryParams?.page_size ? parseInt(queryParams.page_size, 10) : null;
-          const pageIndex = queryParams?.page_index ? parseInt(queryParams.page_index, 10) : null;
-          const search = queryParams?.search ?? null;
-          const sortField = queryParams?.sort_field ?? null;
-          const sortOrder = queryParams?.sort_order ?? null;
-          const status = queryParams?.status ?? null;
-          const timelineType = queryParams?.timeline_type ?? null;
+          const frameworkRequest = await buildFrameworkRequest(context, request);
+          const onlyUserFavorite = request.query?.only_user_favorite === 'true';
+          const pageSize = request.query?.page_size ? parseInt(request.query.page_size, 10) : null;
+          const pageIndex = request.query?.page_index
+            ? parseInt(request.query.page_index, 10)
+            : null;
+          const search = request.query?.search ?? null;
+          const sortField = request.query?.sort_field ?? null;
+          const sortOrder = request.query?.sort_order ?? null;
+          const status = request.query?.status ?? null;
+          const timelineType = request.query?.timeline_type ?? null;
           const sort =
             sortField && sortOrder
               ? {
@@ -67,7 +59,6 @@ export const getTimelinesRoute = (
                   sortOrder,
                 }
               : null;
-          let res = null;
           let totalCount = null;
 
           if (pageSize == null && pageIndex == null) {
@@ -83,7 +74,7 @@ export const getTimelinesRoute = (
             totalCount = allActiveTimelines.totalCount;
           }
 
-          res = await getAllTimeline(
+          const res = await getAllTimeline(
             frameworkRequest,
             onlyUserFavorite,
             {
@@ -96,7 +87,7 @@ export const getTimelinesRoute = (
             timelineType
           );
 
-          return response.ok({ body: res ?? {} });
+          return response.ok({ body: res });
         } catch (err) {
           const error = transformError(err);
           const siemResponse = buildSiemResponse(response);

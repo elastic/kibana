@@ -9,9 +9,14 @@ import { FilterStateStore } from '@kbn/es-query';
 
 import type { DataTableModel } from '@kbn/securitysolution-data-table';
 import { VIEW_SELECTION } from '../../../common/constants';
-import type { TimelineResult } from '../../../common/api/timeline';
 import { TimelineId, TimelineTabs } from '../../../common/types/timeline';
-import { TimelineType, TimelineStatus } from '../../../common/api/timeline';
+import type { TimelineResponse } from '../../../common/api/timeline';
+import {
+  type ColumnHeaderResult,
+  RowRendererIdEnum,
+  TimelineTypeEnum,
+  TimelineStatusEnum,
+} from '../../../common/api/timeline';
 
 import type { OpenTimelineResult } from '../../timelines/components/open_timeline/types';
 import type { TimelineEventsDetailsItem } from '../../../common/search_strategy';
@@ -128,7 +133,7 @@ export const mockOpenTimelineQueryResults = {
       noteIds: ['308783f0-7b6d-11e9-980a-e5349fc014ef', '34ec1690-7b6d-11e9-980a-e5349fc014ef'],
       pinnedEventIds: ['Wl0W12oB9v5HJNSHb400', '410W12oB9v5HJNSHY4wv', 'ZF0W12oB9v5HJNSHwY6L'],
       title: 'test 1',
-      timelineType: TimelineType.default,
+      timelineType: TimelineTypeEnum.default,
       templateTimelineId: null,
       templateTimelineVersion: null,
       created: 1558386787614,
@@ -242,7 +247,7 @@ export const mockOpenTimelineQueryResults = {
       noteIds: ['308783f0-7b6d-11e9-980a-e5349fc014ef', '34ec1690-7b6d-11e9-980a-e5349fc014ef'],
       pinnedEventIds: ['Wl0W12oB9v5HJNSHb400', '410W12oB9v5HJNSHY4wv', 'ZF0W12oB9v5HJNSHwY6L'],
       title: 'test 2',
-      timelineType: TimelineType.default,
+      timelineType: TimelineTypeEnum.default,
       templateTimelineId: null,
       templateTimelineVersion: null,
       created: 1558386787614,
@@ -356,7 +361,7 @@ export const mockOpenTimelineQueryResults = {
       noteIds: ['308783f0-7b6d-11e9-980a-e5349fc014ef', '34ec1690-7b6d-11e9-980a-e5349fc014ef'],
       pinnedEventIds: ['Wl0W12oB9v5HJNSHb400', '410W12oB9v5HJNSHY4wv', 'ZF0W12oB9v5HJNSHwY6L'],
       title: 'test 2',
-      timelineType: TimelineType.default,
+      timelineType: TimelineTypeEnum.default,
       templateTimelineId: null,
       templateTimelineVersion: null,
       created: 1558386787614,
@@ -470,7 +475,7 @@ export const mockOpenTimelineQueryResults = {
       noteIds: ['308783f0-7b6d-11e9-980a-e5349fc014ef', '34ec1690-7b6d-11e9-980a-e5349fc014ef'],
       pinnedEventIds: ['Wl0W12oB9v5HJNSHb400', '410W12oB9v5HJNSHY4wv', 'ZF0W12oB9v5HJNSHwY6L'],
       title: 'test 3',
-      timelineType: TimelineType.default,
+      timelineType: TimelineTypeEnum.default,
       templateTimelineId: null,
       templateTimelineVersion: null,
       created: 1558386787614,
@@ -584,7 +589,7 @@ export const mockOpenTimelineQueryResults = {
       noteIds: ['308783f0-7b6d-11e9-980a-e5349fc014ef', '34ec1690-7b6d-11e9-980a-e5349fc014ef'],
       pinnedEventIds: ['Wl0W12oB9v5HJNSHb400', '410W12oB9v5HJNSHY4wv', 'ZF0W12oB9v5HJNSHwY6L'],
       title: 'test 4',
-      timelineType: TimelineType.default,
+      timelineType: TimelineTypeEnum.default,
       templateTimelineId: null,
       templateTimelineVersion: null,
       created: 1558386787614,
@@ -698,7 +703,7 @@ export const mockOpenTimelineQueryResults = {
       noteIds: ['308783f0-7b6d-11e9-980a-e5349fc014ef', '34ec1690-7b6d-11e9-980a-e5349fc014ef'],
       pinnedEventIds: ['Wl0W12oB9v5HJNSHb400', '410W12oB9v5HJNSHY4wv', 'ZF0W12oB9v5HJNSHwY6L'],
       title: 'test 5',
-      timelineType: TimelineType.default,
+      timelineType: TimelineTypeEnum.default,
       templateTimelineId: null,
       templateTimelineVersion: null,
       created: 1558386787614,
@@ -812,7 +817,7 @@ export const mockOpenTimelineQueryResults = {
       noteIds: ['308783f0-7b6d-11e9-980a-e5349fc014ef', '34ec1690-7b6d-11e9-980a-e5349fc014ef'],
       pinnedEventIds: ['Wl0W12oB9v5HJNSHb400', '410W12oB9v5HJNSHY4wv', 'ZF0W12oB9v5HJNSHwY6L'],
       title: 'test 6',
-      timelineType: TimelineType.default,
+      timelineType: TimelineTypeEnum.default,
       templateTimelineId: null,
       templateTimelineVersion: null,
       created: 1558386787614,
@@ -926,7 +931,7 @@ export const mockOpenTimelineQueryResults = {
       noteIds: ['308783f0-7b6d-11e9-980a-e5349fc014ef', '34ec1690-7b6d-11e9-980a-e5349fc014ef'],
       pinnedEventIds: ['Wl0W12oB9v5HJNSHb400', '410W12oB9v5HJNSHY4wv', 'ZF0W12oB9v5HJNSHwY6L'],
       title: 'test 7',
-      timelineType: TimelineType.default,
+      timelineType: TimelineTypeEnum.default,
       templateTimelineId: null,
       templateTimelineVersion: null,
       created: 1558386787614,
@@ -1040,7 +1045,7 @@ export const mockOpenTimelineQueryResults = {
       noteIds: ['308783f0-7b6d-11e9-980a-e5349fc014ef', '34ec1690-7b6d-11e9-980a-e5349fc014ef'],
       pinnedEventIds: ['Wl0W12oB9v5HJNSHb400', '410W12oB9v5HJNSHY4wv', 'ZF0W12oB9v5HJNSHwY6L'],
       title: 'test 7',
-      timelineType: TimelineType.default,
+      timelineType: TimelineTypeEnum.default,
       templateTimelineId: null,
       templateTimelineVersion: null,
       created: 1558386787614,
@@ -1154,7 +1159,7 @@ export const mockOpenTimelineQueryResults = {
       noteIds: ['308783f0-7b6d-11e9-980a-e5349fc014ef', '34ec1690-7b6d-11e9-980a-e5349fc014ef'],
       pinnedEventIds: ['Wl0W12oB9v5HJNSHb400', '410W12oB9v5HJNSHY4wv', 'ZF0W12oB9v5HJNSHwY6L'],
       title: 'test 7',
-      timelineType: TimelineType.default,
+      timelineType: TimelineTypeEnum.default,
       templateTimelineId: null,
       templateTimelineVersion: null,
       created: 1558386787614,
@@ -1268,7 +1273,7 @@ export const mockOpenTimelineQueryResults = {
       noteIds: ['308783f0-7b6d-11e9-980a-e5349fc014ef', '34ec1690-7b6d-11e9-980a-e5349fc014ef'],
       pinnedEventIds: ['Wl0W12oB9v5HJNSHb400', '410W12oB9v5HJNSHY4wv', 'ZF0W12oB9v5HJNSHwY6L'],
       title: 'test 7',
-      timelineType: TimelineType.default,
+      timelineType: TimelineTypeEnum.default,
       templateTimelineId: null,
       templateTimelineVersion: null,
       created: 1558386787614,
@@ -1382,7 +1387,7 @@ export const mockOpenTimelineQueryResults = {
       noteIds: ['308783f0-7b6d-11e9-980a-e5349fc014ef', '34ec1690-7b6d-11e9-980a-e5349fc014ef'],
       pinnedEventIds: ['Wl0W12oB9v5HJNSHb400', '410W12oB9v5HJNSHY4wv', 'ZF0W12oB9v5HJNSHwY6L'],
       title: 'test 7',
-      timelineType: TimelineType.default,
+      timelineType: TimelineTypeEnum.default,
       templateTimelineId: null,
       templateTimelineVersion: null,
       created: 1558386787614,
@@ -1496,7 +1501,7 @@ export const mockOpenTimelineQueryResults = {
       noteIds: ['308783f0-7b6d-11e9-980a-e5349fc014ef', '34ec1690-7b6d-11e9-980a-e5349fc014ef'],
       pinnedEventIds: ['Wl0W12oB9v5HJNSHb400', '410W12oB9v5HJNSHY4wv', 'ZF0W12oB9v5HJNSHwY6L'],
       title: 'test 7',
-      timelineType: TimelineType.default,
+      timelineType: TimelineTypeEnum.default,
       templateTimelineId: null,
       templateTimelineVersion: null,
       created: 1558386787614,
@@ -1871,7 +1876,6 @@ export const mockTimelineModel: TimelineModel = {
   eventIdToNoteIds: {},
   eventType: 'all',
   excludedRowRendererIds: [],
-  expandedDetail: {},
   filters: [
     {
       $state: {
@@ -1895,7 +1899,6 @@ export const mockTimelineModel: TimelineModel = {
   indexNames: [],
   isFavorite: false,
   isLive: false,
-  isLoading: false,
   isSaving: false,
   isSelectAllChecked: false,
   kqlMode: 'filter',
@@ -1921,9 +1924,9 @@ export const mockTimelineModel: TimelineModel = {
       sortDirection: Direction.desc,
     },
   ],
-  status: TimelineStatus.active,
+  status: TimelineStatusEnum.active,
   title: 'Test rule',
-  timelineType: TimelineType.default,
+  timelineType: TimelineTypeEnum.default,
   templateTimelineId: null,
   templateTimelineVersion: null,
   version: '1',
@@ -1938,7 +1941,6 @@ export const mockDataTableModel: DataTableModel = {
   defaultColumns: mockTimelineModelColumns,
   dataViewId: null,
   deletedEventIds: [],
-  expandedDetail: {},
   filters: [
     {
       $state: {
@@ -1984,9 +1986,11 @@ export const mockDataTableModel: DataTableModel = {
   },
 };
 
-export const mockGetOneTimelineResult: TimelineResult = {
+export const mockGetOneTimelineResult: TimelineResponse = {
   savedObjectId: 'ef579e40-jibber-jabber',
-  columns: timelineDefaults.columns.filter((column) => column.id !== 'event.action'),
+  columns: timelineDefaults.columns.filter(
+    (column) => column.id !== 'event.action'
+  ) as ColumnHeaderResult[],
   dateRange: { start: '2020-03-18T13:46:38.929Z', end: '2020-03-18T13:52:38.929Z' },
   description: 'This is a sample rule description',
   eventType: 'all',
@@ -2003,7 +2007,7 @@ export const mockGetOneTimelineResult: TimelineResult = {
   ],
   kqlMode: 'filter',
   title: 'Test rule',
-  timelineType: TimelineType.default,
+  timelineType: TimelineTypeEnum.default,
   templateTimelineId: null,
   templateTimelineVersion: null,
   savedQueryId: null,
@@ -2011,38 +2015,13 @@ export const mockGetOneTimelineResult: TimelineResult = {
   version: '1',
 };
 
-export const mockTimelineResult = {
-  data: {
-    getOneTimeline: mockGetOneTimelineResult,
-  },
-  loading: false,
-  networkStatus: 7,
-  stale: false,
-};
-
-const defaultTimelineColumns: CreateTimelineProps['timeline']['columns'] = [
-  {
-    columnHeaderType: 'not-filtered',
-    id: '@timestamp',
-    type: 'date',
-    esTypes: ['date'],
-    initialWidth: 190,
-  },
-  { columnHeaderType: 'not-filtered', id: 'message', initialWidth: 180 },
-  { columnHeaderType: 'not-filtered', id: 'event.category', initialWidth: 180 },
-  { columnHeaderType: 'not-filtered', id: 'event.action', initialWidth: 180 },
-  { columnHeaderType: 'not-filtered', id: 'host.name', initialWidth: 180 },
-  { columnHeaderType: 'not-filtered', id: 'source.ip', initialWidth: 180 },
-  { columnHeaderType: 'not-filtered', id: 'destination.ip', initialWidth: 180 },
-  { columnHeaderType: 'not-filtered', id: 'user.name', initialWidth: 180 },
-];
 export const defaultTimelineProps: CreateTimelineProps = {
   from: '2018-11-05T18:58:25.937Z',
   timeline: {
     activeTab: TimelineTabs.query,
     prevActiveTab: TimelineTabs.query,
-    columns: defaultTimelineColumns,
-    defaultColumns: defaultTimelineColumns,
+    columns: timelineDefaults.columns,
+    defaultColumns: timelineDefaults.defaultColumns,
     dataProviders: [
       {
         and: [],
@@ -2063,13 +2042,30 @@ export const defaultTimelineProps: CreateTimelineProps = {
       eventCategoryField: 'event.category',
       query: '',
       size: 100,
-      tiebreakerField: '',
       timestampField: '@timestamp',
     },
     eventIdToNoteIds: {},
     eventType: 'all',
-    excludedRowRendererIds: [],
-    expandedDetail: {},
+    excludedRowRendererIds: [
+      RowRendererIdEnum.alert,
+      RowRendererIdEnum.alerts,
+      RowRendererIdEnum.auditd,
+      RowRendererIdEnum.auditd_file,
+      RowRendererIdEnum.library,
+      RowRendererIdEnum.netflow,
+      RowRendererIdEnum.plain,
+      RowRendererIdEnum.registry,
+      RowRendererIdEnum.suricata,
+      RowRendererIdEnum.system,
+      RowRendererIdEnum.system_dns,
+      RowRendererIdEnum.system_endgame_process,
+      RowRendererIdEnum.system_file,
+      RowRendererIdEnum.system_fim,
+      RowRendererIdEnum.system_security_event,
+      RowRendererIdEnum.system_socket,
+      RowRendererIdEnum.threat_match,
+      RowRendererIdEnum.zeek,
+    ],
     filters: [],
     highlightedDropAndProviderId: '',
     historyIds: [],
@@ -2077,7 +2073,6 @@ export const defaultTimelineProps: CreateTimelineProps = {
     indexNames: [],
     isFavorite: false,
     isLive: false,
-    isLoading: false,
     isSaving: false,
     isSelectAllChecked: false,
     itemsPerPage: 25,
@@ -2104,9 +2099,9 @@ export const defaultTimelineProps: CreateTimelineProps = {
         sortDirection: Direction.desc,
       },
     ],
-    status: TimelineStatus.draft,
+    status: TimelineStatusEnum.draft,
     title: '',
-    timelineType: TimelineType.default,
+    timelineType: TimelineTypeEnum.default,
     templateTimelineVersion: null,
     templateTimelineId: null,
     version: null,

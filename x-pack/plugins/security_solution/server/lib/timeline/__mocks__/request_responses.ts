@@ -6,7 +6,6 @@
  */
 
 import path, { join, resolve } from 'path';
-import type * as rt from 'io-ts';
 
 import {
   TIMELINE_DRAFT_URL,
@@ -17,11 +16,15 @@ import {
 } from '../../../../common/constants';
 import type {
   SavedTimeline,
-  patchTimelineSchema,
-  createTimelineSchema,
-  GetTimelineQuery,
+  PatchTimelineRequestBody,
+  CreateTimelinesRequestBody,
+  GetTimelineRequestQuery,
 } from '../../../../common/api/timeline';
-import { TimelineType, TimelineStatus } from '../../../../common/api/timeline';
+import {
+  type TimelineType,
+  TimelineTypeEnum,
+  TimelineStatusEnum,
+} from '../../../../common/api/timeline';
 
 import { requestMock } from '../../detection_engine/routes/__mocks__';
 
@@ -74,7 +77,7 @@ export const inputTimeline: SavedTimeline = {
   kqlMode: 'filter',
   kqlQuery: { filterQuery: null },
   title: 't',
-  timelineType: TimelineType.default,
+  timelineType: TimelineTypeEnum.default,
   templateTimelineId: null,
   templateTimelineVersion: 1,
   dateRange: { start: '2020-03-26T12:50:05.527Z', end: '2020-03-27T12:50:05.527Z' },
@@ -84,7 +87,7 @@ export const inputTimeline: SavedTimeline = {
 
 export const inputTemplateTimeline = {
   ...inputTimeline,
-  timelineType: TimelineType.template,
+  timelineType: TimelineTypeEnum.template,
   templateTimelineId: '79deb4c0-6bc1-11ea-inpt-templatea189',
   templateTimelineVersion: null,
 };
@@ -94,15 +97,15 @@ export const createTimelineWithoutTimelineId = {
   timeline: inputTimeline,
   timelineId: null,
   version: null,
-  timelineType: TimelineType.default,
+  timelineType: TimelineTypeEnum.default,
 };
 
 export const createTemplateTimelineWithoutTimelineId = {
   timeline: inputTemplateTimeline,
   timelineId: null,
   version: null,
-  timelineType: TimelineType.template,
-  status: TimelineStatus.active,
+  timelineType: TimelineTypeEnum.template,
+  status: TimelineStatusEnum.active,
 };
 
 export const createTimelineWithTimelineId = {
@@ -131,14 +134,14 @@ export const updateTemplateTimelineWithTimelineId = {
   version: 'WzEyMjUsMV0=',
 };
 
-export const getCreateTimelinesRequest = (mockBody: rt.TypeOf<typeof createTimelineSchema>) =>
+export const getCreateTimelinesRequest = (mockBody: CreateTimelinesRequestBody) =>
   requestMock.create({
     method: 'post',
     path: TIMELINE_URL,
     body: mockBody,
   });
 
-export const getUpdateTimelinesRequest = (mockBody: rt.TypeOf<typeof patchTimelineSchema>) =>
+export const getUpdateTimelinesRequest = (mockBody: PatchTimelineRequestBody) =>
   requestMock.create({
     method: 'patch',
     path: TIMELINE_URL,
@@ -163,7 +166,7 @@ export const cleanDraftTimelinesRequest = (timelineType: TimelineType) =>
     },
   });
 
-export const getTimelineRequest = (query?: GetTimelineQuery) =>
+export const getTimelineRequest = (query?: GetTimelineRequestQuery) =>
   requestMock.create({
     method: 'get',
     path: TIMELINE_URL,

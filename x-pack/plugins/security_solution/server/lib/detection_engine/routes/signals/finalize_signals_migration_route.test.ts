@@ -6,7 +6,6 @@
  */
 
 import { serverMock } from '../__mocks__';
-import type { SetupPlugins } from '../../../../plugin';
 import { getFinalizeSignalsMigrationRequest } from '../__mocks__/request_responses';
 import { getMigrationSavedObjectsById } from '../../migrations/get_migration_saved_objects_by_id';
 import { getSignalsMigrationSavedObjectMock } from '../../migrations/saved_objects_schema.mock';
@@ -22,14 +21,9 @@ describe('finalizing signals migrations', () => {
   beforeEach(() => {
     server = serverMock.create();
 
-    const securityMock = {
-      authc: {
-        getCurrentUser: jest.fn().mockReturnValue({ user: { username: 'my-username' } }),
-      },
-    } as unknown as SetupPlugins['security'];
     const ruleDataPluginServiceMock =
       ruleDataServiceMock.create() as unknown as RuleDataPluginService;
-    finalizeSignalsMigrationRoute(server.router, ruleDataPluginServiceMock, securityMock);
+    finalizeSignalsMigrationRoute(server.router, ruleDataPluginServiceMock);
   });
 
   it('returns an empty array error if no migrations exists', async () => {

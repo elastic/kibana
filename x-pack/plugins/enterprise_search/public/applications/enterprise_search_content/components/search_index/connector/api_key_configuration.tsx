@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { Status } from '../../../../../../common/types/api';
 import { GenerateConnectorApiKeyApiLogic } from '../../../api/connector/generate_connector_api_key_api_logic';
@@ -102,7 +103,7 @@ export const ApiKeyConfig: React.FC<{
             ? i18n.translate(
                 'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.apiKey.description',
                 {
-                  defaultMessage: `This native connector's API key {apiKeyName} is managed internally by Elasticsearch. The connector uses this API key to index documents into the {indexName} index. To refresh your API key, click "Generate API key".`,
+                  defaultMessage: `This Elastic managed connector's API key {apiKeyName} is managed internally by Elasticsearch. The connector uses this API key to index documents into the {indexName} index. To refresh your API key, click "Generate API key".`,
                   values: {
                     apiKeyName: `${indexName}-connector`,
                     indexName,
@@ -150,9 +151,10 @@ export const ApiKeyConfig: React.FC<{
         <></>
       )}
       <EuiFlexItem>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="enterpriseSearchApiKeyConfigGenerateApiKeyButton"
               onClick={clickGenerateApiKey}
               isLoading={status === Status.LOADING}
               isDisabled={indexName.length === 0}
@@ -166,6 +168,21 @@ export const ApiKeyConfig: React.FC<{
               )}
             </EuiButton>
           </EuiFlexItem>
+          {status === Status.SUCCESS && (
+            <EuiFlexItem grow={false}>
+              <EuiCallOut
+                color="success"
+                size="s"
+                iconType="check"
+                title={
+                  <FormattedMessage
+                    id="xpack.enterpriseSearch.apiKeyConfig.newApiKeyCreatedCalloutLabel"
+                    defaultMessage="New API key created succesfully"
+                  />
+                }
+              />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlexItem>
 

@@ -11,6 +11,7 @@ import type { CustomizationCallback } from '@kbn/discover-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { waitFor } from 'xstate/lib/waitFor';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { UnifiedDocViewerLogsOverview } from '@kbn/unified-doc-viewer-plugin/public';
 import type { LogsExplorerController } from '../controller';
 import type { LogsExplorerStartDeps } from '../types';
 import { useKibanaContextForPluginProvider } from '../utils/use_kibana';
@@ -81,14 +82,20 @@ export const createLogsExplorerProfileCustomizations =
     customizations.set({
       id: 'data_table',
       logsEnabled: true,
-      customControlColumnsConfiguration: await import('./custom_control_column').then((module) =>
-        module.createCustomControlColumnsConfiguration(service)
+      rowAdditionalLeadingControls: await import('./custom_control_column').then((module) =>
+        module.getRowAdditionalControlColumns()
       ),
     });
 
     customizations.set({
       id: 'field_list',
-      logsFieldsEnabled: true,
+      /**
+       * We are switching from these virtual columns to the One Discover Summary column.
+       * In this effort we don't want to immediately cleanup everything about these virtual columns,
+       * but only disable their instantiation.
+       * We'll clean this part as soon as we decide to definitevely discard these columns.
+       **/
+      logsFieldsEnabled: false,
     });
 
     // Fix bug where filtering on histogram does not work
@@ -130,7 +137,23 @@ export const createLogsExplorerProfileCustomizations =
         },
       },
       docViewsRegistry: (registry) => {
-        registry.enableById('doc_view_logs_overview');
+        const logsAIAssistantFeature = plugins.discoverShared.features.registry.getById(
+          'observability-logs-ai-assistant'
+        );
+
+        registry.add({
+          id: 'doc_view_logs_overview',
+          title: i18n.translate('xpack.logsExplorer.docViews.logsOverview.title', {
+            defaultMessage: 'Overview',
+          }),
+          order: 0,
+          component: (props) => (
+            <UnifiedDocViewerLogsOverview
+              {...props}
+              renderAIAssistant={logsAIAssistantFeature?.render}
+            />
+          ),
+        });
 
         return registry;
       },

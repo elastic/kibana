@@ -21,13 +21,21 @@ const paramSchema = schema.object({
 export const disableAlertRoute = (
   router: AlertingRouter,
   licenseState: ILicenseState,
-  usageCounter?: UsageCounter
+  usageCounter?: UsageCounter,
+  isServerless?: boolean
 ) => {
   router.post(
     {
       path: `${LEGACY_BASE_ALERT_API_PATH}/alert/{id}/_disable`,
       validate: {
         params: paramSchema,
+      },
+      options: {
+        access: isServerless ? 'internal' : 'public',
+        summary: 'Disable an alert',
+        tags: ['oas-tag:alerting'],
+        // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
+        deprecated: true,
       },
     },
     router.handleLegacyErrors(async function (context, req, res) {
@@ -39,7 +47,7 @@ export const disableAlertRoute = (
       const rulesClient = (await context.alerting).getRulesClient();
       const { id } = req.params;
       try {
-        await rulesClient.disable({ id });
+        await rulesClient.disableRule({ id });
         return res.noContent();
       } catch (e) {
         if (e instanceof RuleTypeDisabledError) {

@@ -9,7 +9,6 @@ import { useMemo } from 'react';
 import { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CustomCard } from './types';
-import { toCustomCard } from './utils';
 
 export function toOnboardingPath({
   basePath,
@@ -68,9 +67,9 @@ function formatCustomCards(
   const cards: IntegrationCardItem[] = [];
   for (const card of customCards) {
     if (card.type === 'featured' && !!featuredCards[card.name]) {
-      cards.push(toCustomCard(rewriteUrl(featuredCards[card.name]!)));
+      cards.push(rewriteUrl(featuredCards[card.name]!));
     } else if (card.type === 'virtual') {
-      cards.push(toCustomCard(rewriteUrl(card)));
+      cards.push(rewriteUrl(card));
     }
   }
   return cards;
@@ -80,13 +79,14 @@ function useFilteredCards(
   rewriteUrl: (card: IntegrationCardItem) => IntegrationCardItem,
   integrationsList: IntegrationCardItem[],
   selectedCategory: string[],
+  excludePackageIdList: string[],
   customCards?: CustomCard[]
 ) {
   return useMemo(() => {
     const integrationCards = integrationsList
+      .filter((card) => !excludePackageIdList.includes(card.id))
       .filter((card) => card.categories.some((category) => selectedCategory.includes(category)))
-      .map(rewriteUrl)
-      .map(toCustomCard);
+      .map(rewriteUrl);
 
     if (!customCards) {
       return { featuredCards: {}, integrationCards };
@@ -99,7 +99,7 @@ function useFilteredCards(
       ),
       integrationCards,
     };
-  }, [integrationsList, customCards, selectedCategory, rewriteUrl]);
+  }, [integrationsList, rewriteUrl, customCards, excludePackageIdList, selectedCategory]);
 }
 
 /**
@@ -113,6 +113,7 @@ function useFilteredCards(
 export function useIntegrationCardList(
   integrationsList: IntegrationCardItem[],
   selectedCategory: string[],
+  excludePackageIdList: string[],
   customCards?: CustomCard[],
   flowCategory?: string | null,
   flowSearch?: string,
@@ -123,6 +124,7 @@ export function useIntegrationCardList(
     rewriteUrl,
     integrationsList,
     selectedCategory,
+    excludePackageIdList,
     customCards
   );
 

@@ -1,12 +1,16 @@
 {
   "type": "plugin",
   "id": "@kbn/observability-logs-explorer-plugin",
-  "owner": "@elastic/obs-ux-logs-team",
+  "owner": [
+    "@elastic/obs-ux-logs-team"
+  ],
+  "group": "observability",
+  "visibility": "private",
   "description": "This plugin exposes and registers observability log consumption features.",
   "plugin": {
     "id": "observabilityLogsExplorer",
-    "server": true,
     "browser": true,
+    "server": true,
     "configPath": [
       "xpack",
       "observabilityLogsExplorer"
@@ -19,7 +23,9 @@
       "observabilityShared",
       "slo",
       "share",
-      "kibanaUtils"
+      "kibanaUtils",
+      "dataQuality",
+      "logsDataAccess"
     ],
     "optionalPlugins": [
       "serverless",
@@ -35,7 +41,7 @@
       "triggersActionsUi"
     ],
     "extraPublicDirs": [
-      "common",
+      "common"
     ]
   }
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RootSchema, EventTypeOpts } from '@kbn/analytics-client';
+import { RootSchema, EventTypeOpts } from '@kbn/core/server';
 
 interface ScoredDocument {
   content: string;
@@ -52,9 +52,9 @@ const schema: RootSchema<RecallRanking> = {
   },
 };
 
-export const RecallRankingEventType = 'observability_ai_assistant_recall_ranking';
+export const recallRankingEventType = 'observability_ai_assistant_recall_ranking';
 
 export const recallRankingEvent: EventTypeOpts<RecallRanking> = {
-  eventType: RecallRankingEventType,
+  eventType: recallRankingEventType,
   schema,
 };

@@ -9,7 +9,7 @@ import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { isEmpty } from 'lodash/fp';
 import type { Note } from '../../../../common/api/timeline';
-import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
 import { createNote } from '../notes/helpers';
 
 import { InputsModelId } from '../../../common/store/inputs/constants';
@@ -53,7 +53,9 @@ export const useUpdateTimeline = () => {
     }: UpdateTimeline) => {
       let _timeline = timeline;
       if (duplicate) {
-        _timeline = { ...timeline, updated: undefined, changed: undefined, version: null };
+        // Reset the `updated` and `version` fields because a duplicated timeline has not been saved yet.
+        // The `changed` field is set to true because the duplicated timeline needs to be saved.
+        _timeline = { ...timeline, updated: undefined, changed: true, version: null };
       }
       if (!isEmpty(_timeline.indexNames)) {
         dispatch(
@@ -65,8 +67,8 @@ export const useUpdateTimeline = () => {
         );
       }
       if (
-        _timeline.status === TimelineStatus.immutable &&
-        _timeline.timelineType === TimelineType.template
+        _timeline.status === TimelineStatusEnum.immutable &&
+        _timeline.timelineType === TimelineTypeEnum.template
       ) {
         dispatch(
           dispatchSetRelativeRangeDatePicker({

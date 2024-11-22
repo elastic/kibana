@@ -1,8 +1,6 @@
 get:
-  summary: Get a data view in the default space
+  summary: Get a data view
   operationId: getDataViewDefault
-  description: >
-    This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
   tags:
     - data views
   parameters:
@@ -25,11 +23,10 @@ get:
             $ref: '../components/schemas/404_response.yaml'
 
 delete:
-  summary: Delete a data view from the default space
+  summary: Delete a data view
   operationId: deleteDataViewDefault
   description: >
     WARNING: When you delete a data view, it cannot be recovered.
-    This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
   tags:
     - data views
   parameters:
@@ -46,10 +43,8 @@ delete:
             $ref: '../components/schemas/404_response.yaml'
 
 post:
-  summary: Update a data view in the default space
+  summary: Update a data view
   operationId: updateDataViewDefault
-  description: >
-    This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
   tags:
     - data views
   parameters:

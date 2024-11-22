@@ -9,9 +9,9 @@ import type { Client } from '@elastic/elasticsearch';
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { FakeListChatModel, FakeStreamingLLM } from '@langchain/core/utils/testing';
-import { Message, experimental_StreamData } from 'ai';
 import { createAssist as Assist } from '../utils/assist';
-import { ConversationalChain, clipContext } from './conversational_chain';
+import { ConversationalChain, contextLimitCheck } from './conversational_chain';
+import { ChatMessage, MessageRole } from '../types';
 
 describe('conversational chain', () => {
   const createTestChain = async ({
@@ -28,17 +28,21 @@ describe('conversational chain', () => {
     modelLimit,
   }: {
     responses: string[];
-    chat: Message[];
-    expectedFinalAnswer: string;
-    expectedDocs: any;
-    expectedTokens: any;
-    expectedSearchRequest: any;
+    chat: ChatMessage[];
+    expectedFinalAnswer?: string;
+    expectedDocs?: any;
+    expectedTokens?: any;
+    expectedSearchRequest?: any;
     contentField?: Record<string, string>;
     isChatModel?: boolean;
     docs?: any;
     expectedHasClipped?: boolean;
     modelLimit?: number;
   }) => {
+    if (expectedHasClipped) {
+      expect.assertions(1);
+    }
+
     const searchMock = jest.fn().mockImplementation(() => {
       return {
         hits: {
@@ -96,47 +100,56 @@ describe('conversational chain', () => {
         size: 3,
         inputTokensLimit: modelLimit,
       },
-      prompt: 'you are a QA bot {question} {chat_history} {context}',
+      prompt: 'you are a QA bot {context}',
+      questionRewritePrompt: 'rewrite question {question} using {context}"',
     });
 
-    const stream = await conversationalChain.stream(aiClient, chat);
+    try {
+      const stream = await conversationalChain.stream(aiClient, chat);
 
-    const streamToValue: string[] = await new Promise((resolve, reject) => {
-      const reader = stream.getReader();
-      const textDecoder = new TextDecoder();
-      const chunks: string[] = [];
+      const streamToValue: string[] = await new Promise((resolve, reject) => {
+        const reader = stream.getReader();
+        const textDecoder = new TextDecoder();
+        const chunks: string[] = [];
 
-      const read = () => {
-        reader.read().then(({ done, value }) => {
-          if (done) {
-            resolve(chunks);
-          } else {
-            chunks.push(textDecoder.decode(value));
-            read();
-          }
-        }, reject);
-      };
-      read();
-    });
+        const read = () => {
+          reader.read().then(({ done, value }) => {
+            if (done) {
+              resolve(chunks);
+            } else {
+              chunks.push(textDecoder.decode(value));
+              read();
+            }
+          }, reject);
+        };
+        read();
+      });
 
-    const textValue = streamToValue
-      .filter((v) => v[0] === '0')
-      .reduce((acc, v) => acc + v.replace(/0:"(.*)"\n/, '$1'), '');
-    expect(textValue).toEqual(expectedFinalAnswer);
+      const textValue = streamToValue
+        .filter((v) => v[0] === '0')
+        .reduce((acc, v) => acc + v.replace(/0:"(.*)"\n/, '$1'), '');
+      expect(textValue).toEqual(expectedFinalAnswer);
 
-    const annotations = streamToValue
-      .filter((v) => v[0] === '8')
-      .map((entry) => entry.replace(/8:(.*)\n/, '$1'), '')
-      .map((entry) => JSON.parse(entry))
-      .reduce((acc, v) => acc.concat(v), []);
+      const annotations = streamToValue
+        .filter((v) => v[0] === '8')
+        .map((entry) => entry.replace(/8:(.*)\n/, '$1'), '')
+        .map((entry) => JSON.parse(entry))
+        .reduce((acc, v) => acc.concat(v), []);
 
-    const docValues = annotations.filter((v: { type: string }) => v.type === 'retrieved_docs');
-    const tokens = annotations.filter((v: { type: string }) => v.type.endsWith('_token_count'));
-    const hasClipped = !!annotations.some((v: { type: string }) => v.type === 'context_clipped');
-    expect(docValues).toEqual(expectedDocs);
-    expect(tokens).toEqual(expectedTokens);
-    expect(hasClipped).toEqual(expectedHasClipped);
-    expect(searchMock.mock.calls[0]).toEqual(expectedSearchRequest);
+      const docValues = annotations.filter((v: { type: string }) => v.type === 'retrieved_docs');
+      const tokens = annotations.filter((v: { type: string }) => v.type.endsWith('_token_count'));
+      const hasClipped = !!annotations.some((v: { type: string }) => v.type === 'context_clipped');
+      expect(docValues).toEqual(expectedDocs);
+      expect(tokens).toEqual(expectedTokens);
+      expect(hasClipped).toEqual(expectedHasClipped);
+      expect(searchMock.mock.calls[0]).toEqual(expectedSearchRequest);
+    } catch (error) {
+      if (expectedHasClipped) {
+        expect(error).toMatchInlineSnapshot(`[ContextLimitError: Context exceeds the model limit]`);
+      } else {
+        throw error;
+      }
+    }
   };
 
   it('should be able to create a conversational chain', async () => {
@@ -145,7 +158,7 @@ describe('conversational chain', () => {
       chat: [
         {
           id: '1',
-          role: 'user',
+          role: MessageRole.user,
           content: 'what is the work from home policy?',
         },
       ],
@@ -179,7 +192,7 @@ describe('conversational chain', () => {
       chat: [
         {
           id: '1',
-          role: 'user',
+          role: MessageRole.user,
           content: 'what is the work from home policy?',
         },
       ],
@@ -208,23 +221,74 @@ describe('conversational chain', () => {
     });
   }, 10000);
 
+  it('should be able to create a conversational chain with inner hit field', async () => {
+    await createTestChain({
+      responses: ['the final answer'],
+      chat: [
+        {
+          id: '1',
+          role: MessageRole.user,
+          content: 'what is the work from home policy?',
+        },
+      ],
+      expectedFinalAnswer: 'the final answer',
+      docs: [
+        {
+          _index: 'index',
+          _id: '1',
+          inner_hits: {
+            'index.field': {
+              hits: {
+                hits: [
+                  {
+                    _source: {
+                      text: 'value',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
+      ],
+      expectedDocs: [
+        {
+          documents: [{ metadata: { _id: '1', _index: 'index' }, pageContent: 'value' }],
+          type: 'retrieved_docs',
+        },
+      ],
+      expectedTokens: [
+        { type: 'context_token_count', count: 7 },
+        { type: 'prompt_token_count', count: 20 },
+      ],
+      expectedSearchRequest: [
+        {
+          method: 'POST',
+          path: '/index,website/_search',
+          body: { query: { match: { field: 'what is the work from home policy?' } }, size: 3 },
+        },
+      ],
+      contentField: { index: 'field' },
+    });
+  }, 10000);
+
   it('asking with chat history should re-write the question', async () => {
     await createTestChain({
       responses: ['rewrite the question', 'the final answer'],
       chat: [
         {
           id: '1',
-          role: 'user',
+          role: MessageRole.user,
           content: 'what is the work from home policy?',
         },
         {
           id: '2',
-          role: 'assistant',
+          role: MessageRole.assistant,
           content: 'the final answer',
         },
         {
           id: '3',
-          role: 'user',
+          role: MessageRole.user,
           content: 'what is the work from home policy?',
         },
       ],
@@ -240,7 +304,7 @@ describe('conversational chain', () => {
       ],
       expectedTokens: [
         { type: 'context_token_count', count: 15 },
-        { type: 'prompt_token_count', count: 38 },
+        { type: 'prompt_token_count', count: 39 },
       ],
       expectedSearchRequest: [
         {
@@ -252,23 +316,62 @@ describe('conversational chain', () => {
     });
   }, 10000);
 
+  it('should omit the system messages in chat', async () => {
+    await createTestChain({
+      responses: ['the final answer'],
+      chat: [
+        {
+          id: '1',
+          role: MessageRole.user,
+          content: 'what is the work from home policy?',
+        },
+        {
+          id: '2',
+          role: MessageRole.system,
+          content: 'Error occurred. Please try again.',
+        },
+      ],
+      expectedFinalAnswer: 'the final answer',
+      expectedDocs: [
+        {
+          documents: [
+            { metadata: { _id: '1', _index: 'index' }, pageContent: 'value' },
+            { metadata: { _id: '1', _index: 'website' }, pageContent: 'value2' },
+          ],
+          type: 'retrieved_docs',
+        },
+      ],
+      expectedTokens: [
+        { type: 'context_token_count', count: 15 },
+        { type: 'prompt_token_count', count: 28 },
+      ],
+      expectedSearchRequest: [
+        {
+          method: 'POST',
+          path: '/index,website/_search',
+          body: { query: { match: { field: 'what is the work from home policy?' } }, size: 3 },
+        },
+      ],
+    });
+  }, 10000);
+
   it('should cope with quotes in the query', async () => {
     await createTestChain({
       responses: ['rewrite "the" question', 'the final answer'],
       chat: [
         {
           id: '1',
-          role: 'user',
+          role: MessageRole.user,
           content: 'what is the work from home policy?',
         },
         {
           id: '2',
-          role: 'assistant',
+          role: MessageRole.assistant,
           content: 'the final answer',
         },
         {
           id: '3',
-          role: 'user',
+          role: MessageRole.user,
           content: 'what is the work from home policy?',
         },
       ],
@@ -284,7 +387,7 @@ describe('conversational chain', () => {
       ],
       expectedTokens: [
         { type: 'context_token_count', count: 15 },
-        { type: 'prompt_token_count', count: 40 },
+        { type: 'prompt_token_count', count: 39 },
       ],
       expectedSearchRequest: [
         {
@@ -302,17 +405,17 @@ describe('conversational chain', () => {
       chat: [
         {
           id: '1',
-          role: 'user',
+          role: MessageRole.user,
           content: 'what is the work from home policy?',
         },
         {
           id: '2',
-          role: 'assistant',
+          role: MessageRole.assistant,
           content: 'the final answer',
         },
         {
           id: '3',
-          role: 'user',
+          role: MessageRole.user,
           content: 'what is the work from home policy?',
         },
       ],
@@ -328,7 +431,7 @@ describe('conversational chain', () => {
       ],
       expectedTokens: [
         { type: 'context_token_count', count: 15 },
-        { type: 'prompt_token_count', count: 42 },
+        { type: 'prompt_token_count', count: 49 },
       ],
       expectedSearchRequest: [
         {
@@ -347,17 +450,17 @@ describe('conversational chain', () => {
       chat: [
         {
           id: '1',
-          role: 'user',
+          role: MessageRole.user,
           content: 'what is the work from home policy?',
         },
         {
           id: '2',
-          role: 'assistant',
+          role: MessageRole.assistant,
           content: 'the final answer',
         },
         {
           id: '3',
-          role: 'user',
+          role: MessageRole.user,
           content: 'what is the work from home policy?',
         },
       ],
@@ -378,40 +481,19 @@ describe('conversational chain', () => {
         },
       ],
       modelLimit: 100,
-      expectedFinalAnswer: 'the final answer',
-      expectedDocs: [
-        {
-          documents: [
-            { metadata: { _id: '1', _index: 'index' } },
-            {
-              metadata: { _id: '1', _index: 'website' },
-              pageContent: expect.any(String),
-            },
-          ],
-          type: 'retrieved_docs',
-        },
-      ],
-      // Even with body_content of 1000, the token count should be below the model limit of 100
-      expectedTokens: [
-        { type: 'context_token_count', count: 70 },
-        { type: 'prompt_token_count', count: 97 },
-      ],
       expectedHasClipped: true,
-      expectedSearchRequest: [
-        {
-          method: 'POST',
-          path: '/index,website/_search',
-          body: { query: { match: { field: 'rewrite "the" question' } }, size: 3 },
-        },
-      ],
       isChatModel: false,
     });
   }, 10000);
 
-  describe('clipContext', () => {
+  describe('contextLimitCheck', () => {
     const prompt = ChatPromptTemplate.fromTemplate(
       'you are a QA bot {question} {chat_history} {context}'
     );
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
 
     it('should return the input as is if modelLimit is undefined', async () => {
       const input = {
@@ -419,58 +501,36 @@ describe('conversational chain', () => {
         question: 'This is a test question.',
         chat_history: 'This is a test chat history.',
       };
+      jest.spyOn(prompt, 'format');
+      const result = await contextLimitCheck(undefined, prompt)(input);
 
-      const data = new experimental_StreamData();
-      const appendMessageAnnotationSpy = jest.spyOn(data, 'appendMessageAnnotation');
-
-      const result = await clipContext(undefined, prompt, data)(input);
-      expect(result).toEqual(input);
-      expect(appendMessageAnnotationSpy).not.toHaveBeenCalled();
+      expect(result).toBe(input);
+      expect(prompt.format).not.toHaveBeenCalled();
     });
 
-    it('should not clip context if within modelLimit', async () => {
+    it('should return the input if within modelLimit', async () => {
       const input = {
         context: 'This is a test context.',
         question: 'This is a test question.',
         chat_history: 'This is a test chat history.',
       };
-      const data = new experimental_StreamData();
-      const appendMessageAnnotationSpy = jest.spyOn(data, 'appendMessageAnnotation');
-      const result = await clipContext(10000, prompt, data)(input);
+      jest.spyOn(prompt, 'format');
+      const result = await contextLimitCheck(10000, prompt)(input);
       expect(result).toEqual(input);
-      expect(appendMessageAnnotationSpy).not.toHaveBeenCalled();
+      expect(prompt.format).toHaveBeenCalledWith(input);
     });
 
     it('should clip context if exceeds modelLimit', async () => {
+      expect.assertions(1);
       const input = {
         context: 'This is a test context.\nThis is another line.\nAnd another one.',
         question: 'This is a test question.',
         chat_history: 'This is a test chat history.',
       };
-      const data = new experimental_StreamData();
-      const appendMessageAnnotationSpy = jest.spyOn(data, 'appendMessageAnnotation');
-      const result = await clipContext(33, prompt, data)(input);
-      expect(result.context).toBe('This is a test context.\nThis is another line.');
-      expect(appendMessageAnnotationSpy).toHaveBeenCalledWith({
-        type: 'context_clipped',
-        count: 4,
-      });
-    });
 
-    it('exit when context becomes empty', async () => {
-      const input = {
-        context: 'This is a test context.\nThis is another line.\nAnd another one.',
-        question: 'This is a test question.',
-        chat_history: 'This is a test chat history.',
-      };
-      const data = new experimental_StreamData();
-      const appendMessageAnnotationSpy = jest.spyOn(data, 'appendMessageAnnotation');
-      const result = await clipContext(1, prompt, data)(input);
-      expect(result.context).toBe('');
-      expect(appendMessageAnnotationSpy).toHaveBeenCalledWith({
-        type: 'context_clipped',
-        count: 15,
-      });
+      await expect(contextLimitCheck(33, prompt)(input)).rejects.toMatchInlineSnapshot(
+        `[ContextLimitError: Context exceeds the model limit]`
+      );
     });
   });
 });

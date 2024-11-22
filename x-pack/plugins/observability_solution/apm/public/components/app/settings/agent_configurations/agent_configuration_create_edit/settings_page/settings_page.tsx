@@ -132,7 +132,15 @@ export function SettingsPage({
             <EuiFlexItem>
               <EuiStat
                 titleSize="xs"
-                title={isLoading ? '-' : getOptionLabel(newConfig.service.name)}
+                title={
+                  isLoading ? (
+                    '-'
+                  ) : (
+                    <span data-test-subj="settingsPage_serviceName">
+                      {getOptionLabel(newConfig.service.name)}
+                    </span>
+                  )
+                }
                 description={i18n.translate(
                   'xpack.apm.agentConfig.chooseService.service.name.label',
                   { defaultMessage: 'Service name' }
@@ -142,7 +150,15 @@ export function SettingsPage({
             <EuiFlexItem>
               <EuiStat
                 titleSize="xs"
-                title={isLoading ? '-' : getOptionLabel(newConfig.service.environment)}
+                title={
+                  isLoading ? (
+                    '-'
+                  ) : (
+                    <span data-test-subj="settingsPage_environmentName">
+                      {getOptionLabel(newConfig.service.environment)}
+                    </span>
+                  )
+                }
                 description={i18n.translate(
                   'xpack.apm.agentConfig.chooseService.service.environment.label',
                   { defaultMessage: 'Environment' }
@@ -213,7 +229,7 @@ function renderSettings({
       .filter(filterByAgent(newConfig.agent_name as AgentName))
       .map((setting) => (
         <SettingFormRow
-          isUnsaved={unsavedChanges.hasOwnProperty(setting.key)}
+          isUnsaved={Object.hasOwn(unsavedChanges, setting.key)}
           key={setting.key}
           setting={setting}
           value={newConfig.settings[setting.key]}

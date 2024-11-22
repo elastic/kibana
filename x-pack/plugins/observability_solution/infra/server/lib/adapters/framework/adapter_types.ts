@@ -18,7 +18,7 @@ import {
 import { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { VisTypeTimeseriesSetup } from '@kbn/vis-type-timeseries-plugin/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { PluginSetupContract as AlertingPluginContract } from '@kbn/alerting-plugin/server';
 import { MlPluginSetup } from '@kbn/ml-plugin/server';
@@ -38,6 +38,12 @@ import {
   ApmDataAccessPluginSetup,
   ApmDataAccessPluginStart,
 } from '@kbn/apm-data-access-plugin/server';
+import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/server';
+import { ServerlessPluginStart } from '@kbn/serverless/server';
+import type {
+  EntityManagerServerPluginStart,
+  EntityManagerServerPluginSetup,
+} from '@kbn/entityManager-plugin/server';
 
 export interface InfraServerPluginSetupDeps {
   alerting: AlertingPluginContract;
@@ -55,6 +61,8 @@ export interface InfraServerPluginSetupDeps {
   metricsDataAccess: MetricsDataPluginSetup;
   profilingDataAccess?: ProfilingDataAccessPluginSetup;
   apmDataAccess: ApmDataAccessPluginSetup;
+  serverless?: ServerlessPluginStart;
+  entityManager: EntityManagerServerPluginSetup;
 }
 
 export interface InfraServerPluginStartDeps {
@@ -64,6 +72,8 @@ export interface InfraServerPluginStartDeps {
   profilingDataAccess?: ProfilingDataAccessPluginStart;
   ruleRegistry: RuleRegistryPluginStartContract;
   apmDataAccess: ApmDataAccessPluginStart;
+  logsDataAccess: LogsDataAccessPluginStart;
+  entityManager: EntityManagerServerPluginStart;
 }
 
 export interface CallWithRequestParams extends estypes.RequestBase {

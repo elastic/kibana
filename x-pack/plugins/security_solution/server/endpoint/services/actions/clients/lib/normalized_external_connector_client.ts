@@ -57,7 +57,7 @@ export class NormalizedExternalConnectorClient {
       });
 
       if (!connector) {
-        this.log.debug(stringify(connectorList));
+        this.log.debug(() => stringify(connectorList));
         throw new ResponseActionsConnectorNotConfiguredError(connectorTypeId);
       }
 

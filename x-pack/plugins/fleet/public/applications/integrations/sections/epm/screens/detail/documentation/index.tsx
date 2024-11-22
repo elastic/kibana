@@ -29,6 +29,7 @@ import type {
 } from '../../../../../types';
 import { useStartServices } from '../../../../../../../hooks';
 import { getStreamsForInputType } from '../../../../../../../../common/services';
+import { SideBarColumn } from '../../../components/side_bar_column';
 
 interface Props {
   packageInfo: PackageInfo;
@@ -70,7 +71,7 @@ export const DocumentationPage: React.FunctionComponent<Props> = ({ packageInfo,
 
   return (
     <EuiFlexGroup alignItems="flexStart">
-      <EuiFlexItem grow={1} />
+      <SideBarColumn grow={1} />
       <EuiFlexItem grow={7}>
         <EuiText>
           <FormattedMessage
@@ -78,7 +79,7 @@ export const DocumentationPage: React.FunctionComponent<Props> = ({ packageInfo,
             defaultMessage="This documents all the inputs, streams, and variables available to use this integration programmatically via the Fleet Kibana API. {learnMore}"
             values={{
               learnMore: (
-                <EuiLink href={docLinks.links.fleet.api} external={true}>
+                <EuiLink href={docLinks.links.fleet.api} external={true} target="_blank">
                   <FormattedMessage
                     id="xpack.fleet.epm.packageDetails.apiReference.learnMoreLink"
                     defaultMessage="Learn more"

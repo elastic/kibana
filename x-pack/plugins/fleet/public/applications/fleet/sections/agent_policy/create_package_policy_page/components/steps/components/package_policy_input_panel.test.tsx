@@ -363,6 +363,8 @@ describe('PackagePolicyInputPanel', () => {
         isAgentlessPackagePolicy: jest.fn(),
         isAgentlessAgentPolicy: jest.fn(),
         isAgentlessIntegration: jest.fn(),
+        isAgentlessApiEnabled: true,
+        isDefaultAgentlessPolicyEnabled: false,
       });
     });
 
@@ -396,6 +398,8 @@ describe('PackagePolicyInputPanel', () => {
         isAgentlessPackagePolicy: jest.fn(),
         isAgentlessAgentPolicy: jest.fn(),
         isAgentlessIntegration: jest.fn(),
+        isAgentlessApiEnabled: true,
+        isDefaultAgentlessPolicyEnabled: false,
       });
     });
 

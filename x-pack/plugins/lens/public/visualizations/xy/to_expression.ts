@@ -35,6 +35,8 @@ import {
   XYCurveType,
   YAxisConfigFn,
 } from '@kbn/expression-xy-plugin/common';
+
+import { FittingFunctions } from '@kbn/expression-xy-plugin/public';
 import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
@@ -293,6 +295,7 @@ export const buildXYExpression = (
       : state.legend.legendSize
       ? state.legend.legendSize
       : undefined,
+    layout: state.legend.layout,
     horizontalAlignment:
       state.legend.horizontalAlignment && state.legend.isInside
         ? state.legend.horizontalAlignment
@@ -309,6 +312,8 @@ export const buildXYExpression = (
         : [],
     maxLines: state.legend.maxLines,
     legendStats: state.legend.legendStats,
+    title: state.legend.title,
+    isTitleVisible: state.legend.isTitleVisible,
     shouldTruncate:
       state.legend.shouldTruncate ??
       getDefaultVisualValuesForLayer(state, datasourceLayers).truncateText,
@@ -333,9 +338,9 @@ export const buildXYExpression = (
 
   const layeredXyVisFn = buildExpressionFunction<LayeredXyVisFn>('layeredXyVis', {
     legend: buildExpression([legendConfigFn]).toAst(),
-    fittingFunction: state.fittingFunction ?? 'None',
+    fittingFunction: state.fittingFunction ?? FittingFunctions.LINEAR,
     endValue: state.endValue ?? 'None',
-    emphasizeFitting: state.emphasizeFitting ?? false,
+    emphasizeFitting: state.emphasizeFitting ?? true,
     minBarHeight: state.minBarHeight ?? 1,
     fillOpacity: state.fillOpacity ?? 0.3,
     valueLabels: state.valueLabels ?? 'hide',

@@ -45,7 +45,7 @@ function logHeaders(res) {
   // use `--headers` to print the response headers
   const headers = res.headers.raw();
   for (const key in headers) {
-    if (headers.hasOwnProperty(key)) {
+    if (Object.hasOwn(headers, key)) {
       console.log(`${key}: ${headers[key]}`);
     }
   }

@@ -30,9 +30,6 @@ import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/us
 import { AdHocTaskRunner } from './ad_hoc_task_runner';
 import { TaskRunnerContext } from './types';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
-import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
-import { rulesClientMock } from '../rules_client.mock';
-import { rulesSettingsClientMock } from '../rules_settings_client.mock';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import {
   AlertingEventLogger,
@@ -47,7 +44,7 @@ import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_e
 import { alertsMock } from '../mocks';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { AlertsService } from '../alerts_service';
-import { ReplaySubject } from 'rxjs';
+import { of, ReplaySubject } from 'rxjs';
 import { getDataStreamAdapter } from '../alerts_service/lib/data_stream_adapter';
 import {
   AlertInstanceContext,
@@ -67,6 +64,7 @@ import {
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
   ALERT_INSTANCE_ID,
+  ALERT_SEVERITY_IMPROVING,
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
@@ -93,6 +91,8 @@ import { validateRuleTypeParams } from '../lib/validate_rule_type_params';
 import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
+import { rulesSettingsServiceMock } from '../rules_settings/rules_settings_service.mock';
+import { maintenanceWindowsServiceMock } from './maintenance_windows/maintenance_windows_service.mock';
 
 const UUID = '5f6aa57d-3e22-484e-bae8-cbed868f4d28';
 
@@ -123,12 +123,14 @@ type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
 const alertingEventLogger = alertingEventLoggerMock.create();
+const elasticsearchAndSOAvailability$ = of(true);
 const alertsService = new AlertsService({
   logger,
   pluginStop$: new ReplaySubject(1),
   kibanaVersion: '8.8.0',
   elasticsearchClientPromise: Promise.resolve(clusterClient),
   dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts }),
+  elasticsearchAndSOAvailability$,
 });
 const backfillClient = backfillClientMock.create();
 const dataPlugin = dataPluginMock.createStartContract();
@@ -139,20 +141,16 @@ const dataViewsMock = {
 const elasticsearchService = elasticsearchServiceMock.createInternalStart();
 const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
-const maintenanceWindowClient = maintenanceWindowClientMock.create();
-const rulesClient = rulesClientMock.create();
+const maintenanceWindowsService = maintenanceWindowsServiceMock.create();
 const ruleRunMetricsStore = ruleRunMetricsStoreMock.create();
+const rulesSettingsService = rulesSettingsServiceMock.create();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const savedObjectsService = savedObjectsServiceMock.createInternalStartContract();
 const services = alertsMock.createRuleExecutorServices();
 const uiSettingsService = uiSettingsServiceMock.createStartContract();
 
 const taskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType = {
-  actionsConfigMap: {
-    default: {
-      max: 10000,
-    },
-  },
+  actionsConfigMap: { default: { max: 1000 } },
   actionsPlugin: actionsMock.createStart(),
   alertsService,
   backfillClient,
@@ -165,14 +163,13 @@ const taskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType
   encryptedSavedObjectsClient,
   eventLogger: eventLoggerMock.create(),
   executionContext: executionContextServiceMock.createInternalStartContract(),
-  getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
-  getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),
-  getRulesSettingsClientWithRequest: jest.fn().mockReturnValue(rulesSettingsClientMock.create()),
+  maintenanceWindowsService,
   kibanaBaseUrl: 'https://localhost:5601',
   logger,
   maxAlerts: 1000,
   maxEphemeralActionsPerRule: 10,
   ruleTypeRegistry,
+  rulesSettingsService,
   savedObjects: savedObjectsService,
   share: {} as SharePluginStart,
   spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
@@ -365,6 +362,7 @@ describe('Ad Hoc Task Runner', () => {
       triggeredActionsStatus: 'complete',
     });
     (RuleRunMetricsStore as jest.Mock).mockImplementation(() => ruleRunMetricsStore);
+    logger.isLevelEnabled.mockReturnValue(true);
     logger.get.mockImplementation(() => logger);
     taskRunnerFactoryInitializerParams.executionContext.withContext.mockImplementation((ctx, fn) =>
       fn()
@@ -458,7 +456,6 @@ describe('Ad Hoc Task Runner', () => {
     expect(call.rule.ruleTypeName).toBe('My test rule');
     expect(call.rule.actions).toEqual([]);
     expect(call.flappingSettings).toEqual(DEFAULT_FLAPPING_SETTINGS);
-    expect(call.maintenanceWindowIds).toBe(undefined);
 
     expect(clusterClient.bulk).toHaveBeenCalledWith({
       index: '.alerts-test.alerts-default',
@@ -483,6 +480,7 @@ describe('Ad Hoc Task Runner', () => {
           [ALERT_FLAPPING]: false,
           [ALERT_FLAPPING_HISTORY]: [true],
           [ALERT_INSTANCE_ID]: '1',
+          [ALERT_SEVERITY_IMPROVING]: false,
           [ALERT_MAINTENANCE_WINDOW_IDS]: [],
           [ALERT_CONSECUTIVE_MATCHES]: 1,
           [ALERT_RULE_CATEGORY]: 'My test rule',
@@ -1230,6 +1228,84 @@ describe('Ad Hoc Task Runner', () => {
       expect(logger.debug).nthCalledWith(
         1,
         `Executing ad hoc run for rule test:rule-id for runAt ${schedule1.runAt}`
+      );
+      expect(logger.debug).nthCalledWith(
+        2,
+        `Cancelling execution for ad hoc run with id abc for rule type test with id rule-id - execution exceeded rule type timeout of 3m`
+      );
+      expect(logger.debug).nthCalledWith(
+        3,
+        `Aborting any in-progress ES searches for rule type test with id rule-id`
+      );
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    test('should handle task cancellation signal due to timeout when for last schedule entry', async () => {
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+        ...mockedAdHocRunSO,
+        attributes: {
+          ...mockedAdHocRunSO.attributes,
+          schedule: [{ ...schedule1, status: adHocRunStatus.COMPLETE }, schedule2],
+        },
+      });
+      const taskRunner = new AdHocTaskRunner({
+        context: taskRunnerFactoryInitializerParams,
+        internalSavedObjectsRepository,
+        taskInstance: mockedTaskInstance,
+      });
+
+      const promise = taskRunner.run();
+      await Promise.resolve();
+      await taskRunner.cancel();
+      await promise;
+      await taskRunner.cleanup();
+
+      expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+        AD_HOC_RUN_SAVED_OBJECT_TYPE,
+        'abc',
+        {}
+      );
+      expect(ruleTypeRegistry.get).toHaveBeenCalledWith('siem.queryRule');
+      expect(ruleTypeRegistry.ensureRuleTypeEnabled).toHaveBeenCalledWith('siem.queryRule');
+      expect(mockValidateRuleTypeParams).toHaveBeenCalledWith(
+        mockedAdHocRunSO.attributes.rule.params,
+        ruleTypeWithAlerts.validate.params
+      );
+
+      // @ts-ignore - accessing private variable
+      // should run the first entry in the schedule
+      expect(taskRunner.scheduleToRunIndex).toEqual(1);
+      expect(RuleRunMetricsStore).toHaveBeenCalledTimes(1);
+      expect(ruleTypeWithAlerts.executor).toHaveBeenCalledTimes(1);
+
+      expect(internalSavedObjectsRepository.update).toHaveBeenCalledWith(
+        AD_HOC_RUN_SAVED_OBJECT_TYPE,
+        mockedAdHocRunSO.id,
+        {
+          schedule: [
+            { ...schedule1, status: adHocRunStatus.COMPLETE },
+            { ...schedule2, status: adHocRunStatus.TIMEOUT },
+          ],
+        },
+        { namespace: undefined, refresh: false }
+      );
+
+      expect(internalSavedObjectsRepository.delete).toHaveBeenCalledWith(
+        AD_HOC_RUN_SAVED_OBJECT_TYPE,
+        mockedAdHocRunSO.id,
+        { namespace: undefined, refresh: false }
+      );
+
+      testAlertingEventLogCalls({
+        status: 'ok',
+        timeout: true,
+        backfillRunAt: schedule2.runAt,
+        backfillInterval: schedule2.interval,
+      });
+      expect(logger.debug).toHaveBeenCalledTimes(3);
+      expect(logger.debug).nthCalledWith(
+        1,
+        `Executing ad hoc run for rule test:rule-id for runAt ${schedule2.runAt}`
       );
       expect(logger.debug).nthCalledWith(
         2,

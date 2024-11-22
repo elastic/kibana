@@ -116,8 +116,7 @@ export function SloDeleteModal({ slo, onCancel, onSuccess }: Props) {
           >
             <FormattedMessage
               id="xpack.slo.deleteConfirmationModal.deleteInstanceButtonLabel"
-              defaultMessage="Delete {instanceId}"
-              values={{ instanceId }}
+              defaultMessage="Delete this instance only"
             />
           </EuiButton>
         )}

@@ -60,6 +60,8 @@ export interface SearchAndFilterBarProps {
   onClickAgentActivity: () => void;
   showAgentActivityTour: { isOpen: boolean };
   latestAgentActionErrors: number;
+  sortField?: string;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps> = ({
@@ -89,6 +91,8 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
   onClickAgentActivity,
   showAgentActivityTour,
   latestAgentActionErrors,
+  sortField,
+  sortOrder,
 }) => {
   const authz = useAuthz();
 
@@ -163,14 +167,14 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
             <EuiFlexItem grow={6}>
               <SearchBar
                 value={draftKuery}
+                fieldPrefix={AGENTS_PREFIX}
+                indexPattern={AGENTS_INDEX}
                 onChange={(newSearch, submit) => {
                   onDraftKueryChange(newSearch);
                   if (submit) {
                     onSubmitSearch(newSearch);
                   }
                 }}
-                fieldPrefix={AGENTS_PREFIX}
-                indexPattern={AGENTS_INDEX}
                 dataTestSubj="agentList.queryInput"
               />
             </EuiFlexItem>
@@ -219,6 +223,8 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
                   refreshAgents={refreshAgents}
                   allTags={tags}
                   agentPolicies={agentPolicies}
+                  sortField={sortField}
+                  sortOrder={sortOrder}
                 />
               </EuiFlexItem>
             ) : null}

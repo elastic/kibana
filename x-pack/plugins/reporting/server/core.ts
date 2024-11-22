@@ -8,7 +8,7 @@
 import * as Rx from 'rxjs';
 import { map, take } from 'rxjs';
 
-import {
+import type {
   AnalyticsServiceStart,
   CoreSetup,
   DocLinksServiceSetup,
@@ -19,26 +19,23 @@ import {
   PackageInfo,
   PluginInitializerContext,
   SavedObjectsServiceStart,
+  SecurityServiceStart,
   StatusServiceSetup,
   UiSettingsServiceStart,
 } from '@kbn/core/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
-import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { ReportingServerInfo } from '@kbn/reporting-common/types';
-import {
-  CsvSearchSourceExportType,
-  CsvSearchSourceImmediateExportType,
-  CsvV2ExportType,
-} from '@kbn/reporting-export-types-csv';
+import { CsvSearchSourceExportType, CsvV2ExportType } from '@kbn/reporting-export-types-csv';
 import { PdfExportType, PdfV1ExportType } from '@kbn/reporting-export-types-pdf';
 import { PngExportType } from '@kbn/reporting-export-types-png';
 import type { ReportingConfigType } from '@kbn/reporting-server';
 import { ExportType } from '@kbn/reporting-server';
 import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
-import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type {
@@ -82,7 +79,7 @@ export interface ReportingInternalStart {
   licensing: LicensingPluginStart;
   logger: Logger;
   screenshotting?: ScreenshottingStart;
-  security?: SecurityPluginStart;
+  securityService: SecurityServiceStart;
   taskManager: TaskManagerStartContract;
 }
 
@@ -214,7 +211,7 @@ export class ReportingCore {
    */
   private getExportTypes(): ExportType[] {
     const { csv, pdf, png } = this.config.export_types;
-    const exportTypes = [];
+    const exportTypes: ExportType[] = [];
 
     if (csv.enabled) {
       // NOTE: CsvSearchSourceExportType should be deprecated and replaced with V2 in the UI: https://github.com/elastic/kibana/issues/151190
@@ -381,23 +378,5 @@ export class ReportingCore {
   public getEventLogger(report: IReport, task?: { id: string }) {
     const ReportingEventLogger = reportingEventLoggerFactory(this.logger);
     return new ReportingEventLogger(report, task);
-  }
-
-  /**
-   * @deprecated
-   * Requires `xpack.reporting.csv.enablePanelActionDownload` set to `true` (default is false)
-   */
-  public async getCsvSearchSourceImmediate() {
-    const startDeps = await this.getPluginStartDeps();
-
-    const csvImmediateExport = new CsvSearchSourceImmediateExportType(
-      this.core,
-      this.config,
-      this.logger,
-      this.context
-    );
-    csvImmediateExport.setup(this.getPluginSetupDeps());
-    csvImmediateExport.start({ ...startDeps });
-    return csvImmediateExport;
   }
 }

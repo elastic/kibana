@@ -35,8 +35,13 @@ export const updateAlertByIdRoute = (router: IRouter<RacRequestHandlerContext>) 
           ])
         ),
       },
+      security: {
+        authz: {
+          requiredPrivileges: ['rac'],
+        },
+      },
       options: {
-        tags: ['access:rac'],
+        access: 'internal',
       },
     },
     async (context, req, response) => {

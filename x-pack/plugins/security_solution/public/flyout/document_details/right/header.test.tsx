@@ -11,12 +11,12 @@ import { renderReactTestingLibraryWithI18n as render } from '@kbn/test-jest-help
 import { PanelHeader } from './header';
 import { allThreeTabs } from './hooks/use_tabs';
 import { GuidedOnboardingTourStep } from '../../../common/components/guided_onboarding_tour/tour_step';
-import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
+import { useBasicDataFromDetailsData } from '../shared/hooks/use_basic_data_from_details_data';
 
-jest.mock('./context', () => ({
-  useRightPanelContext: jest.fn().mockReturnValue({ dataFormattedForFieldBrowser: [] }),
+jest.mock('../shared/context', () => ({
+  useDocumentDetailsContext: jest.fn().mockReturnValue({ dataFormattedForFieldBrowser: [] }),
 }));
-jest.mock('../../../timelines/components/side_panel/event_details/helpers', () => ({
+jest.mock('../shared/hooks/use_basic_data_from_details_data', () => ({
   useBasicDataFromDetailsData: jest.fn(),
 }));
 jest.mock('../../../common/components/guided_onboarding_tour/tour_step', () => ({

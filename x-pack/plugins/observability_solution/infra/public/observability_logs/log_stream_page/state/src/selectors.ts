@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { MatchedStateFromActor } from '@kbn/xstate-utils';
 import { LogStreamQueryActorRef } from '../../../log_stream_query_state';
-import { MatchedStateFromActor } from '../../../xstate_helpers';
 import { LogStreamPageActorRef } from './state_machine';
 
 type LogStreamPageStateWithLogViewIndices =
