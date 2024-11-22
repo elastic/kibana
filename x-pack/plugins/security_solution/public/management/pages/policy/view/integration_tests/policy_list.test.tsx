@@ -60,9 +60,9 @@ describe('When on the policy list page', () => {
     });
 
     it('should show table with error state', async () => {
-      expect(renderResult.getByTestId('policyListTable')).toBeTruthy();
+      expect(renderResult.getByTestId('policyListTable')).toBeInTheDocument();
       await waitFor(() => {
-        expect(renderResult.getByText(policyListErrorMessage)).toBeTruthy();
+        expect(renderResult.getByText(policyListErrorMessage)).toBeInTheDocument();
       });
     });
   });
@@ -112,22 +112,20 @@ describe('When on the policy list page', () => {
       await waitFor(() => {
         expect(sendGetEndpointSpecificPackagePolicies).toHaveBeenCalled();
         expect(getPackagePolicies).toHaveBeenCalled();
-        expect(renderResult.getByTestId('policyListTable')).toBeTruthy();
+        expect(renderResult.getByTestId('policyListTable')).toBeInTheDocument();
       });
     });
     it('should display the policy list table', () => {
-      expect(renderResult.getByTestId('policyListTable')).toBeTruthy();
+      expect(renderResult.getByTestId('policyListTable')).toBeInTheDocument();
     });
     it('should show a link for the policy name', () => {
       const policyNameCells = renderResult.getAllByTestId('policyNameCellLink');
-      expect(policyNameCells).toBeTruthy();
       expect(policyNameCells.length).toBe(5);
     });
     it('should show an avatar and name for the Created by column', () => {
       const expectedAvatarName = policies.items[0].created_by;
       const createdByCells = renderResult.getAllByTestId('created-by-avatar');
       const firstCreatedByName = renderResult.getAllByTestId('created-by-name')[0];
-      expect(createdByCells).toBeTruthy();
       expect(createdByCells.length).toBe(5);
       expect(createdByCells[0].textContent).toEqual(expectedAvatarName.charAt(0));
       expect(firstCreatedByName.textContent).toEqual(expectedAvatarName);
@@ -136,7 +134,6 @@ describe('When on the policy list page', () => {
       const expectedAvatarName = policies.items[0].updated_by;
       const updatedByCells = renderResult.getAllByTestId('updated-by-avatar');
       const firstUpdatedByName = renderResult.getAllByTestId('updated-by-name')[0];
-      expect(updatedByCells).toBeTruthy();
       expect(updatedByCells.length).toBe(5);
       expect(updatedByCells[0].textContent).toEqual(expectedAvatarName.charAt(0));
       expect(firstUpdatedByName.textContent).toEqual(expectedAvatarName);
@@ -200,7 +197,7 @@ describe('When on the policy list page', () => {
     });
     it('should pass the correct page value to the api', async () => {
       await waitFor(() => {
-        expect(renderResult.getByTestId('pagination-button-next')).toBeTruthy();
+        expect(renderResult.getByTestId('pagination-button-next')).toBeInTheDocument();
       });
       await userEvent.click(renderResult.getByTestId('pagination-button-next'));
       await waitFor(() => {
@@ -215,7 +212,7 @@ describe('When on the policy list page', () => {
 
     it('should pass the correct pageSize value to the api', async () => {
       await waitFor(() => {
-        expect(renderResult.getByTestId('tablePaginationPopoverButton')).toBeTruthy();
+        expect(renderResult.getByTestId('tablePaginationPopoverButton')).toBeInTheDocument();
       });
       await userEvent.click(renderResult.getByTestId('tablePaginationPopoverButton'));
       await waitForEuiPopoverOpen();
