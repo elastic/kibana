@@ -107,6 +107,7 @@ const createSLORoute = createSloServerRoute({
   handler: async ({ context, response, params, logger, request, plugins, corePlugins }) => {
     await assertPlatinumLicense(plugins);
 
+    const sloContext = await context.slo;
     const dataViews = await plugins.dataViews.start();
     const core = await context.core;
     const scopedClusterClient = core.elasticsearch.client;
@@ -124,7 +125,8 @@ const createSLORoute = createSloServerRoute({
       scopedClusterClient,
       logger,
       spaceId,
-      dataViewsService
+      dataViewsService,
+      sloContext.isServerless
     );
     const summaryTransformManager = new DefaultSummaryTransformManager(
       new DefaultSummaryTransformGenerator(),
@@ -156,6 +158,7 @@ const inspectSLORoute = createSloServerRoute({
   handler: async ({ context, params, logger, request, plugins, corePlugins }) => {
     await assertPlatinumLicense(plugins);
 
+    const sloContext = await context.slo;
     const dataViews = await plugins.dataViews.start();
     const spaceId = await getSpaceId(plugins, request);
     const basePath = corePlugins.http.basePath;
@@ -170,7 +173,8 @@ const inspectSLORoute = createSloServerRoute({
       scopedClusterClient,
       logger,
       spaceId,
-      dataViewsService
+      dataViewsService,
+      sloContext.isServerless
     );
     const summaryTransformManager = new DefaultSummaryTransformManager(
       new DefaultSummaryTransformGenerator(),
@@ -206,6 +210,7 @@ const updateSLORoute = createSloServerRoute({
     const spaceId = await getSpaceId(plugins, request);
     const dataViews = await plugins.dataViews.start();
 
+    const sloContext = await context.slo;
     const basePath = corePlugins.http.basePath;
     const core = await context.core;
     const scopedClusterClient = core.elasticsearch.client;
@@ -218,7 +223,8 @@ const updateSLORoute = createSloServerRoute({
       scopedClusterClient,
       logger,
       spaceId,
-      dataViewsService
+      dataViewsService,
+      sloContext.isServerless
     );
     const summaryTransformManager = new DefaultSummaryTransformManager(
       new DefaultSummaryTransformGenerator(),
@@ -254,6 +260,7 @@ const deleteSLORoute = createSloServerRoute({
     const spaceId = await getSpaceId(plugins, request);
     const dataViews = await plugins.dataViews.start();
 
+    const sloContext = await context.slo;
     const core = await context.core;
     const scopedClusterClient = core.elasticsearch.client;
     const esClient = core.elasticsearch.client.asCurrentUser;
@@ -270,7 +277,8 @@ const deleteSLORoute = createSloServerRoute({
       scopedClusterClient,
       logger,
       spaceId,
-      dataViewsService
+      dataViewsService,
+      sloContext.isServerless
     );
 
     const summaryTransformManager = new DefaultSummaryTransformManager(
@@ -331,7 +339,7 @@ const enableSLORoute = createSloServerRoute({
 
     const spaceId = await getSpaceId(plugins, request);
     const dataViews = await plugins.dataViews.start();
-
+    const sloContext = await context.slo;
     const core = await context.core;
     const scopedClusterClient = core.elasticsearch.client;
     const soClient = core.savedObjects.client;
@@ -343,7 +351,8 @@ const enableSLORoute = createSloServerRoute({
       scopedClusterClient,
       logger,
       spaceId,
-      dataViewsService
+      dataViewsService,
+      sloContext.isServerless
     );
     const summaryTransformManager = new DefaultSummaryTransformManager(
       new DefaultSummaryTransformGenerator(),
@@ -372,6 +381,7 @@ const disableSLORoute = createSloServerRoute({
     const spaceId = await getSpaceId(plugins, request);
     const dataViews = await plugins.dataViews.start();
 
+    const sloContext = await context.slo;
     const core = await context.core;
     const scopedClusterClient = core.elasticsearch.client;
     const soClient = core.savedObjects.client;
@@ -383,7 +393,8 @@ const disableSLORoute = createSloServerRoute({
       scopedClusterClient,
       logger,
       spaceId,
-      dataViewsService
+      dataViewsService,
+      sloContext.isServerless
     );
     const summaryTransformManager = new DefaultSummaryTransformManager(
       new DefaultSummaryTransformGenerator(),
@@ -408,6 +419,7 @@ const resetSLORoute = createSloServerRoute({
   handler: async ({ context, request, params, logger, plugins, corePlugins }) => {
     await assertPlatinumLicense(plugins);
 
+    const sloContext = await context.slo;
     const dataViews = await plugins.dataViews.start();
     const spaceId = await getSpaceId(plugins, request);
     const core = await context.core;
@@ -423,7 +435,8 @@ const resetSLORoute = createSloServerRoute({
       scopedClusterClient,
       logger,
       spaceId,
-      dataViewsService
+      dataViewsService,
+      sloContext.isServerless
     );
     const summaryTransformManager = new DefaultSummaryTransformManager(
       new DefaultSummaryTransformGenerator(),
