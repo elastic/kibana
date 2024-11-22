@@ -11,11 +11,12 @@ export const dataViewRouteHelpersFactory = (
   namespace: string = 'default'
 ) => ({
   create: async (name: string) => {
-    const { body: existingDataView } = await supertest.get(
+    const { body: existingDataView, statusCode } = await supertest.get(
       `/s/${namespace}/api/data_views/data_view/${name}-${namespace}`
     );
 
-    if (existingDataView) {
+    if (statusCode === 200) {
+      // data view exists
       return existingDataView;
     }
 
