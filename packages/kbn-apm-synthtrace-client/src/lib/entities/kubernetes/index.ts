@@ -21,6 +21,7 @@ const identityFieldsMap: Record<Schema, Record<string, string[]>> = {
     node: ['kubernetes.node.name'],
     replicaset: ['kubernetes.replicaset.name'],
     statefulset: ['kubernetes.statefulset.name'],
+    service: ['kubernetes.service.name'],
     container: ['kubernetes.container.id'],
   },
   semconv: {

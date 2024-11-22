@@ -30,6 +30,7 @@ const KUBERNETES_DASHBOARDS_IDS: Record<string, string> = {
   [BUILT_IN_ENTITY_TYPES.KUBERNETES.JOB.ecs]: 'kubernetes-9bf990a0-bcb1-11ec-b64f-7dd6e8e82013',
   [BUILT_IN_ENTITY_TYPES.KUBERNETES.NODE.ecs]: 'kubernetes-b945b7b0-bcb1-11ec-b64f-7dd6e8e82013',
   [BUILT_IN_ENTITY_TYPES.KUBERNETES.POD.ecs]: 'kubernetes-3d4d9290-bcb1-11ec-b64f-7dd6e8e82013',
+  [BUILT_IN_ENTITY_TYPES.KUBERNETES.SERVICE.ecs]: 'kubernetes-ff1b3850-bcb1-11ec-b64f-7dd6e8e82013',
   [BUILT_IN_ENTITY_TYPES.KUBERNETES.STATEFULSET.ecs]:
     'kubernetes-21694370-bcb2-11ec-b64f-7dd6e8e82013',
 };

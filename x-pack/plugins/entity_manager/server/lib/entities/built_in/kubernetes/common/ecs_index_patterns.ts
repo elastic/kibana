@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const commonEcsIndexPatterns = ['metrics-kubernetes*', 'metrics-apm*', 'logs-*'];
+export const commonEcsIndexPatterns = ['metrics-kubernetes*', 'logs-*'];

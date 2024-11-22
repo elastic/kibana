@@ -24,6 +24,7 @@ export const BUILT_IN_ENTITY_TYPES = {
     NAMESPACE: createKubernetesEntity('namespace'),
     NODE: createKubernetesEntity('node'),
     POD: createKubernetesEntity('pod'),
+    SERVICE: createKubernetesEntity('service'),
     STATEFULSET: createKubernetesEntity('statefulset'),
   },
 } as const;

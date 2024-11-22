@@ -31,6 +31,7 @@ const CRON_JOB_ENTITY_ID = generateShortId();
 const CRON_JOB_UID = generateShortId();
 const NODE_ENTITY_ID = generateShortId();
 const NODE_UID = generateShortId();
+const SERVICE_UID = generateShortId();
 
 const scenario: Scenario<Partial<EntityFields>> = async (runOptions) => {
   const { logger } = runOptions;
@@ -45,7 +46,7 @@ const scenario: Scenario<Partial<EntityFields>> = async (runOptions) => {
           .interval('1m')
           .rate(1)
           .generator((timestamp) => {
-            return [
+            const commonEntities = [
               entities.k8s
                 .k8sClusterJobEntity({
                   schema,
@@ -133,6 +134,22 @@ const scenario: Scenario<Partial<EntityFields>> = async (runOptions) => {
                 })
                 .timestamp(timestamp),
             ];
+
+            if (schema === 'ecs') {
+              return [
+                ...commonEntities,
+                entities.k8s
+                  .k8sServiceEntity({
+                    schema,
+                    clusterName: CLUSTER_NAME,
+                    name: 'my_service',
+                    entityId: SERVICE_UID,
+                  })
+                  .timestamp(timestamp),
+              ];
+            }
+
+            return commonEntities;
           });
 
       const ecsEntities = getK8sEntitiesEvents('ecs');
