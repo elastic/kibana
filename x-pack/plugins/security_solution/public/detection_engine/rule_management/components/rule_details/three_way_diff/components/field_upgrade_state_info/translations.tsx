@@ -40,7 +40,7 @@ export const SOLVABLE_CONFLICT_DESCRIPTION = i18n.translate(
 export const NON_SOLVABLE_CONFLICT = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.nonSolvableConflict',
   {
-    defaultMessage: 'Solved conflict',
+    defaultMessage: 'Unsolved conflict',
   }
 );
 
@@ -48,7 +48,7 @@ export const NON_SOLVABLE_CONFLICT_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.nonSolvableConflictDescription',
   {
     defaultMessage:
-      'We have suggested an update for this modified field, please review before accepting.',
+      'Unable to suggest a merged version for the update. Current version is provided for you to edit.',
   }
 );
 
