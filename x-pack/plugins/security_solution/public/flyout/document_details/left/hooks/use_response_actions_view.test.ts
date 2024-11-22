@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useResponseActionsView } from './use_response_actions_view';
 import { mockSearchHit } from '../../shared/mocks/mock_search_hit';
 import { mockDataAsNestedObject } from '../../shared/mocks/mock_data_as_nested_object';

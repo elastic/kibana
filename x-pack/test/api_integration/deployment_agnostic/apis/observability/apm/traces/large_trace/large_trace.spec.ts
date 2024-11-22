@@ -14,8 +14,9 @@ import {
 import type { Client } from '@elastic/elasticsearch';
 import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import expect from '@kbn/expect';
-import { ApmApiClient } from '../../../common/config';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmApiClient } from '../../../../../services/apm_api';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import { generateLargeTrace } from './generate_large_trace';
 
 const start = new Date('2023-01-01T00:00:00.000Z').getTime();
@@ -23,16 +24,17 @@ const end = new Date('2023-01-01T00:01:00.000Z').getTime() - 1;
 const rootTransactionName = 'Long trace';
 const environment = 'long_trace_scenario';
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const registry = getService('registry');
-  const apmApiClient = getService('apmApiClient');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
+  const synthtrace = getService('synthtrace');
   const es = getService('es');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177660
-  registry.when('Large trace', { config: 'basic', archives: [] }, () => {
+  describe('Large trace', () => {
+    let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+
     describe('when the trace is large (>15.000 items)', () => {
-      before(() => {
+      before(async () => {
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
         return generateLargeTrace({
           start,
           end,
