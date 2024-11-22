@@ -72,7 +72,7 @@ export const DataUsageMetrics = memo(
     });
 
     useEffect(() => {
-      if (!metricTypesFromUrl) {
+      if (!metricTypesFromUrl && isFirstPageLoad) {
         setUrlMetricTypesFilter(metricsFilters.metricTypes.join(','));
       }
       if (!dataStreamsFromUrl && dataStreams && isFirstPageLoad) {
@@ -123,7 +123,7 @@ export const DataUsageMetrics = memo(
       },
       {
         retry: false,
-        enabled: !!metricsFilters.dataStreams.length,
+        enabled: !!(metricsFilters.dataStreams.length && metricsFilters.metricTypes.length),
       }
     );
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { orderBy } from 'lodash/fp';
+import { orderBy, findKey } from 'lodash/fp';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiPopoverTitle, EuiSelectable, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
@@ -103,7 +103,7 @@ export const ChartsFilter = memo<ChartsFilterProps>(
     );
 
     // augmented options based on the dataStreams filter
-    const sortedHostsFilterOptions = useMemo(() => {
+    const sortedDataStreamsFilterOptions = useMemo(() => {
       if (shouldPinSelectedDataStreams() || areDataStreamsSelectedOnMount) {
         // pin checked items to the top
         return orderBy('checked', 'asc', items);
@@ -131,13 +131,9 @@ export const ChartsFilter = memo<ChartsFilterProps>(
 
         // update URL params
         if (isMetricsFilter) {
-          setUrlMetricTypesFilter(
-            selectedItems
-              .map((item) => METRIC_TYPE_API_VALUES_TO_UI_OPTIONS_MAP[item as MetricTypes])
-              .join()
-          );
+          setUrlMetricTypesFilter(selectedItems.join(','));
         } else if (isDataStreamsFilter) {
-          setUrlDataStreamsFilter(selectedItems.join());
+          setUrlDataStreamsFilter(selectedItems.join(','));
         }
         // reset shouldPinSelectedDataStreams, setAreDataStreamsSelectedOnMount
         shouldPinSelectedDataStreams(false);
@@ -165,10 +161,28 @@ export const ChartsFilter = memo<ChartsFilterProps>(
         };
       });
       setItems(allItems);
-      const dataStreamNames = items.map((i) => i.label);
-      setUrlDataStreamsFilter(dataStreamNames.join(','));
-      onChangeFilterOptions(dataStreamNames);
-    }, [items, setItems, onChangeFilterOptions, setUrlDataStreamsFilter]);
+      const optionsToSelect = allItems.map((i) => i.label);
+      onChangeFilterOptions(optionsToSelect);
+
+      if (isDataStreamsFilter) {
+        setUrlDataStreamsFilter(optionsToSelect.join(','));
+      }
+      if (isMetricsFilter) {
+        setUrlMetricTypesFilter(
+          optionsToSelect
+            .map((option) => findKey(METRIC_TYPE_API_VALUES_TO_UI_OPTIONS_MAP, option))
+            .join(',')
+        );
+      }
+    }, [
+      items,
+      isDataStreamsFilter,
+      isMetricsFilter,
+      setItems,
+      onChangeFilterOptions,
+      setUrlDataStreamsFilter,
+      setUrlMetricTypesFilter,
+    ]);
 
     const onClearAll = useCallback(() => {
       setItems(
@@ -179,9 +193,22 @@ export const ChartsFilter = memo<ChartsFilterProps>(
           };
         })
       );
-      setUrlDataStreamsFilter('');
       onChangeFilterOptions([]);
-    }, [items, setItems, onChangeFilterOptions, setUrlDataStreamsFilter]);
+      if (isDataStreamsFilter) {
+        setUrlDataStreamsFilter('');
+      }
+      if (isMetricsFilter) {
+        setUrlMetricTypesFilter('');
+      }
+    }, [
+      items,
+      isDataStreamsFilter,
+      isMetricsFilter,
+      setItems,
+      onChangeFilterOptions,
+      setUrlDataStreamsFilter,
+      setUrlMetricTypesFilter,
+    ]);
 
     useEffect(() => {
       return () => {
@@ -205,7 +232,7 @@ export const ChartsFilter = memo<ChartsFilterProps>(
           emptyMessage={UX_LABELS.filterEmptyMessage(filterName)}
           isLoading={isFilterLoading}
           onChange={onOptionsChange}
-          options={sortedHostsFilterOptions}
+          options={sortedDataStreamsFilterOptions}
           searchable={isSearchable ? true : undefined}
           searchProps={{
             placeholder: getSearchPlaceholder(filterName),
