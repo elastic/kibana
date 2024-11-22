@@ -130,5 +130,5 @@ export const formatTimelineData = async (
     }
   }
 
-  return results.filter((res) => res.node._id !== '');
+  return results;
 };
