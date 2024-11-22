@@ -140,6 +140,7 @@ export interface PluginSetupContract {
   getActionsHealth: () => { hasPermanentEncryptionKey: boolean };
   getActionsConfigurationUtilities: () => ActionsConfigurationUtilities;
   setEnabledConnectorTypes: (connectorTypes: EnabledConnectorTypes) => void;
+
   isActionTypeEnabled(id: string, options?: { notifyUsage: boolean }): boolean;
 }
 
@@ -168,6 +169,7 @@ export interface PluginStartContract {
     params: Params,
     variables: Record<string, unknown>
   ): Params;
+
   isSystemActionConnector: (connectorId: string) => boolean;
 }
 
@@ -218,8 +220,10 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
   private inMemoryConnectors: InMemoryConnector[];
   private inMemoryMetrics: InMemoryMetrics;
   private connectorUsageReportingTask: ConnectorUsageReportingTask | undefined;
+  private isServerless = false;
 
   constructor(initContext: PluginInitializerContext) {
+    this.isServerless = initContext.env.packageInfo.buildFlavor === 'serverless';
     this.logger = initContext.logger.get();
     this.actionsConfig = getValidatedConfig(
       this.logger,
@@ -606,7 +610,9 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
 
     this.validateEnabledConnectorTypes(plugins);
 
-    this.connectorUsageReportingTask?.start(plugins.taskManager).catch(() => {});
+    if (this.isServerless) {
+      this.connectorUsageReportingTask?.start(plugins.taskManager).catch(() => {});
+    }
 
     return {
       isActionTypeEnabled: (id, options = { notifyUsage: false }) => {
