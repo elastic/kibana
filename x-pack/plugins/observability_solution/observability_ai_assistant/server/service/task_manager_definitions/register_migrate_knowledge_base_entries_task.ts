@@ -15,7 +15,8 @@ import { resourceNames } from '..';
 import { getInferenceEndpoint } from '../inference_endpoint';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 
-const TASK_ID = 'obs-ai-assistant:knowledge-base-migration-task-id';
+export const KB_SEMANTIC_TEXT_MIGRATION_TASK_ID =
+  'obs-ai-assistant:knowledge-base-migration-task-id';
 const TASK_TYPE = 'obs-ai-assistant:knowledge-base-migration';
 
 // This task will re-index all knowledge base entries without `semantic_text` field
@@ -30,37 +31,41 @@ export async function registerMigrateKnowledgeBaseEntriesTask({
   logger: Logger;
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
 }) {
-  logger.debug(`Register task "${TASK_TYPE}"`);
+  try {
+    logger.debug(`Register task "${TASK_TYPE}"`);
 
-  const [coreStart, pluginsStart] = await core.getStartServices();
+    const [coreStart, pluginsStart] = await core.getStartServices();
 
-  taskManager.registerTaskDefinitions({
-    [TASK_TYPE]: {
-      title: 'Migrate AI Assistant Knowledge Base',
-      description: `Migrates AI Assistant knowledge base entries`,
-      timeout: '1h',
-      maxAttempts: 5,
-      createTaskRunner() {
-        return {
-          async run() {
-            logger.debug(`Run task: "${TASK_TYPE}"`);
+    taskManager.registerTaskDefinitions({
+      [TASK_TYPE]: {
+        title: 'Migrate AI Assistant Knowledge Base',
+        description: `Migrates AI Assistant knowledge base entries`,
+        timeout: '1h',
+        maxAttempts: 5,
+        createTaskRunner() {
+          return {
+            async run() {
+              logger.debug(`Run task: "${TASK_TYPE}"`);
 
-            const esClient = { asInternalUser: coreStart.elasticsearch.client.asInternalUser };
-            await runSemanticTextKnowledgeBaseMigration({ esClient, logger });
-          },
-        };
+              const esClient = { asInternalUser: coreStart.elasticsearch.client.asInternalUser };
+              await runSemanticTextKnowledgeBaseMigration({ esClient, logger });
+            },
+          };
+        },
       },
-    },
-  });
+    });
 
-  logger.debug(`Scheduled task: "${TASK_TYPE}"`);
-  await pluginsStart.taskManager.ensureScheduled({
-    id: TASK_ID,
-    taskType: TASK_TYPE,
-    scope: ['aiAssistant'],
-    params: {},
-    state: {},
-  });
+    logger.debug(`Scheduled task: "${TASK_TYPE}"`);
+    await pluginsStart.taskManager.ensureScheduled({
+      id: KB_SEMANTIC_TEXT_MIGRATION_TASK_ID,
+      taskType: TASK_TYPE,
+      scope: ['aiAssistant'],
+      params: {},
+      state: {},
+    });
+  } catch (error) {
+    logger.error(`Failed to register task "${TASK_TYPE}". Error: ${error}`);
+  }
 }
 
 export async function runSemanticTextKnowledgeBaseMigration({
@@ -109,6 +114,7 @@ export async function runSemanticTextKnowledgeBaseMigration({
         }
 
         return esClient.asInternalUser.update({
+          refresh: 'wait_for',
           index: resourceNames.aliases.kb,
           id: hit._id,
           body: {
@@ -125,7 +131,7 @@ export async function runSemanticTextKnowledgeBaseMigration({
     logger.debug(`Knowledge base migration: Migrated ${promises.length} entries`);
     await runSemanticTextKnowledgeBaseMigration({ esClient, logger });
   } catch (e) {
-    logger.error('Knowledge base migration: Failed to migrate entries');
+    logger.error(`Knowledge base migration failed: ${e.message}`);
     logger.error(e);
   }
 }
@@ -144,6 +150,6 @@ async function waitForInferenceEndpoint({
         throw new Error('Inference endpoint not yet ready');
       }
     },
-    { retries: 20, factor: 2 }
+    { retries: 40, factor: 2, maxTimeout: 30_000 }
   );
 }
