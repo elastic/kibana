@@ -12,7 +12,7 @@ import {
   DataUsagePublicStart,
   DataUsageStartDependencies,
   DataUsageSetupDependencies,
-  ServerlessDataUsagePublicConfigType,
+  DataUsagePublicConfigType,
 } from './types';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import {
@@ -29,11 +29,11 @@ export class DataUsagePlugin
       DataUsageStartDependencies
     >
 {
-  private config: ServerlessDataUsagePublicConfigType;
+  private config: DataUsagePublicConfigType;
   private experimentalFeatures: ExperimentalFeatures;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
-    this.config = this.initializerContext.config.get<ServerlessDataUsagePublicConfigType>();
+    this.config = this.initializerContext.config.get<DataUsagePublicConfigType>();
     this.experimentalFeatures = {} as ExperimentalFeatures;
   }
 

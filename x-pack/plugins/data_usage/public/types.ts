@@ -41,4 +41,4 @@ const schemaObject = schema.object({
   }),
 });
 
-export type ServerlessDataUsagePublicConfigType = TypeOf<typeof schemaObject>;
+export type DataUsagePublicConfigType = TypeOf<typeof schemaObject>;

@@ -11,7 +11,6 @@ import type {
   DataUsagePublicStart,
   DataUsageSetupDependencies,
   DataUsageStartDependencies,
-  // ServerlessDataUsagePublicConfigType,
 } from './types';
 import { DataUsagePlugin } from './plugin';
 
