@@ -2051,7 +2051,6 @@ export const defaultTimelineProps: CreateTimelineProps = {
       eventCategoryField: 'event.category',
       query: '',
       size: 100,
-      tiebreakerField: '',
       timestampField: '@timestamp',
     },
     eventIdToNoteIds: {},
