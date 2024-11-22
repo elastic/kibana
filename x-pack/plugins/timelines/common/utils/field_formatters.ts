@@ -123,8 +123,9 @@ export const getDataFromFieldsHits = (
   prependFieldCategory?: string
 ): TimelineEventsDetailsItem[] => {
   const resultMap = new Map<string, TimelineEventsDetailsItem>();
-
-  for (const field of Object.keys(fields)) {
+  const fieldNames = Object.keys(fields);
+  for (let i = 0; i < fieldNames.length; i++) {
+    const field = fieldNames[i];
     const item: unknown[] = fields[field];
     const fieldCategory = prependFieldCategory ?? getFieldCategory(field);
     const dotField = prependField ? `${prependField}.${field}` : field;

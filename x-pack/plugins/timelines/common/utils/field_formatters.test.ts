@@ -15,21 +15,7 @@ describe('Events Details Helpers', () => {
   describe('#getDataFromFieldsHits', () => {
     it('happy path', () => {
       const result = getDataFromFieldsHits(fields);
-      const resultCategories = result.map((r) => r.category);
-      const expectedCategories = resultFields.map((r) => r.category);
-      const resultFieldsNames = result.map((r) => r.field);
-      const expectedFieldsNames = resultFields.map((r) => r.field);
-      const resultIsObjectArray = result.map((r) => r.isObjectArray);
-      const expectedIsObjectArray = resultFields.map((r) => r.isObjectArray);
-      const resultOriginalValue = result.map((r) => r.originalValue);
-      const expectedOriginalValue = resultFields.map((r) => r.originalValue);
-      const resultValues = result.map((r) => r.values);
-      const expectedValues = resultFields.map((r) => r.values);
-      expect(resultCategories).toEqual(expect.arrayContaining(expectedCategories));
-      expect(resultFieldsNames).toEqual(expect.arrayContaining(expectedFieldsNames));
-      expect(resultIsObjectArray).toEqual(expect.arrayContaining(expectedIsObjectArray));
-      expect(resultOriginalValue).toEqual(expectedOriginalValue);
-      expect(resultValues).toEqual(expect.arrayContaining(expectedValues));
+      expect(result).toEqual(resultFields);
     });
     it('lets get weird', () => {
       const whackFields = {
