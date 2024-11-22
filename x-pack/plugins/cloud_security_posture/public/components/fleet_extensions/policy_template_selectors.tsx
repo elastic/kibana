@@ -155,11 +155,6 @@ export const PolicyTemplateInfo = ({ postureType }: PolicyTemplateInfoProps) => 
             </p>
           </EuiText>
         </EuiCallOut>
-        <EuiSpacer size="m" />
-        <FormattedMessage
-          id="xpack.csp.fleetIntegration.cnvm.configureIntegrationDescription"
-          defaultMessage="Select the cloud service provider (CSP) you want to monitor and then fill in the name and description to help identify this integration"
-        />
       </>
     )}
   </EuiText>
