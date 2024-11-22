@@ -80,7 +80,7 @@ node x-pack/plugins/observability_solution/apm/scripts/test/api --runner --basic
 
 ---
 
-## Deployment-agnostic Tests
+## Deployment-agnostic Tests (dat)
 
 | Option       | Description                                     |
 | ------------ | ----------------------------------------------- |
