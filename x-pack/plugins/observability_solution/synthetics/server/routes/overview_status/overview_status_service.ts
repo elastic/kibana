@@ -174,11 +174,12 @@ export class OverviewStatusService {
           'getCurrentStatusOverview' + count
         );
         count += 1;
+        const data = result.body.aggregations?.monitors;
 
-        hasMoreData = result.body.aggregations?.monitors.buckets.length === pageSize;
-        afterKey = result.body.aggregations?.monitors.after_key;
+        hasMoreData = data?.buckets.length === pageSize;
+        afterKey = data?.after_key;
 
-        result.body.aggregations?.monitors.buckets.forEach(({ status: statusAgg, key: bKey }) => {
+        data?.buckets.forEach(({ status: statusAgg, key: bKey }) => {
           const monitorId = String(bKey.monitorId);
           const locationId = String(bKey.locationId);
           const status = String(statusAgg.top?.[0].metrics?.['monitor.status']);

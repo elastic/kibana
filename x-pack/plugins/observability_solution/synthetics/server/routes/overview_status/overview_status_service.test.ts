@@ -19,16 +19,17 @@ import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import * as allLocationsFn from '../../synthetics_service/get_all_locations';
 import { OverviewStatusService } from './overview_status_service';
-const allLocations: any = [
-  {
-    id: 'us_central_qa',
-    label: 'US Central QA',
-  },
-  {
-    id: 'us_central',
-    label: 'North America - US Central',
-  },
-];
+const japanLoc = {
+  id: 'asia_japan',
+  label: 'Asia/Pacific - Japan',
+};
+
+const germanyLoc = {
+  id: 'europe_germany',
+  label: 'Europe - Germany',
+};
+
+const allLocations: any = [japanLoc, germanyLoc];
 jest.spyOn(allLocationsFn, 'getAllLocations').mockResolvedValue({
   publicLocations: allLocations,
   privateLocations: [],
@@ -90,6 +91,7 @@ describe('current status route', () => {
   const testMonitors = [
     {
       attributes: {
+        config_id: 'id1',
         id: 'id1',
         type: 'browser',
         enabled: true,
@@ -100,11 +102,13 @@ describe('current status route', () => {
           number: '1',
           unit: 'm',
         },
+        locations: [japanLoc],
       },
     },
     {
       attributes: {
         id: 'id2',
+        config_id: 'id2',
         enabled: true,
         type: 'browser',
         name: 'test monitor 2',
@@ -114,6 +118,7 @@ describe('current status route', () => {
           number: '1',
           unit: 'm',
         },
+        locations: allLocations,
       },
     },
   ];
@@ -122,163 +127,89 @@ describe('current status route', () => {
     it('parses expected agg fields', async () => {
       const { esClient, syntheticsEsClient } = getUptimeESMockClient();
 
-      esClient.msearch.mockResponseOnce({
-        responses: [
-          getEsResponse([
-            {
-              key: 'id1',
-              location: {
-                buckets: [
-                  {
-                    key: 'Asia/Pacific - Japan',
-                    status: {
-                      hits: {
-                        hits: [
-                          {
-                            _source: {
-                              '@timestamp': '2022-09-15T16:08:16.724Z',
-                              monitor: {
-                                status: 'up',
-                                id: 'id1',
-                              },
-                              summary: {
-                                up: 1,
-                                down: 0,
-                              },
-                              config_id: 'id1',
-                              observer: {
-                                geo: {
-                                  name: 'Asia/Pacific - Japan',
-                                },
-                              },
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  },
-                ],
-              },
+      esClient.search.mockResponseOnce(
+        getEsResponse([
+          {
+            key: {
+              monitorId: 'id1',
+              locationId: japanLoc.id,
             },
-            {
-              key: 'id2',
-              location: {
-                buckets: [
-                  {
-                    key: 'Asia/Pacific - Japan',
-                    status: {
-                      hits: {
-                        hits: [
-                          {
-                            _source: {
-                              '@timestamp': '2022-09-15T16:09:16.724Z',
-                              monitor: {
-                                status: 'up',
-                                id: 'id2',
-                              },
-                              summary: {
-                                up: 1,
-                                down: 0,
-                              },
-                              config_id: 'id2',
-                              observer: {
-                                geo: {
-                                  name: 'Asia/Pacific - Japan',
-                                },
-                              },
-                            },
-                          },
-                        ],
-                      },
-                    },
+            status: {
+              key: japanLoc.id,
+              top: [
+                {
+                  metrics: {
+                    'monitor.status': 'up',
                   },
-                  {
-                    key: 'Europe - Germany',
-                    status: {
-                      hits: {
-                        hits: [
-                          {
-                            _source: {
-                              '@timestamp': '2022-09-15T16:19:16.724Z',
-                              monitor: {
-                                status: 'down',
-                                id: 'id2',
-                              },
-                              summary: {
-                                down: 1,
-                                up: 0,
-                              },
-                              config_id: 'id2',
-                              observer: {
-                                geo: {
-                                  name: 'Europe - Germany',
-                                },
-                              },
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  },
-                ],
-              },
+                  sort: ['2022-09-15T16:19:16.724Z'],
+                },
+              ],
             },
-          ]),
-        ],
-        took: 605,
-      });
+          },
+          {
+            key: {
+              monitorId: 'id2',
+              locationId: japanLoc.id,
+            },
+            status: {
+              key: japanLoc.id,
+              top: [
+                {
+                  metrics: {
+                    'monitor.status': 'up',
+                  },
+                  sort: ['2022-09-15T16:19:16.724Z'],
+                },
+              ],
+            },
+          },
+          {
+            key: {
+              monitorId: 'id2',
+              locationId: germanyLoc.id,
+            },
+            status: {
+              key: germanyLoc.id,
+              top: [
+                {
+                  metrics: {
+                    'monitor.status': 'down',
+                  },
+                  sort: ['2022-09-15T16:19:16.724Z'],
+                },
+              ],
+            },
+          },
+        ])
+      );
       const routeContext = {
         request: {},
         syntheticsEsClient,
       };
 
       const overviewStatusService = new OverviewStatusService(routeContext);
-      expect(
-        await overviewStatusService.getOverviewStatus({
-          esClient: syntheticsEsClient,
-          monitorLocationIds: ['Europe - Germany', 'Asia/Pacific - Japan'],
-          range: { from: 'now-1d', to: 'now' },
-          monitorQueryIds: ['id1', 'id2'],
-          monitorLocationsMap: {
-            id1: ['Asia/Pacific - Japan'],
-            id2: ['Europe - Germany', 'Asia/Pacific - Japan'],
-          },
-          monitorQueryIdToConfigIdMap: {
-            id1: 'id1',
-            id2: 'id2',
-          },
-          monitors: testMonitors as any,
-        })
-      ).toMatchInlineSnapshot(`
+      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue(testMonitors as any);
+      expect(await overviewStatusService.getOverviewStatus()).toMatchInlineSnapshot(`
         Object {
+          "allIds": Array [
+            "id1",
+            "id2",
+          ],
+          "allMonitorsCount": 2,
           "disabledConfigs": Object {},
+          "disabledCount": 0,
+          "disabledMonitorQueryIds": Array [],
+          "disabledMonitorsCount": 0,
           "down": 1,
           "downConfigs": Object {
-            "id2-Europe - Germany": Object {
+            "id2-europe_germany": Object {
               "configId": "id2",
               "isEnabled": true,
               "isStatusAlertEnabled": false,
-              "locationId": "Europe - Germany",
+              "locationId": "europe_germany",
               "locationLabel": "Europe - Germany",
               "monitorQueryId": "id2",
               "name": "test monitor 2",
-              "ping": Object {
-                "@timestamp": "2022-09-15T16:19:16.724Z",
-                "config_id": "id2",
-                "monitor": Object {
-                  "id": "id2",
-                  "status": "down",
-                },
-                "observer": Object {
-                  "geo": Object {
-                    "name": "Europe - Germany",
-                  },
-                },
-                "summary": Object {
-                  "down": 1,
-                  "up": 0,
-                },
-              },
               "projectId": "project-id",
               "schedule": "1",
               "spaceId": undefined,
@@ -298,33 +229,17 @@ describe('current status route', () => {
           ],
           "pending": 0,
           "pendingConfigs": Object {},
+          "projectMonitorsCount": 0,
           "up": 2,
           "upConfigs": Object {
-            "id1-Asia/Pacific - Japan": Object {
+            "id1-asia_japan": Object {
               "configId": "id1",
               "isEnabled": true,
               "isStatusAlertEnabled": false,
-              "locationId": "Asia/Pacific - Japan",
+              "locationId": "asia_japan",
               "locationLabel": "Asia/Pacific - Japan",
               "monitorQueryId": "id1",
               "name": "test monitor 1",
-              "ping": Object {
-                "@timestamp": "2022-09-15T16:08:16.724Z",
-                "config_id": "id1",
-                "monitor": Object {
-                  "id": "id1",
-                  "status": "up",
-                },
-                "observer": Object {
-                  "geo": Object {
-                    "name": "Asia/Pacific - Japan",
-                  },
-                },
-                "summary": Object {
-                  "down": 0,
-                  "up": 1,
-                },
-              },
               "projectId": "project-id",
               "schedule": "1",
               "spaceId": undefined,
@@ -333,35 +248,18 @@ describe('current status route', () => {
                 "tag-1",
                 "tag-2",
               ],
-              "timestamp": "2022-09-15T16:08:16.724Z",
+              "timestamp": "2022-09-15T16:19:16.724Z",
               "type": "browser",
               "updated_at": undefined,
             },
-            "id2-Asia/Pacific - Japan": Object {
+            "id2-asia_japan": Object {
               "configId": "id2",
               "isEnabled": true,
               "isStatusAlertEnabled": false,
-              "locationId": "Asia/Pacific - Japan",
+              "locationId": "asia_japan",
               "locationLabel": "Asia/Pacific - Japan",
               "monitorQueryId": "id2",
               "name": "test monitor 2",
-              "ping": Object {
-                "@timestamp": "2022-09-15T16:09:16.724Z",
-                "config_id": "id2",
-                "monitor": Object {
-                  "id": "id2",
-                  "status": "up",
-                },
-                "observer": Object {
-                  "geo": Object {
-                    "name": "Asia/Pacific - Japan",
-                  },
-                },
-                "summary": Object {
-                  "down": 0,
-                  "up": 1,
-                },
-              },
               "projectId": "project-id",
               "schedule": "1",
               "spaceId": undefined,
@@ -370,7 +268,7 @@ describe('current status route', () => {
                 "tag-1",
                 "tag-2",
               ],
-              "timestamp": "2022-09-15T16:09:16.724Z",
+              "timestamp": "2022-09-15T16:19:16.724Z",
               "type": "browser",
               "updated_at": undefined,
             },
@@ -1272,7 +1170,7 @@ function getEsResponse(buckets: any[]) {
       hits: [],
     },
     aggregations: {
-      id: {
+      monitors: {
         buckets,
       },
     },
