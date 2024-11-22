@@ -7,14 +7,7 @@
 
 import React from 'react';
 import classNames from 'classnames';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonIcon,
-  EuiBadge,
-  EuiToolTip,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { SearchResult } from '../../../types';
