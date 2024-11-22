@@ -59,7 +59,7 @@ const getFindingsStats = (passedFindingsStats: number, failedFindingsStats: numb
  * Insights view displayed in the document details expandable flyout left section
  */
 export const MisconfigurationFindingsDetailsTable = memo(
-  ({ fieldName, queryName }: { fieldName: 'host.name' | 'user.name'; queryName: string }) => {
+  ({ field, value }: { field: 'host.name' | 'user.name'; value: string }) => {
     useEffect(() => {
       uiMetricService.trackUiMetric(
         METRIC_TYPE.COUNT,
@@ -68,7 +68,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
     }, []);
 
     const { data } = useMisconfigurationFindings({
-      query: buildEntityFlyoutPreviewQuery(fieldName, queryName),
+      query: buildEntityFlyoutPreviewQuery(field, value),
       sort: [],
       enabled: true,
       pageSize: 1,
@@ -126,11 +126,14 @@ export const MisconfigurationFindingsDetailsTable = memo(
       return getNavUrlParams({ [queryField]: name }, 'configurations', ['rule.name']);
     };
 
+    const linkWidth = 40;
+    const resultWidth = 74;
+
     const columns: Array<EuiBasicTableColumn<MisconfigurationFindingDetailFields>> = [
       {
         field: 'rule',
         name: '',
-        width: '5%',
+        width: `${linkWidth}`,
         render: (rule: CspBenchmarkRuleMetadata, finding: MisconfigurationFindingDetailFields) => (
           <SecuritySolutionLinkAnchor
             deepLinkId={SecurityPageName.cloudSecurityPostureFindings}
@@ -160,7 +163,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
             defaultMessage: 'Result',
           }
         ),
-        width: '10%',
+        width: `${resultWidth}px`,
       },
       {
         field: 'rule',
@@ -171,7 +174,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
             defaultMessage: 'Rule',
           }
         ),
-        width: '90%',
+        width: `calc(100% - ${linkWidth + resultWidth}px)`,
       },
     ];
 
@@ -180,7 +183,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
         <EuiPanel hasShadow={false}>
           <SecuritySolutionLinkAnchor
             deepLinkId={SecurityPageName.cloudSecurityPostureFindings}
-            path={`${getFindingsPageUrl(queryName, fieldName)}`}
+            path={`${getFindingsPageUrl(value, field)}`}
             target={'_blank'}
             external={false}
             onClick={() => {

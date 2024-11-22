@@ -15,13 +15,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
 import { last } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
-import {
-  ENTITY_DISPLAY_NAME,
-  ENTITY_LAST_SEEN,
-  ENTITY_TYPE,
-} from '@kbn/observability-shared-plugin/common';
-import { EntityColumnIds } from '../../../common/entities';
-import { APIReturnType } from '../../api';
+import { ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
+import { EntityColumnIds, InventoryEntity } from '../../../common/entities';
 import { BadgeFilterWithPopover } from '../badge_filter_with_popover';
 import { getColumns } from './grid_columns';
 import { AlertsBadge } from '../alerts_badge/alerts_badge';
@@ -29,12 +24,9 @@ import { EntityName } from './entity_name';
 import { EntityActions } from '../entity_actions';
 import { useDiscoverRedirect } from '../../hooks/use_discover_redirect';
 
-type InventoryEntitiesAPIReturnType = APIReturnType<'GET /internal/inventory/entities'>;
-type LatestEntities = InventoryEntitiesAPIReturnType['entities'];
-
 interface Props {
   loading: boolean;
-  entities: LatestEntities;
+  entities: InventoryEntity[];
   sortDirection: 'asc' | 'desc';
   sortField: string;
   pageIndex: number;
@@ -88,16 +80,17 @@ export function EntitiesGrid({
       }
 
       const columnEntityTableId = columnId as EntityColumnIds;
-      const entityType = entity[ENTITY_TYPE];
+      const entityType = entity.entityType;
       const discoverUrl = getDiscoverRedirectUrl(entity);
 
       switch (columnEntityTableId) {
         case 'alertsCount':
           return entity?.alertsCount ? <AlertsBadge entity={entity} /> : null;
 
-        case ENTITY_TYPE:
+        case 'entityType':
           return <BadgeFilterWithPopover field={ENTITY_TYPE} value={entityType} />;
-        case ENTITY_LAST_SEEN:
+
+        case 'entityLastSeenTimestamp':
           return (
             <FormattedMessage
               id="xpack.inventory.entitiesGrid.euiDataGrid.lastSeen"
@@ -105,7 +98,7 @@ export function EntitiesGrid({
               values={{
                 date: (
                   <FormattedDate
-                    value={entity[columnEntityTableId]}
+                    value={entity.entityLastSeenTimestamp}
                     month="short"
                     day="numeric"
                     year="numeric"
@@ -113,7 +106,7 @@ export function EntitiesGrid({
                 ),
                 time: (
                   <FormattedTime
-                    value={entity[columnEntityTableId]}
+                    value={entity.entityLastSeenTimestamp}
                     hour12={false}
                     hour="2-digit"
                     minute="2-digit"
@@ -123,19 +116,19 @@ export function EntitiesGrid({
               }}
             />
           );
-        case ENTITY_DISPLAY_NAME:
+        case 'entityDisplayName':
           return <EntityName entity={entity} />;
         case 'actions':
           return (
             discoverUrl && (
               <EntityActions
                 discoverUrl={discoverUrl}
-                entityIdentifyingValue={entity[ENTITY_DISPLAY_NAME]}
+                entityIdentifyingValue={entity.entityDisplayName}
               />
             )
           );
         default:
-          return entity[columnId as EntityColumnIds] || '';
+          return null;
       }
     },
     [entities, getDiscoverRedirectUrl]
@@ -167,7 +160,7 @@ export function EntitiesGrid({
               <EuiText size="s">
                 <FormattedMessage
                   id="xpack.inventory.entitiesGrid.euiDataGrid.headerLeft"
-                  defaultMessage="Showing {currentItems} of {total} {boldEntites}"
+                  defaultMessage="Showing {currentItems} of {total} {boldEntities}"
                   values={{
                     currentItems: (
                       <strong>
@@ -176,10 +169,10 @@ export function EntitiesGrid({
                       </strong>
                     ),
                     total: entities.length,
-                    boldEntites: (
+                    boldEntities: (
                       <strong>
                         {i18n.translate(
-                          'xpack.inventory.entitiesGrid.euiDataGrid.headerLeft.entites',
+                          'xpack.inventory.entitiesGrid.euiDataGrid.headerLeft.entities',
                           { defaultMessage: 'Entities' }
                         )}
                       </strong>

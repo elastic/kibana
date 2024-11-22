@@ -23,7 +23,8 @@
       "security",
       "observability",
       "licensing",
-      "ruleRegistry"
+      "ruleRegistry",
+      "usageCollection"
     ],
     "requiredBundles": [
       "esql",

@@ -111,7 +111,7 @@ describe('commands.stats', () => {
                 name: 'bar',
               },
             ],
-            fields: ['bar'],
+            usedFields: new Set(['bar']),
           },
         },
       });
@@ -155,7 +155,7 @@ describe('commands.stats', () => {
                 name: 'baz',
               },
             ],
-            fields: ['foo', 'bar', 'baz'],
+            usedFields: new Set(['foo', 'bar', 'baz']),
           },
         },
       });
@@ -172,15 +172,15 @@ describe('commands.stats', () => {
         aggregates: {
           foo: {
             field: 'foo',
-            fields: ['f1', 'f2'],
+            usedFields: new Set(['f1', 'f2']),
           },
           'a.b': {
             field: 'a.b',
-            fields: ['f3'],
+            usedFields: new Set(['f3']),
           },
         },
       });
-      expect(summary.fields).toEqual(new Set(['f1', 'f2', 'f3']));
+      expect(summary.usedFields).toEqual(new Set(['f1', 'f2', 'f3']));
     });
 
     it('can get de-duplicated list of used fields', () => {
@@ -190,7 +190,7 @@ describe('commands.stats', () => {
       const command = commands.stats.byIndex(query.ast, 0)!;
       const summary = commands.stats.summarizeCommand(query, command);
 
-      expect(summary.fields).toEqual(new Set(['f1', 'f2']));
+      expect(summary.usedFields).toEqual(new Set(['f1', 'f2']));
     });
 
     describe('params', () => {
@@ -204,14 +204,14 @@ describe('commands.stats', () => {
         expect(summary).toMatchObject({
           aggregates: {
             foo: {
-              fields: ['f1.?aha', '?nested.?param'],
+              usedFields: new Set(['f1.?aha', '?nested.?param']),
             },
             'a.b': {
-              fields: ['f1'],
+              usedFields: new Set(['f1']),
             },
           },
         });
-        expect(summary.fields).toEqual(new Set(['f1.?aha', '?nested.?param', 'f1']));
+        expect(summary.usedFields).toEqual(new Set(['f1.?aha', '?nested.?param', 'f1']));
       });
 
       it('can use params as destination field names', () => {
@@ -224,11 +224,11 @@ describe('commands.stats', () => {
         expect(summary).toMatchObject({
           aggregates: {
             '?dest': {
-              fields: ['asdf'],
+              usedFields: new Set(['asdf']),
             },
           },
         });
-        expect(summary.fields).toEqual(new Set(['asdf']));
+        expect(summary.usedFields).toEqual(new Set(['asdf']));
       });
     });
 
@@ -243,7 +243,7 @@ describe('commands.stats', () => {
         expect(summary.aggregates).toEqual({
           '`max(1)`': expect.any(Object),
         });
-        expect(summary.fields).toEqual(new Set(['abc']));
+        expect(summary.usedFields).toEqual(new Set(['abc']));
       });
 
       it('returns all "grouping" fields', () => {
@@ -257,10 +257,43 @@ describe('commands.stats', () => {
           '`max(1)`': expect.any(Object),
         });
         expect(summary.grouping).toMatchObject({
-          a: { type: 'column' },
-          b: { type: 'column' },
-          c: { type: 'column' },
+          a: expect.any(Object),
+          b: expect.any(Object),
+          c: expect.any(Object),
         });
+      });
+
+      it('returns grouping destination fields', () => {
+        const src = 'FROM index | STATS max(1) BY a, b, c';
+        const query = EsqlQuery.fromSrc(src);
+
+        const command = commands.stats.byIndex(query.ast, 0)!;
+        const summary = commands.stats.summarizeCommand(query, command);
+
+        expect(summary.aggregates).toEqual({
+          '`max(1)`': expect.any(Object),
+        });
+        expect(summary.grouping).toMatchObject({
+          a: expect.any(Object),
+          b: expect.any(Object),
+          c: expect.any(Object),
+        });
+        expect(summary.usedFields).toEqual(new Set(['a', 'b', 'c']));
+      });
+
+      it('returns grouping "used" fields', () => {
+        const src = 'FROM index | STATS max(1) BY a, b, c';
+        const query = EsqlQuery.fromSrc(src);
+
+        const command = commands.stats.byIndex(query.ast, 0)!;
+        const summary = commands.stats.summarizeCommand(query, command);
+
+        expect(summary.grouping).toMatchObject({
+          a: expect.any(Object),
+          b: expect.any(Object),
+          c: expect.any(Object),
+        });
+        expect(summary.usedFields).toEqual(new Set(['a', 'b', 'c']));
       });
 
       it('can have params and quoted fields in grouping', () => {
@@ -274,9 +307,9 @@ describe('commands.stats', () => {
           '`max(1)`': expect.any(Object),
         });
         expect(summary.grouping).toMatchObject({
-          '`a😎`': { type: 'column' },
-          // '?123': { type: 'column' },
-          'a.?b.?0.`😎`': { type: 'column' },
+          '`a😎`': expect.any(Object),
+          // '?123': expect.any(Object),
+          'a.?b.?0.`😎`': expect.any(Object),
         });
       });
     });
@@ -293,23 +326,67 @@ describe('commands.stats', () => {
           aggregates: {
             '`agg()`': {
               field: '`agg()`',
-              fields: [],
+              usedFields: new Set(),
             },
           },
-          fields: new Set([]),
+          usedFields: new Set([]),
         },
         {
           aggregates: {
             '`max(a, b, c)`': {
               field: '`max(a, b, c)`',
-              fields: ['a', 'b', 'c'],
+              usedFields: new Set(['a', 'b', 'c']),
             },
             '`max2(d.e)`': {
               field: '`max2(d.e)`',
-              fields: ['d.e'],
+              usedFields: new Set(['d.e']),
             },
           },
-          fields: new Set(['a', 'b', 'c', 'd.e']),
+          usedFields: new Set(['a', 'b', 'c', 'd.e']),
+        },
+      ]);
+    });
+
+    it('return used fields from BY clause', () => {
+      const src = 'FROM index | STATS agg(1) BY x, y = z, i = max(agg(1, 2, 3, ttt))';
+      const query = EsqlQuery.fromSrc(src);
+      const summary = commands.stats.summarize(query);
+
+      expect(summary).toMatchObject([
+        {
+          usedFields: new Set(['x', 'z', 'ttt']),
+        },
+      ]);
+    });
+
+    it('correctly returns used fields', () => {
+      const src =
+        'FROM index | LIMIT 1 | STATS agg(a, b), agg(c, a), d = agg(e) | LIMIT 2 | STATS max(a, b, c), max2(d.e) BY x, y = z, i = max(agg(1, 2, 3, ttt))';
+      const query = EsqlQuery.fromSrc(src);
+      const summary = commands.stats.summarize(query);
+
+      expect(summary).toMatchObject([
+        {
+          usedFields: new Set(['a', 'b', 'c', 'e']),
+        },
+        {
+          usedFields: new Set(['a', 'b', 'c', 'd.e', 'x', 'z', 'ttt']),
+        },
+      ]);
+    });
+
+    it('correctly returns new fields', () => {
+      const src =
+        'FROM index | LIMIT 1 | STATS agg(a, b), agg(c, a), d = agg(e) | LIMIT 2 | STATS max(a, b, c), max2(d.e) BY x, y = z, i = max(agg(1, 2, 3, ttt))';
+      const query = EsqlQuery.fromSrc(src);
+      const summary = commands.stats.summarize(query);
+
+      expect(summary).toMatchObject([
+        {
+          newFields: new Set(['`agg(a, b)`', '`agg(c, a)`', 'd']),
+        },
+        {
+          newFields: new Set(['`max(a, b, c)`', '`max2(d.e)`', 'x', 'y', 'i']),
         },
       ]);
     });

@@ -6,8 +6,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
-import { esqlResultToPlainObjects } from '@kbn/observability-utils/es/utils/esql_result_to_plain_objects';
+import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import {
   ENTITIES_LATEST_ALIAS,
   type EntityGroup,
@@ -32,10 +31,8 @@ export async function getEntityGroupsBy({
   const limit = `LIMIT ${MAX_NUMBER_OF_ENTITIES}`;
   const query = [from, ...where, group, sort, limit].join(' | ');
 
-  const groups = await inventoryEsClient.esql('get_entities_groups', {
+  return inventoryEsClient.esql<EntityGroup>('get_entities_groups', {
     query,
     filter: esQuery,
   });
-
-  return esqlResultToPlainObjects<EntityGroup>(groups);
 }

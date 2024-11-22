@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { APP_ID, FEATURE_ID } from '../../../common/constants';
+import { APP_ID, FEATURE_ID_V2 } from '../../../common/constants';
 import { useKibana } from '../../common/lib/kibana';
 import type { CasesPermissions } from '../../containers/types';
 import { allCasePermissions } from '../../utils/permissions';
@@ -25,7 +25,7 @@ export const useAvailableCasesOwners = (
 
   return Object.entries(kibanaCapabilities).reduce(
     (availableOwners: string[], [featureId, kibanaCapability]) => {
-      if (!featureId.endsWith('Cases')) {
+      if (!featureId.endsWith('CasesV2')) {
         return availableOwners;
       }
       for (const cap of capabilities) {
@@ -42,9 +42,9 @@ export const useAvailableCasesOwners = (
 };
 
 const getOwnerFromFeatureID = (featureID: string) => {
-  if (featureID === FEATURE_ID) {
+  if (featureID === FEATURE_ID_V2) {
     return APP_ID;
   }
 
-  return featureID.replace('Cases', '');
+  return featureID.replace('CasesV2', '');
 };
