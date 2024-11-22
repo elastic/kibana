@@ -7,13 +7,17 @@
 
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, waitFor, renderHook } from '@testing-library/react';
 import { useStatusAction } from './use_status_action';
 
 import * as api from '../../../containers/api';
 import { basicCase } from '../../../containers/mock';
 import { CaseStatuses } from '../../../../common/types/domain';
+import { useUserPermissions } from '../../user_actions/use_user_permissions';
+import { useShouldDisableStatus } from './use_should_disable_status';
 
+jest.mock('../../user_actions/use_user_permissions');
+jest.mock('./use_should_disable_status');
 jest.mock('../../../containers/api');
 
 describe('useStatusAction', () => {
@@ -24,6 +28,12 @@ describe('useStatusAction', () => {
   beforeEach(() => {
     appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
+    (useShouldDisableStatus as jest.Mock).mockReturnValue(() => false);
+
+    (useUserPermissions as jest.Mock).mockReturnValue({
+      canUpdate: true,
+      canReopenCase: true,
+    });
   });
 
   it('renders an action', async () => {
@@ -43,7 +53,7 @@ describe('useStatusAction', () => {
       Array [
         Object {
           "data-test-subj": "cases-bulk-action-status-open",
-          "disabled": true,
+          "disabled": false,
           "icon": "empty",
           "key": "cases-bulk-action-status-open",
           "name": "Open",
@@ -72,7 +82,7 @@ describe('useStatusAction', () => {
   it('update the status cases', async () => {
     const updateSpy = jest.spyOn(api, 'updateCases');
 
-    const { result, waitFor } = renderHook(
+    const { result } = renderHook(
       () => useStatusAction({ onAction, onActionSuccess, isDisabled: false }),
       {
         wrapper: appMockRender.AppWrapper,
@@ -110,7 +120,7 @@ describe('useStatusAction', () => {
   it.each(singleCaseTests)(
     'shows the success toaster correctly when updating the status of the case: %s',
     async (_, index, expectedMessage) => {
-      const { result, waitFor } = renderHook(
+      const { result } = renderHook(
         () => useStatusAction({ onAction, onActionSuccess, isDisabled: false }),
         {
           wrapper: appMockRender.AppWrapper,
@@ -142,7 +152,7 @@ describe('useStatusAction', () => {
   it.each(multipleCasesTests)(
     'shows the success toaster correctly when updating the status of the case: %s',
     async (_, index, expectedMessage) => {
-      const { result, waitFor } = renderHook(
+      const { result } = renderHook(
         () => useStatusAction({ onAction, onActionSuccess, isDisabled: false }),
         {
           wrapper: appMockRender.AppWrapper,
@@ -172,6 +182,8 @@ describe('useStatusAction', () => {
   ];
 
   it.each(disabledTests)('disables the status button correctly: %s', async (status, index) => {
+    (useShouldDisableStatus as jest.Mock).mockReturnValue(() => true);
+
     const { result } = renderHook(
       () => useStatusAction({ onAction, onActionSuccess, isDisabled: false }),
       {
@@ -197,4 +209,36 @@ describe('useStatusAction', () => {
       expect(actions[index].disabled).toBe(true);
     }
   );
+
+  it('respects user permissions when everything is false', () => {
+    (useUserPermissions as jest.Mock).mockReturnValue({
+      canUpdate: false,
+      canReopenCase: false,
+    });
+
+    const { result } = renderHook(
+      () => useStatusAction({ onAction, onActionSuccess, isDisabled: false }),
+      {
+        wrapper: appMockRender.AppWrapper,
+      }
+    );
+
+    expect(result.current.canUpdateStatus).toBe(false);
+  });
+
+  it('respects user permissions when only reopen is true', () => {
+    (useUserPermissions as jest.Mock).mockReturnValue({
+      canUpdate: false,
+      canReopenCase: true,
+    });
+
+    const { result } = renderHook(
+      () => useStatusAction({ onAction, onActionSuccess, isDisabled: false }),
+      {
+        wrapper: appMockRender.AppWrapper,
+      }
+    );
+
+    expect(result.current.canUpdateStatus).toBe(true);
+  });
 });
