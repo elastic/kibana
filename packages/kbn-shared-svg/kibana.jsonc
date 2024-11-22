@@ -1,5 +1,7 @@
 {
   "type": "shared-common",
   "id": "@kbn/shared-svg",
-  "owner": "@elastic/obs-ux-infra_services-team"
+  "owner": "@elastic/obs-ux-infra_services-team",
+  "group": "platform",
+  "visibility": "shared"
 }

@@ -72,7 +72,9 @@ export const DataUsageMetrics = memo(
         setUrlMetricTypesFilter(metricsFilters.metricTypes.join(','));
       }
       if (!dataStreamsFromUrl && dataStreams) {
-        setUrlDataStreamsFilter(dataStreams.map((ds) => ds.name).join(','));
+        const hasMoreThan50 = dataStreams.length > 50;
+        const _dataStreams = hasMoreThan50 ? dataStreams.slice(0, 50) : dataStreams;
+        setUrlDataStreamsFilter(_dataStreams.map((ds) => ds.name).join(','));
       }
       if (!startDateFromUrl || !endDateFromUrl) {
         setUrlDateRangeFilter({ startDate: metricsFilters.from, endDate: metricsFilters.to });
@@ -204,7 +206,7 @@ export const DataUsageMetrics = memo(
         </FlexItemWithCss>
 
         <FlexItemWithCss>
-          {isFetched && data?.metrics ? (
+          {isFetched && data ? (
             <Charts data={data} data-test-subj={dataTestSubj} />
           ) : isFetching ? (
             <EuiLoadingElastic data-test-subj={getTestId('charts-loading')} />
