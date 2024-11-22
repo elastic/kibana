@@ -7,22 +7,36 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const GET_STARTED_PAGE_TITLE = (userName: string) =>
+export const ONBOARDING_PAGE_TITLE = (userName: string) =>
   i18n.translate('xpack.securitySolution.onboarding.Title', {
     defaultMessage: `Hi {userName}!`,
     values: { userName },
   });
 
-export const GET_STARTED_DATA_INGESTION_HUB_SUBTITLE = i18n.translate(
+export const ONBOARDING_PAGE_SUBTITLE = i18n.translate(
   'xpack.securitySolution.onboarding.subTitle',
   {
     defaultMessage: `Welcome to Elastic Security`,
   }
 );
 
-export const GET_STARTED_DATA_INGESTION_HUB_DESCRIPTION = i18n.translate(
+export const ONBOARDING_PAGE_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.onboarding.description',
   {
     defaultMessage: `A SIEM with AI-driven security analytics, XDR and Cloud Security.`,
+  }
+);
+
+export const ONBOARDING_PAGE_DEFAULT_TOPIC = i18n.translate(
+  'xpack.securitySolution.onboarding.topic.default',
+  {
+    defaultMessage: 'Set up security',
+  }
+);
+
+export const ONBOARDING_PAGE_SIEM_MIGRATIONS_TOPIC = i18n.translate(
+  'xpack.securitySolution.onboarding.topic.siemMigrations',
+  {
+    defaultMessage: 'SIEM Rule migration',
   }
 );

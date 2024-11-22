@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export const AllowedActionTypeIds = ['.bedrock', '.gen-ai', '.gemini'];
+import type { ActionConnector } from '@kbn/alerts-ui-shared';
+
+export interface AIConnectorCardMetadata {
+  connectors: ActionConnector[];
+  canExecuteConnectors: boolean;
+  canCreateConnectors: boolean;
+}

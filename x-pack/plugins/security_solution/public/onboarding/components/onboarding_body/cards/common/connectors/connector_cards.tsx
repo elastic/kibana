@@ -22,16 +22,24 @@ import { useKibana } from '../../../../../../common/lib/kibana';
 import { CreateConnectorPopover } from './create_connector_popover';
 import { ConnectorSetup } from './connector_setup';
 import * as i18n from './translations';
-import { MissingPrivilegesDescription } from './missing_privileges_tooltip';
+import { MissingPrivilegesDescription } from './missing_privileges';
 
 interface ConnectorCardsProps {
   connectors?: AIConnector[];
   onConnectorSaved: () => void;
   canCreateConnectors?: boolean;
+  selectedConnectorId?: string;
+  setSelectedConnectorId?: (id: string) => void;
 }
 
 export const ConnectorCards = React.memo<ConnectorCardsProps>(
-  ({ connectors, onConnectorSaved, canCreateConnectors }) => {
+  ({
+    connectors,
+    onConnectorSaved,
+    canCreateConnectors,
+    selectedConnectorId,
+    setSelectedConnectorId,
+  }) => {
     const {
       triggersActionsUi: { actionTypeRegistry },
     } = useKibana().services;

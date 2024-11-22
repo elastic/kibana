@@ -7,7 +7,6 @@
 
 import React, { useCallback, useMemo } from 'react';
 import {
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -21,10 +20,10 @@ import { OnboardingCardId } from '../../../../constants';
 import type { OnboardingCardComponent } from '../../../../types';
 import * as i18n from './translations';
 import { OnboardingCardContentPanel } from '../common/card_content_panel';
-import { ConnectorCards } from './connectors/connector_cards';
+import { ConnectorCards } from '../common/connectors/connector_cards';
 import { CardCallOut } from '../common/card_callout';
 import type { AssistantCardMetadata } from './types';
-import { MissingPrivilegesDescription } from './connectors/missing_privileges_tooltip';
+import { MissingPrivilegesCallOut } from '../common/connectors/missing_privileges';
 
 export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
   isCardComplete,
@@ -94,9 +93,7 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
-        <EuiCallOut title={i18n.PRIVILEGES_MISSING_TITLE} iconType="iInCircle">
-          <MissingPrivilegesDescription />
-        </EuiCallOut>
+        <MissingPrivilegesCallOut />
       )}
     </OnboardingCardContentPanel>
   );

@@ -27,5 +27,5 @@ export const integrationsCardConfig: OnboardingCardConfig<IntegrationCardMetadat
       )
   ),
   checkComplete: checkIntegrationsCardComplete,
-  capabilities: 'fleet.read',
+  capabilitiesRequired: 'fleet.read',
 };
