@@ -354,7 +354,6 @@ describe('alert actions', () => {
               eventCategoryField: 'event.category',
               query: '',
               size: 100,
-              tiebreakerField: '',
               timestampField: '@timestamp',
             },
             eventIdToNoteIds: {},

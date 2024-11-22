@@ -32,7 +32,7 @@ import type {
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { MATCHES, AND, OR } from '../../../../common/components/threat_match/translations';
-import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
+import type { EqlOptions } from '../../../../../common/search_strategy';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import * as i18nSeverity from '../severity_mapping/translations';
 import * as i18nRiskScore from '../risk_score_mapping/translations';
@@ -147,7 +147,7 @@ export const buildQueryBarDescription = ({
   return items;
 };
 
-export const buildEqlOptionsDescription = (eqlOptions: EqlOptionsSelected): ListItems[] => {
+export const buildEqlOptionsDescription = (eqlOptions: EqlOptions): ListItems[] => {
   let items: ListItems[] = [];
   if (!isEmpty(eqlOptions.eventCategoryField)) {
     items = [

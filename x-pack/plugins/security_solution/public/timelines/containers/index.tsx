@@ -41,7 +41,7 @@ import { TimelineId } from '../../../common/types/timeline';
 import { useRouteSpy } from '../../common/utils/route/use_route_spy';
 import { activeTimeline } from './active_timeline_context';
 import type {
-  EqlOptionsSelected,
+  EqlOptions,
   TimelineEqlResponse,
 } from '../../../common/search_strategy/timeline/events/eql';
 import { useTrackHttpRequest } from '../../common/lib/apm/use_track_http_request';
@@ -84,7 +84,7 @@ type TimelineResponse<T extends KueryFilterQueryKind> = T extends 'kuery'
 export interface UseTimelineEventsProps {
   dataViewId: string | null;
   endDate?: string;
-  eqlOptions?: EqlOptionsSelected;
+  eqlOptions?: EqlOptions;
   fields: string[];
   filterQuery?: ESQuery | string;
   id: string;
@@ -112,7 +112,7 @@ export const initSortDefault: TimelineRequestSortField[] = [
   },
 ];
 
-const deStructureEqlOptions = (eqlOptions?: EqlOptionsSelected) => ({
+const deStructureEqlOptions = (eqlOptions?: EqlOptions) => ({
   ...(!isEmpty(eqlOptions?.eventCategoryField)
     ? {
         eventCategoryField: eqlOptions?.eventCategoryField,

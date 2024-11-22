@@ -92,16 +92,16 @@ describe('PerFieldRuleDiffTab', () => {
   });
 
   describe('Undefined values are displayed with empty diffs', () => {
-    test('Displays only an updated field value when changed from undefined', () => {
+    test('Displays only an updated field value when changed from an empty value', () => {
       const mockData: PartialRuleDiff = {
         ...ruleFieldsDiffMock,
         fields: {
-          timestamp_field: {
+          name: {
             ...ruleFieldsDiffBaseFieldsMock,
             base_version: undefined,
-            current_version: undefined,
-            merged_version: 'new timestamp field',
-            target_version: 'new timestamp field',
+            current_version: '',
+            merged_version: 'new name',
+            target_version: 'new name',
           },
         },
       };
@@ -109,19 +109,19 @@ describe('PerFieldRuleDiffTab', () => {
       const diffContent = wrapper.getByTestId('ruleUpgradePerFieldDiffContent').textContent;
 
       // Only the new timestamp field should be displayed
-      expect(diffContent).toEqual('+new timestamp field');
+      expect(diffContent).toEqual('+new name');
     });
 
-    test('Displays only an outdated field value when incoming update is undefined', () => {
+    test('Displays only an outdated field value when incoming update is an empty value', () => {
       const mockData: PartialRuleDiff = {
         ...ruleFieldsDiffMock,
         fields: {
-          timestamp_field: {
+          name: {
             ...ruleFieldsDiffBaseFieldsMock,
-            base_version: 'old timestamp field',
-            current_version: 'old timestamp field',
-            merged_version: undefined,
-            target_version: undefined,
+            base_version: 'old name',
+            current_version: 'old name',
+            merged_version: '',
+            target_version: '',
           },
         },
       };
@@ -129,7 +129,7 @@ describe('PerFieldRuleDiffTab', () => {
       const diffContent = wrapper.getByTestId('ruleUpgradePerFieldDiffContent').textContent;
 
       // Only the old timestamp_field should be displayed
-      expect(diffContent).toEqual('-old timestamp field');
+      expect(diffContent).toEqual('-old name');
     });
   });
 
@@ -143,13 +143,6 @@ describe('PerFieldRuleDiffTab', () => {
           current_version: 'old setup',
           merged_version: 'new setup',
           target_version: 'new setup',
-        },
-        timestamp_field: {
-          ...ruleFieldsDiffBaseFieldsMock,
-          base_version: undefined,
-          current_version: undefined,
-          merged_version: 'new timestamp',
-          target_version: 'new timestamp',
         },
         name: {
           ...ruleFieldsDiffBaseFieldsMock,
@@ -166,11 +159,11 @@ describe('PerFieldRuleDiffTab', () => {
     const sectionLabels = matchedSectionElements.map((element) => element.textContent);
 
     // Schedule doesn't have any fields in the diff and shouldn't be displayed
-    expect(sectionLabels).toEqual(['About', 'Definition', 'Setup guide']);
+    expect(sectionLabels).toEqual(['About', 'Setup guide']);
 
     const matchedFieldElements = wrapper.queryAllByTestId('ruleUpgradePerFieldDiffLabel');
     const fieldLabels = matchedFieldElements.map((element) => element.textContent);
 
-    expect(fieldLabels).toEqual(['Name', 'Timestamp Field', 'Setup']);
+    expect(fieldLabels).toEqual(['Name', 'Setup']);
   });
 });
