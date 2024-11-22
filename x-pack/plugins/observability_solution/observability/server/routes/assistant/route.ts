@@ -12,8 +12,12 @@ import { createObservabilityServerRoute } from '../create_observability_server_r
 const getObservabilityAlertDetailsContextRoute = createObservabilityServerRoute({
   endpoint: 'GET /internal/observability/assistant/alert_details_contextual_insights',
   options: {
-    tags: ['access:observability'],
     access: 'internal',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: ['observability'],
+    },
   },
   params: t.type({
     query: alertDetailsContextRt,
