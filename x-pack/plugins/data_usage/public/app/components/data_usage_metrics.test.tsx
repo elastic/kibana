@@ -268,28 +268,26 @@ describe('DataUsageMetrics', () => {
       ...getBaseMockedDataUsageMetrics,
       isFetched: true,
       data: {
-        metrics: {
-          ingest_rate: [
-            {
-              name: '.ds-1',
-              data: [{ x: new Date(), y: 1000 }],
-            },
-            {
-              name: '.ds-10',
-              data: [{ x: new Date(), y: 1100 }],
-            },
-          ],
-          storage_retained: [
-            {
-              name: '.ds-2',
-              data: [{ x: new Date(), y: 2000 }],
-            },
-            {
-              name: '.ds-20',
-              data: [{ x: new Date(), y: 2100 }],
-            },
-          ],
-        },
+        ingest_rate: [
+          {
+            name: '.ds-1',
+            data: [{ x: new Date(), y: 1000 }],
+          },
+          {
+            name: '.ds-10',
+            data: [{ x: new Date(), y: 1100 }],
+          },
+        ],
+        storage_retained: [
+          {
+            name: '.ds-2',
+            data: [{ x: new Date(), y: 2000 }],
+          },
+          {
+            name: '.ds-20',
+            data: [{ x: new Date(), y: 2100 }],
+          },
+        ],
       },
     });
     const { getByTestId } = render(<DataUsageMetrics data-test-subj={testId} />);

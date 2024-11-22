@@ -91,7 +91,6 @@ export type {
   APMEventESSearchRequest,
   APMLogEventESSearchRequest,
   DocumentSourcesRequest,
-  ApmDataAccessPrivilegesCheck,
   HostNamesRequest,
   GetDocumentTypeParams,
 } from './types';
