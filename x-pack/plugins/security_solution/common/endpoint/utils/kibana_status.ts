@@ -7,7 +7,7 @@
 
 import { KbnClient } from '@kbn/test';
 import type { Client } from '@elastic/elasticsearch';
-import type { StatusResponse } from '@kbn/core-status-common-internal';
+import type { StatusResponse } from '@kbn/core-status-common';
 import { catchAxiosErrorFormatAndThrow } from '../format_axios_error';
 
 export const fetchKibanaStatus = async (kbnClient: KbnClient): Promise<StatusResponse> => {
@@ -15,11 +15,11 @@ export const fetchKibanaStatus = async (kbnClient: KbnClient): Promise<StatusRes
   // client (created by `x-pack/plugins/security_solution/scripts/endpoint/common/stack_services.ts:267`)
   // which could be using an API key (which the core KbnClient does not support)
   return kbnClient
-    .request({
+    .request<StatusResponse>({
       method: 'GET',
       path: '/api/status',
     })
-    .then((response) => response.data as StatusResponse)
+    .then(({ data }) => data)
     .catch(catchAxiosErrorFormatAndThrow);
 };
 /**
