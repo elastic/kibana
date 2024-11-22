@@ -7,17 +7,18 @@
 
 import { ExperimentalFeaturesService } from '../services';
 
-import { useLicense } from './use_license';
+import { licenseService } from './use_license';
 
 export const LICENCE_FOR_MULTIPLE_AGENT_POLICIES = 'enterprise';
 
 export function useMultipleAgentPolicies() {
-  const licenseService = useLicense();
+  return { canUseMultipleAgentPolicies: canUseMultipleAgentPolicies() };
+}
+
+export function canUseMultipleAgentPolicies() {
   const { enableReusableIntegrationPolicies } = ExperimentalFeaturesService.get();
 
   const hasEnterpriseLicence = licenseService.hasAtLeast(LICENCE_FOR_MULTIPLE_AGENT_POLICIES);
 
-  const canUseMultipleAgentPolicies = enableReusableIntegrationPolicies && hasEnterpriseLicence;
-
-  return { canUseMultipleAgentPolicies };
+  return Boolean(enableReusableIntegrationPolicies && hasEnterpriseLicence);
 }
