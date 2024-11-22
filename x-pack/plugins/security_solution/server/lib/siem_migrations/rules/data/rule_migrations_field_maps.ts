@@ -27,7 +27,6 @@ export const ruleMigrationsFieldMap: FieldMap<SchemaFieldMapKeys<Omit<RuleMigrat
   elastic_rule: { type: 'nested', required: false },
   'elastic_rule.title': { type: 'keyword', required: true },
   'elastic_rule.integration_ids': { type: 'keyword', array: true, required: false },
-  'elastic_rule.index_patterns': { type: 'keyword', array: true, required: false },
   'elastic_rule.query': { type: 'text', required: true },
   'elastic_rule.query_language': { type: 'keyword', required: true },
   'elastic_rule.description': { type: 'keyword', required: false },
