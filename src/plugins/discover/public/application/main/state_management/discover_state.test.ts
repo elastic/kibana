@@ -99,10 +99,12 @@ describe('Test discover state', () => {
     state.appState.update({}, true);
     stopSync = startSync(state.appState);
   });
+
   afterEach(() => {
     stopSync();
     stopSync = () => {};
   });
+
   test('setting app state and syncing to URL', async () => {
     state.appState.update({
       dataSource: createDataViewDataSource({ dataViewId: 'modified' }),
@@ -124,6 +126,7 @@ describe('Test discover state', () => {
       }
     `);
   });
+
   test('URL navigation to url without _a, state should not change', async () => {
     history.push('/#?_a=(dataSource:(dataViewId:modified,type:dataView))');
     history.push('/');
@@ -241,6 +244,7 @@ describe('Test discover initial state sort handling', () => {
     expect(state.appState.getState().sort).toEqual([['timestamp', 'desc']]);
     unsubscribe();
   });
+
   test('Empty URL should use saved search sort for state', async () => {
     const nextSavedSearch = { ...savedSearchMock, ...{ sort: [['bytes', 'desc']] as SortOrder[] } };
     const { state } = await getState('/', { savedSearch: nextSavedSearch });
@@ -436,10 +440,12 @@ describe('Test discover state actions', () => {
     expect(dataState.data$.totalHits$.value.result).toBe(0);
     expect(dataState.data$.documents$.value.result).toEqual([]);
   });
+
   test('loadDataViewList', async () => {
     const { state } = await getState('');
     expect(state.internalState.getState().savedDataViews.length).toBe(3);
   });
+
   test('loadSavedSearch with no id given an empty URL', async () => {
     const { state, getCurrentUrl } = await getState('');
     await state.actions.loadDataViewList();
@@ -486,6 +492,7 @@ describe('Test discover state actions', () => {
     expect(state.savedSearchState.getHasChanged$().getValue()).toBe(false);
     unsubscribe();
   });
+
   test('loadNewSavedSearch with URL changing interval state', async () => {
     const { state, getCurrentUrl } = await getState(
       '/#?_a=(interval:month,columns:!(bytes))&_g=()',
@@ -501,6 +508,7 @@ describe('Test discover state actions', () => {
     expect(state.savedSearchState.getHasChanged$().getValue()).toBe(true);
     unsubscribe();
   });
+
   test('loadSavedSearch with no id, given URL changes state', async () => {
     const { state, getCurrentUrl } = await getState(
       '/#?_a=(interval:month,columns:!(bytes))&_g=()',
@@ -516,6 +524,7 @@ describe('Test discover state actions', () => {
     expect(state.savedSearchState.getHasChanged$().getValue()).toBe(true);
     unsubscribe();
   });
+
   test('loadSavedSearch given an empty URL, no state changes', async () => {
     const { state, getCurrentUrl } = await getState('/', { savedSearch: savedSearchMock });
     const newSavedSearch = await state.actions.loadSavedSearch({
@@ -530,6 +539,7 @@ describe('Test discover state actions', () => {
     expect(state.savedSearchState.getHasChanged$().getValue()).toBe(false);
     unsubscribe();
   });
+
   test('loadSavedSearch given a URL with different interval and columns modifying the state', async () => {
     const url = '/#?_a=(interval:month,columns:!(message))&_g=()';
     const { state, getCurrentUrl } = await getState(url, {
@@ -683,6 +693,7 @@ describe('Test discover state actions', () => {
     );
     expect(state.savedSearchState.getHasChanged$().getValue()).toBe(true);
   });
+
   test('loadSavedSearch generating a new saved search, updated by ad-hoc data view', async () => {
     const { state } = await getState('/');
     const dataViewSpecMock = {
@@ -810,6 +821,7 @@ describe('Test discover state actions', () => {
     expect(getCurrentUrl()).toContain(dataViewComplexMock.id);
     unsubscribe();
   });
+
   test('onDataViewCreated - persisted data view', async () => {
     const { state } = await getState('/', { savedSearch: savedSearchMock });
     await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
@@ -826,6 +838,7 @@ describe('Test discover state actions', () => {
     );
     unsubscribe();
   });
+
   test('onDataViewCreated - ad-hoc data view', async () => {
     const { state } = await getState('/', { savedSearch: savedSearchMock });
     await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
@@ -842,6 +855,7 @@ describe('Test discover state actions', () => {
     );
     unsubscribe();
   });
+
   test('onDataViewEdited - persisted data view', async () => {
     const { state } = await getState('/', { savedSearch: savedSearchMock });
     await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
@@ -857,6 +871,7 @@ describe('Test discover state actions', () => {
     });
     unsubscribe();
   });
+
   test('onDataViewEdited - ad-hoc data view', async () => {
     const { state } = await getState('/', { savedSearch: savedSearchMock });
     const unsubscribe = state.actions.initializeAndSync();
@@ -903,6 +918,7 @@ describe('Test discover state actions', () => {
     expect(state.internalState.getState().adHocDataViews[0].id).toBe('ad-hoc-id');
     unsubscribe();
   });
+
   test('undoSavedSearchChanges - when changing data views', async () => {
     const { state, getCurrentUrl } = await getState('/', { savedSearch: savedSearchMock });
     // Load a given persisted saved search
