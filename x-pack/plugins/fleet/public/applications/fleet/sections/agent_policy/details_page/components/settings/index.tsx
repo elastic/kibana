@@ -40,12 +40,11 @@ import { DevtoolsRequestFlyoutButton } from '../../../../../components';
 import { ExperimentalFeaturesService } from '../../../../../services';
 import { generateUpdateAgentPolicyDevToolsRequest } from '../../../services';
 
-const pickAgentPolicyKeysToSend = (agentPolicy: AgentPolicy) =>
-  pick(agentPolicy, [
+const pickAgentPolicyKeysToSend = (agentPolicy: AgentPolicy) => {
+  const partialPolicy = pick(agentPolicy, [
     'name',
     'description',
     'namespace',
-    'space_ids',
     'monitoring_enabled',
     'unenroll_timeout',
     'inactivity_timeout',
@@ -61,6 +60,13 @@ const pickAgentPolicyKeysToSend = (agentPolicy: AgentPolicy) =>
     'monitoring_http',
     'monitoring_diagnostics',
   ]);
+  return {
+    ...partialPolicy,
+    ...(!agentPolicy.space_ids?.includes('?') && {
+      space_ids: agentPolicy.space_ids,
+    }),
+  };
+};
 
 const FormWrapper = styled.div`
   max-width: 1200px;

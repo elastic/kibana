@@ -127,8 +127,10 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   const isManagedorAgentlessPolicy =
     agentPolicy.is_managed === true || agentPolicy?.supports_agentless === true;
 
-  const userHasAccessToAllPolicySpaces =
-    'space_ids' in agentPolicy && !agentPolicy.space_ids?.includes('?');
+  const userHasAccessToAllPolicySpaces = useMemo(
+    () => 'space_ids' in agentPolicy && !agentPolicy.space_ids?.includes('?'),
+    [agentPolicy]
+  );
 
   const agentPolicyFormContext = useAgentPolicyFormContext();
 
