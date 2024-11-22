@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { resolve, join } from 'path';
+import { join } from 'path';
 import { format as formatUrl } from 'url';
 
 import {
@@ -26,6 +26,7 @@ import { dockerImage } from '@kbn/test-suites-xpack/fleet_api_integration/config
 import { REPO_ROOT } from '@kbn/repo-info';
 import { STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
 import type { ScoutLoaderConfig } from '../../types';
+import { SAML_IDP_PLUGIN_PATH, STATEFUL_IDP_METADATA_PATH } from '../constants';
 
 const packageRegistryConfig = join(__dirname, './package_registry_config.yml');
 const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
@@ -37,16 +38,6 @@ const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/
  * if this is defined it takes precedence over the `packageRegistryOverride` variable
  */
 const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
-
-// "Fake" SAML provider
-const idpPath = resolve(
-  __dirname,
-  '../../../../../x-pack/test/security_api_integration/plugins/saml_provider/metadata.xml'
-);
-const samlIdPPlugin = resolve(
-  __dirname,
-  '../../../../../x-pack/test/security_api_integration/plugins/saml_provider'
-);
 
 // if config is executed on CI or locally
 const isRunOnCI = process.env.CI;
@@ -97,7 +88,7 @@ export const defaultConfig: ScoutLoaderConfig = {
       'xpack.security.authc.api_key.enabled=true',
       'xpack.security.authc.token.enabled=true',
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.order=0`,
-      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.metadata.path=${idpPath}`,
+      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.metadata.path=${STATEFUL_IDP_METADATA_PATH}`,
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.entity_id=${MOCK_IDP_ENTITY_ID}`,
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.entity_id=${kbnUrl}`,
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.acs=${kbnUrl}/api/security/saml/callback`,
@@ -195,7 +186,7 @@ export const defaultConfig: ScoutLoaderConfig = {
       ...(isRunOnCI ? [] : ['--mock_idp_plugin.enabled=true']),
       // This ensures that we register the Security SAML API endpoints.
       // In the real world the SAML config is injected by control plane.
-      `--plugin-path=${samlIdPPlugin}`,
+      `--plugin-path=${SAML_IDP_PLUGIN_PATH}`,
       '--xpack.cloud.id=ftr_fake_cloud_id',
       // Ensure that SAML is used as the default authentication method whenever a user navigates to Kibana. In other
       // words, Kibana should attempt to authenticate the user using the provider with the lowest order if the Login

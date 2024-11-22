@@ -18,6 +18,7 @@ import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
 import { dockerImage } from '@kbn/test-suites-xpack/fleet_api_integration/config.base';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ScoutLoaderConfig } from '../../types';
+import { SAML_IDP_PLUGIN_PATH, SERVERLESS_IDP_METADATA_PATH, JWKS_PATH } from '../constants';
 
 const packageRegistryConfig = join(__dirname, './package_registry_config.yml');
 const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
@@ -29,18 +30,6 @@ const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/
  * if this is defined it takes precedence over the `packageRegistryOverride` variable
  */
 const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
-
-// "Fake" SAML provider
-const idpPath = resolve(
-  __dirname,
-  '../../../../../x-pack/test/security_api_integration/plugins/saml_provider/metadata.xml'
-);
-const samlIdPPlugin = resolve(
-  __dirname,
-  '../../../../../x-pack/test/security_api_integration/plugins/saml_provider'
-);
-
-const jwksPath = require.resolve('@kbn/security-api-integration-helpers/oidc/jwks.json');
 
 const servers = {
   elasticsearch: {
@@ -76,7 +65,7 @@ export const defaultConfig: ScoutLoaderConfig = {
   }),
   esTestCluster: {
     from: 'serverless',
-    files: [idpPath, jwksPath],
+    files: [SERVERLESS_IDP_METADATA_PATH, JWKS_PATH],
     serverArgs: [
       'xpack.security.authc.realms.file.file1.order=-100',
       `xpack.security.authc.realms.native.native1.enabled=false`,
@@ -89,7 +78,7 @@ export const defaultConfig: ScoutLoaderConfig = {
       `xpack.security.authc.realms.jwt.jwt1.claims.principal=sub`,
       'xpack.security.authc.realms.jwt.jwt1.client_authentication.type=shared_secret',
       'xpack.security.authc.realms.jwt.jwt1.order=-98',
-      `xpack.security.authc.realms.jwt.jwt1.pkc_jwkset_path=${getDockerFileMountPath(jwksPath)}`,
+      `xpack.security.authc.realms.jwt.jwt1.pkc_jwkset_path=${getDockerFileMountPath(JWKS_PATH)}`,
       `xpack.security.authc.realms.jwt.jwt1.token_type=access_token`,
     ],
     ssl: true, // SSL is required for SAML realm
@@ -146,7 +135,7 @@ export const defaultConfig: ScoutLoaderConfig = {
       })}`,
       // This ensures that we register the Security SAML API endpoints.
       // In the real world the SAML config is injected by control plane.
-      `--plugin-path=${samlIdPPlugin}`,
+      `--plugin-path=${SAML_IDP_PLUGIN_PATH}`,
       '--xpack.cloud.id=ftr_fake_cloud_id',
       // Ensure that SAML is used as the default authentication method whenever a user navigates to Kibana. In other
       // words, Kibana should attempt to authenticate the user using the provider with the lowest order if the Login
