@@ -7,6 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ESQL_QUERY_VALIDATION_REQUIRED = i18n.translate(
+  'xpack.securitySolution.ruleManagement.esqlValidation.requiredError',
+  {
+    defaultMessage: 'An ES|QL query is required.',
+  }
+);
+
 export const ESQL_VALIDATION_UNKNOWN_ERROR = i18n.translate(
   'xpack.securitySolution.ruleManagement.esqlValidation.unknownError',
   {
