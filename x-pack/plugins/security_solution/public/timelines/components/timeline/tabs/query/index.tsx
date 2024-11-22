@@ -168,7 +168,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
 
   const [
     dataLoadingState,
-    { events, inspect, totalCount, pageInfo, loadPage, refreshedAt, refetch },
+    { events, inspect, totalCount, loadPage: loadNextEventBatch, refreshedAt, refetch },
   ] = useTimelineEvents({
     dataViewId,
     endDate: end,
@@ -187,7 +187,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     pageSize: itemsPerPage,
   });
 
-  const { onLoad } = useFetchNotes();
+  const { onLoad: loadNotesOnEventsLoad } = useFetchNotes();
 
   useEffect(() => {
     const eventsOnCurrentPage = events.slice(
@@ -195,8 +195,8 @@ export const QueryTabContentComponent: React.FC<Props> = ({
       itemsPerPage * (pageIndex + 1)
     );
 
-    onLoad(eventsOnCurrentPage);
-  }, [events, pageIndex, itemsPerPage, onLoad]);
+    loadNotesOnEventsLoad(eventsOnCurrentPage);
+  }, [events, pageIndex, itemsPerPage, loadNotesOnEventsLoad]);
 
   const { openFlyout } = useExpandableFlyoutApi();
   const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
@@ -369,7 +369,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         dataLoadingState={dataLoadingState}
         totalCount={isBlankTimeline ? 0 : totalCount}
         leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
-        onChangePage={loadPage}
+        onFetchMoreRecords={loadNextEventBatch}
         activeTab={activeTab}
         updatedAt={refreshedAt}
         isTextBasedQuery={false}

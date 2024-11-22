@@ -33,7 +33,7 @@ import type { TimelineItem } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../../common/lib/kibana';
 import type {
   ColumnHeaderOptions,
-  OnChangePage,
+  OnFetchMoreRecords,
   RowRenderer,
   SortColumnTimeline,
   TimelineTabs,
@@ -106,7 +106,7 @@ interface Props {
   events: TimelineItem[];
   refetch: inputsModel.Refetch;
   totalCount: number;
-  onChangePage: OnChangePage;
+  onFetchMoreRecords: OnFetchMoreRecords;
   activeTab: TimelineTabs;
   dataLoadingState: DataLoadingState;
   updatedAt: number;
@@ -129,7 +129,7 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   refetch,
   dataLoadingState,
   totalCount,
-  onChangePage,
+  onFetchMoreRecords,
   updatedAt,
   isTextBasedQuery,
   dataView,
@@ -435,7 +435,7 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
                       onFieldEdited={onFieldEdited}
                       dataLoadingState={dataLoadingState}
                       totalCount={totalCount}
-                      onChangePage={onChangePage}
+                      onFetchMoreRecords={onFetchMoreRecords}
                       activeTab={activeTab}
                       updatedAt={updatedAt}
                       isTextBasedQuery={isTextBasedQuery}

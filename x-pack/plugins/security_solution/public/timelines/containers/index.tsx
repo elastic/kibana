@@ -51,6 +51,16 @@ export interface TimelineArgs {
   events: TimelineItem[];
   id: string;
   inspect: InspectResponse;
+
+  /**
+   * `loadPage` loads the next page/batch of records.
+   * This is different from the data grid pages. Data grid pagination is only
+   * client side and changing data grid pages does not impact this function.
+   *
+   * When user manually requests next batch of records, then a next batch is fetched
+   * irrespective of where user is in Data grid pagination.
+   *
+   */
   loadPage: LoadPage;
   pageInfo: Pick<PaginationInputPaginated, 'activePage' | 'querySize'>;
   refetch: inputsModel.Refetch;
@@ -175,6 +185,15 @@ export const useTimelineEventsHandler = ({
     }
   }, [dispatch, id]);
 
+  /**
+   * `wrappedLoadPage` loads the next page/batch of records.
+   * This is different from the data grid pages. Data grid pagination is only
+   * client side and changing data grid pages does not impact this function.
+   *
+   * When user manually requests next batch of records, then a next batch is fetched
+   * irrespective of where user is in Data grid pagination.
+   *
+   */
   const wrappedLoadPage = useCallback(
     (newActivePage: number) => {
       clearSignalsState();

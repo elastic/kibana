@@ -107,7 +107,7 @@ const TestComponent = (
     events: localMockedTimelineData,
     refetch: jest.fn(),
     totalCount: localMockedTimelineData.length,
-    onChangePage: jest.fn(),
+    onFetchMoreRecords: jest.fn(),
     dataLoadingState: DataLoadingState.loaded,
     updatedAt: Date.now(),
     isTextBasedQuery: false,
