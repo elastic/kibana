@@ -10,14 +10,14 @@ import { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
 import { useFetchDataViews } from '@kbn/observability-plugin/public';
 import { useKibana } from '../../../../../hooks/use_kibana';
 
-export const getDataViewPattern = ({
+export const getDataViewPatternOrId = ({
   byId,
-  byPatten,
+  byPattern,
   dataViewsList,
   adHocDataViews,
 }: {
   byId?: string;
-  byPatten?: string;
+  byPattern?: string;
   dataViewsList: DataViewListItem[];
   adHocDataViews: DataView[];
 }) => {
@@ -28,20 +28,24 @@ export const getDataViewPattern = ({
   if (byId) {
     return allDataViews.find((dv) => dv.id === byId)?.title;
   }
-  if (byPatten) {
-    return allDataViews.find((dv) => dv.title === byPatten)?.id;
+  if (byPattern) {
+    return allDataViews.find((dv) => dv.title === byPattern)?.id;
   }
 };
 
 export const useAdhocDataViews = ({ currentIndexPattern }: { currentIndexPattern: string }) => {
-  const { isLoading: isDataViewsLoading, data: dataViewsList = [], refetch } = useFetchDataViews();
+  const {
+    isLoading: isDataViewsLoading,
+    data: dataViewsList = [],
+    refetch: refetchDataViewsList,
+  } = useFetchDataViews();
   const { dataViews: dataViewsService } = useKibana().services;
   const [adHocDataViews, setAdHocDataViews] = useState<DataView[]>([]);
 
   useEffect(() => {
     if (!isDataViewsLoading) {
-      const missingDataView = getDataViewPattern({
-        byPatten: currentIndexPattern,
+      const missingDataView = getDataViewPatternOrId({
+        byPattern: currentIndexPattern,
         dataViewsList,
         adHocDataViews,
       });
@@ -70,6 +74,6 @@ export const useAdhocDataViews = ({ currentIndexPattern }: { currentIndexPattern
     setAdHocDataViews,
     dataViewsList,
     isDataViewsLoading,
-    refetch,
+    refetchDataViewsList,
   };
 };

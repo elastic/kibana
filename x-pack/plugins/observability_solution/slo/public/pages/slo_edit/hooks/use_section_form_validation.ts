@@ -223,7 +223,7 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
       'settings.syncDelay',
       'settings.frequency',
     ] as const
-  ).every((field) => getFieldState(field).error === undefined);
+  ).every((field) => !getFieldState(field).invalid);
 
   const isDescriptionSectionValid =
     !getFieldState('name').invalid &&

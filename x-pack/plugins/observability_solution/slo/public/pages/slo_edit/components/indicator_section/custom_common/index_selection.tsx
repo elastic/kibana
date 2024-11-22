@@ -8,19 +8,22 @@
 import { EuiFormRow } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { ALL_VALUE } from '@kbn/slo-schema';
+import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import React, { useEffect } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { DataViewPicker } from '@kbn/unified-search-plugin/public';
-import { getDataViewPattern, useAdhocDataViews } from './use_adhoc_data_views';
 import { SLOPublicPluginsStart } from '../../../../..';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { CreateSLOForm } from '../../../types';
+import { getDataViewPatternOrId, useAdhocDataViews } from './use_adhoc_data_views';
 
 const BTN_MAX_WIDTH = 515;
 
 export const DATA_VIEW_FIELD = 'indicator.params.dataViewId';
 const INDEX_FIELD = 'indicator.params.index';
-const TIMESTAMP_FIELD = 'indicator.params.timestampField';
+const INDICATOR_TIMESTAMP_FIELD = 'indicator.params.timestampField';
+const GROUP_BY_FIELD = 'groupBy';
+const SETTINGS_SYNC_FIELD = 'settings.syncField';
 
 export function IndexSelection({ selectedDataView }: { selectedDataView?: DataView }) {
   const { control, getFieldState, setValue, watch } = useFormContext<CreateSLOForm>();
@@ -33,14 +36,19 @@ export function IndexSelection({ selectedDataView }: { selectedDataView?: DataVi
   const currentIndexPattern = watch(INDEX_FIELD);
   const currentDataViewId = watch(DATA_VIEW_FIELD);
 
-  const { dataViewsList, isDataViewsLoading, adHocDataViews, setAdHocDataViews, refetch } =
-    useAdhocDataViews({
-      currentIndexPattern,
-    });
+  const {
+    dataViewsList,
+    isDataViewsLoading,
+    adHocDataViews,
+    setAdHocDataViews,
+    refetchDataViewsList,
+  } = useAdhocDataViews({
+    currentIndexPattern,
+  });
 
   useEffect(() => {
-    const indPatternId = getDataViewPattern({
-      byPatten: currentIndexPattern,
+    const indPatternId = getDataViewPatternOrId({
+      byPattern: currentIndexPattern,
       dataViewsList,
       adHocDataViews,
     });
@@ -56,13 +64,20 @@ export function IndexSelection({ selectedDataView }: { selectedDataView?: DataVi
     setValue,
   ]);
 
+  const updateDataViewDependantFields = (indexPattern?: string, timestampField?: string) => {
+    setValue(INDEX_FIELD, indexPattern ?? '');
+    setValue(INDICATOR_TIMESTAMP_FIELD, timestampField ?? '');
+    setValue(GROUP_BY_FIELD, ALL_VALUE);
+    setValue(SETTINGS_SYNC_FIELD, null);
+  };
+
   return (
     <EuiFormRow label={INDEX_LABEL} isInvalid={getFieldState(INDEX_FIELD).invalid} fullWidth>
       <Controller
         defaultValue=""
         name={DATA_VIEW_FIELD}
         control={control}
-        rules={{ required: !Boolean(currentIndexPattern) }}
+        rules={{ required: true }}
         render={({ field, fieldState }) => (
           <DataViewPicker
             adHocDataViews={adHocDataViews}
@@ -74,15 +89,13 @@ export function IndexSelection({ selectedDataView }: { selectedDataView?: DataVi
               style: { width: '100%', maxWidth: BTN_MAX_WIDTH },
             }}
             onChangeDataView={(newId: string) => {
-              setValue(
-                INDEX_FIELD,
-                getDataViewPattern({ byId: newId, adHocDataViews, dataViewsList })!
-              );
               field.onChange(newId);
+
               dataViewsService.get(newId).then((dataView) => {
-                if (dataView.timeFieldName) {
-                  setValue(TIMESTAMP_FIELD, dataView.timeFieldName);
-                }
+                updateDataViewDependantFields(
+                  getDataViewPatternOrId({ byId: newId, adHocDataViews, dataViewsList })!,
+                  dataView.timeFieldName
+                );
               });
             }}
             onAddField={
@@ -99,8 +112,8 @@ export function IndexSelection({ selectedDataView }: { selectedDataView?: DataVi
             }
             currentDataViewId={
               field.value ??
-              getDataViewPattern({
-                byPatten: currentIndexPattern,
+              getDataViewPatternOrId({
+                byPattern: currentIndexPattern,
                 dataViewsList,
                 adHocDataViews,
               })
@@ -110,17 +123,13 @@ export function IndexSelection({ selectedDataView }: { selectedDataView?: DataVi
                 allowAdHocDataView: true,
                 onSave: (dataView: DataView) => {
                   if (!dataView.isPersisted()) {
-                    setAdHocDataViews([...adHocDataViews, dataView]);
-                    field.onChange(dataView.id);
-                    setValue(INDEX_FIELD, dataView.getIndexPattern());
+                    setAdHocDataViews((prev) => [...prev, dataView]);
                   } else {
-                    refetch();
-                    field.onChange(dataView.id);
-                    setValue(INDEX_FIELD, dataView.getIndexPattern());
+                    refetchDataViewsList();
                   }
-                  if (dataView.timeFieldName) {
-                    setValue(TIMESTAMP_FIELD, dataView.timeFieldName);
-                  }
+
+                  field.onChange(dataView.id);
+                  updateDataViewDependantFields(dataView.getIndexPattern(), dataView.timeFieldName);
                 },
               });
             }}
