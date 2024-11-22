@@ -95,7 +95,10 @@
     "@storybook/react-docgen-typescript-plugin": "1.0.6--canary.9.cd77847.0",
     "@types/react": "~18.2.0",
     "@types/react-dom": "~18.2.0",
+    "@wojtekmaj/enzyme-adapter-react-17/cheerio": "=1.0.0-rc.3",
     "@xstate5/react/**/xstate": "^5.18.1",
+    "enzyme-to-json/cheerio": "=1.0.0-rc.3",
+    "enzyme/cheerio": "=1.0.0-rc.3",
     "globby/fast-glob": "^3.2.11"
   },
   "dependencies": {
@@ -1666,7 +1669,7 @@
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
     "@typescript-eslint/typescript-estree": "^5.62.0",
-    "@wojtekmaj/enzyme-adapter-react-17": "^0.6.7",
+    "@wojtekmaj/enzyme-adapter-react-17": "^0.8.0",
     "@yarnpkg/lockfile": "^1.1.0",
     "aggregate-error": "^3.1.0",
     "argsplit": "^1.0.5",
