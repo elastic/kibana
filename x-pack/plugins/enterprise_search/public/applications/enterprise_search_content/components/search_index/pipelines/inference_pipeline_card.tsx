@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { ReactNode, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -38,6 +38,10 @@ import { TrainedModelHealth } from './ml_model_health';
 import { MLModelTypeBadge } from './ml_model_type_badge';
 import { PipelinesLogic } from './pipelines_logic';
 
+export interface WrapperButtonProps {
+  children: ReactNode;
+}
+
 export const TrainedModelHealthPopover: React.FC<InferencePipeline> = (pipeline) => {
   const { http } = useValues(HttpLogic);
   const { indexName } = useValues(IndexNameLogic);
@@ -50,21 +54,23 @@ export const TrainedModelHealthPopover: React.FC<InferencePipeline> = (pipeline)
 
   const { pipelineName } = pipeline;
 
-  const wrapperButton = (
+  const WrapperButton: React.FC<WrapperButtonProps> = ({ children }) => (
     <EuiButtonEmpty
       data-test-subj="enterpriseSearchTrainedModelHealthPopoverButton"
       iconSide="right"
       flush="both"
       iconType="boxesHorizontal"
       onClick={() => setIsPopOverOpen(!isPopOverOpen)}
-    />
+    >
+      {children}
+    </EuiButtonEmpty>
   );
 
   const actionButton = (
     <TrainedModelHealth
       modelState={pipeline.modelState}
       modelStateReason={pipeline.modelStateReason}
-      wrapperElement={wrapperButton}
+      WrapperElement={WrapperButton}
     />
   );
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ReactElement } from 'react';
+import React from 'react';
 
 import { EuiHealth, EuiToolTip } from '@elastic/eui';
 
@@ -14,6 +14,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { MlModelDeploymentState } from '../../../../../../common/types/ml';
 import { TrainedModelState } from '../../../../../../common/types/pipelines';
+
+import { WrapperButtonProps } from './inference_pipeline_card';
 
 const modelNotDownloadedText = i18n.translate(
   'xpack.enterpriseSearch.inferencePipelineCard.modelState.notDownloaded',
@@ -113,14 +115,14 @@ export interface TrainedModelHealthProps {
   modelState: TrainedModelState | MlModelDeploymentState;
   modelStateReason?: string;
   isDownloadable?: boolean;
-  wrapperElement?: ReactElement<unknown>;
+  WrapperElement?: React.FC<WrapperButtonProps>;
 }
 
 export const TrainedModelHealth: React.FC<TrainedModelHealthProps> = ({
   modelState,
   modelStateReason,
   isDownloadable,
-  wrapperElement,
+  WrapperElement,
 }) => {
   let modelHealth: {
     healthColor: string;
@@ -209,12 +211,10 @@ export const TrainedModelHealth: React.FC<TrainedModelHealthProps> = ({
   }
   return (
     <EuiToolTip content={modelHealth.tooltipText}>
-      {wrapperElement ? (
-        React.cloneElement(
-          wrapperElement,
-          {},
+      {WrapperElement ? (
+        <WrapperElement>
           <EuiHealth color={modelHealth.healthColor}>{modelHealth.healthText}</EuiHealth>
-        )
+        </WrapperElement>
       ) : (
         <EuiHealth color={modelHealth.healthColor}>{modelHealth.healthText}</EuiHealth>
       )}
