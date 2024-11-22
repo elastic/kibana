@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { EuiThemeProvider } from '@elastic/eui';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import crypto from 'crypto';
 import React from 'react';
@@ -19,7 +20,7 @@ import {
   themeServiceMock,
 } from '@kbn/core/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import type { Role } from '@kbn/security-plugin-types-common';
+import type { Role, SecurityLicense } from '@kbn/security-plugin-types-common';
 import {
   createRawKibanaPrivileges,
   kibanaFeatures,
@@ -33,11 +34,8 @@ import {
   FEATURE_PRIVILEGES_READ,
 } from '../../../../../common/constants';
 import { spacesManagerMock } from '../../../../spaces_manager/spaces_manager.mock';
-import {
-  createPrivilegeAPIClientMock,
-  getPrivilegeAPIClientMock,
-} from '../../../privilege_api_client.mock';
-import { createRolesAPIClientMock, getRolesAPIClientMock } from '../../../roles_api_client.mock';
+import { createPrivilegeAPIClientMock } from '../../../privilege_api_client.mock';
+import { createRolesAPIClientMock } from '../../../roles_api_client.mock';
 import { EditSpaceProvider } from '../../provider';
 
 const rolesAPIClient = createRolesAPIClientMock();
@@ -74,6 +72,9 @@ const spacesClientsInvocatorMock = jest.fn((fn) =>
 const dispatchMock = jest.fn();
 const onSaveCompleted = jest.fn();
 const closeFlyout = jest.fn();
+const licenseMock = {
+  getFeatures: jest.fn(() => ({})),
+} as unknown as SecurityLicense;
 
 const renderPrivilegeRolesForm = ({
   preSelectedRoles,
@@ -81,43 +82,48 @@ const renderPrivilegeRolesForm = ({
   preSelectedRoles?: Role[];
 } = {}) => {
   return render(
-    <IntlProvider locale="en">
-      <EditSpaceProvider
-        {...{
-          logger,
-          i18n,
-          http,
-          theme,
-          overlays,
-          notifications,
-          spacesManager,
-          serverBasePath: '',
-          getUrlForApp: jest.fn((_) => _),
-          getRolesAPIClient: getRolesAPIClientMock,
-          getPrivilegesAPIClient: getPrivilegeAPIClientMock,
-          navigateToUrl: jest.fn(),
-          capabilities: {
-            navLinks: {},
-            management: {},
-            catalogue: {},
-            spaces: { manage: true },
-          },
-        }}
-      >
-        <PrivilegesRolesForm
+    <EuiThemeProvider>
+      <IntlProvider locale="en">
+        <EditSpaceProvider
           {...{
-            space,
-            features: kibanaFeatures,
-            closeFlyout,
-            defaultSelected: preSelectedRoles,
-            onSaveCompleted,
-            storeDispatch: dispatchMock,
-            spacesClientsInvocator: spacesClientsInvocatorMock,
+            logger,
+            i18n,
+            http,
+            theme,
+            overlays,
+            notifications,
+            spacesManager,
+            serverBasePath: '',
             getUrlForApp: jest.fn((_) => _),
+            navigateToUrl: jest.fn(),
+            license: licenseMock,
+            isRoleManagementEnabled: true,
+            capabilities: {
+              navLinks: {},
+              management: {},
+              catalogue: {},
+              spaces: { manage: true },
+            },
+            dispatch: dispatchMock,
+            state: {
+              roles: new Map(),
+              fetchRolesError: false,
+            },
+            invokeClient: spacesClientsInvocatorMock,
           }}
-        />
-      </EditSpaceProvider>
-    </IntlProvider>
+        >
+          <PrivilegesRolesForm
+            {...{
+              space,
+              features: kibanaFeatures,
+              closeFlyout,
+              defaultSelected: preSelectedRoles,
+              onSaveCompleted,
+            }}
+          />
+        </EditSpaceProvider>
+      </IntlProvider>
+    </EuiThemeProvider>
   );
 };
 
@@ -134,6 +140,15 @@ describe('PrivilegesRolesForm', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  it("would open the 'manage roles' link in a new tab", () => {
+    getRolesSpy.mockResolvedValue([]);
+    getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
+
+    renderPrivilegeRolesForm();
+
+    expect(screen.getByText('Manage roles')).toHaveAttribute('target', '_blank');
   });
 
   it('does not display the privilege selection buttons or customization form when no role is selected', async () => {
@@ -162,6 +177,23 @@ describe('PrivilegesRolesForm', () => {
     await waitFor(() => null);
 
     expect(screen.getByTestId('space-assign-role-create-roles-privilege-button')).toBeDisabled();
+  });
+
+  it('makes a request to refetch available roles if page transitions back from a user interaction page visibility change', () => {
+    getRolesSpy.mockResolvedValue([]);
+    getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
+
+    renderPrivilegeRolesForm();
+
+    expect(getRolesSpy).toHaveBeenCalledTimes(1);
+
+    // trigger click on manage roles link, which is perquisite for page visibility handler to trigger role refetch
+    fireEvent.click(screen.getByText(/manage roles/i));
+
+    // trigger page visibility change
+    fireEvent(document, new Event('visibilitychange'));
+
+    expect(getRolesSpy).toHaveBeenCalledTimes(2);
   });
 
   it('renders with the assign roles button disabled when no base privileges or feature privileges are selected', async () => {
@@ -358,11 +390,11 @@ describe('PrivilegesRolesForm', () => {
         preSelectedRoles: roles,
       });
 
-      await waitFor(() => null);
-
-      expect(screen.getByTestId(`${FEATURE_PRIVILEGES_READ}-privilege-button`)).toHaveAttribute(
-        'aria-pressed',
-        String(true)
+      await waitFor(() =>
+        expect(screen.getByTestId(`${FEATURE_PRIVILEGES_READ}-privilege-button`)).toHaveAttribute(
+          'aria-pressed',
+          String(true)
+        )
       );
 
       await user.click(screen.getByTestId('custom-privilege-button'));
@@ -407,6 +439,117 @@ describe('PrivilegesRolesForm', () => {
         'aria-pressed',
         String(true)
       );
+    });
+
+    it('prevents customization up to sub privilege level by default', async () => {
+      const user = userEvent.setup();
+
+      const roles: Role[] = [
+        createRole('test_role_1', [
+          { base: [FEATURE_PRIVILEGES_READ], feature: {}, spaces: [space.id] },
+        ]),
+      ];
+
+      getRolesSpy.mockResolvedValue([]);
+      getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
+
+      const featuresWithSubFeatures = kibanaFeatures.filter((kibanaFeature) =>
+        Boolean(kibanaFeature.subFeatures.length)
+      );
+
+      renderPrivilegeRolesForm({
+        preSelectedRoles: roles,
+      });
+
+      await user.click(screen.getByTestId('custom-privilege-button'));
+
+      expect(
+        screen.getByTestId('space-assign-role-privilege-customization-form')
+      ).toBeInTheDocument();
+
+      const featureUT = featuresWithSubFeatures[0];
+
+      // change a single feature with sub features to read from default privilege "none"
+      await user.click(screen.getByTestId(`${featureUT.id}_${FEATURE_PRIVILEGES_READ}`));
+
+      // click on the accordion toggle to show sub features
+      await user.click(
+        screen.getByTestId(
+          `featurePrivilegeControls_${featureUT.category.id}_${featureUT.id}_accordionToggle`
+        )
+      );
+
+      // sub feature table renders
+      expect(
+        screen.getByTestId(`${featureUT.category.id}_${featureUT.id}_subFeaturesTable`)
+      ).toBeInTheDocument();
+
+      // assert switch to customize sub feature can toggled
+      expect(
+        within(
+          screen.getByTestId(
+            `${featureUT.category.id}_${featureUT.id}_customizeSubFeaturesSwitchContainer`
+          )
+        ).getByTestId('customizeSubFeaturePrivileges')
+      ).toBeDisabled();
+    });
+
+    it('supports customization up to sub privilege level only when security license allows', async () => {
+      const user = userEvent.setup();
+
+      const roles: Role[] = [
+        createRole('test_role_1', [
+          { base: [FEATURE_PRIVILEGES_READ], feature: {}, spaces: [space.id] },
+        ]),
+      ];
+
+      // enable sub feature privileges
+      (licenseMock.getFeatures as jest.Mock).mockReturnValue({
+        allowSubFeaturePrivileges: true,
+      });
+
+      getRolesSpy.mockResolvedValue([]);
+      getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
+
+      const featuresWithSubFeatures = kibanaFeatures.filter((kibanaFeature) =>
+        Boolean(kibanaFeature.subFeatures.length)
+      );
+
+      renderPrivilegeRolesForm({
+        preSelectedRoles: roles,
+      });
+
+      await user.click(screen.getByTestId('custom-privilege-button'));
+
+      expect(
+        screen.getByTestId('space-assign-role-privilege-customization-form')
+      ).toBeInTheDocument();
+
+      const featureUT = featuresWithSubFeatures[0];
+
+      // change a single feature with sub features to read from default privilege "none"
+      await user.click(screen.getByTestId(`${featureUT.id}_${FEATURE_PRIVILEGES_READ}`));
+
+      // click on the accordion toggle to show sub features
+      await user.click(
+        screen.getByTestId(
+          `featurePrivilegeControls_${featureUT.category.id}_${featureUT.id}_accordionToggle`
+        )
+      );
+
+      // sub feature table renders
+      expect(
+        screen.getByTestId(`${featureUT.category.id}_${featureUT.id}_subFeaturesTable`)
+      ).toBeInTheDocument();
+
+      // assert switch to customize sub feature can toggled
+      expect(
+        within(
+          screen.getByTestId(
+            `${featureUT.category.id}_${featureUT.id}_customizeSubFeaturesSwitchContainer`
+          )
+        ).getByTestId('customizeSubFeaturePrivileges')
+      ).not.toBeDisabled();
     });
   });
 });

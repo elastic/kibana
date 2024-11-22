@@ -8,7 +8,6 @@
 import { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { InputsModelId } from '../../common/store/inputs/constants';
-import { defaultHeaders } from '../components/timeline/body/column_headers/default_headers';
 import { timelineActions } from '../store';
 import { useTimelineFullScreen } from '../../common/containers/use_full_screen';
 import { TimelineId } from '../../../common/types/timeline';
@@ -20,8 +19,7 @@ import { SourcererScopeName } from '../../sourcerer/store/model';
 import { appActions } from '../../common/store/app';
 import type { TimeRange } from '../../common/store/inputs/model';
 import { useDiscoverInTimelineContext } from '../../common/components/discover_in_timeline/use_discover_in_timeline_context';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { defaultUdtHeaders } from '../components/timeline/unified_components/default_headers';
+import { defaultUdtHeaders } from '../components/timeline/body/column_headers/default_headers';
 import { timelineDefaults } from '../store/defaults';
 
 export interface UseCreateTimelineParams {
@@ -50,9 +48,6 @@ export const useCreateTimeline = ({
   onClick,
 }: UseCreateTimelineParams): ((options?: { timeRange?: TimeRange }) => Promise<void>) => {
   const dispatch = useDispatch();
-  const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
-    'unifiedComponentsInTimelineDisabled'
-  );
   const { id: dataViewId, patternList: selectedPatterns } = useSelector(
     sourcererSelectors.defaultDataView
   ) ?? { id: '', patternList: [] };
@@ -87,7 +82,7 @@ export const useCreateTimeline = ({
 
       dispatch(
         timelineActions.createTimeline({
-          columns: !unifiedComponentsInTimelineDisabled ? defaultUdtHeaders : defaultHeaders,
+          columns: defaultUdtHeaders,
           dataViewId,
           id,
           indexNames: selectedPatterns,
@@ -95,7 +90,7 @@ export const useCreateTimeline = ({
           timelineType,
           updated: undefined,
           excludedRowRendererIds:
-            !unifiedComponentsInTimelineDisabled && timelineType !== TimelineTypeEnum.template
+            timelineType !== TimelineTypeEnum.template
               ? timelineDefaults.excludedRowRendererIds
               : [],
         })
@@ -132,7 +127,6 @@ export const useCreateTimeline = ({
       setTimelineFullScreen,
       timelineFullScreen,
       timelineType,
-      unifiedComponentsInTimelineDisabled,
     ]
   );
 

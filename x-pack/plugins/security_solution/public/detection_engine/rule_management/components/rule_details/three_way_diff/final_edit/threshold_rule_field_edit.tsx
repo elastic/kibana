@@ -6,14 +6,10 @@
  */
 
 import React from 'react';
-import { FieldFormWrapper } from './field_form_wrapper';
-import {
-  KqlQueryEdit,
-  kqlQuerySchema,
-  kqlQuerySerializer,
-  kqlQueryDeserializer,
-} from './fields/kql_query';
 import type { UpgradeableThresholdFields } from '../../../../model/prebuilt_rule_upgrade/fields';
+import { KqlQueryEditForm } from './fields/kql_query';
+import { DataSourceEditForm } from './fields/data_source';
+import { ThresholdAlertSuppressionEditForm } from './fields/threshold_alert_suppression';
 
 interface ThresholdRuleFieldEditProps {
   fieldName: UpgradeableThresholdFields;
@@ -22,14 +18,11 @@ interface ThresholdRuleFieldEditProps {
 export function ThresholdRuleFieldEdit({ fieldName }: ThresholdRuleFieldEditProps) {
   switch (fieldName) {
     case 'kql_query':
-      return (
-        <FieldFormWrapper
-          component={KqlQueryEdit}
-          fieldFormSchema={kqlQuerySchema}
-          serializer={kqlQuerySerializer}
-          deserializer={kqlQueryDeserializer}
-        />
-      );
+      return <KqlQueryEditForm />;
+    case 'data_source':
+      return <DataSourceEditForm />;
+    case 'alert_suppression':
+      return <ThresholdAlertSuppressionEditForm />;
     default:
       return null; // Will be replaced with `assertUnreachable(fieldName)` once all fields are implemented
   }

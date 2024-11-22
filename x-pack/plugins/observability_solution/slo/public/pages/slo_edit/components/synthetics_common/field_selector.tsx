@@ -120,7 +120,6 @@ export function FieldSelector({
                   ? (field.value as Array<{ value: string; label: string }>).map((value) => ({
                       value: value.value,
                       label: value.label,
-                      'data-test-subj': `${dataTestSubj}SelectedValue`,
                     }))
                   : []
               }

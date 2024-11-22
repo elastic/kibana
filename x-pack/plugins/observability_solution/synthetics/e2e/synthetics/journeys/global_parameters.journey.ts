@@ -76,8 +76,8 @@ journey(`GlobalParameters`, async ({ page, params }) => {
     await page.click('text=Delete ParameterEdit Parameter >> :nth-match(button, 2)');
     await page.click('[aria-label="Key"]');
     await page.fill('[aria-label="Key"]', 'username2');
-    await page.click('[aria-label="Value"]');
-    await page.fill('[aria-label="Value"]', 'elastic2');
+    await page.click('[aria-label="New value"]');
+    await page.fill('[aria-label="New value"]', 'elastic2');
     await page.click('.euiComboBox__inputWrap');
     await page.fill('[aria-label="Tags"]', 'staging');
     await page.press('[aria-label="Tags"]', 'Enter');

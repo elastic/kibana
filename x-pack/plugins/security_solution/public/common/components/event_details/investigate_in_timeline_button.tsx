@@ -8,7 +8,7 @@
 import type { FC, PropsWithChildren } from 'react';
 import React, { useCallback } from 'react';
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
-import type { IconType } from '@elastic/eui';
+import type { IconType, EuiButtonEmptyProps } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -34,6 +34,7 @@ export interface InvestigateInTimelineButtonProps {
   isDisabled?: boolean;
   iconType?: IconType;
   children?: React.ReactNode;
+  flush?: EuiButtonEmptyProps['flush'];
 }
 
 export const InvestigateInTimelineButton: FC<
@@ -46,6 +47,7 @@ export const InvestigateInTimelineButton: FC<
   timeRange,
   keepDataView,
   iconType,
+  flush,
   ...rest
 }) => {
   const dispatch = useDispatch();
@@ -118,7 +120,7 @@ export const InvestigateInTimelineButton: FC<
     <EuiButtonEmpty
       aria-label={ACTION_INVESTIGATE_IN_TIMELINE}
       onClick={configureAndOpenTimeline}
-      flush="right"
+      flush={flush ?? 'right'}
       size="xs"
       iconType={iconType}
     >

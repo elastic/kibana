@@ -3322,59 +3322,6 @@
       },
       {
         "parentPluginId": "@kbn/alerts-ui-shared",
-        "id": "def-public.Flapping",
-        "type": "Interface",
-        "tags": [],
-        "label": "Flapping",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/alerting-types",
-            "scope": "common",
-            "docId": "kibKbnAlertingTypesPluginApi",
-            "section": "def-common.Flapping",
-            "text": "Flapping"
-          },
-          " extends ",
-          {
-            "pluginId": "@kbn/core-saved-objects-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-            "section": "def-common.SavedObjectAttributes",
-            "text": "SavedObjectAttributes"
-          }
-        ],
-        "path": "packages/kbn-alerting-types/rule_types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/alerts-ui-shared",
-            "id": "def-public.Flapping.lookBackWindow",
-            "type": "number",
-            "tags": [],
-            "label": "lookBackWindow",
-            "description": [],
-            "path": "packages/kbn-alerting-types/rule_types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/alerts-ui-shared",
-            "id": "def-public.Flapping.statusChangeThreshold",
-            "type": "number",
-            "tags": [],
-            "label": "statusChangeThreshold",
-            "description": [],
-            "path": "packages/kbn-alerting-types/rule_types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/alerts-ui-shared",
         "id": "def-public.GenericValidationResult",
         "type": "Interface",
         "tags": [],
@@ -4813,8 +4760,14 @@
             "label": "onSuccess",
             "description": [],
             "signature": [
-              "((formData: ",
-              "CreateRuleBody",
+              "((rule: ",
+              {
+                "pluginId": "@kbn/alerts-ui-shared",
+                "scope": "public",
+                "docId": "kibKbnAlertsUiSharedPluginApi",
+                "section": "def-public.Rule",
+                "text": "Rule"
+              },
               "<",
               {
                 "pluginId": "@kbn/alerts-ui-shared",
@@ -4832,12 +4785,18 @@
               {
                 "parentPluginId": "@kbn/alerts-ui-shared",
                 "id": "def-public.UseCreateRuleProps.onSuccess.$1",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
-                "label": "formData",
+                "label": "rule",
                 "description": [],
                 "signature": [
-                  "CreateRuleBody",
+                  {
+                    "pluginId": "@kbn/alerts-ui-shared",
+                    "scope": "public",
+                    "docId": "kibKbnAlertsUiSharedPluginApi",
+                    "section": "def-public.Rule",
+                    "text": "Rule"
+                  },
                   "<",
                   {
                     "pluginId": "@kbn/alerts-ui-shared",
@@ -5168,6 +5127,20 @@
             "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_load_connectors.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-public.UseLoadConnectorsProps.cacheTime",
+            "type": "number",
+            "tags": [],
+            "label": "cacheTime",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_load_connectors.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5342,6 +5315,20 @@
             "description": [],
             "signature": [
               "string | undefined"
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_resolve_rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-public.UseResolveProps.cacheTime",
+            "type": "number",
+            "tags": [],
+            "label": "cacheTime",
+            "description": [],
+            "signature": [
+              "number | undefined"
             ],
             "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_resolve_rule.ts",
             "deprecated": false,
@@ -5599,8 +5586,14 @@
             "label": "onSuccess",
             "description": [],
             "signature": [
-              "((formData: ",
-              "UpdateRuleBody",
+              "((rule: ",
+              {
+                "pluginId": "@kbn/alerts-ui-shared",
+                "scope": "public",
+                "docId": "kibKbnAlertsUiSharedPluginApi",
+                "section": "def-public.Rule",
+                "text": "Rule"
+              },
               "<",
               {
                 "pluginId": "@kbn/alerts-ui-shared",
@@ -5618,12 +5611,18 @@
               {
                 "parentPluginId": "@kbn/alerts-ui-shared",
                 "id": "def-public.UseUpdateRuleProps.onSuccess.$1",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
-                "label": "formData",
+                "label": "rule",
                 "description": [],
                 "signature": [
-                  "UpdateRuleBody",
+                  {
+                    "pluginId": "@kbn/alerts-ui-shared",
+                    "scope": "public",
+                    "docId": "kibKbnAlertsUiSharedPluginApi",
+                    "section": "def-public.Rule",
+                    "text": "Rule"
+                  },
                   "<",
                   {
                     "pluginId": "@kbn/alerts-ui-shared",
@@ -6151,7 +6150,7 @@
         "signature": [
           "{ [x: string]: Pick<",
           "OptionsListControlState",
-          ", \"selectedOptions\" | \"title\" | \"fieldName\" | \"exclude\" | \"existsSelected\">; }"
+          ", \"title\" | \"fieldName\" | \"exclude\" | \"existsSelected\" | \"selectedOptions\">; }"
         ],
         "path": "packages/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
         "deprecated": false,

@@ -34,7 +34,7 @@ export const transformElasticNamedSearchToListItem = ({
 }: TransformElasticMSearchToListItemOptions): SearchListItemArraySchema => {
   return value.map((singleValue, index) => {
     const matchingHits = response.hits.hits.filter((hit) => {
-      if (hit.matched_queries != null) {
+      if (hit.matched_queries != null && Array.isArray(hit.matched_queries)) {
         return hit.matched_queries.some((matchedQuery) => {
           const [matchedQueryIndex] = matchedQuery.split('.');
           return matchedQueryIndex === `${index}`;

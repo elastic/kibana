@@ -95,8 +95,17 @@ export function registerAnnotationAPIs({
   router.post(
     {
       path: '/api/observability/annotation',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to Elasticsearch',
+        },
+      },
       validate: {
         body: unknowns,
+      },
+      options: {
+        access: 'public',
       },
     },
     wrapRouteHandler(t.type({ body: createAnnotationRt }), ({ data, client }) => {
@@ -107,8 +116,17 @@ export function registerAnnotationAPIs({
   router.put(
     {
       path: '/api/observability/annotation/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to Elasticsearch',
+        },
+      },
       validate: {
         body: unknowns,
+      },
+      options: {
+        access: 'public',
       },
     },
     wrapRouteHandler(t.type({ body: updateAnnotationRt }), ({ data, client }) => {
@@ -119,8 +137,17 @@ export function registerAnnotationAPIs({
   router.delete(
     {
       path: '/api/observability/annotation/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to Elasticsearch',
+        },
+      },
       validate: {
         params: unknowns,
+      },
+      options: {
+        access: 'public',
       },
     },
     wrapRouteHandler(t.type({ params: deleteAnnotationRt }), ({ data, client }) => {
@@ -131,8 +158,17 @@ export function registerAnnotationAPIs({
   router.get(
     {
       path: '/api/observability/annotation/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to Elasticsearch',
+        },
+      },
       validate: {
         params: unknowns,
+      },
+      options: {
+        access: 'public',
       },
     },
     wrapRouteHandler(t.type({ params: getAnnotationByIdRt }), ({ data, client }) => {
@@ -143,8 +179,17 @@ export function registerAnnotationAPIs({
   router.get(
     {
       path: '/api/observability/annotation/find',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to Elasticsearch',
+        },
+      },
       validate: {
         query: unknowns,
+      },
+      options: {
+        access: 'public',
       },
     },
     wrapRouteHandler(t.type({ query: findAnnotationRt }), ({ data, client }) => {
@@ -155,8 +200,17 @@ export function registerAnnotationAPIs({
   router.get(
     {
       path: '/api/observability/annotation/permissions',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to Elasticsearch',
+        },
+      },
       validate: {
         query: unknowns,
+      },
+      options: {
+        access: 'public',
       },
     },
     wrapRouteHandler(t.type({}), ({ client }) => {

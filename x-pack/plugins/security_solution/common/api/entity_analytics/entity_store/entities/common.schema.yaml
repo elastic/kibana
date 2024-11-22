@@ -22,12 +22,10 @@ components:
             - name
             - source
           properties:
-            name: 
+            name:
               type: string
             source:
-              type: array
-              items:
-                type: string
+              type: string
         user:
           type: object
           properties:
@@ -84,12 +82,10 @@ components:
             - name
             - source
           properties:
-            name: 
+            name:
               type: string
             source:
-              type: array
-              items:
-                type: string
+              type: string
         host:
           type: object
           properties:

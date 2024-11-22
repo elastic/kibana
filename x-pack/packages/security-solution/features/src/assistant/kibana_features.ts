@@ -26,6 +26,9 @@ export const getAssistantBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
   app: [ASSISTANT_FEATURE_ID, 'kibana'],
   catalogue: [APP_ID],
   minimumLicense: 'enterprise',
+  management: {
+    kibana: ['securityAiAssistantManagement'],
+  },
   privileges: {
     all: {
       api: ['elasticAssistant'],
@@ -36,6 +39,9 @@ export const getAssistantBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
         read: [],
       },
       ui: [],
+      management: {
+        kibana: ['securityAiAssistantManagement'],
+      },
     },
     read: {
       // No read-only mode currently supported

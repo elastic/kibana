@@ -25,14 +25,22 @@ import { PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS } from '../../constants';
 import { getUpgradeableRules } from './get_upgradeable_rules';
 import { createModifiedPrebuiltRuleAssets } from './create_upgradeable_rules_payload';
 import { getRuleGroups } from '../../model/rule_groups/get_rule_groups';
+import type { ConfigType } from '../../../../../config';
 
-export const performRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) => {
+export const performRuleUpgradeRoute = (
+  router: SecuritySolutionPluginRouter,
+  config: ConfigType
+) => {
   router.versioned
     .post({
       access: 'internal',
       path: PERFORM_RULE_UPGRADE_URL,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
       options: {
-        tags: ['access:securitySolution'],
         timeout: {
           idleSocket: PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS,
         },
@@ -75,10 +83,12 @@ export const performRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) =>
             mode,
           });
 
+          const { prebuiltRulesCustomizationEnabled } = config.experimentalFeatures;
           const { modifiedPrebuiltRuleAssets, processingErrors } = createModifiedPrebuiltRuleAssets(
             {
               upgradeableRules,
               requestBody: request.body,
+              prebuiltRulesCustomizationEnabled,
             }
           );
 

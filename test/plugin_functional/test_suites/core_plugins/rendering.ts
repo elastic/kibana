@@ -362,6 +362,9 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observability_onboarding.ui.enabled (boolean?)',
         'xpack.observabilityLogsExplorer.navigation.showAppLink (boolean?|never)',
         'xpack.observabilityAIAssistant.scope (observability?|search?)',
+        'xpack.observabilityAiAssistantManagement.logSourcesEnabled (boolean?)',
+        'xpack.observabilityAiAssistantManagement.spacesEnabled (boolean?)',
+        'xpack.observabilityAiAssistantManagement.visibilityEnabled (boolean?)',
         'share.new_version.enabled (boolean?)',
         'aiAssistantManagementSelection.preferredAIAssistantType (default?|never?|observability?)',
         /**

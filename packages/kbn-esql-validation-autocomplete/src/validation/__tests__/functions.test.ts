@@ -100,12 +100,12 @@ describe('function validation', () => {
 
           // straight call
           await expectErrors('FROM a_index | EVAL TEST(1.1)', [
-            'Argument of [test] must be [integer], found value [1.1] type [decimal]',
+            'Argument of [test] must be [integer], found value [1.1] type [double]',
           ]);
 
           // assignment
           await expectErrors('FROM a_index | EVAL var = TEST(1.1)', [
-            'Argument of [test] must be [integer], found value [1.1] type [decimal]',
+            'Argument of [test] must be [integer], found value [1.1] type [double]',
           ]);
 
           // nested function
@@ -115,7 +115,7 @@ describe('function validation', () => {
 
           // inline cast
           await expectErrors('FROM a_index | EVAL TEST(1::DOUBLE)', [
-            'Argument of [test] must be [integer], found value [1::DOUBLE] type [DOUBLE]',
+            'Argument of [test] must be [integer], found value [1::DOUBLE] type [double]',
           ]);
 
           // field
@@ -125,13 +125,13 @@ describe('function validation', () => {
 
           // variables
           await expectErrors('FROM a_index | EVAL var1 = 1. | EVAL TEST(var1)', [
-            'Argument of [test] must be [integer], found value [var1] type [decimal]',
+            'Argument of [test] must be [integer], found value [var1] type [double]',
           ]);
 
           // multiple instances
           await expectErrors('FROM a_index | EVAL TEST(1.1) | EVAL TEST(1.1)', [
-            'Argument of [test] must be [integer], found value [1.1] type [decimal]',
-            'Argument of [test] must be [integer], found value [1.1] type [decimal]',
+            'Argument of [test] must be [integer], found value [1.1] type [double]',
+            'Argument of [test] must be [integer], found value [1.1] type [double]',
           ]);
         });
 
@@ -190,7 +190,7 @@ describe('function validation', () => {
 
           await expectErrors('ROW "a" IN ("a", "b", "c")', []);
           await expectErrors('ROW "a" IN (1, "b", "c")', [
-            'Argument of [in] must be [keyword[]], found value [(1, "b", "c")] type [(integer, string, string)]',
+            'Argument of [in] must be [keyword[]], found value [(1, "b", "c")] type [(integer, keyword, keyword)]',
           ]);
         });
       });
@@ -238,9 +238,9 @@ describe('function validation', () => {
         // double, double, double
         await expectErrors('FROM a_index | EVAL TEST(1., 1., 1.)', []);
         await expectErrors('FROM a_index | EVAL TEST("", "", "")', [
-          'Argument of [test] must be [double], found value [""] type [string]',
-          'Argument of [test] must be [double], found value [""] type [string]',
-          'Argument of [test] must be [double], found value [""] type [string]',
+          'Argument of [test] must be [double], found value [""] type [keyword]',
+          'Argument of [test] must be [double], found value [""] type [keyword]',
+          'Argument of [test] must be [double], found value [""] type [keyword]',
         ]);
 
         // int, int
@@ -260,7 +260,7 @@ describe('function validation', () => {
         // date
         await expectErrors('FROM a_index | EVAL TEST(NOW())', []);
         await expectErrors('FROM a_index | EVAL TEST(1.)', [
-          'Argument of [test] must be [date], found value [1] type [decimal]',
+          'Argument of [test] must be [date], found value [1.] type [double]',
         ]);
       });
     });
@@ -505,162 +505,18 @@ describe('function validation', () => {
         ['Invalid option ["foo"] for test. Supported options: ["ASC", "DESC"].']
       );
     });
-  });
 
-  describe('command/option support', () => {
-    it('validates command support', async () => {
+    it('validates values of type unknown', async () => {
       setTestFunctions([
         {
-          name: 'eval_fn',
-          type: 'eval',
-          description: '',
-          supportedCommands: ['eval'],
-          signatures: [
-            {
-              params: [],
-              returnType: 'keyword',
-            },
-          ],
-        },
-        {
-          name: 'stats_fn',
-          type: 'agg',
-          description: '',
-          supportedCommands: ['stats'],
-          signatures: [
-            {
-              params: [],
-              returnType: 'keyword',
-            },
-          ],
-        },
-        {
-          name: 'row_fn',
-          type: 'eval',
-          description: '',
-          supportedCommands: ['row'],
-          signatures: [
-            {
-              params: [],
-              returnType: 'keyword',
-            },
-          ],
-        },
-        {
-          name: 'where_fn',
-          type: 'eval',
-          description: '',
-          supportedCommands: ['where'],
-          signatures: [
-            {
-              params: [],
-              returnType: 'keyword',
-            },
-          ],
-        },
-        {
-          name: 'sort_fn',
-          type: 'eval',
-          description: '',
-          supportedCommands: ['sort'],
-          signatures: [
-            {
-              params: [],
-              returnType: 'keyword',
-            },
-          ],
-        },
-      ]);
-
-      const { expectErrors } = await setup();
-
-      await expectErrors('FROM a_index | EVAL EVAL_FN()', []);
-      await expectErrors('FROM a_index | SORT SORT_FN()', []);
-      await expectErrors('FROM a_index | STATS STATS_FN()', []);
-      await expectErrors('ROW ROW_FN()', []);
-      await expectErrors('FROM a_index | WHERE WHERE_FN()', []);
-
-      await expectErrors('FROM a_index | EVAL SORT_FN()', [
-        'EVAL does not support function sort_fn',
-      ]);
-      await expectErrors('FROM a_index | SORT STATS_FN()', [
-        'SORT does not support function stats_fn',
-      ]);
-      await expectErrors('FROM a_index | STATS ROW_FN()', [
-        'At least one aggregation function required in [STATS], found [ROW_FN()]',
-        'STATS does not support function row_fn',
-      ]);
-      await expectErrors('ROW WHERE_FN()', ['ROW does not support function where_fn']);
-      await expectErrors('FROM a_index | WHERE EVAL_FN()', [
-        'WHERE does not support function eval_fn',
-      ]);
-    });
-
-    it('validates option support', async () => {
-      setTestFunctions([
-        {
-          name: 'supports_by_option',
-          type: 'eval',
-          description: '',
-          supportedCommands: ['eval'],
-          supportedOptions: ['by'],
-          signatures: [
-            {
-              params: [],
-              returnType: 'keyword',
-            },
-          ],
-        },
-        {
-          name: 'does_not_support_by_option',
-          type: 'eval',
-          description: '',
-          supportedCommands: ['eval'],
-          supportedOptions: [],
-          signatures: [
-            {
-              params: [],
-              returnType: 'keyword',
-            },
-          ],
-        },
-
-        {
-          name: 'agg_fn',
-          type: 'agg',
-          description: '',
-          supportedCommands: ['stats'],
-          supportedOptions: [],
-          signatures: [
-            {
-              params: [],
-              returnType: 'keyword',
-            },
-          ],
-        },
-      ]);
-
-      const { expectErrors } = await setup();
-
-      await expectErrors('FROM a_index | STATS AGG_FN() BY SUPPORTS_BY_OPTION()', []);
-      await expectErrors('FROM a_index | STATS AGG_FN() BY DOES_NOT_SUPPORT_BY_OPTION()', [
-        'STATS BY does not support function does_not_support_by_option',
-      ]);
-    });
-  });
-
-  describe('nested functions', () => {
-    it('supports deep nesting', async () => {
-      setTestFunctions([
-        {
-          name: 'test',
+          name: 'test1',
           type: 'eval',
           description: '',
           supportedCommands: ['eval'],
           signatures: [
             {
               params: [{ name: 'arg1', type: 'keyword' }],
-              returnType: 'integer',
+              returnType: 'keyword',
             },
           ],
         },
@@ -671,40 +527,19 @@ describe('function validation', () => {
           supportedCommands: ['eval'],
           signatures: [
             {
-              params: [{ name: 'arg1', type: 'integer' }],
-              returnType: 'keyword',
-            },
-          ],
-        },
-      ]);
-
-      const { expectErrors } = await setup();
-
-      await expectErrors('FROM a_index | EVAL TEST(TEST2(TEST(TEST2(1))))', []);
-    });
-
-    it("doesn't allow nested aggregation functions", async () => {
-      setTestFunctions([
-        {
-          name: 'agg_fn',
-          type: 'agg',
-          description: '',
-          supportedCommands: ['stats'],
-          signatures: [
-            {
               params: [{ name: 'arg1', type: 'keyword' }],
               returnType: 'keyword',
             },
           ],
         },
         {
-          name: 'scalar_fn',
+          name: 'test3',
           type: 'eval',
           description: '',
-          supportedCommands: ['stats'],
+          supportedCommands: ['eval'],
           signatures: [
             {
-              params: [{ name: 'arg1', type: 'keyword' }],
+              params: [{ name: 'arg1', type: 'long' }],
               returnType: 'keyword',
             },
           ],
@@ -712,14 +547,231 @@ describe('function validation', () => {
       ]);
 
       const { expectErrors } = await setup();
+      await expectErrors(
+        `FROM a_index
+        | EVAL foo = TEST1(1.)
+        | EVAL TEST2(foo)
+        | EVAL TEST3(foo)`,
+        ['Argument of [test1] must be [keyword], found value [1.] type [double]']
+      );
+    });
 
-      await expectErrors('FROM a_index | STATS AGG_FN(AGG_FN(""))', [
-        'Aggregate function\'s parameters must be an attribute, literal or a non-aggregation function; found [AGG_FN("")] of type [keyword]',
-      ]);
-      // @TODO — enable this test when we have fixed this bug
-      // await expectErrors('FROM a_index | STATS AGG_FN(SCALAR_FN(AGG_FN("")))', [
-      //   'No nested aggregation functions.',
-      // ]);
+    describe('command/option support', () => {
+      it('validates command support', async () => {
+        setTestFunctions([
+          {
+            name: 'eval_fn',
+            type: 'eval',
+            description: '',
+            supportedCommands: ['eval'],
+            signatures: [
+              {
+                params: [],
+                returnType: 'keyword',
+              },
+            ],
+          },
+          {
+            name: 'stats_fn',
+            type: 'agg',
+            description: '',
+            supportedCommands: ['stats'],
+            signatures: [
+              {
+                params: [],
+                returnType: 'keyword',
+              },
+            ],
+          },
+          {
+            name: 'row_fn',
+            type: 'eval',
+            description: '',
+            supportedCommands: ['row'],
+            signatures: [
+              {
+                params: [],
+                returnType: 'keyword',
+              },
+            ],
+          },
+          {
+            name: 'where_fn',
+            type: 'eval',
+            description: '',
+            supportedCommands: ['where'],
+            signatures: [
+              {
+                params: [],
+                returnType: 'keyword',
+              },
+            ],
+          },
+          {
+            name: 'sort_fn',
+            type: 'eval',
+            description: '',
+            supportedCommands: ['sort'],
+            signatures: [
+              {
+                params: [],
+                returnType: 'keyword',
+              },
+            ],
+          },
+        ]);
+
+        const { expectErrors } = await setup();
+
+        await expectErrors('FROM a_index | EVAL EVAL_FN()', []);
+        await expectErrors('FROM a_index | SORT SORT_FN()', []);
+        await expectErrors('FROM a_index | STATS STATS_FN()', []);
+        await expectErrors('ROW ROW_FN()', []);
+        await expectErrors('FROM a_index | WHERE WHERE_FN()', []);
+
+        await expectErrors('FROM a_index | EVAL SORT_FN()', [
+          'EVAL does not support function sort_fn',
+        ]);
+        await expectErrors('FROM a_index | SORT STATS_FN()', [
+          'SORT does not support function stats_fn',
+        ]);
+        await expectErrors('FROM a_index | STATS ROW_FN()', [
+          'At least one aggregation function required in [STATS], found [ROW_FN()]',
+          'STATS does not support function row_fn',
+        ]);
+        await expectErrors('ROW WHERE_FN()', ['ROW does not support function where_fn']);
+        await expectErrors('FROM a_index | WHERE EVAL_FN()', [
+          'WHERE does not support function eval_fn',
+        ]);
+      });
+
+      it('validates option support', async () => {
+        setTestFunctions([
+          {
+            name: 'supports_by_option',
+            type: 'eval',
+            description: '',
+            supportedCommands: ['eval'],
+            supportedOptions: ['by'],
+            signatures: [
+              {
+                params: [],
+                returnType: 'keyword',
+              },
+            ],
+          },
+          {
+            name: 'does_not_support_by_option',
+            type: 'eval',
+            description: '',
+            supportedCommands: ['eval'],
+            supportedOptions: [],
+            signatures: [
+              {
+                params: [],
+                returnType: 'keyword',
+              },
+            ],
+          },
+
+          {
+            name: 'agg_fn',
+            type: 'agg',
+            description: '',
+            supportedCommands: ['stats'],
+            supportedOptions: [],
+            signatures: [
+              {
+                params: [],
+                returnType: 'keyword',
+              },
+            ],
+          },
+        ]);
+
+        const { expectErrors } = await setup();
+
+        await expectErrors('FROM a_index | STATS AGG_FN() BY SUPPORTS_BY_OPTION()', []);
+        await expectErrors('FROM a_index | STATS AGG_FN() BY DOES_NOT_SUPPORT_BY_OPTION()', [
+          'STATS BY does not support function does_not_support_by_option',
+        ]);
+      });
+    });
+
+    describe('nested functions', () => {
+      it('supports deep nesting', async () => {
+        setTestFunctions([
+          {
+            name: 'test',
+            type: 'eval',
+            description: '',
+            supportedCommands: ['eval'],
+            signatures: [
+              {
+                params: [{ name: 'arg1', type: 'keyword' }],
+                returnType: 'integer',
+              },
+            ],
+          },
+          {
+            name: 'test2',
+            type: 'eval',
+            description: '',
+            supportedCommands: ['eval'],
+            signatures: [
+              {
+                params: [{ name: 'arg1', type: 'integer' }],
+                returnType: 'keyword',
+              },
+            ],
+          },
+        ]);
+
+        const { expectErrors } = await setup();
+
+        await expectErrors('FROM a_index | EVAL TEST(TEST2(TEST(TEST2(1))))', []);
+      });
+
+      it("doesn't allow nested aggregation functions", async () => {
+        setTestFunctions([
+          {
+            name: 'agg_fn',
+            type: 'agg',
+            description: '',
+            supportedCommands: ['stats'],
+            signatures: [
+              {
+                params: [{ name: 'arg1', type: 'keyword' }],
+                returnType: 'keyword',
+              },
+            ],
+          },
+          {
+            name: 'scalar_fn',
+            type: 'eval',
+            description: '',
+            supportedCommands: ['stats'],
+            signatures: [
+              {
+                params: [{ name: 'arg1', type: 'keyword' }],
+                returnType: 'keyword',
+              },
+            ],
+          },
+        ]);
+
+        const { expectErrors } = await setup();
+
+        await expectErrors('FROM a_index | STATS AGG_FN(AGG_FN(""))', [
+          'Aggregate function\'s parameters must be an attribute, literal or a non-aggregation function; found [AGG_FN("")] of type [keyword]',
+        ]);
+        // @TODO — enable this test when we have fixed this bug
+        // await expectErrors('FROM a_index | STATS AGG_FN(SCALAR_FN(AGG_FN("")))', [
+        //   'No nested aggregation functions.',
+        // ]);
+      });
+
+      // @TODO — test function aliases
     });
   });
 });

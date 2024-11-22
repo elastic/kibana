@@ -194,10 +194,7 @@ const commonFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableCommonFields> 
   setup: multiLineStringDiffAlgorithm,
   related_integrations: simpleDiffAlgorithm,
   required_fields: simpleDiffAlgorithm,
-  author: scalarArrayDiffAlgorithm,
-  license: singleLineStringDiffAlgorithm,
   rule_schedule: simpleDiffAlgorithm,
-  exceptions_list: simpleDiffAlgorithm,
   max_signals: numberDiffAlgorithm,
   rule_name_override: simpleDiffAlgorithm,
   timestamp_override: simpleDiffAlgorithm,
@@ -242,9 +239,6 @@ const eqlFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableEqlFields> = {
   type: ruleTypeDiffAlgorithm,
   eql_query: eqlQueryDiffAlgorithm,
   data_source: dataSourceDiffAlgorithm,
-  event_category_override: singleLineStringDiffAlgorithm,
-  timestamp_field: singleLineStringDiffAlgorithm,
-  tiebreaker_field: singleLineStringDiffAlgorithm,
   alert_suppression: simpleDiffAlgorithm,
 };
 

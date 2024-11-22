@@ -40,6 +40,21 @@
     "objects": [
       {
         "parentPluginId": "expressionXY",
+        "id": "def-public.FittingFunctions",
+        "type": "Object",
+        "tags": [],
+        "label": "FittingFunctions",
+        "description": [],
+        "signature": [
+          "{ readonly NONE: \"None\"; readonly ZERO: \"Zero\"; readonly LINEAR: \"Linear\"; readonly CARRY: \"Carry\"; readonly LOOKAHEAD: \"Lookahead\"; readonly AVERAGE: \"Average\"; readonly NEAREST: \"Nearest\"; }"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionXY",
         "id": "def-public.LayerTypes",
         "type": "Object",
         "tags": [],
@@ -2931,7 +2946,7 @@
         "label": "FittingFunction",
         "description": [],
         "signature": [
-          "\"None\" | \"Average\" | \"Zero\" | \"Nearest\" | \"Linear\" | \"Carry\" | \"Lookahead\""
+          "\"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -2996,11 +3011,11 @@
           },
           "<",
           {
-            "pluginId": "inspector",
+            "pluginId": "expressions",
             "scope": "common",
-            "docId": "kibInspectorPluginApi",
-            "section": "def-common.Adapters",
-            "text": "Adapters"
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DefaultInspectorAdapters",
+            "text": "DefaultInspectorAdapters"
           },
           ">>"
         ],
@@ -3635,6 +3650,21 @@
       }
     ],
     "objects": [
+      {
+        "parentPluginId": "expressionXY",
+        "id": "def-common.FittingFunctions",
+        "type": "Object",
+        "tags": [],
+        "label": "FittingFunctions",
+        "description": [],
+        "signature": [
+          "{ readonly NONE: \"None\"; readonly ZERO: \"Zero\"; readonly LINEAR: \"Linear\"; readonly CARRY: \"Carry\"; readonly LOOKAHEAD: \"Lookahead\"; readonly AVERAGE: \"Average\"; readonly NEAREST: \"Nearest\"; }"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "expressionXY",
         "id": "def-common.LayerTypes",

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState, useCallback, useMemo, useRef } from 'react';
+import React, { type FC, useState, useCallback, useMemo, useRef } from 'react';
 import {
   EuiButtonEmpty,
   EuiButton,
@@ -28,9 +28,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
+import type { TagAttributes } from '../../../common/types';
 import {
-  TagAttributes,
-  TagValidation,
+  type TagValidation,
   validateTagColor,
   tagNameMaxLength,
   tagDescriptionMaxLength,

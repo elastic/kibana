@@ -23,6 +23,10 @@ export const LogsCustom = 'logs@custom';
 
 export type LogsSynthtraceEsClientOptions = Omit<SynthtraceEsClientOptions, 'pipeline'>;
 
+interface Pipeline {
+  includeSerialization?: boolean;
+}
+
 export class LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> {
   constructor(options: { client: Client; logger: Logger } & LogsSynthtraceEsClientOptions) {
     super({
@@ -132,13 +136,22 @@ export class LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> {
       this.logger.error(`Custom pipeline creation failed: ${LogsCustom} - ${err.message}`);
     }
   }
+
+  getDefaultPipeline({ includeSerialization }: Pipeline = { includeSerialization: true }) {
+    return logsPipeline({ includeSerialization });
+  }
 }
 
-function logsPipeline() {
+function logsPipeline({ includeSerialization }: Pipeline = { includeSerialization: true }) {
   return (base: Readable) => {
+    const serializationTransform = includeSerialization
+      ? [getSerializeTransform<LogDocument>()]
+      : [];
+
     return pipeline(
+      // @ts-expect-error Some weird stuff here with the type definition for pipeline. We have tests!
       base,
-      getSerializeTransform<LogDocument>(),
+      ...serializationTransform,
       getRoutingTransform('logs'),
       (err: unknown) => {
         if (err) {

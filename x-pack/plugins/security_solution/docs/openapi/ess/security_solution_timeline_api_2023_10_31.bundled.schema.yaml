@@ -43,13 +43,6 @@ paths:
         required: true
       responses:
         '200':
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: object
           description: Indicates the note was successfully deleted.
       summary: Delete a note
       tags:
@@ -98,7 +91,7 @@ paths:
             nullable: true
             type: string
         - in: query
-          name: userFilter
+          name: createdByFilter
           schema:
             nullable: true
             type: string
@@ -111,9 +104,7 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/GetNotesResult'
-                  - type: object
+                $ref: '#/components/schemas/GetNotesResult'
           description: Indicates the requested notes were returned.
       summary: Get notes
       tags:
@@ -157,17 +148,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      persistNote:
-                        $ref: '#/components/schemas/ResponseNote'
-                    required:
-                      - persistNote
-                required:
-                  - data
+                $ref: '#/components/schemas/ResponseNote'
           description: Indicates the note was successfully created.
       summary: Add or update a note
       tags:
@@ -200,17 +181,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      persistPinnedEventOnTimeline:
-                        $ref: '#/components/schemas/PersistPinnedEventResponse'
-                    required:
-                      - persistPinnedEventOnTimeline
-                required:
-                  - data
+                $ref: '#/components/schemas/PersistPinnedEventResponse'
           description: Indicates the event was successfully pinned to the Timeline.
       summary: Pin an event
       tags:
@@ -243,20 +214,6 @@ paths:
         required: true
       responses:
         '200':
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      deleteTimeline:
-                        type: boolean
-                    required:
-                      - deleteTimeline
-                required:
-                  - data
           description: Indicates the Timeline was successfully deleted.
       summary: Delete Timelines or Timeline templates
       tags:
@@ -281,20 +238,7 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - type: object
-                    properties:
-                      data:
-                        type: object
-                        properties:
-                          getOneTimeline:
-                            $ref: '#/components/schemas/TimelineResponse'
-                        required:
-                          - getOneTimeline
-                    required:
-                      - data
-                  - additionalProperties: false
-                    type: object
+                $ref: '#/components/schemas/TimelineResponse'
           description: Indicates that the (template) Timeline was found and returned.
       summary: Get Timeline or Timeline template details
       tags:
@@ -636,17 +580,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      persistFavorite:
-                        $ref: '#/components/schemas/FavoriteTimelineResponse'
-                    required:
-                      - persistFavorite
-                required:
-                  - data
+                $ref: '#/components/schemas/FavoriteTimelineResponse'
           description: Indicates the favorite status was successfully updated.
         '403':
           content:
@@ -811,15 +745,7 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/ResolvedTimeline'
-                    required:
-                      - data
-                  - additionalProperties: false
-                    type: object
+                $ref: '#/components/schemas/ResolvedTimeline'
           description: The (template) Timeline has been found
         '400':
           description: The request is missing parameters
@@ -928,6 +854,7 @@ components:
     AssociatedFilterType:
       description: Filter notes based on their association with a document or saved object.
       enum:
+        - all
         - document_only
         - saved_object_only
         - document_and_saved_object
@@ -1088,16 +1015,10 @@ components:
     FavoriteTimelineResponse:
       type: object
       properties:
-        code:
-          nullable: true
-          type: number
         favorite:
           items:
             $ref: '#/components/schemas/FavoriteTimelineResult'
           type: array
-        message:
-          nullable: true
-          type: string
         savedObjectId:
           type: string
         templateTimelineId:
@@ -1266,28 +1187,15 @@ components:
             - version
     PersistPinnedEventResponse:
       oneOf:
-        - allOf:
-            - $ref: '#/components/schemas/PinnedEvent'
-            - $ref: '#/components/schemas/PinnedEventBaseResponseBody'
-        - nullable: true
-          type: object
-    PersistTimelineResponse:
-      type: object
-      properties:
-        data:
-          type: object
+        - $ref: '#/components/schemas/PinnedEvent'
+        - type: object
           properties:
-            persistTimeline:
-              type: object
-              properties:
-                timeline:
-                  $ref: '#/components/schemas/TimelineResponse'
-              required:
-                - timeline
+            unpinned:
+              type: boolean
           required:
-            - persistTimeline
-      required:
-        - data
+            - unpinned
+    PersistTimelineResponse:
+      $ref: '#/components/schemas/TimelineResponse'
     PinnedEvent:
       allOf:
         - $ref: '#/components/schemas/BarePinnedEvent'
@@ -1300,15 +1208,6 @@ components:
           required:
             - pinnedEventId
             - version
-    PinnedEventBaseResponseBody:
-      type: object
-      properties:
-        code:
-          type: number
-        message:
-          type: string
-      required:
-        - code
     QueryMatchResult:
       type: object
       properties:
@@ -1349,15 +1248,9 @@ components:
     ResponseNote:
       type: object
       properties:
-        code:
-          type: number
-        message:
-          type: string
         note:
           $ref: '#/components/schemas/Note'
       required:
-        - code
-        - message
         - note
     RowRendererId:
       enum:

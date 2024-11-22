@@ -28,7 +28,18 @@ export const FunctionHelpPopover = memo(() => {
   const onHelpClick = () => setIsHelpOpen((prevIsHelpOpen) => !prevIsHelpOpen);
   const closeHelp = () => setIsHelpOpen(false);
 
-  const helpButton = <EuiButtonIcon onClick={onHelpClick} iconType="help" />;
+  const helpButton = (
+    <EuiButtonIcon
+      onClick={onHelpClick}
+      iconType="help"
+      aria-label={i18n.translate(
+        'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.functionHelpAriaLabel',
+        {
+          defaultMessage: 'Show help',
+        }
+      )}
+    />
+  );
 
   const columns = [
     {

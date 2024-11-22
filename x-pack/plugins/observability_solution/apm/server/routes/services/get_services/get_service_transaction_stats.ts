@@ -6,6 +6,7 @@
  */
 
 import { kqlQuery, rangeQuery, wildcardQuery } from '@kbn/observability-plugin/server';
+import { getAgentName } from '@kbn/elastic-agent-utils';
 import { ApmDocumentType } from '../../../../common/document_type';
 import {
   AGENT_NAME,
@@ -13,6 +14,8 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
   SERVICE_OVERFLOW_COUNT,
+  TELEMETRY_SDK_NAME,
+  TELEMETRY_SDK_LANGUAGE,
 } from '../../../../common/es_fields/apm';
 import { RollupInterval } from '../../../../common/rollup';
 import { ServiceGroup } from '../../../../common/service_groups';
@@ -124,6 +127,16 @@ export async function getServiceTransactionStats({
                 size: maxNumServices,
               },
               aggs: {
+                telemetryAgentName: {
+                  terms: {
+                    field: TELEMETRY_SDK_LANGUAGE,
+                  },
+                },
+                telemetrySdkName: {
+                  terms: {
+                    field: TELEMETRY_SDK_NAME,
+                  },
+                },
                 transactionType: {
                   terms: {
                     field: TRANSACTION_TYPE,
@@ -169,9 +182,11 @@ export async function getServiceTransactionStats({
             topTransactionTypeBucket?.environments.buckets.map(
               (environmentBucket) => environmentBucket.key as string
             ) ?? [],
-          agentName: topTransactionTypeBucket?.sample.top[0].metrics[AGENT_NAME] as
-            | AgentName
-            | undefined,
+          agentName: getAgentName(
+            topTransactionTypeBucket?.sample.top[0].metrics[AGENT_NAME] as string | null,
+            bucket.telemetryAgentName.buckets[0]?.key as string | null,
+            bucket.telemetrySdkName.buckets[0]?.key as string | null
+          ) as AgentName,
           latency: topTransactionTypeBucket?.avg_duration.value,
           transactionErrorRate: topTransactionTypeBucket
             ? calculateFailedTransactionRate(topTransactionTypeBucket)

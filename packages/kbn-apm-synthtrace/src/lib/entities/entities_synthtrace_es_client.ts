@@ -17,6 +17,10 @@ import { Logger } from '../utils/create_logger';
 
 export type EntitiesSynthtraceEsClientOptions = Omit<SynthtraceEsClientOptions, 'pipeline'>;
 
+interface Pipeline {
+  includeSerialization?: boolean;
+}
+
 export class EntitiesSynthtraceEsClient extends SynthtraceEsClient<EntityFields> {
   constructor(options: { client: Client; logger: Logger } & EntitiesSynthtraceEsClientOptions) {
     super({
@@ -25,13 +29,20 @@ export class EntitiesSynthtraceEsClient extends SynthtraceEsClient<EntityFields>
     });
     this.indices = ['.entities.v1.latest.builtin*'];
   }
+
+  getDefaultPipeline({ includeSerialization }: Pipeline = { includeSerialization: true }) {
+    return entitiesPipeline({ includeSerialization });
+  }
 }
 
-function entitiesPipeline() {
+function entitiesPipeline({ includeSerialization }: Pipeline = { includeSerialization: true }) {
   return (base: Readable) => {
+    const serializationTransform = includeSerialization ? [getSerializeTransform()] : [];
+
     return pipeline(
+      // @ts-expect-error Some weird stuff here with the type definition for pipeline. We have tests!
       base,
-      getSerializeTransform(),
+      ...serializationTransform,
       lastSeenTimestampTransform(),
       getRoutingTransform(),
       getDedotTransform(),
@@ -51,7 +62,7 @@ function lastSeenTimestampTransform() {
       const timestamp = document['@timestamp'];
       if (timestamp) {
         const isoString = new Date(timestamp).toISOString();
-        document['entity.lastSeenTimestamp'] = isoString;
+        document['entity.last_seen_timestamp'] = isoString;
         document['event.ingested'] = isoString;
         delete document['@timestamp'];
       }
@@ -71,7 +82,8 @@ function getRoutingTransform() {
       const entityIndexName = `${entityType}s`;
       document._action = {
         index: {
-          _index: `.entities.v1.latest.builtin_${entityIndexName}_from_ecs_data`,
+          _index:
+            `.entities.v1.latest.builtin_${entityIndexName}_from_ecs_data`.toLocaleLowerCase(),
           _id: document['entity.id'],
         },
       };

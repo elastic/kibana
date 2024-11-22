@@ -139,7 +139,7 @@ export const ReportInfoFlyout: FunctionComponent<Props> = ({ config, onClose, jo
           {isLoading ? (
             <EuiLoadingSpinner />
           ) : loadingError ? undefined : !!info ? (
-            <ReportInfoFlyoutContent info={info} />
+            <ReportInfoFlyoutContent info={info} config={config} />
           ) : undefined}
         </EuiFlyoutBody>
         {!isLoading && (

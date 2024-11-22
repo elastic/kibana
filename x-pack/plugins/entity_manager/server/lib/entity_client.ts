@@ -20,6 +20,7 @@ import { uninstallEntityDefinition } from './entities/uninstall_entity_definitio
 import { EntityDefinitionNotFound } from './entities/errors/entity_not_found';
 
 import { stopTransforms } from './entities/stop_transforms';
+import { deleteIndices } from './entities/delete_index';
 import { EntityDefinitionWithState } from './entities/types';
 import { EntityDefinitionUpdateConflict } from './entities/errors/entity_definition_update_conflict';
 
@@ -39,10 +40,13 @@ export class EntityClient {
     definition: EntityDefinition;
     installOnly?: boolean;
   }) {
+    this.options.logger.info(
+      `Creating definition [${definition.id}] v${definition.version} (installOnly=${installOnly})`
+    );
     const installedDefinition = await installEntityDefinition({
       definition,
-      soClient: this.options.soClient,
       esClient: this.options.esClient,
+      soClient: this.options.soClient,
       logger: this.options.logger,
     });
 
@@ -68,7 +72,7 @@ export class EntityClient {
     });
 
     if (!definition) {
-      const message = `Unable to find entity definition with [${id}]`;
+      const message = `Unable to find entity definition [${id}]`;
       this.options.logger.error(message);
       throw new EntityDefinitionNotFound(message);
     }
@@ -83,6 +87,9 @@ export class EntityClient {
       definition as EntityDefinitionWithState
     ).state.components.transforms.some((transform) => transform.running);
 
+    this.options.logger.info(
+      `Updating definition [${definition.id}] from v${definition.version} to v${definitionUpdate.version}`
+    );
     const updatedDefinition = await reinstallEntityDefinition({
       definition,
       definitionUpdate,
@@ -98,26 +105,31 @@ export class EntityClient {
   }
 
   async deleteEntityDefinition({ id, deleteData = false }: { id: string; deleteData?: boolean }) {
-    const [definition] = await findEntityDefinitions({
+    const definition = await findEntityDefinitionById({
       id,
-      perPage: 1,
-      soClient: this.options.soClient,
       esClient: this.options.esClient,
+      soClient: this.options.soClient,
     });
 
     if (!definition) {
-      const message = `Unable to find entity definition with [${id}]`;
-      this.options.logger.error(message);
-      throw new EntityDefinitionNotFound(message);
+      throw new EntityDefinitionNotFound(`Unable to find entity definition [${id}]`);
     }
 
+    this.options.logger.info(
+      `Uninstalling definition [${definition.id}] v${definition.version} (deleteData=${deleteData})`
+    );
     await uninstallEntityDefinition({
       definition,
-      deleteData,
-      soClient: this.options.soClient,
       esClient: this.options.esClient,
+      soClient: this.options.soClient,
       logger: this.options.logger,
     });
+
+    if (deleteData) {
+      // delete data with current user as system user does not have
+      // .entities privileges
+      await deleteIndices(this.options.esClient, definition, this.options.logger);
+    }
   }
 
   async getEntityDefinitions({
@@ -150,10 +162,12 @@ export class EntityClient {
   }
 
   async startEntityDefinition(definition: EntityDefinition) {
+    this.options.logger.info(`Starting transforms for definition [${definition.id}]`);
     return startTransforms(this.options.esClient, definition, this.options.logger);
   }
 
   async stopEntityDefinition(definition: EntityDefinition) {
+    this.options.logger.info(`Stopping transforms for definition [${definition.id}]`);
     return stopTransforms(this.options.esClient, definition, this.options.logger);
   }
 }

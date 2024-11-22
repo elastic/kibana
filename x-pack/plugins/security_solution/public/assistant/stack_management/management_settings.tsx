@@ -19,7 +19,7 @@ import {
 import { useConversation } from '@kbn/elastic-assistant/impl/assistant/use_conversation';
 import type { FetchConversationsResponse } from '@kbn/elastic-assistant/impl/assistant/api';
 import { SECURITY_AI_SETTINGS } from '@kbn/elastic-assistant/impl/assistant/settings/translations';
-import { CONNECTORS_TAB } from '@kbn/elastic-assistant/impl/assistant/settings/const';
+import { CONVERSATIONS_TAB } from '@kbn/elastic-assistant/impl/assistant/settings/const';
 import type { SettingsTabs } from '@kbn/elastic-assistant/impl/assistant/settings/types';
 import { useKibana } from '../../common/lib/kibana';
 
@@ -68,7 +68,7 @@ export const ManagementSettings = React.memo(() => {
 
   const [searchParams] = useSearchParams();
   const currentTab = useMemo(
-    () => (searchParams.get('tab') as SettingsTabs) ?? CONNECTORS_TAB,
+    () => (searchParams.get('tab') as SettingsTabs) ?? CONVERSATIONS_TAB,
     [searchParams]
   );
 

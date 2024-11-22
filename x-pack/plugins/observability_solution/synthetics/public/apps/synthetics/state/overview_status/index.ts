@@ -11,6 +11,7 @@ import { OverviewStatusMetaData, OverviewStatusState } from '../../../../../comm
 import { IHttpSerializedFetchError } from '..';
 import {
   clearOverviewStatusErrorAction,
+  clearOverviewStatusState,
   fetchOverviewStatusAction,
   quietFetchOverviewStatusAction,
 } from './actions';
@@ -55,6 +56,12 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
     .addCase(fetchOverviewStatusAction.fail, (state, action) => {
       state.error = action.payload;
       state.loading = false;
+    })
+    .addCase(clearOverviewStatusState, (state, action) => {
+      state.status = null;
+      state.loading = false;
+      state.loaded = false;
+      state.error = null;
     })
     .addCase(clearOverviewStatusErrorAction, (state) => {
       state.error = null;

@@ -1,0 +1,10 @@
+summary: Get details about a marketing space
+value:
+  id: marketing
+  name: Marketing
+  description : This is the Marketing Space
+  color: #aabbcc
+  initials: MK
+  disabledFeatures: []
+  imageUrl: ""
+  solution: es

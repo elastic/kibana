@@ -67,6 +67,9 @@ export const HistoricalResultsTour: FC<Props> = ({
       repositionOnScroll
       anchor={anchorElement}
       zIndex={zIndex}
+      panelProps={{
+        'data-test-subj': 'historicalResultsTourPanel',
+      }}
       footerAction={[
         <EuiButtonEmpty size="xs" color="text" onClick={onDismissTour}>
           {CLOSE}

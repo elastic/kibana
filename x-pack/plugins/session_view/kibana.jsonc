@@ -1,13 +1,26 @@
 {
   "type": "plugin",
   "id": "@kbn/session-view-plugin",
-  "owner": "@elastic/kibana-cloud-security-posture",
+  "owner": [
+    "@elastic/kibana-cloud-security-posture"
+  ],
+  "group": "security",
+  "visibility": "private",
   "plugin": {
     "id": "sessionView",
-    "server": true,
     "browser": true,
-    "requiredPlugins": ["data", "timelines", "ruleRegistry"],
-    "optionalPlugins": ["usageCollection"],
-    "requiredBundles": ["kibanaReact", "esUiShared"]
+    "server": true,
+    "requiredPlugins": [
+      "data",
+      "timelines",
+      "ruleRegistry"
+    ],
+    "optionalPlugins": [
+      "usageCollection"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "esUiShared"
+    ]
   }
 }

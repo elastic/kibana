@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '@kbn/core/public';
+import { APP_WRAPPER_CLASS, AppMountParameters, CoreStart } from '@kbn/core/public';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
@@ -25,26 +24,20 @@ import { ExperimentalFeatures } from '../common/config';
 import { PluginContext } from './context/plugin_context';
 import { usePluginContext } from './hooks/use_plugin_context';
 import { getRoutes } from './routes/routes';
-import { SloPublicPluginsStart } from './types';
+import { SLOPublicPluginsStart, SLORepositoryClient } from './types';
 
-function App() {
-  const { isServerless } = usePluginContext();
-
-  const routes = getRoutes(isServerless);
-
-  return (
-    <>
-      <Routes>
-        {Object.keys(routes).map((path) => {
-          const { handler, exact } = routes[path];
-          const Wrapper = () => {
-            return handler();
-          };
-          return <Route key={path} path={path} exact={exact} component={Wrapper} />;
-        })}
-      </Routes>
-    </>
-  );
+interface Props {
+  core: CoreStart;
+  plugins: SLOPublicPluginsStart;
+  appMountParameters: AppMountParameters;
+  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
+  ObservabilityPageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
+  usageCollection: UsageCollectionSetup;
+  isDev?: boolean;
+  kibanaVersion: string;
+  isServerless?: boolean;
+  experimentalFeatures: ExperimentalFeatures;
+  sloClient: SLORepositoryClient;
 }
 
 export const renderApp = ({
@@ -58,20 +51,9 @@ export const renderApp = ({
   isServerless,
   observabilityRuleTypeRegistry,
   experimentalFeatures,
-}: {
-  core: CoreStart;
-  plugins: SloPublicPluginsStart;
-  appMountParameters: AppMountParameters;
-  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
-  ObservabilityPageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
-  usageCollection: UsageCollectionSetup;
-  isDev?: boolean;
-  kibanaVersion: string;
-  isServerless?: boolean;
-  experimentalFeatures: ExperimentalFeatures;
-}) => {
+  sloClient,
+}: Props) => {
   const { element, history, theme$ } = appMountParameters;
-  const isDarkMode = core.theme.getTheme().darkMode;
 
   // ensure all divs are .kbnAppWrappers
   element.classList.add(APP_WRAPPER_CLASS);
@@ -128,18 +110,17 @@ export const renderApp = ({
                   ObservabilityPageTemplate,
                   observabilityRuleTypeRegistry,
                   experimentalFeatures,
+                  sloClient,
                 }}
               >
                 <Router history={history}>
-                  <EuiThemeProvider darkMode={isDarkMode}>
-                    <RedirectAppLinks coreStart={core} data-test-subj="observabilityMainContainer">
-                      <PerformanceContextProvider>
-                        <QueryClientProvider client={queryClient}>
-                          <App />
-                        </QueryClientProvider>
-                      </PerformanceContextProvider>
-                    </RedirectAppLinks>
-                  </EuiThemeProvider>
+                  <RedirectAppLinks coreStart={core} data-test-subj="observabilityMainContainer">
+                    <PerformanceContextProvider>
+                      <QueryClientProvider client={queryClient}>
+                        <App />
+                      </QueryClientProvider>
+                    </PerformanceContextProvider>
+                  </RedirectAppLinks>
                 </Router>
               </PluginContext.Provider>
             </KibanaContextProvider>
@@ -160,3 +141,21 @@ export const renderApp = ({
     ReactDOM.unmountComponentAtNode(element);
   };
 };
+
+function App() {
+  const { isServerless } = usePluginContext();
+
+  const routes = getRoutes(isServerless);
+
+  return (
+    <Routes>
+      {Object.keys(routes).map((path) => {
+        const { handler, exact } = routes[path];
+        const Wrapper = () => {
+          return handler();
+        };
+        return <Route key={path} path={path} exact={exact} component={Wrapper} />;
+      })}
+    </Routes>
+  );
+}

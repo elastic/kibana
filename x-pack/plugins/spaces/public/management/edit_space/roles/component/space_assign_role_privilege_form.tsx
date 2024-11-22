@@ -20,9 +20,9 @@ import {
   EuiFormRow,
   EuiLink,
   EuiLoadingSpinner,
-  EuiSpacer,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { FC } from 'react';
@@ -30,7 +30,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { KibanaFeature, KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   RawKibanaPrivileges,
   Role,
@@ -46,7 +45,7 @@ import {
   FEATURE_PRIVILEGES_CUSTOM,
   FEATURE_PRIVILEGES_READ,
 } from '../../../../../common/constants';
-import { type EditSpaceServices, type EditSpaceStore, useEditSpaceServices } from '../../provider';
+import { useEditSpaceServices, useEditSpaceStore } from '../../provider';
 
 type KibanaRolePrivilege =
   | keyof NonNullable<KibanaFeatureConfig['privileges']>
@@ -62,9 +61,6 @@ interface PrivilegesRolesFormProps {
    * this is useful when the form is opened in edit mode
    */
   defaultSelected?: Role[];
-  storeDispatch: EditSpaceStore['dispatch'];
-  spacesClientsInvocator: EditSpaceServices['invokeClient'];
-  getUrlForApp: EditSpaceServices['getUrlForApp'];
 }
 
 const createRolesComboBoxOptions = (roles: Role[]): Array<EuiComboBoxOptionOption<Role>> =>
@@ -74,17 +70,9 @@ const createRolesComboBoxOptions = (roles: Role[]): Array<EuiComboBoxOptionOptio
   }));
 
 export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
-  const {
-    space,
-    onSaveCompleted,
-    closeFlyout,
-    features,
-    defaultSelected = [],
-    spacesClientsInvocator,
-    storeDispatch,
-    getUrlForApp,
-  } = props;
-  const { logger, notifications } = useEditSpaceServices();
+  const { space, onSaveCompleted, closeFlyout, features, defaultSelected = [] } = props;
+  const { logger, notifications, license, invokeClient, getUrlForApp } = useEditSpaceServices();
+  const { dispatch: storeDispatch } = useEditSpaceStore();
   const [assigningToRole, setAssigningToRole] = useState(false);
   const [fetchingDataDeps, setFetchingDataDeps] = useState(false);
   const [kibanaPrivileges, setKibanaPrivileges] = useState<RawKibanaPrivileges | null>(null);
@@ -92,13 +80,16 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
   const [selectedRoles, setSelectedRoles] = useState<ReturnType<typeof createRolesComboBoxOptions>>(
     createRolesComboBoxOptions(defaultSelected)
   );
+  const manageRoleLinkId = useGeneratedHtmlId();
   const isEditOperation = useRef(Boolean(defaultSelected.length));
 
-  useEffect(() => {
-    async function fetchRequiredData(spaceId: string) {
+  const userInvokedPageVisibilityChange = useRef<boolean | null>(null);
+
+  const fetchRequiredData = useCallback(
+    async (spaceId: string) => {
       setFetchingDataDeps(true);
 
-      const [systemRoles, _kibanaPrivileges] = await spacesClientsInvocator((clients) =>
+      const [systemRoles, _kibanaPrivileges] = await invokeClient((clients) =>
         Promise.all([
           clients.rolesClient.getRoles(),
           clients.privilegesClient.getAll({ includeActions: true, respectLicenseLevel: false }),
@@ -120,10 +111,28 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
       );
 
       setKibanaPrivileges(_kibanaPrivileges);
+    },
+    [invokeClient]
+  );
+
+  useEffect(() => {
+    fetchRequiredData(space.id!).finally(() => setFetchingDataDeps(false));
+  }, [fetchRequiredData, invokeClient, space.id]);
+
+  useEffect(() => {
+    async function visibilityChangeHandler() {
+      // page just transitioned back to visible state from hidden state caused by user interaction
+      if (userInvokedPageVisibilityChange.current && !document.hidden) {
+        await fetchRequiredData(space.id!).finally(() => setFetchingDataDeps(false));
+      }
     }
 
-    fetchRequiredData(space.id!).finally(() => setFetchingDataDeps(false));
-  }, [space.id, spacesClientsInvocator]);
+    document.addEventListener('visibilitychange', visibilityChangeHandler);
+
+    return () => {
+      document.removeEventListener('visibilitychange', visibilityChangeHandler);
+    };
+  }, [fetchRequiredData, invokeClient, space.id]);
 
   const selectedRolesCombinedPrivileges = useMemo(() => {
     const combinedPrivilege = new Set(
@@ -146,7 +155,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
 
   const [roleSpacePrivilege, setRoleSpacePrivilege] = useState<KibanaRolePrivilege>(
     !selectedRoles.length || !selectedRolesCombinedPrivileges.length
-      ? FEATURE_PRIVILEGES_ALL
+      ? FEATURE_PRIVILEGES_CUSTOM
       : selectedRolesCombinedPrivileges[0]
   );
 
@@ -315,7 +324,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
         return selectedRole.value!;
       });
 
-      await spacesClientsInvocator((clients) =>
+      await invokeClient((clients) =>
         clients.rolesClient.bulkUpdateRoles({ rolesUpdate: updatedRoles }).then((response) => {
           setAssigningToRole(false);
           onSaveCompleted(response);
@@ -338,13 +347,14 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
       });
     }
   }, [
-    selectedRoles,
-    spacesClientsInvocator,
-    storeDispatch,
-    onSaveCompleted,
-    space.id,
     roleSpacePrivilege,
-    roleCustomizationAnchor,
+    roleCustomizationAnchor.value?.kibana,
+    roleCustomizationAnchor.privilegeIndex,
+    selectedRoles,
+    invokeClient,
+    storeDispatch,
+    space.id,
+    onSaveCompleted,
     logger,
     notifications.toasts,
   ]);
@@ -355,17 +365,30 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
         <React.Fragment>
           {!isEditOperation.current && (
             <EuiFormRow
+              onClick={(event: React.MouseEvent<HTMLFieldSetElement>) => {
+                // leverage event propagation, check if manage role link element was clicked
+                if ((event.target as HTMLFieldSetElement).id === manageRoleLinkId) {
+                  userInvokedPageVisibilityChange.current = true;
+                }
+              }}
               label={i18n.translate(
                 'xpack.spaces.management.spaceDetails.roles.selectRolesFormRowLabel',
                 { defaultMessage: 'Select roles' }
               )}
               labelAppend={
-                <EuiLink href={getUrlForApp('management', { deepLinkId: 'roles' })}>
-                  {i18n.translate(
-                    'xpack.spaces.management.spaceDetails.roles.selectRolesFormRowLabelAnchor',
-                    { defaultMessage: 'Manage roles' }
-                  )}
-                </EuiLink>
+                <EuiText size="xs">
+                  <EuiLink
+                    id={manageRoleLinkId}
+                    href={getUrlForApp('management', { deepLinkId: 'roles' })}
+                    external={false}
+                    target="_blank"
+                  >
+                    {i18n.translate(
+                      'xpack.spaces.management.spaceDetails.roles.selectRolesFormRowLabelAnchor',
+                      { defaultMessage: 'Manage roles' }
+                    )}
+                  </EuiLink>
+                </EuiText>
               }
               helpText={i18n.translate(
                 'xpack.spaces.management.spaceDetails.roles.selectRolesHelp',
@@ -386,7 +409,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
                 )}
                 placeholder={i18n.translate(
                   'xpack.spaces.management.spaceDetails.roles.selectRolesPlaceholder',
-                  { defaultMessage: 'Add a role...' }
+                  { defaultMessage: 'Add roles...' }
                 )}
                 isLoading={fetchingDataDeps}
                 options={createRolesComboBoxOptions(spaceUnallocatedRoles)}
@@ -429,9 +452,9 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
                     iconType="iInCircle"
                     data-test-subj="privilege-info-callout"
                     title={i18n.translate(
-                      'xpack.spaces.management.spaceDetails.roles.assign.privilegeConflictMsg.title',
+                      'xpack.spaces.management.spaceDetails.roles.assign.privilegeCombinationMsg.title',
                       {
-                        defaultMessage: 'Privileges will apply only to this space.',
+                        defaultMessage: `The user's resulting access depends on a combination of their role's global space privileges and specific privileges applied to this space.`,
                       }
                     )}
                   />
@@ -441,7 +464,14 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
                 label={i18n.translate(
                   'xpack.spaces.management.spaceDetails.roles.assign.privilegesLabelText',
                   {
-                    defaultMessage: 'Define role privileges',
+                    defaultMessage: 'Define privileges',
+                  }
+                )}
+                helpText={i18n.translate(
+                  'xpack.spaces.management.spaceDetails.roles.assign.privilegesHelpText',
+                  {
+                    defaultMessage:
+                      'Assign the privilege level you wish to grant to all present and future features across this space.',
                   }
                 )}
               >
@@ -495,7 +525,6 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
                       <EuiLoadingSpinner size="l" />
                     ) : (
                       <KibanaPrivilegeTable
-                        showTitle={false}
                         disabled={roleSpacePrivilege !== FEATURE_PRIVILEGES_CUSTOM}
                         role={roleCustomizationAnchor.value!}
                         privilegeIndex={roleCustomizationAnchor.privilegeIndex}
@@ -571,7 +600,10 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
                           )
                         }
                         allSpacesSelected={false}
-                        canCustomizeSubFeaturePrivileges={false}
+                        canCustomizeSubFeaturePrivileges={
+                          license?.getFeatures().allowSubFeaturePrivileges ?? false
+                        }
+                        showAdditionalPermissionsMessage={false}
                       />
                     )}
                   </React.Fragment>
@@ -618,10 +650,10 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
       >
         {isEditOperation.current
           ? i18n.translate('xpack.spaces.management.spaceDetails.roles.updateRoleButton', {
-              defaultMessage: 'Update',
+              defaultMessage: 'Update role privileges',
             })
           : i18n.translate('xpack.spaces.management.spaceDetails.roles.assignRoleButton', {
-              defaultMessage: 'Assign',
+              defaultMessage: 'Assign roles',
             })}
       </EuiButton>
     );
@@ -634,7 +666,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
           <h2>
             {isEditOperation.current
               ? i18n.translate('xpack.spaces.management.spaceDetails.roles.assignRoleButton', {
-                  defaultMessage: 'Edit role privileges',
+                  defaultMessage: 'Edit role privileges for space',
                 })
               : i18n.translate(
                   'xpack.spaces.management.spaceDetails.roles.assign.privileges.custom',
@@ -644,15 +676,6 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
                 )}
           </h2>
         </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiText size="s">
-          <p>
-            <FormattedMessage
-              id="xpack.spaces.management.spaceDetails.privilegeForm.heading"
-              defaultMessage="Define the privileges a given role should have in this space."
-            />
-          </p>
-        </EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>{getForm()}</EuiFlyoutBody>
       <EuiFlyoutFooter>

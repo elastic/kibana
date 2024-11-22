@@ -9,13 +9,10 @@ import { set } from '@kbn/safer-lodash-set/fp';
 import { getOr } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
 import deepMerge from 'deepmerge';
-import { useDispatch } from 'react-redux';
-import { useCallback } from 'react';
 import { useDiscoverInTimelineContext } from '../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
 import type {
   TimelineResponse,
-  ResolvedTimeline,
   ColumnHeaderResult,
   FilterTimelineResult,
   DataProviderResult,
@@ -37,7 +34,7 @@ import { timelineDefaults } from '../../store/defaults';
 
 import {
   defaultColumnHeaderType,
-  defaultHeaders,
+  defaultUdtHeaders,
 } from '../timeline/body/column_headers/default_headers';
 
 import type { OpenTimelineResult, TimelineErrorCallback } from './types';
@@ -49,8 +46,6 @@ import {
   DEFAULT_TO_MOMENT,
 } from '../../../common/utils/default_date_settings';
 import { resolveTimeline } from '../../containers/api';
-import { defaultUdtHeaders } from '../timeline/unified_components/default_headers';
-import { timelineActions } from '../../store';
 
 export const OPEN_TIMELINE_CLASS_NAME = 'open-timeline';
 
@@ -76,12 +71,6 @@ export const getNotesCount = ({ eventIdToNoteIds, noteIds }: OpenTimelineResult)
 /** Returns true if the timeline is untitlied */
 export const isUntitled = ({ title }: OpenTimelineResult): boolean =>
   title == null || title.trim().length === 0;
-
-const omitTypename = (key: string, value: keyof TimelineModel) =>
-  key === '__typename' ? undefined : value;
-
-export const omitTypenameInTimeline = (timeline: TimelineResponse): TimelineResponse =>
-  JSON.parse(JSON.stringify(timeline), omitTypename);
 
 const parseString = (params: string) => {
   try {
@@ -238,13 +227,10 @@ export const getTimelineStatus = (
 export const defaultTimelineToTimelineModel = (
   timeline: TimelineResponse,
   duplicate: boolean,
-  timelineType?: TimelineType,
-  unifiedComponentsInTimelineDisabled?: boolean
+  timelineType?: TimelineType
 ): TimelineModel => {
   const isTemplate = timeline.timelineType === TimelineTypeEnum.template;
-  const defaultHeadersValue = !unifiedComponentsInTimelineDisabled
-    ? defaultUdtHeaders
-    : defaultHeaders;
+  const defaultHeadersValue = defaultUdtHeaders;
 
   const timelineEntries = {
     ...timeline,
@@ -294,18 +280,12 @@ export const defaultTimelineToTimelineModel = (
 export const formatTimelineResponseToModel = (
   timelineToOpen: TimelineResponse,
   duplicate: boolean = false,
-  timelineType?: TimelineType,
-  unifiedComponentsInTimelineDisabled?: boolean
+  timelineType?: TimelineType
 ): { notes: Note[] | null | undefined; timeline: TimelineModel } => {
   const { notes, ...timelineModel } = timelineToOpen;
   return {
     notes,
-    timeline: defaultTimelineToTimelineModel(
-      timelineModel,
-      duplicate,
-      timelineType,
-      unifiedComponentsInTimelineDisabled
-    ),
+    timeline: defaultTimelineToTimelineModel(timelineModel, duplicate, timelineType),
   };
 };
 
@@ -319,23 +299,11 @@ export interface QueryTimelineById {
   onOpenTimeline?: (timeline: TimelineModel) => void;
   openTimeline?: boolean;
   savedSearchId?: string;
-  /*
-   * Below feature flag will be removed once
-   * unified components have been fully migrated
-   * */
-  unifiedComponentsInTimelineDisabled?: boolean;
 }
 
 export const useQueryTimelineById = () => {
   const { resetDiscoverAppState } = useDiscoverInTimelineContext();
   const updateTimeline = useUpdateTimeline();
-  const dispatch = useDispatch();
-
-  const updateIsLoading = useCallback(
-    (status: { id: string; isLoading: boolean }) =>
-      dispatch(timelineActions.updateIsLoading(status)),
-    [dispatch]
-  );
 
   return ({
     activeTimelineTab = TimelineTabs.query,
@@ -347,9 +315,7 @@ export const useQueryTimelineById = () => {
     onOpenTimeline,
     openTimeline = true,
     savedSearchId,
-    unifiedComponentsInTimelineDisabled = false,
   }: QueryTimelineById) => {
-    updateIsLoading({ id: TimelineId.active, isLoading: true });
     if (timelineId == null) {
       updateTimeline({
         id: TimelineId.active,
@@ -359,33 +325,28 @@ export const useQueryTimelineById = () => {
         to: DEFAULT_TO_MOMENT.toISOString(),
         timeline: {
           ...timelineDefaults,
-          columns: !unifiedComponentsInTimelineDisabled ? defaultUdtHeaders : defaultHeaders,
+          columns: defaultUdtHeaders,
           id: TimelineId.active,
           activeTab: activeTimelineTab,
           show: openTimeline,
           initialized: true,
           savedSearchId: savedSearchId ?? null,
           excludedRowRendererIds:
-            !unifiedComponentsInTimelineDisabled && timelineType !== TimelineTypeEnum.template
+            timelineType !== TimelineTypeEnum.template
               ? timelineDefaults.excludedRowRendererIds
               : [],
         },
       });
       resetDiscoverAppState();
-      updateIsLoading({ id: TimelineId.active, isLoading: false });
     } else {
       return Promise.resolve(resolveTimeline(timelineId))
         .then((result) => {
-          const data: ResolvedTimeline | null = getOr(null, 'data', result);
-          if (!data) return;
-
-          const timelineToOpen = omitTypenameInTimeline(data.timeline);
+          if (!result) return;
 
           const { timeline, notes } = formatTimelineResponseToModel(
-            timelineToOpen,
+            result.timeline,
             duplicate,
-            timelineType,
-            unifiedComponentsInTimelineDisabled
+            timelineType
           );
 
           if (onOpenTimeline != null) {
@@ -401,9 +362,9 @@ export const useQueryTimelineById = () => {
               id: TimelineId.active,
               notes,
               resolveTimelineConfig: {
-                outcome: data.outcome,
-                alias_target_id: data.alias_target_id,
-                alias_purpose: data.alias_purpose,
+                outcome: result.outcome,
+                alias_target_id: result.alias_target_id,
+                alias_purpose: result.alias_purpose,
               },
               timeline: {
                 ...timeline,
@@ -426,9 +387,6 @@ export const useQueryTimelineById = () => {
           if (onError != null) {
             onError(error, timelineId);
           }
-        })
-        .finally(() => {
-          updateIsLoading({ id: TimelineId.active, isLoading: false });
         });
     }
   };

@@ -8,10 +8,10 @@
  */
 
 import { firstValueFrom } from 'rxjs';
-import { apm } from '@elastic/apm-rum';
+import { Transaction, apm } from '@elastic/apm-rum';
 import { type Client, OpenFeature, type Provider } from '@openfeature/web-sdk';
 import { coreContextMock } from '@kbn/core-base-browser-mocks';
-import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
+import type { FeatureFlagsSetup, FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import { FeatureFlagsService } from '..';
@@ -63,7 +63,7 @@ describe('FeatureFlagsService Browser', () => {
     test('awaits initialization in the start context', async () => {
       const { setProvider } = featureFlagsService.setup({ injectedMetadata });
       let externalResolve: Function = () => void 0;
-      const spy = jest.spyOn(OpenFeature, 'setProviderAndWait').mockImplementation(async () => {
+      const spy = jest.spyOn(OpenFeature, 'setProviderAndWait').mockImplementationOnce(async () => {
         await new Promise((resolve) => {
           externalResolve = resolve;
         });
@@ -80,7 +80,7 @@ describe('FeatureFlagsService Browser', () => {
 
     test('do not hold for too long during initialization', async () => {
       const { setProvider } = featureFlagsService.setup({ injectedMetadata });
-      const spy = jest.spyOn(OpenFeature, 'setProviderAndWait').mockImplementation(async () => {
+      const spy = jest.spyOn(OpenFeature, 'setProviderAndWait').mockImplementationOnce(async () => {
         await new Promise(() => {}); // never resolves
       });
       const apmCaptureErrorSpy = jest.spyOn(apm, 'captureError');
@@ -94,6 +94,60 @@ describe('FeatureFlagsService Browser', () => {
       expect(apmCaptureErrorSpy).toHaveBeenCalledWith(
         expect.stringContaining('The feature flags provider took too long to initialize.')
       );
+    });
+
+    describe('APM instrumentation', () => {
+      const fakeProvider = { metadata: { name: 'fake provider' } } as Provider;
+
+      let setProvider: FeatureFlagsSetup['setProvider'];
+      let apmSpy: jest.SpyInstance<Transaction | undefined>;
+      let setProviderSpy: jest.SpyInstance<Promise<void>>;
+
+      beforeEach(() => {
+        const setup = featureFlagsService.setup({ injectedMetadata });
+        setProvider = setup.setProvider;
+        setProviderSpy = jest.spyOn(OpenFeature, 'setProviderAndWait');
+        apmSpy = jest.spyOn(apm, 'startTransaction');
+      });
+
+      test('starts an APM transaction to track the time it takes to set a provider', () => {
+        expect.assertions(1);
+        setProvider(fakeProvider);
+        expect(apmSpy).toHaveBeenCalledWith('set-provider', 'feature-flags');
+      });
+
+      test('APM transaction tracks success', async () => {
+        expect.assertions(4);
+
+        setProviderSpy.mockResolvedValueOnce();
+        setProvider(fakeProvider);
+
+        const transaction = apmSpy.mock.results[0].value;
+        const endTransactionSpy = jest.spyOn(transaction, 'end');
+        expect(transaction.outcome).toBeUndefined();
+        expect(endTransactionSpy).toHaveBeenCalledTimes(0);
+        await setProviderSpy.mock.results[0].value.catch(() => {});
+        expect(transaction.outcome).toBe('success');
+        expect(endTransactionSpy).toHaveBeenCalledTimes(1);
+      });
+
+      test('APM transaction tracks failures', async () => {
+        expect.assertions(5);
+
+        const apmCaptureErrorSpy = jest.spyOn(apm, 'captureError');
+        const error = new Error('Something went terribly wrong');
+        setProviderSpy.mockRejectedValueOnce(error);
+        setProvider(fakeProvider);
+
+        const transaction = apmSpy.mock.results[0].value;
+        const endTransactionSpy = jest.spyOn(transaction, 'end');
+        expect(transaction.outcome).toBeUndefined();
+        expect(endTransactionSpy).toHaveBeenCalledTimes(0);
+        await setProviderSpy.mock.results[0].value.catch(() => {});
+        expect(apmCaptureErrorSpy).toHaveBeenCalledWith(error);
+        expect(transaction.outcome).toBe('failure');
+        expect(endTransactionSpy).toHaveBeenCalledTimes(1);
+      });
     });
   });
 
@@ -188,7 +242,11 @@ describe('FeatureFlagsService Browser', () => {
     beforeEach(async () => {
       addHandlerSpy = jest.spyOn(featureFlagsClient, 'addHandler');
       injectedMetadata.getFeatureFlags.mockReturnValue({
-        overrides: { 'my-overridden-flag': true },
+        overrides: {
+          'my-overridden-flag': true,
+          'myPlugin.myOverriddenFlag': true,
+          myDestructuredObjPlugin: { myOverriddenFlag: true },
+        },
       });
       featureFlagsService.setup({ injectedMetadata });
       startContract = await featureFlagsService.start();
@@ -287,6 +345,15 @@ describe('FeatureFlagsService Browser', () => {
       expect(startContract.getBooleanValue('another-flag', false)).toEqual(false);
       expect(getBooleanValueSpy).toHaveBeenCalledTimes(1);
       expect(getBooleanValueSpy).toHaveBeenCalledWith('another-flag', false);
+    });
+
+    test('overrides with dotted names', async () => {
+      const getBooleanValueSpy = jest.spyOn(featureFlagsClient, 'getBooleanValue');
+      expect(startContract.getBooleanValue('myPlugin.myOverriddenFlag', false)).toEqual(true);
+      expect(
+        startContract.getBooleanValue('myDestructuredObjPlugin.myOverriddenFlag', false)
+      ).toEqual(true);
+      expect(getBooleanValueSpy).not.toHaveBeenCalled();
     });
   });
 });

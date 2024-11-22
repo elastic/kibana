@@ -107,6 +107,7 @@ export const registerIndicesRoutes = ({ logger, router }: RouteDependencies) => 
           searchQuery: schema.string({
             defaultValue: '',
           }),
+          trackTotalHits: schema.boolean({ defaultValue: false }),
         }),
         params: schema.object({
           index_name: schema.string(),
@@ -126,8 +127,16 @@ export const registerIndicesRoutes = ({ logger, router }: RouteDependencies) => 
       const searchQuery = request.body.searchQuery;
       const { page = 0, size = DEFAULT_DOCS_PER_PAGE } = request.query;
       const from = page * size;
+      const trackTotalHits = request.body.trackTotalHits;
 
-      const searchResults = await fetchSearchResults(client, indexName, searchQuery, from, size);
+      const searchResults = await fetchSearchResults(
+        client,
+        indexName,
+        searchQuery,
+        from,
+        size,
+        trackTotalHits
+      );
 
       return response.ok({
         body: {
