@@ -30,23 +30,11 @@ function mapDestinationToPainless(metadata: MetadataField) {
 }
 
 function createMetadataPainlessScript(definition: EntityDefinition) {
-  const displayNameField = definition.displayNameTemplate.replace(/[{}]/g, '');
-  const shouldAddDisplayNameMetadata = definition.identityFields.some(
-    ({ field }) => field !== displayNameField
-  );
-  const displayNameMetadata: EntityDefinition['metadata'] = shouldAddDisplayNameMetadata
-    ? [
-        {
-          source: displayNameField,
-          destination: displayNameField,
-          aggregation: { type: 'top_value', sort: { '@timestamp': 'desc' } },
-        },
-      ]
-    : undefined;
+  if (!definition.metadata) {
+    return '';
+  }
 
-  const combinedMetadata = [...(definition.metadata ?? []), ...(displayNameMetadata ?? [])];
-
-  return combinedMetadata.reduce((acc, metadata) => {
+  return definition.metadata.reduce((acc, metadata) => {
     const { destination, source } = metadata;
     const optionalFieldPath = destination.replaceAll('.', '?.');
 

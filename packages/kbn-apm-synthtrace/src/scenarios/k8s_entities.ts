@@ -153,7 +153,7 @@ const scenario: Scenario<Partial<EntityFields>> = async (runOptions) => {
           });
 
       const ecsEntities = getK8sEntitiesEvents('ecs');
-      const otelEntities = getK8sEntitiesEvents('semconv');
+      const otelEntities = getK8sEntitiesEvents('otel');
 
       return [
         withClient(

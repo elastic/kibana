@@ -30,5 +30,12 @@ export const builtInKubernetesPodEcsEntityDefinition: EntityDefinition =
         frequency: '5m',
       },
     },
-    metadata: commonEcsMetadata,
+    metadata: [
+      ...commonEcsMetadata,
+      {
+        source: 'kubernetes.pod.name',
+        destination: 'kubernetes.pod.name',
+        aggregation: { type: 'top_value', sort: { '@timestamp': 'desc' } },
+      },
+    ],
   });

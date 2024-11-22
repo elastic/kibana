@@ -8,23 +8,11 @@
 import { EntityDefinition } from '@kbn/entities-schema';
 
 export function generateLatestMetadataAggregations(definition: EntityDefinition) {
-  const displayNameField = definition.displayNameTemplate.replace(/[{}]/g, '');
-  const shouldAddDisplayNameMetadata = definition.identityFields.some(
-    ({ field }) => field !== displayNameField
-  );
-  const displayNameMetadata: EntityDefinition['metadata'] = shouldAddDisplayNameMetadata
-    ? [
-        {
-          source: displayNameField,
-          destination: displayNameField,
-          aggregation: { type: 'top_value', sort: { '@timestamp': 'desc' } },
-        },
-      ]
-    : undefined;
+  if (!definition.metadata) {
+    return {};
+  }
 
-  const combinedMetadata = [...(definition.metadata ?? []), ...(displayNameMetadata ?? [])];
-
-  return combinedMetadata.reduce((aggs, metadata) => {
+  return definition.metadata.reduce((aggs, metadata) => {
     const lookbackPeriod = metadata.aggregation.lookbackPeriod || definition.latest.lookbackPeriod;
     let agg;
     if (metadata.aggregation.type === 'terms') {

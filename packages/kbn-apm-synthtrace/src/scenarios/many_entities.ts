@@ -137,7 +137,7 @@ const scenario: Scenario<Partial<EntityFields>> = async (runOptions) => {
         });
 
       const ecsEntities = getK8sEntitiesEvents('ecs');
-      const otelEntities = getK8sEntitiesEvents('semconv');
+      const otelEntities = getK8sEntitiesEvents('otel');
       const synthJavaTraces = entities.serviceEntity({
         serviceName: 'synth_java',
         agentName: ['java'],

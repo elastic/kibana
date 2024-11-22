@@ -24,7 +24,7 @@ const identityFieldsMap: Record<Schema, Record<string, string[]>> = {
     service: ['kubernetes.service.name'],
     container: ['kubernetes.container.id'],
   },
-  semconv: {
+  otel: {
     pod: ['k8s.pod.uid'],
     cluster: ['k8s.cluster.uid'],
     cronjob: ['k8s.cronjob.uid'],
@@ -50,7 +50,9 @@ export class K8sEntity extends Serializable<EntityFields> {
       throw new Error(`Entity definition id not defined`);
     }
 
-    const entityDefinitionWithSchema = `kubernetes_${entityDefinitionId}_${schema}`;
+    const entityDefinitionWithSchema = `kubernetes_${entityDefinitionId}_${
+      schema === 'ecs' ? schema : 'semconv'
+    }`;
     const identityFields = identityFieldsMap[schema][entityType];
     if (identityFields === undefined || identityFields.length === 0) {
       throw new Error(

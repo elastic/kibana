@@ -24,7 +24,7 @@ import { k8sServiceEntity } from './kubernetes/service';
 import { k8sContainerEntity } from './kubernetes/container_entity';
 
 export type EntityDataStreamType = 'metrics' | 'logs' | 'traces';
-export type Schema = 'ecs' | 'semconv';
+export type Schema = 'ecs' | 'otel';
 
 export type EntityFields = Fields &
   Partial<{
