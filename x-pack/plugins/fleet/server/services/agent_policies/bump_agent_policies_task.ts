@@ -33,14 +33,15 @@ export function registerBumpAgentPoliciesTask(taskManagerSetup: TaskManagerSetup
       maxAttempts: 3,
       createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
         let cancelled = false;
+        const isCancelled = () => cancelled;
         return {
           async run() {
-            if (cancelled) {
+            if (isCancelled()) {
               throw new Error('Task has been cancelled');
             }
 
             await runWithCache(async () => {
-              await _updatePackagePoliciesThatNeedBump(appContextService.getLogger(), cancelled);
+              await _updatePackagePoliciesThatNeedBump(appContextService.getLogger(), isCancelled);
             });
           },
           async cancel() {
@@ -70,7 +71,10 @@ async function getPackagePoliciesToBump(savedObjectType: string) {
   };
 }
 
-export async function _updatePackagePoliciesThatNeedBump(logger: Logger, cancelled: boolean) {
+export async function _updatePackagePoliciesThatNeedBump(
+  logger: Logger,
+  isCancelled: () => boolean
+) {
   const savedObjectType = await getPackagePolicySavedObjectType();
   const packagePoliciesToBump = await getPackagePoliciesToBump(savedObjectType);
 
@@ -92,7 +96,7 @@ export async function _updatePackagePoliciesThatNeedBump(logger: Logger, cancell
   const start = Date.now();
 
   for (const [spaceId, packagePolicies] of Object.entries(packagePoliciesIndexedBySpace)) {
-    if (cancelled) {
+    if (isCancelled()) {
       throw new Error('Task has been cancelled');
     }
 
