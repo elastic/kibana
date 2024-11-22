@@ -225,27 +225,45 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   public createInferenceEndpoint = async () => {
     const elserId = await this.options.getElserId();
     this.options.logger.debug(`Deploying ELSER model '${elserId}'...`);
-    try {
-      const esClient = await this.options.elasticsearchClientPromise;
-      if (this.isV2KnowledgeBaseEnabled) {
-        await esClient.inference.put({
-          task_type: 'sparse_embedding',
+    const esClient = await this.options.elasticsearchClientPromise;
+
+    const inferenceEndpointExists = await this.isInferenceEndpointExists();
+
+    if (inferenceEndpointExists) {
+      try {
+        await esClient.inference.delete({
           inference_id: ASSISTANT_ELSER_INFERENCE_ID,
-          inference_config: {
-            service: 'elasticsearch',
-            service_settings: {
-              adaptive_allocations: {
-                enabled: true,
-                min_number_of_allocations: 0,
-                max_number_of_allocations: 8,
-              },
-              num_threads: 1,
-              model_id: elserId,
+          // it's being used in the mapping so we need to force delete
+          force: true,
+        });
+        this.options.logger.debug(`Deleted existing inference endpoint for ELSER model '${elserId}'`);
+      } catch (error) {
+        this.options.logger.error(
+          `Error deleting inference endpoint for ELSER model '${elserId}':\n${error}`
+        );
+      }
+    }
+
+    try {
+      await esClient.inference.put({
+        task_type: 'sparse_embedding',
+        inference_id: ASSISTANT_ELSER_INFERENCE_ID,
+        inference_config: {
+          service: 'elasticsearch',
+          service_settings: {
+            adaptive_allocations: {
+              enabled: true,
+              min_number_of_allocations: 0,
+              max_number_of_allocations: 8,
             },
             task_settings: {},
           },
-        });
-      }
+          task_settings: {},
+        },
+      });
+
+      // await for the model to be deployed
+      await this.isInferenceEndpointExists();
     } catch (error) {
       this.options.logger.error(
         `Error creating inference endpoint for ELSER model '${elserId}':\n${error}`
