@@ -39,7 +39,7 @@ export class ByteSizeValue {
     }
 
     const value = parseInt(match[1], 10);
-    const unit = match[2];
+    const unit = match[2].toLowerCase();
 
     return new ByteSizeValue(value * unitMultiplier[unit]);
   }
