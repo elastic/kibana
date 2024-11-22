@@ -98,3 +98,9 @@ export type StreamDefinition = z.infer<typeof streamDefinitonSchema>;
 export const streamDefinitonWithoutChildrenSchema = streamDefinitonSchema.omit({ children: true });
 
 export type StreamWithoutChildrenDefinition = z.infer<typeof streamDefinitonWithoutChildrenSchema>;
+
+export const readStreamDefinitonSchema = streamDefinitonSchema.extend({
+  inheritedFields: z.array(fieldDefinitionSchema.extend({ from: z.string() })).default([]),
+});
+
+export type ReadStreamDefinition = z.infer<typeof readStreamDefinitonSchema>;

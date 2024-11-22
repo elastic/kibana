@@ -83,38 +83,6 @@ export type LogDocument = Fields &
     'kubernetes.pod.name'?: string;
     'kubernetes.container.name'?: string;
     'orchestrator.resource.name'?: string;
-    log?: {
-      file?: {
-        path?: string;
-      };
-    };
-    process?: {
-      name?: string;
-    };
-    kubernetes?: {
-      namespace?: string;
-      pod?: {
-        uid?: string;
-        name?: string;
-      };
-      container?: {
-        name?: string;
-      };
-    };
-    orchestrator?: {
-      resource?: {
-        id?: string;
-        name?: string;
-      };
-      cluster?: {
-        id?: string;
-        name?: string;
-      };
-    };
-    service?: {
-      name?: string;
-      environment?: string;
-    };
   }>;
 
 class Log extends Serializable<LogDocument> {

@@ -26,7 +26,7 @@ import { i18n } from '@kbn/i18n';
 import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
-import { StreamDefinition } from '@kbn/streams-plugin/common';
+import { ReadStreamDefinition } from '@kbn/streams-plugin/common';
 import React, { useMemo } from 'react';
 import { StreamChild } from '@kbn/streams-plugin/common/types';
 import { useKibana } from '../../hooks/use_kibana';
@@ -39,7 +39,7 @@ export function StreamDetailRouting({
   definition,
   refreshDefinition,
 }: {
-  definition?: StreamDefinition;
+  definition?: ReadStreamDefinition;
   refreshDefinition: () => void;
 }) {
   const {
@@ -413,7 +413,7 @@ function PreviewTable({ documents }: { documents: unknown[] }) {
   );
 }
 
-function CurrentStreamEntry({ definition }: { definition: StreamDefinition }) {
+function CurrentStreamEntry({ definition }: { definition: ReadStreamDefinition }) {
   return (
     <EuiPanel hasShadow={false} hasBorder paddingSize="s">
       <EuiText size="s">{definition.id}</EuiText>

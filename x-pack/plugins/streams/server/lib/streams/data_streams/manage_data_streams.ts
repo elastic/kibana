@@ -80,6 +80,8 @@ export async function rolloverDataStreamIfNecessary({
       ) {
         throw error;
       }
+      console.log(JSON.stringify(mappings));
+      console.log(error);
       try {
         await retryTransientEsErrors(() => esClient.indices.rollover({ alias: dataStream.name }), {
           logger,

@@ -33,17 +33,11 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
     agent: {
       name: getAgentName(),
     },
-    cloud: {
-      provider: getCloudProvider(),
-      region: getCloudRegion(Math.floor(Math.random() * 3)),
-      availability_zone: `${getCloudRegion(0)}a`,
-      instance: {
-        id: generateShortId(),
-      },
-      project: {
-        id: generateShortId(),
-      },
-    },
+    'cloud.provider': getCloudProvider(),
+    'cloud.region': getCloudRegion(Math.floor(Math.random() * 3)),
+    'cloud.availability_zone': `${getCloudRegion(0)}a`,
+    'cloud.instance.id': generateShortId(),
+    'cloud.project.id': generateShortId(),
   });
 
   const generateNginxLogs = (timestamp: number) => {
@@ -54,11 +48,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
         .message(message)
         .defaults({
           ...constructCommonMetadata(),
-          log: {
-            file: {
-              path: `/var/log/nginx/access-${getStableShortId()}.log`,
-            },
-          },
+          'log.file.path': `/var/log/nginx/access-${getStableShortId()}.log`,
         })
         .timestamp(timestamp);
     });
@@ -76,14 +66,8 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
         .setHostIp(getIpAddress())
         .defaults({
           ...constructCommonMetadata(),
-          process: {
-            name: processName,
-          },
-          log: {
-            file: {
-              path: `/var/log/${processName}.log`,
-            },
-          },
+          'process.name': processName,
+          'log.file.path': `/var/log/${processName}.log`,
         })
         .timestamp(timestamp);
     });
@@ -107,20 +91,10 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
         .setHostIp(getIpAddress())
         .defaults({
           ...constructCommonMetadata(),
-          kubernetes: {
-            namespace: 'default',
-            pod: {
-              name: `${service}-pod-${getStableShortId()}`,
-            },
-            container: {
-              name: `${service}-container`,
-            },
-          },
-          orchestrator: {
-            resource: {
-              name: service,
-            },
-          },
+          'kubernetes.namespace': 'default',
+          'kubernetes.pod.name': `${service}-pod-${getStableShortId()}`,
+          'kubernetes.container.name': `${service}-container`,
+          'orchestrator.resource.name': service,
         })
         .timestamp(timestamp);
     });
@@ -134,9 +108,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
         .message(message)
         .defaults({
           ...constructCommonMetadata(),
-          service: {
-            name: serviceName,
-          },
+          'service.name': serviceName,
         })
         .timestamp(timestamp);
     });
