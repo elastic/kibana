@@ -14,7 +14,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('Inference plugin - API integration tests', async () => {
     getAvailableConnectors().forEach((connector) => {
       describe(`Connector ${connector.id}`, () => {
-        chatCompleteSuite(connector.id, providerContext);
+        chatCompleteSuite(connector, providerContext);
       });
     });
   });

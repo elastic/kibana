@@ -9,18 +9,22 @@ import { lastValueFrom } from 'rxjs';
 import expect from '@kbn/expect';
 import { supertestToObservable } from '@kbn/sse-utils-server';
 import { FtrProviderContext } from '../ftr_provider_context';
+import type { AvailableConnectorWithId } from '../../common/connectors';
 
-export const chatCompleteSuite = (connectorId: string, { getService }: FtrProviderContext) => {
+export const chatCompleteSuite = (
+  { id: connectorId }: AvailableConnectorWithId,
+  { getService }: FtrProviderContext
+) => {
   const supertest = getService('supertest');
 
   describe('chatComplete API', () => {
     it('returns a chat completion message for a simple prompt', async () => {
       const response = supertest
-        .post(`/internal/inference/chat_complete`)
+        .post(`/internal/inference/chat_complete/stream`)
         .set('kbn-xsrf', 'kibana')
         .send({
           connectorId,
-          system: 'Some system prompt',
+          system: 'Please answer the user question',
           messages: [{ role: 'user', content: '2+2 ?' }],
         })
         .expect(200);

@@ -5,40 +5,57 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
+
+const AI_CONNECTORS_VAR_ENV = 'KIBANA_TESTING_AI_CONNECTORS';
+
+const connectorsSchema = schema.recordOf(
+  schema.string(),
+  schema.object({
+    name: schema.string(),
+    actionTypeId: schema.string(),
+    config: schema.recordOf(schema.string(), schema.any()),
+    secrets: schema.recordOf(schema.string(), schema.any()),
+  })
+);
+
 interface AvailableConnector {
+  name: string;
+  actionTypeId: string;
+  config: Record<string, unknown>;
+  secrets: Record<string, unknown>;
+}
+
+export interface AvailableConnectorWithId extends AvailableConnector {
   id: string;
-  type: string;
 }
 
-interface ConnectorConfig extends AvailableGenAIConnector {
-  configVarEnv: string;
-}
+export const loadConnectors = (): Record<string, AvailableConnector> => {
+  const envValue = process.env[AI_CONNECTORS_VAR_ENV];
+  if (!envValue) {
+    return {};
+  }
 
-const connectorConfigs: ConnectorConfig[] = [
-  { id: 'azure-gpt4', type: '.gen-ai', configVarEnv: 'KIBANA_CONNECTOR_GPT4' },
-  { id: 'gemini-1-5-pro', type: '.gemini', configVarEnv: 'KIBANA_CONNECTOR_GEMINI_PRO_1_5' },
-  { id: 'claude-3-5-sonnet', type: '.bedrock', configVarEnv: 'KIBANA_CONNECTOR_CLAUDE_3_5_SONNET' },
-];
-
-export const getAvailableConnectors = (): AvailableConnector[] => {
-  return connectorConfigs
-    .filter((config) => !!process.env[config.configVarEnv])
-    .map((config) => ({ id: config.id, type: config.type }));
+  let connectors: Record<string, AvailableConnector>;
+  try {
+    connectors = JSON.parse(Buffer.from(envValue, 'base64').toString('utf-8'));
+  } catch (e) {
+    throw new Error(
+      `Error trying to parse value from KIBANA_AI_CONNECTORS environment variable: ${e.message}`
+    );
+  }
+  return connectorsSchema.validate(connectors);
 };
 
 export const getPreconfiguredConnectorConfig = () => {
-  const connectors = connectorConfigs.filter((config) => !!process.env[config.configVarEnv]);
-  const connectorsWithConfig = connectors.reduce((record, connector) => {
-    const config = JSON.parse(process.env[connector.configVarEnv]);
+  return loadConnectors();
+};
 
-    record[connector.id] = {
-      name: connector.id,
-      actionTypeId: connector.type,
-      ...config,
+export const getAvailableConnectors = (): AvailableConnectorWithId[] => {
+  return Object.entries(loadConnectors()).map(([id, connector]) => {
+    return {
+      id,
+      ...connector,
     };
-
-    return record;
-  }, {} as Record<string, any>);
-
-  return connectorsWithConfig;
+  });
 };

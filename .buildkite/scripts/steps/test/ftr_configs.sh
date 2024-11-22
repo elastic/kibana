@@ -11,6 +11,11 @@ if [ "$FTR_CONFIG_GROUP_KEY" == "" ] && [ "$BUILDKITE_PARALLEL_JOB" == "" ]; the
   exit 1
 fi
 
+if [[ "${FTR_GEN_AI:-}" =~ ^(1|true)$ ]]; then
+  echo "FTR_GEN_AI was set - exposing LLM connectors"
+  export KIBANA_TESTING_AI_CONNECTORS="$(vault_get ai-infra-ci ai-connectors)"
+fi
+
 EXTRA_ARGS=${FTR_EXTRA_ARGS:-}
 test -z "$EXTRA_ARGS" || buildkite-agent meta-data set "ftr-extra-args" "$EXTRA_ARGS"
 
