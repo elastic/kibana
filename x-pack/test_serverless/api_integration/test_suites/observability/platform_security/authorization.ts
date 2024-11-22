@@ -8808,6 +8808,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:uptime/show",
                 "ui:uptime/alerting:save",
                 "ui:uptime/elasticManagedLocationsEnabled",
+                "ui:uptime/canManagePrivateLocations",
                 "alerting:xpack.uptime.alerts.tls/uptime/rule/get",
                 "alerting:xpack.uptime.alerts.tls/uptime/rule/getRuleState",
                 "alerting:xpack.uptime.alerts.tls/uptime/rule/getAlertSummary",
