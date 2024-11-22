@@ -1,0 +1,23 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "__mocks__/**/*",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "../../../../typings/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/i18n",
+    "@kbn/core-chrome-browser",
+    "@kbn/shared-ux-page-solution-nav",
+    "@kbn/logging",
+    "@kbn/serverless",
+    "@kbn/core-plugins-browser",
+  ],
+  "exclude": ["target/**/*"]
+}
