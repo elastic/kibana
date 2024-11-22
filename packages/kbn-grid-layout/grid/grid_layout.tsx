@@ -12,6 +12,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { combineLatest, distinctUntilChanged, filter, map, pairwise, skip } from 'rxjs';
 
 import { GridHeightSmoother } from './grid_height_smoother';
+import { GridOverlay } from './grid_overlay';
 import { GridRow } from './grid_row';
 import { GridLayoutData, GridSettings } from './types';
 import { useGridLayoutEvents } from './use_grid_layout_events';
@@ -136,14 +137,17 @@ export const GridLayout = ({
   }, [rowCount, gridLayoutStateManager, renderPanelContents]);
 
   return (
-    <GridHeightSmoother gridLayoutStateManager={gridLayoutStateManager}>
-      <div
-        ref={(divElement) => {
-          setDimensionsRef(divElement);
-        }}
-      >
-        {children}
-      </div>
-    </GridHeightSmoother>
+    <>
+      <GridHeightSmoother gridLayoutStateManager={gridLayoutStateManager}>
+        <div
+          ref={(divElement) => {
+            setDimensionsRef(divElement);
+          }}
+        >
+          {children}
+        </div>
+      </GridHeightSmoother>
+      <GridOverlay gridLayoutStateManager={gridLayoutStateManager} />
+    </>
   );
 };

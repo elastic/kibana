@@ -186,7 +186,7 @@ export const GridRow = forwardRef<
           });
         }
       },
-      []
+      [gridLayoutStateManager.panelRefs, rowIndex, setInteractionEvent]
     );
 
     /**
@@ -209,7 +209,7 @@ export const GridRow = forwardRef<
           }}
         />
       ));
-    }, [panelIds, rowIndex, gridLayoutStateManager, renderPanelContents, setInteractionEvent]);
+    }, [panelIds, rowIndex, gridLayoutStateManager, renderPanelContents, interactionStart]);
 
     return (
       <>
