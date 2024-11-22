@@ -125,8 +125,8 @@ export class Config {
         }),
       },
       auth: {
-        username: this.get('servers.elasticsearch.username'),
-        password: this.get('servers.elasticsearch.password'),
+        username: this.get('servers.kibana.username'),
+        password: this.get('servers.kibana.password'),
       },
 
       metadata: {
