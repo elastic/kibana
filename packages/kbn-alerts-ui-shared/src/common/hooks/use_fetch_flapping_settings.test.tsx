@@ -9,7 +9,7 @@
 
 import React, { FunctionComponent } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import { testQueryClientConfig } from '../test_utils/test_query_client_config';
 import { useFetchFlappingSettings } from './use_fetch_flapping_settings';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
@@ -43,12 +43,9 @@ describe('useFetchFlappingSettings', () => {
   });
 
   test('should call fetchFlappingSettings with the correct parameters', async () => {
-    const { result, waitFor } = renderHook(
-      () => useFetchFlappingSettings({ http, enabled: true }),
-      {
-        wrapper,
-      }
-    );
+    const { result } = renderHook(() => useFetchFlappingSettings({ http, enabled: true }), {
+      wrapper,
+    });
 
     await waitFor(() => {
       return expect(result.current.isInitialLoading).toEqual(false);
@@ -66,12 +63,9 @@ describe('useFetchFlappingSettings', () => {
   });
 
   test('should not call fetchFlappingSettings if enabled is false', async () => {
-    const { result, waitFor } = renderHook(
-      () => useFetchFlappingSettings({ http, enabled: false }),
-      {
-        wrapper,
-      }
-    );
+    const { result } = renderHook(() => useFetchFlappingSettings({ http, enabled: false }), {
+      wrapper,
+    });
 
     await waitFor(() => {
       return expect(result.current.isInitialLoading).toEqual(false);
@@ -82,7 +76,7 @@ describe('useFetchFlappingSettings', () => {
 
   test('should call onSuccess when the fetching was successful', async () => {
     const onSuccessMock = jest.fn();
-    const { result, waitFor } = renderHook(
+    const { result } = renderHook(
       () => useFetchFlappingSettings({ http, enabled: true, onSuccess: onSuccessMock }),
       {
         wrapper,

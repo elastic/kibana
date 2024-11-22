@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, waitFor, renderHook } from '@testing-library/react';
 import { useKibana } from '../../common/lib/kibana';
 import { useSubAction, UseSubActionParams } from './use_sub_action';
 
@@ -30,102 +30,96 @@ describe('useSubAction', () => {
   });
 
   it('init', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useSubAction(params));
-    await waitForNextUpdate();
-
-    expect(result.current).toEqual({
-      isLoading: false,
-      response: {},
-      error: null,
-    });
+    const { result } = renderHook(() => useSubAction(params));
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        isLoading: false,
+        response: {},
+        error: null,
+      })
+    );
   });
 
   it('executes the sub action correctly', async () => {
-    const { waitForNextUpdate } = renderHook(() => useSubAction(params));
-    await waitForNextUpdate();
-
-    expect(mockHttpPost).toHaveBeenCalledWith('/api/actions/connector/test-id/_execute', {
-      body: '{"params":{"subAction":"test","subActionParams":{"foo":"bar"}}}',
-      signal: new AbortController().signal,
-    });
+    renderHook(() => useSubAction(params));
+    await waitFor(() =>
+      expect(mockHttpPost).toHaveBeenCalledWith('/api/actions/connector/test-id/_execute', {
+        body: '{"params":{"subAction":"test","subActionParams":{"foo":"bar"}}}',
+        signal: new AbortController().signal,
+      })
+    );
   });
 
   it('executes sub action if subAction parameter changes', async () => {
-    const { rerender, waitForNextUpdate } = renderHook(useSubAction, { initialProps: params });
-    await waitForNextUpdate();
-
-    expect(mockHttpPost).toHaveBeenCalledTimes(1);
+    const { rerender } = renderHook(useSubAction, { initialProps: params });
+    await waitFor(() => expect(mockHttpPost).toHaveBeenCalledTimes(1));
 
     await act(async () => {
       rerender({ ...params, subAction: 'test-2' });
-      await waitForNextUpdate();
     });
 
-    expect(mockHttpPost).toHaveBeenCalledTimes(2);
+    await waitFor(() => expect(mockHttpPost).toHaveBeenCalledTimes(2));
   });
 
   it('executes sub action if connectorId parameter changes', async () => {
-    const { rerender, waitForNextUpdate } = renderHook(useSubAction, { initialProps: params });
-    await waitForNextUpdate();
-
-    expect(mockHttpPost).toHaveBeenCalledTimes(1);
+    const { rerender } = renderHook(useSubAction, { initialProps: params });
+    await waitFor(() => expect(mockHttpPost).toHaveBeenCalledTimes(1));
 
     await act(async () => {
       rerender({ ...params, connectorId: 'test-id-2' });
-      await waitForNextUpdate();
     });
 
-    expect(mockHttpPost).toHaveBeenCalledTimes(2);
+    await waitFor(() => expect(mockHttpPost).toHaveBeenCalledTimes(2));
   });
 
   it('returns memoized response if subActionParams changes but values are equal', async () => {
-    const { result, rerender, waitForNextUpdate } = renderHook(useSubAction, {
+    const { result, rerender } = renderHook(useSubAction, {
       initialProps: { ...params, subActionParams: { foo: 'bar' } },
     });
-    await waitForNextUpdate();
+    await waitFor(() => expect(mockHttpPost).toHaveBeenCalledTimes(1));
 
-    expect(mockHttpPost).toHaveBeenCalledTimes(1);
     const previous = result.current;
 
     await act(async () => {
       rerender({ ...params, subActionParams: { foo: 'bar' } });
-      await waitForNextUpdate();
     });
 
-    expect(result.current.response).toBe(previous.response);
-    expect(mockHttpPost).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(result.current.response).toBe(previous.response);
+      expect(mockHttpPost).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('executes sub action if subActionParams changes and values are not equal', async () => {
-    const { result, rerender, waitForNextUpdate } = renderHook(useSubAction, {
+    const { result, rerender } = renderHook(useSubAction, {
       initialProps: { ...params, subActionParams: { foo: 'bar' } },
     });
-    await waitForNextUpdate();
+    await waitFor(() => expect(mockHttpPost).toHaveBeenCalledTimes(1));
 
-    expect(mockHttpPost).toHaveBeenCalledTimes(1);
     const previous = result.current;
 
     await act(async () => {
       rerender({ ...params, subActionParams: { foo: 'baz' } });
-      await waitForNextUpdate();
     });
 
-    expect(result.current.response).not.toBe(previous.response);
-    expect(mockHttpPost).toHaveBeenCalledTimes(2);
+    await waitFor(() => {
+      expect(result.current.response).not.toBe(previous.response);
+      expect(mockHttpPost).toHaveBeenCalledTimes(2);
+    });
   });
 
   it('returns an error correctly', async () => {
     const error = new Error('error executing');
     mockHttpPost.mockRejectedValueOnce(error);
 
-    const { result, waitForNextUpdate } = renderHook(() => useSubAction(params));
-    await waitForNextUpdate();
-
-    expect(result.current).toEqual({
-      isLoading: false,
-      response: undefined,
-      error,
-    });
+    const { result } = renderHook(() => useSubAction(params));
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        isLoading: false,
+        response: undefined,
+        error,
+      })
+    );
   });
 
   it('should abort on unmount', async () => {
