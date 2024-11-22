@@ -91,6 +91,7 @@ import { Configs } from './configs';
 import './index.scss';
 import type { InstallPkgRouteOptions } from './utils/get_install_route_options';
 import { InstallButton } from './settings/install_button';
+import { TabsContent } from './tabs_content';
 
 export type DetailViewPanelName =
   | 'overview'
@@ -129,10 +130,25 @@ function Breadcrumbs({ packageTitle }: { packageTitle: string }) {
   return null;
 }
 
-export function Detail() {
+export function Detail({
+  originFrom,
+  routesEnabled = true,
+  onAddIntegrationPolicyClick,
+}: {
+  originFrom?: string;
+  routesEnabled?: boolean;
+  onAddIntegrationPolicyClick?: () => void;
+}) {
   const { getId: getAgentPolicyId } = useAgentPolicyContext();
-  const { getFromIntegrations } = useIntegrationsStateContext();
-  const { pkgkey, panel } = useParams<DetailParams>();
+  const {
+    getFromIntegrations,
+    pkgkey: pkgKeyContext,
+    panel: panelContext,
+  } = useIntegrationsStateContext();
+  const [selectedPanel, setSelectedPanel] = useState<DetailViewPanelName>(panelContext);
+  const { pkgkey: pkgkeyParam, panel: panelParam } = useParams<DetailParams>();
+  const pkgkey = pkgkeyParam || pkgKeyContext;
+  const panel = panelParam || selectedPanel;
   const { getHref, getPath } = useLink();
   const history = useHistory();
   const { pathname, search, hash } = useLocation();
@@ -144,7 +160,6 @@ export function Detail() {
    */
   const onboardingLink = useMemo(() => queryParams.get('onboardingLink'), [queryParams]);
   const onboardingAppId = useMemo(() => queryParams.get('onboardingAppId'), [queryParams]);
-
   const authz = useAuthz();
   const canAddAgent = authz.fleet.addAgents;
   const canInstallPackages = authz.integrations.installPackages;
@@ -178,7 +193,7 @@ export function Detail() {
     if (packageInfo === null || !packageInfo.name) {
       return undefined;
     }
-    return getPackageInstallStatus(packageInfo?.name)?.status;
+    return getPackageInstallStatus?.(packageInfo?.name)?.status;
   }, [packageInfo, getPackageInstallStatus]);
   const isInstalled = useMemo(
     () =>
@@ -401,6 +416,11 @@ export function Detail() {
       ev.preventDefault();
       // The object below, given to `createHref` is explicitly accessing keys of `location` in order
       // to ensure that dependencies to this `useCallback` is set correctly (because `location` is mutable)
+      if (onAddIntegrationPolicyClick) {
+        onAddIntegrationPolicyClick();
+        return;
+      }
+
       const currentPath = history.createHref({
         pathname,
         search,
@@ -448,6 +468,7 @@ export function Detail() {
       isExperimentalAddIntegrationPageEnabled,
       isFirstTimeAgentUser,
       isGuidedOnboardingActive,
+      onAddIntegrationPolicyClick,
       onboardingAppId,
       onboardingLink,
       pathname,
@@ -559,13 +580,17 @@ export function Detail() {
                         >
                           <AddIntegrationButton
                             userCanInstallPackages={userCanInstallPackages}
-                            href={getHref('add_integration_to_policy', {
-                              pkgkey,
-                              ...(integration ? { integration } : {}),
-                              ...(agentPolicyIdFromContext
-                                ? { agentPolicyId: agentPolicyIdFromContext }
-                                : {}),
-                            })}
+                            href={
+                              onAddIntegrationPolicyClick
+                                ? undefined
+                                : getHref('add_integration_to_policy', {
+                                    pkgkey,
+                                    ...(integration ? { integration } : {}),
+                                    ...(agentPolicyIdFromContext
+                                      ? { agentPolicyId: agentPolicyIdFromContext }
+                                      : {}),
+                                  })
+                            }
                             missingSecurityConfiguration={missingSecurityConfiguration}
                             packageName={integrationInfo?.title || packageInfo.title}
                             onClick={handleAddIntegrationPolicyClick}
@@ -593,12 +618,16 @@ export function Detail() {
       ) : undefined,
     [
       packageInfo,
+      showVersionSelect,
+      versionLabel,
+      versionOptions,
       updateAvailable,
       isInstalled,
       pkgkey,
       isOverviewPage,
       isGuidedOnboardingActive,
       userCanInstallPackages,
+      onAddIntegrationPolicyClick,
       getHref,
       integration,
       agentPolicyIdFromContext,
@@ -606,9 +635,6 @@ export function Detail() {
       integrationInfo?.title,
       handleAddIntegrationPolicyClick,
       onVersionChange,
-      showVersionSelect,
-      versionLabel,
-      versionOptions,
     ]
   );
 
@@ -629,10 +655,17 @@ export function Detail() {
         ),
         isSelected: panel === 'overview',
         'data-test-subj': `tab-overview`,
-        href: getHref('integration_details_overview', {
-          pkgkey: packageInfoKey,
-          ...(integration ? { integration } : {}),
-        }),
+        href:
+          originFrom !== 'onboarding-integration'
+            ? getHref('integration_details_overview', {
+                pkgkey: packageInfoKey,
+                ...(integration ? { integration } : {}),
+              })
+            : undefined,
+        onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
+          e.preventDefault();
+          setSelectedPanel('overview');
+        },
       },
     ];
 
@@ -647,10 +680,16 @@ export function Detail() {
         ),
         isSelected: panel === 'policies',
         'data-test-subj': `tab-policies`,
-        href: getHref('integration_details_policies', {
-          pkgkey: packageInfoKey,
-          ...(integration ? { integration } : {}),
-        }),
+        href: routesEnabled
+          ? getHref('integration_details_policies', {
+              pkgkey: packageInfoKey,
+              ...(integration ? { integration } : {}),
+            })
+          : undefined,
+        onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
+          e.preventDefault();
+          setSelectedPanel('policies');
+        },
       });
     }
 
@@ -671,10 +710,16 @@ export function Detail() {
         ),
         isSelected: panel === 'assets',
         'data-test-subj': `tab-assets`,
-        href: getHref('integration_details_assets', {
-          pkgkey: packageInfoKey,
-          ...(integration ? { integration } : {}),
-        }),
+        href: routesEnabled
+          ? getHref('integration_details_assets', {
+              pkgkey: packageInfoKey,
+              ...(integration ? { integration } : {}),
+            })
+          : undefined,
+        onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
+          e.preventDefault();
+          setSelectedPanel('assets');
+        },
       });
     }
 
@@ -689,10 +734,16 @@ export function Detail() {
         ),
         isSelected: panel === 'settings',
         'data-test-subj': `tab-settings`,
-        href: getHref('integration_details_settings', {
-          pkgkey: packageInfoKey,
-          ...(integration ? { integration } : {}),
-        }),
+        href: routesEnabled
+          ? getHref('integration_details_settings', {
+              pkgkey: packageInfoKey,
+              ...(integration ? { integration } : {}),
+            })
+          : undefined,
+        onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
+          e.preventDefault();
+          setSelectedPanel('settings');
+        },
       });
     }
 
@@ -707,10 +758,16 @@ export function Detail() {
         ),
         isSelected: panel === 'configs',
         'data-test-subj': `tab-configs`,
-        href: getHref('integration_details_configs', {
-          pkgkey: packageInfoKey,
-          ...(integration ? { integration } : {}),
-        }),
+        href: routesEnabled
+          ? getHref('integration_details_configs', {
+              pkgkey: packageInfoKey,
+              ...(integration ? { integration } : {}),
+            })
+          : undefined,
+        onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
+          e.preventDefault();
+          setSelectedPanel('configs');
+        },
       });
     }
 
@@ -725,10 +782,16 @@ export function Detail() {
         ),
         isSelected: panel === 'custom',
         'data-test-subj': `tab-custom`,
-        href: getHref('integration_details_custom', {
-          pkgkey: packageInfoKey,
-          ...(integration ? { integration } : {}),
-        }),
+        href: routesEnabled
+          ? getHref('integration_details_custom', {
+              pkgkey: packageInfoKey,
+              ...(integration ? { integration } : {}),
+            })
+          : undefined,
+        onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
+          e.preventDefault();
+          setSelectedPanel('custom');
+        },
       });
     }
 
@@ -743,10 +806,16 @@ export function Detail() {
         ),
         isSelected: panel === 'api-reference',
         'data-test-subj': `tab-api-reference`,
-        href: getHref('integration_details_api_reference', {
-          pkgkey: packageInfoKey,
-          ...(integration ? { integration } : {}),
-        }),
+        href: routesEnabled
+          ? getHref('integration_details_api_reference', {
+              pkgkey: packageInfoKey,
+              ...(integration ? { integration } : {}),
+            })
+          : undefined,
+        onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
+          e.preventDefault();
+          setSelectedPanel('api-reference');
+        },
       });
     }
 
@@ -754,6 +823,7 @@ export function Detail() {
   }, [
     packageInfo,
     panel,
+    originFrom,
     getHref,
     integration,
     canReadIntegrationPolicies,
@@ -763,6 +833,7 @@ export function Detail() {
     showConfigTab,
     showCustomTab,
     showDocumentationTab,
+    routesEnabled,
     numOfDeferredInstallations,
   ]);
 
@@ -823,45 +894,17 @@ export function Detail() {
       ) : isLoading || !packageInfo ? (
         <Loading />
       ) : (
-        <Routes>
-          <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_overview}>
-            <OverviewPage
-              packageInfo={packageInfo}
-              integrationInfo={integrationInfo}
-              latestGAVersion={latestGAVersion}
-            />
-          </Route>
-          <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_settings}>
-            <SettingsPage
-              packageInfo={packageInfo}
-              packageMetadata={packageInfoData?.metadata}
-              startServices={services}
-            />
-          </Route>
-          <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_assets}>
-            <AssetsPage packageInfo={packageInfo} refetchPackageInfo={refetchPackageInfo} />
-          </Route>
-          <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_configs}>
-            <Configs packageInfo={packageInfo} />
-          </Route>
-          <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_policies}>
-            {canReadIntegrationPolicies ? (
-              <PackagePoliciesPage name={packageInfo.name} version={packageInfo.version} />
-            ) : (
-              <PermissionsError
-                error="MISSING_PRIVILEGES"
-                requiredFleetRole="Agent Policies Read and Integrations Read"
-              />
-            )}
-          </Route>
-          <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_custom}>
-            <CustomViewPage packageInfo={packageInfo} />
-          </Route>
-          <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_api_reference}>
-            <DocumentationPage packageInfo={packageInfo} integration={integrationInfo?.name} />
-          </Route>
-          <Redirect to={INTEGRATIONS_ROUTING_PATHS.integration_details_overview} />
-        </Routes>
+        <TabsContent
+          canReadIntegrationPolicies={canReadIntegrationPolicies}
+          integrationInfo={integrationInfo}
+          latestGAVersion={latestGAVersion}
+          packageInfo={packageInfo}
+          packageInfoData={packageInfoData}
+          panel={panel}
+          refetchPackageInfo={refetchPackageInfo}
+          routesEnabled={routesEnabled}
+          services={services}
+        />
       )}
     </WithHeaderLayout>
   );

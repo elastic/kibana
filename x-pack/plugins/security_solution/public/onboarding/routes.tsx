@@ -8,9 +8,10 @@
 import { ONBOARDING_PATH, SecurityPageName } from '../../common/constants';
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { withSecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
+import type { StartPlugins } from '../types';
 import { OnboardingPage } from './components/onboarding';
 
-export const routes: SecuritySubPluginRoutes = [
+export const routes: (plugins: StartPlugins) => SecuritySubPluginRoutes = (plugins) => [
   {
     path: ONBOARDING_PATH,
     component: withSecurityRoutePageWrapper(OnboardingPage, SecurityPageName.landing),

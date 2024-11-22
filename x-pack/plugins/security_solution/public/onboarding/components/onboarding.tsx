@@ -18,8 +18,9 @@ import { OnboardingHeader } from './onboarding_header';
 import { OnboardingBody } from './onboarding_body';
 import { OnboardingFooter } from './onboarding_footer';
 import { PAGE_CONTENT_WIDTH } from '../constants';
+import type { StartPlugins } from '../../types';
 
-export const OnboardingPage = React.memo(() => {
+export const OnboardingPage = React.memo((plugins: StartPlugins) => {
   const spaceId = useSpaceId();
   const { euiTheme } = useEuiTheme();
 
@@ -32,7 +33,7 @@ export const OnboardingPage = React.memo(() => {
   }
 
   return (
-    <OnboardingContextProvider spaceId={spaceId}>
+    <OnboardingContextProvider spaceId={spaceId} fleet={plugins.fleet}>
       <PluginTemplateWrapper paddingSize="none" data-test-subj="onboarding-hub-page">
         <OnboardingAVCBanner />
         <KibanaPageTemplate.Section
