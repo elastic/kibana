@@ -302,7 +302,6 @@ export default function ({ getService }: FtrProviderContext) {
       expect(typeof execution.duration.sampleTask.p95).to.eql('number');
       expect(typeof execution.duration.sampleTask.p99).to.eql('number');
 
-      expect(typeof execution.persistence.ephemeral).to.eql('number');
       expect(typeof execution.persistence.non_recurring).to.eql('number');
       expect(typeof execution.persistence.recurring).to.eql('number');
 

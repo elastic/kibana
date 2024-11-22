@@ -5,29 +5,14 @@
  * 2.0.
  */
 
-import { filter, take } from 'rxjs';
 import pMap from 'p-map';
-
-import { v4 as uuidv4 } from 'uuid';
-import { chunk, flatten, pick } from 'lodash';
-import { Subject } from 'rxjs';
+import { chunk, flatten } from 'lodash';
 import agent from 'elastic-apm-node';
 import { Logger } from '@kbn/core/server';
-import { either, isErr, mapErr } from './lib/result_type';
-import {
-  ErroredTask,
-  ErrResultOf,
-  isTaskClaimEvent,
-  isTaskRunEvent,
-  isTaskRunRequestEvent,
-  OkResultOf,
-  RanTask,
-} from './task_events';
 import { Middleware } from './lib/middleware';
 import { parseIntervalAsMillisecond } from './lib/intervals';
 import {
   ConcreteTaskInstance,
-  EphemeralTask,
   IntervalSchedule,
   TaskInstanceWithDeprecatedFields,
   TaskInstanceWithId,
@@ -35,9 +20,6 @@ import {
 } from './task';
 import { TaskStore } from './task_store';
 import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
-import { TaskLifecycleEvent } from './polling_lifecycle';
-import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
-import { EphemeralTaskRejectedDueToCapacityError } from './task_running';
 import { retryableBulkUpdate } from './lib/retryable_bulk_update';
 import { ErrorOutput } from './lib/bulk_operation_buffer';
 
@@ -46,7 +28,6 @@ const BULK_ACTION_SIZE = 100;
 export interface TaskSchedulingOpts {
   logger: Logger;
   taskStore: TaskStore;
-  ephemeralTaskLifecycle?: EphemeralTaskLifecycle;
   middleware: Middleware;
   taskManagerId: string;
 }
@@ -76,10 +57,8 @@ export interface RunNowResult {
 
 export class TaskScheduling {
   private store: TaskStore;
-  private ephemeralTaskLifecycle?: EphemeralTaskLifecycle;
   private logger: Logger;
   private middleware: Middleware;
-  private taskManagerId: string;
 
   /**
    * Initializes the task manager, preventing any further addition of middleware,
@@ -89,9 +68,7 @@ export class TaskScheduling {
   constructor(opts: TaskSchedulingOpts) {
     this.logger = opts.logger;
     this.middleware = opts.middleware;
-    this.ephemeralTaskLifecycle = opts.ephemeralTaskLifecycle;
     this.store = opts.taskStore;
-    this.taskManagerId = opts.taskManagerId;
   }
 
   /**
@@ -285,68 +262,6 @@ export class TaskScheduling {
   }
 
   /**
-   * Run an ad-hoc task in memory without persisting it into ES or distributing the load across the cluster.
-   *
-   * @param task - The ephemeral task being queued.
-   * @returns {Promise<ConcreteTaskInstance>}
-   */
-  public async ephemeralRunNow(
-    task: EphemeralTask,
-    options?: Record<string, unknown>
-  ): Promise<RunNowResult> {
-    if (!this.ephemeralTaskLifecycle) {
-      throw new EphemeralTaskRejectedDueToCapacityError(
-        `Ephemeral Task of type ${task.taskType} was rejected because ephemeral tasks are not supported`,
-        task
-      );
-    }
-    const id = uuidv4();
-    const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
-      ...options,
-      taskInstance: task,
-    });
-    return new Promise(async (resolve, reject) => {
-      try {
-        // The actual promise returned from this function is resolved after the awaitTaskRunResult promise resolves.
-        // However, we do not wait to await this promise, as we want later execution to happen in parallel.
-        // The awaitTaskRunResult promise is resolved once the ephemeral task is successfully executed (technically, when a TaskEventType.TASK_RUN is emitted with the same id).
-        // However, the ephemeral task won't even get into the queue until the subsequent this.ephemeralTaskLifecycle.attemptToRun is called (which puts it in the queue).
-        // The reason for all this confusion? Timing.
-        // In the this.ephemeralTaskLifecycle.attemptToRun, it's possible that the ephemeral task is put into the queue and processed before this function call returns anything.
-        // If that happens, putting the awaitTaskRunResult after would just hang because the task already completed. We need to listen for the completion before we add it to the queue to avoid this possibility.
-        const { cancel, resolveOnCancel } = cancellablePromise();
-        this.awaitTaskRunResult(id, resolveOnCancel)
-          .then((arg: RunNowResult) => {
-            resolve(arg);
-          })
-          .catch((err: Error) => {
-            reject(err);
-          });
-        const attemptToRunResult = this.ephemeralTaskLifecycle!.attemptToRun({
-          id,
-          scheduledAt: new Date(),
-          runAt: new Date(),
-          status: TaskStatus.Idle,
-          ownerId: this.taskManagerId,
-          ...modifiedTask,
-        });
-
-        if (isErr(attemptToRunResult)) {
-          cancel();
-          reject(
-            new EphemeralTaskRejectedDueToCapacityError(
-              `Ephemeral Task of type ${task.taskType} was rejected`,
-              task
-            )
-          );
-        }
-      } catch (error) {
-        reject(error);
-      }
-    });
-  }
-
-  /**
    * Schedules a task with an Id
    *
    * @param task - The task being scheduled.
@@ -366,63 +281,6 @@ export class TaskScheduling {
     }
   }
 
-  private awaitTaskRunResult(taskId: string, cancel?: Promise<void>): Promise<RunNowResult> {
-    return new Promise((resolve, reject) => {
-      if (!this.ephemeralTaskLifecycle) {
-        reject(
-          new Error(
-            `Failed to run task "${taskId}" because ephemeral tasks are not supported. Rescheduled the task to ensure it is picked up as soon as possible.`
-          )
-        );
-      }
-      // listen for all events related to the current task
-      const subscription = this.ephemeralTaskLifecycle!.events.pipe(
-        filter(({ id }: TaskLifecycleEvent) => id === taskId)
-      ).subscribe((taskEvent: TaskLifecycleEvent) => {
-        if (isTaskClaimEvent(taskEvent)) {
-          mapErr(async (error: Error) => {
-            // reject if any error event takes place for the requested task
-            subscription.unsubscribe();
-          }, taskEvent.event);
-        } else {
-          either<OkResultOf<TaskLifecycleEvent>, ErrResultOf<TaskLifecycleEvent>>(
-            taskEvent.event,
-            (taskInstance: OkResultOf<TaskLifecycleEvent>) => {
-              // resolve if the task has run sucessfully
-              if (isTaskRunEvent(taskEvent)) {
-                resolve(pick((taskInstance as RanTask).task, ['id', 'state']));
-                subscription.unsubscribe();
-              }
-            },
-            async (errorResult: ErrResultOf<TaskLifecycleEvent>) => {
-              // reject if any error event takes place for the requested task
-              subscription.unsubscribe();
-              return reject(
-                new Error(
-                  `Failed to run task "${taskId}": ${
-                    isTaskRunRequestEvent(taskEvent)
-                      ? `Task Manager is at capacity, please try again later`
-                      : isTaskRunEvent(taskEvent)
-                      ? `${(errorResult as ErroredTask).error}`
-                      : `${errorResult}`
-                  }`
-                )
-              );
-            }
-          );
-        }
-      });
-
-      if (cancel) {
-        cancel
-          .then(() => {
-            subscription.unsubscribe();
-          })
-          .catch(() => {});
-      }
-    });
-  }
-
   private async getNonRunningTask(taskId: string) {
     const task = await this.store.get(taskId);
     switch (task.status) {
@@ -437,17 +295,6 @@ export class TaskScheduling {
     }
   }
 }
-
-const cancellablePromise = () => {
-  const boolStream = new Subject<boolean>();
-  return {
-    cancel: () => boolStream.next(true),
-    resolveOnCancel: boolStream
-      .pipe(take(1))
-      .toPromise()
-      .then(() => {}),
-  };
-};
 
 const randomlyOffsetRunTimestamp: (task: ConcreteTaskInstance) => ConcreteTaskInstance = (task) => {
   const now = Date.now();

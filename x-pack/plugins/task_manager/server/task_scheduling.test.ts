@@ -6,20 +6,15 @@
  */
 
 import sinon from 'sinon';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import moment from 'moment';
 
-import { asTaskRunEvent, TaskPersistence } from './task_events';
-import { TaskLifecycleEvent } from './polling_lifecycle';
 import { TaskScheduling } from './task_scheduling';
-import { asErr, asOk } from './lib/result_type';
+import { asOk } from './lib/result_type';
 import { TaskStatus } from './task';
 import { createInitialMiddleware } from './lib/middleware';
 import { taskStoreMock } from './task_store.mock';
-import { TaskRunResult } from './task_running';
 import { mockLogger } from './test_utils';
 import { TaskTypeDictionary } from './task_type_dictionary';
-import { ephemeralTaskLifecycleMock } from './ephemeral_task_lifecycle.mock';
 import { taskManagerMock } from './mocks';
 import { omit } from 'lodash';
 
@@ -52,7 +47,6 @@ describe('TaskScheduling', () => {
     logger: mockLogger(),
     middleware: createInitialMiddleware(),
     definitions,
-    ephemeralTaskLifecycle: ephemeralTaskLifecycleMock.create({}),
     taskManagerId: '123',
   };
 
@@ -832,122 +826,6 @@ describe('TaskScheduling', () => {
 
       const result = taskScheduling.runSoon(id);
       await expect(result).rejects.toEqual(404);
-    });
-  });
-
-  describe('ephemeralRunNow', () => {
-    test('runs a task ephemerally', async () => {
-      const ephemeralEvents$ = new BehaviorSubject<Partial<TaskLifecycleEvent>>({});
-      const ephemeralTask = taskManagerMock.createTask({
-        state: {
-          foo: 'bar',
-        },
-      });
-      const customEphemeralTaskLifecycleMock = ephemeralTaskLifecycleMock.create({
-        events$: ephemeralEvents$ as Observable<TaskLifecycleEvent>,
-      });
-
-      customEphemeralTaskLifecycleMock.attemptToRun.mockImplementation((value) => {
-        return {
-          tag: 'ok',
-          value,
-        };
-      });
-
-      const middleware = createInitialMiddleware();
-      middleware.beforeSave = jest.fn().mockImplementation(async () => {
-        return { taskInstance: ephemeralTask };
-      });
-      const taskScheduling = new TaskScheduling({
-        ...taskSchedulingOpts,
-        middleware,
-        ephemeralTaskLifecycle: customEphemeralTaskLifecycleMock,
-      });
-
-      const result = taskScheduling.ephemeralRunNow(ephemeralTask);
-      ephemeralEvents$.next(
-        asTaskRunEvent(
-          'v4uuid',
-          asOk({
-            task: {
-              ...ephemeralTask,
-              id: 'v4uuid',
-            },
-            result: TaskRunResult.Success,
-            persistence: TaskPersistence.Ephemeral,
-            isExpired: false,
-          })
-        )
-      );
-      await expect(result).resolves.toEqual({ id: 'v4uuid', state: { foo: 'bar' } });
-    });
-
-    test('rejects ephemeral task if lifecycle returns an error', async () => {
-      const ephemeralEvents$ = new Subject<TaskLifecycleEvent>();
-      const ephemeralTask = taskManagerMock.createTask({
-        state: {
-          foo: 'bar',
-        },
-      });
-      const customEphemeralTaskLifecycleMock = ephemeralTaskLifecycleMock.create({
-        events$: ephemeralEvents$,
-      });
-
-      customEphemeralTaskLifecycleMock.attemptToRun.mockImplementation((value) => {
-        return asErr(value);
-      });
-
-      const middleware = createInitialMiddleware();
-      middleware.beforeSave = jest.fn().mockImplementation(async () => {
-        return { taskInstance: ephemeralTask };
-      });
-      const taskScheduling = new TaskScheduling({
-        ...taskSchedulingOpts,
-        middleware,
-        ephemeralTaskLifecycle: customEphemeralTaskLifecycleMock,
-      });
-
-      const result = taskScheduling.ephemeralRunNow(ephemeralTask);
-      ephemeralEvents$.next(
-        asTaskRunEvent(
-          'v4uuid',
-          asOk({
-            task: {
-              ...ephemeralTask,
-              id: 'v4uuid',
-            },
-            result: TaskRunResult.Failed,
-            persistence: TaskPersistence.Ephemeral,
-            isExpired: false,
-          })
-        )
-      );
-
-      await expect(result).rejects.toMatchInlineSnapshot(
-        `[Error: Ephemeral Task of type foo was rejected]`
-      );
-    });
-
-    test('rejects ephemeral task if ephemeralTaskLifecycle is not defined', async () => {
-      const ephemeralTask = taskManagerMock.createTask({
-        state: {
-          foo: 'bar',
-        },
-      });
-      const middleware = createInitialMiddleware();
-      middleware.beforeSave = jest.fn().mockImplementation(async () => {
-        return { taskInstance: ephemeralTask };
-      });
-      const taskScheduling = new TaskScheduling({
-        ...taskSchedulingOpts,
-        middleware,
-        ephemeralTaskLifecycle: undefined,
-      });
-
-      const result = taskScheduling.ephemeralRunNow(ephemeralTask);
-      await expect(result).rejects.toMatchInlineSnapshot(
-        `[Error: Ephemeral Task of type foo was rejected because ephemeral tasks are not supported]`
-      );
     });
   });
 

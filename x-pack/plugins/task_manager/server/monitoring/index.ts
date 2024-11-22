@@ -16,7 +16,6 @@ import {
 import { TaskStore } from '../task_store';
 import { TaskPollingLifecycle } from '../polling_lifecycle';
 import { ManagedConfiguration } from '../lib/create_managed_configuration';
-import { EphemeralTaskLifecycle } from '../ephemeral_task_lifecycle';
 import { AdHocTaskCounter } from '../lib/adhoc_task_counter';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 
@@ -37,7 +36,6 @@ export interface CreateMonitoringStatsOpts {
   adHocTaskCounter: AdHocTaskCounter;
   taskDefinitions: TaskTypeDictionary;
   taskPollingLifecycle?: TaskPollingLifecycle;
-  ephemeralTaskLifecycle?: EphemeralTaskLifecycle;
 }
 
 export function createMonitoringStats(

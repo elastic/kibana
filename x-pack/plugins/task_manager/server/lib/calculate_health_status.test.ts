@@ -42,10 +42,6 @@ const config = {
     },
     custom: {},
   },
-  ephemeral_tasks: {
-    enabled: false,
-    request_capacity: 10,
-  },
   unsafe: {
     exclude_task_types: [],
     authenticate_background_task_utilization: true,
@@ -195,7 +191,6 @@ const getStatsWithTimestamp = ({
             persistence: {
               recurring: 95,
               non_recurring: 5,
-              ephemeral: 0,
             },
             result_frequency_percent_as_number: {
               taskType1: {
