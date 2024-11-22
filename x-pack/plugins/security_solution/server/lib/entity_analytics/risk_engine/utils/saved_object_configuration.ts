@@ -42,7 +42,10 @@ export const updateSavedObjectAttribute = async ({
   attributes,
 }: SavedObjectsClientArg & {
   attributes: {
-    enabled: boolean;
+    enabled?: boolean;
+    excludeAlertIds?: string[];
+    range?: { start: string; end: string };
+    excludeAlertTags?: string[];
   };
 }) => {
   const savedObjectConfiguration = await getConfigurationSavedObject({
