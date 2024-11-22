@@ -10,7 +10,7 @@ import { getDeprecationsInfo as getIlmPolicyDeprecationsInfo } from './migrate_e
 export const registerDeprecations = ({ core }: { core: CoreSetup }) => {
   core.deprecations.registerDeprecations({
     getDeprecations: async (ctx) => {
-      return [...(await getIlmPolicyDeprecationsInfo(ctx))];
+      return await getIlmPolicyDeprecationsInfo(ctx);
     },
   });
 };
