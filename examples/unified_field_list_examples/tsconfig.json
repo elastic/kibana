@@ -28,7 +28,7 @@
     "@kbn/field-formats-plugin",
     "@kbn/data-view-field-editor-plugin",
     "@kbn/unified-field-list",
-    "@kbn/core-theme-browser-internal",
     "@kbn/ui-actions-plugin",
+    "@kbn/react-kibana-context-theme",
   ]
 }

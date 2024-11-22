@@ -8,6 +8,7 @@
 export const AGENT_NAME_DASHBOARD_FILE_MAPPING: Record<string, string> = {
   nodejs: 'nodejs',
   'opentelemetry/nodejs': 'opentelemetry_nodejs',
+  'opentelemetry/nodejs/elastic': 'opentelemetry_nodejs',
   java: 'java',
   'opentelemetry/java': 'opentelemetry_java',
   'opentelemetry/java/opentelemetry-java-instrumentation': 'opentelemetry_java',

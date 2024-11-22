@@ -67,13 +67,15 @@ export const registerBurnRateRuleType = (
     documentationUrl(docLinks) {
       return `${docLinks.links.observability.sloBurnRateRule}`;
     },
-    ruleParamsExpression: lazy(() => import('../components/burn_rate_rule_editor')),
+    ruleParamsExpression: lazyWithContextProviders(
+      lazy(() => import('../components/burn_rate_rule_editor'))
+    ),
     validate: validateBurnRateRule,
     requiresAppContext: false,
     defaultActionMessage: sloBurnRateDefaultActionMessage,
     defaultRecoveryMessage: sloBurnRateDefaultRecoveryMessage,
     alertDetailsAppSection: lazyWithContextProviders(
-      lazy(() => import('../components/slo/burn_rate/alert_details/alert_details_app_section'))
+      lazy(() => import('../components/alert_details/alert_details_app_section'))
     ),
     priority: 100,
   });

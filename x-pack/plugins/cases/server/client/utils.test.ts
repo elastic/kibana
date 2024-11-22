@@ -12,6 +12,7 @@ import { toElasticsearchQuery, toKqlExpression } from '@kbn/es-query';
 import { createSavedObjectsSerializerMock } from './mocks';
 import {
   arraysDifference,
+  buildAttachmentRequestFromFileJSON,
   buildFilter,
   buildObservablesFieldsFilter,
   buildRangeFilter,
@@ -23,6 +24,7 @@ import {
 import { CasePersistedSeverity, CasePersistedStatus } from '../common/types/case';
 import type { CustomFieldsConfiguration } from '../../common/types/domain';
 import { CaseSeverity, CaseStatuses, CustomFieldTypes } from '../../common/types/domain';
+import type { FileJSON } from '@kbn/shared-ux-file-types';
 
 describe('utils', () => {
   describe('buildFilter', () => {
@@ -1609,6 +1611,42 @@ describe('utils', () => {
           "type": "function",
         }
       `);
+    });
+  });
+
+  describe('buildAttachmentRequestFromFileJSON', () => {
+    it('builds attachment request correctly', () => {
+      expect(
+        buildAttachmentRequestFromFileJSON({
+          owner: 'theOwner',
+          fileMetadata: {
+            id: 'file-id',
+            created: 'created',
+            extension: 'jpg',
+            mimeType: 'image/jpeg',
+            name: 'foobar',
+          } as FileJSON,
+        })
+      ).toStrictEqual({
+        externalReferenceAttachmentTypeId: '.files',
+        externalReferenceId: 'file-id',
+        externalReferenceMetadata: {
+          files: [
+            {
+              created: 'created',
+              extension: 'jpg',
+              mimeType: 'image/jpeg',
+              name: 'foobar',
+            },
+          ],
+        },
+        externalReferenceStorage: {
+          soType: 'file',
+          type: 'savedObject',
+        },
+        owner: 'theOwner',
+        type: 'externalReference',
+      });
     });
   });
 });

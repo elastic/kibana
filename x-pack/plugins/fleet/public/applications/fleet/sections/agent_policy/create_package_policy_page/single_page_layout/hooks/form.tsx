@@ -280,7 +280,7 @@ export function useOnSubmit({
 
   useEffect(() => {
     if (
-      agentPolicies.length > 0 &&
+      (canUseMultipleAgentPolicies || agentPolicies.length > 0) &&
       !isEqual(
         agentPolicies.map((policy) => policy.id),
         packagePolicy.policy_ids
@@ -290,7 +290,7 @@ export function useOnSubmit({
         policy_ids: agentPolicies.map((policy) => policy.id),
       });
     }
-  }, [packagePolicy, agentPolicies, updatePackagePolicy]);
+  }, [packagePolicy, agentPolicies, updatePackagePolicy, canUseMultipleAgentPolicies]);
 
   const onSaveNavigate = useOnSaveNavigate({
     packagePolicy,
