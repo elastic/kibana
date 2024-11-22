@@ -307,13 +307,15 @@ type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {
 export function savedObjectToItem(
   savedObject: SavedObject<DashboardSavedObjectAttributes>,
   partial: false,
-  allowedAttributes?: string[]
+  allowedAttributes?: string[],
+  includeReferences?: string[]
 ): SavedObjectToItemReturn<DashboardItem>;
 
 export function savedObjectToItem(
   savedObject: PartialSavedObject<DashboardSavedObjectAttributes>,
   partial: true,
-  allowedAttributes?: string[]
+  allowedAttributes?: string[],
+  includeReferences?: string[]
 ): SavedObjectToItemReturn<PartialDashboardItem>;
 
 export function savedObjectToItem(
@@ -321,7 +323,8 @@ export function savedObjectToItem(
     | SavedObject<DashboardSavedObjectAttributes>
     | PartialSavedObject<DashboardSavedObjectAttributes>,
   partial: boolean,
-  allowedAttributes?: string[]
+  allowedAttributes?: string[],
+  includeReferences?: string[]
 ): SavedObjectToItemReturn<DashboardItem | PartialDashboardItem> {
   const {
     id,
@@ -342,6 +345,12 @@ export function savedObjectToItem(
     const attributesOut = allowedAttributes
       ? pick(dashboardAttributesOut(attributes), allowedAttributes)
       : dashboardAttributesOut(attributes);
+
+    // if includeReferences is provided, only include references of those types
+    const referencesOut = includeReferences
+      ? references?.filter((reference) => includeReferences.includes(reference.type))
+      : references;
+
     return {
       item: {
         id,
@@ -353,7 +362,7 @@ export function savedObjectToItem(
         attributes: attributesOut,
         error,
         namespaces,
-        references,
+        references: referencesOut,
         version,
         managed,
       },
