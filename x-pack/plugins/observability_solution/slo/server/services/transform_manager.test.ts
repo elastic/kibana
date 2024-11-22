@@ -44,15 +44,12 @@ describe('TransformManager', () => {
       it('throws when no generator exists for the slo indicator type', async () => {
         // @ts-ignore defining only a subset of the possible SLI
         const generators: Record<IndicatorTypes, TransformGenerator> = {
-          'sli.apm.transactionDuration': new DummyTransformGenerator(),
+          'sli.apm.transactionDuration': new DummyTransformGenerator(spaceId, dataViewsService),
         };
         const service = new DefaultTransformManager(
           generators,
           scopedClusterClientMock,
-          loggerMock,
-          spaceId,
-          dataViewsService,
-          false
+          loggerMock
         );
 
         await expect(
@@ -63,15 +60,12 @@ describe('TransformManager', () => {
       it('throws when transform generator fails', async () => {
         // @ts-ignore defining only a subset of the possible SLI
         const generators: Record<IndicatorTypes, TransformGenerator> = {
-          'sli.apm.transactionDuration': new FailTransformGenerator(),
+          'sli.apm.transactionDuration': new FailTransformGenerator(spaceId, dataViewsService),
         };
         const transformManager = new DefaultTransformManager(
           generators,
           scopedClusterClientMock,
-          loggerMock,
-          spaceId,
-          dataViewsService,
-          false
+          loggerMock
         );
 
         await expect(
@@ -85,15 +79,15 @@ describe('TransformManager', () => {
     it('installs the transform', async () => {
       // @ts-ignore defining only a subset of the possible SLI
       const generators: Record<IndicatorTypes, TransformGenerator> = {
-        'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(),
+        'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(
+          spaceId,
+          dataViewsService
+        ),
       };
       const transformManager = new DefaultTransformManager(
         generators,
         scopedClusterClientMock,
-        loggerMock,
-        spaceId,
-        dataViewsService,
-        false
+        loggerMock
       );
       const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
 
@@ -110,15 +104,15 @@ describe('TransformManager', () => {
     it('previews the transform', async () => {
       // @ts-ignore defining only a subset of the possible SLI
       const generators: Record<IndicatorTypes, TransformGenerator> = {
-        'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(),
+        'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(
+          spaceId,
+          dataViewsService
+        ),
       };
       const transformManager = new DefaultTransformManager(
         generators,
         scopedClusterClientMock,
-        loggerMock,
-        spaceId,
-        dataViewsService,
-        false
+        loggerMock
       );
 
       await transformManager.preview('slo-transform-id');
@@ -133,15 +127,15 @@ describe('TransformManager', () => {
     it('starts the transform', async () => {
       // @ts-ignore defining only a subset of the possible SLI
       const generators: Record<IndicatorTypes, TransformGenerator> = {
-        'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(),
+        'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(
+          spaceId,
+          dataViewsService
+        ),
       };
       const transformManager = new DefaultTransformManager(
         generators,
         scopedClusterClientMock,
-        loggerMock,
-        spaceId,
-        dataViewsService,
-        false
+        loggerMock
       );
 
       await transformManager.start('slo-transform-id');
@@ -156,15 +150,15 @@ describe('TransformManager', () => {
     it('stops the transform', async () => {
       // @ts-ignore defining only a subset of the possible SLI
       const generators: Record<IndicatorTypes, TransformGenerator> = {
-        'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(),
+        'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(
+          spaceId,
+          dataViewsService
+        ),
       };
       const transformManager = new DefaultTransformManager(
         generators,
         scopedClusterClientMock,
-        loggerMock,
-        spaceId,
-        dataViewsService,
-        false
+        loggerMock
       );
 
       await transformManager.stop('slo-transform-id');
@@ -179,15 +173,15 @@ describe('TransformManager', () => {
     it('uninstalls the transform', async () => {
       // @ts-ignore defining only a subset of the possible SLI
       const generators: Record<IndicatorTypes, TransformGenerator> = {
-        'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(),
+        'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(
+          spaceId,
+          dataViewsService
+        ),
       };
       const transformManager = new DefaultTransformManager(
         generators,
         scopedClusterClientMock,
-        loggerMock,
-        spaceId,
-        dataViewsService,
-        false
+        loggerMock
       );
 
       await transformManager.uninstall('slo-transform-id');
@@ -203,15 +197,15 @@ describe('TransformManager', () => {
       );
       // @ts-ignore defining only a subset of the possible SLI
       const generators: Record<IndicatorTypes, TransformGenerator> = {
-        'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(),
+        'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(
+          spaceId,
+          dataViewsService
+        ),
       };
       const transformManager = new DefaultTransformManager(
         generators,
         scopedClusterClientMock,
-        loggerMock,
-        spaceId,
-        dataViewsService,
-        false
+        loggerMock
       );
 
       await transformManager.uninstall('slo-transform-id');
@@ -224,21 +218,20 @@ describe('TransformManager', () => {
 });
 
 class DummyTransformGenerator extends TransformGenerator {
-  async getTransformParams(
-    slo: SLODefinition,
-    spaceId: string,
-    dataViewService: DataViewsService
-  ): Promise<TransformPutTransformRequest> {
+  constructor(spaceId: string, dataViewService: DataViewsService) {
+    super(spaceId, dataViewService);
+  }
+  async getTransformParams(slo: SLODefinition): Promise<TransformPutTransformRequest> {
     return {} as TransformPutTransformRequest;
   }
 }
 
 class FailTransformGenerator extends TransformGenerator {
-  getTransformParams(
-    slo: SLODefinition,
-    spaceId: string,
-    dataViewService: DataViewsService
-  ): Promise<TransformPutTransformRequest> {
+  constructor(spaceId: string, dataViewService: DataViewsService) {
+    super(spaceId, dataViewService);
+  }
+
+  getTransformParams(slo: SLODefinition): Promise<TransformPutTransformRequest> {
     throw new Error('Some error');
   }
 }
