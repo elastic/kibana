@@ -28,7 +28,8 @@ import { SearchIndexPipelines } from '../search_index/pipelines/pipelines';
 import { getHeaderActions } from '../shared/header_actions/header_actions';
 
 import { ConnectorConfiguration } from './connector_configuration';
-import { ConnectorNameAndDescription } from './connector_name_and_description';
+import { ConnectorDescription } from './connector_description';
+import { ConnectorName } from './connector_name';
 import { ConnectorViewLogic } from './connector_view_logic';
 import { ConnectorDetailOverview } from './overview';
 
@@ -246,7 +247,8 @@ export const ConnectorDetail: React.FC = () => {
       pageViewTelemetry={tabId}
       isLoading={isLoading}
       pageHeader={{
-        pageTitle: connector ? <ConnectorNameAndDescription connector={connector} /> : '...',
+        description: connector ? <ConnectorDescription connector={connector} /> : '...',
+        pageTitle: connector ? <ConnectorName connector={connector} /> : '...',
         rightSideGroupProps: {
           gutterSize: 's',
           responsive: false,
