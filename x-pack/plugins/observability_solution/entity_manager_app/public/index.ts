@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-export class AssetNotFoundError extends Error {
-  constructor(ean: string) {
-    super(`Asset with ean (${ean}) not found in the provided time range`);
-    Object.setPrototypeOf(this, new.target.prototype);
-    this.name = 'AssetNotFoundError';
-  }
-}
+import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
+import { Plugin } from './plugin';
+
+export const plugin: PluginInitializer<{}, {}> = (context: PluginInitializerContext) => {
+  return new Plugin(context);
+};
