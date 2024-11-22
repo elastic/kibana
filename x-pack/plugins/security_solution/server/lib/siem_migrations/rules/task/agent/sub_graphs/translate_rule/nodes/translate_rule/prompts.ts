@@ -9,7 +9,6 @@ import type { TranslateRuleState } from '../../types';
 
 export const getEsqlTranslationPrompt = (
   state: TranslateRuleState,
-  query: string,
   indexPatterns: string
 ): string => {
   return `You are a helpful cybersecurity (SIEM) expert agent. Your task is to migrate "detection rules" from Splunk to Elastic Security.
@@ -44,7 +43,7 @@ ${state.original_rule.description}
 <</DESCRIPTION>>
 
 <<SPL_QUERY>>
-${query}
+${state.inline_query}
 <</SPL_QUERY>>
 `;
 };
