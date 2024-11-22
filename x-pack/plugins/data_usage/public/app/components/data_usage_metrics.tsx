@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { Charts } from './charts';
 import { useBreadcrumbs } from '../../utils/use_breadcrumbs';
 import { useKibanaContextForPlugin } from '../../utils/use_kibana';
-import { DEFAULT_METRIC_TYPES, type UsageMetricsRequestBody } from '../../../common';
+import { DEFAULT_METRIC_TYPES, type UsageMetricsRequestBody } from '../../../common/rest_types';
 import { PLUGIN_NAME } from '../../translations';
 import { useGetDataUsageMetrics } from '../../hooks/use_get_usage_metrics';
 import { useGetDataUsageDataStreams } from '../../hooks/use_get_data_streams';

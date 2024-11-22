@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  UsageMetricsRequestSchema,
-  UsageMetricsResponseSchema,
-  DATA_USAGE_METRICS_API_ROUTE,
-} from '../../../common';
+import { UsageMetricsRequestSchema, UsageMetricsResponseSchema } from '../../../common/rest_types';
+import { DATA_USAGE_METRICS_API_ROUTE } from '../../../common';
 import { DataUsageContext, DataUsageRouter } from '../../types';
 
 import { getUsageMetricsHandler } from './usage_metrics_handler';

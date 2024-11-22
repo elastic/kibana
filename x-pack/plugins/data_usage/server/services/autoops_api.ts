@@ -18,8 +18,8 @@ import {
   UsageMetricsAutoOpsResponseSchema,
   type UsageMetricsAutoOpsResponseSchemaBody,
   type UsageMetricsRequestBody,
-  dateParser,
-} from '../../common';
+} from '../../common/rest_types';
+import { dateParser } from '../../common/utils';
 import { AutoOpsConfig } from '../types';
 import { AutoOpsError } from './errors';
 import { appContextService } from './app_context';

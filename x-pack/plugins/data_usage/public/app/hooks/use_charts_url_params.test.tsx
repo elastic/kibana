@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { METRIC_TYPE_VALUES, type MetricTypes } from '../../../common';
+import { METRIC_TYPE_VALUES, type MetricTypes } from '../../../common/rest_types';
 import { getDataUsageMetricsFiltersFromUrlParams } from './use_charts_url_params';
 
 describe('#getDataUsageMetricsFiltersFromUrlParams', () => {

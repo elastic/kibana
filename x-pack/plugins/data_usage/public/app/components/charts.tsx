@@ -7,7 +7,7 @@
 import React, { useCallback, useState } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { ChartPanel } from './chart_panel';
-import { type UsageMetricsResponseSchemaBody, type MetricTypes } from '../../../common';
+import type { UsageMetricsResponseSchemaBody, MetricTypes } from '../../../common/rest_types';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 interface ChartsProps {
   data: UsageMetricsResponseSchemaBody;

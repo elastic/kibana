@@ -6,12 +6,12 @@
  */
 
 import { useState, useEffect, useMemo } from 'react';
+import { DEFAULT_SELECTED_OPTIONS } from '../../../common';
 import {
-  isDefaultMetricType,
-  METRIC_TYPE_API_VALUES_TO_UI_OPTIONS_MAP,
   METRIC_TYPE_VALUES,
-  DEFAULT_SELECTED_OPTIONS,
-} from '../../../common';
+  METRIC_TYPE_API_VALUES_TO_UI_OPTIONS_MAP,
+  isDefaultMetricType,
+} from '../../../common/rest_types';
 import { FILTER_NAMES } from '../../translations';
 import { useDataUsageMetricsUrlParams } from './use_charts_url_params';
 import { formatBytes } from '../../utils/format_bytes';
