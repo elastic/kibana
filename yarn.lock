@@ -5430,6 +5430,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/entityManager-app-plugin@link:x-pack/plugins/observability_solution/entity_manager_app":
+  version "0.0.0"
+  uid ""
+
 "@kbn/entityManager-plugin@link:x-pack/plugins/entity_manager":
   version "0.0.0"
   uid ""
@@ -6911,6 +6915,10 @@
   uid ""
 
 "@kbn/search-inference-endpoints@link:x-pack/plugins/search_inference_endpoints":
+  version "0.0.0"
+  uid ""
+
+"@kbn/search-navigation@link:x-pack/plugins/search_solution/search_navigation":
   version "0.0.0"
   uid ""
 
