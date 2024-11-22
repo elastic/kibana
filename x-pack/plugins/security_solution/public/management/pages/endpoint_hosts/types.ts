@@ -7,6 +7,7 @@
 
 import type { DataViewBase } from '@kbn/es-query';
 import type { GetInfoResponse } from '@kbn/fleet-plugin/common';
+import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type {
   AppLocation,
   EndpointPendingActions,
@@ -154,4 +155,11 @@ export interface TransformStats {
 export interface TransformStatsResponse {
   count: number;
   transforms: TransformStats[];
+}
+
+export interface EndpointInsightRouteState {
+  insight?: {
+    back_url: string;
+    item: CreateExceptionListItemSchema;
+  };
 }

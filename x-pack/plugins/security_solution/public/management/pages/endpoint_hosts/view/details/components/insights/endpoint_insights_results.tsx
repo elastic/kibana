@@ -17,11 +17,11 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import type { EndpointInsightRouteState } from '../../../../types';
+import { getEndpointDetailsPath } from '../../../../../../common/routing';
+import { useKibana } from '../../../../../../../common/lib/kibana';
 import { ENDPOINT_INSIGHTS } from '../../../translations';
-
-interface EndpointInsightsResultsProps {
-  results: boolean;
-}
+import { APP_PATH, TRUSTED_APPS_PATH } from '../../../../../../../../common/constants';
 
 const CustomEuiCallOut = styled(EuiCallOut)`
   & .euiButtonIcon {
@@ -29,12 +29,50 @@ const CustomEuiCallOut = styled(EuiCallOut)`
   }
 `;
 
-export const EndpointInsightsResults = ({ results }: EndpointInsightsResultsProps) => {
+export const EndpointInsightsResults = () => {
   const [showEmptyResultsCallout, setShowEmptyResultsCallout] = useState(true);
   const hideEmptyStateCallout = () => setShowEmptyResultsCallout(false);
-  if (!results) {
-    return null;
-  }
+  const {
+    application: { navigateToUrl },
+  } = useKibana().services;
+
+  const openArtifactCreationPage = () => {
+    const url = `${APP_PATH}${TRUSTED_APPS_PATH}?show=create`;
+    const state: EndpointInsightRouteState = {
+      insight: {
+        back_url: `${APP_PATH}${getEndpointDetailsPath({
+          name: 'endpointDetails',
+          selected_endpoint: '69f8c984-56bb-4f5d-b6fc-2f5673d93ec9',
+        })}`,
+        item: {
+          comments: [],
+          description: 'Test',
+          entries: [
+            {
+              field: 'process.hash.*',
+              operator: 'included',
+              type: 'match',
+              value: 'aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d',
+            },
+          ],
+          list_id: 'endpoint_trusted_apps',
+          name: 'Test',
+          namespace_type: 'agnostic',
+          tags: ['policy:all'],
+          type: 'simple',
+          os_types: ['windows'],
+        },
+      },
+    };
+    navigateToUrl(url, {
+      state,
+    });
+  };
+
+  const onInsightClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    openArtifactCreationPage();
+  };
 
   return (
     <>
@@ -62,9 +100,8 @@ export const EndpointInsightsResults = ({ results }: EndpointInsightsResultsProp
           <EuiFlexItem grow={false} style={{ marginLeft: 'auto' }}>
             <EuiButtonIcon
               iconType="popout"
-              aria-label="External link"
-              href="https://google.com"
-              target="_blank"
+              href={`${APP_PATH}${TRUSTED_APPS_PATH}?show=create`}
+              onClick={onInsightClick}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

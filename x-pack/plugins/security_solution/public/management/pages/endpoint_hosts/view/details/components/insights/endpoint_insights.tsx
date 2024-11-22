@@ -48,7 +48,7 @@ export const EndpointInsights = () => {
         <EuiSpacer size={'m'} />
         <EndpointInsightsScanSection />
         <EuiSpacer size={'m'} />
-        <EndpointInsightsResults results={true} />
+        <EndpointInsightsResults />
         <EuiHorizontalRule />
       </EuiAccordion>
       <EuiSpacer size="l" />
