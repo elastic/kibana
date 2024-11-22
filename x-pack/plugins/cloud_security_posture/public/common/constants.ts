@@ -23,8 +23,6 @@ import {
 } from '../../common/constants';
 
 import eksLogo from '../assets/icons/cis_eks_logo.svg';
-import aksLogo from '../assets/icons/cis_aks_logo.svg';
-import gkeLogo from '../assets/icons/cis_gke_logo.svg';
 import googleCloudLogo from '../assets/icons/google_cloud_logo.svg';
 
 export const CSP_MOMENT_FORMAT = 'MMMM D, YYYY @ HH:mm:ss.SSS';
@@ -144,34 +142,6 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
           defaultMessage: 'Elastic Kubernetes Service',
         }),
         testId: 'cisEksTestId',
-      },
-      {
-        type: CLOUDBEAT_AKS,
-        name: i18n.translate('xpack.csp.kspmIntegration.aksOption.nameTitle', {
-          defaultMessage: 'AKS',
-        }),
-        benchmark: i18n.translate('xpack.csp.kspmIntegration.aksOption.benchmarkTitle', {
-          defaultMessage: 'CIS AKS',
-        }),
-        disabled: true,
-        icon: aksLogo,
-        tooltip: i18n.translate('xpack.csp.kspmIntegration.aksOption.tooltipContent', {
-          defaultMessage: 'Azure Kubernetes Service - Coming soon',
-        }),
-      },
-      {
-        type: CLOUDBEAT_GKE,
-        name: i18n.translate('xpack.csp.kspmIntegration.gkeOption.nameTitle', {
-          defaultMessage: 'GKE',
-        }),
-        benchmark: i18n.translate('xpack.csp.kspmIntegration.gkeOption.benchmarkTitle', {
-          defaultMessage: 'CIS GKE',
-        }),
-        disabled: true,
-        icon: gkeLogo,
-        tooltip: i18n.translate('xpack.csp.kspmIntegration.gkeOption.tooltipContent', {
-          defaultMessage: 'Google Kubernetes Engine - Coming soon',
-        }),
       },
     ],
   },
