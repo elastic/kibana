@@ -53,24 +53,21 @@ export const formatSyntheticsPolicy = (
     dataStream.enabled = true;
   }
 
-  // TODO: temp for testing purposes
-  configKeys
-    .filter((k) => k !== ConfigKey.SOURCE_INLINE)
-    .forEach((key) => {
-      const configItem = dataStream?.vars?.[key];
-      if (configItem) {
-        if (syntheticsPolicyFormatters[key]) {
-          configItem.value = syntheticsPolicyFormatters[key]?.(config, key);
-        } else if (key === ConfigKey.MONITOR_SOURCE_TYPE && isLegacy) {
-          configItem.value = undefined;
-        } else {
-          configItem.value = config[key] === undefined || config[key] === null ? null : config[key];
-        }
-        if (!PARAMS_KEYS_TO_SKIP.includes(key)) {
-          configItem.value = replaceStringWithParams(configItem.value, params);
-        }
+  configKeys.forEach((key) => {
+    const configItem = dataStream?.vars?.[key];
+    if (configItem) {
+      if (syntheticsPolicyFormatters[key]) {
+        configItem.value = syntheticsPolicyFormatters[key]?.(config, key);
+      } else if (key === ConfigKey.MONITOR_SOURCE_TYPE && isLegacy) {
+        configItem.value = undefined;
+      } else {
+        configItem.value = config[key] === undefined || config[key] === null ? null : config[key];
       }
-    });
+      if (!PARAMS_KEYS_TO_SKIP.includes(key)) {
+        configItem.value = replaceStringWithParams(configItem.value, params);
+      }
+    }
+  });
 
   const processorItem = dataStream?.vars?.processors;
   if (processorItem) {
