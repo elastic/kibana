@@ -19,14 +19,14 @@ export const cli = () => {
       const log = cliContext.log;
       const kbnClient = createKbnClient({
         log,
-        url: cliContext.flags.kibana as string,
+        url: cliContext.flags.kibanaUrl as string,
         username: cliContext.flags.username as string,
         password: cliContext.flags.password as string,
         noCertForSsl: true,
       });
       const esClient = createEsClient({
         log,
-        url: cliContext.flags.elasticsearch as string,
+        url: cliContext.flags.elasticsearchUrl as string,
         username: cliContext.flags.username as string,
         password: cliContext.flags.password as string,
         noCertForSsl: true,
@@ -57,8 +57,8 @@ ${HORIZONTAL_LINE}
         --username                      User name to be used for auth against elasticsearch and
                                         kibana (Default: elastic).
         --password                      User name Password (Default: changeme)
-        --kibana                        The url to Kibana (Default: http://127.0.0.1:5601)
-        --elasticsearch                 The url to Elasticsearch (Default: http://127.0.0.1:9200)
+        --kibanaUrl                     The url to Kibana (Default: http://127.0.0.1:5601)
+        --elasticsearchUrl              The url to Elasticsearch (Default: http://127.0.0.1:9200)
       `,
       },
     }
