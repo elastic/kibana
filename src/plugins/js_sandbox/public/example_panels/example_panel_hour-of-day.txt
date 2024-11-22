@@ -1,3 +1,8 @@
+FROM kibana_sample_data_logs
+| STATS count = COUNT(*) BY hour = BUCKET(DATE_EXTRACT("hour_of_day", @timestamp), 24, 0, 24)
+| SORT hour ASC
+| LIMIT 10000
+
 function(props) {
   const [initalized, setInitialized] = React.useState(false);
   const wrapperRef = React.useRef(null);
@@ -7,17 +12,20 @@ function(props) {
 
   const data = React.useMemo(() => {
     const data = [
-      ...props.data.map((d, i) => ({
-        ...d,
-        count: d.count - (props.crossfilter.find(d2 => d2.agent === d.agent)?.count ?? 0),
-        type: '02_context'
-      })),
       ...props.crossfilter.map(d => ({
-        ...d,
-        type: '01_filter'
+        hour: d['hour'],
+        count: d.count,
+        type: 'crossfilter',
+        typeOrder: 0
+      })),
+      ...props.data.map((d, i) => ({
+        hour: d['hour'],
+        count: d.count - (props.crossfilter.find(d2 => d2['hour'] === d['hour'])?.count ?? 0),
+        type: 'context',
+        typeOrder: 1
       }))
     ];
-    console.log('data agent', data);
+    console.log('data hour', data);
     return data;
   }, [props.data, props.crossfilter]);
 
@@ -49,14 +57,13 @@ function(props) {
         // initialize tooltip handler
         view.tooltip(new vegaTooltip.Handler().call);
 
-        view.addSignalListener('agent', function(event, item) {
-            console.log('item',item);
-            if (item.agent) {
-              props.dispatch(`WHERE agent == "${item.agent[0]}"`);
-            } else {
-              props.dispatch('');
-            }
-          })
+        view.addSignalListener('brushX', function(event, item) {
+          if (item.hour) {
+            props.dispatch(`WHERE DATE_EXTRACT("hour_of_day", @timestamp) >= ${Math.round(item.hour[0])} AND DATE_EXTRACT("hour_of_day", @timestamp) < ${Math.round(item.hour[1])}`);
+          } else {
+            props.dispatch('');
+          }
+        })
 
         setInitialized(true);
       },
@@ -67,22 +74,25 @@ function(props) {
     // register vega and vega-lite with the API
     vl.register(vega, vegaLite, options);
 
-    const click = vl.selectMulti().encodings('y').name('agent');
+    const brush = vl.selectInterval().name('brushX').encodings('x');
 
     // now you can use the API!
     const spec = vl.markBar({ tooltip: true })
       .data({ name: 'table'})
       .encode(
         // https://vega.github.io/vega-lite/docs/timeunit.html
-        vl.x().sum("count"),
-        vl.y().fieldN('agent'),
-        vl.color().fieldN('type').scale({ range: ['steelblue', 'lightgrey'] }).legend({disable: true}),
-        vl.tooltip([vl.fieldN("agent"), vl.fieldQ("count")])
+        vl.y().sum("count"),
+        vl.x().fieldQ('hour').bin({ step: 1}),
+        vl.color().fieldN('type').scale({ range: ['#ddd','#00a69b'] }).legend({disable: true}),
+        vl.opacity().condition({test:"datum['type'] == 'context'",value:0.3}).value(1),
+        vl.order().field('typeOrder'),
+        vl.tooltip([vl.fieldN("hour"), vl.fieldQ("count")])
       )
       .width(props.width)
       .height(props.height)
       .autosize({ type: 'fit-x'})
-      .params(click)
+      .config({view:{stroke:null}})
+      .params(brush)
 
       spec.render()
       .then((viewElement) => {

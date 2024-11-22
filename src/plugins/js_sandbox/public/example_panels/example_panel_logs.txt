@@ -1,0 +1,10 @@
+FROM kibana_sample_data_logs | LIMIT 100
+
+function(props) {
+    const messages = props.crossfilter.map(d => d.message).join('\n');
+    return (
+      <pre>
+        {messages}
+      </pre>
+    );
+  }
