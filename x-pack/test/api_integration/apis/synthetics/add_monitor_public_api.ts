@@ -11,6 +11,9 @@ import { DEFAULT_FIELDS } from '@kbn/synthetics-plugin/common/constants/monitor_
 import { LOCATION_REQUIRED_ERROR } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/monitor_validation';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { addMonitorAPIHelper, omitMonitorKeys } from './add_monitor';
+import { ConfigKey } from '@kbn/synthetics-plugin/common/runtime_types';
+import { omit } from 'lodash';
+import { unzipFile } from '@kbn/synthetics-plugin/server/common/unzip_project_code';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('AddNewMonitorsPublicAPI', function () {
@@ -253,12 +256,16 @@ export default function ({ getService }: FtrProviderContext) {
         };
         const { body: result } = await addMonitorAPI(monitor);
 
-        expect(result).eql(
+        expect(omit(result, ConfigKey.SOURCE_PROJECT_CONTENT)).eql(
           omitMonitorKeys({
             ...defaultFields,
             ...monitor,
             locations: [localLoc],
           })
+        );
+        expect(result[ConfigKey.SOURCE_PROJECT_CONTENT]).to.be.a('string');
+        expect(await unzipFile(result[ConfigKey.SOURCE_PROJECT_CONTENT])).to.contain(
+          monitor[ConfigKey.SOURCE_INLINE]
         );
       });
 
@@ -271,12 +278,16 @@ export default function ({ getService }: FtrProviderContext) {
         };
         const { body: result } = await addMonitorAPI(monitor);
 
-        expect(result).eql(
+        expect(omit(result, ConfigKey.SOURCE_PROJECT_CONTENT)).eql(
           omitMonitorKeys({
             ...defaultFields,
             ...monitor,
             locations: [localLoc],
           })
+        );
+        expect(result[ConfigKey.SOURCE_PROJECT_CONTENT]).to.be.a('string');
+        expect(await unzipFile(result[ConfigKey.SOURCE_PROJECT_CONTENT])).to.contain(
+          monitor.inline_script
         );
       });
     });
