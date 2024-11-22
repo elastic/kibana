@@ -22,7 +22,7 @@ let mockCore: ReportingCore;
 let mockSetupDeps: ReportingInternalSetup;
 let mockStartDeps: ReportingInternalStart;
 
-const mockReportingConfig = createMockConfigSchema({ roles: { enabled: false } });
+const mockReportingConfig = createMockConfigSchema();
 
 const getMockContext = () =>
   ({

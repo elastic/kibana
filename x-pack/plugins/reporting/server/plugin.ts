@@ -80,7 +80,6 @@ export class ReportingPlugin
 
     // async background setup
     (async () => {
-      // Feature registration relies on config, depending on whether deprecated roles are enabled, so it cannot be setup before here.
       registerFeatures({
         features: plugins.features,
         isServerless: this.initContext.env.packageInfo.buildFlavor === 'serverless',

@@ -263,16 +263,5 @@ describe('GetCsvReportPanelAction', () => {
 
       expect(await plugin.isCompatible(context)).toEqual(true);
     });
-
-    it(`allows csv generation when license is valid and deprecated roles config is enabled`, async () => {
-      const plugin = new ReportingCsvPanelAction({
-        core,
-        apiClient,
-        startServices$: mockStartServices$,
-        csvConfig,
-      });
-
-      expect(await plugin.isCompatible(context)).toEqual(true);
-    });
   });
 });

@@ -92,9 +92,6 @@ describe('Reporting server createConfig', () => {
           "pollInterval": 3000,
           "timeout": 120000,
         },
-        "roles": Object {
-          "enabled": false,
-        },
         "statefulSettings": Object {
           "enabled": true,
         },

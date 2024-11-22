@@ -12,7 +12,6 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
   exposeToBrowser: {
     csv: { scroll: true },
     poll: true,
-    roles: true,
     export_types: true,
     statefulSettings: true,
   },

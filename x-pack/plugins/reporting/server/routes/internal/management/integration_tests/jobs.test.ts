@@ -76,7 +76,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
   };
 
   const coreSetupMock = coreMock.createSetup();
-  const mockConfigSchema = createMockConfigSchema({ roles: { enabled: false } });
+  const mockConfigSchema = createMockConfigSchema();
 
   beforeEach(async () => {
     ({ server, httpSetup } = await setupServer(reportingSymbol));
