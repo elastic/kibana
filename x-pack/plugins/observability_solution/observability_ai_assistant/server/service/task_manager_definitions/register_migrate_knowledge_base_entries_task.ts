@@ -12,8 +12,9 @@ import type { CoreSetup, Logger } from '@kbn/core/server';
 import pRetry from 'p-retry';
 import { KnowledgeBaseEntry } from '../../../common';
 import { resourceNames } from '..';
-import { getInferenceEndpoint } from '../inference_endpoint';
+import { getElserModelStatus } from '../inference_endpoint';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
+import { ObservabilityAIAssistantConfig } from '../../config';
 
 export const KB_SEMANTIC_TEXT_MIGRATION_TASK_ID =
   'obs-ai-assistant:knowledge-base-migration-task-id';
@@ -26,10 +27,12 @@ export async function registerMigrateKnowledgeBaseEntriesTask({
   taskManager,
   logger,
   core,
+  config,
 }: {
   taskManager: TaskManagerSetupContract;
   logger: Logger;
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
+  config: ObservabilityAIAssistantConfig;
 }) {
   try {
     logger.debug(`Register task "${TASK_TYPE}"`);
@@ -48,7 +51,7 @@ export async function registerMigrateKnowledgeBaseEntriesTask({
               logger.debug(`Run task: "${TASK_TYPE}"`);
 
               const esClient = { asInternalUser: coreStart.elasticsearch.client.asInternalUser };
-              await runSemanticTextKnowledgeBaseMigration({ esClient, logger });
+              await runSemanticTextKnowledgeBaseMigration({ esClient, logger, config });
             },
           };
         },
@@ -71,9 +74,11 @@ export async function registerMigrateKnowledgeBaseEntriesTask({
 export async function runSemanticTextKnowledgeBaseMigration({
   esClient,
   logger,
+  config,
 }: {
   esClient: { asInternalUser: ElasticsearchClient };
   logger: Logger;
+  config: ObservabilityAIAssistantConfig;
 }) {
   logger.debug('Knowledge base migration: Running migration');
 
@@ -103,7 +108,7 @@ export async function runSemanticTextKnowledgeBaseMigration({
 
     logger.debug(`Knowledge base migration: Found ${response.hits.hits.length} entries to migrate`);
 
-    await waitForInferenceEndpoint({ esClient });
+    await waitForModel({ esClient, logger, config });
 
     // Limit the number of concurrent requests to avoid overloading the cluster
     const limiter = pLimit(10);
@@ -129,23 +134,28 @@ export async function runSemanticTextKnowledgeBaseMigration({
 
     await Promise.all(promises);
     logger.debug(`Knowledge base migration: Migrated ${promises.length} entries`);
-    await runSemanticTextKnowledgeBaseMigration({ esClient, logger });
+    await runSemanticTextKnowledgeBaseMigration({ esClient, logger, config });
   } catch (e) {
     logger.error(`Knowledge base migration failed: ${e.message}`);
     logger.error(e);
   }
 }
 
-async function waitForInferenceEndpoint({
+async function waitForModel({
   esClient,
+  logger,
+  config,
 }: {
   esClient: { asInternalUser: ElasticsearchClient };
+  logger: Logger;
+  config: ObservabilityAIAssistantConfig;
 }) {
   return pRetry(
     async () => {
-      const endpoint = await getInferenceEndpoint({ esClient });
-      if (!endpoint) {
-        throw new Error('Inference endpoint not yet ready');
+      const { ready } = await getElserModelStatus({ esClient, logger, config });
+      if (!ready) {
+        logger.debug('Elser model is not yet ready. Retrying...');
+        throw new Error('Elser model is not yet ready');
       }
     },
     { retries: 40, factor: 2, maxTimeout: 30_000 }

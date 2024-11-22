@@ -85,12 +85,14 @@ import {
   runSemanticTextKnowledgeBaseMigration,
 } from '../task_manager_definitions/register_migrate_knowledge_base_entries_task';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
+import { ObservabilityAIAssistantConfig } from '../../config';
 
 const MAX_FUNCTION_CALLS = 8;
 
 export class ObservabilityAIAssistantClient {
   constructor(
     private readonly dependencies: {
+      config: ObservabilityAIAssistantConfig;
       core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
       actionsClient: PublicMethodsOf<ActionsClient>;
       uiSettingsClient: IUiSettingsClient;
@@ -758,6 +760,7 @@ export class ObservabilityAIAssistantClient {
     return runSemanticTextKnowledgeBaseMigration({
       esClient: this.dependencies.esClient,
       logger: this.dependencies.logger,
+      config: this.dependencies.config,
     });
   };
 

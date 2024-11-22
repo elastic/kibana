@@ -97,6 +97,7 @@ export class ObservabilityAIAssistantService {
 
     return new ObservabilityAIAssistantClient({
       core: this.core,
+      config: this.config,
       actionsClient: await plugins.actions.getActionsClientWithRequest(request),
       uiSettingsClient: coreStart.uiSettings.asScopedToClient(soClient),
       namespace: spaceId,

@@ -126,6 +126,7 @@ export class ObservabilityAIAssistantPlugin
           core,
           taskManager: plugins.taskManager,
           logger: this.logger,
+          config: this.config,
         });
       })
       .catch((e) => {
