@@ -49,9 +49,8 @@ export const setWriteBlock =
           {
             index,
             block: 'write',
-            timeout,
           },
-          { maxRetries: 0 /** handle retry ourselves for now */ }
+          { requestTimeout: timeout, maxRetries: 0 /** handle retry ourselves for now */ }
         )
         // not typed yet
         .then((res) => {
