@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Entity, EntityDefinition, EntityDefinitionUpdate } from '@kbn/entities-schema';
+import { EntityV2, EntityDefinition, EntityDefinitionUpdate } from '@kbn/entities-schema';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
@@ -266,7 +266,10 @@ export class EntityClient {
         });
         this.options.logger.debug(`Entity query: ${query}`);
 
-        const rawEntities = await runESQLQuery<Entity>({ query, esClient: this.options.esClient });
+        const rawEntities = await runESQLQuery<EntityV2>({
+          query,
+          esClient: this.options.esClient,
+        });
 
         return rawEntities.map((entity) => {
           entity['entity.id'] = source.identity_fields.map((field) => entity[field]).join(':');

@@ -23,7 +23,7 @@ export interface MetadataRecord {
   [key: string]: string[] | MetadataRecord | string;
 }
 
-export interface Entity {
+export interface EntityV2 {
   'entity.id': string;
   'entity.last_seen_timestamp': string;
   'entity.type': string;

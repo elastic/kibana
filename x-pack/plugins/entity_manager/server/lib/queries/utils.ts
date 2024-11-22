@@ -6,12 +6,12 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { Entity } from '@kbn/entities-schema';
+import { EntityV2 } from '@kbn/entities-schema';
 import { ESQLSearchResponse } from '@kbn/es-types';
 import { uniq } from 'lodash';
 
-function mergeEntities(entity1: Entity, entity2: Entity): Entity {
-  const merged: Entity = {
+function mergeEntities(entity1: EntityV2, entity2: EntityV2): EntityV2 {
+  const merged: EntityV2 = {
     ...entity1,
     'entity.last_seen_timestamp': new Date(
       Math.max(
@@ -36,8 +36,8 @@ function mergeEntities(entity1: Entity, entity2: Entity): Entity {
   return merged;
 }
 
-export function mergeEntitiesList(entities: Entity[]): Entity[] {
-  const instances: { [key: string]: Entity } = {};
+export function mergeEntitiesList(entities: EntityV2[]): EntityV2[] {
+  const instances: { [key: string]: EntityV2 } = {};
 
   for (let i = 0; i < entities.length; i++) {
     const entity = entities[i];

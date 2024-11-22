@@ -21,7 +21,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { Entity } from '@kbn/entities-schema';
+import { EntityV2 } from '@kbn/entities-schema';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 
 function EntitySourceForm({
@@ -137,7 +137,7 @@ const newEntitySource = ({
 
 export function EntityManagerOverviewPage() {
   const { ObservabilityPageTemplate, entityClient } = usePluginContext();
-  const [previewEntities, setPreviewEntities] = useState<Entity[]>([]);
+  const [previewEntities, setPreviewEntities] = useState<EntityV2[]>([]);
   const [isSearchingEntities, setIsSearchingEntities] = useState(false);
   const [previewError, setPreviewError] = useState(null);
   const [formErrors, setFormErrors] = useState<string[]>([]);
