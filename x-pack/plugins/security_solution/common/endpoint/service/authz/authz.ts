@@ -100,10 +100,19 @@ export const calculateEndpointAuthz = (
   const authz: EndpointAuthz = {
     canWriteSecuritySolution,
     canReadSecuritySolution,
+
+    // ---------------------------------------------------------
+    // Coming from Fleet authz
+    // ---------------------------------------------------------
     canAccessFleet: fleetAuthz?.fleet.all ?? false,
     canReadFleetAgentPolicies: fleetAuthz?.fleet.readAgentPolicies ?? false,
     canWriteFleetAgents: fleetAuthz?.fleet.allAgents ?? false,
     canReadFleetAgents: fleetAuthz?.fleet.readAgents ?? false,
+    canWriteIntegrationPolicies: fleetAuthz?.integrations.writeIntegrationPolicies ?? false,
+
+    // ---------------------------------------------------------
+    // Endpoint & policy management
+    // ---------------------------------------------------------
     canAccessEndpointManagement: hasEndpointManagementAccess, // TODO: is this one deprecated? it is the only place we need to check for superuser.
     canCreateArtifactsByPolicy: isPlatinumPlusLicense,
     canWriteEndpointList,
@@ -167,6 +176,7 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
     canReadFleetAgentPolicies: false,
     canReadFleetAgents: false,
     canWriteFleetAgents: false,
+    canWriteIntegrationPolicies: false,
     canAccessEndpointActionsLogManagement: false,
     canAccessEndpointManagement: false,
     canCreateArtifactsByPolicy: false,

@@ -38,7 +38,12 @@ describe('When on the policy list page', () => {
 
   beforeEach(() => {
     useUserPrivilegesMock.mockReturnValue({
-      endpointPrivileges: { canReadEndpointList: true, canAccessFleet: true, loading: false },
+      endpointPrivileges: {
+        canReadEndpointList: true,
+        canAccessFleet: true,
+        canWriteIntegrationPolicies: true,
+        loading: false,
+      },
     });
 
     mockedContext = createAppRootMockRenderer();
@@ -75,28 +80,61 @@ describe('When on the policy list page', () => {
           count: 0,
         })
       );
-      render();
-      await waitFor(() => {
-        expect(getPackagePolicies).toHaveBeenCalled();
-      });
     });
+
     afterEach(() => {
       getPackagePolicies.mockReset();
     });
-    it('should show the empty page', async () => {
+
+    it('should show the empty page with onboarding instructions', async () => {
+      render();
+
       await waitFor(() => {
-        expect(renderResult.getByTestId('emptyPolicyTable')).toBeTruthy();
-      });
-    });
-    it('should show instruction text and a button to add the Endpoint Security integration', async () => {
-      await waitFor(() => {
+        expect(renderResult.getByTestId('emptyPolicyTable')).toBeInTheDocument();
+        expect(renderResult.getByTestId('policyOnboardingInstructions')).toBeInTheDocument();
         expect(
           renderResult.getByText(
             'From this page, you can view and manage the Elastic Defend integration policies in your environment running Elastic Defend.'
           )
-        ).toBeTruthy();
+        ).toBeInTheDocument();
+      });
+    });
 
-        expect(renderResult.getByTestId('onboardingStartButton')).toBeTruthy();
+    it('should show onboarding button with fleet access and integrations write privilege', async () => {
+      useUserPrivilegesMock.mockReturnValue({
+        endpointPrivileges: { canAccessFleet: true, canWriteIntegrationPolicies: true },
+      });
+      render();
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('policyOnboardingInstructions')).toBeInTheDocument();
+        expect(renderResult.getByTestId('onboardingStartButton')).toBeInTheDocument();
+      });
+    });
+
+    it('should not show onboarding button with integrations write privilege but without fleet access', async () => {
+      useUserPrivilegesMock.mockReturnValue({
+        endpointPrivileges: { canAccessFleet: false, canWriteIntegrationPolicies: true },
+      });
+
+      render();
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('policyOnboardingInstructions')).toBeInTheDocument();
+        expect(renderResult.queryByTestId('onboardingStartButton')).not.toBeInTheDocument();
+      });
+    });
+
+    it('should not show onboarding button with fleet access but without integrations write privilege', async () => {
+      useUserPrivilegesMock.mockReturnValue({
+        endpointPrivileges: { canAccessFleet: true, canWriteIntegrationPolicies: false },
+      });
+
+      render();
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('policyOnboardingInstructions')).toBeInTheDocument();
+        expect(renderResult.queryByTestId('onboardingStartButton')).not.toBeInTheDocument();
       });
     });
   });

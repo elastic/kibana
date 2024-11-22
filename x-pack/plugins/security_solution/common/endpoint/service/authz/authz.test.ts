@@ -96,46 +96,58 @@ describe('Endpoint Authz service', () => {
       );
     });
 
-    it('should not give canAccessFleet if `fleet.all` is false', () => {
-      fleetAuthz.fleet.all = false;
-      expect(calculateEndpointAuthz(licenseService, fleetAuthz, userRoles).canAccessFleet).toBe(
-        false
-      );
+    describe('Fleet', () => {
+      [true, false].forEach((value) => {
+        it(`should set canAccessFleet to ${value} if \`fleet.all\` is ${value}`, () => {
+          fleetAuthz.fleet.all = value;
+          expect(calculateEndpointAuthz(licenseService, fleetAuthz, userRoles).canAccessFleet).toBe(
+            value
+          );
+        });
+
+        it(`should set canReadFleetAgents to ${value} if \`fleet.readAgents\` is ${value}`, () => {
+          fleetAuthz.fleet.readAgents = value;
+          expect(
+            calculateEndpointAuthz(licenseService, fleetAuthz, userRoles).canReadFleetAgents
+          ).toBe(value);
+        });
+
+        it(`should set canWriteFleetAgents to ${value} if \`fleet.allAgents\` is ${value}`, () => {
+          fleetAuthz.fleet.allAgents = value;
+          expect(
+            calculateEndpointAuthz(licenseService, fleetAuthz, userRoles).canWriteFleetAgents
+          ).toBe(value);
+        });
+
+        it(`should set canReadFleetAgentPolicies to ${value} if \`fleet.readAgentPolicies\` is ${value}`, () => {
+          fleetAuthz.fleet.readAgentPolicies = value;
+          expect(
+            calculateEndpointAuthz(licenseService, fleetAuthz, userRoles).canReadFleetAgentPolicies
+          ).toBe(value);
+        });
+
+        it(`should set canAccessFleet to ${value} if \`fleet.all\` is ${value}`, () => {
+          fleetAuthz.fleet.all = value;
+          expect(calculateEndpointAuthz(licenseService, fleetAuthz, userRoles).canAccessFleet).toBe(
+            value
+          );
+        });
+
+        it(`should set canWriteIntegrationPolicies to ${value} if \`integrations.writeIntegrationPolicies\` is ${value}`, () => {
+          fleetAuthz.integrations.writeIntegrationPolicies = value;
+          expect(
+            calculateEndpointAuthz(licenseService, fleetAuthz, userRoles)
+              .canWriteIntegrationPolicies
+          ).toBe(value);
+        });
+      });
     });
 
-    it('should not give canReadFleetAgents if `fleet.readAgents` is false', () => {
-      fleetAuthz.fleet.readAgents = false;
-      expect(calculateEndpointAuthz(licenseService, fleetAuthz, userRoles).canReadFleetAgents).toBe(
-        false
-      );
-    });
-
-    it('should not give canWriteFleetAgents if `fleet.allAgents` is false', () => {
-      fleetAuthz.fleet.allAgents = false;
-      expect(
-        calculateEndpointAuthz(licenseService, fleetAuthz, userRoles).canWriteFleetAgents
-      ).toBe(false);
-    });
-
-    it('should not give canReadFleetAgentPolicies if `fleet.readAgentPolicies` is false', () => {
-      fleetAuthz.fleet.readAgentPolicies = false;
-      expect(
-        calculateEndpointAuthz(licenseService, fleetAuthz, userRoles).canReadFleetAgentPolicies
-      ).toBe(false);
-    });
-
-    it('should not give canAccessEndpointManagement if not superuser', () => {
+    it('should set canAccessEndpointManagement if not superuser', () => {
       userRoles = [];
       expect(
         calculateEndpointAuthz(licenseService, fleetAuthz, userRoles).canAccessEndpointManagement
       ).toBe(false);
-    });
-
-    it('should give canAccessFleet if `fleet.all` is true', () => {
-      fleetAuthz.fleet.all = true;
-      expect(calculateEndpointAuthz(licenseService, fleetAuthz, userRoles).canAccessFleet).toBe(
-        true
-      );
     });
 
     it('should give canAccessEndpointManagement if superuser', () => {
@@ -308,6 +320,7 @@ describe('Endpoint Authz service', () => {
         canReadFleetAgentPolicies: false,
         canReadFleetAgents: false,
         canWriteFleetAgents: false,
+        canWriteIntegrationPolicies: false,
         canAccessEndpointActionsLogManagement: false,
         canAccessEndpointManagement: false,
         canCreateArtifactsByPolicy: false,
