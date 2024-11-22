@@ -27,10 +27,7 @@ export const migrateLegacyPrivateLocations = async (
     try {
       obj = await soClient.get<SyntheticsPrivateLocationsAttributes>(
         legacyPrivateLocationsSavedObjectName,
-        legacyPrivateLocationsSavedObjectId,
-        {
-          namespace: '*',
-        }
+        legacyPrivateLocationsSavedObjectId
       );
     } catch (e) {
       // we don't need to do anything if the legacy object doesn't exist

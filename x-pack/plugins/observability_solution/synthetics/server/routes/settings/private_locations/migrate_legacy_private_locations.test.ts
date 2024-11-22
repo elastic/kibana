@@ -29,8 +29,7 @@ describe('migrateLegacyPrivateLocations', () => {
 
     expect(repositoryMock.get).toHaveBeenCalledWith(
       'synthetics-privates-locations',
-      'synthetics-privates-locations-singleton',
-      { namespace: '*' }
+      'synthetics-privates-locations-singleton'
     );
   });
 
