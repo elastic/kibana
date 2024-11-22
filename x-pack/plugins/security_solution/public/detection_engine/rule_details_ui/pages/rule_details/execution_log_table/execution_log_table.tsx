@@ -14,6 +14,7 @@ import type {
   OnRefreshProps,
   OnRefreshChangeProps,
   EuiSwitchEvent,
+  CriteriaWithPagination,
 } from '@elastic/eui';
 import {
   EuiTextColor,
@@ -36,6 +37,7 @@ import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 
+import { dataViewSpecToViewBase } from '../../../../../common/lib/kuery';
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
 
 import {
@@ -83,8 +85,7 @@ import {
   getSourceEventTimeRangeColumns,
 } from './execution_log_columns';
 import { ExecutionLogSearchBar } from './execution_log_search_bar';
-
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { EventLogEventTypes } from '../../../../../common/lib/telemetry';
 
 const EXECUTION_UUID_FIELD_NAME = 'kibana.alert.rule.execution.uuid';
 
@@ -127,7 +128,6 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
     timelines,
     telemetry,
   } = useKibana().services;
-  const isManualRuleRunEnabled = useIsExperimentalFeatureEnabled('manualRuleRunEnabled');
 
   const {
     [RuleDetailTabs.executionResults]: {
@@ -161,7 +161,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
   } = useRuleDetailsContext();
 
   // Index for `add filter` action and toasts for errors
-  const { indexPattern } = useSourcererDataView(SourcererScopeName.detections);
+  const { sourcererDataView } = useSourcererDataView(SourcererScopeName.detections);
   const { addError, addSuccess, remove } = useAppToasts();
 
   // QueryString, Filters, and TimeRange state
@@ -234,20 +234,22 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
   const maxEvents = events?.total ?? 0;
 
   // Cache UUID field from data view as it can be expensive to iterate all data view fields
-  const uuidDataViewField = useMemo(() => {
-    return indexPattern.fields.find((f) => f.name === EXECUTION_UUID_FIELD_NAME);
-  }, [indexPattern]);
+  const uuidDataViewField = useMemo(
+    () => sourcererDataView.fields?.[EXECUTION_UUID_FIELD_NAME],
+    [sourcererDataView]
+  );
 
   // Callbacks
   const onTableChangeCallback = useCallback(
-    ({ page = {}, sort = {} }) => {
+    ({ page, sort }: CriteriaWithPagination<RuleExecutionResult>) => {
       const { index, size } = page;
-      const { field, direction } = sort;
-
       setPageIndex(index + 1);
       setPageSize(size);
-      setSortField(field);
-      setSortDirection(direction);
+      if (sort) {
+        const { field, direction } = sort;
+        setSortField(field);
+        setSortDirection(direction);
+      }
     },
     [setPageIndex, setPageSize, setSortDirection, setSortField]
   );
@@ -300,12 +302,18 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
 
   const onFilterByExecutionIdCallback = useCallback(
     (executionId: string, executionStart: string) => {
-      if (uuidDataViewField != null) {
+      const dataViewAsViewBase = dataViewSpecToViewBase(sourcererDataView);
+
+      if (
+        uuidDataViewField != null &&
+        typeof uuidDataViewField !== 'undefined' &&
+        dataViewAsViewBase
+      ) {
         // Update cached global query state with current state as a rollback point
         cachedGlobalQueryState.current = { filters, query, timerange };
         // Create filter & daterange constraints
         const filter = buildFilter(
-          indexPattern,
+          dataViewAsViewBase,
           uuidDataViewField,
           FILTERS.PHRASE,
           false,
@@ -351,18 +359,18 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
       }
     },
     [
-      addError,
-      addSuccess,
+      uuidDataViewField,
+      filters,
+      query,
+      timerange,
+      sourcererDataView,
       dispatch,
       filterManager,
-      filters,
-      indexPattern,
-      query,
-      resetGlobalQueryState,
       selectAlertsTab,
-      timerange,
-      uuidDataViewField,
+      addSuccess,
+      resetGlobalQueryState,
       startServices,
+      addError,
     ]
   );
 
@@ -463,7 +471,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
     (e: EuiSwitchEvent) => {
       const isVisible = e.target.checked;
       onShowSourceEventTimeRange(isVisible);
-      telemetry.reportEventLogShowSourceEventDateRange({
+      telemetry.reportEvent(EventLogEventTypes.EventLogShowSourceEventDateRange, {
         isVisible,
       });
     },
@@ -471,15 +479,10 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
   );
 
   const executionLogColumns = useMemo(() => {
-    const columns = [...EXECUTION_LOG_COLUMNS].filter((item) => {
-      if ('field' in item) {
-        return item.field === 'type' ? isManualRuleRunEnabled : true;
-      }
-      return true;
-    });
+    const columns = [...EXECUTION_LOG_COLUMNS];
     let messageColumnWidth = 50;
 
-    if (showSourceEventTimeRange && isManualRuleRunEnabled) {
+    if (showSourceEventTimeRange) {
       columns.push(...getSourceEventTimeRangeColumns());
       messageColumnWidth = 30;
     }
@@ -504,7 +507,6 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
 
     return columns;
   }, [
-    isManualRuleRunEnabled,
     actions,
     docLinks,
     showMetricColumns,
@@ -581,14 +583,12 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
                 updatedAt: dataUpdatedAt,
               })}
             </UtilityBarText>
-            {isManualRuleRunEnabled && (
-              <UtilitySwitch
-                label={i18n.RULE_EXECUTION_LOG_SHOW_SOURCE_EVENT_TIME_RANGE}
-                checked={showSourceEventTimeRange}
-                compressed={true}
-                onChange={handleShowSourceEventTimeRange}
-              />
-            )}
+            <UtilitySwitch
+              label={i18n.RULE_EXECUTION_LOG_SHOW_SOURCE_EVENT_TIME_RANGE}
+              checked={showSourceEventTimeRange}
+              compressed={true}
+              onChange={handleShowSourceEventTimeRange}
+            />
             <UtilitySwitch
               label={i18n.RULE_EXECUTION_LOG_SHOW_METRIC_COLUMNS_SWITCH}
               checked={showMetricColumns}

@@ -7,8 +7,8 @@
 
 import Boom from '@hapi/boom';
 
+import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import { logAnalysisResultsV1 } from '../../../../common/http_api';
-import { createValidationFunction } from '../../../../common/runtime_types';
 import type { InfraBackendLibs } from '../../../lib/infra_types';
 import { getTopLogEntryCategories } from '../../../lib/log_analysis';
 import { assertHasInfraMlPlugins } from '../../../utils/request_context';
@@ -29,7 +29,7 @@ export const initGetLogEntryCategoriesRoute = ({ framework }: InfraBackendLibs) 
         version: '1',
         validate: {
           request: {
-            body: createValidationFunction(
+            body: createRouteValidationFunction(
               logAnalysisResultsV1.getLogEntryCategoriesRequestPayloadRT
             ),
           },

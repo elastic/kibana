@@ -2,7 +2,7 @@
 
 exports[`<CodeEditor /> hint element should be tabable 1`] = `
 <div
-  aria-label="Code Editor"
+  aria-label="Code Editor, activate edit mode"
   css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop).,false"
   data-test-subj="codeEditorHint codeEditorHint--active"
   id="1234"
@@ -221,7 +221,7 @@ exports[`<CodeEditor /> is rendered 1`] = `
                     </style>
                     <style
                       data-styled="active"
-                      data-styled-version="5.1.0"
+                      data-styled-version="5.3.11"
                     />
                   </head>,
                   "ctr": 2,
@@ -267,7 +267,7 @@ exports[`<CodeEditor /> is rendered 1`] = `
             onMouseOver={[Function]}
           >
             <div
-              aria-label="Code Editor"
+              aria-label="Code Editor, activate edit mode"
               css={
                 Array [
                   Object {

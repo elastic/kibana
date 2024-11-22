@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
-import { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
-import { InventoryMetricConditions } from '../../../../../common/alerting/metrics';
-import { InfraTimerangeInput, SnapshotCustomMetricInput } from '../../../../../common/http_api';
-import { LogQueryFields } from '../../../metrics/types';
-import { InfraSource } from '../../../sources';
+import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
+import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
+import type { InventoryMetricConditions } from '../../../../../common/alerting/metrics';
+import type {
+  InfraTimerangeInput,
+  SnapshotCustomMetricInput,
+} from '../../../../../common/http_api';
+import type { LogQueryFields } from '../../../metrics/types';
+import type { InfraSource } from '../../../sources';
 import { createRequest } from './create_request';
 import {
   AdditionalContext,
@@ -156,9 +159,9 @@ export const getData = async (
     customMetric,
     fieldsExisted
   );
-  logger.trace(`Request: ${JSON.stringify(request)}`);
+  logger.trace(() => `Request: ${JSON.stringify(request)}`);
   const body = await esClient.search<undefined, ResponseAggregations>(request);
-  logger.trace(`Response: ${JSON.stringify(body)}`);
+  logger.trace(() => `Response: ${JSON.stringify(body)}`);
   if (body.aggregations) {
     return handleResponse(body.aggregations, previousNodes);
   }

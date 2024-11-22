@@ -40,20 +40,22 @@ export type ReportContent = Pick<ReportSource, 'status' | 'jobtype' | 'output'> 
 
 export interface JobsQueryFactory {
   list(
-    jobTypes: string[],
     user: ReportingUser,
     page: number,
     size: number,
     jobIds: string[] | null
   ): Promise<ReportApiJSON[]>;
-  count(jobTypes: string[], user: ReportingUser): Promise<number>;
+  count(user: ReportingUser): Promise<number>;
   get(user: ReportingUser, id: string): Promise<ReportApiJSON | void>;
   getError(id: string): Promise<string>;
   getDocumentPayload(doc: ReportApiJSON): Promise<Payload>;
   delete(deleteIndex: string, id: string): Promise<TransportResult<estypes.DeleteResponse>>;
 }
 
-export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory {
+export function jobsQueryFactory(
+  reportingCore: ReportingCore,
+  { isInternal }: { isInternal: boolean }
+): JobsQueryFactory {
   async function execQuery<
     T extends (client: ElasticsearchClient) => Promise<Awaited<ReturnType<T>> | undefined>
   >(callback: T): Promise<Awaited<ReturnType<T>> | undefined> {
@@ -71,7 +73,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
   }
 
   return {
-    async list(jobTypes, user, page = 0, size = defaultSize, jobIds) {
+    async list(user, page = 0, size = defaultSize, jobIds) {
       const username = getUsername(user);
       const body = getSearchBody({
         size,
@@ -81,7 +83,6 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
             filter: {
               bool: {
                 must: [
-                  { terms: { jobtype: jobTypes } },
                   { term: { created_by: username } },
                   ...(jobIds ? [{ ids: { values: jobIds } }] : []),
                 ],
@@ -108,14 +109,14 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
       );
     },
 
-    async count(jobTypes, user) {
+    async count(user) {
       const username = getUsername(user);
       const body = {
         query: {
           constant_score: {
             filter: {
               bool: {
-                must: [{ terms: { jobtype: jobTypes } }, { term: { created_by: username } }],
+                must: [{ term: { created_by: username } }],
               },
             },
           },
@@ -202,7 +203,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
     },
 
     async getDocumentPayload(doc: ReportApiJSON) {
-      const getDocumentPayload = getDocumentPayloadFactory(reportingCore);
+      const getDocumentPayload = getDocumentPayloadFactory(reportingCore, { isInternal });
       return await getDocumentPayload(doc);
     },
 

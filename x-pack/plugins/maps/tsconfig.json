@@ -8,8 +8,8 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "config.ts",
-    "../../../typings/**/*",
+    "server/config.ts",
+    "../../../typings/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -78,7 +78,7 @@
     "@kbn/search-response-warnings",
     "@kbn/calculate-width-from-char-count",
     "@kbn/content-management-table-list-view-common",
-    "@kbn/text-based-languages",
+    "@kbn/esql",
     "@kbn/es-types",
     "@kbn/data-service",
     "@kbn/code-editor",
@@ -90,7 +90,8 @@
     "@kbn/react-kibana-context-render",
     "@kbn/embeddable-enhanced-plugin",
     "@kbn/presentation-containers",
-    "@kbn/field-utils"
+    "@kbn/field-utils",
+    "@kbn/react-hooks"
   ],
   "exclude": [
     "target/**/*",

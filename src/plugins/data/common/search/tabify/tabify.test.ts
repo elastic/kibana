@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { tabifyAggResponse } from './tabify';
@@ -151,7 +152,7 @@ describe('tabifyAggResponse Integration', () => {
 
       function getTopAggregations(
         rawResp: typeof threeTermBuckets
-      ): typeof threeTermBuckets['aggregations'] {
+      ): (typeof threeTermBuckets)['aggregations'] {
         return !isSamplingEnabled(probability)
           ? rawResp.aggregations!
           : // @ts-ignore
@@ -188,9 +189,9 @@ describe('tabifyAggResponse Integration', () => {
       ) {
         expect(typeof row).toBe('object');
 
-        asserts.forEach((assert, i: number) => {
+        asserts.forEach((a, i: number) => {
           if (row[`col-${i}`]) {
-            assert(row[`col-${i}`]);
+            a(row[`col-${i}`]);
           }
         });
       }
@@ -214,7 +215,7 @@ describe('tabifyAggResponse Integration', () => {
       // check for something like an average bytes result
       function expectAvgBytes(val: string | number) {
         expect(typeof val).toBe('number');
-        expect(val === 0 || val > 1000).toBeDefined();
+        expect(val === 0 || +val > 1000).toBe(true);
       }
 
       test('for non-hierarchical vis', () => {

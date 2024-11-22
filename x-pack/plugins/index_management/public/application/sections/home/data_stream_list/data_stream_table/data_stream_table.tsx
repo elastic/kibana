@@ -16,8 +16,13 @@ import {
   EuiIcon,
   EuiToolTip,
   EuiTextColor,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSwitch,
+  EuiIconTip,
 } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
+import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 
 import { MAX_DATA_RETENTION } from '../../../../../../common/constants';
 import { useAppContext } from '../../../../app_context';
@@ -31,6 +36,9 @@ import { humanizeTimeStamp } from '../humanize_time_stamp';
 import { DataStreamsBadges } from '../data_stream_badges';
 import { ConditionalWrap } from '../data_stream_detail_panel';
 import { isDataStreamFullyManagedByILM } from '../../../../lib/data_streams';
+import { indexModeLabels } from '../../../../lib/index_mode_labels';
+import { FilterListButton, Filters } from '../../components';
+import { type DataStreamFilterName } from '../data_stream_list';
 
 interface TableDataStream extends DataStream {
   isDataStreamFullyManagedByILM: boolean;
@@ -41,10 +49,14 @@ interface Props {
   reload: UseRequestResponse['resendRequest'];
   history: ScopedHistory;
   includeStats: boolean;
-  filters?: string;
+  filters: string;
+  viewFilters: Filters<DataStreamFilterName>;
+  onViewFilterChange: (newFilter: Filters<DataStreamFilterName>) => void;
+  setIncludeStats: (includeStats: boolean) => void;
 }
 
 const INFINITE_AS_ICON = true;
+const PAGE_SIZE_OPTIONS = [10, 20, 50];
 
 export const DataStreamTable: React.FunctionComponent<Props> = ({
   dataStreams,
@@ -52,6 +64,9 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
   history,
   filters,
   includeStats,
+  setIncludeStats,
+  onViewFilterChange,
+  viewFilters,
 }) => {
   const [selection, setSelection] = useState<DataStream[]>([]);
   const [dataStreamsToDelete, setDataStreamsToDelete] = useState<string[]>([]);
@@ -77,6 +92,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
       return (
         <Fragment>
           <EuiLink
+            role="button"
             data-test-subj="nameLink"
             {...reactRouterNavigate(history, getDataStreamDetailsLink(name))}
           >
@@ -101,31 +117,55 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
   });
 
   if (includeStats) {
-    columns.push({
-      field: 'maxTimeStamp',
-      name: i18n.translate('xpack.idxMgmt.dataStreamList.table.maxTimeStampColumnTitle', {
-        defaultMessage: 'Last updated',
-      }),
-      truncateText: true,
-      sortable: true,
-      render: (maxTimeStamp: DataStream['maxTimeStamp']) =>
-        maxTimeStamp
-          ? humanizeTimeStamp(maxTimeStamp)
-          : i18n.translate('xpack.idxMgmt.dataStreamList.table.maxTimeStampColumnNoneMessage', {
-              defaultMessage: 'Never',
-            }),
-    });
-
-    columns.push({
-      field: 'storageSizeBytes',
-      name: i18n.translate('xpack.idxMgmt.dataStreamList.table.storageSizeColumnTitle', {
-        defaultMessage: 'Storage size',
-      }),
-      truncateText: true,
-      sortable: true,
-      render: (storageSizeBytes: DataStream['storageSizeBytes'], dataStream: DataStream) =>
-        dataStream.storageSize,
-    });
+    if (config.enableSizeAndDocCount) {
+      // datastreams stats from metering API on serverless
+      columns.push({
+        field: 'meteringStorageSizeBytes',
+        name: i18n.translate('xpack.idxMgmt.dataStreamList.table.storageSizeColumnTitle', {
+          defaultMessage: 'Storage size',
+        }),
+        truncateText: true,
+        sortable: true,
+        render: (
+          meteringStorageSizeBytes: DataStream['meteringStorageSizeBytes'],
+          dataStream: DataStream
+        ) => dataStream.meteringStorageSize,
+      });
+      columns.push({
+        field: 'meteringDocsCount',
+        name: i18n.translate('xpack.idxMgmt.dataStreamList.table.docsCountColumnTitle', {
+          defaultMessage: 'Documents count',
+        }),
+        truncateText: true,
+        sortable: true,
+      });
+    }
+    if (config.enableDataStreamStats) {
+      columns.push({
+        field: 'maxTimeStamp',
+        name: i18n.translate('xpack.idxMgmt.dataStreamList.table.maxTimeStampColumnTitle', {
+          defaultMessage: 'Last updated',
+        }),
+        truncateText: true,
+        sortable: true,
+        render: (maxTimeStamp: DataStream['maxTimeStamp']) =>
+          maxTimeStamp
+            ? humanizeTimeStamp(maxTimeStamp)
+            : i18n.translate('xpack.idxMgmt.dataStreamList.table.maxTimeStampColumnNoneMessage', {
+                defaultMessage: 'Never',
+              }),
+      });
+      columns.push({
+        field: 'storageSizeBytes',
+        name: i18n.translate('xpack.idxMgmt.dataStreamList.table.storageSizeColumnTitle', {
+          defaultMessage: 'Storage size',
+        }),
+        truncateText: true,
+        sortable: true,
+        render: (storageSizeBytes: DataStream['storageSizeBytes'], dataStream: DataStream) =>
+          dataStream.storageSize,
+      });
+    }
   }
 
   columns.push({
@@ -143,6 +183,16 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
         {indices.length}
       </EuiLink>
     ),
+  });
+
+  columns.push({
+    field: 'indexMode',
+    name: i18n.translate('xpack.idxMgmt.dataStreamList.table.indexModeColumnTitle', {
+      defaultMessage: 'Index mode',
+    }),
+    truncateText: true,
+    sortable: true,
+    render: (indexMode: DataStream['indexMode']) => indexModeLabels[indexMode],
   });
 
   columns.push({
@@ -230,18 +280,6 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     ],
   });
 
-  const pagination = {
-    initialPageSize: 20,
-    pageSizeOptions: [10, 20, 50],
-  };
-
-  const sorting = {
-    sort: {
-      field: 'name',
-      direction: 'asc',
-    },
-  } as const;
-
   const selectionConfig = {
     onSelectionChange: setSelection,
   };
@@ -267,6 +305,34 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
         </EuiButton>
       ) : undefined,
     toolsRight: [
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiSwitch
+            label={i18n.translate('xpack.idxMgmt.dataStreamListControls.includeStatsSwitchLabel', {
+              defaultMessage: 'Include stats',
+            })}
+            checked={includeStats}
+            onChange={(e) => setIncludeStats(e.target.checked)}
+            data-test-subj="includeStatsSwitch"
+          />
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiIconTip
+            content={i18n.translate(
+              'xpack.idxMgmt.dataStreamListControls.includeStatsSwitchToolTip',
+              {
+                defaultMessage: 'Including stats can increase reload times',
+              }
+            )}
+            position="top"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>,
+      <FilterListButton<DataStreamFilterName>
+        filters={viewFilters}
+        onChange={onViewFilterChange}
+      />,
       <EuiButton
         color="success"
         iconType="refresh"
@@ -280,6 +346,21 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
         />
       </EuiButton>,
     ],
+  };
+
+  const { pageSize, sorting, onTableChange } = useEuiTablePersist<TableDataStream>({
+    tableId: 'dataStreams',
+    initialPageSize: 20,
+    initialSort: {
+      field: 'name',
+      direction: 'asc',
+    },
+    pageSizeOptions: PAGE_SIZE_OPTIONS,
+  });
+
+  const pagination = {
+    pageSize,
+    pageSizeOptions: PAGE_SIZE_OPTIONS,
   };
 
   return (
@@ -318,6 +399,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
           />
         }
         tableLayout={'auto'}
+        onTableChange={onTableChange}
       />
     </>
   );

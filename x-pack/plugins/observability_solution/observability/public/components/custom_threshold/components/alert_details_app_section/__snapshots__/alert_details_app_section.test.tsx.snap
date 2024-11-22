@@ -49,6 +49,7 @@ Array [
       "metrics": Array [
         Object {
           "aggType": "count",
+          "filter": "host.name: host-1",
           "name": "A",
         },
       ],

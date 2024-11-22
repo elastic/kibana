@@ -1,0 +1,45 @@
+{
+  "id": "@kbn/product-doc-artifact-builder",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/product-doc-artifact-builder",
+        "id": "def-common.runScript",
+        "type": "Function",
+        "tags": [],
+        "label": "runScript",
+        "description": [],
+        "signature": [
+          "() => void"
+        ],
+        "path": "x-pack/packages/ai-infra/product-doc-artifact-builder/src/command.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-import { FC, PropsWithChildren } from 'react';
+import { FC, ReactNode } from 'react';
 
-declare const AutoFollowPatternDeleteProvider: FC<PropsWithChildren<unknown>>;
+declare const AutoFollowPatternDeleteProvider: FC<{
+  children: (deleteAutoFollowPattern: (ids: string[]) => void) => ReactNode;
+}>;

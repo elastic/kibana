@@ -7,8 +7,8 @@
 
 import { SavedObjectsClientContract, SavedObject } from '@kbn/core/server';
 import { SavedObjectsGetOptions } from '@kbn/core-saved-objects-api-server';
+import { RawRule } from '../../../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
-import { RuleAttributes } from '../types';
 
 export interface GetRuleSoParams {
   savedObjectsClient: SavedObjectsClientContract;
@@ -16,8 +16,8 @@ export interface GetRuleSoParams {
   savedObjectsGetOptions?: SavedObjectsGetOptions;
 }
 
-export const getRuleSo = (params: GetRuleSoParams): Promise<SavedObject<RuleAttributes>> => {
+export const getRuleSo = (params: GetRuleSoParams): Promise<SavedObject<RawRule>> => {
   const { savedObjectsClient, id, savedObjectsGetOptions } = params;
 
-  return savedObjectsClient.get<RuleAttributes>(RULE_SAVED_OBJECT_TYPE, id, savedObjectsGetOptions);
+  return savedObjectsClient.get<RawRule>(RULE_SAVED_OBJECT_TYPE, id, savedObjectsGetOptions);
 };

@@ -156,6 +156,10 @@ describe('Data Streams tab', () => {
         name: 'dataStream1',
         storageSize: '5b',
         storageSizeBytes: 5,
+        // metering API mock
+        meteringStorageSize: '156kb',
+        meteringStorageSizeBytes: 156000,
+        meteringDocsCount: 10000,
       });
 
       setLoadDataStreamsResponse([
@@ -164,6 +168,10 @@ describe('Data Streams tab', () => {
           name: 'dataStream2',
           storageSize: '1kb',
           storageSizeBytes: 1000,
+          // metering API mock
+          meteringStorageSize: '156kb',
+          meteringStorageSizeBytes: 156000,
+          meteringDocsCount: 10000,
           lifecycle: {
             enabled: true,
             data_retention: '7d',
@@ -197,8 +205,8 @@ describe('Data Streams tab', () => {
       const { tableCellsValues } = table.getMetaData('dataStreamTable');
 
       expect(tableCellsValues).toEqual([
-        ['', 'dataStream1', 'green', '1', '7 days', 'Delete'],
-        ['', 'dataStream2', 'green', '1', '5 days ', 'Delete'],
+        ['', 'dataStream1', 'green', '1', 'Standard', '7 days', 'Delete'],
+        ['', 'dataStream2', 'green', '1', 'Standard', '5 days ', 'Delete'],
       ]);
     });
 
@@ -224,15 +232,12 @@ describe('Data Streams tab', () => {
     });
 
     test('has a switch that will reload the data streams with additional stats when clicked', async () => {
-      const { exists, actions, table, component } = testBed;
+      const { exists, actions, table } = testBed;
 
       expect(exists('includeStatsSwitch')).toBe(true);
 
       // Changing the switch will automatically reload the data streams.
-      await act(async () => {
-        actions.clickIncludeStatsSwitch();
-      });
-      component.update();
+      await actions.clickIncludeStatsSwitch();
 
       expect(httpSetup.get).toHaveBeenLastCalledWith(
         `${API_BASE_PATH}/data_streams`,
@@ -249,6 +254,7 @@ describe('Data Streams tab', () => {
           'December 31st, 1969 7:00:00 PM',
           '5b',
           '1',
+          'Standard',
           '7 days',
           'Delete',
         ],
@@ -259,6 +265,7 @@ describe('Data Streams tab', () => {
           'December 31st, 1969 7:00:00 PM',
           '1kb',
           '1',
+          'Standard',
           '5 days ',
           'Delete',
         ],
@@ -267,12 +274,9 @@ describe('Data Streams tab', () => {
 
     test('sorting on stats sorts by bytes value instead of human readable value', async () => {
       // Guards against regression of #86122.
-      const { actions, table, component } = testBed;
+      const { actions, table } = testBed;
 
-      await act(async () => {
-        actions.clickIncludeStatsSwitch();
-      });
-      component.update();
+      await actions.clickIncludeStatsSwitch();
 
       actions.sortTableOnStorageSize();
 
@@ -287,6 +291,7 @@ describe('Data Streams tab', () => {
           'December 31st, 1969 7:00:00 PM',
           '5b',
           '1',
+          'Standard',
           '7 days',
           'Delete',
         ],
@@ -297,13 +302,17 @@ describe('Data Streams tab', () => {
           'December 31st, 1969 7:00:00 PM',
           '1kb',
           '1',
+          'Standard',
           '5 days ',
           'Delete',
         ],
       ]);
+
+      // Revert sorting back on Name column to not impact the rest of the tests
+      actions.sortTableOnName();
     });
 
-    test('hides stats toggle if enableDataStreamStats===false', async () => {
+    test(`doesn't hide stats toggle if enableDataStreamStats===false`, async () => {
       testBed = await setup(httpSetup, {
         config: {
           enableDataStreamStats: false,
@@ -318,14 +327,84 @@ describe('Data Streams tab', () => {
 
       component.update();
 
-      expect(exists('includeStatsSwitch')).toBeFalsy();
+      expect(exists('includeStatsSwitch')).toBeTruthy();
+    });
+
+    test('shows storage size and documents count if enableSizeAndDocCount===true, enableDataStreamStats==false', async () => {
+      testBed = await setup(httpSetup, {
+        config: {
+          enableSizeAndDocCount: true,
+          enableDataStreamStats: false,
+        },
+      });
+
+      const { actions, component, table } = testBed;
+
+      await act(async () => {
+        actions.goToDataStreamsList();
+      });
+
+      component.update();
+
+      await actions.clickIncludeStatsSwitch();
+
+      const { tableCellsValues } = table.getMetaData('dataStreamTable');
+      expect(tableCellsValues).toEqual([
+        ['', 'dataStream1', 'green', '156kb', '10000', '1', 'Standard', '7 days', 'Delete'],
+        ['', 'dataStream2', 'green', '156kb', '10000', '1', 'Standard', '5 days ', 'Delete'],
+      ]);
+    });
+
+    test('shows last updated and storage size if enableDataStreamStats===true, enableSizeAndDocCount===false', async () => {
+      testBed = await setup(httpSetup, {
+        config: {
+          enableDataStreamStats: true,
+          enableSizeAndDocCount: false,
+        },
+      });
+
+      const { actions, component, table } = testBed;
+
+      await act(async () => {
+        actions.goToDataStreamsList();
+      });
+
+      component.update();
+
+      await actions.clickIncludeStatsSwitch();
+
+      const { tableCellsValues } = table.getMetaData('dataStreamTable');
+      expect(tableCellsValues).toEqual([
+        [
+          '',
+          'dataStream1',
+          'green',
+          'December 31st, 1969 7:00:00 PM',
+          '5b',
+          '1',
+          'Standard',
+          '7 days',
+          'Delete',
+        ],
+        [
+          '',
+          'dataStream2',
+          'green',
+          'December 31st, 1969 7:00:00 PM',
+          '1kb',
+          '1',
+          'Standard',
+          '5 days ',
+          'Delete',
+        ],
+      ]);
     });
 
     test('clicking the indices count navigates to the backing indices', async () => {
       const { table, actions } = testBed;
       await actions.clickIndicesAt(0);
       expect(table.getMetaData('indexTable').tableCellsValues).toEqual([
-        ['', 'data-stream-index', '', '', '', '', '', '', 'dataStream1'],
+        ['', 'data-stream-index', '', '', '', '', '0', '', 'dataStream1'],
       ]);
     });
 
@@ -436,8 +515,8 @@ describe('Data Streams tab', () => {
           const { tableCellsValues } = table.getMetaData('dataStreamTable');
 
           expect(tableCellsValues).toEqual([
-            ['', 'dataStream1', 'green', '1', 'Disabled', 'Delete'],
-            ['', 'dataStream2', 'green', '1', '', 'Delete'],
+            ['', 'dataStream1', 'green', '1', 'Standard', 'Disabled', 'Delete'],
+            ['', 'dataStream2', 'green', '1', 'Standard', '', 'Delete'],
           ]);
 
           await actions.clickNameAt(0);
@@ -704,7 +783,7 @@ describe('Data Streams tab', () => {
         const { table, actions } = testBed;
         await actions.clickIndicesAt(0);
         expect(table.getMetaData('indexTable').tableCellsValues).toEqual([
-          ['', 'data-stream-index', '', '', '', '', '', '', '%dataStream'],
+          ['', 'data-stream-index', '', '', '', '', '0', '', '%dataStream'],
         ]);
       });
     });
@@ -733,7 +812,7 @@ describe('Data Streams tab', () => {
 
       const { actions, findDetailPanelIlmPolicyLink } = testBed;
       await actions.clickNameAt(0);
-      expect(findDetailPanelIlmPolicyLink().prop('href')).toBe('/test/my_ilm_policy');
+      expect(findDetailPanelIlmPolicyLink().prop('data-href')).toBe('/test/my_ilm_policy');
     });
 
     test('with an ILM url locator and no ILM policy', async () => {
@@ -819,8 +898,16 @@ describe('Data Streams tab', () => {
       const { tableCellsValues } = table.getMetaData('dataStreamTable');
 
       expect(tableCellsValues).toEqual([
-        ['', `managed-data-stream${nonBreakingSpace}Managed`, 'green', '1', '7 days', 'Delete'],
-        ['', 'non-managed-data-stream', 'green', '1', '7 days', 'Delete'],
+        [
+          '',
+          `managed-data-stream${nonBreakingSpace}Managed`,
+          'green',
+          '1',
+          'Standard',
+          '7 days',
+          'Delete',
+        ],
+        ['', 'non-managed-data-stream', 'green', '1', 'Standard', '7 days', 'Delete'],
       ]);
     });
 
@@ -829,15 +916,23 @@ describe('Data Streams tab', () => {
       let { tableCellsValues } = table.getMetaData('dataStreamTable');
 
       expect(tableCellsValues).toEqual([
-        ['', `managed-data-stream${nonBreakingSpace}Managed`, 'green', '1', '7 days', 'Delete'],
-        ['', 'non-managed-data-stream', 'green', '1', '7 days', 'Delete'],
+        [
+          '',
+          `managed-data-stream${nonBreakingSpace}Managed`,
+          'green',
+          '1',
+          'Standard',
+          '7 days',
+          'Delete',
+        ],
+        ['', 'non-managed-data-stream', 'green', '1', 'Standard', '7 days', 'Delete'],
       ]);
 
       actions.toggleViewFilterAt(0);
 
       ({ tableCellsValues } = table.getMetaData('dataStreamTable'));
       expect(tableCellsValues).toEqual([
-        ['', 'non-managed-data-stream', 'green', '1', '7 days', 'Delete'],
+        ['', 'non-managed-data-stream', 'green', '1', 'Standard', '7 days', 'Delete'],
       ]);
     });
   });
@@ -869,7 +964,15 @@ describe('Data Streams tab', () => {
       const { tableCellsValues } = table.getMetaData('dataStreamTable');
 
       expect(tableCellsValues).toEqual([
-        ['', `hidden-data-stream${nonBreakingSpace}Hidden`, 'green', '1', '7 days', 'Delete'],
+        [
+          '',
+          `hidden-data-stream${nonBreakingSpace}Hidden`,
+          'green',
+          '1',
+          'Standard',
+          '7 days',
+          'Delete',
+        ],
       ]);
     });
   });
@@ -916,10 +1019,10 @@ describe('Data Streams tab', () => {
         const { tableCellsValues } = table.getMetaData('dataStreamTable');
 
         expect(tableCellsValues).toEqual([
-          ['', 'dataStreamNoDelete', 'green', '1', '7 days', ''],
-          ['', 'dataStreamNoEditRetention', 'green', '1', '7 days', 'Delete'],
-          ['', 'dataStreamNoPermissions', 'green', '1', '7 days', ''],
-          ['', 'dataStreamWithDelete', 'green', '1', '7 days', 'Delete'],
+          ['', 'dataStreamNoDelete', 'green', '1', 'Standard', '7 days', ''],
+          ['', 'dataStreamNoEditRetention', 'green', '1', 'Standard', '7 days', 'Delete'],
+          ['', 'dataStreamNoPermissions', 'green', '1', 'Standard', '7 days', ''],
+          ['', 'dataStreamWithDelete', 'green', '1', 'Standard', '7 days', 'Delete'],
         ]);
       });
 

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /**
@@ -24,6 +25,7 @@ export interface DocLinksMeta {
 export interface DocLinks {
   readonly settings: string;
   readonly elasticStackGetStarted: string;
+  readonly apiReference: string;
   readonly upgrade: {
     readonly upgradingStackOnPrem: string;
     readonly upgradingStackOnCloud: string;
@@ -160,9 +162,11 @@ export interface DocLinks {
     readonly crawlerOverview: string;
     readonly deployTrainedModels: string;
     readonly documentLevelSecurity: string;
+    readonly e5Model: string;
     readonly elser: string;
     readonly engines: string;
     readonly indexApi: string;
+    readonly inferenceApiCreate: string;
     readonly ingestionApis: string;
     readonly ingestPipelines: string;
     readonly knnSearch: string;
@@ -179,7 +183,9 @@ export interface DocLinks {
     readonly searchApplicationsSearch: string;
     readonly searchLabs: string;
     readonly searchLabsRepo: string;
+    readonly semanticSearch: string;
     readonly searchTemplates: string;
+    readonly semanticTextField: string;
     readonly start: string;
     readonly supportedNlpModels: string;
     readonly syncRules: string;
@@ -233,9 +239,6 @@ export interface DocLinks {
   readonly logstash: {
     readonly base: string;
     readonly inputElasticAgent: string;
-  };
-  readonly functionbeat: {
-    readonly base: string;
   };
   readonly winlogbeat: {
     readonly base: string;
@@ -311,6 +314,7 @@ export interface DocLinks {
     readonly autocompleteSuggestions: string;
     readonly secureSavedObject: string;
     readonly xpackSecurity: string;
+    readonly dashboardImportExport: string;
   };
   readonly upgradeAssistant: {
     readonly overview: string;
@@ -333,10 +337,13 @@ export interface DocLinks {
     readonly configureAlertSuppression: string;
   };
   readonly securitySolution: {
+    readonly aiAssistant: string;
     readonly artifactControl: string;
     readonly avcResults: string;
+    readonly bidirectionalIntegrations: string;
     readonly trustedApps: string;
     readonly eventFilters: string;
+    readonly eventMerging: string;
     readonly blocklist: string;
     readonly endpointArtifacts: string;
     readonly policyResponseTroubleshooting: {
@@ -360,8 +367,6 @@ export interface DocLinks {
     readonly ruleUiAdvancedParams: string;
     readonly entityAnalytics: {
       readonly riskScorePrerequisites: string;
-      readonly hostRiskScore: string;
-      readonly userRiskScore: string;
       readonly entityRiskScoring: string;
       readonly assetCriticality: string;
     };
@@ -375,6 +380,7 @@ export interface DocLinks {
     readonly percolate: string;
     readonly queryDsl: string;
     readonly queryESQL: string;
+    readonly queryESQLExamples: string;
   };
   readonly date: {
     readonly dateMath: string;
@@ -440,6 +446,7 @@ export interface DocLinks {
     syntheticsProjectMonitors: string;
     syntheticsMigrateFromIntegration: string;
     sloBurnRateRule: string;
+    aiAssistant: string;
   }>;
   readonly alerting: Readonly<{
     guide: string;
@@ -498,6 +505,7 @@ export interface DocLinks {
     mappingRoles: string;
     mappingRolesFieldRules: string;
     runAsPrivilege: string;
+    deprecatedV1Endpoints: string;
   }>;
   readonly spaces: Readonly<{
     kibanaLegacyUrlAliases: string;
@@ -557,6 +565,7 @@ export interface DocLinks {
     roleAndPrivileges: string;
     proxiesSettings: string;
     unprivilegedMode: string;
+    httpMonitoring: string;
   }>;
   readonly integrationDeveloper: {
     upload: string;

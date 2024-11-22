@@ -15,6 +15,7 @@ import type { FieldBrowserOptions } from '@kbn/triggers-actions-ui-plugin/public
 import type { ComponentType, JSXElementConstructor } from 'react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { SortColumnTable } from '@kbn/securitysolution-data-table';
+import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { OnRowSelected, SetEventsDeleted, SetEventsLoading } from '..';
 import type { BrowserFields, TimelineNonEcsData } from '../../search_strategy';
 
@@ -43,7 +44,7 @@ export type ColumnHeaderOptions = Pick<
   description?: string | null;
   esTypes?: string[];
   example?: string | number | null;
-  format?: string;
+  format?: SerializedFieldFormat;
   linkField?: string;
   placeholder?: string;
   subType?: IFieldSubType;

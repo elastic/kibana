@@ -16,16 +16,21 @@ import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder, fromKueryExpression, escapeKuery } from '@kbn/es-query';
 import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespace';
 
+import type { FileJSON } from '@kbn/shared-ux-file-types';
+import { FILE_SO_TYPE } from '@kbn/files-plugin/common/constants';
 import type {
+  CaseCustomField,
   CaseSeverity,
   CaseStatuses,
   CustomFieldsConfiguration,
   ExternalReferenceAttachmentPayload,
   TemplatesConfiguration,
+  CustomFieldTypes,
 } from '../../common/types/domain';
 import {
   ActionsAttachmentPayloadRt,
   AlertAttachmentPayloadRt,
+  AttachmentType,
   ExternalReferenceNoSOAttachmentPayloadRt,
   ExternalReferenceSOAttachmentPayloadRt,
   ExternalReferenceStorageType,
@@ -38,6 +43,7 @@ import type { CasesSearchParams } from './types';
 import { decodeWithExcessOrThrow } from '../common/runtime_types';
 import {
   CASE_SAVED_OBJECT,
+  FILE_ATTACHMENT_TYPE,
   NO_ASSIGNEES_FILTERING_KEYWORD,
   OWNER_FIELD,
 } from '../../common/constants';
@@ -607,9 +613,9 @@ export const constructSearch = (
 };
 
 /**
- * remove deleted custom field from template
+ * remove deleted custom field from template or add newly added custom field to template
  */
-export const removeCustomFieldFromTemplates = ({
+export const transformTemplateCustomFields = ({
   templates,
   customFields,
 }: {
@@ -621,21 +627,67 @@ export const removeCustomFieldFromTemplates = ({
   }
 
   return templates.map((template) => {
-    if (!template.caseFields?.customFields || !template.caseFields?.customFields.length) {
-      return template;
-    }
+    const templateCustomFields = template.caseFields?.customFields ?? [];
 
-    if (!customFields || !customFields?.length) {
+    if (!customFields || !customFields.length) {
       return { ...template, caseFields: { ...template.caseFields, customFields: [] } };
     }
 
-    const templateCustomFields = template.caseFields.customFields.filter((templateCustomField) =>
+    // remove deleted custom field from template
+    const transformedTemplateCustomFields = templateCustomFields.filter((templateCustomField) =>
       customFields?.find((customField) => customField.key === templateCustomField.key)
     );
 
+    // add new custom fields to template
+    if (customFields.length >= transformedTemplateCustomFields.length) {
+      customFields.forEach((field) => {
+        if (
+          !transformedTemplateCustomFields.find(
+            (templateCustomField) => templateCustomField.key === field.key
+          )
+        ) {
+          const { getDefaultValue } = casesCustomFields.get(field.type) ?? {};
+          const value = getDefaultValue?.() ?? null;
+
+          transformedTemplateCustomFields.push({
+            key: field.key,
+            type: field.type as CustomFieldTypes,
+            value: field.defaultValue ?? value,
+          } as CaseCustomField);
+        }
+      });
+    }
+
     return {
       ...template,
-      caseFields: { ...template.caseFields, customFields: templateCustomFields },
+      caseFields: { ...template.caseFields, customFields: transformedTemplateCustomFields },
     };
   });
 };
+
+export const buildAttachmentRequestFromFileJSON = ({
+  owner,
+  fileMetadata,
+}: {
+  owner: string;
+  fileMetadata: FileJSON;
+}): AttachmentRequest => ({
+  owner,
+  type: AttachmentType.externalReference,
+  externalReferenceId: fileMetadata.id,
+  externalReferenceStorage: {
+    type: ExternalReferenceStorageType.savedObject,
+    soType: FILE_SO_TYPE,
+  },
+  externalReferenceAttachmentTypeId: FILE_ATTACHMENT_TYPE,
+  externalReferenceMetadata: {
+    files: [
+      {
+        name: fileMetadata.name,
+        extension: fileMetadata.extension ?? 'txt',
+        mimeType: fileMetadata.mimeType ?? 'text/plain',
+        created: fileMetadata.created,
+      },
+    ],
+  },
+});

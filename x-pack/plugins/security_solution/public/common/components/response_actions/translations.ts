@@ -13,3 +13,26 @@ export const LOAD_CONNECTORS_ERROR_MESSAGE = i18n.translate(
     defaultMessage: 'Error loading connectors. Please check your configuration and try again.',
   }
 );
+
+export const ENDPOINT_COMMANDS = Object.freeze({
+  tried: (command: string) =>
+    i18n.translate('xpack.securitySolution.eventDetails.responseActions.endpoint.tried', {
+      values: { command },
+      defaultMessage: 'tried to execute {command} command',
+    }),
+  executed: (command: string) =>
+    i18n.translate('xpack.securitySolution.eventDetails.responseActions.endpoint.executed', {
+      values: { command },
+      defaultMessage: 'executed {command} command',
+    }),
+  pending: (command: string) =>
+    i18n.translate('xpack.securitySolution.eventDetails.responseActions.endpoint.pending', {
+      values: { command },
+      defaultMessage: 'is executing {command} command',
+    }),
+  failed: (command: string) =>
+    i18n.translate('xpack.securitySolution.eventDetails.responseActions.endpoint.failed', {
+      values: { command },
+      defaultMessage: 'failed to execute {command} command',
+    }),
+});

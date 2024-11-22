@@ -15,6 +15,7 @@ import type { AgentPolicy, Agent } from '../../common/types';
 import { useLink } from '../hooks';
 const MIN_WIDTH: CSSProperties = { minWidth: 0 };
 const NO_WRAP_WHITE_SPACE: CSSProperties = { whiteSpace: 'nowrap' };
+const WRAP_WHITE_SPACE: CSSProperties = { whiteSpace: 'normal' };
 
 export const AgentPolicySummaryLine = memo<{
   policy: AgentPolicy;
@@ -27,7 +28,7 @@ export const AgentPolicySummaryLine = memo<{
 
   const revision = agent ? agent.policy_revision : policy.revision;
   return (
-    <EuiFlexGroup direction="column" gutterSize="xs">
+    <EuiFlexGroup direction="column" gutterSize="xs" wrap={true}>
       <EuiFlexItem>
         <EuiFlexGroup
           direction={direction}
@@ -37,11 +38,11 @@ export const AgentPolicySummaryLine = memo<{
           responsive={false}
           justifyContent={'flexStart'}
         >
-          <EuiFlexItem grow={false} className="eui-textTruncate">
+          <EuiFlexItem grow={false}>
             <EuiFlexGroup style={MIN_WIDTH} gutterSize="s" alignItems="baseline" responsive={false}>
-              <EuiFlexItem grow={false} className="eui-textTruncate">
+              <EuiFlexItem grow={false}>
                 <EuiLink
-                  className={`eui-textTruncate`}
+                  style={WRAP_WHITE_SPACE}
                   href={getHref('policy_details', { policyId: id })}
                   title={name || id}
                   data-test-subj="agentPolicyNameLink"
@@ -85,7 +86,7 @@ export const AgentPolicySummaryLine = memo<{
       </EuiFlexItem>
       {withDescription && description && (
         <EuiFlexItem>
-          <EuiText color="subdued" className="eui-textTruncate" title={description} size="xs">
+          <EuiText color="subdued" title={description} size="xs">
             {description}
           </EuiText>
         </EuiFlexItem>

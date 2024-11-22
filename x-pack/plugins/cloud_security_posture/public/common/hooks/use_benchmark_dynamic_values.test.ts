@@ -6,9 +6,9 @@
  */
 
 import { useBenchmarkDynamicValues } from './use_benchmark_dynamic_values';
-import { renderHook } from '@testing-library/react-hooks/dom';
+import { renderHook } from '@testing-library/react';
+import type { BenchmarksCisId } from '@kbn/cloud-security-posture-common';
 import { useCspIntegrationLink } from '../navigation/use_csp_integration_link';
-import { BenchmarksCisId } from '../../../common/types/benchmarks/v2';
 
 jest.mock('../navigation/use_csp_integration_link');
 

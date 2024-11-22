@@ -78,9 +78,11 @@ export interface NewPackagePolicy {
   namespace?: string;
   enabled: boolean;
   is_managed?: boolean;
-  /** @deprecated */
-  policy_id?: string;
+  /** @deprecated Nullable to allow user to clear existing policy id */
+  policy_id?: string | null;
   policy_ids: string[];
+  // Nullable to allow user to reset to default outputs
+  output_id?: string | null;
   package?: PackagePolicyPackage;
   inputs: NewPackagePolicyInput[];
   vars?: PackagePolicyConfigRecord;
@@ -88,6 +90,7 @@ export interface NewPackagePolicy {
     privileges?: {
       cluster?: string[];
     };
+    [key: string]: any;
   };
   overrides?: { inputs?: { [key: string]: any } } | null;
 }
@@ -99,7 +102,7 @@ export interface UpdatePackagePolicy extends NewPackagePolicy {
 // SO definition for this type is declared in server/types/interfaces
 export interface PackagePolicy extends Omit<NewPackagePolicy, 'inputs'> {
   id: string;
-  spaceId?: string;
+  spaceIds?: string[];
   inputs: PackagePolicyInput[];
   version?: string;
   agents?: number;

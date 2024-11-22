@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import type { InfraMetadata } from '../../../common/http_api';
-import { INTEGRATIONS, APM_FILTER_FIELD_PER_ASSET_TYPE } from './constants';
+import { INTEGRATIONS } from './constants';
 
 export const toTimestampRange = ({ from, to }: { from: string; to: string }) => {
   const fromTs = new Date(from).getTime();
@@ -34,15 +33,4 @@ export const getIntegrationsAvailable = (metadata?: InfraMetadata | null) => {
   return Object.entries(INTEGRATIONS)
     .filter(([_, fields]) => metadata?.features?.some((f) => fields.includes(f.name)))
     .map(([name]) => name);
-};
-
-export const getApmField = (assetType: InventoryItemType): string => {
-  switch (assetType) {
-    case 'host':
-      return APM_FILTER_FIELD_PER_ASSET_TYPE.host;
-    case 'container':
-      return APM_FILTER_FIELD_PER_ASSET_TYPE.container;
-    default:
-      return '';
-  }
 };

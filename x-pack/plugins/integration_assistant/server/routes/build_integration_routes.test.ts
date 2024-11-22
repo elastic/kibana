@@ -40,6 +40,7 @@ describe('registerIntegrationBuilderRoutes', () => {
               processors: [{ script: { source: {} } }],
             },
             docs: [],
+            samplesFormat: { name: 'ndjson', multiline: false },
           },
         ],
       },

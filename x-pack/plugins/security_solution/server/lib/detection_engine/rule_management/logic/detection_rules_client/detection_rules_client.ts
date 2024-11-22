@@ -6,17 +6,21 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import type { MlAuthz } from '../../../../machine_learning/authz';
 import { createPrebuiltRuleAssetsClient } from '../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
+import type { RuleImportErrorObject } from '../import/errors';
 import type {
   CreateCustomRuleArgs,
   CreatePrebuiltRuleArgs,
   DeleteRuleArgs,
   IDetectionRulesClient,
   ImportRuleArgs,
+  ImportRulesArgs,
   PatchRuleArgs,
   UpdateRuleArgs,
   UpgradePrebuiltRuleArgs,
@@ -27,14 +31,17 @@ import { importRule } from './methods/import_rule';
 import { patchRule } from './methods/patch_rule';
 import { updateRule } from './methods/update_rule';
 import { upgradePrebuiltRule } from './methods/upgrade_prebuilt_rule';
+import { importRules } from './methods/import_rules';
 
 interface DetectionRulesClientParams {
+  actionsClient: ActionsClient;
   rulesClient: RulesClient;
   savedObjectsClient: SavedObjectsClientContract;
   mlAuthz: MlAuthz;
 }
 
 export const createDetectionRulesClient = ({
+  actionsClient,
   rulesClient,
   mlAuthz,
   savedObjectsClient,
@@ -45,6 +52,7 @@ export const createDetectionRulesClient = ({
     async createCustomRule(args: CreateCustomRuleArgs): Promise<RuleResponse> {
       return withSecuritySpan('DetectionRulesClient.createCustomRule', async () => {
         return createRule({
+          actionsClient,
           rulesClient,
           rule: {
             ...args.params,
@@ -62,6 +70,7 @@ export const createDetectionRulesClient = ({
     async createPrebuiltRule(args: CreatePrebuiltRuleArgs): Promise<RuleResponse> {
       return withSecuritySpan('DetectionRulesClient.createPrebuiltRule', async () => {
         return createRule({
+          actionsClient,
           rulesClient,
           rule: {
             ...args.params,
@@ -74,13 +83,25 @@ export const createDetectionRulesClient = ({
 
     async updateRule({ ruleUpdate }: UpdateRuleArgs): Promise<RuleResponse> {
       return withSecuritySpan('DetectionRulesClient.updateRule', async () => {
-        return updateRule({ rulesClient, prebuiltRuleAssetClient, mlAuthz, ruleUpdate });
+        return updateRule({
+          actionsClient,
+          rulesClient,
+          prebuiltRuleAssetClient,
+          mlAuthz,
+          ruleUpdate,
+        });
       });
     },
 
     async patchRule({ rulePatch }: PatchRuleArgs): Promise<RuleResponse> {
       return withSecuritySpan('DetectionRulesClient.patchRule', async () => {
-        return patchRule({ rulesClient, prebuiltRuleAssetClient, mlAuthz, rulePatch });
+        return patchRule({
+          actionsClient,
+          rulesClient,
+          prebuiltRuleAssetClient,
+          mlAuthz,
+          rulePatch,
+        });
       });
     },
 
@@ -93,6 +114,7 @@ export const createDetectionRulesClient = ({
     async upgradePrebuiltRule({ ruleAsset }: UpgradePrebuiltRuleArgs): Promise<RuleResponse> {
       return withSecuritySpan('DetectionRulesClient.upgradePrebuiltRule', async () => {
         return upgradePrebuiltRule({
+          actionsClient,
           rulesClient,
           ruleAsset,
           mlAuthz,
@@ -104,10 +126,21 @@ export const createDetectionRulesClient = ({
     async importRule(args: ImportRuleArgs): Promise<RuleResponse> {
       return withSecuritySpan('DetectionRulesClient.importRule', async () => {
         return importRule({
+          actionsClient,
           rulesClient,
           importRulePayload: args,
           mlAuthz,
           prebuiltRuleAssetClient,
+        });
+      });
+    },
+
+    async importRules(args: ImportRulesArgs): Promise<Array<RuleResponse | RuleImportErrorObject>> {
+      return withSecuritySpan('DetectionRulesClient.importRules', async () => {
+        return importRules({
+          ...args,
+          detectionRulesClient: this,
+          savedObjectsClient,
         });
       });
     },

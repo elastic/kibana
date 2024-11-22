@@ -11,7 +11,7 @@ import { has, unset, some, mapKeys } from 'lodash';
 import { produce } from 'immer';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
@@ -40,7 +40,11 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
     .post({
       access: 'public',
       path: '/api/osquery/packs',
-      options: { tags: [`access:${PLUGIN_ID}-writePacks`] },
+      security: {
+        authz: {
+          requiredPrivileges: [`${PLUGIN_ID}-writePacks`],
+        },
+      },
     })
     .addVersion(
       {
@@ -112,7 +116,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         const references = policiesList.map((id) => ({
           id,
           name: agentPoliciesIdMap[id]?.name,
-          type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+          type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
         }));
 
         const packSO = await savedObjectsClient.create<PackSavedObjectLimited>(
@@ -152,9 +156,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                     }
 
                     set(draft, `inputs[0].config.osquery.value.packs.${packSO.attributes.name}`, {
-                      shard: policyShards[packagePolicy.policy_ids[0]] // TODO
-                        ? policyShards[packagePolicy.policy_ids[0]]
-                        : 100,
+                      shard: policyShards[agentPolicyId] ?? 100,
                       queries: convertSOQueriesToPackConfig(queries),
                     });
 

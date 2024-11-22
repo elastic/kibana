@@ -6,16 +6,12 @@
  */
 import type { EuiDataGridControlColumn } from '@elastic/eui';
 import { TestProviders } from '../../../../../common/mock';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { useTimelineControlColumn } from './use_timeline_control_columns';
 import type { ColumnHeaderOptions } from '../../../../../../common/types/timeline/columns';
 import { TimelineId } from '@kbn/timelines-plugin/public/store/timeline';
 import { TimelineTabs } from '../../../../../../common/types';
-
-jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
-}));
 
 jest.mock('../../../../../common/hooks/use_license', () => ({
   useLicense: jest.fn().mockReturnValue({
@@ -25,7 +21,7 @@ jest.mock('../../../../../common/hooks/use_license', () => ({
 
 const useLicenseMock = useLicense as jest.Mock;
 
-describe('useTimelineColumns', () => {
+describe('useTimelineControlColumns', () => {
   const mockColumns: ColumnHeaderOptions[] = [
     {
       columnHeaderType: 'not-filtered',

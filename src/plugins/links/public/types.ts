@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -21,7 +22,7 @@ import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/p
 import { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-containers';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { DashboardLocatorParams, DASHBOARD_CONTAINER_TYPE } from '@kbn/dashboard-plugin/public';
-import { DashboardAttributes } from '@kbn/dashboard-plugin/common';
+import type { DashboardAttributes } from '@kbn/dashboard-plugin/server';
 
 import { CONTENT_ID } from '../common';
 import { Link, LinksAttributes, LinksLayoutType } from '../common/content_management';
@@ -72,5 +73,5 @@ export type ResolvedLink = Link & {
 
 export interface DashboardItem {
   id: string;
-  attributes: DashboardAttributes;
+  attributes: Pick<DashboardAttributes, 'title' | 'description' | 'timeRestore'>;
 }

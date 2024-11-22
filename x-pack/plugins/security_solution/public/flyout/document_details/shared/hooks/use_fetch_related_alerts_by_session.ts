@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { useAlertPrevalence } from '../../../../common/containers/alerts/use_alert_prevalence';
+import { useAlertPrevalence } from './use_alert_prevalence';
 import { isActiveTimeline } from '../../../../helpers';
 import { ENTRY_LEADER_ENTITY_ID } from '../constants/field_names';
 
@@ -50,7 +50,7 @@ export const useFetchRelatedAlertsBySession = ({
     field: ENTRY_LEADER_ENTITY_ID,
     value: entityId,
     isActiveTimelines: isActiveTimeline(scopeId),
-    signalIndexName: null,
+    indexName: null,
     includeAlertIds: true,
     ignoreTimerange: true,
   });

@@ -15,7 +15,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const tagManagementPage = PageObjects.tagManagement;
 
   describe('bulk assign', () => {
-    let assignFlyout: typeof tagManagementPage['assignFlyout'];
+    let assignFlyout: (typeof tagManagementPage)['assignFlyout'];
 
     beforeEach(async () => {
       assignFlyout = tagManagementPage.assignFlyout;

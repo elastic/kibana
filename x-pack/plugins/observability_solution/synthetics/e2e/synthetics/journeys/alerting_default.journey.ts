@@ -43,13 +43,13 @@ journey('AlertingDefaults', async ({ page, params }) => {
     await page.press('input[type="text"]', 'Tab');
   });
   step(
-    'Fill text=Webhook URLCreate a Slack Webhook URL(opens in a new tab or window) >> input[type="text"]',
+    'Fill text=Webhook URLCreate a Slack Webhook URL(external, opens in a new tab or window) >> input[type="text"]',
     async () => {
       if (await page.isVisible(byTestId('webhookButton'))) {
         await page.click(byTestId('webhookButton'));
       }
       await page.fill(
-        'text=Webhook URLCreate a Slack Webhook URL(opens in a new tab or window) >> input[type="text"]',
+        'text=Webhook URLCreate a Slack Webhook URL(external, opens in a new tab or window) >> input[type="text"]',
         'https://www.slack.com'
       );
       await page.click('button:has-text("Save")');
@@ -74,10 +74,10 @@ journey('AlertingDefaults', async ({ page, params }) => {
     await page.fill('input[type="password"]', 'changeme');
     await page.click('button:has-text("Save")');
     await page.click(
-      'text=Sender is required.Configure email accounts(opens in a new tab or window) >> input[type="text"]'
+      'text=Sender is required.Configure email accounts(external, opens in a new tab or window) >> input[type="text"]'
     );
     await page.fill(
-      'text=Sender is required.Configure email accounts(opens in a new tab or window) >> input[type="text"]',
+      'text=Sender is required.Configure email accounts(external, opens in a new tab or window) >> input[type="text"]',
       'test@gmail.com'
     );
     await page.click('button:has-text("Save")');
@@ -119,21 +119,15 @@ journey('AlertingDefaults', async ({ page, params }) => {
     await page.click('.euiForm');
     await page.click('text=To: Email is required for selected email connector');
   });
-  step(
-    'Click .euiComboBox.euiComboBox--fullWidth.euiComboBox-isInvalid .euiFormControlLayout .euiFormControlLayout__childrenWrapper .euiComboBox__inputWrap',
-    async () => {
-      await page.click(
-        '.euiComboBox.euiComboBox--fullWidth.euiComboBox-isInvalid .euiFormControlLayout .euiFormControlLayout__childrenWrapper .euiComboBox__inputWrap'
-      );
-      await page.fill(
-        'text=To BccCombo box. Selected. Combo box input. Type some text or, to display a list >> input[role="combobox"]',
-        'test@gmail.com'
-      );
-      await page.isDisabled('button:has-text("Apply changes")');
-      await page.click('[aria-label="Account menu"]');
-      await page.click('text=Log out');
-    }
-  );
+  step('Fill email fields', async () => {
+    await page
+      .getByTestId('toEmailAddressInput')
+      .getByTestId('comboBoxSearchInput')
+      .fill('test@gmail.com');
+    await page.isDisabled('button:has-text("Apply changes")');
+    await page.click('[aria-label="Account menu"]');
+    await page.click('text=Log out');
+  });
 
   step('Login to kibana with readonly', async () => {
     await syntheticsApp.loginToKibana('viewer', 'changeme');

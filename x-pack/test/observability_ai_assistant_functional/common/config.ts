@@ -9,13 +9,14 @@ import { FtrConfigProviderContext } from '@kbn/test';
 import { merge } from 'lodash';
 import { UrlObject } from 'url';
 import {
-  editorUser,
-  viewerUser,
-} from '../../observability_ai_assistant_api_integration/common/users/users';
-import {
   KibanaEBTServerProvider,
   KibanaEBTUIProvider,
-} from '../../../../test/analytics/services/kibana_ebt';
+} from '@kbn/test-suites-src/analytics/services/kibana_ebt';
+import {
+  secondaryEditor,
+  editor,
+  viewer,
+} from '../../observability_ai_assistant_api_integration/common/users/users';
 import {
   ObservabilityAIAssistantFtrConfig,
   createObservabilityAIAssistantAPIConfig,
@@ -61,9 +62,10 @@ async function getTestConfig({
           ObservabilityAIAssistantUIProvider(context),
         observabilityAIAssistantAPIClient: async (context: InheritedFtrProviderContext) => {
           return {
-            adminUser: await getScopedApiClient(kibanaServer, 'elastic'),
-            viewerUser: await getScopedApiClient(kibanaServer, viewerUser.username),
-            editorUser: await getScopedApiClient(kibanaServer, editorUser.username),
+            admin: getScopedApiClient(kibanaServer, 'elastic'),
+            viewer: getScopedApiClient(kibanaServer, viewer.username),
+            editor: getScopedApiClient(kibanaServer, editor.username),
+            secondaryEditor: getScopedApiClient(kibanaServer, secondaryEditor.username),
           };
         },
         kibana_ebt_server: KibanaEBTServerProvider,

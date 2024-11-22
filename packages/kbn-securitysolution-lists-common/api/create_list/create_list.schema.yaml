@@ -8,9 +8,8 @@ paths:
       x-labels: [serverless, ess]
       operationId: CreateList
       x-codegen-enabled: true
-      summary: Creates a list
-      tags:
-        - List API
+      summary: Create a list
+      description: Create a new list.
       requestBody:
         description: List's properties
         required: true

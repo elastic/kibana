@@ -7,9 +7,8 @@
 
 import { CoreSetup } from '@kbn/core/public';
 import type { PaletteRegistry } from '@kbn/coloring';
-import { CustomPaletteState } from '@kbn/charts-plugin/public';
 import type { IAggType } from '@kbn/data-plugin/public';
-import type { Datatable, RenderMode } from '@kbn/expressions-plugin/common';
+import type { Datatable, DatatableColumnMeta, RenderMode } from '@kbn/expressions-plugin/common';
 import type {
   ILensInterpreterRenderHandlers,
   LensCellValueAction,
@@ -50,7 +49,7 @@ export type LensPagesizeAction = LensEditEvent<typeof LENS_EDIT_PAGESIZE_ACTION>
 export type DatatableRenderProps = DatatableProps & {
   formatFactory: FormatFactory;
   dispatchEvent: ILensInterpreterRenderHandlers['event'];
-  getType: (name: string) => IAggType | undefined;
+  getType: (meta?: DatatableColumnMeta) => IAggType | undefined;
   renderMode: RenderMode;
   paletteService: PaletteRegistry;
   theme: CoreSetup['theme'];
@@ -73,8 +72,8 @@ export type DatatableRenderProps = DatatableProps & {
 export interface DataContextType {
   table?: Datatable;
   rowHasRowClickTriggerActions?: boolean[];
-  alignments?: Record<string, 'left' | 'right' | 'center'>;
-  minMaxByColumnId?: Record<string, { min: number; max: number }>;
+  alignments?: Map<string, 'left' | 'right' | 'center'>;
+  minMaxByColumnId?: Map<string, { min: number; max: number }>;
   handleFilterClick?: (
     field: string,
     value: unknown,
@@ -82,9 +81,4 @@ export interface DataContextType {
     rowIndex: number,
     negate?: boolean
   ) => void;
-  getColorForValue?: (
-    value: number | undefined,
-    state: CustomPaletteState,
-    minMax: { min: number; max: number }
-  ) => string | undefined;
 }

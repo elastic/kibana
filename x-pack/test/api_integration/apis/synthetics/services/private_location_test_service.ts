@@ -4,12 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { v4 as uuidv4 } from 'uuid';
-import { privateLocationsSavedObjectName } from '@kbn/synthetics-plugin/common/saved_objects/private_locations';
-import { privateLocationsSavedObjectId } from '@kbn/synthetics-plugin/server/saved_objects/private_locations';
-import { SyntheticsPrivateLocations } from '@kbn/synthetics-plugin/common/runtime_types';
+import expect from '@kbn/expect';
+import { PrivateLocation } from '@kbn/synthetics-plugin/common/runtime_types';
+import { KibanaSupertestProvider } from '@kbn/ftr-common-functional-services';
+import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import {
+  legacyPrivateLocationsSavedObjectId,
+  legacyPrivateLocationsSavedObjectName,
+} from '@kbn/synthetics-plugin/common/saved_objects/private_locations';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { KibanaSupertestProvider } from '../../../../../../test/api_integration/services/supertest';
 
 export const INSTALLED_VERSION = '1.1.1';
 
@@ -37,18 +40,12 @@ export class PrivateLocationTestService {
     }
   }
 
-  async addTestPrivateLocation() {
-    const apiResponse = await this.addFleetPolicy(uuidv4());
-    const testPolicyId = apiResponse.body.item.id;
-    return (await this.setTestLocations([testPolicyId]))[0];
-  }
-
-  async addFleetPolicy(name: string) {
+  async addFleetPolicy(name?: string) {
     return this.supertest
       .post('/api/fleet/agent_policies?sys_monitoring=true')
       .set('kbn-xsrf', 'true')
       .send({
-        name,
+        name: name ?? 'Fleet test server policy' + Date.now(),
         description: '',
         namespace: 'default',
         monitoring_enabled: [],
@@ -56,28 +53,72 @@ export class PrivateLocationTestService {
       .expect(200);
   }
 
-  async setTestLocations(testFleetPolicyIds: string[]) {
-    const server = this.getService('kibanaServer');
+  async addPrivateLocation({ policyId, label }: { policyId?: string; label?: string } = {}) {
+    let agentPolicyId = policyId;
 
-    const locations: SyntheticsPrivateLocations = testFleetPolicyIds.map((id, index) => ({
-      label: 'Test private location ' + index,
-      agentPolicyId: id,
-      id,
+    if (!agentPolicyId) {
+      const apiResponse = await this.addFleetPolicy();
+      agentPolicyId = apiResponse.body.item.id;
+    }
+
+    const location: Omit<PrivateLocation, 'id'> = {
+      label: label ?? 'Test private location 0',
+      agentPolicyId: agentPolicyId!,
       geo: {
         lat: 0,
         lon: 0,
       },
-      isServiceManaged: false,
-    }));
+    };
+
+    const response = await this.supertest
+      .post(SYNTHETICS_API_URLS.PRIVATE_LOCATIONS)
+      .set('kbn-xsrf', 'true')
+      .send(location);
+
+    expect(response.status).to.be(200);
+
+    const { isInvalid, ...loc } = response.body;
+
+    return loc;
+  }
+
+  async addLegacyPrivateLocations() {
+    const server = this.getService('kibanaServer');
+    const fleetPolicy = await this.addFleetPolicy();
+    const fleetPolicy2 = await this.addFleetPolicy();
+
+    const locs = [
+      {
+        id: fleetPolicy.body.item.id,
+        agentPolicyId: fleetPolicy.body.item.id,
+        name: 'Test private location 1',
+        lat: 0,
+        lon: 0,
+      },
+      {
+        id: fleetPolicy2.body.item.id,
+        agentPolicyId: fleetPolicy2.body.item.id,
+        name: 'Test private location 2',
+        lat: 0,
+        lon: 0,
+      },
+    ];
 
     await server.savedObjects.create({
-      type: privateLocationsSavedObjectName,
-      id: privateLocationsSavedObjectId,
+      type: legacyPrivateLocationsSavedObjectName,
+      id: legacyPrivateLocationsSavedObjectId,
       attributes: {
-        locations,
+        locations: locs,
       },
       overwrite: true,
     });
-    return locations;
+    return locs;
+  }
+
+  async fetchAll() {
+    return this.supertest
+      .get(SYNTHETICS_API_URLS.PRIVATE_LOCATIONS)
+      .set('kbn-xsrf', 'true')
+      .expect(200);
   }
 }

@@ -245,7 +245,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
   const config = popoverConfig(axis, isHorizontal);
 
   const onExtentChange = useCallback(
-    (newExtent) => {
+    (newExtent: AxisExtentConfig | undefined) => {
       if (setExtent && newExtent && !isEqual(newExtent, extent)) {
         const { errorMsg } = validateExtent(hasBarOrAreaOnAxis, newExtent, scale);
         if (axis === 'x' || newExtent.mode !== 'custom' || !errorMsg) {
@@ -279,7 +279,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
         isTitleVisible={isTitleVisible}
       />
       <EuiFormRow
-        display="columnCompressedSwitch"
+        display="columnCompressed"
         label={i18n.translate('xpack.lens.xyChart.Gridlines', {
           defaultMessage: 'Gridlines',
         })}
@@ -332,7 +332,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
       )}
       {setEndzoneVisibility && (
         <EuiFormRow
-          display="columnCompressedSwitch"
+          display="columnCompressed"
           label={i18n.translate('xpack.lens.xyChart.showEnzones', {
             defaultMessage: 'Show partial data markers',
           })}
@@ -352,7 +352,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
       )}
       {setCurrentTimeMarkerVisibility && (
         <EuiFormRow
-          display="columnCompressedSwitch"
+          display="columnCompressed"
           label={i18n.translate('xpack.lens.xyChart.showCurrenTimeMarker', {
             defaultMessage: 'Show current time marker',
           })}

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { createValidationFunction } from '../../../common/runtime_types';
+import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import { TopNodesRequestRT } from '../../../common/http_api/overview_api';
 import { InfraBackendLibs } from '../../lib/infra_types';
 import { createSearchClient } from '../../lib/create_search_client';
@@ -18,7 +18,7 @@ export const initOverviewRoute = (libs: InfraBackendLibs) => {
       method: 'post',
       path: '/api/metrics/overview/top',
       validate: {
-        body: createValidationFunction(TopNodesRequestRT),
+        body: createRouteValidationFunction(TopNodesRequestRT),
       },
     },
     async (requestContext, request, response) => {

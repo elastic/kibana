@@ -12,22 +12,39 @@ import styled from '@emotion/styled';
 import { isEmpty } from 'lodash/fp';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
+import { css } from '@emotion/react';
 import { EMPTY_PROMPT } from './translations';
 
 const Strong = styled.strong`
   margin-right: ${euiThemeVars.euiSizeS};
 `;
 
+interface GetOptionFromPromptProps extends PromptResponse {
+  content: string;
+  id: string;
+  name: string;
+}
+
 export const getOptionFromPrompt = ({
   content,
   id,
   name,
-}: PromptResponse): EuiSuperSelectOption<string> => ({
+}: GetOptionFromPromptProps): EuiSuperSelectOption<string> => ({
   value: id,
-  inputDisplay: <span data-test-subj="systemPromptText">{name}</span>,
+  inputDisplay: (
+    <span
+      data-test-subj="systemPromptText"
+      // @ts-ignore
+      css={css`
+        color: ${euiThemeVars.euiColorDarkestShade};
+      `}
+    >
+      {name}
+    </span>
+  ),
   dropdownDisplay: (
     <>
-      <Strong data-test-subj="name">{name}</Strong>
+      <Strong data-test-subj={`systemPrompt-${name}`}>{name}</Strong>
 
       {/* Empty content tooltip gets around :hover styles from SuperSelectOptionButton */}
       <EuiToolTip content={undefined}>
@@ -39,8 +56,6 @@ export const getOptionFromPrompt = ({
   ),
 });
 
-interface GetOptionsProps {
-  prompts: PromptResponse[] | undefined;
-}
-export const getOptions = ({ prompts }: GetOptionsProps): Array<EuiSuperSelectOption<string>> =>
-  prompts?.map(getOptionFromPrompt) ?? [];
+export const getOptions = (
+  prompts: PromptResponse[] | undefined
+): Array<EuiSuperSelectOption<string>> => prompts?.map((p) => getOptionFromPrompt(p)) ?? [];

@@ -19,11 +19,8 @@ export const controlPanelConfigs: ControlPanels = {
     width: 'medium',
     grow: false,
     type: 'optionsListControl',
-    explicitInput: {
-      id: availableControlsPanels.NAMESPACE,
-      fieldName: availableControlsPanels.NAMESPACE,
-      title: 'Namespace',
-    },
+    fieldName: availableControlsPanels.NAMESPACE,
+    title: 'Namespace',
   },
 };
 

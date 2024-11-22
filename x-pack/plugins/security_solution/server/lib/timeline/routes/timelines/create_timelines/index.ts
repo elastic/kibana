@@ -7,17 +7,13 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse } from '@kbn/core/server';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import { TIMELINE_URL } from '../../../../../../common/constants';
 
-import type { ConfigType } from '../../../../..';
-import type { SetupPlugins } from '../../../../../plugin';
-import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
-
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
-import { createTimelineSchema } from '../../../../../../common/api/timeline';
 import {
   buildFrameworkRequest,
   CompareTimelinesStatus,
@@ -25,20 +21,21 @@ import {
 } from '../../../utils/common';
 import { DEFAULT_ERROR } from '../../../utils/failure_cases';
 import { createTimelines } from './helpers';
-import type { CreateTimelinesResponse } from '../../../../../../common/api/timeline';
+import {
+  CreateTimelinesRequestBody,
+  type CreateTimelinesResponse,
+} from '../../../../../../common/api/timeline';
 
 export * from './helpers';
 
-export const createTimelinesRoute = (
-  router: SecuritySolutionPluginRouter,
-  _: ConfigType,
-  security: SetupPlugins['security']
-) => {
+export const createTimelinesRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .post({
       path: TIMELINE_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
       access: 'public',
     })
@@ -47,7 +44,7 @@ export const createTimelinesRoute = (
         version: '2023-10-31',
         validate: {
           request: {
-            body: buildRouteValidationWithExcess(createTimelineSchema),
+            body: buildRouteValidationWithZod(CreateTimelinesRequestBody),
           },
         },
       },
@@ -55,7 +52,7 @@ export const createTimelinesRoute = (
         const siemResponse = buildSiemResponse(response);
 
         try {
-          const frameworkRequest = await buildFrameworkRequest(context, security, request);
+          const frameworkRequest = await buildFrameworkRequest(context, request);
 
           const { timelineId, timeline, version } = request.body;
           const { templateTimelineId, templateTimelineVersion, timelineType, title, status } =
@@ -84,13 +81,16 @@ export const createTimelinesRoute = (
               timelineVersion: version,
             });
 
-            return response.ok({
-              body: {
-                data: {
-                  persistTimeline: newTimeline,
-                },
-              },
-            });
+            if (newTimeline.code === 200) {
+              return response.ok({
+                body: newTimeline.timeline,
+              });
+            } else {
+              return siemResponse.error({
+                statusCode: newTimeline.code,
+                body: newTimeline.message,
+              });
+            }
           } else {
             return siemResponse.error(
               compareTimelinesStatus.checkIsFailureCases(TimelineStatusActions.create) || {

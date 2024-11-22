@@ -20,10 +20,12 @@ export const exportListItemRoute = (router: ListsPluginRouter): void => {
   router.versioned
     .post({
       access: 'public',
-      options: {
-        tags: ['access:lists-read'],
-      },
       path: `${LIST_ITEM_URL}/_export`,
+      security: {
+        authz: {
+          requiredPrivileges: ['lists-read'],
+        },
+      },
     })
     .addVersion(
       {
@@ -40,25 +42,26 @@ export const exportListItemRoute = (router: ListsPluginRouter): void => {
           const { list_id: listId } = request.query;
           const lists = await getListClient(context);
           const list = await lists.getList({ id: listId });
+
           if (list == null) {
             return siemResponse.error({
               body: `list_id: ${listId} does not exist`,
               statusCode: 400,
             });
-          } else {
-            // TODO: Allow the API to override the name of the file to export
-            const fileName = list.name;
-
-            const stream = new Stream.PassThrough();
-            lists.exportListItemsToStream({ listId, stream, stringToAppend: '\n' });
-            return response.ok({
-              body: stream,
-              headers: {
-                'Content-Disposition': `attachment; filename="${fileName}"`,
-                'Content-Type': 'application/ndjson',
-              },
-            });
           }
+
+          // TODO: Allow the API to override the name of the file to export
+          const fileName = list.name;
+
+          const stream = new Stream.PassThrough();
+          lists.exportListItemsToStream({ listId, stream, stringToAppend: '\n' });
+          return response.ok({
+            body: stream,
+            headers: {
+              'Content-Disposition': `attachment; filename="${fileName}"`,
+              'Content-Type': 'application/ndjson',
+            },
+          });
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

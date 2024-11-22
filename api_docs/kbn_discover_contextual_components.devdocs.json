@@ -1,0 +1,853 @@
+{
+  "id": "@kbn/discover-contextual-components",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/discover-contextual-components",
+        "id": "def-public.Content",
+        "type": "Function",
+        "tags": [],
+        "label": "Content",
+        "description": [],
+        "signature": [
+          "({ columnId, dataView, fieldFormats, isCompressed, isSingleLine, row, shouldShowFieldHandler, }: ContentProps) => React.JSX.Element"
+        ],
+        "path": "packages/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/content.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-contextual-components",
+            "id": "def-public.Content.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  columnId,\n  dataView,\n  fieldFormats,\n  isCompressed,\n  isSingleLine = false,\n  row,\n  shouldShowFieldHandler,\n}",
+            "description": [],
+            "signature": [
+              "ContentProps"
+            ],
+            "path": "packages/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/content.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-contextual-components",
+        "id": "def-public.createResourceFields",
+        "type": "Function",
+        "tags": [],
+        "label": "createResourceFields",
+        "description": [],
+        "signature": [
+          "(row: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DataTableRecord",
+            "text": "DataTableRecord"
+          },
+          ", core: ",
+          {
+            "pluginId": "@kbn/core-lifecycle-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+            "section": "def-public.CoreStart",
+            "text": "CoreStart"
+          },
+          ", share?: ",
+          {
+            "pluginId": "share",
+            "scope": "public",
+            "docId": "kibSharePluginApi",
+            "section": "def-public.SharePublicStart",
+            "text": "SharePublicStart"
+          },
+          " | undefined) => ",
+          {
+            "pluginId": "@kbn/discover-contextual-components",
+            "scope": "public",
+            "docId": "kibKbnDiscoverContextualComponentsPluginApi",
+            "section": "def-public.ResourceFieldDescriptor",
+            "text": "ResourceFieldDescriptor"
+          },
+          "[]"
+        ],
+        "path": "packages/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-contextual-components",
+            "id": "def-public.createResourceFields.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "row",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DataTableRecord",
+                "text": "DataTableRecord"
+              }
+            ],
+            "path": "packages/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-contextual-components",
+            "id": "def-public.createResourceFields.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "core",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.CoreStart",
+                "text": "CoreStart"
+              }
+            ],
+            "path": "packages/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-contextual-components",
+            "id": "def-public.createResourceFields.$3",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "share",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.SharePublicStart",
+                "text": "SharePublicStart"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-contextual-components",
+        "id": "def-public.formatJsonDocumentForContent",
+        "type": "Function",
+        "tags": [],
+        "label": "formatJsonDocumentForContent",
+        "description": [
+          "\nformatJsonDocumentForContent definitions"
+        ],
+        "signature": [
+          "(row: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DataTableRecord",
+            "text": "DataTableRecord"
+          },
+          ") => { flattened: Record<string, unknown>; raw: { fields: Record<string, any>; _index?: string | undefined; _id?: string | undefined; _source?: Record<string, unknown> | undefined; sort?: ",
+          "SortResults",
+          " | undefined; _score?: number | null | undefined; _explanation?: ",
+          "ExplainExplanation",
+          " | undefined; highlight?: Record<string, string[]> | undefined; inner_hits?: Record<string, ",
+          "SearchInnerHitsResult",
+          "> | undefined; matched_queries?: string[] | Record<string, number> | undefined; _nested?: ",
+          "SearchNestedIdentity",
+          " | undefined; _ignored?: string[] | undefined; ignored_field_values?: Record<string, any[]> | undefined; _shard?: string | undefined; _node?: string | undefined; _routing?: string | undefined; _rank?: number | undefined; _seq_no?: number | undefined; _primary_term?: number | undefined; _version?: number | undefined; }; id: string; isAnchor?: boolean | undefined; }"
+        ],
+        "path": "packages/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-contextual-components",
+            "id": "def-public.formatJsonDocumentForContent.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "row",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DataTableRecord",
+                "text": "DataTableRecord"
+              }
+            ],
+            "path": "packages/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-contextual-components",
+        "id": "def-public.getLogLevelBadgeCell",
+        "type": "Function",
+        "tags": [],
+        "label": "getLogLevelBadgeCell",
+        "description": [],
+        "signature": [
+          "(logLevelField: string) => (props: ",
+          {
+            "pluginId": "@kbn/unified-data-table",
+            "scope": "public",
+            "docId": "kibKbnUnifiedDataTablePluginApi",
+            "section": "def-public.DataGridCellValueElementProps",
+            "text": "DataGridCellValueElementProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "packages/kbn-discover-contextual-components/src/data_types/logs/components/log_level_badge_cell/log_level_badge_cell.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-contextual-components",
+            "id": "def-public.getLogLevelBadgeCell.$1",
+            "type": "string",
+            "tags": [],
+            "label": "logLevelField",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-discover-contextual-components/src/data_types/logs/components/log_level_badge_cell/log_level_badge_cell.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-contextual-components",
+        "id": "def-public.getUnformattedResourceFields",
+        "type": "Function",
+        "tags": [],
+        "label": "getUnformattedResourceFields",
+        "description": [
+          "\ngetUnformattedResourceFields definitions"
+        ],
+        "signature": [
+          "(doc: ",
+          "LogDocument",
+          ") => ",
+          "ResourceFields"
+        ],
+        "path": "packages/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-contextual-components",
+            "id": "def-public.getUnformattedResourceFields.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "doc",
+            "description": [],
+            "signature": [
+              "LogDocument"
+            ],
+            "path": "packages/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-contextual-components",
+        "id": "def-public.LazySummaryColumn",
+        "type": "Function",
+        "tags": [],
+        "label": "LazySummaryColumn",
+        "description": [],
+        "signature": [
+          "React.ForwardRefExoticComponent<",
+          "EuiDataGridCellValueElementProps",
+          " & { row: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DataTableRecord",
+            "text": "DataTableRecord"
+          },
+          "; dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          "; fieldFormats: ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "public",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-public.FieldFormatsStart",
+            "text": "FieldFormatsStart"
+          },
+          "; closePopover: () => void; isCompressed?: boolean | undefined; } & ",
+          {
+            "pluginId": "@kbn/discover-contextual-components",
+            "scope": "public",
+            "docId": "kibKbnDiscoverContextualComponentsPluginApi",
+            "section": "def-public.SummaryColumnFactoryDeps",
+            "text": "SummaryColumnFactoryDeps"
+          },
+          " & React.RefAttributes<{}>>"
+        ],
+        "path": "packages/kbn-discover-contextual-components/src/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-contextual-components",
+            "id": "def-public.LazySummaryColumn.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-contextual-components",
+        "id": "def-public.Resource",
+        "type": "Function",
+        "tags": [],
+        "label": "Resource",
+        "description": [],
+        "signature": [
+          "({ fields, limited, onFilter, ...props }: ResourceProps) => React.JSX.Element"
+        ],
+        "path": "packages/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/resource.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-contextual-components",
+            "id": "def-public.Resource.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ fields, limited = false, onFilter, ...props }",
+            "description": [],
+            "signature": [
+              "ResourceProps"
+            ],
+            "path": "packages/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/resource.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-contextual-components",
+        "id": "def-public.ServiceNameBadgeWithActions",
+        "type": "Function",
+        "tags": [],
+        "label": "ServiceNameBadgeWithActions",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "FieldBadgeWithActionsPropsAndDependencies",
+          ") => React.JSX.Element"
+        ],
+        "path": "packages/kbn-discover-contextual-components/src/data_types/logs/components/service_name_badge_with_actions.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-contextual-components",
+            "id": "def-public.ServiceNameBadgeWithActions.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "FieldBadgeWithActionsPropsAndDependencies"
+            ],
+            "path": "packages/kbn-discover-contextual-components/src/data_types/logs/components/service_name_badge_with_actions.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-contextual-components",
+        "id": "def-public.SummaryColumn",
+        "type": "Function",
+        "tags": [],
+        "label": "SummaryColumn",
+        "description": [],
+        "signature": [
+          "(props: ",
+          {
+            "pluginId": "@kbn/discover-contextual-components",
+            "scope": "public",
+            "docId": "kibKbnDiscoverContextualComponentsPluginApi",
+            "section": "def-public.AllSummaryColumnProps",
+            "text": "AllSummaryColumnProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "packages/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/summary_column.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-contextual-components",
+            "id": "def-public.SummaryColumn.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-contextual-components",
+                "scope": "public",
+                "docId": "kibKbnDiscoverContextualComponentsPluginApi",
+                "section": "def-public.AllSummaryColumnProps",
+                "text": "AllSummaryColumnProps"
+              }
+            ],
+            "path": "packages/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/summary_column.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/discover-contextual-components",
+        "id": "def-public.ResourceFieldDescriptor",
+        "type": "Interface",
+        "tags": [],
+        "label": "ResourceFieldDescriptor",
+        "description": [],
+        "path": "packages/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-contextual-components",
+            "id": "def-public.ResourceFieldDescriptor.ResourceBadge",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ResourceBadge",
+            "description": [],
+            "signature": [
+              "React.ComponentClass<",
+              "FieldBadgeWithActionsProps",
+              ", any> | React.FunctionComponent<",
+              "FieldBadgeWithActionsProps",
+              ">"
+            ],
+            "path": "packages/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-contextual-components",
+            "id": "def-public.ResourceFieldDescriptor.Icon",
+            "type": "Function",
+            "tags": [],
+            "label": "Icon",
+            "description": [],
+            "signature": [
+              "(() => JSX.Element) | undefined"
+            ],
+            "path": "packages/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/discover-contextual-components",
+            "id": "def-public.ResourceFieldDescriptor.name",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "keyof ",
+              "ResourceFields"
+            ],
+            "path": "packages/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-contextual-components",
+            "id": "def-public.ResourceFieldDescriptor.value",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "path": "packages/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-contextual-components",
+        "id": "def-public.SummaryColumnFactoryDeps",
+        "type": "Interface",
+        "tags": [],
+        "label": "SummaryColumnFactoryDeps",
+        "description": [],
+        "path": "packages/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/summary_column.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-contextual-components",
+            "id": "def-public.SummaryColumnFactoryDeps.density",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "density",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-data-table",
+                "scope": "public",
+                "docId": "kibKbnUnifiedDataTablePluginApi",
+                "section": "def-public.DataGridDensity",
+                "text": "DataGridDensity"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/summary_column.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-contextual-components",
+            "id": "def-public.SummaryColumnFactoryDeps.rowHeight",
+            "type": "number",
+            "tags": [],
+            "label": "rowHeight",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/summary_column.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-contextual-components",
+            "id": "def-public.SummaryColumnFactoryDeps.shouldShowFieldHandler",
+            "type": "Function",
+            "tags": [],
+            "label": "shouldShowFieldHandler",
+            "description": [],
+            "signature": [
+              "(fieldName: string) => boolean"
+            ],
+            "path": "packages/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/summary_column.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/discover-contextual-components",
+                "id": "def-public.SummaryColumnFactoryDeps.shouldShowFieldHandler.$1",
+                "type": "string",
+                "tags": [],
+                "label": "fieldName",
+                "description": [],
+                "path": "packages/kbn-discover-utils/src/utils/get_should_show_field_handler.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/discover-contextual-components",
+            "id": "def-public.SummaryColumnFactoryDeps.onFilter",
+            "type": "Function",
+            "tags": [],
+            "label": "onFilter",
+            "description": [],
+            "signature": [
+              "DocViewFilterFn",
+              " | undefined"
+            ],
+            "path": "packages/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/summary_column.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-contextual-components",
+            "id": "def-public.SummaryColumnFactoryDeps.core",
+            "type": "Object",
+            "tags": [],
+            "label": "core",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.CoreStart",
+                "text": "CoreStart"
+              }
+            ],
+            "path": "packages/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/summary_column.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-contextual-components",
+            "id": "def-public.SummaryColumnFactoryDeps.share",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "share",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.SharePublicStart",
+                "text": "SharePublicStart"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/summary_column.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/discover-contextual-components",
+        "id": "def-public.AllSummaryColumnProps",
+        "type": "Type",
+        "tags": [],
+        "label": "AllSummaryColumnProps",
+        "description": [],
+        "signature": [
+          "EuiDataGridCellValueElementProps",
+          " & { row: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DataTableRecord",
+            "text": "DataTableRecord"
+          },
+          "; dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          "; fieldFormats: ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "public",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-public.FieldFormatsStart",
+            "text": "FieldFormatsStart"
+          },
+          "; closePopover: () => void; isCompressed?: boolean | undefined; } & ",
+          {
+            "pluginId": "@kbn/discover-contextual-components",
+            "scope": "public",
+            "docId": "kibKbnDiscoverContextualComponentsPluginApi",
+            "section": "def-public.SummaryColumnFactoryDeps",
+            "text": "SummaryColumnFactoryDeps"
+          }
+        ],
+        "path": "packages/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/summary_column.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-contextual-components",
+        "id": "def-public.LogLevelBadgeCell",
+        "type": "Type",
+        "tags": [],
+        "label": "LogLevelBadgeCell",
+        "description": [],
+        "signature": [
+          "(props: ",
+          {
+            "pluginId": "@kbn/unified-data-table",
+            "scope": "public",
+            "docId": "kibKbnUnifiedDataTablePluginApi",
+            "section": "def-public.DataGridCellValueElementProps",
+            "text": "DataGridCellValueElementProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "packages/kbn-discover-contextual-components/src/data_types/logs/components/log_level_badge_cell/log_level_badge_cell.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-contextual-components",
+            "id": "def-public.LogLevelBadgeCell.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "EuiDataGridCellValueElementProps",
+              " & { row: ",
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DataTableRecord",
+                "text": "DataTableRecord"
+              },
+              "; dataView: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              "; fieldFormats: ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "public",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-public.FieldFormatsStart",
+                "text": "FieldFormatsStart"
+              },
+              "; closePopover: () => void; isCompressed?: boolean | undefined; }"
+            ],
+            "path": "packages/kbn-discover-contextual-components/src/data_types/logs/components/log_level_badge_cell/log_level_badge_cell.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-contextual-components",
+        "id": "def-public.SummaryColumnProps",
+        "type": "Type",
+        "tags": [],
+        "label": "SummaryColumnProps",
+        "description": [],
+        "signature": [
+          "EuiDataGridCellValueElementProps",
+          " & { row: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DataTableRecord",
+            "text": "DataTableRecord"
+          },
+          "; dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          "; fieldFormats: ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "public",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-public.FieldFormatsStart",
+            "text": "FieldFormatsStart"
+          },
+          "; closePopover: () => void; isCompressed?: boolean | undefined; }"
+        ],
+        "path": "packages/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/summary_column.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

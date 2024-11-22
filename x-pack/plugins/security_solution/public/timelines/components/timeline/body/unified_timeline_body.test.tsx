@@ -9,7 +9,7 @@ import { TimelineTabs } from '../../../../../common/types';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import React from 'react';
 import { UnifiedTimeline } from '../unified_components';
-import { defaultUdtHeaders } from '../unified_components/default_headers';
+import { defaultUdtHeaders } from './column_headers/default_headers';
 import type { UnifiedTimelineBodyProps } from './unified_timeline_body';
 import { UnifiedTimelineBody } from './unified_timeline_body';
 import { render, screen } from '@testing-library/react';
@@ -28,16 +28,13 @@ const defaultProps: UnifiedTimelineBodyProps = {
   columns: defaultUdtHeaders,
   dataLoadingState: DataLoadingState.loading,
   events: mockEventsData,
-  expandedDetail: {},
   header: <div />,
   isTextBasedQuery: false,
   itemsPerPage: 25,
   itemsPerPageOptions: [10, 25, 50],
   onChangePage: jest.fn(),
-  onEventClosed: jest.fn(),
   refetch: jest.fn(),
   rowRenderers: [],
-  showExpandedDetails: false,
   sort: [],
   timelineId: 'timeline-1',
   totalCount: 0,
@@ -100,7 +97,7 @@ describe('UnifiedTimelineBody', () => {
 
     expect(MockUnifiedTimelineComponent).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        columns: defaultUdtHeaders,
+        columns: [],
       }),
       {}
     );

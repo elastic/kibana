@@ -52,8 +52,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('opens and closes the connectors flyout correctly', async () => {
-        await common.clickAndValidate('dropdown-connectors', 'dropdown-connector-add-connector');
-        await common.clickAndValidate('dropdown-connector-add-connector', 'euiFlyoutCloseButton');
+        await common.clickAndValidate('add-new-connector', 'euiFlyoutCloseButton');
         await testSubjects.click('euiFlyoutCloseButton');
         expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
       });
@@ -116,6 +115,58 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('deletes a custom field', async () => {
+        await testSubjects.existOrFail('custom-fields-form-group');
+        const deleteButton = await find.byCssSelector('[data-test-subj*="-custom-field-delete"]');
+
+        await deleteButton.click();
+
+        await testSubjects.existOrFail('confirm-delete-modal');
+
+        await testSubjects.click('confirmModalConfirmButton');
+
+        await testSubjects.missingOrFail('custom-fields-list');
+      });
+
+      it('adds a number custom field', async () => {
+        await testSubjects.existOrFail('custom-fields-form-group');
+        await common.clickAndValidate('add-custom-field', 'common-flyout');
+
+        await testSubjects.setValue('custom-field-label-input', 'Count');
+        await testSubjects.click('custom-field-type-selector');
+        await (await find.byCssSelector('[value="number"]')).click();
+        await testSubjects.setCheckbox('number-custom-field-required-wrapper', 'check');
+
+        const defaultNumberInput = await testSubjects.find('number-custom-field-default-value');
+        await defaultNumberInput.type('0');
+
+        await testSubjects.click('common-flyout-save');
+        expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
+
+        await testSubjects.existOrFail('custom-fields-list');
+
+        expect(await testSubjects.getVisibleText('custom-fields-list')).to.be('Count\nNumber');
+      });
+
+      it('edits a number custom field', async () => {
+        await testSubjects.existOrFail('custom-fields-form-group');
+        const numberField = await find.byCssSelector('[data-test-subj*="-custom-field-edit"]');
+
+        await numberField.click();
+
+        const labelInput = await testSubjects.find('custom-field-label-input');
+        await labelInput.type('!');
+
+        await testSubjects.setValue('number-custom-field-default-value', '321');
+
+        await testSubjects.click('common-flyout-save');
+        expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
+
+        await testSubjects.existOrFail('custom-fields-list');
+
+        expect(await testSubjects.getVisibleText('custom-fields-list')).to.be('Count!\nNumber');
+      });
+
+      it('deletes a number custom field', async () => {
         await testSubjects.existOrFail('custom-fields-form-group');
         const deleteButton = await find.byCssSelector('[data-test-subj*="-custom-field-delete"]');
 

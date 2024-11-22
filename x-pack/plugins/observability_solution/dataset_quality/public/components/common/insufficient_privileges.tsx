@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -54,7 +54,7 @@ export const PrivilegesWarningIconWrapper = ({
 }) => {
   const [isPopoverOpen, togglePopover] = useToggle(false);
 
-  const handleButtonClick = useCallback(() => togglePopover(true), [togglePopover]);
+  const handleButtonClick = togglePopover;
 
   if (hasPrivileges) {
     return <>{children}</>;

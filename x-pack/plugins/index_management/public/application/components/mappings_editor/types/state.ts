@@ -108,10 +108,13 @@ export interface State {
   };
   templates: TemplatesFormState;
   inferenceToModelIdMap?: InferenceToModelIdMap;
+  hasEnterpriseLicense: boolean;
+  mappingViewFields: NormalizedFields; // state of the incoming index mappings, separate from the editor state above
 }
 
 export type Action =
   | { type: 'editor.replaceMappings'; value: { [key: string]: any } }
+  | { type: 'editor.replaceViewMappings'; value: { fields: NormalizedFields } }
   | {
       type: 'inferenceToModelIdMap.update';
       value: { inferenceToModelIdMap?: InferenceToModelIdMap };
@@ -122,7 +125,6 @@ export type Action =
   | { type: 'templates.save'; value: MappingsTemplates }
   | { type: 'fieldForm.update'; value: OnFormUpdateArg<any> }
   | { type: 'field.add'; value: Field }
-  | { type: 'field.addSemanticText'; value: Field }
   | { type: 'field.remove'; value: string }
   | { type: 'field.edit'; value: Field }
   | { type: 'field.toggleExpand'; value: { fieldId: string; isExpanded?: boolean } }
@@ -139,6 +141,7 @@ export type Action =
   | { type: 'fieldsJsonEditor.update'; value: { json: { [key: string]: any }; isValid: boolean } }
   | { type: 'search:update'; value: string }
   | { type: 'validity:update'; value: boolean }
-  | { type: 'filter:update'; value: { selectedOptions: EuiSelectableOption[] } };
+  | { type: 'filter:update'; value: { selectedOptions: EuiSelectableOption[] } }
+  | { type: 'hasEnterpriseLicense.update'; value: boolean };
 
 export type Dispatch = (action: Action) => void;

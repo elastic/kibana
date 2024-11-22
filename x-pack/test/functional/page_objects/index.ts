@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { pageObjects as kibanaFunctionalPageObjects } from '../../../../test/functional/page_objects';
+import { pageObjects as kibanaFunctionalPageObjects } from '@kbn/test-suites-src/functional/page_objects';
 
 import { AccountSettingsPageObject } from './account_settings_page';
 import { ApiKeysPageProvider } from './api_keys_page';
@@ -54,6 +54,7 @@ import { UserProfilePageProvider } from './user_profile_page';
 import { WatcherPageObject } from './watcher_page';
 import { SearchProfilerPageProvider } from './search_profiler_page';
 import { SearchPlaygroundPageProvider } from './search_playground_page';
+import { SearchClassicNavigationProvider } from './search_classic_navigation';
 
 // just like services, PageObjects are defined as a map of
 // names to Providers. Merge in Kibana's or pick specific ones
@@ -93,6 +94,7 @@ export const pageObjects = {
   reporting: ReportingPageObject,
   roleMappings: RoleMappingsPageProvider,
   rollup: RollupPageObject,
+  searchClassicNavigation: SearchClassicNavigationProvider,
   searchProfiler: SearchProfilerPageProvider,
   searchPlayground: SearchPlaygroundPageProvider,
   searchSessionsManagement: SearchSessionsPageProvider,

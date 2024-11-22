@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { useState } from 'react';
+import { useCallback } from 'react';
 import type { Direction, EuiBasicTableProps, Pagination, PropertySort } from '@elastic/eui';
+import type { ListingPageUrlState } from '@kbn/ml-url-state';
 
-const PAGE_SIZE = 10;
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
 // Copying from EUI EuiBasicTable types as type is not correctly picked up for table's onChange
@@ -30,15 +30,6 @@ export interface CriteriaWithPagination<T extends object> extends Criteria<T> {
   };
 }
 
-interface AnalyticsBasicTableSettings<T extends object> {
-  pageIndex: number;
-  pageSize: number;
-  totalItemCount: number;
-  showPerPageOptions: boolean;
-  sortField: keyof T;
-  sortDirection: Direction;
-}
-
 interface UseTableSettingsReturnValue<T extends object> {
   onTableChange: EuiBasicTableProps<T>['onChange'];
   pagination: Pagination;
@@ -47,34 +38,29 @@ interface UseTableSettingsReturnValue<T extends object> {
 
 export function useTableSettings<TypeOfItem extends object>(
   sortByField: keyof TypeOfItem,
-  items: TypeOfItem[]
+  items: TypeOfItem[],
+  pageState: ListingPageUrlState,
+  updatePageState: (update: Partial<ListingPageUrlState>) => void
 ): UseTableSettingsReturnValue<TypeOfItem> {
-  const [tableSettings, setTableSettings] = useState<AnalyticsBasicTableSettings<TypeOfItem>>({
-    pageIndex: 0,
-    pageSize: PAGE_SIZE,
-    totalItemCount: 0,
-    showPerPageOptions: true,
-    sortField: sortByField,
-    sortDirection: 'asc',
-  });
+  const { pageIndex, pageSize, sortField, sortDirection } = pageState;
 
-  const onTableChange: EuiBasicTableProps<TypeOfItem>['onChange'] = ({
-    page = { index: 0, size: PAGE_SIZE },
-    sort = { field: sortByField, direction: 'asc' },
-  }: CriteriaWithPagination<TypeOfItem>) => {
-    const { index, size } = page;
-    const { field, direction } = sort;
+  const onTableChange: EuiBasicTableProps<TypeOfItem>['onChange'] = useCallback(
+    ({ page, sort }: CriteriaWithPagination<TypeOfItem>) => {
+      let resultSortField = sort?.field;
+      if (typeof resultSortField !== 'string') {
+        resultSortField = pageState.sortField as keyof TypeOfItem;
+      }
 
-    setTableSettings({
-      ...tableSettings,
-      pageIndex: index,
-      pageSize: size,
-      sortField: field,
-      sortDirection: direction,
-    });
-  };
-
-  const { pageIndex, pageSize, sortField, sortDirection } = tableSettings;
+      const result = {
+        pageIndex: page?.index ?? pageState.pageIndex,
+        pageSize: page?.size ?? pageState.pageSize,
+        sortField: resultSortField as string,
+        sortDirection: sort?.direction ?? pageState.sortDirection,
+      };
+      updatePageState(result);
+    },
+    [pageState, updatePageState]
+  );
 
   const pagination = {
     pageIndex,
@@ -85,8 +71,8 @@ export function useTableSettings<TypeOfItem extends object>(
 
   const sorting = {
     sort: {
-      field: sortField as string,
-      direction: sortDirection,
+      field: sortField,
+      direction: sortDirection as Direction,
     },
   };
   return { onTableChange, pagination, sorting };

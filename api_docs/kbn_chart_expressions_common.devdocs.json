@@ -133,7 +133,7 @@
             "section": "def-common.DatatableRow",
             "text": "DatatableRow"
           },
-          "[], accessor: string | undefined) => (string | string[])[]"
+          "[], accessor: string | undefined, isTransposed: boolean | undefined, exclude: any[] | undefined) => (string | string[])[]"
         ],
         "path": "src/plugins/chart_expressions/common/color_categories.ts",
         "deprecated": false,
@@ -170,6 +170,36 @@
             "description": [],
             "signature": [
               "string | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/common/color_categories.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.getColorCategories.$3",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isTransposed",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/common/color_categories.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.getColorCategories.$4",
+            "type": "Array",
+            "tags": [],
+            "label": "exclude",
+            "description": [],
+            "signature": [
+              "any[] | undefined"
             ],
             "path": "src/plugins/chart_expressions/common/color_categories.ts",
             "deprecated": false,

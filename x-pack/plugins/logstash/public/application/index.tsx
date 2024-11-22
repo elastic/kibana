@@ -32,7 +32,8 @@ export const renderApp = async (
   core: CoreStart,
   { history, element, setBreadcrumbs }: ManagementAppMountParams,
   isMonitoringEnabled: boolean,
-  licenseService$: Observable<any>
+  licenseService$: Observable<any>,
+  isServerless: boolean
 ) => {
   const logstashLicenseService = await licenseService$.pipe(first()).toPromise();
   const clusterService = new ClusterService(core.http);
@@ -52,6 +53,7 @@ export const renderApp = async (
               return (
                 <PipelineList
                   clusterService={clusterService}
+                  isServerless={isServerless}
                   isReadOnly={logstashLicenseService.isReadOnly}
                   isForbidden={true}
                   isLoading={false}

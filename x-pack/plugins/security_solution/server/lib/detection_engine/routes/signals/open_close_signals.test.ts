@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '../../../../../common/constants';
 import {
@@ -24,18 +24,8 @@ describe('set signal status', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { context } = requestContextMock.createTools();
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
-  let mockCore: ReturnType<typeof coreMock.createSetup>;
 
   beforeEach(() => {
-    mockCore = coreMock.createSetup({
-      pluginStartDeps: {
-        security: {
-          authc: {
-            getCurrentUser: jest.fn().mockReturnValue({ user: { username: 'my-username' } }),
-          },
-        },
-      },
-    });
     server = serverMock.create();
     logger = loggingSystemMock.createLogger();
     ({ context } = requestContextMock.createTools());
@@ -44,7 +34,7 @@ describe('set signal status', () => {
       getSuccessfulSignalUpdateResponse()
     );
     const telemetrySenderMock = createMockTelemetryEventsSender();
-    setSignalsStatusRoute(server.router, logger, telemetrySenderMock, mockCore.getStartServices);
+    setSignalsStatusRoute(server.router, logger, telemetrySenderMock);
   });
 
   describe('status on signal', () => {

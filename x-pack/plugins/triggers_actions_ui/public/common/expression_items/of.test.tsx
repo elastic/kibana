@@ -24,12 +24,12 @@ describe('of expression', () => {
         onChangeSelectedAggField={onChangeSelectedAggField}
       />
     );
-    expect(wrapper.find('[data-test-subj="availablefieldsOptionsComboBox"]'))
+    expect(wrapper.find('[data-test-subj="availableFieldsOptionsComboBox"]'))
       .toMatchInlineSnapshot(`
       <EuiComboBox
         async={false}
         compressed={false}
-        data-test-subj="availablefieldsOptionsComboBox"
+        data-test-subj="availableFieldsOptionsComboBox"
         fullWidth={true}
         isClearable={true}
         isInvalid={false}
@@ -80,12 +80,12 @@ describe('of expression', () => {
         }}
       />
     );
-    expect(wrapper.find('[data-test-subj="availablefieldsOptionsComboBox"]'))
+    expect(wrapper.find('[data-test-subj="availableFieldsOptionsComboBox"]'))
       .toMatchInlineSnapshot(`
       <EuiComboBox
         async={false}
         compressed={false}
-        data-test-subj="availablefieldsOptionsComboBox"
+        data-test-subj="availableFieldsOptionsComboBox"
         fullWidth={true}
         isClearable={true}
         isInvalid={false}
@@ -152,7 +152,7 @@ describe('of expression', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="availablefieldsOptionsFormRow"]').prop('helpText')).toBe(
+    expect(wrapper.find('[data-test-subj="availableFieldsOptionsFormRow"]').prop('helpText')).toBe(
       'Helptext test message'
     );
   });

@@ -7,7 +7,7 @@
 
 import { createMockStore, kibanaMock, mockGlobalState } from '../../../common/mock';
 import { TimelineId } from '../../../../common/types/timeline';
-import { TimelineStatus } from '../../../../common/api/timeline';
+import { TimelineStatusEnum } from '../../../../common/api/timeline';
 import { persistTimeline } from '../../containers/api';
 import { ensureTimelineIsSaved } from './helpers';
 
@@ -39,16 +39,8 @@ describe('Timeline middleware helpers', () => {
     it('should return a draft timeline with a savedObjectId when an unsaved timeline is passed', async () => {
       const mockSavedObjectId = 'mockSavedObjectId';
       (persistTimeline as jest.Mock).mockResolvedValue({
-        data: {
-          persistTimeline: {
-            code: 200,
-            message: 'success',
-            timeline: {
-              ...mockGlobalState.timeline.timelineById[TimelineId.test],
-              savedObjectId: mockSavedObjectId,
-            },
-          },
-        },
+        ...mockGlobalState.timeline.timelineById[TimelineId.test],
+        savedObjectId: mockSavedObjectId,
       });
 
       const returnedTimeline = await ensureTimelineIsSaved({
@@ -58,7 +50,7 @@ describe('Timeline middleware helpers', () => {
       });
 
       expect(returnedTimeline.savedObjectId).toBe(mockSavedObjectId);
-      expect(returnedTimeline.status).toBe(TimelineStatus.draft);
+      expect(returnedTimeline.status).toBe(TimelineStatusEnum.draft);
     });
   });
 });

@@ -16,7 +16,7 @@ import { FlyoutHeaderTabs } from '../../shared/components/flyout_header_tabs';
 import { AlertHeaderTitle } from './components/alert_header_title';
 import { EventHeaderTitle } from './components/event_header_title';
 import { useDocumentDetailsContext } from '../shared/context';
-import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
+import { useBasicDataFromDetailsData } from '../shared/hooks/use_basic_data_from_details_data';
 import {
   AlertsCasesTourSteps,
   getTourAnchor,
@@ -65,6 +65,7 @@ export const PanelHeader: FC<PanelHeaderProps> = memo(
           isTourAnchor={isAlert}
           step={AlertsCasesTourSteps.reviewAlertDetailsFlyout}
           tourId={SecurityStepId.alertsCases}
+          key={index}
         >
           <EuiTab
             onClick={() => onSelectedTabChanged(tab.id)}

@@ -1,34 +1,36 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-
+import { PresentationContainer } from '@kbn/presentation-containers';
 import {
-  apiCanAccessViewMode,
-  apiHasLibraryTransforms,
   CanAccessViewMode,
   EmbeddableApiContext,
-  getInheritedViewMode,
-  getPanelTitle,
-  PublishesPanelTitle,
+  HasInPlaceLibraryTransforms,
   HasLibraryTransforms,
   HasParentApi,
-  apiHasParentApi,
-  HasUniqueId,
-  apiHasUniqueId,
   HasType,
-  apiHasType,
-  HasInPlaceLibraryTransforms,
+  HasUniqueId,
+  PublishesPanelTitle,
+  apiCanAccessViewMode,
   apiHasInPlaceLibraryTransforms,
+  apiHasLibraryTransforms,
+  apiHasParentApi,
+  apiHasType,
+  apiHasUniqueId,
+  getInheritedViewMode,
+  getPanelTitle,
 } from '@kbn/presentation-publishing';
-import { PresentationContainer } from '@kbn/presentation-containers';
-import { pluginServices } from '../services/plugin_services';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+
+import { coreServices } from '../services/kibana_services';
 import { dashboardUnlinkFromLibraryActionStrings } from './_dashboard_actions_strings';
+import { DASHBOARD_ACTION_GROUP } from '.';
 
 export const ACTION_UNLINK_FROM_LIBRARY = 'unlinkFromLibrary';
 
@@ -53,14 +55,7 @@ export class UnlinkFromLibraryAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_UNLINK_FROM_LIBRARY;
   public readonly id = ACTION_UNLINK_FROM_LIBRARY;
   public order = 15;
-
-  private toastsService;
-
-  constructor() {
-    ({
-      notifications: { toasts: this.toastsService },
-    } = pluginServices.getServices());
-  }
+  public grouping = [DASHBOARD_ACTION_GROUP];
 
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
@@ -106,12 +101,12 @@ export class UnlinkFromLibraryAction implements Action<EmbeddableApiContext> {
       } else {
         throw new IncompatibleActionError();
       }
-      this.toastsService.addSuccess({
+      coreServices.notifications.toasts.addSuccess({
         title: dashboardUnlinkFromLibraryActionStrings.getSuccessMessage(title ? `'${title}'` : ''),
         'data-test-subj': 'unlinkPanelSuccess',
       });
     } catch (e) {
-      this.toastsService.addDanger({
+      coreServices.notifications.toasts.addDanger({
         title: dashboardUnlinkFromLibraryActionStrings.getFailureMessage(title ? `'${title}'` : ''),
         'data-test-subj': 'unlinkPanelFailure',
       });

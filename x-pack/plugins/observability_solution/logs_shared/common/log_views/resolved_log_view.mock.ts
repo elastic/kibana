@@ -11,6 +11,7 @@ import { defaultLogViewsStaticConfig } from './defaults';
 import { ResolvedLogView, resolveLogView } from './resolved_log_view';
 import { LogViewAttributes } from './types';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { createLogSourcesServiceMock } from '@kbn/logs-data-access-plugin/common/services/log_sources_service/log_sources_service.mocks';
 
 export const createResolvedLogViewMock = (
   resolvedLogViewOverrides: Partial<ResolvedLogView> = {}
@@ -63,5 +64,6 @@ export const createResolvedLogViewMockFromAttributes = (logViewAttributes: LogVi
           spec,
         }),
     } as unknown as DataViewsContract,
+    createLogSourcesServiceMock(),
     defaultLogViewsStaticConfig
   );

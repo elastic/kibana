@@ -156,7 +156,7 @@ export default function ({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const ml = getService('ml');
 
-  describe('anomaly table with link to log rate analysis', async function () {
+  describe('anomaly table with link to log rate analysis', function () {
     this.tags(['ml']);
 
     before(async () => {
@@ -176,7 +176,7 @@ export default function ({ getService }: FtrProviderContext) {
           entitySelectionValue,
           expected,
         } = td;
-        describe(`via ${page} for job ${jobConfig.job_id}`, async function () {
+        describe(`via ${page} for job ${jobConfig.job_id}`, function () {
           before(async () => {
             await ml.api.createAndRunAnomalyDetectionLookbackJob(jobConfig, datafeedConfig);
 

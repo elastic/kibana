@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiButton, EuiInMemoryTable, EuiSearchBarProps } from '@elastic/eui';
@@ -12,6 +13,7 @@ import { CoreStart } from '@kbn/core/public';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
+import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 import { TableText } from '..';
 import { SEARCH_SESSIONS_TABLE_ID } from '../../../../../../common';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
@@ -21,7 +23,7 @@ import { OnActionComplete } from '../actions';
 import { getAppFilter } from './app_filter';
 import { getStatusFilter } from './status_filter';
 import { SearchUsageCollector } from '../../../../collectors';
-import { SearchSessionsConfigSchema } from '../../../../../../config';
+import type { SearchSessionsConfigSchema } from '../../../../../../server/config';
 
 interface Props {
   core: CoreStart;
@@ -44,13 +46,20 @@ export function SearchSessionsMgmtTable({
   const [tableData, setTableData] = useState<UISession[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [debouncedIsLoading, setDebouncedIsLoading] = useState(false);
-  const [pagination, setPagination] = useState({ pageIndex: 0 });
   const showLatestResultsHandler = useRef<Function>();
   const refreshTimeoutRef = useRef<number | null>(null);
   const refreshInterval = useMemo(
     () => moment.duration(config.management.refreshInterval).asMilliseconds(),
     [config.management.refreshInterval]
   );
+
+  const { pageSize, sorting, onTableChange } = useEuiTablePersist<UISession>({
+    tableId: 'searchSessionsMgmt',
+    initialSort: {
+      field: 'created',
+      direction: 'desc',
+    },
+  });
 
   // Debounce rendering the state of the Refresh button
   useDebounce(
@@ -147,12 +156,12 @@ export function SearchSessionsMgmtTable({
         searchUsageCollector
       )}
       items={tableData}
-      pagination={pagination}
-      search={search}
-      sorting={{ sort: { field: 'created', direction: 'desc' } }}
-      onTableChange={({ page: { index } }) => {
-        setPagination({ pageIndex: index });
+      pagination={{
+        pageSize,
       }}
+      search={search}
+      sorting={sorting}
+      onTableChange={onTableChange}
       tableLayout="auto"
     />
   );

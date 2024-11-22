@@ -24,7 +24,7 @@ import { performChecks } from '../helpers';
 export const updateConversationRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
     .put({
-      access: 'internal',
+      access: 'public',
       path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
       options: {
         tags: ['access:elasticAssistant'],
@@ -32,7 +32,7 @@ export const updateConversationRoute = (router: ElasticAssistantPluginRouter) =>
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v1,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             body: buildRouteValidationWithZod(ConversationUpdateProps),
@@ -45,18 +45,16 @@ export const updateConversationRoute = (router: ElasticAssistantPluginRouter) =>
         const { id } = request.params;
         try {
           const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
-          const authenticatedUser = ctx.elasticAssistant.getCurrentUser();
           // Perform license and authenticated user checks
           const checkResponse = performChecks({
-            authenticatedUser: true,
             context: ctx,
-            license: true,
             request,
             response,
           });
-          if (checkResponse) {
-            return checkResponse;
+          if (!checkResponse.isSuccess) {
+            return checkResponse.response;
           }
+          const authenticatedUser = checkResponse.currentUser;
 
           const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
 

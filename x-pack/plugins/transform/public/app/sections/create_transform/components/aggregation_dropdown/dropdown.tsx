@@ -8,7 +8,7 @@
 import React from 'react';
 
 import type { EuiComboBoxOptionsListProps, EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox } from '@elastic/eui';
+import { OptionListWithFieldStats } from '@kbn/ml-field-stats-flyout/options_list_with_stats/option_list_with_stats';
 
 interface Props {
   options: EuiComboBoxOptionOption[];
@@ -30,7 +30,7 @@ export const DropDown: React.FC<Props> = ({
   isDisabled,
 }) => {
   return (
-    <EuiComboBox
+    <OptionListWithFieldStats
       fullWidth
       placeholder={placeholder}
       singleSelection={{ asPlainText: true }}
@@ -40,7 +40,6 @@ export const DropDown: React.FC<Props> = ({
       isClearable={false}
       data-test-subj={testSubj}
       isDisabled={isDisabled}
-      renderOption={renderOption}
     />
   );
 };

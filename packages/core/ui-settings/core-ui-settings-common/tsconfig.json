@@ -12,7 +12,8 @@
   ],
   "kbn_references": [
     "@kbn/config-schema",
-    "@kbn/analytics"
+    "@kbn/analytics",
+    "@kbn/core-http-server"
   ],
   "exclude": [
     "target/**/*",

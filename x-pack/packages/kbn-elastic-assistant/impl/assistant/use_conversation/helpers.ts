@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { PromptResponse } from '@kbn/elastic-assistant-common';
+import { ApiConfig, PromptResponse } from '@kbn/elastic-assistant-common';
 import { Conversation } from '../../assistant_context/types';
 import { AIConnector } from '../../connectorland/connector_selector';
 import { getGenAiConfig } from '../../connectorland/helpers';
@@ -71,15 +71,18 @@ export const analyzeMarkdown = (markdown: string): CodeBlockDetails[] => {
 };
 
 /**
- * Returns the default system prompt
+ * Returns the new default system prompt, fallback to the default system prompt if not found
  *
  * @param allSystemPrompts All available System Prompts
  */
-export const getDefaultNewSystemPrompt = (allSystemPrompts: PromptResponse[]) =>
-  allSystemPrompts.find((prompt) => prompt.isNewConversationDefault) ?? allSystemPrompts?.[0];
+export const getDefaultNewSystemPrompt = (
+  allSystemPrompts: PromptResponse[]
+): PromptResponse | undefined => {
+  return allSystemPrompts.find((prompt) => prompt.isNewConversationDefault);
+};
 
 /**
- * Returns the default system prompt for a given (New Custom) conversation
+ * Returns the default system prompt for a given conversation
  *
  * @param allSystemPrompts All available System Prompts
  * @param conversation Conversation to get the default system prompt for
@@ -94,29 +97,8 @@ export const getDefaultSystemPrompt = ({
   const conversationSystemPrompt = allSystemPrompts.find(
     (prompt) => prompt.id === conversation?.apiConfig?.defaultSystemPromptId
   );
-  const defaultNewSystemPrompt = getDefaultNewSystemPrompt(allSystemPrompts);
 
-  return conversationSystemPrompt?.id ? conversationSystemPrompt : defaultNewSystemPrompt;
-};
-
-/**
- * Returns the default system prompt for an existing conversation that has never been given a system prompt
- *
- * @param allSystemPrompts All available System Prompts
- * @param conversation Conversation to get the default system prompt for
- */
-export const getInitialDefaultSystemPrompt = ({
-  allSystemPrompts,
-  conversation,
-}: {
-  allSystemPrompts: PromptResponse[];
-  conversation: Conversation | undefined;
-}): PromptResponse | undefined => {
-  const conversationSystemPrompt = allSystemPrompts.find(
-    (prompt) => prompt.id === conversation?.apiConfig?.defaultSystemPromptId
-  );
-
-  return conversationSystemPrompt ?? allSystemPrompts?.[0];
+  return conversationSystemPrompt;
 };
 
 /**
@@ -140,27 +122,29 @@ export const getConversationApiConfig = ({
 }) => {
   const connector: AIConnector | undefined =
     connectors?.find((c) => c.id === conversation.apiConfig?.connectorId) ?? defaultConnector;
-  const connectorModel = getGenAiConfig(connector)?.defaultModel;
-  const defaultSystemPrompt =
-    conversation.apiConfig?.defaultSystemPromptId == null
-      ? getInitialDefaultSystemPrompt({
-          allSystemPrompts,
-          conversation,
-        })
-      : getDefaultSystemPrompt({
-          allSystemPrompts,
-          conversation,
-        });
+
+  const { apiProvider: connectorApiProvider, defaultModel: connectorModel } =
+    getGenAiConfig(connector) ?? {};
+
+  const defaultSystemPrompt = getDefaultSystemPrompt({
+    allSystemPrompts,
+    conversation,
+  });
 
   return connector
     ? {
         apiConfig: {
           connectorId: connector.id,
           actionTypeId: connector.actionTypeId,
-          provider: connector.apiProvider,
+          provider: connector.apiProvider ?? connectorApiProvider,
           defaultSystemPromptId: defaultSystemPrompt?.id,
           model: conversation?.apiConfig?.model ?? connectorModel,
         },
       }
-    : {};
+    : ({
+        // Scenario when no connectors is configured
+        apiConfig: {
+          defaultSystemPromptId: defaultSystemPrompt?.id,
+        },
+      } as unknown as { apiConfig: ApiConfig });
 };

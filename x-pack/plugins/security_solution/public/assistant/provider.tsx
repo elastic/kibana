@@ -23,14 +23,13 @@ import { once } from 'lodash/fp';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { Message } from '@kbn/elastic-assistant-common';
 import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
-import { useObservable } from 'react-use';
+import useObservable from 'react-use/lib/useObservable';
 import { APP_ID } from '../../common';
 import { useBasePath, useKibana } from '../common/lib/kibana';
 import { useAssistantTelemetry } from './use_assistant_telemetry';
 import { getComments } from './get_comments';
 import { LOCAL_STORAGE_KEY, augmentMessageCodeBlocks } from './helpers';
 import { BASE_SECURITY_QUICK_PROMPTS } from './content/quick_prompts';
-import { BASE_SECURITY_SYSTEM_PROMPTS } from './content/prompts/system';
 import { useBaseConversations } from './use_conversation_store';
 import { PROMPT_CONTEXTS } from './content/prompt_contexts';
 import { useAssistantAvailability } from './use_assistant_availability';
@@ -117,7 +116,7 @@ export const createConversations = async (
 };
 
 export const createBasePrompts = async (notifications: NotificationsStart, http: HttpSetup) => {
-  const promptsToCreate = [...BASE_SECURITY_QUICK_PROMPTS, ...BASE_SECURITY_SYSTEM_PROMPTS];
+  const promptsToCreate = [...BASE_SECURITY_QUICK_PROMPTS];
 
   // post bulk create
   const bulkResult = await bulkUpdatePrompts(
@@ -128,7 +127,7 @@ export const createBasePrompts = async (notifications: NotificationsStart, http:
     notifications.toasts
   );
   if (bulkResult && bulkResult.success) {
-    return true;
+    return bulkResult.attributes.results.created;
   }
 };
 
@@ -143,6 +142,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
     storage,
     triggersActionsUi: { actionTypeRegistry },
     docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
+    userProfile,
   } = useKibana().services;
   const basePath = useBasePath();
 
@@ -183,14 +183,17 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
         assistantAvailability.isAssistantEnabled &&
         assistantAvailability.hasAssistantPrivilege
       ) {
-        const res = await getPrompts({
-          http,
-          toasts: notifications.toasts,
-        });
+        try {
+          const res = await getPrompts({
+            http,
+            toasts: notifications.toasts,
+          });
 
-        if (res.total === 0) {
-          await createBasePrompts(notifications, http);
-        }
+          if (res.total === 0) {
+            await createBasePrompts(notifications, http);
+          }
+          // eslint-disable-next-line no-empty
+        } catch (e) {}
       }
     });
     createSecurityPrompts();
@@ -223,6 +226,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
       title={ASSISTANT_TITLE}
       toasts={toasts}
       currentAppId={currentAppId ?? 'securitySolutionUI'}
+      userProfileService={userProfile}
     >
       {children}
     </ElasticAssistantProvider>

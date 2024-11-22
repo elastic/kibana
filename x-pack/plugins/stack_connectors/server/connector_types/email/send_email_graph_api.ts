@@ -11,18 +11,14 @@ import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { Logger } from '@kbn/core/server';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { SendEmailOptions } from './send_email';
-
-interface SendEmailGraphApiOptions {
-  options: SendEmailOptions;
-  headers: Record<string, string>;
-  messageHTML: string;
-}
 
 export async function sendEmailGraphApi(
   sendEmailOptions: SendEmailGraphApiOptions,
   logger: Logger,
   configurationUtilities: ActionsConfigurationUtilities,
+  connectorUsageCollector: ConnectorUsageCollector,
   axiosInstance?: AxiosInstance
 ): Promise<AxiosResponse> {
   const { options, headers, messageHTML } = sendEmailOptions;
@@ -42,6 +38,7 @@ export async function sendEmailGraphApi(
     headers,
     configurationUtilities,
     validateStatus: () => true,
+    connectorUsageCollector,
   });
   if (res.status === 202) {
     return res.data;
@@ -51,6 +48,12 @@ export async function sendEmailGraphApi(
     `error thrown sending Microsoft Exchange email for clientID: ${sendEmailOptions.options.transport.clientId}: ${errString}`
   );
   throw new Error(errString);
+}
+
+interface SendEmailGraphApiOptions {
+  options: SendEmailOptions;
+  headers: Record<string, string>;
+  messageHTML: string;
 }
 
 function getMessage(emailOptions: SendEmailOptions, messageHTML: string) {

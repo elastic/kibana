@@ -37,8 +37,9 @@ describe('updateApiKeyRoute', () => {
     const [config, handler] = router.post.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}/_update_api_key"`);
+    expect(config.options?.access).toBe('public');
 
-    rulesClient.updateApiKey.mockResolvedValueOnce();
+    rulesClient.updateRuleApiKey.mockResolvedValueOnce();
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -52,8 +53,8 @@ describe('updateApiKeyRoute', () => {
 
     expect(await handler(context, req, res)).toEqual(undefined);
 
-    expect(rulesClient.updateApiKey).toHaveBeenCalledTimes(1);
-    expect(rulesClient.updateApiKey.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(rulesClient.updateRuleApiKey).toHaveBeenCalledTimes(1);
+    expect(rulesClient.updateRuleApiKey.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "id": "1",
@@ -64,6 +65,18 @@ describe('updateApiKeyRoute', () => {
     expect(res.noContent).toHaveBeenCalled();
   });
 
+  it('should have internal access for serverless', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    updateApiKeyRoute(router, licenseState, undefined, true);
+
+    const [config] = router.post.mock.calls[0];
+
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}/_update_api_key"`);
+    expect(config.options?.access).toBe('internal');
+  });
+
   it('ensures the alert type gets validated for the license', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
@@ -72,7 +85,7 @@ describe('updateApiKeyRoute', () => {
 
     const [, handler] = router.post.mock.calls[0];
 
-    rulesClient.updateApiKey.mockRejectedValue(
+    rulesClient.updateRuleApiKey.mockRejectedValue(
       new RuleTypeDisabledError('Fail', 'license_invalid')
     );
 

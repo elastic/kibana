@@ -16,7 +16,7 @@ import {
   getPrebuiltRulesAndTimelinesStatus,
   getPrebuiltRulesStatus,
   installPrebuiltRules,
-  upgradePrebuiltRules,
+  performUpgradePrebuiltRules,
   fetchRule,
   patchRule,
 } from '../../../../utils';
@@ -100,7 +100,10 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(statusResponse.stats.num_prebuilt_rules_to_upgrade).toBe(1);
 
         // Call the install prebuilt rules again and check that the outdated rule was updated
-        const response = await upgradePrebuiltRules(es, supertest);
+        const response = await performUpgradePrebuiltRules(es, supertest, {
+          mode: 'ALL_RULES',
+          pick_version: 'TARGET',
+        });
         expect(response.summary.succeeded).toBe(1);
         expect(response.summary.skipped).toBe(0);
       });
@@ -121,7 +124,10 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(installResponse.summary.skipped).toBe(0);
 
         // Call the upgrade prebuilt rules endpoint and check that no rules were updated
-        const upgradeResponse = await upgradePrebuiltRules(es, supertest);
+        const upgradeResponse = await performUpgradePrebuiltRules(es, supertest, {
+          mode: 'ALL_RULES',
+          pick_version: 'TARGET',
+        });
         expect(upgradeResponse.summary.succeeded).toBe(0);
         expect(upgradeResponse.summary.skipped).toBe(0);
       });
@@ -178,7 +184,10 @@ export default ({ getService }: FtrProviderContext): void => {
           ]);
 
           // Upgrade to a newer version with the same type
-          await upgradePrebuiltRules(es, supertest);
+          await performUpgradePrebuiltRules(es, supertest, {
+            mode: 'ALL_RULES',
+            pick_version: 'TARGET',
+          });
 
           expect(await fetchRule(supertest, { ruleId: 'rule-to-test-1' })).toMatchObject({
             id: initialRuleSoId,
@@ -186,8 +195,7 @@ export default ({ getService }: FtrProviderContext): void => {
             enabled: false,
             actions,
             exceptions_list: exceptionsList,
-            timeline_id: 'some-timeline-id',
-            timeline_title: 'Some timeline title',
+            // current values for timeline_id and timeline_title are lost when updating to TARGET version
           });
         });
       });
@@ -250,7 +258,10 @@ export default ({ getService }: FtrProviderContext): void => {
           ]);
 
           // Upgrade to a newer version with a different rule type
-          await upgradePrebuiltRules(es, supertest);
+          await performUpgradePrebuiltRules(es, supertest, {
+            mode: 'ALL_RULES',
+            pick_version: 'TARGET',
+          });
 
           expect(await fetchRule(supertest, { ruleId: 'rule-to-test-2' })).toMatchObject({
             id: initialRuleSoId,

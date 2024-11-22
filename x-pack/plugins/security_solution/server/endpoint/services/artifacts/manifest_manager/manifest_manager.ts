@@ -157,9 +157,14 @@ export class ManifestManager {
   }): Promise<WrappedTranslatedExceptionList> {
     if (!this.cachedExceptionsListsByOs.has(`${listId}-${os}`)) {
       let itemsByListId: ExceptionListItemSchema[] = [];
+      // endpointHostIsolationExceptions includes full CRUD support for Host Isolation Exceptions
+      // endpointArtifactManagement includes full CRUD support for all other exception lists + RD support for Host Isolation Exceptions
+      // If there are host isolation exceptions in place but there is a downgrade scenario, those shouldn't be taken into account when generating artifacts.
       if (
         (listId === ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id &&
-          this.productFeaturesService.isEnabled(ProductFeatureKey.endpointResponseActions)) ||
+          this.productFeaturesService.isEnabled(
+            ProductFeatureKey.endpointHostIsolationExceptions
+          )) ||
         (listId !== ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id &&
           this.productFeaturesService.isEnabled(ProductFeatureKey.endpointArtifactManagement))
       ) {
@@ -686,7 +691,7 @@ export class ManifestManager {
       },
     });
 
-    for await (const policies of this.fetchAllPolicies()) {
+    for await (const policies of await this.fetchAllPolicies()) {
       for (const packagePolicy of policies) {
         const { id, name } = packagePolicy;
 
@@ -768,7 +773,7 @@ export class ManifestManager {
     }
   }
 
-  private fetchAllPolicies(): AsyncIterable<PackagePolicy[]> {
+  private fetchAllPolicies(): Promise<AsyncIterable<PackagePolicy[]>> {
     return this.packagePolicyService.fetchAllItems(this.savedObjectsClient, {
       kuery: 'ingest-package-policies.package.name:endpoint',
     });
@@ -776,7 +781,7 @@ export class ManifestManager {
 
   private async listEndpointPolicyIds(): Promise<string[]> {
     const allPolicyIds: string[] = [];
-    const idFetcher = this.packagePolicyService.fetchAllItemIds(this.savedObjectsClient, {
+    const idFetcher = await this.packagePolicyService.fetchAllItemIds(this.savedObjectsClient, {
       kuery: 'ingest-package-policies.package.name:endpoint',
     });
 

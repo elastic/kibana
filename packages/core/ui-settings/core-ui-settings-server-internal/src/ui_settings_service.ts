@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { firstValueFrom, Observable } from 'rxjs';
@@ -67,10 +68,15 @@ export class UiSettingsService
   public async preboot(): Promise<InternalUiSettingsServicePreboot> {
     this.log.debug('Prebooting ui settings service');
 
-    const { overrides } = await firstValueFrom(this.config$);
+    const { overrides, experimental } = await firstValueFrom(this.config$);
     this.overrides = overrides;
 
-    this.register(getCoreSettings({ isDist: this.isDist }));
+    this.register(
+      getCoreSettings({
+        isDist: this.isDist,
+        isThemeSwitcherEnabled: experimental?.themeSwitcherEnabled,
+      })
+    );
 
     return {
       createDefaultsClient: () =>
@@ -94,7 +100,7 @@ export class UiSettingsService
     registerInternalRoutes(router);
 
     // Register public routes by default unless the publicApiEnabled config setting is set to false
-    if (!config.hasOwnProperty('publicApiEnabled') || config.publicApiEnabled === true) {
+    if (!Object.hasOwn(config, 'publicApiEnabled') || config.publicApiEnabled === true) {
       registerRoutes(router);
     }
 
@@ -218,13 +224,17 @@ export class UiSettingsService
       if (!definition.schema) {
         throw new Error(`Validation schema is not provided for [${key}] UI Setting`);
       }
-      definition.schema.validate(definition.value, {}, `ui settings defaults [${key}]`);
+      if (definition.value) {
+        definition.schema.validate(definition.value, {}, `ui settings defaults [${key}]`);
+      }
     }
     for (const [key, definition] of this.uiSettingsGlobalDefaults) {
       if (!definition.schema) {
         throw new Error(`Validation schema is not provided for [${key}] Global UI Setting`);
       }
-      definition.schema.validate(definition.value, {});
+      if (definition.value) {
+        definition.schema.validate(definition.value, {});
+      }
     }
   }
 

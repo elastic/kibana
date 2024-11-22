@@ -75,3 +75,7 @@ export const createDrilldownTemplatesFromSiblings = (
 
   return templates;
 };
+
+export const DRILLDOWN_MAX_WIDTH = 500;
+
+export const DRILLDOWN_ACTION_GROUP = { id: 'drilldown', order: 3 } as const;

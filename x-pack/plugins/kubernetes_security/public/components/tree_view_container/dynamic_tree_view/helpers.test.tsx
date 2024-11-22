@@ -28,9 +28,9 @@ describe('DynamicTreeView component', () => {
     const wrapper = render(<TestButtonList onKeyDown={onKeyDown} />);
     wrapper.getByText('Button 40').focus();
 
-    userEvent.keyboard('{ArrowRight}');
+    await userEvent.keyboard('{ArrowRight}');
     expect(wrapper.getByText('Button 41')).toHaveFocus();
-    userEvent.keyboard('{ArrowRight}');
+    await userEvent.keyboard('{ArrowRight}');
     expect(wrapper.getByText('Button 42')).toHaveFocus();
   });
   it('Should focus the previous element', async () => {
@@ -40,9 +40,9 @@ describe('DynamicTreeView component', () => {
     const wrapper = render(<TestButtonList onKeyDown={onKeyDown} />);
     wrapper.getByText('Button 40').focus();
 
-    userEvent.keyboard('{ArrowLeft}');
+    await userEvent.keyboard('{ArrowLeft}');
     expect(wrapper.getByText('Button 39')).toHaveFocus();
-    userEvent.keyboard('{ArrowLeft}');
+    await userEvent.keyboard('{ArrowLeft}');
     expect(wrapper.getByText('Button 38')).toHaveFocus();
   });
 });

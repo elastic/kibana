@@ -28,5 +28,6 @@
     "@kbn/management-cards-navigation",
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-render",
+    "@kbn/ui-theme",
   ]
 }

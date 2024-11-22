@@ -180,6 +180,7 @@ export class AdHocTaskRunner implements CancellableTask {
     const ruleTypeRunnerContext = {
       alertingEventLogger: this.alertingEventLogger,
       namespace: this.context.spaceIdToNamespace(adHocRunData.spaceId),
+      request: fakeRequest,
       ruleId: rule.id,
       ruleLogPrefix: ruleLabel,
       ruleRunMetricsStore,
@@ -212,7 +213,7 @@ export class AdHocTaskRunner implements CancellableTask {
       taskInstance: this.taskInstance,
     });
 
-    const executorServices = await getExecutorServices({
+    const executorServices = getExecutorServices({
       context: this.context,
       fakeRequest,
       abortController: this.searchAbortController,

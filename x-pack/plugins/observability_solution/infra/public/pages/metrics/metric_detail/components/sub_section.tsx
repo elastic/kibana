@@ -15,7 +15,7 @@ type SubSectionProps = LayoutProps & {
   label?: string;
 };
 
-export const SubSection: FunctionComponent<SubSectionProps> = ({
+export const SubSection: FunctionComponent<React.PropsWithChildren<SubSectionProps>> = ({
   id,
   label,
   children,

@@ -12,7 +12,7 @@ import { filter, reduce, mapKeys, each, unset, uniq, map, has, flatMap } from 'l
 import type { PackagePolicyInputStream } from '@kbn/fleet-plugin/common';
 import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
 import { API_VERSIONS } from '../../../common/constants';
@@ -27,7 +27,11 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
     .get({
       access: 'internal',
       path: '/internal/osquery/status',
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      security: {
+        authz: {
+          requiredPrivileges: [`${PLUGIN_ID}-read`],
+        },
+      },
     })
     .addVersion(
       {
@@ -146,7 +150,7 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
                     references: packObject.policy_ids.map((policyId: string) => ({
                       id: policyId,
                       name: agentPolicies[policyId].name,
-                      type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+                      type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
                     })),
                     refresh: 'wait_for',
                   }

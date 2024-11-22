@@ -182,7 +182,7 @@ queue:
 
       cy.contains('Name is required');
       cy.contains('URL is required');
-      cy.contains('Service Token is required');
+      cy.contains('Service token is required');
       shouldDisplayError(SETTINGS_OUTPUTS.NAME_INPUT);
       shouldDisplayError('serviceTokenSecretInput');
     });

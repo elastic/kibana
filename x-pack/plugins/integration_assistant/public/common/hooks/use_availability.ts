@@ -6,15 +6,17 @@
  */
 
 import { useMemo } from 'react';
-import { useObservable } from 'react-use';
+import useObservable from 'react-use/lib/useObservable';
 import { MINIMUM_LICENSE_TYPE } from '../../../common/constants';
 import { useKibana } from './use_kibana';
 import type { RenderUpselling } from '../../services';
 
-export const useAvailability = (): {
+export interface Availability {
   hasLicense: boolean;
   renderUpselling: RenderUpselling | undefined;
-} => {
+}
+
+export const useAvailability = (): Availability => {
   const { licensing, renderUpselling$ } = useKibana().services;
   const licenseService = useObservable(licensing.license$);
   const renderUpselling = useObservable(renderUpselling$);

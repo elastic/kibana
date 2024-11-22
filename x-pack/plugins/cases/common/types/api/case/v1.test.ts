@@ -114,9 +114,14 @@ const basicCase: Case = {
       value: true,
     },
     {
-      key: 'second_custom_field_key',
+      key: 'third_custom_field_key',
       type: CustomFieldTypes.TEXT,
       value: 'www.example.com',
+    },
+    {
+      key: 'fourth_custom_field_key',
+      type: CustomFieldTypes.NUMBER,
+      value: 3,
     },
   ],
 };
@@ -148,6 +153,11 @@ describe('CasePostRequestRt', () => {
         key: 'second_custom_field_key',
         type: CustomFieldTypes.TOGGLE,
         value: true,
+      },
+      {
+        key: 'third_custom_field_key',
+        type: CustomFieldTypes.NUMBER,
+        value: 3,
       },
     ],
   };
@@ -319,6 +329,44 @@ describe('CasePostRequestRt', () => {
       )
     ).toContain(
       `The length of the value is too long. The maximum length is ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH}.`
+    );
+  });
+
+  it(`throws an error when a number customFields is more than ${Number.MAX_SAFE_INTEGER}`, () => {
+    expect(
+      PathReporter.report(
+        CasePostRequestRt.decode({
+          ...defaultRequest,
+          customFields: [
+            {
+              key: 'first_custom_field_key',
+              type: CustomFieldTypes.NUMBER,
+              value: Number.MAX_SAFE_INTEGER + 1,
+            },
+          ],
+        })
+      )
+    ).toContain(
+      `The value field should be an integer between -(2^53 - 1) and 2^53 - 1, inclusive.`
+    );
+  });
+
+  it(`throws an error when a number customFields is less than ${Number.MIN_SAFE_INTEGER}`, () => {
+    expect(
+      PathReporter.report(
+        CasePostRequestRt.decode({
+          ...defaultRequest,
+          customFields: [
+            {
+              key: 'first_custom_field_key',
+              type: CustomFieldTypes.NUMBER,
+              value: Number.MIN_SAFE_INTEGER - 1,
+            },
+          ],
+        })
+      )
+    ).toContain(
+      `The value field should be an integer between -(2^53 - 1) and 2^53 - 1, inclusive.`
     );
   });
 
@@ -664,6 +712,11 @@ describe('CasePatchRequestRt', () => {
         key: 'second_custom_field_key',
         type: 'toggle',
         value: true,
+      },
+      {
+        key: 'third_custom_field_key',
+        type: 'number',
+        value: 123,
       },
     ],
   };

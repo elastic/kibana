@@ -18,10 +18,12 @@ export const createListRoute = (router: ListsPluginRouter): void => {
   router.versioned
     .post({
       access: 'public',
-      options: {
-        tags: ['access:lists-all'],
-      },
       path: LIST_URL,
+      security: {
+        authz: {
+          requiredPrivileges: ['lists-all'],
+        },
+      },
     })
     .addVersion(
       {
@@ -46,34 +48,36 @@ export const createListRoute = (router: ListsPluginRouter): void => {
               body: `To create a list, the data stream must exist first. Data stream "${lists.getListName()}" does not exist`,
               statusCode: 400,
             });
-          } else {
-            // needs to be migrated to data stream
-            if (!dataStreamExists && indexExists) {
-              await lists.migrateListIndexToDataStream();
-            }
-            if (id != null) {
-              const list = await lists.getList({ id });
-              if (list != null) {
-                return siemResponse.error({
-                  body: `list id: "${id}" already exists`,
-                  statusCode: 409,
-                });
-              }
-            }
-            const list = await lists.createList({
-              description,
-              deserializer,
-              id,
-              immutable: false,
-              meta,
-              name,
-              serializer,
-              type,
-              version,
-            });
-
-            return response.ok({ body: CreateListResponse.parse(list) });
           }
+
+          // needs to be migrated to data stream
+          if (!dataStreamExists && indexExists) {
+            await lists.migrateListIndexToDataStream();
+          }
+
+          if (id != null) {
+            const list = await lists.getList({ id });
+            if (list != null) {
+              return siemResponse.error({
+                body: `list id: "${id}" already exists`,
+                statusCode: 409,
+              });
+            }
+          }
+
+          const list = await lists.createList({
+            description,
+            deserializer,
+            id,
+            immutable: false,
+            meta,
+            name,
+            serializer,
+            type,
+            version,
+          });
+
+          return response.ok({ body: CreateListResponse.parse(list) });
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

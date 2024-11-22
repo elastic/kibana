@@ -40,7 +40,11 @@ describe('Security Plugin', () => {
         })
       ).toEqual({
         authc: { getCurrentUser: expect.any(Function), areAPIKeysEnabled: expect.any(Function) },
-        authz: { isRoleManagementEnabled: expect.any(Function), roles: expect.any(Object) },
+        authz: {
+          isRoleManagementEnabled: expect.any(Function),
+          roles: expect.any(Object),
+          privileges: expect.any(Object),
+        },
         license: {
           isLicenseAvailable: expect.any(Function),
           getLicenseType: expect.any(Function),
@@ -129,7 +133,11 @@ describe('Security Plugin', () => {
           },
           "authz": Object {
             "isRoleManagementEnabled": [Function],
+            "privileges": Object {
+              "getAll": [Function],
+            },
             "roles": Object {
+              "bulkUpdateRoles": [Function],
               "deleteRole": [Function],
               "getRole": [Function],
               "getRoles": [Function],

@@ -1699,21 +1699,6 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/test",
-                "id": "def-common.SamlSessionManager.Unnamed.$2",
-                "type": "string",
-                "tags": [],
-                "label": "rolesFilename",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "packages/kbn-test/src/auth/session_manager.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
               }
             ],
             "returnComment": []
@@ -1726,7 +1711,15 @@
             "label": "getApiCredentialsForRole",
             "description": [],
             "signature": [
-              "(role: string) => Promise<{ Cookie: string; }>"
+              "(role: string, options?: ",
+              {
+                "pluginId": "@kbn/test",
+                "scope": "common",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-common.GetCookieOptions",
+                "text": "GetCookieOptions"
+              },
+              " | undefined) => Promise<{ Cookie: string; }>"
             ],
             "path": "packages/kbn-test/src/auth/session_manager.ts",
             "deprecated": false,
@@ -1746,19 +1739,49 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.SamlSessionManager.getApiCredentialsForRole.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.GetCookieOptions",
+                    "text": "GetCookieOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-test/src/auth/session_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-common.SamlSessionManager.getSessionCookieForRole",
+            "id": "def-common.SamlSessionManager.getInteractiveUserSessionCookieWithRoleScope",
             "type": "Function",
             "tags": [],
-            "label": "getSessionCookieForRole",
+            "label": "getInteractiveUserSessionCookieWithRoleScope",
             "description": [],
             "signature": [
-              "(role: string) => Promise<string>"
+              "(role: string, options?: ",
+              {
+                "pluginId": "@kbn/test",
+                "scope": "common",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-common.GetCookieOptions",
+                "text": "GetCookieOptions"
+              },
+              " | undefined) => Promise<string>"
             ],
             "path": "packages/kbn-test/src/auth/session_manager.ts",
             "deprecated": false,
@@ -1766,7 +1789,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-common.SamlSessionManager.getSessionCookieForRole.$1",
+                "id": "def-common.SamlSessionManager.getInteractiveUserSessionCookieWithRoleScope.$1",
                 "type": "string",
                 "tags": [],
                 "label": "role",
@@ -1778,6 +1801,28 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.SamlSessionManager.getInteractiveUserSessionCookieWithRoleScope.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.GetCookieOptions",
+                    "text": "GetCookieOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-test/src/auth/session_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -3330,6 +3375,20 @@
           },
           {
             "parentPluginId": "@kbn/test",
+            "id": "def-common.CreateTestEsClusterOptions.esVersion",
+            "type": "string",
+            "tags": [],
+            "label": "esVersion",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-test/src/es/test_es_cluster.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
             "id": "def-common.CreateTestEsClusterOptions.esFrom",
             "type": "string",
             "tags": [],
@@ -3352,7 +3411,7 @@
             "signature": [
               "Pick<",
               "ServerlessOptions",
-              ", \"host\" | \"tag\" | \"image\" | \"dataPath\" | \"kibanaUrl\" | \"resources\" | \"projectType\"> | undefined"
+              ", \"image\" | \"host\" | \"tag\" | \"dataPath\" | \"kibanaUrl\" | \"resources\" | \"projectType\"> | undefined"
             ],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
@@ -4725,6 +4784,31 @@
       },
       {
         "parentPluginId": "@kbn/test",
+        "id": "def-common.GetCookieOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetCookieOptions",
+        "description": [],
+        "path": "packages/kbn-test/src/auth/session_manager.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.GetCookieOptions.forceNewSession",
+            "type": "boolean",
+            "tags": [],
+            "label": "forceNewSession",
+            "description": [],
+            "path": "packages/kbn-test/src/auth/session_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
         "id": "def-common.HostOptions",
         "type": "Interface",
         "tags": [],
@@ -5077,13 +5161,25 @@
           {
             "parentPluginId": "@kbn/test",
             "id": "def-common.SamlSessionManagerOptions.supportedRoles",
-            "type": "Array",
+            "type": "Object",
             "tags": [],
             "label": "supportedRoles",
             "description": [],
             "signature": [
-              "string[] | undefined"
+              "SupportedRoles",
+              " | undefined"
             ],
+            "path": "packages/kbn-test/src/auth/session_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.SamlSessionManagerOptions.cloudUsersFilePath",
+            "type": "string",
+            "tags": [],
+            "label": "cloudUsersFilePath",
+            "description": [],
             "path": "packages/kbn-test/src/auth/session_manager.ts",
             "deprecated": false,
             "trackAdoption": false

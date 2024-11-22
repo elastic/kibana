@@ -24,7 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('rollup data views - fields for wildcard', function () {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
       await esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/basic_index');
     });
@@ -33,7 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
       await esArchiver.unload(
         'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
       );
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
     it('returns 200 and best effort response despite lack of rollup support', async () => {
       const response = await supertestWithoutAuth

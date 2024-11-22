@@ -10,7 +10,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { RequestHandler } from '@kbn/core/server';
 
-import { groupBy, keyBy } from 'lodash';
+import { groupBy, isEmpty, isEqual, keyBy } from 'lodash';
 
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
@@ -43,11 +43,7 @@ import type {
   UpgradePackagePolicyResponse,
 } from '../../../common/types';
 import { installationStatuses, inputsFormat } from '../../../common/constants';
-import {
-  defaultFleetErrorHandler,
-  PackagePolicyNotFoundError,
-  PackagePolicyRequestError,
-} from '../../errors';
+import { PackagePolicyNotFoundError, PackagePolicyRequestError } from '../../errors';
 import {
   getInstallation,
   getInstallations,
@@ -63,9 +59,10 @@ import {
 import type { SimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 
 import {
-  canUseMultipleAgentPolicies,
   isSimplifiedCreatePackagePolicyRequest,
   removeFieldsFromInputSchema,
+  renameAgentlessAgentPolicy,
+  alignInputsAndStreams,
 } from './utils';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
@@ -79,33 +76,26 @@ export const getPackagePoliciesHandler: FleetRequestHandler<
   const soClient = fleetContext.internalSoClient;
   const limitedToPackages = fleetContext.limitedToPackages;
 
-  try {
-    const { items, total, page, perPage } = await packagePolicyService.list(
-      soClient,
-      request.query
-    );
+  const { items, total, page, perPage } = await packagePolicyService.list(soClient, request.query);
 
-    checkAllowedPackages(items, limitedToPackages, 'package.name');
+  checkAllowedPackages(items, limitedToPackages, 'package.name');
 
-    if (request.query.withAgentCount) {
-      await populatePackagePolicyAssignedAgentsCount(esClient, items);
-    }
-
-    // agnostic to package-level RBAC
-    return response.ok({
-      body: {
-        items:
-          request.query.format === inputsFormat.Simplified
-            ? items.map((item) => packagePolicyToSimplifiedPackagePolicy(item))
-            : items,
-        total,
-        page,
-        perPage,
-      },
-    });
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
+  if (request.query.withAgentCount) {
+    await populatePackagePolicyAssignedAgentsCount(esClient, items);
   }
+
+  // agnostic to package-level RBAC
+  return response.ok({
+    body: {
+      items:
+        request.query.format === inputsFormat.Simplified
+          ? items.map((item) => packagePolicyToSimplifiedPackagePolicy(item))
+          : items,
+      total,
+      page,
+      perPage,
+    },
+  });
 };
 
 export const bulkGetPackagePoliciesHandler: FleetRequestHandler<
@@ -141,7 +131,7 @@ export const bulkGetPackagePoliciesHandler: FleetRequestHandler<
       });
     }
 
-    return defaultFleetErrorHandler({ error, response });
+    throw error;
   }
 };
 
@@ -176,9 +166,8 @@ export const getOnePackagePolicyHandler: FleetRequestHandler<
   } catch (error) {
     if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
       return notFoundResponse();
-    } else {
-      return defaultFleetErrorHandler({ error, response });
     }
+    throw error;
   }
 };
 
@@ -188,42 +177,39 @@ export const getOrphanedPackagePolicies: RequestHandler<undefined, undefined> = 
   response
 ) => {
   const soClient = (await context.core).savedObjects.client;
-  try {
-    const installedPackages = await getInstallations(soClient, {
-      perPage: SO_SEARCH_LIMIT,
-      filter: `
+
+  const installedPackages = await getInstallations(soClient, {
+    perPage: SO_SEARCH_LIMIT,
+    filter: `
         ${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_status:${installationStatuses.Installed}
     `,
+  });
+  const orphanedPackagePolicies: PackagePolicy[] = [];
+  const packagePolicies = await packagePolicyService.list(soClient, {
+    perPage: SO_SEARCH_LIMIT,
+  });
+  const packagePoliciesByPackage = groupBy(packagePolicies.items, 'package.name');
+  const agentPolicies = await agentPolicyService.list(soClient, {
+    perPage: SO_SEARCH_LIMIT,
+  });
+  const agentPoliciesById = keyBy(agentPolicies.items, 'id');
+  const usedPackages = installedPackages.saved_objects.filter(
+    ({ attributes: { name } }) => !!packagePoliciesByPackage[name]
+  );
+  usedPackages.forEach(({ attributes: { name } }) => {
+    packagePoliciesByPackage[name].forEach((packagePolicy) => {
+      if (packagePolicy.policy_ids.every((policyId) => !agentPoliciesById[policyId])) {
+        orphanedPackagePolicies.push(packagePolicy);
+      }
     });
-    const orphanedPackagePolicies: PackagePolicy[] = [];
-    const packagePolicies = await packagePolicyService.list(soClient, {
-      perPage: SO_SEARCH_LIMIT,
-    });
-    const packagePoliciesByPackage = groupBy(packagePolicies.items, 'package.name');
-    const agentPolicies = await agentPolicyService.list(soClient, {
-      perPage: SO_SEARCH_LIMIT,
-    });
-    const agentPoliciesById = keyBy(agentPolicies.items, 'id');
-    const usedPackages = installedPackages.saved_objects.filter(
-      ({ attributes: { name } }) => !!packagePoliciesByPackage[name]
-    );
-    usedPackages.forEach(({ attributes: { name } }) => {
-      packagePoliciesByPackage[name].forEach((packagePolicy) => {
-        if (packagePolicy.policy_ids.every((policyId) => !agentPoliciesById[policyId])) {
-          orphanedPackagePolicies.push(packagePolicy);
-        }
-      });
-    });
+  });
 
-    return response.ok({
-      body: {
-        items: orphanedPackagePolicies,
-        total: orphanedPackagePolicies.length,
-      },
-    });
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
-  }
+  return response.ok({
+    body: {
+      items: orphanedPackagePolicies,
+      total: orphanedPackagePolicies.length,
+    },
+  });
 };
 
 export const createPackagePolicyHandler: FleetRequestHandler<
@@ -240,21 +226,8 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
   let wasPackageAlreadyInstalled = false;
 
-  if ('output_id' in newPolicy) {
-    // TODO Remove deprecated APIs https://github.com/elastic/kibana/issues/121485
-    delete newPolicy.output_id;
-  }
   const spaceId = fleetContext.spaceId;
   try {
-    if (!newPolicy.policy_id && (!newPolicy.policy_ids || newPolicy.policy_ids.length === 0)) {
-      throw new PackagePolicyRequestError('Either policy_id or policy_ids must be provided');
-    }
-
-    const { canUseReusablePolicies, errorMessage } = canUseMultipleAgentPolicies();
-    if ((newPolicy.policy_ids ?? []).length > 1 && !canUseReusablePolicies) {
-      throw new PackagePolicyRequestError(errorMessage);
-    }
-
     let newPackagePolicy: NewPackagePolicy;
     if (isSimplifiedCreatePackagePolicyRequest(newPolicy)) {
       if (!pkg) {
@@ -276,6 +249,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
         package: pkg,
       } as NewPackagePolicy);
     }
+    newPackagePolicy.inputs = alignInputsAndStreams(newPackagePolicy.inputs);
 
     const installation = await getInstallation({
       savedObjectsClient: soClient,
@@ -334,7 +308,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
         body: { message: error.message },
       });
     }
-    return defaultFleetErrorHandler({ error, response });
+    throw error;
   }
 };
 
@@ -366,11 +340,6 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
 
   try {
     const { force, package: pkg, ...body } = request.body;
-    // TODO Remove deprecated APIs https://github.com/elastic/kibana/issues/121485
-    if ('output_id' in body) {
-      delete body.output_id;
-    }
-
     let newData: NewPackagePolicy;
 
     if (
@@ -402,7 +371,8 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         name: restOfBody.name ?? packagePolicy.name,
         description: restOfBody.description ?? packagePolicy.description,
         namespace: restOfBody.namespace ?? packagePolicy?.namespace,
-        policy_id: restOfBody.policy_id ?? packagePolicy.policy_id,
+        policy_id:
+          restOfBody.policy_id === undefined ? packagePolicy.policy_id : restOfBody.policy_id,
         enabled:
           'enabled' in restOfBody
             ? restOfBody.enabled ?? packagePolicy.enabled
@@ -416,10 +386,22 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         newData.overrides = overrides;
       }
     }
-    const { canUseReusablePolicies, errorMessage } = canUseMultipleAgentPolicies();
-    if ((newData.policy_ids ?? []).length > 1 && !canUseReusablePolicies) {
-      throw new PackagePolicyRequestError(errorMessage);
+    newData.inputs = alignInputsAndStreams(newData.inputs);
+
+    if (
+      newData.policy_ids &&
+      !isEmpty(packagePolicy.policy_ids) &&
+      !isEqual(newData.policy_ids, packagePolicy.policy_ids)
+    ) {
+      const agentPolicy = await agentPolicyService.get(soClient, packagePolicy.policy_ids[0]);
+      if (agentPolicy?.supports_agentless) {
+        throw new PackagePolicyRequestError(
+          'Cannot change agent policies of an agentless integration'
+        );
+      }
     }
+
+    await renameAgentlessAgentPolicy(soClient, esClient, packagePolicy, newData.name);
 
     const updatedPackagePolicy = await packagePolicyService.update(
       soClient,
@@ -444,7 +426,7 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         body: { message: error.message },
       });
     }
-    return defaultFleetErrorHandler({ error, response });
+    throw error;
   }
 };
 
@@ -458,22 +440,18 @@ export const deletePackagePolicyHandler: RequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
 
-  try {
-    const body: PostDeletePackagePoliciesResponse = await packagePolicyService.delete(
-      soClient,
-      esClient,
-      request.body.packagePolicyIds,
-      { user, force: request.body.force, skipUnassignFromAgentPolicies: request.body.force },
-      context,
-      request
-    );
+  const body: PostDeletePackagePoliciesResponse = await packagePolicyService.delete(
+    soClient,
+    esClient,
+    request.body.packagePolicyIds,
+    { user, force: request.body.force, skipUnassignFromAgentPolicies: request.body.force },
+    context,
+    request
+  );
 
-    return response.ok({
-      body,
-    });
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
-  }
+  return response.ok({
+    body,
+  });
 };
 
 export const deleteOnePackagePolicyHandler: RequestHandler<
@@ -486,33 +464,29 @@ export const deleteOnePackagePolicyHandler: RequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
 
-  try {
-    const res = await packagePolicyService.delete(
-      soClient,
-      esClient,
-      [request.params.packagePolicyId],
-      { user, force: request.query.force, skipUnassignFromAgentPolicies: request.query.force },
-      context,
-      request
-    );
+  const res = await packagePolicyService.delete(
+    soClient,
+    esClient,
+    [request.params.packagePolicyId],
+    { user, force: request.query.force, skipUnassignFromAgentPolicies: request.query.force },
+    context,
+    request
+  );
 
-    if (
-      res[0] &&
-      res[0].success === false &&
-      res[0].statusCode !== 404 // ignore 404 to allow that call to be idempotent
-    ) {
-      return response.customError({
-        statusCode: res[0].statusCode ?? 500,
-        body: res[0].body,
-      });
-    }
-
-    return response.ok({
-      body: { id: request.params.packagePolicyId },
+  if (
+    res[0] &&
+    res[0].success === false &&
+    res[0].statusCode !== 404 // ignore 404 to allow that call to be idempotent
+  ) {
+    return response.customError({
+      statusCode: res[0].statusCode ?? 500,
+      body: res[0].body,
     });
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
   }
+
+  return response.ok({
+    body: { id: request.params.packagePolicyId },
+  });
 };
 
 export const upgradePackagePolicyHandler: RequestHandler<
@@ -524,28 +498,24 @@ export const upgradePackagePolicyHandler: RequestHandler<
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
-  try {
-    const body: UpgradePackagePolicyResponse = await packagePolicyService.upgrade(
-      soClient,
-      esClient,
-      request.body.packagePolicyIds,
-      { user }
-    );
+  const body: UpgradePackagePolicyResponse = await packagePolicyService.upgrade(
+    soClient,
+    esClient,
+    request.body.packagePolicyIds,
+    { user }
+  );
 
-    const firstFatalError = body.find((item) => item.statusCode && item.statusCode !== 200);
+  const firstFatalError = body.find((item) => item.statusCode && item.statusCode !== 200);
 
-    if (firstFatalError) {
-      return response.customError({
-        statusCode: firstFatalError.statusCode!,
-        body: { message: firstFatalError.body!.message },
-      });
-    }
-    return response.ok({
-      body,
+  if (firstFatalError) {
+    return response.customError({
+      statusCode: firstFatalError.statusCode!,
+      body: { message: firstFatalError.body!.message },
     });
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
   }
+  return response.ok({
+    body,
+  });
 };
 
 export const dryRunUpgradePackagePolicyHandler: RequestHandler<
@@ -554,28 +524,25 @@ export const dryRunUpgradePackagePolicyHandler: RequestHandler<
   TypeOf<typeof DryRunPackagePoliciesRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = (await context.core).savedObjects.client;
-  try {
-    const body: UpgradePackagePolicyDryRunResponse = [];
-    const { packagePolicyIds } = request.body;
 
-    for (const id of packagePolicyIds) {
-      const result = await packagePolicyService.getUpgradeDryRunDiff(soClient, id);
-      body.push(result);
-    }
+  const body: UpgradePackagePolicyDryRunResponse = [];
+  const { packagePolicyIds } = request.body;
 
-    const firstFatalError = body.find((item) => item.statusCode && item.statusCode !== 200);
-
-    if (firstFatalError) {
-      return response.customError({
-        statusCode: firstFatalError.statusCode!,
-        body: { message: firstFatalError.body!.message },
-      });
-    }
-
-    return response.ok({
-      body,
-    });
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
+  for (const id of packagePolicyIds) {
+    const result = await packagePolicyService.getUpgradeDryRunDiff(soClient, id);
+    body.push(result);
   }
+
+  const firstFatalError = body.find((item) => item.statusCode && item.statusCode !== 200);
+
+  if (firstFatalError) {
+    return response.customError({
+      statusCode: firstFatalError.statusCode!,
+      body: { message: firstFatalError.body!.message },
+    });
+  }
+
+  return response.ok({
+    body,
+  });
 };

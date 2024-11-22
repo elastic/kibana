@@ -6,24 +6,16 @@
  */
 
 import React from 'react';
-import { screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
 import { templatesConfigurationMock } from '../../containers/mock';
 import { TemplateSelector } from './templates';
 
-describe('CustomFields', () => {
-  let appMockRender: AppMockRenderer;
+describe('TemplateSelector', () => {
   const onTemplateChange = jest.fn();
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
-  });
-
   it('renders correctly', async () => {
-    appMockRender.render(
+    render(
       <TemplateSelector
         isLoading={false}
         templates={templatesConfigurationMock}
@@ -38,7 +30,7 @@ describe('CustomFields', () => {
   it('selects a template correctly', async () => {
     const selectedTemplate = templatesConfigurationMock[2];
 
-    appMockRender.render(
+    render(
       <TemplateSelector
         isLoading={false}
         templates={templatesConfigurationMock}
@@ -46,20 +38,68 @@ describe('CustomFields', () => {
       />
     );
 
-    userEvent.selectOptions(
+    expect(onTemplateChange).not.toHaveBeenCalled();
+
+    await userEvent.selectOptions(
       await screen.findByTestId('create-case-template-select'),
       selectedTemplate.key
     );
 
     await waitFor(() => {
-      expect(onTemplateChange).toHaveBeenCalledWith(selectedTemplate.caseFields);
+      expect(onTemplateChange).toHaveBeenCalledWith({
+        caseFields: selectedTemplate.caseFields,
+        key: selectedTemplate.key,
+      });
+    });
+  });
+
+  it('shows selected template as default', async () => {
+    const templateToSelect = templatesConfigurationMock[1];
+
+    render(
+      <TemplateSelector
+        isLoading={false}
+        templates={templatesConfigurationMock}
+        onTemplateChange={onTemplateChange}
+        initialTemplate={templateToSelect}
+      />
+    );
+
+    expect(await screen.findByText(templateToSelect.name)).toBeInTheDocument();
+  });
+
+  it('updates selected template correctly', async () => {
+    const templateToSelect = templatesConfigurationMock[1];
+    const newTemplate = templatesConfigurationMock[2];
+
+    render(
+      <TemplateSelector
+        isLoading={false}
+        templates={templatesConfigurationMock}
+        onTemplateChange={onTemplateChange}
+        initialTemplate={templateToSelect}
+      />
+    );
+
+    expect(await screen.findByText(templateToSelect.name)).toBeInTheDocument();
+
+    await userEvent.selectOptions(
+      await screen.findByTestId('create-case-template-select'),
+      newTemplate.key
+    );
+
+    await waitFor(() => {
+      expect(onTemplateChange).toHaveBeenCalledWith({
+        caseFields: newTemplate.caseFields,
+        key: newTemplate.key,
+      });
     });
   });
 
   it('shows the selected option correctly', async () => {
     const selectedTemplate = templatesConfigurationMock[2];
 
-    appMockRender.render(
+    render(
       <TemplateSelector
         isLoading={false}
         templates={templatesConfigurationMock}
@@ -67,7 +107,7 @@ describe('CustomFields', () => {
       />
     );
 
-    userEvent.selectOptions(
+    await userEvent.selectOptions(
       await screen.findByTestId('create-case-template-select'),
       selectedTemplate.key
     );

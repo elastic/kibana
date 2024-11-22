@@ -14,7 +14,6 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useCallback } from 'react';
 import { MAX_MANUAL_RULE_RUN_BULK_SIZE } from '../../../../../../common/constants';
 import type { TimeRange } from '../../../../rule_gaps/types';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { convertRulesFilterToKQL } from '../../../../../../common/detection_engine/rule_management/rule_filtering';
 import { DuplicateOptions } from '../../../../../../common/detection_engine/rule_management/constants';
@@ -46,6 +45,7 @@ import type { ExecuteBulkActionsDryRun } from './use_bulk_actions_dry_run';
 import { computeDryRunEditPayload } from './utils/compute_dry_run_edit_payload';
 import { transformExportDetailsToDryRunResult } from './utils/dry_run_result';
 import { prepareSearchParams } from './utils/prepare_search_params';
+import { ManualRuleRunEventTypes } from '../../../../../common/lib/telemetry';
 
 interface UseBulkActionsArgs {
   filterOptions: FilterOptions;
@@ -88,10 +88,6 @@ export const useBulkActions = ({
     state: { isAllSelected, rules, loadingRuleIds, selectedRuleIds },
     actions: { clearRulesSelection, setIsPreflightInProgress },
   } = rulesTableContext;
-
-  const isBulkCustomHighlightedFieldsEnabled = useIsExperimentalFeatureEnabled(
-    'bulkCustomHighlightedFieldsEnabled'
-  );
 
   const getBulkItemsPopoverContent = useCallback(
     (closePopover: () => void): EuiContextMenuPanelDescriptor[] => {
@@ -239,7 +235,7 @@ export const useBulkActions = ({
         }
 
         const modalManualRuleRunConfirmationResult = await showManualRuleRunConfirmation();
-        startServices.telemetry.reportManualRuleRunOpenModal({
+        startServices.telemetry.reportEvent(ManualRuleRunEventTypes.ManualRuleRunOpenModal, {
           type: 'bulk',
         });
         if (modalManualRuleRunConfirmationResult === null) {
@@ -257,7 +253,7 @@ export const useBulkActions = ({
           },
         });
 
-        startServices.telemetry.reportManualRuleRunExecute({
+        startServices.telemetry.reportEvent(ManualRuleRunEventTypes.ManualRuleRunExecute, {
           rangeInMs: modalManualRuleRunConfirmationResult.endDate.diff(
             modalManualRuleRunConfirmationResult.startDate
           ),
@@ -400,17 +396,13 @@ export const useBulkActions = ({
               disabled: isEditDisabled,
               panel: 1,
             },
-            ...(isBulkCustomHighlightedFieldsEnabled
-              ? [
-                  {
-                    key: i18n.BULK_ACTION_INVESTIGATION_FIELDS,
-                    name: i18n.BULK_ACTION_INVESTIGATION_FIELDS,
-                    'data-test-subj': 'investigationFieldsBulkEditRule',
-                    disabled: isEditDisabled,
-                    panel: 3,
-                  },
-                ]
-              : []),
+            {
+              key: i18n.BULK_ACTION_INVESTIGATION_FIELDS,
+              name: i18n.BULK_ACTION_INVESTIGATION_FIELDS,
+              'data-test-subj': 'investigationFieldsBulkEditRule',
+              disabled: isEditDisabled,
+              panel: 3,
+            },
             {
               key: i18n.BULK_ACTION_ADD_RULE_ACTIONS,
               name: i18n.BULK_ACTION_ADD_RULE_ACTIONS,
@@ -584,7 +576,6 @@ export const useBulkActions = ({
       selectedRuleIds,
       hasActionsPrivileges,
       isAllSelected,
-      isBulkCustomHighlightedFieldsEnabled,
       loadingRuleIds,
       startTransaction,
       hasMlPermissions,

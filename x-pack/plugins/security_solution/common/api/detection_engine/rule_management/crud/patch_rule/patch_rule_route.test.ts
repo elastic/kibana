@@ -766,19 +766,6 @@ describe('Patch rule request schema', () => {
     });
   });
 
-  test('You cannot send in an array of actions that are missing "group"', () => {
-    const payload: Omit<PatchRuleRequestBody['actions'], 'group'> = {
-      ...getPatchRulesSchemaMock(),
-      actions: [{ id: 'id', action_type_id: 'action_type_id', params: {} }],
-    };
-
-    const result = PatchRuleRequestBody.safeParse(payload);
-    expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"actions.0.group: Required, type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", actions.0.group: Required, actions.0.group: Required, and 12 more"`
-    );
-  });
-
   test('You cannot send in an array of actions that are missing "id"', () => {
     const payload: Omit<PatchRuleRequestBody['actions'], 'id'> = {
       ...getPatchRulesSchemaMock(),

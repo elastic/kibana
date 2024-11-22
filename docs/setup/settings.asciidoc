@@ -14,7 +14,7 @@ KBN_PATH_CONF=/home/kibana/config ./bin/kibana
 --
 
 The default host and port settings configure {kib} to run on `localhost:5601`. To change this behavior and allow remote users to connect, you'll need to update your `kibana.yml` file. You can also enable SSL and set a
-variety of other options. 
+variety of other options.
 
 Environment variables can be injected into configuration using `${MY_ENV_VAR}` syntax. By default, configuration validation
 will fail if an environment variable used in the config file is not present when Kibana starts. This behavior can be changed by using a default value
@@ -93,7 +93,7 @@ The maximum number of sockets that can be used for communications with {es}.
 *Default: `Infinity`*
 
 [[elasticsearch-maxResponseSize]] `elasticsearch.maxResponseSize`::
-Either `false` or a `byteSize` value. When set, responses from {es} with a size higher than the defined limit will be rejected. 
+Either `false` or a `byteSize` value. When set, responses from {es} with a size higher than the defined limit will be rejected.
 This is intended to be used as a circuit-breaker mechanism to avoid memory errors in case of unexpectedly high responses coming from {es}.
 *Default: `false`*
 
@@ -116,6 +116,9 @@ listed here must be on the same cluster. *Default: `[ "http://localhost:9200" ]`
 +
 To enable SSL/TLS for outbound connections to {es}, use the `https` protocol
 in this setting.
+
+[[elasticsearch-publicBaseUrl]] `elasticsearch.publicBaseUrl:`::
+The URL through which Elasticsearch is publicly accessible, if any. This will be shown to users in Kibana when they need connection details for your Elasticsearch cluster.
 
 [[elasticsearch-pingTimeout]] `elasticsearch.pingTimeout`::
 Time in milliseconds to wait for {es} to respond to pings.
@@ -380,7 +383,7 @@ deprecation warning at startup. This setting cannot end in a slash (`/`).
 [[server-publicBaseUrl]] `server.publicBaseUrl`::
 The publicly available URL that end-users access Kibana at. Must include the protocol, hostname, port
 (if different than the defaults for `http` and `https`, 80 and 443 respectively), and the
-<<server-basePath, `server.basePath`>> (if configured). This setting cannot end in a slash (`/`).
+<<server-basePath,`server.basePath`>> (when that setting is configured explicitly). This setting cannot end in a slash (`/`).
 
 [[server-compression]] `server.compression.enabled`::
 Set to `false` to disable HTTP compression for all responses. *Default: `true`*
@@ -447,7 +450,7 @@ responses to the client from the {kib} server, and specifies what value is used.
 Header names and values to send on all responses to the client from the {kib} server. *Default: `{}`*
 
 [[server-shutdownTimeout]] `server.shutdownTimeout`::
-Sets the grace period for {kib} to attempt to resolve any ongoing HTTP requests after receiving a `SIGTERM`/`SIGINT` signal, and before shutting down. Any new HTTP requests received during this period are rejected with a `503` response. *Default: `30s`*
+Sets the grace period for {kib} to attempt to resolve any ongoing HTTP requests after receiving a `SIGTERM`/`SIGINT` signal, and before shutting down. Any new HTTP requests received during this period are rejected, because the incoming socket is closed without further processing. *Default: `30s`*
 
 [[server-host]] `server.host`::
 This setting specifies the host of the
@@ -470,7 +473,7 @@ identifies this {kib} instance. *Default: `"your-hostname"`*
 setting specifies the port to use. *Default: `5601`*
 
 `server.protocol`::
-experimental[] The http protocol to use, either `http1` or `http2`. Set to `http2` to enable `HTTP/2` support for the {kib} server. 
+experimental[] The http protocol to use, either `http1` or `http2`. Set to `http2` to enable `HTTP/2` support for the {kib} server.
 *Default: `http1`*
 +
 NOTE: By default, enabling `http2` requires a valid `h2c` configuration, meaning that TLS must be enabled via <<server-ssl-enabled, `server.ssl.enabled`>>
@@ -484,11 +487,8 @@ Sets whether or not the `X-Opaque-Id` header should be trusted from any IP addre
 A list of IPv4 and IPv6 address which the `X-Opaque-Id` header should be trusted from. Normally this would be set to the IP addresses of the load balancers or reverse-proxy that end users use to access Kibana. If any are set, <<server-requestId-allowFromAnyIp, `server.requestId.allowFromAnyIp`>> must also be set to `false.`
 
 [[server-rewriteBasePath]] `server.rewriteBasePath`::
-Specifies whether {kib} should
-rewrite requests that are prefixed with <<server-basePath, `server.basePath`>> or require that they
-are rewritten by your reverse proxy. In {kib} 6.3 and earlier, the default is
-`false`. In {kib} 7.x, the setting is deprecated. In {kib} 8.0 and later, the
-default is `true`. *Default: `deprecated`*
+Specifies whether {kib} should rewrite requests that are prefixed with <<server-basePath,`server.basePath`>> or require that they
+are rewritten by your reverse proxy. *Default: `false`*
 
 [[server-socketTimeout]] `server.socketTimeout`::
 The number of milliseconds to wait before closing an

@@ -74,6 +74,7 @@ describe('usePersistentControls', () => {
     (useSourcererDataView as jest.Mock).mockReturnValue({
       ...sourcererDataView,
       selectedPatterns: ['myFakebeat-*'],
+      sourcererDataView: {},
     });
   });
 
@@ -88,7 +89,9 @@ describe('usePersistentControls', () => {
     });
     const usePersistentControls = getPersistentControlsHook(tableId);
     const { result } = renderHook(() => usePersistentControls(), {
-      wrapper: ({ children }) => <TestProviders store={store}>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders store={store}>{children}</TestProviders>
+      ),
     });
 
     const groupSelector = result.current.right.props.additionalMenuOptions[0];

@@ -11,9 +11,9 @@ import type { IKibanaResponse, KibanaResponseFactory, Logger } from '@kbn/core/s
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
-  BulkActionSkipResult,
-  BulkCrudActionResponse,
-  BulkCrudActionResults,
+  ConversationsBulkActionSkipResult,
+  ConversationsBulkCrudActionResponse,
+  ConversationsBulkCrudActionResults,
   BulkCrudActionSummary,
   PerformBulkActionRequestBody,
   PerformBulkActionResponse,
@@ -35,7 +35,7 @@ import {
   transformToUpdateScheme,
 } from '../../ai_assistant_data_clients/conversations/update_conversation';
 import { EsConversationSchema } from '../../ai_assistant_data_clients/conversations/types';
-import { UPGRADE_LICENSE_MESSAGE, hasAIAssistantLicense } from '../helpers';
+import { performChecks } from '../helpers';
 
 export interface BulkOperationError {
   message: string;
@@ -45,8 +45,6 @@ export interface BulkOperationError {
     name?: string;
   };
 }
-
-export type BulkActionError = BulkOperationError | unknown;
 
 const buildBulkResponse = (
   response: KibanaResponseFactory,
@@ -61,9 +59,9 @@ const buildBulkResponse = (
     updated?: ConversationResponse[];
     created?: ConversationResponse[];
     deleted?: string[];
-    skipped?: BulkActionSkipResult[];
+    skipped?: ConversationsBulkActionSkipResult[];
   }
-): IKibanaResponse<BulkCrudActionResponse> => {
+): IKibanaResponse<ConversationsBulkCrudActionResponse> => {
   const numSucceeded = updated.length + created.length + deleted.length;
   const numSkipped = skipped.length;
   const numFailed = errors.length;
@@ -75,7 +73,7 @@ const buildBulkResponse = (
     total: numSucceeded + numFailed + numSkipped,
   };
 
-  const results: BulkCrudActionResults = {
+  const results: ConversationsBulkCrudActionResults = {
     updated,
     created,
     deleted,
@@ -83,7 +81,7 @@ const buildBulkResponse = (
   };
 
   if (numFailed > 0) {
-    return response.custom<BulkCrudActionResponse>({
+    return response.custom<ConversationsBulkCrudActionResponse>({
       headers: { 'content-type': 'application/json' },
       body: {
         message: summary.succeeded > 0 ? 'Bulk edit partially failed' : 'Bulk edit failed',
@@ -101,7 +99,7 @@ const buildBulkResponse = (
     });
   }
 
-  const responseBody: BulkCrudActionResponse = {
+  const responseBody: ConversationsBulkCrudActionResponse = {
     success: true,
     conversations_count: summary.total,
     attributes: { results, summary },
@@ -156,30 +154,28 @@ export const bulkActionConversationsRoute = (
         request.events.completed$.subscribe(() => abortController.abort());
         try {
           const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
-          const license = ctx.licensing.license;
-          if (!hasAIAssistantLicense(license)) {
-            return response.forbidden({
-              body: {
-                message: UPGRADE_LICENSE_MESSAGE,
-              },
-            });
+          const checkResponse = performChecks({
+            context: ctx,
+            request,
+            response,
+          });
+          if (!checkResponse.isSuccess) {
+            return checkResponse.response;
           }
+          const authenticatedUser = checkResponse.currentUser;
           const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
           const spaceId = ctx.elasticAssistant.getSpaceId();
-          const authenticatedUser = ctx.elasticAssistant.getCurrentUser();
-          if (authenticatedUser == null) {
-            return assistantResponse.error({
-              body: `Authenticated user not found`,
-              statusCode: 401,
-            });
-          }
 
           if (body.create && body.create.length > 0) {
+            const userFilter = authenticatedUser?.username
+              ? `name: "${authenticatedUser?.username}"`
+              : `id: "${authenticatedUser?.profile_uid}"`;
             const result = await dataClient?.findDocuments<EsConversationSchema>({
               perPage: 100,
               page: 1,
-              filter: `users:{ id: "${authenticatedUser?.profile_uid}" } AND (${body.create
-                .map((c) => `title:${c.title}`)
+              filter: `users:{ ${userFilter} } AND (${body.create
+                // without stringify, special characters in the title can break this filter
+                .map((c) => `title:${JSON.stringify(c.title)}`)
                 .join(' OR ')})`,
               fields: ['title'],
             });

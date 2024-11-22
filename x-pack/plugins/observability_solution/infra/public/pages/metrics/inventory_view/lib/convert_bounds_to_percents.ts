@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InfraWaffleMapBounds } from '../../../../lib/lib';
+import { InfraWaffleMapBounds } from '../../../../common/inventory/types';
 export const convertBoundsToPercents = (bounds: InfraWaffleMapBounds) => ({
   min: bounds.min * 100,
   max: (bounds.max || 1) * 100,

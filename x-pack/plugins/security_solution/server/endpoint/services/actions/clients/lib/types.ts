@@ -23,17 +23,18 @@ import type {
   UploadedFileInfo,
   ResponseActionScanOutputContent,
   ResponseActionScanParameters,
-  KillProcessRequestBody,
-  SuspendProcessRequestBody,
 } from '../../../../../../common/endpoint/types';
 import type {
   IsolationRouteRequestBody,
+  UnisolationRouteRequestBody,
   GetProcessesRequestBody,
   ResponseActionGetFileRequestBody,
   ExecuteActionRequestBody,
   UploadActionApiRequestBody,
   BaseActionRequestBody,
   ScanActionRequestBody,
+  KillProcessRequestBody,
+  SuspendProcessRequestBody,
 } from '../../../../../../common/api/endpoint';
 
 type OmitUnsupportedAttributes<T extends BaseActionRequestBody> = Omit<
@@ -84,7 +85,7 @@ export interface ResponseActionsClient {
   ) => Promise<ActionDetails>;
 
   release: (
-    actionRequest: OmitUnsupportedAttributes<IsolationRouteRequestBody>,
+    actionRequest: OmitUnsupportedAttributes<UnisolationRouteRequestBody>,
     options?: CommonResponseActionMethodOptions
   ) => Promise<ActionDetails>;
 

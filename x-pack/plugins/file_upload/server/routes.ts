@@ -12,7 +12,7 @@ import type {
   IndicesIndexSettings,
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { MAX_FILE_SIZE_BYTES } from '../common/constants';
+import { MAX_FILE_SIZE_BYTES, MAX_TIKA_FILE_SIZE_BYTES } from '../common/constants';
 import type { IngestPipelineWrapper, InputData } from '../common/types';
 import { wrapError } from './error_wrapper';
 import { importDataProvider } from './import_data';
@@ -29,6 +29,7 @@ import {
 import type { StartDeps } from './types';
 import { checkFileUploadPrivileges } from './check_privileges';
 import { previewIndexTimeRange } from './preview_index_time_range';
+import { previewTikaContents } from './preview_tika_contents';
 
 function importData(
   client: IScopedClusterClient,
@@ -57,6 +58,13 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
     .addVersion(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'This route is opted out from authorization because permissions will be checked by elasticsearch',
+          },
+        },
         validate: {
           request: {
             query: schema.object({
@@ -101,12 +109,16 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
     .post({
       path: '/internal/file_upload/analyze_file',
       access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: ['fileUpload:analyzeFile'],
+        },
+      },
       options: {
         body: {
           accepts: ['text/*', 'application/json'],
           maxBytes: MAX_FILE_SIZE_BYTES,
         },
-        tags: ['access:fileUpload:analyzeFile'],
       },
     })
     .addVersion(
@@ -154,6 +166,13 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
     .addVersion(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'This route is opted out from authorization because permissions will be checked by elasticsearch',
+          },
+        },
         validate: {
           request: {
             query: importFileQuerySchema,
@@ -205,6 +224,13 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
     .addVersion(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'This route is opted out from authorization because permissions will be checked by elasticsearch',
+          },
+        },
         validate: {
           request: {
             body: schema.object({ index: schema.string() }),
@@ -238,8 +264,10 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
     .post({
       path: '/internal/file_upload/time_field_range',
       access: 'internal',
-      options: {
-        tags: ['access:fileUpload:analyzeFile'],
+      security: {
+        authz: {
+          requiredPrivileges: ['fileUpload:analyzeFile'],
+        },
       },
     })
     .addVersion(
@@ -291,8 +319,10 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
     .post({
       path: '/internal/file_upload/preview_index_time_range',
       access: 'internal',
-      options: {
-        tags: ['access:fileUpload:analyzeFile'],
+      security: {
+        authz: {
+          requiredPrivileges: ['fileUpload:analyzeFile'],
+        },
       },
     })
     .addVersion(
@@ -313,6 +343,55 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
           const { docs, pipeline, timeField } = request.body;
           const esClient = (await context.core).elasticsearch.client;
           const resp = await previewIndexTimeRange(esClient, timeField, pipeline, docs);
+
+          return response.ok({
+            body: resp,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      }
+    );
+
+  /**
+   * @apiGroup FileDataVisualizer
+   *
+   * @api {post} /internal/file_upload/preview_tika_contents Returns the contents of a file using the attachment ingest processor
+   * @apiName PreviewTikaContents
+   * @apiDescription Preview the contents of a file using the attachment ingest processor
+   */
+  router.versioned
+    .post({
+      path: '/internal/file_upload/preview_tika_contents',
+      access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: ['fileUpload:analyzeFile'],
+        },
+      },
+      options: {
+        body: {
+          accepts: ['application/json'],
+          maxBytes: MAX_TIKA_FILE_SIZE_BYTES,
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: schema.object({
+              base64File: schema.string(),
+            }),
+          },
+        },
+      },
+      async (context, request, response) => {
+        try {
+          const { base64File } = request.body;
+          const esClient = (await context.core).elasticsearch.client;
+          const resp = await previewTikaContents(esClient, base64File);
 
           return response.ok({
             body: resp,

@@ -6,6 +6,7 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
+import { ensureUserHasAuthzToFilesForAction } from './utils';
 import type { EndpointActionFileDownloadParams } from '../../../../common/api/endpoint';
 import { EndpointActionFileDownloadSchema } from '../../../../common/api/endpoint';
 import type { ResponseActionsClient } from '../../services';
@@ -37,7 +38,12 @@ export const registerActionFileDownloadRoutes = (
       // we need to enable setting the version number via query params
       enableQueryVersion: true,
       path: ACTION_AGENT_FILE_DOWNLOAD_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -47,9 +53,10 @@ export const registerActionFileDownloadRoutes = (
         },
       },
       withEndpointAuthz(
-        { all: ['canWriteFileOperations'] },
+        { any: ['canWriteFileOperations', 'canWriteExecuteOperations', 'canGetRunningProcesses'] },
         logger,
-        getActionFileDownloadRouteHandler(endpointContext)
+        getActionFileDownloadRouteHandler(endpointContext),
+        ensureUserHasAuthzToFilesForAction
       )
     );
 };
@@ -66,11 +73,12 @@ export const getActionFileDownloadRouteHandler = (
 
   return async (context, req, res) => {
     const { action_id: actionId, file_id: fileId } = req.params;
+    const coreContext = await context.core;
 
     try {
-      const esClient = (await context.core).elasticsearch.client.asInternalUser;
+      const esClient = coreContext.elasticsearch.client.asInternalUser;
       const { agentType } = await getActionAgentType(esClient, actionId);
-      const user = endpointContext.service.security?.authc.getCurrentUser(req);
+      const user = coreContext.security.authc.getCurrentUser();
       const casesClient = await endpointContext.service.getCasesClient(req);
       const connectorActions = (await context.actions).getActionsClient();
       const responseActionsClient: ResponseActionsClient = getResponseActionsClient(agentType, {

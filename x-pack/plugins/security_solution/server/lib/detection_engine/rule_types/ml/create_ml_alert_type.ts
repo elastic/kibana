@@ -19,7 +19,8 @@ import { wrapSuppressedAlerts } from '../utils/wrap_suppressed_alerts';
 export const createMlAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<MachineLearningRuleParams, {}, {}, 'default'> => {
-  const { experimentalFeatures, ml, licensing } = createOptions;
+  const { experimentalFeatures, ml, licensing, scheduleNotificationResponseActionsService } =
+    createOptions;
   return {
     id: ML_RULE_TYPE_ID,
     name: 'Machine Learning Rule',
@@ -64,6 +65,7 @@ export const createMlAlertType = (
           alertWithSuppression,
           primaryTimestamp,
           secondaryTimestamp,
+          intendedTimestamp,
         },
         services,
         spaceId,
@@ -72,7 +74,6 @@ export const createMlAlertType = (
 
       const isAlertSuppressionActive = await getIsAlertSuppressionActive({
         alertSuppression: completeRule.ruleParams.alertSuppression,
-        isFeatureDisabled: !experimentalFeatures.alertSuppressionForMachineLearningRuleEnabled,
         licensing,
       });
 
@@ -89,6 +90,7 @@ export const createMlAlertType = (
           publicBaseUrl,
           primaryTimestamp,
           secondaryTimestamp,
+          intendedTimestamp,
         });
 
       const result = await mlExecutor({
@@ -107,6 +109,7 @@ export const createMlAlertType = (
         alertWithSuppression,
         isAlertSuppressionActive,
         experimentalFeatures,
+        scheduleNotificationResponseActionsService,
       });
       return { ...result, state };
     },

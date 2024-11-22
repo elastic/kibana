@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -16,7 +17,8 @@ import {
 } from '@elastic/eui';
 import { UrlFormat } from '@kbn/field-formats-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { context as contextType } from '@kbn/kibana-react-plugin/public';
+import { context as contextType, KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
+import { CoreStart } from '@kbn/core/public';
 import React, { Fragment } from 'react';
 import { FormatEditorSamples } from '../../samples';
 import { DefaultFormatEditor } from '../default/default';
@@ -55,6 +57,9 @@ export class UrlFormatEditor extends DefaultFormatEditor<
 > {
   static contextType = contextType;
   static formatId = formatId;
+
+  declare context: KibanaReactContextValue<Partial<CoreStart>>;
+
   private get sampleIconPath() {
     const sampleIconPath = `/plugins/dataViewFieldEditor/assets/icons/{{value}}.png`;
     return this.context?.services.http
@@ -206,7 +211,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
           helpText={
             <EuiLink
               target="_blank"
-              href={this.context.services.docLinks.links.indexPatterns.fieldFormattersString}
+              href={this.context.services.docLinks?.links.indexPatterns.fieldFormattersString}
             >
               <FormattedMessage
                 id="indexPatternFieldEditor.url.template.helpLinkText"
@@ -236,7 +241,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
           helpText={
             <EuiLink
               target="_blank"
-              href={this.context.services.docLinks.links.indexPatterns.fieldFormattersString}
+              href={this.context.services.docLinks?.links.indexPatterns.fieldFormattersString}
             >
               <FormattedMessage
                 id="indexPatternFieldEditor.url.labelTemplateHelpText"

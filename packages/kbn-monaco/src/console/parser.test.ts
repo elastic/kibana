@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { createParser } from './parser';
@@ -25,9 +26,7 @@ describe('console parser', () => {
     const { requests, errors } = parser(input) as ConsoleParserResult;
     expect(requests.length).toBe(1);
     expect(errors.length).toBe(0);
-    const { method, url, startOffset, endOffset } = requests[0];
-    expect(method).toBe('GET');
-    expect(url).toBe('_search');
+    const { startOffset, endOffset } = requests[0];
     // the start offset of the request is the beginning of the string
     expect(startOffset).toBe(0);
     // the end offset of the request is the end of the string
@@ -38,6 +37,10 @@ describe('console parser', () => {
     const input = 'GET _search\nPOST _test_index';
     const { requests } = parser(input) as ConsoleParserResult;
     expect(requests.length).toBe(2);
+    expect(requests[0].startOffset).toBe(0);
+    expect(requests[0].endOffset).toBe(11);
+    expect(requests[1].startOffset).toBe(12);
+    expect(requests[1].endOffset).toBe(28);
   });
 
   it('parses a request with a request body', () => {
@@ -45,15 +48,53 @@ describe('console parser', () => {
       'GET _search\n' + '{\n' + '  "query": {\n' + '    "match_all": {}\n' + '  }\n' + '}';
     const { requests } = parser(input) as ConsoleParserResult;
     expect(requests.length).toBe(1);
-    const { method, url, data } = requests[0];
-    expect(method).toBe('GET');
-    expect(url).toBe('_search');
-    expect(data).toEqual([
+    const { startOffset, endOffset } = requests[0];
+    expect(startOffset).toBe(0);
+    expect(endOffset).toBe(52);
+  });
+
+  describe('case insensitive methods', () => {
+    const expectedRequests = [
       {
-        query: {
-          match_all: {},
-        },
+        startOffset: 0,
+        endOffset: 11,
       },
-    ]);
+      {
+        startOffset: 12,
+        endOffset: 24,
+      },
+      {
+        startOffset: 25,
+        endOffset: 38,
+      },
+      {
+        startOffset: 39,
+        endOffset: 50,
+      },
+      {
+        startOffset: 51,
+        endOffset: 63,
+      },
+    ];
+    it('allows upper case methods', () => {
+      const input = 'GET _search\nPOST _search\nPATCH _search\nPUT _search\nHEAD _search';
+      const { requests, errors } = parser(input) as ConsoleParserResult;
+      expect(errors.length).toBe(0);
+      expect(requests).toEqual(expectedRequests);
+    });
+
+    it('allows lower case methods', () => {
+      const input = 'get _search\npost _search\npatch _search\nput _search\nhead _search';
+      const { requests, errors } = parser(input) as ConsoleParserResult;
+      expect(errors.length).toBe(0);
+      expect(requests).toEqual(expectedRequests);
+    });
+
+    it('allows mixed case methods', () => {
+      const input = 'GeT _search\npOSt _search\nPaTch _search\nPut _search\nheAD _search';
+      const { requests, errors } = parser(input) as ConsoleParserResult;
+      expect(errors.length).toBe(0);
+      expect(requests).toEqual(expectedRequests);
+    });
   });
 });

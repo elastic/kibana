@@ -1,5 +1,10 @@
 {
-  "type": "shared-common",
+  "type": "shared-server",
   "id": "@kbn/apm-config-loader",
-  "owner": ["@elastic/kibana-core", "@vigneshshanmugam"]
+  "owner": [
+    "@elastic/kibana-core",
+    "@vigneshshanmugam"
+  ],
+  "group": "platform",
+  "visibility": "private"
 }

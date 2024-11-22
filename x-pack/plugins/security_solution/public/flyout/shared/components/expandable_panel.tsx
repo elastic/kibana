@@ -22,7 +22,7 @@ import {
   EuiSkeletonText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { IconType } from '@elastic/eui';
+import type { EuiPanelProps, IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export interface ExpandablePanelPanelProps {
@@ -59,6 +59,10 @@ export interface ExpandablePanelPanelProps {
      * Returns a null component if true
      */
     error?: boolean;
+    /**
+     * Content's padding size
+     */
+    paddingSize?: EuiPanelProps['paddingSize'];
   };
   expand?: {
     /**
@@ -84,7 +88,11 @@ export interface ExpandablePanelPanelProps {
  */
 export const ExpandablePanel: FC<PropsWithChildren<ExpandablePanelPanelProps>> = ({
   header: { title, link, iconType, headerContent },
-  content: { loading, error } = { loading: false, error: false },
+  content: { loading, error, paddingSize: contentPaddingSize } = {
+    loading: false,
+    error: false,
+    paddingSize: 'm',
+  },
   expand: { expandable, expandedOnFirstRender } = {
     expandable: false,
     expandedOnFirstRender: false,
@@ -228,7 +236,9 @@ export const ExpandablePanel: FC<PropsWithChildren<ExpandablePanelPanelProps>> =
       </EuiSplitPanel.Inner>
       {showContent && (
         <EuiSplitPanel.Inner paddingSize="none">
-          <EuiPanel data-test-subj={`${dataTestSubj}Content`}>{content}</EuiPanel>
+          <EuiPanel paddingSize={contentPaddingSize} data-test-subj={`${dataTestSubj}Content`}>
+            {content}
+          </EuiPanel>
         </EuiSplitPanel.Inner>
       )}
     </EuiSplitPanel.Outer>

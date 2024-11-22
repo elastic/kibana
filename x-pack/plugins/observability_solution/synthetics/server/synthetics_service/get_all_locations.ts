@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { SavedObjectsClientContract } from '@kbn/core/server';
-import { toClientContract } from '../routes/settings/private_locations/helpers';
+import { allLocationsToClientContract } from '../routes/settings/private_locations/helpers';
 import { getPrivateLocationsAndAgentPolicies } from '../routes/settings/private_locations/get_private_locations';
 import { SyntheticsServerSetup } from '../types';
 import { getServiceLocations } from './get_service_locations';
@@ -15,27 +15,34 @@ export async function getAllLocations({
   syntheticsMonitorClient,
   savedObjectsClient,
   server,
+  excludeAgentPolicies = false,
 }: {
   server: SyntheticsServerSetup;
   syntheticsMonitorClient: SyntheticsMonitorClient;
   savedObjectsClient: SavedObjectsClientContract;
+  excludeAgentPolicies?: boolean;
 }) {
   try {
     const [
       { locations: privateLocations, agentPolicies },
       { locations: publicLocations, throttling },
     ] = await Promise.all([
-      getPrivateLocationsAndAgentPolicies(savedObjectsClient, syntheticsMonitorClient),
+      getPrivateLocationsAndAgentPolicies(
+        savedObjectsClient,
+        syntheticsMonitorClient,
+        excludeAgentPolicies
+      ),
       getServicePublicLocations(server, syntheticsMonitorClient),
     ]);
+    const pvtLocations = allLocationsToClientContract(
+      { locations: privateLocations },
+      agentPolicies
+    );
     return {
       publicLocations,
-      privateLocations,
+      privateLocations: pvtLocations,
       throttling,
-      allLocations: [
-        ...publicLocations,
-        ...toClientContract({ locations: privateLocations }, agentPolicies),
-      ],
+      allLocations: [...publicLocations, ...pvtLocations],
     };
   } catch (e) {
     server.logger.error(e);

@@ -39,6 +39,7 @@ describe('unmuteAlertInstanceRoute', () => {
     expect(config.path).toMatchInlineSnapshot(
       `"/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute"`
     );
+    expect(config.options?.access).toBe('public');
 
     rulesClient.unmuteInstance.mockResolvedValueOnce();
 
@@ -66,6 +67,20 @@ describe('unmuteAlertInstanceRoute', () => {
     `);
 
     expect(res.noContent).toHaveBeenCalled();
+  });
+
+  it('should have internal access for serverless', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    unmuteAlertInstanceRoute(router, licenseState, undefined, true);
+
+    const [config] = router.post.mock.calls[0];
+
+    expect(config.path).toMatchInlineSnapshot(
+      `"/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute"`
+    );
+    expect(config.options?.access).toBe('internal');
   });
 
   it('ensures the alert type gets validated for the license', async () => {

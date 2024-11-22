@@ -7,15 +7,18 @@
 
 import type { PolicyConfig } from '../types';
 import { PolicyOperatingSystem, ProtectionModes, AntivirusRegistrationModes } from '../types';
-import { policyFactory } from './policy_config';
+import { DefaultPolicyNotificationMessage, policyFactory } from './policy_config';
 import {
   disableProtections,
   isPolicySetToEventCollectionOnly,
   ensureOnlyEventCollectionIsAllowed,
   isBillablePolicy,
   getPolicyProtectionsReference,
+  checkIfPopupMessagesContainCustomNotifications,
+  resetCustomNotifications,
 } from './policy_config_helpers';
-import { set } from 'lodash';
+import { get, merge } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 
 describe('Policy Config helpers', () => {
   describe('disableProtections', () => {
@@ -222,6 +225,107 @@ describe('Policy Config helpers', () => {
         }
       }
     );
+  });
+
+  describe('checkIfPopupMessagesContainCustomNotifications', () => {
+    let policy: PolicyConfig;
+
+    beforeEach(() => {
+      policy = policyFactory();
+    });
+
+    it('returns false when all popup messages are default', () => {
+      expect(checkIfPopupMessagesContainCustomNotifications(policy)).toBe(false);
+    });
+
+    it('returns true when any popup message is custom', () => {
+      set(policy, 'windows.popup.malware.message', 'Custom message');
+      expect(checkIfPopupMessagesContainCustomNotifications(policy)).toBe(true);
+    });
+
+    it('returns false when all popup messages are empty', () => {
+      set(policy, 'windows.popup.malware.message', '');
+      set(policy, 'mac.popup.memory_protection.message', '');
+      expect(checkIfPopupMessagesContainCustomNotifications(policy)).toBe(false);
+    });
+
+    it('returns true when any popup message is not empty or default', () => {
+      set(policy, 'linux.popup.behavior_protection.message', 'Another custom message');
+      expect(checkIfPopupMessagesContainCustomNotifications(policy)).toBe(true);
+    });
+
+    it('returns false when all popup messages are default across all OS', () => {
+      set(policy, 'windows.popup.malware.message', DefaultPolicyNotificationMessage);
+      set(policy, 'mac.popup.memory_protection.message', DefaultPolicyNotificationMessage);
+      set(policy, 'linux.popup.behavior_protection.message', DefaultPolicyNotificationMessage);
+      set(policy, 'windows.popup.ransomware.message', '');
+      expect(checkIfPopupMessagesContainCustomNotifications(policy)).toBe(false);
+    });
+  });
+
+  describe('resetCustomNotifications', () => {
+    let policy: PolicyConfig;
+
+    beforeEach(() => {
+      policy = policyFactory();
+    });
+
+    it.each([
+      'windows.popup.malware.message',
+      'windows.popup.behavior_protection.message',
+      'windows.popup.memory_protection.message',
+      'windows.popup.ransomware.message',
+      'linux.popup.malware.message',
+      'linux.popup.behavior_protection.message',
+      'linux.popup.memory_protection.message',
+      'mac.popup.malware.message',
+      'mac.popup.behavior_protection.message',
+      'mac.popup.memory_protection.message',
+    ])('resets %s to default message', (keyPath) => {
+      set(policy, keyPath, `Custom message`);
+      const defaultNotifications = resetCustomNotifications();
+
+      const updatedPolicy = merge({}, policy, defaultNotifications);
+      expect(get(updatedPolicy, keyPath)).toBe(DefaultPolicyNotificationMessage);
+    });
+
+    it('does not change default messages', () => {
+      set(policy, 'windows.popup.malware.message', DefaultPolicyNotificationMessage);
+      const defaultNotifications = resetCustomNotifications();
+
+      const updatedPolicy = merge({}, policy, defaultNotifications);
+      expect(get(updatedPolicy, 'windows.popup.malware.message')).toBe(
+        DefaultPolicyNotificationMessage
+      );
+    });
+
+    it('resets empty messages to default messages', () => {
+      set(policy, 'windows.popup.malware.message', '');
+      const defaultNotifications = resetCustomNotifications();
+
+      const updatedPolicy = merge({}, policy, defaultNotifications);
+      expect(get(updatedPolicy, 'windows.popup.malware.message')).toBe(
+        DefaultPolicyNotificationMessage
+      );
+    });
+
+    it('resets messages for all operating systems', () => {
+      set(policy, 'windows.popup.malware.message', 'Custom message');
+      set(policy, 'mac.popup.memory_protection.message', 'Another custom message');
+      set(policy, 'linux.popup.behavior_protection.message', 'Yet another custom message');
+      const defaultNotifications = resetCustomNotifications();
+
+      const updatedPolicy = merge({}, policy, defaultNotifications);
+      expect(get(updatedPolicy, 'windows.popup.malware.message')).toBe(
+        DefaultPolicyNotificationMessage
+      );
+      expect(get(updatedPolicy, 'mac.popup.memory_protection.message')).toBe(
+        DefaultPolicyNotificationMessage
+      );
+      expect(get(updatedPolicy, 'linux.popup.behavior_protection.message')).toBe(
+        DefaultPolicyNotificationMessage
+      );
+    });
   });
 });
 

@@ -8,7 +8,7 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { uniq } from 'lodash/fp';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { ManageAlertTagsRequestBody } from '../../../../../common/api/detection_engine/alert_tags';
+import { SetAlertTagsRequestBody } from '../../../../../common/api/detection_engine/alert_tags';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import {
   DEFAULT_ALERTS_INDEX,
@@ -22,8 +22,10 @@ export const setAlertTagsRoute = (router: SecuritySolutionPluginRouter) => {
     .post({
       path: DETECTION_ENGINE_ALERT_TAGS_URL,
       access: 'public',
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(
@@ -31,7 +33,7 @@ export const setAlertTagsRoute = (router: SecuritySolutionPluginRouter) => {
         version: '2023-10-31',
         validate: {
           request: {
-            body: buildRouteValidationWithZod(ManageAlertTagsRequestBody),
+            body: buildRouteValidationWithZod(SetAlertTagsRequestBody),
           },
         },
       },

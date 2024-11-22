@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiButtonGroup,
-  EuiFormControlLayout,
-  EuiFormRow,
-  EuiSelect,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiButtonGroup, EuiFormRow, EuiSelect, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import deepEqual from 'fast-deep-equal';
 import { Moment } from 'moment';
@@ -127,11 +120,11 @@ export const CustomRecurrenceScheduler: React.FC<CustomRecurrenceSchedulerProps>
         display="columnCompressed"
         data-test-subj="customRecurrenceScheduler"
         fullWidth
-        label=" "
+        hasEmptyLabelSpace
       >
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem>
-            <EuiFormControlLayout
+            <NumberField
               compressed
               prepend={i18n.translate(
                 'xpack.triggersActionsUI.ruleSnoozeScheduler.repeatIntervalLabel',
@@ -139,15 +132,11 @@ export const CustomRecurrenceScheduler: React.FC<CustomRecurrenceSchedulerProps>
                   defaultMessage: 'Every',
                 }
               )}
-            >
-              <NumberField
-                compressed
-                data-test-subj="customRecurrenceSchedulerInterval"
-                min={intervalMin}
-                value={interval}
-                onChange={(value) => setInterval(Number(value))}
-              />
-            </EuiFormControlLayout>
+              data-test-subj="customRecurrenceSchedulerInterval"
+              min={intervalMin}
+              value={interval}
+              onChange={(value) => setInterval(Number(value))}
+            />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiSelect
@@ -165,7 +154,7 @@ export const CustomRecurrenceScheduler: React.FC<CustomRecurrenceSchedulerProps>
         <EuiFormRow
           fullWidth
           display="columnCompressed"
-          label={' '}
+          hasEmptyLabelSpace
           data-test-subj="customRecurrenceSchedulerWeekly"
         >
           <EuiButtonGroup

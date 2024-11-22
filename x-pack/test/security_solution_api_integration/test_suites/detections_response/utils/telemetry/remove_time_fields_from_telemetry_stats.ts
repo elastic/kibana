@@ -15,6 +15,8 @@ export const removeExtraFieldsFromTelemetryStats = (stats: any) => {
         unset(value, `[${i}][${j}].start_time`);
         unset(value, `[${i}][${j}].end_time`);
         unset(value, `[${i}][${j}].cluster_uuid`);
+        unset(value, `[${i}][${j}].cluster_name`);
+        unset(value, `[${i}][${j}].license`);
       });
     });
   });

@@ -6,9 +6,9 @@
  */
 
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { cloneDeep, remove } from 'lodash';
+import { cloneDeep, remove, find } from 'lodash';
 import type { AppLinkItems, LinkItem } from '../../../common/links/types';
-import { createInvestigationsLinkFromTimeline } from './sections/investigations_links';
+import { createInvestigationsLink, createTimelineLink } from './sections/investigations_links';
 import { mlAppLink } from './sections/ml_links';
 import { createAssetsLinkFromManage } from './sections/assets_links';
 import { createSettingsLinksFromManage } from './sections/settings_links';
@@ -20,18 +20,28 @@ import { createSettingsLinksFromManage } from './sections/settings_links';
 export const solutionAppLinksSwitcher = (appLinks: AppLinkItems): AppLinkItems => {
   const solutionAppLinks = cloneDeep(appLinks) as LinkItem[];
 
-  // Remove timeline link
-  const [timelineLinkItem] = remove(solutionAppLinks, { id: SecurityPageName.timelines });
-  if (timelineLinkItem) {
-    solutionAppLinks.push(createInvestigationsLinkFromTimeline(timelineLinkItem));
-  }
-
   // Remove manage link
   const [manageLinkItem] = remove(solutionAppLinks, { id: SecurityPageName.administration });
 
   if (manageLinkItem) {
     solutionAppLinks.push(createAssetsLinkFromManage(manageLinkItem));
     solutionAppLinks.push(...createSettingsLinksFromManage(manageLinkItem));
+  }
+
+  // Create investigations link
+  const investigationsLinks = [];
+  const [timelineLinkItem] = remove(solutionAppLinks, { id: SecurityPageName.timelines });
+  if (timelineLinkItem) {
+    investigationsLinks.push(createTimelineLink(timelineLinkItem));
+  }
+  if (manageLinkItem) {
+    const noteLinkItem = find(manageLinkItem.links, { id: SecurityPageName.notes });
+    if (noteLinkItem) {
+      investigationsLinks.push(noteLinkItem);
+    }
+  }
+  if (investigationsLinks.length > 0) {
+    solutionAppLinks.push(createInvestigationsLink(investigationsLinks));
   }
 
   // Add ML link

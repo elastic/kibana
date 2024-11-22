@@ -19,11 +19,11 @@
     "@kbn/navigation-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/data-views-plugin",
-    "@kbn/visualizations-plugin",
     "@kbn/developer-examples-plugin",
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/controls-plugin",
     "@kbn/shared-ux-router",
-    "@kbn/presentation-publishing"
+    "@kbn/presentation-publishing",
+    "@kbn/react-kibana-context-render"
   ]
 }

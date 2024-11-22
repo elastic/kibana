@@ -10,7 +10,6 @@ export { install } from './install';
 export type { Context } from './chromium';
 export {
   getChromiumDisconnectedError,
-  ChromiumArchivePaths,
   DEFAULT_VIEWPORT,
   HeadlessChromiumDriver,
   HeadlessChromiumDriverFactory,

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
 import {
   AI_SEARCH_PLUGIN,
   ANALYTICS_PLUGIN,
@@ -12,6 +14,7 @@ import {
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   SEARCH_EXPERIENCES_PLUGIN,
   SEARCH_PRODUCT_NAME,
+  SEMANTIC_SEARCH_PLUGIN,
   VECTOR_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../common/constants';
@@ -39,7 +42,12 @@ export const searchTitle = (page: Title = []) => generateTitle([...page, SEARCH_
 export const analyticsTitle = (page: Title = []) => generateTitle([...page, ANALYTICS_PLUGIN.NAME]);
 
 export const elasticsearchTitle = (page: Title = []) =>
-  generateTitle([...page, 'Getting started with Elasticsearch']);
+  generateTitle([
+    ...page,
+    i18n.translate('xpack.enterpriseSearch.titles.elasticsearch', {
+      defaultMessage: 'Getting started with Elasticsearch',
+    }),
+  ]);
 
 export const appSearchTitle = (page: Title = []) =>
   generateTitle([...page, APP_SEARCH_PLUGIN.NAME]);
@@ -55,5 +63,16 @@ export const aiSearchTitle = (page: Title = []) => generateTitle([...page, AI_SE
 export const vectorSearchTitle = (page: Title = []) =>
   generateTitle([...page, VECTOR_SEARCH_PLUGIN.NAME]);
 
+export const semanticSearchTitle = (page: Title = []) =>
+  generateTitle([...page, SEMANTIC_SEARCH_PLUGIN.NAME]);
+
 export const enterpriseSearchContentTitle = (page: Title = []) =>
   generateTitle([...page, ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME]);
+
+export const searchApplicationsTitle = (page: Title = []) =>
+  generateTitle([
+    ...page,
+    i18n.translate('xpack.enterpriseSearch.titles.searchApplications', {
+      defaultMessage: 'Search Applications',
+    }),
+  ]);

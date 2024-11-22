@@ -18,7 +18,7 @@ describe('initializeEs', () => {
     esContext.esAdapter.getExistingIndexAliases.mockResolvedValue({});
   });
 
-  test(`should update existing index templates if any exist and are not hidden`, async () => {
+  test(`should update existing index templates to hidden if any exist and are not hidden`, async () => {
     const testTemplate = {
       order: 0,
       index_patterns: ['foo-bar-*'],
@@ -393,14 +393,16 @@ describe('initializeEs', () => {
     await initializeEs(esContext);
     expect(esContext.esAdapter.doesIndexTemplateExist).toHaveBeenCalled();
     expect(esContext.esAdapter.createIndexTemplate).toHaveBeenCalled();
+    expect(esContext.esAdapter.updateIndexTemplate).not.toHaveBeenCalled();
   });
 
-  test(`shouldn't create index template if it already exists`, async () => {
+  test(`should update index template if it already exists`, async () => {
     esContext.esAdapter.doesIndexTemplateExist.mockResolvedValue(true);
 
     await initializeEs(esContext);
     expect(esContext.esAdapter.doesIndexTemplateExist).toHaveBeenCalled();
     expect(esContext.esAdapter.createIndexTemplate).not.toHaveBeenCalled();
+    expect(esContext.esAdapter.updateIndexTemplate).toHaveBeenCalled();
   });
 
   test(`should create data stream if it doesn't exist`, async () => {
@@ -409,14 +411,16 @@ describe('initializeEs', () => {
     await initializeEs(esContext);
     expect(esContext.esAdapter.doesDataStreamExist).toHaveBeenCalled();
     expect(esContext.esAdapter.createDataStream).toHaveBeenCalled();
+    expect(esContext.esAdapter.updateConcreteIndices).not.toHaveBeenCalled();
   });
 
-  test(`shouldn't create data stream if it already exists`, async () => {
+  test(`should update indices of data stream if it already exists`, async () => {
     esContext.esAdapter.doesDataStreamExist.mockResolvedValue(true);
 
     await initializeEs(esContext);
     expect(esContext.esAdapter.doesDataStreamExist).toHaveBeenCalled();
     expect(esContext.esAdapter.createDataStream).not.toHaveBeenCalled();
+    expect(esContext.esAdapter.updateConcreteIndices).toHaveBeenCalled();
   });
 });
 

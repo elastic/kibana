@@ -25,14 +25,14 @@ export default function ({ getService }: FtrProviderContext) {
   // Failing: See https://github.com/elastic/kibana/issues/182791
   describe.skip('component templates', () => {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
     });
 
     after(async () => {
       await svlComponentTemplateHelpers.cleanUpIndexTemplates();
       await svlComponentTemplateHelpers.cleanUpComponentTemplates();
       await svlComponentTemplateHelpers.cleanupDatastreams();
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     describe('Get', () => {
@@ -115,7 +115,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('Update', () => {
+    describe('Update #1', () => {
       const COMPONENT_NAME = 'test_update_component_template';
       const COMPONENT = {
         template: {
@@ -208,7 +208,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('Update', () => {
+    describe('Update #2', () => {
       const COMPONENT_NAME = 'test_update_component_template';
       const COMPONENT = {
         template: {

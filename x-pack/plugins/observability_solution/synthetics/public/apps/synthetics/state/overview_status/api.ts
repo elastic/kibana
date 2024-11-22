@@ -7,9 +7,28 @@
 
 import { MonitorOverviewPageState } from '..';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
-import { OverviewStatus, OverviewStatusCodec } from '../../../../../common/runtime_types';
+import {
+  FetchMonitorOverviewQueryArgs,
+  OverviewStatus,
+  OverviewStatusCodec,
+} from '../../../../../common/runtime_types';
 import { apiService } from '../../../../utils/api_service';
-import { toStatusOverviewQueryArgs } from '../overview/api';
+
+export function toStatusOverviewQueryArgs(
+  pageState: MonitorOverviewPageState
+): FetchMonitorOverviewQueryArgs {
+  return {
+    query: pageState.query,
+    tags: pageState.tags,
+    locations: pageState.locations,
+    projects: pageState.projects,
+    schedules: pageState.schedules,
+    monitorTypes: pageState.monitorTypes,
+    monitorQueryIds: pageState.monitorQueryIds,
+    showFromAllSpaces: pageState.showFromAllSpaces,
+    searchFields: [],
+  };
+}
 
 export const fetchOverviewStatus = async ({
   pageState,

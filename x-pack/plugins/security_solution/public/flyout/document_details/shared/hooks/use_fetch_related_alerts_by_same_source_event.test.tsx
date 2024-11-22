@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import type { RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import type {
   UseFetchRelatedAlertsBySameSourceEventParams,
   UseFetchRelatedAlertsBySameSourceEventResult,
 } from './use_fetch_related_alerts_by_same_source_event';
 import { useFetchRelatedAlertsBySameSourceEvent } from './use_fetch_related_alerts_by_same_source_event';
-import { useAlertPrevalence } from '../../../../common/containers/alerts/use_alert_prevalence';
+import { useAlertPrevalence } from './use_alert_prevalence';
 
-jest.mock('../../../../common/containers/alerts/use_alert_prevalence');
+jest.mock('./use_alert_prevalence');
 
 const originalEventId = 'originalEventId';
 const scopeId = 'scopeId';
 
 describe('useFetchRelatedAlertsBySameSourceEvent', () => {
   let hookResult: RenderHookResult<
-    UseFetchRelatedAlertsBySameSourceEventParams,
-    UseFetchRelatedAlertsBySameSourceEventResult
+    UseFetchRelatedAlertsBySameSourceEventResult,
+    UseFetchRelatedAlertsBySameSourceEventParams
   >;
 
   it('should return loading true while data is loading', () => {

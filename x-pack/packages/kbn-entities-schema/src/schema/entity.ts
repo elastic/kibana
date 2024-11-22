@@ -5,27 +5,50 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import { arrayOfStringsSchema } from './common';
 
-const entitySchema = z.object({
-  entity: z.object({
-    id: z.string(),
-    identityFields: arrayOfStringsSchema,
-    displayName: z.string(),
-    metrics: z.record(z.string(), z.number()),
-  }),
+export const entityBaseSchema = z.object({
+  id: z.string(),
+  type: z.string(),
+  identity_fields: z.union([arrayOfStringsSchema, z.string()]),
+  display_name: z.string(),
+  metrics: z.optional(z.record(z.string(), z.number())),
+  definition_version: z.string(),
+  schema_version: z.string(),
+  definition_id: z.string(),
 });
 
-export const entitySummarySchema = z.intersection(
-  entitySchema.extend({
-    lastSeenTimestamp: z.string(),
-    firstSeenTimestamp: z.string(),
-  }),
-  z.record(z.string(), z.string().or(z.number()))
+export interface MetadataRecord {
+  [key: string]: string[] | MetadataRecord | string;
+}
+
+export interface EntityV2 {
+  'entity.id': string;
+  'entity.last_seen_timestamp': string;
+  'entity.type': string;
+  [metadata: string]: any;
+}
+
+const literalSchema = z.union([z.string(), z.number(), z.boolean(), z.null()]);
+
+type Literal = z.infer<typeof literalSchema>;
+interface Metadata {
+  [key: string]: Metadata | Literal | Literal[];
+}
+export const entityMetadataSchema: z.ZodType<Metadata> = z.lazy(() =>
+  z.record(z.string(), z.union([literalSchema, z.array(literalSchema), entityMetadataSchema]))
 );
 
-export const entityHistorySchema = z.intersection(
-  entitySchema.extend({ ['@timestamp']: z.string() }),
-  z.record(z.string(), z.string().or(z.number()))
-);
+export const entityLatestSchema = z
+  .object({
+    entity: entityBaseSchema.merge(
+      z.object({
+        last_seen_timestamp: z.string(),
+      })
+    ),
+  })
+  .and(entityMetadataSchema);
+
+export type EntityInstance = z.infer<typeof entityLatestSchema>;
+export type EntityMetadata = z.infer<typeof entityMetadataSchema>;

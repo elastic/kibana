@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as usng from 'usng.js';
@@ -12,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 export const converter = new usng.Converter();
 
 export function withinRange(value: string | number, min: number, max: number) {
+  // @ts-expect-error upgrade typescript v5.1.6
   const isInvalid = value === '' || value > max || value < min;
   const error = isInvalid
     ? i18n.translate('fieldFormats.geoUtils.outOfRangeErrorMsg', {

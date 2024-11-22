@@ -13,9 +13,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiSpacer, EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
+import { FieldStatsFlyoutProvider } from '@kbn/ml-field-stats-flyout';
 import { JobCreatorContext } from '../components/job_creator_context';
 import { useMlKibana } from '../../../../contexts/kibana';
-import { FieldStatsFlyoutProvider } from '../../../../components/field_stats_flyout';
 import { WIZARD_STEPS } from '../components/step_types';
 
 import { TimeRangeStep } from '../components/time_range_step';
@@ -123,6 +123,7 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
             fieldStatsServices={fieldStatsServices}
             timeRangeMs={timeRangeMs}
             dslQuery={jobCreator.query}
+            theme={services.theme}
           >
             <>
               <EuiFlexGroup gutterSize="s">

@@ -24,13 +24,14 @@ import {
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import moment from 'moment';
-import type { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common/types';
+import { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/public';
 import { useGetKnowledgeBaseEntries } from '../../hooks/use_get_knowledge_base_entries';
 import { categorizeEntries, KnowledgeBaseEntryCategory } from '../../helpers/categorize_entries';
 import { KnowledgeBaseEditManualEntryFlyout } from './knowledge_base_edit_manual_entry_flyout';
 import { KnowledgeBaseCategoryFlyout } from './knowledge_base_category_flyout';
 import { KnowledgeBaseBulkImportFlyout } from './knowledge_base_bulk_import_flyout';
 import { useKibana } from '../../hooks/use_kibana';
+import { KnowledgeBaseEditUserInstructionFlyout } from './knowledge_base_edit_user_instruction_flyout';
 
 export function KnowledgeBaseTab() {
   const { uiSettings } = useKibana().services;
@@ -56,10 +57,10 @@ export function KnowledgeBaseTab() {
             data-test-subj="pluginsColumnsButton"
             onClick={() => setSelectedCategory(category)}
             aria-label={
-              category.categoryName === selectedCategory?.categoryName ? 'Collapse' : 'Expand'
+              category.categoryKey === selectedCategory?.categoryKey ? 'Collapse' : 'Expand'
             }
             iconType={
-              category.categoryName === selectedCategory?.categoryName ? 'minimize' : 'expand'
+              category.categoryKey === selectedCategory?.categoryKey ? 'minimize' : 'expand'
             }
           />
         );
@@ -84,7 +85,8 @@ export function KnowledgeBaseTab() {
       width: '40px',
     },
     {
-      field: 'categoryName',
+      'data-test-subj': 'knowledgeBaseTableTitleCell',
+      field: 'title',
       name: i18n.translate('xpack.observabilityAiAssistantManagement.kbTab.columns.name', {
         defaultMessage: 'Name',
       }),
@@ -106,6 +108,7 @@ export function KnowledgeBaseTab() {
       },
     },
     {
+      'data-test-subj': 'knowledgeBaseTableAuthorCell',
       name: i18n.translate('xpack.observabilityAiAssistantManagement.kbTab.columns.author', {
         defaultMessage: 'Author',
       }),
@@ -175,13 +178,14 @@ export function KnowledgeBaseTab() {
     KnowledgeBaseEntryCategory | undefined
   >();
 
-  const [flyoutOpenType, setFlyoutOpenType] = useState<
-    'singleEntry' | 'bulkImport' | 'category' | undefined
+  const [newEntryFlyoutType, setNewEntryFlyoutType] = useState<
+    'singleEntry' | 'bulkImport' | undefined
   >();
 
-  const [newEntryPopoverOpen, setNewEntryPopoverOpen] = useState(false);
+  const [isNewEntryPopoverOpen, setIsNewEntryPopoverOpen] = useState(false);
+  const [isEditUserInstructionFlyoutOpen, setIsEditUserInstructionFlyoutOpen] = useState(false);
   const [query, setQuery] = useState('');
-  const [sortBy, setSortBy] = useState<'doc_id' | '@timestamp'>('doc_id');
+  const [sortBy, setSortBy] = useState<keyof KnowledgeBaseEntryCategory>('title');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   const {
@@ -191,23 +195,12 @@ export function KnowledgeBaseTab() {
   } = useGetKnowledgeBaseEntries({ query, sortBy, sortDirection });
   const categorizedEntries = categorizeEntries({ entries });
 
-  const handleChangeSort = ({
-    sort,
-  }: Criteria<KnowledgeBaseEntryCategory & KnowledgeBaseEntry>) => {
+  const handleChangeSort = ({ sort }: Criteria<KnowledgeBaseEntryCategory>) => {
     if (sort) {
       const { field, direction } = sort;
-      if (field === '@timestamp') {
-        setSortBy(field);
-      }
-      if (field === 'categoryName') {
-        setSortBy('doc_id');
-      }
+      setSortBy(field);
       setSortDirection(direction);
     }
-  };
-
-  const handleClickNewEntry = () => {
-    setNewEntryPopoverOpen(true);
   };
 
   const handleChangeQuery = (e: React.ChangeEvent<HTMLInputElement> | undefined) => {
@@ -236,6 +229,7 @@ export function KnowledgeBaseTab() {
                 )}
               />
             </EuiFlexItem>
+
             <EuiFlexItem grow={false}>
               <EuiButton
                 data-test-subj="knowledgeBaseTabReloadButton"
@@ -250,16 +244,29 @@ export function KnowledgeBaseTab() {
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="observabilityAiAssistantManagementKnowledgeBaseTabEditInstructionsButton"
+                color="text"
+                onClick={() => setIsEditUserInstructionFlyoutOpen(true)}
+              >
+                {i18n.translate(
+                  'xpack.observabilityAiAssistantManagement.knowledgeBaseTab.editInstructionsButtonLabel',
+                  { defaultMessage: 'Edit User-specific Prompt' }
+                )}
+              </EuiButton>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
               <EuiPopover
-                isOpen={newEntryPopoverOpen}
-                closePopover={() => setNewEntryPopoverOpen(false)}
+                isOpen={isNewEntryPopoverOpen}
+                closePopover={() => setIsNewEntryPopoverOpen(false)}
                 button={
                   <EuiButton
                     fill
                     data-test-subj="knowledgeBaseNewEntryButton"
                     iconSide="right"
                     iconType="arrowDown"
-                    onClick={handleClickNewEntry}
+                    onClick={() => setIsNewEntryPopoverOpen((prevValue) => !prevValue)}
                   >
                     {i18n.translate(
                       'xpack.observabilityAiAssistantManagement.knowledgeBaseTab.newEntryButtonLabel',
@@ -278,8 +285,8 @@ export function KnowledgeBaseTab() {
                       icon="document"
                       data-test-subj="knowledgeBaseSingleEntryContextMenuItem"
                       onClick={() => {
-                        setNewEntryPopoverOpen(false);
-                        setFlyoutOpenType('singleEntry');
+                        setIsNewEntryPopoverOpen(false);
+                        setNewEntryFlyoutType('singleEntry');
                       }}
                       size="s"
                     >
@@ -293,8 +300,8 @@ export function KnowledgeBaseTab() {
                       icon="documents"
                       data-test-subj="knowledgeBaseBulkImportContextMenuItem"
                       onClick={() => {
-                        setNewEntryPopoverOpen(false);
-                        setFlyoutOpenType('bulkImport');
+                        setIsNewEntryPopoverOpen(false);
+                        setNewEntryFlyoutType('bulkImport');
                       }}
                     >
                       {i18n.translate(
@@ -317,7 +324,7 @@ export function KnowledgeBaseTab() {
             loading={isLoading}
             sorting={{
               sort: {
-                field: sortBy === 'doc_id' ? 'categoryName' : sortBy,
+                field: sortBy,
                 direction: sortDirection,
               },
             }}
@@ -329,12 +336,18 @@ export function KnowledgeBaseTab() {
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {flyoutOpenType === 'singleEntry' ? (
-        <KnowledgeBaseEditManualEntryFlyout onClose={() => setFlyoutOpenType(undefined)} />
+      {isEditUserInstructionFlyoutOpen ? (
+        <KnowledgeBaseEditUserInstructionFlyout
+          onClose={() => setIsEditUserInstructionFlyoutOpen(false)}
+        />
       ) : null}
 
-      {flyoutOpenType === 'bulkImport' ? (
-        <KnowledgeBaseBulkImportFlyout onClose={() => setFlyoutOpenType(undefined)} />
+      {newEntryFlyoutType === 'singleEntry' ? (
+        <KnowledgeBaseEditManualEntryFlyout onClose={() => setNewEntryFlyoutType(undefined)} />
+      ) : null}
+
+      {newEntryFlyoutType === 'bulkImport' ? (
+        <KnowledgeBaseBulkImportFlyout onClose={() => setNewEntryFlyoutType(undefined)} />
       ) : null}
 
       {selectedCategory ? (

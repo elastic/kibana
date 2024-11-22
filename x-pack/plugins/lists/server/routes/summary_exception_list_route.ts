@@ -5,41 +5,34 @@
  * 2.0.
  */
 
-import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import {
+  ReadExceptionListSummaryRequestQuery,
+  ReadExceptionListSummaryResponse,
+} from '@kbn/securitysolution-exceptions-common/api';
 
 import type { ListsPluginRouter } from '../types';
-import {
-  SummaryExceptionListRequestQueryDecoded,
-  summaryExceptionListRequestQuery,
-  summaryExceptionListResponse,
-} from '../../common/api';
 
-import {
-  buildRouteValidation,
-  buildSiemResponse,
-  getErrorMessageExceptionList,
-  getExceptionListClient,
-} from './utils';
+import { buildSiemResponse, getErrorMessageExceptionList, getExceptionListClient } from './utils';
 
 export const summaryExceptionListRoute = (router: ListsPluginRouter): void => {
   router.versioned
     .get({
       access: 'public',
-      options: {
-        tags: ['access:lists-summary'],
-      },
       path: `${EXCEPTION_LIST_URL}/summary`,
+      security: {
+        authz: {
+          requiredPrivileges: ['lists-summary'],
+        },
+      },
     })
     .addVersion(
       {
         validate: {
           request: {
-            query: buildRouteValidation<
-              typeof summaryExceptionListRequestQuery,
-              SummaryExceptionListRequestQueryDecoded
-            >(summaryExceptionListRequestQuery),
+            query: buildRouteValidationWithZod(ReadExceptionListSummaryRequestQuery),
           },
         },
         version: '2023-10-31',
@@ -49,32 +42,28 @@ export const summaryExceptionListRoute = (router: ListsPluginRouter): void => {
         try {
           const { id, list_id: listId, namespace_type: namespaceType, filter } = request.query;
           const exceptionLists = await getExceptionListClient(context);
-          if (id != null || listId != null) {
-            const exceptionListSummary = await exceptionLists.getExceptionListSummary({
-              filter,
-              id,
-              listId,
-              namespaceType,
-            });
-            if (exceptionListSummary == null) {
-              return siemResponse.error({
-                body: getErrorMessageExceptionList({ id, listId }),
-                statusCode: 404,
-              });
-            } else {
-              const [validated, errors] = validate(
-                exceptionListSummary,
-                summaryExceptionListResponse
-              );
-              if (errors != null) {
-                return response.ok({ body: exceptionListSummary });
-              } else {
-                return response.ok({ body: validated ?? {} });
-              }
-            }
-          } else {
+
+          if (id == null && listId == null) {
             return siemResponse.error({ body: 'id or list_id required', statusCode: 400 });
           }
+
+          const exceptionListSummary = await exceptionLists.getExceptionListSummary({
+            filter,
+            id,
+            listId,
+            namespaceType,
+          });
+
+          if (exceptionListSummary == null) {
+            return siemResponse.error({
+              body: getErrorMessageExceptionList({ id, listId }),
+              statusCode: 404,
+            });
+          }
+
+          return response.ok({
+            body: ReadExceptionListSummaryResponse.parse(exceptionListSummary),
+          });
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

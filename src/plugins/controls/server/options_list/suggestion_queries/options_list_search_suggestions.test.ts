@@ -1,21 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { FieldSpec } from '@kbn/data-views-plugin/common';
 
 import { OptionsListRequestBody } from '../../../common/options_list/types';
-import { getExactMatchAggregationBuilder } from './options_list_exact_match';
+import * as ExactMatch from './options_list_exact_match';
 import { getSearchSuggestionsAggregationBuilder } from './options_list_search_suggestions';
-
-jest.mock('./options_list_exact_match', () => ({
-  getExactMatchAggregationBuilder: jest.fn(),
-}));
 
 describe('options list type-specific search queries', () => {
   let rawSearchResponseMock: SearchResponse = {} as SearchResponse;
@@ -41,6 +38,7 @@ describe('options list type-specific search queries', () => {
 
   describe('suggestion aggregation', () => {
     test('for unsupported field types, return exact match search instead', () => {
+      const exactMatchSpy = jest.spyOn(ExactMatch, 'getExactMatchAggregationBuilder');
       const optionsListRequestBodyMock: OptionsListRequestBody = {
         size: 10,
         fieldName: 'success',
@@ -49,7 +47,7 @@ describe('options list type-specific search queries', () => {
         fieldSpec: { type: 'boolean' } as unknown as FieldSpec,
       };
       getSearchSuggestionsAggregationBuilder(optionsListRequestBodyMock);
-      expect(getExactMatchAggregationBuilder).toBeCalled();
+      expect(exactMatchSpy).toBeCalled();
     });
 
     describe('string (keyword, text+keyword, or nested) field', () => {
@@ -459,6 +457,25 @@ describe('options list type-specific search queries', () => {
         `);
       });
     });
+
+    describe('numeric field', () => {
+      test('handles an invalid search', () => {
+        const optionsListRequestBodyMock: OptionsListRequestBody = {
+          size: 10,
+          fieldName: 'bytes',
+          allowExpensiveQueries: true,
+          sort: { by: '_key', direction: 'asc' },
+          searchString: '123a',
+          fieldSpec: { type: 'number' } as unknown as FieldSpec,
+        };
+        const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
+          optionsListRequestBodyMock
+        );
+        expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock)).toEqual({});
+      });
+
+      // for tests related to searching numeric fields, refer to './options_list_exact_match.test.ts`
+    });
   });
 
   describe('suggestion parsing', () => {
@@ -667,5 +684,7 @@ describe('options list type-specific search queries', () => {
         ]
       `);
     });
+
+    // for tests related to parsing numeric suggestions, refer to './options_list_exact_match.test.ts`
   });
 });

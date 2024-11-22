@@ -25,6 +25,7 @@ export const DslRetentionTab = () => {
 
   return (
     <EuiBasicTable
+      rowHeader="name"
       items={dataStreamStatuses}
       loading={loading === true}
       columns={DSL_RETENTION_COLUMNS}

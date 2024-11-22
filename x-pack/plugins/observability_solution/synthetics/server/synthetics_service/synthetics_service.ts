@@ -25,7 +25,7 @@ import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_se
 import { installSyntheticsIndexTemplates } from '../routes/synthetics_service/install_index_templates';
 import { getAPIKeyForSyntheticsService } from './get_api_key';
 import { getEsHosts } from './get_es_hosts';
-import { ServiceConfig } from '../../common/config';
+import { ServiceConfig } from '../config';
 import { ServiceAPIClient, ServiceData } from './service_api_client';
 
 import {

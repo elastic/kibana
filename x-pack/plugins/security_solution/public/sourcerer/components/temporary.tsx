@@ -21,7 +21,7 @@ import * as i18n from './translations';
 import { Blockquote, ResetButton } from './helpers';
 import { UpdateDefaultDataViewModal } from './update_default_data_view_modal';
 import { TimelineId } from '../../../common/types';
-import { TimelineType } from '../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../common/api/timeline';
 import { timelineSelectors } from '../../timelines/store';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { timelineDefaults } from '../../timelines/store/defaults';
@@ -46,15 +46,15 @@ interface Props {
 const translations = {
   deprecated: {
     title: {
-      [TimelineType.default]: i18n.CALL_OUT_DEPRECATED_TITLE,
-      [TimelineType.template]: i18n.CALL_OUT_DEPRECATED_TEMPLATE_TITLE,
+      [TimelineTypeEnum.default]: i18n.CALL_OUT_DEPRECATED_TITLE,
+      [TimelineTypeEnum.template]: i18n.CALL_OUT_DEPRECATED_TEMPLATE_TITLE,
     },
     update: i18n.UPDATE_INDEX_PATTERNS,
   },
   missingPatterns: {
     title: {
-      [TimelineType.default]: i18n.CALL_OUT_MISSING_PATTERNS_TITLE,
-      [TimelineType.template]: i18n.CALL_OUT_MISSING_PATTERNS_TEMPLATE_TITLE,
+      [TimelineTypeEnum.default]: i18n.CALL_OUT_MISSING_PATTERNS_TITLE,
+      [TimelineTypeEnum.template]: i18n.CALL_OUT_MISSING_PATTERNS_TEMPLATE_TITLE,
     },
     update: i18n.ADD_INDEX_PATTERN,
   },

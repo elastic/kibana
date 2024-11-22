@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { METADATA_FIELDS } from '../../../shared/constants';
@@ -17,10 +18,10 @@ export const validationFromCommandTestSuite = (setup: helpers.Setup) => {
           const { expectErrors } = await setup();
 
           await expectErrors('f', [
-            "SyntaxError: mismatched input 'f' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}",
+            "SyntaxError: mismatched input 'f' expecting {'explain', 'from', 'row', 'show'}",
           ]);
           await expectErrors('from ', [
-            "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'",
+            "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}",
           ]);
         });
 
@@ -30,6 +31,8 @@ export const validationFromCommandTestSuite = (setup: helpers.Setup) => {
 
             await expectErrors('from index', []);
             await expectErrors('FROM index', []);
+            await expectErrors('FROM "index"', []);
+            await expectErrors('FROM """index"""', []);
             await expectErrors('FrOm index', []);
             await expectErrors('from index, other_index', []);
             await expectErrors('from index, other_index,.secret_index', []);
@@ -53,10 +56,6 @@ export const validationFromCommandTestSuite = (setup: helpers.Setup) => {
             await expectErrors('fRoM in*ex', []);
             await expectErrors('fRoM ind*ex', []);
             await expectErrors('fRoM *,-.*', []);
-            await expectErrors('fRoM remote-*:indexes*', []);
-            await expectErrors('fRoM remote-*:indexes', []);
-            await expectErrors('fRoM remote-ccs:indexes', []);
-            await expectErrors('fRoM a_index, remote-ccs:indexes', []);
             await expectErrors('fRoM .secret_index', []);
             await expectErrors('from my-index', []);
           });
@@ -65,10 +64,10 @@ export const validationFromCommandTestSuite = (setup: helpers.Setup) => {
             const { expectErrors } = await setup();
 
             await expectErrors('from index,', [
-              "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'",
+              "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}",
             ]);
             await expectErrors(`FROM index\n, \tother_index\t,\n \t `, [
-              "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'",
+              "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}",
             ]);
 
             await expectErrors(`from assignment = 1`, [
@@ -80,10 +79,7 @@ export const validationFromCommandTestSuite = (setup: helpers.Setup) => {
           test('errors on invalid syntax', async () => {
             const { expectErrors } = await setup();
 
-            await expectErrors('FROM `index`', [
-              "SyntaxError: token recognition error at: '`'",
-              "SyntaxError: token recognition error at: '`'",
-            ]);
+            await expectErrors('FROM `index`', ['Unknown index [`index`]']);
             await expectErrors(`from assignment = 1`, [
               "SyntaxError: mismatched input '=' expecting <EOF>",
               'Unknown index [assignment]',
@@ -110,7 +106,7 @@ export const validationFromCommandTestSuite = (setup: helpers.Setup) => {
             await expectErrors('from index metadata _id, \t\n _index\n ', []);
           });
 
-          test('errors when wrapped in brackets', async () => {
+          test('errors when wrapped in parentheses', async () => {
             const { expectErrors } = await setup();
 
             await expectErrors(`from index (metadata _id)`, [
@@ -118,75 +114,20 @@ export const validationFromCommandTestSuite = (setup: helpers.Setup) => {
             ]);
           });
 
-          for (const isWrapped of [true, false]) {
-            function setWrapping(option: string) {
-              return isWrapped ? `[${option}]` : option;
-            }
+          describe('validates fields', () => {
+            test('validates fields', async () => {
+              const { expectErrors } = await setup();
 
-            function addBracketsWarning() {
-              return isWrapped
-                ? ["Square brackets '[]' need to be removed from FROM METADATA declaration"]
-                : [];
-            }
-
-            describe(`wrapped = ${isWrapped}`, () => {
-              test('no errors on correct usage, waning on square brackets', async () => {
-                const { expectErrors } = await setup();
-
-                await expectErrors(`from index ${setWrapping('METADATA _id')}`, []);
-                await expectErrors(
-                  `from index ${setWrapping('METADATA _id')}`,
-                  [],
-                  addBracketsWarning()
-                );
-                await expectErrors(
-                  `from index ${setWrapping('metadata _id')}`,
-                  [],
-                  addBracketsWarning()
-                );
-                await expectErrors(
-                  `from index ${setWrapping('METADATA _id, _source')}`,
-                  [],
-                  addBracketsWarning()
-                );
-                await expectErrors(
-                  `from remote-ccs:indexes ${setWrapping('METADATA _id')}`,
-                  [],
-                  addBracketsWarning()
-                );
-                await expectErrors(
-                  `from *:indexes ${setWrapping('METADATA _id')}`,
-                  [],
-                  addBracketsWarning()
-                );
-              });
-
-              test('validates fields', async () => {
-                const { expectErrors } = await setup();
-
-                await expectErrors(
-                  `from index ${setWrapping('METADATA _id, _source2')}`,
-                  [
-                    `Metadata field [_source2] is not available. Available metadata fields are: [${METADATA_FIELDS.join(
-                      ', '
-                    )}]`,
-                  ],
-                  addBracketsWarning()
-                );
-                await expectErrors(
-                  `from index ${setWrapping('metadata _id, _source')} ${setWrapping(
-                    'METADATA _id2'
-                  )}`,
-                  [
-                    isWrapped
-                      ? "SyntaxError: mismatched input '[' expecting <EOF>"
-                      : "SyntaxError: mismatched input 'METADATA' expecting <EOF>",
-                  ],
-                  addBracketsWarning()
-                );
-              });
+              await expectErrors(`from index METADATA _id, _source2`, [
+                `Metadata field [_source2] is not available. Available metadata fields are: [${METADATA_FIELDS.join(
+                  ', '
+                )}]`,
+              ]);
+              await expectErrors(`from index metadata _id, _source METADATA _id2`, [
+                "SyntaxError: mismatched input 'METADATA' expecting <EOF>",
+              ]);
             });
-          }
+          });
         });
       });
     });

@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { appendToESQLQuery, appendWhereClauseToESQLQuery } from './append_to_query';
 
 describe('appendToQuery', () => {
@@ -165,6 +167,12 @@ AND \`dest\`=="Crete"`
         `from logstash-* | where CIDR_MATCH(ip1, "127.0.0.2/32", "127.0.0.3/32")
 and \`ip\`::string!="127.0.0.2/32"`
       );
+    });
+
+    it('returns undefined for multivalue fields', () => {
+      expect(
+        appendWhereClauseToESQLQuery('from logstash-*', 'dest', ['meow'], '+', 'string')
+      ).toBeUndefined();
     });
   });
 });

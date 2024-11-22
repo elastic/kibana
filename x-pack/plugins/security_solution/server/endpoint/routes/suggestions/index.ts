@@ -10,7 +10,7 @@ import { firstValueFrom } from 'rxjs';
 import type { RequestHandler, Logger } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
-import type { ConfigSchema } from '@kbn/unified-search-plugin/config';
+import type { ConfigSchema } from '@kbn/unified-search-plugin/server/config';
 import { termsEnumSuggestions } from '@kbn/unified-search-plugin/server/autocomplete/terms_enum';
 import {
   type EndpointSuggestionsBody,
@@ -21,7 +21,10 @@ import type {
   SecuritySolutionRequestHandlerContext,
 } from '../../../types';
 import type { EndpointAppContext } from '../../types';
-import { eventsIndexPattern, SUGGESTIONS_ROUTE } from '../../../../common/endpoint/constants';
+import {
+  eventsIndexPattern,
+  SUGGESTIONS_INTERNAL_ROUTE,
+} from '../../../../common/endpoint/constants';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import { errorHandler } from '../error_handler';
 
@@ -36,13 +39,18 @@ export function registerEndpointSuggestionsRoutes(
 ) {
   router.versioned
     .post({
-      access: 'public',
-      path: SUGGESTIONS_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      access: 'internal',
+      path: SUGGESTIONS_INTERNAL_ROUTE,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {
-        version: '2023-10-31',
+        version: '1',
         validate: {
           request: EndpointSuggestionsSchema,
         },

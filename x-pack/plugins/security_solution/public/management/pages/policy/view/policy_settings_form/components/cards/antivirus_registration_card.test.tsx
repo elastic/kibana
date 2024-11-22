@@ -93,13 +93,13 @@ describe('Policy Form Antivirus Registration Card', () => {
     );
   });
 
-  it('should be able to enable the option', () => {
+  it('should be able to enable the option', async () => {
     const expectedUpdate = cloneDeep(formProps.policy);
     expectedUpdate.windows.antivirus_registration.mode = AntivirusRegistrationModes.enabled;
 
     render();
 
-    userEvent.click(getRadioButton(antivirusTestSubj.enabledRadioButton));
+    await userEvent.click(getRadioButton(antivirusTestSubj.enabledRadioButton));
 
     expect(formProps.onChange).toHaveBeenCalledWith({
       isValid: true,
@@ -115,7 +115,7 @@ describe('Policy Form Antivirus Registration Card', () => {
 
     render();
 
-    userEvent.click(getRadioButton(antivirusTestSubj.disabledRadioButton));
+    await userEvent.click(getRadioButton(antivirusTestSubj.disabledRadioButton));
 
     expect(formProps.onChange).toHaveBeenCalledWith({
       isValid: true,
@@ -131,7 +131,7 @@ describe('Policy Form Antivirus Registration Card', () => {
 
     render();
 
-    userEvent.click(getRadioButton(antivirusTestSubj.syncRadioButton));
+    await userEvent.click(getRadioButton(antivirusTestSubj.syncRadioButton));
 
     expect(formProps.onChange).toHaveBeenCalledWith({
       isValid: true,

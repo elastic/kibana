@@ -23,20 +23,17 @@ export function systemRoutes(
   { router, mlLicense, routeGuard }: RouteInitialization,
   { getSpaces, cloud, resolveMlCapabilities }: SystemRouteDeps
 ) {
-  /**
-   * @apiGroup SystemRoutes
-   *
-   * @api {post} /internal/ml/_has_privileges Check privileges
-   * @apiName HasPrivileges
-   * @apiDescription Checks if the user has required privileges
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/_has_privileges`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetMlInfo'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetMlInfo'],
+        },
       },
+      summary: 'Check privileges',
+      description: 'Checks if the user has required privileges',
     })
     .addVersion(
       {
@@ -92,21 +89,23 @@ export function systemRoutes(
       })
     );
 
-  /**
-   * @apiGroup SystemRoutes
-   *
-   * @api {get} /internal/ml/ml_capabilities Check ML capabilities
-   * @apiName MlCapabilitiesResponse
-   * @apiDescription Checks ML capabilities
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/ml_capabilities`,
       access: 'internal',
+      summary: 'Check ML capabilities',
+      description: 'Checks ML capabilities',
     })
     .addVersion(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'This route is opted out from authorization because permissions will be checked by elasticsearch',
+          },
+        },
         validate: false,
       },
       routeGuard.basicLicenseAPIGuard(async ({ mlClient, request, response }) => {
@@ -135,20 +134,17 @@ export function systemRoutes(
       })
     );
 
-  /**
-   * @apiGroup SystemRoutes
-   *
-   * @api {get} /internal/ml/ml_node_count Get the amount of ML nodes
-   * @apiName MlNodeCount
-   * @apiDescription Returns the amount of ML nodes.
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/ml_node_count`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetMlInfo'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetMlInfo'],
+        },
       },
+      summary: 'Get the number of ML nodes',
+      description: 'Returns the number of ML nodes',
     })
     .addVersion(
       {
@@ -166,34 +162,45 @@ export function systemRoutes(
       })
     );
 
-  /**
-   * @apiGroup SystemRoutes
-   *
-   * @api {get} /internal/ml/info Get ML info
-   * @apiName MlInfo
-   * @apiDescription Returns defaults and limits used by machine learning.
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/info`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetMlInfo'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetMlInfo'],
+        },
       },
+      summary: 'Get ML info',
+      description: 'Returns defaults and limits used by machine learning',
     })
     .addVersion(
       {
         version: '1',
         validate: false,
       },
-      routeGuard.basicLicenseAPIGuard(async ({ mlClient, response }) => {
+      routeGuard.basicLicenseAPIGuard(async ({ mlClient, response, client }) => {
         try {
           const body = await mlClient.info();
           const cloudId = cloud?.cloudId;
           const isCloudTrial = cloud?.trialEndDate && Date.now() < cloud.trialEndDate.getTime();
 
+          let isMlAutoscalingEnabled = false;
+          try {
+            await client.asInternalUser.autoscaling.getAutoscalingPolicy({ name: 'ml' });
+            isMlAutoscalingEnabled = true;
+          } catch (e) {
+            // If doesn't exist, then keep the false
+          }
+
           return response.ok({
-            body: { ...body, cloudId, isCloudTrial },
+            body: {
+              ...body,
+              cloudId,
+              isCloudTrial,
+              cloudUrl: cloud.baseUrl,
+              isMlAutoscalingEnabled,
+            },
           });
         } catch (error) {
           return response.customError(wrapError(error));
@@ -201,21 +208,18 @@ export function systemRoutes(
       })
     );
 
-  /**
-   * @apiGroup SystemRoutes
-   *
-   * @apiDeprecated
-   *
-   * @api {post} /internal/ml/es_search ES Search wrapper
-   * @apiName MlEsSearch
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/es_search`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
+      summary: 'ES Search wrapper',
+      // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
+      deprecated: true,
     })
     .addVersion(
       {
@@ -238,19 +242,16 @@ export function systemRoutes(
       })
     );
 
-  /**
-   * @apiGroup SystemRoutes
-   *
-   * @api {post} /internal/ml/index_exists ES Field caps wrapper checks if index exists
-   * @apiName MlIndexExists
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/index_exists`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetFieldInfo'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetFieldInfo'],
+        },
       },
+      summary: 'ES Field caps wrapper checks if index exists',
     })
     .addVersion(
       {
@@ -286,19 +287,16 @@ export function systemRoutes(
       })
     );
 
-  /**
-   * @apiGroup SystemRoutes
-   *
-   * @api {post} /internal/ml/reindex_with_pipeline ES reindex wrapper to reindex with pipeline
-   * @apiName MlReindexWithPipeline
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/reindex_with_pipeline`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateTrainedModels'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateTrainedModels'],
+        },
       },
+      summary: 'ES reindex wrapper to reindex with pipeline',
     })
     .addVersion(
       {

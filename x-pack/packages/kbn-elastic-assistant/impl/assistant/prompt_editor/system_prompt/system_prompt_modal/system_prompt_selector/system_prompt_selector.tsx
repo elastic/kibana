@@ -87,6 +87,7 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
             ? undefined
             : systemPrompts.find((sp) => sp.name === systemPromptSelectorOption[0]?.label) ??
               systemPromptSelectorOption[0]?.label;
+
         onSystemPromptSelectionChange(newSystemPrompt);
       },
       [onSystemPromptSelectionChange, resetSettings, systemPrompts]
@@ -94,7 +95,8 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
 
     // Callback for when user types to create a new system prompt
     const onCreateOption = useCallback(
-      (searchValue, flattenedOptions = []) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (searchValue: any, flattenedOptions: any[] = []) => {
         if (!searchValue || !searchValue.trim().toLowerCase()) {
           return;
         }

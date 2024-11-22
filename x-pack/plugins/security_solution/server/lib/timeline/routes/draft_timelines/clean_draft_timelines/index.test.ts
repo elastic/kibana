@@ -6,7 +6,7 @@
  */
 
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import { TimelineType } from '../../../../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../../../../common/api/timeline';
 
 import {
   serverMock,
@@ -82,23 +82,17 @@ describe('clean draft timelines', () => {
     });
 
     const response = await server.inject(
-      cleanDraftTimelinesRequest(TimelineType.default),
+      cleanDraftTimelinesRequest(TimelineTypeEnum.default),
       requestContextMock.convertContext(context)
     );
-    const req = cleanDraftTimelinesRequest(TimelineType.default);
+    const req = cleanDraftTimelinesRequest(TimelineTypeEnum.default);
     expect(mockPersistTimeline).toHaveBeenCalled();
     expect(mockPersistTimeline.mock.calls[0][3]).toEqual({
       ...draftTimelineDefaults,
       timelineType: req.body.timelineType,
     });
     expect(response.status).toEqual(200);
-    expect(response.body).toEqual({
-      data: {
-        persistTimeline: {
-          timeline: createTimelineWithTimelineId,
-        },
-      },
-    });
+    expect(response.body).toEqual(createTimelineWithTimelineId);
   });
 
   test('should return clean existing draft if draft available ', async () => {
@@ -109,10 +103,10 @@ describe('clean draft timelines', () => {
     mockGetTimeline.mockResolvedValue({ ...mockGetDraftTimelineValue });
 
     const response = await server.inject(
-      cleanDraftTimelinesRequest(TimelineType.default),
+      cleanDraftTimelinesRequest(TimelineTypeEnum.default),
       requestContextMock.convertContext(context)
     );
-    const req = cleanDraftTimelinesRequest(TimelineType.default);
+    const req = cleanDraftTimelinesRequest(TimelineTypeEnum.default);
 
     expect(mockPersistTimeline).not.toHaveBeenCalled();
     expect(mockResetTimeline).toHaveBeenCalled();
@@ -121,12 +115,6 @@ describe('clean draft timelines', () => {
 
     expect(mockGetTimeline).toHaveBeenCalled();
     expect(response.status).toEqual(200);
-    expect(response.body).toEqual({
-      data: {
-        persistTimeline: {
-          timeline: mockGetDraftTimelineValue,
-        },
-      },
-    });
+    expect(response.body).toEqual(mockGetDraftTimelineValue);
   });
 });

@@ -1,9 +1,0 @@
-title: Elasticsearch asset type
-type: string
-enum:
-  - component_template
-  - ingest_pipeline
-  - index_template
-  - ilm_policy
-  - transform
-  - data_stream_ilm_policy

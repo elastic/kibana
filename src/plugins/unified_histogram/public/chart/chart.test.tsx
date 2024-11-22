@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { ReactElement } from 'react';
@@ -43,7 +44,7 @@ async function mountComponent({
   isPlainRecord,
   hasDashboardPermissions,
   isChartLoading,
-  hasHistogramSuggestionForESQL,
+  isTransformationalESQL,
 }: {
   customToggle?: ReactElement;
   noChart?: boolean;
@@ -56,7 +57,7 @@ async function mountComponent({
   isPlainRecord?: boolean;
   hasDashboardPermissions?: boolean;
   isChartLoading?: boolean;
-  hasHistogramSuggestionForESQL?: boolean;
+  isTransformationalESQL?: boolean;
 } = {}) {
   (searchSourceInstanceMock.fetch$ as jest.Mock).mockImplementation(
     jest.fn().mockReturnValue(of({ rawResponse: { hits: { total: noHits ? 0 : 2 } } }))
@@ -86,7 +87,9 @@ async function mountComponent({
 
   const requestParams = {
     query: isPlainRecord
-      ? { esql: 'from logs | limit 10' }
+      ? isTransformationalESQL
+        ? { esql: 'from logs | limit 10 | stats var0 = avg(bytes) by extension' }
+        : { esql: 'from logs | limit 10' }
       : {
           language: 'kuery',
           query: '',
@@ -107,7 +110,7 @@ async function mountComponent({
       breakdownField: undefined,
       columns: [],
       allSuggestions,
-      hasHistogramSuggestionForESQL,
+      isTransformationalESQL,
     })
   ).lensService;
 
@@ -210,12 +213,111 @@ describe('Chart', () => {
     expect(component.find('[data-test-subj="unifiedHistogramChart"]').exists()).toBeTruthy();
   });
 
-  test('render when is text based and not timebased', async () => {
-    const component = await mountComponent({ isPlainRecord: true, dataView: dataViewMock });
+  test('should render when is text based, transformational and non-time-based', async () => {
+    const component = await mountComponent({
+      isPlainRecord: true,
+      dataView: dataViewMock,
+      isTransformationalESQL: true,
+    });
     expect(
       component.find('[data-test-subj="unifiedHistogramToggleChartButton"]').exists()
     ).toBeTruthy();
     expect(component.find('[data-test-subj="unifiedHistogramChart"]').exists()).toBeTruthy();
+    expect(
+      component.find('[data-test-subj="unifiedHistogramEditFlyoutVisualization"]').exists()
+    ).toBeTruthy();
+    expect(
+      component.find('[data-test-subj="unifiedHistogramSaveVisualization"]').exists()
+    ).toBeTruthy();
+  });
+
+  test('should not render when is text based, non-transformational and non-time-based', async () => {
+    const component = await mountComponent({
+      isPlainRecord: true,
+      dataView: dataViewMock,
+      isTransformationalESQL: false,
+    });
+    expect(
+      component.find('[data-test-subj="unifiedHistogramToggleChartButton"]').exists()
+    ).toBeTruthy();
+    expect(component.find('[data-test-subj="unifiedHistogramChart"]').exists()).toBeFalsy();
+    expect(
+      component.find('[data-test-subj="unifiedHistogramEditFlyoutVisualization"]').exists()
+    ).toBeFalsy();
+    expect(
+      component.find('[data-test-subj="unifiedHistogramSaveVisualization"]').exists()
+    ).toBeFalsy();
+  });
+
+  test('should not render when is text based, non-transformational, non-time-based and suggestions are available', async () => {
+    const component = await mountComponent({
+      allSuggestions: allSuggestionsMock,
+      isPlainRecord: true,
+      dataView: dataViewMock,
+      isTransformationalESQL: false,
+    });
+    expect(
+      component.find('[data-test-subj="unifiedHistogramToggleChartButton"]').exists()
+    ).toBeTruthy();
+    expect(component.find('[data-test-subj="unifiedHistogramChart"]').exists()).toBeFalsy();
+    expect(
+      component.find('[data-test-subj="unifiedHistogramEditFlyoutVisualization"]').exists()
+    ).toBeFalsy();
+    expect(
+      component.find('[data-test-subj="unifiedHistogramSaveVisualization"]').exists()
+    ).toBeFalsy();
+  });
+
+  test('should render when is text based, non-transformational and time-based', async () => {
+    const component = await mountComponent({
+      isPlainRecord: true,
+      isTransformationalESQL: false,
+    });
+    expect(
+      component.find('[data-test-subj="unifiedHistogramToggleChartButton"]').exists()
+    ).toBeTruthy();
+    expect(component.find('[data-test-subj="unifiedHistogramChart"]').exists()).toBeTruthy();
+    expect(
+      component.find('[data-test-subj="unifiedHistogramEditFlyoutVisualization"]').exists()
+    ).toBeTruthy();
+    expect(
+      component.find('[data-test-subj="unifiedHistogramSaveVisualization"]').exists()
+    ).toBeTruthy();
+  });
+
+  test('should render when is text based, transformational and time-based', async () => {
+    const component = await mountComponent({
+      isPlainRecord: true,
+      isTransformationalESQL: true,
+    });
+    expect(
+      component.find('[data-test-subj="unifiedHistogramToggleChartButton"]').exists()
+    ).toBeTruthy();
+    expect(component.find('[data-test-subj="unifiedHistogramChart"]').exists()).toBeTruthy();
+    expect(
+      component.find('[data-test-subj="unifiedHistogramEditFlyoutVisualization"]').exists()
+    ).toBeTruthy();
+    expect(
+      component.find('[data-test-subj="unifiedHistogramSaveVisualization"]').exists()
+    ).toBeTruthy();
+  });
+
+  test('should not render when is text based, transformational and no suggestions available', async () => {
+    const component = await mountComponent({
+      allSuggestions: [],
+      isPlainRecord: true,
+      isTransformationalESQL: true,
+    });
+    expect(
+      component.find('[data-test-subj="unifiedHistogramToggleChartButton"]').exists()
+    ).toBeTruthy();
+    expect(component.find('[data-test-subj="unifiedHistogramChart"]').exists()).toBeFalsy();
+    expect(
+      component.find('[data-test-subj="unifiedHistogramEditFlyoutVisualization"]').exists()
+    ).toBeFalsy();
+    expect(
+      component.find('[data-test-subj="unifiedHistogramSaveVisualization"]').exists()
+    ).toBeFalsy();
   });
 
   test('render progress bar when text based and request is loading', async () => {
@@ -266,35 +368,17 @@ describe('Chart', () => {
     expect(component.find(BreakdownFieldSelector).exists()).toBeFalsy();
   });
 
-  it('should render the edit on the fly button when chart is visible and suggestions exist', async () => {
-    const component = await mountComponent({
-      allSuggestions: allSuggestionsMock,
-      isPlainRecord: true,
-    });
-    expect(
-      component.find('[data-test-subj="unifiedHistogramEditFlyoutVisualization"]').exists()
-    ).toBeTruthy();
-  });
-
-  it('should not render the edit on the fly button when chart is visible and suggestions dont exist', async () => {
+  it('should not render the save button when text-based and the dashboard save by value permissions are false', async () => {
     const component = await mountComponent({
       allSuggestions: [],
-      hasHistogramSuggestionForESQL: false,
+      isTransformationalESQL: false,
       isPlainRecord: true,
+      hasDashboardPermissions: false,
     });
-    expect(
-      component.find('[data-test-subj="unifiedHistogramEditFlyoutVisualization"]').exists()
-    ).toBeFalsy();
-  });
-
-  it('should render the save button when chart is visible and suggestions exist', async () => {
-    const component = await mountComponent({
-      allSuggestions: allSuggestionsMock,
-      isPlainRecord: true,
-    });
+    expect(component.find('[data-test-subj="unifiedHistogramChart"]').exists()).toBeTruthy();
     expect(
       component.find('[data-test-subj="unifiedHistogramSaveVisualization"]').exists()
-    ).toBeTruthy();
+    ).toBeFalsy();
   });
 
   it('should not render the save button when the dashboard save by value permissions are false', async () => {
@@ -302,6 +386,7 @@ describe('Chart', () => {
       allSuggestions: allSuggestionsMock,
       hasDashboardPermissions: false,
     });
+    expect(component.find('[data-test-subj="unifiedHistogramChart"]').exists()).toBeTruthy();
     expect(
       component.find('[data-test-subj="unifiedHistogramSaveVisualization"]').exists()
     ).toBeFalsy();

@@ -859,7 +859,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                 value={
                   transformSettingsNumFailureRetries ||
                   (transformSettingsNumFailureRetries !== undefined &&
-                    transformSettingsNumFailureRetries >= -1)
+                    Number(transformSettingsNumFailureRetries) >= -1)
                     ? transformSettingsNumFailureRetries.toString()
                     : ''
                 }

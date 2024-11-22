@@ -11,11 +11,11 @@ import type { DataViewCreateQuerySchema } from '@kbn/ml-data-view-utils/schemas/
 import { createDataViewFn } from '@kbn/ml-data-view-utils/actions/create';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
-import type { TransformIdParamSchema } from '../../../../common/api_schemas/common';
+import type { TransformIdParamSchema } from '../../api_schemas/common';
 import type {
   PutTransformsRequestSchema,
   PutTransformsResponseSchema,
-} from '../../../../common/api_schemas/transforms';
+} from '../../api_schemas/transforms';
 import { isLatestTransform } from '../../../../common/types/transform';
 
 import type { RouteDependencies } from '../../../types';

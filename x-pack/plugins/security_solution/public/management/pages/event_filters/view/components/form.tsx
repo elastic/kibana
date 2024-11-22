@@ -30,8 +30,12 @@ import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-t
 import {
   EVENT_FILTERS_OPERATORS,
   hasWrongOperatorWithWildcard,
+  hasPartialCodeSignatureEntry,
 } from '@kbn/securitysolution-list-utils';
-import { WildCardWithWrongOperatorCallout } from '@kbn/securitysolution-exception-list-components';
+import {
+  WildCardWithWrongOperatorCallout,
+  PartialCodeSignatureCallout,
+} from '@kbn/securitysolution-exception-list-components';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
@@ -41,6 +45,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use
 import { useGetUpdatedTags } from '../../../../hooks/artifacts';
 import {
   FILTER_PROCESS_DESCENDANTS_TAG,
+  PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY,
   PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY_TEXT,
 } from '../../../../../../common/endpoint/service/artifacts/constants';
 import {
@@ -169,6 +174,9 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     const [hasWildcardWithWrongOperator, setHasWildcardWithWrongOperator] = useState<boolean>(
       hasWrongOperatorWithWildcard([exception])
     );
+
+    const [hasPartialCodeSignatureWarning, setHasPartialCodeSignatureWarning] =
+      useState<boolean>(false);
 
     // This value has to be memoized to avoid infinite useEffect loop on useFetchIndex
     const indexNames = useMemo(() => [eventsIndexPattern], []);
@@ -545,15 +553,24 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         const hasDuplicates =
           (!hasFormChanged && arg.exceptionItems[0] === undefined) ||
           isEqual(arg.exceptionItems[0]?.entries, exception?.entries);
+
         if (hasDuplicates) {
           const addedFields = arg.exceptionItems[0]?.entries.map((e) => e.field) || [''];
+
+          if (isFilterProcessDescendantsFeatureEnabled && isFilterProcessDescendantsSelected) {
+            addedFields.push(PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY.field);
+          }
+
           setHasDuplicateFields(computeHasDuplicateFields(getAddedFieldsCounts(addedFields)));
           if (!hasFormChanged) setHasFormChanged(true);
           return;
+        } else {
+          setHasDuplicateFields(false);
         }
 
         // handle wildcard with wrong operator case
         setHasWildcardWithWrongOperator(hasWrongOperatorWithWildcard(arg.exceptionItems));
+        setHasPartialCodeSignatureWarning(hasPartialCodeSignatureEntry(arg.exceptionItems));
 
         const updatedItem: Partial<ArtifactFormComponentProps['item']> =
           arg.exceptionItems[0] !== undefined
@@ -566,7 +583,10 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
                 tags: exception?.tags ?? [],
                 meta: exception.meta,
               }
-            : exception;
+            : {
+                ...exception,
+                entries: [{ field: '', operator: 'included', type: 'match', value: '' }],
+              };
         const hasValidConditions =
           arg.exceptionItems[0] !== undefined
             ? !(arg.errorExists && !arg.exceptionItems[0]?.entries?.length)
@@ -576,7 +596,13 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         processChanged(updatedItem);
         if (!hasFormChanged) setHasFormChanged(true);
       },
-      [exception, hasFormChanged, processChanged]
+      [
+        exception,
+        hasFormChanged,
+        isFilterProcessDescendantsFeatureEnabled,
+        isFilterProcessDescendantsSelected,
+        processChanged,
+      ]
     );
     const exceptionBuilderComponentMemo = useMemo(
       () =>
@@ -707,6 +733,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         <EuiHorizontalRule />
         {criteriaSection}
         {hasWildcardWithWrongOperator && <WildCardWithWrongOperatorCallout />}
+        {hasPartialCodeSignatureWarning && <PartialCodeSignatureCallout />}
         {hasDuplicateFields && (
           <>
             <EuiSpacer size="xs" />

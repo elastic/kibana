@@ -11,9 +11,7 @@ import styled from 'styled-components';
 import type { Filter } from '@kbn/es-query';
 
 import type { FilterManager } from '@kbn/data-plugin/public';
-import { DataViewPicker } from '../../../../sourcerer/experimental/components/dataview_picker';
-import { isExperimentalSourcererEnabled } from '../../../../sourcerer/experimental/is_enabled';
-import { TimelineType } from '../../../../../common/api/timeline';
+import { type TimelineType, TimelineTypeEnum } from '../../../../../common/api/timeline';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import type { KqlMode } from '../../../store/model';
 import type { DispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
@@ -30,7 +28,6 @@ import {
   DATA_PROVIDER_HIDDEN_POPULATED,
   DATA_PROVIDER_VISIBLE,
 } from './translations';
-import { TIMELINE_TOUR_CONFIG_ANCHORS } from '../tour/step_config';
 
 interface Props {
   dataProviders: DataProvider[];
@@ -105,12 +102,6 @@ export const SearchOrFilter = React.memo<Props>(
       [isDataProviderEmpty, isDataProviderVisible]
     );
 
-    const dataviewPicker = isExperimentalSourcererEnabled() ? (
-      <DataViewPicker />
-    ) : (
-      <Sourcerer scope={SourcererScopeName.timeline} />
-    );
-
     return (
       <>
         <SearchOrFilterContainer>
@@ -120,8 +111,8 @@ export const SearchOrFilter = React.memo<Props>(
             alignItems="flexStart"
             responsive={false}
           >
-            <EuiFlexItem grow={false} id={TIMELINE_TOUR_CONFIG_ANCHORS.DATA_VIEW}>
-              {dataviewPicker}
+            <EuiFlexItem grow={false}>
+              <Sourcerer scope={SourcererScopeName.timeline} />
             </EuiFlexItem>
             <EuiFlexItem data-test-subj="timeline-search-or-filter-search-container" grow={1}>
               <QueryBarTimeline
@@ -147,11 +138,10 @@ export const SearchOrFilter = React.memo<Props>(
               DataProvider toggle is not needed in template timeline because
               it is always visible
               */
-              timelineType === TimelineType.default ? (
+              timelineType === TimelineTypeEnum.default ? (
                 <EuiFlexItem grow={false}>
                   <EuiToolTip content={dataProviderIconTooltipContent}>
                     <EuiButtonIcon
-                      id={TIMELINE_TOUR_CONFIG_ANCHORS.DATA_PROVIDER}
                       color={buttonColor}
                       isSelected={isDataProviderVisible}
                       iconType="timeline"

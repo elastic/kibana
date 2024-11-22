@@ -6,7 +6,7 @@
  */
 
 import { act, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 import React from 'react';
 import { TRUSTED_APPS_PATH } from '../../../../../common/constants';
 import type { AppContextTestRender } from '../../../../common/mock/endpoint';
@@ -22,6 +22,7 @@ jest.mock('../../../../common/components/user_privileges');
 const mockUserPrivileges = useUserPrivileges as jest.Mock;
 
 describe('When on the trusted applications page', () => {
+  let user: UserEvent;
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let history: AppContextTestRender['history'];
@@ -29,7 +30,17 @@ describe('When on the trusted applications page', () => {
   let apiMocks: ReturnType<typeof exceptionsListAllHttpMocks>;
   let mockedEndpointPrivileges: Partial<EndpointPrivileges>;
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   beforeEach(() => {
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     mockedContext = createAppRootMockRenderer();
     ({ history } = mockedContext);
     render = () => (renderResult = mockedContext.render(<TrustedAppsList />));
@@ -56,8 +67,9 @@ describe('When on the trusted applications page', () => {
     });
 
     apiMocks.responseProvider.exceptionsFind.mockClear();
-    userEvent.type(renderResult.getByTestId('searchField'), 'fooFooFoo');
-    userEvent.click(renderResult.getByTestId('searchButton'));
+    await user.click(renderResult.getByTestId('searchField'));
+    await user.paste('fooFooFoo');
+    await user.click(renderResult.getByTestId('searchButton'));
     await waitFor(() => {
       expect(apiMocks.responseProvider.exceptionsFind).toHaveBeenCalled();
     });
@@ -91,7 +103,7 @@ describe('When on the trusted applications page', () => {
         const actionsButton = await waitFor(
           () => renderResult.getAllByTestId('trustedAppsListPage-card-header-actions-button')[0]
         );
-        userEvent.click(actionsButton);
+        await user.click(actionsButton);
 
         expect(renderResult.getByTestId('trustedAppsListPage-card-cardEditAction')).toBeTruthy();
         expect(renderResult.getByTestId('trustedAppsListPage-card-cardDeleteAction')).toBeTruthy();

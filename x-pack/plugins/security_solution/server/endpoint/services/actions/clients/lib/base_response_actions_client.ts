@@ -13,8 +13,14 @@ import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/
 import type { CaseAttachments } from '@kbn/cases-plugin/public/types';
 import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { SimpleMemCache } from './simple_mem_cache';
-import { validateActionId } from '../../utils/validate_action_id';
+import {
+  ENDPOINT_RESPONSE_ACTION_SENT_EVENT,
+  ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT,
+  ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT,
+} from '../../../../../lib/telemetry/event_based/events';
+import { NotFoundError } from '../../../../errors';
+import { fetchActionRequestById } from '../../utils/fetch_action_request_by_id';
+import { SimpleMemCache } from '../../../../lib/simple_mem_cache';
 import {
   fetchActionResponses,
   fetchEndpointActionResponses,
@@ -65,16 +71,17 @@ import type {
   SuspendProcessActionOutputContent,
   UploadedFileInfo,
   WithAllKeys,
-  KillProcessRequestBody,
-  SuspendProcessRequestBody,
 } from '../../../../../../common/endpoint/types';
 import type {
   ExecuteActionRequestBody,
   GetProcessesRequestBody,
   IsolationRouteRequestBody,
+  KillProcessRequestBody,
   ResponseActionGetFileRequestBody,
   ResponseActionsRequestBody,
   ScanActionRequestBody,
+  SuspendProcessRequestBody,
+  UnisolationRouteRequestBody,
   UploadActionApiRequestBody,
 } from '../../../../../../common/api/endpoint';
 import { stringify } from '../../../../utils/stringify';
@@ -329,6 +336,36 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   }
 
   /**
+   * Fetches the Action request ES document for a given action id
+   * @param actionId
+   * @protected
+   */
+  protected async fetchActionRequestEsDoc<
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+    TMeta extends {} = {}
+  >(actionId: string): Promise<LogsEndpointAction<TParameters, TOutputContent, TMeta>> {
+    const cacheKey = `fetchActionRequestEsDoc-${actionId}`;
+    const cachedResponse =
+      this.cache.get<LogsEndpointAction<TParameters, TOutputContent, TMeta>>(cacheKey);
+
+    if (cachedResponse) {
+      this.log.debug(
+        `fetchActionRequestEsDoc(): returning cached response for action id ${actionId}`
+      );
+      return cachedResponse;
+    }
+
+    return fetchActionRequestById<TParameters, TOutputContent, TMeta>(
+      this.options.esClient,
+      actionId
+    ).then((actionRequestDoc) => {
+      this.cache.set(cacheKey, actionRequestDoc);
+      return actionRequestDoc;
+    });
+  }
+
+  /**
    * Fetches the Response Action ES response documents for a given action id
    * @param actionId
    * @param agentIds
@@ -450,7 +487,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
           comment: actionRequest.comment ?? undefined,
           ...(actionRequest.alert_ids ? { alert_id: actionRequest.alert_ids } : {}),
           ...(actionRequest.hosts ? { hosts: actionRequest.hosts } : {}),
-          parameters: actionRequest.parameters as EndpointActionDataParameterTypes,
+          parameters: actionRequest.parameters as TParameters,
         },
       },
       user: {
@@ -481,8 +518,12 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
         );
       }
 
+      this.sendActionCreationTelemetry(doc);
+
       return doc;
     } catch (err) {
+      this.sendActionCreationErrorTelemetry(actionRequest.command, err);
+
       if (!(err instanceof ResponseActionsClientError)) {
         throw new ResponseActionsClientError(
           `Failed to create action request document: ${err.message}`,
@@ -540,6 +581,10 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   >(
     options: ResponseActionsClientWriteActionResponseToEndpointIndexOptions<TOutputContent>
   ): Promise<LogsEndpointActionResponse<TOutputContent>> {
+    // FIXME:PT need to ensure we use a index below that has the proper `namespace` when agent type is Endpoint
+    //        Background: Endpoint responses require that the document be written to an index that has the
+    //        correct `namespace` as defined by the Integration/Agent policy and that logic is not currently implemented.
+
     const doc = this.buildActionResponseEsDoc(options);
 
     this.log.debug(() => `Writing response action response:\n${stringify(doc)}`);
@@ -553,7 +598,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       .catch((err) => {
         throw new ResponseActionsClientError(
           `Failed to create action response document: ${err.message}`,
-          err.statusCode ?? 500,
+          500,
           err
         );
       });
@@ -595,8 +640,15 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       (comment ? `: ${comment}` : '')
     );
   }
+
   protected async ensureValidActionId(actionId: string): Promise<void> {
-    return validateActionId(this.options.esClient, actionId, this.agentType);
+    const actionRequest = await this.fetchActionRequestEsDoc(actionId);
+
+    if (actionRequest.EndpointActions.input_type !== this.agentType) {
+      throw new NotFoundError(
+        `Action id [${actionId}] with agent type of [${this.agentType}] not found`
+      );
+    }
   }
 
   protected fetchAllPendingActions(): AsyncIterable<ResponseActionsClientPendingAction[]> {
@@ -670,6 +722,58 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     });
   }
 
+  protected sendActionCreationTelemetry(actionRequest: LogsEndpointAction): void {
+    if (!this.options.endpointService.experimentalFeatures.responseActionsTelemetryEnabled) {
+      return;
+    }
+    this.options.endpointService
+      .getTelemetryService()
+      .reportEvent(ENDPOINT_RESPONSE_ACTION_SENT_EVENT.eventType, {
+        responseActions: {
+          actionId: actionRequest.EndpointActions.action_id,
+          agentType: this.agentType,
+          command: actionRequest.EndpointActions.data.command,
+          isAutomated: this.options.isAutomated ?? false,
+        },
+      });
+  }
+
+  protected sendActionCreationErrorTelemetry(
+    command: ResponseActionsApiCommandNames,
+    error: Error
+  ): void {
+    if (!this.options.endpointService.experimentalFeatures.responseActionsTelemetryEnabled) {
+      return;
+    }
+    this.options.endpointService
+      .getTelemetryService()
+      .reportEvent(ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT.eventType, {
+        responseActions: {
+          agentType: this.agentType,
+          command,
+          error: error.message,
+        },
+      });
+  }
+
+  protected sendActionResponseTelemetry(responseList: LogsEndpointActionResponse[]): void {
+    if (!this.options.endpointService.experimentalFeatures.responseActionsTelemetryEnabled) {
+      return;
+    }
+    for (const response of responseList) {
+      this.options.endpointService
+        .getTelemetryService()
+        .reportEvent(ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT.eventType, {
+          responseActions: {
+            actionId: response.EndpointActions.action_id,
+            agentType: this.agentType,
+            actionStatus: response.error ? 'failed' : 'successful',
+            command: response.EndpointActions.data.command,
+          },
+        });
+    }
+  }
+
   public async isolate(
     actionRequest: IsolationRouteRequestBody,
     options?: CommonResponseActionMethodOptions
@@ -678,7 +782,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   }
 
   public async release(
-    actionRequest: IsolationRouteRequestBody,
+    actionRequest: UnisolationRouteRequestBody,
     options?: CommonResponseActionMethodOptions
   ): Promise<ActionDetails> {
     throw new ResponseActionsNotSupportedError('unisolate');

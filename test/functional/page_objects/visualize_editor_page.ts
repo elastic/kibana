@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -63,10 +64,12 @@ export class VisualizeEditorPageObject extends FtrService {
     await this.visChart.waitForVisualizationRenderingStabilized();
   }
 
-  public async clickGo(isNewChartLibrary = false) {
-    if ((await this.visChart.isNewChartsLibraryEnabled()) || isNewChartLibrary) {
+  public async clickGo(isLegacyChartLib = false) {
+    if ((await this.visChart.isNewChartsLibraryEnabled()) || !isLegacyChartLib) {
       await this.elasticChart.setNewChartUiDebugFlag();
     }
+
+    await this.common.sleep(500); // wait for the visualization to render
 
     const prevRenderingCount = await this.visChart.getVisualizationRenderingCount();
     this.log.debug(`Before Rendering count ${prevRenderingCount}`);
@@ -278,7 +281,7 @@ export class VisualizeEditorPageObject extends FtrService {
 
   public async setCustomLabel(label: string, index: number | string = 1) {
     const customLabel = await this.testSubjects.find(`visEditorStringInput${index}customLabel`);
-    customLabel.type(label);
+    await customLabel.type(label);
   }
 
   public async selectYAxisAggregation(agg: string, field: string, label: string, index = 1) {

@@ -23,7 +23,7 @@ import {
 import { AddLayerFunction, DragDropOperation, Visualization } from '../../../types';
 import { LayerPanel } from './layer_panel';
 import { generateId } from '../../../id_generator';
-import { ConfigPanelWrapperProps } from './types';
+import { ConfigPanelWrapperProps, LayerPanelProps } from './types';
 import { useFocusUpdate } from './use_focus_update';
 import {
   setLayerDefaultDimension,
@@ -245,10 +245,9 @@ export function LayerPanels(
     setNextFocusedLayerId(layerId);
   };
 
-  const registerLibraryAnnotationGroupFunction = useCallback(
-    (groupInfo) => dispatchLens(registerLibraryAnnotationGroup(groupInfo)),
-    [dispatchLens]
-  );
+  const registerLibraryAnnotationGroupFunction = useCallback<
+    LayerPanelProps['registerLibraryAnnotationGroup']
+  >((groupInfo) => dispatchLens(registerLibraryAnnotationGroup(groupInfo)), [dispatchLens]);
 
   const hideAddLayerButton = query && isOfAggregateQueryType(query);
 

@@ -7,7 +7,7 @@
 
 import { HttpSetup } from '@kbn/core-http-browser';
 
-import { deleteKnowledgeBase, getKnowledgeBaseStatus, postKnowledgeBase } from './api';
+import { getKnowledgeBaseIndices, getKnowledgeBaseStatus, postKnowledgeBase } from './api';
 
 jest.mock('@kbn/core-http-browser');
 
@@ -18,6 +18,7 @@ const mockHttp = {
 describe('API tests', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (mockHttp.fetch as jest.Mock).mockImplementation(() => Promise.resolve({}));
   });
 
   const knowledgeBaseArgs = {
@@ -68,18 +69,18 @@ describe('API tests', () => {
         throw new Error(error);
       });
 
-      await expect(postKnowledgeBase(knowledgeBaseArgs)).resolves.toThrowError('simulated error');
+      await expect(postKnowledgeBase(knowledgeBaseArgs)).rejects.toThrowError('simulated error');
     });
   });
 
-  describe('deleteKnowledgeBase', () => {
+  describe('getKnowledgeBaseIndices', () => {
     it('calls the knowledge base API when correct resource path', async () => {
-      await deleteKnowledgeBase(knowledgeBaseArgs);
+      await getKnowledgeBaseIndices({ http: mockHttp });
 
       expect(mockHttp.fetch).toHaveBeenCalledWith(
-        '/internal/elastic_assistant/knowledge_base/a-resource',
+        '/internal/elastic_assistant/knowledge_base/_indices',
         {
-          method: 'DELETE',
+          method: 'GET',
           signal: undefined,
           version: '1',
         }
@@ -91,7 +92,9 @@ describe('API tests', () => {
         throw new Error(error);
       });
 
-      await expect(deleteKnowledgeBase(knowledgeBaseArgs)).resolves.toThrowError('simulated error');
+      await expect(getKnowledgeBaseIndices({ http: mockHttp })).resolves.toThrowError(
+        'simulated error'
+      );
     });
   });
 });

@@ -14,13 +14,6 @@ export const SETTINGS = i18n.translate(
   }
 );
 
-export const SETTINGS_TOOLTIP = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.settingsTooltip',
-  {
-    defaultMessage: 'Settings',
-  }
-);
-
 export const SECURITY_AI_SETTINGS = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.securityAiSettingsTitle',
   {
@@ -81,13 +74,6 @@ export const EVALUATION_MENU_ITEM = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.settingsEvaluationMenuItemTitle',
   {
     defaultMessage: 'Evaluation',
-  }
-);
-
-export const ADD_SYSTEM_PROMPT_MODAL_TITLE = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.modalTitle',
-  {
-    defaultMessage: 'System Prompts',
   }
 );
 

@@ -10,8 +10,9 @@ import { isEmpty } from 'lodash/fp';
 import moment from 'moment';
 import { timeline as timelineLib, pinnedEvent as pinnedEventLib } from '../../../saved_object';
 import type { FrameworkRequest } from '../../../../framework';
-import type { ResponseTimeline, SavedTimeline, Note } from '../../../../../../common/api/timeline';
+import type { SavedTimeline, Note } from '../../../../../../common/api/timeline';
 import { persistNotes } from '../../../saved_object/notes/persist_notes';
+import type { InternalTimelineResponse } from '../../../saved_object/timelines';
 
 interface CreateTimelineProps {
   frameworkRequest: FrameworkRequest;
@@ -21,7 +22,7 @@ interface CreateTimelineProps {
   overrideNotesOwner?: boolean;
   pinnedEventIds?: string[] | null;
   notes?: Note[];
-  existingNoteIds?: string[];
+  existingNoteIds?: string[] | null;
   isImmutable?: boolean;
 }
 
@@ -40,7 +41,7 @@ export const createTimelines = async ({
   existingNoteIds = [],
   isImmutable,
   overrideNotesOwner = true,
-}: CreateTimelineProps): Promise<ResponseTimeline> => {
+}: CreateTimelineProps): Promise<InternalTimelineResponse> => {
   const timerangeStart = isImmutable
     ? moment().subtract(24, 'hours').toISOString()
     : timeline.dateRange?.start;

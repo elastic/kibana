@@ -45,7 +45,12 @@ export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
     const { setConnector } = useActions();
     const rowCss = useRowCss();
     return (
-      <>
+      <EuiFlexGroup
+        alignItems="stretch"
+        direction="column"
+        gutterSize="s"
+        data-test-subj="connectorSelector"
+      >
         {connectors.map((connector) => (
           <EuiFlexItem key={connector.id}>
             <EuiPanel
@@ -55,6 +60,7 @@ export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
               hasBorder
               paddingSize="l"
               css={rowCss}
+              data-test-subj={`connectorSelector-${connector.id}`}
             >
               <EuiFlexGroup direction="row" alignItems="center" justifyContent="spaceBetween">
                 <EuiFlexItem>
@@ -63,6 +69,9 @@ export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
                     id={connector.id}
                     checked={selectedConnectorId === connector.id}
                     onChange={noop}
+                    data-test-subj={`connectorSelectorRadio-${connector.id}${
+                      selectedConnectorId === connector.id ? '-selected' : ''
+                    }`}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -74,7 +83,7 @@ export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
             </EuiPanel>
           </EuiFlexItem>
         ))}
-      </>
+      </EuiFlexGroup>
     );
   }
 );

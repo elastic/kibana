@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import classNames from 'classnames';
@@ -105,33 +106,31 @@ export const LinksEditorSingleLink = ({
           <LinkLabel />
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="none" responsive={false} className="links_hoverActions">
-            <EuiFlexItem>
-              <EuiToolTip content={LinksStrings.editor.getEditLinkTitle()}>
-                <EuiButtonIcon
-                  size="xs"
-                  iconType="pencil"
-                  onClick={editLink}
-                  aria-label={LinksStrings.editor.getEditLinkTitle(link.title)}
-                  data-test-subj="panelEditorLink--editBtn"
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiToolTip content={LinksStrings.editor.getDeleteLinkTitle()}>
-                <EuiButtonIcon
-                  size="xs"
-                  iconType="trash"
-                  aria-label={LinksStrings.editor.getDeleteLinkTitle(link.title)}
-                  color="danger"
-                  onClick={deleteLink}
-                  data-test-subj="panelEditorLink--deleteBtn"
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+        <EuiFlexGroup gutterSize="none" responsive={false} className="links_hoverActions">
+          <EuiFlexItem>
+            <EuiToolTip content={LinksStrings.editor.getEditLinkTitle()}>
+              <EuiButtonIcon
+                size="xs"
+                iconType="pencil"
+                onClick={editLink}
+                aria-label={LinksStrings.editor.getEditLinkTitle(link.title)}
+                data-test-subj="panelEditorLink--editBtn"
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiToolTip content={LinksStrings.editor.getDeleteLinkTitle()}>
+              <EuiButtonIcon
+                size="xs"
+                iconType="trash"
+                aria-label={LinksStrings.editor.getDeleteLinkTitle(link.title)}
+                color="danger"
+                onClick={deleteLink}
+                data-test-subj="panelEditorLink--deleteBtn"
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexGroup>
     </EuiPanel>
   );

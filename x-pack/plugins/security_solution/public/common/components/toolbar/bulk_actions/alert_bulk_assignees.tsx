@@ -12,9 +12,10 @@ import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 
 import type { SetAlertAssigneesFunc } from './use_set_alert_assignees';
+import type { AssigneesApplyPanelProps } from '../../assignees/assignees_apply_panel';
 import { AssigneesApplyPanel } from '../../assignees/assignees_apply_panel';
 
-interface BulkAlertAssigneesPanelComponentProps {
+export interface BulkAlertAssigneesPanelComponentProps {
   alertItems: TimelineItem[];
   setIsLoading: (isLoading: boolean) => void;
   refresh?: () => void;
@@ -47,7 +48,7 @@ const BulkAlertAssigneesPanelComponent: React.FC<BulkAlertAssigneesPanelComponen
     if (clearSelection) clearSelection();
   }, [clearSelection, refresh]);
 
-  const handleApplyAssignees = useCallback(
+  const handleApplyAssignees = useCallback<AssigneesApplyPanelProps['onApply']>(
     async (assignees) => {
       closePopoverMenu();
       if (onSubmit) {

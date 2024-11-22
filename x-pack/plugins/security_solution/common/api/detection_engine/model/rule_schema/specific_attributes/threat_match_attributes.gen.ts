@@ -14,12 +14,12 @@
  *   version: not applicable
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { NonEmptyString } from '../../../../model/primitives.gen';
 
 /**
- * Query to execute
+ * Query to run
  */
 export type ThreatQuery = z.infer<typeof ThreatQuery>;
 export const ThreatQuery = z.string();

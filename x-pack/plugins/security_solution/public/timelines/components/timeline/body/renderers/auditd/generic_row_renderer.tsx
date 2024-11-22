@@ -10,7 +10,7 @@ import { get } from 'lodash/fp';
 import React from 'react';
 
 import type { RowRenderer } from '../../../../../../../common/types/timeline';
-import { RowRendererId } from '../../../../../../../common/api/timeline';
+import { RowRendererIdEnum } from '../../../../../../../common/api/timeline';
 
 import { RowRendererContainer } from '../row_renderer';
 import { AuditdGenericDetails } from './generic_details';
@@ -24,7 +24,7 @@ export const createGenericAuditRowRenderer = ({
   actionName: string;
   text: string;
 }): RowRenderer => ({
-  id: RowRendererId.auditd,
+  id: RowRendererIdEnum.auditd,
   isInstance: (ecs) => {
     const module: string | null | undefined = get('event.module[0]', ecs);
     const action: string | null | undefined = get('event.action[0]', ecs);
@@ -57,7 +57,7 @@ export const createGenericFileRowRenderer = ({
   text: string;
   fileIcon?: IconType;
 }): RowRenderer => ({
-  id: RowRendererId.auditd_file,
+  id: RowRendererIdEnum.auditd_file,
   isInstance: (ecs) => {
     const module: string | null | undefined = get('event.module[0]', ecs);
     const action: string | null | undefined = get('event.action[0]', ecs);

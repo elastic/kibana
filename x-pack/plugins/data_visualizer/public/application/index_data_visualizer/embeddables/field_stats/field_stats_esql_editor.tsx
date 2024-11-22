@@ -5,29 +5,29 @@
  * 2.0.
  */
 import React, { useRef, useState, useCallback } from 'react';
-import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
+import { ESQLLangEditor } from '@kbn/esql/public';
 import { EuiFlexItem } from '@elastic/eui';
 import type { AggregateQuery } from '@kbn/es-query';
-
-const expandCodeEditor = (status: boolean) => {};
 
 interface FieldStatsESQLEditorProps {
   canEditTextBasedQuery?: boolean;
   query: AggregateQuery;
   setQuery: (query: AggregateQuery) => void;
-  onQuerySubmit: (query: AggregateQuery, abortController: AbortController) => Promise<void>;
+  onQuerySubmit: (query: AggregateQuery, abortController?: AbortController) => Promise<void>;
+  disableSubmitAction?: boolean;
 }
 export const FieldStatsESQLEditor = ({
   canEditTextBasedQuery = true,
   query,
   setQuery,
   onQuerySubmit,
+  disableSubmitAction = false,
 }: FieldStatsESQLEditorProps) => {
   const prevQuery = useRef<AggregateQuery>(query);
   const [isVisualizationLoading, setIsVisualizationLoading] = useState(false);
 
   const onTextLangQuerySubmit = useCallback(
-    async (q, abortController) => {
+    async (q?: AggregateQuery, abortController?: AbortController) => {
       if (q && onQuerySubmit) {
         setIsVisualizationLoading(true);
         await onQuerySubmit(q, abortController);
@@ -41,20 +41,17 @@ export const FieldStatsESQLEditor = ({
 
   return (
     <EuiFlexItem grow={false} data-test-subj="InlineEditingESQLEditor">
-      <TextBasedLangEditor
+      <ESQLLangEditor
         query={query}
         onTextLangQueryChange={(q) => {
           setQuery(q);
           prevQuery.current = q;
         }}
-        expandCodeEditor={expandCodeEditor}
-        isCodeEditorExpanded
-        hideMinimizeButton
         editorIsInline
         hideRunQueryText
         onTextLangQuerySubmit={onTextLangQuerySubmit}
-        isDisabled={false}
-        allowQueryCancellation
+        allowQueryCancellation={false}
+        disableSubmitAction={disableSubmitAction}
         isLoading={isVisualizationLoading}
       />
     </EuiFlexItem>

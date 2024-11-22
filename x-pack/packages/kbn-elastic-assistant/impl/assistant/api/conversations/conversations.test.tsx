@@ -36,11 +36,11 @@ describe('conversations api', () => {
       await waitForNextUpdate();
 
       expect(deleteProps.http.fetch).toHaveBeenCalledWith(
-        '/internal/elastic_assistant/current_user/conversations/test',
+        '/api/security_ai_assistant/current_user/conversations/test',
         {
           method: 'DELETE',
           signal: undefined,
-          version: '1',
+          version: '2023-10-31',
         }
       );
       expect(toasts.addError).not.toHaveBeenCalled();
@@ -62,11 +62,11 @@ describe('conversations api', () => {
       await waitForNextUpdate();
 
       expect(getProps.http.fetch).toHaveBeenCalledWith(
-        '/internal/elastic_assistant/current_user/conversations/test',
+        '/api/security_ai_assistant/current_user/conversations/test',
         {
           method: 'GET',
           signal: undefined,
-          version: '1',
+          version: '2023-10-31',
         }
       );
       expect(toasts.addError).not.toHaveBeenCalled();

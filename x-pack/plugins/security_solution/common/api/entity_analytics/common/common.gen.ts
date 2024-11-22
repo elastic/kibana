@@ -14,9 +14,23 @@
  *   version: 1
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { AssetCriticalityLevel } from '../asset_criticality/common.gen';
+
+export type EntityAnalyticsPrivileges = z.infer<typeof EntityAnalyticsPrivileges>;
+export const EntityAnalyticsPrivileges = z.object({
+  has_all_required: z.boolean(),
+  has_read_permissions: z.boolean().optional(),
+  has_write_permissions: z.boolean().optional(),
+  privileges: z.object({
+    elasticsearch: z.object({
+      cluster: z.object({}).catchall(z.boolean()).optional(),
+      index: z.object({}).catchall(z.object({}).catchall(z.boolean())).optional(),
+    }),
+    kibana: z.object({}).catchall(z.boolean()).optional(),
+  }),
+});
 
 export type EntityAfterKey = z.infer<typeof EntityAfterKey>;
 export const EntityAfterKey = z.object({}).catchall(z.string());

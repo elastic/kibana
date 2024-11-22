@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import {
   type EuiBasicTableColumn,
   EuiBadge,
@@ -21,7 +21,16 @@ import { type SignificantItem, SIGNIFICANT_ITEM_TYPE } from '@kbn/ml-agg-utils';
 import { getCategoryQuery } from '@kbn/aiops-log-pattern-analysis/get_category_query';
 import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
 import { useAppSelector } from '@kbn/aiops-log-rate-analysis/state';
-import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis';
+import {
+  commonColumns,
+  significantItemColumns,
+  type LogRateAnalysisResultsTableColumnName,
+} from '@kbn/aiops-log-rate-analysis/state/log_rate_analysis_table_slice';
+import {
+  getBaselineAndDeviationRates,
+  getLogRateChange,
+  LOG_RATE_ANALYSIS_TYPE,
+} from '@kbn/aiops-log-rate-analysis';
 import { getFailedTransactionsCorrelationImpactLabel } from './get_failed_transactions_correlation_impact_label';
 import { FieldStatsPopover } from '../field_stats_popover';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
@@ -31,69 +40,17 @@ import { useViewInDiscoverAction } from './use_view_in_discover_action';
 import { useViewInLogPatternAnalysisAction } from './use_view_in_log_pattern_analysis_action';
 import { useCopyToClipboardAction } from './use_copy_to_clipboard_action';
 import { MiniHistogram } from '../mini_histogram';
-import { getBaselineAndDeviationRates, getLogRateChange } from './get_baseline_and_deviation_rates';
 
 const TRUNCATE_TEXT_LINES = 3;
 const UNIQUE_COLUMN_WIDTH = '40px';
 const NOT_AVAILABLE = '--';
-
-export const commonColumns = {
-  ['Log rate']: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.logRateColumnTitle', {
-    defaultMessage: 'Log rate',
-  }),
-  ['Doc count']: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.docCountColumnTitle', {
-    defaultMessage: 'Doc count',
-  }),
-  ['p-value']: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.pValueColumnTitle', {
-    defaultMessage: 'p-value',
-  }),
-  ['Impact']: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.impactColumnTitle', {
-    defaultMessage: 'Impact',
-  }),
-  ['Baseline rate']: i18n.translate(
-    'xpack.aiops.logRateAnalysis.resultsTable.baselineRateColumnTitle',
-    {
-      defaultMessage: 'Baseline rate',
-    }
-  ),
-  ['Deviation rate']: i18n.translate(
-    'xpack.aiops.logRateAnalysis.resultsTable.deviationRateColumnTitle',
-    {
-      defaultMessage: 'Deviation rate',
-    }
-  ),
-  ['Log rate change']: i18n.translate(
-    'xpack.aiops.logRateAnalysis.resultsTable.logRateChangeColumnTitle',
-    {
-      defaultMessage: 'Log rate change',
-    }
-  ),
-  ['Actions']: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.actionsColumnTitle', {
-    defaultMessage: 'Actions',
-  }),
-};
-
-export const significantItemColumns = {
-  ['Field name']: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.fieldNameColumnTitle', {
-    defaultMessage: 'Field name',
-  }),
-  ['Field value']: i18n.translate(
-    'xpack.aiops.logRateAnalysis.resultsTable.fieldValueColumnTitle',
-    {
-      defaultMessage: 'Field value',
-    }
-  ),
-  ...commonColumns,
-} as const;
 
 export const LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE = {
   GROUPS: 'groups',
   SIGNIFICANT_ITEMS: 'significantItems',
 } as const;
 export type LogRateAnalysisResultsTableType =
-  typeof LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE[keyof typeof LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE];
-
-export type ColumnNames = keyof typeof significantItemColumns | 'unique';
+  (typeof LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE)[keyof typeof LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE];
 
 const logRateHelpMessage = i18n.translate(
   'xpack.aiops.logRateAnalysis.resultsTable.logRateColumnTooltip',
@@ -107,18 +64,6 @@ const groupLogRateHelpMessage = i18n.translate(
   {
     defaultMessage:
       'A visual representation of the impact of the group on the message rate difference.',
-  }
-);
-const groupImpactMessage = i18n.translate(
-  'xpack.aiops.logRateAnalysis.resultsTableGroups.impactLabelColumnTooltip',
-  {
-    defaultMessage: 'The level of impact of the group on the message rate difference',
-  }
-);
-const impactMessage = i18n.translate(
-  'xpack.aiops.logRateAnalysis.resultsTable.impactLabelColumnTooltip',
-  {
-    defaultMessage: 'The level of impact of the field on the message rate difference.',
   }
 );
 const logRateChangeMessage = i18n.translate(
@@ -141,6 +86,69 @@ const deviationRateMessage = i18n.translate(
   }
 );
 
+// EuiInMemoryTable stores column `name` in its own memory as an object and computed columns may be updating dynamically which means the reference is no longer ===.
+// Need to declare name react node outside to keep it static and maintain reference equality.
+const LogRateColumnName = (
+  <>
+    <FormattedMessage
+      id="xpack.aiops.logRateAnalysis.resultsTable.logRateChangeLabel"
+      defaultMessage="Log rate change"
+    />
+    &nbsp;
+    <EuiIconTip
+      size="s"
+      position="top"
+      color="subdued"
+      type="questionInCircle"
+      className="eui-alignTop"
+      content={logRateChangeMessage}
+    />
+  </>
+);
+
+const ImpactColumnName = (
+  <>
+    <FormattedMessage
+      id="xpack.aiops.logRateAnalysis.resultsTable.impactLabel"
+      defaultMessage="Impact"
+    />
+    &nbsp;
+    <EuiIconTip
+      size="s"
+      position="top"
+      color="subdued"
+      type="questionInCircle"
+      className="eui-alignTop"
+      content={i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.impactLabelColumnTooltip', {
+        defaultMessage: 'The level of impact of the field on the message rate difference.',
+      })}
+    />
+  </>
+);
+
+const GroupImpactColumnName = (
+  <>
+    <FormattedMessage
+      id="xpack.aiops.logRateAnalysis.resultsTable.impactLabel"
+      defaultMessage="Impact"
+    />
+    &nbsp;
+    <EuiIconTip
+      size="s"
+      position="top"
+      color="subdued"
+      type="questionInCircle"
+      className="eui-alignTop"
+      content={i18n.translate(
+        'xpack.aiops.logRateAnalysis.resultsTableGroups.impactLabelColumnTooltip',
+        {
+          defaultMessage: 'The level of impact of the group on the message rate difference',
+        }
+      )}
+    />
+  </>
+);
+
 export const useColumns = (
   tableType: LogRateAnalysisResultsTableType,
   skippedColumns: string[],
@@ -159,13 +167,14 @@ export const useColumns = (
   const { earliest, latest } = useAppSelector((s) => s.logRateAnalysis);
   const timeRangeMs = { from: earliest ?? 0, to: latest ?? 0 };
 
-  const loading = useAppSelector((s) => s.logRateAnalysisStream.isRunning);
+  const loading = useAppSelector((s) => s.stream.isRunning);
   const zeroDocsFallback = useAppSelector((s) => s.logRateAnalysisResults.zeroDocsFallback);
   const {
-    analysisType,
-    windowParameters,
     documentStats: { documentCountStats },
   } = useAppSelector((s) => s.logRateAnalysis);
+  const { currentAnalysisType, currentAnalysisWindowParameters } = useAppSelector(
+    (s) => s.logRateAnalysisResults
+  );
 
   const isGroupsTable = tableType === LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE.GROUPS;
   const interval = documentCountStats?.interval ?? 0;
@@ -181,16 +190,45 @@ export const useColumns = (
   }, [uiSettings, data, fieldFormats, charts]);
 
   const buckets = useMemo(() => {
-    if (windowParameters === undefined) return;
+    if (currentAnalysisWindowParameters === undefined) return;
 
-    const { baselineMin, baselineMax, deviationMin, deviationMax } = windowParameters;
+    const { baselineMin, baselineMax, deviationMin, deviationMax } =
+      currentAnalysisWindowParameters;
     const baselineBuckets = (baselineMax - baselineMin) / interval;
     const deviationBuckets = (deviationMax - deviationMin) / interval;
 
     return { baselineBuckets, deviationBuckets };
-  }, [windowParameters, interval]);
+  }, [currentAnalysisWindowParameters, interval]);
 
-  const columnsMap: Record<ColumnNames, EuiBasicTableColumn<SignificantItem>> = useMemo(
+  const logRateChangeNotAvailable = useMemo(
+    () =>
+      interval === 0 ||
+      currentAnalysisType === undefined ||
+      currentAnalysisWindowParameters === undefined ||
+      buckets === undefined ||
+      isGroupsTable,
+    [interval, currentAnalysisType, currentAnalysisWindowParameters, buckets, isGroupsTable]
+  );
+
+  const getLogRateChangeValues = useCallback(
+    (docCount: number, bgCount: number) => {
+      const { baselineBucketRate, deviationBucketRate } = getBaselineAndDeviationRates(
+        currentAnalysisType!,
+        buckets!.baselineBuckets,
+        buckets!.deviationBuckets,
+        docCount,
+        bgCount
+      );
+
+      return getLogRateChange(currentAnalysisType!, baselineBucketRate, deviationBucketRate);
+    },
+    [currentAnalysisType, buckets]
+  );
+
+  const columnsMap: Record<
+    LogRateAnalysisResultsTableColumnName,
+    EuiBasicTableColumn<SignificantItem>
+  > = useMemo(
     () => ({
       ['Field name']: {
         'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnFieldName',
@@ -317,24 +355,8 @@ export const useColumns = (
         'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnImpact',
         width: '8%',
         field: 'pValue',
-        name: (
-          <>
-            <FormattedMessage
-              id="xpack.aiops.logRateAnalysis.resultsTable.impactLabel"
-              defaultMessage="Impact"
-            />
-            &nbsp;
-            <EuiIconTip
-              size="s"
-              position="top"
-              color="subdued"
-              type="questionInCircle"
-              className="eui-alignTop"
-              content={isGroupsTable ? groupImpactMessage : impactMessage}
-            />
-          </>
-        ),
-        render: (_, { pValue }) => {
+        name: isGroupsTable ? GroupImpactColumnName : ImpactColumnName, // content={isGroupsTable ? groupImpactMessage : impactMessage}
+        render: (_, { pValue }: SignificantItem) => {
           if (typeof pValue !== 'number') return NOT_AVAILABLE;
           const label = getFailedTransactionsCorrelationImpactLabel(pValue);
           return label ? <EuiBadge color={label.color}>{label.impact}</EuiBadge> : null;
@@ -365,14 +387,15 @@ export const useColumns = (
         render: (_, { bg_count: bgCount, doc_count: docCount }) => {
           if (
             interval === 0 ||
-            windowParameters === undefined ||
+            currentAnalysisType === undefined ||
+            currentAnalysisWindowParameters === undefined ||
             buckets === undefined ||
             isGroupsTable
           )
             return NOT_AVAILABLE;
 
           const { baselineBucketRate } = getBaselineAndDeviationRates(
-            analysisType,
+            currentAnalysisType,
             buckets.baselineBuckets,
             buckets.deviationBuckets,
             docCount,
@@ -407,14 +430,15 @@ export const useColumns = (
         render: (_, { doc_count: docCount, bg_count: bgCount }) => {
           if (
             interval === 0 ||
-            windowParameters === undefined ||
+            currentAnalysisType === undefined ||
+            currentAnalysisWindowParameters === undefined ||
             buckets === undefined ||
             isGroupsTable
           )
             return NOT_AVAILABLE;
 
           const { deviationBucketRate } = getBaselineAndDeviationRates(
-            analysisType,
+            currentAnalysisType,
             buckets.baselineBuckets,
             buckets.deviationBuckets,
             docCount,
@@ -428,52 +452,19 @@ export const useColumns = (
       },
       ['Log rate change']: {
         'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnLogRateChange',
-        name: (
-          <>
-            <FormattedMessage
-              id="xpack.aiops.logRateAnalysis.resultsTable.logRateChangeLabel"
-              defaultMessage="Log rate change"
-            />
-            &nbsp;
-            <EuiIconTip
-              size="s"
-              position="top"
-              color="subdued"
-              type="questionInCircle"
-              className="eui-alignTop"
-              content={logRateChangeMessage}
-            />
-          </>
-        ),
-        render: ({ doc_count: docCount, bg_count: bgCount }: SignificantItem) => {
-          if (
-            interval === 0 ||
-            windowParameters === undefined ||
-            buckets === undefined ||
-            isGroupsTable
-          )
-            return NOT_AVAILABLE;
-
-          const { baselineBucketRate, deviationBucketRate } = getBaselineAndDeviationRates(
-            analysisType,
-            buckets.baselineBuckets,
-            buckets.deviationBuckets,
-            docCount,
-            bgCount
-          );
-
-          const logRateChange = getLogRateChange(
-            analysisType,
-            baselineBucketRate!,
-            deviationBucketRate!
-          );
+        field: 'logRateChangeSort',
+        name: LogRateColumnName,
+        sortable: isGroupsTable ? false : true,
+        render: (_, { doc_count: docCount, bg_count: bgCount }: SignificantItem) => {
+          if (logRateChangeNotAvailable) return NOT_AVAILABLE;
+          const logRateChange = getLogRateChangeValues(docCount, bgCount);
 
           return (
             <>
               <EuiIcon
                 size="s"
                 color="subdued"
-                type={analysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE ? 'sortUp' : 'sortDown'}
+                type={currentAnalysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE ? 'sortUp' : 'sortDown'}
                 className="eui-alignTop"
               />
               &nbsp;
@@ -581,20 +572,21 @@ export const useColumns = (
   );
 
   const columns = useMemo(() => {
-    const columnNamesToReturn: Partial<Record<ColumnNames, string>> = isGroupsTable
-      ? commonColumns
-      : significantItemColumns;
+    const columnNamesToReturn: Partial<Record<LogRateAnalysisResultsTableColumnName, string>> =
+      isGroupsTable ? commonColumns : significantItemColumns;
     const columnsToReturn = [];
 
     for (const columnName in columnNamesToReturn) {
       if (
-        columnNamesToReturn.hasOwnProperty(columnName) === false ||
-        skippedColumns.includes(columnNamesToReturn[columnName as ColumnNames] as string) ||
+        Object.hasOwn(columnNamesToReturn, columnName) === false ||
+        skippedColumns.includes(
+          columnNamesToReturn[columnName as LogRateAnalysisResultsTableColumnName] as string
+        ) ||
         ((columnName === 'p-value' || columnName === 'Impact') && zeroDocsFallback)
       )
         continue;
 
-      columnsToReturn.push(columnsMap[columnName as ColumnNames]);
+      columnsToReturn.push(columnsMap[columnName as LogRateAnalysisResultsTableColumnName]);
     }
 
     if (isExpandedRow === true) {

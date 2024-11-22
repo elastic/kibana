@@ -119,7 +119,8 @@ function validateConnectorTypeConfig(
 async function teamsExecutor(
   execOptions: TeamsConnectorTypeExecutorOptions
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
-  const { actionId, secrets, params, configurationUtilities, logger } = execOptions;
+  const { actionId, secrets, params, configurationUtilities, logger, connectorUsageCollector } =
+    execOptions;
   const { webhookUrl } = secrets;
   const { message } = params;
   const data = { text: message };
@@ -134,6 +135,7 @@ async function teamsExecutor(
       logger,
       data,
       configurationUtilities,
+      connectorUsageCollector,
     })
   );
 

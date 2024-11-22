@@ -3,12 +3,7 @@
 exports[`OptionsTab should renders OptionsTab 1`] = `
 <EuiForm>
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     id="updateFiltersOnChange"
-    labelType="label"
   >
     <EuiSwitch
       checked={false}
@@ -23,12 +18,7 @@ exports[`OptionsTab should renders OptionsTab 1`] = `
     />
   </EuiFormRow>
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     id="useTimeFilter"
-    labelType="label"
   >
     <EuiSwitch
       checked={false}
@@ -43,12 +33,7 @@ exports[`OptionsTab should renders OptionsTab 1`] = `
     />
   </EuiFormRow>
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     id="pinFilters"
-    labelType="label"
   >
     <EuiSwitch
       checked={false}

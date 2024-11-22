@@ -171,10 +171,11 @@ export const IntegrationPreference = ({
           <EuiSpacer size="l" />
         </>
       )}
-      <EuiText size="s">{title}</EuiText>
-      <EuiSpacer size="m" />
       <EuiForm>
         <EuiRadioGroup
+          legend={{
+            children: <EuiText size="s">{title}</EuiText>,
+          }}
           options={radios}
           idSelected={idSelected}
           onChange={(id, value) => {

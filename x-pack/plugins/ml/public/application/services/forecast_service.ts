@@ -11,7 +11,7 @@ import { useMemo } from 'react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { get, find, each } from 'lodash';
 import { map } from 'rxjs';
-import type { MlApiServices } from './ml_api_service';
+import type { MlApi } from './ml_api_service';
 import type { Job } from '../../../common/types/anomaly_detection_jobs';
 import { useMlKibana } from '../contexts/kibana';
 
@@ -21,7 +21,7 @@ export interface AggType {
   min: string;
 }
 
-export function forecastServiceFactory(mlApiServices: MlApiServices) {
+export function forecastServiceFactory(mlApi: MlApi) {
   // Gets a basic summary of the most recently run forecasts for the specified
   // job, with results at or later than the supplied timestamp.
   // Extra query object can be supplied, or pass null if no additional query.
@@ -58,7 +58,7 @@ export function forecastServiceFactory(mlApiServices: MlApiServices) {
         filterCriteria.push(query);
       }
 
-      mlApiServices.results
+      mlApi.results
         .anomalySearch(
           {
             // @ts-expect-error SearchRequest type has not been updated to include size
@@ -121,7 +121,7 @@ export function forecastServiceFactory(mlApiServices: MlApiServices) {
       // TODO - add in criteria for detector index and entity fields (by, over, partition)
       // once forecasting with these parameters is supported.
 
-      mlApiServices.results
+      mlApi.results
         .anomalySearch(
           {
             // @ts-expect-error SearchRequest type has not been updated to include size
@@ -261,7 +261,7 @@ export function forecastServiceFactory(mlApiServices: MlApiServices) {
             min: aggType.min,
           };
 
-    return mlApiServices.results
+    return mlApi.results
       .anomalySearch$(
         {
           // @ts-expect-error SearchRequest type has not been updated to include size
@@ -319,14 +319,15 @@ export function forecastServiceFactory(mlApiServices: MlApiServices) {
       );
   }
   // Runs a forecast
-  function runForecast(jobId: string, duration?: string) {
+  function runForecast(jobId: string, duration?: string, neverExpires?: boolean) {
     // eslint-disable-next-line no-console
     console.log('ML forecast service run forecast with duration:', duration);
     return new Promise((resolve, reject) => {
-      mlApiServices
+      mlApi
         .forecast({
           jobId,
           duration,
+          neverExpires,
         })
         .then((resp) => {
           resolve(resp);
@@ -364,7 +365,7 @@ export function forecastServiceFactory(mlApiServices: MlApiServices) {
         },
       ];
 
-      mlApiServices.results
+      mlApi.results
         .anomalySearch(
           {
             // @ts-expect-error SearchRequest type has not been updated to include size
@@ -405,10 +406,10 @@ export type MlForecastService = ReturnType<typeof forecastServiceFactory>;
 export function useForecastService(): MlForecastService {
   const {
     services: {
-      mlServices: { mlApiServices },
+      mlServices: { mlApi },
     },
   } = useMlKibana();
 
-  const mlForecastService = useMemo(() => forecastServiceFactory(mlApiServices), [mlApiServices]);
+  const mlForecastService = useMemo(() => forecastServiceFactory(mlApi), [mlApi]);
   return mlForecastService;
 }

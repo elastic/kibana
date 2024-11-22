@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { lastValueFrom } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
@@ -36,7 +36,10 @@ describe('Spaces plugin', () => {
           "hasOnlyDefaultSpace$": Observable {
             "operator": [Function],
             "source": Observable {
-              "_subscribe": [Function],
+              "operator": [Function],
+              "source": Observable {
+                "_subscribe": [Function],
+              },
             },
           },
           "spacesClient": Object {
@@ -114,13 +117,16 @@ describe('Spaces plugin', () => {
 
       const coreStart = coreMock.createStart();
 
-      const spacesStart = plugin.start(coreStart);
+      const spacesStart = plugin.start(coreStart, { features: featuresPluginMock.createStart() });
       expect(spacesStart).toMatchInlineSnapshot(`
         Object {
           "hasOnlyDefaultSpace$": Observable {
             "operator": [Function],
             "source": Observable {
-              "_subscribe": [Function],
+              "operator": [Function],
+              "source": Observable {
+                "_subscribe": [Function],
+              },
             },
           },
           "spacesService": Object {
@@ -148,10 +154,10 @@ describe('Spaces plugin', () => {
 
     const spacesSetup = plugin.setup(core, { features, licensing, usageCollection });
     const coreStart = coreMock.createStart();
-    const spacesStart = plugin.start(coreStart);
+    const spacesStart = plugin.start(coreStart, { features: featuresPluginMock.createStart() });
 
-    await expect(lastValueFrom(spacesSetup.hasOnlyDefaultSpace$)).resolves.toEqual(true);
-    await expect(lastValueFrom(spacesStart.hasOnlyDefaultSpace$)).resolves.toEqual(true);
+    await expect(firstValueFrom(spacesSetup.hasOnlyDefaultSpace$)).resolves.toEqual(true);
+    await expect(firstValueFrom(spacesStart.hasOnlyDefaultSpace$)).resolves.toEqual(true);
   });
 
   it('determines hasOnlyDefaultSpace$ correctly when maxSpaces=1000', async () => {
@@ -166,9 +172,9 @@ describe('Spaces plugin', () => {
 
     const spacesSetup = plugin.setup(core, { features, licensing, usageCollection });
     const coreStart = coreMock.createStart();
-    const spacesStart = plugin.start(coreStart);
+    const spacesStart = plugin.start(coreStart, { features: featuresPluginMock.createStart() });
 
-    await expect(lastValueFrom(spacesSetup.hasOnlyDefaultSpace$)).resolves.toEqual(false);
-    await expect(lastValueFrom(spacesStart.hasOnlyDefaultSpace$)).resolves.toEqual(false);
+    await expect(firstValueFrom(spacesSetup.hasOnlyDefaultSpace$)).resolves.toEqual(false);
+    await expect(firstValueFrom(spacesStart.hasOnlyDefaultSpace$)).resolves.toEqual(false);
   });
 });

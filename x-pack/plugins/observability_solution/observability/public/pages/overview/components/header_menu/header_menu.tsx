@@ -18,7 +18,7 @@ import { useKibana } from '../../../../utils/kibana_react';
 import HeaderMenuPortal from './header_menu_portal';
 
 export function HeaderMenu(): React.ReactElement | null {
-  const { share, theme } = useKibana().services;
+  const { share, theme, http } = useKibana().services;
 
   const onboardingLocator = share?.url.locators.get<ObservabilityOnboardingLocatorParams>(
     OBSERVABILITY_ONBOARDING_LOCATOR
@@ -38,6 +38,15 @@ export function HeaderMenu(): React.ReactElement | null {
             <EuiHeaderLink color="primary" href={href} iconType="indexOpen">
               {i18n.translate('xpack.observability.home.addData', {
                 defaultMessage: 'Add data',
+              })}
+            </EuiHeaderLink>
+            <EuiHeaderLink
+              color="primary"
+              href={http.basePath.prepend('/app/observability/annotations')}
+              iconType="brush"
+            >
+              {i18n.translate('xpack.observability.home.annotations', {
+                defaultMessage: 'Annotations',
               })}
             </EuiHeaderLink>
           </EuiHeaderLinks>

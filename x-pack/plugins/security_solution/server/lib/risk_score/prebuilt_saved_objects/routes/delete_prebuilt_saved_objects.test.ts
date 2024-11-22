@@ -4,12 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { PREBUILT_SAVED_OBJECTS_BULK_DELETE } from '../../../../../common/constants';
 import {
   serverMock,
   requestContextMock,
-  mockGetCurrentUser,
   requestMock,
 } from '../../../detection_engine/routes/__mocks__';
 import { deletePrebuiltSavedObjectsRoute } from './delete_prebuilt_saved_objects';
@@ -48,7 +46,6 @@ const deletePrebuiltSavedObjectsRequest = (savedObjectTemplate: string) =>
 
 describe('deletePrebuiltSavedObjects', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let securitySetup: SecurityPluginSetup;
   let { clients, context } = requestContextMock.createTools();
 
   beforeEach(() => {
@@ -57,16 +54,9 @@ describe('deletePrebuiltSavedObjects', () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
-    securitySetup = {
-      authc: {
-        getCurrentUser: jest.fn().mockReturnValue(mockGetCurrentUser),
-      },
-      authz: {},
-    } as unknown as SecurityPluginSetup;
-
     clients.savedObjectsClient.delete.mockResolvedValue('');
 
-    deletePrebuiltSavedObjectsRoute(server.router, securitySetup);
+    deletePrebuiltSavedObjectsRoute(server.router);
   });
 
   it('should delete legacy hostRiskScoreDashboards', async () => {

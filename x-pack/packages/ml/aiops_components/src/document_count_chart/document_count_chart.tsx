@@ -24,7 +24,7 @@ import { getTimeZone } from '@kbn/visualization-utils';
 import { i18n } from '@kbn/i18n';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import {
-  getLogRateAnalysisType,
+  getLogRateAnalysisTypeForHistogram,
   getSnappedTimestamps,
   getSnappedWindowParameters,
   getWindowParametersForTrigger,
@@ -334,7 +334,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
             brushSelectionUpdateHandler({
               windowParameters: wpSnap,
               force: true,
-              analysisType: getLogRateAnalysisType(adjustedChartPoints, wpSnap),
+              analysisType: getLogRateAnalysisTypeForHistogram(adjustedChartPoints, wpSnap),
             });
           }
         }
@@ -391,7 +391,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
     brushSelectionUpdateHandler({
       windowParameters: wp,
       force: false,
-      analysisType: getLogRateAnalysisType(adjustedChartPoints, wp),
+      analysisType: getLogRateAnalysisTypeForHistogram(adjustedChartPoints, wp),
     });
   }
 
@@ -426,7 +426,12 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
     <>
       {isBrushVisible && (
         <div className="aiopsHistogramBrushes" data-test-subj={'aiopsHistogramBrushes'}>
-          <div css={{ height: BADGE_HEIGHT }}>
+          {/**
+           * We need position:relative on this parent container of the BrushBadges,
+           * because of the absolute positioning of the BrushBadges. Without it, the
+           * BrushBadges would not be positioned correctly when used in embedded panels.
+           */}
+          <div css={{ height: BADGE_HEIGHT, position: 'relative' }}>
             <BrushBadge
               label={
                 baselineBrush.label ??

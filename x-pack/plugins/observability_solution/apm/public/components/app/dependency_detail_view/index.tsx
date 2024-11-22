@@ -69,7 +69,10 @@ export function DependencyDetailView({ children }: { children: React.ReactChild 
       rangeTo,
       refreshInterval,
       refreshPaused,
-    ]
+    ],
+    {
+      omitRootOnServerless: true,
+    }
   );
   return <DependencyDetailTemplate>{children}</DependencyDetailTemplate>;
 }

@@ -6,6 +6,8 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+
 import type {
   RulePatchProps,
   RuleResponse,
@@ -14,12 +16,14 @@ import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { applyRulePatch } from '../mergers/apply_rule_patch';
 import { getIdError } from '../../../utils/utils';
+import { validateNonCustomizablePatchFields } from '../../../utils/validate';
 import { convertAlertingRuleToRuleResponse } from '../converters/convert_alerting_rule_to_rule_response';
 import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_response_to_alerting_rule';
 import { ClientError, toggleRuleEnabledOnUpdate, validateMlAuth } from '../utils';
 import { getRuleByIdOrRuleId } from './get_rule_by_id_or_rule_id';
 
 interface PatchRuleOptions {
+  actionsClient: ActionsClient;
   rulesClient: RulesClient;
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
   rulePatch: RulePatchProps;
@@ -27,6 +31,7 @@ interface PatchRuleOptions {
 }
 
 export const patchRule = async ({
+  actionsClient,
   rulesClient,
   prebuiltRuleAssetClient,
   rulePatch,
@@ -47,6 +52,8 @@ export const patchRule = async ({
 
   await validateMlAuth(mlAuthz, rulePatch.type ?? existingRule.type);
 
+  validateNonCustomizablePatchFields(rulePatch, existingRule);
+
   const patchedRule = await applyRulePatch({
     prebuiltRuleAssetClient,
     existingRule,
@@ -55,7 +62,7 @@ export const patchRule = async ({
 
   const patchedInternalRule = await rulesClient.update({
     id: existingRule.id,
-    data: convertRuleResponseToAlertingRule(patchedRule),
+    data: convertRuleResponseToAlertingRule(patchedRule, actionsClient),
   });
 
   const { enabled } = await toggleRuleEnabledOnUpdate(rulesClient, existingRule, patchedRule);

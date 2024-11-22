@@ -24,7 +24,7 @@ properties:
   description:
     $ref: 'case_description.yaml'
   owner:
-    $ref: 'owners.yaml'
+    $ref: 'owner.yaml'
   settings:
     $ref: 'settings.yaml'
   severity:
@@ -40,7 +40,6 @@ properties:
     description: >
       Custom field values for a case.
       Any optional custom fields that are not specified in the request are set to null.
-    x-technical-preview: true
     minItems: 0
     maxItems: 10
     items:

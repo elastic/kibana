@@ -2,11 +2,8 @@
 
 exports[`TimeIntervalParamEditor should match snapshot 1`] = `
 <EuiFormRow
-  describedByIds={Array []}
   display="rowCompressed"
   fullWidth={true}
-  hasChildLabel={true}
-  hasEmptyLabelSpace={false}
   helpText={
     <React.Fragment>
       <Memo(MemoizedFormattedMessage)
@@ -17,7 +14,6 @@ exports[`TimeIntervalParamEditor should match snapshot 1`] = `
   }
   isInvalid={true}
   label="Minimum interval"
-  labelType="label"
 >
   <EuiComboBox
     async={false}

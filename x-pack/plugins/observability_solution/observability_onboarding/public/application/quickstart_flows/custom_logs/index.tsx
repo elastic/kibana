@@ -14,6 +14,7 @@ import { createWizardContext, Step } from '../../../context/create_wizard_contex
 import { ConfigureLogs } from './configure_logs';
 import { Inspect } from './inspect';
 import { InstallElasticAgent } from './install_elastic_agent';
+import { FeedbackButtons } from '../shared/feedback_buttons';
 
 interface WizardState {
   integrationName?: string;
@@ -79,6 +80,7 @@ export const CustomLogsPanel: React.FC = () => {
           const { handler, exact } = customLogsRoutes[path];
           return <Route key={path} path={path} exact={exact} component={handler} />;
         })}
+        <FeedbackButtons flow="custom-logs" />
       </EuiPanel>
     </Provider>
   );

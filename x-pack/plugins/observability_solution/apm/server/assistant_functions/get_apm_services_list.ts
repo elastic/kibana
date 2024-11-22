@@ -32,7 +32,7 @@ export function registerGetApmServicesListFunction({
       parameters: {
         type: 'object',
         properties: {
-          'service.environment': {
+          serviceEnvironment: {
             ...NON_EMPTY_STRING,
             description:
               'Optionally filter the services by the environments that they are running in',

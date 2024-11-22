@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -16,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const dataViews = getService('dataViews');
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
+  const { common, discover, timePicker } = getPageObjects(['common', 'discover', 'timePicker']);
 
   const isCcsTest = config.get('esTestCluster.ccs');
   const archiveDirectory = isCcsTest
@@ -40,11 +41,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('exception on single shard shows warning and results', async () => {
-      await PageObjects.common.navigateToApp('discover');
+      await common.navigateToApp('discover');
       await dataViews.switchToAndValidate(defaultIndex);
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await timePicker.setDefaultAbsoluteRange();
       await retry.try(async () => {
-        const hitCount = await PageObjects.discover.getHitCount();
+        const hitCount = await discover.getHitCount();
         expect(hitCount).to.be('14,004');
       });
       await filterBar.addDslFilter(`
@@ -64,7 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Ensure documents are still returned for the successful shards
       await retry.try(async function tryingForTime() {
-        const hitCount = await PageObjects.discover.getHitCount();
+        const hitCount = await discover.getHitCount({ isPartial: true });
         expect(hitCount).to.be('9,247');
       });
 
@@ -73,11 +74,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('exception on all shards shows error', async () => {
-      await PageObjects.common.navigateToApp('discover');
+      await common.navigateToApp('discover');
       await dataViews.switchToAndValidate(defaultIndex);
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await timePicker.setDefaultAbsoluteRange();
       await retry.try(async () => {
-        const hitCount = await PageObjects.discover.getHitCount();
+        const hitCount = await discover.getHitCount();
         expect(hitCount).to.be('14,004');
       });
       await filterBar.addDslFilter(`

@@ -32,7 +32,12 @@ import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { txtDisplayName } from './i18n';
 import { MenuItem } from './menu_item';
 import { StartDependencies } from '../../../../plugin';
-import { createDrilldownTemplatesFromSiblings, ensureNestedTriggers } from '../drilldown_shared';
+import {
+  createDrilldownTemplatesFromSiblings,
+  DRILLDOWN_ACTION_GROUP,
+  DRILLDOWN_MAX_WIDTH,
+  ensureNestedTriggers,
+} from '../drilldown_shared';
 
 export const OPEN_FLYOUT_EDIT_DRILLDOWN = 'OPEN_FLYOUT_EDIT_DRILLDOWN';
 
@@ -53,6 +58,7 @@ export class FlyoutEditDrilldownAction implements Action<EmbeddableApiContext> {
   public readonly type = OPEN_FLYOUT_EDIT_DRILLDOWN;
   public readonly id = OPEN_FLYOUT_EDIT_DRILLDOWN;
   public order = 10;
+  public grouping = [DRILLDOWN_ACTION_GROUP];
 
   constructor(protected readonly params: FlyoutEditDrilldownParams) {}
 
@@ -95,6 +101,7 @@ export class FlyoutEditDrilldownAction implements Action<EmbeddableApiContext> {
         core
       ),
       {
+        maxWidth: DRILLDOWN_MAX_WIDTH,
         ownFocus: true,
         'data-test-subj': 'editDrilldownFlyout',
         onClose: () => {

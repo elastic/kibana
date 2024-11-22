@@ -1,0 +1,3 @@
+title: Certificate key
+type: string
+description: If `authType` is `webhook-authentication-ssl` and `certType` is `ssl-crt-key`, it is a base64 encoded version of the KEY file.

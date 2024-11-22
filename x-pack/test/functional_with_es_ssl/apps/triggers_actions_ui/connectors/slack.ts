@@ -36,8 +36,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should only show one slack connector', async () => {
-        if (await testSubjects.exists('createActionButton')) {
-          await testSubjects.click('createActionButton');
+        if (await testSubjects.exists('createConnectorButton')) {
+          await testSubjects.click('createConnectorButton');
         } else {
           await testSubjects.click('createFirstActionButton');
         }
@@ -66,7 +66,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           },
         ]);
         const connector = await getConnectorByName(connectorName, supertest);
-        objectRemover.add(connector.id, 'action', 'actions');
+        objectRemover.add(connector.id, 'connector', 'actions');
       });
 
       /* FUTURE ENGINEER
@@ -94,11 +94,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           },
         ]);
         const connector = await getConnectorByName(connectorName, supertest);
-        objectRemover.add(connector.id, 'action', 'actions');
+        objectRemover.add(connector.id, 'connector', 'actions');
       });
     });
 
-    describe('rule creation', async () => {
+    describe('rule creation', () => {
       const webhookConnectorName = generateUniqueKey();
       const webApiConnectorName = generateUniqueKey();
       let webApiAction: { id: string };
@@ -140,8 +140,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           connectorTypeId: '.slack',
         });
 
-        objectRemover.add(webhookAction.id, 'action', 'actions');
-        objectRemover.add(webApiAction.id, 'action', 'actions');
+        objectRemover.add(webhookAction.id, 'connector', 'actions');
+        objectRemover.add(webApiAction.id, 'connector', 'actions');
         await pageObjects.common.navigateToApp('triggersActions');
       });
 

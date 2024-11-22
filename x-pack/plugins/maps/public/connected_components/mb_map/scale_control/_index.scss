@@ -5,9 +5,10 @@
   bottom: $euiSizeM;
   pointer-events: none;
   color: $euiTextColor;
-  border-left: 2px solid $euiTextColor;
-  border-bottom: 2px solid $euiTextColor;
+  border-left: 2px solid rgba($euiTextColor, .6);
+  border-bottom: 2px solid rgba($euiTextColor, .6);
   text-align: right;
+  @include mapOverlayIsTextOnly;
 }
 
 .mapScaleControlFullScreen {

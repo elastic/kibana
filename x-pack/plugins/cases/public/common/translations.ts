@@ -153,6 +153,14 @@ export const ACTIONS = i18n.translate('xpack.cases.allCases.actions', {
   defaultMessage: 'Actions',
 });
 
+export const ACTIONS_BUTTON_ARIA_LABEL = (title: string) =>
+  i18n.translate('xpack.cases.allCases.actions.button.ariaLabel', {
+    defaultMessage: 'Actions for "{title}" column',
+    values: {
+      title,
+    },
+  });
+
 export const NO_TAGS_AVAILABLE = i18n.translate('xpack.cases.allCases.noTagsAvailable', {
   defaultMessage: 'No tags available',
 });
@@ -290,6 +298,12 @@ export const MAX_LENGTH_ERROR = (field: string, length: number) =>
     values: { field, length },
     defaultMessage:
       'The length of the {field} is too long. The maximum length is {length} characters.',
+  });
+
+export const SAFE_INTEGER_NUMBER_ERROR = (field: string) =>
+  i18n.translate('xpack.cases.customFields.safeIntegerNumberError', {
+    values: { field },
+    defaultMessage: `The value of the {field} should be an integer between -(2^53 - 1) and 2^53 - 1, inclusive.`,
   });
 
 export const MAX_TAGS_ERROR = (length: number) =>

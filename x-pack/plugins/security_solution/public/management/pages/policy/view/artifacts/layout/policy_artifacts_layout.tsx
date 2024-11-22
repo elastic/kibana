@@ -28,6 +28,7 @@ import { usePolicyDetailsArtifactsNavigateCallback } from '../../policy_hooks';
 import type { ExceptionsListApiClient } from '../../../../../services/exceptions_list/exceptions_list_api_client';
 import { useListArtifact } from '../../../../../hooks/artifacts';
 import { PolicyArtifactsEmptyUnassigned, PolicyArtifactsEmptyUnexisting } from '../empty';
+import type { PolicyArtifactsListProps } from '../list';
 import { PolicyArtifactsList } from '../list';
 import { PolicyArtifactsFlyout } from '../flyout';
 import type { PolicyArtifactsPageLabels } from '../translations';
@@ -106,7 +107,9 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
       setExceptionItemToDelete(undefined);
     }, [setExceptionItemToDelete]);
 
-    const handleOnDeleteActionCallback = useCallback(
+    const handleOnDeleteActionCallback = useCallback<
+      PolicyArtifactsListProps['onDeleteActionCallback']
+    >(
       (item) => {
         setExceptionItemToDelete(item);
       },

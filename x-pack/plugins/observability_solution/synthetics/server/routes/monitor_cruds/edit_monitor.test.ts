@@ -27,12 +27,22 @@ describe('syncEditedMonitor', () => {
   const logger = loggerMock.create();
 
   const serverMock: SyntheticsServerSetup = {
-    uptimeEsClient: { search: jest.fn() },
+    syntheticsEsClient: { search: jest.fn() },
     stackVersion: null,
     authSavedObjectsClient: {
       bulkUpdate: jest.fn(),
       get: jest.fn(),
       update: jest.fn(),
+      createPointInTimeFinder: jest.fn().mockImplementation(({ perPage, type: soType }) => ({
+        close: jest.fn(async () => {}),
+        find: jest.fn().mockReturnValue({
+          async *[Symbol.asyncIterator]() {
+            yield {
+              saved_objects: [],
+            };
+          },
+        }),
+      })),
     },
     logger,
     config: {

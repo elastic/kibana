@@ -12,3 +12,12 @@ export type FetchOptions = Omit<HttpFetchOptions, 'body'> & {
   method?: string;
   body?: any;
 };
+
+export interface ApiErrorResponse {
+  body: {
+    statusCode: number;
+    error: string;
+    message: string;
+    attributes: object;
+  };
+}

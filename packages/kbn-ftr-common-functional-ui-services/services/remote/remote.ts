@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { NoSuchSessionError, NoSuchWindowError } from 'selenium-webdriver/lib/error';
@@ -17,6 +18,16 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
   const browserType: Browsers = config.get('browser.type');
   type BrowserStorage = 'sessionStorage' | 'localStorage';
+
+  const getSessionStorageItem = async (key: string) => {
+    try {
+      return await driver.executeScript<string>(`return window.sessionStorage.getItem("${key}");`);
+    } catch (error) {
+      if (!error.message.includes(`Failed to read the 'sessionStorage' property from 'Window'`)) {
+        throw error;
+      }
+    }
+  };
 
   const clearBrowserStorage = async (storageType: BrowserStorage) => {
     try {
@@ -93,6 +104,32 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
 
   lifecycle.afterTestSuite.add(async () => {
     await tryWebDriverCall(async () => {
+      // collect error message stashed in SessionStorage that indicate EuiProvider implementation error
+      const euiProviderWarning = await getSessionStorageItem('dev.euiProviderWarning');
+      if (euiProviderWarning != null) {
+        let errorMessage: string;
+        let errorStack: string;
+        let pageHref: string;
+        let pageTitle: string;
+        try {
+          ({
+            message: errorMessage,
+            stack: errorStack,
+            pageHref,
+            pageTitle,
+          } = JSON.parse(euiProviderWarning));
+        } catch (error) {
+          throw new Error(`Found EuiProvider dev error, but the details could not be parsed`);
+        }
+
+        log.error(`pageTitle: ${pageTitle}`);
+        log.error(`pageHref: ${pageHref}`);
+        log.error(`Error: ${errorMessage}`);
+        log.error(`Error stack: ${errorStack}`);
+        throw new Error(`Found EuiProvider dev error on: ${pageHref}`);
+      }
+
+      // global cleanup
       const { width, height } = windowSizeStack.shift()!;
       await driver.manage().window().setRect({ width, height });
       await clearBrowserStorage('sessionStorage');

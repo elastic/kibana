@@ -5,41 +5,41 @@
  * 2.0.
  */
 
+import type { IKibanaResponse } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import type { ConfigType } from '../../../../..';
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { TIMELINE_DRAFT_URL } from '../../../../../../common/constants';
 import { buildFrameworkRequest } from '../../../utils/common';
-import type { SetupPlugins } from '../../../../../plugin';
-import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 import { getDraftTimeline, persistTimeline } from '../../../saved_object/timelines';
 import { draftTimelineDefaults } from '../../../utils/default_timeline';
-import { getDraftTimelineSchema } from '../../../../../../common/api/timeline';
+import {
+  GetDraftTimelinesRequestQuery,
+  type GetDraftTimelinesResponse,
+} from '../../../../../../common/api/timeline';
 
-export const getDraftTimelinesRoute = (
-  router: SecuritySolutionPluginRouter,
-  _: ConfigType,
-  security: SetupPlugins['security']
-) => {
+export const getDraftTimelinesRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .get({
       path: TIMELINE_DRAFT_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
       access: 'public',
     })
     .addVersion(
       {
         validate: {
-          request: { query: buildRouteValidationWithExcess(getDraftTimelineSchema) },
+          request: { query: buildRouteValidationWithZod(GetDraftTimelinesRequestQuery) },
         },
         version: '2023-10-31',
       },
-      async (context, request, response) => {
-        const frameworkRequest = await buildFrameworkRequest(context, security, request);
+      async (context, request, response): Promise<IKibanaResponse<GetDraftTimelinesResponse>> => {
+        const frameworkRequest = await buildFrameworkRequest(context, request);
         const siemResponse = buildSiemResponse(response);
 
         try {
@@ -49,13 +49,7 @@ export const getDraftTimelinesRoute = (
 
           if (draftTimeline?.savedObjectId) {
             return response.ok({
-              body: {
-                data: {
-                  persistTimeline: {
-                    timeline: draftTimeline,
-                  },
-                },
-              },
+              body: draftTimeline,
             });
           }
 
@@ -65,18 +59,13 @@ export const getDraftTimelinesRoute = (
           });
 
           if (newTimelineResponse.code === 200) {
-            return response.ok({
-              body: {
-                data: {
-                  persistTimeline: {
-                    timeline: newTimelineResponse.timeline,
-                  },
-                },
-              },
+            return response.ok({ body: newTimelineResponse.timeline });
+          } else {
+            return siemResponse.error({
+              body: newTimelineResponse.message,
+              statusCode: newTimelineResponse.code,
             });
           }
-
-          return response.ok({});
         } catch (err) {
           const error = transformError(err);
 

@@ -7,11 +7,8 @@
 
 import type { Filter } from '@kbn/es-query';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
-import type { ExpandedDetailTimeline, SessionViewConfig } from '../../../common/types';
-import type {
-  EqlOptionsSelected,
-  TimelineNonEcsData,
-} from '../../../common/search_strategy/timeline';
+import type { SessionViewConfig } from '../../../common/types';
+import type { EqlOptions, TimelineNonEcsData } from '../../../common/search_strategy/timeline';
 import type {
   TimelineTabs,
   ScrollToTopEvent,
@@ -42,7 +39,7 @@ export interface TimelineModel {
   createdBy?: string;
   /** A summary of the events and notes in this timeline */
   description: string;
-  eqlOptions: EqlOptionsSelected;
+  eqlOptions: EqlOptions;
   /** Type of event you want to see in this timeline */
   eventType?: TimelineEventsType;
   /** A map of events in this timeline to the chronologically ordered notes (in this timeline) associated with the event */
@@ -105,7 +102,6 @@ export interface TimelineModel {
   loadingText?: string | React.ReactNode;
   queryFields: string[];
   /** This holds the view information for the flyout when viewing timeline in a consuming view (i.e. hosts page) or the side panel in the primary timeline view */
-  expandedDetail: ExpandedDetailTimeline;
   /** When non-empty, display a graph view for this event */
   graphEventId?: string;
   indexNames: string[];
@@ -130,7 +126,6 @@ export interface TimelineModel {
   selectedEventIds: Record<string, TimelineNonEcsData[]>;
   /** If selectAll checkbox in header is checked **/
   isSelectAllChecked: boolean;
-  isLoading: boolean;
   selectAll: boolean;
   /* discover saved search Id */
   savedSearchId: string | null;
@@ -162,7 +157,6 @@ export type SubsetTimelineModel = Readonly<
     | 'eventType'
     | 'eventIdToNoteIds'
     | 'excludedRowRendererIds'
-    | 'expandedDetail'
     | 'footerText'
     | 'graphEventId'
     | 'highlightedDropAndProviderId'
@@ -192,7 +186,6 @@ export type SubsetTimelineModel = Readonly<
     | 'show'
     | 'sort'
     | 'isSaving'
-    | 'isLoading'
     | 'savedObjectId'
     | 'version'
     | 'status'

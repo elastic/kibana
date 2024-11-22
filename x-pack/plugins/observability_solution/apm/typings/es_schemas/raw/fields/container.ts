@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export interface Container {
-  id?: string | null;
-  image?: string | null;
-}
+export type { Container } from '@kbn/apm-types/es_schemas_raw';

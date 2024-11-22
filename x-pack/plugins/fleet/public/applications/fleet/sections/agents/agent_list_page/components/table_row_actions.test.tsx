@@ -61,6 +61,7 @@ describe('TableRowActions', () => {
         readAgents: true,
         allAgents: true,
       },
+      integrations: {},
     } as any);
     mockedUseAgentVersion.mockReturnValue('8.10.2');
   });
@@ -97,6 +98,7 @@ describe('TableRowActions', () => {
         fleet: {
           allAgents: false,
         },
+        integrations: {},
       } as any);
       const res = renderAndGetDiagnosticsButton({
         agent: {
@@ -192,6 +194,7 @@ describe('TableRowActions', () => {
         fleet: {
           readAgents: false,
         },
+        integrations: {},
       } as any);
       const res = renderAndGetRestartUpgradeButton({
         agent: {

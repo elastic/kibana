@@ -8,11 +8,10 @@
 import { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { InputsModelId } from '../../common/store/inputs/constants';
-import { defaultHeaders } from '../components/timeline/body/column_headers/default_headers';
 import { timelineActions } from '../store';
 import { useTimelineFullScreen } from '../../common/containers/use_full_screen';
 import { TimelineId } from '../../../common/types/timeline';
-import type { TimelineTypeLiteral } from '../../../common/api/timeline';
+import { type TimelineType, TimelineTypeEnum } from '../../../common/api/timeline';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { inputsActions, inputsSelectors } from '../../common/store/inputs';
 import { sourcererActions, sourcererSelectors } from '../../sourcerer/store';
@@ -20,8 +19,7 @@ import { SourcererScopeName } from '../../sourcerer/store/model';
 import { appActions } from '../../common/store/app';
 import type { TimeRange } from '../../common/store/inputs/model';
 import { useDiscoverInTimelineContext } from '../../common/components/discover_in_timeline/use_discover_in_timeline_context';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { defaultUdtHeaders } from '../components/timeline/unified_components/default_headers';
+import { defaultUdtHeaders } from '../components/timeline/body/column_headers/default_headers';
 import { timelineDefaults } from '../store/defaults';
 
 export interface UseCreateTimelineParams {
@@ -32,7 +30,7 @@ export interface UseCreateTimelineParams {
   /**
    * Type of the timeline (default, template)
    */
-  timelineType: TimelineTypeLiteral;
+  timelineType: TimelineType;
   /**
    * Callback to be called when the timeline is created
    */
@@ -50,9 +48,6 @@ export const useCreateTimeline = ({
   onClick,
 }: UseCreateTimelineParams): ((options?: { timeRange?: TimeRange }) => Promise<void>) => {
   const dispatch = useDispatch();
-  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
-    'unifiedComponentsInTimelineEnabled'
-  );
   const { id: dataViewId, patternList: selectedPatterns } = useSelector(
     sourcererSelectors.defaultDataView
   ) ?? { id: '', patternList: [] };
@@ -63,7 +58,15 @@ export const useCreateTimeline = ({
   const { resetDiscoverAppState } = useDiscoverInTimelineContext();
 
   const createTimeline = useCallback(
-    ({ id, show, timeRange: timeRangeParam }) => {
+    ({
+      id,
+      show,
+      timeRange: timeRangeParam,
+    }: {
+      id: string;
+      show: boolean;
+      timeRange?: TimeRange;
+    }) => {
       const timerange = timeRangeParam ?? globalTimeRange;
 
       if (id === TimelineId.active && timelineFullScreen) {
@@ -79,16 +82,17 @@ export const useCreateTimeline = ({
 
       dispatch(
         timelineActions.createTimeline({
-          columns: unifiedComponentsInTimelineEnabled ? defaultUdtHeaders : defaultHeaders,
+          columns: defaultUdtHeaders,
           dataViewId,
           id,
           indexNames: selectedPatterns,
           show,
           timelineType,
           updated: undefined,
-          excludedRowRendererIds: unifiedComponentsInTimelineEnabled
-            ? timelineDefaults.excludedRowRendererIds
-            : [],
+          excludedRowRendererIds:
+            timelineType !== TimelineTypeEnum.template
+              ? timelineDefaults.excludedRowRendererIds
+              : [],
         })
       );
 
@@ -123,18 +127,17 @@ export const useCreateTimeline = ({
       setTimelineFullScreen,
       timelineFullScreen,
       timelineType,
-      unifiedComponentsInTimelineEnabled,
     ]
   );
 
   return useCallback(
     async (options?: { timeRange?: TimeRange }) => {
       await resetDiscoverAppState();
-      createTimeline({ id: timelineId, show: true, timelineType, timeRange: options?.timeRange });
+      createTimeline({ id: timelineId, show: true, timeRange: options?.timeRange });
       if (typeof onClick === 'function') {
         onClick();
       }
     },
-    [createTimeline, timelineId, timelineType, onClick, resetDiscoverAppState]
+    [createTimeline, timelineId, onClick, resetDiscoverAppState]
   );
 };

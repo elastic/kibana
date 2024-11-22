@@ -24,21 +24,21 @@ export const EXPLORER_ACTION = {
   JOB_SELECTION_CHANGE: 'jobSelectionChange',
   SET_CHARTS_DATA_LOADING: 'setChartsDataLoading',
   SET_EXPLORER_DATA: 'setExplorerData',
-};
+} as const;
 
 export const FILTER_ACTION = {
   ADD: '+',
   REMOVE: '-',
 } as const;
 
-export type FilterAction = typeof FILTER_ACTION[keyof typeof FILTER_ACTION];
+export type FilterAction = (typeof FILTER_ACTION)[keyof typeof FILTER_ACTION];
 
 export const SWIMLANE_TYPE = {
   OVERALL: 'overall',
   VIEW_BY: 'viewBy',
 } as const;
 
-export type SwimlaneType = typeof SWIMLANE_TYPE[keyof typeof SWIMLANE_TYPE];
+export type SwimlaneType = (typeof SWIMLANE_TYPE)[keyof typeof SWIMLANE_TYPE];
 
 export const CHART_TYPE = {
   EVENT_DISTRIBUTION: 'event_distribution',
@@ -47,7 +47,7 @@ export const CHART_TYPE = {
   GEO_MAP: 'geo_map',
 } as const;
 
-export type ChartType = typeof CHART_TYPE[keyof typeof CHART_TYPE];
+export type ChartType = (typeof CHART_TYPE)[keyof typeof CHART_TYPE];
 
 export const MAX_CATEGORY_EXAMPLES = 10;
 

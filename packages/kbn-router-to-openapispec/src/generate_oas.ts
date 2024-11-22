@@ -1,18 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { OpenAPIV3 } from 'openapi-types';
 import type { CoreVersionedRouter, Router } from '@kbn/core-http-router-server-internal';
+import type { OpenAPIV3 } from 'openapi-types';
 import { OasConverter } from './oas_converter';
-import { createOperationIdCounter } from './operation_id_counter';
 import { processRouter } from './process_router';
 import { processVersionedRouter } from './process_versioned_router';
-import { buildGlobalTags } from './util';
+import { buildGlobalTags, createOpIdGenerator } from './util';
 
 export const openApiVersion = '3.0.0';
 
@@ -39,8 +39,8 @@ export const generateOpenApiDocument = (
 ): OpenAPIV3.Document => {
   const { filters } = opts;
   const converter = new OasConverter();
-  const getOpId = createOperationIdCounter();
   const paths: OpenAPIV3.PathsObject = {};
+  const getOpId = createOpIdGenerator();
   for (const router of appRouters.routers) {
     const result = processRouter(router, converter, getOpId, filters);
     Object.assign(paths, result.paths);

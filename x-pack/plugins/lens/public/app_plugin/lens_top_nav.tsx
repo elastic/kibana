@@ -8,9 +8,9 @@
 import { cloneDeep, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { isOfAggregateQueryType } from '@kbn/es-query';
+import { AggregateQuery, isOfAggregateQueryType, Query } from '@kbn/es-query';
 import { useStore } from 'react-redux';
-import { TopNavMenuData } from '@kbn/navigation-plugin/public';
+import { TopNavMenuData, TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -281,7 +281,6 @@ export const LensTopNavMenu = ({
   initialContext,
   indexPatternService,
   currentDoc,
-  onTextBasedSavedAndExit,
   getUserMessages,
   shortUrlService,
   isCurrentStateDirty,
@@ -577,6 +576,8 @@ export const LensTopNavMenu = ({
               return;
             }
 
+            const activeVisualization = visualizationMap[visualization.activeId];
+
             const {
               shareableUrl,
               savedObjectURL,
@@ -599,12 +600,22 @@ export const LensTopNavMenu = ({
               isCurrentStateDirty
             );
 
-            const sharingData = {
-              activeData,
-              columnsSorting: visualizationMap[visualization.activeId].getSortedColumns?.(
+            const datasourceLayers = getDatasourceLayers(
+              datasourceStates,
+              datasourceMap,
+              dataViews.indexPatterns
+            );
+
+            const exportDatatables =
+              activeVisualization.getExportDatatables?.(
                 visualization.state,
-                getDatasourceLayers(datasourceStates, datasourceMap, dataViews.indexPatterns)
-              ),
+                datasourceLayers,
+                activeData
+              ) ?? [];
+            const datatables =
+              exportDatatables.length > 0 ? exportDatatables : Object.values(activeData ?? {});
+            const sharingData = {
+              datatables,
               csvEnabled,
               reportingDisabled: !csvEnabled,
               title: title || defaultLensTitle,
@@ -614,9 +625,8 @@ export const LensTopNavMenu = ({
               },
               layout: {
                 dimensions:
-                  visualizationMap[visualization.activeId].getReportingLayout?.(
-                    visualization.state
-                  ) ?? DEFAULT_LENS_LAYOUT_DIMENSIONS,
+                  activeVisualization.getReportingLayout?.(visualization.state) ??
+                  DEFAULT_LENS_LAYOUT_DIMENSIONS,
               },
             };
 
@@ -804,7 +814,9 @@ export const LensTopNavMenu = ({
     startServices,
   ]);
 
-  const onQuerySubmitWrapped = useCallback(
+  const onQuerySubmitWrapped = useCallback<
+    Required<TopNavMenuProps<AggregateQuery>>['onQuerySubmit']
+  >(
     (payload) => {
       const { dateRange, query: newQuery } = payload;
       const currentRange = data.query.timefilter.timefilter.getTime();
@@ -820,7 +832,7 @@ export const LensTopNavMenu = ({
       }
       if (newQuery) {
         if (!isEqual(newQuery, query)) {
-          dispatchSetState({ query: newQuery });
+          dispatchSetState({ query: newQuery as Query });
           // check if query is text-based (esql etc) and switchAndCleanDatasource
           if (isOfAggregateQueryType(newQuery) && !isOnTextBasedMode) {
             setIsOnTextBasedMode(true);
@@ -847,14 +859,16 @@ export const LensTopNavMenu = ({
     ]
   );
 
-  const onSavedWrapped = useCallback(
+  const onSavedWrapped = useCallback<Required<TopNavMenuProps<AggregateQuery>>['onSaved']>(
     (newSavedQuery) => {
       dispatchSetState({ savedQuery: newSavedQuery });
     },
     [dispatchSetState]
   );
 
-  const onSavedQueryUpdatedWrapped = useCallback(
+  const onSavedQueryUpdatedWrapped = useCallback<
+    Required<TopNavMenuProps<AggregateQuery>>['onSavedQueryUpdated']
+  >(
     (newSavedQuery) => {
       // If the user tries to load the same saved query that is already loaded,
       // we will receive the same object reference which was previously frozen
@@ -1068,6 +1082,7 @@ export const LensTopNavMenu = ({
   return (
     <AggregateQueryTopNavMenu
       setMenuMountPoint={setHeaderActionMenu}
+      popoverBreakpoints={['xs', 's', 'm']}
       config={topNavConfig}
       saveQueryMenuVisibility={
         application.capabilities.visualize.saveQuery
@@ -1112,7 +1127,6 @@ export const LensTopNavMenu = ({
         )
       }
       textBasedLanguageModeErrors={textBasedLanguageModeErrors}
-      onTextBasedSavedAndExit={onTextBasedSavedAndExit}
       showFilterBar={true}
       data-test-subj="lnsApp_topNav"
       screenTitle={'lens'}

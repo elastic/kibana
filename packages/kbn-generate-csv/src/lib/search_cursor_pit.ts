@@ -1,19 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/core/server';
 import { lastValueFrom } from 'rxjs';
-import {
-  ES_SEARCH_STRATEGY,
-  type ISearchSource,
-  type SearchRequest,
-} from '@kbn/data-plugin/common';
+import { ES_SEARCH_STRATEGY, type ISearchSource } from '@kbn/data-plugin/common';
 import { SearchCursor, type SearchCursorClients, type SearchCursorSettings } from './search_cursor';
 import { i18nTexts } from './i18n_texts';
 
@@ -74,7 +71,7 @@ export class SearchCursorPit extends SearchCursor {
     return pitId;
   }
 
-  protected async searchWithPit(searchBody: SearchRequest) {
+  protected async searchWithPit(searchBody: estypes.SearchRequest) {
     const { maxConcurrentShardRequests, scroll, taskInstanceFields } = this.settings;
 
     // maxConcurrentShardRequests=0 is not supported

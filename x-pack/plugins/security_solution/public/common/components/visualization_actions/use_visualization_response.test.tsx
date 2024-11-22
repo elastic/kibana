@@ -45,7 +45,9 @@ describe('useVisualizationResponse', () => {
   });
   it('should get result by visualization id', () => {
     const { result } = renderHook(() => useVisualizationResponse({ visualizationId }), {
-      wrapper: ({ children }) => <TestProviders store={mockStore}>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders store={mockStore}>{children}</TestProviders>
+      ),
     });
     expect(result.current.responses).toEqual(
       parseVisualizationData(mockState.inputs.global.queries[0].inspect.response)

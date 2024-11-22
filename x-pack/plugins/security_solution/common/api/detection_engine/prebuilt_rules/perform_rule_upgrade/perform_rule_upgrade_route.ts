@@ -5,94 +5,154 @@
  * 2.0.
  */
 
-import { enumeration } from '@kbn/securitysolution-io-ts-types';
-import * as t from 'io-ts';
+import { z } from '@kbn/zod';
+import { mapValues } from 'lodash';
+import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
+import { AggregatedPrebuiltRuleError, DiffableAllFields } from '../model';
+import { RuleSignatureId, RuleVersion } from '../../model';
 
-import type { RuleResponse } from '../../model';
-import type { AggregatedPrebuiltRuleError } from '../model';
+export type Mode = z.infer<typeof Mode>;
+export const Mode = z.enum(['ALL_RULES', 'SPECIFIC_RULES']);
+export type ModeEnum = typeof Mode.enum;
+export const ModeEnum = Mode.enum;
 
-export enum PickVersionValues {
-  BASE = 'BASE',
-  CURRENT = 'CURRENT',
-  TARGET = 'TARGET',
-}
+export type PickVersionValues = z.infer<typeof PickVersionValues>;
+export const PickVersionValues = z.enum(['BASE', 'CURRENT', 'TARGET', 'MERGED']);
+export type PickVersionValuesEnum = typeof PickVersionValues.enum;
+export const PickVersionValuesEnum = PickVersionValues.enum;
 
-export const TPickVersionValues = enumeration('PickVersionValues', PickVersionValues);
+// Specific handling of special fields according to:
+// https://github.com/elastic/kibana/issues/186544
+export const FIELDS_TO_UPGRADE_TO_CURRENT_VERSION = [
+  'enabled',
+  'exceptions_list',
+  'alert_suppression',
+  'actions',
+  'throttle',
+  'response_actions',
+  'meta',
+  'output_index',
+  'namespace',
+  'alias_purpose',
+  'alias_target_id',
+  'outcome',
+  'concurrent_searches',
+  'items_per_search',
+] as const;
 
-export const RuleUpgradeSpecifier = t.exact(
-  t.intersection([
-    t.type({
-      rule_id: t.string,
-      /**
-       * This parameter is needed for handling race conditions with Optimistic Concurrency Control.
-       * Two or more users can call upgrade/_review and upgrade/_perform endpoints concurrently.
-       * Also, in general the time between these two calls can be anything.
-       * The idea is to only allow the user to install a rule if the user has reviewed the exact version
-       * of it that had been returned from the _review endpoint. If the version changed on the BE,
-       * upgrade/_perform endpoint will return a version mismatch error for this rule.
-       */
-      revision: t.number,
-      /**
-       * The target version to upgrade to.
-       */
-      version: t.number,
-    }),
-    t.partial({
-      pick_version: TPickVersionValues,
-    }),
-  ])
-);
-export type RuleUpgradeSpecifier = t.TypeOf<typeof RuleUpgradeSpecifier>;
+export const FIELDS_TO_UPGRADE_TO_TARGET_VERSION = [
+  'type',
+  'rule_id',
+  'version',
+  'author',
+  'license',
+] as const;
 
-export type UpgradeSpecificRulesRequest = t.TypeOf<typeof UpgradeSpecificRulesRequest>;
-export const UpgradeSpecificRulesRequest = t.exact(
-  t.intersection([
-    t.type({
-      mode: t.literal(`SPECIFIC_RULES`),
-      rules: t.array(RuleUpgradeSpecifier),
-    }),
-    t.partial({
-      pick_version: TPickVersionValues,
-    }),
-  ])
-);
+// Fields which are part of DiffableRule but are not upgradeable
+// and need to be omittted from the DiffableUpgradableFields
+export const NON_UPGRADEABLE_DIFFABLE_FIELDS = ['type', 'rule_id', 'version'] as const;
 
-export const UpgradeAllRulesRequest = t.exact(
-  t.intersection([
-    t.type({
-      mode: t.literal(`ALL_RULES`),
-    }),
-    t.partial({
-      pick_version: TPickVersionValues,
-    }),
-  ])
-);
+type NON_UPGRADEABLE_DIFFABLE_FIELDS_TO_OMIT_TYPE = {
+  readonly [key in (typeof NON_UPGRADEABLE_DIFFABLE_FIELDS)[number]]: true;
+};
 
-export const PerformRuleUpgradeRequestBody = t.union([
+// This transformation is needed to have Zod's `omit` accept the rule fields that need to be omitted
+export const DiffableFieldsToOmit = NON_UPGRADEABLE_DIFFABLE_FIELDS.reduce((acc, field) => {
+  return { ...acc, [field]: true };
+}, {} as NON_UPGRADEABLE_DIFFABLE_FIELDS_TO_OMIT_TYPE);
+
+/**
+ * Fields upgradable by the /upgrade/_perform endpoint.
+ * Specific fields are omitted because they are not upgradeable, and
+ * handled under the hood by endpoint logic.
+ * See: https://github.com/elastic/kibana/issues/186544
+ */
+export type DiffableUpgradableFields = z.infer<typeof DiffableUpgradableFields>;
+export const DiffableUpgradableFields = DiffableAllFields.omit(DiffableFieldsToOmit);
+
+export type FieldUpgradeSpecifier<T> = z.infer<
+  ReturnType<typeof fieldUpgradeSpecifier<z.ZodType<T>>>
+>;
+export const fieldUpgradeSpecifier = <T extends z.ZodTypeAny>(fieldSchema: T) =>
+  z.discriminatedUnion('pick_version', [
+    z
+      .object({
+        pick_version: PickVersionValues,
+      })
+      .strict(),
+    z
+      .object({
+        pick_version: z.literal('RESOLVED'),
+        resolved_value: fieldSchema,
+      })
+      .strict(),
+  ]);
+
+type FieldUpgradeSpecifiers<TFields> = {
+  [Field in keyof TFields]?: FieldUpgradeSpecifier<TFields[Field]>;
+};
+
+export type RuleFieldsToUpgrade = FieldUpgradeSpecifiers<DiffableUpgradableFields>;
+export const RuleFieldsToUpgrade = z
+  .object(
+    mapValues(DiffableUpgradableFields.shape, (fieldSchema) => {
+      return fieldUpgradeSpecifier(fieldSchema).optional();
+    })
+  )
+  .strict();
+
+export type RuleUpgradeSpecifier = z.infer<typeof RuleUpgradeSpecifier>;
+export const RuleUpgradeSpecifier = z.object({
+  rule_id: RuleSignatureId,
+  revision: z.number(),
+  version: RuleVersion,
+  pick_version: PickVersionValues.optional(),
+  // Fields that can be customized during the upgrade workflow
+  // as decided in: https://github.com/elastic/kibana/issues/186544
+  fields: RuleFieldsToUpgrade.optional(),
+});
+
+export type UpgradeSpecificRulesRequest = z.infer<typeof UpgradeSpecificRulesRequest>;
+export const UpgradeSpecificRulesRequest = z.object({
+  mode: z.literal('SPECIFIC_RULES'),
+  rules: z.array(RuleUpgradeSpecifier),
+  pick_version: PickVersionValues.optional(),
+});
+
+export type UpgradeAllRulesRequest = z.infer<typeof UpgradeAllRulesRequest>;
+export const UpgradeAllRulesRequest = z.object({
+  mode: z.literal('ALL_RULES'),
+  pick_version: PickVersionValues.optional(),
+});
+
+export type SkipRuleUpgradeReason = z.infer<typeof SkipRuleUpgradeReason>;
+export const SkipRuleUpgradeReason = z.enum(['RULE_UP_TO_DATE']);
+export type SkipRuleUpgradeReasonEnum = typeof SkipRuleUpgradeReason.enum;
+export const SkipRuleUpgradeReasonEnum = SkipRuleUpgradeReason.enum;
+
+export type SkippedRuleUpgrade = z.infer<typeof SkippedRuleUpgrade>;
+export const SkippedRuleUpgrade = z.object({
+  rule_id: z.string(),
+  reason: SkipRuleUpgradeReason,
+});
+
+export type PerformRuleUpgradeResponseBody = z.infer<typeof PerformRuleUpgradeResponseBody>;
+export const PerformRuleUpgradeResponseBody = z.object({
+  summary: z.object({
+    total: z.number(),
+    succeeded: z.number(),
+    skipped: z.number(),
+    failed: z.number(),
+  }),
+  results: z.object({
+    updated: z.array(RuleResponse),
+    skipped: z.array(SkippedRuleUpgrade),
+  }),
+  errors: z.array(AggregatedPrebuiltRuleError),
+});
+
+export type PerformRuleUpgradeRequestBody = z.infer<typeof PerformRuleUpgradeRequestBody>;
+export const PerformRuleUpgradeRequestBody = z.discriminatedUnion('mode', [
   UpgradeAllRulesRequest,
   UpgradeSpecificRulesRequest,
 ]);
-export type PerformRuleUpgradeRequestBody = t.TypeOf<typeof PerformRuleUpgradeRequestBody>;
-
-export enum SkipRuleUpgradeReason {
-  RULE_UP_TO_DATE = 'RULE_UP_TO_DATE',
-}
-
-export interface SkippedRuleUpgrade {
-  rule_id: string;
-  reason: SkipRuleUpgradeReason;
-}
-
-export interface PerformRuleUpgradeResponseBody {
-  summary: {
-    total: number;
-    succeeded: number;
-    skipped: number;
-    failed: number;
-  };
-  results: {
-    updated: RuleResponse[];
-    skipped: SkippedRuleUpgrade[];
-  };
-  errors: AggregatedPrebuiltRuleError[];
-}

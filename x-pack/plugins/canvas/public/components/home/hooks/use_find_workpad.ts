@@ -8,21 +8,21 @@
 import { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { useNotifyService, useWorkpadService } from '../../../services';
+import { useNotifyService } from '../../../services';
+import { getCanvasWorkpadService } from '../../../services/canvas_workpad_service';
 
 export const useFindWorkpads = () => {
-  const workpadService = useWorkpadService();
   const notifyService = useNotifyService();
 
   return useCallback(
     async (text = '') => {
       try {
-        return await workpadService.find(text);
+        return await getCanvasWorkpadService().find(text);
       } catch (err) {
         notifyService.error(err, { title: errors.getFindFailureErrorMessage() });
       }
     },
-    [notifyService, workpadService]
+    [notifyService]
   );
 };
 

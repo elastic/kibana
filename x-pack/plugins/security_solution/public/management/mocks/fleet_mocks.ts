@@ -154,7 +154,7 @@ export const fleetGetPackageHttpMock = httpHandlerMockFactory<FleetGetPackageHtt
   {
     id: 'endpointPackage',
     method: 'get',
-    path: EPM_API_ROUTES.INFO_PATTERN_DEPRECATED,
+    path: EPM_API_ROUTES.INFO_WITHOUT_VERSION_PATTERN,
     handler() {
       const generator = new EndpointDocGenerator('seed');
 

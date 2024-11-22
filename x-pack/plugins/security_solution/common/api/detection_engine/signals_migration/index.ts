@@ -8,4 +8,4 @@
 export * from './create_signals_migration/create_signals_migration.gen';
 export * from './delete_signals_migration/delete_signals_migration.gen';
 export * from './finalize_signals_migration/finalize_signals_migration.gen';
-export * from './get_signals_migration_status/get_signals_migration_status.gen';
+export * from './read_signals_migration_status/read_signals_migration_status.gen';

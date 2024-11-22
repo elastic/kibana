@@ -16,6 +16,7 @@ import {
   SavedObjectReference,
   Logger,
   ISavedObjectsRepository,
+  IScopedClusterClient,
 } from '@kbn/core/server';
 import { AnySchema } from 'joi';
 import { SubActionConnector } from './sub_action_framework/sub_action_connector';
@@ -39,11 +40,11 @@ export type ActionTypeSecrets = Record<string, unknown>;
 export type ActionTypeParams = Record<string, unknown>;
 export type ConnectorTokenClientContract = PublicMethodsOf<ConnectorTokenClient>;
 
-import type { ActionExecutionSource } from './lib';
 import { Connector, ConnectorWithExtraFindData } from './application/connector/types';
-export type { ActionExecutionSource } from './lib';
-
+import type { ActionExecutionSource } from './lib';
 export { ActionExecutionSourceType } from './lib';
+import { ConnectorUsageCollector } from './usage';
+export { ConnectorUsageCollector } from './usage';
 
 export interface Services {
   savedObjectsClient: SavedObjectsClientContract;
@@ -55,6 +56,10 @@ export interface UnsecuredServices {
   savedObjectsClient: ISavedObjectsRepository;
   scopedClusterClient: ElasticsearchClient;
   connectorTokenClient: ConnectorTokenClient;
+}
+
+export interface HookServices {
+  scopedClusterClient: IScopedClusterClient;
 }
 
 export interface ActionsApiRequestHandlerContext {
@@ -88,6 +93,7 @@ export interface ActionTypeExecutorOptions<
   configurationUtilities: ActionsConfigurationUtilities;
   source?: ActionExecutionSource<unknown>;
   request?: KibanaRequest;
+  connectorUsageCollector: ConnectorUsageCollector;
 }
 
 export type ActionResult = Connector;
@@ -137,6 +143,44 @@ export type RenderParameterTemplates<Params extends ActionTypeParams> = (
   actionId?: string
 ) => Params;
 
+export interface PreSaveConnectorHookParams<
+  Config extends ActionTypeConfig = ActionTypeConfig,
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets
+> {
+  connectorId: string;
+  config: Config;
+  secrets: Secrets;
+  logger: Logger;
+  request: KibanaRequest;
+  services: HookServices;
+  isUpdate: boolean;
+}
+
+export interface PostSaveConnectorHookParams<
+  Config extends ActionTypeConfig = ActionTypeConfig,
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets
+> {
+  connectorId: string;
+  config: Config;
+  secrets: Secrets;
+  logger: Logger;
+  request: KibanaRequest;
+  services: HookServices;
+  isUpdate: boolean;
+  wasSuccessful: boolean;
+}
+
+export interface PostDeleteConnectorHookParams<
+  Config extends ActionTypeConfig = ActionTypeConfig,
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets
+> {
+  connectorId: string;
+  config: Config;
+  logger: Logger;
+  request: KibanaRequest;
+  services: HookServices;
+}
+
 export interface ActionType<
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
@@ -170,6 +214,9 @@ export interface ActionType<
   renderParameterTemplates?: RenderParameterTemplates<Params>;
   executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
   getService?: (params: ServiceParams<Config, Secrets>) => SubActionConnector<Config, Secrets>;
+  preSaveHook?: (params: PreSaveConnectorHookParams<Config, Secrets>) => Promise<void>;
+  postSaveHook?: (params: PostSaveConnectorHookParams<Config, Secrets>) => Promise<void>;
+  postDeleteHook?: (params: PostDeleteConnectorHookParams<Config, Secrets>) => Promise<void>;
 }
 
 export interface RawAction extends Record<string, unknown> {

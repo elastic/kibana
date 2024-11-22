@@ -39,6 +39,7 @@ import {
 import { SummarizedAlertsChunk, ScopedQueryAlerts } from '../..';
 import { FormatAlert } from '../../types';
 import { expandFlattenedAlert } from './format_alert';
+import { injectAnalyzeWildcard } from './inject_analyze_wildcard';
 
 const MAX_ALERT_DOCS_TO_RETURN = 100;
 enum AlertTypes {
@@ -310,9 +311,14 @@ export const getQueryByScopedQueries = ({
       return;
     }
 
-    const scopedQueryFilter = generateAlertsFilterDSL({
-      query: scopedQuery as AlertsFilter['query'],
-    })[0] as { bool: BoolQuery };
+    const scopedQueryFilter = generateAlertsFilterDSL(
+      {
+        query: scopedQuery as AlertsFilter['query'],
+      },
+      {
+        analyzeWildcard: true,
+      }
+    )[0] as { bool: BoolQuery };
 
     aggs[id] = {
       filter: {
@@ -324,7 +330,7 @@ export const getQueryByScopedQueries = ({
       aggs: {
         alertId: {
           top_hits: {
-            size: 1,
+            size: MAX_ALERT_DOCS_TO_RETURN,
             _source: {
               includes: [ALERT_UUID],
             },
@@ -341,11 +347,19 @@ export const getQueryByScopedQueries = ({
   };
 };
 
-const generateAlertsFilterDSL = (alertsFilter: AlertsFilter): QueryDslQueryContainer[] => {
+const generateAlertsFilterDSL = (
+  alertsFilter: AlertsFilter,
+  options?: { analyzeWildcard?: boolean }
+): QueryDslQueryContainer[] => {
   const filter: QueryDslQueryContainer[] = [];
+  const { analyzeWildcard = false } = options || {};
 
   if (alertsFilter.query) {
-    filter.push(JSON.parse(alertsFilter.query.dsl!));
+    const parsedQuery = JSON.parse(alertsFilter.query.dsl!);
+    if (analyzeWildcard) {
+      injectAnalyzeWildcard(parsedQuery);
+    }
+    filter.push(parsedQuery);
   }
   if (alertsFilter.timeframe) {
     filter.push(

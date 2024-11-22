@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useState } from 'react';
@@ -81,7 +82,7 @@ export const CloudDetailsPanel = ({
       <EuiSpacer size="l" />
       <EuiCheckableCard
         id={CloudDetail.ElasticsearchEndpoint}
-        name={CloudDetail.ElasticsearchEndpoint}
+        name="copy-connection-details-choices"
         label={
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem>
@@ -122,7 +123,7 @@ export const CloudDetailsPanel = ({
       {Boolean(cloudId) && (
         <EuiCheckableCard
           id={CloudDetail.CloudId}
-          name={CloudDetail.CloudId}
+          name="copy-connection-details-choices"
           label={
             <EuiTitle size="xxs">
               <h5>

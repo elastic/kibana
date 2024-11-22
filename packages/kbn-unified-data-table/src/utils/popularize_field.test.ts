@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Capabilities } from '@kbn/core/public';
@@ -38,11 +39,13 @@ describe('Popularize field', () => {
   });
 
   test('do not updates saved object if data view is not persisted', async () => {
+    const field = { count: 0 };
     const dataView = {
       id: 'id',
       fields: {
-        getByName: () => ({ count: 0 }),
+        getByName: () => field,
       },
+      setFieldCount: jest.fn(),
       isPersisted: () => false,
     } as unknown as DataView;
     const updateSavedObjectMock = jest.fn();
@@ -62,6 +65,9 @@ describe('Popularize field', () => {
       fields: {
         getByName: () => field,
       },
+      setFieldCount: jest.fn().mockImplementation((fieldName, count) => {
+        field.count = count;
+      }),
       isPersisted: () => true,
     } as unknown as DataView;
     const fieldName = '@timestamp';
@@ -84,6 +90,9 @@ describe('Popularize field', () => {
       fields: {
         getByName: () => field,
       },
+      setFieldCount: jest.fn().mockImplementation((fieldName, count) => {
+        field.count = count;
+      }),
       isPersisted: () => true,
     } as unknown as DataView;
     const fieldName = '@timestamp';

@@ -21,9 +21,7 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
 import { FleetSetup, FleetStart } from '@kbn/fleet-plugin/public';
@@ -34,7 +32,14 @@ import { PLUGIN_ID } from '../common';
 import { ObservabilityOnboardingLocatorDefinition } from './locators/onboarding_locator/locator_definition';
 import { ObservabilityOnboardingPluginLocators } from './locators';
 import { ConfigSchema } from '.';
-import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../common/telemetry_events';
+import {
+  OBSERVABILITY_ONBOARDING_FEEDBACK_TELEMETRY_EVENT,
+  OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT,
+  OBSERVABILITY_ONBOARDING_AUTODETECT_TELEMETRY_EVENT,
+  OBSERVABILITY_ONBOARDING_FLOW_PROGRESS_TELEMETRY_EVENT,
+  OBSERVABILITY_ONBOARDING_FLOW_ERROR_TELEMETRY_EVENT,
+  OBSERVABILITY_ONBOARDING_FLOW_DATASET_DETECTED_TELEMETRY_EVENT,
+} from '../common/telemetry_events';
 
 export type ObservabilityOnboardingPluginSetup = void;
 export type ObservabilityOnboardingPluginStart = void;
@@ -46,7 +51,6 @@ export interface ObservabilityOnboardingPluginSetupDeps {
   discover: DiscoverSetup;
   share: SharePluginSetup;
   fleet: FleetSetup;
-  security: SecurityPluginSetup;
   cloud?: CloudSetup;
   usageCollection?: UsageCollectionSetup;
 }
@@ -58,10 +62,8 @@ export interface ObservabilityOnboardingPluginStartDeps {
   discover: DiscoverStart;
   share: SharePluginStart;
   fleet: FleetStart;
-  security: SecurityPluginStart;
   cloud?: CloudStart;
   usageCollection?: UsageCollectionStart;
-  cloudExperiments?: CloudExperimentsPluginStart;
 }
 
 export type ObservabilityOnboardingContextValue = CoreStart &
@@ -80,7 +82,8 @@ export class ObservabilityOnboardingPlugin
     const {
       ui: { enabled: isObservabilityOnboardingUiEnabled },
     } = config;
-
+    const isServerlessBuild = this.ctx.env.packageInfo.buildFlavor === 'serverless';
+    const isDevEnvironment = this.ctx.env.mode.dev;
     const pluginSetupDeps = plugins;
 
     // set xpack.observability_onboarding.ui.enabled: true
@@ -111,8 +114,12 @@ export class ObservabilityOnboardingPlugin
             corePlugins: corePlugins as ObservabilityOnboardingPluginStartDeps,
             config,
             context: {
-              isServerless: Boolean(pluginSetupDeps.cloud?.isServerlessEnabled),
+              isDev: isDevEnvironment,
+              isCloud: Boolean(pluginSetupDeps.cloud?.isCloudEnabled),
+              isServerless:
+                Boolean(pluginSetupDeps.cloud?.isServerlessEnabled) || isServerlessBuild,
               stackVersion,
+              cloudServiceProvider: pluginSetupDeps.cloud?.csp,
             },
           });
         },
@@ -125,6 +132,13 @@ export class ObservabilityOnboardingPlugin
     };
 
     core.analytics.registerEventType(OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT);
+    core.analytics.registerEventType(OBSERVABILITY_ONBOARDING_FEEDBACK_TELEMETRY_EVENT);
+    core.analytics.registerEventType(OBSERVABILITY_ONBOARDING_AUTODETECT_TELEMETRY_EVENT);
+    core.analytics.registerEventType(OBSERVABILITY_ONBOARDING_FLOW_PROGRESS_TELEMETRY_EVENT);
+    core.analytics.registerEventType(OBSERVABILITY_ONBOARDING_FLOW_ERROR_TELEMETRY_EVENT);
+    core.analytics.registerEventType(
+      OBSERVABILITY_ONBOARDING_FLOW_DATASET_DETECTED_TELEMETRY_EVENT
+    );
 
     return {
       locators: this.locators,

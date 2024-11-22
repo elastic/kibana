@@ -1,14 +1,15 @@
 openapi: 3.0.0
 info:
   title: Find Prompts API endpoint
-  version: '1'
+  version: '2023-10-31'
 paths:
-  /internal/elastic_assistant/prompts/_find:
+  /api/security_ai_assistant/prompts/_find:
     get:
-      operationId: FindPrompts
       x-codegen-enabled: true
-      description: Finds prompts that match the given query.
-      summary: Finds prompts that match the given query.
+      x-labels: [ess, serverless]
+      operationId: FindPrompts
+      description: Get a list of all prompts.
+      summary: Get prompts
       tags:
         - Prompts API
       parameters:

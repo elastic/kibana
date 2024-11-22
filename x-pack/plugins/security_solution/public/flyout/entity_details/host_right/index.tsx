@@ -9,6 +9,10 @@ import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
+import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
+import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
+import { useNonClosedAlerts } from '../../../cloud_security_posture/hooks/use_non_closed_alerts';
+import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
 import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
 import { RISK_INPUTS_TAB_QUERY_ID } from '../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
 import type { Refetch } from '../../../common/types';
@@ -29,8 +33,9 @@ import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anom
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import { useObservedHost } from './hooks/use_observed_host';
 import { HostDetailsPanelKey } from '../host_details_left';
-import type { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
+import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { HostPreviewPanelFooter } from '../host_preview/footer';
+import { EntityEventTypes } from '../../../common/lib/telemetry';
 
 export interface HostPanelProps extends Record<string, unknown> {
   contextID: string;
@@ -93,6 +98,18 @@ export const HostPanel = ({
     { onSuccess: refetchRiskScore }
   );
 
+  const { hasMisconfigurationFindings } = useHasMisconfigurations('host.name', hostName);
+
+  const { hasVulnerabilitiesFindings } = useHasVulnerabilities('host.name', hostName);
+
+  const { hasNonClosedAlerts } = useNonClosedAlerts({
+    field: 'host.name',
+    value: hostName,
+    to,
+    from,
+    queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}HOST_NAME_RIGHT`,
+  });
+
   useQueryInspector({
     deleteQuery,
     inspect: inspectRiskScore,
@@ -104,7 +121,7 @@ export const HostPanel = ({
 
   const openTabPanel = useCallback(
     (tab?: EntityDetailsLeftPanelTab) => {
-      telemetry.reportRiskInputsExpandedFlyoutOpened({
+      telemetry.reportEvent(EntityEventTypes.RiskInputsExpandedFlyoutOpened, {
         entity: 'host',
       });
 
@@ -115,13 +132,34 @@ export const HostPanel = ({
           scopeId,
           isRiskScoreExist,
           path: tab ? { tab } : undefined,
+          hasMisconfigurationFindings,
+          hasVulnerabilitiesFindings,
+          hasNonClosedAlerts,
         },
       });
     },
-    [telemetry, openLeftPanel, hostName, isRiskScoreExist, scopeId]
+    [
+      telemetry,
+      openLeftPanel,
+      hostName,
+      scopeId,
+      isRiskScoreExist,
+      hasMisconfigurationFindings,
+      hasVulnerabilitiesFindings,
+      hasNonClosedAlerts,
+    ]
   );
 
-  const openDefaultPanel = useCallback(() => openTabPanel(), [openTabPanel]);
+  const openDefaultPanel = useCallback(
+    () =>
+      openTabPanel(
+        isRiskScoreExist
+          ? EntityDetailsLeftPanelTab.RISK_INPUTS
+          : EntityDetailsLeftPanelTab.CSP_INSIGHTS
+      ),
+    [isRiskScoreExist, openTabPanel]
+  );
+
   const observedHost = useObservedHost(hostName, scopeId);
 
   if (observedHost.isLoading) {
@@ -148,7 +186,13 @@ export const HostPanel = ({
         return (
           <>
             <FlyoutNavigation
-              flyoutIsExpandable={!isPreviewMode && isRiskScoreExist}
+              flyoutIsExpandable={
+                !isPreviewMode &&
+                (isRiskScoreExist ||
+                  hasMisconfigurationFindings ||
+                  hasVulnerabilitiesFindings ||
+                  hasNonClosedAlerts)
+              }
               expandDetails={openDefaultPanel}
             />
             <HostPanelHeader hostName={hostName} observedHost={observedHostWithAnomalies} />

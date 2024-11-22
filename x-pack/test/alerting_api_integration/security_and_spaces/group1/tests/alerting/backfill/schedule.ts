@@ -33,7 +33,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
     const objectRemover = new ObjectRemover(supertest);
 
     afterEach(async () => {
-      asyncForEach(backfillIds, async ({ id, spaceId }: { id: string; spaceId: string }) => {
+      await asyncForEach(backfillIds, async ({ id, spaceId }: { id: string; spaceId: string }) => {
         await supertest
           .delete(`${getUrlPrefix(spaceId)}/internal/alerting/rules/backfill/${id}`)
           .set('kbn-xsrf', 'foo');
@@ -63,7 +63,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
         rule_type_id: 'test.patternFiringAutoRecoverFalse',
         params: {
           pattern: {
-            instance: [true, false, true],
+            instance: ['run_long', 'run_long', 'run_long'],
           },
         },
         schedule: { interval: '12h' },
@@ -85,7 +85,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
         expect(result.rule.tags).to.eql(['foo']);
         expect(result.rule.params).to.eql({
           pattern: {
-            instance: [true, false, true],
+            instance: ['run_long', 'run_long', 'run_long'],
           },
         });
         expect(result.rule.enabled).to.eql(true);
@@ -103,7 +103,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
         expect(result.rule.tags).to.eql(['foo']);
         expect(result.rule.params).to.eql({
           pattern: {
-            instance: [true, false, true],
+            instance: ['run_long', 'run_long', 'run_long'],
           },
         });
         expect(result.rule.enabled).to.eql(true);
@@ -232,9 +232,15 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
 
               // check that the ad hoc run SO was created
               const adHocRunSO1 = (await getAdHocRunSO(result[0].id)) as SavedObject<AdHocRunSO>;
-              const adHocRun1: AdHocRunSO = get(adHocRunSO1, 'ad_hoc_run_params');
+              const adHocRun1: AdHocRunSO = get(
+                adHocRunSO1,
+                'ad_hoc_run_params'
+              ) as unknown as AdHocRunSO;
               const adHocRunSO2 = (await getAdHocRunSO(result[1].id)) as SavedObject<AdHocRunSO>;
-              const adHocRun2: AdHocRunSO = get(adHocRunSO2, 'ad_hoc_run_params');
+              const adHocRun2: AdHocRunSO = get(
+                adHocRunSO2,
+                'ad_hoc_run_params'
+              ) as unknown as AdHocRunSO;
 
               expect(typeof adHocRun1.apiKeyId).to.be('string');
               expect(typeof adHocRun1.apiKeyToUse).to.be('string');
@@ -435,11 +441,11 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
 
               // check that the ad hoc run SO was created
               const adHocRunSO1 = (await getAdHocRunSO(result[0].id)) as SavedObject<AdHocRunSO>;
-              const adHocRun1: AdHocRunSO = get(adHocRunSO1, 'ad_hoc_run_params');
+              const adHocRun1: AdHocRunSO = get(adHocRunSO1, 'ad_hoc_run_params')!;
               const adHocRunSO2 = (await getAdHocRunSO(result[1].id)) as SavedObject<AdHocRunSO>;
-              const adHocRun2: AdHocRunSO = get(adHocRunSO2, 'ad_hoc_run_params');
+              const adHocRun2: AdHocRunSO = get(adHocRunSO2, 'ad_hoc_run_params')!;
               const adHocRunSO3 = (await getAdHocRunSO(result[2].id)) as SavedObject<AdHocRunSO>;
-              const adHocRun3: AdHocRunSO = get(adHocRunSO3, 'ad_hoc_run_params');
+              const adHocRun3: AdHocRunSO = get(adHocRunSO3, 'ad_hoc_run_params')!;
 
               expect(typeof adHocRun1.apiKeyId).to.be('string');
               expect(typeof adHocRun1.apiKeyToUse).to.be('string');
@@ -753,7 +759,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
         });
 
         it('should handle schedule request where some requests succeed and some requests fail appropriately', async () => {
-          const start = moment().utc().startOf('day').subtract(7, 'days').toISOString();
+          const start = moment().utc().startOf('day').subtract(14, 'days').toISOString();
           const end = moment().utc().startOf('day').subtract(5, 'days').toISOString();
           // create 2 rules
           const rresponse1 = await supertest
@@ -940,11 +946,11 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
 
               // check that the expected ad hoc run SOs were created
               const adHocRunSO1 = (await getAdHocRunSO(result[0].id)) as SavedObject<AdHocRunSO>;
-              const adHocRun1: AdHocRunSO = get(adHocRunSO1, 'ad_hoc_run_params');
+              const adHocRun1: AdHocRunSO = get(adHocRunSO1, 'ad_hoc_run_params')!;
               const adHocRunSO2 = (await getAdHocRunSO(result[1].id)) as SavedObject<AdHocRunSO>;
-              const adHocRun2: AdHocRunSO = get(adHocRunSO2, 'ad_hoc_run_params');
+              const adHocRun2: AdHocRunSO = get(adHocRunSO2, 'ad_hoc_run_params')!;
               const adHocRunSO3 = (await getAdHocRunSO(result[5].id)) as SavedObject<AdHocRunSO>;
-              const adHocRun3: AdHocRunSO = get(adHocRunSO3, 'ad_hoc_run_params');
+              const adHocRun3: AdHocRunSO = get(adHocRunSO3, 'ad_hoc_run_params')!;
 
               expect(typeof adHocRun1.apiKeyId).to.be('string');
               expect(typeof adHocRun1.apiKeyToUse).to.be('string');

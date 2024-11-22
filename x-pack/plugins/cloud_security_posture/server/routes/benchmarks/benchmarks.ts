@@ -20,8 +20,10 @@ export const defineGetBenchmarksRoute = (router: CspRouter) =>
     .get({
       access: 'internal',
       path: BENCHMARKS_ROUTE_PATH,
-      options: {
-        tags: ['access:cloud-security-posture-read'],
+      security: {
+        authz: {
+          requiredPrivileges: ['cloud-security-posture-read'],
+        },
       },
     })
     .addVersion(
@@ -34,9 +36,6 @@ export const defineGetBenchmarksRoute = (router: CspRouter) =>
         },
       },
       async (context, request, response) => {
-        if (!(await context.fleet).authz.fleet.all) {
-          return response.forbidden();
-        }
         const cspContext = await context.csp;
         try {
           const cspBenchmarks = await getBenchmarksV1(
@@ -72,9 +71,6 @@ export const defineGetBenchmarksRoute = (router: CspRouter) =>
         },
       },
       async (context, request, response) => {
-        if (!(await context.fleet).authz.fleet.all) {
-          return response.forbidden();
-        }
         const cspContext = await context.csp;
         const esClient = cspContext.esClient.asCurrentUser;
         try {

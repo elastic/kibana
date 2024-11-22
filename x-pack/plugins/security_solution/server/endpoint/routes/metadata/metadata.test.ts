@@ -17,7 +17,13 @@ import {
   httpServiceMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
-import type { HostInfo, MetadataListResponse } from '../../../../common/endpoint/types';
+import { createAppContextStartContractMock as fleetCreateAppContextStartContractMock } from '@kbn/fleet-plugin/server/mocks';
+import { appContextService as fleetAppContextService } from '@kbn/fleet-plugin/server/services';
+import type {
+  HostInfo,
+  MetadataListResponse,
+  UnitedAgentMetadataPersistedData,
+} from '../../../../common/endpoint/types';
 import { HostStatus } from '../../../../common/endpoint/types';
 import { registerEndpointRoutes } from '.';
 import {
@@ -45,7 +51,7 @@ import {
   ENDPOINT_DEFAULT_SORT_FIELD,
   HOST_METADATA_GET_ROUTE,
   HOST_METADATA_LIST_ROUTE,
-  METADATA_TRANSFORMS_STATUS_ROUTE,
+  METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE,
   METADATA_UNITED_INDEX,
 } from '../../../../common/endpoint/constants';
 import { TRANSFORM_STATES } from '../../../../common/constants';
@@ -60,6 +66,7 @@ import type { TransformGetTransformStatsResponse } from '@elastic/elasticsearch/
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
 import type { VersionedRouteConfig } from '@kbn/core-http-server';
 import type { SecuritySolutionPluginRouterMock } from '../../../mocks';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 describe('test endpoint routes', () => {
   let routerMock: SecuritySolutionPluginRouterMock;
@@ -92,8 +99,7 @@ describe('test endpoint routes', () => {
     startContract = createMockEndpointAppContextServiceStartContract();
 
     (
-      startContract.endpointFleetServicesFactory.asInternalUser()
-        .packagePolicy as jest.Mocked<PackagePolicyClient>
+      startContract.fleetStartServices.packagePolicyService as jest.Mocked<PackagePolicyClient>
     ).list.mockImplementation(() => {
       return Promise.resolve({
         items: [],
@@ -105,11 +111,14 @@ describe('test endpoint routes', () => {
 
     endpointAppContextService = new EndpointAppContextService();
     endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
-    endpointAppContextService.start({ ...startContract });
-    mockAgentClient = startContract.endpointFleetServicesFactory.asInternalUser()
-      .agent as jest.Mocked<AgentClient>;
-    mockAgentPolicyService = startContract.endpointFleetServicesFactory.asInternalUser()
-      .agentPolicy as jest.Mocked<AgentPolicyServiceInterface>;
+    endpointAppContextService.start({
+      ...startContract,
+      esClient: mockScopedClient.asInternalUser,
+    });
+    mockAgentClient = startContract.fleetStartServices.agentService
+      .asInternalUser as jest.Mocked<AgentClient>;
+    mockAgentPolicyService = startContract.fleetStartServices
+      .agentPolicyService as jest.Mocked<AgentPolicyServiceInterface>;
 
     registerEndpointRoutes(routerMock, {
       ...createMockEndpointAppContext(),
@@ -120,6 +129,29 @@ describe('test endpoint routes', () => {
   afterEach(() => endpointAppContextService.stop());
 
   describe('GET list endpoints route', () => {
+    let searchListResponse: estypes.SearchResponse<UnitedAgentMetadataPersistedData>;
+
+    beforeEach(() => {
+      mockSavedObjectClient.find.mockResolvedValueOnce({
+        total: 0,
+        saved_objects: [],
+        page: 1,
+        per_page: 10,
+      });
+      fleetAppContextService.start(
+        fleetCreateAppContextStartContractMock({}, false, {
+          withoutSpaceExtensions: mockSavedObjectClient,
+        })
+      );
+      searchListResponse = unitedMetadataSearchResponseMock(
+        new EndpointDocGenerator('seed').generateHostMetadata()
+      );
+      mockAgentClient.getAgentStatusById.mockResolvedValue('error');
+      mockAgentClient.listAgents.mockResolvedValue(noUnenrolledAgent);
+      mockAgentPolicyService.getByIds = jest.fn().mockResolvedValueOnce([]);
+      mockScopedClient.asInternalUser.search.mockResponseOnce(searchListResponse);
+    });
+
     it('should return expected metadata', async () => {
       const mockRequest = httpServerMock.createKibanaRequest({
         query: {
@@ -129,18 +161,7 @@ describe('test endpoint routes', () => {
           kuery: 'not host.ip:10.140.73.246',
         },
       });
-      mockSavedObjectClient.find.mockResolvedValueOnce({
-        total: 0,
-        saved_objects: [],
-        page: 1,
-        per_page: 10,
-      });
-      mockAgentClient.getAgentStatusById.mockResolvedValue('error');
-      mockAgentClient.listAgents.mockResolvedValue(noUnenrolledAgent);
-      mockAgentPolicyService.getByIds = jest.fn().mockResolvedValueOnce([]);
-      const metadata = new EndpointDocGenerator().generateHostMetadata();
       const esSearchMock = mockScopedClient.asInternalUser.search;
-      esSearchMock.mockResponseOnce(unitedMetadataSearchResponseMock(metadata));
 
       ({ routeHandler, routeConfig } = getRegisteredVersionedRouteMock(
         routerMock,
@@ -219,12 +240,14 @@ describe('test endpoint routes', () => {
       });
       expect(routeConfig.options).toEqual({
         authRequired: true,
-        tags: ['access:securitySolution'],
       });
+      expect(routeConfig.security?.authz).toEqual({ requiredPrivileges: ['securitySolution'] });
       expect(mockResponse.ok).toBeCalled();
       const endpointResultList = mockResponse.ok.mock.calls[0][0]?.body as MetadataListResponse;
       expect(endpointResultList.data.length).toEqual(1);
-      expect(endpointResultList.data[0].metadata).toEqual(metadata);
+      expect(endpointResultList.data[0].metadata).toEqual(
+        searchListResponse.hits.hits[0]._source!.united.endpoint
+      );
       expect(endpointResultList.total).toEqual(1);
       expect(endpointResultList.page).toEqual(0);
       expect(endpointResultList.pageSize).toEqual(10);
@@ -252,6 +275,27 @@ describe('test endpoint routes', () => {
       );
 
       expect(mockResponse.forbidden).toBeCalled();
+    });
+
+    it('should use space id when retrieving Endpoint Metadata service client', async () => {
+      const mockRequest = httpServerMock.createKibanaRequest();
+      const mockContext = createRouteHandlerContext(mockScopedClient, mockSavedObjectClient);
+      (mockContext.securitySolution.getSpaceId as jest.Mock).mockReturnValue('foo');
+
+      ({ routeHandler, routeConfig } = getRegisteredVersionedRouteMock(
+        routerMock,
+        'get',
+        HOST_METADATA_LIST_ROUTE,
+        '2023-10-31'
+      ));
+      const getEndpointMetadataServiceSpy = jest.spyOn(
+        endpointAppContextService,
+        'getEndpointMetadataService'
+      );
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      expect(getEndpointMetadataServiceSpy).toHaveBeenCalledWith('foo');
     });
   });
 
@@ -488,6 +532,34 @@ describe('test endpoint routes', () => {
 
       expect(mockResponse.forbidden).toBeCalled();
     });
+
+    it('should retrieve Endpoint Metadata Service client using the space id', async () => {
+      const response = legacyMetadataSearchResponseMock(
+        new EndpointDocGenerator().generateHostMetadata()
+      );
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: response.hits.hits[0]._id },
+      });
+      const esSearchMock = mockScopedClient.asInternalUser.search;
+      mockAgentClient.getAgent.mockResolvedValue(agentGenerator.generate({ status: 'online' }));
+      esSearchMock.mockResponseOnce(response);
+      const getEndpointMetadataServiceSpy = jest.spyOn(
+        endpointAppContextService,
+        'getEndpointMetadataService'
+      );
+      ({ routeConfig, routeHandler } = getRegisteredVersionedRouteMock(
+        routerMock,
+        'get',
+        HOST_METADATA_GET_ROUTE,
+        '2023-10-31'
+      ));
+      const mockContext = createRouteHandlerContext(mockScopedClient, mockSavedObjectClient);
+      (mockContext.securitySolution.getSpaceId as jest.Mock).mockReturnValue('foo');
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      expect(getEndpointMetadataServiceSpy).toHaveBeenCalledWith('foo');
+    });
   });
 
   describe('GET metadata transform stats route', () => {
@@ -497,8 +569,8 @@ describe('test endpoint routes', () => {
       ({ routeConfig, routeHandler } = getRegisteredVersionedRouteMock(
         routerMock,
         'get',
-        METADATA_TRANSFORMS_STATUS_ROUTE,
-        '2023-10-31'
+        METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE,
+        '1'
       ));
 
       const contextOverrides = {
@@ -530,8 +602,8 @@ describe('test endpoint routes', () => {
       ({ routeConfig, routeHandler } = getRegisteredVersionedRouteMock(
         routerMock,
         'get',
-        METADATA_TRANSFORMS_STATUS_ROUTE,
-        '2023-10-31'
+        METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE,
+        '1'
       ));
       await routeHandler(
         createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
@@ -542,8 +614,8 @@ describe('test endpoint routes', () => {
       expect(esClientMock.transform.getTransformStats).toHaveBeenCalledTimes(1);
       expect(routeConfig.options).toEqual({
         authRequired: true,
-        tags: ['access:securitySolution'],
       });
+      expect(routeConfig.security?.authz).toEqual({ requiredPrivileges: ['securitySolution'] });
       expect(mockResponse.ok).toBeCalled();
       const response = mockResponse.ok.mock.calls[0][0]?.body as TransformGetTransformStatsResponse;
       expect(response.count).toEqual(expectedResponse.count);

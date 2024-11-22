@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { DataViewLazy } from '@kbn/data-views-plugin/common';
-import { fromKueryExpression, getKqlFieldNames } from '@kbn/es-query';
+import { fromKueryExpression, getKqlFieldNames, isFilter, isOfQueryType } from '@kbn/es-query';
 import type { SearchRequest } from './fetch';
 import { EsQuerySortValue } from '../..';
 
@@ -25,23 +26,20 @@ export async function queryToFields({
     const sortArr = Array.isArray(sort) ? sort : [sort];
     fields.push(...sortArr.flatMap((s) => Object.keys(s)));
   }
-  for (const query of request.query) {
+  for (const query of (request.query ?? []).filter(isOfQueryType)) {
     if (query.query && query.language === 'kuery') {
       const nodes = fromKueryExpression(query.query);
       const queryFields = getKqlFieldNames(nodes);
       fields = fields.concat(queryFields);
     }
   }
-  const filters = request.filters;
-  if (filters) {
-    const filtersArr = Array.isArray(filters) ? filters : [filters];
-    for (const f of filtersArr) {
-      // unified search bar filters have meta object and key (regular filters)
-      // unified search bar "custom" filters ("Edit as query DSL", where meta.key is not present but meta is)
-      // Any other Elasticsearch query DSL filter that gets passed in by consumers (not coming from unified search, and these probably won't have a meta key at all)
-      if (f?.meta?.key && f.meta.disabled !== true) {
-        fields.push(f.meta.key);
-      }
+  const { filters = [] } = request;
+  for (const f of typeof filters === 'function' ? filters() : filters) {
+    // unified search bar filters have meta object and key (regular filters)
+    // unified search bar "custom" filters ("Edit as query DSL", where meta.key is not present but meta is)
+    // Any other Elasticsearch query DSL filter that gets passed in by consumers (not coming from unified search, and these probably won't have a meta key at all)
+    if (isFilter(f) && f?.meta?.key && f.meta.disabled !== true) {
+      fields.push(f.meta.key);
     }
   }
 

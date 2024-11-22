@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { addInternalBasePath } from '../../../../common/constants';
-import type { TransformIdParamSchema } from '../../../../common/api_schemas/common';
-import { transformIdParamSchema } from '../../../../common/api_schemas/common';
+import type { TransformIdParamSchema } from '../../api_schemas/common';
+import { transformIdParamSchema } from '../../api_schemas/common';
 import {
   getTransformAuditMessagesQuerySchema,
   type GetTransformAuditMessagesQuerySchema,
-} from '../../../../common/api_schemas/audit_messages';
+} from '../../api_schemas/audit_messages';
+import { addInternalBasePath } from '../../../../common/constants';
 
 import type { RouteDependencies } from '../../../types';
 
@@ -35,6 +35,13 @@ export function registerRoute({ router, getLicense }: RouteDependencies) {
     .addVersion<TransformIdParamSchema, GetTransformAuditMessagesQuerySchema, undefined>(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'This route is opted out from authorization because permissions will be checked by elasticsearch',
+          },
+        },
         validate: {
           request: {
             params: transformIdParamSchema,

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -828,5 +829,15 @@ describe('UnifiedFieldList FieldStats', () => {
     expect(loadFieldStats).toHaveBeenCalledTimes(1);
 
     expect(wrapper.text()).toBe('Summarymin29674max36821994Calculated from 5000 sample records.');
+  });
+
+  it('should not request field stats for ES|QL query', async () => {
+    const wrapper = await mountComponent(
+      <FieldStats {...defaultProps} query={{ esql: 'from logs* | limit 10' }} />
+    );
+
+    expect(loadFieldStats).toHaveBeenCalledTimes(0);
+
+    expect(wrapper.text()).toBe('Analysis is not available for this field.');
   });
 });

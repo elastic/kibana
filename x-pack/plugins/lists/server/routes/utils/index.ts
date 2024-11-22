@@ -8,6 +8,7 @@
 export * from './get_error_message_exception_list_item';
 export * from './get_error_message_exception_list';
 export * from './get_list_client';
+export * from './get_internal_list_client';
 export * from './get_exception_list_client';
 export * from './route_validation';
 export * from './build_siem_response';

@@ -28,6 +28,7 @@ import {
 } from '@kbn/ml-data-grid';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 
+import { isCCSRemoteIndexName } from '@kbn/es-query';
 import {
   hasKeywordDuplicate,
   isKeywordDuplicate,
@@ -43,13 +44,16 @@ import type { SearchItems } from './use_search_items';
 import { useGetHistogramsForFields } from './use_get_histograms_for_fields';
 import { useDataSearch } from './use_data_search';
 
-export const useIndexData = (
-  dataView: SearchItems['dataView'],
-  query: TransformConfigQuery,
-  combinedRuntimeMappings?: StepDefineExposedState['runtimeMappings'],
-  timeRangeMs?: TimeRangeMs,
-  populatedFields?: string[]
-): UseIndexDataReturnType => {
+interface UseIndexDataOptions {
+  dataView: SearchItems['dataView'];
+  query: TransformConfigQuery;
+  populatedFields: string[];
+  combinedRuntimeMappings?: StepDefineExposedState['runtimeMappings'];
+  timeRangeMs?: TimeRangeMs;
+}
+
+export const useIndexData = (options: UseIndexDataOptions): UseIndexDataReturnType => {
+  const { dataView, query, populatedFields, combinedRuntimeMappings, timeRangeMs } = options;
   const { analytics } = useAppDependencies();
 
   // Store the performance metric's start time using a ref
@@ -59,11 +63,10 @@ export const useIndexData = (
   const indexPattern = useMemo(() => dataView.getIndexPattern(), [dataView]);
   const toastNotifications = useToastNotifications();
 
-  const baseFilterCriteria = buildBaseFilterCriteria(
-    dataView.timeFieldName,
-    timeRangeMs?.from,
-    timeRangeMs?.to,
-    query
+  const baseFilterCriteria = useMemo(
+    () =>
+      buildBaseFilterCriteria(dataView.timeFieldName, timeRangeMs?.from, timeRangeMs?.to, query),
+    [dataView.timeFieldName, query, timeRangeMs]
   );
 
   const defaultQuery = useMemo(
@@ -71,85 +74,23 @@ export const useIndexData = (
     [baseFilterCriteria, dataView, timeRangeMs]
   );
 
-  const queryWithBaseFilterCriteria = {
-    bool: {
-      filter: baseFilterCriteria,
-    },
-  };
-
-  // Fetch 500 random documents to determine populated fields.
-  // This is a workaround to avoid passing potentially thousands of unpopulated fields
-  // (for example, as part of filebeat/metricbeat/ECS based indices)
-  // to the data grid component which would significantly slow down the page.
-  const {
-    error: dataViewFieldsError,
-    data: dataViewFieldsData,
-    isError: dataViewFieldsIsError,
-    isLoading: dataViewFieldsIsLoading,
-  } = useDataSearch(
-    {
-      index: indexPattern,
-      body: {
-        fields: ['*'],
-        _source: false,
-        query: {
-          function_score: {
-            query: defaultQuery,
-            random_score: {},
-          },
-        },
-        size: 500,
+  const queryWithBaseFilterCriteria = useMemo(
+    () => ({
+      bool: {
+        filter: baseFilterCriteria,
       },
-    },
-    // Check whether fetching should be enabled
-    // If populatedFields are not provided, make own request to calculate
-    !Array.isArray(populatedFields) &&
-      !(dataView.timeFieldName !== undefined && timeRangeMs === undefined)
+    }),
+    [baseFilterCriteria]
   );
 
-  useEffect(() => {
-    if (dataViewFieldsIsLoading && !dataViewFieldsIsError) {
-      setErrorMessage('');
-      setStatus(INDEX_STATUS.LOADING);
-    } else if (dataViewFieldsError !== null) {
-      setErrorMessage(getErrorMessage(dataViewFieldsError));
-      setStatus(INDEX_STATUS.ERROR);
-    } else if (
-      !dataViewFieldsIsLoading &&
-      !dataViewFieldsIsError &&
-      dataViewFieldsData !== undefined
-    ) {
-      const isCrossClusterSearch = indexPattern.includes(':');
-      const isMissingFields = dataViewFieldsData.hits.hits.every(
-        (d) => typeof d.fields === 'undefined'
-      );
-
-      setCcsWarning(isCrossClusterSearch && isMissingFields);
-      setStatus(INDEX_STATUS.LOADED);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataViewFieldsData, dataViewFieldsError, dataViewFieldsIsError, dataViewFieldsIsLoading]);
-
   const dataViewFields = useMemo(() => {
-    let allPopulatedFields = Array.isArray(populatedFields) ? populatedFields : [];
-
-    if (populatedFields === undefined && dataViewFieldsData) {
-      // Get all field names for each returned doc and flatten it
-      // to a list of unique field names used across all docs.
-      const docs = dataViewFieldsData.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
-      allPopulatedFields = [...new Set(docs.map(Object.keys).flat(1))];
-    }
-
+    const allPopulatedFields = Array.isArray(populatedFields) ? populatedFields : [];
     const allDataViewFields = getFieldsFromKibanaDataView(dataView);
     return allPopulatedFields.filter((d) => allDataViewFields.includes(d)).sort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataViewFieldsData, populatedFields]);
+  }, [populatedFields]);
 
   const columns: EuiDataGridColumn[] = useMemo(() => {
-    if (typeof dataViewFields === 'undefined') {
-      return [];
-    }
-
     let result: Array<{ id: string; schema: string | undefined }> = [];
 
     // Get the the runtime fields that are defined from API field and index patterns
@@ -206,7 +147,9 @@ export const useIndexData = (
     error: dataGridDataError,
     data: dataGridData,
     isError: dataGridDataIsError,
-    isLoading: dataGridDataIsLoading,
+    // React Query v4 has the weird behavior that `isLoading` is `true` on load
+    // when a query is disabled, that's why we need to use `isFetching` here.
+    isFetching: dataGridDataIsLoading,
   } = useDataSearch(
     {
       index: indexPattern,
@@ -223,7 +166,7 @@ export const useIndexData = (
       },
     },
     // Check whether fetching should be enabled
-    dataViewFields !== undefined
+    dataViewFields.length > 0
   );
 
   useEffect(() => {
@@ -234,7 +177,7 @@ export const useIndexData = (
       setErrorMessage(getErrorMessage(dataGridDataError));
       setStatus(INDEX_STATUS.ERROR);
     } else if (!dataGridDataIsLoading && !dataGridDataIsError && dataGridData !== undefined) {
-      const isCrossClusterSearch = indexPattern.includes(':');
+      const isCrossClusterSearch = isCCSRemoteIndexName(indexPattern);
       const isMissingFields = dataGridData.hits.hits.every((d) => typeof d.fields === 'undefined');
 
       const docs = dataGridData.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
@@ -254,7 +197,7 @@ export const useIndexData = (
       setStatus(INDEX_STATUS.LOADED);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataGridDataError, dataGridDataIsError, dataGridDataIsLoading]);
+  }, [dataGridDataError, dataGridDataIsError, dataGridDataIsLoading, dataGridData]);
 
   const allDataViewFieldNames = new Set(dataView.fields.map((f) => f.name));
   const { error: histogramsForFieldsError, data: histogramsForFieldsData } =
@@ -309,7 +252,7 @@ export const useIndexData = (
 
   if (
     dataGrid.status === INDEX_STATUS.LOADED &&
-    dataViewFields !== undefined &&
+    dataViewFields.length > 0 &&
     Array.isArray(histogramsForFieldsData) &&
     histogramsForFieldsData.length > 0 &&
     loadIndexDataStartTime.current !== undefined
@@ -325,8 +268,11 @@ export const useIndexData = (
     });
   }
 
-  return {
-    ...dataGrid,
-    renderCellValue,
-  };
+  return useMemo(
+    () => ({
+      ...dataGrid,
+      renderCellValue,
+    }),
+    [dataGrid, renderCellValue]
+  );
 };

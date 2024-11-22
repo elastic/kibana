@@ -31,8 +31,13 @@ export const bulkGetMaintenanceWindowRoute = (
       validate: {
         body: bulkGetBodySchemaV1,
       },
+      security: {
+        authz: {
+          requiredPrivileges: [`${MAINTENANCE_WINDOW_API_PRIVILEGES.READ_MAINTENANCE_WINDOW}`],
+        },
+      },
       options: {
-        tags: [`access:${MAINTENANCE_WINDOW_API_PRIVILEGES.READ_MAINTENANCE_WINDOW}`],
+        access: 'internal',
       },
     },
     router.handleLegacyErrors(

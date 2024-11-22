@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { v4 as uuidv4 } from 'uuid';
@@ -99,7 +100,7 @@ export const LinkEditor = ({
           iconType={'arrowLeft'}
           onClick={() => onClose()}
         >
-          <EuiTitle size="m" aria-label={LinksStrings.editor.linkEditor.getGoBackAriaLabel()}>
+          <EuiTitle size="s" aria-label={LinksStrings.editor.linkEditor.getGoBackAriaLabel()}>
             <h2>
               {link
                 ? LinksStrings.editor.getEditLinkTitle()
@@ -112,6 +113,7 @@ export const LinkEditor = ({
         <EuiForm component="form" fullWidth>
           <EuiFormRow label={LinksStrings.editor.linkEditor.getLinkTypePickerLabel()}>
             <EuiRadioGroup
+              compressed
               options={linkTypes}
               idSelected={selectedLinkType}
               onChange={(id) => {
@@ -130,6 +132,7 @@ export const LinkEditor = ({
           />
           <EuiFormRow label={LinksStrings.editor.linkEditor.getLinkTextLabel()}>
             <EuiFieldText
+              compressed
               placeholder={
                 (linkDestination ? defaultLinkLabel : '') ||
                 LinksStrings.editor.linkEditor.getLinkTextPlaceholder()
@@ -150,8 +153,8 @@ export const LinkEditor = ({
         <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              flush="left"
               onClick={() => onClose()}
-              iconType="cross"
               data-test-subj="links--linkEditor--closeBtn"
             >
               {LinksStrings.editor.getCancelButtonLabel()}
@@ -159,6 +162,7 @@ export const LinkEditor = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
+              fill
               disabled={!linkDestination}
               onClick={() => {
                 // this check should always be true, since the button is disabled otherwise - this is just for type safety

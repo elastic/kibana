@@ -21,8 +21,10 @@ export const getInstalledIntegrationsRoute = (router: SecuritySolutionPluginRout
     .get({
       access: 'internal',
       path: GET_INSTALLED_INTEGRATIONS_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(
@@ -46,7 +48,7 @@ export const getInstalledIntegrationsRoute = (router: SecuritySolutionPluginRout
           });
 
           const packagePolicies = await fleet.packagePolicy.list(
-            fleet.internalReadonlySoClient,
+            fleet.savedObjects.createInternalScopedSoClient(),
             {}
           );
           packagePolicies.items.forEach((policy) => {

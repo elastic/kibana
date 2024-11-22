@@ -11,7 +11,7 @@ import { EuiCallOut, EuiPageBody, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getNestedProperty } from '@kbn/ml-nested-property';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
-import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
+import type { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { CreateDataViewButton } from '../../../../../components/create_data_view_button';
 import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
 import { useToastNotificationService } from '../../../../../services/toast_notification_service';
@@ -21,6 +21,8 @@ import {
 } from '../../../../../util/index_utils';
 
 const fixedPageSize: number = 20;
+
+type SavedObject = SavedObjectCommon<FinderAttributes & { isTextBasedQuery?: boolean }>;
 
 export const SourceSelection: FC = () => {
   const {
@@ -41,7 +43,7 @@ export const SourceSelection: FC = () => {
     id: string,
     type: string,
     fullName?: string,
-    savedObject?: SavedObjectCommon
+    savedObject?: SavedObject
   ) => {
     // Kibana data views including `:` are cross-cluster search indices
     // and are not supported by Data Frame Analytics yet. For saved searches
@@ -123,6 +125,7 @@ export const SourceSelection: FC = () => {
             </>
           )}
           <SavedObjectFinder
+            id="mlDFASourceSelection"
             key="searchSavedObjectFinder"
             onChoose={onSearchSelected}
             showFilter
@@ -142,6 +145,9 @@ export const SourceSelection: FC = () => {
                     defaultMessage: 'Saved search',
                   }
                 ),
+                showSavedObject: (savedObject: SavedObject) =>
+                  // ES|QL Based saved searches are not supported in DFA, filter them out
+                  savedObject.attributes.isTextBasedQuery !== true,
               },
               {
                 type: 'index-pattern',

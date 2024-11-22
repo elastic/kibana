@@ -11,12 +11,15 @@ import type OpenAI from 'openai';
 export interface InvokeAIActionParamsSchema {
   messages: Array<{
     role: string;
-    content: string | OpenAI.ChatCompletionContentPart[];
+    content:
+      | string
+      | OpenAI.ChatCompletionContentPart[]
+      | Array<OpenAI.ChatCompletionContentPartText | OpenAI.ChatCompletionContentPartRefusal>;
     name?: string;
     function_call?: {
       arguments: string;
       name: string;
-    };
+    } | null;
     tool_calls?: Array<{
       id: string;
 

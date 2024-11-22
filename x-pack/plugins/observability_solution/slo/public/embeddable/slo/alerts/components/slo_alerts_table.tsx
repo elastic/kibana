@@ -108,7 +108,7 @@ export function SloAlertsTable({
       featureIds={[AlertConsumers.SLO, AlertConsumers.OBSERVABILITY]}
       hideLazyLoader
       id={ALERTS_TABLE_ID}
-      pageSize={ALERTS_PER_PAGE}
+      initialPageSize={ALERTS_PER_PAGE}
       showAlertStatusWithFlapping
       onLoaded={() => {
         if (onLoaded) {

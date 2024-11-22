@@ -1,10 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { CriticalError } from '@kbn/core-base-server-internal';
 
 const mockGetFipsFn = jest.fn();
 jest.mock('crypto', () => ({
@@ -20,89 +23,74 @@ import { isFipsEnabled, checkFipsConfig } from './fips';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 describe('fips', () => {
-  let config: SecurityServiceConfigType;
+  let securityConfig: SecurityServiceConfigType;
   describe('#isFipsEnabled', () => {
-    it('should return `true` if config.experimental.fipsMode.enabled is `true`', () => {
-      config = { experimental: { fipsMode: { enabled: true } } };
+    it('should return `true` if config.fipsMode.enabled is `true`', () => {
+      securityConfig = { fipsMode: { enabled: true } };
 
-      expect(isFipsEnabled(config)).toBe(true);
+      expect(isFipsEnabled(securityConfig)).toBe(true);
     });
 
-    it('should return `false` if config.experimental.fipsMode.enabled is `false`', () => {
-      config = { experimental: { fipsMode: { enabled: false } } };
+    it('should return `false` if config.fipsMode.enabled is `false`', () => {
+      securityConfig = { fipsMode: { enabled: false } };
 
-      expect(isFipsEnabled(config)).toBe(false);
+      expect(isFipsEnabled(securityConfig)).toBe(false);
     });
 
-    it('should return `false` if config.experimental.fipsMode.enabled is `undefined`', () => {
-      expect(isFipsEnabled(config)).toBe(false);
+    it('should return `false` if config.fipsMode.enabled is `undefined`', () => {
+      expect(isFipsEnabled(securityConfig)).toBe(false);
     });
   });
 
   describe('checkFipsConfig', () => {
-    let mockExit: jest.SpyInstance;
-
-    beforeAll(() => {
-      mockExit = jest.spyOn(process, 'exit').mockImplementation((exitCode) => {
-        throw new Error(`Fake Exit: ${exitCode}`);
-      });
-    });
-
-    afterAll(() => {
-      mockExit.mockRestore();
-    });
-
-    it('should log an error message if FIPS mode is misconfigured - xpack.security.experimental.fipsMode.enabled true, Nodejs FIPS mode false', async () => {
-      config = { experimental: { fipsMode: { enabled: true } } };
+    it('should log an error message if FIPS mode is misconfigured - xpack.security.fipsMode.enabled true, Nodejs FIPS mode false', async () => {
+      securityConfig = { fipsMode: { enabled: true } };
       const logger = loggingSystemMock.create().get();
+      let fipsException: undefined | CriticalError;
       try {
-        checkFipsConfig(config, logger);
+        checkFipsConfig(securityConfig, {}, {}, logger);
       } catch (e) {
-        expect(mockExit).toHaveBeenNthCalledWith(1, 78);
+        fipsException = e;
       }
 
-      expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
-                        Array [
-                          Array [
-                            "Configuration mismatch error. xpack.security.experimental.fipsMode.enabled is set to true and the configured Node.js environment has FIPS disabled",
-                          ],
-                        ]
-                `);
+      expect(fipsException).toBeInstanceOf(CriticalError);
+      expect(fipsException!.processExitCode).toBe(78);
+      expect(fipsException!.message).toEqual(
+        'Configuration mismatch error. xpack.security.fipsMode.enabled is set to true and the configured Node.js environment has FIPS disabled'
+      );
     });
 
-    it('should log an error message if FIPS mode is misconfigured - xpack.security.experimental.fipsMode.enabled false, Nodejs FIPS mode true', async () => {
+    it('should log an error message if FIPS mode is misconfigured - xpack.security.fipsMode.enabled false, Nodejs FIPS mode true', async () => {
       mockGetFipsFn.mockImplementationOnce(() => {
         return 1;
       });
 
-      config = { experimental: { fipsMode: { enabled: false } } };
+      securityConfig = { fipsMode: { enabled: false } };
       const logger = loggingSystemMock.create().get();
 
+      let fipsException: undefined | CriticalError;
       try {
-        checkFipsConfig(config, logger);
+        checkFipsConfig(securityConfig, {}, {}, logger);
       } catch (e) {
-        expect(mockExit).toHaveBeenNthCalledWith(1, 78);
+        fipsException = e;
       }
-
-      expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
-                        Array [
-                          Array [
-                            "Configuration mismatch error. xpack.security.experimental.fipsMode.enabled is set to false and the configured Node.js environment has FIPS enabled",
-                          ],
-                        ]
-                `);
+      expect(fipsException).toBeInstanceOf(CriticalError);
+      expect(fipsException!.processExitCode).toBe(78);
+      expect(fipsException!.message).toEqual(
+        'Configuration mismatch error. xpack.security.fipsMode.enabled is set to false and the configured Node.js environment has FIPS enabled'
+      );
     });
 
-    it('should log an info message if FIPS mode is properly configured - xpack.security.experimental.fipsMode.enabled true, Nodejs FIPS mode true', async () => {
+    it('should log an info message if FIPS mode is properly configured - xpack.security.fipsMode.enabled true, Nodejs FIPS mode true', async () => {
       mockGetFipsFn.mockImplementationOnce(() => {
         return 1;
       });
 
-      config = { experimental: { fipsMode: { enabled: true } } };
+      securityConfig = { fipsMode: { enabled: true } };
       const logger = loggingSystemMock.create().get();
 
       try {
-        checkFipsConfig(config, logger);
+        checkFipsConfig(securityConfig, {}, {}, logger);
       } catch (e) {
         logger.error('Should not throw error!');
       }
@@ -114,6 +102,90 @@ describe('fips', () => {
                           ],
                         ]
                 `);
+    });
+
+    describe('PKCS12 Config settings', function () {
+      let serverConfig = {};
+      let elasticsearchConfig = {};
+
+      beforeEach(function () {
+        mockGetFipsFn.mockImplementationOnce(() => {
+          return 1;
+        });
+
+        securityConfig = { fipsMode: { enabled: true } };
+      });
+
+      afterEach(function () {
+        serverConfig = {};
+        elasticsearchConfig = {};
+      });
+
+      it('should log an error message for each PKCS12 configuration option that is set', async () => {
+        elasticsearchConfig = {
+          ssl: {
+            keystore: {
+              path: '/test',
+            },
+            truststore: {
+              path: '/test',
+            },
+          },
+        };
+
+        serverConfig = {
+          ssl: {
+            keystore: {
+              path: '/test',
+            },
+            truststore: {
+              path: '/test',
+            },
+          },
+        };
+
+        const logger = loggingSystemMock.create().get();
+
+        let fipsException: undefined | CriticalError;
+        try {
+          checkFipsConfig(securityConfig, elasticsearchConfig, serverConfig, logger);
+        } catch (e) {
+          fipsException = e;
+        }
+
+        expect(fipsException).toBeInstanceOf(CriticalError);
+        expect(fipsException!.processExitCode).toBe(78);
+        expect(fipsException!.message).toEqual(
+          'Configuration mismatch error: elasticsearch.ssl.keystore.path, elasticsearch.ssl.truststore.path, server.ssl.keystore.path, server.ssl.truststore.path are set, PKCS12 configurations are not allowed while running in FIPS mode.'
+        );
+      });
+
+      it('should log an error message for one PKCS12 configuration option that is set', async () => {
+        elasticsearchConfig = {
+          ssl: {
+            keystore: {
+              path: '/test',
+            },
+          },
+        };
+
+        serverConfig = {};
+
+        const logger = loggingSystemMock.create().get();
+
+        let fipsException: undefined | CriticalError;
+        try {
+          checkFipsConfig(securityConfig, elasticsearchConfig, serverConfig, logger);
+        } catch (e) {
+          fipsException = e;
+        }
+
+        expect(fipsException).toBeInstanceOf(CriticalError);
+        expect(fipsException!.processExitCode).toBe(78);
+        expect(fipsException!.message).toEqual(
+          'Configuration mismatch error: elasticsearch.ssl.keystore.path is set, PKCS12 configurations are not allowed while running in FIPS mode.'
+        );
+      });
     });
   });
 });

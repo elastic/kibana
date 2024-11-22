@@ -10,14 +10,11 @@ import {
   type DataViewCreateQuerySchema,
 } from '@kbn/ml-data-view-utils/schemas/api_create_query_schema';
 
-import {
-  transformIdParamSchema,
-  type TransformIdParamSchema,
-} from '../../../../common/api_schemas/common';
+import { transformIdParamSchema, type TransformIdParamSchema } from '../../api_schemas/common';
 import {
   putTransformsRequestSchema,
   type PutTransformsRequestSchema,
-} from '../../../../common/api_schemas/transforms';
+} from '../../api_schemas/transforms';
 import { addInternalBasePath } from '../../../../common/constants';
 
 import type { RouteDependencies } from '../../../types';
@@ -46,6 +43,13 @@ export function registerRoute(routeDependencies: RouteDependencies) {
     .addVersion<TransformIdParamSchema, DataViewCreateQuerySchema, PutTransformsRequestSchema>(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'This route is opted out from authorization because permissions will be checked by elasticsearch',
+          },
+        },
         validate: {
           request: {
             params: transformIdParamSchema,

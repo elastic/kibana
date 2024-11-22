@@ -11,10 +11,10 @@ import {
   getCertsRequestBody,
   processCertsResult,
 } from '../../common/requests/get_certs_request_body';
-import type { UptimeEsClient } from '../lib';
+import type { SyntheticsEsClient } from '../lib';
 
 export const getSyntheticsCerts = async (
-  requestParams: GetCertsParams & { uptimeEsClient: UptimeEsClient }
+  requestParams: GetCertsParams & { syntheticsEsClient: SyntheticsEsClient }
 ): Promise<CertResult> => {
   const result = await getCertsResults(requestParams);
 
@@ -24,15 +24,15 @@ export const getSyntheticsCerts = async (
 export type CertificatesResults = PromiseType<ReturnType<typeof getCertsResults>>;
 
 const getCertsResults = async (
-  requestParams: GetCertsParams & { uptimeEsClient: UptimeEsClient }
+  requestParams: GetCertsParams & { syntheticsEsClient: SyntheticsEsClient }
 ) => {
-  const { uptimeEsClient } = requestParams;
+  const { syntheticsEsClient } = requestParams;
 
   const searchBody = getCertsRequestBody(requestParams);
 
   const request = { body: searchBody };
 
-  const { body: result } = await uptimeEsClient.search<Ping, typeof request>({
+  const { body: result } = await syntheticsEsClient.search<Ping, typeof request>({
     body: searchBody,
   });
 

@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import type { CriteriaWithPagination } from '@elastic/eui';
+import type { CriteriaWithPagination, EuiSuperDatePickerProps } from '@elastic/eui';
 import {
   EuiBasicTable,
   type EuiBasicTableColumn,
@@ -40,7 +40,7 @@ import { EndpointListNavLink } from './components/endpoint_list_nav_link';
 import { AgentStatus } from '../../../../common/components/endpoint/agents/agent_status';
 import { EndpointDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
-import { nonExistingPolicies } from '../store/selectors';
+import type { nonExistingPolicies } from '../store/selectors';
 import { useEndpointSelector } from './hooks';
 import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
 import type { CreateStructuredSelector } from '../../../../common/store';
@@ -69,6 +69,7 @@ import { APP_UI_ID } from '../../../../../common/constants';
 import { ManagementEmptyStateWrapper } from '../../../components/management_empty_state_wrapper';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { BackToPolicyListButton } from './components/back_to_policy_list_button';
+import { useBulkGetAgentPolicies } from '../../../services/policies/hooks';
 
 const MAX_PAGINATED_ITEM = 9999;
 
@@ -179,7 +180,7 @@ const getEndpointListColumns = ({
             policyId={policy.id}
             revision={policy.endpoint_policy_version}
             isOutdated={isPolicyOutOfDate(policy, item.policy_info)}
-            policyExists={!missingPolicies[policy.id]}
+            policyExists={!missingPolicies.has(policy.id)}
             data-test-subj="policyNameCellLink"
             backLink={backToEndpointList}
           >
@@ -300,7 +301,7 @@ const getEndpointListColumns = ({
       actions: [
         {
           render: (item: HostInfo) => {
-            return <TableRowActions endpointMetadata={item.metadata} />;
+            return <TableRowActions endpointInfo={item} />;
           },
         },
       ],
@@ -338,8 +339,8 @@ export const EndpointList = () => {
     patternsError,
     metadataTransformStats,
     isInitialized,
+    nonExistingPolicies: missingPolicies,
   } = useEndpointSelector(selector);
-  const missingPolicies = useEndpointSelector(nonExistingPolicies);
   const {
     canReadEndpointList,
     canAccessFleet,
@@ -353,24 +354,22 @@ export const EndpointList = () => {
   // cap ability to page at 10k records. (max_result_window)
   const maxPageCount = totalItemCount > MAX_PAGINATED_ITEM ? MAX_PAGINATED_ITEM : totalItemCount;
 
-  const hasPolicyData = useMemo(() => policyItems && policyItems.length > 0, [policyItems]);
-  const hasListData = useMemo(() => listData && listData.length > 0, [listData]);
+  const hasPolicyData = policyItems && policyItems.length > 0;
+  const hasListData = listData && listData.length > 0;
 
   const refreshStyle = useMemo(() => {
     return { display: endpointsExist ? 'flex' : 'none', maxWidth: 200 };
   }, [endpointsExist]);
 
-  const refreshIsPaused = useMemo(() => {
-    return !endpointsExist ? false : hasSelectedEndpoint ? true : !isAutoRefreshEnabled;
-  }, [endpointsExist, hasSelectedEndpoint, isAutoRefreshEnabled]);
+  const refreshIsPaused = !endpointsExist
+    ? false
+    : hasSelectedEndpoint
+    ? true
+    : !isAutoRefreshEnabled;
 
-  const refreshInterval = useMemo(() => {
-    return !endpointsExist ? DEFAULT_POLL_INTERVAL : autoRefreshInterval;
-  }, [endpointsExist, autoRefreshInterval]);
+  const refreshInterval = !endpointsExist ? DEFAULT_POLL_INTERVAL : autoRefreshInterval;
 
-  const shouldShowKQLBar = useMemo(() => {
-    return endpointsExist && !patternsError;
-  }, [endpointsExist, patternsError]);
+  const shouldShowKQLBar = endpointsExist && !patternsError;
 
   const paginationSetup = useMemo(() => {
     return {
@@ -452,7 +451,7 @@ export const EndpointList = () => {
     });
   }, [dispatch]);
 
-  const onRefreshChange = useCallback(
+  const onRefreshChange = useCallback<NonNullable<EuiSuperDatePickerProps['onRefreshChange']>>(
     (evt) => {
       dispatch({
         type: 'userUpdatedEndpointListRefreshOptions',
@@ -463,6 +462,57 @@ export const EndpointList = () => {
       });
     },
     [dispatch]
+  );
+
+  const stateToDisplay:
+    | 'loading'
+    | 'policyEmptyState'
+    | 'policyEmptyStateWithoutFleetAccess'
+    | 'hostsEmptyState'
+    | 'endpointTable'
+    | 'listError' = useMemo(() => {
+    if (!isInitialized) {
+      return 'loading';
+    } else if (listError) {
+      return 'listError';
+    } else if (endpointsExist) {
+      return 'endpointTable';
+    } else if (canReadEndpointList && !canAccessFleet) {
+      return 'policyEmptyStateWithoutFleetAccess';
+    } else if (!policyItemsLoading && hasPolicyData) {
+      return 'hostsEmptyState';
+    } else {
+      return 'policyEmptyState';
+    }
+  }, [
+    canAccessFleet,
+    canReadEndpointList,
+    endpointsExist,
+    hasPolicyData,
+    isInitialized,
+    listError,
+    policyItemsLoading,
+  ]);
+
+  const referencedAgentPolicyIds: string[] = useMemo(
+    // Agent Policy IDs should be unique as one Agent Policy can have only one Defend integration
+    () => policyItems.flatMap((item) => item.policy_ids),
+    [policyItems]
+  );
+
+  const { data: referencedAgentPolicies, isLoading: isAgentPolicesLoading } =
+    useBulkGetAgentPolicies({
+      isEnabled: stateToDisplay === 'hostsEmptyState',
+      policyIds: referencedAgentPolicyIds,
+    });
+
+  const agentPolicyNameMap = useMemo(
+    () =>
+      referencedAgentPolicies?.reduce<Record<string, string>>((acc, policy) => {
+        acc[policy.id] = policy.name;
+        return acc;
+      }, {}) ?? {},
+    [referencedAgentPolicies]
   );
 
   // Used for an auto-refresh super date picker version without any date/time selection
@@ -526,84 +576,92 @@ export const EndpointList = () => {
   );
 
   const mutableListData = useMemo(() => [...listData], [listData]);
+
   const renderTableOrEmptyState = useMemo(() => {
-    if (!isInitialized) {
-      return (
-        <ManagementEmptyStateWrapper>
-          <EuiEmptyPrompt
-            icon={<EuiLoadingLogo logo="logoSecurity" size="xl" />}
-            title={
-              <h2>
-                {i18n.translate('xpack.securitySolution.endpoint.list.loadingEndpointManagement', {
-                  defaultMessage: 'Loading Endpoint Management',
-                })}
-              </h2>
-            }
+    switch (stateToDisplay) {
+      case 'loading':
+        return (
+          <ManagementEmptyStateWrapper>
+            <EuiEmptyPrompt
+              icon={<EuiLoadingLogo logo="logoSecurity" size="xl" />}
+              title={
+                <h2>
+                  {i18n.translate(
+                    'xpack.securitySolution.endpoint.list.loadingEndpointManagement',
+                    {
+                      defaultMessage: 'Loading Endpoint Management',
+                    }
+                  )}
+                </h2>
+              }
+            />
+          </ManagementEmptyStateWrapper>
+        );
+      case 'listError':
+        return (
+          <ManagementEmptyStateWrapper>
+            <EuiEmptyPrompt
+              color="danger"
+              iconType="error"
+              title={<h2>{listError?.error}</h2>}
+              body={<p>{listError?.message}</p>}
+            />
+          </ManagementEmptyStateWrapper>
+        );
+      case 'endpointTable':
+        return (
+          <EuiBasicTable
+            data-test-subj="endpointListTable"
+            items={mutableListData}
+            columns={columns}
+            pagination={paginationSetup}
+            onChange={onTableChange}
+            loading={loading}
+            rowProps={setTableRowProps}
+            sorting={sorting}
           />
-        </ManagementEmptyStateWrapper>
-      );
-    } else if (listError) {
-      return (
-        <ManagementEmptyStateWrapper>
-          <EuiEmptyPrompt
-            color="danger"
-            iconType="error"
-            title={<h2>{listError.error}</h2>}
-            body={<p>{listError.message}</p>}
+        );
+      case 'policyEmptyStateWithoutFleetAccess':
+        return (
+          <ManagementEmptyStateWrapper>
+            <PolicyEmptyState loading={endpointPrivilegesLoading} />
+          </ManagementEmptyStateWrapper>
+        );
+      case 'hostsEmptyState':
+        const selectionOptions: EuiSelectableProps['options'] = policyItems.flatMap((policy) =>
+          // displaying Package Policy - Agent Policy pairs
+          policy.policy_ids.map((agentPolicyId) => ({
+            key: agentPolicyId,
+            label: `${policy.name} - ${agentPolicyNameMap[agentPolicyId] || agentPolicyId}`,
+            checked: selectedPolicyId === agentPolicyId ? 'on' : undefined,
+          }))
+        );
+
+        return (
+          <HostsEmptyState
+            loading={loading || isAgentPolicesLoading}
+            onActionClick={handleDeployEndpointsClick}
+            actionDisabled={!selectedPolicyId}
+            handleSelectableOnChange={handleSelectableOnChange}
+            selectionOptions={selectionOptions}
+            policyItems={policyItems}
           />
-        </ManagementEmptyStateWrapper>
-      );
-    } else if (endpointsExist) {
-      return (
-        <EuiBasicTable
-          data-test-subj="endpointListTable"
-          items={mutableListData}
-          columns={columns}
-          pagination={paginationSetup}
-          onChange={onTableChange}
-          loading={loading}
-          rowProps={setTableRowProps}
-          sorting={sorting}
-        />
-      );
-    } else if (canReadEndpointList && !canAccessFleet) {
-      return (
-        <ManagementEmptyStateWrapper>
-          <PolicyEmptyState loading={endpointPrivilegesLoading} />
-        </ManagementEmptyStateWrapper>
-      );
-    } else if (!policyItemsLoading && hasPolicyData) {
-      const selectionOptions: EuiSelectableProps['options'] = policyItems.map((item) => {
-        return {
-          key: item.policy_id,
-          label: item.name,
-          checked: selectedPolicyId === item.policy_id ? 'on' : undefined,
-        };
-      });
-      return (
-        <HostsEmptyState
-          loading={loading}
-          onActionClick={handleDeployEndpointsClick}
-          actionDisabled={!selectedPolicyId}
-          handleSelectableOnChange={handleSelectableOnChange}
-          selectionOptions={selectionOptions}
-        />
-      );
-    } else {
-      return (
-        <ManagementEmptyStateWrapper>
-          <PolicyEmptyState loading={policyItemsLoading} onActionClick={handleCreatePolicyClick} />
-        </ManagementEmptyStateWrapper>
-      );
+        );
+      case 'policyEmptyState':
+      default:
+        return (
+          <ManagementEmptyStateWrapper>
+            <PolicyEmptyState
+              loading={policyItemsLoading}
+              onActionClick={handleCreatePolicyClick}
+            />
+          </ManagementEmptyStateWrapper>
+        );
     }
   }, [
-    isInitialized,
+    stateToDisplay,
     listError,
-    endpointsExist,
-    canReadEndpointList,
-    canAccessFleet,
     policyItemsLoading,
-    hasPolicyData,
     mutableListData,
     columns,
     paginationSetup,
@@ -613,6 +671,8 @@ export const EndpointList = () => {
     sorting,
     endpointPrivilegesLoading,
     policyItems,
+    agentPolicyNameMap,
+    isAgentPolicesLoading,
     handleDeployEndpointsClick,
     selectedPolicyId,
     handleSelectableOnChange,

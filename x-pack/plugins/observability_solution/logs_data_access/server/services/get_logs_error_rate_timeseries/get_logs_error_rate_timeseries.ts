@@ -7,10 +7,10 @@
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { AggregationOptionsByType, AggregationResultOf } from '@kbn/es-types';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { existsQuery, kqlQuery } from '@kbn/observability-plugin/server';
 import { estypes } from '@elastic/elasticsearch';
-import { getBucketSizeFromTimeRangeAndBucketCount, getLogErrorRate } from '../../utils';
-import { LOG_LEVEL } from '../../es_fields';
+import { getBucketSizeFromTimeRangeAndBucketCount } from '../../utils';
+import { ERROR_LOG_LEVEL, LOG_LEVEL } from '../../es_fields';
+import { kqlQuery } from '../../utils/es_queries';
 
 export interface LogsErrorRateTimeseries {
   esClient: ElasticsearchClient;
@@ -22,19 +22,32 @@ export interface LogsErrorRateTimeseries {
   kuery?: string;
 }
 
-export const getLogErrorsAggegation = () => ({
+const getLogErrorsAggregation = () => ({
   terms: {
     field: LOG_LEVEL,
     include: ['error', 'ERROR'],
   },
 });
 
-type LogErrorsAggregation = ReturnType<typeof getLogErrorsAggegation>;
+type LogErrorsAggregation = ReturnType<typeof getLogErrorsAggregation>;
+
+const getErrorLogLevelErrorsAggregation = () => ({
+  terms: {
+    field: ERROR_LOG_LEVEL,
+    include: ['error', 'ERROR'],
+  },
+});
+
+type ErrorLogLevelErrorsAggregation = ReturnType<typeof getErrorLogLevelErrorsAggregation>;
+
 interface LogsErrorRateTimeseriesHistogram {
   timeseries: AggregationResultOf<
     {
       date_histogram: AggregationOptionsByType['date_histogram'];
-      aggs: { logErrors: LogErrorsAggregation };
+      aggs: {
+        logErrors: LogErrorsAggregation;
+        errorLogLevelErrors: ErrorLogLevelErrorsAggregation;
+      };
     },
     {}
   >;
@@ -60,13 +73,14 @@ export function createGetLogErrorRateTimeseries() {
   }: LogsErrorRateTimeseries): Promise<LogsErrorRateTimeseriesReturnType> => {
     const intervalString = getBucketSizeFromTimeRangeAndBucketCount(timeFrom, timeTo, 50);
 
+    // Note: Please keep the formula in `metricsFormulasMap` up to date with the query!
+
     const esResponse = await esClient.search({
       index: 'logs-*-*',
       size: 0,
       query: {
         bool: {
           filter: [
-            ...existsQuery(LOG_LEVEL),
             ...kqlQuery(kuery),
             {
               terms: {
@@ -103,7 +117,8 @@ export function createGetLogErrorRateTimeseries() {
                 },
               },
               aggs: {
-                logErrors: getLogErrorsAggegation(),
+                logErrors: getLogErrorsAggregation(),
+                errorLogLevelErrors: getErrorLogLevelErrorsAggregation(),
               },
             },
           },
@@ -117,12 +132,13 @@ export function createGetLogErrorRateTimeseries() {
     return buckets
       ? buckets.reduce<LogsErrorRateTimeseriesReturnType>((acc, bucket) => {
           const timeseries = bucket.timeseries.buckets.map((timeseriesBucket) => {
-            const totalCount = timeseriesBucket.doc_count;
-            const logErrorCount = timeseriesBucket.logErrors.buckets[0]?.doc_count;
-
+            const logErrorCount = timeseriesBucket.logErrors.buckets[0]?.doc_count || 0;
+            const errorLogLevelErrorsCount =
+              timeseriesBucket.errorLogLevelErrors?.buckets[0]?.doc_count || 0;
+            const totalErrorsCount = logErrorCount + errorLogLevelErrorsCount;
             return {
               x: timeseriesBucket.key,
-              y: logErrorCount ? getLogErrorRate({ logCount: totalCount, logErrorCount }) : null,
+              y: totalErrorsCount,
             };
           });
 

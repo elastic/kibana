@@ -6,13 +6,16 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { CoreRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import { aiAssistantLogsIndexPattern } from '@kbn/observability-ai-assistant-plugin/common';
 import { rangeQuery, termQuery, typedSearch } from '@kbn/observability-plugin/server/utils/queries';
 import * as t from 'io-ts';
 import moment from 'moment';
 import { ESSearchRequest } from '@kbn/es-types';
 import { alertDetailsContextRt } from '@kbn/observability-plugin/server/services';
+import type { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
+import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { SERVICE_NAME } from '@kbn/apm-types';
+import { maybe } from '../../../../common/utils/maybe';
+import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { ApmDocumentType } from '../../../../common/document_type';
 import {
   APMEventClient,
@@ -23,12 +26,12 @@ import { RollupInterval } from '../../../../common/rollup';
 export async function getServiceNameFromSignals({
   query,
   esClient,
-  coreContext,
+  logSourcesService,
   apmEventClient,
 }: {
   query: t.TypeOf<typeof alertDetailsContextRt>;
   esClient: ElasticsearchClient;
-  coreContext: Pick<CoreRequestHandlerContext, 'uiSettings'>;
+  logSourcesService: LogSourcesService;
   apmEventClient: APMEventClient;
 }) {
   if (query['service.name']) {
@@ -75,19 +78,19 @@ export async function getServiceNameFromSignals({
     return serviceName;
   }
 
-  return getServiceNameFromLogs({ params, esClient, coreContext });
+  return getServiceNameFromLogs({ params, esClient, logSourcesService });
 }
 
 async function getServiceNameFromLogs({
   params,
   esClient,
-  coreContext,
+  logSourcesService,
 }: {
   params: ESSearchRequest['body'];
   esClient: ElasticsearchClient;
-  coreContext: Pick<CoreRequestHandlerContext, 'uiSettings'>;
+  logSourcesService: LogSourcesService;
 }) {
-  const index = await coreContext.uiSettings.client.get<string>(aiAssistantLogsIndexPattern);
+  const index = await logSourcesService.getFlattenedLogSources();
   const res = await typedSearch<{ service: { name: string } }, any>(esClient, {
     index,
     ...params,
@@ -103,6 +106,7 @@ async function getServiceNameFromTraces({
   params: APMEventESSearchRequest['body'];
   apmEventClient: APMEventClient;
 }) {
+  const requiredFields = asMutableArray([SERVICE_NAME] as const);
   const res = await apmEventClient.search('get_service_name_from_traces', {
     apm: {
       sources: [
@@ -112,8 +116,13 @@ async function getServiceNameFromTraces({
         },
       ],
     },
-    body: params,
+    body: {
+      ...params,
+      fields: requiredFields,
+    },
   });
 
-  return res.hits.hits[0]?._source.service.name;
+  const event = unflattenKnownApmEventFields(maybe(res.hits.hits[0])?.fields, requiredFields);
+
+  return event?.service.name;
 }

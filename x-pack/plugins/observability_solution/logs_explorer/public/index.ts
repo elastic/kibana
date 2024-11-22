@@ -20,6 +20,7 @@ export type {
   LogsExplorerCustomizationEvents,
 } from './customizations/types';
 export type { LogsExplorerControllerContext } from './state_machines/logs_explorer_controller';
+export { DEFAULT_ALL_SELECTION } from './state_machines/logs_explorer_controller/src/default_all_selection';
 export type { LogsExplorerPluginSetup, LogsExplorerPluginStart } from './types';
 export {
   getDiscoverColumnsFromDisplayOptions,

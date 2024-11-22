@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -32,11 +33,13 @@ const globalState: {
   registered: boolean;
   currentTest: Test | null;
   snapshotStates: Record<string, ISnapshotState>;
+  deploymentAgnostic: boolean;
 } = {
   updateSnapshot: 'none',
   registered: false,
   currentTest: null,
   snapshotStates: {},
+  deploymentAgnostic: false,
 };
 
 const modifyStackTracePrepareOnce = once(() => {
@@ -124,7 +127,7 @@ export function decorateSnapshotUi({
       const snapshotState = globalState.snapshotStates[file];
 
       if (snapshotState && !test.isPassed()) {
-        snapshotState.markSnapshotsAsCheckedForTest(test.fullTitle());
+        snapshotState.markSnapshotsAsCheckedForTest(getTestTitle(test));
       }
     });
 
@@ -193,7 +196,7 @@ export function expectSnapshot(received: any) {
 
   const context: SnapshotContext = {
     snapshotState,
-    currentTestName: test.fullTitle(),
+    currentTestName: getTestTitle(test),
   };
 
   return {
@@ -201,6 +204,18 @@ export function expectSnapshot(received: any) {
     // use bind to support optional 3rd argument (actual)
     toMatchInline: expectToMatchInlineSnapshot.bind(null, context, received),
   };
+}
+
+function getTestTitle(test: Test) {
+  return (
+    test
+      .fullTitle()
+      // remove deployment type from test title so that a single snapshot can be used for all deployment types
+      .replace(
+        /^(Serverless|Stateful)\s+([^\-]+)\s*-?\s*Deployment-agnostic/g,
+        'Deployment-agnostic'
+      )
+  );
 }
 
 function expectToMatchSnapshot(snapshotContext: SnapshotContext, received: any) {

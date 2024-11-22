@@ -16,22 +16,31 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiImage,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../../common/constants';
+import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
+import type { IndexDetails, CspStatusCode } from '@kbn/cloud-security-posture-common';
+import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
+import { useLocation } from 'react-router-dom';
+import { findingsNavigation } from '@kbn/cloud-security-posture';
+import { EmptyStatesIllustrationContainer } from '../empty_states_illustration_container';
+import { useAdd3PIntegrationRoute } from '../../common/api/use_wiz_integration_route';
 import { FullSizeCenteredPage } from '../full_size_centered_page';
 import { useCISIntegrationPoliciesLink } from '../../common/navigation/use_navigate_to_cis_integration_policies';
 import {
   CSPM_NOT_INSTALLED_ACTION_SUBJ,
   KSPM_NOT_INSTALLED_ACTION_SUBJ,
   NO_FINDINGS_STATUS_TEST_SUBJ,
+  THIRD_PARTY_INTEGRATIONS_NO_MISCONFIGURATIONS_FINDINGS_PROMPT,
+  THIRD_PARTY_NO_MISCONFIGURATIONS_FINDINGS_PROMPT_WIZ_INTEGRATION_BUTTON,
 } from '../test_subjects';
 import { CloudPosturePage, PACKAGE_NOT_INSTALLED_TEST_SUBJECT } from '../cloud_posture_page';
-import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
-import type { IndexDetails, PostureTypes, CspStatusCode } from '../../../common/types_old';
-import noDataIllustration from '../../assets/illustrations/no_data_illustration.svg';
+import type { PostureTypes } from '../../../common/types_old';
+import cloudsSVG from '../../assets/illustrations/clouds.svg';
+import misconfigurationsVendorsSVG from '../../assets/illustrations/misconfigurations_vendors.svg';
 import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
 import { NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS } from '../../common/constants';
 import { cspIntegrationDocsNavigation } from '../../common/navigation/constants';
@@ -170,74 +179,149 @@ const Unprivileged = ({ unprivilegedIndices }: { unprivilegedIndices: string[] }
 );
 
 const EmptySecurityFindingsPrompt = () => {
+  const location = useLocation();
+  const { euiTheme } = useEuiTheme();
   const kspmIntegrationLink = useCspIntegrationLink(KSPM_POLICY_TEMPLATE);
   const cspmIntegrationLink = useCspIntegrationLink(CSPM_POLICY_TEMPLATE);
+  const wizAddIntegrationLink = useAdd3PIntegrationRoute('wiz');
+  const is3PSupportedPage = location.pathname.includes(findingsNavigation.findings_default.path);
 
   return (
-    <EuiEmptyPrompt
-      data-test-subj={PACKAGE_NOT_INSTALLED_TEST_SUBJECT}
-      icon={<EuiImage size="fullWidth" src={noDataIllustration} alt="" role="presentation" />}
-      title={
-        <h2>
-          <FormattedMessage
-            id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.promptTitle"
-            defaultMessage="Detect security misconfigurations in your cloud infrastructure!"
-          />
-        </h2>
-      }
-      layout="horizontal"
-      color="plain"
-      body={
-        <p>
-          <FormattedMessage
-            id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.promptDescription"
-            defaultMessage="Detect and remediate potential configuration risks in your cloud infrastructure, like publicly accessible S3 buckets, with our Cloud and Kubernetes Security Posture Management solutions. {learnMore}"
-            values={{
-              learnMore: (
-                <EuiLink href={cspIntegrationDocsNavigation.cspm.overviewPath} target="_blank">
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <EuiEmptyPrompt
+          style={{ padding: euiTheme.size.l }}
+          data-test-subj={PACKAGE_NOT_INSTALLED_TEST_SUBJECT}
+          icon={
+            <EmptyStatesIllustrationContainer>
+              <EuiImage size="fullWidth" src={cloudsSVG} alt="clouds" role="presentation" />
+            </EmptyStatesIllustrationContainer>
+          }
+          title={
+            <h2>
+              <FormattedMessage
+                id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.promptTitle"
+                defaultMessage="Elastic’s Cloud Security {lineBreak} Posture Management"
+                values={{
+                  lineBreak: <br />,
+                }}
+              />
+            </h2>
+          }
+          layout="vertical"
+          color="plain"
+          body={
+            <p>
+              <FormattedMessage
+                id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.promptDescription"
+                defaultMessage="Detect and remediate potential configuration {lineBreak} risks in your cloud infrastructure, with our {lineBreak} Cloud and Kubernetes Security Posture {lineBreak} Management solutions. {learnMore}"
+                values={{
+                  lineBreak: <br />,
+                  learnMore: (
+                    <EuiLink href={cspIntegrationDocsNavigation.cspm.overviewPath} target="_blank">
+                      <FormattedMessage
+                        id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.learnMoreTitle"
+                        defaultMessage="Learn more"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </p>
+          }
+          actions={
+            <EuiFlexGroup justifyContent="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  color="primary"
+                  fill
+                  href={cspmIntegrationLink}
+                  isDisabled={!cspmIntegrationLink}
+                  data-test-subj={CSPM_NOT_INSTALLED_ACTION_SUBJ}
+                >
                   <FormattedMessage
-                    id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.learnMoreTitle"
-                    defaultMessage="Learn more about Cloud Security Posture"
+                    id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.addCspmIntegrationButtonTitle"
+                    defaultMessage="Add CSPM Integration"
                   />
-                </EuiLink>
-              ),
-            }}
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  color="primary"
+                  fill
+                  href={kspmIntegrationLink}
+                  isDisabled={!kspmIntegrationLink}
+                  data-test-subj={KSPM_NOT_INSTALLED_ACTION_SUBJ}
+                >
+                  <FormattedMessage
+                    id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.addKspmIntegrationButtonTitle"
+                    defaultMessage="Add KSPM Integration"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+        />
+      </EuiFlexItem>
+      {is3PSupportedPage && (
+        <EuiFlexItem>
+          <EuiEmptyPrompt
+            style={{ padding: euiTheme.size.l }}
+            data-test-subj={THIRD_PARTY_INTEGRATIONS_NO_MISCONFIGURATIONS_FINDINGS_PROMPT}
+            icon={
+              <EmptyStatesIllustrationContainer>
+                <EuiImage
+                  size="fullWidth"
+                  src={misconfigurationsVendorsSVG}
+                  alt="misconfigurationsVendorsSVG"
+                  role="presentation"
+                />
+              </EmptyStatesIllustrationContainer>
+            }
+            title={
+              <h2>
+                <FormattedMessage
+                  id="xpack.csp.cloudPosturePage.3pIntegrationsNoFindingsPrompt.promptTitle"
+                  defaultMessage="Already using a {lineBreak} cloud security product?"
+                  values={{ lineBreak: <br /> }}
+                />
+              </h2>
+            }
+            layout="vertical"
+            color="plain"
+            body={
+              <p>
+                <FormattedMessage
+                  id="xpack.csp.cloudPosturePage.3pIntegrationsNoFindingsPrompt.promptDescription"
+                  defaultMessage="Ingest data from your existing CSPM solution {lineBreak} for centralized analytics, hunting, {lineBreak} investigations, visualizations, and more. {lineBreak} Other integrations coming soon."
+                  values={{ lineBreak: <br /> }}
+                />
+              </p>
+            }
+            actions={
+              <EuiFlexGroup justifyContent="center">
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    color="primary"
+                    fill
+                    href={wizAddIntegrationLink}
+                    isDisabled={!wizAddIntegrationLink}
+                    data-test-subj={
+                      THIRD_PARTY_NO_MISCONFIGURATIONS_FINDINGS_PROMPT_WIZ_INTEGRATION_BUTTON
+                    }
+                  >
+                    <FormattedMessage
+                      id="xpack.csp.cloudPosturePage.3pIntegrationsNoFindingsPrompt.addWizIntegrationButtonTitle"
+                      defaultMessage="Add Wiz Integration"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
           />
-        </p>
-      }
-      actions={
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              color="primary"
-              fill
-              href={cspmIntegrationLink}
-              isDisabled={!cspmIntegrationLink}
-              data-test-subj={CSPM_NOT_INSTALLED_ACTION_SUBJ}
-            >
-              <FormattedMessage
-                id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.addCspmIntegrationButtonTitle"
-                defaultMessage="Add CSPM Integration"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              color="primary"
-              fill
-              href={kspmIntegrationLink}
-              isDisabled={!kspmIntegrationLink}
-              data-test-subj={KSPM_NOT_INSTALLED_ACTION_SUBJ}
-            >
-              <FormattedMessage
-                id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.addKspmIntegrationButtonTitle"
-                defaultMessage="Add KSPM Integration"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      }
-    />
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
   );
 };
 

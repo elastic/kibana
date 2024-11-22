@@ -5,10 +5,12 @@
     "@elastic/obs-ux-logs-team",
     "@elastic/obs-ux-onboarding-team"
   ],
+  "group": "observability",
+  "visibility": "private",
   "plugin": {
     "id": "observabilityOnboarding",
-    "server": true,
     "browser": true,
+    "server": true,
     "configPath": [
       "xpack",
       "observability_onboarding"
@@ -20,11 +22,10 @@
       "discover",
       "share",
       "fleet",
-      "security"
+      "customIntegrations"
     ],
     "optionalPlugins": [
       "cloud",
-      "cloudExperiments",
       "usageCollection"
     ],
     "requiredBundles": [

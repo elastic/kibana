@@ -6,7 +6,7 @@
  */
 
 import { isBoom } from '@hapi/boom';
-import { createValidationFunction } from '../../../common/runtime_types';
+import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import {
   metricsExplorerViewRequestParamsRT,
   METRICS_EXPLORER_VIEW_URL_ENTITY,
@@ -29,7 +29,7 @@ export const initDeleteMetricsExplorerViewRoute = ({
       method: 'delete',
       path: METRICS_EXPLORER_VIEW_URL_ENTITY,
       validate: {
-        params: createValidationFunction(metricsExplorerViewRequestParamsRT),
+        params: createRouteValidationFunction(metricsExplorerViewRequestParamsRT),
       },
     },
     async (_requestContext, request, response) => {

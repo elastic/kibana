@@ -14,6 +14,7 @@ import {
   API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import { performChecks } from '../helpers';
@@ -21,7 +22,7 @@ import { performChecks } from '../helpers';
 export const createConversationRoute = (router: ElasticAssistantPluginRouter): void => {
   router.versioned
     .post({
-      access: 'internal',
+      access: 'public',
       path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
 
       options: {
@@ -30,7 +31,7 @@ export const createConversationRoute = (router: ElasticAssistantPluginRouter): v
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v1,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             body: buildRouteValidationWithZod(ConversationCreateProps),
@@ -43,31 +44,14 @@ export const createConversationRoute = (router: ElasticAssistantPluginRouter): v
           const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
           // Perform license and authenticated user checks
           const checkResponse = performChecks({
-            authenticatedUser: true,
             context: ctx,
-            license: true,
             request,
             response,
           });
-          if (checkResponse) {
-            return checkResponse;
+          if (!checkResponse.isSuccess) {
+            return checkResponse.response;
           }
           const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
-
-          const result = await dataClient?.findDocuments({
-            perPage: 100,
-            page: 1,
-            filter: `users:{ id: "${
-              ctx.elasticAssistant.getCurrentUser()?.profile_uid
-            }" } AND title:${request.body.title}`,
-            fields: ['title'],
-          });
-          if (result?.data != null && result.total > 0) {
-            return assistantResponse.error({
-              statusCode: 409,
-              body: `conversation title: "${request.body.title}" already exists`,
-            });
-          }
 
           const createdConversation = await dataClient?.createConversation({
             conversation: request.body,

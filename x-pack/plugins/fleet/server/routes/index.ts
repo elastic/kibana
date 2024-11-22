@@ -31,7 +31,7 @@ import { registerRoutes as registerDebugRoutes } from './debug';
 
 export function registerRoutes(fleetAuthzRouter: FleetAuthzRouter, config: FleetConfigType) {
   // Always register app routes for permissions checking
-  registerAppRoutes(fleetAuthzRouter);
+  registerAppRoutes(fleetAuthzRouter, config);
 
   // The upload package route is only authorized for the superuser
   registerEPMRoutes(fleetAuthzRouter, config);
@@ -40,7 +40,7 @@ export function registerRoutes(fleetAuthzRouter: FleetAuthzRouter, config: Fleet
   registerAgentPolicyRoutes(fleetAuthzRouter);
   registerPackagePolicyRoutes(fleetAuthzRouter);
   registerOutputRoutes(fleetAuthzRouter);
-  registerSettingsRoutes(fleetAuthzRouter);
+  registerSettingsRoutes(fleetAuthzRouter, config);
   registerDataStreamRoutes(fleetAuthzRouter);
   registerPreconfigurationRoutes(fleetAuthzRouter);
   registerFleetServerHostRoutes(fleetAuthzRouter);

@@ -1,5 +1,9 @@
 {
-  "type": "shared-common",
+  "type": "shared-browser",
   "id": "@kbn/core-http-browser",
-  "owner": "@elastic/kibana-core"
+  "owner": [
+    "@elastic/kibana-core"
+  ],
+  "group": "platform",
+  "visibility": "shared"
 }

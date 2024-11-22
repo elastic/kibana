@@ -17,21 +17,32 @@ import {
   LocationStatus,
 } from '../../common/runtime_types';
 
-export const getDevLocation = (devUrl: string): PublicLocation => ({
-  id: 'dev',
-  label: 'Dev Service',
-  geo: { lat: 0, lon: 0 },
-  url: devUrl,
-  isServiceManaged: true,
-  status: LocationStatus.EXPERIMENTAL,
-  isInvalid: false,
-});
+export const getDevLocation = (devUrl: string): PublicLocation[] => [
+  {
+    id: 'dev',
+    label: 'Dev Service',
+    geo: { lat: 0, lon: 0 },
+    url: devUrl,
+    isServiceManaged: true,
+    status: LocationStatus.EXPERIMENTAL,
+    isInvalid: false,
+  },
+  {
+    id: 'dev2',
+    label: 'Dev Service 2',
+    geo: { lat: 0, lon: 0 },
+    url: devUrl,
+    isServiceManaged: true,
+    status: LocationStatus.EXPERIMENTAL,
+    isInvalid: false,
+  },
+];
 
 export async function getServiceLocations(server: SyntheticsServerSetup) {
   let locations: PublicLocations = [];
 
   if (server.config.service?.devUrl) {
-    locations = [getDevLocation(server.config.service.devUrl)];
+    locations = getDevLocation(server.config.service.devUrl);
   }
   const manifestUrl = server.config.service?.manifestUrl;
 

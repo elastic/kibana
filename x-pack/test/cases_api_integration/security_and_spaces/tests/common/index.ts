@@ -21,6 +21,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./comments/get_all_comments'));
     loadTestFile(require.resolve('./comments/patch_comment'));
     loadTestFile(require.resolve('./comments/post_comment'));
+    loadTestFile(require.resolve('./files/post_file'));
     loadTestFile(require.resolve('./alerts/get_cases'));
     loadTestFile(require.resolve('./alerts/get_alerts_attached_to_case'));
     loadTestFile(require.resolve('./cases/delete_cases'));
@@ -69,6 +70,11 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
      * Cases client
      */
     loadTestFile(require.resolve('./cases/bulk_create_cases'));
+
+    /**
+     * Telemetry
+     */
+    loadTestFile(require.resolve('./telemetry'));
 
     // NOTE: Migrations are not included because they can inadvertently remove the .kibana indices which removes the users and spaces
     // which causes errors in any tests after them that relies on those

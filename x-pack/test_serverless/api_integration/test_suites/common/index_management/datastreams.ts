@@ -25,11 +25,11 @@ export default function ({ getService }: FtrProviderContext) {
     // see details: https://github.com/elastic/kibana/issues/187372
     this.tags(['failsOnMKI']);
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
     describe('Get', () => {
       const testDataStreamName = 'test-data-stream';
@@ -80,6 +80,7 @@ export default function ({ getService }: FtrProviderContext) {
           health: 'green',
           indexTemplateName: testDataStreamName,
           hidden: false,
+          indexMode: 'standard',
         });
       });
 
@@ -118,6 +119,10 @@ export default function ({ getService }: FtrProviderContext) {
           lifecycle: {
             enabled: true,
           },
+          meteringDocsCount: 0,
+          meteringStorageSize: '0b',
+          meteringStorageSizeBytes: 0,
+          indexMode: 'standard',
         });
       });
     });

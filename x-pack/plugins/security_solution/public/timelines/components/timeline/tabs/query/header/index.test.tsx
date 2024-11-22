@@ -15,7 +15,7 @@ import { mockDataProviders } from '../../../data_providers/mock/mock_data_provid
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 
 import { QueryTabHeader } from '.';
-import { TimelineStatus, TimelineType } from '../../../../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../../../../common/api/timeline';
 import { waitFor } from '@testing-library/react';
 import { TimelineId, TimelineTabs } from '../../../../../../../common/types';
 
@@ -23,7 +23,8 @@ const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 
 jest.mock('../../../../../../common/lib/kibana');
 
-describe('Header', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/195830
+describe.skip('Header', () => {
   const indexPattern = mockIndexPattern;
   const mount = useMountAppended();
   const getWrapper = async (childrenComponent: JSX.Element) => {
@@ -46,9 +47,9 @@ describe('Header', () => {
     onToggleDataProviderType: jest.fn(),
     show: true,
     showCallOutUnauthorizedMsg: false,
-    status: TimelineStatus.active,
+    status: TimelineStatusEnum.active,
     timelineId: TimelineId.test,
-    timelineType: TimelineType.default,
+    timelineType: TimelineTypeEnum.default,
   };
 
   describe('rendering', () => {
@@ -122,7 +123,7 @@ describe('Header', () => {
         ...props,
         filterManager: new FilterManager(mockUiSettingsForFilterManager),
         showCallOutUnauthorizedMsg: false,
-        status: TimelineStatus.immutable,
+        status: TimelineStatusEnum.immutable,
       };
 
       const wrapper = await getWrapper(
@@ -139,7 +140,7 @@ describe('Header', () => {
         ...props,
         filterManager: new FilterManager(mockUiSettingsForFilterManager),
         showCallOutUnauthorizedMsg: false,
-        status: TimelineStatus.immutable,
+        status: TimelineStatusEnum.immutable,
       };
 
       const wrapper = await getWrapper(
@@ -158,7 +159,7 @@ describe('Header', () => {
         ...props,
         filterManager: new FilterManager(mockUiSettingsForFilterManager),
         showCallOutUnauthorizedMsg: false,
-        status: TimelineStatus.immutable,
+        status: TimelineStatusEnum.immutable,
       };
 
       const wrapper = await getWrapper(

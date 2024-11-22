@@ -1,15 +1,15 @@
 get:
-  summary: Get case settings in the default space
+  summary: Get case settings
   operationId: getCaseConfigurationDefaultSpace
   description: >
-    Retrieves setting details such as the closure type, custom fields, templatse, and the default connector for cases in the default space.
+    Get setting details such as the closure type, custom fields, templatse, and the default connector for cases.
     You must have `read` privileges for the **Cases** feature in the
     **Management**, **Observability**, or **Security** section of the Kibana
     feature privileges, depending on where the cases were created.
   tags:
     - cases
   parameters:
-    - $ref: '../components/parameters/owner.yaml'
+    - $ref: '../components/parameters/owner_filter.yaml'
   responses:
     '200':
       description: Indicates a successful call.
@@ -17,7 +17,7 @@ get:
         application/json:
           schema:
             type: array
-            items: 
+            items:
               type: object
               properties:
                 $ref: '../components/schemas/case_configure_response_properties.yaml'
@@ -32,10 +32,10 @@ get:
             $ref: '../components/schemas/4xx_response.yaml'
 
 post:
-  summary: Add case settings in the default space
+  summary: Add case settings
   operationId: setCaseConfigurationDefaultSpace
   description: >
-    Case settings include external connection details, custom fields, and templates. 
+    Case settings include external connection details, custom fields, and templates.
     Connectors are used to interface with external systems.
     You must create a connector before you can use it in your cases.
     If you set a default connector, it is automatically selected when you create cases in Kibana.

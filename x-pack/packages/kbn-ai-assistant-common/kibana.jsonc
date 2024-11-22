@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/ai-assistant-common",
+  "owner": [
+    "@elastic/search-kibana"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

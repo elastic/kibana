@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { Fragment, memo, useEffect, useRef, useMemo, useCallback } from 'react';
@@ -23,8 +24,9 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
-import { popularizeField, useColumns } from '@kbn/unified-data-table';
+import { UseColumnsProps, popularizeField, useColumns } from '@kbn/unified-data-table';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { ContextErrorMessage } from './components/context_error_message';
 import { LoadingStatus } from './services/context_query_state';
 import { AppState, GlobalState, isEqualFilters } from './services/context_state';
@@ -54,6 +56,8 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
     navigation,
     filterManager,
     core,
+    ebtManager,
+    fieldsMetadata,
   } = services;
 
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
@@ -69,15 +73,23 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
   const prevAppState = useRef<AppState>();
   const prevGlobalState = useRef<GlobalState>({ filters: [] });
 
+  const setAppState = useCallback<UseColumnsProps['setAppState']>(
+    ({ settings, ...rest }) => {
+      stateContainer.setAppState({ ...rest, grid: settings as DiscoverGridSettings });
+    },
+    [stateContainer]
+  );
+
   const { columns, onAddColumn, onRemoveColumn, onSetColumns } = useColumns({
     capabilities,
     defaultOrder: uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
     dataView,
     dataViews,
     useNewFieldsApi,
-    setAppState: stateContainer.setAppState,
+    setAppState,
     columns: appState.columns,
     sort: appState.sort,
+    settings: appState.grid,
   });
 
   useEffect(() => {
@@ -189,15 +201,36 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
   );
 
   const addFilter = useCallback(
-    async (field: DataViewField | string, values: unknown, operation: string) => {
+    async (field: DataViewField | string, values: unknown, operation: '+' | '-') => {
       const newFilters = generateFilters(filterManager, field, values, operation, dataView);
       filterManager.addFilters(newFilters);
       if (dataViews) {
         const fieldName = typeof field === 'string' ? field : field.name;
         await popularizeField(dataView, fieldName, dataViews, capabilities);
+        void ebtManager.trackFilterAddition({
+          fieldName: fieldName === '_exists_' ? String(values) : fieldName,
+          filterOperation: fieldName === '_exists_' ? '_exists_' : operation,
+          fieldsMetadata,
+        });
       }
     },
-    [filterManager, dataViews, dataView, capabilities]
+    [filterManager, dataViews, dataView, capabilities, ebtManager, fieldsMetadata]
+  );
+
+  const onAddColumnWithTracking = useCallback(
+    (columnName: string) => {
+      onAddColumn(columnName);
+      void ebtManager.trackDataTableSelection({ fieldName: columnName, fieldsMetadata });
+    },
+    [onAddColumn, ebtManager, fieldsMetadata]
+  );
+
+  const onRemoveColumnWithTracking = useCallback(
+    (columnName: string) => {
+      onRemoveColumn(columnName);
+      void ebtManager.trackDataTableRemoval({ fieldName: columnName, fieldsMetadata });
+    },
+    [onRemoveColumn, ebtManager, fieldsMetadata]
   );
 
   const TopNavMenu = navigation.ui.AggregateQueryTopNavMenu;
@@ -260,8 +293,9 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
                 useNewFieldsApi={useNewFieldsApi}
                 isLegacy={isLegacy}
                 columns={columns}
-                onAddColumn={onAddColumn}
-                onRemoveColumn={onRemoveColumn}
+                grid={appState.grid}
+                onAddColumn={onAddColumnWithTracking}
+                onRemoveColumn={onRemoveColumnWithTracking}
                 onSetColumns={onSetColumns}
                 predecessorCount={appState.predecessorCount}
                 successorCount={appState.successorCount}

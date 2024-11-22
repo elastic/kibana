@@ -118,7 +118,7 @@ describe('Home page', () => {
         'be.visible'
       );
       cy.getBySel(AGENT_POLICY_CREATE_AGENT_POLICY_NAME_FIELD).type('testName');
-      cy.get('.ingest-active-button').click();
+      cy.getBySel(AGENT_POLICIES_CREATE_AGENT_POLICY_FLYOUT.ADVANCED_OPTIONS_TOGGLE).click();
       cy.getBySel(AGENT_POLICIES_FLYOUT_ADVANCED_DEFAULT_NAMESPACE_HEADER, {
         timeout: 15000,
       }).should('be.visible');

@@ -57,7 +57,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
       notifications: { toasts },
       mlServices: {
         mlUsageCollection,
-        mlApiServices: {
+        mlApi: {
           jobs: { bulkCreateJobs },
           dataFrameAnalytics: { createDataFrameAnalytics },
           filters: { filters: getFilters },

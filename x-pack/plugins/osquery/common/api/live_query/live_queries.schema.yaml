@@ -5,12 +5,11 @@ info:
 paths:
   /api/osquery/live_queries:
     get:
-      summary: Find live queries
+      summary: Get live queries
+      description: Get a list of all live queries.
       operationId: OsqueryFindLiveQueries
       x-codegen-enabled: true
-      x-labels:
-        - ess
-        - serverless
+      x-labels: [serverless, ess]
       parameters:
         - name: query
           in: query
@@ -27,11 +26,10 @@ paths:
 
     post:
       summary: Create a live query
+      description: Create and run a live query.
       operationId: OsqueryCreateLiveQuery
       x-codegen-enabled: true
-      x-labels:
-        - ess
-        - serverless
+      x-labels: [serverless, ess]
       requestBody:
         required: true
         content:
@@ -49,11 +47,10 @@ paths:
   /api/osquery/live_queries/{id}:
     get:
       summary: Get live query details
+      description: Get the details of a live query using the query ID.
       operationId: OsqueryGetLiveQueryDetails
       x-codegen-enabled: true
-      x-labels:
-        - ess
-        - serverless
+      x-labels: [serverless, ess]
       parameters:
         - name: id
           in: path
@@ -76,22 +73,26 @@ paths:
   /api/osquery/live_queries/{id}/results/{actionId}:
     get:
       summary: Get live query results
+      description: Get the results of a live query using the query action ID.
       operationId: OsqueryGetLiveQueryResults
       x-codegen-enabled: true
-      x-labels:
-        - ess
-        - serverless
+      x-labels: [serverless, ess]
       parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Id'
+        - name: actionId
+          in: path
+          required: true
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Id'
         - name: query
           in: query
           required: true
           schema:
             $ref: './get_live_query_results.schema.yaml#/components/schemas/GetLiveQueryResultsRequestQuery'
-        - name: query
-          in: path
-          required: true
-          schema:
-            $ref: './get_live_query_results.schema.yaml#/components/schemas/GetLiveQueryResultsRequestParams'
       responses:
         '200':
           description: OK
@@ -99,4 +100,3 @@ paths:
             application/json:
               schema:
                 $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
-

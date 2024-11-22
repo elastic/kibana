@@ -7,11 +7,14 @@
 
 import { loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { getUserCommentsTelemetryData } from './comments';
+import { TelemetrySavedObjectsClient } from '../telemetry_saved_objects_client';
 
 describe('comments', () => {
   describe('getUserCommentsTelemetryData', () => {
     const logger = loggingSystemMock.createLogger();
     const savedObjectsClient = savedObjectsRepositoryMock.create();
+    const telemetrySavedObjectsClient = new TelemetrySavedObjectsClient(savedObjectsClient);
+
     savedObjectsClient.find.mockResolvedValue({
       total: 5,
       saved_objects: [],
@@ -34,7 +37,10 @@ describe('comments', () => {
     });
 
     it('it returns the correct res', async () => {
-      const res = await getUserCommentsTelemetryData({ savedObjectsClient, logger });
+      const res = await getUserCommentsTelemetryData({
+        savedObjectsClient: telemetrySavedObjectsClient,
+        logger,
+      });
       expect(res).toEqual({
         all: {
           total: 5,
@@ -47,13 +53,16 @@ describe('comments', () => {
     });
 
     it('should call find with correct arguments', async () => {
-      await getUserCommentsTelemetryData({ savedObjectsClient, logger });
+      await getUserCommentsTelemetryData({
+        savedObjectsClient: telemetrySavedObjectsClient,
+        logger,
+      });
       expect(savedObjectsClient.find).toBeCalledWith({
         aggs: {
           counts: {
             date_range: {
               field: 'cases-comments.attributes.created_at',
-              format: 'dd/MM/YYYY',
+              format: 'dd/MM/yyyy',
               ranges: [
                 {
                   from: 'now-1d',
@@ -116,6 +125,7 @@ describe('comments', () => {
         page: 0,
         perPage: 0,
         type: 'cases-comments',
+        namespaces: ['*'],
       });
     });
   });

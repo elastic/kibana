@@ -7,7 +7,7 @@
 
 import { filter, map, omit } from 'lodash';
 
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
 import type { FindPacksRequestQuerySchema } from '../../../common/api';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
@@ -23,7 +23,11 @@ export const findPackRoute = (router: IRouter) => {
     .get({
       access: 'public',
       path: '/api/osquery/packs',
-      options: { tags: [`access:${PLUGIN_ID}-readPacks`] },
+      security: {
+        authz: {
+          requiredPrivileges: [`${PLUGIN_ID}-readPacks`],
+        },
+      },
     })
     .addVersion(
       {
@@ -51,7 +55,7 @@ export const findPackRoute = (router: IRouter) => {
 
         const packSavedObjects: PackResponseData[] = map(soClientResponse.saved_objects, (pack) => {
           const policyIds = map(
-            filter(pack.references, ['type', AGENT_POLICY_SAVED_OBJECT_TYPE]),
+            filter(pack.references, ['type', LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE]),
             'id'
           );
 

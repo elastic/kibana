@@ -38,13 +38,14 @@ import {
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { isDefined } from '@kbn/ml-is-defined';
-import { EuiFlexItem } from '@elastic/eui';
+import { EuiCallOut, EuiEmptyPrompt, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
-import { getESQLAdHocDataview, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { ENABLE_ESQL, getESQLAdHocDataview } from '@kbn/esql-utils';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataVisualizerTableState } from '../../../../../common/types';
 import type { DataVisualizerPluginStart } from '../../../../plugin';
 import type { FieldStatisticsTableEmbeddableState } from '../grid_embeddable/types';
@@ -54,6 +55,7 @@ import { initializeFieldStatsControls } from './initialize_field_stats_controls'
 import type { DataVisualizerStartDependencies } from '../../../common/types/data_visualizer_plugin';
 import type { FieldStatisticsTableEmbeddableApi } from './types';
 import { isESQLQuery } from '../../search_strategy/requests/esql_utils';
+import { FieldStatsComponentType } from '../../constants/field_stats_component_type';
 
 export interface EmbeddableFieldStatsChartStartServices {
   data: DataPublicPluginStart;
@@ -152,23 +154,19 @@ export const getFieldStatsChartEmbeddableFactory = (
         serializeFieldStatsChartState,
         onFieldStatsTableDestroy,
         resetData$,
-      } = initializeFieldStatsControls(state);
+      } = initializeFieldStatsControls(state, deps.uiSettings);
       const { onError, dataLoading, blockingError } = dataLoadingApi;
 
-      const defaultDataViewId = await deps.data.dataViews.getDefaultId();
-      const validDataViewId: string =
-        isDefined(state.dataViewId) && state.dataViewId !== ''
-          ? state.dataViewId
-          : defaultDataViewId ?? '';
-      let initialDataView: DataView[] | undefined;
+      const validDataViewId: string | undefined =
+        isDefined(state.dataViewId) && state.dataViewId !== '' ? state.dataViewId : undefined;
+      let initialDataView: DataView | undefined;
       try {
         const dataView = isESQLQuery(state.query)
-          ? await getESQLAdHocDataview(
-              getIndexPatternFromESQLQuery(state.query.esql),
-              deps.data.dataViews
-            )
-          : await deps.data.dataViews.get(validDataViewId);
-        initialDataView = [dataView];
+          ? await getESQLAdHocDataview(state.query.esql, deps.data.dataViews)
+          : validDataViewId
+          ? await deps.data.dataViews.get(validDataViewId)
+          : undefined;
+        initialDataView = dataView;
       } catch (error) {
         // Only need to publish blocking error if viewtype is data view, and no data view found
         if (state.viewType === FieldStatsInitializerViewType.DATA_VIEW) {
@@ -176,7 +174,9 @@ export const getFieldStatsChartEmbeddableFactory = (
         }
       }
 
-      const dataViews$ = new BehaviorSubject<DataView[] | undefined>(initialDataView);
+      const dataViews$ = new BehaviorSubject<DataView[] | undefined>(
+        initialDataView ? [initialDataView] : undefined
+      );
 
       const subscriptions = new Subscription();
       if (fieldStatsControlsApi.dataViewId$) {
@@ -184,10 +184,10 @@ export const getFieldStatsChartEmbeddableFactory = (
           fieldStatsControlsApi.dataViewId$
             .pipe(
               skip(1),
-              skipWhile((dataViewId) => !dataViewId && !defaultDataViewId),
+              skipWhile((dataViewId) => !dataViewId),
               switchMap(async (dataViewId) => {
                 try {
-                  return await deps.data.dataViews.get(dataViewId ?? defaultDataViewId);
+                  return await deps.data.dataViews.get(dataViewId);
                 } catch (error) {
                   return undefined;
                 }
@@ -326,6 +326,8 @@ export const getFieldStatsChartEmbeddableFactory = (
               api.viewType$,
               api.showDistributions$
             );
+          const isEsqlEnabled = deps.uiSettings.get(ENABLE_ESQL);
+
           const lastReloadRequestTime = useObservable(reload$, Date.now());
 
           const isEsqlMode = viewType === FieldStatsInitializerViewType.ESQL;
@@ -364,9 +366,53 @@ export const getFieldStatsChartEmbeddableFactory = (
             };
           }, []);
 
+          if (viewType === FieldStatsInitializerViewType.DATA_VIEW && !dataViews) {
+            return (
+              <EuiEmptyPrompt
+                color="primary"
+                title={
+                  <h3>
+                    <FormattedMessage
+                      id="xpack.dataVisualizer.dashboard.fieldStats.noDataViewSelected"
+                      defaultMessage="No data view selected"
+                    />
+                  </h3>
+                }
+                body={
+                  <p>
+                    <FormattedMessage
+                      id="xpack.dataVisualizer.dashboard.fieldStats.noDataViewSelectedDescription"
+                      defaultMessage="Pick a data view to view field statistics."
+                    />
+                  </p>
+                }
+              />
+            );
+          }
+
+          if (isEsqlMode && !isEsqlEnabled) {
+            return (
+              <EuiFlexItem css={statsTableCss} data-test-subj="dashboardFieldStatsEmbeddedContent">
+                <EuiCallOut
+                  title={
+                    <h3>
+                      <FormattedMessage
+                        id="xpack.dataVisualizer.fieldStats.noDataViewSelected"
+                        defaultMessage="ES|QL is disabled"
+                      />
+                    </h3>
+                  }
+                  color="warning"
+                  iconType="alert"
+                />
+              </EuiFlexItem>
+            );
+          }
+
           return (
             <EuiFlexItem css={statsTableCss} data-test-subj="dashboardFieldStatsEmbeddedContent">
               <FieldStatisticsWrapper
+                id={FieldStatsComponentType.DashboardEmbeddable}
                 shouldGetSubfields={false}
                 dataView={dataView}
                 esqlQuery={esqlQuery}

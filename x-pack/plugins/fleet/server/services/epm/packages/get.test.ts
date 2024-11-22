@@ -8,7 +8,7 @@
 import type { SavedObjectsClientContract, SavedObjectsFindResult } from '@kbn/core/server';
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import {
   ASSETS_SAVED_OBJECT_TYPE,
@@ -17,7 +17,7 @@ import {
 } from '../../../../common';
 import type { RegistryPackage } from '../../../../common/types';
 import type { PackagePolicySOAttributes } from '../../../types';
-
+import { dataStreamService } from '../../data_streams';
 import { createAppContextStartContractMock } from '../../../mocks';
 import { appContextService } from '../../app_context';
 import { PackageNotFoundError } from '../../../errors';
@@ -27,11 +27,14 @@ import { auditLoggingService } from '../../audit_logging';
 
 import * as Registry from '../registry';
 
+import { createArchiveIteratorFromMap } from '../archive/archive_iterator';
+
 import { getInstalledPackages, getPackageInfo, getPackages, getPackageUsageStats } from './get';
 
 jest.mock('../registry');
 jest.mock('../../settings');
 jest.mock('../../audit_logging');
+jest.mock('../../data_streams');
 
 const MockRegistry = jest.mocked(Registry);
 
@@ -643,6 +646,7 @@ owner: elastic`,
       });
 
       await getInstalledPackages({
+        esClient: elasticsearchServiceMock.createInternalClient(),
         savedObjectsClient: soClient,
         dataStreamType: 'logs',
         nameQuery: 'nginx',
@@ -785,6 +789,7 @@ owner: elastic`,
       });
 
       const results = await getInstalledPackages({
+        esClient: elasticsearchServiceMock.createInternalClient(),
         savedObjectsClient: soClient,
         dataStreamType: 'logs',
         nameQuery: 'nginx',
@@ -816,6 +821,84 @@ owner: elastic`,
         total: 5,
       });
     });
+    it('filter non active datastreams if flag is true', async () => {
+      const soClient = savedObjectsClientMock.create();
+
+      jest.mocked(dataStreamService.getAllFleetDataStreams).mockResolvedValue([
+        {
+          name: `logs-elastic_agent.apm_server-production`,
+        },
+        {
+          name: `metrics-elastic_agent.apm_server-production`,
+        },
+      ] as any);
+
+      soClient.find.mockImplementation(async (options) => {
+        if (options.type === PACKAGES_SAVED_OBJECT_TYPE) {
+          return {
+            total: 5,
+            saved_objects: [
+              {
+                type: 'epm-packages',
+                id: 'elastic_agent',
+                attributes: {
+                  es_index_patterns: {
+                    fleet_server_logs: 'logs-elastic_agent.fleet_server-*',
+                    apm_server_logs: 'logs-elastic_agent.apm_server-*',
+                    apm_server_metrics: 'metrics-elastic_agent.apm_server-*',
+                  },
+                  name: 'elastic_agent',
+                  version: '1.8.0',
+                  install_status: 'installed',
+                },
+                references: [],
+                sort: ['elastic_agent'],
+              },
+            ],
+          } as any;
+        } else if (options.type === ASSETS_SAVED_OBJECT_TYPE) {
+          return {
+            total: 5,
+            saved_objects: [
+              {
+                type: 'epm-packages-assets',
+                id: '338b6f9e-e126-5f1e-abb9-afe017d4788b',
+                attributes: {
+                  package_name: 'elastic_agent',
+                  package_version: '1.8.0',
+                  install_source: 'upload',
+                  asset_path: 'elastic_agent-1.8.0/manifest.yml',
+                  media_type: 'text/yaml; charset=utf-8',
+                  data_utf8:
+                    'name: elastic_agent\ntitle: Elastic Agent\nversion: 1.8.0\ndescription: Collect logs and metrics from Elastic Agents.\ntype: integration\nformat_version: 1.0.0\nlicense: basic\ncategories: ["elastic_stack"]\nconditions:\n  kibana.version: "^8.7.1"\nowner:\n  github: elastic/elastic-agent\nicons:\n  - src: /img/logo_elastic_agent.svg\n    title: logo Elastic Agent\n    size: 64x64\n    type: image/svg+xml\nscreenshots:\n  - src: /img/elastic_agent_overview.png\n    title: Elastic Agent Overview\n    size: 2560×1234\n    type: image/png\n  - src: /img/elastic_agent_metrics.png\n    title: Elastic Agent Metrics\n    size: 2560×1234\n    type: image/png\n  - src: /img/elastic_agent_info.png\n    title: Elastic Agent Information\n    size: 2560×1234\n    type: image/png\n  - src: /img/elastic_agent_integrations.png\n    title: Elastic Agent Integrations\n    size: 2560×1234\n    type: image/png\n',
+                  data_base64: '',
+                },
+                references: [],
+              },
+            ],
+          } as any;
+        }
+      });
+
+      const results = await getInstalledPackages({
+        savedObjectsClient: soClient,
+        esClient: elasticsearchServiceMock.createInternalClient(),
+        perPage: 10,
+        sortOrder: 'asc',
+        showOnlyActiveDataStreams: true,
+      });
+
+      expect(results.items[0].dataStreams).toEqual([
+        {
+          name: 'logs-elastic_agent.apm_server-*',
+          title: 'apm_server_logs',
+        },
+        {
+          name: 'metrics-elastic_agent.apm_server-*',
+          title: 'apm_server_metrics',
+        },
+      ]);
+    });
   });
 
   describe('getPackageInfo', () => {
@@ -834,6 +917,7 @@ owner: elastic`,
       MockRegistry.getPackage.mockResolvedValue({
         paths: [],
         assetsMap: new Map(),
+        archiveIterator: createArchiveIteratorFromMap(new Map()),
         packageInfo: {
           name: 'my-package',
           version: '1.0.0',

@@ -32,7 +32,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const utils = getService('securitySolutionUtils');
 
-  describe('@ess @serverless delete_rules_bulk', () => {
+  // TODO: https://github.com/elastic/kibana/issues/193184 Unskip and rewrite using the _bulk_action API endpoint
+  describe.skip('@ess @serverless @skipInServerlessMKI delete_rules_bulk', () => {
     describe('deleting rules bulk using DELETE', () => {
       beforeEach(async () => {
         await createAlertsIndex(supertest, log);

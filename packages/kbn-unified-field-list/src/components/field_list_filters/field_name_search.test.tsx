@@ -1,18 +1,33 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useState } from 'react';
-import userEvent from '@testing-library/user-event';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
+import { render, screen } from '@testing-library/react';
 import { FieldNameSearch, type FieldNameSearchProps } from './field_name_search';
-import { render, screen, waitFor } from '@testing-library/react';
 
-// Flaky: https://github.com/elastic/kibana/issues/187714
-describe.skip('UnifiedFieldList <FieldNameSearch />', () => {
+describe('UnifiedFieldList <FieldNameSearch />', () => {
+  let user: UserEvent;
+
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
+  beforeEach(() => {
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+  });
+
   it('should render correctly', async () => {
     const props: FieldNameSearchProps = {
       nameFilter: '',
@@ -23,8 +38,9 @@ describe.skip('UnifiedFieldList <FieldNameSearch />', () => {
     render(<FieldNameSearch {...props} />);
     const input = screen.getByRole('searchbox', { name: 'Search field names' });
     expect(input).toHaveAttribute('aria-describedby', 'htmlId');
-    userEvent.type(input, 'hey');
-    await waitFor(() => expect(props.onChange).toHaveBeenCalledWith('hey'), { timeout: 256 });
+    await user.type(input, 'hey');
+    jest.advanceTimersByTime(256);
+    expect(props.onChange).toHaveBeenCalledWith('hey');
     expect(props.onChange).toBeCalledTimes(1);
   });
 
@@ -47,7 +63,7 @@ describe.skip('UnifiedFieldList <FieldNameSearch />', () => {
     render(<FieldNameSearchWithWrapper defaultNameFilter="this" />);
     expect(screen.getByRole('searchbox')).toHaveValue('this');
     const button = screen.getByRole('button', { name: 'update nameFilter' });
-    userEvent.click(button);
+    await user.click(button);
     expect(screen.getByRole('searchbox')).toHaveValue('that');
   });
 });

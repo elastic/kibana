@@ -6,3 +6,15 @@
  */
 
 export const ONE_WEEK_IN_HOURS = 24 * 7;
+
+export const getEntraUserIndex = (spaceId: string = 'default') =>
+  `logs-entityanalytics_entra_id.user-${spaceId}`;
+
+export const ENTRA_ID_PACKAGE_NAME = 'entityanalytics_entra_id';
+
+export const getOktaUserIndex = (spaceId: string = 'default') =>
+  `logs-entityanalytics_okta.user-${spaceId}`;
+
+export const OKTA_PACKAGE_NAME = 'entityanalytics_okta';
+
+export const MANAGED_USER_QUERY_ID = 'managedUserDetailsQuery';

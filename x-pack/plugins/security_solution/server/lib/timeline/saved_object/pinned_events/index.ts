@@ -6,7 +6,6 @@
  */
 
 import { failure } from 'io-ts/lib/PathReporter';
-import { getOr } from 'lodash/fp';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
@@ -17,8 +16,7 @@ import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import type {
   BarePinnedEvent,
   PinnedEvent,
-  PinnedEventResponse,
-  BarePinnedEventWithoutExternalRefs,
+  PersistPinnedEventResponse,
 } from '../../../../../common/api/timeline';
 import { SavedObjectPinnedEventRuntimeType } from '../../../../../common/types/timeline/pinned_event/saved_object';
 import type { SavedObjectPinnedEventWithoutExternalRefs } from '../../../../../common/types/timeline/pinned_event/saved_object';
@@ -77,48 +75,25 @@ export const persistPinnedEventOnTimeline = async (
   pinnedEventId: string | null, // pinned event saved object id
   eventId: string,
   timelineId: string
-): Promise<PinnedEventResponse | null> => {
-  try {
-    if (pinnedEventId != null) {
-      // Delete Pinned Event on Timeline
-      await deletePinnedEventOnTimeline(request, [pinnedEventId]);
-      return null;
-    }
-
-    const pinnedEvents = await getPinnedEventsInTimelineWithEventId(request, timelineId, eventId);
-
-    // we already had this event pinned so let's just return the one we already had
-    if (pinnedEvents.length > 0) {
-      return { ...pinnedEvents[0], code: 200 };
-    }
-
-    return await createPinnedEvent({
-      request,
-      eventId,
-      timelineId,
-    });
-  } catch (err) {
-    if (getOr(null, 'output.statusCode', err) === 404) {
-      /*
-       * Why we are doing that, because if it is not found for sure that it will be unpinned
-       * There is no need to bring back this error since we can assume that it is unpinned
-       */
-      return null;
-    }
-    if (getOr(null, 'output.statusCode', err) === 403) {
-      return pinnedEventId != null
-        ? {
-            code: 403,
-            message: err.message,
-            pinnedEventId: eventId,
-            timelineId: '',
-            version: '',
-            eventId: '',
-          }
-        : null;
-    }
-    throw err;
+): Promise<PersistPinnedEventResponse> => {
+  if (pinnedEventId != null) {
+    // Delete Pinned Event on Timeline
+    await deletePinnedEventOnTimeline(request, [pinnedEventId]);
+    return { unpinned: true };
   }
+
+  const pinnedEvents = await getPinnedEventsInTimelineWithEventId(request, timelineId, eventId);
+
+  // we already had this event pinned so let's just return the one we already had
+  if (pinnedEvents.length > 0) {
+    return { ...pinnedEvents[0] };
+  }
+
+  return createPinnedEvent({
+    request,
+    eventId,
+    timelineId,
+  });
 };
 
 const getPinnedEventsInTimelineWithEventId = async (
@@ -140,7 +115,7 @@ const createPinnedEvent = async ({
   request: FrameworkRequest;
   eventId: string;
   timelineId: string;
-}): Promise<PinnedEventResponse> => {
+}): Promise<PersistPinnedEventResponse> => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
 
   const savedPinnedEvent: BarePinnedEvent = {
@@ -151,7 +126,7 @@ const createPinnedEvent = async ({
   const pinnedEventWithCreator = pickSavedPinnedEvent(null, savedPinnedEvent, request.user);
 
   const { transformedFields: migratedAttributes, references } =
-    pinnedEventFieldsMigrator.extractFieldsToReferences<BarePinnedEventWithoutExternalRefs>({
+    pinnedEventFieldsMigrator.extractFieldsToReferences<Omit<BarePinnedEvent, 'timelineId'>>({
       data: pinnedEventWithCreator,
     });
 
@@ -176,7 +151,6 @@ const createPinnedEvent = async ({
   // create Pinned Event on Timeline
   return {
     ...convertSavedObjectToSavedPinnedEvent(repopulatedSavedObject),
-    code: 200,
   };
 };
 

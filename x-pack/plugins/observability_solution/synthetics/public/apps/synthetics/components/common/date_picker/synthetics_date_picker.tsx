@@ -7,20 +7,18 @@
 
 import React, { useContext, useEffect } from 'react';
 import { EuiSuperDatePicker } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ClientPluginsStart } from '../../../../../plugin';
 import { useUrlParams } from '../../../hooks';
 import { CLIENT_DEFAULTS } from '../../../../../../common/constants';
-import {
-  SyntheticsSettingsContext,
-  SyntheticsStartupPluginsContext,
-  SyntheticsRefreshContext,
-} from '../../../contexts';
+import { SyntheticsSettingsContext, SyntheticsRefreshContext } from '../../../contexts';
 
 export const SyntheticsDatePicker = ({ fullWidth }: { fullWidth?: boolean }) => {
   const [getUrlParams, updateUrl] = useUrlParams();
   const { commonlyUsedRanges } = useContext(SyntheticsSettingsContext);
   const { refreshApp } = useContext(SyntheticsRefreshContext);
 
-  const { data } = useContext(SyntheticsStartupPluginsContext);
+  const { data } = useKibana<ClientPluginsStart>().services;
 
   // read time from state and update the url
   const sharedTimeState = data?.query.timefilter.timefilter.getTime();
@@ -65,6 +63,9 @@ export const SyntheticsDatePicker = ({ fullWidth }: { fullWidth?: boolean }) => 
         refreshApp();
       }}
       onRefresh={refreshApp}
+      updateButtonProps={{
+        fill: false,
+      }}
     />
   );
 };

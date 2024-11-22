@@ -22,7 +22,7 @@ import type { UnifiedQueryRuleParams } from '../../rule_schema';
 import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { buildReasonMessageForQueryAlert } from '../utils/reason_formatters';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
-import type { CreateQueryRuleAdditionalOptions, RunOpts } from '../types';
+import type { CreateRuleOptions, RunOpts } from '../types';
 
 export const queryExecutor = async ({
   runOpts,
@@ -42,7 +42,7 @@ export const queryExecutor = async ({
   version: string;
   spaceId: string;
   bucketHistory?: BucketHistory[];
-  scheduleNotificationResponseActionsService?: CreateQueryRuleAdditionalOptions['scheduleNotificationResponseActionsService'];
+  scheduleNotificationResponseActionsService: CreateRuleOptions['scheduleNotificationResponseActionsService'];
   licensing: LicensingPluginSetup;
 }) => {
   const completeRule = runOpts.completeRule;
@@ -58,7 +58,6 @@ export const queryExecutor = async ({
       services,
       index: runOpts.inputIndex,
       exceptionFilter: runOpts.exceptionFilter,
-      fields: runOpts.inputIndexFields,
       loadFields: true,
     });
 
@@ -99,16 +98,11 @@ export const queryExecutor = async ({
             state: {},
           };
 
-    if (
-      completeRule.ruleParams.responseActions?.length &&
-      result.createdSignalsCount &&
-      scheduleNotificationResponseActionsService
-    ) {
-      scheduleNotificationResponseActionsService({
-        signals: result.createdSignals,
-        responseActions: completeRule.ruleParams.responseActions,
-      });
-    }
+    scheduleNotificationResponseActionsService({
+      signals: result.createdSignals,
+      signalsCount: result.createdSignalsCount,
+      responseActions: completeRule.ruleParams.responseActions,
+    });
 
     return result;
   });

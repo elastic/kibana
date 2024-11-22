@@ -22,6 +22,16 @@
       show_user: true
       default: 
         - '\.gz$'
+    {% if multiline_ndjson %}
+    - name: multiline_ndjson
+      type: bool
+      title: Parse multiline JSON events
+      description: >-
+          Enables parsing of newline-delimited JSON-formatted events that take more than one line. Each event must start with the curly brace at the first column.
+      required: false
+      show_user: false
+      default: true
+    {% endif %}
     - name: custom
       type: yaml
       title: Additional Filestream Configuration Options

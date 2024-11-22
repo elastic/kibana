@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
-import { AwaitingControlGroupAPI, ControlGroupRenderer } from '@kbn/controls-plugin/public';
-import { ViewMode } from '@kbn/embeddable-plugin/common';
+import { css } from '@emotion/react';
+import { ControlGroupRenderer, ControlGroupRendererApi } from '@kbn/controls-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
-import styled from 'styled-components';
 import { Filter } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
+import React, { useEffect, useState } from 'react';
+import { skip } from 'rxjs';
 import { SearchState } from '../../hooks/use_url_search_state';
 
 interface Props {
@@ -27,13 +27,13 @@ export function QuickFilters({
   initialState: { tagsFilter, statusFilter },
   onStateChange,
 }: Props) {
-  const [controlGroupAPI, setControlGroupAPI] = useState<AwaitingControlGroupAPI>();
+  const [controlGroupAPI, setControlGroupAPI] = useState<ControlGroupRendererApi | undefined>();
 
   useEffect(() => {
     if (!controlGroupAPI) {
       return;
     }
-    const subscription = controlGroupAPI.onFiltersPublished$.subscribe((newFilters) => {
+    const subscription = controlGroupAPI.filters$.pipe(skip(1)).subscribe((newFilters = []) => {
       if (newFilters.length === 0) {
         onStateChange({ tagsFilter: undefined, statusFilter: undefined });
       } else {
@@ -53,44 +53,58 @@ export function QuickFilters({
   }
 
   return (
-    <Container>
+    <div
+      css={css`
+        .controlsWrapper {
+          align-items: flex-start;
+          min-height: initial;
+        }
+        .controlGroup {
+          min-height: initial;
+        }
+      `}
+    >
       <ControlGroupRenderer
-        getCreationOptions={async (initialInput, builder) => {
-          await builder.addOptionsListControl(initialInput, {
-            dataViewId: dataView.id!,
-            fieldName: 'status',
-            width: 'small',
-            grow: true,
-            title: STATUS_LABEL,
-            controlId: 'slo-status-filter',
-            exclude: statusFilter?.meta?.negate,
-            selectedOptions: getSelectedOptions(statusFilter),
-            existsSelected: Boolean(statusFilter?.query?.exists?.field === 'status'),
-            placeholder: ALL_LABEL,
-          });
-          await builder.addOptionsListControl(initialInput, {
-            dataViewId: dataView.id!,
-            title: TAGS_LABEL,
-            fieldName: 'slo.tags',
-            width: 'small',
-            grow: false,
-            controlId: 'slo-tags-filter',
-            selectedOptions: getSelectedOptions(tagsFilter),
-            exclude: statusFilter?.meta?.negate,
-            existsSelected: Boolean(tagsFilter?.query?.exists?.field === 'slo.tags'),
-            placeholder: ALL_LABEL,
-          });
-          return {
-            initialInput: {
-              ...initialInput,
-              viewMode: ViewMode.VIEW,
+        onApiAvailable={setControlGroupAPI}
+        getCreationOptions={async (initialState, builder) => {
+          builder.addOptionsListControl(
+            initialState,
+            {
+              dataViewId: dataView.id!,
+              fieldName: 'status',
+              width: 'small',
+              grow: true,
+              title: STATUS_LABEL,
+              exclude: statusFilter?.meta?.negate,
+              selectedOptions: getSelectedOptions(statusFilter),
+              existsSelected: Boolean(statusFilter?.query?.exists?.field === 'status'),
+              placeholder: ALL_LABEL,
             },
+            'slo-status-filter'
+          );
+          builder.addOptionsListControl(
+            initialState,
+            {
+              dataViewId: dataView.id!,
+              title: TAGS_LABEL,
+              fieldName: 'slo.tags',
+              width: 'small',
+              grow: false,
+              selectedOptions: getSelectedOptions(tagsFilter),
+              exclude: statusFilter?.meta?.negate,
+              existsSelected: Boolean(tagsFilter?.query?.exists?.field === 'slo.tags'),
+              placeholder: ALL_LABEL,
+            },
+            'slo-tags-filter'
+          );
+          return {
+            initialState,
           };
         }}
-        ref={setControlGroupAPI}
         timeRange={{ from: 'now-24h', to: 'now' }}
+        compressed={false}
       />
-    </Container>
+    </div>
   );
 }
 
@@ -109,16 +123,6 @@ export const getSelectedOptions = (filter?: Filter) => {
   }
   return [];
 };
-
-const Container = styled.div`
-  .controlsWrapper {
-    align-items: flex-start;
-    min-height: initial;
-  }
-  .controlGroup {
-    min-height: initial;
-  }
-`;
 
 const TAGS_LABEL = i18n.translate('xpack.slo.list.tags', {
   defaultMessage: 'Tags',

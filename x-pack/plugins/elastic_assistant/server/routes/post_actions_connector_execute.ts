@@ -22,13 +22,13 @@ import { POST_ACTIONS_CONNECTOR_EXECUTE } from '../../common/constants';
 import { buildResponse } from '../lib/build_response';
 import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
 import {
-  DEFAULT_PLUGIN_NAME,
   appendAssistantMessageToConversation,
-  getPluginNameFromRequest,
+  getIsKnowledgeBaseInstalled,
+  getSystemPromptFromUserConversation,
   langChainExecute,
-  nonLangChainExecute,
-  updateConversationWithUserInput,
+  performChecks,
 } from './helpers';
+import { isOpenSourceModel } from './utils';
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
@@ -65,12 +65,16 @@ export const postActionsConnectorExecuteRoute = (
         let onLlmResponse;
 
         try {
-          const authenticatedUser = assistantContext.getCurrentUser();
-          if (authenticatedUser == null) {
-            return response.unauthorized({
-              body: `Authenticated user not found`,
-            });
+          const checkResponse = performChecks({
+            context: ctx,
+            request,
+            response,
+          });
+
+          if (!checkResponse.isSuccess) {
+            return checkResponse.response;
           }
+
           let latestReplacements: Replacements = request.body.replacements;
           const onNewReplacements = (newReplacements: Replacements) => {
             latestReplacements = { ...latestReplacements, ...newReplacements };
@@ -92,45 +96,15 @@ export const postActionsConnectorExecuteRoute = (
 
           // get the actions plugin start contract from the request context:
           const actions = ctx.elasticAssistant.actions;
+          const inference = ctx.elasticAssistant.inference;
           const actionsClient = await actions.getActionsClientWithRequest(request);
+          const connectors = await actionsClient.getBulk({ ids: [connectorId] });
+          const connector = connectors.length > 0 ? connectors[0] : undefined;
+          const isOssModel = isOpenSourceModel(connector);
 
           const conversationsDataClient =
             await assistantContext.getAIAssistantConversationsDataClient();
-
-          // Fetch any tools registered by the request's originating plugin
-          const pluginName = getPluginNameFromRequest({
-            request,
-            defaultPluginName: DEFAULT_PLUGIN_NAME,
-            logger,
-          });
-          const isGraphAvailable =
-            assistantContext.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault &&
-            request.body.isEnabledKnowledgeBase;
-
-          // TODO: remove non-graph persistance when KB will be enabled by default
-          if (!isGraphAvailable && conversationId && conversationsDataClient) {
-            const updatedConversation = await updateConversationWithUserInput({
-              actionsClient,
-              actionTypeId,
-              connectorId,
-              conversationId,
-              conversationsDataClient,
-              logger,
-              replacements: latestReplacements,
-              newMessages: newMessage ? [newMessage] : [],
-              model: request.body.model,
-            });
-            if (updatedConversation == null) {
-              return response.badRequest({
-                body: `conversation id: "${conversationId}" not updated`,
-              });
-            }
-            // messages are anonymized by conversationsDataClient
-            messages = updatedConversation?.messages?.map((c) => ({
-              role: c.role,
-              content: c.content,
-            }));
-          }
+          const promptsDataClient = await assistantContext.getAIAssistantPromptsDataClient();
 
           onLlmResponse = async (
             content: string,
@@ -148,41 +122,34 @@ export const postActionsConnectorExecuteRoute = (
               });
             }
           };
-
-          if (!request.body.isEnabledKnowledgeBase && !request.body.isEnabledRAGAlerts) {
-            // if not langchain, call execute action directly and return the response:
-            return await nonLangChainExecute({
-              abortSignal,
-              actionsClient,
-              actionTypeId,
-              connectorId,
-              logger,
-              messages: messages ?? [],
-              onLlmResponse,
-              request,
-              response,
-              telemetry,
+          let systemPrompt;
+          if (conversationsDataClient && promptsDataClient && conversationId) {
+            systemPrompt = await getSystemPromptFromUserConversation({
+              conversationsDataClient,
+              conversationId,
+              promptsDataClient,
             });
           }
-
           return await langChainExecute({
             abortSignal,
             isStream: request.body.subAction !== 'invokeAI',
-            isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase ?? false,
             actionsClient,
             actionTypeId,
             connectorId,
+            isOssModel,
             conversationId,
             context: ctx,
             getElser,
             logger,
-            messages: (isGraphAvailable && newMessage ? [newMessage] : messages) ?? [],
+            inference,
+            messages: (newMessage ? [newMessage] : messages) ?? [],
             onLlmResponse,
             onNewReplacements,
             replacements: latestReplacements,
             request,
             response,
             telemetry,
+            systemPrompt,
           });
         } catch (err) {
           logger.error(err);
@@ -190,13 +157,16 @@ export const postActionsConnectorExecuteRoute = (
           if (onLlmResponse) {
             await onLlmResponse(error.message, {}, true);
           }
+
+          const kbDataClient =
+            (await assistantContext.getAIAssistantKnowledgeBaseDataClient()) ?? undefined;
+          const isKnowledgeBaseInstalled = await getIsKnowledgeBaseInstalled(kbDataClient);
           telemetry.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
             actionTypeId: request.body.actionTypeId,
-            isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
-            isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
             model: request.body.model,
             errorMessage: error.message,
             assistantStreamingEnabled: request.body.subAction !== 'invokeAI',
+            isEnabledKnowledgeBase: isKnowledgeBaseInstalled,
           });
 
           return resp.error({

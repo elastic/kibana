@@ -8,7 +8,8 @@ paths:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: PatchRule
-      description: Patch a single rule
+      summary: Patch a detection rule
+      description: Update specific fields of an existing detection rule using the `rule_id` or `id` field.
       tags:
         - Rules API
       requestBody:

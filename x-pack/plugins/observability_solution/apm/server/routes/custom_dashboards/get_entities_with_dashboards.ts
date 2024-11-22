@@ -9,7 +9,7 @@ import { kqlQuery, termQuery } from '@kbn/observability-plugin/server';
 import { estypes } from '@elastic/elasticsearch';
 import { SERVICE_NAME } from '../../../common/es_fields/apm';
 import { SavedApmCustomDashboard } from '../../../common/custom_dashboards';
-import { EntitiesESClient } from '../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
+import { EntitiesESClient } from '../../lib/helpers/create_es_client/create_entities_es_client/create_entities_es_client';
 
 function getSearchRequest(filters: estypes.QueryDslQueryContainer[]) {
   return {

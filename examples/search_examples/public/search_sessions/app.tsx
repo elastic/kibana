@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -31,7 +32,6 @@ import { lastValueFrom, of } from 'rxjs';
 
 import { CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import type { TimeRange } from '@kbn/es-query';
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
@@ -47,6 +47,7 @@ import {
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { createStateContainer, useContainerState } from '@kbn/kibana-utils-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { PLUGIN_ID } from '../../common';
 import { getInitialStateFromUrl, SEARCH_SESSIONS_EXAMPLES_APP_LOCATOR } from './app_locator';
 
@@ -725,7 +726,7 @@ function doSearch(
           const message = (
             <KibanaRenderContextProvider {...startServices}>
               <EuiText>
-                Searched {res.rawResponse.hits.total} documents. <br />
+                Searched {res.rawResponse.hits.total as number} documents. <br />
                 The average of {numericFieldName} is {avgResult ? Math.floor(avgResult) : 0}
                 .
                 <br />
@@ -734,7 +735,7 @@ function doSearch(
           );
           notifications.toasts.addSuccess({
             title: 'Query result',
-            text: mountReactNode(message),
+            text: toMountPoint(message, startServices),
           });
         }
       }),

@@ -9,10 +9,12 @@ import type {
   QueryDslQueryContainer,
   AggregationsCustomCategorizeTextAnalyzer,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object/src/is_populated_object';
 
 import type { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 
-import { createCategorizeQuery } from './create_categorize_query';
+import { createDefaultQuery } from '@kbn/aiops-common/create_default_query';
 
 const CATEGORY_LIMIT = 1000;
 const EXAMPLE_LIMIT = 4;
@@ -29,13 +31,14 @@ export function createCategoryRequest(
   timeField: string,
   timeRange: { from: number; to: number } | undefined,
   queryIn: QueryDslQueryContainer,
+  runtimeMappings: MappingRuntimeFields | undefined,
   wrap: ReturnType<typeof createRandomSamplerWrapper>['wrap'],
   intervalMs?: number,
   additionalFilter?: CategorizationAdditionalFilter,
   useStandardTokenizer: boolean = true,
   includeSparkline: boolean = true
 ) {
-  const query = createCategorizeQuery(queryIn, timeField, timeRange);
+  const query = createDefaultQuery(queryIn, timeField, timeRange);
   const aggs = {
     categories: {
       categorize_text: {
@@ -109,10 +112,11 @@ export function createCategoryRequest(
   return {
     params: {
       index,
-      size: 0,
       body: {
         query,
         aggs: wrap(aggs),
+        ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
+        size: 0,
       },
     },
   };

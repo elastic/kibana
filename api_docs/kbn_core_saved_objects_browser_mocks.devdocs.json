@@ -6,26 +6,10 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-saved-objects-browser-mocks",
-        "id": "def-common.savedObjectsServiceMock",
+        "id": "def-public.savedObjectsServiceMock",
         "type": "Object",
         "tags": [
           "deprecated"
@@ -60,7 +44,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-browser-mocks",
-            "id": "def-common.savedObjectsServiceMock.create",
+            "id": "def-public.savedObjectsServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -76,7 +60,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-browser-mocks",
-            "id": "def-common.savedObjectsServiceMock.createStartContract",
+            "id": "def-public.savedObjectsServiceMock.createStartContract",
             "type": "Function",
             "tags": [],
             "label": "createStartContract",
@@ -85,9 +69,9 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-saved-objects-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreSavedObjectsBrowserPluginApi",
-                "section": "def-common.SavedObjectsStart",
+                "section": "def-public.SavedObjectsStart",
                 "text": "SavedObjectsStart"
               },
               ">"
@@ -103,7 +87,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-browser-mocks",
-        "id": "def-common.simpleSavedObjectMock",
+        "id": "def-public.simpleSavedObjectMock",
         "type": "Object",
         "tags": [
           "deprecated"
@@ -125,20 +109,12 @@
           {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/find_object_by_title.test.ts"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/saved_object/helpers/find_object_by_title.test.ts"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/saved_object/helpers/find_object_by_title.test.ts"
           }
         ],
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-browser-mocks",
-            "id": "def-common.simpleSavedObjectMock.create",
+            "id": "def-public.simpleSavedObjectMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -147,9 +123,9 @@
               "(client: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
-                "section": "def-common.SavedObjectsClientContract",
+                "section": "def-public.SavedObjectsClientContract",
                 "text": "SavedObjectsClientContract"
               },
               ", savedObject: ",
@@ -163,9 +139,9 @@
               "<unknown>) => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-saved-objects-api-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
-                "section": "def-common.SimpleSavedObject",
+                "section": "def-public.SimpleSavedObject",
                 "text": "SimpleSavedObject"
               },
               "<unknown>>"
@@ -176,7 +152,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-browser-mocks",
-                "id": "def-common.simpleSavedObjectMock.create.$1",
+                "id": "def-public.simpleSavedObjectMock.create.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "client",
@@ -184,9 +160,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
-                    "section": "def-common.SavedObjectsClientContract",
+                    "section": "def-public.SavedObjectsClientContract",
                     "text": "SavedObjectsClientContract"
                   }
                 ],
@@ -197,7 +173,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-browser-mocks",
-                "id": "def-common.simpleSavedObjectMock.create.$2",
+                "id": "def-public.simpleSavedObjectMock.create.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "savedObject",
@@ -224,5 +200,21 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

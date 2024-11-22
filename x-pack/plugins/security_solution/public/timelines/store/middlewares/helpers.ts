@@ -6,13 +6,14 @@
  */
 
 import type { MiddlewareAPI, Dispatch, AnyAction } from 'redux';
+import type { IHttpFetchError } from '@kbn/core/public';
 import type { State } from '../../../common/store/types';
 import { ALL_TIMELINE_QUERY_ID } from '../../containers/all';
 import type { inputsModel } from '../../../common/store/inputs';
 import { inputsSelectors } from '../../../common/store/inputs';
 import type { TimelineModel } from '../model';
 import { saveTimeline, updateTimeline } from '../actions';
-import { TimelineStatus } from '../../../../common/api/timeline';
+import { TimelineStatusEnum } from '../../../../common/api/timeline';
 import { selectTimelineById } from '../selectors';
 
 /**
@@ -51,7 +52,7 @@ export async function ensureTimelineIsSaved({
       id: localTimelineId,
       timeline: {
         ...timeline,
-        status: TimelineStatus.draft,
+        status: TimelineStatusEnum.draft,
       },
     })
   );
@@ -61,4 +62,18 @@ export async function ensureTimelineIsSaved({
 
   // Make sure we're returning the most updated version of the timeline
   return selectTimelineById(store.getState(), localTimelineId);
+}
+
+export function isHttpFetchError(
+  error: unknown
+): error is IHttpFetchError<{ status_code: number }> {
+  return (
+    error !== null &&
+    typeof error === 'object' &&
+    'body' in error &&
+    error.body !== null &&
+    typeof error.body === 'object' &&
+    `status_code` in error.body &&
+    typeof error.body.status_code === 'number'
+  );
 }

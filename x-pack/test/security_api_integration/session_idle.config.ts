@@ -6,7 +6,9 @@
  */
 
 import { resolve } from 'path';
-import { FtrConfigProviderContext } from '@kbn/test';
+
+import type { FtrConfigProviderContext } from '@kbn/test';
+
 import { services } from './services';
 
 // the default export of config files must be a config provider

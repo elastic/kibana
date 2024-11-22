@@ -26,14 +26,16 @@ import * as i18n from './translations';
 interface DeployStepProps {
   integrationSettings: State['integrationSettings'];
   result: State['result'];
+  celInputResult?: State['celInputResult'];
   connector: State['connector'];
 }
 
 export const DeployStep = React.memo<DeployStepProps>(
-  ({ integrationSettings, result, connector }) => {
+  ({ integrationSettings, result, celInputResult, connector }) => {
     const { isLoading, error, integrationFile, integrationName } = useDeployIntegration({
       integrationSettings,
       result,
+      celInputResult,
       connector,
     });
 
@@ -47,9 +49,9 @@ export const DeployStep = React.memo<DeployStepProps>(
           <EuiSpacer size="m" />
           <EuiFlexGroup direction="row" justifyContent="center">
             <EuiFlexItem grow={false}>
-              {isLoading && <EuiLoadingSpinner size="xl" />}
+              {isLoading && <EuiLoadingSpinner size="xl" data-test-subj="deployStep-loading" />}
               {error && (
-                <EuiText color="danger" size="s">
+                <EuiText color="danger" size="s" data-test-subj="deployStep-error">
                   {error}
                 </EuiText>
               )}
@@ -62,7 +64,7 @@ export const DeployStep = React.memo<DeployStepProps>(
       return (
         <SuccessSection integrationName={integrationName}>
           <EuiSpacer size="m" />
-          <EuiPanel hasShadow={false} hasBorder paddingSize="l">
+          <EuiPanel hasShadow={false} hasBorder paddingSize="l" data-test-subj="deployStep-success">
             <EuiFlexGroup direction="row" alignItems="center">
               <EuiFlexItem>
                 <EuiFlexGroup direction="row" alignItems="flexStart" justifyContent="flexStart">
@@ -86,7 +88,9 @@ export const DeployStep = React.memo<DeployStepProps>(
                 </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiLink onClick={onSaveZip}>{i18n.DOWNLOAD_ZIP_LINK}</EuiLink>
+                <EuiLink onClick={onSaveZip} data-test-subj="saveZipButton">
+                  {i18n.DOWNLOAD_ZIP_LINK}
+                </EuiLink>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>

@@ -18,10 +18,12 @@ export const findListRoute = (router: ListsPluginRouter): void => {
   router.versioned
     .get({
       access: 'public',
-      options: {
-        tags: ['access:lists-read'],
-      },
       path: `${LIST_URL}/_find`,
+      security: {
+        authz: {
+          requiredPrivileges: ['lists-read'],
+        },
+      },
     })
     .addVersion(
       {
@@ -58,25 +60,26 @@ export const findListRoute = (router: ListsPluginRouter): void => {
             perPage,
             sortField,
           });
+
           if (!isValid) {
             return siemResponse.error({
               body: errorMessage,
               statusCode: 400,
             });
-          } else {
-            const exceptionList = await lists.findList({
-              currentIndexPosition,
-              filter,
-              page,
-              perPage,
-              runtimeMappings: undefined,
-              searchAfter,
-              sortField,
-              sortOrder,
-            });
-
-            return response.ok({ body: FindListsResponse.parse(exceptionList) });
           }
+
+          const exceptionList = await lists.findList({
+            currentIndexPosition,
+            filter,
+            page,
+            perPage,
+            runtimeMappings: undefined,
+            searchAfter,
+            sortField,
+            sortOrder,
+          });
+
+          return response.ok({ body: FindListsResponse.parse(exceptionList) });
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

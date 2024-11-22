@@ -13,6 +13,7 @@ import type {
   UsageCollectionSetup,
 } from '@kbn/usage-collection-plugin/server';
 
+import type { SolutionView } from '../../common';
 import type { PluginsSetup } from '../plugin';
 import type { UsageStats, UsageStatsServiceSetup } from '../usage_stats';
 
@@ -46,7 +47,13 @@ async function getSpacesUsage(
   }
 
   const knownFeatureIds = features.getKibanaFeatures().map((feature) => feature.id);
-  const knownSolutions = ['classic', 'es', 'oblt', 'security', 'unset'];
+  const knownSolutions: Array<SolutionView | 'unset'> = [
+    'classic',
+    'es',
+    'oblt',
+    'security',
+    'unset',
+  ];
 
   const resp = (await esClient.search({
     index: kibanaIndex,

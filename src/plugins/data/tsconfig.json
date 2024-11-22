@@ -7,7 +7,6 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "config.ts",
     "config.mock.ts",
     "common/**/*.json",
     "public/**/*.json",
@@ -56,6 +55,7 @@
     "@kbn/search-types",
     "@kbn/safer-lodash-set",
     "@kbn/esql-utils",
+    "@kbn/shared-ux-table-persist"
   ],
   "exclude": [
     "target/**/*",

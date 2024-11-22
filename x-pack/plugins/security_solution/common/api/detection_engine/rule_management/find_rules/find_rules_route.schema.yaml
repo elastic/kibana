@@ -8,7 +8,8 @@ paths:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: FindRules
-      description: Finds rules that match the given query.
+      summary: List all detection rules
+      description: Retrieve a paginated list of detection rules. By default, the first page is returned, with 20 results per page.
       tags:
         - Rules API
       parameters:

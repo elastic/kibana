@@ -23,15 +23,15 @@ import { INVOKE_ASSISTANT_ERROR_EVENT } from '../../lib/telemetry/event_based_te
 import { ElasticAssistantPluginRouter, GetElser } from '../../types';
 import { buildResponse } from '../../lib/build_response';
 import {
-  DEFAULT_PLUGIN_NAME,
   appendAssistantMessageToConversation,
-  createOrUpdateConversationWithUserInput,
-  getPluginNameFromRequest,
+  createConversationWithUserInput,
+  getIsKnowledgeBaseInstalled,
   langChainExecute,
   performChecks,
 } from '../helpers';
 import { transformESSearchToAnonymizationFields } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
+import { isOpenSourceModel } from '../utils';
 
 export const SYSTEM_PROMPT_CONTEXT_NON_I18N = (context: string) => {
   return `CONTEXT:\n"""\n${context}\n"""`;
@@ -64,21 +64,20 @@ export const chatCompleteRoute = (
         const assistantResponse = buildResponse(response);
         let telemetry;
         let actionTypeId;
+        const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
+        const logger: Logger = ctx.elasticAssistant.logger;
         try {
-          const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
-          const logger: Logger = ctx.elasticAssistant.logger;
           telemetry = ctx.elasticAssistant.telemetry;
+          const inference = ctx.elasticAssistant.inference;
 
           // Perform license and authenticated user checks
           const checkResponse = performChecks({
-            authenticatedUser: true,
             context: ctx,
-            license: true,
             request,
             response,
           });
-          if (checkResponse) {
-            return checkResponse;
+          if (!checkResponse.isSuccess) {
+            return checkResponse.response;
           }
 
           const conversationsDataClient =
@@ -100,7 +99,9 @@ export const chatCompleteRoute = (
           const actions = ctx.elasticAssistant.actions;
           const actionsClient = await actions.getActionsClientWithRequest(request);
           const connectors = await actionsClient.getBulk({ ids: [connectorId] });
-          actionTypeId = connectors.length > 0 ? connectors[0].actionTypeId : '.gen-ai';
+          const connector = connectors.length > 0 ? connectors[0] : undefined;
+          actionTypeId = connector?.actionTypeId ?? '.gen-ai';
+          const isOssModel = isOpenSourceModel(connector);
 
           // replacements
           const anonymizationFieldsRes =
@@ -150,41 +151,21 @@ export const chatCompleteRoute = (
             return transformedMessage;
           });
 
-          let updatedConversation: ConversationResponse | undefined | null;
-          // Fetch any tools registered by the request's originating plugin
-          const pluginName = getPluginNameFromRequest({
-            request,
-            defaultPluginName: DEFAULT_PLUGIN_NAME,
-            logger,
-          });
-          const enableKnowledgeBaseByDefault =
-            ctx.elasticAssistant.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
-          // TODO: remove non-graph persistance when KB will be enabled by default
-          if (
-            (!enableKnowledgeBaseByDefault || (enableKnowledgeBaseByDefault && !conversationId)) &&
-            request.body.persist &&
-            conversationsDataClient
-          ) {
-            updatedConversation = await createOrUpdateConversationWithUserInput({
-              actionsClient,
+          let newConversation: ConversationResponse | undefined | null;
+          if (conversationsDataClient && !conversationId && request.body.persist) {
+            newConversation = await createConversationWithUserInput({
               actionTypeId,
               connectorId,
               conversationId,
               conversationsDataClient,
               promptId: request.body.promptId,
-              logger,
               replacements: latestReplacements,
               newMessages: messages,
               model: request.body.model,
             });
-            if (updatedConversation == null) {
-              return assistantResponse.error({
-                body: `conversation id: "${conversationId}" not updated`,
-                statusCode: 400,
-              });
-            }
+
             // messages are anonymized by conversationsDataClient
-            messages = updatedConversation?.messages?.map((c) => ({
+            messages = newConversation?.messages?.map((c) => ({
               role: c.role,
               content: c.content,
             }));
@@ -195,9 +176,9 @@ export const chatCompleteRoute = (
             traceData: Message['traceData'] = {},
             isError = false
           ): Promise<void> => {
-            if (updatedConversation?.id && conversationsDataClient) {
+            if (newConversation?.id && conversationsDataClient) {
               await appendAssistantMessageToConversation({
-                conversationId: updatedConversation?.id,
+                conversationId: newConversation?.id,
                 conversationsDataClient,
                 messageContent: content,
                 replacements: latestReplacements,
@@ -209,35 +190,46 @@ export const chatCompleteRoute = (
 
           return await langChainExecute({
             abortSignal,
-            isEnabledKnowledgeBase: true,
             isStream: request.body.isStream ?? false,
             actionsClient,
             actionTypeId,
             connectorId,
-            conversationId,
+            isOssModel,
+            conversationId: conversationId ?? newConversation?.id,
             context: ctx,
             getElser,
             logger,
+            inference,
             messages: messages ?? [],
             onLlmResponse,
             onNewReplacements,
             replacements: latestReplacements,
-            request,
+            request: {
+              ...request,
+              // TODO: clean up after empty tools will be available to use
+              body: {
+                ...request.body,
+                replacements: {},
+                size: 10,
+                alertsIndexPattern: '.alerts-security.alerts-default',
+              },
+            },
             response,
             telemetry,
             responseLanguage: request.body.responseLanguage,
           });
         } catch (err) {
           const error = transformError(err as Error);
+          const kbDataClient =
+            (await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient()) ?? undefined;
+          const isKnowledgeBaseInstalled = await getIsKnowledgeBaseInstalled(kbDataClient);
+
           telemetry?.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
             actionTypeId: actionTypeId ?? '',
-            isEnabledKnowledgeBase: true,
-            isEnabledRAGAlerts: true,
             model: request.body.model,
             errorMessage: error.message,
-            // TODO rm actionTypeId check when llmClass for bedrock streaming is implemented
-            // tracked here: https://github.com/elastic/security-team/issues/7363
             assistantStreamingEnabled: request.body.isStream ?? false,
+            isEnabledKnowledgeBase: isKnowledgeBaseInstalled,
           });
           return assistantResponse.error({
             body: error.message,

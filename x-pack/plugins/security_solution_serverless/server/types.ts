@@ -6,7 +6,7 @@
  */
 import type { CoreSetup, ElasticsearchClient, Logger, LoggerFactory } from '@kbn/core/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
-import type { PluginSetupContract, PluginStartContract } from '@kbn/features-plugin/server';
+import type { FeaturesPluginSetup, FeaturesPluginStart } from '@kbn/features-plugin/server';
 import type {
   PluginSetup as SecuritySolutionPluginSetup,
   PluginStart as SecuritySolutionPluginStart,
@@ -25,6 +25,7 @@ import type { IntegrationAssistantPluginSetup } from '@kbn/integration-assistant
 import type { ProductTier } from '../common/product';
 
 import type { ServerlessSecurityConfig } from './config';
+import type { UsageReportingService } from './common/services/usage_reporting_service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SecuritySolutionServerlessPluginSetup {}
@@ -36,7 +37,7 @@ export interface SecuritySolutionServerlessPluginSetupDeps {
   securitySolution: SecuritySolutionPluginSetup;
   securitySolutionEss: SecuritySolutionEssPluginSetup;
   serverless: ServerlessPluginSetup;
-  features: PluginSetupContract;
+  features: FeaturesPluginSetup;
   taskManager: TaskManagerSetupContract;
   cloud: CloudSetup;
   actions: ActionsPluginSetupContract;
@@ -46,7 +47,7 @@ export interface SecuritySolutionServerlessPluginSetupDeps {
 export interface SecuritySolutionServerlessPluginStartDeps {
   security: SecurityPluginStart;
   securitySolution: SecuritySolutionPluginStart;
-  features: PluginStartContract;
+  features: FeaturesPluginStart;
   taskManager: TaskManagerStartContract;
   fleet: FleetStartContract;
 }
@@ -86,6 +87,7 @@ export interface SecurityUsageReportingTaskSetupContract {
   taskTitle: string;
   version: string;
   meteringCallback: MeteringCallback;
+  usageReportingService: UsageReportingService;
 }
 
 export interface SecurityUsageReportingTaskStartContract {

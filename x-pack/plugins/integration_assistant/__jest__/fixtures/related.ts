@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SamplesFormatName } from '../../common';
 import type { Pipeline } from '../../common';
 
 export const relatedInitialPipeline: Pipeline = {
@@ -55,7 +56,7 @@ export const relatedExpectedResults = {
       {
         append: {
           field: 'related.ip',
-          value: ['{{{source.ip}}}'],
+          value: '{{{source.ip}}}',
           allow_duplicates: false,
           if: 'ctx.source?.ip != null',
         },
@@ -63,7 +64,7 @@ export const relatedExpectedResults = {
       {
         append: {
           field: 'related.ip',
-          value: ['{{{destination.ip}}}'],
+          value: '{{{destination.ip}}}',
           allow_duplicates: false,
           if: 'ctx.destination?.ip != null',
         },
@@ -91,58 +92,38 @@ export const relatedExpectedResults = {
 
 export const relatedInitialMockedResponse = [
   {
-    append: {
-      field: 'related.ip',
-      value: ['{{{source.ip}?.split(":")[0]}}'],
-      allow_duplicates: false,
-      if: 'ctx.source?.ip != null',
-    },
+    field: 'related.ip',
+    value_field: 'source.ip',
+    if: 'ctx.source?.ip != null',
   },
   {
-    append: {
-      field: 'related.ip',
-      value: ['{{{destination.ip}}}'],
-      allow_duplicates: false,
-      if: 'ctx.destination?.ip != null',
-    },
+    field: 'related.ip',
+    value_field: 'destination.ip',
   },
 ];
 
 export const relatedErrorMockedResponse = [
   {
-    append: {
-      field: 'related.ip',
-      value: ['{{{source.ip}}}'],
-      allow_duplicates: false,
-      if: 'ctx.source?.ip != null',
-    },
+    field: 'related.ip',
+    value_field: 'source.ip',
   },
   {
-    append: {
-      field: 'related.ip',
-      value: ['{{{destination.ip}}}'],
-      allow_duplicates: false,
-      if: 'ctx.destination?.ip != null',
-    },
+    field: 'related.ip',
+    value_field: 'destination.ip',
+    if: 'ctx.destination?.ip != null',
   },
 ];
 
 export const relatedReviewMockedResponse = [
   {
-    append: {
-      field: 'related.ip',
-      value: ['{{{source.ip}}}'],
-      allow_duplicates: false,
-      if: 'ctx.source?.ip != null',
-    },
+    field: 'related.ip',
+    value_field: 'source.ip',
+    if: 'ctx.source?.ip != null',
   },
   {
-    append: {
-      field: 'related.ip',
-      value: ['{{{destination.ip}}}'],
-      allow_duplicates: false,
-      if: 'ctx.destination?.ip != null',
-    },
+    field: 'related.ip',
+    value_field: 'destination.ip',
+    if: 'ctx.destination?.ip != null',
   },
 ];
 
@@ -159,55 +140,44 @@ export const testPipelineValidResult: { pipelineResults: object[]; errors: objec
 export const relatedTestState = {
   rawSamples: ['{"test1": "test1"}'],
   samples: ['{ "test1": "test1" }'],
-  formattedSamples: '{"test1": "test1"}',
   ecs: 'testtypes',
   exAnswer: 'testanswer',
   packageName: 'testpackage',
   dataStreamName: 'testDataStream',
   errors: { test: 'testerror' },
+  previousError: 'testerror',
   pipelineResults: [{ test: 'testresult' }],
   finalized: false,
   reviewed: false,
+  hasTriedOnce: false,
   currentPipeline: { test: 'testpipeline' },
   currentProcessors: [
     {
-      append: {
-        field: 'related.ip',
-        value: ['{{{source.ip}?.split(":")[0]}}'],
-        allow_duplicates: false,
-        if: 'ctx.source?.ip != null',
-      },
+      field: 'related.ip',
+      value_field: 'source.ip',
+      if: 'ctx.source?.ip != null',
     },
     {
-      append: {
-        field: 'related.ip',
-        value: ['{{{destination.ip}}}'],
-        allow_duplicates: false,
-        if: 'ctx.destination?.ip != null',
-      },
+      field: 'related.ip',
+      value_field: 'destination.ip',
+      if: 'ctx.destination?.ip != null',
     },
   ],
   initialPipeline: relatedInitialPipeline,
   results: { test: 'testresults' },
   lastExecutedChain: 'testchain',
+  samplesFormat: { name: SamplesFormatName.Values.json },
 };
 
 export const relatedMockProcessors = [
   {
-    append: {
-      field: 'related.ip',
-      value: ['{{{source.ip}?.split(":")[0]}}'],
-      allow_duplicates: false,
-      if: 'ctx.source?.ip != null',
-    },
+    field: 'related.user',
+    value_field: 'source.user.id',
   },
   {
-    append: {
-      field: 'related.ip',
-      value: ['{{{destination.ip}}}'],
-      allow_duplicates: false,
-      if: 'ctx.destination?.ip != null',
-    },
+    field: 'related.ip',
+    value_field: 'destination.ip',
+    if: 'ctx.destination?.ip != null',
   },
 ];
 
@@ -223,16 +193,16 @@ export const relatedExpectedHandlerResponse = {
       },
       {
         append: {
-          field: 'related.ip',
-          value: ['{{{source.ip}?.split(":")[0]}}'],
+          field: 'related.user',
+          value: '{{{source.user.id}}}',
           allow_duplicates: false,
-          if: 'ctx.source?.ip != null',
+          if: 'ctx.source?.user?.id != null',
         },
       },
       {
         append: {
           field: 'related.ip',
-          value: ['{{{destination.ip}}}'],
+          value: '{{{destination.ip}}}',
           allow_duplicates: false,
           if: 'ctx.destination?.ip != null',
         },
@@ -258,18 +228,13 @@ export const relatedExpectedHandlerResponse = {
   },
   currentProcessors: [
     {
-      append: {
-        field: 'event.type',
-        value: ['creation'],
-        if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
-      },
+      field: 'related.ip',
+      value_field: 'source.ip',
     },
     {
-      append: {
-        field: 'event.category',
-        value: ['database'],
-        if: "ctx.mysql_enterprise.audit.general_data.sql_command == 'create_db'",
-      },
+      field: 'related.ip',
+      value_field: 'destination.ip',
+      if: 'ctx.destination?.ip != null',
     },
   ],
   reviewed: false,

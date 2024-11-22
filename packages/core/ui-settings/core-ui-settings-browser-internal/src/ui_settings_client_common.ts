@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { cloneDeep, defaultsDeep } from 'lodash';
@@ -37,7 +38,11 @@ export abstract class UiSettingsClientCommon implements IUiSettingsClient {
   constructor(params: UiSettingsClientParams) {
     this.api = params.api;
     this.defaults = cloneDeep(params.defaults);
-    this.cache = defaultsDeep({}, this.defaults, cloneDeep(params.initialSettings));
+    this.cache = defaultsDeep(
+      Object.create(null),
+      this.defaults,
+      cloneDeep(params.initialSettings)
+    );
 
     params.done$.subscribe({
       complete: () => {
@@ -101,7 +106,10 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
   }
 
   isDeclared(key: string) {
-    return key in this.cache;
+    return (
+      // @ts-ignore
+      (key !== '__proto__' || key !== 'constructor' || key !== 'prototype') && key in this.cache
+    );
   }
 
   isDefault(key: string) {

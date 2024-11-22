@@ -5,17 +5,19 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { AstFunction, fromExpression } from '@kbn/interpreter';
 import { shallowEqual, useSelector } from 'react-redux';
+
 import { State } from '../../../../types';
 import { getFiltersByFilterExpressions } from '../../../lib/filter';
 import { adaptCanvasFilter } from '../../../lib/filter_adapters';
-import { useFiltersService } from '../../../services';
+import { getCanvasFiltersService } from '../../../services/canvas_filters_service';
 
 const extractExpressionAST = (filters: string[]) => fromExpression(filters.join(' | '));
 
 export function useCanvasFilters(filterExprsToGroupBy: AstFunction[] = []) {
-  const filtersService = useFiltersService();
+  const filtersService = useMemo(() => getCanvasFiltersService(), []);
   const filterExpressions = useSelector(
     (state: State) => filtersService.getFilters(state),
     shallowEqual

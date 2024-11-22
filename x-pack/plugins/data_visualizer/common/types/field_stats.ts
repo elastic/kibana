@@ -287,7 +287,7 @@ export const EMBEDDABLE_SAMPLER_OPTION = {
   NORMAL: 'normal_sampling',
 };
 export type FieldStatsEmbeddableSamplerOption =
-  typeof EMBEDDABLE_SAMPLER_OPTION[keyof typeof EMBEDDABLE_SAMPLER_OPTION];
+  (typeof EMBEDDABLE_SAMPLER_OPTION)[keyof typeof EMBEDDABLE_SAMPLER_OPTION];
 
 export function isRandomSamplingOption(arg: SamplingOption): arg is RandomSamplingOption {
   return arg.mode === 'random_sampling';

@@ -6,6 +6,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import moment from 'moment';
 import useMountedState from 'react-use/lib/useMountedState';
 import type { FC } from 'react';
 import React from 'react';
@@ -15,19 +16,27 @@ import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
+import type { MlJob, MlJobStats } from '@elastic/elasticsearch/lib/api/types';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import usePrevious from 'react-use/lib/usePrevious';
+import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { tz } from 'moment';
 import { pick, throttle } from 'lodash';
 import type { MlDependencies } from '../../application/app';
 import { TimeSeriesExplorerEmbeddableChart } from '../../application/timeseriesexplorer/timeseriesexplorer_embeddable_chart';
 import { APP_STATE_ACTION } from '../../application/timeseriesexplorer/timeseriesexplorer_constants';
-import type { SingleMetricViewerServices, MlEntity } from '../../embeddables/types';
-import './_index.scss';
+import type {
+  SingleMetricViewerServices,
+  MlEntity,
+  SingleMetricViewerEmbeddableApi,
+} from '../../embeddables/types';
+import {
+  getTimeseriesExplorerStyles,
+  getAnnotationStyles,
+} from '../../application/timeseriesexplorer/styles';
 
-const containerPadding = 10;
+const containerPadding = 20;
 const minElemAndChartDiff = 20;
 const RESIZE_THROTTLE_TIME_MS = 500;
 interface AppStateZoom {
@@ -35,9 +44,16 @@ interface AppStateZoom {
   to?: string;
 }
 
-const errorMessage = i18n.translate('xpack.ml.singleMetricViewerEmbeddable.errorMessage"', {
+const basicErrorMessage = i18n.translate('xpack.ml.singleMetricViewerEmbeddable.errorMessage"', {
   defaultMessage: 'Unable to load the ML single metric viewer data',
 });
+
+const jobNotFoundErrorMessage = i18n.translate(
+  'xpack.ml.singleMetricViewerEmbeddable.jobNotFoundErrorMessage"',
+  {
+    defaultMessage: 'No known job with the selected id',
+  }
+);
 
 export type SingleMetricViewerSharedComponent = FC<SingleMetricViewerProps>;
 
@@ -45,13 +61,16 @@ export type SingleMetricViewerSharedComponent = FC<SingleMetricViewerProps>;
  * Only used to initialize internally
  */
 export type SingleMetricViewerPropsWithDeps = SingleMetricViewerProps & {
+  api?: SingleMetricViewerEmbeddableApi;
   coreStart: CoreStart;
   pluginStart: MlDependencies;
   mlServices: SingleMetricViewerServices;
 };
 
 export interface SingleMetricViewerProps {
+  shouldShowForecastButton?: boolean;
   bounds?: TimeRangeBounds;
+  forecastId?: string;
   selectedEntities?: MlEntity;
   selectedDetectorIndex?: number;
   functionDescription?: string;
@@ -61,15 +80,20 @@ export interface SingleMetricViewerProps {
    */
   lastRefresh?: number;
   onRenderComplete?: () => void;
-  onError?: (error: Error) => void;
+  onError?: (error?: Error) => void;
+  onForecastIdChange?: (forecastId: string | undefined) => void;
   uuid: string;
 }
 
 type Zoom = AppStateZoom | undefined;
 type ForecastId = string | undefined;
 
+const timeseriesExplorerStyles = getTimeseriesExplorerStyles();
+const annotationStyles = getAnnotationStyles();
+
 const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
   // Component dependencies
+  api,
   coreStart,
   pluginStart,
   mlServices,
@@ -78,10 +102,13 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
   functionDescription,
   lastRefresh,
   onError,
+  onForecastIdChange,
   onRenderComplete,
+  forecastId,
   selectedDetectorIndex,
   selectedEntities,
   selectedJobId,
+  shouldShowForecastButton,
   uuid,
 }) => {
   const [chartDimensions, setChartDimensions] = useState<{ width: number; height: number }>({
@@ -89,14 +116,14 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
     height: 0,
   });
   const [zoom, setZoom] = useState<Zoom>();
-  const [selectedForecastId, setSelectedForecastId] = useState<ForecastId>();
-  const [selectedJob, setSelectedJob] = useState<MlJob | undefined>();
-  const [jobsLoaded, setJobsLoaded] = useState(false);
+  const [selectedForecastId, setSelectedForecastId] = useState<ForecastId>(forecastId);
+  const [selectedJobWrapper, setSelectedJobWrapper] = useState<
+    { job: MlJob; stats: MlJobStats } | undefined
+  >();
+  const [errorEncountered, setErrorEncountered] = useState<number | undefined>();
 
   const isMounted = useMountedState();
-
-  const { mlApiServices, mlJobService, mlTimeSeriesExplorerService, toastNotificationService } =
-    mlServices;
+  const { mlApi, mlTimeSeriesExplorerService, toastNotificationService } = mlServices;
   const startServices = pick(coreStart, 'analytics', 'i18n', 'theme');
   const datePickerDeps: DatePickerDependencies = {
     ...pick(coreStart, ['http', 'notifications', 'theme', 'uiSettings', 'i18n']),
@@ -108,48 +135,46 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
   const previousRefresh = usePrevious(lastRefresh ?? 0);
 
   useEffect(
-    function setUpJobsLoaded() {
-      async function loadJobs() {
-        try {
-          await mlJobService.loadJobsWrapper();
-          setJobsLoaded(true);
-        } catch (e) {
-          if (onError) {
-            onError(new Error(errorMessage));
-          }
-        }
-      }
-      if (isMounted() === false) {
-        return;
-      }
-      loadJobs();
+    function resetErrorOnJobChange() {
+      // Calling onError to clear any previous error
+      setErrorEncountered(undefined);
+      onError?.();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isMounted]
+    [selectedJobId]
   );
 
   useEffect(
     function setUpSelectedJob() {
       async function fetchSelectedJob() {
-        if (mlApiServices && selectedJobId !== undefined) {
+        if (mlApi && selectedJobId !== undefined) {
           try {
-            const { jobs } = await mlApiServices.getJobs({ jobId: selectedJobId });
-            const job = jobs[0];
-            setSelectedJob(job);
+            const [{ jobs }, { jobs: jobStats }] = await Promise.all([
+              mlApi.getJobs({ jobId: selectedJobId }),
+              mlApi.getJobStats({ jobId: selectedJobId }),
+            ]);
+            setSelectedJobWrapper({ job: jobs[0], stats: jobStats[0] });
           } catch (e) {
+            const error = extractErrorProperties(e);
+            // Could get 404 because job has been deleted and also avoid infinite refetches on any error
+            setErrorEncountered(error.statusCode);
             if (onError) {
-              onError(new Error(errorMessage));
+              onError(
+                new Error(errorEncountered === 404 ? jobNotFoundErrorMessage : basicErrorMessage)
+              );
             }
           }
         }
       }
-      if (isMounted() === false) {
+      if (isMounted() === false || errorEncountered !== undefined) {
         return;
       }
       fetchSelectedJob();
     },
-    [selectedJobId, mlApiServices, isMounted, onError]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [selectedJobId, isMounted, errorEncountered]
   );
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const resizeHandler = useCallback(
     throttle((e: { width: number; height: number }) => {
@@ -164,9 +189,11 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
   );
 
   const autoZoomDuration = useMemo(() => {
-    if (!selectedJob) return;
-    return mlTimeSeriesExplorerService?.getAutoZoomDuration(selectedJob);
-  }, [mlTimeSeriesExplorerService, selectedJob]);
+    if (!selectedJobWrapper) return;
+    return mlTimeSeriesExplorerService?.getAutoZoomDuration(
+      selectedJobWrapper.job.analysis_config?.bucket_span
+    );
+  }, [mlTimeSeriesExplorerService, selectedJobWrapper]);
 
   const appStateHandler = useCallback(
     (action: string, payload?: Zoom | ForecastId) => {
@@ -176,6 +203,9 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
        */
       switch (action) {
         case APP_STATE_ACTION.SET_FORECAST_ID:
+          if (onForecastIdChange) {
+            onForecastIdChange(payload as ForecastId);
+          }
           setSelectedForecastId(payload as ForecastId);
           setZoom(undefined);
           break;
@@ -190,8 +220,27 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
       }
     },
 
-    [setZoom, setSelectedForecastId]
+    [setZoom, setSelectedForecastId, onForecastIdChange]
   );
+
+  const onForecastComplete = (forecastEndTimestamp?: number) => {
+    const { timefilter } = pluginStart.data.query.timefilter;
+    const currentBounds = timefilter.getActiveBounds();
+
+    if (
+      forecastEndTimestamp &&
+      currentBounds?.max &&
+      currentBounds?.min &&
+      currentBounds.max.unix() * 1000 < forecastEndTimestamp
+    ) {
+      const to = moment(forecastEndTimestamp);
+      timefilter.setTime({
+        from: currentBounds.min,
+        to,
+        mode: 'absolute',
+      });
+    }
+  };
 
   return (
     <EuiResizeObserver onResize={resizeHandler}>
@@ -206,7 +255,7 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
           }}
           data-test-subj={`mlSingleMetricViewer_${uuid}`}
           ref={resizeRef}
-          className="ml-time-series-explorer"
+          css={[timeseriesExplorerStyles, annotationStyles]}
           data-shared-item="" // TODO: Remove data-shared-item as part of https://github.com/elastic/kibana/issues/179376
           data-rendering-count={1}
         >
@@ -223,9 +272,9 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
               <DatePickerContextProvider {...datePickerDeps}>
                 {selectedJobId !== undefined &&
                   autoZoomDuration !== undefined &&
-                  jobsLoaded &&
-                  selectedJobId === selectedJob?.job_id && (
+                  selectedJobId === selectedJobWrapper?.job.job_id && (
                     <TimeSeriesExplorerEmbeddableChart
+                      api={api}
                       chartWidth={chartDimensions.width - containerPadding}
                       chartHeight={chartDimensions.height - containerPadding}
                       dataViewsService={pluginStart.data.dataViews}
@@ -244,8 +293,11 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
                       tableSeverity={0}
                       zoom={zoom}
                       functionDescription={functionDescription}
-                      selectedJob={selectedJob}
+                      selectedJob={selectedJobWrapper.job}
+                      selectedJobStats={selectedJobWrapper.stats}
                       onRenderComplete={onRenderComplete}
+                      onForecastComplete={onForecastComplete}
+                      shouldShowForecastButton={shouldShowForecastButton}
                     />
                   )}
               </DatePickerContextProvider>

@@ -64,6 +64,7 @@ kibana_vars=(
     elasticsearch.logQueries
     elasticsearch.password
     elasticsearch.pingTimeout
+    elasticsearch.publicBaseUrl
     elasticsearch.requestHeadersWhitelist
     elasticsearch.requestTimeout
     elasticsearch.serviceAccountToken
@@ -220,16 +221,13 @@ kibana_vars=(
     xpack.actions.proxyBypassHosts
     xpack.actions.proxyHeaders
     xpack.actions.proxyOnlyHosts
-    xpack.actions.proxyRejectUnauthorizedCertificates
     xpack.actions.proxyUrl
-    xpack.actions.rejectUnauthorized
     xpack.actions.responseTimeout
     xpack.actions.ssl.proxyVerificationMode
     xpack.actions.ssl.verificationMode
     xpack.alerting.healthCheck.interval
     xpack.alerting.invalidateApiKeysTask.interval
     xpack.alerting.invalidateApiKeysTask.removalDelay
-    xpack.alerting.defaultRuleTaskTimeout
     xpack.alerting.rules.run.timeout
     xpack.alerting.rules.run.ruleTypeOverrides
     xpack.alerting.cancelAlertsOnRuleTimeout
@@ -238,9 +236,7 @@ kibana_vars=(
     xpack.alerting.rules.run.actions.max
     xpack.alerting.rules.run.alerts.max
     xpack.alerting.rules.run.actions.connectorTypeOverrides
-    xpack.alerts.healthCheck.interval
-    xpack.alerts.invalidateApiKeysTask.interval
-    xpack.alerts.invalidateApiKeysTask.removalDelay
+    xpack.alerting.maxScheduledPerMinute
     xpack.apm.indices.error
     xpack.apm.indices.metric
     xpack.apm.indices.onboarding
@@ -319,7 +315,6 @@ kibana_vars=(
     xpack.observability.unsafe.thresholdRule.enabled
     xpack.reporting.capture.browser.autoDownload
     xpack.reporting.capture.browser.chromium.disableSandbox
-    xpack.reporting.capture.browser.chromium.inspect
     xpack.reporting.capture.browser.chromium.maxScreenshotDimension
     xpack.reporting.capture.browser.chromium.proxy.bypass
     xpack.reporting.capture.browser.chromium.proxy.enabled
@@ -391,7 +386,7 @@ kibana_vars=(
     xpack.security.authc.selector.enabled
     xpack.security.cookieName
     xpack.security.encryptionKey
-    xpack.security.experimental.fipsMode.enabled
+    xpack.security.fipsMode.enabled
     xpack.security.loginAssistanceMessage
     xpack.security.loginHelp
     xpack.security.sameSiteCookies
@@ -412,7 +407,12 @@ kibana_vars=(
     xpack.securitySolution.packagerTaskInterval
     xpack.securitySolution.prebuiltRulesPackageVersion
     xpack.spaces.maxSpaces
+    xpack.task_manager.capacity
     xpack.task_manager.claim_strategy
+    xpack.task_manager.auto_calculate_default_ech_capacity
+    xpack.task_manager.discovery.active_nodes_lookback
+    xpack.task_manager.discovery.interval
+    xpack.task_manager.kibanas_per_partition
     xpack.task_manager.max_attempts
     xpack.task_manager.max_workers
     xpack.task_manager.monitored_aggregated_stats_refresh_rate

@@ -1,17 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
-import { type CoreSetup, Plugin, type CoreStart } from '@kbn/core/public';
+import { type CoreSetup, Plugin, type CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ServerlessPluginSetup } from '@kbn/serverless/public';
 import { BehaviorSubject, Observable } from 'rxjs';
+import type { BuildFlavor } from '@kbn/config';
 import { AIAssistantType } from '../common/ai_assistant_type';
 import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
 
@@ -40,7 +42,13 @@ export class AIAssistantManagementPlugin
       StartDependencies
     >
 {
-  constructor() {}
+  private readonly kibanaBranch: string;
+  private readonly buildFlavor: BuildFlavor;
+
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.kibanaBranch = this.initializerContext.env.packageInfo.branch;
+    this.buildFlavor = this.initializerContext.env.packageInfo.buildFlavor;
+  }
 
   public setup(
     core: CoreSetup<StartDependencies, AIAssistantManagementSelectionPluginPublicStart>,
@@ -78,6 +86,8 @@ export class AIAssistantManagementPlugin
         return mountManagementSection({
           core,
           mountParams,
+          kibanaBranch: this.kibanaBranch,
+          buildFlavor: this.buildFlavor,
         });
       },
     });

@@ -71,7 +71,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
       }
       fullWidth
     >
-      <EuiFormRow hasEmptyLabelSpace fullWidth>
+      <EuiFormRow fullWidth>
         <EuiSwitch
           data-test-subj="ignoreUnavailableIndicesToggle"
           label={
@@ -111,7 +111,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
       }
       fullWidth
     >
-      <EuiFormRow hasEmptyLabelSpace fullWidth>
+      <EuiFormRow fullWidth>
         <EuiSwitch
           data-test-subj="partialIndicesToggle"
           label={

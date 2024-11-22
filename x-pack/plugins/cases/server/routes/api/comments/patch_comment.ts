@@ -23,7 +23,10 @@ export const patchCommentRoute = createCasesRoute({
   },
   routerOptions: {
     access: 'public',
-    summary: `Update an alert or comment in a case`,
+    summary: `Update a case comment or alert`,
+    tags: ['oas-tag:cases'],
+    description: 'You cannot change the comment type or the owner of a comment.',
+    // You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're updating.
   },
   handler: async ({ context, request, response }) => {
     try {

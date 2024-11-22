@@ -19,7 +19,8 @@ import { QUERY_MODE } from '@kbn/aiops-log-pattern-analysis/get_category_query';
 import type { OpenInDiscover } from '../category_table/use_open_in_discover';
 
 export const SelectedPatterns: FC<{ openInDiscover: OpenInDiscover }> = ({ openInDiscover }) => {
-  const { labels, openFunction } = openInDiscover;
+  const { getLabels, openFunction } = openInDiscover;
+  const labels = getLabels(false);
   const [showMenu, setShowMenu] = useState(false);
   const togglePopover = () => setShowMenu(!showMenu);
 
@@ -51,14 +52,14 @@ export const SelectedPatterns: FC<{ openInDiscover: OpenInDiscover }> = ({ openI
           <EuiContextMenuItem
             key="in"
             icon="plusInCircle"
-            onClick={() => openFunction(QUERY_MODE.INCLUDE)}
+            onClick={() => openFunction(QUERY_MODE.INCLUDE, false)}
           >
             {labels.multiSelect.in}
           </EuiContextMenuItem>,
           <EuiContextMenuItem
             key="out"
             icon="minusInCircle"
-            onClick={() => openFunction(QUERY_MODE.EXCLUDE)}
+            onClick={() => openFunction(QUERY_MODE.EXCLUDE, false)}
           >
             {labels.multiSelect.out}
           </EuiContextMenuItem>,

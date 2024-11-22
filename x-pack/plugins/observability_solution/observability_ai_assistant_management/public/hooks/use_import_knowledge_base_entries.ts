@@ -20,7 +20,7 @@ export function useImportKnowledgeBaseEntries() {
     notifications: { toasts },
   } = useKibana().services;
   const queryClient = useQueryClient();
-  const observabilityAIAssistantApi = observabilityAIAssistant?.service.callApi;
+  const observabilityAIAssistantApi = observabilityAIAssistant.service.callApi;
 
   return useMutation<
     void,
@@ -30,17 +30,13 @@ export function useImportKnowledgeBaseEntries() {
         Omit<
           KnowledgeBaseEntry,
           '@timestamp' | 'confidence' | 'is_correction' | 'public' | 'labels'
-        >
+        > & { title: string }
       >;
     }
   >(
     [REACT_QUERY_KEYS.IMPORT_KB_ENTRIES],
     ({ entries }) => {
-      if (!observabilityAIAssistantApi) {
-        return Promise.reject('Error with observabilityAIAssistantApi: API not found.');
-      }
-
-      return observabilityAIAssistantApi?.(
+      return observabilityAIAssistantApi(
         'POST /internal/observability_ai_assistant/kb/entries/import',
         {
           signal: null,

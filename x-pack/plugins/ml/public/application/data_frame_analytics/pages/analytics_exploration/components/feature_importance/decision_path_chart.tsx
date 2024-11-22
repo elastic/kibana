@@ -122,7 +122,7 @@ export const DecisionPathChart = ({
       );
   // if regression, guarantee up to num_precision significant digits without having it in scientific notation
   // if classification, hide the numeric values since we only want to show the path
-  const tickFormatter = useCallback((d) => formatSingleValue(d, '').toString(), []);
+  const tickFormatter = useCallback((d: any) => formatSingleValue(d, '').toString(), []);
 
   return (
     <div data-test-subj="mlDFADecisionPathChart">

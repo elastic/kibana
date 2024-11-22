@@ -53,7 +53,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(CIS_AZURE_OPTION_TEST_ID);
         await cisIntegration.clickOptionButton(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE);
         await cisIntegration.clickSaveButton();
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegrationAzure.getPostInstallArmTemplateModal()) !== undefined).to.be(
           true
         );
@@ -70,7 +70,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL);
         await cisIntegration.selectValue(AZURE_CREDENTIAL_SELECTOR, 'managed_identity');
         await cisIntegration.clickSaveButton();
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
       });
     });
@@ -83,7 +83,7 @@ export default function (providerContext: FtrProviderContext) {
           AZURE_CREDENTIAL_SELECTOR,
           'service_principal_with_client_secret'
         );
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.fillInTextField(
           CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
           clientId
@@ -97,7 +97,7 @@ export default function (providerContext: FtrProviderContext) {
           clientSecret
         );
         await cisIntegration.clickSaveButton();
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         await cisIntegration.navigateToIntegrationCspList();
         await cisIntegration.clickFirstElementOnIntegrationTable();
@@ -123,7 +123,7 @@ export default function (providerContext: FtrProviderContext) {
           AZURE_CREDENTIAL_SELECTOR,
           'service_principal_with_client_certificate'
         );
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.fillInTextField(
           CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
           clientId
@@ -137,7 +137,7 @@ export default function (providerContext: FtrProviderContext) {
           clientCertificatePath
         );
         await cisIntegration.clickSaveButton();
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         await cisIntegration.navigateToIntegrationCspList();
         await cisIntegration.clickFirstElementOnIntegrationTable();
@@ -164,7 +164,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(CIS_AZURE_OPTION_TEST_ID);
         await cisIntegration.clickOptionButton(CIS_AZURE_SINGLE_SUB_TEST_ID);
         await cisIntegration.clickSaveButton();
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegrationAzure.getPostInstallArmTemplateModal()) !== undefined).to.be(
           true
         );
@@ -182,7 +182,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL);
         await cisIntegration.selectValue(AZURE_CREDENTIAL_SELECTOR, 'managed_identity');
         await cisIntegration.clickSaveButton();
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
       });
     });
@@ -195,7 +195,7 @@ export default function (providerContext: FtrProviderContext) {
           AZURE_CREDENTIAL_SELECTOR,
           'service_principal_with_client_secret'
         );
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.fillInTextField(
           CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
           clientId
@@ -209,7 +209,7 @@ export default function (providerContext: FtrProviderContext) {
           clientSecret
         );
         await cisIntegration.clickSaveButton();
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         await cisIntegration.navigateToIntegrationCspList();
         await cisIntegration.clickFirstElementOnIntegrationTable();
@@ -235,7 +235,7 @@ export default function (providerContext: FtrProviderContext) {
           AZURE_CREDENTIAL_SELECTOR,
           'service_principal_with_client_certificate'
         );
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.fillInTextField(
           CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
           clientId
@@ -249,7 +249,7 @@ export default function (providerContext: FtrProviderContext) {
           clientCertificatePath
         );
         await cisIntegration.clickSaveButton();
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         await cisIntegration.navigateToIntegrationCspList();
         await cisIntegration.clickFirstElementOnIntegrationTable();

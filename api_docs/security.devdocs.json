@@ -253,6 +253,28 @@
             "path": "x-pack/packages/security/plugin_types_public/src/authorization/authorization_service.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-public.AuthorizationServiceSetup.privileges",
+            "type": "Object",
+            "tags": [],
+            "label": "privileges",
+            "description": [
+              "\nA set of methods to work with Kibana role privileges"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-plugin-types-public",
+                "scope": "public",
+                "docId": "kibKbnSecurityPluginTypesPublicPluginApi",
+                "section": "def-public.PrivilegesAPIClientPublicContract",
+                "text": "PrivilegesAPIClientPublicContract"
+              }
+            ],
+            "path": "x-pack/packages/security/plugin_types_public/src/authorization/authorization_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -922,7 +944,7 @@
               "Render a custom ReactNode instead of the default <EuiContextMenuItem />"
             ],
             "signature": [
-              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "x-pack/packages/security/plugin_types_public/src/nav_control/nav_control_service.ts",
             "deprecated": false,
@@ -1146,25 +1168,25 @@
           "{ i18n: ",
           {
             "pluginId": "@kbn/core-i18n-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreI18nBrowserPluginApi",
-            "section": "def-common.I18nStart",
+            "section": "def-public.I18nStart",
             "text": "I18nStart"
           },
           "; analytics: ",
           {
             "pluginId": "@kbn/core-analytics-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
-            "section": "def-common.AnalyticsServiceStart",
+            "section": "def-public.AnalyticsServiceStart",
             "text": "AnalyticsServiceStart"
           },
           "; theme: ",
           {
             "pluginId": "@kbn/core-theme-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreThemeBrowserPluginApi",
-            "section": "def-common.ThemeServiceSetup",
+            "section": "def-public.ThemeServiceSetup",
             "text": "ThemeServiceSetup"
           },
           "; }"
@@ -1434,9 +1456,9 @@
               "(request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>, headerName?: string) => ",
@@ -1465,9 +1487,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.KibanaRequest",
+                    "section": "def-server.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -1796,7 +1818,15 @@
             "label": "get",
             "description": [],
             "signature": [
-              "(operation: string) => string"
+              "{ (operation: ",
+              {
+                "pluginId": "@kbn/security-plugin-types-server",
+                "scope": "server",
+                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
+                "section": "def-server.ApiOperation",
+                "text": "ApiOperation"
+              },
+              ", subject: string): string; (subject: string): string; }"
             ],
             "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/api.ts",
             "deprecated": false,
@@ -1805,9 +1835,570 @@
               {
                 "parentPluginId": "security",
                 "id": "def-server.ApiActions.get.$1",
-                "type": "string",
+                "type": "Enum",
                 "tags": [],
                 "label": "operation",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/security-plugin-types-server",
+                    "scope": "server",
+                    "docId": "kibKbnSecurityPluginTypesServerPluginApi",
+                    "section": "def-server.ApiOperation",
+                    "text": "ApiOperation"
+                  }
+                ],
+                "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/api.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "security",
+                "id": "def-server.ApiActions.get.$2",
+                "type": "string",
+                "tags": [],
+                "label": "subject",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/api.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.ApiActions.get",
+            "type": "Function",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "get",
+            "description": [],
+            "signature": [
+              "{ (operation: ",
+              {
+                "pluginId": "@kbn/security-plugin-types-server",
+                "scope": "server",
+                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
+                "section": "def-server.ApiOperation",
+                "text": "ApiOperation"
+              },
+              ", subject: string): string; (subject: string): string; }"
+            ],
+            "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/api.ts",
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/security-plugin-types-server",
+                "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/api.ts"
+              },
+              {
+                "plugin": "telemetry",
+                "path": "src/plugins/telemetry/server/routes/telemetry_usage_stats.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/security/security.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/security/security.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/security/security.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/security/security.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/security/security.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/security/security.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/security/security.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/security/security.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/security/security.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/security/security.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/security/security.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/routes/agent_policy/handlers.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/routes/app/index.ts"
+              },
+              {
+                "plugin": "profiling",
+                "path": "x-pack/plugins/observability_solution/profiling/server/lib/setup/get_has_setup_privileges.ts"
+              },
+              {
+                "plugin": "profiling",
+                "path": "x-pack/plugins/observability_solution/profiling/server/lib/setup/get_has_setup_privileges.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/actions/api.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/actions/api.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/feature_privilege_builder/api.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/security/fleet_router.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/actions/api.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/actions/api.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              }
+            ],
+            "children": [
+              {
+                "parentPluginId": "security",
+                "id": "def-server.ApiActions.get.$1",
+                "type": "string",
+                "tags": [],
+                "label": "subject",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/api.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.ApiActions.actionFromRouteTag",
+            "type": "Function",
+            "tags": [],
+            "label": "actionFromRouteTag",
+            "description": [],
+            "signature": [
+              "(routeTag: string) => string"
+            ],
+            "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/api.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "security",
+                "id": "def-server.ApiActions.actionFromRouteTag.$1",
+                "type": "string",
+                "tags": [],
+                "label": "routeTag",
                 "description": [],
                 "signature": [
                   "string"
@@ -1829,8 +2420,10 @@
         "type": "Interface",
         "tags": [],
         "label": "APIKeys",
-        "description": [],
-        "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+        "description": [
+          "\nInterface for managing API keys in Elasticsearch, including creation,\nvalidation, and invalidation of API keys,\nas well as checking the status of API key features."
+        ],
+        "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1846,7 +2439,7 @@
             "signature": [
               "() => Promise<boolean>"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1864,7 +2457,7 @@
             "signature": [
               "() => Promise<boolean>"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1883,16 +2476,16 @@
               "(request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>, createParams: ",
               {
-                "pluginId": "@kbn/security-plugin-types-server",
+                "pluginId": "@kbn/core-security-server",
                 "scope": "server",
-                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
                 "section": "def-server.CreateAPIKeyParams",
                 "text": "CreateAPIKeyParams"
               },
@@ -1900,7 +2493,7 @@
               "SecurityCreateApiKeyResponse",
               " | null>"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1916,14 +2509,14 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.KibanaRequest",
+                    "section": "def-server.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
                 ],
-                "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+                "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1939,14 +2532,98 @@
                 ],
                 "signature": [
                   {
-                    "pluginId": "@kbn/security-plugin-types-server",
+                    "pluginId": "@kbn/core-security-server",
                     "scope": "server",
-                    "docId": "kibKbnSecurityPluginTypesServerPluginApi",
+                    "docId": "kibKbnCoreSecurityServerPluginApi",
                     "section": "def-server.CreateAPIKeyParams",
                     "text": "CreateAPIKeyParams"
                   }
                 ],
-                "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+                "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.APIKeys.update",
+            "type": "Function",
+            "tags": [],
+            "label": "update",
+            "description": [
+              "\nAttempts update an API key with the provided 'role_descriptors' and 'metadata'\n\nReturns `updated`, `true` if the update was successful, `false` if there was nothing to update\n\nUser needs `manage_api_key` privilege to update REST API keys and `manage_security` for cross-cluster API keys.\n"
+            ],
+            "signature": [
+              "(request: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>, updateParams: ",
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-server.UpdateAPIKeyParams",
+                "text": "UpdateAPIKeyParams"
+              },
+              ") => Promise<",
+              "SecurityUpdateApiKeyResponse",
+              " | null>"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "security",
+                "id": "def-server.APIKeys.update.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [
+                  "Request instance."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-server.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "security",
+                "id": "def-server.APIKeys.update.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "updateParams",
+                "description": [
+                  "The params to edit an API key"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-security-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSecurityServerPluginApi",
+                    "section": "def-server.UpdateAPIKeyParams",
+                    "text": "UpdateAPIKeyParams"
+                  }
+                ],
+                "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1967,22 +2644,38 @@
               "(request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, unknown, any>, createParams: Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { name: string; role_descriptors: Record<string, Readonly<{} & {}>>; }> | Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { name: string; kibana_role_descriptors: Record<string, Readonly<{} & { kibana: Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]; elasticsearch: Readonly<{ cluster?: string[] | undefined; indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"except\" | \"grant\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined; remote_cluster?: Readonly<{} & { privileges: string[]; clusters: string[]; }>[] | undefined; remote_indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"except\" | \"grant\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined; run_as?: string[] | undefined; } & {}>; }>>; }>) => Promise<",
+              "<unknown, unknown, unknown, any>, createParams: ",
               {
-                "pluginId": "@kbn/security-plugin-types-server",
+                "pluginId": "@kbn/core-security-server",
                 "scope": "server",
-                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-server.CreateRestAPIKeyParams",
+                "text": "CreateRestAPIKeyParams"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-server.CreateRestAPIKeyWithKibanaPrivilegesParams",
+                "text": "CreateRestAPIKeyWithKibanaPrivilegesParams"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
                 "section": "def-server.GrantAPIKeyResult",
                 "text": "GrantAPIKeyResult"
               },
               " | null>"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1998,14 +2691,14 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.KibanaRequest",
+                    "section": "def-server.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
                 ],
-                "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+                "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2020,9 +2713,23 @@
                   "Create operation parameters."
                 ],
                 "signature": [
-                  "Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { name: string; role_descriptors: Record<string, Readonly<{} & {}>>; }> | Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { name: string; kibana_role_descriptors: Record<string, Readonly<{} & { kibana: Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]; elasticsearch: Readonly<{ cluster?: string[] | undefined; indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"except\" | \"grant\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined; remote_cluster?: Readonly<{} & { privileges: string[]; clusters: string[]; }>[] | undefined; remote_indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"except\" | \"grant\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined; run_as?: string[] | undefined; } & {}>; }>>; }>"
+                  {
+                    "pluginId": "@kbn/core-security-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSecurityServerPluginApi",
+                    "section": "def-server.CreateRestAPIKeyParams",
+                    "text": "CreateRestAPIKeyParams"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "@kbn/core-security-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSecurityServerPluginApi",
+                    "section": "def-server.CreateRestAPIKeyWithKibanaPrivilegesParams",
+                    "text": "CreateRestAPIKeyWithKibanaPrivilegesParams"
+                  }
                 ],
-                "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+                "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2042,15 +2749,15 @@
             "signature": [
               "(apiKeyPrams: ",
               {
-                "pluginId": "@kbn/security-plugin-types-server",
+                "pluginId": "@kbn/core-security-server",
                 "scope": "server",
-                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
                 "section": "def-server.ValidateAPIKeyParams",
                 "text": "ValidateAPIKeyParams"
               },
               ") => Promise<boolean>"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2065,14 +2772,14 @@
                 ],
                 "signature": [
                   {
-                    "pluginId": "@kbn/security-plugin-types-server",
+                    "pluginId": "@kbn/core-security-server",
                     "scope": "server",
-                    "docId": "kibKbnSecurityPluginTypesServerPluginApi",
+                    "docId": "kibKbnCoreSecurityServerPluginApi",
                     "section": "def-server.ValidateAPIKeyParams",
                     "text": "ValidateAPIKeyParams"
                   }
                 ],
-                "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+                "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2093,30 +2800,30 @@
               "(request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>, params: ",
               {
-                "pluginId": "@kbn/security-plugin-types-server",
+                "pluginId": "@kbn/core-security-server",
                 "scope": "server",
-                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
                 "section": "def-server.InvalidateAPIKeysParams",
                 "text": "InvalidateAPIKeysParams"
               },
               ") => Promise<",
               {
-                "pluginId": "@kbn/security-plugin-types-server",
+                "pluginId": "@kbn/core-security-server",
                 "scope": "server",
-                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
                 "section": "def-server.InvalidateAPIKeyResult",
                 "text": "InvalidateAPIKeyResult"
               },
               " | null>"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2132,14 +2839,14 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.KibanaRequest",
+                    "section": "def-server.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
                 ],
-                "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+                "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2155,14 +2862,14 @@
                 ],
                 "signature": [
                   {
-                    "pluginId": "@kbn/security-plugin-types-server",
+                    "pluginId": "@kbn/core-security-server",
                     "scope": "server",
-                    "docId": "kibKbnSecurityPluginTypesServerPluginApi",
+                    "docId": "kibKbnCoreSecurityServerPluginApi",
                     "section": "def-server.InvalidateAPIKeysParams",
                     "text": "InvalidateAPIKeysParams"
                   }
                 ],
-                "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+                "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2182,23 +2889,23 @@
             "signature": [
               "(params: ",
               {
-                "pluginId": "@kbn/security-plugin-types-server",
+                "pluginId": "@kbn/core-security-server",
                 "scope": "server",
-                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
                 "section": "def-server.InvalidateAPIKeysParams",
                 "text": "InvalidateAPIKeysParams"
               },
               ") => Promise<",
               {
-                "pluginId": "@kbn/security-plugin-types-server",
+                "pluginId": "@kbn/core-security-server",
                 "scope": "server",
-                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
                 "section": "def-server.InvalidateAPIKeyResult",
                 "text": "InvalidateAPIKeyResult"
               },
               " | null>"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2213,14 +2920,14 @@
                 ],
                 "signature": [
                   {
-                    "pluginId": "@kbn/security-plugin-types-server",
+                    "pluginId": "@kbn/core-security-server",
                     "scope": "server",
-                    "docId": "kibKbnSecurityPluginTypesServerPluginApi",
+                    "docId": "kibKbnCoreSecurityServerPluginApi",
                     "section": "def-server.InvalidateAPIKeysParams",
                     "text": "InvalidateAPIKeysParams"
                   }
                 ],
-                "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+                "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2289,9 +2996,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-security-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-common.AuditEvent",
+            "section": "def-server.AuditEvent",
             "text": "AuditEvent"
           },
           " extends ",
@@ -2332,9 +3039,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.AuditKibana",
+                "section": "def-server.AuditKibana",
                 "text": "AuditKibana"
               },
               " | undefined"
@@ -2355,9 +3062,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.AuditHttp",
+                "section": "def-server.AuditHttp",
                 "text": "AuditHttp"
               },
               " | undefined"
@@ -2381,9 +3088,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-security-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-common.AuditHttp",
+            "section": "def-server.AuditHttp",
             "text": "AuditHttp"
           },
           " extends ",
@@ -2405,9 +3112,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.AuditRequest",
+                "section": "def-server.AuditRequest",
                 "text": "AuditRequest"
               },
               " | undefined"
@@ -2635,9 +3342,9 @@
               "(event: ",
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.AuditEvent",
+                "section": "def-server.AuditEvent",
                 "text": "AuditEvent"
               },
               " | undefined) => void"
@@ -2656,9 +3363,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-security-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreSecurityServerPluginApi",
-                    "section": "def-common.AuditEvent",
+                    "section": "def-server.AuditEvent",
                     "text": "AuditEvent"
                   },
                   " | undefined"
@@ -2699,9 +3406,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-security-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-common.AuditRequest",
+            "section": "def-server.AuditRequest",
             "text": "AuditRequest"
           },
           " extends { body?: { bytes?: number | undefined; content?: string | undefined; } | undefined; bytes?: number | undefined; id?: string | undefined; method?: string | undefined; mime_type?: string | undefined; referrer?: string | undefined; }"
@@ -2753,17 +3460,17 @@
               "(request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) => ",
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.AuditLogger",
+                "section": "def-server.AuditLogger",
                 "text": "AuditLogger"
               }
             ],
@@ -2781,9 +3488,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.KibanaRequest",
+                    "section": "def-server.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -2808,9 +3515,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.AuditLogger",
+                "section": "def-server.AuditLogger",
                 "text": "AuditLogger"
               }
             ],
@@ -2984,9 +3691,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/security-plugin-types-server",
+                "pluginId": "@kbn/core-security-server",
                 "scope": "server",
-                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
                 "section": "def-server.APIKeys",
                 "text": "APIKeys"
               }
@@ -3006,9 +3713,9 @@
               "(request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) => ",
@@ -3035,9 +3742,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.KibanaRequest",
+                    "section": "def-server.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -3075,9 +3782,9 @@
               "(request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) => boolean"
@@ -3096,9 +3803,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.KibanaRequest",
+                    "section": "def-server.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -3160,9 +3867,9 @@
               "(request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) => ",
@@ -3189,9 +3896,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.KibanaRequest",
+                    "section": "def-server.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -3213,9 +3920,9 @@
               "(request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) => ",
@@ -3242,9 +3949,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.KibanaRequest",
+                    "section": "def-server.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -3266,9 +3973,9 @@
               "(request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) => ",
@@ -3295,9 +4002,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.KibanaRequest",
+                    "section": "def-server.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -3985,12 +4692,357 @@
       },
       {
         "parentPluginId": "security",
+        "id": "def-server.CreateCrossClusterAPIKeyParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "CreateCrossClusterAPIKeyParams",
+        "description": [],
+        "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-server.CreateCrossClusterAPIKeyParams.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"cross_cluster\""
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.CreateCrossClusterAPIKeyParams.expiration",
+            "type": "string",
+            "tags": [],
+            "label": "expiration",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.CreateCrossClusterAPIKeyParams.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.CreateCrossClusterAPIKeyParams.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [],
+            "signature": [
+              "{ [key: string]: any; } | undefined"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.CreateCrossClusterAPIKeyParams.access",
+            "type": "Object",
+            "tags": [],
+            "label": "access",
+            "description": [],
+            "signature": [
+              "{ search?: { names: string[]; query?: unknown; field_security?: unknown; allow_restricted_indices?: boolean | undefined; }[] | undefined; replication?: { names: string[]; }[] | undefined; }"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-server.CreateRestAPIKeyParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "CreateRestAPIKeyParams",
+        "description": [],
+        "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-server.CreateRestAPIKeyParams.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"rest\" | undefined"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.CreateRestAPIKeyParams.expiration",
+            "type": "string",
+            "tags": [],
+            "label": "expiration",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.CreateRestAPIKeyParams.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.CreateRestAPIKeyParams.role_descriptors",
+            "type": "Object",
+            "tags": [],
+            "label": "role_descriptors",
+            "description": [],
+            "signature": [
+              "{ [x: string]: { [key: string]: any; }; }"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.CreateRestAPIKeyParams.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [],
+            "signature": [
+              "{ [key: string]: any; } | undefined"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-server.CreateRestAPIKeyWithKibanaPrivilegesParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "CreateRestAPIKeyWithKibanaPrivilegesParams",
+        "description": [],
+        "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-server.CreateRestAPIKeyWithKibanaPrivilegesParams.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"rest\" | undefined"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.CreateRestAPIKeyWithKibanaPrivilegesParams.expiration",
+            "type": "string",
+            "tags": [],
+            "label": "expiration",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.CreateRestAPIKeyWithKibanaPrivilegesParams.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.CreateRestAPIKeyWithKibanaPrivilegesParams.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [],
+            "signature": [
+              "{ [key: string]: any; } | undefined"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.CreateRestAPIKeyWithKibanaPrivilegesParams.kibana_role_descriptors",
+            "type": "Object",
+            "tags": [],
+            "label": "kibana_role_descriptors",
+            "description": [],
+            "signature": [
+              "{ [x: string]: { elasticsearch: ",
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-server.ElasticsearchPrivilegesType",
+                "text": "ElasticsearchPrivilegesType"
+              },
+              " & { [key: string]: unknown; }; kibana: ",
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-server.KibanaPrivilegesType",
+                "text": "KibanaPrivilegesType"
+              },
+              "; }; }"
+            ],
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-server.ElasticsearchPrivilegesType",
+        "type": "Interface",
+        "tags": [],
+        "label": "ElasticsearchPrivilegesType",
+        "description": [
+          "\nType representing Elasticsearch specific portion of the role definition."
+        ],
+        "path": "packages/core/security/core-security-server/src/roles/schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-server.ElasticsearchPrivilegesType.cluster",
+            "type": "Array",
+            "tags": [],
+            "label": "cluster",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/core/security/core-security-server/src/roles/schema.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.ElasticsearchPrivilegesType.remote_cluster",
+            "type": "Array",
+            "tags": [],
+            "label": "remote_cluster",
+            "description": [],
+            "signature": [
+              "{ privileges: string[]; clusters: string[]; }[] | undefined"
+            ],
+            "path": "packages/core/security/core-security-server/src/roles/schema.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.ElasticsearchPrivilegesType.indices",
+            "type": "Array",
+            "tags": [],
+            "label": "indices",
+            "description": [],
+            "signature": [
+              "{ names: string[]; field_security?: Record<\"except\" | \"grant\", string[]> | undefined; privileges: string[]; query?: string | undefined; allow_restricted_indices?: boolean | undefined; }[] | undefined"
+            ],
+            "path": "packages/core/security/core-security-server/src/roles/schema.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.ElasticsearchPrivilegesType.remote_indices",
+            "type": "Array",
+            "tags": [],
+            "label": "remote_indices",
+            "description": [],
+            "signature": [
+              "{ clusters: string[]; names: string[]; field_security?: Record<\"except\" | \"grant\", string[]> | undefined; privileges: string[]; query?: string | undefined; allow_restricted_indices?: boolean | undefined; }[] | undefined"
+            ],
+            "path": "packages/core/security/core-security-server/src/roles/schema.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.ElasticsearchPrivilegesType.run_as",
+            "type": "Array",
+            "tags": [],
+            "label": "run_as",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/core/security/core-security-server/src/roles/schema.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
         "id": "def-server.GrantAPIKeyResult",
         "type": "Interface",
         "tags": [],
         "label": "GrantAPIKeyResult",
         "description": [],
-        "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+        "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4003,7 +5055,7 @@
             "description": [
               "\nUnique id for this API key"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4016,7 +5068,7 @@
             "description": [
               "\nName for this API key"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4029,7 +5081,7 @@
             "description": [
               "\nGenerated API key"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4045,7 +5097,7 @@
         "description": [
           "\nThe return value when invalidating an API key in Elasticsearch."
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+        "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4061,7 +5113,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4077,7 +5129,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4090,7 +5142,7 @@
             "description": [
               "\nThe number of errors that were encountered when invalidating the API keys."
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4106,7 +5158,7 @@
             "signature": [
               "{ type?: string | undefined; reason?: string | undefined; caused_by?: { type?: string | undefined; reason?: string | undefined; } | undefined; }[] | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4122,7 +5174,7 @@
         "description": [
           "\nRepresents the params for invalidating multiple API keys"
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+        "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4132,11 +5184,13 @@
             "type": "Array",
             "tags": [],
             "label": "ids",
-            "description": [],
+            "description": [
+              "\nList of unique API key IDs"
+            ],
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4164,9 +5218,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-deprecations-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreDeprecationsServerPluginApi",
-                "section": "def-common.GetDeprecationsContext",
+                "section": "def-server.GetDeprecationsContext",
                 "text": "GetDeprecationsContext"
               }
             ],
@@ -4547,9 +5601,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>"
@@ -4711,9 +5765,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-user-profile-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreUserProfileServerPluginApi",
-                "section": "def-common.UserProfileRequiredPrivileges",
+                "section": "def-server.UserProfileRequiredPrivileges",
                 "text": "UserProfileRequiredPrivileges"
               },
               " | undefined"
@@ -4734,7 +5788,7 @@
         "description": [
           "\nRepresents the parameters for validating API Key credentials."
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+        "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4747,7 +5801,7 @@
             "description": [
               "\nUnique id for this API key"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4760,7 +5814,7 @@
             "description": [
               "\nGenerated API Key (secret)"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+            "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4778,9 +5832,9 @@
         "label": "CasesSupportedOperations",
         "description": [],
         "signature": [
-          "\"getTags\" | \"pushCase\" | \"createCase\" | \"createComment\" | \"getCase\" | \"getComment\" | \"getReporters\" | \"getUserActions\" | \"findConfigurations\" | \"updateCase\" | \"updateComment\" | \"deleteCase\" | \"deleteComment\" | \"createConfiguration\" | \"updateConfiguration\""
+          "\"getTags\" | \"createComment\" | \"reopenCase\" | \"pushCase\" | \"createCase\" | \"getCase\" | \"getComment\" | \"getReporters\" | \"getUserActions\" | \"findConfigurations\" | \"updateCase\" | \"updateComment\" | \"deleteCase\" | \"deleteComment\" | \"createConfiguration\" | \"updateConfiguration\""
         ],
-        "path": "x-pack/plugins/security/server/authorization/privileges/feature_privilege_builder/cases.ts",
+        "path": "x-pack/packages/security/authorization_core/src/privileges/feature_privilege_builder/cases.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4879,9 +5933,9 @@
           "(request: ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.KibanaRequest",
+            "section": "def-server.KibanaRequest",
             "text": "KibanaRequest"
           },
           "<unknown, unknown, unknown, any>) => ",
@@ -4908,9 +5962,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>"
@@ -4933,9 +5987,9 @@
           "(request: ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.KibanaRequest",
+            "section": "def-server.KibanaRequest",
             "text": "KibanaRequest"
           },
           "<unknown, unknown, unknown, any>) => ",
@@ -4962,9 +6016,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>"
@@ -5041,9 +6095,9 @@
           "(request: ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.KibanaRequest",
+            "section": "def-server.KibanaRequest",
             "text": "KibanaRequest"
           },
           "<unknown, unknown, unknown, any>) => ",
@@ -5070,9 +6124,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>"
@@ -5092,9 +6146,31 @@
         "label": "CreateAPIKeyParams",
         "description": [],
         "signature": [
-          "Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { name: string; role_descriptors: Record<string, Readonly<{} & {}>>; }> | Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { name: string; kibana_role_descriptors: Record<string, Readonly<{} & { kibana: Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]; elasticsearch: Readonly<{ cluster?: string[] | undefined; indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"except\" | \"grant\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined; remote_cluster?: Readonly<{} & { privileges: string[]; clusters: string[]; }>[] | undefined; remote_indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"except\" | \"grant\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined; run_as?: string[] | undefined; } & {}>; }>>; }> | Readonly<{ metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { type: \"cross_cluster\"; name: string; access: Readonly<{ search?: Readonly<{ query?: any; field_security?: any; allow_restricted_indices?: boolean | undefined; } & { names: string[]; }>[] | undefined; replication?: Readonly<{} & { names: string[]; }>[] | undefined; } & {}>; }>"
+          {
+            "pluginId": "@kbn/core-security-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSecurityServerPluginApi",
+            "section": "def-server.CreateRestAPIKeyParams",
+            "text": "CreateRestAPIKeyParams"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/core-security-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSecurityServerPluginApi",
+            "section": "def-server.CreateRestAPIKeyWithKibanaPrivilegesParams",
+            "text": "CreateRestAPIKeyWithKibanaPrivilegesParams"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/core-security-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSecurityServerPluginApi",
+            "section": "def-server.CreateCrossClusterAPIKeyParams",
+            "text": "CreateCrossClusterAPIKeyParams"
+          }
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+        "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5111,67 +6187,7 @@
         "signature": [
           "SecurityCreateApiKeyResponse"
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "security",
-        "id": "def-server.CreateCrossClusterAPIKeyParams",
-        "type": "Type",
-        "tags": [],
-        "label": "CreateCrossClusterAPIKeyParams",
-        "description": [],
-        "signature": [
-          "{ readonly metadata?: Readonly<{} & {}> | undefined; readonly expiration?: string | undefined; readonly type: \"cross_cluster\"; readonly name: string; readonly access: Readonly<{ search?: Readonly<{ query?: any; field_security?: any; allow_restricted_indices?: boolean | undefined; } & { names: string[]; }>[] | undefined; replication?: Readonly<{} & { names: string[]; }>[] | undefined; } & {}>; }"
-        ],
-        "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "security",
-        "id": "def-server.CreateRestAPIKeyParams",
-        "type": "Type",
-        "tags": [],
-        "label": "CreateRestAPIKeyParams",
-        "description": [],
-        "signature": [
-          "{ readonly type?: \"rest\" | undefined; readonly metadata?: Readonly<{} & {}> | undefined; readonly expiration?: string | undefined; readonly name: string; readonly role_descriptors: Record<string, Readonly<{} & {}>>; }"
-        ],
-        "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "security",
-        "id": "def-server.CreateRestAPIKeyWithKibanaPrivilegesParams",
-        "type": "Type",
-        "tags": [],
-        "label": "CreateRestAPIKeyWithKibanaPrivilegesParams",
-        "description": [],
-        "signature": [
-          "{ readonly type?: \"rest\" | undefined; readonly metadata?: Readonly<{} & {}> | undefined; readonly expiration?: string | undefined; readonly name: string; readonly kibana_role_descriptors: Record<string, Readonly<{} & { kibana: Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]; elasticsearch: Readonly<{ cluster?: string[] | undefined; indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"except\" | \"grant\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined; remote_cluster?: Readonly<{} & { privileges: string[]; clusters: string[]; }>[] | undefined; remote_indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"except\" | \"grant\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined; run_as?: string[] | undefined; } & {}>; }>>; }"
-        ],
-        "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "security",
-        "id": "def-server.ElasticsearchPrivilegesType",
-        "type": "Type",
-        "tags": [],
-        "label": "ElasticsearchPrivilegesType",
-        "description": [],
-        "signature": [
-          "{ readonly cluster?: string[] | undefined; readonly indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"except\" | \"grant\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined; readonly remote_cluster?: Readonly<{} & { privileges: string[]; clusters: string[]; }>[] | undefined; readonly remote_indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"except\" | \"grant\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined; readonly run_as?: string[] | undefined; }"
-        ],
-        "path": "x-pack/packages/security/plugin_types_server/src/authorization/role_schema.ts",
+        "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5182,11 +6198,13 @@
         "type": "Type",
         "tags": [],
         "label": "KibanaPrivilegesType",
-        "description": [],
-        "signature": [
-          "Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]"
+        "description": [
+          "\nType representing Kibana specific portion of the role definition."
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/authorization/role_schema.ts",
+        "signature": [
+          "{ spaces: string[]; base?: string[] | undefined; feature?: Record<string, string[]> | undefined; }[]"
+        ],
+        "path": "packages/core/security/core-security-server/src/roles/schema.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5237,9 +6255,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-user-profile-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreUserProfileServerPluginApi",
-            "section": "def-common.UserProfileService",
+            "section": "def-server.UserProfileService",
             "text": "UserProfileService"
           }
         ],
@@ -5293,9 +6311,9 @@
             "{ getCurrentUser: (request: ",
             {
               "pluginId": "@kbn/core-http-server",
-              "scope": "common",
+              "scope": "server",
               "docId": "kibKbnCoreHttpServerPluginApi",
-              "section": "def-common.KibanaRequest",
+              "section": "def-server.KibanaRequest",
               "text": "KibanaRequest"
             },
             "<unknown, unknown, unknown, any>) => ",
@@ -5318,27 +6336,7 @@
             },
             {
               "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/request_context_factory.ts"
-            },
-            {
-              "plugin": "securitySolution",
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/route.ts"
-            },
-            {
-              "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/create_signals_migration_route.ts"
-            },
-            {
-              "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/delete_signals_migration_route.ts"
-            },
-            {
-              "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/finalize_signals_migration_route.ts"
-            },
-            {
-              "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/timeline/utils/common.ts"
             }
           ]
         },
@@ -5484,36 +6482,36 @@
               "path": "x-pack/plugins/cloud_security_posture/server/routes/setup_routes.ts"
             },
             {
-              "plugin": "enterpriseSearch",
-              "path": "x-pack/plugins/enterprise_search/server/lib/indices/create_api_key.ts"
+              "plugin": "entityManager",
+              "path": "x-pack/plugins/entity_manager/server/lib/auth/api_key/api_key.ts"
             },
             {
-              "plugin": "enterpriseSearch",
-              "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/api_keys.ts"
+              "plugin": "entityManager",
+              "path": "x-pack/plugins/entity_manager/server/lib/auth/api_key/api_key.ts"
             },
             {
-              "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/endpoint/endpoint_app_context_services.ts"
+              "plugin": "entityManager",
+              "path": "x-pack/plugins/entity_manager/server/lib/auth/api_key/api_key.ts"
             },
             {
-              "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/open_close_signals_route.ts"
+              "plugin": "entityManager",
+              "path": "x-pack/plugins/entity_manager/server/routes/enablement/enable.ts"
             },
             {
-              "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/open_close_signals_route.ts"
+              "plugin": "entityManager",
+              "path": "x-pack/plugins/entity_manager/server/routes/enablement/disable.ts"
             },
             {
-              "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/file_info_handler.ts"
+              "plugin": "apm",
+              "path": "x-pack/plugins/observability_solution/apm/server/lib/helpers/get_random_sampler/index.ts"
             },
             {
-              "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/file_download_handler.ts"
+              "plugin": "apm",
+              "path": "x-pack/plugins/observability_solution/apm/server/routes/agent_keys/get_agent_keys_privileges.ts"
             },
             {
-              "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
+              "plugin": "apm",
+              "path": "x-pack/plugins/observability_solution/apm/server/routes/fleet/is_superuser.ts"
             },
             {
               "plugin": "serverlessSearch",
@@ -5536,42 +6534,6 @@
               "path": "x-pack/plugins/upgrade_assistant/server/lib/reindexing/credential_store.ts"
             },
             {
-              "plugin": "apm",
-              "path": "x-pack/plugins/observability_solution/apm/server/lib/helpers/get_random_sampler/index.ts"
-            },
-            {
-              "plugin": "apm",
-              "path": "x-pack/plugins/observability_solution/apm/server/routes/agent_keys/get_agent_keys_privileges.ts"
-            },
-            {
-              "plugin": "apm",
-              "path": "x-pack/plugins/observability_solution/apm/server/routes/fleet/is_superuser.ts"
-            },
-            {
-              "plugin": "entityManager",
-              "path": "x-pack/plugins/observability_solution/entity_manager/server/lib/auth/api_key/api_key.ts"
-            },
-            {
-              "plugin": "entityManager",
-              "path": "x-pack/plugins/observability_solution/entity_manager/server/lib/auth/api_key/api_key.ts"
-            },
-            {
-              "plugin": "entityManager",
-              "path": "x-pack/plugins/observability_solution/entity_manager/server/lib/auth/api_key/api_key.ts"
-            },
-            {
-              "plugin": "entityManager",
-              "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/enablement/enable.ts"
-            },
-            {
-              "plugin": "entityManager",
-              "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/enablement/disable.ts"
-            },
-            {
-              "plugin": "observabilityOnboarding",
-              "path": "x-pack/plugins/observability_solution/observability_onboarding/server/routes/flow/route.ts"
-            },
-            {
               "plugin": "synthetics",
               "path": "x-pack/plugins/observability_solution/synthetics/server/synthetics_service/get_api_key.ts"
             },
@@ -5614,30 +6576,6 @@
             {
               "plugin": "fleet",
               "path": "x-pack/plugins/fleet/server/routes/setup/handlers.test.ts"
-            },
-            {
-              "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
-            },
-            {
-              "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.test.ts"
-            },
-            {
-              "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/state.test.ts"
-            },
-            {
-              "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/endpoint/routes/suggestions/index.test.ts"
-            },
-            {
-              "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lists_integration/endpoint/validators/base_validator.test.ts"
-            },
-            {
-              "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/timeline/utils/common.ts"
             }
           ]
         },
@@ -5677,9 +6615,9 @@
           "signature": [
             {
               "pluginId": "@kbn/core-user-profile-server",
-              "scope": "common",
+              "scope": "server",
               "docId": "kibKbnCoreUserProfileServerPluginApi",
-              "section": "def-common.UserProfileService",
+              "section": "def-server.UserProfileService",
               "text": "UserProfileService"
             }
           ],
@@ -5706,6 +6644,10 @@
             {
               "plugin": "securitySolution",
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/users/suggest_user_profiles_route.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/notes/get_notes.ts"
             }
           ]
         }
@@ -6419,12 +7361,40 @@
       },
       {
         "parentPluginId": "security",
+        "id": "def-common.RawKibanaFeaturePrivileges",
+        "type": "Interface",
+        "tags": [],
+        "label": "RawKibanaFeaturePrivileges",
+        "description": [],
+        "path": "x-pack/packages/security/plugin_types_common/src/authorization/raw_kibana_privileges.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-common.RawKibanaFeaturePrivileges.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[featureId: string]: { [privilegeId: string]: string[]; }",
+            "description": [],
+            "signature": [
+              "[featureId: string]:  { [privilegeId: string]: string[]; }"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/raw_kibana_privileges.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
         "id": "def-common.RawKibanaPrivileges",
         "type": "Interface",
         "tags": [],
         "label": "RawKibanaPrivileges",
         "description": [],
-        "path": "x-pack/plugins/security/common/model/raw_kibana_privileges.ts",
+        "path": "x-pack/packages/security/plugin_types_common/src/authorization/raw_kibana_privileges.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6438,7 +7408,7 @@
             "signature": [
               "{ [x: string]: string[]; }"
             ],
-            "path": "x-pack/plugins/security/common/model/raw_kibana_privileges.ts",
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/raw_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6450,9 +7420,15 @@
             "label": "features",
             "description": [],
             "signature": [
-              "RawKibanaFeaturePrivileges"
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.RawKibanaFeaturePrivileges",
+                "text": "RawKibanaFeaturePrivileges"
+              }
             ],
-            "path": "x-pack/plugins/security/common/model/raw_kibana_privileges.ts",
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/raw_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6466,7 +7442,7 @@
             "signature": [
               "{ [x: string]: string[]; }"
             ],
-            "path": "x-pack/plugins/security/common/model/raw_kibana_privileges.ts",
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/raw_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6480,7 +7456,7 @@
             "signature": [
               "{ [x: string]: string[]; }"
             ],
-            "path": "x-pack/plugins/security/common/model/raw_kibana_privileges.ts",
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/raw_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6863,7 +7839,14 @@
             "label": "rules",
             "description": [],
             "signature": [
-              "{} | RoleMappingRule"
+              "{} | ",
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.RoleMappingRule",
+                "text": "RoleMappingRule"
+              }
             ],
             "path": "x-pack/plugins/security/common/model/role_mapping.ts",
             "deprecated": false,
@@ -6875,6 +7858,162 @@
             "type": "Object",
             "tags": [],
             "label": "metadata",
+            "description": [],
+            "signature": [
+              "{ [x: string]: any; }"
+            ],
+            "path": "x-pack/plugins/security/common/model/role_mapping.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-common.RoleMappingAllRule",
+        "type": "Interface",
+        "tags": [],
+        "label": "RoleMappingAllRule",
+        "description": [],
+        "path": "x-pack/plugins/security/common/model/role_mapping.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-common.RoleMappingAllRule.all",
+            "type": "Array",
+            "tags": [],
+            "label": "all",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.RoleMappingRule",
+                "text": "RoleMappingRule"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/security/common/model/role_mapping.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-common.RoleMappingAnyRule",
+        "type": "Interface",
+        "tags": [],
+        "label": "RoleMappingAnyRule",
+        "description": [],
+        "path": "x-pack/plugins/security/common/model/role_mapping.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-common.RoleMappingAnyRule.any",
+            "type": "Array",
+            "tags": [],
+            "label": "any",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.RoleMappingRule",
+                "text": "RoleMappingRule"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/security/common/model/role_mapping.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-common.RoleMappingExceptRule",
+        "type": "Interface",
+        "tags": [],
+        "label": "RoleMappingExceptRule",
+        "description": [],
+        "path": "x-pack/plugins/security/common/model/role_mapping.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-common.RoleMappingExceptRule.except",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "except",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.RoleMappingAnyRule",
+                "text": "RoleMappingAnyRule"
+              },
+              " | ",
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.RoleMappingAllRule",
+                "text": "RoleMappingAllRule"
+              },
+              " | ",
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.RoleMappingFieldRule",
+                "text": "RoleMappingFieldRule"
+              },
+              " | ",
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.RoleMappingExceptRule",
+                "text": "RoleMappingExceptRule"
+              }
+            ],
+            "path": "x-pack/plugins/security/common/model/role_mapping.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-common.RoleMappingFieldRule",
+        "type": "Interface",
+        "tags": [],
+        "label": "RoleMappingFieldRule",
+        "description": [],
+        "path": "x-pack/plugins/security/common/model/role_mapping.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-common.RoleMappingFieldRule.field",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
             "description": [],
             "signature": [
               "{ [x: string]: any; }"
@@ -7845,6 +8984,51 @@
           "\"form\" | \"error-es-unavailable\" | \"error-xpack-unavailable\""
         ],
         "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-common.RoleMappingRule",
+        "type": "Type",
+        "tags": [],
+        "label": "RoleMappingRule",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "security",
+            "scope": "common",
+            "docId": "kibSecurityPluginApi",
+            "section": "def-common.RoleMappingAnyRule",
+            "text": "RoleMappingAnyRule"
+          },
+          " | ",
+          {
+            "pluginId": "security",
+            "scope": "common",
+            "docId": "kibSecurityPluginApi",
+            "section": "def-common.RoleMappingAllRule",
+            "text": "RoleMappingAllRule"
+          },
+          " | ",
+          {
+            "pluginId": "security",
+            "scope": "common",
+            "docId": "kibSecurityPluginApi",
+            "section": "def-common.RoleMappingFieldRule",
+            "text": "RoleMappingFieldRule"
+          },
+          " | ",
+          {
+            "pluginId": "security",
+            "scope": "common",
+            "docId": "kibSecurityPluginApi",
+            "section": "def-common.RoleMappingExceptRule",
+            "text": "RoleMappingExceptRule"
+          }
+        ],
+        "path": "x-pack/plugins/security/common/model/role_mapping.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

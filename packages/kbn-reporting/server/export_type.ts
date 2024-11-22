@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { IClusterClient } from '@kbn/core-elasticsearch-server';
-import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
 import type {
   FakeRawRequest,
   Headers,
@@ -27,6 +27,7 @@ import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { CreateJobFn, RunTaskFn } from './types';
 import type { ReportingConfigType } from '.';
 
@@ -99,7 +100,6 @@ export abstract class ExportType<
     }
   }
 
-  // needed to be protected vs private for the csv search source immediate export type
   protected getUiSettingsServiceFactory(savedObjectsClient: SavedObjectsClientContract) {
     const { uiSettings: uiSettingsService } = this.startDeps;
     const scopedUiSettingsService = uiSettingsService.asScopedToClient(savedObjectsClient);
@@ -126,7 +126,7 @@ export abstract class ExportType<
       headers,
       path: '/',
     };
-    const fakeRequest = CoreKibanaRequest.from(rawRequest);
+    const fakeRequest = kibanaRequestFactory(rawRequest);
 
     const spacesService = this.setupDeps.spaces?.spacesService;
     if (spacesService) {

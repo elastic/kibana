@@ -23,7 +23,7 @@ import { MetricsExplorerMetrics } from './metrics';
 import { MetricsExplorerGroupBy } from './group_by';
 import { MetricsExplorerAggregationPicker } from './aggregation';
 import { MetricsExplorerChartOptions as MetricsExplorerChartOptionsComponent } from './chart_options';
-import { useKibanaUiSetting } from '../../../../utils/use_kibana_ui_setting';
+import { useKibanaUiSetting } from '../../../../hooks/use_kibana_ui_setting';
 import { mapKibanaQuickRangesToDatePickerRanges } from '../../../../utils/map_timepicker_quickranges_to_datepicker_ranges';
 
 interface Props {

@@ -10,11 +10,9 @@ import React from 'react';
 import { NewTimelineButton } from './new_timeline_button';
 import { TimelineId } from '../../../../../common/types';
 import { timelineActions } from '../../../store';
-import { defaultHeaders } from '../../timeline/body/column_headers/default_headers';
 import { TestProviders } from '../../../../common/mock';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { RowRendererId } from '../../../../../common/api/timeline';
-import { defaultUdtHeaders } from '../../timeline/unified_components/default_headers';
+import { RowRendererValues } from '../../../../../common/api/timeline';
+import { defaultUdtHeaders } from '../../timeline/body/column_headers/default_headers';
 
 jest.mock('../../../../common/components/discover_in_timeline/use_discover_in_timeline_context');
 jest.mock('../../../../common/hooks/use_selector');
@@ -66,27 +64,6 @@ describe('NewTimelineButton', () => {
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalledWith({
-        columns: defaultHeaders,
-        dataViewId,
-        id: TimelineId.test,
-        indexNames: selectedPatterns,
-        show: true,
-        timelineType: 'default',
-        updated: undefined,
-        excludedRowRendererIds: [],
-      });
-    });
-
-    // enable unified components in timeline
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-
-    getByTestId('timeline-modal-new-timeline-dropdown-button').click();
-    getByTestId('timeline-modal-new-timeline').click();
-
-    spy.mockClear();
-
-    await waitFor(() => {
-      expect(spy).toHaveBeenCalledWith({
         columns: defaultUdtHeaders,
         dataViewId,
         id: TimelineId.test,
@@ -94,7 +71,7 @@ describe('NewTimelineButton', () => {
         show: true,
         timelineType: 'default',
         updated: undefined,
-        excludedRowRendererIds: [...Object.keys(RowRendererId)],
+        excludedRowRendererIds: RowRendererValues,
       });
     });
   });

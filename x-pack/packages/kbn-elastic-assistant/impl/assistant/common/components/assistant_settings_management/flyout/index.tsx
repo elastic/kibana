@@ -22,11 +22,13 @@ import * as i18n from './translations';
 
 interface Props {
   children: React.ReactNode;
-  title: string;
+  title?: string;
   flyoutVisible: boolean;
   onClose: () => void;
   onSaveCancelled: () => void;
   onSaveConfirmed: () => void;
+  saveButtonDisabled?: boolean;
+  saveButtonLoading?: boolean;
 }
 
 const FlyoutComponent: React.FC<Props> = ({
@@ -36,9 +38,12 @@ const FlyoutComponent: React.FC<Props> = ({
   onClose,
   onSaveCancelled,
   onSaveConfirmed,
+  saveButtonDisabled = false,
+  saveButtonLoading = false,
 }) => {
   return flyoutVisible ? (
     <EuiFlyout
+      data-test-subj={'flyout'}
       ownFocus
       onClose={onClose}
       css={css`
@@ -71,6 +76,8 @@ const FlyoutComponent: React.FC<Props> = ({
               data-test-subj="save-button"
               onClick={onSaveConfirmed}
               iconType="check"
+              disabled={saveButtonDisabled}
+              isLoading={saveButtonLoading}
               fill
             >
               {i18n.FLYOUT_SAVE_BUTTON_TITLE}

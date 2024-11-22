@@ -44,6 +44,11 @@ describe('ContentStream', () => {
     );
   });
 
+  afterEach(() => {
+    stream.destroy();
+    base64Stream.destroy();
+  });
+
   describe('read', () => {
     it('should perform a search using index and the document id', async () => {
       await new Promise((resolve) => stream.once('data', resolve));

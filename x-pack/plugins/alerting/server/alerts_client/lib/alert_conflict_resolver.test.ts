@@ -25,6 +25,12 @@ import { resolveAlertConflicts } from './alert_conflict_resolver';
 
 const logger = loggingSystemMock.create().get();
 const esClient = elasticsearchServiceMock.createElasticsearchClient();
+const ruleId = 'rule-id';
+const ruleName = 'name of rule';
+const ruleType = 'rule-type';
+
+const ruleInfo = `for ${ruleType}:${ruleId} '${ruleName}'`;
+const logTags = { tags: [ruleType, ruleId, 'resolve-alert-conflicts'] };
 
 const alertDoc = {
   [EVENT_ACTION]: 'active',
@@ -45,11 +51,20 @@ describe('alert_conflict_resolver', () => {
 
       esClient.mget.mockRejectedValueOnce(new Error('mget failed'));
 
-      await resolveAlertConflicts({ logger, esClient, bulkRequest, bulkResponse });
+      await resolveAlertConflicts({
+        logger,
+        esClient,
+        bulkRequest,
+        bulkResponse,
+        ruleId,
+        ruleName,
+        ruleType,
+      });
 
       expect(logger.error).toHaveBeenNthCalledWith(
         2,
-        'Error resolving alert conflicts: mget failed'
+        `Error resolving alert conflicts ${ruleInfo}: mget failed`,
+        logTags
       );
     });
 
@@ -61,11 +76,20 @@ describe('alert_conflict_resolver', () => {
       });
       esClient.bulk.mockRejectedValueOnce(new Error('bulk failed'));
 
-      await resolveAlertConflicts({ logger, esClient, bulkRequest, bulkResponse });
+      await resolveAlertConflicts({
+        logger,
+        esClient,
+        bulkRequest,
+        bulkResponse,
+        ruleId,
+        ruleName,
+        ruleType,
+      });
 
       expect(logger.error).toHaveBeenNthCalledWith(
         2,
-        'Error resolving alert conflicts: bulk failed'
+        `Error resolving alert conflicts ${ruleInfo}: bulk failed`,
+        logTags
       );
     });
   });
@@ -73,13 +97,29 @@ describe('alert_conflict_resolver', () => {
   describe('is successful with', () => {
     test('no bulk results', async () => {
       const { bulkRequest, bulkResponse } = getReqRes('');
-      await resolveAlertConflicts({ logger, esClient, bulkRequest, bulkResponse });
+      await resolveAlertConflicts({
+        logger,
+        esClient,
+        bulkRequest,
+        bulkResponse,
+        ruleId,
+        ruleName,
+        ruleType,
+      });
       expect(logger.error).not.toHaveBeenCalled();
     });
 
     test('no errors in bulk results', async () => {
       const { bulkRequest, bulkResponse } = getReqRes('c is is c is');
-      await resolveAlertConflicts({ logger, esClient, bulkRequest, bulkResponse });
+      await resolveAlertConflicts({
+        logger,
+        esClient,
+        bulkRequest,
+        bulkResponse,
+        ruleId,
+        ruleName,
+        ruleType,
+      });
       expect(logger.error).not.toHaveBeenCalled();
     });
 
@@ -96,16 +136,30 @@ describe('alert_conflict_resolver', () => {
         items: [getBulkResItem(0)],
       });
 
-      await resolveAlertConflicts({ logger, esClient, bulkRequest, bulkResponse });
+      await resolveAlertConflicts({
+        logger,
+        esClient,
+        bulkRequest,
+        bulkResponse,
+        ruleId,
+        ruleName,
+        ruleType,
+      });
 
       expect(logger.error).toHaveBeenNthCalledWith(
         1,
-        `Error writing alerts: 0 successful, 1 conflicts, 0 errors: `
+        `Error writing alerts ${ruleInfo}: 0 successful, 1 conflicts, 0 errors: `,
+        logTags
       );
-      expect(logger.info).toHaveBeenNthCalledWith(1, `Retrying bulk update of 1 conflicted alerts`);
+      expect(logger.info).toHaveBeenNthCalledWith(
+        1,
+        `Retrying bulk update of 1 conflicted alerts ${ruleInfo}`,
+        logTags
+      );
       expect(logger.info).toHaveBeenNthCalledWith(
         2,
-        `Retried bulk update of 1 conflicted alerts succeeded`
+        `Retried bulk update of 1 conflicted alerts succeeded ${ruleInfo}`,
+        logTags
       );
     });
 
@@ -122,16 +176,30 @@ describe('alert_conflict_resolver', () => {
         items: [getBulkResItem(2)],
       });
 
-      await resolveAlertConflicts({ logger, esClient, bulkRequest, bulkResponse });
+      await resolveAlertConflicts({
+        logger,
+        esClient,
+        bulkRequest,
+        bulkResponse,
+        ruleId,
+        ruleName,
+        ruleType,
+      });
 
       expect(logger.error).toHaveBeenNthCalledWith(
         1,
-        `Error writing alerts: 2 successful, 1 conflicts, 1 errors: hallo`
+        `Error writing alerts ${ruleInfo}: 2 successful, 1 conflicts, 1 errors: hallo`,
+        logTags
       );
-      expect(logger.info).toHaveBeenNthCalledWith(1, `Retrying bulk update of 1 conflicted alerts`);
+      expect(logger.info).toHaveBeenNthCalledWith(
+        1,
+        `Retrying bulk update of 1 conflicted alerts ${ruleInfo}`,
+        logTags
+      );
       expect(logger.info).toHaveBeenNthCalledWith(
         2,
-        `Retried bulk update of 1 conflicted alerts succeeded`
+        `Retried bulk update of 1 conflicted alerts succeeded ${ruleInfo}`,
+        logTags
       );
     });
 
@@ -148,16 +216,30 @@ describe('alert_conflict_resolver', () => {
         items: [getBulkResItem(2), getBulkResItem(3), getBulkResItem(5)],
       });
 
-      await resolveAlertConflicts({ logger, esClient, bulkRequest, bulkResponse });
+      await resolveAlertConflicts({
+        logger,
+        esClient,
+        bulkRequest,
+        bulkResponse,
+        ruleId,
+        ruleName,
+        ruleType,
+      });
 
       expect(logger.error).toHaveBeenNthCalledWith(
         1,
-        `Error writing alerts: 2 successful, 3 conflicts, 1 errors: hallo`
+        `Error writing alerts ${ruleInfo}: 2 successful, 3 conflicts, 1 errors: hallo`,
+        logTags
       );
-      expect(logger.info).toHaveBeenNthCalledWith(1, `Retrying bulk update of 3 conflicted alerts`);
+      expect(logger.info).toHaveBeenNthCalledWith(
+        1,
+        `Retrying bulk update of 3 conflicted alerts ${ruleInfo}`,
+        logTags
+      );
       expect(logger.info).toHaveBeenNthCalledWith(
         2,
-        `Retried bulk update of 3 conflicted alerts succeeded`
+        `Retried bulk update of 3 conflicted alerts succeeded ${ruleInfo}`,
+        logTags
       );
     });
   });

@@ -44,36 +44,42 @@ export const EngineOverviewLogic = kea<MakeLogicType<EngineOverviewValues, Engin
     startDate: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onOverviewMetricsLoad: (_, { startDate }) => startDate,
       },
     ],
     queriesPerDay: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onOverviewMetricsLoad: (_, { queriesPerDay }) => queriesPerDay,
       },
     ],
     operationsPerDay: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onOverviewMetricsLoad: (_, { operationsPerDay }) => operationsPerDay,
       },
     ],
     totalQueries: [
       0,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onOverviewMetricsLoad: (_, { totalQueries }) => totalQueries,
       },
     ],
     totalClicks: [
       0,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onOverviewMetricsLoad: (_, { totalClicks }) => totalClicks,
       },
     ],
     documentCount: [
       0,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onOverviewMetricsLoad: (_, { documentCount }) => documentCount,
       },
     ],

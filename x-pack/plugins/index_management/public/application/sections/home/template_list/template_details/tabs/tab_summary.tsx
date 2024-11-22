@@ -22,12 +22,13 @@ import {
 } from '@elastic/eui';
 import { reactRouterNavigate } from '../../../../../../shared_imports';
 import { useAppContext } from '../../../../../app_context';
-import { serializeAsESLifecycle } from '../../../../../../../common/lib/data_stream_serialization';
+import { serializeAsESLifecycle } from '../../../../../../../common/lib';
 import { getLifecycleValue } from '../../../../../lib/data_streams';
 import { TemplateDeserialized } from '../../../../../../../common';
 import { ILM_PAGES_POLICY_EDIT } from '../../../../../constants';
 import { useIlmLocator } from '../../../../../services/use_ilm_locator';
 import { allowAutoCreateRadioIds } from '../../../../../../../common/constants';
+import { indexModeLabels } from '../../../../../lib/index_mode_labels';
 
 interface Props {
   templateDetails: TemplateDeserialized;
@@ -53,6 +54,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
     composedOf,
     order,
     indexPatterns = [],
+    indexMode,
     ilmPolicy,
     _meta,
     _kbnMeta: { isLegacy, hasDatastream },
@@ -61,7 +63,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
 
   const numIndexPatterns = indexPatterns.length;
 
-  const { history } = useAppContext();
+  const { history, core } = useAppContext();
   const ilmPolicyLink = useIlmLocator(ILM_PAGES_POLICY_EDIT, ilmPolicy?.name);
 
   return (
@@ -169,7 +171,9 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
                 </EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>
                   {ilmPolicy?.name && ilmPolicyLink ? (
-                    <EuiLink href={ilmPolicyLink}>{ilmPolicy!.name}</EuiLink>
+                    <EuiLink onClick={() => core.application.navigateToUrl(ilmPolicyLink)}>
+                      {ilmPolicy!.name}
+                    </EuiLink>
                   ) : (
                     ilmPolicy?.name || i18nTexts.none
                   )}
@@ -220,6 +224,17 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
                 </EuiDescriptionListDescription>
               </>
             )}
+
+            {/* Index mode */}
+            <EuiDescriptionListTitle>
+              <FormattedMessage
+                id="xpack.idxMgmt.templateDetails.stepReview.summaryTab.indexModeLabel"
+                defaultMessage="Index mode"
+              />
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              {indexModeLabels[indexMode]}
+            </EuiDescriptionListDescription>
 
             {/* Allow auto create */}
             {isLegacy !== true &&

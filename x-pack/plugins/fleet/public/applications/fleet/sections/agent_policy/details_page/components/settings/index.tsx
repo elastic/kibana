@@ -19,6 +19,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { useSpaceSettingsContext } from '../../../../../../../hooks/use_space_settings_context';
+
 import type { AgentPolicy } from '../../../../../types';
 import {
   useStartServices,
@@ -43,6 +45,7 @@ const pickAgentPolicyKeysToSend = (agentPolicy: AgentPolicy) =>
     'name',
     'description',
     'namespace',
+    'space_ids',
     'monitoring_enabled',
     'unenroll_timeout',
     'inactivity_timeout',
@@ -54,6 +57,9 @@ const pickAgentPolicyKeysToSend = (agentPolicy: AgentPolicy) =>
     'is_protected',
     'advanced_settings',
     'global_data_tags',
+    'monitoring_pprof_enabled',
+    'monitoring_http',
+    'monitoring_diagnostics',
   ]);
 
 const FormWrapper = styled.div`
@@ -74,12 +80,17 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
     const [agentPolicy, setAgentPolicy] = useState<AgentPolicy>({
       ...originalAgentPolicy,
     });
+    const spaceSettings = useSpaceSettingsContext();
+
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [hasChanges, setHasChanges] = useState<boolean>(false);
     const [agentCount, setAgentCount] = useState<number>(0);
     const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
-    const validation = agentPolicyFormValidation(agentPolicy);
+    const validation = agentPolicyFormValidation(agentPolicy, {
+      allowedNamespacePrefixes: spaceSettings?.allowedNamespacePrefixes,
+    });
     const [hasAdvancedSettingsErrors, setHasAdvancedSettingsErrors] = useState<boolean>(false);
+    const [hasInvalidSpaceError, setInvalidSpaceError] = useState<boolean>(false);
 
     const updateAgentPolicy = (updatedFields: Partial<AgentPolicy>) => {
       setAgentPolicy({
@@ -139,8 +150,8 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
       if (isFleetEnabled) {
         setIsLoading(true);
         const { data } = await sendGetAgentStatus({ policyId: agentPolicy.id });
-        if (data?.results.total) {
-          setAgentCount(data.results.total);
+        if (data?.results.active) {
+          setAgentCount(data.results.active);
         } else {
           await submitUpdateAgentPolicy();
         }
@@ -173,6 +184,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
           validation={validation}
           isEditing={true}
           updateAdvancedSettingsHasErrors={setHasAdvancedSettingsErrors}
+          setInvalidSpaceError={setInvalidSpaceError}
         />
 
         {hasChanges ? (
@@ -209,7 +221,8 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
                           isDisabled={
                             isLoading ||
                             Object.keys(validation).length > 0 ||
-                            hasAdvancedSettingsErrors
+                            hasAdvancedSettingsErrors ||
+                            hasInvalidSpaceError
                           }
                           btnProps={{
                             color: 'text',
@@ -232,8 +245,10 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
                           !hasAllAgentPoliciesPrivileges ||
                           isLoading ||
                           Object.keys(validation).length > 0 ||
-                          hasAdvancedSettingsErrors
+                          hasAdvancedSettingsErrors ||
+                          hasInvalidSpaceError
                         }
+                        data-test-subj="agentPolicyDetailsSaveButton"
                         iconType="save"
                         color="primary"
                         fill

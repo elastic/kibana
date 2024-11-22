@@ -1,0 +1,191 @@
+= Use and filter dashboards
+
+[float]
+[[search-or-filter-your-data]]
+== Search and filter your dashboard data
+
+{kib} supports several ways to explore the data displayed in a dashboard more in depth:
+
+* The **query bar**, using KQL expressions by default.
+* The **Time range**, that allows you to display data only for the period that you want to focus on. You can set a global time range for the entire dashboard, or specify a custom time range for each panel.
+* **Controls**, that dashboard creators can add to help viewers filter on specific values.
+* **Filter pills**, that you can add and combine by clicking on specific parts of the dashboard visualizations, or by defining conditions manually from the filter editor. The filter editor is a good alternative if you're not comfortable with using KQL expressions in the main query bar.
+* View the data of a panel and the requests used to build it.
+
+//You can combine the filters with any panel filter to display the data you want to see.
+
+This section shows the most common ways for you to filter dashboard data. For more information about {kib} and {es} filtering capabilities, refer to <<kibana-concepts-analysts,{kib} concepts>>.
+
+[float]
+=== Filter dashboards using the KQL query bar
+
+The query bar lets you build filters using <<kuery-query,{kib} Query Language (KQL)>>. When typing, it dynamically suggests matching fields, operators, and values to help you get the exact results that you want.
+
+image::images/dashboard-filter-kql.png[KQL filter dynamically suggesting values, width=40%]
+
+[float]
+=== Set a time range
+
+The data visible in a dashboard highly depends on the time range that is applied. In a dashboard, you can select a time range that applies globally to all panels, or set a custom time range for specific panels.
+
+[float]
+==== Apply a global time range to an entire dashboard
+
+The global time range menu is located right next to the query bar, in the dashboard's header. With this menu, you can select the time range to apply, and set the frequency for refreshing the dashboard data. Setting the time range is a common action in {kib}. Refer to <<set-time-filter>> for more details.
+
+image::images/dashboard-global-time-range.png[Time range menu with multiple time range suggestions, width=40%]
+
+[float]
+==== Apply a custom time range to a panel
+
+**To apply a panel-level time range:**
+
+. Open the panel menu, then select *Settings*.
+
+. Turn on *Apply a custom time range*.
+
+. Enter the time range you want to view, then *Apply* it.
+
+**To view and edit the time range applied to a specific panel:**
+
+When a custom time range is active for a single panel, it is indicated in the panel's header.
+
+To edit it, click the filter. You can then adjust and apply the updated **Time range**.
+
+[float]
+=== Use available controls
+
+Dashboard authors can <<add-controls,add various types of additional controls>> to help you filter the data that you want to visualize.
+
+[float]
+[[filter-the-data-with-options-list-controls]]
+==== Filter the data with Options list controls
+Filter the data with one or more options that you select.
+
+. Open the Options list dropdown.
+
+. Select the available options.
++
+The *Exists* query returns all documents that contain an indexed value for the field. 
+
+. Select how to filter the options.
+
+* To display only the data for the options you selected, select *Include*.
+
+* To exclude the data for the options you selected, select *Exclude*.
+
+. To clear the selections, click image:images/dashboard_controlsClearSelections_8.3.0.png[The icon to clear all selected options in the Options list].
+
+. To display only the options you selected in the dropdown, click image:images/dashboard_showOnlySelectedOptions_8.3.0.png[The icon to display only the options you have selected in the Options list].
+
+[role="screenshot"]
+image::images/dashboard_controlsOptionsList_8.7.0.png[Options list control]
+
+[float]
+[[filter-the-data-with-range-slider-controls]]
+==== Filter the data with Range slider controls
+Filter the data within a specified range of values.
+
+. On the Range slider, click a value.
+
+. Move the sliders to specify the values you want to display.
++
+The dashboard displays only the data for the range of values you specified.
+
+. To clear the specified values, click image:images/dashboard_controlsClearSelections_8.3.0.png[The icon to clear all specified values in the Range slider].
+
+[role="screenshot"]
+image::images/dashboard_controlsRangeSlider_8.3.0.png[Range slider control]
+
+[float]
+[[filter-the-data-with-time-slider-controls]]
+==== Filter the data with time slider controls
+Filter the data within a specified range of time.
+
+. To view a different time range, click the time slider, then move the sliders to specify the time range you want to display.
+
+. To advance the time range forward, click image:images/dashboard_timeSliderControl_advanceForward_8.5.0.png[The icon to advance the time range forward].
+
+. To advance the time range backward, click image:images/dashboard_timeSliderControl_advanceBackward_8.5.0.png[The icon to advance the time range backward].
+
+. To animate the data changes over time, click image:images/dashboard_timeSliderControl_animate_8.5.0.png[The icon to clear all specified values in the Range slider].
+
+. To clear the specified values, click image:images/dashboard_controlsClearSelections_8.3.0.png[The icon to clear all specified values in the Range slider].
+
+[role="screenshot"]
+image::images/dashboard_timeSliderControl_8.7.0.gif[Time slider control]
+
+[float]
+=== Use filter pills
+
+Use filter pills to focus in on the specific data you want.
+
+[role="screenshot"]
+image::images/dashboard_filter_pills_8.15.0.png[Filter pills, width=50%]
+
+[float]
+==== Add pills by interacting with visualizations
+
+You can interact with some panel visualizations to explore specific data more in depth. Upon clicking, filter pills are added and applied to the entire dashboard, so that surrounding panels and visualizations also reflect your browsing.
+
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt3636aae815d783f9/66c467d346b3f438b396fafa/dashboard-filter-pills.gif[Browsing a chart creates a filter dynamically]
+
+[float]
+==== Add pills using the filter editor
+
+As an alternative to the main query bar, you can filter dashboard data by defining individual conditions on specific fields and values, and by combining these conditions together in a filter pill.
+
+image::images/dashboard-filter-editor.png[Filter editor with 2 conditions]
+
+
+[float]
+[[download-csv]]
+=== View the panel data and requests
+//Looks outdated
+
+**View the data in visualizations and the requests that collect the data:**
+
+. Open the panel menu, then select **Inspect**.
+
+. View and download the panel data.
+
+.. Open the *View* dropdown, then click *Data*.
+
+.. Click *Download CSV*, then select the format type from the dropdown:
+
+* *Formatted CSV* &mdash; Contains human-readable dates and numbers.
+
+* *Unformatted* &mdash; Best used for computer use.
++
+When you download visualization panels with multiple layers, each layer produces a CSV file, and the file names contain the visualization and layer {data-source} names.
+
+. View the requests that collect the data.
+
+.. Open the *View* dropdown, then click *Requests*.
+
+.. From the dropdown, select the requests you want to view.
+
+.. To view the requests in *Console*, click *Request*, then click *Open in Console*.
+
+
+**View the time range on specific panels:**
+
+When a custom time range is active for a single panel, it is indicated in the panel's header.
+
+You can view it in more details and edit it by clicking the filter.
+
+[float]
+== Full screen mode and maximized panel views
+
+You can display dashboards in full screen mode to gain visual space and view or show visualizations without the rest of the {kib} interface. 
+
+image::images/dashboard-full-screen.png[A dashboard in full screen mode]
+
+If you need to focus on a particular panel, you can maximize it. To do that, open the panel menu, and select **More** > **Maximize**. You can minimize it again the same way.
+
+TIP: When sharing a dashboard with a link while a panel is in maximized view, the generated link will also open the dashboard on the same maximized panel view.
+
+image::images/dashboard-panel-maximized.png[A maximized panel in a dashboard]
+
+
+

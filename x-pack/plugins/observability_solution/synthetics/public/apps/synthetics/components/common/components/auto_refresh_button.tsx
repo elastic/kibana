@@ -5,69 +5,17 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { EuiAutoRefreshButton, OnRefreshChangeProps } from '@elastic/eui';
-import { useDispatch, useSelector } from 'react-redux';
-import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../../../common/constants/synthetics/client_defaults';
-import { SyntheticsUrlParams } from '../../../utils/url_params';
-import { useUrlParams } from '../../../hooks';
-import {
-  selectRefreshInterval,
-  selectRefreshPaused,
-  setRefreshIntervalAction,
-  setRefreshPausedAction,
-} from '../../../state';
-const { AUTOREFRESH_INTERVAL_SECONDS, AUTOREFRESH_IS_PAUSED } = CLIENT_DEFAULTS_SYNTHETICS;
+import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
 
-const replaceDefaults = ({ refreshPaused, refreshInterval }: Partial<SyntheticsUrlParams>) => {
-  return {
-    refreshInterval: refreshInterval === AUTOREFRESH_INTERVAL_SECONDS ? undefined : refreshInterval,
-    refreshPaused: refreshPaused === AUTOREFRESH_IS_PAUSED ? undefined : refreshPaused,
-  };
-};
 export const AutoRefreshButton = () => {
-  const dispatch = useDispatch();
-
-  const refreshPaused = useSelector(selectRefreshPaused);
-  const refreshInterval = useSelector(selectRefreshInterval);
-
-  const [getUrlsParams, updateUrlParams] = useUrlParams();
-
-  const { refreshInterval: urlRefreshInterval, refreshPaused: urlIsPaused } = getUrlsParams();
-
-  const isFirstRender = useRef(true);
-
-  useEffect(() => {
-    if (isFirstRender.current) {
-      // sync url state with redux state on first render
-      dispatch(setRefreshIntervalAction(urlRefreshInterval));
-      dispatch(setRefreshPausedAction(urlIsPaused));
-      isFirstRender.current = false;
-    } else {
-      // sync redux state with url state on subsequent renders
-      if (urlRefreshInterval !== refreshInterval || urlIsPaused !== refreshPaused) {
-        updateUrlParams(
-          replaceDefaults({
-            refreshInterval,
-            refreshPaused,
-          }),
-          true
-        );
-      }
-    }
-  }, [updateUrlParams, refreshInterval, refreshPaused, urlRefreshInterval, urlIsPaused, dispatch]);
+  const { refreshInterval, setRefreshInterval, refreshPaused, setRefreshPaused } =
+    useSyntheticsRefreshContext();
 
   const onRefreshChange = (newProps: OnRefreshChangeProps) => {
-    dispatch(setRefreshIntervalAction(newProps.refreshInterval / 1000));
-    dispatch(setRefreshPausedAction(newProps.isPaused));
-
-    updateUrlParams(
-      replaceDefaults({
-        refreshInterval: newProps.refreshInterval / 1000,
-        refreshPaused: newProps.isPaused,
-      }),
-      true
-    );
+    setRefreshPaused(newProps.isPaused);
+    setRefreshInterval(newProps.refreshInterval / 1000);
   };
 
   return (

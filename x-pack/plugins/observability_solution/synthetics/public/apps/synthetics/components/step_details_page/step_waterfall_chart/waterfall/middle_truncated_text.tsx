@@ -26,7 +26,6 @@ interface Props {
   index: number;
   highestIndex: number;
   ariaLabel: string;
-  text: string;
   onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   setButtonRef?: (ref: HTMLButtonElement | HTMLAnchorElement | null) => void;
   url: string;
@@ -102,14 +101,13 @@ export const getChunks = (text: string = '') => {
 export const MiddleTruncatedText = ({
   index,
   ariaLabel,
-  text: fullText,
   onClick,
   setButtonRef,
   url,
   highestIndex,
 }: Props) => {
-  const secureHttps = fullText.startsWith('https://');
-  const text = fullText.replace(/https:\/\/www.|http:\/\/www.|http:\/\/|https:\/\//, '');
+  const secureHttps = url.startsWith('https://');
+  const text = url.replace(/https:\/\/www.|http:\/\/www.|http:\/\/|https:\/\//, '');
 
   const chunks = useMemo(() => {
     return getChunks(text);
@@ -118,15 +116,17 @@ export const MiddleTruncatedText = ({
   return (
     <OuterContainer aria-label={ariaLabel} data-test-subj="middleTruncatedTextContainer">
       <EuiScreenReaderOnly>
-        <span data-test-subj="middleTruncatedTextSROnly">{fullText}</span>
+        <span data-test-subj="middleTruncatedTextSROnly">{url}</span>
       </EuiScreenReaderOnly>
       <WaterfallChartTooltip
         as={EuiToolTip}
         content={
-          <WaterfallTooltipContent {...{ text: formatTooltipHeading(index, fullText), url }} />
+          <WaterfallTooltipContent
+            {...{ text: formatTooltipHeading(index, url), url }}
+            index={index}
+          />
         }
         data-test-subj="middleTruncatedTextToolTip"
-        delay="long"
         position="top"
       >
         <>

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -120,7 +121,7 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
   return (
     <>
       <EuiFlyoutHeader hasBorder={true}>
-        <EuiTitle size="m">
+        <EuiTitle size="s">
           <h2>
             {isEditing ? (
               <FormattedMessage
@@ -135,8 +136,9 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
             )}
           </h2>
         </EuiTitle>
-        <EuiSpacer size={'s'} />
-        <EuiTabs style={{ marginBottom: '-25px' }}>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <EuiTabs size="s" bottomBorder={false}>
           <EuiTab onClick={() => setSrcType('file')} isSelected={srcType === 'file'}>
             <FormattedMessage
               id="imageEmbeddable.imageEditor.uploadTabLabel"
@@ -150,8 +152,7 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
             />
           </EuiTab>
         </EuiTabs>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+        <EuiSpacer size="m" />
         {srcType === 'file' && (
           <>
             {isDraftImageConfigValid ? (
@@ -237,7 +238,7 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
                     />
                   </p>
                 }
-                titleSize={'s'}
+                titleSize={'xs'}
               />
             ) : (
               <ImageViewer
@@ -256,8 +257,7 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
                 `}
               />
             )}
-
-            <EuiSpacer />
+            <EuiSpacer size="m" />
             <EuiFormRow
               label={
                 <FormattedMessage
@@ -299,7 +299,6 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
             </EuiFormRow>
           </>
         )}
-        <EuiSpacer />
         <EuiFormRow
           label={
             <FormattedMessage
@@ -310,6 +309,7 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
           fullWidth
         >
           <EuiSelect
+            compressed
             fullWidth
             options={[
               {
@@ -343,8 +343,6 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
             }
           />
         </EuiFormRow>
-        <EuiSpacer />
-
         <EuiFormRow
           label={
             <FormattedMessage
@@ -357,6 +355,7 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
           error={colorErrors}
         >
           <EuiColorPicker
+            compressed
             fullWidth
             onChange={setColor}
             color={color}
@@ -370,8 +369,6 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
             )}
           />
         </EuiFormRow>
-
-        <EuiSpacer />
         <EuiFormRow
           label={
             <FormattedMessage
@@ -402,10 +399,10 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={props.onCancel} flush="left">
+            <EuiButtonEmpty onClick={props.onCancel} flush="left">
               <FormattedMessage
                 id="imageEmbeddable.imageEditor.imageBackgroundCloseButtonText"
-                defaultMessage="Close"
+                defaultMessage="Cancel"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>

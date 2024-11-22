@@ -1,31 +1,34 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { omit } from 'lodash';
+import moment from 'moment';
+import React, { ReactElement, useState } from 'react';
+
 import { EuiCheckboxGroup } from '@elastic/eui';
-import type { SerializableControlGroupInput } from '@kbn/controls-plugin/common';
 import type { Capabilities } from '@kbn/core/public';
 import { QueryState } from '@kbn/data-plugin/common';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
-import { omit } from 'lodash';
-import moment from 'moment';
-import React, { ReactElement, useState } from 'react';
-import {
-  convertPanelMapToSavedPanels,
-  DashboardContainerInput,
-  DashboardPanelMap,
-} from '../../../../common';
+
+import { convertPanelMapToPanelsArray, DashboardPanelMap } from '../../../../common';
 import { DashboardLocatorParams } from '../../../dashboard_container';
-import { pluginServices } from '../../../services/plugin_services';
-import { dashboardUrlParams } from '../../dashboard_router';
+import {
+  getDashboardBackupService,
+  PANELS_CONTROL_GROUP_KEY,
+} from '../../../services/dashboard_backup_service';
+import { coreServices, dataService, shareService } from '../../../services/kibana_services';
+import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { shareModalStrings } from '../../_dashboard_app_strings';
+import { dashboardUrlParams } from '../../dashboard_router';
 
 const showFilterBarId = 'showFilterBar';
 
@@ -34,7 +37,7 @@ export interface ShowShareModalProps {
   savedObjectId?: string;
   dashboardTitle?: string;
   anchorElement: HTMLElement;
-  getDashboardState: () => DashboardContainerInput;
+  getPanelsState: () => DashboardPanelMap;
 }
 
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
@@ -50,23 +53,9 @@ export function ShowShareModal({
   anchorElement,
   savedObjectId,
   dashboardTitle,
-  getDashboardState,
+  getPanelsState,
 }: ShowShareModalProps) {
-  const {
-    dashboardCapabilities: { createShortUrl: allowShortUrl },
-    dashboardBackup,
-    data: {
-      query: {
-        timefilter: {
-          timefilter: { getTime },
-        },
-      },
-    },
-    notifications,
-    share: { toggleShareContextMenu },
-  } = pluginServices.getServices();
-
-  if (!toggleShareContextMenu) return; // TODO: Make this logic cleaner once share is an optional service
+  if (!shareService) return;
 
   const EmbedUrlParamExtension = ({
     setParamValue,
@@ -128,7 +117,7 @@ export function ShowShareModal({
   let unsavedStateForLocator: DashboardLocatorParams = {};
 
   const { dashboardState: unsavedDashboardState, panels: panelModifications } =
-    dashboardBackup.getState(savedObjectId) ?? {};
+    getDashboardBackupService().getState(savedObjectId) ?? {};
 
   const allUnsavedPanels = (() => {
     if (
@@ -139,7 +128,7 @@ export function ShowShareModal({
       return;
     }
 
-    const latestPanels = getDashboardState().panels;
+    const latestPanels = getPanelsState();
     // apply modifications to panels.
     const modifiedPanels = panelModifications
       ? Object.entries(panelModifications).reduce((acc, [panelId, unsavedPanel]) => {
@@ -162,14 +151,16 @@ export function ShowShareModal({
       ...latestPanels,
       ...modifiedPanels,
     };
-    return convertPanelMapToSavedPanels(allUnsavedPanelsMap);
+    return convertPanelMapToPanelsArray(allUnsavedPanelsMap);
   })();
 
   if (unsavedDashboardState) {
     unsavedStateForLocator = {
       query: unsavedDashboardState.query,
       filters: unsavedDashboardState.filters,
-      controlGroupInput: unsavedDashboardState.controlGroupInput as SerializableControlGroupInput,
+      controlGroupState: panelModifications?.[
+        PANELS_CONTROL_GROUP_KEY
+      ] as DashboardLocatorParams['controlGroupState'],
       panels: allUnsavedPanels as DashboardLocatorParams['panels'],
 
       // options
@@ -187,7 +178,7 @@ export function ShowShareModal({
     refreshInterval: undefined, // We don't share refresh interval externally
     viewMode: ViewMode.VIEW, // For share locators we always load the dashboard in view mode
     useHash: false,
-    timeRange: getTime(),
+    timeRange: dataService.query.timefilter.timefilter.getTime(),
     ...unsavedStateForLocator,
   };
 
@@ -204,11 +195,11 @@ export function ShowShareModal({
     unhashUrl(baseUrl)
   );
 
-  toggleShareContextMenu({
+  shareService.toggleShareContextMenu({
     isDirty,
     anchorElement,
     allowEmbed: true,
-    allowShortUrl,
+    allowShortUrl: getDashboardCapabilities().createShortUrl,
     shareableUrl,
     objectId: savedObjectId,
     objectType: 'dashboard',
@@ -239,6 +230,6 @@ export function ShowShareModal({
     snapshotShareWarning: Boolean(unsavedDashboardState?.panels)
       ? shareModalStrings.getSnapshotShareWarning()
       : undefined,
-    toasts: notifications.toasts,
+    toasts: coreServices.notifications.toasts,
   });
 }

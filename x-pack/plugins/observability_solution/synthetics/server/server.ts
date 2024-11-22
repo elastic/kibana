@@ -21,7 +21,7 @@ export const initSyntheticsServer = (
 ) => {
   const { router } = server;
   syntheticsAppRestApiRoutes.forEach((route) => {
-    const { method, options, handler, validate, path } = syntheticsRouteWrapper(
+    const { method, options, handler, validate, path, security } = syntheticsRouteWrapper(
       createSyntheticsRouteWithAuth(route),
       server,
       syntheticsMonitorClient
@@ -30,6 +30,7 @@ export const initSyntheticsServer = (
     const routeDefinition = {
       path,
       validate,
+      security,
       options,
     };
 
@@ -52,11 +53,8 @@ export const initSyntheticsServer = (
   });
 
   syntheticsAppPublicRestApiRoutes.forEach((route) => {
-    const { method, options, handler, validate, path, validation } = syntheticsRouteWrapper(
-      createSyntheticsRouteWithAuth(route),
-      server,
-      syntheticsMonitorClient
-    );
+    const { method, options, handler, validate, path, validation, security } =
+      syntheticsRouteWrapper(createSyntheticsRouteWithAuth(route), server, syntheticsMonitorClient);
 
     const routeDefinition = {
       path,
@@ -70,13 +68,11 @@ export const initSyntheticsServer = (
           .get({
             access: 'public',
             path: routeDefinition.path,
-            options: {
-              tags: options?.tags,
-            },
           })
           .addVersion(
             {
               version: '2023-10-31',
+              security,
               validate: validation ?? false,
             },
             handler
@@ -87,13 +83,11 @@ export const initSyntheticsServer = (
           .put({
             access: 'public',
             path: routeDefinition.path,
-            options: {
-              tags: options?.tags,
-            },
           })
           .addVersion(
             {
               version: '2023-10-31',
+              security,
               validate: validation ?? false,
             },
             handler
@@ -104,13 +98,11 @@ export const initSyntheticsServer = (
           .post({
             access: 'public',
             path: routeDefinition.path,
-            options: {
-              tags: options?.tags,
-            },
           })
           .addVersion(
             {
               version: '2023-10-31',
+              security,
               validate: validation ?? false,
             },
             handler
@@ -128,6 +120,7 @@ export const initSyntheticsServer = (
           .addVersion(
             {
               version: '2023-10-31',
+              security,
               validate: validation ?? false,
             },
             handler
@@ -138,16 +131,6 @@ export const initSyntheticsServer = (
     }
   });
 
-  const { alerting } = plugins;
-
-  registerSyntheticsStatusCheckRule(server, plugins, syntheticsMonitorClient, alerting);
-
-  const tlsRule = registerSyntheticsTLSCheckRule(
-    server,
-    plugins,
-    syntheticsMonitorClient,
-    ruleDataClient
-  );
-
-  alerting.registerType(tlsRule);
+  registerSyntheticsStatusCheckRule(server, plugins, syntheticsMonitorClient);
+  registerSyntheticsTLSCheckRule(server, plugins, syntheticsMonitorClient);
 };

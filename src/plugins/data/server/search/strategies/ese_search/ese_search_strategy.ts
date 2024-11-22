@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Observable } from 'rxjs';
@@ -25,13 +26,9 @@ import {
 } from './request_utils';
 import { toAsyncKibanaSearchResponse, toAsyncKibanaSearchStatusResponse } from './response_utils';
 import { SearchUsage, searchUsageObserver } from '../../collectors/search';
-import {
-  getDefaultSearchParams,
-  getShardTimeout,
-  getTotalLoaded,
-  shimHitsTotal,
-} from '../es_search';
-import { SearchConfigSchema } from '../../../../config';
+import { getDefaultSearchParams, getShardTimeout } from '../es_search';
+import { getTotalLoaded, shimHitsTotal } from '../../../../common/search/strategies/es_search';
+import { SearchConfigSchema } from '../../../config';
 import { sanitizeRequestParams } from '../../sanitize_request_params';
 
 export const enhancedEsSearchStrategyProvider = (
@@ -84,12 +81,17 @@ export const enhancedEsSearchStrategyProvider = (
         ? { wait_for_completion_timeout: request.params.wait_for_completion_timeout }
         : {}),
     };
-    const { body, headers } = await client.asyncSearch.get(
+    const { body, headers, meta } = await client.asyncSearch.get(
       { ...params, id: id! },
-      { ...options.transport, signal: options.abortSignal, meta: true }
+      {
+        ...options.transport,
+        signal: options.abortSignal,
+        meta: true,
+        asStream: options.stream,
+      }
     );
-    const response = shimHitsTotal(body.response, options);
-    return toAsyncKibanaSearchResponse({ ...body, response }, headers?.warning);
+
+    return toAsyncKibanaSearchResponse(body, headers, meta?.request?.params, options);
   }
 
   async function submitAsyncSearch(
@@ -106,13 +108,10 @@ export const enhancedEsSearchStrategyProvider = (
       ...options.transport,
       signal: options.abortSignal,
       meta: true,
+      asStream: options.stream,
     });
-    const response = shimHitsTotal(body.response, options);
-    return toAsyncKibanaSearchResponse(
-      { ...body, response },
-      headers?.warning,
-      meta?.request?.params
-    );
+
+    return toAsyncKibanaSearchResponse(body, headers, meta?.request?.params, options);
   }
 
   function asyncSearch(

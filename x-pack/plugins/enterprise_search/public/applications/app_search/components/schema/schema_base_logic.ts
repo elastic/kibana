@@ -45,7 +45,9 @@ export const SchemaBaseLogic = kea<MakeLogicType<SchemaBaseValues, SchemaBaseAct
     schema: [
       {},
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onSchemaLoad: (_, { schema }) => schema,
+        // @ts-expect-error upgrade typescript v5.1.6
         setSchema: (_, { schema }) => schema,
       },
     ],

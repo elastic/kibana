@@ -12,6 +12,10 @@ import { AgentReassignmentError } from '../../errors';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
 
+import { agentsKueryNamespaceFilter } from '../spaces/agent_namespaces';
+
+import { getCurrentNamespace } from '../spaces/get_current_namespace';
+
 import { getAgentsById, getAgentsByKuery, openPointInTime } from './crud';
 import type { GetAgentsOptions } from '.';
 import { UpdateAgentTagsActionRunner, updateTagsBatch } from './update_agent_tags_action_runner';
@@ -23,6 +27,7 @@ export async function updateAgentTags(
   tagsToAdd: string[],
   tagsToRemove: string[]
 ): Promise<{ actionId: string }> {
+  const currentSpaceId = getCurrentNamespace(soClient);
   const outgoingErrors: Record<Agent['id'], Error> = {};
   const givenAgents: Agent[] = [];
 
@@ -39,8 +44,9 @@ export async function updateAgentTags(
     }
   } else if ('kuery' in options) {
     const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
+    const namespaceFilter = await agentsKueryNamespaceFilter(currentSpaceId);
 
-    const filters = [];
+    const filters = namespaceFilter ? [namespaceFilter] : [];
     if (options.kuery !== '') {
       filters.push(options.kuery);
     }
@@ -66,6 +72,7 @@ export async function updateAgentTags(
       soClient,
       {
         ...options,
+        spaceId: currentSpaceId,
         kuery,
         tagsToAdd,
         tagsToRemove,
@@ -79,5 +86,6 @@ export async function updateAgentTags(
   return await updateTagsBatch(soClient, esClient, givenAgents, outgoingErrors, {
     tagsToAdd,
     tagsToRemove,
+    spaceId: currentSpaceId,
   });
 }

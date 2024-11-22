@@ -7,7 +7,7 @@
 
 import { transformError, getIndexAliases } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { GetAlertsMigrationStatusRequestQuery } from '../../../../../common/api/detection_engine/signals_migration';
+import { ReadAlertsMigrationStatusRequestQuery } from '../../../../../common/api/detection_engine/signals_migration';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL } from '../../../../../common/constants';
 import { getIndexVersionsByIndex } from '../../migrations/get_index_versions_by_index';
@@ -23,15 +23,17 @@ export const getSignalsMigrationStatusRoute = (router: SecuritySolutionPluginRou
     .get({
       path: DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL,
       access: 'public',
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(
       {
         version: '2023-10-31',
         validate: {
-          request: { query: buildRouteValidationWithZod(GetAlertsMigrationStatusRequestQuery) },
+          request: { query: buildRouteValidationWithZod(ReadAlertsMigrationStatusRequestQuery) },
         },
       },
       async (context, request, response) => {

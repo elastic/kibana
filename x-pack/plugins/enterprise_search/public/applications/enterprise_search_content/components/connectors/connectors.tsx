@@ -44,8 +44,8 @@ import { ConnectorStats } from './connector_stats';
 import { ConnectorsLogic } from './connectors_logic';
 import { ConnectorsTable } from './connectors_table';
 import { CrawlerEmptyState } from './crawler_empty_state';
+import { CreateConnector } from './create_connector';
 import { DeleteConnectorModal } from './delete_connector_modal';
-import { SelectConnector } from './select_connector/select_connector';
 
 export const connectorsBreadcrumbs = [
   i18n.translate('xpack.enterpriseSearch.content.connectors.breadcrumb', {
@@ -81,7 +81,7 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler }) => {
   }, [searchParams.from, searchParams.size, searchQuery, isCrawler]);
 
   return !isLoading && isEmpty && !isCrawler ? (
-    <SelectConnector />
+    <CreateConnector />
   ) : (
     <>
       <DeleteConnectorModal isCrawler={isCrawler} />
@@ -160,7 +160,7 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler }) => {
                             {i18n.translate(
                               'xpack.enterpriseSearch.connectors.newNativeConnectorButtonLabel',
                               {
-                                defaultMessage: 'New Native Connector',
+                                defaultMessage: 'New Elastic managed Connector',
                               }
                             )}
                           </EuiContextMenuItem>,
@@ -176,7 +176,7 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler }) => {
                           >
                             {i18n.translate(
                               'xpack.enterpriseSearch.connectors.newConnectorsClientButtonLabel',
-                              { defaultMessage: 'New Connector Client' }
+                              { defaultMessage: 'New Self-managed Connector' }
                             )}
                           </EuiContextMenuItem>,
                         ]}

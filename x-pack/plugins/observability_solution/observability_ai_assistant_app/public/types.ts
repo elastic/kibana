@@ -16,7 +16,6 @@ import type {
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import type { SecurityPluginStart, SecurityPluginSetup } from '@kbn/security-plugin/public';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type {
   ObservabilitySharedPluginSetup,
@@ -41,7 +40,6 @@ export interface ObservabilityAIAssistantAppPublicSetup {}
 export interface ObservabilityAIAssistantAppPluginStartDependencies {
   licensing: LicensingPluginStart;
   share: SharePluginStart;
-  security: SecurityPluginStart;
   lens: LensPublicStart;
   dataViews: DataViewsPublicPluginStart;
   uiActions: UiActionsStart;
@@ -56,7 +54,6 @@ export interface ObservabilityAIAssistantAppPluginStartDependencies {
 export interface ObservabilityAIAssistantAppPluginSetupDependencies {
   licensing: LicensingPluginSetup;
   share: SharePluginSetup;
-  security: SecurityPluginSetup;
   lens: LensPublicSetup;
   dataViews: DataViewsPublicPluginSetup;
   uiActions: UiActionsSetup;

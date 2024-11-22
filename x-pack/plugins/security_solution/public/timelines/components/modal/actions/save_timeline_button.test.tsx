@@ -10,7 +10,7 @@ import { render, waitFor } from '@testing-library/react';
 import { SaveTimelineButton } from './save_timeline_button';
 import { mockTimelineModel, TestProviders } from '../../../../common/mock';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { TimelineStatus } from '../../../../../common/api/timeline';
+import { TimelineStatusEnum } from '../../../../../common/api/timeline';
 import { useCreateTimeline } from '../../../hooks/use_create_timeline';
 
 jest.mock('../../../../common/components/user_privileges');
@@ -49,7 +49,7 @@ describe('SaveTimelineButton', () => {
     });
     mockGetState.mockReturnValue({
       ...mockTimelineModel,
-      status: TimelineStatus.active,
+      status: TimelineStatusEnum.active,
       isSaving: false,
     });
     (useCreateTimeline as jest.Mock).mockReturnValue({});
@@ -58,8 +58,36 @@ describe('SaveTimelineButton', () => {
 
     expect(getByTestId('timeline-modal-save-timeline')).toBeInTheDocument();
     expect(getByText('Save')).toBeInTheDocument();
+    expect(getByTestId('timeline-modal-save-timeline')).toHaveStyle('background-color: #07C');
 
     expect(queryByTestId('save-timeline-modal')).not.toBeInTheDocument();
+  });
+
+  it('should override the default text and color of the button', async () => {
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      kibanaSecuritySolutionsPrivileges: { crud: true },
+    });
+    mockGetState.mockReturnValue({
+      ...mockTimelineModel,
+      status: TimelineStatusEnum.active,
+      isSaving: false,
+    });
+    (useCreateTimeline as jest.Mock).mockReturnValue({});
+
+    const { getByTestId, getByText, queryByText } = render(
+      <TestProviders>
+        <SaveTimelineButton
+          timelineId="timeline-1"
+          buttonText="TEST"
+          buttonColor="warning"
+          data-test-subj={'TEST_ID'}
+        />
+      </TestProviders>
+    );
+
+    expect(queryByText('Save')).not.toBeInTheDocument();
+    expect(getByText('TEST')).toBeInTheDocument();
+    expect(getByTestId('TEST_ID')).toHaveStyle('background-color: #FEC514');
   });
 
   it('should open the timeline save modal', async () => {
@@ -68,7 +96,7 @@ describe('SaveTimelineButton', () => {
     });
     mockGetState.mockReturnValue({
       ...mockTimelineModel,
-      status: TimelineStatus.active,
+      status: TimelineStatusEnum.active,
       isSaving: false,
     });
     (useCreateTimeline as jest.Mock).mockReturnValue({});
@@ -98,7 +126,7 @@ describe('SaveTimelineButton', () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
       kibanaSecuritySolutionsPrivileges: { crud: true },
     });
-    mockGetState.mockReturnValue({ ...mockTimelineModel, status: TimelineStatus.immutable });
+    mockGetState.mockReturnValue({ ...mockTimelineModel, status: TimelineStatusEnum.immutable });
 
     const { getByTestId } = renderSaveTimelineButton();
 

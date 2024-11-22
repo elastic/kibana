@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { RuleAttributes } from '../../data/rule/types';
+import { RawRule } from '../../types';
 import { RulesClientContext } from '../types';
 
-export function updateMetaAttributes<T extends Partial<RuleAttributes>>(
+export function updateMetaAttributes<T extends Partial<RawRule>>(
   context: RulesClientContext,
   alertAttributes: T
 ): T {
-  if (alertAttributes.hasOwnProperty('apiKey') || alertAttributes.hasOwnProperty('apiKeyOwner')) {
+  if (Object.hasOwn(alertAttributes, 'apiKey') || Object.hasOwn(alertAttributes, 'apiKeyOwner')) {
     return {
       ...alertAttributes,
       meta: {

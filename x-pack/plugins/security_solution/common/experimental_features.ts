@@ -43,16 +43,6 @@ export const allowedExperimentalValues = Object.freeze({
   socTrendsEnabled: false,
 
   /**
-   * Enables the automated response actions in rule + alerts
-   */
-  responseActionsEnabled: true,
-
-  /**
-   * Enables the automated endpoint response action in rule + alerts
-   */
-  endpointResponseActionsEnabled: true,
-
-  /**
    * Enables the `upload` endpoint response action (v8.9)
    */
   responseActionUploadEnabled: true,
@@ -82,7 +72,10 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsSentinelOneGetFileEnabled: true,
 
   /** Enables the `kill-process` response action for SentinelOne */
-  responseActionsSentinelOneKillProcessEnabled: false,
+  responseActionsSentinelOneKillProcessEnabled: true,
+
+  /** Enable the `processes` response actions for SentinelOne */
+  responseActionsSentinelOneProcessesEnabled: true,
 
   /**
    * Enables the ability to send Response actions to Crowdstrike and persist the results
@@ -91,34 +84,24 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsCrowdstrikeManualHostIsolationEnabled: true,
 
   /**
-   * Enables scan response action on Endpoint
+   * Space awareness for Elastic Defend management.
+   * Feature depends on Fleet's corresponding features also being enabled:
+   * - `subfeaturePrivileges`
+   * - `useSpaceAwareness`
+   * and Fleet must set it runtime mode to spaces by calling the following API:
+   * - `POST /internal/fleet/enable_space_awareness`
    */
-  responseActionScanEnabled: false,
+  endpointManagementSpaceAwarenessEnabled: false,
 
   /**
-   * Enables top charts on Alerts Page
+   * Disables new notes
    */
-  alertsPageChartsEnabled: true,
+  securitySolutionNotesDisabled: false,
 
   /**
-   * Enables the alert type column in KPI visualizations on Alerts Page
+   * Disables entity and alert previews
    */
-  alertTypeEnabled: false,
-
-  /**
-   * Disables expandable flyout
-   */
-  expandableFlyoutDisabled: false,
-
-  /**
-   * Enables new notes
-   */
-  securitySolutionNotesEnabled: false,
-
-  /**
-   * Enables entity and alert previews
-   */
-  entityAlertPreviewEnabled: false,
+  entityAlertPreviewDisabled: false,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -126,13 +109,7 @@ export const allowedExperimentalValues = Object.freeze({
   assistantModelEvaluation: false,
 
   /**
-   * Enables the Assistant Knowledge Base by default, introduced in `8.15.0`.
-   */
-  assistantKnowledgeBaseByDefault: false,
-
-  /**
    * Enables the Managed User section inside the new user details flyout.
-   * To see this section you also need expandableFlyoutDisabled flag set to false.
    */
   newUserDetailsFlyoutManagedUser: false,
 
@@ -157,31 +134,16 @@ export const allowedExperimentalValues = Object.freeze({
   protectionUpdatesEnabled: true,
 
   /**
-   * Enables AI assistant on rule creation form when query has error
-   */
-  AIAssistantOnRuleCreationFormEnabled: false,
-
-  /**
    * Disables the timeline save tour.
    * This flag is used to disable the tour in cypress tests.
    */
   disableTimelineSaveTour: false,
 
   /**
-   * Enables alerts suppression for ES|QL rules
-   */
-  alertSuppressionForEsqlRuleEnabled: false,
-
-  /**
    * Enables the risk engine privileges route
    * and associated callout in the UI
    */
   riskEnginePrivilegesRouteEnabled: true,
-
-  /**
-   * Enables alerts suppression for machine learning rules
-   */
-  alertSuppressionForMachineLearningRuleEnabled: false,
 
   /**
    * Enables experimental Experimental S1 integration data to be available in Analyzer
@@ -201,25 +163,32 @@ export const allowedExperimentalValues = Object.freeze({
   crowdstrikeDataInAnalyzerEnabled: true,
 
   /**
+   * Enables Response actions telemetry collection
+   * Should be enabled in 8.17.0
+   */
+  responseActionsTelemetryEnabled: false,
+
+  /**
    * Enables experimental JAMF integration data to be available in Analyzer
    */
-  jamfDataInAnalyzerEnabled: false,
+  jamfDataInAnalyzerEnabled: true,
 
   /*
    * Disables discover esql tab within timeline
    *
    */
   timelineEsqlTabDisabled: false,
-  /*
-   * Enables Discover components, UnifiedFieldList and UnifiedDataTable in Timeline.
-   */
-  unifiedComponentsInTimelineEnabled: false,
 
   /*
    * Disables date pickers and sourcerer in analyzer if needed.
    *
    */
   analyzerDatePickersAndSourcererDisabled: false,
+
+  /**
+   * Enables graph visualization in alerts flyout
+   */
+  graphVisualizationInFlyoutEnabled: false,
 
   /**
    * Enables an ability to customize Elastic prebuilt rules.
@@ -248,19 +217,30 @@ export const allowedExperimentalValues = Object.freeze({
   valueListItemsModalEnabled: true,
 
   /**
-   * Enables the new rule's bulk action to manage custom highlighted fields
-   */
-  bulkCustomHighlightedFieldsEnabled: false,
-
-  /**
-   * Enables the manual rule run
-   */
-  manualRuleRunEnabled: false,
-
-  /**
    * Adds a new option to filter descendants of a process for Management / Event Filters
    */
-  filterProcessDescendantsForEventFiltersEnabled: false,
+  filterProcessDescendantsForEventFiltersEnabled: true,
+
+  /**
+   * Enables the new data ingestion hub
+   */
+  dataIngestionHubEnabled: false,
+
+  /**
+   * Disables Security's Entity Store engine routes. The Entity Store feature is available by default, but
+   * can be disabled if necessary in a given environment.
+   */
+  entityStoreDisabled: false,
+
+  /**
+   * Enables the siem migrations feature
+   */
+  siemMigrationsEnabled: false,
+
+  /**
+   * Enables the Defend Insights feature
+   */
+  defendInsights: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

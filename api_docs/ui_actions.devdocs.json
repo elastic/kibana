@@ -767,18 +767,6 @@
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/embeddable/search_embeddable_factory.ts"
-              },
-              {
-                "plugin": "discover",
                 "path": "src/plugins/discover/public/plugin.tsx"
               },
               {
@@ -2211,7 +2199,7 @@
             "section": "def-common.Presentable",
             "text": "Presentable"
           },
-          "<Context>, \"order\" | \"getDisplayName\" | \"getIconType\" | \"getDisplayNameTooltip\">>"
+          "<Context>, \"order\" | \"getIconType\" | \"getDisplayName\" | \"getDisplayNameTooltip\">>"
         ],
         "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
         "deprecated": false,
@@ -2432,13 +2420,7 @@
                 "text": "RuntimeFieldSpec"
               },
               "> | undefined; fieldAttrs?: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldAttrs",
-                "text": "FieldAttrs"
-              },
+              "FieldAttrsAsObject",
               " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; allowHidden?: boolean | undefined; }"
             ],
             "path": "src/plugins/ui_actions/public/types.ts",
@@ -2683,9 +2665,9 @@
           "Partial<",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.EmbeddableApiContext",
+            "section": "def-public.EmbeddableApiContext",
             "text": "EmbeddableApiContext"
           },
           "> & { data: { rowIndex: number; table: ",

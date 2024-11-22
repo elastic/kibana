@@ -7,7 +7,7 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_INDEX } from '@kbn/securitysolution-list-constants';
-import { GetListIndexResponse } from '@kbn/securitysolution-lists-common/api';
+import { ReadListIndexResponse } from '@kbn/securitysolution-lists-common/api';
 
 import type { ListsPluginRouter } from '../../types';
 import { buildSiemResponse } from '../utils';
@@ -17,10 +17,12 @@ export const readListIndexRoute = (router: ListsPluginRouter): void => {
   router.versioned
     .get({
       access: 'public',
-      options: {
-        tags: ['access:lists-read'],
-      },
       path: LIST_INDEX,
+      security: {
+        authz: {
+          requiredPrivileges: ['lists-read'],
+        },
+      },
     })
     .addVersion(
       {
@@ -37,7 +39,7 @@ export const readListIndexRoute = (router: ListsPluginRouter): void => {
 
           if (listDataStreamExists && listItemDataStreamExists) {
             return response.ok({
-              body: GetListIndexResponse.parse({
+              body: ReadListIndexResponse.parse({
                 list_index: listDataStreamExists,
                 list_item_index: listItemDataStreamExists,
               }),

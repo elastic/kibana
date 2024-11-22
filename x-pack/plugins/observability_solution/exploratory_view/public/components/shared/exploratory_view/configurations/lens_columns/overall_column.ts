@@ -55,7 +55,9 @@ export function getDistributionInPercentageColumn({
     dataView
   ) ?? { columns: {} };
 
+  // @ts-expect-error upgrade typescript v5.1.6
   const { [yAxisColId]: main, ...supportingColumns } = columns;
 
+  // @ts-expect-error upgrade typescript v5.1.6
   return { main: columns[yAxisColId] as FormulaIndexPatternColumn, supportingColumns };
 }

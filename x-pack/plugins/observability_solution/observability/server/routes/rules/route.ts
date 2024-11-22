@@ -13,6 +13,7 @@ const alertsDynamicIndexPatternRoute = createObservabilityServerRoute({
   endpoint: 'GET /api/observability/rules/alerts/dynamic_index_pattern 2023-10-31',
   options: {
     tags: [],
+    access: 'public',
   },
   params: t.type({
     query: t.type({

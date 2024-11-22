@@ -195,9 +195,15 @@ describe('mappingFromFieldMap', () => {
           properties: {
             action: {
               type: 'keyword',
+              ignore_above: 1024,
             },
             kind: {
               type: 'keyword',
+              ignore_above: 1024,
+            },
+            original: {
+              type: 'keyword',
+              ignore_above: 1024,
             },
           },
         },
@@ -254,6 +260,9 @@ describe('mappingFromFieldMap', () => {
                     },
                   },
                 },
+                intended_timestamp: {
+                  type: 'date',
+                },
                 rule: {
                   properties: {
                     category: {
@@ -266,6 +275,9 @@ describe('mappingFromFieldMap', () => {
                       properties: {
                         timestamp: {
                           type: 'date',
+                        },
+                        type: {
+                          type: 'keyword',
                         },
                         uuid: {
                           type: 'keyword',

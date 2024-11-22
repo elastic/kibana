@@ -8,9 +8,8 @@ paths:
       x-labels: [serverless, ess]
       operationId: DeleteListIndex
       x-codegen-enabled: true
-      summary: Deletes list data streams
-      tags:
-        - List API
+      summary: Delete list data streams
+      description: Delete the `.lists` and `.items` data streams.
       responses:
         200:
           description: Successful response

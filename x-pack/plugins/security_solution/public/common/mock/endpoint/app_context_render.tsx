@@ -16,7 +16,7 @@ import { QueryClient } from '@tanstack/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import type { RenderHookOptions, RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook as reactRenderHoook } from '@testing-library/react-hooks';
+import { renderHook as reactRenderHook } from '@testing-library/react-hooks';
 import type {
   ReactHooksRenderer,
   WrapperComponent,
@@ -283,7 +283,7 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     },
   });
 
-  const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
+  const AppWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
     <AppRootProvider
       store={store}
       history={history}
@@ -309,7 +309,7 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     hookFn: HookRendererFunction<TProps, TResult>,
     options: RenderHookOptions<TProps> = {}
   ): RenderHookResult<TProps, TResult> => {
-    return reactRenderHoook<TProps, TResult>(hookFn, {
+    return reactRenderHook<TProps, TResult>(hookFn, {
       wrapper: AppWrapper as WrapperComponent<TProps>,
       ...options,
     });

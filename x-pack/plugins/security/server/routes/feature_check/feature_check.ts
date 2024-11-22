@@ -43,6 +43,12 @@ export function defineSecurityFeatureCheckRoute({ router, logger }: RouteDefinit
   router.get(
     {
       path: '/internal/security/_check_security_features',
+      security: {
+        authz: {
+          enabled: false,
+          reason: `This route delegates authorization to Core's scoped ES cluster client`,
+        },
+      },
       validate: false,
     },
     createLicensedRouteHandler(async (context, request, response) => {
@@ -142,5 +148,5 @@ async function getEnabledSecurityFeatures(esClient: ElasticsearchClient, logger:
 function usesCustomScriptSettings(
   nodeResponse: NodeSettingsResponse | {}
 ): nodeResponse is NodeSettingsResponse {
-  return nodeResponse.hasOwnProperty('nodes');
+  return Object.hasOwn(nodeResponse, 'nodes');
 }

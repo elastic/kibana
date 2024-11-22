@@ -20,11 +20,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('Application', () => {
     before(async () => {
-      await PageObjects.svlCommonPage.login();
-    });
-
-    after(async () => {
-      await PageObjects.svlCommonPage.forceLogout();
+      await PageObjects.svlCommonPage.loginWithPrivilegedRole();
     });
 
     it('is shown in the global search', async () => {

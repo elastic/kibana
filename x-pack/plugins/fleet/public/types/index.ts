@@ -101,6 +101,7 @@ export type {
   CategorySummaryItem,
   CategorySummaryList,
   PackageInfo,
+  PackageMetadata,
   RegistryVarsEntry,
   RegistryInput,
   RegistryStream,
@@ -119,6 +120,7 @@ export type {
   GetLimitedPackagesResponse,
   GetInfoResponse,
   InstallPackageResponse,
+  DeletePackageRequest,
   DeletePackageResponse,
   InstallationStatus,
   Installable,
@@ -144,6 +146,10 @@ export type {
   EnrollmentSettingsFleetServerPolicy,
   GetEnrollmentSettingsRequest,
   GetEnrollmentSettingsResponse,
+  GetSpaceSettingsResponse,
+  GetAgentPolicyOutputsResponse,
+  GetListAgentPolicyOutputsRequest,
+  GetListAgentPolicyOutputsResponse,
 } from '../../common/types';
 export {
   entries,

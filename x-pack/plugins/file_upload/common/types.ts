@@ -28,6 +28,7 @@ export interface FindFileStructureResponse {
   has_header_row: boolean;
   has_byte_order_marker: boolean;
   format: string;
+  document_type?: string;
   field_stats: {
     [fieldName: string]: {
       count: number;
@@ -56,6 +57,7 @@ export interface FindFileStructureResponse {
       };
     };
   };
+  ingest_pipeline: IngestPipeline;
   quote: string;
   delimiter: string;
   need_client_timezone: boolean;
@@ -123,14 +125,32 @@ export interface ImportDocMessage {
   message: string;
 }
 
-export type ImportDoc = ImportDocMessage | string | object;
+export interface ImportDocTika {
+  data: string;
+}
+
+export type ImportDoc = ImportDocMessage | ImportDocTika | string | object;
 
 export interface IngestPipelineWrapper {
   id: string;
-  pipeline: IngestPipeline;
+  pipeline?: IngestPipeline;
 }
 
 export interface IngestPipeline {
   description: string;
   processors: any[];
+  isManaged?: boolean;
+  name?: string;
+}
+
+export interface PreviewTikaResponse {
+  date?: string;
+  content_type: string;
+  author?: string;
+  format: string;
+  modified: string;
+  language: string;
+  creator_tool?: string;
+  content: string;
+  content_length: number;
 }

@@ -9,7 +9,7 @@ import { ComponentType } from 'react';
 import { Stackframe } from '../../../../../typings/es_schemas/raw/fields/stackframe';
 
 export interface FrameHeadingRendererProps {
-  fileDetailComponent: ComponentType;
+  fileDetailComponent: ComponentType<React.PropsWithChildren<{}>>;
   stackframe: Stackframe;
   idx?: string;
 }

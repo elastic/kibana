@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import type {
   UseThreatIntelligenceParams,
   UseThreatIntelligenceResult,
 } from './use_fetch_threat_intelligence';
 import { useFetchThreatIntelligence } from './use_fetch_threat_intelligence';
-import { useInvestigationTimeEnrichment } from '../../../../common/containers/cti/event_enrichment';
+import { useInvestigationTimeEnrichment } from '../../shared/hooks/use_investigation_enrichment';
 
-jest.mock('../../../../common/containers/cti/event_enrichment');
+jest.mock('../../shared/hooks/use_investigation_enrichment');
 
 const dataFormattedForFieldBrowser = [
   {
@@ -41,7 +41,7 @@ const dataFormattedForFieldBrowser = [
 ];
 
 describe('useFetchThreatIntelligence', () => {
-  let hookResult: RenderHookResult<UseThreatIntelligenceParams, UseThreatIntelligenceResult>;
+  let hookResult: RenderHookResult<UseThreatIntelligenceResult, UseThreatIntelligenceParams>;
 
   it('return render 1 match detected and 1 field enriched', () => {
     (useInvestigationTimeEnrichment as jest.Mock).mockReturnValue({

@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -18,6 +17,7 @@ export default function (providerContext: FtrProviderContext) {
   const badPackageVersion = '0.2.0';
   const goodUpgradePackageVersion = '0.3.0';
   const kibanaServer = getService('kibanaServer');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   const installPackage = (pkg: string, version: string) => {
     return supertest
@@ -39,9 +39,12 @@ export default function (providerContext: FtrProviderContext) {
       .set('kbn-xsrf', 'xxxx');
   };
 
-  describe('package installation error handling and rollback', async () => {
+  describe('package installation error handling and rollback', () => {
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
+
+    before(async () => {
+      await fleetAndAgents.setup();
+    });
 
     beforeEach(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
@@ -70,7 +73,7 @@ export default function (providerContext: FtrProviderContext) {
       expect(JSON.parse(goodPkgInfoResponse.text).item.status).to.be('installed');
       expect(JSON.parse(goodPkgInfoResponse.text).item.version).to.be('0.1.0');
       const latestInstallFailedAttempts =
-        goodPkgInfoResponse.body.item.savedObject.attributes.latest_install_failed_attempts;
+        goodPkgInfoResponse.body.item.installationInfo.latest_install_failed_attempts;
       expect(latestInstallFailedAttempts).to.have.length(1);
       expect(latestInstallFailedAttempts[0].target_version).to.be('0.2.0');
       expect(latestInstallFailedAttempts[0].error.message).to.contain(
@@ -87,7 +90,7 @@ export default function (providerContext: FtrProviderContext) {
       expect(JSON.parse(goodPkgInfoResponse.text).item.status).to.be('installed');
       expect(JSON.parse(goodPkgInfoResponse.text).item.version).to.be('0.3.0');
       const latestInstallFailedAttempts =
-        goodPkgInfoResponse.body.item.savedObject.attributes.latest_install_failed_attempts;
+        goodPkgInfoResponse.body.item.installationInfo.latest_install_failed_attempts;
       expect(latestInstallFailedAttempts).to.have.length(0);
     });
   });

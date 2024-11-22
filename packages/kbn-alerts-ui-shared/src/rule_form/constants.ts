@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -13,21 +14,30 @@ import {
   RuleCreationValidConsumer,
   AlertConsumers,
 } from '@kbn/rule-data-utils';
+import { RuleNotifyWhen } from '@kbn/alerting-types';
 import { RuleFormData } from './types';
 
 export const DEFAULT_RULE_INTERVAL = '1m';
 
 export const ALERTING_FEATURE_ID = 'alerts';
 
-export const GET_DEFAULT_FORM_DATA = ({
+export const DEFAULT_FREQUENCY = {
+  notifyWhen: RuleNotifyWhen.CHANGE,
+  throttle: null,
+  summary: false,
+};
+
+export const getDefaultFormData = ({
   ruleTypeId,
   name,
   consumer,
   schedule,
+  actions,
 }: {
   ruleTypeId: RuleFormData['ruleTypeId'];
   name: RuleFormData['name'];
   consumer: RuleFormData['consumer'];
+  actions: RuleFormData['actions'];
   schedule?: RuleFormData['schedule'];
 }) => {
   return {
@@ -39,6 +49,8 @@ export const GET_DEFAULT_FORM_DATA = ({
     consumer,
     ruleTypeId,
     name,
+    actions,
+    alertDelay: { active: 1 },
   };
 };
 

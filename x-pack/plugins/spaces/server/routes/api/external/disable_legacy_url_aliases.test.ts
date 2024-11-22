@@ -15,6 +15,7 @@ import {
   httpServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
 import { initDisableLegacyUrlAliasesApi } from './disable_legacy_url_aliases';
 import { spacesConfig } from '../../../lib/__fixtures__';
@@ -57,7 +58,7 @@ describe('_disable_legacy_url_aliases', () => {
       usageStatsServiceMock.createSetupContract(usageStatsClient)
     );
 
-    const clientServiceStart = clientService.start(coreStart);
+    const clientServiceStart = clientService.start(coreStart, featuresPluginMock.createStart());
 
     const spacesServiceStart = service.start({
       basePath: coreStart.http.basePath,

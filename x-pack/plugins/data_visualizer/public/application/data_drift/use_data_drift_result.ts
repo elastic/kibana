@@ -304,10 +304,8 @@ const getDataComparisonQuery = ({
 
   if (rangeFilter && isPopulatedObject<string, QueryDslBoolQuery>(query, ['bool'])) {
     if (Array.isArray(query.bool.filter)) {
-      // @ts-expect-error gte and lte can be numeric
       query.bool.filter.push(rangeFilter);
     } else {
-      // @ts-expect-error gte and lte can be numeric
       query.bool.filter = [rangeFilter];
     }
   }

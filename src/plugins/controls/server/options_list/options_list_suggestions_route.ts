@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Observable } from 'rxjs';
 
 import { schema } from '@kbn/config-schema';
 import { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
-import { SearchRequest } from '@kbn/data-plugin/common';
 import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
 import { PluginSetup as UnifiedSearchPluginSetup } from '@kbn/unified-search-plugin/server';
 
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { OptionsListRequestBody, OptionsListResponse } from '../../common/options_list/types';
 import { getValidationAggregationBuilder } from './options_list_validation_queries';
 import { getSuggestionAggregationBuilder } from './suggestion_queries';
@@ -48,6 +49,7 @@ export const setupOptionsListSuggestionsRoute = (
                 filters: schema.maybe(schema.any()),
                 fieldSpec: schema.maybe(schema.any()),
                 allowExpensiveQueries: schema.boolean(),
+                ignoreValidations: schema.maybe(schema.boolean()),
                 searchString: schema.maybe(schema.string()),
                 searchTechnique: schema.maybe(
                   schema.oneOf([
@@ -102,7 +104,7 @@ export const setupOptionsListSuggestionsRoute = (
     /**
      * Build ES Query
      */
-    const { runPastTimeout, filters, runtimeFieldMap } = request;
+    const { runPastTimeout, filters, runtimeFieldMap, ignoreValidations } = request;
     const { terminateAfter, timeout } = getAutocompleteSettings();
     const timeoutSettings = runPastTimeout
       ? {}
@@ -112,7 +114,9 @@ export const setupOptionsListSuggestionsRoute = (
     const validationBuilder = getValidationAggregationBuilder();
 
     const suggestionAggregation: any = suggestionBuilder.buildAggregation(request) ?? {};
-    const validationAggregation: any = validationBuilder.buildAggregation(request);
+    const validationAggregation: any = ignoreValidations
+      ? {}
+      : validationBuilder.buildAggregation(request);
 
     const body: SearchRequest['body'] = {
       size: 0,
@@ -141,7 +145,10 @@ export const setupOptionsListSuggestionsRoute = (
      */
     const results = suggestionBuilder.parse(rawEsResult, request);
     const totalCardinality = results.totalCardinality;
-    const invalidSelections = validationBuilder.parse(rawEsResult, request);
+    const invalidSelections = ignoreValidations
+      ? []
+      : validationBuilder.parse(rawEsResult, request);
+
     return {
       suggestions: results.suggestions,
       totalCardinality,

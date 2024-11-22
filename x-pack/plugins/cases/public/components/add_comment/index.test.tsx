@@ -10,7 +10,12 @@ import { waitFor, act, fireEvent, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { noop } from 'lodash/fp';
 
-import { noCreateCasesPermissions, TestProviders, createAppMockRenderer } from '../../common/mock';
+import {
+  onlyCreateCommentPermissions,
+  noCreateCommentCasesPermissions,
+  TestProviders,
+  createAppMockRenderer,
+} from '../../common/mock';
 
 import { AttachmentType } from '../../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER, MAX_COMMENT_LENGTH } from '../../../common/constants';
@@ -21,12 +26,13 @@ import { CasesTimelineIntegrationProvider } from '../timeline_context';
 import { timelineIntegrationMock } from '../__mock__/timeline';
 import type { CaseAttachmentWithoutOwner } from '../../types';
 import type { AppMockRenderer } from '../../common/mock';
+import { useCreateAttachments } from '../../containers/use_create_attachments';
 
-jest.mock('../../containers/api', () => ({
-  createAttachments: jest.fn(),
-}));
+jest.mock('../../containers/use_create_attachments');
 
-const createAttachmentsMock = createAttachments as jest.Mock;
+const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
+
+const createAttachmentsMock = jest.fn().mockImplementation(() => defaultResponse);
 const onCommentSaving = jest.fn();
 const onCommentPosted = jest.fn();
 
@@ -58,7 +64,10 @@ describe('AddComment ', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     appMockRender = createAppMockRenderer();
-    createAttachmentsMock.mockImplementation(() => defaultResponse);
+    useCreateAttachmentsMock.mockReturnValue({
+      isLoading: false,
+      mutate: createAttachmentsMock,
+    });
   });
 
   afterEach(() => {
@@ -72,6 +81,11 @@ describe('AddComment ', () => {
   });
 
   it('should render spinner and disable submit when loading', async () => {
+    useCreateAttachmentsMock.mockReturnValue({
+      isLoading: true,
+      mutateAsync: createAttachmentsMock,
+    });
+
     appMockRender.render(<AddComment {...{ ...addCommentProps, showLoading: true }} />);
 
     fireEvent.change(screen.getByLabelText('caseComment'), {
@@ -84,41 +98,61 @@ describe('AddComment ', () => {
     expect(screen.getByTestId('submit-comment')).toHaveAttribute('disabled');
   });
 
-  it('should hide the component when the user does not have create permissions', () => {
+  it('should hide the component when the user does not have createComment permissions', () => {
     createAttachmentsMock.mockImplementation(() => ({
       ...defaultResponse,
       isLoading: true,
     }));
 
     appMockRender.render(
-      <TestProviders permissions={noCreateCasesPermissions()}>
+      <TestProviders permissions={noCreateCommentCasesPermissions()}>
         <AddComment {...{ ...addCommentProps }} />
       </TestProviders>
     );
 
     expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('add-comment-form-wrapper')).not.toBeInTheDocument();
+  });
+
+  it('should show the component when the user does not have create permissions, but has createComment permissions', () => {
+    createAttachmentsMock.mockImplementation(() => ({
+      ...defaultResponse,
+      isLoading: true,
+    }));
+
+    appMockRender.render(
+      <TestProviders permissions={onlyCreateCommentPermissions()}>
+        <AddComment {...{ ...addCommentProps }} />
+      </TestProviders>
+    );
+
+    expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('add-comment-form-wrapper')).toBeInTheDocument();
   });
 
   it('should post comment on submit click', async () => {
     appMockRender.render(<AddComment {...addCommentProps} />);
 
     const markdown = screen.getByTestId('euiMarkdownEditorTextArea');
-    userEvent.type(markdown, sampleData.comment);
+    await userEvent.type(markdown, sampleData.comment);
 
-    userEvent.click(screen.getByTestId('submit-comment'));
+    await userEvent.click(screen.getByTestId('submit-comment'));
 
     await waitFor(() => expect(onCommentSaving).toBeCalled());
     await waitFor(() =>
-      expect(createAttachmentsMock).toBeCalledWith({
-        caseId: addCommentProps.caseId,
-        attachments: [
-          {
-            comment: sampleData.comment,
-            owner: SECURITY_SOLUTION_OWNER,
-            type: AttachmentType.user,
-          },
-        ],
-      })
+      expect(createAttachmentsMock).toBeCalledWith(
+        {
+          caseId: addCommentProps.caseId,
+          attachments: [
+            {
+              comment: sampleData.comment,
+              type: AttachmentType.user,
+            },
+          ],
+          caseOwner: SECURITY_SOLUTION_OWNER,
+        },
+        { onSuccess: expect.any(Function) }
+      )
     );
     await waitFor(() => {
       expect(screen.getByTestId('euiMarkdownEditorTextArea')).toHaveTextContent('');
@@ -131,7 +165,8 @@ describe('AddComment ', () => {
 
     appMockRender.render(<AddComment {...addCommentProps} ref={ref} />);
 
-    userEvent.paste(await screen.findByTestId('euiMarkdownEditorTextArea'), sampleData.comment);
+    await userEvent.click(await screen.findByTestId('euiMarkdownEditorTextArea'));
+    await userEvent.paste(sampleData.comment);
 
     await act(async () => {
       ref.current!.addQuote(sampleQuote);
@@ -173,8 +208,8 @@ describe('AddComment ', () => {
 
       const markdown = screen.getByTestId('euiMarkdownEditorTextArea');
 
-      userEvent.type(markdown, 'test');
-      userEvent.clear(markdown);
+      await userEvent.type(markdown, 'test');
+      await userEvent.clear(markdown);
 
       await waitFor(() => {
         expect(screen.getByText('Empty comments are not allowed.')).toBeInTheDocument();
@@ -187,8 +222,8 @@ describe('AddComment ', () => {
 
       const markdown = screen.getByTestId('euiMarkdownEditorTextArea');
 
-      userEvent.clear(markdown);
-      userEvent.type(markdown, '  ');
+      await userEvent.clear(markdown);
+      await userEvent.type(markdown, '  ');
 
       await waitFor(() => {
         expect(screen.getByText('Empty comments are not allowed.')).toBeInTheDocument();
@@ -203,7 +238,8 @@ describe('AddComment ', () => {
 
       const markdown = screen.getByTestId('euiMarkdownEditorTextArea');
 
-      userEvent.paste(markdown, longComment);
+      await userEvent.click(markdown);
+      await userEvent.paste(longComment);
 
       await waitFor(() => {
         expect(
@@ -256,16 +292,19 @@ describe('draft comment ', () => {
 
     await waitFor(() => {
       expect(onCommentSaving).toBeCalled();
-      expect(createAttachmentsMock).toBeCalledWith({
-        caseId: addCommentProps.caseId,
-        attachments: [
-          {
-            comment: sampleData.comment,
-            owner: SECURITY_SOLUTION_OWNER,
-            type: AttachmentType.user,
-          },
-        ],
-      });
+      expect(createAttachmentsMock).toBeCalledWith(
+        {
+          caseId: addCommentProps.caseId,
+          attachments: [
+            {
+              comment: sampleData.comment,
+              type: AttachmentType.user,
+            },
+          ],
+          caseOwner: SECURITY_SOLUTION_OWNER,
+        },
+        { onSuccess: expect.any(Function) }
+      );
     });
 
     await waitFor(() => {

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
@@ -20,7 +21,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [
       require.resolve('./apps/dashboard/group3'),
       require.resolve('./apps/discover/ccs_compatibility'),
-      require.resolve('./apps/console/monaco/_console_ccs'),
+      require.resolve('./apps/console/_console_ccs'),
       require.resolve('./apps/management/ccs_compatibility'),
       require.resolve('./apps/getting_started'),
     ],

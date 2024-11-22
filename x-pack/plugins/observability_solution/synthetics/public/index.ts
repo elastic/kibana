@@ -6,7 +6,7 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/public';
-import { UptimePlugin } from './plugin';
+import { SyntheticsPlugin } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>
-  new UptimePlugin(initializerContext);
+  new SyntheticsPlugin(initializerContext);

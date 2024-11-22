@@ -6,14 +6,12 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { validate } from '@kbn/securitysolution-io-ts-utils';
-import { checkTimelineStatusRt } from '../../../../../../common/api/timeline';
+import { InstallPrepackedTimelinesRequestBody } from '../../../../../../common/api/timeline';
 import { buildSiemResponse } from '../../../routes/utils';
-import type { SetupPlugins } from '../../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import {
-  GetPrebuiltRulesAndTimelinesStatusResponse,
+  ReadPrebuiltRulesAndTimelinesStatusResponse,
   PREBUILT_RULES_STATUS_URL,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 
@@ -27,16 +25,15 @@ import { rulesToMap } from '../../logic/utils';
 import { buildFrameworkRequest } from '../../../../timeline/utils/common';
 import { checkTimelinesStatus } from '../../../../timeline/utils/check_timelines_status';
 
-export const getPrebuiltRulesAndTimelinesStatusRoute = (
-  router: SecuritySolutionPluginRouter,
-  security: SetupPlugins['security']
-) => {
+export const getPrebuiltRulesAndTimelinesStatusRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .get({
       access: 'public',
       path: PREBUILT_RULES_STATUS_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(
@@ -71,14 +68,12 @@ export const getPrebuiltRulesAndTimelinesStatusRoute = (
           const rulesToInstall = getRulesToInstall(latestPrebuiltRules, installedPrebuiltRules);
           const rulesToUpdate = getRulesToUpdate(latestPrebuiltRules, installedPrebuiltRules);
 
-          const frameworkRequest = await buildFrameworkRequest(context, security, request);
+          const frameworkRequest = await buildFrameworkRequest(context, request);
           const prebuiltTimelineStatus = await checkTimelinesStatus(frameworkRequest);
-          const [validatedPrebuiltTimelineStatus] = validate(
-            prebuiltTimelineStatus,
-            checkTimelineStatusRt
-          );
+          const validatedPrebuiltTimelineStatus =
+            InstallPrepackedTimelinesRequestBody.parse(prebuiltTimelineStatus);
 
-          const responseBody: GetPrebuiltRulesAndTimelinesStatusResponse = {
+          const responseBody: ReadPrebuiltRulesAndTimelinesStatusResponse = {
             rules_custom_installed: customRules.total,
             rules_installed: installedPrebuiltRules.size,
             rules_not_installed: rulesToInstall.length,
@@ -90,7 +85,7 @@ export const getPrebuiltRulesAndTimelinesStatusRoute = (
           };
 
           return response.ok({
-            body: GetPrebuiltRulesAndTimelinesStatusResponse.parse(responseBody),
+            body: ReadPrebuiltRulesAndTimelinesStatusResponse.parse(responseBody),
           });
         } catch (err) {
           const error = transformError(err);

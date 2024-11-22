@@ -5,18 +5,26 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiBetaBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
-import { isSuppressionRuleInGA } from '../../../../../common/detection_engine/utils';
+import { i18n } from '@kbn/i18n';
 
+import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
+import { InsightsSummaryRow } from './insights_summary_row';
 import {
   CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID,
   CORRELATIONS_SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID,
 } from './test_ids';
-import { InsightsSummaryRow } from './insights_summary_row';
-import { SUPPRESSED_ALERTS_COUNT_TECHNICAL_PREVIEW } from '../../../../common/components/event_details/insights/translations';
+import { isSuppressionRuleInGA } from '../../../../../common/detection_engine/utils';
+
+const SUPPRESSED_ALERTS_COUNT_TECHNICAL_PREVIEW = i18n.translate(
+  'xpack.securitySolution.flyout.right.overview.insights.suppressedAlertsCountTechnicalPreview',
+  {
+    defaultMessage: 'Technical Preview',
+  }
+);
 
 export interface SuppressedAlertsProps {
   /**
@@ -36,21 +44,24 @@ export const SuppressedAlerts: React.VFC<SuppressedAlertsProps> = ({
   alertSuppressionCount,
   ruleType,
 }) => {
+  const text = useMemo(
+    () => (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.right.insights.correlations.suppressedAlertsLabel"
+        defaultMessage="Suppressed {count, plural, one {alert} other {alerts}}"
+        values={{ count: alertSuppressionCount }}
+      />
+    ),
+    [alertSuppressionCount]
+  );
+
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
         <InsightsSummaryRow
-          loading={false}
-          error={false}
-          icon={'layers'}
+          text={text}
           value={alertSuppressionCount}
-          text={
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.right.insights.correlations.suppressedAlertsLabel"
-              defaultMessage="suppressed {count, plural, =1 {alert} other {alerts}}"
-              values={{ count: alertSuppressionCount }}
-            />
-          }
+          expandedSubTab={CORRELATIONS_TAB_ID}
           data-test-subj={CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID}
           key={`correlation-row-suppressed-alerts`}
         />

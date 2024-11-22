@@ -24,9 +24,26 @@ export const muteAlertRoute = (
       options: {
         access: 'public',
         summary: `Mute an alert`,
+        tags: ['oas-tag:alerting'],
       },
       validate: {
-        params: muteAlertParamsSchemaV1,
+        request: {
+          params: muteAlertParamsSchemaV1,
+        },
+        response: {
+          204: {
+            description: 'Indicates a successful call.',
+          },
+          400: {
+            description: 'Indicates an invalid schema or parameters.',
+          },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
+          404: {
+            description: 'Indicates a rule or alert with the given ID does not exist.',
+          },
+        },
       },
     },
     router.handleLegacyErrors(

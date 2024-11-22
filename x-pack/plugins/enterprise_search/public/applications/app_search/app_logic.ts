@@ -16,10 +16,12 @@ import { ConfiguredLimits, Account, Role } from './types';
 import { getRoleAbilities } from './utils/role';
 
 interface AppValues {
-  configuredLimits: ConfiguredLimits;
   account: Account;
+  showGateForm: boolean;
+  configuredLimits: ConfiguredLimits;
   myRole: Role;
 }
+
 interface AppActions {
   setOnboardingComplete(): boolean;
 }
@@ -33,6 +35,7 @@ export const AppLogic = kea<MakeLogicType<AppValues, AppActions, Required<Initia
     account: [
       props.appSearch,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setOnboardingComplete: (account) => ({
           ...account,
           onboardingComplete: true,
@@ -40,6 +43,10 @@ export const AppLogic = kea<MakeLogicType<AppValues, AppActions, Required<Initia
       },
     ],
     configuredLimits: [props.configuredLimits.appSearch, {}],
+    showGateForm: [
+      props.appSearch.kibanaUIsEnabled === false && props.appSearch.role.roleType === 'owner',
+      {},
+    ],
   }),
   selectors: {
     myRole: [

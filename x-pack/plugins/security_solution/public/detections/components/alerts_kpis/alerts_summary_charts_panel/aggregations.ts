@@ -17,23 +17,6 @@ export const severityAggregations = {
   },
 };
 
-export const alertTypeAggregations = {
-  alertsByType: {
-    terms: {
-      field: ALERT_RULE_NAME,
-      size: DEFAULT_QUERY_SIZE,
-    },
-    aggs: {
-      ruleByEventType: {
-        terms: {
-          field: 'event.type',
-          size: DEFAULT_QUERY_SIZE,
-        },
-      },
-    },
-  },
-};
-
 export const alertRuleAggregations = {
   alertsByRule: {
     terms: {

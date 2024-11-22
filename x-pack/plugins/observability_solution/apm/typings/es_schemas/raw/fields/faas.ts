@@ -5,12 +5,4 @@
  * 2.0.
  */
 
-export interface Faas {
-  id: string;
-  coldstart?: boolean;
-  execution?: string;
-  trigger?: {
-    type?: string;
-    request_id?: string;
-  };
-}
+export type { Faas } from '@kbn/apm-types/es_schemas_raw';

@@ -1,44 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { isAbsolute } from 'path';
 import { RefResolver } from './ref_resolver/ref_resolver';
 import { processDocument } from './process_document/process_document';
-import { X_CODEGEN_ENABLED, X_INLINE, X_INTERNAL, X_LABELS, X_MODIFY } from './known_custom_props';
+import { X_INLINE } from './known_custom_props';
 import { isPlainObjectType } from '../utils/is_plain_object_type';
 import { ResolvedDocument } from './ref_resolver/resolved_document';
-import { ResolvedRef } from './ref_resolver/resolved_ref';
-import { createSkipNodeWithInternalPropProcessor } from './process_document/document_processors/skip_node_with_internal_prop';
-import { createSkipInternalPathProcessor } from './process_document/document_processors/skip_internal_path';
-import { createModifyPartialProcessor } from './process_document/document_processors/modify_partial';
-import { createModifyRequiredProcessor } from './process_document/document_processors/modify_required';
-import { createRemovePropsProcessor } from './process_document/document_processors/remove_props';
-import {
-  createFlattenFoldedAllOfItemsProcessor,
-  createMergeNonConflictingAllOfItemsProcessor,
-  createUnfoldSingleAllOfItemProcessor,
-} from './process_document/document_processors/reduce_all_of_items';
-import { createIncludeLabelsProcessor } from './process_document/document_processors/include_labels';
 import { BundleRefProcessor } from './process_document/document_processors/bundle_refs';
 import { RemoveUnusedComponentsProcessor } from './process_document/document_processors/remove_unused_components';
+import { DocumentNodeProcessor } from './process_document/document_processors/types/document_node_processor';
 
 export class SkipException extends Error {
   constructor(public documentPath: string, message: string) {
     super(message);
   }
-}
-
-export interface BundledDocument extends ResolvedDocument {
-  bundledRefs: ResolvedRef[];
-}
-
-interface BundleDocumentOptions {
-  includeLabels?: string[];
 }
 
 /**
@@ -57,8 +39,8 @@ interface BundleDocumentOptions {
  */
 export async function bundleDocument(
   absoluteDocumentPath: string,
-  options?: BundleDocumentOptions
-): Promise<BundledDocument> {
+  processors: Readonly<DocumentNodeProcessor[]> = []
+): Promise<ResolvedDocument> {
   if (!isAbsolute(absoluteDocumentPath)) {
     throw new Error(
       `bundleDocument expects an absolute document path but got "${absoluteDocumentPath}"`
@@ -78,26 +60,11 @@ export async function bundleDocument(
     throw new SkipException(resolvedDocument.absolutePath, 'Document has no paths defined');
   }
 
-  const defaultProcessors = [
-    createSkipNodeWithInternalPropProcessor(X_INTERNAL),
-    createSkipInternalPathProcessor('/internal'),
-    createModifyPartialProcessor(),
-    createModifyRequiredProcessor(),
-    createRemovePropsProcessor([X_INLINE, X_MODIFY, X_CODEGEN_ENABLED, X_LABELS]),
-    createFlattenFoldedAllOfItemsProcessor(),
-    createMergeNonConflictingAllOfItemsProcessor(),
-    createUnfoldSingleAllOfItemProcessor(),
-  ];
-
-  if (options?.includeLabels) {
-    defaultProcessors.push(createIncludeLabelsProcessor(options?.includeLabels));
-  }
-
   const bundleRefsProcessor = new BundleRefProcessor(X_INLINE);
   const removeUnusedComponentsProcessor = new RemoveUnusedComponentsProcessor();
 
   await processDocument(resolvedDocument, refResolver, [
-    ...defaultProcessors,
+    ...processors,
     bundleRefsProcessor,
     removeUnusedComponentsProcessor,
   ]);
@@ -114,7 +81,7 @@ export async function bundleDocument(
     );
   }
 
-  return { ...resolvedDocument, bundledRefs: Array.from(bundleRefsProcessor.getBundledRefs()) };
+  return resolvedDocument;
 }
 
 interface MaybeObjectWithPaths {

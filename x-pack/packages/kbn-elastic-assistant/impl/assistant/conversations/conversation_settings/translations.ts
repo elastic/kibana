@@ -52,7 +52,7 @@ export const SETTINGS_PROMPT_TITLE = i18n.translate(
 export const SETTINGS_PROMPT_HELP_TEXT_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.conversations.settings.promptHelpTextTitle',
   {
-    defaultMessage: 'Context provided as part of every conversation',
+    defaultMessage: 'Context provided as part of every conversation.',
   }
 );
 

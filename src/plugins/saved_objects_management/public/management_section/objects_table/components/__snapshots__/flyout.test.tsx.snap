@@ -102,7 +102,6 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
       onTableChange={[Function]}
       pagination={
         Object {
-          "pageIndex": 0,
           "pageSize": 5,
           "pageSizeOptions": Array [
             5,
@@ -251,10 +250,6 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
               "newIndexPatternId": "2",
             },
           ],
-          "unmatchedReferencesTablePagination": Object {
-            "pageIndex": 0,
-            "pageSize": 5,
-          },
         },
       },
     ],
@@ -295,11 +290,7 @@ exports[`Flyout should render import step 1`] = `
   <EuiFlyoutBody>
     <EuiForm>
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
         fullWidth={true}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         label={
           <EuiTitle
             size="xs"
@@ -312,7 +303,6 @@ exports[`Flyout should render import step 1`] = `
             </span>
           </EuiTitle>
         }
-        labelType="label"
       >
         <EuiFilePickerClass
           accept=".ndjson"
@@ -327,12 +317,7 @@ exports[`Flyout should render import step 1`] = `
         />
       </EuiFormRow>
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
         fullWidth={true}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
-        labelType="label"
       >
         <ImportModeControl
           initialValues={

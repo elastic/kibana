@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const CONNECTOR_SETTINGS_MANAGEMENT_TITLE = i18n.translate(
   'xpack.elasticAssistant.connectors.connectorSettingsManagement.title',
   {
-    defaultMessage: 'Connector Settings',
+    defaultMessage: 'Settings',
   }
 );
 
@@ -18,7 +18,7 @@ export const CONNECTOR_SETTINGS_MANAGEMENT_DESCRIPTION = i18n.translate(
   'xpack.elasticAssistant.connectors.connectorSettingsManagement.description',
   {
     defaultMessage:
-      'Using the Elastic AI Assistant requires setting up a connector with API access to OpenAI or Bedrock large language models. ',
+      'To use Elastic AI Assistant, you must set up a connector to an external large language model.',
   }
 );
 

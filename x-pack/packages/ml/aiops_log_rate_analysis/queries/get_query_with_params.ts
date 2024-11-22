@@ -18,7 +18,7 @@ export const getTermsQuery = ({ fieldName, fieldValue }: FieldValuePair) => {
 };
 
 interface QueryParams {
-  params: AiopsLogRateAnalysisSchema<'2'>;
+  params: AiopsLogRateAnalysisSchema<'3'>;
   termFilters?: FieldValuePair[];
   filter?: estypes.QueryDslQueryContainer;
   skipRangeQuery?: boolean;

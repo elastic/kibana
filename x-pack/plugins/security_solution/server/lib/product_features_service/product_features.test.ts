@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PluginSetupContract } from '@kbn/features-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { ProductFeatures } from './product_features';
 import type {
@@ -150,7 +150,7 @@ describe('ProductFeatures', () => {
       const featuresSetup = {
         registerKibanaFeature: jest.fn(),
         getKibanaFeatures: jest.fn(),
-      } as unknown as PluginSetupContract;
+      } as unknown as FeaturesPluginSetup;
 
       const productFeatures = new ProductFeatures(
         loggingSystemMock.create().get('mock'),
@@ -171,7 +171,7 @@ describe('ProductFeatures', () => {
       const featuresSetup = {
         registerKibanaFeature: jest.fn(),
         getKibanaFeatures: jest.fn(),
-      } as unknown as PluginSetupContract;
+      } as unknown as FeaturesPluginSetup;
 
       const productFeatures = new ProductFeatures(
         loggingSystemMock.create().get('mock'),
@@ -195,7 +195,7 @@ describe('ProductFeatures', () => {
       const featuresSetup = {
         registerKibanaFeature: jest.fn(),
         getKibanaFeatures: jest.fn(),
-      } as unknown as PluginSetupContract;
+      } as unknown as FeaturesPluginSetup;
 
       const productFeatures = new ProductFeatures(
         loggingSystemMock.create().get('mock'),
@@ -222,7 +222,7 @@ describe('ProductFeatures', () => {
       const featuresSetup = {
         registerKibanaFeature: jest.fn(),
         getKibanaFeatures: jest.fn(),
-      } as unknown as PluginSetupContract;
+      } as unknown as FeaturesPluginSetup;
 
       const productFeatures = new ProductFeatures(
         loggingSystemMock.create().get('mock'),
@@ -250,7 +250,7 @@ describe('ProductFeatures', () => {
     it('should register base privilege actions', () => {
       const featuresSetup = {
         registerKibanaFeature: jest.fn(),
-      } as unknown as PluginSetupContract;
+      } as unknown as FeaturesPluginSetup;
 
       const productFeatures = new ProductFeatures(
         loggingSystemMock.create().get('mock'),
@@ -276,7 +276,7 @@ describe('ProductFeatures', () => {
     it('should register config privilege actions', () => {
       const featuresSetup = {
         registerKibanaFeature: jest.fn(),
-      } as unknown as PluginSetupContract;
+      } as unknown as FeaturesPluginSetup;
 
       const productFeatures = new ProductFeatures(
         loggingSystemMock.create().get('mock'),
@@ -304,7 +304,7 @@ describe('ProductFeatures', () => {
     it('should register config sub-feature privilege actions', () => {
       const featuresSetup = {
         registerKibanaFeature: jest.fn(),
-      } as unknown as PluginSetupContract;
+      } as unknown as FeaturesPluginSetup;
 
       const productFeatures = new ProductFeatures(
         loggingSystemMock.create().get('mock'),
@@ -335,7 +335,7 @@ describe('ProductFeatures', () => {
     it('should register default and config sub-feature privilege actions', () => {
       const featuresSetup = {
         registerKibanaFeature: jest.fn(),
-      } as unknown as PluginSetupContract;
+      } as unknown as FeaturesPluginSetup;
 
       const productFeatures = new ProductFeatures(
         loggingSystemMock.create().get('mock'),

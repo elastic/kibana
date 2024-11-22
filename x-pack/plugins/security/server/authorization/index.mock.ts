@@ -5,9 +5,8 @@
  * 2.0.
  */
 
+import { actionsMock } from '@kbn/security-authorization-core/src/actions/actions.mock';
 import type { AuthorizationMode } from '@kbn/security-plugin-types-server';
-
-import { actionsMock } from './actions/actions.mock';
 
 export const authorizationMock = {
   create: ({

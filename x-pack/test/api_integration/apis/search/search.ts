@@ -9,8 +9,8 @@ import expect from '@kbn/expect';
 import { parse as parseCookie } from 'tough-cookie';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { DataViewType } from '@kbn/data-views-plugin/common';
+import { verifyErrorResponse } from '@kbn/test-suites-src/api_integration/apis/search/verify_error';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { verifyErrorResponse } from '../../../../../test/api_integration/apis/search/verify_error';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -224,7 +224,7 @@ export default function ({ getService }: FtrProviderContext) {
         // This should be swallowed and not kill the Kibana server
         await new Promise((resolve) =>
           setTimeout(() => {
-            req.abort();
+            void req.abort(); // Explicitly ignore any potential promise
             resolve(null);
           }, 2000)
         );

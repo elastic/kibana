@@ -9,15 +9,16 @@ import React, { useMemo } from 'react';
 import { EmbeddableFunctions } from '@kbn/observability-shared-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { TopNFunctions } from '@kbn/profiling-utils';
+import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
-import { useProfilingFunctionsData } from '../../hooks/use_profiling_functions_data';
 import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
-import { ContentTabIds } from '../../types';
 import { ErrorPrompt } from './error_prompt';
 import { ProfilingLinks } from './profiling_links';
 import { EmptyDataPrompt } from './empty_data_prompt';
+import { useRequestObservable } from '../../hooks/use_request_observable';
 
 interface Props {
   kuery: string;
@@ -26,14 +27,17 @@ interface Props {
 export function Functions({ kuery }: Props) {
   const { services } = useKibanaContextForPlugin();
   const { asset } = useAssetDetailsRenderPropsContext();
-  const { activeTabId } = useTabSwitcherContext();
+  const { isActiveTab } = useTabSwitcherContext();
   const { dateRange, getDateRangeInTimestamp } = useDatePickerContext();
   const { from, to } = getDateRangeInTimestamp();
+  const { request$ } = useRequestObservable<TopNFunctions>();
+  const { renderMode } = useAssetDetailsRenderPropsContext();
 
   const profilingLinkLocator = services.observabilityShared.locators.profiling.topNFunctionsLocator;
   const profilingLinkLabel = i18n.translate('xpack.infra.flamegraph.profilingAppTopFunctionsLink', {
     defaultMessage: 'Go to Universal Profiling Functions',
   });
+  const showFullScreenSelector = renderMode.mode === 'page';
 
   const params = useMemo(
     () => ({
@@ -46,16 +50,25 @@ export function Functions({ kuery }: Props) {
     [kuery, from, to]
   );
 
-  const { error, loading, response } = useProfilingFunctionsData({
-    isActive: activeTabId === ContentTabIds.PROFILING,
-    params,
-  });
+  const { data, status, error } = useFetcher(
+    async (callApi) => {
+      return callApi<TopNFunctions>('/api/infra/profiling/functions', {
+        method: 'GET',
+        query: params,
+      });
+    },
+    [params],
+    {
+      requestObservable$: request$,
+      autoFetch: isActiveTab('profiling'),
+    }
+  );
 
-  if (error !== null) {
+  if (error) {
     return <ErrorPrompt />;
   }
 
-  if (!loading && response?.TotalCount === 0) {
+  if (!isPending(status) && data?.TotalCount === 0) {
     return <EmptyDataPrompt />;
   }
 
@@ -70,10 +83,12 @@ export function Functions({ kuery }: Props) {
       />
       <EuiSpacer />
       <EmbeddableFunctions
-        data={response ?? undefined}
-        isLoading={loading}
+        data={data}
+        isLoading={isPending(status)}
         rangeFrom={from}
         rangeTo={to}
+        height="60vh"
+        showFullScreenSelector={showFullScreenSelector}
       />
     </>
   );

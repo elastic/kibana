@@ -6,34 +6,30 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type { IKibanaResponse } from '@kbn/core-http-server';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import { TIMELINE_RESOLVE_URL } from '../../../../../../common/constants';
 
-import type { ConfigType } from '../../../../..';
-import type { SetupPlugins } from '../../../../../plugin';
-import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
-
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../../utils/common';
-import { getTimelineQuerySchema } from '../../../../../../common/api/timeline';
-import { getTimelineTemplateOrNull, resolveTimelineOrNull } from '../../../saved_object/timelines';
-import type {
-  SavedTimeline,
-  ResolvedTimelineWithOutcomeSavedObject,
+import {
+  ResolveTimelineRequestQuery,
+  type ResolveTimelineResponse,
 } from '../../../../../../common/api/timeline';
+import { getTimelineTemplateOrNull, resolveTimelineOrNull } from '../../../saved_object/timelines';
 
-export const resolveTimelineRoute = (
-  router: SecuritySolutionPluginRouter,
-  _: ConfigType,
-  security: SetupPlugins['security']
-) => {
+export const resolveTimelineRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .get({
       path: TIMELINE_RESOLVE_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
       access: 'public',
     })
@@ -41,32 +37,43 @@ export const resolveTimelineRoute = (
       {
         version: '2023-10-31',
         validate: {
-          request: { query: buildRouteValidationWithExcess(getTimelineQuerySchema) },
+          request: { query: buildRouteValidationWithZod(ResolveTimelineRequestQuery) },
         },
       },
-      async (context, request, response) => {
+      async (context, request, response): Promise<IKibanaResponse<ResolveTimelineResponse>> => {
+        const siemResponse = buildSiemResponse(response);
+
         try {
-          const frameworkRequest = await buildFrameworkRequest(context, security, request);
+          const frameworkRequest = await buildFrameworkRequest(context, request);
           const query = request.query ?? {};
           const { template_timeline_id: templateTimelineId, id } = query;
 
-          let res: SavedTimeline | ResolvedTimelineWithOutcomeSavedObject | null = null;
-
           if (templateTimelineId != null && id == null) {
             // Template timelineId is not a SO id, so it does not need to be updated to use resolve
-            res = await getTimelineTemplateOrNull(frameworkRequest, templateTimelineId);
+            const timeline = await getTimelineTemplateOrNull(frameworkRequest, templateTimelineId);
+            if (timeline) {
+              return response.ok({
+                body: { timeline, outcome: 'exactMatch' },
+              });
+            }
           } else if (templateTimelineId == null && id != null) {
             // In the event the objectId is defined, run the resolve call
-            res = await resolveTimelineOrNull(frameworkRequest, id);
+            const timelineOrNull = await resolveTimelineOrNull(frameworkRequest, id);
+            if (timelineOrNull) {
+              return response.ok({
+                body: timelineOrNull,
+              });
+            }
           } else {
             throw new Error('please provide id or template_timeline_id');
           }
 
-          return response.ok({ body: res ? { data: res } : {} });
+          return siemResponse.error({
+            statusCode: 404,
+            body: 'Could not resolve timeline',
+          });
         } catch (err) {
           const error = transformError(err);
-          const siemResponse = buildSiemResponse(response);
-
           return siemResponse.error({
             body: error.message,
             statusCode: error.statusCode,

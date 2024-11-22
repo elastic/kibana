@@ -29,6 +29,8 @@ export const FieldValidationCallout: FC<Props> = ({ validationResults }) => {
   return (
     <EuiCallOut
       color="warning"
+      size="s"
+      iconType={'alert'}
       title={i18n.translate('xpack.aiops.logCategorization.fieldValidationTitle', {
         defaultMessage: 'The selected field is possibly not suitable for pattern analysis',
       })}

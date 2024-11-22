@@ -18,7 +18,7 @@ import {
 import type { ESQLRow } from '@kbn/es-types';
 import { ESQLDataGrid } from '@kbn/esql-datagrid/public';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
-import { getESQLAdHocDataview, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -37,7 +37,7 @@ import {
   VisualizeESQLUserIntention,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
+import { getLensAttributesFromSuggestion, ChartType } from '@kbn/visualization-utils';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import ReactDOM from 'react-dom';
 import useAsync from 'react-use/lib/useAsync';
@@ -47,19 +47,6 @@ import type {
   VisualizeQueryResponse,
 } from '../../common/functions/visualize_esql';
 import { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
-
-enum ChartType {
-  XY = 'XY',
-  Bar = 'Bar',
-  Line = 'Line',
-  Area = 'Area',
-  Donut = 'Donut',
-  Heatmap = 'Heat map',
-  Treemap = 'Treemap',
-  Tagcloud = 'Tag cloud',
-  Waffle = 'Waffle',
-  Table = 'Table',
-}
 
 interface VisualizeESQLProps {
   /** Lens start contract, get the ES|QL charts suggestions api */
@@ -117,15 +104,13 @@ export function VisualizeESQL({
   ObservabilityAIAssistantMultipaneFlyoutContext,
   errorMessages,
 }: VisualizeESQLProps) {
-  // fetch the pattern from the query
-  const indexPattern = getIndexPatternFromESQLQuery(query);
   const lensHelpersAsync = useAsync(() => {
     return lens.stateHelperApi();
   }, [lens]);
 
   const dataViewAsync = useAsync(() => {
-    return getESQLAdHocDataview(indexPattern, dataViews);
-  }, [indexPattern, dataViews]);
+    return getESQLAdHocDataview(query, dataViews);
+  }, [query, dataViews]);
 
   const chatFlyoutSecondSlotHandler = useContext(ObservabilityAIAssistantMultipaneFlyoutContext);
 
@@ -355,6 +340,7 @@ export function VisualizeESQL({
                   query={{ esql: query }}
                   flyoutType="overlay"
                   isTableView
+                  initialRowHeight={0}
                 />
               ) : (
                 <lens.EmbeddableComponent
@@ -377,6 +363,7 @@ export function VisualizeESQL({
               dataView={dataViewAsync.value}
               query={{ esql: query }}
               flyoutType="overlay"
+              initialRowHeight={0}
             />
           </EuiFlexItem>
         )}
@@ -418,6 +405,11 @@ export function registerVisualizeQueryRenderFunction({
         'content' in typedResponse && 'errorMessages' in typedResponse.content
           ? typedResponse.content.errorMessages
           : [];
+
+      const correctedQuery =
+        'data' in typedResponse && 'correctedQuery' in typedResponse.data
+          ? typedResponse.data.correctedQuery
+          : query;
 
       if ('data' in typedResponse && 'userOverrides' in typedResponse.data) {
         userOverrides = typedResponse.data.userOverrides;
@@ -472,7 +464,7 @@ export function registerVisualizeQueryRenderFunction({
           break;
       }
 
-      const trimmedQuery = query.trim();
+      const trimmedQuery = correctedQuery.trim();
 
       return (
         <VisualizeESQL

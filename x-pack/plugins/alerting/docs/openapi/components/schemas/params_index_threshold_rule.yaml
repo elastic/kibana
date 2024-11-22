@@ -1,5 +1,7 @@
+title: Index threshold rule params
+description: >-
+  An index threshold rule runs an Elasticsearch query, aggregates field values from documents, compares them to threshold values, and schedules actions to run when the thresholds are met. These parameters are appropriate when `rule_type_id` is `.index-threshold`.
 type: object
-description: The parameters for an index threshold rule.
 required:
   - index 
   - threshold

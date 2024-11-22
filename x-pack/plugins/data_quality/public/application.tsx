@@ -12,10 +12,12 @@ import ReactDOM from 'react-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { KbnUrlStateStorageFromRouterProvider } from './utils/kbn_url_state_context';
 import { useKibanaContextForPluginProvider } from './utils/use_kibana';
 import { AppPluginStartDependencies, DataQualityPluginStart } from './types';
-import { DatasetQualityRoute } from './routes';
+import { DatasetQualityRoute, DatasetQualityDetailsRoute } from './routes';
+import { PLUGIN_ID } from '../common';
 
 export const renderApp = (
   core: CoreStart,
@@ -31,6 +33,34 @@ export const renderApp = (
   return () => {
     ReactDOM.unmountComponentAtNode(params.element);
   };
+};
+
+const AppWithExecutionContext = ({
+  core,
+  params,
+}: {
+  core: CoreStart;
+  params: ManagementAppMountParams;
+}) => {
+  const { executionContext } = core;
+
+  useExecutionContext(executionContext, {
+    type: 'application',
+    page: PLUGIN_ID,
+  });
+
+  return (
+    <KbnUrlStateStorageFromRouterProvider>
+      <Router history={params.history}>
+        <PerformanceContextProvider>
+          <Routes>
+            <Route path="/" exact={true} render={() => <DatasetQualityRoute />} />
+            <Route path="/details" exact={true} render={() => <DatasetQualityDetailsRoute />} />
+          </Routes>
+        </PerformanceContextProvider>
+      </Router>
+    </KbnUrlStateStorageFromRouterProvider>
+  );
 };
 
 interface AppProps {
@@ -51,15 +81,7 @@ const App = ({ core, plugins, pluginStart, params }: AppProps) => {
   return (
     <KibanaRenderContextProvider {...core} {...params}>
       <KibanaContextProviderForPlugin>
-        <KbnUrlStateStorageFromRouterProvider>
-          <Router history={params.history}>
-            <PerformanceContextProvider>
-              <Routes>
-                <Route path="/" exact={true} render={() => <DatasetQualityRoute />} />
-              </Routes>
-            </PerformanceContextProvider>
-          </Router>
-        </KbnUrlStateStorageFromRouterProvider>
+        <AppWithExecutionContext core={core} params={params} />
       </KibanaContextProviderForPlugin>
     </KibanaRenderContextProvider>
   );

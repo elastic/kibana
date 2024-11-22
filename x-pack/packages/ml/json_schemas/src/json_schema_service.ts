@@ -10,7 +10,7 @@ import Path from 'path';
 import { jsonSchemaOverrides } from './schema_overrides';
 import { type PropertyDefinition } from './types';
 
-export type EditorEndpoints = typeof supportedEndpoints[number]['path'];
+export type EditorEndpoints = (typeof supportedEndpoints)[number]['path'];
 
 const supportedEndpoints = [
   {
@@ -68,7 +68,7 @@ export class JsonSchemaService {
     };
   }
 
-  private allComponents: Record<string, object> = {};
+  private allComponents: Record<string, object> = Object.create(null);
   private componentsDict = new Set<string>();
 
   /**
