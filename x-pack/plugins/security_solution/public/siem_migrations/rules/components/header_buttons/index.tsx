@@ -5,18 +5,36 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
+
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { useMemo } from 'react';
-import { useSiemMigrationsTableContext } from './siem_migrations_table_context';
 import * as i18n from './translations';
 
-export const SiemMigrationsHeaderButtons = () => {
-  const {
-    state: { migrationsIds, selectedMigrationId },
-    actions: { onMigrationIdChange },
-  } = useSiemMigrationsTableContext();
+export interface HeaderButtonsProps {
+  /**
+   * Available rule migrations ids
+   */
+  migrationsIds: string[];
 
+  /**
+   * Selected rule migration id
+   */
+  selectedMigrationId: string | undefined;
+
+  /**
+   * Handles migration selection changes
+   * @param selectedId Selected migration id
+   * @returns
+   */
+  onMigrationIdChange: (selectedId?: string) => void;
+}
+
+const HeaderButtonsComponent: React.FC<HeaderButtonsProps> = ({
+  migrationsIds,
+  selectedMigrationId,
+  onMigrationIdChange,
+}) => {
   const migrationOptions = useMemo(() => {
     const options: Array<EuiComboBoxOptionOption<string>> = migrationsIds.map((id, index) => ({
       value: id,
@@ -61,3 +79,6 @@ export const SiemMigrationsHeaderButtons = () => {
     </EuiFlexGroup>
   );
 };
+
+export const HeaderButtons = React.memo(HeaderButtonsComponent);
+HeaderButtons.displayName = 'HeaderButtons';

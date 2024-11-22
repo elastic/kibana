@@ -24,7 +24,7 @@ import type { RuleMigration } from '../../../../../../common/siem_migrations/mod
 import { TranslationTabHeader } from './header';
 import { RuleQueryComponent } from './rule_query';
 import * as i18n from './translations';
-import { convertTranslationResultIntoText } from '../../utils';
+import { convertTranslationResultIntoText } from '../../../utils/helpers';
 
 interface TranslationTabProps {
   ruleMigration: RuleMigration;

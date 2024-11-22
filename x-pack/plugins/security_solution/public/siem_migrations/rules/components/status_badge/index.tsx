@@ -10,7 +10,7 @@ import { euiLightVars } from '@kbn/ui-theme';
 
 import type { RuleMigrationTranslationResult } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { HealthTruncateText } from '../../../../common/components/health_truncate_text';
-import { convertTranslationResultIntoText } from '../utils';
+import { convertTranslationResultIntoText } from '../../utils/helpers';
 
 const { euiColorVis0, euiColorVis7, euiColorVis9 } = euiLightVars;
 const statusToColorMap: Record<RuleMigrationTranslationResult, string> = {
@@ -46,3 +46,4 @@ const StatusBadgeComponent: React.FC<Props> = ({
 };
 
 export const StatusBadge = React.memo(StatusBadgeComponent);
+StatusBadge.displayName = 'StatusBadge';

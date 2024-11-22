@@ -41,7 +41,10 @@ import {
   LARGE_DESCRIPTION_LIST_COLUMN_WIDTHS,
 } from './constants';
 import { TranslationTab } from './translation_tab';
-import { DEFAULT_TRANSLATION_RISK_SCORE, DEFAULT_TRANSLATION_SEVERITY } from '../constants';
+import {
+  DEFAULT_TRANSLATION_RISK_SCORE,
+  DEFAULT_TRANSLATION_SEVERITY,
+} from '../../utils/constants';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
@@ -118,8 +121,6 @@ interface TranslationDetailsFlyoutProps {
   ruleMigration: RuleMigration;
   size?: EuiFlyoutProps['size'];
   extraTabs?: EuiTabbedContentTab[];
-  dataTestSubj?: string;
-  id?: string;
   closeFlyout: () => void;
 }
 
@@ -128,8 +129,6 @@ export const TranslationDetailsFlyout = ({
   ruleMigration,
   size = 'm',
   extraTabs = [],
-  dataTestSubj,
-  id,
   closeFlyout,
 }: TranslationDetailsFlyoutProps) => {
   const { expandedOverviewSections, toggleOverviewSection } = useOverviewTabSections();
@@ -211,12 +210,11 @@ export const TranslationDetailsFlyout = ({
 
   return (
     <EuiFlyout
-      id={id}
       size={size}
       onClose={closeFlyout}
       key="migrations-rules-flyout"
       paddingSize="l"
-      data-test-subj={dataTestSubj}
+      data-test-subj="ruleMigrationDetailsFlyout"
       aria-labelledby={migrationsRulesFlyoutTitleId}
       ownFocus
     >

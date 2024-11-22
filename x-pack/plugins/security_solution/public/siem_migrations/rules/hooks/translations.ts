@@ -7,6 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const PAGE_TITLE = i18n.translate('xpack.securitySolution.siemMigrations.rules.pageTitle', {
-  defaultMessage: 'Translated rules',
-});
+export const COLUMN_STATUS = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.columns.statusTitle',
+  {
+    defaultMessage: 'Status',
+  }
+);

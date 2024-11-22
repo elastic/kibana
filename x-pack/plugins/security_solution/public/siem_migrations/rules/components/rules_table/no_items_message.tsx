@@ -7,11 +7,11 @@
 
 import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { SecurityPageName } from '../../../../common';
-import { useGetSecuritySolutionLinkProps } from '../../../common/components/links';
+import { SecurityPageName } from '../../../../../common';
+import { useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 import * as i18n from './translations';
 
-const SiemMigrationsTableNoItemsMessageComponent = () => {
+const NoItemsMessageComponent = () => {
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
   const { onClick: onClickLink } = getSecuritySolutionLinkProps({
     deepLinkId: SecurityPageName.rules,
@@ -48,6 +48,4 @@ const SiemMigrationsTableNoItemsMessageComponent = () => {
   );
 };
 
-export const SiemMigrationsTableNoItemsMessage = React.memo(
-  SiemMigrationsTableNoItemsMessageComponent
-);
+export const NoItemsMessage = React.memo(NoItemsMessageComponent);

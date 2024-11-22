@@ -7,27 +7,44 @@
 
 import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
+import type { Dispatch, SetStateAction } from 'react';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import * as i18n from './translations';
-import { TagsFilterPopover } from '../../../detection_engine/rule_management_ui/components/rules_table/rules_table_filters/tags_filter_popover';
-import { RuleSearchField } from '../../../detection_engine/rule_management_ui/components/rules_table/rules_table_filters/rule_search_field';
-import { useSiemMigrationsTableContext } from './siem_migrations_table_context';
+import { TagsFilterPopover } from '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table_filters/tags_filter_popover';
+import { RuleSearchField } from '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table_filters/rule_search_field';
+import type { TableFilterOptions } from '../../hooks/use_filter_rules_to_install';
 
 const FilterWrapper = styled(EuiFlexGroup)`
   margin-bottom: ${({ theme }) => theme.eui.euiSizeM};
 `;
 
+export interface FiltersComponentProps {
+  /**
+   * Currently selected table filter
+   */
+  filterOptions: TableFilterOptions;
+
+  /**
+   * All unique tags for all rule translations
+   */
+  tags: string[];
+
+  /**
+   * Handles filter options changes
+   */
+  setFilterOptions: Dispatch<SetStateAction<TableFilterOptions>>;
+}
+
 /**
  * Collection of filters for filtering data within the SIEM Rules Migrations table.
  * Contains search bar and tag selection
  */
-const SiemMigrationsTableFiltersComponent = () => {
-  const {
-    state: { filterOptions, tags },
-    actions: { setFilterOptions },
-  } = useSiemMigrationsTableContext();
-
+const FiltersComponent: React.FC<FiltersComponentProps> = ({
+  filterOptions,
+  tags,
+  setFilterOptions,
+}) => {
   const { tags: selectedTags } = filterOptions;
 
   const handleOnSearch = useCallback(
@@ -73,8 +90,5 @@ const SiemMigrationsTableFiltersComponent = () => {
   );
 };
 
-SiemMigrationsTableFiltersComponent.displayName = 'SiemMigrationsTableFiltersComponent';
-
-export const SiemMigrationsTableFilters = React.memo(SiemMigrationsTableFiltersComponent);
-
-SiemMigrationsTableFilters.displayName = 'SiemMigrationsTableFilters';
+export const Filters = React.memo(FiltersComponent);
+Filters.displayName = 'Filters';

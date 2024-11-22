@@ -9,14 +9,14 @@ import { useMemo } from 'react';
 import type { RuleMigration } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import type { FilterOptions } from '../../../detection_engine/rule_management/logic/types';
 
-export type SiemMigrationsTableFilterOptions = Pick<FilterOptions, 'filter' | 'tags'>;
+export type TableFilterOptions = Pick<FilterOptions, 'filter' | 'tags'>;
 
-export const useFilterSiemMigrationsToInstall = ({
+export const useFilterRulesToInstall = ({
   ruleMigrations,
   filterOptions,
 }: {
   ruleMigrations: RuleMigration[];
-  filterOptions: SiemMigrationsTableFilterOptions;
+  filterOptions: TableFilterOptions;
 }) => {
   const filteredRules = useMemo(() => {
     const { filter, tags } = filterOptions;

@@ -8,21 +8,21 @@
 import { i18n } from '@kbn/i18n';
 
 export const OVERVIEW_TAB_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.translationDetails.overviewTabLabel',
+  'xpack.securitySolution.siemMigrations.rules.translationDetails.overviewTabLabel',
   {
     defaultMessage: 'Overview',
   }
 );
 
 export const TRANSLATION_TAB_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.translationDetails.translationTabLabel',
+  'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTabLabel',
   {
     defaultMessage: 'Translation',
   }
 );
 
 export const DISMISS_BUTTON_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.translationDetails.dismissButtonLabel',
+  'xpack.securitySolution.siemMigrations.rules.translationDetails.dismissButtonLabel',
   {
     defaultMessage: 'Dismiss',
   }

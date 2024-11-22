@@ -13,27 +13,23 @@ import type { RuleMigration } from '../../../../common/siem_migrations/model/rul
 import { SeverityBadge } from '../../../common/components/severity_badge';
 import * as rulesI18n from '../../../detections/pages/detection_engine/rules/translations';
 import * as i18n from './translations';
-import { useSiemMigrationsTableContext } from './siem_migrations_table_context';
 import { getNormalizedSeverity } from '../../../detection_engine/rule_management_ui/components/rules_table/helpers';
-import { StatusBadge } from './status_badge';
-import { DEFAULT_TRANSLATION_RISK_SCORE, DEFAULT_TRANSLATION_SEVERITY } from './constants';
+import { StatusBadge } from '../components/status_badge';
+import { DEFAULT_TRANSLATION_RISK_SCORE, DEFAULT_TRANSLATION_SEVERITY } from '../utils/constants';
 
 export type TableColumn = EuiBasicTableColumn<RuleMigration>;
 
 interface RuleNameProps {
   name: string;
-  ruleId: string;
+  rule: RuleMigration;
+  openRulePreview: (rule: RuleMigration) => void;
 }
 
-const RuleName = ({ name, ruleId }: RuleNameProps) => {
-  const {
-    actions: { openRuleTranslationPreview: openRulePreview },
-  } = useSiemMigrationsTableContext();
-
+const RuleName = ({ name, rule, openRulePreview }: RuleNameProps) => {
   return (
     <EuiLink
       onClick={() => {
-        openRulePreview(ruleId);
+        openRulePreview(rule);
       }}
       data-test-subj="ruleName"
     >
@@ -42,16 +38,22 @@ const RuleName = ({ name, ruleId }: RuleNameProps) => {
   );
 };
 
-export const RULE_NAME_COLUMN: TableColumn = {
-  field: 'original_rule.title',
-  name: rulesI18n.COLUMN_RULE,
-  render: (value: RuleMigration['original_rule']['title'], rule: RuleMigration) => (
-    <RuleName name={value} ruleId={rule.original_rule.id} />
-  ),
-  sortable: true,
-  truncateText: true,
-  width: '40%',
-  align: 'left',
+const createRuleNameColumn = ({
+  openRulePreview,
+}: {
+  openRulePreview: (rule: RuleMigration) => void;
+}): TableColumn => {
+  return {
+    field: 'original_rule.title',
+    name: rulesI18n.COLUMN_RULE,
+    render: (value: RuleMigration['original_rule']['title'], rule: RuleMigration) => (
+      <RuleName name={value} rule={rule} openRulePreview={openRulePreview} />
+    ),
+    sortable: true,
+    truncateText: true,
+    width: '40%',
+    align: 'left',
+  };
 };
 
 const STATUS_COLUMN: TableColumn = {
@@ -65,10 +67,14 @@ const STATUS_COLUMN: TableColumn = {
   width: '12%',
 };
 
-export const useSiemMigrationsTableColumns = (): TableColumn[] => {
+export const useRulesTableColumns = ({
+  openRulePreview,
+}: {
+  openRulePreview: (rule: RuleMigration) => void;
+}): TableColumn[] => {
   return useMemo(
     () => [
-      RULE_NAME_COLUMN,
+      createRuleNameColumn({ openRulePreview }),
       STATUS_COLUMN,
       {
         field: 'risk_score',
@@ -96,6 +102,6 @@ export const useSiemMigrationsTableColumns = (): TableColumn[] => {
         width: '12%',
       },
     ],
-    []
+    [openRulePreview]
   );
 };
