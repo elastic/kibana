@@ -36,7 +36,7 @@ describe('getEuiTableColumn ', () => {
 
   it('render function renders a list column correctly', async () => {
     const key = 'test_key_1';
-    const value = 'foobar';
+    const value = { foobar: 'MockOption' };
     const options = [{ key: 'foobar', label: 'MockOption' }];
 
     const column = getEuiTableColumn({ label: 'MockLabel', options });

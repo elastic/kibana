@@ -125,7 +125,7 @@ const EditComponent: CustomFieldType<CaseCustomFieldList, ListCustomFieldConfigu
   const selectedOptionExists = customFieldConfiguration.options.find(
     (option) => option.key === selectedKey
   );
-  const initialValue = selectedOptionExists ? customField?.value ?? '' : '';
+  const initialValue = selectedOptionExists ? selectedKey ?? '' : '';
 
   const [isEdit, setIsEdit] = useState(false);
   const [formState, setFormState] = useState<FormState>({
@@ -133,6 +133,17 @@ const EditComponent: CustomFieldType<CaseCustomFieldList, ListCustomFieldConfigu
     submit: async () => ({ isValid: false, data: { value: '' } }),
     value: initialValue,
   });
+
+  // When updating the field, store the selected value while waiting for the response
+  // Display the selected value in the view component while waiting, and only switch it back to the
+  // previous value if the response fails
+  const [optimisticDisplayField, setOptimisticDisplayField] = useState<CaseCustomFieldList | null>(
+    null
+  );
+  const displayCustomField = useMemo(
+    () => (!isLoading || !optimisticDisplayField ? customField : optimisticDisplayField),
+    [isLoading, customField, optimisticDisplayField]
+  );
 
   const onEdit = () => {
     setIsEdit(true);
@@ -155,13 +166,14 @@ const EditComponent: CustomFieldType<CaseCustomFieldList, ListCustomFieldConfigu
                 customFieldConfiguration.options.find((option) => option.key === keyToSubmit)
                   ?.label ?? '',
             };
-
-      onSubmit({
+      const fieldToSubmit: CaseCustomFieldList = {
         ...customField,
         key: customField?.key ?? customFieldConfiguration.key,
         type: CustomFieldTypes.LIST,
         value,
-      });
+      };
+      setOptimisticDisplayField(fieldToSubmit);
+      onSubmit(fieldToSubmit);
     }
 
     setIsEdit(false);
@@ -214,7 +226,7 @@ const EditComponent: CustomFieldType<CaseCustomFieldList, ListCustomFieldConfigu
         )}
         {!isEdit && isCustomFieldValueDefined && (
           <EuiFlexItem>
-            <View customField={customField} configuration={customFieldConfiguration} />
+            <View customField={displayCustomField} configuration={customFieldConfiguration} />
           </EuiFlexItem>
         )}
         {isEdit && canUpdate && (

@@ -22,7 +22,7 @@ describe('Create', () => {
   });
 
   // required list custom field with a default value
-  const customFieldConfiguration = customFieldsConfigurationMock[4] as ListCustomFieldConfiguration;
+  const customFieldConfiguration = customFieldsConfigurationMock[6] as ListCustomFieldConfiguration;
 
   it('renders correctly with default values', async () => {
     render(
@@ -35,7 +35,7 @@ describe('Create', () => {
 
     expect(
       await screen.findByTestId(`${customFieldConfiguration.key}-list-create-custom-field`)
-    ).toHaveValue(customFieldConfiguration.defaultValue as string);
+    ).toHaveValue(Object.keys(customFieldConfiguration.defaultValue ?? {})[0] as string);
   });
 
   it('renders correctly with optional fields', async () => {

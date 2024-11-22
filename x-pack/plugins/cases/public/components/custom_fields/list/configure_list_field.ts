@@ -31,7 +31,7 @@ export const configureListCustomFieldFactory: CustomFieldFactory<
     View,
     Create,
   }),
-  convertNullToEmpty: (value: string | boolean | null) => (value == null ? '' : String(value)),
+  convertNullToEmpty: (value) => (value == null ? '' : String(value)),
   getFilterOptions: ({ options }) => options.map((option) => ({ ...option, value: option.key })),
   convertValueToDisplayText: (
     value: { [x: string]: string } | null,

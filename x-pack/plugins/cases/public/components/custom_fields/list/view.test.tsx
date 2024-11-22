@@ -28,7 +28,7 @@ describe('View ', () => {
   const customField = {
     type: CustomFieldTypes.LIST as const,
     key: 'test_key_1',
-    value: 'test_option',
+    value: { test_option: 'My list test value' },
   };
 
   it('renders correctly', async () => {

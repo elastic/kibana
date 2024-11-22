@@ -8,7 +8,7 @@
 import type React from 'react';
 import type { EuiTableComputedColumnType } from '@elastic/eui';
 
-import type { CaseCustomField, CustomFieldTypes } from '../../../common/types/domain';
+import type { CustomFieldTypes } from '../../../common/types/domain';
 import type {
   CasesConfigurationUICustomField,
   CaseUI,
@@ -42,11 +42,11 @@ export interface CustomFieldFactoryFilterOption<T extends CaseUICustomField> {
   value: T['value'];
 }
 
-export type CustomFieldEuiTableColumn = Pick<
+export type CustomFieldEuiTableColumn<T> = Pick<
   EuiTableComputedColumnType<CaseUI>,
   'name' | 'width' | 'data-test-subj'
 > & {
-  render: (customField: CaseCustomField) => React.ReactNode;
+  render: (customField: T) => React.ReactNode;
 };
 
 export type CustomFieldFactory<
@@ -55,11 +55,11 @@ export type CustomFieldFactory<
 > = () => {
   id: string;
   label: string;
-  getEuiTableColumn: (params: I) => CustomFieldEuiTableColumn;
+  getEuiTableColumn: (params: I) => CustomFieldEuiTableColumn<T>;
   build: () => CustomFieldType<T, I>;
   getFilterOptions?: (configuration: I) => Array<CustomFieldFactoryFilterOption<T>>;
-  getDefaultValue?: () => string | boolean | null;
-  convertNullToEmpty?: (value: string | number | boolean | null) => string;
+  getDefaultValue?: () => T['value'];
+  convertNullToEmpty?: (value: T['value']) => string;
   convertValueToDisplayText?: (value: T['value'], configuration: I) => string;
 };
 

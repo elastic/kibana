@@ -197,13 +197,6 @@ export function transformSavedObjectToExternalModel(
         caseSavedObjectAttributes.customFields
       ) as CaseCustomFields);
 
-  console.log(
-    'TRANSFORMED CUSTOM FIELDS',
-    !caseSavedObjectAttributes.customFields
-      ? []
-      : transformCustomFieldsToExternalModel(caseSavedObjectAttributes.customFields)
-  );
-
   return {
     ...caseSavedObject,
     attributes: {

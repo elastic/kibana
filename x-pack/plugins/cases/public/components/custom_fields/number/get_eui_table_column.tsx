@@ -7,13 +7,17 @@
 
 import React from 'react';
 
-import type { CaseCustomField } from '../../../../common/types/domain';
+import type { CaseCustomFieldNumber } from '../../../../common/types/domain';
 import type { CustomFieldEuiTableColumn } from '../types';
 
-export const getEuiTableColumn = ({ label }: { label: string }): CustomFieldEuiTableColumn => ({
+export const getEuiTableColumn = ({
+  label,
+}: {
+  label: string;
+}): CustomFieldEuiTableColumn<CaseCustomFieldNumber> => ({
   name: label,
   width: '150px',
-  render: (customField: CaseCustomField) => {
+  render: (customField) => {
     return (
       <p
         className="eui-textNumber"

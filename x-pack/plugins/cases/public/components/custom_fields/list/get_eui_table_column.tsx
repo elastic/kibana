@@ -8,7 +8,7 @@
 import React from 'react';
 
 import type {
-  CaseCustomField,
+  CaseCustomFieldList,
   ListCustomFieldConfiguration,
 } from '../../../../common/types/domain';
 import type { CustomFieldEuiTableColumn } from '../types';
@@ -16,10 +16,13 @@ import type { CustomFieldEuiTableColumn } from '../types';
 export const getEuiTableColumn = ({
   label,
   options,
-}: Pick<ListCustomFieldConfiguration, 'label' | 'options'>): CustomFieldEuiTableColumn => ({
+}: Pick<
+  ListCustomFieldConfiguration,
+  'label' | 'options'
+>): CustomFieldEuiTableColumn<CaseCustomFieldList> => ({
   name: label,
   width: '250px',
-  render: (customField: CaseCustomField) => {
+  render: (customField) => {
     const selectedKey = customField.value ? Object.keys(customField.value)[0] : null;
     return (
       <p

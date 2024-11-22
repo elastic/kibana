@@ -13,7 +13,7 @@ import type {
   ConnectorTypeFields,
 } from '../../common/types/domain';
 import { CustomFieldTypes } from '../../common/types/domain';
-import type { CasePersistedAttributes, CaseTransformedAttributes } from '../common/types/case';
+import type { CasePersistedAttributes } from '../common/types/case';
 import type { ConnectorPersisted, ConnectorPersistedFields } from '../common/types/connectors';
 import { getNoneCaseConnector } from '../common/utils';
 
@@ -119,7 +119,7 @@ export function transformCustomFieldsToESModel(customFields: CaseCustomFields) {
 
 export function transformCustomFieldsToExternalModel(
   customFields: NonNullable<CasePersistedAttributes['customFields']>
-): CaseTransformedAttributes['customFields'] {
+) {
   return customFields.map((customField) => {
     if (customField.type === CustomFieldTypes.LIST && customField.value) {
       const [key, selectedKey] = customField.key.split('.');
