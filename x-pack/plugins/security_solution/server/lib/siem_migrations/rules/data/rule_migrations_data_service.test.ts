@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { INDEX_PATTERN, RuleMigrationsDataService } from './rule_migrations_data_service';
-import { Subject } from 'rxjs';
-import type { InstallParams } from '@kbn/index-adapter';
-import { IndexPatternAdapter } from '@kbn/index-adapter';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { loggerMock } from '@kbn/logging-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
+import type { InstallParams } from '@kbn/index-adapter';
+import { IndexPatternAdapter } from '@kbn/index-adapter';
+import { loggerMock } from '@kbn/logging-mocks';
+import { Subject } from 'rxjs';
 import type { IndexNameProviders } from './rule_migrations_data_client';
+import { INDEX_PATTERN, RuleMigrationsDataService } from './rule_migrations_data_service';
 
 jest.mock('@kbn/index-adapter');
 
@@ -42,7 +42,7 @@ describe('SiemRuleMigrationsDataService', () => {
   describe('constructor', () => {
     it('should create IndexPatternAdapters', () => {
       new RuleMigrationsDataService(logger, kibanaVersion);
-      expect(MockedIndexPatternAdapter).toHaveBeenCalledTimes(2);
+      expect(MockedIndexPatternAdapter).toHaveBeenCalledTimes(3);
     });
 
     it('should create component templates', () => {
@@ -53,6 +53,9 @@ describe('SiemRuleMigrationsDataService', () => {
       );
       expect(indexPatternAdapter.setComponentTemplate).toHaveBeenCalledWith(
         expect.objectContaining({ name: `${INDEX_PATTERN}-resources` })
+      );
+      expect(indexPatternAdapter.setComponentTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({ name: `${INDEX_PATTERN}-integrations` })
       );
     });
 
