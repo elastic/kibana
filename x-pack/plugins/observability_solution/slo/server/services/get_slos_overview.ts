@@ -53,64 +53,71 @@ export class GetSLOsOverview {
       },
       body: {
         aggs: {
-          worst: {
-            top_hits: {
-              sort: {
-                errorBudgetRemaining: {
-                  order: 'asc',
-                },
-              },
-              _source: {
-                includes: ['sliValue', 'status', 'slo.id', 'slo.instanceId', 'slo.name'],
-              },
-              size: 1,
-            },
-          },
           stale: {
             filter: {
               range: {
                 summaryUpdatedAt: {
-                  lt: `now-${settings.staleThresholdInHours}h`,
+                  lt: 'now-48h',
                 },
-              },
-            },
-          },
-          violated: {
-            filter: {
-              term: {
-                status: 'VIOLATED',
-              },
-            },
-          },
-          healthy: {
-            filter: {
-              term: {
-                status: 'HEALTHY',
               },
             },
             aggs: {
-              not_stale: {
-                filter: {
-                  range: {
-                    summaryUpdatedAt: {
-                      gte: 'now-48h',
-                    },
-                  },
+              by_status: {
+                terms: {
+                  field: 'status',
                 },
               },
             },
           },
-          degrading: {
+          not_stale: {
             filter: {
-              term: {
-                status: 'DEGRADING',
+              range: {
+                summaryUpdatedAt: {
+                  gte: 'now-48h',
+                },
               },
             },
-          },
-          noData: {
-            filter: {
-              term: {
-                status: 'NO_DATA',
+            aggs: {
+              worst: {
+                top_hits: {
+                  sort: {
+                    errorBudgetRemaining: {
+                      order: 'asc',
+                    },
+                  },
+                  _source: {
+                    includes: ['sliValue', 'status', 'slo.id', 'slo.instanceId', 'slo.name'],
+                  },
+                  size: 1,
+                },
+              },
+              violated: {
+                filter: {
+                  term: {
+                    status: 'VIOLATED',
+                  },
+                },
+              },
+              healthy: {
+                filter: {
+                  term: {
+                    status: 'HEALTHY',
+                  },
+                },
+              },
+              degrading: {
+                filter: {
+                  term: {
+                    status: 'DEGRADING',
+                  },
+                },
+              },
+              noData: {
+                filter: {
+                  term: {
+                    status: 'NO_DATA',
+                  },
+                },
               },
             },
           },
@@ -142,10 +149,10 @@ export class GetSLOsOverview {
     const aggs = response.aggregations;
 
     return {
-      violated: aggs?.violated.doc_count ?? 0,
-      degrading: aggs?.degrading.doc_count ?? 0,
-      healthy: aggs?.healthy?.not_stale?.doc_count ?? 0,
-      noData: aggs?.noData.doc_count ?? 0,
+      violated: aggs?.not_stale?.violated.doc_count ?? 0,
+      degrading: aggs?.not_stale?.degrading.doc_count ?? 0,
+      healthy: aggs?.not_stale?.healthy?.doc_count ?? 0,
+      noData: aggs?.not_stale?.noData.doc_count ?? 0,
       stale: aggs?.stale.doc_count ?? 0,
       worst: {
         value: 0,
