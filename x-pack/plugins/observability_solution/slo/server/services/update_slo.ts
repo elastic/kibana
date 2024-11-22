@@ -49,8 +49,6 @@ export class UpdateSLO {
       settings: Object.assign({}, originalSlo.settings, params.settings),
     });
 
-    console.dir(updatedSlo);
-
     if (isEqual(originalSlo, updatedSlo)) {
       return this.toResponse(originalSlo);
     }
