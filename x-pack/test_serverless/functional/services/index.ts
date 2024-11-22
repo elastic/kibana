@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  KibanaEBTUIProvider,
+  KibanaEBTServerProvider,
+} from '@kbn/test-suites-src/analytics/services/kibana_ebt';
 import { services as deploymentAgnosticFunctionalServices } from './deployment_agnostic_services';
 import { services as svlSharedServices } from '../../shared/services';
 import { SvlCommonNavigationServiceProvider } from './svl_common_navigation';
@@ -35,4 +39,7 @@ export const services = {
   // log services
   svlLogsSynthtraceClient: LogsSynthtraceProvider,
   alertingApi: SvlApiIntegrationSvcs.alertingApi,
+  // EBT services
+  kibana_ebt_server: KibanaEBTServerProvider,
+  kibana_ebt_ui: KibanaEBTUIProvider,
 };
