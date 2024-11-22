@@ -24,7 +24,7 @@ export const Charts: React.FC<ChartsProps> = ({ data, 'data-test-subj': dataTest
 
   return (
     <EuiFlexGroup direction="column" data-test-subj={getTestId('charts')}>
-      {Object.entries(data.metrics).map(([metricType, series], idx) => (
+      {Object.entries(data).map(([metricType, series], idx) => (
         <ChartPanel
           key={metricType}
           metricType={metricType as MetricTypes}
