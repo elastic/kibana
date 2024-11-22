@@ -31,7 +31,7 @@ export const useQueryIndices = (
           query: {
             search_query: query,
             exact,
-            size: 10,
+            size: 50,
           },
         });
 
