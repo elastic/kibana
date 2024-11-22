@@ -961,6 +961,7 @@ x-pack/plugins/search_indices @elastic/search-kibana
 x-pack/plugins/search_inference_endpoints @elastic/search-kibana
 x-pack/plugins/search_notebooks @elastic/search-kibana
 x-pack/plugins/search_playground @elastic/search-kibana
+x-pack/plugins/search_solution/search_navigation @elastic/search-kibana
 x-pack/plugins/searchprofiler @elastic/kibana-management
 x-pack/plugins/security @elastic/kibana-security
 x-pack/plugins/security_solution @elastic/security-solution

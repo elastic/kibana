@@ -1564,6 +1564,8 @@
       "@kbn/search-indices/*": ["x-pack/plugins/search_indices/*"],
       "@kbn/search-inference-endpoints": ["x-pack/plugins/search_inference_endpoints"],
       "@kbn/search-inference-endpoints/*": ["x-pack/plugins/search_inference_endpoints/*"],
+      "@kbn/search-navigation": ["x-pack/plugins/search_solution/search_navigation"],
+      "@kbn/search-navigation/*": ["x-pack/plugins/search_solution/search_navigation/*"],
       "@kbn/search-notebooks": ["x-pack/plugins/search_notebooks"],
       "@kbn/search-notebooks/*": ["x-pack/plugins/search_notebooks/*"],
       "@kbn/search-playground": ["x-pack/plugins/search_playground"],

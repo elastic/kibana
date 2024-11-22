@@ -20,7 +20,7 @@
       "logsShared",
       "logsDataAccess",
       "esUiShared",
-      "navigation"
+      "navigation",
     ],
     "optionalPlugins": [
       "customIntegrations",
@@ -34,8 +34,9 @@
       "guidedOnboarding",
       "console",
       "searchConnectors",
-      "searchPlayground",
       "searchInferenceEndpoints",
+      "searchNavigation",
+      "searchPlayground",
       "embeddable",
       "discover",
       "charts",
