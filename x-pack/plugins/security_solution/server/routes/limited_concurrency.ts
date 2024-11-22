@@ -6,11 +6,11 @@
  */
 
 import type {
-  CoreSetup,
   KibanaRequest,
   LifecycleResponseFactory,
   OnPreAuthToolkit,
-} from '@kbn/core/server';
+} from '@kbn/core-http-server';
+import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import { LIMITED_CONCURRENCY_ROUTE_TAG_PREFIX } from '../../common/constants';
 
 class MaxCounter {
