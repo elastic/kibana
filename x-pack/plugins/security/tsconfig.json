@@ -86,7 +86,8 @@
     "@kbn/security-role-management-model",
     "@kbn/security-ui-components",
     "@kbn/core-http-router-server-mocks",
-    "@kbn/security-authorization-core-common"
+    "@kbn/security-authorization-core-common",
+    "@kbn/doc-links",
   ],
   "exclude": [
     "target/**/*",
