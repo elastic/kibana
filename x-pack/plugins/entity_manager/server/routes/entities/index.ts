@@ -10,6 +10,7 @@ import { deleteEntityDefinitionRoute } from './delete';
 import { getEntityDefinitionRoute } from './get';
 import { resetEntityDefinitionRoute } from './reset';
 import { updateEntityDefinitionRoute } from './update';
+import { searchEntitiesRoute, searchEntitiesPreviewRoute } from '../v2/search';
 
 export const entitiesRoutes = {
   ...createEntityDefinitionRoute,
@@ -17,4 +18,6 @@ export const entitiesRoutes = {
   ...getEntityDefinitionRoute,
   ...resetEntityDefinitionRoute,
   ...updateEntityDefinitionRoute,
+  ...searchEntitiesRoute,
+  ...searchEntitiesPreviewRoute,
 };

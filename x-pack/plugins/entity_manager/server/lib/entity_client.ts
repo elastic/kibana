@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EntityDefinition, EntityDefinitionUpdate } from '@kbn/entities-schema';
+import { EntityV2, EntityDefinition, EntityDefinitionUpdate } from '@kbn/entities-schema';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
@@ -23,6 +23,9 @@ import { stopTransforms } from './entities/stop_transforms';
 import { deleteIndices } from './entities/delete_index';
 import { EntityDefinitionWithState } from './entities/types';
 import { EntityDefinitionUpdateConflict } from './entities/errors/entity_definition_update_conflict';
+import { EntitySource, getEntityInstancesQuery } from './queries';
+import { mergeEntitiesList, runESQLQuery } from './queries/utils';
+import { UnknownEntityType } from './entities/errors/unknown_entity_type';
 
 export class EntityClient {
   constructor(
@@ -126,8 +129,6 @@ export class EntityClient {
     });
 
     if (deleteData) {
-      // delete data with current user as system user does not have
-      // .entities privileges
       await deleteIndices(this.options.esClient, definition, this.options.logger);
     }
   }
@@ -169,5 +170,115 @@ export class EntityClient {
   async stopEntityDefinition(definition: EntityDefinition) {
     this.options.logger.info(`Stopping transforms for definition [${definition.id}]`);
     return stopTransforms(this.options.esClient, definition, this.options.logger);
+  }
+
+  async getEntitySources({ type }: { type: string }) {
+    const result = await this.options.esClient.search<EntitySource>({
+      index: 'kibana_entity_definitions',
+      query: {
+        bool: {
+          must: {
+            term: { entity_type: type },
+          },
+        },
+      },
+    });
+
+    return result.hits.hits.map((hit) => hit._source) as EntitySource[];
+  }
+
+  async searchEntities({
+    type,
+    start,
+    end,
+    metadataFields = [],
+    filters = [],
+    limit = 10,
+  }: {
+    type: string;
+    start: string;
+    end: string;
+    metadataFields?: string[];
+    filters?: string[];
+    limit?: number;
+  }) {
+    const sources = await this.getEntitySources({ type });
+    if (sources.length === 0) {
+      throw new UnknownEntityType(`No sources found for entity type [${type}]`);
+    }
+
+    return this.searchEntitiesBySources({
+      sources,
+      start,
+      end,
+      metadataFields,
+      filters,
+      limit,
+    });
+  }
+
+  async searchEntitiesBySources({
+    sources,
+    start,
+    end,
+    metadataFields = [],
+    filters = [],
+    limit = 10,
+  }: {
+    sources: EntitySource[];
+    start: string;
+    end: string;
+    metadataFields?: string[];
+    filters?: string[];
+    limit?: number;
+  }) {
+    const entities = await Promise.all(
+      sources.map(async (source) => {
+        const mandatoryFields = [source.timestamp_field, ...source.identity_fields];
+        const metaFields = [...metadataFields, ...source.metadata_fields];
+        const { fields } = await this.options.esClient.fieldCaps({
+          index: source.index_patterns,
+          fields: [...mandatoryFields, ...metaFields],
+        });
+
+        const sourceHasMandatoryFields = mandatoryFields.every((field) => !!fields[field]);
+        if (!sourceHasMandatoryFields) {
+          // we can't build entities without id fields so we ignore the source.
+          // filters should likely behave similarly.
+          this.options.logger.info(
+            `Ignoring source for type [${source.type}] with index_patterns [${source.index_patterns}] because some mandatory fields [${mandatoryFields}] are not mapped`
+          );
+          return [];
+        }
+
+        // but metadata field not being available is fine
+        const availableMetadataFields = metaFields.filter((field) => fields[field]);
+
+        const query = getEntityInstancesQuery({
+          source: {
+            ...source,
+            metadata_fields: availableMetadataFields,
+            filters: [...source.filters, ...filters],
+          },
+          start,
+          end,
+          limit,
+        });
+        this.options.logger.debug(`Entity query: ${query}`);
+
+        const rawEntities = await runESQLQuery<EntityV2>({
+          query,
+          esClient: this.options.esClient,
+        });
+
+        return rawEntities.map((entity) => {
+          entity['entity.id'] = source.identity_fields.map((field) => entity[field]).join(':');
+          entity['entity.type'] = source.type;
+          return entity;
+        });
+      })
+    ).then((results) => results.flat());
+
+    return mergeEntitiesList(entities).slice(0, limit);
   }
 }
