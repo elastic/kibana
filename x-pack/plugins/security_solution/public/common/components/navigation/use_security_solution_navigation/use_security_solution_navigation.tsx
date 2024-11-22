@@ -35,7 +35,7 @@ export const useSecuritySolutionNavigation = (): KibanaPageTemplateProps['soluti
   }
 
   if (chromeStyle === 'project') {
-    // new shared-ux 'project' navigation enabled, return undefined to disable the 'classic' navigation
+    // new shared-ux 'project' navigation enabled, return null to disable the 'classic' navigation
     return null;
   }
 
