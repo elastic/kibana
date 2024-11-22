@@ -469,6 +469,7 @@ describe('#start()', () => {
       i18n: expect.any(Object),
       overlays: expect.any(Object),
       theme: expect.any(Object),
+      userProfile: expect.any(Object),
       targetDomElement: expect.any(HTMLElement),
       analytics: expect.any(Object),
     });
@@ -494,6 +495,7 @@ describe('#start()', () => {
       overlays: expect.any(Object),
       i18n: expect.any(Object),
       theme: expect.any(Object),
+      userProfile: expect.any(Object),
       targetDomElement: expect.any(HTMLElement),
     });
   });
