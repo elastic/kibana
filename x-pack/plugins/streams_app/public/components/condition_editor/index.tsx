@@ -13,15 +13,20 @@ import {
   EuiFormRow,
   EuiPanel,
   EuiSelect,
+  EuiSwitch,
+  EuiText,
 } from '@elastic/eui';
 import {
   AndCondition,
+  BinaryFilterCondition,
   Condition,
   FilterCondition,
   OrCondition,
 } from '@kbn/streams-plugin/common/types';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/css';
+import { CodeEditor } from '@kbn/code-editor';
 
 export function ConditionEditor(props: {
   condition: Condition;
@@ -50,16 +55,65 @@ export function ConditionForm(props: {
   condition: Condition;
   onConditionChange: (condition: Condition) => void;
 }) {
+  const [syntaxEditor, setSyntaxEditor] = React.useState(() =>
+    Boolean(props.condition && !('operator' in props.condition))
+  );
+  const [jsonCondition, setJsonCondition] = React.useState<string | null>(() =>
+    JSON.stringify(props.condition, null, 2)
+  );
+  useEffect(() => {
+    if (!syntaxEditor && props.condition) {
+      setJsonCondition(JSON.stringify(props.condition, null, 2));
+    }
+  }, [syntaxEditor, props.condition]);
   return (
-    props.condition &&
-    ('operator' in props.condition ? (
-      <FilterForm
-        condition={props.condition as FilterCondition}
-        onConditionChange={props.onConditionChange}
-      />
-    ) : (
-      <pre>{JSON.stringify(props.condition, null, 2)}</pre>
-    ))
+    <>
+      <EuiFlexGroup>
+        <EuiFlexItem grow>
+          <EuiText
+            className={css`
+              font-weight: bold;
+            `}
+            size="xs"
+          >
+            {i18n.translate('xpack.streams.conditionEditor.title', { defaultMessage: 'Condition' })}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiSwitch
+          label={i18n.translate('xpack.streams.conditionEditor.switch', {
+            defaultMessage: 'Syntax editor',
+          })}
+          checked={syntaxEditor}
+          onChange={() => setSyntaxEditor(!syntaxEditor)}
+        />
+      </EuiFlexGroup>
+      {syntaxEditor ? (
+        <CodeEditor
+          height={200}
+          languageId="json"
+          value={jsonCondition || ''}
+          onChange={(e) => {
+            setJsonCondition(e);
+            try {
+              const condition = JSON.parse(e);
+              props.onConditionChange(condition);
+            } catch (error: unknown) {
+              // do nothing
+            }
+          }}
+        />
+      ) : (
+        props.condition &&
+        ('operator' in props.condition ? (
+          <FilterForm
+            condition={props.condition as FilterCondition}
+            onConditionChange={props.onConditionChange}
+          />
+        ) : (
+          <pre>{JSON.stringify(props.condition, null, 2)}</pre>
+        ))
+      )}
+    </>
   );
 }
 
@@ -136,7 +190,7 @@ function FilterForm(props: {
             ]}
             value={props.condition.operator}
             onChange={(e) => {
-              const newCondition: FilterCondition = {
+              const newCondition: Partial<FilterCondition> = {
                 ...props.condition,
               };
 
@@ -147,9 +201,12 @@ function FilterForm(props: {
               ) {
                 delete newCondition.value;
               } else if (!('value' in newCondition)) {
-                newCondition.value = '';
+                (newCondition as BinaryFilterCondition).value = '';
               }
-              props.onConditionChange({ ...newCondition, operator: newOperator });
+              props.onConditionChange({
+                ...newCondition,
+                operator: newOperator,
+              } as FilterCondition);
             }}
           />
         </EuiFormRow>
@@ -161,10 +218,13 @@ function FilterForm(props: {
             label={i18n.translate('xpack.streams.filter.value', { defaultMessage: 'Value' })}
           >
             <EuiFieldText
-              value={props.condition.value}
+              value={String(props.condition.value)}
               data-test-subj="streamsAppFilterFormValueText"
               onChange={(e) => {
-                props.onConditionChange({ ...props.condition, value: e.target.value });
+                props.onConditionChange({
+                  ...props.condition,
+                  value: e.target.value,
+                } as BinaryFilterCondition);
               }}
             />
           </EuiFormRow>
@@ -195,9 +255,15 @@ function OrDisplay(props: { condition: OrCondition }) {
   return (
     <div>
       {i18n.translate('xpack.streams.orDisplay.div.orLabel', { defaultMessage: 'Or' })}
-      {props.condition.or.map((condition, index) => (
-        <ConditionEditor key={index} condition={condition} readonly />
-      ))}
+      <div
+        className={css`
+          margin-left: 10px;
+        `}
+      >
+        {props.condition.or.map((condition, index) => (
+          <ConditionEditor key={index} condition={condition} readonly />
+        ))}
+      </div>
     </div>
   );
 }
@@ -206,9 +272,15 @@ function AndDisplay(props: { condition: AndCondition }) {
   return (
     <div>
       {i18n.translate('xpack.streams.andDisplay.div.andLabel', { defaultMessage: 'And' })}
-      {props.condition.and.map((condition, index) => (
-        <ConditionEditor key={index} condition={condition} readonly />
-      ))}
+      <div
+        className={css`
+          margin-left: 10px;
+        `}
+      >
+        {props.condition.and.map((condition, index) => (
+          <ConditionEditor key={index} condition={condition} readonly />
+        ))}
+      </div>
     </div>
   );
 }
