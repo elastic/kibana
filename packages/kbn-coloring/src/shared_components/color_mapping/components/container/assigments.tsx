@@ -99,13 +99,13 @@ export function AssignmentsConfig({
             ? {
                 type: 'categorical',
                 paletteId: palette.id,
-                colorIndex: nextCategoricalIndex % palette.colors.length,
+                colorIndex: nextCategoricalIndex % palette.colors().length,
               }
             : { type: 'gradient' },
         touched: false,
       })
     );
-  }, [assignments, colorMode.type, data.type, dispatch, palette.colors.length, palette.id]);
+  }, [assignments, colorMode.type, data.type, dispatch, palette]);
 
   const onClickAddAllCurrentCategories = useCallback(() => {
     if (data.type === 'categories') {
@@ -127,7 +127,7 @@ export function AssignmentsConfig({
                 ? {
                     type: 'categorical',
                     paletteId: palette.id,
-                    colorIndex: (nextCategoricalIndex + i) % palette.colors.length,
+                    colorIndex: (nextCategoricalIndex + i) % palette.colors().length,
                   }
                 : { type: 'gradient' },
             touched: false,
@@ -136,15 +136,7 @@ export function AssignmentsConfig({
       );
       dispatch(addNewAssignments(newAssignments));
     }
-  }, [
-    data.type,
-    assignments,
-    unmatchingCategories,
-    dispatch,
-    colorMode.type,
-    palette.id,
-    palette.colors.length,
-  ]);
+  }, [data.type, assignments, unmatchingCategories, dispatch, colorMode.type, palette]);
 
   return (
     <EuiPanel

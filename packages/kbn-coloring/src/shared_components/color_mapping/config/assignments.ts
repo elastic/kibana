@@ -27,7 +27,7 @@ export function updateAssignmentsPalette(
           ? {
               type: 'categorical',
               paletteId,
-              colorIndex: index % palette.colors.length,
+              colorIndex: index % palette.colors().length,
             }
           : { type: 'gradient' };
       return {
