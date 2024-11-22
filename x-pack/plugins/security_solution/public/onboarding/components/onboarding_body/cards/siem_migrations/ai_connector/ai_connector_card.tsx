@@ -13,7 +13,7 @@ import {
   useEuiTheme,
   COLOR_MODES_STANDARD,
 } from '@elastic/eui';
-import { useStoredSiemMigrationsConnectorId } from '../../../../../hooks/use_stored_state';
+import { useStoredSiemMigrationsConnectorId } from '../../../../hooks/use_stored_state';
 import type { OnboardingCardComponent } from '../../../../../types';
 import * as i18n from './translations';
 import { OnboardingCardContentPanel } from '../../common/card_content_panel';

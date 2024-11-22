@@ -11,7 +11,7 @@ import type { RouteComponentProps } from 'react-router-dom';
 import { OnboardingHeader } from './onboarding_header';
 import { OnboardingBody } from './onboarding_body';
 import type { OnboardingRouteParams } from '../types';
-import { getCardIdFromHash, useUrlDetail } from '../hooks/use_url_detail';
+import { getCardIdFromHash, useUrlDetail } from './hooks/use_url_detail';
 
 type OnboardingRouteProps = RouteComponentProps<OnboardingRouteParams>;
 

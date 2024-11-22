@@ -10,7 +10,7 @@ import { useLocation } from 'react-router-dom';
 import { HEIGHT_ANIMATION_DURATION } from '../onboarding_card_panel.styles';
 import { type OnboardingCardId } from '../../../constants';
 import type { SetExpandedCardId } from '../../../types';
-import { getCardIdFromHash, useUrlDetail } from '../../../hooks/use_url_detail';
+import { getCardIdFromHash, useUrlDetail } from '../../hooks/use_url_detail';
 
 const HEADER_OFFSET = 40;
 

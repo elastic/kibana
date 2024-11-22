@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import { useOnboardingContext } from '../../onboarding_context';
-import { useTopicId } from '../../../hooks/use_topic_id';
+import { useTopicId } from '../../hooks/use_topic_id';
 import type { OnboardingGroupConfig } from '../../../types';
 
 /**

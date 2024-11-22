@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { useKibana } from '../../common/lib/kibana/kibana_react';
+import { useKibana } from '../../../common/lib/kibana/kibana_react';
 
 export const useOnboardingService = () => useKibana().services.onboarding;

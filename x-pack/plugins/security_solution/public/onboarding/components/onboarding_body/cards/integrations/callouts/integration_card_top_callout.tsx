@@ -8,7 +8,7 @@
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
-import { useOnboardingService } from '../../../../../hooks/use_onboarding_service';
+import { useOnboardingService } from '../../../../hooks/use_onboarding_service';
 import { AgentlessAvailableCallout } from './agentless_available_callout';
 import { InstalledIntegrationsCallout } from './installed_integrations_callout';
 import { IntegrationTabId } from '../types';

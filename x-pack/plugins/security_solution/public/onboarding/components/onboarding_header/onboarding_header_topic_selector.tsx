@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiButtonGroup } from '@elastic/eui';
 import type { OnboardingTopicId } from '../../constants';
 import { useOnboardingContext } from '../onboarding_context';
-import { useTopic } from '../../hooks/use_topic_id';
+import { useTopic } from '../hooks/use_topic_id';
 
 export const OnboardingHeaderTopicSelector = React.memo(() => {
   const { config } = useOnboardingContext();

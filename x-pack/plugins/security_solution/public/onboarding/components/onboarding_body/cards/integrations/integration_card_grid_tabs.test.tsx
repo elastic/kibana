@@ -13,9 +13,9 @@ import * as module from '@kbn/fleet-plugin/public';
 import {
   useStoredIntegrationSearchTerm,
   useStoredIntegrationTabId,
-} from '../../../../hooks/use_stored_state';
+} from '../../../hooks/use_stored_state';
 import { DEFAULT_TAB } from './constants';
-import { trackOnboardingLinkClick } from '../../../../common/lib/telemetry';
+import { trackOnboardingLinkClick } from '../../../lib/telemetry';
 
 jest.mock('../../../onboarding_context');
 jest.mock('../../../../hooks/use_stored_state');

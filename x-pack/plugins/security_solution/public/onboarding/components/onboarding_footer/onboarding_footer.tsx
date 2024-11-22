@@ -9,7 +9,7 @@ import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { useFooterStyles } from './onboarding_footer.styles';
 import { useFooterItems } from './footer_items';
-import { trackOnboardingLinkClick } from '../../common/lib/telemetry';
+import { trackOnboardingLinkClick } from '../lib/telemetry';
 import type { OnboardingFooterLinkItemId } from './constants';
 import { TELEMETRY_FOOTER_LINK } from './constants';
 

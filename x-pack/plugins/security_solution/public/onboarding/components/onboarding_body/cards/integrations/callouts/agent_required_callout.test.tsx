@@ -14,7 +14,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { AgentRequiredCallout } from './agent_required_callout';
 import { TestProviders } from '../../../../../../common/mock/test_providers';
-import { trackOnboardingLinkClick } from '../../../../../common/lib/telemetry';
+import { trackOnboardingLinkClick } from '../../../../lib/telemetry';
 
 jest.mock('../../../../../../common/lib/kibana');
 jest.mock('../../../../../common/lib/telemetry');

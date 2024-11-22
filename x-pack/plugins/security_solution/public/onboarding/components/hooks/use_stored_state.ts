@@ -7,8 +7,8 @@
 
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useMemo } from 'react';
-import { LocalStorageKey, type OnboardingCardId } from '../constants';
-import type { IntegrationTabId } from '../components/onboarding_body/cards/integrations/types';
+import { LocalStorageKey, type OnboardingCardId } from '../../constants';
+import type { IntegrationTabId } from '../onboarding_body/cards/integrations/types';
 
 /**
  * Wrapper hook for useLocalStorage, but always returns the default value when not defined instead of `undefined`.

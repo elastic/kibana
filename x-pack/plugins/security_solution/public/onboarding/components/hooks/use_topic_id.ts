@@ -7,8 +7,8 @@
 
 import { useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { OnboardingTopicId } from '../constants';
-import type { OnboardingRouteParams } from '../types';
+import { OnboardingTopicId } from '../../constants';
+import type { OnboardingRouteParams } from '../../types';
 import { useUrlDetail } from './use_url_detail';
 
 /**

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { trackOnboardingLinkClick } from '../../common/lib/telemetry';
+import { trackOnboardingLinkClick } from '../lib/telemetry';
 import { FooterLinkItem } from './onboarding_footer';
 import { OnboardingFooterLinkItemId, TELEMETRY_FOOTER_LINK } from './constants';
 

@@ -12,7 +12,7 @@ import { css } from '@emotion/react';
 
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { LinkAnchor } from '../../../../../../common/components/links';
-import { trackOnboardingLinkClick } from '../../../../../common/lib/telemetry';
+import { trackOnboardingLinkClick } from '../../../../lib/telemetry';
 import { CardCallOut } from '../../common/card_callout';
 import { TELEMETRY_AGENTLESS_LEARN_MORE } from '../constants';
 

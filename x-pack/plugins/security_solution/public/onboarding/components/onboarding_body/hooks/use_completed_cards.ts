@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useStoredCompletedCardIds } from '../../../hooks/use_stored_state';
+import { useStoredCompletedCardIds } from '../../hooks/use_stored_state';
 import type { OnboardingCardId } from '../../../constants';
 import type {
   CheckCompleteResult,

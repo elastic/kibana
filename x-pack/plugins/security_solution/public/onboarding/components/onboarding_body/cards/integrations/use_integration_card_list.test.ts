@@ -6,7 +6,7 @@
  */
 import { renderHook } from '@testing-library/react-hooks';
 import { useIntegrationCardList } from './use_integration_card_list';
-import { trackOnboardingLinkClick } from '../../../../common/lib/telemetry';
+import { trackOnboardingLinkClick } from '../../../lib/telemetry';
 
 jest.mock('../../../../common/lib/telemetry');
 jest.mock('../../../../../common/lib/kibana', () => ({

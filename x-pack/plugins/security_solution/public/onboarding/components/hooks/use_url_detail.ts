@@ -8,8 +8,8 @@
 import { useCallback } from 'react';
 import { SecurityPageName, useNavigateTo } from '@kbn/security-solution-navigation';
 import { useStoredUrlDetails } from './use_stored_state';
-import { OnboardingTopicId, type OnboardingCardId } from '../constants';
-import { useOnboardingContext } from '../components/onboarding_context';
+import { OnboardingTopicId, type OnboardingCardId } from '../../constants';
+import { useOnboardingContext } from '../onboarding_context';
 import { useTopicId } from './use_topic_id';
 
 export const getCardIdFromHash = (hash: string): OnboardingCardId | null =>

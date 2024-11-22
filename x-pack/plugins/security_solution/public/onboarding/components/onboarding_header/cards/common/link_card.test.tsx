@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { LinkCard } from './link_card';
 import { OnboardingHeaderCardId, TELEMETRY_HEADER_CARD } from '../../constants';
-import { trackOnboardingLinkClick } from '../../../../common/lib/telemetry';
+import { trackOnboardingLinkClick } from '../../../lib/telemetry';
 
 jest.mock('../../../../common/lib/telemetry');
 
