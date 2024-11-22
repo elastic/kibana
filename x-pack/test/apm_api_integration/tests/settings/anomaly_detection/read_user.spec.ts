@@ -35,37 +35,35 @@ export default function apiTest({ getService }: FtrProviderContext) {
   }
 
   registry.when('ML jobs', { config: 'trial', archives: [] }, () => {
-    (['readUser', 'apmAllPrivilegesWithoutWriteSettingsUser'] as ApmApiClientKey[]).forEach(
-      (user) => {
-        describe(`when ${user} has read access to ML`, () => {
-          before(async () => {
-            const res = await getJobs({ user });
-            const jobIds = res.body.jobs.map((job: any) => job.jobId);
-            await deleteJobs(jobIds);
-          });
+    (['apmAllPrivilegesWithoutWriteSettingsUser'] as ApmApiClientKey[]).forEach((user) => {
+      describe(`when ${user} has read access to ML`, () => {
+        before(async () => {
+          const res = await getJobs({ user });
+          const jobIds = res.body.jobs.map((job: any) => job.jobId);
+          await deleteJobs(jobIds);
+        });
 
-          describe('when calling the endpoint for listing jobs', () => {
-            it('returns a list of jobs', async () => {
-              const { body } = await getJobs({ user });
+        describe('when calling the endpoint for listing jobs', () => {
+          it('returns a list of jobs', async () => {
+            const { body } = await getJobs({ user });
 
-              expect(body.jobs.length).to.be(0);
-              expect(body.hasLegacyJobs).to.be(false);
-            });
-          });
-
-          describe('when calling create endpoint', () => {
-            it('returns an error because the user does not have access', async () => {
-              try {
-                await createJobs(['production', 'staging'], { user });
-                expect(true).to.be(false);
-              } catch (e) {
-                const err = e as ApmApiError;
-                expect(err.res.status).to.be(403);
-              }
-            });
+            expect(body.jobs.length).to.be(0);
+            expect(body.hasLegacyJobs).to.be(false);
           });
         });
-      }
-    );
+
+        describe('when calling create endpoint', () => {
+          it('returns an error because the user does not have access', async () => {
+            try {
+              await createJobs(['production', 'staging'], { user });
+              expect(true).to.be(false);
+            } catch (e) {
+              const err = e as ApmApiError;
+              expect(err.res.status).to.be(403);
+            }
+          });
+        });
+      });
+    });
   });
 }

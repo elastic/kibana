@@ -8,10 +8,7 @@
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import {
-  DeleteTimelinesRequestBody,
-  type DeleteTimelinesResponse,
-} from '../../../../../../common/api/timeline';
+import { DeleteTimelinesRequestBody } from '../../../../../../common/api/timeline';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { TIMELINE_URL } from '../../../../../../common/constants';
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
@@ -37,7 +34,7 @@ export const deleteTimelinesRoute = (router: SecuritySolutionPluginRouter) => {
           request: { body: buildRouteValidationWithZod(DeleteTimelinesRequestBody) },
         },
       },
-      async (context, request, response): Promise<IKibanaResponse<DeleteTimelinesResponse>> => {
+      async (context, request, response): Promise<IKibanaResponse> => {
         const siemResponse = buildSiemResponse(response);
 
         try {
@@ -45,8 +42,7 @@ export const deleteTimelinesRoute = (router: SecuritySolutionPluginRouter) => {
           const { savedObjectIds, searchIds } = request.body;
 
           await deleteTimeline(frameworkRequest, savedObjectIds, searchIds);
-          const body: DeleteTimelinesResponse = { data: { deleteTimeline: true } };
-          return response.ok({ body });
+          return response.ok();
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({
