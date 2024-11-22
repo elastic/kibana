@@ -7,7 +7,7 @@
 
 import React, { createContext, useContext, type PropsWithChildren, useCallback } from 'react';
 import { invariant } from '../../../../../../../common/utils/invariant';
-import { FinalSideMode } from './constants';
+import { FinalSideMode } from './final_side_mode';
 import type { UpgradeableDiffableFields } from '../../../../model/prebuilt_rule_upgrade/fields';
 
 interface FinalSideContextType {
@@ -21,15 +21,17 @@ const FinalSideContext = createContext<FinalSideContextType | null>(null);
 
 interface FinalSideContextProviderProps {
   fieldName: UpgradeableDiffableFields;
+  initialMode: FinalSideMode;
 }
 
 export function FinalSideContextProvider({
   children,
   fieldName,
+  initialMode,
 }: PropsWithChildren<FinalSideContextProviderProps>) {
-  const [mode, setMode] = React.useState<FinalSideMode>(FinalSideMode.READONLY);
-  const setReadOnlyMode = useCallback(() => setMode(FinalSideMode.READONLY), []);
-  const setEditMode = useCallback(() => setMode(FinalSideMode.EDIT), []);
+  const [mode, setMode] = React.useState(initialMode);
+  const setReadOnlyMode = useCallback(() => setMode(FinalSideMode.Readonly), []);
+  const setEditMode = useCallback(() => setMode(FinalSideMode.Edit), []);
 
   const contextValue = {
     fieldName,

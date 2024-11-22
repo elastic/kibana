@@ -25,7 +25,7 @@ import type {
   UpgradeableMachineLearningFields,
 } from '../../../../model/prebuilt_rule_upgrade/fields';
 import { isCommonFieldName } from '../../../../model/prebuilt_rule_upgrade/fields';
-import { useFinalSideContext } from '../field_final_side/final_side_context';
+import { useFinalSideContext } from '../field_final_side';
 import { EqlRuleFieldEdit } from './eql_rule_field_edit';
 import { EsqlRuleFieldEdit } from './esql_rule_field_edit';
 import { MachineLearningRuleFieldEdit } from './machine_learning_rule_field_edit';
