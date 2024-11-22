@@ -10,11 +10,14 @@ import {
   SUB_ACTION,
 } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import type { CrowdstrikeGetAgentOnlineStatusResponse } from '@kbn/stack-connectors-plugin/common/crowdstrike/types';
+import type {
+  CrowdstrikeGetAgentOnlineStatusResponse,
+  CrowdstrikeGetAgentsResponse,
+} from '@kbn/stack-connectors-plugin/common/crowdstrike/types';
 import { keyBy } from 'lodash';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
-import type { RawCrowdstrikeInfo } from './types';
+import type { LimitedCrowdstrikeHostDetails, RawCrowdstrikeInfo } from './types';
 import { catchAndWrapError } from '../../../../utils';
 import { getPendingActionsSummary, NormalizedExternalConnectorClient } from '../../..';
 import { type AgentStatusRecords, HostStatus } from '../../../../../../common/endpoint/types';
@@ -61,12 +64,7 @@ export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
 
   private async getAgentDetailsFromConnectorAction(
     agentIds: string[]
-  ): Promise<
-    Record<
-      string,
-      { device: { id: string }; crowdstrike: { host: { status: string; last_seen: string } } }
-    >
-  > {
+  ): Promise<Record<string, LimitedCrowdstrikeHostDetails>> {
     try {
       const connectorActions = new NormalizedExternalConnectorClient(
         this.options.connectorActionsClient as ActionsClient,
@@ -74,30 +72,36 @@ export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
       );
       connectorActions.setup(CROWDSTRIKE_CONNECTOR_ID);
 
-      const agentStatusResponse = (await connectorActions.execute({
+      const getAgentDetails = (await connectorActions.execute({
         params: {
           subAction: SUB_ACTION.GET_AGENT_DETAILS,
           subActionParams: {
             ids: agentIds,
           },
         },
-      })) as ActionTypeExecutorResult<CrowdstrikeGetAgentOnlineStatusResponse>;
+      })) as ActionTypeExecutorResult<CrowdstrikeGetAgentsResponse>;
+      const resources = getAgentDetails.data?.resources as Array<{
+        device_id: string;
+        status: CROWDSTRIKE_NETWORK_STATUS;
+        last_seen: string;
+      }>;
 
-      return agentStatusResponse.data?.resources.reduce((acc, response) => {
-        acc[response.device_id] = {
-          device: {
-            id: response.device_id,
-          },
-          crowdstrike: {
-            host: {
-              status: response.status,
-              last_seen: response.last_seen,
+      return resources.reduce((acc, response) => {
+        if (response.device_id) {
+          acc[response.device_id] = {
+            device: {
+              id: response.device_id,
             },
-          },
-        };
-
+            crowdstrike: {
+              host: {
+                status: response.status,
+                last_seen: response.last_seen,
+              },
+            },
+          };
+        }
         return acc;
-      }, {});
+      }, {} as Record<string, LimitedCrowdstrikeHostDetails>);
     } catch (error) {
       this.log.error(`Failed to get agent details from connector action: ${error.message}`);
       throw error;
@@ -164,7 +168,7 @@ export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
         getPendingActionsSummary(esClient, metadataService, this.log, agentIds),
       ]).catch(catchAndWrapError);
 
-      let mostRecentAgentInfosByAgentId = {};
+      let mostRecentAgentInfosByAgentId: Record<string, LimitedCrowdstrikeHostDetails> = {};
       if (searchResponse.hits.hits.length > 0) {
         mostRecentAgentInfosByAgentId = searchResponse?.hits?.hits?.reduce<
           Record<string, RawCrowdstrikeInfo>

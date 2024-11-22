@@ -266,3 +266,8 @@ export interface RawCrowdstrikeInfo {
   crowdstrike: Crowdstrike;
   device: Device;
 }
+
+export interface LimitedCrowdstrikeHostDetails {
+  device: { id: string };
+  crowdstrike: { host: { status: CROWDSTRIKE_NETWORK_STATUS; last_seen: string } };
+}
