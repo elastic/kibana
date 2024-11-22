@@ -10,6 +10,7 @@
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { DOC_TABLE_LEGACY } from '../constants';
 
+// TODO: remove
 export function isLegacyTableEnabled({
   uiSettings,
   isEsqlMode,

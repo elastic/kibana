@@ -671,24 +671,6 @@ export class DataGridService extends FtrService {
     await sampleSizeInput.type(String(newValue));
   }
 
-  public async getDetailsRow(): Promise<WebElementWrapper> {
-    const detailRows = await this.getDetailsRows();
-    return detailRows[0];
-  }
-
-  public async getTableDocViewRow(
-    detailsRow: WebElementWrapper,
-    fieldName: string
-  ): Promise<WebElementWrapper> {
-    return await detailsRow.findByTestSubject(`~tableDocViewRow-${fieldName}`);
-  }
-
-  public async getRemoveInclusiveFilterButton(
-    tableDocViewRow: WebElementWrapper
-  ): Promise<WebElementWrapper> {
-    return await tableDocViewRow.findByTestSubject(`~removeInclusiveFilterButton`);
-  }
-
   public async showFieldCellActionInFlyout(fieldName: string, actionName: string): Promise<void> {
     const cellSelector = ['addFilterForValueButton', 'addFilterOutValueButton'].includes(actionName)
       ? `tableDocViewRow-${fieldName}-value`

@@ -9,7 +9,6 @@
 
 import React from 'react';
 import type { CoreSetup, Plugin } from '@kbn/core/public';
-import { isLegacyTableEnabled } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
@@ -31,9 +30,6 @@ const fallback = (
   </EuiDelayRender>
 );
 
-const LazyDocViewerLegacyTable = dynamic(() => import('./components/doc_viewer_table/legacy'), {
-  fallback,
-});
 const LazyDocViewerTable = dynamic(() => import('./components/doc_viewer_table'), { fallback });
 const LazySourceViewer = dynamic(() => import('./components/doc_viewer_source'), { fallback });
 
@@ -65,17 +61,7 @@ export class UnifiedDocViewerPublicPlugin
       }),
       order: 10,
       component: (props) => {
-        const { textBasedHits } = props;
-        const { uiSettings } = getUnifiedDocViewerServices();
-
-        const LazyDocView = isLegacyTableEnabled({
-          uiSettings,
-          isEsqlMode: Array.isArray(textBasedHits),
-        })
-          ? LazyDocViewerLegacyTable
-          : LazyDocViewerTable;
-
-        return <LazyDocView {...props} />;
+        return <LazyDocViewerTable {...props} />;
       },
     });
 
