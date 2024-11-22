@@ -19,6 +19,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { UNKNOWN_SPACE } from '@kbn/spaces-plugin/common/constants';
+
 import { useSpaceSettingsContext } from '../../../../../../../hooks/use_space_settings_context';
 
 import type { AgentPolicy } from '../../../../../types';
@@ -62,7 +64,7 @@ const pickAgentPolicyKeysToSend = (agentPolicy: AgentPolicy) => {
   ]);
   return {
     ...partialPolicy,
-    ...(!agentPolicy.space_ids?.includes('?') && {
+    ...(!agentPolicy.space_ids?.includes(UNKNOWN_SPACE) && {
       space_ids: agentPolicy.space_ids,
     }),
   };

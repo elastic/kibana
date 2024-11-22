@@ -28,6 +28,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
+import { UNKNOWN_SPACE } from '@kbn/spaces-plugin/common/constants';
+
 import { MissingPrivilegesToolTip } from '../../../../../../components/missing_privileges_tooltip';
 
 import {
@@ -128,7 +130,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
     agentPolicy.is_managed === true || agentPolicy?.supports_agentless === true;
 
   const userHasAccessToAllPolicySpaces = useMemo(
-    () => 'space_ids' in agentPolicy && !agentPolicy.space_ids?.includes('?'),
+    () => 'space_ids' in agentPolicy && !agentPolicy.space_ids?.includes(UNKNOWN_SPACE),
     [agentPolicy]
   );
 
@@ -350,7 +352,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
             value={
               'space_ids' in agentPolicy && agentPolicy.space_ids
                 ? agentPolicy.space_ids.map((id) =>
-                    id === '?'
+                    id === UNKNOWN_SPACE
                       ? i18n.translate(
                           'xpack.fleet.agentPolicyForm.spaceSelector.unavailableSpaceBadgeLabel',
                           { defaultMessage: 'Unavailable space' }
