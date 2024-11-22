@@ -434,35 +434,6 @@ export const casesV2All: Role = {
   },
 };
 
-export const casesV2NoReopen: Role = {
-  name: 'cases_v2_no_reopen_role_api_int',
-  privileges: {
-    elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
-    },
-    kibana: [
-      {
-        spaces: ['*'],
-        base: [],
-        feature: {
-          generalCasesV2: ['all'],
-          actions: ['all'],
-          actionsSimulators: ['all'],
-        },
-      },
-    ],
-  },
-};
-
-// export const casesV2NoComment
-// export const casesV2ReopenButNoComment
-// export cosnt cases
-
 export const casesRead: Role = {
   name: 'cases_read_role_api_int',
   privileges: {
