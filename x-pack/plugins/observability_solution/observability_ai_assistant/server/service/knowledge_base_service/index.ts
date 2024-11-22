@@ -440,12 +440,11 @@ export class KnowledgeBaseService {
     let errorMessage = '';
     const endpoint = await getInferenceEndpoint({
       esClient: this.dependencies.esClient,
-      logger: this.dependencies.logger,
     }).catch((error) => {
       if (!isInferenceEndpointMissingOrUnavailable(error)) {
         throw error;
       }
-      this.dependencies.logger.error(`Failed to get inference endpoint: ${error.message}`);
+      this.dependencies.logger.debug(`Failed to get inference endpoint: ${error.message}`);
       errorMessage = error.message;
     });
 

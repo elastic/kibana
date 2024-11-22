@@ -103,7 +103,7 @@ export async function runSemanticTextKnowledgeBaseMigration({
 
     logger.debug(`Knowledge base migration: Found ${response.hits.hits.length} entries to migrate`);
 
-    await waitForInferenceEndpoint({ esClient, logger });
+    await waitForInferenceEndpoint({ esClient });
 
     // Limit the number of concurrent requests to avoid overloading the cluster
     const limiter = pLimit(10);
@@ -138,14 +138,12 @@ export async function runSemanticTextKnowledgeBaseMigration({
 
 async function waitForInferenceEndpoint({
   esClient,
-  logger,
 }: {
   esClient: { asInternalUser: ElasticsearchClient };
-  logger: Logger;
 }) {
   return pRetry(
     async () => {
-      const endpoint = await getInferenceEndpoint({ esClient, logger });
+      const endpoint = await getInferenceEndpoint({ esClient });
       if (!endpoint) {
         throw new Error('Inference endpoint not yet ready');
       }
