@@ -1,22 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { debounceAsync } from './validators';
+import { debounceAsync } from './debounce_async';
 
 jest.useFakeTimers({ legacyFakeTimers: true });
 
 describe('debounceAsync', () => {
-  let fn: jest.Mock;
-
-  beforeEach(() => {
-    fn = jest.fn().mockResolvedValueOnce('first');
-  });
-
   it('resolves with the underlying invocation result', async () => {
+    const fn = jest.fn().mockResolvedValueOnce('first');
+
     const debounced = debounceAsync(fn, 0);
     const promise = debounced();
     jest.runOnlyPendingTimers();
@@ -25,6 +23,8 @@ describe('debounceAsync', () => {
   });
 
   it('resolves intermediate calls when the next invocation resolves', async () => {
+    const fn = jest.fn().mockResolvedValueOnce('first');
+
     const debounced = debounceAsync(fn, 200);
     fn.mockResolvedValueOnce('second');
 
@@ -39,6 +39,8 @@ describe('debounceAsync', () => {
   });
 
   it('debounces the function', async () => {
+    const fn = jest.fn().mockResolvedValueOnce('first');
+
     const debounced = debounceAsync(fn, 200);
 
     debounced();

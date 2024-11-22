@@ -20,28 +20,27 @@ import {
 import type { FC } from 'react';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
-
+import type { DataViewBase } from '@kbn/es-query';
 import type { DebouncedFunc } from 'lodash';
-import { debounce } from 'lodash';
-import type {
-  EqlOptionsData,
-  EqlOptionsSelected,
-  FieldsEqlOptions,
-} from '../../../../../common/search_strategy';
+import { debounce, isEmpty } from 'lodash';
+import type { EqlOptions } from '../../../../../common/search_strategy';
 import * as i18n from './translations';
 import { ErrorsPopover } from './errors_popover';
 import { EqlOverviewLink } from './eql_overview_link';
 
-export interface Props {
+export interface EqlQueryBarFooterProps {
   errors: string[];
   isLoading?: boolean;
   isSizeOptionDisabled?: boolean;
-  optionsData?: EqlOptionsData;
-  optionsSelected?: EqlOptionsSelected;
-  onOptionsChange?: (field: FieldsEqlOptions, newValue: string | undefined) => void;
+  dataView: DataViewBase;
+  eqlOptions?: EqlOptions;
+  onEqlOptionsChange?: <Field extends keyof EqlOptions>(
+    field: Field,
+    newValue: EqlOptions[Field]
+  ) => void;
 }
 
-type SizeVoidFunc = (newSize: string) => void;
+type SizeVoidFunc = (newSize: number) => void;
 
 const Container = styled(EuiFlexGroup)`
   border-radius: 0;
@@ -69,17 +68,39 @@ const Spinner = styled(EuiLoadingSpinner)`
 
 const singleSelection = { asPlainText: true };
 
-export const EqlQueryBarFooter: FC<Props> = ({
+export const EqlQueryBarFooter: FC<EqlQueryBarFooterProps> = ({
   errors,
   isLoading,
   isSizeOptionDisabled,
-  optionsData,
-  optionsSelected,
-  onOptionsChange,
+  dataView,
+  eqlOptions,
+  onEqlOptionsChange,
 }) => {
   const [openEqlSettings, setIsOpenEqlSettings] = useState(false);
-  const [localSize, setLocalSize] = useState<string | number>(optionsSelected?.size ?? 100);
+  const [localSize, setLocalSize] = useState<number>(eqlOptions?.size ?? 100);
   const debounceSize = useRef<DebouncedFunc<SizeVoidFunc>>();
+
+  const { keywordFields, nonDateFields, dateFields } = useMemo(
+    () =>
+      isEmpty(dataView?.fields)
+        ? {
+            keywordFields: [],
+            dateFields: [],
+            nonDateFields: [],
+          }
+        : {
+            keywordFields: dataView.fields
+              .filter((f) => f.esTypes?.includes('keyword'))
+              .map((f) => ({ label: f.name })),
+            dateFields: dataView.fields
+              .filter((f) => f.type === 'date')
+              .map((f) => ({ label: f.name })),
+            nonDateFields: dataView.fields
+              .filter((f) => f.type !== 'date')
+              .map((f) => ({ label: f.name })),
+          },
+    [dataView]
+  );
 
   const openEqlSettingsHandler = useCallback(() => {
     setIsOpenEqlSettings(true);
@@ -90,74 +111,70 @@ export const EqlQueryBarFooter: FC<Props> = ({
 
   const handleEventCategoryField = useCallback(
     (opt: EuiComboBoxOptionOption[]) => {
-      if (onOptionsChange) {
+      if (onEqlOptionsChange) {
         if (opt.length > 0) {
-          onOptionsChange('eventCategoryField', opt[0].label);
+          onEqlOptionsChange('eventCategoryField', opt[0].label);
         } else {
-          onOptionsChange('eventCategoryField', undefined);
+          onEqlOptionsChange('eventCategoryField', undefined);
         }
       }
     },
-    [onOptionsChange]
+    [onEqlOptionsChange]
   );
   const handleTiebreakerField = useCallback(
     (opt: EuiComboBoxOptionOption[]) => {
-      if (onOptionsChange) {
+      if (onEqlOptionsChange) {
         if (opt.length > 0) {
-          onOptionsChange('tiebreakerField', opt[0].label);
+          onEqlOptionsChange('tiebreakerField', opt[0].label);
         } else {
-          onOptionsChange('tiebreakerField', undefined);
+          onEqlOptionsChange('tiebreakerField', undefined);
         }
       }
     },
-    [onOptionsChange]
+    [onEqlOptionsChange]
   );
   const handleTimestampField = useCallback(
     (opt: EuiComboBoxOptionOption[]) => {
-      if (onOptionsChange) {
+      if (onEqlOptionsChange) {
         if (opt.length > 0) {
-          onOptionsChange('timestampField', opt[0].label);
+          onEqlOptionsChange('timestampField', opt[0].label);
         } else {
-          onOptionsChange('timestampField', undefined);
+          onEqlOptionsChange('timestampField', undefined);
         }
       }
     },
-    [onOptionsChange]
+    [onEqlOptionsChange]
   );
   const handleSizeField = useCallback<NonNullable<EuiFieldNumberProps['onChange']>>(
     (evt) => {
-      if (onOptionsChange) {
+      if (onEqlOptionsChange) {
         setLocalSize(evt?.target?.valueAsNumber);
         if (debounceSize.current?.cancel) {
           debounceSize.current?.cancel();
         }
-        debounceSize.current = debounce((newSize) => onOptionsChange('size', newSize), 800);
-        debounceSize.current(evt?.target?.value);
+        debounceSize.current = debounce((newSize) => onEqlOptionsChange('size', newSize), 800);
+        debounceSize.current(evt?.target?.valueAsNumber);
       }
     },
-    [onOptionsChange]
+    [onEqlOptionsChange]
   );
 
   const eventCategoryField = useMemo(
     () =>
-      optionsSelected?.eventCategoryField != null
-        ? [{ label: optionsSelected?.eventCategoryField }]
+      eqlOptions?.eventCategoryField != null
+        ? [{ label: eqlOptions?.eventCategoryField }]
         : undefined,
-    [optionsSelected?.eventCategoryField]
+    [eqlOptions?.eventCategoryField]
   );
   const tiebreakerField = useMemo(
     () =>
-      optionsSelected?.tiebreakerField != null
-        ? [{ label: optionsSelected?.tiebreakerField }]
-        : undefined,
-    [optionsSelected?.tiebreakerField]
+      eqlOptions?.tiebreakerField != null ? [{ label: eqlOptions?.tiebreakerField }] : undefined,
+    [eqlOptions?.tiebreakerField]
   );
   const timestampField = useMemo(
     () =>
-      optionsSelected?.timestampField != null
-        ? [{ label: optionsSelected?.timestampField }]
-        : undefined,
-    [optionsSelected?.timestampField]
+      eqlOptions?.timestampField != null ? [{ label: eqlOptions?.timestampField }] : undefined,
+    [eqlOptions?.timestampField]
   );
 
   return (
@@ -183,13 +200,13 @@ export const EqlQueryBarFooter: FC<Props> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize={'none'} alignItems="center" responsive={false}>
-            {!onOptionsChange && (
+            {!onEqlOptionsChange && (
               <EuiFlexItem grow={false}>
                 <EqlOverviewLink />
               </EuiFlexItem>
             )}
 
-            {onOptionsChange && (
+            {onEqlOptionsChange && (
               <>
                 <FlexItemWithMarginRight grow={false}>
                   <EqlOverviewLink />
@@ -232,7 +249,7 @@ export const EqlQueryBarFooter: FC<Props> = ({
                         helpText={i18n.EQL_OPTIONS_EVENT_CATEGORY_FIELD_HELPER}
                       >
                         <EuiComboBox
-                          options={optionsData?.keywordFields}
+                          options={keywordFields}
                           selectedOptions={eventCategoryField}
                           singleSelection={singleSelection}
                           onChange={handleEventCategoryField}
@@ -244,7 +261,7 @@ export const EqlQueryBarFooter: FC<Props> = ({
                         helpText={i18n.EQL_OPTIONS_EVENT_TIEBREAKER_FIELD_HELPER}
                       >
                         <EuiComboBox
-                          options={optionsData?.nonDateFields}
+                          options={nonDateFields}
                           selectedOptions={tiebreakerField}
                           singleSelection={singleSelection}
                           onChange={handleTiebreakerField}
@@ -256,7 +273,7 @@ export const EqlQueryBarFooter: FC<Props> = ({
                         helpText={i18n.EQL_OPTIONS_EVENT_TIMESTAMP_FIELD_HELPER}
                       >
                         <EuiComboBox
-                          options={optionsData?.dateFields}
+                          options={dateFields}
                           selectedOptions={timestampField}
                           singleSelection={singleSelection}
                           onChange={handleTimestampField}

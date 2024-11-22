@@ -8,9 +8,10 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { render, screen, fireEvent, within } from '@testing-library/react';
-
+import type { SecuritySolutionDataViewBase } from '../../../../common/types';
 import { mockIndexPattern, TestProviders, useFormFieldMock } from '../../../../common/mock';
 import { mockQueryBar } from '../../../rule_management_ui/components/rules_table/__mocks__/mock';
+import { selectEuiComboBoxOption } from '../../../../common/test/eui/combobox';
 import type { EqlQueryBarProps } from './eql_query_bar';
 import { EqlQueryBar } from './eql_query_bar';
 import { getEqlValidationError } from './validators.mock';
@@ -115,36 +116,82 @@ describe('EqlQueryBar', () => {
   });
 
   describe('EQL options interaction', () => {
-    const mockOptionsData = {
-      keywordFields: [],
-      dateFields: [{ label: 'timestamp', value: 'timestamp' }],
-      nonDateFields: [],
+    const mockIndexPatternWithEqlOptionsFields: SecuritySolutionDataViewBase = {
+      fields: [
+        {
+          name: 'category',
+          searchable: true,
+          type: 'keyword',
+          esTypes: ['keyword'],
+          aggregatable: true,
+        },
+        {
+          name: 'timestamp',
+          searchable: true,
+          type: 'date',
+          aggregatable: true,
+        },
+        {
+          name: 'tiebreaker',
+          searchable: true,
+          type: 'string',
+          aggregatable: true,
+        },
+      ],
+      title: 'test-*',
     };
 
-    it('invokes onOptionsChange when the EQL options change', () => {
-      const onOptionsChangeMock = jest.fn();
+    it('updates EQL options', async () => {
+      let eqlOptions = {};
 
-      const { getByTestId, getByText } = render(
+      const mockEqlOptionsField = useFormFieldMock({
+        value: {},
+        setValue: (updater) => {
+          if (typeof updater === 'function') {
+            eqlOptions = updater(eqlOptions);
+          }
+        },
+      });
+
+      const { getByTestId } = render(
         <TestProviders>
           <EqlQueryBar
             dataTestSubj="myQueryBar"
             field={mockField}
+            eqlOptionsField={mockEqlOptionsField}
             isLoading={false}
-            optionsData={mockOptionsData}
-            indexPattern={mockIndexPattern}
-            onOptionsChange={onOptionsChangeMock}
+            indexPattern={mockIndexPatternWithEqlOptionsFields}
           />
         </TestProviders>
       );
 
       // open options popover
       fireEvent.click(getByTestId('eql-settings-trigger'));
-      // display combobox options
-      within(getByTestId(`eql-timestamp-field`)).getByRole('combobox').focus();
-      // select timestamp
-      getByText('timestamp').click();
 
-      expect(onOptionsChangeMock).toHaveBeenCalledWith('timestampField', 'timestamp');
+      await selectEuiComboBoxOption({
+        comboBoxToggleButton: within(getByTestId('eql-event-category-field')).getByRole('combobox'),
+        optionText: 'category',
+      });
+
+      expect(eqlOptions).toEqual({ eventCategoryField: 'category' });
+
+      await selectEuiComboBoxOption({
+        comboBoxToggleButton: within(getByTestId('eql-tiebreaker-field')).getByRole('combobox'),
+        optionText: 'tiebreaker',
+      });
+
+      expect(eqlOptions).toEqual({ eventCategoryField: 'category', tiebreakerField: 'tiebreaker' });
+
+      await selectEuiComboBoxOption({
+        comboBoxToggleButton: within(getByTestId('eql-timestamp-field')).getByRole('combobox'),
+        optionText: 'timestamp',
+      });
+
+      expect(eqlOptions).toEqual({
+        eventCategoryField: 'category',
+        tiebreakerField: 'tiebreaker',
+        timestampField: 'timestamp',
+      });
     });
   });
 });
