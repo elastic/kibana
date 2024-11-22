@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import type {
   UseShowRelatedAlertsByAncestryParams,
   UseShowRelatedAlertsByAncestryResult,
@@ -36,8 +36,8 @@ const dataAsNestedObject = mockDataAsNestedObject;
 
 describe('useShowRelatedAlertsByAncestry', () => {
   let hookResult: RenderHookResult<
-    UseShowRelatedAlertsByAncestryParams,
-    UseShowRelatedAlertsByAncestryResult
+    UseShowRelatedAlertsByAncestryResult,
+    UseShowRelatedAlertsByAncestryParams
   >;
 
   it('should return false if Process Entity Info is not available', () => {
