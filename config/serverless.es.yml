@@ -113,7 +113,7 @@ data_visualizer.resultLinks.fileBeat.enabled: false
 xpack.searchPlayground.ui.enabled: true
 
 # Search InferenceEndpoints
-xpack.searchInferenceEndpoints.ui.enabled: false
+xpack.searchInferenceEndpoints.ui.enabled: true
 
 # Search Notebooks
 xpack.search.notebooks.catalog.url: https://elastic-enterprise-search.s3.us-east-2.amazonaws.com/serverless/catalog.json
