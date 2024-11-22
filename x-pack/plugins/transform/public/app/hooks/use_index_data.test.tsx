@@ -7,8 +7,7 @@
 
 import React, { type FC, type PropsWithChildren } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen, waitFor } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { render, screen, waitFor, renderHook } from '@testing-library/react';
 
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { CoreSetup } from '@kbn/core/public';
@@ -47,7 +46,7 @@ describe('Transform: useIndexData()', () => {
       </QueryClientProvider>
     );
 
-    const { result, waitForNextUpdate } = renderHook(
+    const { result } = renderHook(
       () =>
         useIndexData({
           dataView: {
@@ -62,13 +61,13 @@ describe('Transform: useIndexData()', () => {
       { wrapper }
     );
 
-    const IndexObj: UseIndexDataReturnType = result.current;
+    await waitFor(() => {
+      const IndexObj: UseIndexDataReturnType = result.current;
 
-    await waitForNextUpdate();
-
-    expect(IndexObj.errorMessage).toBe('');
-    expect(IndexObj.status).toBe(INDEX_STATUS.UNUSED);
-    expect(IndexObj.tableItems).toEqual([]);
+      expect(IndexObj.errorMessage).toBe('');
+      expect(IndexObj.status).toBe(INDEX_STATUS.UNUSED);
+      expect(IndexObj.tableItems).toEqual([]);
+    });
   });
 
   test('dataView set triggers loading', async () => {
@@ -78,7 +77,7 @@ describe('Transform: useIndexData()', () => {
       </QueryClientProvider>
     );
 
-    const { result, waitForNextUpdate } = renderHook(
+    const { result } = renderHook(
       () =>
         useIndexData({
           dataView: {
@@ -108,11 +107,11 @@ describe('Transform: useIndexData()', () => {
 
     const IndexObj: UseIndexDataReturnType = result.current;
 
-    await waitForNextUpdate();
-
-    expect(IndexObj.errorMessage).toBe('');
-    expect(IndexObj.status).toBe(INDEX_STATUS.LOADING);
-    expect(IndexObj.tableItems).toEqual([]);
+    await waitFor(() => {
+      expect(IndexObj.errorMessage).toBe('');
+      expect(IndexObj.status).toBe(INDEX_STATUS.LOADING);
+      expect(IndexObj.tableItems).toEqual([]);
+    });
   });
 });
 
