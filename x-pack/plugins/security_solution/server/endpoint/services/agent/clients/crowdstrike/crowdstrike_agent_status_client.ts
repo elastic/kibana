@@ -59,6 +59,51 @@ export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
     return keyBy(agentStatusResponse.data?.resources, 'id');
   }
 
+  private async getAgentDetailsFromConnectorAction(
+    agentIds: string[]
+  ): Promise<
+    Record<
+      string,
+      { device: { id: string }; crowdstrike: { host: { status: string; last_seen: string } } }
+    >
+  > {
+    try {
+      const connectorActions = new NormalizedExternalConnectorClient(
+        this.options.connectorActionsClient as ActionsClient,
+        this.log
+      );
+      connectorActions.setup(CROWDSTRIKE_CONNECTOR_ID);
+
+      const agentStatusResponse = (await connectorActions.execute({
+        params: {
+          subAction: SUB_ACTION.GET_AGENT_DETAILS,
+          subActionParams: {
+            ids: agentIds,
+          },
+        },
+      })) as ActionTypeExecutorResult<CrowdstrikeGetAgentOnlineStatusResponse>;
+
+      return agentStatusResponse.data?.resources.reduce((acc, response) => {
+        acc[response.device_id] = {
+          device: {
+            id: response.device_id,
+          },
+          crowdstrike: {
+            host: {
+              status: response.status,
+              last_seen: response.last_seen,
+            },
+          },
+        };
+
+        return acc;
+      }, {});
+    } catch (error) {
+      this.log.error(`Failed to get agent details from connector action: ${error.message}`);
+      throw error;
+    }
+  }
+
   async getAgentStatuses(agentIds: string[]): Promise<AgentStatusRecords> {
     const esClient = this.options.esClient;
     const metadataService = this.options.endpointService.getEndpointMetadataService();
@@ -119,15 +164,21 @@ export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
         getPendingActionsSummary(esClient, metadataService, this.log, agentIds),
       ]).catch(catchAndWrapError);
 
-      const mostRecentAgentInfosByAgentId = searchResponse?.hits?.hits?.reduce<
-        Record<string, RawCrowdstrikeInfo>
-      >((acc, hit) => {
-        if (hit.fields?.['device.id'][0]) {
-          acc[hit.fields?.['device.id'][0]] = hit.inner_hits?.most_recent.hits.hits[0]._source;
-        }
+      let mostRecentAgentInfosByAgentId = {};
+      if (searchResponse.hits.hits.length > 0) {
+        mostRecentAgentInfosByAgentId = searchResponse?.hits?.hits?.reduce<
+          Record<string, RawCrowdstrikeInfo>
+        >((acc, hit) => {
+          if (hit.fields?.['device.id'][0]) {
+            acc[hit.fields?.['device.id'][0]] = hit.inner_hits?.most_recent.hits.hits[0]._source;
+          }
 
-        return acc;
-      }, {});
+          return acc;
+        }, {});
+      } else {
+        // if not found in the index, try to get the agent details from the connector
+        mostRecentAgentInfosByAgentId = await this.getAgentDetailsFromConnectorAction(agentIds);
+      }
 
       const agentStatuses = await this.getAgentStatusFromConnectorAction(agentIds);
 
@@ -158,7 +209,6 @@ export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
           pendingActions: pendingActions?.pending_actions ?? {},
         };
 
-        // console.log({ acc });
         return acc;
       }, {});
     } catch (err) {

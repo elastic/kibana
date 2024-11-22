@@ -299,4 +299,58 @@ describe('CrowdstrikeAgentStatusClient', () => {
       expect(client.log.error).toHaveBeenCalledWith(expect.any(AgentStatusClientError));
     });
   });
+
+  describe('getAgentDetailsFromConnectorAction', () => {
+    it('should get agent details from connector action', async () => {
+      const agentIds = ['agent1', 'agent2'];
+      const mockExecute = jest.fn().mockResolvedValue({
+        data: {
+          resources: [
+            {
+              device_id: 'agent1',
+              status: CROWDSTRIKE_NETWORK_STATUS.NORMAL,
+              last_seen: '2023-01-01',
+            },
+            {
+              device_id: 'agent2',
+              status: CROWDSTRIKE_NETWORK_STATUS.CONTAINED,
+              last_seen: '2023-01-02',
+            },
+          ],
+        },
+      });
+
+      (NormalizedExternalConnectorClient as jest.Mock).mockImplementation(() => ({
+        setup: jest.fn(),
+        execute: mockExecute,
+      }));
+
+      // @ts-expect-error private method
+      const result = await client.getAgentDetailsFromConnectorAction(agentIds);
+
+      expect(mockExecute).toHaveBeenCalledWith({
+        params: {
+          subAction: 'getAgentDetails',
+          subActionParams: {
+            ids: agentIds,
+          },
+        },
+      });
+
+      expect(result).toEqual({
+        agent1: {
+          device: { id: 'agent1' },
+          crowdstrike: {
+            host: { status: CROWDSTRIKE_NETWORK_STATUS.NORMAL, last_seen: '2023-01-01' },
+          },
+        },
+        agent2: {
+          device: { id: 'agent2' },
+          crowdstrike: {
+            host: { status: CROWDSTRIKE_NETWORK_STATUS.CONTAINED, last_seen: '2023-01-02' },
+          },
+        },
+      });
+    });
+  });
 });
