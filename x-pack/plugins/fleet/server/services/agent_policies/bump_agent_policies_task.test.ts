@@ -74,7 +74,7 @@ describe('_updatePackagePoliciesThatNeedBump', () => {
   it('should update package policy if bump agent policy revision needed', async () => {
     const logger = loggingSystemMock.createLogger();
 
-    await _updatePackagePoliciesThatNeedBump(logger, false);
+    await _updatePackagePoliciesThatNeedBump(logger, () => false);
 
     expect(mockSoClient.bulkUpdate).toHaveBeenCalledWith([
       {
