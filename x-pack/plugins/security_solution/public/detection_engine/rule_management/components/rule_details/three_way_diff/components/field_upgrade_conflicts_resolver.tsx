@@ -17,7 +17,7 @@ import type {
 import { ThreeWayDiffConflict } from '../../../../../../../common/api/detection_engine';
 import type { FieldUpgradeState } from '../../../../model/prebuilt_rule_upgrade';
 import { ComparisonSide } from '../comparison_side/comparison_side';
-import { FieldFinalSide } from '../field_final_side/field_final_side';
+import { FieldFinalSide, FinalSideMode } from '../field_final_side';
 import { FieldUpgradeConflictsResolverHeader } from './field_upgrade_conflicts_resolver_header';
 import { useDiffableRuleContext } from '../diffable_rule_context';
 import type { UpgradeableDiffableFields } from '../../../../model/prebuilt_rule_upgrade/fields';
@@ -35,6 +35,10 @@ export function FieldUpgradeConflictsResolver<FieldName extends UpgradeableDiffa
 }: FieldUpgradeConflictsResolverProps<FieldName>): JSX.Element {
   const { euiTheme } = useEuiTheme();
   const hasConflict = fieldThreeWayDiff.conflict !== ThreeWayDiffConflict.NONE;
+  const initialFieldFinalSideMode =
+    fieldThreeWayDiff.conflict === ThreeWayDiffConflict.NON_SOLVABLE
+      ? FinalSideMode.Edit
+      : FinalSideMode.Readonly;
 
   const { finalDiffableRule } = useDiffableRuleContext();
 
@@ -66,7 +70,7 @@ export function FieldUpgradeConflictsResolver<FieldName extends UpgradeableDiffa
             `}
           />
           <EuiFlexItem grow={1}>
-            <FieldFinalSide fieldName={fieldName} />
+            <FieldFinalSide fieldName={fieldName} initialMode={initialFieldFinalSideMode} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </SplitAccordion>
