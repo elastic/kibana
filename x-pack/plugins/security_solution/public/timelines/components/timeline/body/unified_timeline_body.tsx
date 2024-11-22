@@ -30,7 +30,7 @@ export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
     refetch,
     dataLoadingState,
     totalCount,
-    onFetchMoreRecords: onChangePage,
+    onFetchMoreRecords,
     activeTab,
     updatedAt,
     trailingControlColumns,
@@ -59,7 +59,7 @@ export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
             refetch={refetch}
             dataLoadingState={dataLoadingState}
             totalCount={totalCount}
-            onFetchMoreRecords={onChangePage}
+            onFetchMoreRecords={onFetchMoreRecords}
             activeTab={activeTab}
             updatedAt={updatedAt}
             isTextBasedQuery={false}

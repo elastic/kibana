@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import type { ConnectedProps } from 'react-redux';
 import { connect } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
@@ -17,6 +17,7 @@ import type { EuiDataGridControlColumn } from '@elastic/eui';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import { useFetchNotes } from '../../../../../notes/hooks/use_fetch_notes';
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
 import {
@@ -83,7 +84,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     getManageTimeline(state, timelineId ?? TimelineId.active)
   );
 
-  const { sampleSize } = currentTimeline;
+  const { sampleSize, pageIndex } = currentTimeline;
 
   const isBlankTimeline: boolean = isEmpty(eqlQuery);
 
@@ -113,6 +114,19 @@ export const EqlTabContentComponent: React.FC<Props> = ({
       startDate: start,
       timerangeKind,
     });
+
+  const { onLoad: loadNotesOnEventsLoad } = useFetchNotes();
+
+  useEffect(() => {
+    // This useEffect loads the notes only for the events on the current
+    // page.
+    const eventsOnCurrentPage = events.slice(
+      itemsPerPage * pageIndex,
+      itemsPerPage * (pageIndex + 1)
+    );
+
+    loadNotesOnEventsLoad(eventsOnCurrentPage);
+  }, [events, pageIndex, itemsPerPage, loadNotesOnEventsLoad]);
 
   const { openFlyout } = useExpandableFlyoutApi();
   const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(

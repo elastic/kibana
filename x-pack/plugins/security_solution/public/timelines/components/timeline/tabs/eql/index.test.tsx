@@ -25,6 +25,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use
 import type { ExperimentalFeatures } from '../../../../../../common';
 import { allowedExperimentalValues } from '../../../../../../common';
 import { render, screen } from '@testing-library/react';
+import * as notesApi from '../../../../../notes/api/api';
 
 jest.mock('../../../../containers', () => ({
   useTimelineEvents: jest.fn(),
@@ -105,7 +106,9 @@ describe('EQL Tab', () => {
   });
 
   describe('rendering', () => {
+    const fetchNotesMock = jest.spyOn(notesApi, 'fetchNotesByDocumentIds');
     test('should render the timeline table', async () => {
+      fetchNotesMock.mockImplementation(jest.fn());
       render(
         <TestProviders>
           <EqlTabContentComponent {...props} />

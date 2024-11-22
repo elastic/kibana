@@ -190,6 +190,8 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const { onLoad: loadNotesOnEventsLoad } = useFetchNotes();
 
   useEffect(() => {
+    // This useEffect loads the notes only for the events on the current
+    // page.
     const eventsOnCurrentPage = events.slice(
       itemsPerPage * pageIndex,
       itemsPerPage * (pageIndex + 1)

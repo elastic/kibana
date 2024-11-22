@@ -144,7 +144,7 @@ export interface TimelineModel {
   /** the note id pending deletion */
   confirmingNoteId?: string | null;
   /** the page index of the table */
-  pageIndex?: number;
+  pageIndex: number;
 }
 
 export type SubsetTimelineModel = Readonly<
