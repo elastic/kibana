@@ -74,6 +74,9 @@ export const ChartPanel: React.FC<ChartPanelProps> = ({
   }, [series]);
   const renderLegendAction = useCallback(
     ({ label }: { label: string }) => {
+      if (label === 'Total') {
+        return null;
+      }
       return (
         <LegendAction
           label={label}
