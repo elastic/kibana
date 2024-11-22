@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Deployment-agnostic APM Traces Top traces when data is loaded returns the correct buckets 1`] = `
+exports[`Deployment-agnostic APM API integration tests APM Traces Top traces when data is loaded returns the correct buckets 1`] = `
 Array [
   Object {
     "agentName": "ruby",

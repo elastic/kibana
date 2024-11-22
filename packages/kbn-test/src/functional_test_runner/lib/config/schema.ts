@@ -152,7 +152,6 @@ export const schema = Joi.object()
 
     updateBaselines: Joi.boolean().default(false),
     updateSnapshots: Joi.boolean().default(false),
-    deploymentAgnosticSnapshots: Joi.boolean().default(false),
     browser: Joi.object()
       .keys({
         type: Joi.string().valid('chrome', 'firefox', 'msedge').default('chrome'),

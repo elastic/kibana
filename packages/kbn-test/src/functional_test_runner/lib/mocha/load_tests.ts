@@ -61,7 +61,6 @@ export const loadTests = ({
     lifecycle,
     updateSnapshots,
     isCi: !!process.env.CI,
-    deploymentAgnostic: config.get('deploymentAgnosticSnapshots'),
   });
 
   function loadTestFile(path: string) {

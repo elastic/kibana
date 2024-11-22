@@ -68,12 +68,10 @@ export function decorateSnapshotUi({
   lifecycle,
   updateSnapshots,
   isCi,
-  deploymentAgnostic = false,
 }: {
   lifecycle: Lifecycle;
   updateSnapshots: boolean;
   isCi: boolean;
-  deploymentAgnostic?: boolean;
 }) {
   let rootSuite: Suite | undefined;
 
@@ -86,7 +84,6 @@ export function decorateSnapshotUi({
     globalState.registered = true;
     globalState.snapshotStates = {};
     globalState.currentTest = null;
-    globalState.deploymentAgnostic = deploymentAgnostic;
 
     if (isCi) {
       // make sure snapshots that have not been committed
@@ -130,9 +127,7 @@ export function decorateSnapshotUi({
       const snapshotState = globalState.snapshotStates[file];
 
       if (snapshotState && !test.isPassed()) {
-        snapshotState.markSnapshotsAsCheckedForTest(
-          getTestTitle(test, globalState.deploymentAgnostic)
-        );
+        snapshotState.markSnapshotsAsCheckedForTest(getTestTitle(test));
       }
     });
 
@@ -201,7 +196,7 @@ export function expectSnapshot(received: any) {
 
   const context: SnapshotContext = {
     snapshotState,
-    currentTestName: getTestTitle(test, globalState.deploymentAgnostic),
+    currentTestName: getTestTitle(test),
   };
 
   return {
@@ -211,11 +206,16 @@ export function expectSnapshot(received: any) {
   };
 }
 
-function getTestTitle(test: Test, deploymentAgnostic: boolean = false) {
-  if (deploymentAgnostic) {
-    return ['Deployment-agnostic', ...test.titlePath().splice(1)].join(' ');
-  }
-  return test.fullTitle();
+function getTestTitle(test: Test) {
+  return (
+    test
+      .fullTitle()
+      // remove deployment type from test title so that a single snapshot can be used for all deployment types
+      .replace(
+        /^(Serverless|Stateful)\s+([^\-]+)\s*-?\s*Deployment-agnostic/g,
+        'Deployment-agnostic'
+      )
+  );
 }
 
 function expectToMatchSnapshot(snapshotContext: SnapshotContext, received: any) {
