@@ -66,7 +66,9 @@ export const ConnectorConfigurationFormItems: React.FC<ConnectorConfigurationFor
                 <p>{label}</p>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiIconTip content={tooltip} />
+                <div role="tooltip">
+                  <EuiIconTip content={tooltip} />
+                </div>
               </EuiFlexItem>
             </EuiFlexGroup>
           ) : (
