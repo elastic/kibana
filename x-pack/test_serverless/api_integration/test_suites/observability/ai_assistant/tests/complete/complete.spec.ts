@@ -185,7 +185,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       const parsedEvents = decodeEvents(receivedChunks.join(''));
 
-      expect(parsedEvents.map((event) => event.type)).to.eql([
+      expect(
+        parsedEvents
+          .map((event) => event.type)
+          .filter((eventType) => eventType !== StreamingChatResponseEventType.BufferFlush)
+      ).to.eql([
         StreamingChatResponseEventType.MessageAdd,
         StreamingChatResponseEventType.MessageAdd,
         StreamingChatResponseEventType.ChatCompletionChunk,
