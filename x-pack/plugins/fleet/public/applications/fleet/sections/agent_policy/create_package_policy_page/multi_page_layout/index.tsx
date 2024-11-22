@@ -73,6 +73,8 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
   prerelease,
   from,
   integrationName,
+  setIntegrationStep,
+  onCanceled,
 }) => {
   const { params } = useRouteMatch<AddToPolicyParams>();
   // fixme
@@ -155,6 +157,7 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
     }
 
     setCurrentStep(currentStep + 1);
+    setIntegrationStep(currentStep + 1);
     if (props?.selectedAgentPolicies) {
       setSelectedAgentPolicies(props?.selectedAgentPolicies);
     }
@@ -186,6 +189,7 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
       setIsManaged={toggleIsManaged}
       setEnrolledAgentIds={setEnrolledAgentIds}
       enrolledAgentIds={enrolledAgentIds}
+      onCanceled={onCanceled}
     />
   );
 };

@@ -20,7 +20,16 @@ export const CreatePackagePolicyPage: React.FC<{
   originFrom?: EditPackagePolicyFrom;
   propPolicyId?: string;
   integrationName?: string;
-}> = ({ useMultiPageLayoutProp, originFrom, propPolicyId, integrationName }) => {
+  setIntegrationStep?: (step: number) => void;
+  onCanceled?: () => void;
+}> = ({
+  useMultiPageLayoutProp,
+  originFrom,
+  propPolicyId,
+  integrationName,
+  setIntegrationStep,
+  onCanceled,
+}) => {
   const { search } = useLocation();
   const { params } = useRouteMatch<AddToPolicyParams>();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
@@ -63,6 +72,8 @@ export const CreatePackagePolicyPage: React.FC<{
     propPolicyId,
     integrationName,
     prerelease,
+    setIntegrationStep,
+    onCanceled,
   };
 
   if (useMultiPageLayout) {

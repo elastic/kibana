@@ -5,14 +5,16 @@
  * 2.0.
  */
 import React, { lazy, Suspense, useMemo, useCallback, useEffect, useRef, useState } from 'react';
-import { Routes, Route } from '@kbn/shared-ux-router';
 
 import {
+  EuiButton,
   EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiModal,
   EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
   EuiPortal,
   EuiSkeletonText,
   useGeneratedHtmlId,
@@ -75,6 +77,12 @@ const FleetIntegrationsStateContextProvider = lazy(async () => ({
     .then((pkg) => pkg.FleetIntegrationsStateContextProvider),
 }));
 
+const integrationStepMap = {
+  0: 'Add integration',
+  1: 'Install Elastic Agent',
+  2: 'Confirm incoming data',
+}
+
 export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGridTabsProps>(
   ({ installedIntegrationsCount, isAgentRequired, useAvailablePackages }) => {
     const { spaceId } = useOnboardingContext();
@@ -104,18 +112,19 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
     const [modalView, setModalView] = useState<'overview' | 'configure-integration' | 'add-agent'>(
       'overview'
     );
+    const [integrationStep, setIntegrationStep] = useState(0);
     const onAddIntegrationPolicyClick = useCallback(() => {
       setModalView('configure-integration');
     }, []);
     const closeModal = useCallback(() => {
       setIsModalVisible(false);
       setModalView('overview');
+      setIntegrationStep(0);
     }, []);
     const onCardClicked = useCallback((name: string) => {
       setIsModalVisible(true);
       setIntegrationName(name);
     }, []);
-    const ref = useRef<HTMLDivElement | null>(null);
     const modalTitleId = useGeneratedHtmlId();
     const {
       filteredCards,
@@ -256,6 +265,7 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
               `}
               maxWidth="90%"
             >
+              {modalView === 'configure-integration' && (<EuiModalHeader>{`step indicator place holder. Integration step: ${integrationStepMap[integrationStep]}`}</EuiModalHeader>)}
               <EuiModalBody>
                 <FleetIntegrationsStateContextProvider
                   values={{ startServices, useMultiPageLayoutProp: true }}
@@ -273,10 +283,13 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
                       originFrom="onboarding-integration"
                       propPolicyId=""
                       integrationName={integrationName}
+                      setIntegrationStep={setIntegrationStep}
+                      onCanceled={closeModal}
                     />
                   )}
                 </FleetIntegrationsStateContextProvider>
               </EuiModalBody>
+              {/* <EuiModalFooter><EuiButton onClick={closeModal}>Close</EuiButton></EuiModalFooter> */}
             </EuiModal>
           </EuiPortal>
         )}

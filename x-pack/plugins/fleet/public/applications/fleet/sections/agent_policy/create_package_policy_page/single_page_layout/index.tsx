@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState, Suspense, forwardRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, Suspense } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
@@ -20,7 +20,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
-  EuiPortal,
   EuiSpacer,
   EuiSteps,
 } from '@elastic/eui';
@@ -109,6 +108,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   queryParamsPolicyId,
   prerelease,
   onNext,
+  onCanceled,
 }) => {
   const {
     agents: { enabled: isFleetEnabled },
@@ -203,6 +203,14 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       }
     }
   }, [onNext, agentPolicies, savedPackagePolicy, navigateAddAgent]);
+
+  const handleCancellation = useCallback(() => {
+    if (onCanceled) {
+      onCanceled();
+    } else {
+      navigateAddAgentHelp(savedPackagePolicy);
+    }
+  }, [onCanceled, savedPackagePolicy, navigateAddAgentHelp]);
 
   const setPolicyValidation = useCallback(
     (selectedTab: SelectedPolicyTab, updatedAgentPolicy: NewAgentPolicy) => {
@@ -520,7 +528,10 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                 agentCount={agentCount}
                 agentPolicies={agentPolicies}
                 onConfirm={onSubmit}
-                onCancel={() => setFormState('VALID')}
+                onCancel={() => {
+                  setFormState('VALID');
+                  onCanceled?.();
+                }}
               />
             )}
             {formState === 'SUBMITTED_NO_AGENTS' &&
@@ -530,7 +541,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                 <PostInstallAddAgentModal
                   packageInfo={packageInfo}
                   onConfirm={handleNavigateAddAgent}
-                  onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
+                  onCancel={handleCancellation}
                 />
               )}
             {formState === 'SUBMITTED_AZURE_ARM_TEMPLATE' &&
@@ -540,7 +551,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                   agentPolicy={agentPolicies[0]}
                   packagePolicy={savedPackagePolicy}
                   onConfirm={handleNavigateAddAgent}
-                  onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
+                  onCancel={handleCancellation}
                 />
               )}
             {formState === 'SUBMITTED_CLOUD_FORMATION' &&
@@ -550,7 +561,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                   agentPolicy={agentPolicies[0]}
                   packagePolicy={savedPackagePolicy}
                   onConfirm={handleNavigateAddAgent}
-                  onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
+                  onCancel={handleCancellation}
                 />
               )}
             {formState === 'SUBMITTED_GOOGLE_CLOUD_SHELL' &&
@@ -560,7 +571,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                   agentPolicy={agentPolicies[0]}
                   packagePolicy={savedPackagePolicy}
                   onConfirm={handleNavigateAddAgent}
-                  onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
+                  onCancel={handleCancellation}
                 />
               )}
             {packageInfo && (
