@@ -73,7 +73,7 @@ export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
     const expectedBuckets = [
       {
         key: 'default',
-        doc_count: 10,
+        doc_count: 20,
         countByType: {
           doc_count_error_upper_bound: 0,
           sum_other_doc_count: 0,
@@ -82,12 +82,12 @@ export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
             { key: 'visualization', doc_count: 3 },
             { key: 'legacy-url-alias', doc_count: 2 }, // aliases (1)
             { key: 'dashboard', doc_count: 1 },
-            { key: 'index-pattern', doc_count: 1 },
+            { key: 'index-pattern', doc_count: 11 },
           ],
         },
       },
       {
-        doc_count: 5,
+        doc_count: 10,
         key: 'space_1',
         countByType: {
           doc_count_error_upper_bound: 0,
@@ -95,18 +95,21 @@ export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
           buckets: [
             { key: 'visualization', doc_count: 3 },
             { key: 'dashboard', doc_count: 1 },
-            { key: 'index-pattern', doc_count: 1 },
+            { key: 'index-pattern', doc_count: 6 },
             // no legacy url alias objects exist in space_1
           ],
         },
       },
       {
-        doc_count: 2,
+        doc_count: 3,
         key: 'other_space',
         countByType: {
           doc_count_error_upper_bound: 0,
           sum_other_doc_count: 0,
-          buckets: [{ key: 'legacy-url-alias', doc_count: 2 }], // aliases (3)
+          buckets: [
+            { key: 'legacy-url-alias', doc_count: 2 },
+            { key: 'index-pattern', doc_count: 1 },
+          ], // aliases (3)
         },
       },
     ];
