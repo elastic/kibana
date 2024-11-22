@@ -14,6 +14,7 @@ import { KbnPalette } from '../../constants';
 
 export const coolPalette = new KbnColorFnPalette({
   id: KbnPalette.Cool,
+  type: 'gradient',
   name: i18n.translate('palettes.cool.name', {
     defaultMessage: 'Cool',
   }),

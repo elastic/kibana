@@ -9,24 +9,38 @@
 
 import { Optional } from 'utility-types';
 import { KbnBasePaletteConfig, KbnBasePalette } from './palette';
-import { IKbnPalette } from './types';
+import { IKbnPalette, KbnPaletteType } from './types';
+
+const DEFAULT_COLOR_COUNT = 10;
 
 export interface KbnColorFnPaletteConfig extends Optional<KbnBasePaletteConfig, 'colorCount'> {
+  type: KbnPaletteType;
   colorFn: (n: number) => string[];
+  defaultNumberOfColors?: number;
 }
 
 export class KbnColorFnPalette extends KbnBasePalette implements IKbnPalette {
-  public readonly type = 'gradient' as const;
+  public readonly type: KbnPaletteType;
 
   #colorFn: (n: number) => string[];
+  #defaultNumberOfColors: number;
 
-  constructor({ colorFn, colorCount = 10, ...rest }: KbnColorFnPaletteConfig) {
+  constructor({
+    type,
+    colorFn,
+    defaultNumberOfColors,
+    colorCount = DEFAULT_COLOR_COUNT,
+    ...rest
+  }: KbnColorFnPaletteConfig) {
     super({ ...rest, colorCount });
 
+    this.type = type;
+
     this.#colorFn = colorFn;
+    this.#defaultNumberOfColors = defaultNumberOfColors ?? colorCount;
   }
 
-  public colors = (n: number = 10) => {
+  public colors = (n: number = this.#defaultNumberOfColors) => {
     return this.#colorFn(n);
   };
 }

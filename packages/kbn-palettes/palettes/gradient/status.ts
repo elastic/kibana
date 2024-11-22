@@ -14,6 +14,7 @@ import { KbnPalette } from '../../constants';
 
 export const statusPalette = new KbnColorFnPalette({
   id: KbnPalette.Status,
+  type: 'gradient',
   name: i18n.translate('palettes.status.name', {
     defaultMessage: 'Status',
   }),

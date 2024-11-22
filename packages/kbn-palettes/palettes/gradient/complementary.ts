@@ -14,6 +14,7 @@ import { KbnPalette } from '../../constants';
 
 export const complementaryPalette = new KbnColorFnPalette({
   id: KbnPalette.Complementary,
+  type: 'gradient',
   name: i18n.translate('palettes.complementary.name', {
     defaultMessage: 'Complementary',
   }),
