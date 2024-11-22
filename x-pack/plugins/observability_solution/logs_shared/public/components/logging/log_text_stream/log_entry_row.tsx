@@ -6,8 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
-import { getContextMenuItemsFromActions } from '@kbn/observability-shared-plugin/public';
 import { isEmpty } from 'lodash';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
@@ -22,6 +20,7 @@ import {
 } from '../../../utils/log_column_render_configuration';
 import { isTimestampColumn } from '../../../utils/log_entry';
 import { useUiTracker } from '../../../utils/use_ui_tracker';
+import { getExternalContextMenuItemsFromActions } from './external_context_menu_items';
 import { LogEntryColumn, LogEntryColumnWidths, iconColumnId } from './log_entry_column';
 import { LogEntryContextMenu } from './log_entry_context_menu';
 import { LogEntryFieldColumn } from './log_entry_field_column';
@@ -100,9 +99,8 @@ export const LogEntryRow = memo(
     const uiActions = useKibanaContextForPlugin().services.uiActions;
 
     const externalContextMenuItems = useAsync(() => {
-      return getContextMenuItemsFromActions({
+      return getExternalContextMenuItemsFromActions({
         uiActions,
-        triggerId: ObservabilityTriggerId.LogEntryContextMenu,
         context: logEntry,
       });
     }, [uiActions, logEntry]);

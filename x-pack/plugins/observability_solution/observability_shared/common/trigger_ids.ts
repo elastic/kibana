@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { logEntryContextMenuTriggerId } from '@kbn/logs-shared-plugin/common';
+
 export enum ObservabilityTriggerId {
-  LogEntryContextMenu = 'logEntryContextMenu',
+  LogEntryContextMenu = logEntryContextMenuTriggerId,
   ApmTransactionContextMenu = 'apmTransactionContextMenu',
   ApmErrorContextMenu = 'apmErrorContextMenu',
 }

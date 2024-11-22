@@ -70,3 +70,6 @@ export {
 } from './locators';
 export type { LogsLocatorParams, NodeLogsLocatorParams, TraceLogsLocatorParams } from './locators';
 export { createNodeLogsQuery } from './locators/helpers';
+
+// Log stream actions
+export { logEntryContextMenuTriggerId } from './constants';

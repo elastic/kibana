@@ -2,27 +2,38 @@
   "type": "plugin",
   "id": "@kbn/logs-shared-plugin",
   "owner": "@elastic/obs-ux-logs-team",
+  "group": "platform",
+  "visibility": "shared",
   "description": "Exposes the shared components and APIs to access and visualize logs.",
   "plugin": {
     "id": "logsShared",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "logs_shared"],
+    "configPath": [
+      "xpack",
+      "logs_shared"
+    ],
     "requiredPlugins": [
       "charts",
       "data",
-      "fieldFormats", 
+      "fieldFormats",
       "dataViews",
       "discoverShared",
       "logsDataAccess",
-      "observabilityShared",
       "share",
+      "uiActions",
       "usageCollection",
     ],
     "optionalPlugins": [
       "observabilityAIAssistant",
     ],
-    "requiredBundles": ["kibanaUtils", "kibanaReact", "unifiedDocViewer"],
-    "extraPublicDirs": ["common"]
+    "requiredBundles": [
+      "kibanaUtils",
+      "kibanaReact",
+      "unifiedDocViewer"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
   }
 }

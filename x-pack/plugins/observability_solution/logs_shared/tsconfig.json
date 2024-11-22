@@ -10,7 +10,9 @@
     "server/**/*",
     "types/**/*"
   ],
-  "exclude": ["target/**/*"],
+  "exclude": [
+    "target/**/*"
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/i18n",
@@ -28,7 +30,6 @@
     "@kbn/logging-mocks",
     "@kbn/kibana-react-plugin",
     "@kbn/test-subj-selector",
-    "@kbn/observability-shared-plugin",
     "@kbn/datemath",
     "@kbn/core-http-browser",
     "@kbn/ui-actions-plugin",
