@@ -19,6 +19,7 @@ import { useRouteResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { MlPageHeader } from '../../../components/page_header';
+import { useSavedObjectsApiService } from '../../../services/ml_api_service/saved_objects';
 
 const ModelsList = dynamic(async () => ({
   default: (await import('../../../model_management/models_list')).ModelsList,
@@ -48,7 +49,12 @@ export const modelsListRouteFactory = (
 });
 
 const PageWrapper: FC = () => {
-  const { context } = useRouteResolver('full', ['canGetTrainedModels'], basicResolvers());
+  const { initSavedObjects } = useSavedObjectsApiService();
+
+  const { context } = useRouteResolver('full', ['canGetTrainedModels'], {
+    ...basicResolvers(),
+    initSavedObjects: () => initSavedObjects(),
+  });
 
   return (
     <PageLoader context={context}>
