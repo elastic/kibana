@@ -77,7 +77,7 @@ const getDataViewsService = () => {
 const getHookContext = (stateContainer: DiscoverStateContainer) => {
   return ({ children }: React.PropsWithChildren) => (
     <DiscoverMainProvider value={stateContainer}>
-      {React.createElement(React.Fragment, null, children)}
+      <>{children}</>
     </DiscoverMainProvider>
   );
 };
