@@ -7,7 +7,7 @@
 
 import deepEqual from 'fast-deep-equal';
 import { isEmpty, noop } from 'lodash/fp';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 
@@ -187,6 +187,12 @@ export const useTimelineEventsHandler = ({
     [clearSignalsState, id]
   );
 
+  useEffect(() => {
+    return () => {
+      searchSubscription$.current?.unsubscribe();
+    };
+  }, []);
+
   const refetchGrid = useCallback(() => {
     if (refetch.current != null) {
       refetch.current();
@@ -241,10 +247,12 @@ export const useTimelineEventsHandler = ({
             next: (response) => {
               if (!isRunningResponse(response)) {
                 endTracking('success');
+
                 setLoading(DataLoadingState.loaded);
                 setTimelineResponse((prevResponse) => {
                   const newTimelineResponse = {
                     ...prevResponse,
+                    /**/
                     events: getTimelineEvents(response.edges),
                     inspect: getInspectResponse(response, prevResponse.inspect),
                     pageInfo: response.pageInfo,
@@ -270,6 +278,7 @@ export const useTimelineEventsHandler = ({
             },
             error: (msg) => {
               endTracking(abortCtrl.current.signal.aborted ? 'aborted' : 'error');
+
               setLoading(DataLoadingState.loaded);
               data.search.showError(msg);
               searchSubscription$.current.unsubscribe();
@@ -485,6 +494,7 @@ export const useTimelineEvents = ({
   skip = false,
   timerangeKind,
 }: UseTimelineEventsProps): [DataLoadingState, TimelineArgs] => {
+  const [eventsPerPage, setEventsPerPage] = useState<TimelineItem[][]>([[]]);
   const [dataLoadingState, timelineResponse, timelineSearchHandler] = useTimelineEventsHandler({
     dataViewId,
     endDate,
@@ -503,9 +513,33 @@ export const useTimelineEvents = ({
   });
 
   useEffect(() => {
+    /*
+     * `timelineSearchHandler` only returns the events for the current page.
+     * This effect is responsible for storing the events for each page so that
+     * the combined list of events can be supplied to DataGrid.
+     *
+     * */
+    setEventsPerPage((prev) => {
+      const result = [...prev];
+      result[timelineResponse.pageInfo.activePage] = timelineResponse.events;
+      return result;
+    });
+  }, [timelineResponse.events, timelineResponse.pageInfo.activePage]);
+
+  useEffect(() => {
     if (!timelineSearchHandler) return;
     timelineSearchHandler();
   }, [timelineSearchHandler]);
 
-  return [dataLoadingState, timelineResponse];
+  const combinedEvents = useMemo(() => eventsPerPage.flat(), [eventsPerPage]);
+
+  const combinedResponse = useMemo(
+    () => ({
+      ...timelineResponse,
+      events: combinedEvents,
+    }),
+    [timelineResponse, combinedEvents]
+  );
+
+  return [dataLoadingState, combinedResponse];
 };

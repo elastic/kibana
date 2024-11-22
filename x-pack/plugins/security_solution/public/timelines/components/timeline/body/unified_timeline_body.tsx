@@ -6,23 +6,20 @@
  */
 
 import type { ComponentProps, ReactElement } from 'react';
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import { StyledTableFlexGroup, StyledUnifiedTableFlexItem } from '../unified_components/styles';
 import { UnifiedTimeline } from '../unified_components';
 import { defaultUdtHeaders } from './column_headers/default_headers';
-import type { PaginationInputPaginated, TimelineItem } from '../../../../../common/search_strategy';
 
 export interface UnifiedTimelineBodyProps extends ComponentProps<typeof UnifiedTimeline> {
   header: ReactElement;
-  pageInfo: Pick<PaginationInputPaginated, 'activePage' | 'querySize'>;
 }
 
 export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
   const {
     header,
     isSortEnabled,
-    pageInfo,
     columns,
     rowRenderers,
     timelineId,
@@ -39,21 +36,6 @@ export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
     trailingControlColumns,
     leadingControlColumns,
   } = props;
-
-  const [pageRows, setPageRows] = useState<TimelineItem[][]>([]);
-
-  const rows = useMemo(() => pageRows.flat(), [pageRows]);
-
-  useEffect(() => {
-    setPageRows((currentPageRows) => {
-      if (pageInfo.activePage !== 0 && currentPageRows[pageInfo.activePage]?.length) {
-        return currentPageRows;
-      }
-      const newPageRows = pageInfo.activePage === 0 ? [] : [...currentPageRows];
-      newPageRows[pageInfo.activePage] = events;
-      return newPageRows;
-    });
-  }, [events, pageInfo.activePage]);
 
   const columnsHeader = useMemo(() => columns ?? defaultUdtHeaders, [columns]);
 
@@ -73,7 +55,7 @@ export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
             itemsPerPage={itemsPerPage}
             itemsPerPageOptions={itemsPerPageOptions}
             sort={sort}
-            events={rows}
+            events={events}
             refetch={refetch}
             dataLoadingState={dataLoadingState}
             totalCount={totalCount}

@@ -373,7 +373,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         activeTab={activeTab}
         updatedAt={refreshedAt}
         isTextBasedQuery={false}
-        pageInfo={pageInfo}
       />
     </>
   );
