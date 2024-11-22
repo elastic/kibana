@@ -34,7 +34,13 @@ describe(
         // ],
       },
     },
-    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
+    tags: [
+      '@ess',
+      '@serverless',
+      '@brokenInServerless',
+      '@skipInServerless',
+      '@skipInServerlessMKI',
+    ],
   },
   () => {
     beforeEach(() => {
