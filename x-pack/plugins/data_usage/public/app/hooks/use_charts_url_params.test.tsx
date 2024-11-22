@@ -56,12 +56,12 @@ describe('#getDataUsageMetricsFiltersFromUrlParams', () => {
   it('should use given relative startDate and endDate values URL params', () => {
     expect(
       getDataUsageMetricsFiltersFromUrlParams({
-        startDate: 'now-9d/d',
+        startDate: 'now-9d',
         endDate: 'now-24h/h',
       })
     ).toEqual({
       endDate: 'now-24h/h',
-      startDate: 'now-9d/d',
+      startDate: 'now-9d',
     });
   });
 
