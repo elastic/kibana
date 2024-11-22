@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AbortableAsyncState } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
-import { ReadStreamDefinition } from '@kbn/streams-plugin/common';
+import { StreamDefinition } from '@kbn/streams-plugin/common';
 import React, { useMemo } from 'react';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 
@@ -22,7 +22,7 @@ export function StreamsTable({
   listFetch,
   query,
 }: {
-  listFetch: AbortableAsyncState<{ definitions: ReadStreamDefinition[] }>;
+  listFetch: AbortableAsyncState<{ definitions: StreamDefinition[] }>;
   query: string;
 }) {
   const router = useStreamsAppRouter();
@@ -39,7 +39,7 @@ export function StreamsTable({
     return items.filter((item) => item.id.toLowerCase().startsWith(query.toLowerCase()));
   }, [query, items]);
 
-  const columns = useMemo<Array<EuiBasicTableColumn<ReadStreamDefinition>>>(() => {
+  const columns = useMemo<Array<EuiBasicTableColumn<StreamDefinition>>>(() => {
     return [
       {
         field: 'id',
