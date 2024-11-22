@@ -37,30 +37,15 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                required: [data]
-                properties:
-                  data:
-                    type: object
-                    required: [persistPinnedEventOnTimeline]
-                    properties:
-                      persistPinnedEventOnTimeline:
-                        $ref: '#/components/schemas/PersistPinnedEventResponse'
+                $ref: '#/components/schemas/PersistPinnedEventResponse'
 
 components:
   schemas:
     PersistPinnedEventResponse:
       oneOf:
-        - allOf:
-            - $ref: '../model/components.schema.yaml#/components/schemas/PinnedEvent'
-            - $ref: '#/components/schemas/PinnedEventBaseResponseBody'
+        - $ref: '../model/components.schema.yaml#/components/schemas/PinnedEvent'
         - type: object
-          nullable: true
-    PinnedEventBaseResponseBody:
-      type: object
-      required: [code]
-      properties:
-        code:
-          type: number
-        message:
-          type: string
+          required: [unpinned]
+          properties:
+            unpinned:
+              type: boolean

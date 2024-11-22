@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
+
 export const mockTemplate = {
   columns: [
     {
@@ -172,13 +174,13 @@ export const mockTemplate = {
   kqlQuery: { filterQuery: { kuery: { kind: 'kuery', expression: '' }, serializedQuery: '' } },
   indexNames: [],
   title: 'Generic Process Timeline - Duplicate - Duplicate',
-  timelineType: 'template',
+  timelineType: TimelineTypeEnum.template,
   templateTimelineVersion: null,
   templateTimelineId: null,
   dateRange: { start: '2020-10-01T11:37:31.655Z', end: '2020-10-02T11:37:31.655Z' },
   savedQueryId: null,
   sort: { columnId: '@timestamp', sortDirection: 'desc' },
-  status: 'active',
+  status: TimelineStatusEnum.active,
 };
 
 export const mockTimeline = {
@@ -210,11 +212,11 @@ export const mockTimeline = {
     '.siem-signals-angelachuang-default',
   ],
   title: 'my timeline',
-  timelineType: 'default',
+  timelineType: TimelineTypeEnum.default,
   templateTimelineVersion: null,
   templateTimelineId: null,
   dateRange: { start: '2020-11-03T13:34:40.339Z', end: '2020-11-04T13:34:40.339Z' },
   savedQueryId: null,
   sort: { columnId: '@timestamp', columnType: 'number', sortDirection: 'desc' },
-  status: 'draft',
+  status: TimelineStatusEnum.draft,
 };

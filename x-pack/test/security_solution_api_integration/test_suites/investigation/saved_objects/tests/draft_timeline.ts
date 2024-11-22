@@ -27,8 +27,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
             timelineType: 'default',
           });
 
-        const { savedObjectId, version } =
-          response.body.data && response.body.data.persistTimeline.timeline;
+        const { savedObjectId, version } = response.body.data && response.body;
 
         expect(savedObjectId).to.not.be.empty();
         expect(version).to.not.be.empty();
@@ -49,7 +48,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
           timelineType,
           templateTimelineId,
           templateTimelineVersion,
-        } = response.body.data && response.body.data.persistTimeline.timeline;
+        } = response.body.data && response.body;
 
         expect(savedObjectId).to.not.be.empty();
         expect(version).to.not.be.empty();
@@ -72,7 +71,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
           pinnedEventIds: initialPinnedEventIds,
           noteIds: initialNoteIds,
           version: initialVersion,
-        } = response.body.data && response.body.data.persistTimeline.timeline;
+        } = response.body.data && response.body;
 
         expect(initialPinnedEventIds).to.have.length(0, 'should not have any pinned events');
         expect(initialNoteIds).to.have.length(0, 'should not have any notes');
@@ -107,7 +106,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
           pinnedEventIds,
           noteIds,
           status: newStatus,
-        } = getTimelineRequest.body.data && getTimelineRequest.body.data.getOneTimeline;
+        } = getTimelineRequest.body.data && getTimelineRequest.body;
 
         expect(newStatus).to.be.equal('draft', 'status should still be draft');
         expect(pinnedEventIds).to.have.length(1, 'should have one pinned event');
@@ -126,8 +125,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
           pinnedEventIds: cleanedPinnedEventIds,
           noteIds: cleanedNoteIds,
           version: cleanedVersion,
-        } = cleanDraftTimelineRequest.body.data &&
-        cleanDraftTimelineRequest.body.data.persistTimeline.timeline;
+        } = cleanDraftTimelineRequest.body.data && cleanDraftTimelineRequest.body;
 
         expect(cleanedPinnedEventIds).to.have.length(0, 'should not have pinned events anymore');
         expect(cleanedNoteIds).to.have.length(0, 'should not have notes anymore');
