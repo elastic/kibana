@@ -34,11 +34,11 @@ describe.skip('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
     }).as('export');
     createTimeline().then((response) => {
       cy.wrap(response).as('timelineResponse1');
-      cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId1');
+      cy.wrap(response.body.savedObjectId).as('timelineId1');
     });
     createTimeline().then((response) => {
       cy.wrap(response).as('timelineResponse2');
-      cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId2');
+      cy.wrap(response.body.savedObjectId).as('timelineId2');
     });
     visit(TIMELINES_URL);
   });
@@ -46,8 +46,9 @@ describe.skip('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
   /**
    *  TODO: Good candidate for converting to a jest Test
    *  https://github.com/elastic/kibana/issues/195612
+   *  Failing: https://github.com/elastic/kibana/issues/187550
    */
-  it('should export custom timeline(s)', function () {
+  it.skip('should export custom timeline(s)', function () {
     cy.log('Export a custom timeline via timeline actions');
 
     exportTimeline(this.timelineId1);

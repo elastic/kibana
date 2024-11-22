@@ -16,6 +16,12 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { setupMockServer } from '../mock_api';
 import { mockAutoOpsResponse } from '../mock_data';
 
+const now = new Date();
+const to = now.toISOString(); // Current time in ISO format
+
+const nowMinus24Hours = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+const from = nowMinus24Hours.toISOString();
+
 export default function ({ getService }: FtrProviderContext) {
   const svlDatastreamsHelpers = getService('svlDatastreamsHelpers');
   const roleScopedSupertest = getService('roleScopedSupertest');
@@ -46,8 +52,8 @@ export default function ({ getService }: FtrProviderContext) {
       after(async () => await svlDatastreamsHelpers.deleteDataStream(testDataStreamName));
       it('returns 400 with non-existent data streams', async () => {
         const requestBody: UsageMetricsRequestBody = {
-          from: 'now-24h/h',
-          to: 'now',
+          from,
+          to,
           metricTypes: ['ingest_rate', 'storage_retained'],
           dataStreams: ['invalid-data-stream'],
         };
@@ -61,8 +67,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('returns 400 when requesting no data streams', async () => {
         const requestBody = {
-          from: 'now-24h/h',
-          to: 'now',
+          from,
+          to,
           metricTypes: ['ingest_rate'],
           dataStreams: [],
         };
@@ -76,8 +82,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('returns 400 when requesting an invalid metric type', async () => {
         const requestBody = {
-          from: 'now-24h/h',
-          to: 'now',
+          from,
+          to,
           metricTypes: [testDataStreamName],
           dataStreams: ['datastream'],
         };
@@ -93,8 +99,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('returns 200 with valid request', async () => {
         const requestBody: UsageMetricsRequestBody = {
-          from: 'now-24h/h',
-          to: 'now',
+          from,
+          to,
           metricTypes: ['ingest_rate', 'storage_retained'],
           dataStreams: [testDataStreamName],
         };
