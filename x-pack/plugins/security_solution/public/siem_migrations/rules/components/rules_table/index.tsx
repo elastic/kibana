@@ -32,7 +32,7 @@ export interface RulesTableComponentProps {
   /**
    * Selected rule migration id
    */
-  migrationId: string | undefined;
+  migrationId: string;
 
   /**
    * Opens the flyout with the details of the rule migration

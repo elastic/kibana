@@ -7,18 +7,18 @@
 
 import React from 'react';
 
-import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { SIEM_MIGRATIONS_RULES_PATH, SecurityPageName } from '../../common/constants';
 import { RulesPage } from './rules/pages';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
+import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 
 export const RulesRoutes = () => {
   return (
     <PluginTemplateWrapper>
-      <TrackApplicationView viewId={SecurityPageName.siemMigrationsRules}>
+      <SecurityRoutePageWrapper pageName={SecurityPageName.siemMigrationsRules}>
         <RulesPage />
-      </TrackApplicationView>
+      </SecurityRoutePageWrapper>
     </PluginTemplateWrapper>
   );
 };

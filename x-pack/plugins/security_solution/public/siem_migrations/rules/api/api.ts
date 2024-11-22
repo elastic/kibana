@@ -29,8 +29,8 @@ export const getRuleMigrationsStatsAll = async ({
   signal,
 }: {
   signal: AbortSignal | undefined;
-}): Promise<GetAllStatsRuleMigrationResponse> =>
-  KibanaServices.get().http.fetch<GetAllStatsRuleMigrationResponse>(
+}): Promise<GetAllStatsRuleMigrationResponse> => {
+  return KibanaServices.get().http.fetch<GetAllStatsRuleMigrationResponse>(
     SIEM_RULE_MIGRATIONS_ALL_STATS_PATH,
     {
       method: 'GET',
@@ -38,6 +38,7 @@ export const getRuleMigrationsStatsAll = async ({
       signal,
     }
   );
+};
 
 /**
  * Retrieves all the migration rule documents of a specific migration.
@@ -51,12 +52,9 @@ export const getRuleMigrations = async ({
   migrationId,
   signal,
 }: {
-  migrationId?: string;
+  migrationId: string;
   signal: AbortSignal | undefined;
 }): Promise<GetRuleMigrationResponse> => {
-  if (!migrationId) {
-    return [];
-  }
   return KibanaServices.get().http.fetch<GetRuleMigrationResponse>(
     replaceParams(SIEM_RULE_MIGRATION_PATH, { migration_id: migrationId }),
     {

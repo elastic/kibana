@@ -11,7 +11,7 @@ import { SecurityPageName } from '../../../../../common';
 import { useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 import * as i18n from './translations';
 
-const NoItemsMessageComponent = () => {
+const NoMigrationsComponent = () => {
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
   const { onClick: onClickLink } = getSecuritySolutionLinkProps({
     deepLinkId: SecurityPageName.landing,
@@ -28,10 +28,10 @@ const NoItemsMessageComponent = () => {
     >
       <EuiFlexItem grow={false}>
         <EuiEmptyPrompt
-          title={<h2>{i18n.NO_TRANSLATIONS_AVAILABLE_FOR_INSTALL}</h2>}
+          title={<h2>{i18n.NO_MIGRATIONS_AVAILABLE}</h2>}
           titleSize="s"
-          body={i18n.NO_TRANSLATIONS_AVAILABLE_FOR_INSTALL_BODY}
-          data-test-subj="noRulesTranslationAvailableForInstall"
+          body={i18n.NO_MIGRATIONS_AVAILABLE_BODY}
+          data-test-subj="noMigrationsAvailable"
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -49,4 +49,5 @@ const NoItemsMessageComponent = () => {
   );
 };
 
-export const NoItemsMessage = React.memo(NoItemsMessageComponent);
+export const NoMigrations = React.memo(NoMigrationsComponent);
+NoMigrations.displayName = 'NoMigrations';

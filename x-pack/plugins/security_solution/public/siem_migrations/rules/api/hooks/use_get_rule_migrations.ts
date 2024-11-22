@@ -14,14 +14,12 @@ import type { GetRuleMigrationResponse } from '../../../../../common/siem_migrat
 import { SIEM_RULE_MIGRATION_PATH } from '../../../../../common/siem_migrations/constants';
 
 export const useGetRuleMigrationsQuery = (
-  migrationId?: string,
+  migrationId: string,
   options?: UseQueryOptions<GetRuleMigrationResponse>
 ) => {
-  const SPECIFIC_MIGRATION_PATH = migrationId
-    ? replaceParams(SIEM_RULE_MIGRATION_PATH, {
-        migration_id: migrationId,
-      })
-    : SIEM_RULE_MIGRATION_PATH;
+  const SPECIFIC_MIGRATION_PATH = replaceParams(SIEM_RULE_MIGRATION_PATH, {
+    migration_id: migrationId,
+  });
   return useQuery<GetRuleMigrationResponse>(
     ['GET', SPECIFIC_MIGRATION_PATH],
     async ({ signal }) => {
