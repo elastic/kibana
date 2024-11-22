@@ -130,7 +130,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   );
   const { augmentedColumnHeaders } = useTimelineColumns(columns);
 
-  const [queryLoadingState, { events, totalCount, pageInfo, loadPage, refreshedAt, refetch }] =
+  const [queryLoadingState, { events, totalCount, loadPage, refreshedAt, refetch }] =
     useTimelineEvents({
       endDate: '',
       id: `pinned-${timelineId}`,
@@ -261,7 +261,6 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
         activeTab={TimelineTabs.pinned}
         updatedAt={refreshedAt}
         isTextBasedQuery={false}
-        pageInfo={pageInfo}
         leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
         trailingControlColumns={rowDetailColumn}
       />

@@ -516,7 +516,7 @@ describe('query tab with unified timeline', () => {
           },
         };
 
-        const { container } = render(
+        render(
           <TestProviders
             store={createMockStore({
               ...structuredClone(mockStateWithNoteInTimeline),
