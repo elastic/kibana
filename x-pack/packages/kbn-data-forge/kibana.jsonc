@@ -1,5 +1,9 @@
 {
   "type": "shared-common",
   "id": "@kbn/data-forge",
-  "owner": "@elastic/obs-ux-management-team"
+  "owner": [
+    "@elastic/obs-ux-management-team"
+  ],
+  "group": "platform",
+  "visibility": "shared"
 }
