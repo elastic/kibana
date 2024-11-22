@@ -103,21 +103,6 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
                     to: 'now',
                     display: 'Last 7 days',
                   },
-                  {
-                    from: 'now-30d',
-                    to: 'now',
-                    display: 'Last 30 days',
-                  },
-                  {
-                    from: 'now-90d',
-                    to: 'now',
-                    display: 'Last 90 days',
-                  },
-                  {
-                    from: 'now-1y',
-                    to: 'now',
-                    display: 'Last 1 year',
-                  },
                 ],
               };
               return x[k];
