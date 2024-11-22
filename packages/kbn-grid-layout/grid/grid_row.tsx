@@ -232,23 +232,11 @@ export const GridRow = forwardRef<
         `}
       >
         {rowIndex !== 0 && (
-          <>
-            <EuiSpacer size="s" />
-            <EuiFlexGroup gutterSize="s">
-              <EuiButtonIcon
-                color="text"
-                aria-label={i18n.translate('kbnGridLayout.row.toggleCollapse', {
-                  defaultMessage: 'Toggle collapse',
-                })}
-                iconType={isCollapsed ? 'arrowRight' : 'arrowDown'}
-                onClick={toggleIsCollapsed}
-              />
-              <EuiTitle size="xs">
-                <h2>{rowTitle}</h2>
-              </EuiTitle>
-            </EuiFlexGroup>
-            <EuiSpacer size="s" />
-          </>
+          <GridRowSummary
+            isCollapsed={isCollapsed}
+            toggleIsCollapsed={toggleIsCollapsed}
+            rowTitle={rowTitle}
+          />
         )}
         {!isCollapsed && (
           <div
@@ -268,3 +256,33 @@ export const GridRow = forwardRef<
     );
   }
 );
+
+const GridRowSummary = ({
+  isCollapsed,
+  toggleIsCollapsed,
+  rowTitle,
+}: {
+  isCollapsed: boolean;
+  toggleIsCollapsed: () => void;
+  rowTitle?: string;
+}) => {
+  return (
+    <>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup gutterSize="s">
+        <EuiButtonIcon
+          color="text"
+          aria-label={i18n.translate('kbnGridLayout.row.toggleCollapse', {
+            defaultMessage: 'Toggle collapse',
+          })}
+          iconType={isCollapsed ? 'arrowRight' : 'arrowDown'}
+          onClick={toggleIsCollapsed}
+        />
+        <EuiTitle size="xs">
+          <h2>{rowTitle}</h2>
+        </EuiTitle>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+    </>
+  );
+};
