@@ -32,8 +32,12 @@ export const importTimelinesRoute = (router: SecuritySolutionPluginRouter, confi
   router.versioned
     .post({
       path: `${TIMELINE_IMPORT_URL}`,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
       options: {
-        tags: ['access:securitySolution'],
         body: {
           maxBytes: config.maxTimelineImportPayloadBytes,
           output: 'stream',
@@ -79,7 +83,7 @@ export const importTimelinesRoute = (router: SecuritySolutionPluginRouter, confi
           if (res instanceof Error || typeof res === 'string') {
             throw res;
           } else {
-            return response.ok({ body: res ?? {} });
+            return response.ok({ body: res });
           }
         } catch (err) {
           const error = transformError(err);

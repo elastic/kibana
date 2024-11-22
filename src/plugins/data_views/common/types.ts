@@ -571,4 +571,5 @@ export interface ClientConfigType {
   scriptedFieldsEnabled?: boolean;
   dataTiersExcludedForFields?: string;
   fieldListCachingEnabled?: boolean;
+  hasEsDataTimeout: number;
 }

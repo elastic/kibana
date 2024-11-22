@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { screen, fireEvent, render, within, act, waitFor } from '@testing-library/react';
 import type { Type as RuleType } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { DataViewBase } from '@kbn/es-query';
@@ -638,7 +638,6 @@ function TestForm({
   onSubmit,
   formProps,
 }: TestFormProps): JSX.Element {
-  const [selectedEqlOptions, setSelectedEqlOptions] = useState(stepDefineDefaultValue.eqlOptions);
   const { form } = useForm({
     options: { stripEmptyFields: false },
     schema: defineRuleSchema,
@@ -653,8 +652,6 @@ function TestForm({
         form={form}
         indicesConfig={[]}
         threatIndicesConfig={[]}
-        optionsSelected={selectedEqlOptions}
-        setOptionsSelected={setSelectedEqlOptions}
         indexPattern={indexPattern}
         isIndexPatternLoading={false}
         isQueryBarValid={true}

@@ -10,6 +10,7 @@ import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/publ
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
 
 import type {
   ObservabilityAIAssistantPublicSetup,
@@ -31,6 +32,7 @@ export interface SetupDependencies {
 export interface StartDependencies {
   observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
   serverless?: ServerlessPluginStart;
+  productDocBase?: ProductDocBasePluginStart;
 }
 
 export interface ConfigSchema {
