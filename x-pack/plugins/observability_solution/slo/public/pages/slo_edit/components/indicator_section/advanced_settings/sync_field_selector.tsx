@@ -12,6 +12,7 @@ import { Controller, useFormContext } from 'react-hook-form';
 import { useCreateDataView } from '../../../../../hooks/use_create_data_view';
 import { createOptionsFromFields } from '../../../helpers/create_options';
 import { CreateSLOForm } from '../../../types';
+import { OptionalText } from '../../common/optional_text';
 
 const placeholder = i18n.translate('xpack.slo.sloEdit.settings.syncField.placeholder', {
   defaultMessage: 'Select a timestamp field',
@@ -43,6 +44,7 @@ export function SyncFieldSelector() {
         </span>
       }
       isInvalid={getFieldState('settings.syncField').invalid}
+      labelAppend={<OptionalText />}
     >
       <Controller
         name={'settings.syncField'}
