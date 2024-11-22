@@ -15,9 +15,9 @@ import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
 } from '@kbn/apm-plugin/common/environment_filter_values';
-import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import { roundNumber } from '../utils/common';
-import { generateData } from './generate_data';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
+import { roundNumber } from '../../utils/common';
+import { generateDependencyData } from '../generate_data';
 import { apmDependenciesMapping, createServiceDependencyDocs } from './es_utils';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -308,7 +308,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       before(async () => {
         apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
-        await generateData({ apmSynthtraceEsClient, start, end });
+        await generateDependencyData({ apmSynthtraceEsClient, start, end });
       });
       after(() => apmSynthtraceEsClient.clean());
 

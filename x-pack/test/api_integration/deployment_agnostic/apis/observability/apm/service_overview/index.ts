@@ -12,5 +12,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./instance_details.spec.ts'));
     loadTestFile(require.resolve('./instances_detailed_statistics.spec.ts'));
     loadTestFile(require.resolve('./instances_main_statistics.spec.ts'));
+    loadTestFile(require.resolve('./dependencies/index.spec.ts'));
   });
 }

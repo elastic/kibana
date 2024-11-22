@@ -72,3 +72,39 @@ export async function generateServiceData({
       ),
   ]);
 }
+
+export async function generateDependencyData({
+  apmSynthtraceEsClient,
+  start,
+  end,
+}: {
+  apmSynthtraceEsClient: ApmSynthtraceEsClient;
+  start: number;
+  end: number;
+}) {
+  const instance = apm
+    .service({ name: 'synth-go', environment: 'production', agentName: 'go' })
+    .instance('instance-a');
+  const { rate, transaction, span } = dataConfig;
+
+  await apmSynthtraceEsClient.index(
+    timerange(start, end)
+      .interval('1m')
+      .rate(rate)
+      .generator((timestamp) =>
+        instance
+          .transaction({ transactionName: transaction.name })
+          .timestamp(timestamp)
+          .duration(transaction.duration)
+          .success()
+          .children(
+            instance
+              .span({ spanName: span.name, spanType: span.type, spanSubtype: span.subType })
+              .duration(transaction.duration)
+              .success()
+              .destination(span.destination)
+              .timestamp(timestamp)
+          )
+      )
+  );
+}
