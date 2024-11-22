@@ -663,6 +663,58 @@ paths:
       summary: Cleanup the Risk Engine
       tags:
         - Security Entity Analytics API
+  /api/risk_score/engine/saved_object/configure:
+    patch:
+      description: Configuring the Risk Engine Saved Object
+      operationId: ConfigureRiskEngineSavedObject
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                exclude_alert_statuses:
+                  items:
+                    type: string
+                  type: array
+                exclude_alert_tags:
+                  items:
+                    type: string
+                  type: array
+                range:
+                  type: object
+                  properties:
+                    end:
+                      type: string
+                    start:
+                      type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  risk_engine_saved_object_configured:
+                    type: boolean
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskManagerUnavailableResponse'
+          description: Task manager is unavailable
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: >-
+                  #/components/schemas/ConfigureRiskEngineSavedObjectErrorResponse
+          description: Unexpected error
+      summary: Configure the Risk Engine Saved Object
+      tags:
+        - Security Entity Analytics API
   /api/risk_score/engine/schedule_now:
     post:
       description: >-
@@ -814,6 +866,27 @@ components:
           type: array
       required:
         - cleanup_successful
+        - errors
+    ConfigureRiskEngineSavedObjectErrorResponse:
+      type: object
+      properties:
+        errors:
+          items:
+            type: object
+            properties:
+              error:
+                type: string
+              seq:
+                type: integer
+            required:
+              - seq
+              - error
+          type: array
+        risk_engine_saved_object_configured:
+          example: false
+          type: boolean
+      required:
+        - risk_engine_saved_object_configured
         - errors
     CreateAssetCriticalityRecord:
       allOf:
