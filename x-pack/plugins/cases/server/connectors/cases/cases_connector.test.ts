@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -17,7 +18,6 @@ import { CasesService } from './cases_service';
 import { CasesConnectorError } from './cases_connector_error';
 import { CaseError } from '../../common/error';
 import { fullJitterBackoffFactory } from './full_jitter_backoff';
-import { CoreKibanaRequest } from '@kbn/core/server';
 
 jest.mock('./cases_connector_executor');
 jest.mock('./full_jitter_backoff');
@@ -28,7 +28,7 @@ const fullJitterBackoffFactoryMock = fullJitterBackoffFactory as jest.Mock;
 describe('CasesConnector', () => {
   const services = actionsMock.createServices();
   const logger = loggingSystemMock.createLogger();
-  const kibanaRequest = CoreKibanaRequest.from({ path: '/', headers: {} });
+  const kibanaRequest = kibanaRequestFactory({ path: '/', headers: {} });
 
   const groupingBy = ['host.name', 'dest.ip'];
   const rule = {

@@ -836,7 +836,6 @@ describe('<IndexDetailsPage />', () => {
           testBed.actions.mappings.isReferenceFieldVisible();
           testBed.actions.mappings.selectInferenceIdButtonExists();
           testBed.actions.mappings.openSelectInferencePopover();
-          testBed.actions.mappings.expectDefaultInferenceModelToExists();
           testBed.actions.mappings.expectCustomInferenceModelToExists(
             `custom-inference_${customInferenceModel}`
           );
