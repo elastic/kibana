@@ -301,13 +301,14 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       await this.waitUntilTableLoaded();
       const table = await this.getDatasetsTable();
       return this.parseTable(table, [
-        '0',
-        'Data Set Name',
+        'Data set name',
         'Namespace',
+        'Type',
         'Size',
-        'Data Set Quality',
-        'Degraded Docs (%)',
-        'Last Activity',
+        'Data set quality',
+        'Degraded docs (%)',
+        'Failed docs (%)',
+        'Last activity',
         'Actions',
       ]);
     },
