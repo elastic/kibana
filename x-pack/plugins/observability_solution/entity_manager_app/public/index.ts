@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { AddEmptyPrompt } from './add_empty_prompt';
+import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
+import { Plugin } from './plugin';
+
+export const plugin: PluginInitializer<{}, {}> = (context: PluginInitializerContext) => {
+  return new Plugin(context);
+};
