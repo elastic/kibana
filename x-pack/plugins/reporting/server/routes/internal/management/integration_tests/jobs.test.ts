@@ -350,45 +350,6 @@ describe(`Reporting Job Management Routes: Internal`, () => {
     });
   });
 
-  describe('Deprecated: role-based access control', () => {
-    it('fails on users without the appropriate role', async () => {
-      mockStartDeps = await createMockPluginStart(
-        {
-          licensing: {
-            ...licensingMock.createStart(),
-            license$: new BehaviorSubject({ isActive: true, isAvailable: true, type: 'gold' }),
-          },
-          securityService: {
-            authc: {
-              getCurrentUser: () => ({ id: '123', roles: ['peasant'], username: 'Tom Riddle' }),
-            },
-          },
-        },
-        mockConfigSchema
-      );
-
-      reportingCore = await createMockReportingCore(
-        createMockConfigSchema({ roles: { enabled: true } }),
-        mockSetupDeps,
-        mockStartDeps
-      );
-
-      registerJobInfoRoutes(reportingCore);
-
-      await server.start();
-
-      await supertest(httpSetup.server.listener)
-        .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/dope`)
-        .expect(403)
-        .then(({ body }) =>
-          expect(body.message).toMatchInlineSnapshot(`
-            "Ask your administrator for access to reporting features. <a href=https://www.elastic.co/guide/en/kibana/test-branch/secure-reporting.html#grant-user-access style=\\"font-weight: 600;\\"
-                                target=\\"_blank\\" rel=\\"noopener\\">Learn more</a>."
-          `)
-        );
-    });
-  });
-
   describe('usage counters', () => {
     it('increments the info api counter', async () => {
       mockEsClient.search.mockResponseOnce(getCompleteHits());
