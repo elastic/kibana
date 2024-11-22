@@ -4,5 +4,7 @@
   "owner": [
     "@elastic/kibana-visualizations",
     "@elastic/kibana-data-discovery"
-  ]
+  ],
+  "group": "platform",
+  "visibility": "shared"
 }
