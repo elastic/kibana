@@ -11,7 +11,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useGetDataUsageMetrics } from './use_get_usage_metrics';
 import { DATA_USAGE_METRICS_API_ROUTE } from '../../common';
 import { coreMock as mockCore } from '@kbn/core/public/mocks';
-import { dataUsageTestQueryClientOptions, timeXMinutesAgo } from '../test_utils';
+import { dataUsageTestQueryClientOptions, timeXMinutesAgo } from '../../common/test_utils';
 
 const useQueryMock = _useQuery as jest.Mock;
 

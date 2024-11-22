@@ -12,6 +12,14 @@ export {
   DATA_USAGE_METRICS_API_ROUTE,
   DATA_USAGE_DATA_STREAMS_API_ROUTE,
 } from './constants';
+export { dateParser, momentDateParser } from './utils';
+
+export {
+  DataUsageQueryClient,
+  dataUsageQueryClient,
+  DataUsageReactQueryClientProvider,
+  type ReactQueryClientProviderProps,
+} from './query_client';
 
 export {
   DEFAULT_METRIC_TYPES,

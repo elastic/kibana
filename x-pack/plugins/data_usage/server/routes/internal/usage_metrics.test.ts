@@ -19,8 +19,7 @@ import { DATA_USAGE_METRICS_API_ROUTE } from '../../../common';
 import { createMockedDataUsageContext } from '../../mocks';
 import { CustomHttpRequestError } from '../../utils';
 import { AutoOpsError } from '../../services/errors';
-
-const timeXMinutesAgo = (minutes: number) => new Date(Date.now() - minutes * 60 * 1000);
+import { timeXMinutesAgo } from '../../../common/test_utils';
 
 describe('registerUsageMetricsRoute', () => {
   let mockCore: MockedKeys<CoreSetup<{}, DataUsageServerStart>>;
