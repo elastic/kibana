@@ -31,7 +31,6 @@ import { docLinks } from '../../../shared/doc_links';
 
 import { SettingsLogic } from './settings_logic';
 import { SettingsPanel } from './settings_panel';
-import { element } from 'prop-types';
 
 export interface DefaultSettingsFlyoutProps {
   closeFlyout: () => void;
@@ -57,7 +56,7 @@ export const DefaultSettingsFlyout: React.FC<DefaultSettingsFlyoutProps> = ({ cl
     reduce_whitespace: reduceWhitespace,
     run_ml_inference: runMLInference,
   } = pipelineState;
-  const elementRef = useRef(null);
+  const elementRef = useRef<HTMLAnchorElement>(null);
   return (
     <EuiFlyout onClose={closeFlyout} size="s" paddingSize="l">
       <EuiFlyoutHeader hasBorder>
@@ -208,8 +207,8 @@ export const DefaultSettingsFlyout: React.FC<DefaultSettingsFlyoutProps> = ({ cl
                   disabled={hasNoChanges}
                   isLoading={isLoading}
                   onClick={() => {
-                    elementRef.current?.focus();
                     setPipeline(defaultPipeline);
+                    elementRef.current?.focus();
                   }}
                   data-test-subj={'entSearchContentSettingsResetButton'}
                 >
@@ -224,7 +223,10 @@ export const DefaultSettingsFlyout: React.FC<DefaultSettingsFlyoutProps> = ({ cl
                   fill
                   disabled={hasNoChanges}
                   isLoading={isLoading}
-                  onClick={() => makeRequest(pipelineState)}
+                  onClick={() => {
+                    makeRequest(pipelineState);
+                    elementRef.current?.focus();
+                  }}
                   data-test-subj={'entSearchContentSettingsSaveButton'}
                 >
                   {i18n.translate('xpack.enterpriseSearch.content.settings.saveButtonLabel', {
