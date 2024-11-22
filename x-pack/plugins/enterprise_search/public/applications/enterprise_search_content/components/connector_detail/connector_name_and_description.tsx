@@ -84,8 +84,8 @@ export const ConnectorNameAndDescription: React.FC<ConnectorNameAndDescriptionPr
           isInvalid={nameErrors.length > 0}
           size="m"
           editModeProps={{
-            formRowProps: { error: nameErrors },
             cancelButtonProps: { onClick: () => setNameErrors([]) },
+            formRowProps: { error: nameErrors },
             inputProps: { readOnly: isLoading },
           }}
           onSave={(inputValue) => {
