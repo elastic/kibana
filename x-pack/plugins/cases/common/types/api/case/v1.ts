@@ -33,7 +33,7 @@ import {
   CaseCustomFieldToggleRt,
   CustomFieldTextTypeRt,
   CustomFieldNumberTypeRt,
-  CaseCustomFieldListRt,
+  CustomFieldListTypeRt,
 } from '../../domain';
 import {
   CaseRt,
@@ -66,7 +66,7 @@ const CaseCustomFieldNumberWithValidationRt = rt.strict({
 
 const CaseCustomFieldListWithValidationRt = rt.strict({
   key: rt.string,
-  type: CaseCustomFieldListRt,
+  type: CustomFieldListTypeRt,
   value: rt.union([CaseCustomFieldListWithValidationValueRt('value'), rt.null]),
 });
 
