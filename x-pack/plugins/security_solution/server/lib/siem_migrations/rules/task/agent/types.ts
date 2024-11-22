@@ -7,10 +7,11 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { InferenceClient } from '@kbn/inference-plugin/server';
-import type { migrateRuleState } from './state';
 import type { ChatModel } from '../util/actions_client_chat';
+import type { IntegrationRetriever } from '../util/integration_retriever';
 import type { PrebuiltRulesMapByName } from '../util/prebuilt_rules';
 import type { RuleResourceRetriever } from '../util/rule_resource_retriever';
+import type { migrateRuleState } from './state';
 
 export type MigrateRuleState = typeof migrateRuleState.State;
 export type GraphNode = (state: MigrateRuleState) => Promise<Partial<MigrateRuleState>>;
@@ -21,5 +22,6 @@ export interface MigrateRuleGraphParams {
   connectorId: string;
   prebuiltRulesMap: PrebuiltRulesMapByName;
   resourceRetriever: RuleResourceRetriever;
+  integrationRetriever: IntegrationRetriever;
   logger: Logger;
 }
