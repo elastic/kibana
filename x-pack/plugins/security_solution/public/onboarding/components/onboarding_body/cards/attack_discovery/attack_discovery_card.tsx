@@ -11,10 +11,11 @@ import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { SecuritySolutionLinkButton } from '../../../../../common/components/links';
 import { OnboardingCardId } from '../../../../constants';
 import type { OnboardingCardComponent } from '../../../../types';
-import { OnboardingCardContentImagePanel } from '../common/card_content_asset_panel';
+import { OnboardingCardContentAssetPanel } from '../common/card_content_asset_panel';
 import { CardCallOut } from '../common/card_callout';
 import attackDiscoveryImageSrc from './images/attack_discovery.png';
 import * as i18n from './translations';
+import { CardSelectorListItemAssetType } from '../common/card_selector_list';
 
 export const AttackDiscoveryCard: OnboardingCardComponent = React.memo(
   ({ isCardComplete, setExpandedCardId, setComplete }) => {
@@ -28,9 +29,12 @@ export const AttackDiscoveryCard: OnboardingCardComponent = React.memo(
     }, [setExpandedCardId]);
 
     return (
-      <OnboardingCardContentImagePanel
-        imageSrc={attackDiscoveryImageSrc}
-        imageAlt={i18n.ATTACK_DISCOVERY_CARD_TITLE}
+      <OnboardingCardContentAssetPanel
+        asset={{
+          type: CardSelectorListItemAssetType.image,
+          source: attackDiscoveryImageSrc,
+          alt: i18n.ATTACK_DISCOVERY_CARD_TITLE,
+        }}
       >
         <EuiFlexGroup
           direction="column"
@@ -76,7 +80,7 @@ export const AttackDiscoveryCard: OnboardingCardComponent = React.memo(
             </SecuritySolutionLinkButton>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </OnboardingCardContentImagePanel>
+      </OnboardingCardContentAssetPanel>
     );
   }
 );
