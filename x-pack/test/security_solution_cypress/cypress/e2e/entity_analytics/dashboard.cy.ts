@@ -13,14 +13,15 @@ import { deleteRiskEngineConfiguration } from '../../tasks/api_calls/risk_engine
 
 import {
   PAGE_TITLE,
-  ENTITIES_LIST_PANEL,
   ENTITY_STORE_ENABLEMENT_PANEL,
-  ENTITY_STORE_ENABLEMENT_BUTTON,
-  ENTITY_STORE_ENABLEMENT_MODAL,
   ENABLEMENT_MODAL_RISK_SCORE_SWITCH,
   ENABLEMENT_MODAL_ENTITY_STORE_SWITCH,
-  ENABLEMENT_MODAL_CONFIRM_BUTTON,
 } from '../../screens/entity_analytics/dashboard';
+import {
+  openEntityStoreEnablementModal,
+  confirmEntityStoreEnablement,
+  waitForEntitiesListToAppear,
+} from '../../tasks/entity_analytics';
 
 describe(
   'Entity analytics dashboard page',
@@ -48,23 +49,18 @@ describe(
 
     describe('Entity Store enablement', () => {
       it('renders enablement panel', () => {
-        cy.get(ENTITY_STORE_ENABLEMENT_PANEL).should('exist');
         cy.get(ENTITY_STORE_ENABLEMENT_PANEL).contains('Enable entity store and risk score');
       });
 
       it('enables risk score followed by the store', () => {
-        cy.get(ENTITY_STORE_ENABLEMENT_BUTTON).click();
+        openEntityStoreEnablementModal();
 
-        cy.get(ENTITY_STORE_ENABLEMENT_MODAL).should('exist');
-        cy.get(ENTITY_STORE_ENABLEMENT_MODAL).contains('Entity Analytics Enablement');
+        cy.get(ENABLEMENT_MODAL_RISK_SCORE_SWITCH).should('be.visible');
+        cy.get(ENABLEMENT_MODAL_ENTITY_STORE_SWITCH).should('be.visible');
 
-        cy.get(ENABLEMENT_MODAL_RISK_SCORE_SWITCH).should('exist');
-        cy.get(ENABLEMENT_MODAL_ENTITY_STORE_SWITCH).should('exist');
+        confirmEntityStoreEnablement();
 
-        cy.get(ENABLEMENT_MODAL_CONFIRM_BUTTON).should('exist').click();
-
-        cy.get(ENTITIES_LIST_PANEL, { timeout: 30000 }).scrollIntoView();
-        cy.get(ENTITIES_LIST_PANEL).contains('Entities');
+        waitForEntitiesListToAppear();
       });
     });
   }
