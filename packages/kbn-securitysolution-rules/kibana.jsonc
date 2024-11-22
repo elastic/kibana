@@ -1,5 +1,9 @@
 {
   "type": "shared-common",
   "id": "@kbn/securitysolution-rules",
-  "owner": "@elastic/security-detection-engine"
+  "owner": [
+    "@elastic/security-detection-engine"
+  ],
+  "group": "platform",
+  "visibility": "shared"
 }

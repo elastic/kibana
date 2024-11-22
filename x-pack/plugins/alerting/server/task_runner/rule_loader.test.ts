@@ -6,10 +6,11 @@
  */
 
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { CoreKibanaRequest, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { isCoreKibanaRequest } from '@kbn/core-http-server-utils';
 import { schema } from '@kbn/config-schema';
-import { Logger } from '@kbn/core/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import type { Logger } from '@kbn/logging';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import {
   getDecryptedRule,
@@ -244,59 +245,48 @@ describe('rule_loader', () => {
 
   describe('getFakeKibanaRequest()', () => {
     test('has API key, in default space', async () => {
-      const kibanaRequestFromMock = jest.spyOn(CoreKibanaRequest, 'from');
       const fakeRequest = getFakeKibanaRequest(context, 'default', apiKey);
-
       const bpsSetParams = mockBasePathService.set.mock.calls[0];
       expect(bpsSetParams).toEqual([fakeRequest, '/']);
-      expect(fakeRequest).toEqual(expect.any(CoreKibanaRequest));
-      expect(kibanaRequestFromMock.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "headers": Object {
-              "authorization": "ApiKey MTIzOmFiYw==",
-            },
-            "path": "/",
-          },
-        ]
-      `);
+      expect(isCoreKibanaRequest(fakeRequest)).toEqual(true);
+      expect(fakeRequest.auth.isAuthenticated).toEqual(false);
+      expect(fakeRequest.headers.authorization).toEqual('ApiKey MTIzOmFiYw==');
+      expect(fakeRequest.isFakeRequest).toEqual(true);
+      expect(fakeRequest.isInternalApiRequest).toEqual(false);
+      expect(fakeRequest.isSystemRequest).toEqual(false);
+      expect(fakeRequest.route.path).toEqual('/');
+      expect(fakeRequest.url.toString()).toEqual('https://fake-request/url');
+      expect(fakeRequest.uuid).toEqual(expect.any(String));
     });
 
     test('has API key, in non-default space', async () => {
-      const kibanaRequestFromMock = jest.spyOn(CoreKibanaRequest, 'from');
       const fakeRequest = getFakeKibanaRequest(context, spaceId, apiKey);
-
       const bpsSetParams = mockBasePathService.set.mock.calls[0];
       expect(bpsSetParams).toEqual([fakeRequest, '/s/rule-spaceId']);
-      expect(fakeRequest).toEqual(expect.any(CoreKibanaRequest));
-      expect(kibanaRequestFromMock.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "headers": Object {
-              "authorization": "ApiKey MTIzOmFiYw==",
-            },
-            "path": "/",
-          },
-        ]
-      `);
+      expect(isCoreKibanaRequest(fakeRequest)).toEqual(true);
+      expect(fakeRequest.auth.isAuthenticated).toEqual(false);
+      expect(fakeRequest.headers.authorization).toEqual('ApiKey MTIzOmFiYw==');
+      expect(fakeRequest.isFakeRequest).toEqual(true);
+      expect(fakeRequest.isInternalApiRequest).toEqual(false);
+      expect(fakeRequest.isSystemRequest).toEqual(false);
+      expect(fakeRequest.route.path).toEqual('/');
+      expect(fakeRequest.url.toString()).toEqual('https://fake-request/url');
+      expect(fakeRequest.uuid).toEqual(expect.any(String));
     });
 
     test('does not have API key, in default space', async () => {
-      const kibanaRequestFromMock = jest.spyOn(CoreKibanaRequest, 'from');
       const fakeRequest = getFakeKibanaRequest(context, 'default', null);
-
       const bpsSetParams = mockBasePathService.set.mock.calls[0];
       expect(bpsSetParams).toEqual([fakeRequest, '/']);
 
-      expect(fakeRequest).toEqual(expect.any(CoreKibanaRequest));
-      expect(kibanaRequestFromMock.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "headers": Object {},
-            "path": "/",
-          },
-        ]
-      `);
+      expect(fakeRequest.auth.isAuthenticated).toEqual(false);
+      expect(fakeRequest.headers).toEqual({});
+      expect(fakeRequest.isFakeRequest).toEqual(true);
+      expect(fakeRequest.isInternalApiRequest).toEqual(false);
+      expect(fakeRequest.isSystemRequest).toEqual(false);
+      expect(fakeRequest.route.path).toEqual('/');
+      expect(fakeRequest.url.toString()).toEqual('https://fake-request/url');
+      expect(fakeRequest.uuid).toEqual(expect.any(String));
     });
   });
 });

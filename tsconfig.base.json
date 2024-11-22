@@ -414,6 +414,8 @@
       "@kbn/core-http-server-internal/*": ["packages/core/http/core-http-server-internal/*"],
       "@kbn/core-http-server-mocks": ["packages/core/http/core-http-server-mocks"],
       "@kbn/core-http-server-mocks/*": ["packages/core/http/core-http-server-mocks/*"],
+      "@kbn/core-http-server-utils": ["packages/core/http/core-http-server-utils"],
+      "@kbn/core-http-server-utils/*": ["packages/core/http/core-http-server-utils/*"],
       "@kbn/core-i18n-browser": ["packages/core/i18n/core-i18n-browser"],
       "@kbn/core-i18n-browser/*": ["packages/core/i18n/core-i18n-browser/*"],
       "@kbn/core-i18n-browser-internal": ["packages/core/i18n/core-i18n-browser-internal"],

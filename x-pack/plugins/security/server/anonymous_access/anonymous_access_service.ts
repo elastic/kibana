@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-import type {
-  Capabilities,
-  CapabilitiesStart,
-  FakeRawRequest,
-  IBasePath,
-  IClusterClient,
-  KibanaRequest,
-  Logger,
-} from '@kbn/core/server';
-import { CoreKibanaRequest } from '@kbn/core/server';
+import type { Capabilities } from '@kbn/core-capabilities-common';
+import type { CapabilitiesStart } from '@kbn/core-capabilities-server';
+import type { IClusterClient } from '@kbn/core-elasticsearch-server';
+import type { FakeRawRequest, IBasePath, KibanaRequest } from '@kbn/core-http-server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import type { Logger } from '@kbn/logging';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 
@@ -176,6 +172,6 @@ export class AnonymousAccessService {
       auth: { isAuthenticated: authenticateRequest },
       path: '/',
     };
-    return CoreKibanaRequest.from(fakeRawRequest);
+    return kibanaRequestFactory(fakeRawRequest);
   }
 }
