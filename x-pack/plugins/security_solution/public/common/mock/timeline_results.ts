@@ -2015,15 +2015,6 @@ export const mockGetOneTimelineResult: TimelineResponse = {
   version: '1',
 };
 
-export const mockTimelineResult = {
-  data: {
-    getOneTimeline: mockGetOneTimelineResult,
-  },
-  loading: false,
-  networkStatus: 7,
-  stale: false,
-};
-
 export const defaultTimelineProps: CreateTimelineProps = {
   from: '2018-11-05T18:58:25.937Z',
   timeline: {
