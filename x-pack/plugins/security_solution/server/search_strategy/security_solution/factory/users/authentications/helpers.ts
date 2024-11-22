@@ -8,7 +8,7 @@
 import { get, getOr, isEmpty } from 'lodash/fp';
 import { set } from '@kbn/safer-lodash-set/fp';
 import { sourceFieldsMap, hostFieldsMap } from '@kbn/securitysolution-ecs';
-import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array';
+import { toObjectArrayOfStrings } from '@kbn/timelines-plugin/common';
 import type {
   AuthenticationsEdges,
   AuthenticationHit,
