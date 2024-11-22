@@ -113,7 +113,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             expect(Object.values(response.body.previousPeriod)).to.eql(0);
           });
 
-          it('returns statistics for each service node', async () => {
+          it('returns statistics for each service node', () => {
             const item = response.body.currentPeriod[serviceNodeIds[0]];
 
             expect(item?.cpuUsage?.some((point) => isFiniteNumber(point.y))).to.be(true);
