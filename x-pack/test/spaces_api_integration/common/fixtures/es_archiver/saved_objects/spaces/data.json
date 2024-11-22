@@ -412,7 +412,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:default_only",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "index-pattern": {
         "title": "A shared saved-object in one space"
@@ -452,7 +452,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:space_1_only",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "index-pattern": {
         "title": "A shared saved-object in one space"
@@ -472,7 +472,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:space_1_only_matching_origin",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "originId": "space_1_only",
       "index-pattern": {
@@ -491,7 +491,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:space_2_only",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "index-pattern": {
         "title": "A shared saved-object in one space"
@@ -511,7 +511,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:space_2_only_matching_origin",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "originId": "space_2_only",
       "index-pattern": {
@@ -569,7 +569,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:default_and_space_1",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "index-pattern": {
         "title": "A shared saved-object in the default and space_1 spaces"
@@ -586,7 +586,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:default_and_space_2",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "index-pattern": {
         "title": "A shared saved-object in the default and space_2 spaces"
@@ -603,7 +603,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:space_1_and_space_2",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "index-pattern": {
         "title": "A shared saved-object in the space_1 and space_2 spaces"
@@ -620,7 +620,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:each_space",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "index-pattern": {
         "title": "A shared saved-object in the default, space_1, and space_2 spaces"
@@ -643,7 +643,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:all_spaces",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "index-pattern": {
         "title": "A shared saved-object in all spaces"
@@ -660,7 +660,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:alias_delete_inclusive",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "index-pattern": {
         "title": "This is used to test that when an object is unshared from a space, inbound aliases for just those spaces are removed"
@@ -713,7 +713,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:alias_delete_exclusive",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "index-pattern": {
         "title": "This is used to test that when an object is unshared from all space, inbound aliases for all spaces are removed"
@@ -748,7 +748,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:conflict_1a_default",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "originId": "conflict_1a",
       "index-pattern": {
@@ -766,7 +766,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:conflict_1a_space_1",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "originId": "conflict_1a",
       "index-pattern": {
@@ -784,7 +784,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:conflict_1a_space_2",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "originId": "conflict_1a",
       "index-pattern": {
@@ -802,7 +802,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:conflict_1b_default",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "originId": "conflict_1b_space_2",
       "index-pattern": {
@@ -820,7 +820,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:conflict_1b_space_1",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "originId": "conflict_1b_space_2",
       "index-pattern": {
@@ -838,7 +838,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:conflict_1b_space_2",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "index-pattern": {
         "title": "This is used to test an inexact match conflict for an originId -> id match"
@@ -855,7 +855,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:conflict_1c_default_and_space_1",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "index-pattern": {
         "title": "This is used to test an inexact match conflict for an id -> originId match"
@@ -872,7 +872,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:conflict_1c_space_2",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "originId": "conflict_1c_default_and_space_1",
       "index-pattern": {
@@ -890,7 +890,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:conflict_2_default",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "originId": "conflict_2",
       "index-pattern": {
@@ -908,7 +908,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:conflict_2_space_1",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "originId": "conflict_2",
       "index-pattern": {
@@ -926,7 +926,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:conflict_2_space_2",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "originId": "conflict_2",
       "index-pattern": {
@@ -944,7 +944,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:conflict_2_all",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "originId": "conflict_2",
       "index-pattern": {
