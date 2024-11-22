@@ -4606,6 +4606,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-http-server-utils@link:packages/core/http/core-http-server-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-http-server@link:packages/core/http/core-http-server":
   version "0.0.0"
   uid ""
@@ -6907,6 +6911,10 @@
   uid ""
 
 "@kbn/search-inference-endpoints@link:x-pack/plugins/search_inference_endpoints":
+  version "0.0.0"
+  uid ""
+
+"@kbn/search-navigation@link:x-pack/plugins/search_solution/search_navigation":
   version "0.0.0"
   uid ""
 
