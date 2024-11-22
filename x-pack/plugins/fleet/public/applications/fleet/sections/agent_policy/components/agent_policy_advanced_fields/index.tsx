@@ -28,14 +28,13 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { UNKNOWN_SPACE } from '@kbn/spaces-plugin/common/constants';
-
 import { MissingPrivilegesToolTip } from '../../../../../../components/missing_privileges_tooltip';
 
 import {
   LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   dataTypes,
   DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT,
+  UNKNOWN_SPACE,
 } from '../../../../../../../common/constants';
 import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
 import {
@@ -351,14 +350,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
             }
             value={
               'space_ids' in agentPolicy && agentPolicy.space_ids
-                ? agentPolicy.space_ids.map((id) =>
-                    id === UNKNOWN_SPACE
-                      ? i18n.translate(
-                          'xpack.fleet.agentPolicyForm.spaceSelector.unavailableSpaceBadgeLabel',
-                          { defaultMessage: 'Unavailable space' }
-                        )
-                      : id
-                  )
+                ? agentPolicy.space_ids.filter((id) => id !== UNKNOWN_SPACE)
                 : [spaceId || 'default']
             }
             setInvalidSpaceError={agentPolicyFormContext?.setInvalidSpaceError}
