@@ -15,9 +15,8 @@ import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { useKibanaContextForPluginProvider } from './utils/use_kibana';
 import { DataUsageStartDependencies, DataUsagePublicStart } from './types';
-import { PLUGIN_ID } from '../common';
+import { PLUGIN_ID, DataUsageReactQueryClientProvider } from '../common';
 import { DataUsageMetricsPage } from './app/data_usage_metrics_page';
-import { DataUsageReactQueryClientProvider } from '../common/query_client';
 
 export const renderApp = (
   core: CoreStart,

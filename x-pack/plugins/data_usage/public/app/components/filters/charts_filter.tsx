@@ -10,8 +10,7 @@ import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from '
 import { EuiPopoverTitle, EuiSelectable, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
-import { METRIC_TYPE_API_VALUES_TO_UI_OPTIONS_MAP } from '../../../../common/rest_types';
-
+import { METRIC_TYPE_API_VALUES_TO_UI_OPTIONS_MAP } from '../../../../common';
 import { UX_LABELS } from '../../translations';
 import { ChartsFilterPopover } from './charts_filter_popover';
 import { ToggleAllButton } from './toggle_all_button';

@@ -10,8 +10,8 @@ import {
   isDefaultMetricType,
   METRIC_TYPE_API_VALUES_TO_UI_OPTIONS_MAP,
   METRIC_TYPE_VALUES,
-} from '../../../common/rest_types';
-import { DEFAULT_SELECTED_OPTIONS } from '../../../common';
+  DEFAULT_SELECTED_OPTIONS,
+} from '../../../common';
 import { FILTER_NAMES } from '../translations';
 import { useDataUsageMetricsUrlParams } from './use_charts_url_params';
 import { formatBytes } from '../../utils/format_bytes';

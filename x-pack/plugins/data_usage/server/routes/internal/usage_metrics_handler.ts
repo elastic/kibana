@@ -8,11 +8,11 @@
 import { chunk } from 'lodash/fp';
 import { RequestHandler } from '@kbn/core/server';
 import {
-  MetricTypes,
-  UsageMetricsAutoOpsResponseSchemaBody,
-  UsageMetricsRequestBody,
-  UsageMetricsResponseSchemaBody,
-} from '../../../common/rest_types';
+  type MetricTypes,
+  type UsageMetricsAutoOpsResponseSchemaBody,
+  type UsageMetricsRequestBody,
+  type UsageMetricsResponseSchemaBody,
+} from '../../../common';
 import { DataUsageContext, DataUsageRequestHandlerContext } from '../../types';
 
 import { errorHandler } from '../error_handler';

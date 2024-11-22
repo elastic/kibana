@@ -8,8 +8,11 @@
 import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { UsageMetricsRequestBody, UsageMetricsResponseSchemaBody } from '../../common/rest_types';
-import { DATA_USAGE_METRICS_API_ROUTE } from '../../common';
+import {
+  type UsageMetricsRequestBody,
+  type UsageMetricsResponseSchemaBody,
+  DATA_USAGE_METRICS_API_ROUTE,
+} from '../../common';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 
 interface ErrorType {
