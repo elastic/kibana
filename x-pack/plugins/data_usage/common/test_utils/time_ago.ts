@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export { TestProvider } from './test_provider';
-export { dataUsageTestQueryClientOptions } from './test_query_client_options';
-export { timeXMinutesAgo } from './time_ago';
+export const timeXMinutesAgo = (x: number) =>
+  new Date(new Date().getTime() - x * 60 * 1000).toISOString();
