@@ -516,7 +516,7 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
   /**
    * Additional route options {@link RouteConfigOptions}.
    */
-  options?: Omit<RouteConfigOptions<Method>, 'security'>;
+  options?: RouteConfigOptions<Method>;
 }
 
 /**
