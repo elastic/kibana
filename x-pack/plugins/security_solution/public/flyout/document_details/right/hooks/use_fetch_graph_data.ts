@@ -10,6 +10,7 @@ import type {
   GraphRequest,
   GraphResponse,
 } from '@kbn/cloud-security-posture-common/types/graph/latest';
+import { useMemo } from 'react';
 import { EVENT_GRAPH_VISUALIZATION_API } from '../../../../../common/constants';
 import { useHttp } from '../../../../common/lib/kibana';
 
@@ -30,6 +31,11 @@ export interface UseFetchGraphDataParams {
      * Defaults to true.
      */
     enabled?: boolean;
+    /**
+     * If true, the query will refetch on window focus.
+     * Defaults to true.
+     */
+    refetchOnWindowFocus?: boolean;
   };
 }
 
@@ -61,18 +67,25 @@ export const useFetchGraphData = ({
   req,
   options,
 }: UseFetchGraphDataParams): UseFetchGraphDataResult => {
-  const { actorIds, eventIds, start, end } = req.query;
+  const { eventIds, start, end, esQuery } = req.query;
   const http = useHttp();
+  const QUERY_KEY = useMemo(
+    () => ['useFetchGraphData', eventIds, start, end, esQuery],
+    [end, esQuery, eventIds, start]
+  );
 
   const { isLoading, isError, data } = useQuery<GraphResponse>(
-    ['useFetchGraphData', actorIds, eventIds, start, end],
+    QUERY_KEY,
     () => {
       return http.post<GraphResponse>(EVENT_GRAPH_VISUALIZATION_API, {
         version: '1',
         body: JSON.stringify(req),
       });
     },
-    options
+    {
+      enabled: options?.enabled ?? true,
+      refetchOnWindowFocus: options?.refetchOnWindowFocus ?? true,
+    }
   );
 
   return {

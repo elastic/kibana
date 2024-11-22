@@ -10,7 +10,7 @@ import Fs from 'fs/promises';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 
-const fileSizeLimit = 250_000;
+const fileSizeLimit = 500_000;
 
 export const createChunkFiles = async ({
   index,

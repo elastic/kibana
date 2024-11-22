@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
 import { indexPatternValidatorFactory } from '../../../../../../../rule_creation_ui/validators/index_pattern_validator_factory';
 import { dataViewIdValidatorFactory } from '../../../../../../../rule_creation_ui/validators/data_view_id_validator_factory';
@@ -20,6 +19,7 @@ import { DataSourceType } from '../../../../../../../../../common/api/detection_
 import { RuleFieldEditFormWrapper } from '../rule_field_edit_form_wrapper';
 import { DataSourceEdit } from './data_source_edit';
 import { INDEX_HELPER_TEXT } from '../../../../../../../rule_creation_ui/components/step_define_rule/translations';
+import * as i18n from './translations';
 
 export function DataSourceEditForm(): JSX.Element {
   return (
@@ -53,12 +53,7 @@ const dataSourceSchema = {
   index_patterns: {
     defaultValue: [],
     type: FIELD_TYPES.COMBO_BOX,
-    label: i18n.translate(
-      'xpack.securitySolution.ruleManagement.threeWayDiff.finalEdit.indexPatterns.label',
-      {
-        defaultMessage: 'Index patterns',
-      }
-    ),
+    label: i18n.INDEX_PATTERNS,
     helpText: <EuiText size="xs">{INDEX_HELPER_TEXT}</EuiText>,
     validations: [
       {
@@ -77,12 +72,7 @@ const dataSourceSchema = {
     ],
   },
   data_view_id: {
-    label: i18n.translate(
-      'xpack.securitySolution.ruleManagement.threeWayDiff.finalEdit.dataViewSelector.name',
-      {
-        defaultMessage: 'Data view',
-      }
-    ),
+    label: i18n.DATA_VIEW,
     validations: [
       {
         validator: (...args: Parameters<ValidationFunc>) => {
