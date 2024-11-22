@@ -202,29 +202,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     setFieldValue,
   });
 
-  const handleSetRuleFromTimeline = useCallback<SetRuleQuery>(
-    ({ index: timelineIndex, queryBar: timelineQueryBar, eqlOptions }) => {
-      const setQuery = () => {
-        setFieldValue('index', timelineIndex);
-        setFieldValue('queryBar', timelineQueryBar);
-      };
-      if (timelineQueryBar.query.language === 'eql') {
-        setPersistentEqlQuery(timelineQueryBar);
-        setRuleTypeCallback('eql', setQuery);
-        setOptionsSelected((prevOptions) => ({
-          ...prevOptions,
-          ...(eqlOptions != null ? eqlOptions : {}),
-        }));
-      } else {
-        setQuery();
-      }
-    },
-    [setFieldValue, setRuleTypeCallback, setOptionsSelected, setPersistentEqlQuery]
-  );
-
-  const { onOpenTimeline, loading: timelineQueryLoading } =
-    useRuleFromTimeline(handleSetRuleFromTimeline);
-
   // Callback for when user toggles between Data Views and Index Patterns
   const onChangeDataSource = useCallback(
     (optionId: string) => {
@@ -273,10 +250,31 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     setThreatIndexModified(!isEqual(threatIndex, threatIndicesConfig));
   }, [threatIndex, threatIndicesConfig]);
 
-  const { setPersistentEqlQuery } = usePersistentQuery({
+  const { setPersistentEqlQuery, setPersistentEqlOptions } = usePersistentQuery({
     form,
   });
   usePersistentAlertSuppressionState({ form });
+
+  const handleSetRuleFromTimeline = useCallback<SetRuleQuery>(
+    ({ index: timelineIndex, queryBar: timelineQueryBar, eqlOptions }) => {
+      const setQuery = () => {
+        setFieldValue('index', timelineIndex);
+        setFieldValue('queryBar', timelineQueryBar);
+      };
+      if (timelineQueryBar.query.language === 'eql') {
+        setPersistentEqlQuery(timelineQueryBar);
+        setPersistentEqlOptions(eqlOptions ?? {});
+        setRuleTypeCallback('eql', setQuery);
+        setFieldValue('eqlOptions', eqlOptions ?? {});
+      } else {
+        setQuery();
+      }
+    },
+    [setFieldValue, setRuleTypeCallback, setPersistentEqlQuery, setPersistentEqlOptions]
+  );
+
+  const { onOpenTimeline, loading: timelineQueryLoading } =
+    useRuleFromTimeline(handleSetRuleFromTimeline);
 
   // if saved query failed to load:
   // - reset shouldLoadFormDynamically to false, as non existent query cannot be used for loading and execution

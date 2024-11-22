@@ -16,6 +16,7 @@ import { useAssistantAvailability } from '../../../../assistant/use_assistant_av
 import * as i18nAssistant from '../../../../detections/pages/detection_engine/translations';
 import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import type { FormHook, ValidationError } from '../../../../shared_imports';
+
 import * as i18n from './translations';
 
 const getLanguageName = (language: string | undefined) => {

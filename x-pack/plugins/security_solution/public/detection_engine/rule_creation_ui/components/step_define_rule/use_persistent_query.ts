@@ -8,6 +8,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { isEqual } from 'lodash';
 import usePrevious from 'react-use/lib/usePrevious';
+import type { EqlOptions } from '../../../../../common/search_strategy';
 import type { FieldHook } from '../../../../shared_imports';
 import { useFormData, type FormHook } from '../../../../shared_imports';
 import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
@@ -34,6 +35,7 @@ interface UsePersistentQueryParams {
 interface UsePersistentQueryResult {
   setPersistentQuery: (value: FieldValueQueryBar) => void;
   setPersistentEqlQuery: (value: FieldValueQueryBar) => void;
+  setPersistentEqlOptions: (value: EqlOptions) => void;
   setPersistentEsqlQuery: (value: FieldValueQueryBar) => void;
 }
 
@@ -52,13 +54,15 @@ export function usePersistentQuery({ form }: UsePersistentQueryParams): UsePersi
    * fields. Kibana's Form lib doesn't persist field values when corresponding UseField hooks
    * aren't rendered.
    */
-  const [{ ruleType, queryBar: currentQuery }] = useFormData<DefineStepRule>({
-    form,
-    watch: ['ruleType', 'queryBar'],
-  });
+  const [{ ruleType, queryBar: currentQuery, eqlOptions: currentEqlOptions }] =
+    useFormData<DefineStepRule>({
+      form,
+      watch: ['ruleType', 'queryBar', 'eqlOptions'],
+    });
   const previousRuleType = usePrevious(ruleType);
   const queryRef = useRef<FieldValueQueryBar>(DEFAULT_KQL_QUERY_FIELD_VALUE);
   const eqlQueryRef = useRef<FieldValueQueryBar>(DEFAULT_EQL_QUERY_FIELD_VALUE);
+  const eqlOptionsRef = useRef<EqlOptions>({});
   const esqlQueryRef = useRef<FieldValueQueryBar>(DEFAULT_ESQL_QUERY_FIELD_VALUE);
 
   /**
@@ -75,6 +79,10 @@ export function usePersistentQuery({ form }: UsePersistentQueryParams): UsePersi
     if (isEqlRule(ruleType)) {
       eqlQueryRef.current =
         currentQuery?.query?.language === EQL_QUERY_LANGUAGE ? currentQuery : eqlQueryRef.current;
+      eqlOptionsRef.current =
+        currentQuery?.query?.language === EQL_QUERY_LANGUAGE
+          ? currentEqlOptions
+          : eqlOptionsRef.current;
 
       return;
     }
@@ -91,7 +99,7 @@ export function usePersistentQuery({ form }: UsePersistentQueryParams): UsePersi
     }
 
     queryRef.current = currentQuery;
-  }, [ruleType, currentQuery]);
+  }, [ruleType, currentQuery, currentEqlOptions]);
 
   /**
    * This useEffect restores a corresponding query (kuery, EQL or ES|QL) in form data
@@ -105,10 +113,14 @@ export function usePersistentQuery({ form }: UsePersistentQueryParams): UsePersi
     }
 
     const queryField = form.getFields().queryBar as FieldHook<FieldValueQueryBar>;
+    const eqlOptionsField = form.getFields().eqlOptions as FieldHook<EqlOptions>;
 
     if (isEqlRule(ruleType)) {
       queryField.reset({
         defaultValue: eqlQueryRef.current,
+      });
+      eqlOptionsField.reset({
+        defaultValue: eqlOptionsRef.current,
       });
       return;
     }
@@ -149,6 +161,7 @@ export function usePersistentQuery({ form }: UsePersistentQueryParams): UsePersi
     () => ({
       setPersistentQuery: (value: FieldValueQueryBar) => (queryRef.current = value),
       setPersistentEqlQuery: (value: FieldValueQueryBar) => (eqlQueryRef.current = value),
+      setPersistentEqlOptions: (value: EqlOptions) => (eqlOptionsRef.current = value),
       setPersistentEsqlQuery: (value: FieldValueQueryBar) => (esqlQueryRef.current = value),
     }),
     []
