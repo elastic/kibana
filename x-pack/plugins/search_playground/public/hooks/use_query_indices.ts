@@ -10,32 +10,42 @@ import { IndexName } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useKibana } from './use_kibana';
 import { APIRoutes } from '../types';
 
-export const useQueryIndices = ({
-  query,
-  targetIndices = [],
-}: {
-  query?: string;
-  targetIndices?: string[];
-} = {}): { indices: IndexName[]; isLoading: boolean; isFetched: boolean } => {
+export const useQueryIndices = (
+  {
+    query,
+    exact,
+  }: {
+    query?: string;
+    exact?: boolean;
+  } = { query: '', exact: false }
+): { indices: IndexName[]; isLoading: boolean; isFetched: boolean; isError: boolean } => {
   const { services } = useKibana();
 
-  const { data, isLoading, isFetched } = useQuery({
-    queryKey: ['indices', query, targetIndices.join(',')],
+  const { data, isLoading, isFetched, isError } = useQuery({
+    queryKey: ['indices', query],
     queryFn: async () => {
-      const response = await services.http.get<{
-        indices: string[];
-      }>(APIRoutes.GET_INDICES, {
-        query: {
-          search_query: query,
-          target_indices: targetIndices.join(','),
-          size: 10,
-        },
-      });
+      try {
+        const response = await services.http.get<{
+          indices: string[];
+        }>(APIRoutes.GET_INDICES, {
+          query: {
+            search_query: query,
+            exact,
+            size: 10,
+          },
+        });
 
-      return response.indices;
+        return response.indices;
+      } catch (err) {
+        if (err?.response?.status === 404) {
+          return [];
+        }
+
+        throw err;
+      }
     },
     initialData: [],
   });
 
-  return { indices: data, isLoading, isFetched };
+  return { indices: data, isLoading, isFetched, isError };
 };

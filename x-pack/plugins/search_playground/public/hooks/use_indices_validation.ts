@@ -12,7 +12,8 @@ export const useIndicesValidation = (unvalidatedIndices: string[]) => {
   const [isValidated, setIsValidated] = useState<boolean>(false);
   const [validIndices, setValidIndices] = useState<string[]>([]);
   const { indices, isFetched: isIndicesLoaded } = useQueryIndices({
-    targetIndices: unvalidatedIndices,
+    query: unvalidatedIndices.join(','),
+    exact: true,
   });
 
   useEffect(() => {
