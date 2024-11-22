@@ -191,6 +191,7 @@ export class SyntheticsMonitorTestService {
         {
           feature: {
             uptime: uptimePermissions,
+            slo: ['all'],
           },
           spaces: ['*'],
         },
