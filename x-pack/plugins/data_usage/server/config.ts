@@ -26,6 +26,19 @@ export const configSchema = schema.object({
       ),
     })
   ),
+  /**
+   * For internal use. A list of string values (comma delimited) that will enable experimental
+   * type of functionality that is not yet released. Valid values for this settings need to
+   * be defined in:
+   * `x-pack/plugins/dataUsage/common/experimental_features.ts`
+   * under the `allowedExperimentalValues` object
+   *
+   * @example
+   * xpack.dataUsage.enableExperimental: ['someFeature']
+   */
+  enableExperimental: schema.arrayOf(schema.string(), {
+    defaultValue: () => [],
+  }),
 });
 
 export type DataUsageConfigType = TypeOf<typeof configSchema>;
