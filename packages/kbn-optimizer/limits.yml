@@ -17,7 +17,7 @@ pageLoadAssetSize:
   cloudFullStory: 18493
   cloudLinks: 55984
   cloudSecurityPosture: 19109
-  console: 46091
+  console: 61528
   contentManagement: 16254
   controls: 60000
   core: 564663
@@ -63,7 +63,7 @@ pageLoadAssetSize:
   expressionTagcloud: 27505
   expressionXY: 45000
   features: 21723
-  fieldFormats: 65209
+  fieldFormats: 81291
   fieldsMetadata: 21885
   files: 22673
   filesManagement: 18683
@@ -189,7 +189,7 @@ pageLoadAssetSize:
   visTypeTagcloud: 37575
   visTypeTimelion: 68883
   visTypeTimeseries: 55203
-  visTypeVega: 153573
+  visTypeVega: 571074
   visTypeVislib: 242838
   visTypeXy: 46868
   visualizations: 90000
