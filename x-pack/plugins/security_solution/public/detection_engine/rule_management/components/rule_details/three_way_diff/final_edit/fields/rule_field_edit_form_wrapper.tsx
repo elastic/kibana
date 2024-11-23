@@ -16,7 +16,7 @@ import type {
   DiffableAllFields,
   DiffableRule,
 } from '../../../../../../../../common/api/detection_engine';
-import { useFinalSideContext } from '../../field_final_side';
+import { useFieldFinalSideContext } from '../../field_final_side';
 import { useDiffableRuleContext } from '../../diffable_rule_context';
 import * as i18n from '../../translations';
 import type { RuleFieldEditComponentProps } from './rule_field_edit_component_props';
@@ -55,7 +55,10 @@ export function RuleFieldEditFormWrapper({
   deserializer,
   serializer,
 }: RuleFieldEditFormWrapperProps) {
-  const { fieldName, setReadOnlyMode } = useFinalSideContext();
+  const {
+    state: { fieldName, triggerSubmitSubject },
+    actions: { setReadOnlyMode, setValid },
+  } = useFieldFinalSideContext();
   const { finalDiffableRule, setRuleFieldResolvedValue } = useDiffableRuleContext();
 
   const deserialize = useCallback(
@@ -110,14 +113,23 @@ export function RuleFieldEditFormWrapper({
     form.validate();
   }, [form]);
 
+  // Sets global field value validity state
+  useEffect(() => {
+    setValid(form.isValid ?? false);
+  }, [form.isValid, setValid]);
+
+  // Submits form upon submission events arrival
+  useEffect(() => {
+    const subscription = triggerSubmitSubject.subscribe(() => form.submit());
+
+    return () => subscription.unsubscribe();
+  }, [triggerSubmitSubject, form]);
+
   return (
     <>
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiButtonEmpty iconType="cross" onClick={setReadOnlyMode}>
           {i18n.CANCEL_BUTTON_LABEL}
-        </EuiButtonEmpty>
-        <EuiButtonEmpty iconType="save" onClick={form.submit} disabled={!form.isValid}>
-          {i18n.SAVE_BUTTON_LABEL}
         </EuiButtonEmpty>
       </EuiFlexGroup>
       {modal}

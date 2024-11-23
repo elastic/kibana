@@ -17,7 +17,7 @@ import type {
 import { ThreeWayDiffConflict } from '../../../../../../../common/api/detection_engine';
 import type { FieldUpgradeState } from '../../../../model/prebuilt_rule_upgrade';
 import { ComparisonSide } from '../comparison_side/comparison_side';
-import { FieldFinalSide, FinalSideMode } from '../field_final_side';
+import { FieldFinalSide, FieldFinalSideMode } from '../field_final_side';
 import { FieldUpgradeConflictsResolverHeader } from './field_upgrade_conflicts_resolver_header';
 import { useDiffableRuleContext } from '../diffable_rule_context';
 import type { UpgradeableDiffableFields } from '../../../../model/prebuilt_rule_upgrade/fields';
@@ -37,8 +37,8 @@ export function FieldUpgradeConflictsResolver<FieldName extends UpgradeableDiffa
   const hasConflict = fieldThreeWayDiff.conflict !== ThreeWayDiffConflict.NONE;
   const initialFieldFinalSideMode =
     fieldThreeWayDiff.conflict === ThreeWayDiffConflict.NON_SOLVABLE
-      ? FinalSideMode.Edit
-      : FinalSideMode.Readonly;
+      ? FieldFinalSideMode.Edit
+      : FieldFinalSideMode.Readonly;
 
   const { finalDiffableRule } = useDiffableRuleContext();
 

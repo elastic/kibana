@@ -5,24 +5,31 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
+import { Subject } from 'rxjs';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { SideHeader } from '../components/side_header';
-import { FinalSideHelpInfo } from './final_side_help_info';
+import { FieldFinalSideHelpInfo } from './field_final_side_help_info';
 import { FieldFinalReadOnly } from '../final_readonly/field_final_readonly';
 import { FieldFinalEdit } from '../final_edit/field_final_edit';
-import { FinalSideMode } from './final_side_mode';
+import { FieldFinalSideMode } from './field_final_side_mode';
 import type { UpgradeableDiffableFields } from '../../../../model/prebuilt_rule_upgrade/fields';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
-import { FinalSideContextProvider, useFinalSideContext } from './final_side_context';
+import {
+  FieldFinalSideContextProvider,
+  useFieldFinalSideContext,
+} from './field_final_side_context';
 import * as i18n from './translations';
 
 interface FieldFinalSideProps {
   fieldName: UpgradeableDiffableFields;
-  initialMode: FinalSideMode;
+  initialMode: FieldFinalSideMode;
 }
 
 export function FieldFinalSide({ fieldName, initialMode }: FieldFinalSideProps): JSX.Element {
+  const submitSubject = useMemo(() => new Subject<void>(), []);
+  const handleSaveButtonClick = useCallback(() => submitSubject.next(), [submitSubject]);
+
   return (
     <>
       <SideHeader>
@@ -32,32 +39,38 @@ export function FieldFinalSide({ fieldName, initialMode }: FieldFinalSideProps):
               <EuiTitle size="xxs">
                 <h3>
                   {i18n.FINAL_UPDATE}
-                  <FinalSideHelpInfo />
+                  <FieldFinalSideHelpInfo />
                 </h3>
               </EuiTitle>
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton iconType="checkInCircleFilled" size="s" onClick={() => {}}>
+            <EuiButton iconType="checkInCircleFilled" size="s" onClick={handleSaveButtonClick}>
               {i18n.SAVE}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </SideHeader>
-      <FinalSideContextProvider fieldName={fieldName} initialMode={initialMode}>
+      <FieldFinalSideContextProvider
+        fieldName={fieldName}
+        initialMode={initialMode}
+        submitSubject={submitSubject}
+      >
         <FieldFinalSideContent />
-      </FinalSideContextProvider>
+      </FieldFinalSideContextProvider>
     </>
   );
 }
 
 function FieldFinalSideContent(): JSX.Element {
-  const { mode } = useFinalSideContext();
+  const {
+    state: { mode },
+  } = useFieldFinalSideContext();
 
   switch (mode) {
-    case FinalSideMode.Readonly:
+    case FieldFinalSideMode.Readonly:
       return <FieldFinalReadOnly />;
-    case FinalSideMode.Edit:
+    case FieldFinalSideMode.Edit:
       return <FieldFinalEdit />;
     default:
       return assertUnreachable(mode);

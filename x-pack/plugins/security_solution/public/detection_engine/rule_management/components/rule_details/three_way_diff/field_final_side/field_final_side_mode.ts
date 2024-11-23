@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export enum FinalSideMode {
+export enum FieldFinalSideMode {
   Readonly = 'readonly',
   Edit = 'edit',
 }
