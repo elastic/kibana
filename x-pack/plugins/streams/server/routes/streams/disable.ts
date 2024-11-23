@@ -16,10 +16,10 @@ export const disableStreamsRoute = createServerRoute({
   params: z.object({}),
   options: {
     access: 'internal',
-    security: {
-      authz: {
-        requiredPrivileges: ['streams_write'],
-      },
+  },
+  security: {
+    authz: {
+      requiredPrivileges: ['streams_write'],
     },
   },
   handler: async ({

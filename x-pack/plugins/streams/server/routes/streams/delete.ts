@@ -24,12 +24,12 @@ export const deleteStreamRoute = createServerRoute({
   endpoint: 'DELETE /api/streams/{id}',
   options: {
     access: 'internal',
-    security: {
-      authz: {
-        enabled: false,
-        reason:
-          'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
-      },
+  },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
     },
   },
   params: z.object({

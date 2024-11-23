@@ -12,10 +12,10 @@ export const getStreamsStatusRoute = createServerRoute({
   endpoint: 'GET /api/streams/_status',
   options: {
     access: 'internal',
-    security: {
-      authz: {
-        requiredPrivileges: ['streams_read'],
-      },
+  },
+  security: {
+    authz: {
+      requiredPrivileges: ['streams_read'],
     },
   },
   handler: async ({ request, getScopedClients }): Promise<{ enabled: boolean }> => {
