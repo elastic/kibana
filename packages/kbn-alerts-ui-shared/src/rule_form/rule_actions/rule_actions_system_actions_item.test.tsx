@@ -21,6 +21,7 @@ import {
 import { ActionTypeModel } from '../../common';
 import { RuleActionsMessageProps } from './rule_actions_message';
 import { RuleActionsSystemActionsItem } from './rule_actions_system_actions_item';
+import { I18nProvider } from '@kbn/i18n-react';
 
 jest.mock('../hooks', () => ({
   useRuleFormState: jest.fn(),
@@ -81,7 +82,7 @@ const { validateParamsForWarnings } = jest.requireMock(
   '../validation/validate_params_for_warnings'
 );
 
-const mockConnectors = [getConnector('1', { id: 'action-1' })];
+const mockConnectors = [getConnector('1', { id: 'action-1', isSystemAction: true })];
 
 const mockActionTypes = [getActionType('1')];
 
@@ -259,5 +260,60 @@ describe('ruleActionsSystemActionsItem', () => {
     });
 
     expect(screen.getByText('warning message!')).toBeInTheDocument();
+  });
+
+  describe('licensing', () => {
+    it('should render the licensing message if the user does not have the sufficient license', async () => {
+      const mockConnectorsWithLicensing = [
+        getConnector('1', { id: 'action-1', isSystemAction: true }),
+      ];
+      const mockActionTypesWithLicensing = [
+        getActionType('1', {
+          enabledInLicense: false,
+          minimumLicenseRequired: 'platinum' as const,
+        }),
+      ];
+
+      const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
+      actionTypeRegistry.register(
+        getActionTypeModel('1', {
+          id: 'actionType-1',
+          validateParams: mockValidate,
+        })
+      );
+      useRuleFormState.mockReturnValue({
+        plugins: {
+          actionTypeRegistry,
+          http: {
+            basePath: {
+              publicBaseUrl: 'publicUrl',
+            },
+          },
+        },
+        actionsParamsErrors: {},
+        selectedRuleType: {
+          ...ruleType,
+          enabledInLicense: false,
+          minimumLicenseRequired: 'platinum' as const,
+        },
+        aadTemplateFields: [],
+        connectors: mockConnectorsWithLicensing,
+        connectorTypes: mockActionTypesWithLicensing,
+      });
+
+      render(
+        <I18nProvider>
+          <RuleActionsSystemActionsItem
+            action={getAction('1', { actionTypeId: 'actionType-1' })}
+            index={0}
+            producerId="stackAlerts"
+          />
+        </I18nProvider>
+      );
+
+      expect(
+        await screen.findByText('This feature requires a Platinum license.')
+      ).toBeInTheDocument();
+    });
   });
 });
