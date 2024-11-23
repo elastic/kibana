@@ -219,7 +219,9 @@ export async function suggest(
       getFieldsMap,
       getPolicies,
       getPolicyMetadata,
-      resourceRetriever?.canCreateEnrichPolicy!, // todo
+      resourceRetriever?.canCreateEnrichPolicy
+        ? resourceRetriever?.canCreateEnrichPolicy
+        : () => false,
       resourceRetriever?.getPreferences,
       fullAst
     );
