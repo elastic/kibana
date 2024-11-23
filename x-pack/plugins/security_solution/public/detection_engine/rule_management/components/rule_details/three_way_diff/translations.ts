@@ -14,13 +14,6 @@ export const CANCEL_BUTTON_LABEL = i18n.translate(
   }
 );
 
-export const SAVE_BUTTON_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.upgradeRules.saveButtonLabel',
-  {
-    defaultMessage: 'Save',
-  }
-);
-
 export const EDIT_BUTTON_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.editButtonLabel',
   {

@@ -7,12 +7,15 @@
 
 import React from 'react';
 import { EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
-import { useFinalSideContext } from '../field_final_side';
+import { useFieldFinalSideContext } from '../field_final_side';
 import * as i18n from '../translations';
 import { FieldReadOnly } from './field_readonly';
 
 export function FieldFinalReadOnly(): JSX.Element {
-  const { setEditMode, fieldName } = useFinalSideContext();
+  const {
+    state: { fieldName },
+    actions: { setEditMode },
+  } = useFieldFinalSideContext();
 
   return (
     <>

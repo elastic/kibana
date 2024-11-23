@@ -19,7 +19,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
  */
 const POPOVER_WIDTH = 320;
 
-export function FinalSideHelpInfo(): JSX.Element {
+export function FieldFinalSideHelpInfo(): JSX.Element {
   const [isPopoverOpen, togglePopover] = useToggle(false);
 
   const button = (

@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export * from './final_side_mode';
+export * from './field_final_side_mode';
 export * from './field_final_side';
-export { useFinalSideContext } from './final_side_context';
+export { useFieldFinalSideContext } from './field_final_side_context';
