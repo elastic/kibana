@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { uniq } from 'lodash';
 
 export const entitySourceSchema = z.object({
   type: z.string(),
@@ -18,74 +19,88 @@ export const entitySourceSchema = z.object({
 
 export type EntitySource = z.infer<typeof entitySourceSchema>;
 
-const sourceCommand = ({ source }: { source: EntitySource }) => {
-  let query = `FROM ${source.index_patterns}`;
+const sourceCommand = ({ sources }: { sources: EntitySource[] }) => {
+  return `FROM ${sources.flatMap((source) => source.index_patterns).join(', ')}`;
+};
 
-  const esMetadataFields = source.metadata_fields.filter((field) =>
-    ['_index', '_id'].includes(field)
-  );
-  if (esMetadataFields.length) {
-    query += ` METADATA ${esMetadataFields.join(',')}`;
-  }
+const idEvalCommand = ({ sources }: { sources: EntitySource[] }) => {
+  const conditions = sources.flatMap((source) => {
+    return [
+      source.identity_fields.map((field) => `${field} IS NOT NULL`).join(' AND '),
+      source.identity_fields.length === 1
+        ? source.identity_fields[0]
+        : `CONCAT(${source.identity_fields.join(', ":", ')})`,
+    ];
+  });
+  return `EVAL entity.id = CASE(${conditions.join(', ')})`;
+};
 
-  return query;
+const timestampEvalCommand = ({ sources }: { sources: EntitySource[] }) => {
+  const conditions = uniq(sources.map((source) => source.timestamp_field)).flatMap((field) => {
+    return [`${field} IS NOT NULL`, field];
+  });
+  return `EVAL entity.timestamp = CASE(${conditions.join(', ')})`;
 };
 
 const filterCommands = ({
-  source,
+  sources,
   start,
   end,
 }: {
-  source: EntitySource;
+  sources: EntitySource[];
   start: string;
   end: string;
 }) => {
-  const commands = [
-    `WHERE ${source.timestamp_field} >= "${start}"`,
-    `WHERE ${source.timestamp_field} <= "${end}"`,
+  const conditions = [
+    'entity.id IS NOT NULL',
+    'entity.timestamp IS NOT NULL',
+    `(entity.timestamp >= "${start}" AND entity.timestamp <= "${end}")`,
   ];
 
-  source.identity_fields.forEach((field) => {
-    commands.push(`WHERE ${field} IS NOT NULL`);
-  });
-
-  source.filters.forEach((filter) => {
-    commands.push(`WHERE ${filter}`);
-  });
-
-  return commands;
+  return conditions.map((condition) => `WHERE ${condition}`).join(' | ');
 };
 
-const statsCommand = ({ source }: { source: EntitySource }) => {
+const statsCommand = ({
+  sources,
+  metadataFields,
+}: {
+  sources: EntitySource[];
+  metadataFields: string[];
+}) => {
   const aggs = [
     // default 'last_seen' attribute
-    `entity.last_seen_timestamp=MAX(${source.timestamp_field})`,
-    ...source.metadata_fields
-      .filter((field) => !source.identity_fields.some((idField) => idField === field))
-      .map((field) => `metadata.${field}=VALUES(${field})`),
+    'entity.last_seen_timestamp=MAX(entity.timestamp)',
+    ...uniq(sources.flatMap((source) => source.identity_fields)).map(
+      (field) => `${field}=TOP(${field}, 1, "desc")`
+    ),
+    ...metadataFields.map((field) => `metadata.${field}=VALUES(${field})`),
   ];
 
-  return `STATS ${aggs.join(',')} BY ${source.identity_fields.join(',')}`;
+  return `STATS ${aggs.join(',')} BY entity.id`;
 };
 
 export function getEntityInstancesQuery({
-  source,
+  sources,
   limit,
   start,
   end,
+  metadataFields = [],
 }: {
-  source: EntitySource;
+  sources: EntitySource[];
   limit: number;
   start: string;
   end: string;
+  metadataFields?: string[];
 }): string {
   const commands = [
-    sourceCommand({ source }),
-    ...filterCommands({ source, start, end }),
-    statsCommand({ source }),
-    `SORT entity.last_seen_timestamp DESC`,
+    sourceCommand({ sources }),
+    idEvalCommand({ sources }),
+    timestampEvalCommand({ sources }),
+    filterCommands({ sources, start, end }),
+    statsCommand({ sources, metadataFields }),
+    'SORT entity.last_seen_timestamp DESC',
     `LIMIT ${limit}`,
   ];
 
-  return commands.join('|');
+  return commands.join(' | ');
 }
