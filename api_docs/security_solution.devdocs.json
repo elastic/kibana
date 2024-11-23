@@ -880,8 +880,8 @@
                 "pluginId": "timelines",
                 "scope": "common",
                 "docId": "kibTimelinesPluginApi",
-                "section": "def-common.EqlOptionsSelected",
-                "text": "EqlOptionsSelected"
+                "section": "def-common.EqlOptions",
+                "text": "EqlOptions"
               }
             ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
