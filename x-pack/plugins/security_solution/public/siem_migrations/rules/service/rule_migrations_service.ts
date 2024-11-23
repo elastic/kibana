@@ -34,15 +34,7 @@ export class SiemRulesMigrationsService {
   }
 
   public isAvailable() {
-    setTimeout(() => {
-      this.core.notifications.toasts.addSuccess(
-        getSuccessToast({ migration_id: '132', rules: { total: Math.ceil(Math.random() * 100) } }, this.core)
-      );
-    }, 10000);
-    return (
-      ExperimentalFeaturesService.get().siemMigrationsEnabled && licenseService.isEnterprise()
-      // TODO: RBAC -> this.core.application.capabilities.siem?.migrations
-    );
+    return ExperimentalFeaturesService.get().siemMigrationsEnabled && licenseService.isEnterprise();
   }
 
   public startPolling() {
@@ -66,7 +58,7 @@ export class SiemRulesMigrationsService {
       this.latestStats$.next(results);
 
       if (pendingMigrationIds.length > 0) {
-        // notify pending migrations that have finished
+        // send notifications for finished migrations
         pendingMigrationIds.forEach((pendingMigrationId) => {
           const migration = results.find((item) => item.migration_id === pendingMigrationId);
           if (migration && migration.status === 'finished') {
@@ -82,7 +74,7 @@ export class SiemRulesMigrationsService {
         }
         return acc;
       }, []);
-      console.log('pendingMigrationIds', pendingMigrationIds);
+
       await new Promise((resolve) => setTimeout(resolve, this.pollingInterval));
     } while (pendingMigrationIds.length > 0);
   }
