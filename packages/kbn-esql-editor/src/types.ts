@@ -66,6 +66,8 @@ export interface ESQLEditorProps {
 
   /** adds a documentation icon in the footer which opens the inline docs as a flyout **/
   displayDocumentationAsFlyout?: boolean;
+
+  canCreateEnrichPolicy?: boolean;
 }
 
 export interface ESQLEditorDeps {

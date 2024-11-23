@@ -84,6 +84,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   hideQueryHistory,
   hasOutline,
   displayDocumentationAsFlyout,
+  canCreateEnrichPolicy = false,
 }: ESQLEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const datePickerOpenStatusRef = useRef<boolean>(false);
@@ -389,6 +390,7 @@ export const ESQLEditor = memo(function ESQLEditor({
       },
       // @ts-expect-error To prevent circular type import, type defined here is partial of full client
       getFieldsMetadata: fieldsMetadata?.getClient(),
+      canCreateEnrichPolicy: () => canCreateEnrichPolicy,
     };
     return callbacks;
   }, [
@@ -404,6 +406,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     indexManagementApiService,
     histogramBarTarget,
     fieldsMetadata,
+    canCreateEnrichPolicy,
   ]);
 
   const queryRunButtonProperties = useMemo(() => {

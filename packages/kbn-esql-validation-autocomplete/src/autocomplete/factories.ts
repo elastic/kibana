@@ -412,26 +412,36 @@ export const buildSettingDefinitions = (
   }));
 };
 
-export const buildNoPoliciesAvailableDefinition = (): SuggestionRawDefinition => ({
-  label: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.noPoliciesLabel', {
-    defaultMessage: 'No available policy',
-  }),
-  text: '',
-  kind: 'Issue',
-  detail: i18n.translate(
-    'kbn-esql-validation-autocomplete.esql.autocomplete.noPoliciesLabelsFound',
-    {
-      defaultMessage: 'Click to create',
-    }
-  ),
-  sortText: 'D',
-  command: {
-    id: 'esql.policies.create',
-    title: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.createNewPolicy', {
-      defaultMessage: 'Click to create',
+export const buildNoPoliciesAvailableDefinition = (
+  canCreateEnrichPolicy: boolean
+): SuggestionRawDefinition => {
+  const noPoliciesDef: SuggestionRawDefinition = {
+    label: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.noPoliciesLabel', {
+      defaultMessage: 'No available policy',
     }),
-  },
-});
+    text: '',
+    kind: 'Issue',
+    detail: '',
+  };
+
+  if (canCreateEnrichPolicy) {
+    noPoliciesDef.detail = i18n.translate(
+      'kbn-esql-validation-autocomplete.esql.autocomplete.noPoliciesLabelsFound',
+      {
+        defaultMessage: 'Click to create',
+      }
+    );
+    noPoliciesDef.sortText = 'D';
+    noPoliciesDef.command = {
+      id: 'esql.policies.create',
+      title: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.createNewPolicy', {
+        defaultMessage: 'Click to create',
+      }),
+    };
+  }
+
+  return noPoliciesDef;
+};
 
 export function getUnitDuration(unit: number = 1) {
   const filteredTimeLiteral = timeUnitsToSuggest.filter(({ name }) => {
