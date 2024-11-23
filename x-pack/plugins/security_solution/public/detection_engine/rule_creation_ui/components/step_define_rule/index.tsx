@@ -26,7 +26,6 @@ import type { FieldSpec } from '@kbn/data-plugin/common';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import type { DataViewBase } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useSetFieldValueWithCallback } from '../../../../common/utils/use_set_field_value_cb';
 import type { SetRuleQuery } from '../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
 import { useRuleFromTimeline } from '../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
@@ -196,12 +195,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const alertSuppressionUpsellingMessage = useUpsellingMessage('alert_suppression_rule_form');
   const { getFields, reset, setFieldValue } = form;
 
-  const setRuleTypeCallback = useSetFieldValueWithCallback({
-    field: 'ruleType',
-    value: ruleType,
-    setFieldValue,
-  });
-
   // Callback for when user toggles between Data Views and Index Patterns
   const onChangeDataSource = useCallback(
     (optionId: string) => {
@@ -258,19 +251,26 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const handleSetRuleFromTimeline = useCallback<SetRuleQuery>(
     ({ index: timelineIndex, queryBar: timelineQueryBar, eqlOptions }) => {
       const setQuery = () => {
+        setPersistentEqlQuery(timelineQueryBar);
         setFieldValue('index', timelineIndex);
         setFieldValue('queryBar', timelineQueryBar);
       };
       if (timelineQueryBar.query.language === 'eql') {
-        setPersistentEqlQuery(timelineQueryBar);
-        setPersistentEqlOptions(eqlOptions ?? {});
-        setRuleTypeCallback('eql', setQuery);
-        setFieldValue('eqlOptions', eqlOptions ?? {});
+        setFieldValue('ruleType', 'eql');
+
+        // Forms needs to be re-rendered with a new rule type first
+        // setTimeout is used to delay setting rule type specific values.
+        // Without that form turns out in an "impossible" state.
+        setTimeout(() => {
+          setPersistentEqlOptions(eqlOptions ?? {});
+          setQuery();
+          setFieldValue('eqlOptions', eqlOptions ?? {});
+        });
       } else {
         setQuery();
       }
     },
-    [setFieldValue, setRuleTypeCallback, setPersistentEqlQuery, setPersistentEqlOptions]
+    [setFieldValue, setPersistentEqlQuery, setPersistentEqlOptions]
   );
 
   const { onOpenTimeline, loading: timelineQueryLoading } =
@@ -620,20 +620,17 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             <>
               <EuiSpacer size="s" />
               {isEqlRule(ruleType) ? (
-                <>
-                  <EqlQueryEdit
-                    key="eqlQueryBar"
-                    path="queryBar"
-                    eqlOptionsPath="eqlOptions"
-                    fieldsToValidateOnChange={ALERT_SUPPRESSION_FIELDS_FIELD_NAME}
-                    required
-                    showFilterBar
-                    dataView={indexPattern}
-                    loading={isIndexPatternLoading}
-                    disabled={isLoading}
-                    onValidityChange={setIsQueryBarValid}
-                  />
-                </>
+                <EqlQueryEdit
+                  path="queryBar"
+                  eqlOptionsPath="eqlOptions"
+                  fieldsToValidateOnChange={ALERT_SUPPRESSION_FIELDS_FIELD_NAME}
+                  required
+                  showFilterBar
+                  dataView={indexPattern}
+                  loading={isIndexPatternLoading}
+                  disabled={isLoading}
+                  onValidityChange={setIsQueryBarValid}
+                />
               ) : isEsqlRule(ruleType) ? (
                 <EsqlQueryEdit
                   path="queryBar"
