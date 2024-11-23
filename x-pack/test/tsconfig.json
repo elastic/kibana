@@ -139,7 +139,6 @@
     "@kbn/apm-data-access-plugin",
     "@kbn/profiling-utils",
     "@kbn/profiling-data-access-plugin",
-    "@kbn/coloring",
     "@kbn/es",
     "@kbn/metrics-data-access-plugin",
     "@kbn/dataset-quality-plugin",
