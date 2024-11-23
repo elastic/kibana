@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { waitForEuiPopoverOpen, screen, render } from '@elastic/eui/lib/test/rtl';
-import { waitFor } from '@testing-library/react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { render, waitFor, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FilterPopover } from '.';
 
