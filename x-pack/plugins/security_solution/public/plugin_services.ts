@@ -27,6 +27,7 @@ import type {
   StartPluginsDependencies,
   StartServices,
 } from './types';
+import { SiemMigrationsService } from './siem_migrations/service';
 
 export class PluginServices {
   private readonly telemetry: TelemetryService = new TelemetryService();
@@ -152,6 +153,7 @@ export class PluginServices {
       customDataService,
       timelineDataService,
       topValuesPopover: new TopValuesPopoverService(),
+      siemMigrations: new SiemMigrationsService(coreStart),
       ...(params && {
         onAppLeave: params.onAppLeave,
         setHeaderActionMenu: params.setHeaderActionMenu,

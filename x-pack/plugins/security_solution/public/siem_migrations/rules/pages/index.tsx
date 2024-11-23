@@ -19,13 +19,12 @@ import { RulesTable } from '../components/rules_table';
 import { NeedAdminForUpdateRulesCallOut } from '../../../detections/components/callouts/need_admin_for_update_callout';
 import { MissingPrivilegesCallOut } from '../../../detections/components/callouts/missing_privileges_callout';
 import { HeaderButtons } from '../components/header_buttons';
-import { useGetRuleMigrationsStatsAllQuery } from '../api/hooks/use_get_rule_migrations_stats_all';
 import { useRulePreviewFlyout } from '../hooks/use_rule_preview_flyout';
 import { NoMigrations } from '../components/no_migrations';
+import { useLatestStats } from '../hooks/use_latest_stats';
 
 const RulesPageComponent: React.FC = () => {
-  const { data: ruleMigrationsStatsAll, isLoading: isLoadingMigrationsStats } =
-    useGetRuleMigrationsStatsAllQuery();
+  const { data: ruleMigrationsStatsAll, isLoading: isLoadingMigrationsStats } = useLatestStats();
 
   const migrationsIds = useMemo(() => {
     if (isLoadingMigrationsStats || !ruleMigrationsStatsAll?.length) {

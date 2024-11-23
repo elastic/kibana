@@ -30,8 +30,8 @@ import { IntegrationRetriever } from './util/integration_retriever';
 import { retrievePrebuiltRulesMap } from './util/prebuilt_rules';
 import { RuleResourceRetriever } from './util/rule_resource_retriever';
 
-const ITERATION_BATCH_SIZE = 50 as const;
-const ITERATION_SLEEP_SECONDS = 10 as const;
+const ITERATION_BATCH_SIZE = 10 as const;
+const ITERATION_SLEEP_SECONDS = 5 as const;
 
 type MigrationsRunning = Map<string, { user: string; abortController: AbortController }>;
 
