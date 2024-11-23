@@ -16,8 +16,8 @@ import type {
 } from '../../../../../../../common/api/detection_engine';
 import { ThreeWayDiffConflict } from '../../../../../../../common/api/detection_engine';
 import type { FieldUpgradeState } from '../../../../model/prebuilt_rule_upgrade';
-import { ComparisonSide } from '../comparison_side/comparison_side';
-import { FieldFinalSide, FieldFinalSideMode } from '../field_final_side';
+import { FieldComparisonSide } from '../comparison_side/field_comparison_side';
+import { FieldFinalSide } from '../field_final_side';
 import { FieldUpgradeConflictsResolverHeader } from './field_upgrade_conflicts_resolver_header';
 import { useDiffableRuleContext } from '../diffable_rule_context';
 import type { UpgradeableDiffableFields } from '../../../../model/prebuilt_rule_upgrade/fields';
@@ -35,11 +35,6 @@ export function FieldUpgradeConflictsResolver<FieldName extends UpgradeableDiffa
 }: FieldUpgradeConflictsResolverProps<FieldName>): JSX.Element {
   const { euiTheme } = useEuiTheme();
   const hasConflict = fieldThreeWayDiff.conflict !== ThreeWayDiffConflict.NONE;
-  const initialFieldFinalSideMode =
-    fieldThreeWayDiff.conflict === ThreeWayDiffConflict.NON_SOLVABLE
-      ? FieldFinalSideMode.Edit
-      : FieldFinalSideMode.Readonly;
-
   const { finalDiffableRule } = useDiffableRuleContext();
 
   return (
@@ -56,7 +51,7 @@ export function FieldUpgradeConflictsResolver<FieldName extends UpgradeableDiffa
       >
         <EuiFlexGroup gutterSize="s" alignItems="flexStart">
           <EuiFlexItem grow={1}>
-            <ComparisonSide
+            <FieldComparisonSide
               fieldName={fieldName}
               fieldThreeWayDiff={fieldThreeWayDiff as ThreeWayDiff<DiffableAllFields[FieldName]>}
               resolvedValue={finalDiffableRule[fieldName] as DiffableAllFields[FieldName]}
@@ -70,7 +65,7 @@ export function FieldUpgradeConflictsResolver<FieldName extends UpgradeableDiffa
             `}
           />
           <EuiFlexItem grow={1}>
-            <FieldFinalSide fieldName={fieldName} initialMode={initialFieldFinalSideMode} />
+            <FieldFinalSide fieldName={fieldName} fieldUpgradeState={fieldUpgradeState} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </SplitAccordion>

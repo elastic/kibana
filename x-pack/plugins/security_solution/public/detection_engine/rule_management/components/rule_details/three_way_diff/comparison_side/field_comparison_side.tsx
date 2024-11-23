@@ -21,17 +21,17 @@ import { SideHeader } from '../components/side_header';
 import { ComparisonSideHelpInfo } from './comparison_side_help_info';
 import * as i18n from './translations';
 
-interface ComparisonSideProps<FieldName extends keyof DiffableAllFields> {
+interface FieldComparisonSideProps<FieldName extends keyof DiffableAllFields> {
   fieldName: FieldName;
   fieldThreeWayDiff: ThreeWayDiff<DiffableAllFields[FieldName]>;
   resolvedValue: DiffableAllFields[FieldName];
 }
 
-export function ComparisonSide<FieldName extends keyof DiffableAllFields>({
+export function FieldComparisonSide<FieldName extends keyof DiffableAllFields>({
   fieldName,
   fieldThreeWayDiff,
   resolvedValue,
-}: ComparisonSideProps<FieldName>) {
+}: FieldComparisonSideProps<FieldName>) {
   const [selectedVersions, setSelectedVersions] = useState<SelectedVersions>(
     SelectedVersions.CurrentFinal
   );
