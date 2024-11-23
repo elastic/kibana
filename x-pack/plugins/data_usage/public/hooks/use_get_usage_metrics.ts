@@ -8,8 +8,12 @@
 import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { UsageMetricsRequestBody, UsageMetricsResponseSchemaBody } from '../../common/rest_types';
+import { dateParser } from '../../common/utils';
 import { DATA_USAGE_METRICS_API_ROUTE } from '../../common';
+import type {
+  UsageMetricsRequestBody,
+  UsageMetricsResponseSchemaBody,
+} from '../../common/rest_types';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 
 interface ErrorType {
@@ -33,8 +37,8 @@ export const useGetDataUsageMetrics = (
           signal,
           version: '1',
           body: JSON.stringify({
-            from: body.from,
-            to: body.to,
+            from: dateParser(body.from),
+            to: dateParser(body.to),
             metricTypes: body.metricTypes,
             dataStreams: body.dataStreams,
           }),

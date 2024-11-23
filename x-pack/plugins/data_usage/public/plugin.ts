@@ -13,7 +13,8 @@ import {
   DataUsageStartDependencies,
   DataUsageSetupDependencies,
 } from './types';
-import { PLUGIN_ID, PLUGIN_NAME } from '../common';
+import { PLUGIN_ID } from '../common';
+import { PLUGIN_NAME } from './translations';
 
 export class DataUsagePlugin
   implements

@@ -27,10 +27,15 @@ export const getDataStreamsHandler = (
         meteringStats && !!meteringStats.length
           ? meteringStats
               .sort((a, b) => b.size_in_bytes - a.size_in_bytes)
-              .map((stat) => ({
-                name: stat.name,
-                storageSizeBytes: stat.size_in_bytes ?? 0,
-              }))
+              .reduce<Array<{ name: string; storageSizeBytes: number }>>((acc, stat) => {
+                if (stat.size_in_bytes > 0) {
+                  acc.push({
+                    name: stat.name,
+                    storageSizeBytes: stat.size_in_bytes ?? 0,
+                  });
+                }
+                return acc;
+              }, [])
           : [];
 
       return response.ok({

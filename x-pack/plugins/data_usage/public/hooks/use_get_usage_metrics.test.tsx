@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import React, { ReactNode } from 'react';
 import { QueryClient, QueryClientProvider, useQuery as _useQuery } from '@tanstack/react-query';
 import { renderHook } from '@testing-library/react-hooks';
 import { useGetDataUsageMetrics } from './use_get_usage_metrics';
 import { DATA_USAGE_METRICS_API_ROUTE } from '../../common';
 import { coreMock as mockCore } from '@kbn/core/public/mocks';
-import { dataUsageTestQueryClientOptions } from '../../common/test_utils/test_query_client_options';
+import { dataUsageTestQueryClientOptions, timeXMinutesAgo } from '../../common/test_utils';
 
 const useQueryMock = _useQuery as jest.Mock;
 
@@ -42,8 +41,8 @@ jest.mock('../utils/use_kibana', () => {
 });
 
 const defaultUsageMetricsRequestBody = {
-  from: moment().subtract(15, 'minutes').toISOString(),
-  to: moment().toISOString(),
+  from: timeXMinutesAgo(15),
+  to: timeXMinutesAgo(0),
   metricTypes: ['ingest_rate'],
   dataStreams: ['ds-1'],
 };

@@ -6,7 +6,7 @@
  */
 
 import https from 'https';
-import dateMath from '@kbn/datemath';
+
 import { SslConfig, sslSchema } from '@kbn/server-http-tools';
 import apm from 'elastic-apm-node';
 
@@ -16,9 +16,10 @@ import axios from 'axios';
 import { LogMeta } from '@kbn/core/server';
 import {
   UsageMetricsAutoOpsResponseSchema,
-  UsageMetricsAutoOpsResponseSchemaBody,
-  UsageMetricsRequestBody,
+  type UsageMetricsAutoOpsResponseSchemaBody,
+  type UsageMetricsRequestBody,
 } from '../../common/rest_types';
+import { dateParser } from '../../common/utils';
 import { AutoOpsConfig } from '../types';
 import { AutoOpsError } from './errors';
 import { appContextService } from './app_context';
@@ -30,7 +31,6 @@ const AUTO_OPS_MISSING_CONFIG_ERROR = 'Missing autoops configuration';
 const getAutoOpsAPIRequestUrl = (url?: string, projectId?: string): string =>
   `${url}/monitoring/serverless/v1/projects/${projectId}/metrics`;
 
-const dateParser = (date: string) => dateMath.parse(date)?.toISOString();
 export class AutoOpsAPIService {
   private logger: Logger;
   constructor(logger: Logger) {
