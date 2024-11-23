@@ -8,7 +8,11 @@
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import React from 'react';
 import { type AppMountParameters, type CoreStart } from '@kbn/core/public';
-import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
+import {
+  BreadcrumbsContextProvider,
+  RouteRenderer,
+  RouterProvider,
+} from '@kbn/typed-react-router-config';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { StreamsAppContextProvider } from '../streams_app_context_provider';
@@ -40,7 +44,9 @@ export function AppRoot({
     <StreamsAppContextProvider context={context}>
       <RedirectAppLinks coreStart={coreStart}>
         <RouterProvider history={history} router={streamsAppRouter}>
-          <RouteRenderer />
+          <BreadcrumbsContextProvider>
+            <RouteRenderer />
+          </BreadcrumbsContextProvider>
           <StreamsAppHeaderActionMenu appMountParameters={appMountParameters} />
         </RouterProvider>
       </RedirectAppLinks>

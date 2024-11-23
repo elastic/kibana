@@ -54,13 +54,11 @@ import { canManageEntityDefinition } from '../../lib/auth';
  */
 export const updateEntityDefinitionRoute = createEntityManagerServerRoute({
   endpoint: 'PATCH /internal/entities/definition/{id}',
-  options: {
-    security: {
-      authz: {
-        enabled: false,
-        reason:
-          'This endpoint mainly manages Elasticsearch resources using the requesting users credentials',
-      },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This endpoint mainly manages Elasticsearch resources using the requesting users credentials',
     },
   },
   params: z.object({

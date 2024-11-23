@@ -150,7 +150,7 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
           path: pathname,
           // @ts-expect-error we are essentially calling multiple methods at the same type so TS gets confused
           options: {
-            ...options,
+            ...omit(options, 'security'),
             access,
           },
           security,
