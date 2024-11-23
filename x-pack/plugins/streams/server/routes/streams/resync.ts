@@ -37,6 +37,7 @@ export const resyncStreamsRoute = createServerRoute({
         scopedClusterClient,
         id: stream.id,
       });
+
       await syncStream({
         scopedClusterClient,
         definition,
