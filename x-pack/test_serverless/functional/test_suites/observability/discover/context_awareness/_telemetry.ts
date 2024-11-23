@@ -28,6 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const browser = getService('browser');
 
   describe('telemetry', () => {
     describe('context', () => {
@@ -168,6 +169,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dataViews.switchToAndValidate('my-example-logs');
         await discover.waitUntilSearchingHasFinished();
         await unifiedFieldList.waitUntilSidebarHasLoaded();
+        await unifiedFieldList.clickFieldListItemAdd('log.level');
+        await browser.refresh();
+        await discover.waitUntilSearchingHasFinished();
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
         await ebtUIHelper.setOptIn(true);
         await unifiedFieldList.clickFieldListItemRemove('log.level');
         await header.waitUntilLoadingHasFinished();
@@ -223,6 +228,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dataViews.switchToAndValidate('my-example-logs');
         await discover.waitUntilSearchingHasFinished();
         await unifiedFieldList.waitUntilSidebarHasLoaded();
+        await unifiedFieldList.clickFieldListItemAdd('log.level');
+        await browser.refresh();
+        await discover.waitUntilSearchingHasFinished();
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
         await ebtUIHelper.setOptIn(true);
 
         await dataGrid.clickRowToggle();
@@ -269,7 +278,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dataViews.switchToAndValidate('my-example-logs');
         await discover.waitUntilSearchingHasFinished();
         await unifiedFieldList.waitUntilSidebarHasLoaded();
-
+        await unifiedFieldList.clickFieldListItemAdd('log.level');
+        await browser.refresh();
+        await discover.waitUntilSearchingHasFinished();
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
         await dataGrid.clickRowToggle({ rowIndex: 1 });
         await discover.isShowingDocViewer();
 
