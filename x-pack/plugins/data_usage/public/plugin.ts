@@ -14,12 +14,12 @@ import {
   DataUsageSetupDependencies,
   DataUsagePublicConfigType,
 } from './types';
-import { PLUGIN_ID, PLUGIN_NAME } from '../common';
+import { PLUGIN_ID } from '../common';
+import { PLUGIN_NAME } from './translations';
 import {
   ExperimentalFeatures,
   parseExperimentalConfigValue,
 } from '../common/experimental_features';
-
 export class DataUsagePlugin
   implements
     Plugin<
