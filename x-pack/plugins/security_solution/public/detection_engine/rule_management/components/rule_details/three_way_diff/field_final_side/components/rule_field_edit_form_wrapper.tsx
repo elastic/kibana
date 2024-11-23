@@ -11,14 +11,15 @@ import { extractValidationMessages } from '../../../../../../rule_creation/logic
 import type { FormWithWarningsSubmitHandler } from '../../../../../../../common/hooks/use_form_with_warnings';
 import { useFormWithWarnings } from '../../../../../../../common/hooks/use_form_with_warnings';
 import { Form } from '../../../../../../../shared_imports';
+import { useForm, Form } from '../../../../../../../shared_imports';
 import type { FormSchema, FormData } from '../../../../../../../shared_imports';
 import type {
   DiffableAllFields,
   DiffableRule,
 } from '../../../../../../../../common/api/detection_engine';
-import { useFieldFinalSideContext } from '../../field_final_side';
+import { useFieldFinalSideContext } from '../context/field_final_side_context';
 import { useDiffableRuleContext } from '../../diffable_rule_context';
-import * as i18n from '../../translations';
+import { useFieldEditFormContext } from '../context/field_edit_form_context';
 import type { RuleFieldEditComponentProps } from './rule_field_edit_component_props';
 import { useConfirmValidationErrorsModal } from '../../../../../../../common/hooks/use_confirm_validation_errors_modal';
 import {
@@ -55,9 +56,10 @@ export function RuleFieldEditFormWrapper({
   deserializer,
   serializer,
 }: RuleFieldEditFormWrapperProps) {
+  const { registerForm } = useFieldEditFormContext();
   const {
-    state: { fieldName, triggerSubmitSubject },
-    actions: { setReadOnlyMode, setValid },
+    state: { fieldName },
+    actions: { setReadOnlyMode },
   } = useFieldFinalSideContext();
   const { finalDiffableRule, setRuleFieldResolvedValue } = useDiffableRuleContext();
 
@@ -107,40 +109,23 @@ export function RuleFieldEditFormWrapper({
     },
   });
 
+  useEffect(() => registerForm(form), [registerForm, form]);
+
   // form.isValid has `undefined` value until all fields are dirty.
   // Run the validation upfront to visualize form validity state.
   useEffect(() => {
     form.validate();
   }, [form]);
 
-  // Sets global field value validity state
-  useEffect(() => {
-    setValid(form.isValid ?? false);
-  }, [form.isValid, setValid]);
-
-  // Submits form upon submission events arrival
-  useEffect(() => {
-    const subscription = triggerSubmitSubject.subscribe(() => form.submit());
-
-    return () => subscription.unsubscribe();
-  }, [triggerSubmitSubject, form]);
-
   return (
-    <>
-      <EuiFlexGroup justifyContent="flexEnd">
-        <EuiButtonEmpty iconType="cross" onClick={setReadOnlyMode}>
-          {i18n.CANCEL_BUTTON_LABEL}
-        </EuiButtonEmpty>
-      </EuiFlexGroup>
+    <Form form={form}>
       {modal}
-      <Form form={form}>
-        <FieldComponent
-          finalDiffableRule={finalDiffableRule}
-          setFieldValue={form.setFieldValue}
-          resetForm={form.reset}
-        />
-      </Form>
-    </>
+      <FieldComponent
+        finalDiffableRule={finalDiffableRule}
+        setFieldValue={form.setFieldValue}
+        resetForm={form.reset}
+      />
+    </Form>
   );
 }
 

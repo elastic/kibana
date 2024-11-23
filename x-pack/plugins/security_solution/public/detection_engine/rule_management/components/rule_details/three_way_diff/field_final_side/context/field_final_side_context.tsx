@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, type PropsWithChildren, useState, useMemo } from 'react';
-import type { Subject } from 'rxjs';
+import React, { createContext, useContext, type PropsWithChildren, useMemo } from 'react';
 import { useBoolean } from '@kbn/react-hooks';
-import type { UpgradeableDiffableFields } from '../../../../model/prebuilt_rule_upgrade/fields';
-import { invariant } from '../../../../../../../common/utils/invariant';
-import { FieldFinalSideMode } from './field_final_side_mode';
+import type { UpgradeableDiffableFields } from '../../../../../model/prebuilt_rule_upgrade/fields';
+import { invariant } from '../../../../../../../../common/utils/invariant';
+import { FieldFinalSideMode } from '../field_final_side_mode';
 
 interface FieldFinalSideState {
   /**
@@ -21,14 +20,6 @@ interface FieldFinalSideState {
    * Field final side view mode `Readonly` or `Editing`
    */
   mode: FieldFinalSideMode;
-  /**
-   * Whether the field value is valid. It might be not valid in editing after form validation.
-   */
-  valid: boolean;
-  /**
-   * Triggers field form submission
-   */
-  triggerSubmitSubject: Subject<void>;
 }
 
 interface FieldFinalSideActions {
@@ -40,10 +31,6 @@ interface FieldFinalSideActions {
    * Sets Editing field final side view mode
    */
   setEditMode: () => void;
-  /**
-   * Sets field's value validity
-   */
-  setValid: (value: boolean) => void;
 }
 
 interface FieldFinalSideContextType {
@@ -56,16 +43,13 @@ const FieldFinalSideContext = createContext<FieldFinalSideContextType | null>(nu
 interface FieldFinalSideContextProviderProps {
   fieldName: UpgradeableDiffableFields;
   initialMode: FieldFinalSideMode;
-  submitSubject: Subject<void>;
 }
 
 export function FieldFinalSideContextProvider({
   children,
   fieldName,
   initialMode,
-  submitSubject,
 }: PropsWithChildren<FieldFinalSideContextProviderProps>) {
-  const [valid, setValid] = useState(true);
   const [editing, { on: setEditMode, off: setReadOnlyMode }] = useBoolean(
     initialMode === FieldFinalSideMode.Edit
   );
@@ -75,16 +59,13 @@ export function FieldFinalSideContextProvider({
       state: {
         fieldName,
         mode: editing ? FieldFinalSideMode.Edit : FieldFinalSideMode.Readonly,
-        valid: editing === false || valid,
-        triggerSubmitSubject: submitSubject,
       },
       actions: {
         setReadOnlyMode,
         setEditMode,
-        setValid,
       },
     }),
-    [fieldName, editing, valid, submitSubject, setReadOnlyMode, setEditMode, setValid]
+    [fieldName, editing, setReadOnlyMode, setEditMode]
   );
 
   return (
@@ -92,10 +73,13 @@ export function FieldFinalSideContextProvider({
   );
 }
 
-export function useFieldFinalSideContext() {
+export function useFieldFinalSideContext(): FieldFinalSideContextType {
   const context = useContext(FieldFinalSideContext);
 
-  invariant(context !== null, 'useFinalSideContext must be used inside a FinalSideContextProvider');
+  invariant(
+    context !== null,
+    'useFieldFinalSideContext must be used inside a FieldFinalSideContextProvider'
+  );
 
   return context;
 }

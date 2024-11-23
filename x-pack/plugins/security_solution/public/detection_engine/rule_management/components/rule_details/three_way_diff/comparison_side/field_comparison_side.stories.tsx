@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { Story } from '@storybook/react';
-import { ComparisonSide } from './comparison_side';
+import { FieldComparisonSide } from './field_comparison_side';
 import type {
   ThreeWayDiff,
   DiffableAllFields,
@@ -20,7 +20,7 @@ import {
   KqlQueryType,
 } from '../../../../../../../common/api/detection_engine';
 export default {
-  component: ComparisonSide,
+  component: FieldComparisonSide,
   title: 'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/ComparisonSide',
   argTypes: {
     fieldName: {
@@ -46,7 +46,7 @@ interface TemplateProps<FieldName extends keyof DiffableAllFields> {
 
 const Template: Story<TemplateProps<keyof DiffableAllFields>> = (args) => {
   return (
-    <ComparisonSide
+    <FieldComparisonSide
       fieldName={args.fieldName}
       fieldThreeWayDiff={args.fieldThreeWayDiff}
       resolvedValue={args.resolvedValue}

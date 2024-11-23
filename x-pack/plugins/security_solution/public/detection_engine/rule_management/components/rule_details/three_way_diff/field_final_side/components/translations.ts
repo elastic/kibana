@@ -34,3 +34,17 @@ export const SAVE_AND_ACCEPT = i18n.translate(
     defaultMessage: 'Save and accept',
   }
 );
+
+export const CANCEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.cancelButtonLabel',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+export const EDIT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.editButtonLabel',
+  {
+    defaultMessage: 'Edit',
+  }
+);
