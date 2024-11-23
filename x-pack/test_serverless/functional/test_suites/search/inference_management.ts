@@ -16,6 +16,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'svlCommonPage',
     'embeddedConsole',
     'svlSearchInferenceManagementPage',
+    'header',
   ]);
   const svlSearchNavigation = getService('svlSearchNavigation');
   const browser = getService('browser');
@@ -66,6 +67,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       beforeEach(async () => {
         await ml.api.createInferenceEndpoint(endpoint, taskType, modelConfig);
         await browser.refresh();
+        await pageObjects.header.waitUntilLoadingHasFinished();
       });
 
       after(async () => {
