@@ -579,6 +579,10 @@ security and spaces filtering.
 |This plugin provides access to observed entity data, such as information about hosts, pods, containers, services, and more.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/entity_manager_app/README.md[entityManagerApp]
+|This plugin provides a user interface to interact with the Entity Manager.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/event_log/README.md[eventLog]
 |The event log plugin provides a persistent history of alerting and action
 activities.
@@ -830,6 +834,10 @@ It uses Chromium and Puppeteer underneath to run the browser in headless mode.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/search_inference_endpoints/README.md[searchInferenceEndpoints]
 |The Inference Endpoints is a tool used to manage inference endpoints
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/search_solution/search_navigation/README.mdx[searchNavigation]
+|The Search Navigation plugin is used to handle navigation for search solution plugins across both stack and serverless.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/search_notebooks/README.mdx[searchNotebooks]
