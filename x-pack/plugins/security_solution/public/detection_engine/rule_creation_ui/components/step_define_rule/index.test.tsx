@@ -677,6 +677,8 @@ describe('StepDefineRule', () => {
     });
 
     it('updates EQL query correctly', async () => {
+      jest.useFakeTimers();
+
       const timelineEqlQuery = {
         index: ['.alerts-security.alerts-default', 'logs-*', 'packetbeat-*'],
         queryBar: {
@@ -713,6 +715,8 @@ describe('StepDefineRule', () => {
       });
 
       await setRuleFromTimeline();
+
+      jest.runAllTimers();
 
       expect(screen.getByTestId('eqlQueryBarTextInput')).toHaveValue(
         timelineEqlQuery.queryBar.query.query

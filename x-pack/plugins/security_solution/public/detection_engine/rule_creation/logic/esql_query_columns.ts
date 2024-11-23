@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { QueryClient, QueryFunction, QueryKey } from '@tanstack/react-query';
+import type {
+  FetchQueryOptions,
+  QueryClient,
+  QueryFunction,
+  QueryKey,
+} from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { getESQLQueryColumns } from '@kbn/esql-utils';
@@ -22,12 +27,7 @@ export async function fetchEsqlQueryColumns({
   esqlQuery,
   queryClient,
 }: FetchEsqlQueryColumnsParams): Promise<DatatableColumn[]> {
-  const data = await queryClient.fetchQuery({
-    queryKey: [esqlQuery.trim()],
-    queryFn: queryEsqlColumnsFactory(esqlQuery),
-    staleTime: DEFAULT_STALE_TIME,
-    retry: false,
-  });
+  const data = await queryClient.fetchQuery(createSharedTanstackQueryOptions(esqlQuery));
 
   if (data instanceof Error) {
     throw data;
@@ -43,16 +43,24 @@ interface UseEsqlQueryColumnsResult {
 
 export function useEsqlQueryColumns(esqlQuery: string): UseEsqlQueryColumnsResult {
   const { data, isLoading } = useQuery({
-    queryKey: [esqlQuery.trim()],
-    queryFn: queryEsqlColumnsFactory(esqlQuery),
-    staleTime: DEFAULT_STALE_TIME,
-    retry: false,
+    ...createSharedTanstackQueryOptions(esqlQuery),
     retryOnMount: false,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
   });
 
   return { columns: !data || data instanceof Error ? [] : data, isLoading };
+}
+
+function createSharedTanstackQueryOptions(
+  esqlQuery: string
+): FetchQueryOptions<DatatableColumn[] | Error> {
+  return {
+    queryKey: [esqlQuery.trim()],
+    queryFn: queryEsqlColumnsFactory(esqlQuery),
+    staleTime: DEFAULT_STALE_TIME,
+    retry: false,
+  };
 }
 
 function queryEsqlColumnsFactory(
