@@ -14,7 +14,7 @@ import type {
 } from '@kbn/core/server';
 import { mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { registerRoutes } from '@kbn/server-route-repository';
+import { DefaultRouteHandlerResources, registerRoutes } from '@kbn/server-route-repository';
 import { getObservabilityOnboardingServerRouteRepository } from './routes';
 import { ObservabilityOnboardingRouteHandlerResources } from './routes/types';
 import {
@@ -74,13 +74,17 @@ export class ObservabilityOnboardingPlugin
 
     const dependencies: Omit<
       ObservabilityOnboardingRouteHandlerResources,
-      'core' | 'logger' | 'request' | 'context' | 'response'
+      keyof DefaultRouteHandlerResources
     > = {
       config,
       kibanaVersion: this.initContext.env.packageInfo.version,
       plugins: resourcePlugins,
       services: {
         esLegacyConfigService: this.esLegacyConfigService,
+      },
+      core: {
+        setup: core,
+        start: () => core.getStartServices().then(([coreStart]) => coreStart),
       },
     };
 
