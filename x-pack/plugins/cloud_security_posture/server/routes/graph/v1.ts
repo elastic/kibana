@@ -32,6 +32,7 @@ interface GraphEdge {
   actorIds: string[] | string;
   action: string;
   targetIds: string[] | string;
+  lastEventId: string;
   eventOutcome: string;
   isAlert: boolean;
 }
@@ -144,23 +145,26 @@ const fetchGraph = async ({
   showUnknownTarget: boolean;
   esQuery?: EsQuery;
 }): Promise<EsqlToRecords<GraphEdge>> => {
-  const query = `from logs-*
+  const query = `from logs-* METADATA _id
 | WHERE event.action IS NOT NULL AND actor.entity.id IS NOT NULL
 | EVAL isAlert = ${
     eventIds.length > 0
       ? `event.id in (${eventIds.map((_id, idx) => `?al_id${idx}`).join(', ')})`
       : 'false'
   }
+| EVAL eventId = CONCAT(TO_STRING(\`@timestamp\`), "~", _id)
 | STATS badge = COUNT(*),
   ips = VALUES(related.ip),
   // hosts = VALUES(related.hosts),
-  users = VALUES(related.user)
+  users = VALUES(related.user),
+  lastEventId = MAX(eventId)
     by actorIds = actor.entity.id,
       action = event.action,
       targetIds = target.entity.id,
       eventOutcome = event.outcome,
       isAlert
 | LIMIT 1000
+| EVAL lastEventId = MV_SLICE(SPLIT(lastEventId, "~"), 1)
 | SORT isAlert DESC`;
 
   logger.trace(`Executing query [${query}]`);
@@ -281,6 +285,8 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
           id: edgeId + `label(${action})outcome(${eventOutcome})`,
           label: action,
           color: isAlert ? 'danger' : eventOutcome === 'failed' ? 'warning' : 'primary',
+          badge: record.badge,
+          lastEventId: record.lastEventId,
           shape: 'label',
         };
 

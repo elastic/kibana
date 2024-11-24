@@ -19,6 +19,11 @@ export const GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID =
 export const GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID =
   `${GRAPH_VISUALIZATION_TEST_ID}ShowActionsOnEntity` as const;
 
+export const GRAPH_LABEL_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID =
+  `${GRAPH_VISUALIZATION_TEST_ID}ShowEventsWithThisAction` as const;
+export const GRAPH_LABEL_POPOVER_VIEW_EVENT_DETAILS_ITEM_ID =
+  `${GRAPH_VISUALIZATION_TEST_ID}ViewEventDetails` as const;
+
 /* Insights tab */
 
 /* Prevalence */

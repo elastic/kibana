@@ -23,6 +23,7 @@ interface GraphNodeExpandPopoverProps {
   onExploreRelatedEntitiesClick: () => void;
   onShowActionsByEntityClick: () => void;
   onShowActionsOnEntityClick: () => void;
+  // onViewEntityDetailsClick: () => void;
 }
 
 export const GraphNodeExpandPopover: React.FC<GraphNodeExpandPopoverProps> = memo(
@@ -33,6 +34,7 @@ export const GraphNodeExpandPopover: React.FC<GraphNodeExpandPopoverProps> = mem
     onExploreRelatedEntitiesClick,
     onShowActionsByEntityClick,
     onShowActionsOnEntityClick,
+    // onViewEntityDetailsClick,
   }) => {
     return (
       <GraphPopover
@@ -71,6 +73,15 @@ export const GraphNodeExpandPopover: React.FC<GraphNodeExpandPopoverProps> = mem
             onClick={onExploreRelatedEntitiesClick}
             data-test-subj={GRAPH_NODE_POPOVER_EXPLORE_RELATED_ITEM_ID}
           />
+          {/* <EuiHorizontalRule margin="xs" />
+          <ExpandPopoverListItem
+            iconType="expand"
+            label={i18n.translate(
+              'xpack.securitySolution.flyout.documentDetails.left.graphNodeExpandPopover.viewEntityDetails',
+              { defaultMessage: 'View entity details' }
+            )}
+            onClick={onViewEntityDetailsClick}
+          /> */}
         </EuiListGroup>
       </GraphPopover>
     );

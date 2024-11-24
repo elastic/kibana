@@ -12,22 +12,18 @@ import type {
 } from '@kbn/cloud-security-posture-graph/src/components/types';
 import type { PopoverActions } from '@kbn/cloud-security-posture-graph/src/components/graph/use_graph_popover';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { GraphNodeExpandPopover } from './graph_node_expand_popover';
+import { GraphLabelExpandPopover } from './graph_label_expand_popover';
 
-interface UseGraphNodeExpandPopoverArgs {
-  onExploreRelatedEntitiesClick: (node: NodeProps) => void;
-  onShowActionsByEntityClick: (node: NodeProps) => void;
-  onShowActionsOnEntityClick: (node: NodeProps) => void;
-  // onViewEntityDetailsClick: (node: NodeProps) => void;
+interface UseGraphLabelExpandPopoverArgs {
+  onShowEventsWithThisActionClick: (node: NodeProps) => void;
+  onViewEventDetailsClick: (node: NodeProps) => void;
 }
 
-export const useGraphNodeExpandPopover = ({
-  onExploreRelatedEntitiesClick,
-  onShowActionsByEntityClick,
-  onShowActionsOnEntityClick,
-}: // onViewEntityDetailsClick,
-UseGraphNodeExpandPopoverArgs) => {
-  const { id, state, actions } = useGraphPopover('node-expand-popover');
+export const useGraphLabelExpandPopover = ({
+  onShowEventsWithThisActionClick,
+  onViewEventDetailsClick,
+}: UseGraphLabelExpandPopoverArgs) => {
+  const { id, state, actions } = useGraphPopover('label-expand-popover');
   const { openPopover, closePopover } = actions;
 
   const selectedNode = useRef<NodeProps | null>(null);
@@ -45,7 +41,7 @@ UseGraphNodeExpandPopoverArgs) => {
     closePopover();
   }, [closePopover]);
 
-  const onNodeExpandButtonClick: ExpandButtonClickCallback = useCallback(
+  const onLabelExpandButtonClick: ExpandButtonClickCallback = useCallback(
     (e, node, unToggleCallback) => {
       if (selectedNode.current?.id === node.id) {
         // If the same node is clicked again, close the popover
@@ -75,30 +71,22 @@ UseGraphNodeExpandPopoverArgs) => {
   }, [state.isOpen, pendingOpen, openPopover]);
 
   const PopoverComponent = memo(() => (
-    <GraphNodeExpandPopover
+    <GraphLabelExpandPopover
       isOpen={state.isOpen}
       anchorElement={state.anchorElement}
       closePopover={closePopoverHandler}
-      onExploreRelatedEntitiesClick={() => {
-        onExploreRelatedEntitiesClick(selectedNode.current as NodeProps);
+      onShowEventsWithThisActionClick={() => {
+        onShowEventsWithThisActionClick(selectedNode.current as NodeProps);
         closePopoverHandler();
       }}
-      onShowActionsByEntityClick={() => {
-        onShowActionsByEntityClick(selectedNode.current as NodeProps);
+      onViewEventDetailsClick={() => {
+        onViewEventDetailsClick(selectedNode.current as NodeProps);
         closePopoverHandler();
       }}
-      onShowActionsOnEntityClick={() => {
-        onShowActionsOnEntityClick(selectedNode.current as NodeProps);
-        closePopoverHandler();
-      }}
-      // onViewEntityDetailsClick={() => {
-      //   onViewEntityDetailsClick(selectedNode.current as NodeProps);
-      //   closePopoverHandler();
-      // }}
     />
   ));
 
-  PopoverComponent.displayName = GraphNodeExpandPopover.displayName;
+  PopoverComponent.displayName = GraphLabelExpandPopover.displayName;
 
   const actionsWithClose: PopoverActions = useMemo(
     () => ({
@@ -110,12 +98,12 @@ UseGraphNodeExpandPopoverArgs) => {
 
   return useMemo(
     () => ({
-      onNodeExpandButtonClick,
+      onLabelExpandButtonClick,
       PopoverComponent,
       id,
       actions: actionsWithClose,
       state,
     }),
-    [PopoverComponent, actionsWithClose, id, onNodeExpandButtonClick, state]
+    [PopoverComponent, actionsWithClose, id, onLabelExpandButtonClick, state]
   );
 };

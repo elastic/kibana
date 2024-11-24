@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { isEntityNode } from '@kbn/cloud-security-posture-graph';
 import type { NodeViewModel } from '@kbn/cloud-security-posture-graph';
 import {
   BooleanRelation,
@@ -21,6 +22,8 @@ import { css } from '@emotion/css';
 import { getEsQueryConfig } from '@kbn/data-service';
 import dateMath from '@kbn/datemath';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { normalizeTimeRange } from '../../../../common/utils/normalize_time_range';
 import { InvestigateInTimelineButton } from '../../../../common/components/event_details/investigate_in_timeline_button';
 import { useGetScopedSourcererDataView } from '../../../../sourcerer/components/use_get_sourcerer_data_view';
@@ -30,6 +33,9 @@ import { GRAPH_VISUALIZATION_TEST_ID } from './test_ids';
 import { useFetchGraphData } from '../../shared/hooks/use_fetch_graph_data';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
 import { useGraphNodeExpandPopover } from './use_graph_node_expand_popover';
+import { useGraphLabelExpandPopover } from './use_graph_label_expand_popover';
+import { ALERT_PREVIEW_BANNER, EVENT_PREVIEW_BANNER } from '../../preview/constants';
+import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
 
 export const GRAPH_VISUALIZATION_ID = 'graph_visualization';
 const CONTROLLED_BY_GRAPH_VISUALIZATION_FILTER = 'graph-visualization';
@@ -126,10 +132,40 @@ const addFilter = (dataViewId: string, prev: Filter[], key: string, value: strin
   }
 };
 
+type NodeEventOnClick = ({
+  documentId,
+  indexName,
+  scopeId,
+  isAlert,
+}: {
+  documentId: string | undefined;
+  indexName: string | undefined;
+  scopeId: string;
+  isAlert: boolean;
+}) => void;
+
 const useGraphPopovers = (
   dataViewId: string,
   setSearchFilters: React.Dispatch<React.SetStateAction<Filter[]>>
 ) => {
+  const { openPreviewPanel } = useExpandableFlyoutApi();
+
+  const openPreview = useCallback<NodeEventOnClick>(
+    ({ documentId, indexName, scopeId, isAlert }) => {
+      openPreviewPanel({
+        id: DocumentDetailsPreviewPanelKey,
+        params: {
+          id: documentId,
+          indexName,
+          scopeId,
+          isPreviewMode: true,
+          banner: isAlert ? ALERT_PREVIEW_BANNER : EVENT_PREVIEW_BANNER,
+        },
+      });
+    },
+    [openPreviewPanel]
+  );
+
   const nodeExpandPopover = useGraphNodeExpandPopover({
     onExploreRelatedEntitiesClick: (node) => {
       setSearchFilters((prev) => addFilter(dataViewId, prev, 'related.entity', node.id));
@@ -140,9 +176,28 @@ const useGraphPopovers = (
     onShowActionsOnEntityClick: (node) => {
       setSearchFilters((prev) => addFilter(dataViewId, prev, 'target.entity.id', node.id));
     },
+    // onViewEntityDetailsClick: (node) => {
+    //
+    // },
   });
 
-  const popovers = [nodeExpandPopover];
+  const labelExpandPopover = useGraphLabelExpandPopover({
+    onShowEventsWithThisActionClick: (node) => {
+      setSearchFilters((prev) =>
+        addFilter(dataViewId, prev, 'event.action', node.data.label ?? '')
+      );
+    },
+    onViewEventDetailsClick: (node) => {
+      openPreview({
+        documentId: node.data.lastEventId,
+        indexName: 'logs-gcp.audit-default',
+        scopeId: TableId.alertsOnAlertsPage,
+        isAlert: node.data.color === 'primary',
+      });
+    },
+  });
+
+  const popovers = [nodeExpandPopover, labelExpandPopover];
   const popoverOpenWrapper = (cb: Function, ...args: unknown[]) => {
     popovers.forEach(({ actions: { closePopover } }) => {
       closePopover();
@@ -150,22 +205,29 @@ const useGraphPopovers = (
     cb(...args);
   };
 
-  return { nodeExpandPopover, popoverOpenWrapper };
+  return { nodeExpandPopover, labelExpandPopover, popoverOpenWrapper };
 };
 
 const useGraphNodes = (
   nodes: NodeViewModel[],
-  expandButtonClickHandler: (...args: unknown[]) => void
+  nodeExpandButtonClickHandler: (...args: unknown[]) => void,
+  labelExpandButtonClickHandler: (...args: unknown[]) => void
 ) => {
   return useMemo(() => {
     return nodes.map((node) => {
-      const nodeHandlers =
-        node.shape !== 'label' && node.shape !== 'group'
-          ? {
-              expandButtonClick: expandButtonClickHandler,
-            }
-          : undefined;
-      return { ...node, ...nodeHandlers };
+      if (isEntityNode(node)) {
+        return {
+          ...node,
+          expandButtonClick: nodeExpandButtonClickHandler,
+        };
+      } else if (node.shape === 'label') {
+        return {
+          ...node,
+          expandButtonClick: labelExpandButtonClickHandler,
+        };
+      }
+
+      return { ...node };
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nodes]);
@@ -214,15 +276,21 @@ export const GraphVisualization: React.FC = memo(() => {
     );
   }, [searchFilters, dataView, uiSettings, isAlert, eventIds]);
 
-  const { nodeExpandPopover, popoverOpenWrapper } = useGraphPopovers(
+  const { nodeExpandPopover, labelExpandPopover, popoverOpenWrapper } = useGraphPopovers(
     dataView?.id ?? '',
     setSearchFilters
   );
-  const expandButtonClickHandler = (...args: unknown[]) =>
+  const nodeExpandButtonClickHandler = (...args: unknown[]) =>
     popoverOpenWrapper(nodeExpandPopover.onNodeExpandButtonClick, ...args);
+  const labelExpandButtonClickHandler = (...args: unknown[]) =>
+    popoverOpenWrapper(labelExpandPopover.onLabelExpandButtonClick, ...args);
   const isPopoverOpen = [nodeExpandPopover].some(({ state: { isOpen } }) => isOpen);
   const { data, refresh, isFetching } = useGraphData(eventIds, isAlert, timeRange, query);
-  const nodes = useGraphNodes(data?.nodes ?? [], expandButtonClickHandler);
+  const nodes = useGraphNodes(
+    data?.nodes ?? [],
+    nodeExpandButtonClickHandler,
+    labelExpandButtonClickHandler
+  );
   const parsedTimeRange: TimeRange = useMemo(() => {
     return {
       ...timeRange,
@@ -291,6 +359,7 @@ export const GraphVisualization: React.FC = memo(() => {
         />
       </React.Suspense>
       <nodeExpandPopover.PopoverComponent />
+      <labelExpandPopover.PopoverComponent />
     </div>
   );
 });

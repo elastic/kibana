@@ -60,9 +60,9 @@ const NodeLabelComponent: React.FC<NodeLabelProps> = ({ text = '' }: NodeLabelPr
       <EuiToolTip content={isTruncated ? text : ''} position="bottom">
         <EuiTextTruncate
           truncation="end"
-          truncationOffset={26}
+          truncationOffset={20}
           text={text}
-          width={NODE_LABEL_WIDTH * 2 - 5}
+          width={NODE_LABEL_WIDTH * 1.5}
         >
           {(truncatedText) => (
             <>

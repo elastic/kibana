@@ -23,7 +23,7 @@ import { ExpandablePanel } from '../../../shared/components/expandable_panel';
  * Graph preview under Overview, Visualizations. It shows a graph representation of entities.
  */
 export const GraphPreviewContainer: React.FC = () => {
-  const { dataAsNestedObject, getFieldsData, eventId, indexName, scopeId } =
+  const { dataAsNestedObject, getFieldsData, eventId, indexName, scopeId, isPreviewMode } =
     useDocumentDetailsContext();
 
   const [visualizationInFlyoutEnabled] = useUiSetting$<boolean>(
@@ -94,17 +94,18 @@ export const GraphPreviewContainer: React.FC = () => {
             />
           ),
           iconType: visualizationInFlyoutEnabled ? 'arrowStart' : 'indexMapping',
-          ...(visualizationInFlyoutEnabled && {
-            link: {
-              callback: navigateToGraphVisualization,
-              tooltip: (
-                <FormattedMessage
-                  id="xpack.securitySolution.flyout.right.visualizations.graphPreview.graphPreviewOpenGraphTooltip"
-                  defaultMessage="Expand graph"
-                />
-              ),
-            },
-          }),
+          ...(visualizationInFlyoutEnabled &&
+            !isPreviewMode && {
+              link: {
+                callback: navigateToGraphVisualization,
+                tooltip: (
+                  <FormattedMessage
+                    id="xpack.securitySolution.flyout.right.visualizations.graphPreview.graphPreviewOpenGraphTooltip"
+                    defaultMessage="Expand graph"
+                  />
+                ),
+              },
+            }),
         }}
         data-test-subj={GRAPH_PREVIEW_TEST_ID}
         content={
