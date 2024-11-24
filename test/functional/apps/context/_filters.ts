@@ -176,7 +176,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await filterBar.clickEditFilterById('0');
 
       expect(await filterBar.getFilterEditorPreview()).to.equal(
-        'extension: png OR bytes: 1,000B to 2KB'
+        'extension: png\nOR\nbytes: 1,000B to 2KB'
       );
     });
 
@@ -222,7 +222,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await filterBar.clickEditFilterById('0');
 
       expect(await filterBar.getFilterEditorPreview()).to.equal(
-        '(NOT clientip: exists OR extension: is one of png, jpeg) AND bytes: 1,000B to 2KB'
+        '(NOT clientip: exists\nOR\nextension: is one of png, jpeg)\nAND\nbytes: 1,000B to 2KB'
       );
     });
 
@@ -252,7 +252,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.clickWhenNotDisabled('saveFilter');
 
       const filterLabelUpdated = await filterBar.getFiltersLabel();
-      expect(filterLabelUpdated[0]).to.be('NOT extension: png AND extension: jpeg');
+      expect(filterLabelUpdated[0]).to.be('NOT extension: png\nAND\nextension: jpeg');
     });
   });
 }

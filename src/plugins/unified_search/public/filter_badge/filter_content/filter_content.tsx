@@ -18,11 +18,11 @@ import { strings } from '../i18n';
 const FilterValue = ({ value, operator }: { value?: string | number; operator?: string }) => {
   const { euiTheme } = useEuiTheme();
   const operatorStyles = css`
-    font-weight: ${euiTheme.font.weight.semiBold};
-    color: ${euiTheme.colors.primaryText};
+    font-weight: ${euiTheme.font.weight.medium};
+    color: ${euiTheme.colors.textPrimary};
   `;
   const valueFontWeight = css`
-    font-weight: ${euiTheme.font.weight.medium};
+    font-weight: ${euiTheme.font.weight.regular};
   `;
 
   return (
@@ -50,7 +50,7 @@ const FilterField = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const fontWeight = css`
-    font-weight: ${euiTheme.font.weight.semiBold};
+    font-weight: ${euiTheme.font.weight.medium};
   `;
 
   return (
@@ -64,7 +64,7 @@ const FilterField = ({
 const Prefix = ({ prefix }: { prefix?: boolean }) => {
   const { euiTheme } = useEuiTheme();
   const fontWeight = css`
-    font-weight: ${euiTheme.font.weight.semiBold};
+    font-weight: ${euiTheme.font.weight.medium};
   `;
 
   return prefix ? (

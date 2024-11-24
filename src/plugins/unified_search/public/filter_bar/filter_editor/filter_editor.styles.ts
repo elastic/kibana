@@ -24,5 +24,6 @@ export const filterBadgeStyle = css`
 export const filterPreviewLabelStyle = css`
   & .euiFormLabel[for] {
     cursor: default;
+    margin-top: 24px;
   }
 `;
