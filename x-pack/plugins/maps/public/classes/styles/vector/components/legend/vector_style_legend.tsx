@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { EuiText, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiCallOut } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { i18n } from '@kbn/i18n';
+import { StyleError } from './style_error';
 import { DataRequest } from '../../../../util/data_request';
 import { DynamicStyleProperty } from '../../properties/dynamic_style_property';
 import { FIELD_ORIGIN } from '../../../../../../common/constants';
@@ -41,34 +41,9 @@ export function VectorStyleLegend({
       : undefined;
 
     const error = styleMetaDataRequest?.getError();
-    const fieldName = (styles[i] as DynamicStyleProperty<DataRequest>)?.getFieldName();
-    const styleName = styles[i].getDisplayStyleName();
 
     const row = error ? (
-      <div>
-        <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiToolTip position="top" title={styleName} content={fieldName}>
-              <EuiText className="eui-textTruncate" size="xs" style={{ maxWidth: '180px' }}>
-                <small>
-                  <strong>{fieldName}</strong>
-                </small>
-              </EuiText>
-            </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiCallOut
-            title={i18n.translate('xpack.maps.vectorStyleLegend.fetchStyleMetaDataError', {
-              defaultMessage: 'Unable to fetch style meta data',
-            })}
-            color="warning"
-            iconType="warning"
-          >
-            <p>{error.message}</p>
-          </EuiCallOut>
-        </EuiFlexGroup>
-      </div>
+      <StyleError error={error} style={styles[i] as DynamicStyleProperty<DataRequest>} />
     ) : (
       styles[i].renderLegendDetailRow({
         isLinesOnly,
