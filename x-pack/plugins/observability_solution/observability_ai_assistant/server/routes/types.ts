@@ -49,7 +49,6 @@ export type ObservabilityAIAssistantRequestHandlerContext = Omit<
     savedObjects: {
       client: SavedObjectsClientContract;
     };
-    coreStart: CoreStart;
   }>;
 };
 

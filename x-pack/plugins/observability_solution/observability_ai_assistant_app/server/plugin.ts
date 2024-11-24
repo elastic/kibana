@@ -98,7 +98,6 @@ export class ObservabilityAIAssistantAppPlugin
           };
         }),
         core: Promise.resolve({
-          coreStart,
           elasticsearch: {
             client: coreStart.elasticsearch.client.asScoped(request),
           },
