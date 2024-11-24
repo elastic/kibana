@@ -354,6 +354,10 @@ export function jobsProvider(
     const result: { datafeed?: Datafeed; job?: Job } = { job: undefined, datafeed: undefined };
     if (datafeedResult && datafeedResult.job_id === jobId) {
       result.datafeed = datafeedResult;
+      if (result.datafeed.indices_options?.ignore_throttled !== undefined) {
+        // ignore_throttled is a deprecated setting, remove it from the response
+        delete result.datafeed.indices_options.ignore_throttled;
+      }
     }
 
     if (jobResults?.jobs?.length > 0) {
