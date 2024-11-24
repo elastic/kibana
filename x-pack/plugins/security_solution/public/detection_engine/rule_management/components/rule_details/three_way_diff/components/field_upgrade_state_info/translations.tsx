@@ -7,18 +7,45 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const UPDATE_ACCEPTED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.updateAccepted',
+export const READY_FOR_UPDATE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.badge.readyForUpdate',
   {
-    defaultMessage: 'Update accepted',
+    defaultMessage: 'Ready for update',
   }
 );
 
-export const UPDATE_ACCEPTED_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.updateAcceptedDescription',
+export const REVIEW_REQUIRED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.badge.reviewRequired',
   {
-    defaultMessage:
-      'You can still make changes, please review/accept all other conflicts before updating the rule.',
+    defaultMessage: 'Review required',
+  }
+);
+
+export const ACTION_REQUIRED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.badge.actionRequired',
+  {
+    defaultMessage: 'Action required',
+  }
+);
+
+export const NO_CONFLICT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.noConflict',
+  {
+    defaultMessage: 'No conflicts',
+  }
+);
+
+export const NO_CONFLICT_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.noConflictDescription',
+  {
+    defaultMessage: 'The update has no conflicts and has been applied to the final update.',
+  }
+);
+
+export const REVIEWED_AND_ACCEPTED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.reviewedAndAccepted',
+  {
+    defaultMessage: 'Reviewed and accepted',
   }
 );
 

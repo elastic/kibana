@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiIcon, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiText } from '@elastic/eui';
 import { FieldUpgradeState } from '../../../../../model/prebuilt_rule_upgrade';
 import * as i18n from './translations';
 
@@ -16,14 +16,26 @@ interface FieldUpgradeStateInfoProps {
 
 export function FieldUpgradeStateInfo({ state }: FieldUpgradeStateInfoProps): JSX.Element {
   switch (state) {
+    case FieldUpgradeState.NoConflict:
+      return (
+        <>
+          <EuiText color="success" size="xs">
+            <EuiBadge color="success">{i18n.READY_FOR_UPDATE}</EuiBadge>
+            &nbsp;&nbsp;
+            <strong>{i18n.NO_CONFLICT}</strong>
+            {i18n.SEPARATOR}
+            {i18n.NO_CONFLICT_DESCRIPTION}
+          </EuiText>
+        </>
+      );
+
     case FieldUpgradeState.Accepted:
       return (
         <>
           <EuiText color="success" size="xs">
-            <EuiIcon type="checkInCircleFilled" />
-            &nbsp;<strong>{i18n.UPDATE_ACCEPTED}</strong>
-            {i18n.SEPARATOR}
-            {i18n.UPDATE_ACCEPTED_DESCRIPTION}
+            <EuiBadge color="success">{i18n.READY_FOR_UPDATE}</EuiBadge>
+            &nbsp;&nbsp;
+            {i18n.REVIEWED_AND_ACCEPTED}
           </EuiText>
         </>
       );
@@ -32,8 +44,9 @@ export function FieldUpgradeStateInfo({ state }: FieldUpgradeStateInfoProps): JS
       return (
         <>
           <EuiText color="warning" size="xs">
-            <EuiIcon type="warning" />
-            &nbsp;<strong>{i18n.SOLVABLE_CONFLICT}</strong>
+            <EuiBadge color="warning">{i18n.REVIEW_REQUIRED}</EuiBadge>
+            &nbsp;&nbsp;
+            <strong>{i18n.SOLVABLE_CONFLICT}</strong>
             {i18n.SEPARATOR}
             {i18n.SOLVABLE_CONFLICT_DESCRIPTION}
           </EuiText>
@@ -44,8 +57,9 @@ export function FieldUpgradeStateInfo({ state }: FieldUpgradeStateInfoProps): JS
       return (
         <>
           <EuiText color="danger" size="xs">
-            <EuiIcon type="warning" />
-            &nbsp;<strong>{i18n.NON_SOLVABLE_CONFLICT}</strong>
+            <EuiBadge color="danger">{i18n.ACTION_REQUIRED}</EuiBadge>
+            &nbsp;&nbsp;
+            <strong>{i18n.NON_SOLVABLE_CONFLICT}</strong>
             {i18n.SEPARATOR}
             {i18n.NON_SOLVABLE_CONFLICT_DESCRIPTION}
           </EuiText>
