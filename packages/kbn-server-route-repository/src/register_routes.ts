@@ -16,7 +16,6 @@ import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import type { Logger } from '@kbn/logging';
 import {
   DefaultRouteCreateOptions,
-  DefaultRouteHandlerResources,
   RouteParamsRT,
   ServerRoute,
   ZodParamsObject,
@@ -45,16 +44,7 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
   dependencies,
 }: {
   core: CoreSetup;
-  repository: Record<
-    string,
-    ServerRoute<
-      string,
-      RouteParamsRT | undefined,
-      DefaultRouteHandlerResources & TDependencies,
-      any,
-      any
-    >
-  >;
+  repository: Record<string, ServerRoute<string, RouteParamsRT | undefined, any, any, any>>;
   logger: Logger;
   dependencies: TDependencies;
 }) {

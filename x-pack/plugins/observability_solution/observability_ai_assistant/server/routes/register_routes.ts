@@ -26,7 +26,6 @@ export function registerServerRoutes({
   registerRoutes({
     core,
     logger,
-    // @ts-expect-error request context is not assignable to that of DefaultRouteHandlerResources
     repository: getGlobalObservabilityAIAssistantServerRouteRepository(),
     dependencies,
   });

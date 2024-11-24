@@ -17,7 +17,6 @@ import {
   ObservabilityAIAssistantRequestHandlerContext,
   ObservabilityAIAssistantRouteHandlerResources,
 } from '@kbn/observability-ai-assistant-plugin/server/routes/types';
-import { ObservabilityAIAssistantPluginStartDependencies } from '@kbn/observability-ai-assistant-plugin/server/types';
 import { mapValues } from 'lodash';
 import { firstValueFrom } from 'rxjs';
 import type { ObservabilityAIAssistantAppConfig } from './config';
@@ -59,13 +58,22 @@ export class ObservabilityAIAssistantAppPlugin
         setup: value,
         start: () =>
           core.getStartServices().then((services) => {
-            const [, pluginsStartContracts] = services;
+            const [_, pluginsStartContracts] = services;
+
             return pluginsStartContracts[
-              key as keyof ObservabilityAIAssistantPluginStartDependencies
+              key as keyof ObservabilityAIAssistantAppPluginStartDependencies
             ];
           }),
       };
-    }) as ObservabilityAIAssistantRouteHandlerResources['plugins'];
+    }) as Omit<ObservabilityAIAssistantRouteHandlerResources['plugins'], 'core'>;
+
+    const withCore = {
+      ...routeHandlerPlugins,
+      core: {
+        setup: core,
+        start: () => core.getStartServices().then(([coreStart]) => coreStart),
+      },
+    };
 
     const initResources = async (
       request: KibanaRequest
@@ -110,7 +118,7 @@ export class ObservabilityAIAssistantAppPlugin
         context,
         service: plugins.observabilityAIAssistant.service,
         logger: this.logger.get('connector'),
-        plugins: routeHandlerPlugins,
+        plugins: withCore,
       };
     };
 

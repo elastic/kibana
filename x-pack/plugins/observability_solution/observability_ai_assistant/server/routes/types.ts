@@ -73,8 +73,8 @@ type PluginContractResolveDependenciesSetup = {
 };
 
 export interface ObservabilityAIAssistantRouteHandlerResources
-  extends DefaultRouteHandlerResources {
-  context: ObservabilityAIAssistantRequestHandlerContextBase;
+  extends Omit<DefaultRouteHandlerResources, 'context' | 'response'> {
+  context: ObservabilityAIAssistantRequestHandlerContext;
   service: ObservabilityAIAssistantService;
   plugins: PluginContractResolveCore &
     PluginContractResolveDependenciesSetup &
