@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { SearchHit, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import assert from 'assert';
-import type { SearchHit, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Stored } from '../types';
 import type { IndexNameProvider } from './rule_migrations_data_client';
 
