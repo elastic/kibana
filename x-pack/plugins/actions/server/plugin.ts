@@ -220,10 +220,8 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
   private inMemoryConnectors: InMemoryConnector[];
   private inMemoryMetrics: InMemoryMetrics;
   private connectorUsageReportingTask: ConnectorUsageReportingTask | undefined;
-  private isServerless = false;
 
   constructor(initContext: PluginInitializerContext) {
-    this.isServerless = initContext.env.packageInfo.buildFlavor === 'serverless';
     this.logger = initContext.logger.get();
     this.actionsConfig = getValidatedConfig(
       this.logger,
@@ -610,9 +608,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
 
     this.validateEnabledConnectorTypes(plugins);
 
-    if (this.isServerless) {
-      this.connectorUsageReportingTask?.start(plugins.taskManager).catch(() => {});
-    }
+    this.connectorUsageReportingTask?.start(plugins.taskManager).catch(() => {});
 
     return {
       isActionTypeEnabled: (id, options = { notifyUsage: false }) => {

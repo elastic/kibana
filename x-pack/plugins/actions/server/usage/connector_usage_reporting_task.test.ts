@@ -392,4 +392,27 @@ describe('ConnectorUsageReportingTask', () => {
       'Usage data could not be pushed to usage-api. Stopped retrying after 5 attempts. Error:test-error'
     );
   });
+
+  it('does not schedule the task when the project id is missing', async () => {
+    const core = createSetup();
+    const taskManagerStart = taskManagerStartMock();
+
+    const task = new ConnectorUsageReportingTask({
+      eventLogIndex: 'test-index',
+      projectId: undefined,
+      logger,
+      core,
+      taskManager: mockTaskManagerSetup,
+      config: {
+        url: 'usage-api',
+        ca: {
+          path: './ca.crt',
+        },
+      },
+    });
+
+    await task.start(taskManagerStart);
+
+    expect(taskManagerStart.ensureScheduled).not.toBeCalled();
+  });
 });

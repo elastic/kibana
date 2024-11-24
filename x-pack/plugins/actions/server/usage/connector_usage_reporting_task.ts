@@ -82,6 +82,9 @@ export class ConnectorUsageReportingTask {
   }
 
   public start = async (taskManager?: TaskManagerStartContract) => {
+    if (!this.projectId) {
+      return;
+    }
     if (!taskManager) {
       this.logger.error(
         `Missing required task manager service during start of ${CONNECTOR_USAGE_REPORTING_TASK_TYPE}`
