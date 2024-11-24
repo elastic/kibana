@@ -121,6 +121,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         before(async () => {
           await createConnector();
           await createIndex();
+        });
+
+        beforeEach(async () => {
           await pageObjects.searchPlayground.session.setSession();
           await browser.refresh();
         });
