@@ -82,6 +82,9 @@ function wrapSearchBarInContext(testProps: any) {
     theme: startMock.theme,
     docLinks: startMock.docLinks,
     storage: createMockStorage(),
+    application: {
+      capabilities: { index_management: { manageEnrich: true } },
+    },
     data: {
       query: {
         savedQueries: {
