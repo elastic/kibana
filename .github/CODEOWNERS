@@ -1283,7 +1283,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test/functional/apps/infra/logs @elastic/obs-ux-logs-team
 
 # Observability UX management team
-/x-pack/test/api_integration/services/data_view_api.ts @elastic/obs-ux-management-team
+/test/api_integration/apis/suggestions  @elastic/obs-ux-management-team # Assigned per https://github.com/elastic/kibana/pull/200950#discussion_r1853705079
 /x-pack/test/api_integration/services/slo.ts @elastic/obs-ux-management-team
 /x-pack/test/functional/services/slo @elastic/obs-ux-management-team
 /x-pack/test/functional/apps/slo @elastic/obs-ux-management-team
