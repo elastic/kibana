@@ -305,5 +305,35 @@ export default function updateMaintenanceWindowTests({ getService }: FtrProvider
         })
         .expect(400);
     });
+
+    describe('validation', () => {
+      it('should return 400 if the timezone is not valid', async () => {
+        const { body: createdMaintenanceWindow } = await supertest
+          .post(`${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window`)
+          .set('kbn-xsrf', 'foo')
+          .send(createParams)
+          .expect(200);
+
+        objectRemover.add(
+          'space1',
+          createdMaintenanceWindow.id,
+          'rules/maintenance_window',
+          'alerting',
+          true
+        );
+
+        await supertest
+          .post(
+            `${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window/${
+              createdMaintenanceWindow.id
+            }`
+          )
+          .set('kbn-xsrf', 'foo')
+          .send({
+            r_rule: { ...createParams.r_rule, tzid: 'invalid' },
+          })
+          .expect(400);
+      });
+    });
   });
 }

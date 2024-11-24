@@ -407,6 +407,34 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
         });
       });
     });
+
+    describe('validation', () => {
+      it('should return 400 if the timezone is not valid', async () => {
+        const { body: createdRule } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              enabled: false,
+            })
+          )
+          .expect(200);
+
+        objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+
+        const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
+          snooze_schedule: {
+            ...SNOOZE_SCHEDULE,
+            rRule: { ...SNOOZE_SCHEDULE.rRule, tzid: 'invalid' },
+          },
+        });
+
+        expect(response.statusCode).to.eql(400);
+        expect(response.body.message).to.eql(
+          '[request body.snooze_schedule.rRule.tzid]: string is not a valid timezone: invalid'
+        );
+      });
+    });
   });
 
   async function getRuleEvents(id: string, minActions: number = 1) {

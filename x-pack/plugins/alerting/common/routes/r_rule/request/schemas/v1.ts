@@ -11,10 +11,11 @@ import {
   validateEndDateV1,
   createValidateRecurrenceByV1,
 } from '../../validation';
+import { validateTimezone } from '../../../rule/validation/validate_timezone/v1';
 
 export const rRuleRequestSchema = schema.object({
   dtstart: schema.string({ validate: validateStartDateV1 }),
-  tzid: schema.string(),
+  tzid: schema.string({ validate: validateTimezone }),
   freq: schema.maybe(
     schema.oneOf([schema.literal(0), schema.literal(1), schema.literal(2), schema.literal(3)])
   ),
