@@ -9,7 +9,9 @@ import { schema } from '@kbn/config-schema';
 import {
   validateStartDateV1,
   validateEndDateV1,
-  createValidateRecurrenceByV1,
+  validateByWeekDayV1,
+  validateByMonthDayV1,
+  validateByMonthV1,
 } from '../../validation';
 import { validateTimezone } from '../../../rule/validation/validate_timezone/v1';
 
@@ -42,17 +44,17 @@ export const rRuleRequestSchema = schema.object({
   ),
   byweekday: schema.maybe(
     schema.arrayOf(schema.string(), {
-      validate: createValidateRecurrenceByV1('byweekday'),
+      validate: validateByWeekDayV1,
     })
   ),
   bymonthday: schema.maybe(
     schema.arrayOf(schema.number(), {
-      validate: createValidateRecurrenceByV1('bymonthday'),
+      validate: validateByMonthDayV1,
     })
   ),
   bymonth: schema.maybe(
     schema.arrayOf(schema.number(), {
-      validate: createValidateRecurrenceByV1('bymonth'),
+      validate: validateByMonthV1,
     })
   ),
 });
