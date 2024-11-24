@@ -190,7 +190,7 @@ const useGraphPopovers = (
     onViewEventDetailsClick: (node) => {
       openPreview({
         documentId: node.data.lastEventId,
-        indexName: 'logs-gcp.audit-default',
+        indexName: node.data.lastEventIdx,
         scopeId: TableId.alertsOnAlertsPage,
         isAlert: node.data.color === 'primary',
       });

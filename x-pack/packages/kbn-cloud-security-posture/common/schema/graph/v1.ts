@@ -91,6 +91,7 @@ export const labelNodeDataSchema = schema.allOf([
     color: colorSchema,
     badge: schema.number(),
     lastEventId: schema.string(),
+    lastEventIdx: schema.string(),
   }),
 ]);
 
