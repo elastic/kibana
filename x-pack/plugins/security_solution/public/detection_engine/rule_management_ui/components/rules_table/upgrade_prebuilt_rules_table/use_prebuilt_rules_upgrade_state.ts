@@ -117,7 +117,7 @@ function calcFieldsState(
   for (const fieldName of Object.keys(ruleFieldsDiff)) {
     switch (ruleFieldsDiff[fieldName].conflict) {
       case ThreeWayDiffConflict.NONE:
-        fieldsState[fieldName] = FieldUpgradeState.Accepted;
+        fieldsState[fieldName] = FieldUpgradeState.NoConflict;
         break;
 
       case ThreeWayDiffConflict.SOLVABLE:
