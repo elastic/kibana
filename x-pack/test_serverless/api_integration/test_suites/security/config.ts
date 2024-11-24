@@ -27,6 +27,7 @@ export default createTestConfig({
     `--xpack.securitySolutionServerless.cloudSecurityUsageReportingTaskInterval=5s`,
     `--xpack.securitySolutionServerless.usageApi.url=http://localhost:8081`,
     '--xpack.dataUsage.enabled=true',
+    '--xpack.dataUsage.enableExperimental=[]',
     // dataUsage.autoops* config is set in kibana controller
     '--xpack.dataUsage.autoops.enabled=true',
     '--xpack.dataUsage.autoops.api.url=http://localhost:9000',
