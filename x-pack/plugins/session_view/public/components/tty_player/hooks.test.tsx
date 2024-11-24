@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { renderHook, act } from '@testing-library/react-hooks';
+
+import { renderHook, act } from '@testing-library/react';
 import { sessionViewIOEventsMock } from '../../../common/mocks/responses/session_view_io_events.mock';
 import { useIOLines, useXtermPlayer, XtermPlayerDeps } from './hooks';
 import type { ProcessEventsPage } from '../../../common';
@@ -31,7 +32,7 @@ describe('TTYPlayer/hooks', () => {
 
       // test memoization
       let last = result.current.lines;
-      rerender();
+      rerender({ pages: initial });
       expect(result.current.lines === last).toBeTruthy();
       last = result.current.lines;
       rerender({ pages: [...initial] });
