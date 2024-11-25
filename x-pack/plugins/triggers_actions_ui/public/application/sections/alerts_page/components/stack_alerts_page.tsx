@@ -5,16 +5,9 @@
  * 2.0.
  */
 
-import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiBetaBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPageTemplate,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 import {
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
@@ -260,31 +253,29 @@ const PageContentComponent: React.FC<PageContentProps> = ({
             onEsQueryChange={setEsQuery}
             onFilterSelected={onFilterSelected}
           />
-          <Suspense fallback={<EuiLoadingSpinner />}>
-            <AlertsTable
-              // Here we force a rerender when switching feature ids to prevent the data grid
-              // columns alignment from breaking after a change in the number of columns
-              key={ruleTypeIds.join()}
-              id="stack-alerts-page-table"
-              ruleTypeIds={ruleTypeIds}
-              consumers={consumers}
-              query={esQuery}
-              initialSort={defaultAlertsTableSort}
-              showAlertStatusWithFlapping
-              columns={defaultAlertsTableColumns}
-              initialPageSize={20}
-              renderCellValue={renderCellValue}
-              renderActionsCell={AlertActionsCell}
-              services={{
-                data,
-                http,
-                notifications,
-                fieldFormats,
-                application,
-                licensing,
-              }}
-            />
-          </Suspense>
+          <AlertsTable
+            // Here we force a rerender when switching feature ids to prevent the data grid
+            // columns alignment from breaking after a change in the number of columns
+            key={ruleTypeIds.join()}
+            id="stack-alerts-page-table"
+            ruleTypeIds={ruleTypeIds}
+            consumers={consumers}
+            query={esQuery}
+            initialSort={defaultAlertsTableSort}
+            showAlertStatusWithFlapping
+            columns={defaultAlertsTableColumns}
+            initialPageSize={20}
+            renderCellValue={renderCellValue}
+            renderActionsCell={AlertActionsCell}
+            services={{
+              data,
+              http,
+              notifications,
+              fieldFormats,
+              application,
+              licensing,
+            }}
+          />
         </EuiFlexGroup>
       )}
     </>
