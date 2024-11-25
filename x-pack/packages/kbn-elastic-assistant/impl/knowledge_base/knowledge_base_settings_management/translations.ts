@@ -56,38 +56,16 @@ export const COLUMN_ENTRIES = i18n.translate(
   }
 );
 
-export const COLUMN_SPACE = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.columnSpaceLabel',
-  {
-    defaultMessage: 'Space',
-  }
-);
-
 export const COLUMN_CREATED = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.columnCreatedLabel',
   {
     defaultMessage: 'Created',
   }
 );
-
-export const COLUMN_ACTIONS = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.columnActionsLabel',
-  {
-    defaultMessage: 'Actions',
-  }
-);
-
 export const SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.searchPlaceholder',
   {
     defaultMessage: 'Search for an entry',
-  }
-);
-
-export const DEFAULT_FLYOUT_TITLE = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.defaultFlyoutTitle',
-  {
-    defaultMessage: 'Knowledge Base',
   }
 );
 
@@ -126,27 +104,6 @@ export const MANUAL = i18n.translate(
   }
 );
 
-export const CREATE_INDEX_TITLE = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.createIndexTitle',
-  {
-    defaultMessage: 'New Index entry',
-  }
-);
-
-export const NEW_ENTRY_TITLE = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.newEntryTitle',
-  {
-    defaultMessage: 'New entry',
-  }
-);
-
-export const DELETE_ENTRY_DEFAULT_TITLE = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.deleteEntryDefaultTitle',
-  {
-    defaultMessage: 'Delete item',
-  }
-);
-
 export const ENTRY_NAME_INPUT_LABEL = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryNameInputLabel',
   {
@@ -165,20 +122,6 @@ export const ENTRY_NAME_INPUT_PLACEHOLDER = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryNameInputPlaceholder',
   {
     defaultMessage: 'Name your Knowledge Base entry',
-  }
-);
-
-export const ENTRY_SPACE_INPUT_LABEL = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entrySpaceInputLabel',
-  {
-    defaultMessage: 'Space',
-  }
-);
-
-export const ENTRY_SPACE_INPUT_PLACEHOLDER = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entrySpaceInputPlaceholder',
-  {
-    defaultMessage: 'Select',
   }
 );
 
@@ -212,6 +155,13 @@ export const DELETE_ENTRY_CONFIRMATION_TITLE = (title: string) =>
     }
   );
 
+export const DELETE_ENTRY_CONFIRMATION_CONTENT = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.deleteEntryContent',
+  {
+    defaultMessage: "You will not be able to recover this knowledge base entry once it's deleted.",
+  }
+);
+
 export const ENTRY_MARKDOWN_INPUT_TEXT = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryMarkdownInputText',
   {
@@ -241,6 +191,14 @@ export const ENTRY_INDEX_NAME_INPUT_LABEL = i18n.translate(
   }
 );
 
+export const ENTRY_INDEX_NAME_INPUT_DESCRIPTION = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryIndexNameInputDescription',
+  {
+    defaultMessage:
+      'Indices will only be available to select from this drop down list if they contain a semantic_text field. Please refer to the documentation for more information on configuring an index for use as a custom knowledge source.',
+  }
+);
+
 export const ENTRY_FIELD_INPUT_LABEL = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryFieldInputLabel',
   {
@@ -251,21 +209,67 @@ export const ENTRY_FIELD_INPUT_LABEL = i18n.translate(
 export const ENTRY_DESCRIPTION_INPUT_LABEL = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryDescriptionInputLabel',
   {
-    defaultMessage: 'Description',
+    defaultMessage: 'Data Description',
+  }
+);
+
+export const ENTRY_DESCRIPTION_HELP_LABEL = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryDescriptionHelpLabel',
+  {
+    defaultMessage: 'Describe when this custom knowledge should be used during a conversation.',
+  }
+);
+
+export const ENTRY_DESCRIPTION_PLACEHOLDER = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryDescriptionPlaceholder',
+  {
+    defaultMessage:
+      'Example: "Use this index to answer any question related to asset information."',
   }
 );
 
 export const ENTRY_QUERY_DESCRIPTION_INPUT_LABEL = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryQueryDescriptionInputLabel',
   {
-    defaultMessage: 'Query Description',
+    defaultMessage: 'Query Instruction',
   }
 );
 
-export const ENTRY_INPUT_PLACEHOLDER = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryInputPlaceholder',
+export const ENTRY_QUERY_DESCRIPTION_HELP_LABEL = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryQueryDescriptionHelpLabel',
   {
-    defaultMessage: 'Input',
+    defaultMessage:
+      'Describe what query should be constructed by the model to retrieve this custom knowledge.',
+  }
+);
+
+export const ENTRY_QUERY_DESCRIPTION_PLACEHOLDER = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryQueryDescriptionPlaceholder',
+  {
+    defaultMessage:
+      'Example: "Key terms to retrieve asset related information, like host names, IP Addresses or cloud objects."',
+  }
+);
+
+export const ENTRY_OUTPUT_FIELDS_INPUT_LABEL = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryOutputFieldsInputLabel',
+  {
+    defaultMessage: 'Output Fields',
+  }
+);
+
+export const ENTRY_OUTPUT_FIELDS_HELP_LABEL = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryOutputFieldsHelpLabel',
+  {
+    defaultMessage:
+      'What fields should be sent to the LLM. Leave empty to send the entire document.',
+  }
+);
+
+export const ENTRY_FIELD_PLACEHOLDER = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryFieldPlaceholder',
+  {
+    defaultMessage: 'semantic_text',
   }
 );
 
@@ -287,5 +291,49 @@ export const PRIVATE = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.knowledgeBasePrivate',
   {
     defaultMessage: 'Private',
+  }
+);
+
+export const SAVE_BUTTON_TEXT = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.saveButtonText',
+  {
+    defaultMessage: 'Save',
+  }
+);
+
+export const DUPLICATE_ENTRY_CONFIRMATION_TITLE = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.duplicateEntryConfirmationTitle',
+  {
+    defaultMessage: 'Duplicate entry?',
+  }
+);
+
+export const DUPLICATE_ENTRY_CONFIRMATION_CONTENT = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.duplicateEntryConfirmationContent',
+  {
+    defaultMessage:
+      'Changing a knowledge base entry from global to private will create a private copy of the original global entry. Please delete the global entry if you would like to revoke the content for other users.',
+  }
+);
+
+export const MISSING_INDEX_ERROR = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.missingIndexError',
+  {
+    defaultMessage: `Index doesn't exist`,
+  }
+);
+
+export const MISSING_INDEX_TOOLTIP_CONTENT = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.missingIndexTootipContent',
+  {
+    defaultMessage:
+      'The index assigned to this knowledge base entry is unavailable. Check the permissions on the configured index, or that the index has not been deleted. You can update the index to be used for this knowledge entry, or delete the entry entirely.',
+  }
+);
+
+export const SECURITY_LABS_NOT_FULLY_LOADED = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.securityLabsNotFullyLoadedTooltipContent',
+  {
+    defaultMessage: 'Security Labs content is not fully loaded. Click to reload.',
   }
 );

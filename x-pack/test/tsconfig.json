@@ -184,6 +184,9 @@
     "@kbn/mock-idp-utils",
     "@kbn/cloud-security-posture-common",
     "@kbn/saved-objects-management-plugin",
-    "@kbn/alerting-types"
+    "@kbn/alerting-types",
+    "@kbn/ai-assistant-common",
+    "@kbn/core-deprecations-common",
+    "@kbn/usage-collection-plugin",
   ]
 }

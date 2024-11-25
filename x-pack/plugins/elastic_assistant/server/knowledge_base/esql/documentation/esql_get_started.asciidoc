@@ -1,8 +1,0 @@
-[[esql-getting-started]]
-== Getting started with {esql}
-
-++++
-<titleabbrev>Getting started</titleabbrev>
-++++
-
-coming::[8.11]

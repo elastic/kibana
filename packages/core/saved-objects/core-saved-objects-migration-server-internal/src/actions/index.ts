@@ -112,7 +112,7 @@ import type { UnknownDocsFound } from './check_for_unknown_docs';
 import type { IncompatibleClusterRoutingAllocation } from './check_cluster_routing_allocation';
 import type { ClusterShardLimitExceeded } from './create_index';
 import type { SynchronizationFailed } from './synchronize_migrators';
-import type { IndexMappingsIncomplete, TypesChanged } from './check_target_mappings';
+import type { IndexMappingsIncomplete, TypesAdded, TypesChanged } from './check_target_mappings';
 
 export type {
   CheckForUnknownDocsParams,
@@ -193,6 +193,7 @@ export interface ActionErrorTypeMap {
   synchronization_failed: SynchronizationFailed;
   index_mappings_incomplete: IndexMappingsIncomplete;
   types_changed: TypesChanged;
+  types_added: TypesAdded;
   operation_not_supported: OperationNotSupported;
   source_equals_target: SourceEqualsTarget;
 }

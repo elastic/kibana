@@ -450,7 +450,7 @@
             "label": "shipper",
             "description": [],
             "signature": [
-              "\"other\" | \"beats\" | \"enterprise_search\" | \"language_clients\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\""
+              "\"search\" | \"other\" | \"beats\" | \"language_clients\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\""
             ],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false,
@@ -740,7 +740,7 @@
             "label": "shipper",
             "description": [],
             "signature": [
-              "\"other\" | \"beats\" | \"enterprise_search\" | \"language_clients\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\""
+              "\"search\" | \"other\" | \"beats\" | \"language_clients\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\""
             ],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false,
@@ -943,7 +943,7 @@
           "\nThe list of all known shippers."
         ],
         "signature": [
-          "(\"other\" | \"beats\" | \"enterprise_search\" | \"language_clients\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\")[]"
+          "(\"search\" | \"other\" | \"beats\" | \"language_clients\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\")[]"
         ],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
@@ -960,7 +960,7 @@
           "\nA shipper-- an internal or external system capable of storing data in ES/Kibana-- applicable to an Integration."
         ],
         "signature": [
-          "\"other\" | \"beats\" | \"enterprise_search\" | \"language_clients\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\""
+          "\"search\" | \"other\" | \"beats\" | \"language_clients\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\""
         ],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
@@ -1119,41 +1119,6 @@
               {
                 "parentPluginId": "customIntegrations",
                 "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.application_observability.parent_id",
-                "type": "string",
-                "tags": [],
-                "label": "parent_id",
-                "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "customIntegrations",
-            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.app_search",
-            "type": "Object",
-            "tags": [],
-            "label": "app_search",
-            "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "customIntegrations",
-                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.app_search.title",
-                "type": "string",
-                "tags": [],
-                "label": "title",
-                "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "customIntegrations",
-                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.app_search.parent_id",
                 "type": "string",
                 "tags": [],
                 "label": "parent_id",
@@ -2036,44 +2001,6 @@
           },
           {
             "parentPluginId": "customIntegrations",
-            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.enterprise_search",
-            "type": "Object",
-            "tags": [],
-            "label": "enterprise_search",
-            "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "customIntegrations",
-                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.enterprise_search.title",
-                "type": "string",
-                "tags": [],
-                "label": "title",
-                "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "customIntegrations",
-                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.enterprise_search.parent_id",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "parent_id",
-                "description": [],
-                "signature": [
-                  "undefined"
-                ],
-                "path": "src/plugins/custom_integrations/common/index.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "customIntegrations",
             "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.firewall_security",
             "type": "Object",
             "tags": [],
@@ -2900,6 +2827,44 @@
           },
           {
             "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.search",
+            "type": "Object",
+            "tags": [],
+            "label": "search",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.search.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.search.parent_id",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "signature": [
+                  "undefined"
+                ],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
             "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.security",
             "type": "Object",
             "tags": [],
@@ -3434,10 +3399,10 @@
           },
           {
             "parentPluginId": "customIntegrations",
-            "id": "def-common.SHIPPER_DISPLAY.enterprise_search",
+            "id": "def-common.SHIPPER_DISPLAY.search",
             "type": "string",
             "tags": [],
-            "label": "enterprise_search",
+            "label": "search",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false,

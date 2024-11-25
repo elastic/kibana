@@ -12,7 +12,6 @@ import {
 } from '@kbn/screenshot-mode-plugin/server';
 import { ConfigType } from '@kbn/screenshotting-server';
 import { truncate } from 'lodash';
-import open from 'opn';
 import { ElementHandle, EvaluateFunc, HTTPResponse, Page } from 'puppeteer';
 import { Subject } from 'rxjs';
 import { parse as parseUrl } from 'url';
@@ -139,10 +138,6 @@ export class HeadlessChromiumDriver {
     await this.page.setRequestInterception(true);
     this.registerListeners(url, headers, logger);
     await this.page.goto(url, { waitUntil: 'domcontentloaded' });
-
-    if (this.config.browser.chromium.inspect) {
-      await this.launchDebugger();
-    }
 
     await this.waitForSelector(
       pageLoadSelector,
@@ -450,26 +445,6 @@ export class HeadlessChromiumDriver {
     });
 
     this.listenersAttached = true;
-  }
-
-  private async launchDebugger() {
-    // In order to pause on execution we have to reach more deeply into Chromiums Devtools Protocol,
-    // and more specifically, for the page being used. _client is per-page.
-    // In order to get the inspector running, we have to know the page's internal ID (again, private)
-    // in order to construct the final debugging URL.
-
-    const client = this.page._client();
-    const target = this.page.target();
-    const targetId = target._targetId;
-
-    await client.send('Debugger.enable');
-    await client.send('Debugger.pause');
-    const wsEndpoint = this.page.browser().wsEndpoint();
-    const { port } = parseUrl(wsEndpoint);
-
-    await open(
-      `http://localhost:${port}/devtools/inspector.html?ws=localhost:${port}/devtools/page/${targetId}`
-    );
   }
 
   private _shouldUseCustomHeaders(sourceUrl: string, targetUrl: string) {

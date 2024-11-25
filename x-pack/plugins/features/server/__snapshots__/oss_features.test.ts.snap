@@ -557,9 +557,11 @@ Array [
       "cases": Object {
         "all": Array [],
         "create": Array [],
+        "createComment": Array [],
         "delete": Array [],
         "push": Array [],
         "read": Array [],
+        "reopenCase": Array [],
         "settings": Array [],
         "update": Array [],
       },
@@ -716,9 +718,11 @@ Array [
       "cases": Object {
         "all": Array [],
         "create": Array [],
+        "createComment": Array [],
         "delete": Array [],
         "push": Array [],
         "read": Array [],
+        "reopenCase": Array [],
         "settings": Array [],
         "update": Array [],
       },
@@ -1013,6 +1017,17 @@ Array [
     },
     "privilegeId": "all",
   },
+  Object {
+    "privilege": Object {
+      "disabled": true,
+      "savedObject": Object {
+        "all": Array [],
+        "read": Array [],
+      },
+      "ui": Array [],
+    },
+    "privilegeId": "read",
+  },
 ]
 `;
 
@@ -1039,9 +1054,11 @@ Array [
       "cases": Object {
         "all": Array [],
         "create": Array [],
+        "createComment": Array [],
         "delete": Array [],
         "push": Array [],
         "read": Array [],
+        "reopenCase": Array [],
         "settings": Array [],
         "update": Array [],
       },
@@ -1179,9 +1196,11 @@ Array [
       "cases": Object {
         "all": Array [],
         "create": Array [],
+        "createComment": Array [],
         "delete": Array [],
         "push": Array [],
         "read": Array [],
+        "reopenCase": Array [],
         "settings": Array [],
         "update": Array [],
       },
@@ -1338,9 +1357,11 @@ Array [
       "cases": Object {
         "all": Array [],
         "create": Array [],
+        "createComment": Array [],
         "delete": Array [],
         "push": Array [],
         "read": Array [],
+        "reopenCase": Array [],
         "settings": Array [],
         "update": Array [],
       },
@@ -1635,6 +1656,17 @@ Array [
     },
     "privilegeId": "all",
   },
+  Object {
+    "privilege": Object {
+      "disabled": true,
+      "savedObject": Object {
+        "all": Array [],
+        "read": Array [],
+      },
+      "ui": Array [],
+    },
+    "privilegeId": "read",
+  },
 ]
 `;
 
@@ -1661,9 +1693,11 @@ Array [
       "cases": Object {
         "all": Array [],
         "create": Array [],
+        "createComment": Array [],
         "delete": Array [],
         "push": Array [],
         "read": Array [],
+        "reopenCase": Array [],
         "settings": Array [],
         "update": Array [],
       },

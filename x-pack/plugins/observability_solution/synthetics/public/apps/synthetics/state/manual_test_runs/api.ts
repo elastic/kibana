@@ -12,19 +12,37 @@ import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 
 export const triggerTestNowMonitor = async ({
   configId,
+  spaceId,
 }: {
   configId: string;
   name: string;
+  spaceId?: string;
 }): Promise<TestNowResponse | undefined> => {
-  return await apiService.post(SYNTHETICS_API_URLS.TRIGGER_MONITOR + `/${configId}`);
+  return await apiService.post(
+    SYNTHETICS_API_URLS.TRIGGER_MONITOR + `/${configId}`,
+    undefined,
+    undefined,
+    {
+      spaceId,
+    }
+  );
 };
 
 export const runOnceMonitor = async ({
   monitor,
   id,
+  spaceId,
 }: {
   monitor: SyntheticsMonitor;
   id: string;
+  spaceId?: string;
 }): Promise<{ errors: ServiceLocationErrors }> => {
-  return await apiService.post(SYNTHETICS_API_URLS.RUN_ONCE_MONITOR + `/${id}`, monitor);
+  return await apiService.post(
+    SYNTHETICS_API_URLS.RUN_ONCE_MONITOR + `/${id}`,
+    monitor,
+    undefined,
+    {
+      spaceId,
+    }
+  );
 };

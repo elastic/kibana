@@ -7,7 +7,8 @@
 
 import type { ActionCreator } from 'typescript-fsa';
 
-import type { DataViewBase, Filter, Query } from '@kbn/es-query';
+import { type DataViewSpec } from '@kbn/data-plugin/common';
+import type { Filter, Query } from '@kbn/es-query';
 
 import type { UsersQueryProps } from '../types';
 import type { NavTab } from '../../../../common/components/navigation/types';
@@ -47,6 +48,6 @@ export type UsersDetailsTabsProps = UserBodyComponentDispatchProps &
     indexNames: string[];
     userDetailFilter: Filter[];
     filterQuery?: string;
-    indexPattern: DataViewBase;
+    dataViewSpec?: DataViewSpec;
     type: usersModel.UsersType;
   };

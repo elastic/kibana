@@ -25,11 +25,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import { TopNavMenuBadgeProps, TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import {
-  LazyLabsFlyout,
-  getContextProvider as getPresentationUtilContextProvider,
-  withSuspense,
-} from '@kbn/presentation-util-plugin/public';
+import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
 
 import { UI_SETTINGS } from '../../common';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
@@ -37,7 +33,6 @@ import {
   dashboardManagedBadge,
   getDashboardBreadcrumb,
   getDashboardTitle,
-  leaveConfirmStrings,
   unsavedChangesBadgeStrings,
 } from '../dashboard_app/_dashboard_app_strings';
 import { useDashboardMountContext } from '../dashboard_app/hooks/dashboard_mount_context';
@@ -52,7 +47,6 @@ import { getDashboardRecentlyAccessedService } from '../services/dashboard_recen
 import {
   coreServices,
   dataService,
-  embeddableService,
   navigationService,
   serverlessService,
 } from '../services/kibana_services';
@@ -88,7 +82,6 @@ export function InternalDashboardTopNav({
   const { setHeaderActionMenu, onAppLeave } = useDashboardMountContext();
 
   const dashboardApi = useDashboardApi();
-  const PresentationUtilContextProvider = getPresentationUtilContextProvider();
 
   const [
     allDataViews,
@@ -127,13 +120,6 @@ export function InternalDashboardTopNav({
   useEffect(() => {
     dashboardTitleRef.current?.focus();
   }, [title, viewMode]);
-
-  /**
-   * Manage chrome visibility when dashboard is embedded.
-   */
-  useEffect(() => {
-    if (!embedSettings) coreServices.chrome.setIsVisible(viewMode !== 'print');
-  }, [embedSettings, viewMode]);
 
   /**
    * populate recently accessed, and set is chrome visible.
@@ -194,7 +180,10 @@ export function InternalDashboardTopNav({
             },
           },
           ...dashboardTitleBreadcrumbs,
-        ])
+        ]),
+        {
+          project: { value: dashboardTitleBreadcrumbs },
+        }
       );
     }
   }, [redirectTo, dashboardTitle, dashboardApi, viewMode, customLeadingBreadCrumbs]);
@@ -204,16 +193,6 @@ export function InternalDashboardTopNav({
    */
   useEffect(() => {
     onAppLeave((actions) => {
-      if (
-        viewMode === 'edit' &&
-        hasUnsavedChanges &&
-        !embeddableService.getStateTransfer().isTransferInProgress
-      ) {
-        return actions.confirm(
-          leaveConfirmStrings.getLeaveSubtitle(),
-          leaveConfirmStrings.getLeaveTitle()
-        );
-      }
       return actions.default();
     });
     return () => {
@@ -405,9 +384,7 @@ export function InternalDashboardTopNav({
         onSavedQueryIdChange={setSavedQueryId}
       />
       {viewMode !== 'print' && isLabsEnabled && isLabsShown ? (
-        <PresentationUtilContextProvider>
-          <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
-        </PresentationUtilContextProvider>
+        <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
       ) : null}
       {viewMode === 'edit' ? <DashboardEditingToolbar isDisabled={!!focusedPanelId} /> : null}
       {showBorderBottom && <EuiHorizontalRule margin="none" />}

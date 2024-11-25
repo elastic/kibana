@@ -16,8 +16,8 @@ import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { useKibanaContextForPluginProvider } from './utils/use_kibana';
 import { DataUsageStartDependencies, DataUsagePublicStart } from './types';
 import { PLUGIN_ID } from '../common';
-import { DataUsage } from './app/data_usage';
 import { DataUsageReactQueryClientProvider } from '../common/query_client';
+import { DataUsageMetricsPage } from './app/data_usage_metrics_page';
 
 export const renderApp = (
   core: CoreStart,
@@ -53,7 +53,7 @@ const AppWithExecutionContext = ({
     <Router history={params.history}>
       <PerformanceContextProvider>
         <Routes>
-          <Route path="/" exact={true} component={DataUsage} />
+          <Route path="/" exact={true} component={DataUsageMetricsPage} />
         </Routes>
       </PerformanceContextProvider>
     </Router>

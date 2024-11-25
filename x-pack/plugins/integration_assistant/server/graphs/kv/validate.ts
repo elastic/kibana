@@ -10,8 +10,11 @@ import { ESProcessorItem } from '../../../common';
 import type { KVState } from '../../types';
 import type { HandleKVNodeParams } from './types';
 import { testPipeline } from '../../util';
-import { onFailure, removeProcessor } from './constants';
-import { createGrokProcessor } from '../../util/processors';
+import {
+  createGrokProcessor,
+  createPassthroughFailureProcessor,
+  createRemoveProcessor,
+} from '../../util/processors';
 
 interface StructuredLogResult {
   [packageName: string]: { [dataStreamName: string]: unknown };
@@ -65,7 +68,7 @@ export async function handleHeaderValidate({
 }: HandleKVNodeParams): Promise<Partial<KVState>> {
   const grokPattern = state.grokPattern;
   const grokProcessor = createGrokProcessor([grokPattern]);
-  const pipeline = { processors: grokProcessor, on_failure: [onFailure] };
+  const pipeline = { processors: grokProcessor, on_failure: [createPassthroughFailureProcessor()] };
 
   const { pipelineResults, errors } = (await testPipeline(state.logSamples, pipeline, client)) as {
     pipelineResults: GrokResult[];
@@ -90,12 +93,15 @@ export async function handleHeaderValidate({
 
 async function verifyKVProcessor(
   kvProcessor: ESProcessorItem,
-  formattedSamples: string[],
+  samples: string[],
   client: IScopedClusterClient
 ): Promise<{ errors: object[] }> {
   // This processor removes the original message field in the  output
-  const pipeline = { processors: [kvProcessor[0], removeProcessor], on_failure: [onFailure] };
-  const { errors } = await testPipeline(formattedSamples, pipeline, client);
+  const pipeline = {
+    processors: [kvProcessor[0], createRemoveProcessor()],
+    on_failure: [createPassthroughFailureProcessor()],
+  };
+  const { errors } = await testPipeline(samples, pipeline, client);
   return { errors };
 }
 
@@ -104,7 +110,10 @@ async function buildJSONSamples(
   processors: object[],
   client: IScopedClusterClient
 ): Promise<StructuredLogResult[]> {
-  const pipeline = { processors: [...processors, removeProcessor], on_failure: [onFailure] };
+  const pipeline = {
+    processors: [...processors, createRemoveProcessor()],
+    on_failure: [createPassthroughFailureProcessor()],
+  };
   const { pipelineResults } = (await testPipeline(samples, pipeline, client)) as {
     pipelineResults: StructuredLogResult[];
   };

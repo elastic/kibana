@@ -1075,6 +1075,11 @@ Object {
       "required": false,
       "type": "date",
     },
+    "kibana.alert.rule.execution.type": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.rule.execution.uuid": Object {
       "array": false,
       "required": false,
@@ -2172,6 +2177,11 @@ Object {
       "array": false,
       "required": false,
       "type": "date",
+    },
+    "kibana.alert.rule.execution.type": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
     },
     "kibana.alert.rule.execution.uuid": Object {
       "array": false,
@@ -3271,6 +3281,11 @@ Object {
       "required": false,
       "type": "date",
     },
+    "kibana.alert.rule.execution.type": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.rule.execution.uuid": Object {
       "array": false,
       "required": false,
@@ -4369,6 +4384,11 @@ Object {
       "required": false,
       "type": "date",
     },
+    "kibana.alert.rule.execution.type": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.rule.execution.uuid": Object {
       "array": false,
       "required": false,
@@ -5466,6 +5486,11 @@ Object {
       "array": false,
       "required": false,
       "type": "date",
+    },
+    "kibana.alert.rule.execution.type": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
     },
     "kibana.alert.rule.execution.uuid": Object {
       "array": false,
@@ -6571,6 +6596,11 @@ Object {
       "required": false,
       "type": "date",
     },
+    "kibana.alert.rule.execution.type": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.rule.execution.uuid": Object {
       "array": false,
       "required": false,
@@ -7668,6 +7698,11 @@ Object {
       "array": false,
       "required": false,
       "type": "date",
+    },
+    "kibana.alert.rule.execution.type": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
     },
     "kibana.alert.rule.execution.uuid": Object {
       "array": false,
@@ -8767,6 +8802,11 @@ Object {
       "required": false,
       "type": "date",
     },
+    "kibana.alert.rule.execution.type": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.rule.execution.uuid": Object {
       "array": false,
       "required": false,
@@ -9811,6 +9851,10 @@ Object {
       "required": false,
       "type": "text",
     },
+    "error.stack_trace": Object {
+      "required": false,
+      "type": "wildcard",
+    },
     "host.name": Object {
       "required": false,
       "type": "keyword",
@@ -9851,6 +9895,10 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "labels": Object {
+      "required": false,
+      "type": "object",
+    },
     "location.id": Object {
       "array": true,
       "required": false,
@@ -9889,6 +9937,10 @@ Object {
     },
     "observer.name": Object {
       "array": true,
+      "required": false,
+      "type": "keyword",
+    },
+    "service.name": Object {
       "required": false,
       "type": "keyword",
     },
@@ -9943,6 +9995,10 @@ Object {
       "required": false,
       "type": "text",
     },
+    "error.stack_trace": Object {
+      "required": false,
+      "type": "wildcard",
+    },
     "host.name": Object {
       "required": false,
       "type": "keyword",
@@ -9983,6 +10039,10 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "labels": Object {
+      "required": false,
+      "type": "object",
+    },
     "location.id": Object {
       "array": true,
       "required": false,
@@ -10021,6 +10081,10 @@ Object {
     },
     "observer.name": Object {
       "array": true,
+      "required": false,
+      "type": "keyword",
+    },
+    "service.name": Object {
       "required": false,
       "type": "keyword",
     },
@@ -10075,6 +10139,10 @@ Object {
       "required": false,
       "type": "text",
     },
+    "error.stack_trace": Object {
+      "required": false,
+      "type": "wildcard",
+    },
     "host.name": Object {
       "required": false,
       "type": "keyword",
@@ -10115,6 +10183,10 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "labels": Object {
+      "required": false,
+      "type": "object",
+    },
     "location.id": Object {
       "array": true,
       "required": false,
@@ -10153,6 +10225,10 @@ Object {
     },
     "observer.name": Object {
       "array": true,
+      "required": false,
+      "type": "keyword",
+    },
+    "service.name": Object {
       "required": false,
       "type": "keyword",
     },
@@ -10207,6 +10283,10 @@ Object {
       "required": false,
       "type": "text",
     },
+    "error.stack_trace": Object {
+      "required": false,
+      "type": "wildcard",
+    },
     "host.name": Object {
       "required": false,
       "type": "keyword",
@@ -10247,6 +10327,10 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "labels": Object {
+      "required": false,
+      "type": "object",
+    },
     "location.id": Object {
       "array": true,
       "required": false,
@@ -10285,6 +10369,10 @@ Object {
     },
     "observer.name": Object {
       "array": true,
+      "required": false,
+      "type": "keyword",
+    },
+    "service.name": Object {
       "required": false,
       "type": "keyword",
     },
@@ -10345,6 +10433,10 @@ Object {
       "required": false,
       "type": "text",
     },
+    "error.stack_trace": Object {
+      "required": false,
+      "type": "wildcard",
+    },
     "host.name": Object {
       "required": false,
       "type": "keyword",
@@ -10385,6 +10477,10 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "labels": Object {
+      "required": false,
+      "type": "object",
+    },
     "location.id": Object {
       "array": true,
       "required": false,
@@ -10423,6 +10519,10 @@ Object {
     },
     "observer.name": Object {
       "array": true,
+      "required": false,
+      "type": "keyword",
+    },
+    "service.name": Object {
       "required": false,
       "type": "keyword",
     },

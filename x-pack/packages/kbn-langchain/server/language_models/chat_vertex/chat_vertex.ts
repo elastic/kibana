@@ -98,11 +98,14 @@ export class ActionsClientChatVertexAI extends ChatVertexAI {
       };
 
       const actionResult = await this.#actionsClient.execute(requestBody);
-
       if (actionResult.status === 'error') {
-        throw new Error(
+        const error = new Error(
           `ActionsClientChatVertexAI: action result status is error: ${actionResult?.message} - ${actionResult?.serviceMessage}`
         );
+        if (actionResult?.serviceMessage) {
+          error.name = actionResult?.serviceMessage;
+        }
+        throw error;
       }
 
       const readable = get('data', actionResult) as Readable;
@@ -127,7 +130,12 @@ export class ActionsClientChatVertexAI extends ChatVertexAI {
         partialStreamChunk += nextChunk;
       }
 
-      if (parsedStreamChunk !== null && !parsedStreamChunk.candidates?.[0]?.finishReason) {
+      if (parsedStreamChunk !== null) {
+        const errorMessage = convertResponseBadFinishReasonToErrorMsg(parsedStreamChunk);
+        if (errorMessage != null) {
+          throw new Error(errorMessage);
+        }
+
         const response = {
           ...parsedStreamChunk,
           functionCalls: () =>
@@ -174,12 +182,6 @@ export class ActionsClientChatVertexAI extends ChatVertexAI {
         if (chunk) {
           yield chunk;
           await runManager?.handleLLMNewToken(chunk.text ?? '');
-        }
-      } else if (parsedStreamChunk) {
-        // handle bad finish reason
-        const errorMessage = convertResponseBadFinishReasonToErrorMsg(parsedStreamChunk);
-        if (errorMessage != null) {
-          throw new Error(errorMessage);
         }
       }
     }

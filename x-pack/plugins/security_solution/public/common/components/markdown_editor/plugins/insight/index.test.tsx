@@ -135,7 +135,7 @@ describe('plugin', () => {
   });
 
   it('show investigate message when insightsUpsellingMessage is not provided', () => {
-    const result = plugin({ insightsUpsellingMessage: null });
+    const result = plugin({ insightsUpsellingMessage: undefined });
 
     expect(result.button.label).toEqual('Investigate');
   });

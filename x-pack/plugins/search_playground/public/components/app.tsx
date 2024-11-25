@@ -18,10 +18,11 @@ import { Chat } from './chat';
 import { SearchMode } from './search_mode/search_mode';
 import { SearchPlaygroundSetupPage } from './setup_page/search_playground_setup_page';
 import { usePageMode } from '../hooks/use_page_mode';
+import { useKibana } from '../hooks/use_kibana';
 
 export interface AppProps {
   showDocs?: boolean;
-  pageMode?: PlaygroundPageMode;
+  pageMode?: 'chat' | 'search';
 }
 
 export enum ViewMode {
@@ -33,6 +34,7 @@ export const App: React.FC<AppProps> = ({
   showDocs = false,
   pageMode = PlaygroundPageMode.chat,
 }) => {
+  const { services } = useKibana();
   const [selectedMode, setSelectedMode] = useState<ViewMode>(ViewMode.chat);
   const { data: connectors } = useLoadConnectors();
   const hasSelectedIndices = Boolean(
@@ -41,7 +43,10 @@ export const App: React.FC<AppProps> = ({
     }).length
   );
   const handleModeChange = (id: ViewMode) => setSelectedMode(id);
-  const handlePageModeChange = (mode: PlaygroundPageMode) => setSelectedPageMode(mode);
+  const handlePageModeChange = (mode: PlaygroundPageMode) => {
+    services.application?.navigateToUrl(`./${mode}`);
+    setSelectedPageMode(mode);
+  };
   const {
     showSetupPage,
     pageMode: selectedPageMode,
@@ -49,7 +54,7 @@ export const App: React.FC<AppProps> = ({
   } = usePageMode({
     hasSelectedIndices,
     hasConnectors: Boolean(connectors?.length),
-    initialPageMode: pageMode,
+    initialPageMode: pageMode === 'chat' ? PlaygroundPageMode.chat : PlaygroundPageMode.search,
   });
 
   const restrictedWidth = selectedPageMode === PlaygroundPageMode.search && selectedMode === 'chat';

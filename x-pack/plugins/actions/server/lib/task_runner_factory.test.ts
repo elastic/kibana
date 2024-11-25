@@ -885,7 +885,8 @@ describe('Task Runner Factory', () => {
     expect(err).toBeDefined();
     expect(isRetryableError(err)).toEqual(false);
     expect(taskRunnerFactoryInitializerParams.logger.error as jest.Mock).toHaveBeenCalledWith(
-      `Action '2' failed: Error message`
+      `Action '2' failed: Error message`,
+      { tags: ['connector-run-failed', 'framework-error'] }
     );
     expect(getErrorSource(err)).toBe(TaskErrorSource.FRAMEWORK);
   });
@@ -934,7 +935,8 @@ describe('Task Runner Factory', () => {
 
     expect(err).toBeDefined();
     expect(taskRunnerFactoryInitializerParams.logger.error as jest.Mock).toHaveBeenCalledWith(
-      `Action '2' failed: Error message: Service message`
+      `Action '2' failed: Error message: Service message`,
+      { tags: ['connector-run-failed', 'framework-error'] }
     );
   });
 
@@ -1033,7 +1035,8 @@ describe('Task Runner Factory', () => {
     }
     expect(err).toBeDefined();
     expect(taskRunnerFactoryInitializerParams.logger.error as jest.Mock).toHaveBeenCalledWith(
-      `Action '2' failed: Fail`
+      `Action '2' failed: Fail`,
+      { tags: ['connector-run-failed', 'framework-error'] }
     );
     expect(thrownError).toEqual(err);
     expect(getErrorSource(err)).toBe(TaskErrorSource.FRAMEWORK);
@@ -1140,10 +1143,16 @@ describe('Task Runner Factory', () => {
 
     try {
       await taskRunner.run();
+      throw new Error('Should have thrown');
     } catch (e) {
       expect(mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledTimes(1);
       expect(getErrorSource(e)).toBe(TaskErrorSource.FRAMEWORK);
       expect(e).toEqual(error);
+
+      expect(taskRunnerFactoryInitializerParams.logger.error).toHaveBeenCalledWith(
+        `Failed to load action task params ${mockedTaskInstance.params.actionTaskParamsId}: test`,
+        { tags: ['connector-run-failed', 'framework-error'] }
+      );
     }
   });
 });

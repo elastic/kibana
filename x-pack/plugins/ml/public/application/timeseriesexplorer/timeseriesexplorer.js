@@ -1081,6 +1081,7 @@ export class TimeSeriesExplorer extends React.Component {
                   latestRecordTimestamp={selectedJob.data_counts.latest_record_timestamp}
                   setForecastId={this.setForecastId}
                   className="forecast-controls"
+                  selectedForecastId={this.props.selectedForecastId}
                 />
               </EuiFormRow>
             </EuiFlexItem>

@@ -27,6 +27,7 @@ import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { ElasticsearchClient } from '@kbn/core/server';
 import {
   AttackDiscoveryPostRequestBody,
+  DefendInsightsPostRequestBody,
   AssistantFeatures,
   ExecuteConnectorRequestBody,
   Replacements,
@@ -37,21 +38,21 @@ import {
   LicensingPluginStart,
 } from '@kbn/licensing-plugin/server';
 import {
-  ActionsClientBedrockChatModel,
+  ActionsClientChatBedrockConverse,
   ActionsClientChatOpenAI,
   ActionsClientChatVertexAI,
   ActionsClientGeminiChatModel,
   ActionsClientLlm,
-  ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server';
-
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+
 import type { GetAIAssistantKnowledgeBaseDataClientParams } from './ai_assistant_data_clients/knowledge_base';
-import { AttackDiscoveryDataClient } from './ai_assistant_data_clients/attack_discovery';
+import { AttackDiscoveryDataClient } from './lib/attack_discovery/persistence';
 import { AIAssistantConversationsDataClient } from './ai_assistant_data_clients/conversations';
 import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
 import { AIAssistantDataClient } from './ai_assistant_data_clients';
 import { AIAssistantKnowledgeBaseDataClient } from './ai_assistant_data_clients/knowledge_base';
+import type { DefendInsightsDataClient } from './ai_assistant_data_clients/defend_insights';
 
 export const PLUGIN_ID = 'elasticAssistant' as const;
 
@@ -127,9 +128,10 @@ export interface ElasticAssistantApiRequestHandlerContext {
   getCurrentUser: () => AuthenticatedUser | null;
   getAIAssistantConversationsDataClient: () => Promise<AIAssistantConversationsDataClient | null>;
   getAIAssistantKnowledgeBaseDataClient: (
-    params: GetAIAssistantKnowledgeBaseDataClientParams
+    params?: GetAIAssistantKnowledgeBaseDataClientParams
   ) => Promise<AIAssistantKnowledgeBaseDataClient | null>;
   getAttackDiscoveryDataClient: () => Promise<AttackDiscoveryDataClient | null>;
+  getDefendInsightsDataClient: () => Promise<DefendInsightsDataClient | null>;
   getAIAssistantPromptsDataClient: () => Promise<AIAssistantDataClient | null>;
   getAIAssistantAnonymizationFieldsDataClient: () => Promise<AIAssistantDataClient | null>;
   inference: InferenceServerStart;
@@ -152,13 +154,6 @@ export type ElasticAssistantPluginCoreSetupDependencies = CoreSetup<
 
 export type GetElser = () => Promise<string> | never;
 
-export interface InitAssistantResult {
-  assistantResourcesInstalled: boolean;
-  assistantNamespaceResourcesInstalled: boolean;
-  assistantSettingsCreated: boolean;
-  errors: string[];
-}
-
 export interface AssistantResourceNames {
   componentTemplate: {
     conversations: string;
@@ -166,6 +161,7 @@ export interface AssistantResourceNames {
     prompts: string;
     anonymizationFields: string;
     attackDiscovery: string;
+    defendInsights: string;
   };
   indexTemplate: {
     conversations: string;
@@ -173,6 +169,7 @@ export interface AssistantResourceNames {
     prompts: string;
     anonymizationFields: string;
     attackDiscovery: string;
+    defendInsights: string;
   };
   aliases: {
     conversations: string;
@@ -180,6 +177,7 @@ export interface AssistantResourceNames {
     prompts: string;
     anonymizationFields: string;
     attackDiscovery: string;
+    defendInsights: string;
   };
   indexPatterns: {
     conversations: string;
@@ -187,6 +185,7 @@ export interface AssistantResourceNames {
     prompts: string;
     anonymizationFields: string;
     attackDiscovery: string;
+    defendInsights: string;
   };
   pipelines: {
     knowledgeBase: string;
@@ -200,18 +199,6 @@ export interface IIndexPatternString {
   basePattern: string;
   validPrefixes?: string[];
   secondaryAlias?: string;
-}
-
-export interface PublicAIAssistantDataClient {
-  getConversationsLimitValue: () => number;
-}
-
-export interface IAIAssistantDataClient {
-  client(): PublicAIAssistantDataClient | null;
-}
-
-export interface AIAssistantPrompts {
-  id: string;
 }
 
 /**
@@ -228,11 +215,10 @@ export interface AssistantTool {
 }
 
 export type AssistantToolLlm =
-  | ActionsClientBedrockChatModel
+  | ActionsClientChatBedrockConverse
   | ActionsClientChatOpenAI
   | ActionsClientGeminiChatModel
-  | ActionsClientChatVertexAI
-  | ActionsClientSimpleChatModel;
+  | ActionsClientChatVertexAI;
 
 export interface AssistantToolParams {
   alertsIndexPattern?: string;
@@ -246,13 +232,13 @@ export interface AssistantToolParams {
   llm?: ActionsClientLlm | AssistantToolLlm;
   isOssModel?: boolean;
   logger: Logger;
-  modelExists: boolean;
   onNewReplacements?: (newReplacements: Replacements) => void;
   replacements?: Replacements;
   request: KibanaRequest<
     unknown,
     unknown,
-    ExecuteConnectorRequestBody | AttackDiscoveryPostRequestBody
+    ExecuteConnectorRequestBody | AttackDiscoveryPostRequestBody | DefendInsightsPostRequestBody
   >;
   size?: number;
+  telemetry?: AnalyticsServiceSetup;
 }

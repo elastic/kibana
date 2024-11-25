@@ -6,7 +6,8 @@
  */
 
 import type { History } from 'history';
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Redirect } from 'react-router-dom';
 

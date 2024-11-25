@@ -38,37 +38,13 @@ export const ELASTIC_AGENT_NAMES: ElasticAgentName[] = [
 ];
 
 export type OpenTelemetryAgentName =
-  | 'otlp'
   | 'opentelemetry'
-  | 'opentelemetry/cpp'
-  | 'opentelemetry/dotnet'
-  | 'opentelemetry/erlang'
-  | 'opentelemetry/go'
-  | 'opentelemetry/java'
-  | 'opentelemetry/nodejs'
-  | 'opentelemetry/php'
-  | 'opentelemetry/python'
-  | 'opentelemetry/ruby'
-  | 'opentelemetry/rust'
-  | 'opentelemetry/swift'
-  | 'opentelemetry/android'
-  | 'opentelemetry/webjs'
-  | 'otlp/cpp'
-  | 'otlp/dotnet'
-  | 'otlp/erlang'
-  | 'otlp/go'
-  | 'otlp/java'
-  | 'otlp/nodejs'
-  | 'otlp/php'
-  | 'otlp/python'
-  | 'otlp/ruby'
-  | 'otlp/rust'
-  | 'otlp/swift'
-  | 'otlp/android'
-  | 'otlp/webjs';
+  | 'otlp'
+  | `opentelemetry/${string}`
+  | `otlp/${string}`;
+export const OPEN_TELEMETRY_BASE_AGENT_NAMES: OpenTelemetryAgentName[] = ['otlp', 'opentelemetry'];
 export const OPEN_TELEMETRY_AGENT_NAMES: OpenTelemetryAgentName[] = [
-  'otlp',
-  'opentelemetry',
+  ...OPEN_TELEMETRY_BASE_AGENT_NAMES,
   'opentelemetry/cpp',
   'opentelemetry/dotnet',
   'opentelemetry/erlang',

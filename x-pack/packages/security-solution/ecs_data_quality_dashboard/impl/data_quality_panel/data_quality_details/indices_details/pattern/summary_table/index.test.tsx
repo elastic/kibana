@@ -71,26 +71,7 @@ const defaultProps: Props = {
   setSorting: jest.fn(),
   sorting: defaultSort,
   onCheckNowAction: jest.fn(),
-  onExpandAction: jest.fn(),
-  checkState: Object.fromEntries(
-    indexNames.map((indexName) => [
-      indexName,
-      {
-        isChecking: false,
-        isLoadingMappings: false,
-        isLoadingUnallowedValues: false,
-        indexes: null,
-        mappingsProperties: null,
-        unallowedValues: null,
-        genericError: null,
-        mappingsError: null,
-        unallowedValuesError: null,
-        partitionedFieldMetadata: null,
-        isCheckComplete: false,
-        searchResults: null,
-      },
-    ])
-  ),
+  onViewHistoryAction: jest.fn(),
 };
 
 describe('SummaryTable', () => {

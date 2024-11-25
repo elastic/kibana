@@ -19,7 +19,6 @@ import { useKibana } from '../../../common/lib/kibana';
 import type { FormHook, ValidationError } from '../../../shared_imports';
 import { useForm, useFormData } from '../../../shared_imports';
 import { schema as defineRuleSchema } from '../components/step_define_rule/schema';
-import type { EqlOptionsSelected } from '../../../../common/search_strategy';
 import {
   schema as aboutRuleSchema,
   threatMatchAboutSchema,
@@ -53,20 +52,14 @@ export const useRuleForms = ({
     options: { stripEmptyFields: false },
     schema: defineRuleSchema,
   });
-  const [eqlOptionsSelected, setEqlOptionsSelected] = useState<EqlOptionsSelected>(
-    defineStepDefault.eqlOptions
-  );
   const [defineStepFormData] = useFormData<DefineStepRule | {}>({
     form: defineStepForm,
   });
   // FormData doesn't populate on the first render, so we use the defaultValue if the formData
   // doesn't have what we wanted
   const defineStepData = useMemo(
-    () =>
-      'index' in defineStepFormData
-        ? { ...defineStepFormData, eqlOptions: eqlOptionsSelected }
-        : defineStepDefault,
-    [defineStepDefault, defineStepFormData, eqlOptionsSelected]
+    () => ('index' in defineStepFormData ? defineStepFormData : defineStepDefault),
+    [defineStepDefault, defineStepFormData]
   );
 
   // ABOUT STEP FORM
@@ -118,8 +111,6 @@ export const useRuleForms = ({
     scheduleStepData,
     actionsStepForm,
     actionsStepData,
-    eqlOptionsSelected,
-    setEqlOptionsSelected,
   };
 };
 
@@ -149,7 +140,7 @@ export const useRuleIndexPattern = ({
 
     if (dataSourceType === DataSourceType.DataView) {
       const fetchDataView = async () => {
-        if (dataViewId != null) {
+        if (dataViewId != null && dataViewId !== '') {
           const dv = await data.dataViews.get(dataViewId);
           setIndexPattern(dv);
         }

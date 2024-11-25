@@ -34,6 +34,12 @@ export function defineUpdateApiKeyRoutes({
   router.put(
     {
       path: '/internal/security/api_key',
+      security: {
+        authz: {
+          enabled: false,
+          reason: `This route delegates authorization to the scoped ES cluster client of the internal authentication service`,
+        },
+      },
       validate: {
         body: schema.oneOf([
           updateRestApiKeySchema,

@@ -122,11 +122,6 @@ export class ImportResolver {
       return true;
     }
 
-    // ignore amd require done by ace syntax plugin
-    if (req === 'ace/lib/dom') {
-      return true;
-    }
-
     // typescript validates these imports fine and they're purely virtual thanks to ambient type definitions in @elastic/eui so /shrug
     if (
       req.startsWith('@elastic/eui/src/components/') ||

@@ -16,7 +16,14 @@ import type {
 } from '@kbn/alerting-plugin/server';
 import type { ListClient } from '@kbn/lists-plugin/server';
 import type { Filter } from '@kbn/es-query';
-import type { RuleRangeTuple, BulkCreate, WrapHits, WrapSuppressedHits, RunOpts } from '../types';
+import type {
+  RuleRangeTuple,
+  BulkCreate,
+  WrapHits,
+  WrapSuppressedHits,
+  RunOpts,
+  CreateRuleOptions,
+} from '../types';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { createThreatSignals } from './threat_mapping/create_threat_signals';
 import type { CompleteRule, ThreatRuleParams } from '../../rule_schema';
@@ -47,6 +54,7 @@ export const indicatorMatchExecutor = async ({
   runOpts,
   licensing,
   experimentalFeatures,
+  scheduleNotificationResponseActionsService,
 }: {
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
@@ -67,6 +75,7 @@ export const indicatorMatchExecutor = async ({
   wrapSuppressedHits: WrapSuppressedHits;
   runOpts: RunOpts<ThreatRuleParams>;
   licensing: LicensingPluginSetup;
+  scheduleNotificationResponseActionsService: CreateRuleOptions['scheduleNotificationResponseActionsService'];
   experimentalFeatures: ExperimentalFeatures;
 }) => {
   const ruleParams = completeRule.ruleParams;
@@ -107,6 +116,7 @@ export const indicatorMatchExecutor = async ({
       runOpts,
       licensing,
       experimentalFeatures,
+      scheduleNotificationResponseActionsService,
     });
   });
 };

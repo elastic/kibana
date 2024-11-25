@@ -25,6 +25,10 @@ export const ENTITY_ANALYTICS_RISK_SCORE = i18n.translate(
   }
 );
 
+export const ENTITY_STORE = i18n.translate('xpack.securitySolution.navigation.entityStore', {
+  defaultMessage: 'Entity Store',
+});
+
 export const NOTES = i18n.translate('xpack.securitySolution.navigation.notes', {
   defaultMessage: 'Notes',
 });
@@ -96,6 +100,13 @@ export const ADD_RULES = i18n.translate('xpack.securitySolution.navigation.addRu
 export const EXCEPTIONS = i18n.translate('xpack.securitySolution.navigation.exceptions', {
   defaultMessage: 'Shared exception lists',
 });
+
+export const SIEM_MIGRATIONS_RULES = i18n.translate(
+  'xpack.securitySolution.navigation.siemMigrationsRules',
+  {
+    defaultMessage: 'SIEM Rules Migrations',
+  }
+);
 
 export const ALERTS = i18n.translate('xpack.securitySolution.navigation.alerts', {
   defaultMessage: 'Alerts',

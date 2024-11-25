@@ -82,6 +82,8 @@ const mockFiniding = (postureType: string, isBillableAsset?: boolean) => {
       },
     };
   }
+
+  throw new Error('Invalid posture type');
 };
 
 export const getMockDefendForContainersHeartbeats = ({

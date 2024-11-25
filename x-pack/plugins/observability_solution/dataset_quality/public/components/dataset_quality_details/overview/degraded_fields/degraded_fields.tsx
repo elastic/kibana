@@ -45,6 +45,7 @@ export function DegradedFields() {
         aria-describedby={toggleTextSwitchId}
         compressed
         data-test-subj="datasetQualityDetailsOverviewDegradedFieldToggleSwitch"
+        css={{ marginRight: '5px' }}
       />
       <EuiIconTip content={overviewDegradedFieldToggleSwitchTooltip} position="top" />
     </>

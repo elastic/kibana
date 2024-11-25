@@ -10,6 +10,7 @@ import { EuiCallOut, EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiText } from '@el
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { useSelector } from 'react-redux';
+import { TimelineStatusEnum } from '../../../../../common/api/timeline';
 import type { State } from '../../../../common/store';
 import { TimelineId } from '../../../../../common/types';
 import { SaveTimelineButton } from '../../../../timelines/components/modal/actions/save_timeline_button';
@@ -25,31 +26,31 @@ const timelineCheckBoxId = 'xpack.securitySolution.flyout.notes.attachToTimeline
 export const ATTACH_TO_TIMELINE_CALLOUT_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.left.notes.attachToTimeline.calloutTitle',
   {
-    defaultMessage: 'Attach to timeline',
+    defaultMessage: 'Attach to current Timeline',
   }
 );
 export const SAVED_TIMELINE_CALLOUT_CONTENT = i18n.translate(
   'xpack.securitySolution.flyout.left.notes.attachToTimeline.calloutContent',
   {
-    defaultMessage: 'You can associate the newly created note to the active timeline.',
+    defaultMessage: 'Also attach this note to the current Timeline.',
   }
 );
 export const UNSAVED_TIMELINE_CALLOUT_CONTENT = i18n.translate(
   'xpack.securitySolution.flyout.left.notes.attachToTimeline.calloutContent',
   {
-    defaultMessage: 'Before attaching a note to the timeline, you need to save the timeline first.',
+    defaultMessage: 'You must save the current Timeline before attaching notes to it.',
   }
 );
 export const ATTACH_TO_TIMELINE_CHECKBOX = i18n.translate(
   'xpack.securitySolution.flyout.left.notes.attachToTimeline.checkboxLabel',
   {
-    defaultMessage: 'Attach to active timeline',
+    defaultMessage: 'Attach to current Timeline',
   }
 );
 export const SAVE_TIMELINE_BUTTON = i18n.translate(
-  'xpack.securitySolution.flyout.left.notes.savedTimelineButtonLabel',
+  'xpack.securitySolution.flyout.left.notes.attachToTimeline.savedTimelineButtonLabel',
   {
-    defaultMessage: 'Save timeline',
+    defaultMessage: 'Save current Timeline',
   }
 );
 
@@ -76,10 +77,9 @@ export const AttachToActiveTimeline = memo(
     const timeline = useSelector((state: State) =>
       timelineSelectors.selectTimelineById(state, TimelineId.active)
     );
-    const timelineSavedObjectId = useMemo(() => timeline?.savedObjectId ?? '', [timeline]);
     const isTimelineSaved: boolean = useMemo(
-      () => timelineSavedObjectId.length > 0,
-      [timelineSavedObjectId]
+      () => timeline.status === TimelineStatusEnum.active,
+      [timeline.status]
     );
 
     const onCheckboxChange = useCallback(

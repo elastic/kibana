@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, Fragment } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,6 +14,7 @@ import {
   EuiSpacer,
   EuiLink,
   EuiCode,
+  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -34,7 +35,13 @@ import { UnitField, timeUnits } from '../../shared';
 import { DataRetention } from '../../../../../common';
 import { documentationService } from '../../../services/documentation';
 import { schemas, nameConfig, nameConfigWithoutValidations } from '../template_form_schemas';
-import { allowAutoCreateRadios } from '../../../../../common/constants';
+import {
+  allowAutoCreateRadios,
+  STANDARD_INDEX_MODE,
+  TIME_SERIES_MODE,
+  LOGSDB_INDEX_MODE,
+} from '../../../../../common/constants';
+import { indexModeLabels, indexModeDescriptions } from '../../../lib/index_mode_labels';
 
 // Create or Form components with partial props that are common to all instances
 const UseField = getUseField({ component: Field });
@@ -90,6 +97,54 @@ function getFieldsMeta(esDocsBase: string) {
         />
       ),
       testSubject: 'dataStreamField',
+    },
+    indexMode: {
+      title: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.indexModeTitle', {
+        defaultMessage: 'Data stream index mode',
+      }),
+      description: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.indexModeDescription', {
+        defaultMessage:
+          'The index.mode setting is used to control settings applied in specific domains like ingestions of time series data or logs.',
+      }),
+      options: [
+        {
+          value: STANDARD_INDEX_MODE,
+          inputDisplay: indexModeLabels[STANDARD_INDEX_MODE],
+          dropdownDisplay: (
+            <Fragment>
+              <strong>{indexModeLabels[STANDARD_INDEX_MODE]}</strong>
+              <EuiText size="s" color="subdued">
+                <p>{indexModeDescriptions[STANDARD_INDEX_MODE]}</p>
+              </EuiText>
+            </Fragment>
+          ),
+        },
+        {
+          value: TIME_SERIES_MODE,
+          inputDisplay: indexModeLabels[TIME_SERIES_MODE],
+          dropdownDisplay: (
+            <Fragment>
+              <strong>{indexModeLabels[TIME_SERIES_MODE]}</strong>
+              <EuiText size="s" color="subdued">
+                <p>{indexModeDescriptions[TIME_SERIES_MODE]}</p>
+              </EuiText>
+            </Fragment>
+          ),
+        },
+        {
+          value: LOGSDB_INDEX_MODE,
+          inputDisplay: indexModeLabels[LOGSDB_INDEX_MODE],
+          dropdownDisplay: (
+            <Fragment>
+              <strong>{indexModeLabels[LOGSDB_INDEX_MODE]}</strong>
+              <EuiText size="s" color="subdued">
+                <p>{indexModeDescriptions[LOGSDB_INDEX_MODE]}</p>
+              </EuiText>
+            </Fragment>
+          ),
+        },
+      ],
+      testSubject: 'indexModeField',
     },
     order: {
       title: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.orderTitle', {
@@ -194,24 +249,41 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
     const {
       submit,
       isSubmitted,
+      isSubmitting,
       isValid: isFormValid,
       getErrors: getFormErrors,
       getFormData,
+      setFieldValue,
     } = form;
 
-    const [{ addMeta, doCreateDataStream, lifecycle }] = useFormData<{
-      addMeta: boolean;
-      lifecycle: DataRetention;
-      doCreateDataStream: boolean;
-    }>({
-      form,
-      watch: [
-        'addMeta',
-        'lifecycle.enabled',
-        'lifecycle.infiniteDataRetention',
-        'doCreateDataStream',
-      ],
-    });
+    const [{ addMeta, doCreateDataStream, lifecycle, indexPatterns: indexPatternsField }] =
+      useFormData<{
+        addMeta: boolean;
+        lifecycle: DataRetention;
+        doCreateDataStream: boolean;
+        indexPatterns: string[];
+      }>({
+        form,
+        watch: [
+          'addMeta',
+          'lifecycle.enabled',
+          'lifecycle.infiniteDataRetention',
+          'doCreateDataStream',
+          'indexPatterns',
+        ],
+      });
+
+    useEffect(() => {
+      if (
+        indexPatternsField &&
+        indexPatternsField.length === 1 &&
+        indexPatternsField[0] === 'logs-*-*' &&
+        // Only set index mode if index pattern was changed
+        defaultValue.indexPatterns !== indexPatternsField
+      ) {
+        setFieldValue('indexMode', LOGSDB_INDEX_MODE);
+      }
+    }, [defaultValue.indexPatterns, indexPatternsField, setFieldValue]);
 
     /**
      * When the consumer call validate() on this step, we submit the form so it enters the "isSubmitted" state
@@ -233,6 +305,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
       name,
       indexPatterns,
       createDataStream,
+      indexMode,
       order,
       priority,
       version,
@@ -275,7 +348,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
 
         <Form
           form={form}
-          isInvalid={isSubmitted && !isFormValid}
+          isInvalid={isSubmitted && !isSubmitting && !isFormValid}
           error={getFormErrors()}
           data-test-subj="stepLogistics"
         >
@@ -307,6 +380,21 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
               <UseField
                 path="doCreateDataStream"
                 componentProps={{ 'data-test-subj': createDataStream.testSubject }}
+              />
+            </FormRow>
+          )}
+
+          {doCreateDataStream && (
+            <FormRow title={indexMode.title} description={indexMode.description}>
+              <UseField
+                path="indexMode"
+                componentProps={{
+                  euiFieldProps: {
+                    hasDividers: true,
+                    'data-test-subj': indexMode.testSubject,
+                    options: indexMode.options,
+                  },
+                }}
               />
             </FormRow>
           )}

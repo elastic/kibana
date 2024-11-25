@@ -102,3 +102,9 @@ export {
 } from './components/feature_feedback_button/feature_feedback_button';
 export { BottomBarActions } from './components/bottom_bar_actions/bottom_bar_actions';
 export { FieldValueSelection, FieldValueSuggestions } from './components';
+
+export { AddDataPanel, type AddDataPanelProps } from './components/add_data_panel';
+
+export { useUrlState } from './hooks/use_url_state';
+export { type ControlPanels, useControlPanels } from './hooks/use_control_panels_url_state';
+export { useKibanaQuerySettings } from './hooks/use_kibana_query_settings';

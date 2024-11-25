@@ -45,6 +45,8 @@ import {
   PackageSavedObjectConflictError,
   FleetTooManyRequestsError,
   AgentlessPolicyExistsRequestError,
+  PackageInvalidDeploymentMode,
+  PackagePolicyContentPackageError,
 } from '.';
 
 type IngestErrorHandler = (
@@ -60,6 +62,9 @@ interface IngestErrorHandlerParams {
 // this type is based on BadRequest values observed while debugging https://github.com/elastic/kibana/issues/75862
 const getHTTPResponseCode = (error: FleetError): number => {
   // Bad Request
+  if (error instanceof PackageInvalidDeploymentMode) {
+    return 400;
+  }
   if (error instanceof PackageFailedVerificationError) {
     return 400;
   }
@@ -82,6 +87,9 @@ const getHTTPResponseCode = (error: FleetError): number => {
     return 400;
   }
   if (error instanceof PackagePolicyRequestError) {
+    return 400;
+  }
+  if (error instanceof PackagePolicyContentPackageError) {
     return 400;
   }
   // Unauthorized

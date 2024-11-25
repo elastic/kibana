@@ -393,5 +393,10 @@ export function syntheticsAppPageProvider({
       const isDisabled = await addMonitorBtn.isDisabled();
       return !isDisabled;
     },
+
+    async goToRulesPage() {
+      const rulesPage = '/app/observability/alerts/rules';
+      await page.goto(basePath + rulesPage);
+    },
   };
 }

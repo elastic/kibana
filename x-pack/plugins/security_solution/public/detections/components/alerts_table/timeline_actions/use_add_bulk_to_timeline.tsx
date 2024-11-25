@@ -23,7 +23,6 @@ import { useTimelineEventsHandler } from '../../../../timelines/containers';
 import { eventsViewerSelector } from '../../../../common/components/events_viewer/selectors';
 import type { State } from '../../../../common/store/types';
 import { useUpdateTimeline } from '../../../../timelines/components/open_timeline/use_update_timeline';
-import { timelineActions } from '../../../../timelines/store';
 import { useCreateTimeline } from '../../../../timelines/hooks/use_create_timeline';
 import { INVESTIGATE_BULK_IN_TIMELINE } from '../translations';
 import { TimelineId } from '../../../../../common/types/timeline';
@@ -67,7 +66,6 @@ export const useAddBulkToTimelineAction = ({
   const {
     browserFields,
     dataViewId,
-    indexPattern,
     sourcererDataView,
     // important to get selectedPatterns from useSourcererDataView
     // in order to include the exclude filters in the search that are not stored in the timeline
@@ -96,13 +94,13 @@ export const useAddBulkToTimelineAction = ({
     return combineQueries({
       config: esQueryConfig,
       dataProviders: [],
-      indexPattern,
+      indexPattern: sourcererDataView,
       filters: combinedFilters,
       kqlQuery: { query: '', language: 'kuery' },
       browserFields,
       kqlMode: 'filter',
     });
-  }, [esQueryConfig, indexPattern, combinedFilters, browserFields]);
+  }, [esQueryConfig, sourcererDataView, combinedFilters, browserFields]);
 
   const filterQuery = useMemo(() => {
     if (!combinedQuery) return '';
@@ -120,7 +118,7 @@ export const useAddBulkToTimelineAction = ({
     sort: timelineQuerySortField,
     indexNames: selectedPatterns,
     filterQuery,
-    runtimeMappings: sourcererDataView?.runtimeFieldMap as RunTimeMappings,
+    runtimeMappings: sourcererDataView.runtimeFieldMap as RunTimeMappings,
     limit: Math.min(BULK_ADD_TO_TIMELINE_LIMIT, totalCount),
     timerangeKind: 'absolute',
   });
@@ -142,18 +140,11 @@ export const useAddBulkToTimelineAction = ({
     timelineType: TimelineTypeEnum.default,
   });
 
-  const updateTimelineIsLoading = useCallback(
-    (payload: Parameters<typeof timelineActions.updateIsLoading>[0]) =>
-      dispatch(timelineActions.updateIsLoading(payload)),
-    [dispatch]
-  );
-
   const updateTimeline = useUpdateTimeline();
 
   const createTimeline = useCallback(
     async ({ timeline, ruleNote, timeline: { filters: eventIdFilters } }: CreateTimelineProps) => {
       await clearActiveTimeline();
-      updateTimelineIsLoading({ id: TimelineId.active, isLoading: false });
       updateTimeline({
         duplicate: true,
         from,
@@ -169,7 +160,7 @@ export const useAddBulkToTimelineAction = ({
         ruleNote,
       });
     },
-    [updateTimeline, updateTimelineIsLoading, clearActiveTimeline, from, to]
+    [updateTimeline, clearActiveTimeline, from, to]
   );
 
   const sendBulkEventsToTimelineHandler = useCallback(

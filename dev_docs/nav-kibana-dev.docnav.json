@@ -101,7 +101,10 @@
           "id": "kibBuildingBlocks"
         },
         {
-          "id": "kibDevDocsSecurityIntro"
+          "id": "kibDevDocsSecurityAPIAuthorization"
+        },
+        {
+          "id": "kibDevDocsSecurityKibanaSystemUser"
         },
         {
           "id": "kibDevFeaturePrivileges",
@@ -180,8 +183,13 @@
           "label": "data.search"
         },
         {
-          "id": "kibDevTutorialFileService",
-          "label": "File service"
+          "id": "kibDevTutorialScreenshotting",
+          "label": "Screenshotting",
+          "items": [
+            {
+              "id": "kibDevDocsUpdatingPuppeteerAndChromium"
+            }
+          ]
         },
         {
           "id": "kibDevTutorialDataViews"
@@ -264,10 +272,6 @@
           ]
         },
         {
-          "id": "kibDevTutorialScreenshotting",
-          "label": "Screenshotting"
-        },
-        {
           "id": "kibDevTutorialAdvancedSettings",
           "label": "Advanced Settings"
         },
@@ -278,6 +282,10 @@
         {
           "id": "kibDevReactKibanaContext",
           "label": "Kibana React Contexts"
+        },
+        {
+          "id": "kibDevDocsChromeRecentlyAccessed",
+          "label": "Recently Viewed"
         }
       ]
     },
@@ -615,9 +623,6 @@
         },
         {
           "id": "kibTelemetryCollectionManagerPluginApi"
-        },
-        {
-          "id": "kibTelemetryCollectionXpackPluginApi"
         },
         {
           "id": "kibTelemetryManagementSectionPluginApi"

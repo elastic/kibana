@@ -18,6 +18,7 @@
 export type {
   CasesBulkGetResponse,
   CasePostRequest,
+  CasePatchRequest,
   GetRelatedCasesByAlertResponse,
   UserActionFindResponse,
 } from './types/api';
@@ -38,6 +39,7 @@ export { CaseSeverity } from './types/domain';
 export {
   APP_ID,
   FEATURE_ID,
+  FEATURE_ID_V2,
   CASES_URL,
   SECURITY_SOLUTION_OWNER,
   OBSERVABILITY_OWNER,
@@ -55,6 +57,8 @@ export {
   CASES_CONNECTORS_CAPABILITY,
   GET_CONNECTORS_CONFIGURE_API_TAG,
   CASES_SETTINGS_CAPABILITY,
+  CREATE_COMMENT_CAPABILITY,
+  CASES_REOPEN_CAPABILITY,
 } from './constants';
 
 export type { AttachmentAttributes } from './types/domain';

@@ -21,7 +21,8 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
-} from '@kbn/security-solution-common';
+} from '../../../shared/components/test_ids';
+
 import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 
 jest.mock(
@@ -68,7 +69,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 });
 
 const NO_ANALYZER_MESSAGE =
-  'You can only visualize events triggered by hosts configured with the Elastic Defend integration or any sysmon data from winlogbeat. Refer to Visual event analyzerExternal link(opens in a new tab or window) for more information.';
+  'You can only visualize events triggered by hosts configured with the Elastic Defend integration or any sysmon data from winlogbeat. Refer to Visual event analyzer(external, opens in a new tab or window) for more information.';
 
 const renderAnalyzerPreview = (context = mockContextValue) =>
   render(

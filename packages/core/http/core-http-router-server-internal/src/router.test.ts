@@ -7,20 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Router, type RouterOptions } from './router';
+import type { ResponseToolkit, ResponseObject } from '@hapi/hapi';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { isConfigSchema, schema } from '@kbn/config-schema';
-import { createFooValidation } from './router.test.util';
 import { createRequestMock } from '@kbn/hapi-mocks/src/request';
+import { createFooValidation } from './router.test.util';
+import { Router, type RouterOptions } from './router';
 import type { RouteValidatorRequestAndResponses } from '@kbn/core-http-server';
 
-const mockResponse: any = {
+const mockResponse = {
   code: jest.fn().mockImplementation(() => mockResponse),
   header: jest.fn().mockImplementation(() => mockResponse),
-};
-const mockResponseToolkit: any = {
+} as unknown as jest.Mocked<ResponseObject>;
+
+const mockResponseToolkit = {
   response: jest.fn().mockReturnValue(mockResponse),
-};
+} as unknown as jest.Mocked<ResponseToolkit>;
 
 const logger = loggingSystemMock.create().get();
 const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
@@ -48,10 +50,18 @@ describe('Router', () => {
           path: '/',
           validate: { body: validation, query: validation, params: validation },
           options: {
-            deprecated: true,
+            deprecated: {
+              documentationUrl: 'https://fake-url.com',
+              reason: { type: 'remove' },
+              severity: 'warning',
+            },
             discontinued: 'post test discontinued',
             summary: 'post test summary',
             description: 'post test description',
+            availability: {
+              since: '1.0.0',
+              stability: 'experimental',
+            },
           },
         },
         (context, req, res) => res.ok()
@@ -66,10 +76,18 @@ describe('Router', () => {
         validationSchemas: { body: validation, query: validation, params: validation },
         isVersioned: false,
         options: {
-          deprecated: true,
+          deprecated: {
+            documentationUrl: 'https://fake-url.com',
+            reason: { type: 'remove' },
+            severity: 'warning',
+          },
           discontinued: 'post test discontinued',
           summary: 'post test summary',
           description: 'post test description',
+          availability: {
+            since: '1.0.0',
+            stability: 'experimental',
+          },
         },
       });
     });
@@ -83,7 +101,7 @@ describe('Router', () => {
           validate: { body: validation, query: validation, params: validation },
         },
         (context, req, res) => res.ok(),
-        { isVersioned: true }
+        { isVersioned: true, events: false }
       );
       router.get(
         {
@@ -131,6 +149,78 @@ describe('Router', () => {
       expect(validateOutputFn).toHaveBeenCalledTimes(0);
     }
   );
+
+  describe('elastic-api-version header', () => {
+    it('adds the header to public, unversioned routes', async () => {
+      const router = new Router('', logger, enhanceWithContext, routerOptions);
+      router.post(
+        {
+          path: '/public',
+          options: {
+            access: 'public',
+          },
+          validate: false,
+        },
+        (context, req, res) => res.ok({ headers: { AAAA: 'test' } }) // with some fake headers
+      );
+      router.post(
+        {
+          path: '/internal',
+          options: {
+            access: 'internal',
+          },
+          validate: false,
+        },
+        (context, req, res) => res.ok()
+      );
+      const [{ handler: publicHandler }, { handler: internalHandler }] = router.getRoutes();
+
+      await publicHandler(createRequestMock(), mockResponseToolkit);
+      expect(mockResponse.header).toHaveBeenCalledTimes(2);
+      const [first, second] = mockResponse.header.mock.calls
+        .concat()
+        .sort(([k1], [k2]) => k1.localeCompare(k2));
+      expect(first).toEqual(['AAAA', 'test']);
+      expect(second).toEqual(['elastic-api-version', '2023-10-31']);
+
+      await internalHandler(createRequestMock(), mockResponseToolkit);
+      expect(mockResponse.header).toHaveBeenCalledTimes(2); // no additional calls
+    });
+
+    it('does not add the header to public http resource routes', async () => {
+      const router = new Router('', logger, enhanceWithContext, routerOptions);
+      router.post(
+        {
+          path: '/public',
+          options: {
+            access: 'public',
+          },
+          validate: false,
+        },
+        (context, req, res) => res.ok()
+      );
+      router.post(
+        {
+          path: '/public-resource',
+          options: {
+            access: 'public',
+            httpResource: true,
+          },
+          validate: false,
+        },
+        (context, req, res) => res.ok()
+      );
+      const [{ handler: publicHandler }, { handler: resourceHandler }] = router.getRoutes();
+
+      await publicHandler(createRequestMock(), mockResponseToolkit);
+      expect(mockResponse.header).toHaveBeenCalledTimes(1);
+      const [headersTuple] = mockResponse.header.mock.calls;
+      expect(headersTuple).toEqual(['elastic-api-version', '2023-10-31']);
+
+      await resourceHandler(createRequestMock(), mockResponseToolkit);
+      expect(mockResponse.header).toHaveBeenCalledTimes(1); // no additional calls
+    });
+  });
 
   it('constructs lazily provided validations once (idempotency)', async () => {
     const router = new Router('', logger, enhanceWithContext, routerOptions);
@@ -212,6 +302,23 @@ describe('Router', () => {
         )
       ).toThrowErrorMatchingInlineSnapshot(
         `"Expected a valid validation logic declared with '@kbn/config-schema' package, '@kbn/zod' package or a RouteValidationFunction at key: [params]."`
+      );
+    });
+
+    it('throws if route has security declared wrong', () => {
+      const router = new Router('', logger, enhanceWithContext, routerOptions);
+      expect(() =>
+        router.get(
+          // we use 'any' because validate requires valid Type or function usage
+          {
+            path: '/',
+            validate: false,
+            options: { security: { authz: { requiredPrivileges: [] } } } as any,
+          },
+          (context, req, res) => res.ok({})
+        )
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"\`options.security\` is not allowed in route config. Use \`security\` instead."`
       );
     });
 

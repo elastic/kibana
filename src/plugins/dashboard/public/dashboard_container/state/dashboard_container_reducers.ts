@@ -9,6 +9,7 @@
 
 import { PayloadAction } from '@reduxjs/toolkit';
 
+import { isFilterPinned } from '@kbn/es-query';
 import {
   DashboardReduxState,
   DashboardStateFromSaveModal,
@@ -94,13 +95,20 @@ export const dashboardContainerReducers = {
    *    `timeRestore` is `false`, this causes unecessary data fetches for the control group.
    * 2) The view mode, since resetting should never impact this - sometimes the Dashboard saved objects
    *    have this saved in and we don't want resetting to cause unexpected view mode changes.
+   * 3) Pinned filters.
    */
   resetToLastSavedInput: (
     state: DashboardReduxState,
     action: PayloadAction<DashboardContainerInput>
   ) => {
+    const keepPinnedFilters = [
+      ...state.explicitInput.filters.filter(isFilterPinned),
+      ...action.payload.filters,
+    ];
+
     state.explicitInput = {
       ...action.payload,
+      filters: keepPinnedFilters,
       ...(!state.explicitInput.timeRestore && { timeRange: state.explicitInput.timeRange }),
       viewMode: state.explicitInput.viewMode,
     };

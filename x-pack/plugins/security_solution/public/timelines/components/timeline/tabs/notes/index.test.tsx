@@ -18,6 +18,8 @@ import React from 'react';
 import { TimelineId } from '../../../../../../common/types';
 import { SAVE_TIMELINE_CALLOUT_TEST_ID } from '../../../notes/test_ids';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
+import { TimelineStatusEnum } from '../../../../../../common/api/timeline';
+import type { State } from '../../../../../common/store';
 
 jest.mock('../../../../../common/hooks/use_experimental_features');
 jest.mock('../../../../../common/components/user_privileges');
@@ -38,7 +40,7 @@ jest.mock('react-redux', () => {
   };
 });
 
-const mockGlobalStateWithSavedTimeline = {
+const mockGlobalStateWithSavedTimeline: State = {
   ...mockGlobalState,
   timeline: {
     ...mockGlobalState.timeline,
@@ -47,11 +49,12 @@ const mockGlobalStateWithSavedTimeline = {
       [TimelineId.active]: {
         ...mockGlobalState.timeline.timelineById[TimelineId.test],
         savedObjectId: 'savedObjectId',
+        status: TimelineStatusEnum.active,
       },
     },
   },
 };
-const mockGlobalStateWithUnSavedTimeline = {
+const mockGlobalStateWithUnSavedTimeline: State = {
   ...mockGlobalState,
   timeline: {
     ...mockGlobalState.timeline,
@@ -67,14 +70,14 @@ const mockGlobalStateWithUnSavedTimeline = {
 describe('NotesTabContentComponent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
     (useUserPrivileges as jest.Mock).mockReturnValue({
       kibanaSecuritySolutionsPrivileges: { crud: true },
     });
   });
 
   it('should show the old note system', () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
 
     const { getByTestId, queryByTestId } = render(
       <TestProviders>

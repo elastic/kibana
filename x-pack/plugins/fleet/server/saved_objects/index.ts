@@ -101,6 +101,7 @@ import {
   migratePackagePolicySetRequiresRootToV8150,
 } from './migrations/to_v8_15_0';
 import { backfillAgentPolicyToV4 } from './model_versions/agent_policy_v4';
+import { backfillOutputPolicyToV7 } from './model_versions/outputs';
 
 /*
  * Saved object types and mappings
@@ -161,6 +162,12 @@ export const getSavedObjectTypes = (
           output_secret_storage_requirements_met: { type: 'boolean' },
           use_space_awareness_migration_status: { type: 'keyword', index: false },
           use_space_awareness_migration_started_at: { type: 'date', index: false },
+          delete_unenrolled_agents: {
+            properties: {
+              enabled: { type: 'boolean', index: false },
+              is_preconfigured: { type: 'boolean', index: false },
+            },
+          },
         },
       },
       migrations: {
@@ -177,6 +184,21 @@ export const getSavedObjectTypes = (
               addedMappings: {
                 use_space_awareness_migration_status: { type: 'keyword', index: false },
                 use_space_awareness_migration_started_at: { type: 'date', index: false },
+              },
+            },
+          ],
+        },
+        3: {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                delete_unenrolled_agents: {
+                  properties: {
+                    enabled: { type: 'boolean', index: false },
+                    is_preconfigured: { type: 'boolean', index: false },
+                  },
+                },
               },
             },
           ],
@@ -537,6 +559,18 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '7': {
+          changes: [
+            {
+              type: 'mappings_deprecation',
+              deprecatedMappings: ['topics'],
+            },
+            {
+              type: 'data_backfill',
+              backfillFn: backfillOutputPolicyToV7,
+            },
+          ],
+        },
       },
       migrations: {
         '7.13.0': migrateOutputToV7130,
@@ -585,6 +619,7 @@ export const getSavedObjectTypes = (
           updated_by: { type: 'keyword' },
           created_at: { type: 'date' },
           created_by: { type: 'keyword' },
+          bump_agent_policy_revision: { type: 'boolean' },
         },
       },
       modelVersions: {
@@ -729,6 +764,16 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '15': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                bump_agent_policy_revision: { type: 'boolean' },
+              },
+            },
+          ],
+        },
       },
       migrations: {
         '7.10.0': migratePackagePolicyToV7100,
@@ -789,6 +834,19 @@ export const getSavedObjectTypes = (
           updated_by: { type: 'keyword' },
           created_at: { type: 'date' },
           created_by: { type: 'keyword' },
+          bump_agent_policy_revision: { type: 'boolean' },
+        },
+      },
+      modelVersions: {
+        '1': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                bump_agent_policy_revision: { type: 'boolean' },
+              },
+            },
+          ],
         },
       },
     },

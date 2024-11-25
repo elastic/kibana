@@ -119,7 +119,7 @@ describe('Test preconfiguration schema', () => {
             type: 'kafka',
             hosts: ['localhost:9200'],
             auth_type: 'ssl',
-            topics: [{ topic: 'topic1' }],
+            topic: 'topic1',
             secrets: {
               password: 'mypassword',
               ssl: {

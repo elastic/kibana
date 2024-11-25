@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { ToastInput } from '@kbn/core-notifications-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
+import type { ToastInput } from '@kbn/core-notifications-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 
 export const DATA_TEST_SUBJ_PAGE_RELOAD_BUTTON = 'pageReloadButton';

@@ -12,7 +12,9 @@ import { SerializableRecord } from '@kbn/utility-types';
 export const OBSERVABILITY_ONBOARDING_LOCATOR = 'OBSERVABILITY_ONBOARDING_LOCATOR' as const;
 
 export interface ObservabilityOnboardingLocatorParams extends SerializableRecord {
-  /** If given, it will load the given map else will load the create a new map page. */
-  source?: 'customLogs' | 'systemLogs';
+  /** If given, it will load the given onboarding flow
+   * else will load the main onboarding screen.
+   */
+  source?: 'auto-detect' | 'customLogs' | 'kubernetes' | 'otel-logs' | 'firehose';
   category?: string;
 }

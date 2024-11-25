@@ -17,17 +17,21 @@ import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import { fetchRuleVersionsTriad } from '../../logic/rule_versions/fetch_rule_versions_triad';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
-import { getVersionBuckets } from '../../model/rule_versions/get_version_buckets';
 import { convertPrebuiltRuleAssetToRuleResponse } from '../../../rule_management/logic/detection_rules_client/converters/convert_prebuilt_rule_asset_to_rule_response';
 import { PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS } from '../../constants';
+import { getRuleGroups } from '../../model/rule_groups/get_rule_groups';
 
 export const reviewRuleInstallationRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .post({
       access: 'internal',
       path: REVIEW_RULE_INSTALLATION_URL,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
       options: {
-        tags: ['access:securitySolution'],
         timeout: {
           idleSocket: PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS,
         },
@@ -52,7 +56,7 @@ export const reviewRuleInstallationRoute = (router: SecuritySolutionPluginRouter
             ruleAssetsClient,
             ruleObjectsClient,
           });
-          const { installableRules } = getVersionBuckets(ruleVersionsMap);
+          const { installableRules } = getRuleGroups(ruleVersionsMap);
 
           const body: ReviewRuleInstallationResponseBody = {
             stats: calculateRuleStats(installableRules),

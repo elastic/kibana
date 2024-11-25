@@ -38,7 +38,7 @@ import {
   EsAnonymizationFieldsSchema,
   UpdateAnonymizationFieldSchema,
 } from '../../ai_assistant_data_clients/anonymization_fields/types';
-import { UPGRADE_LICENSE_MESSAGE, hasAIAssistantLicense } from '../helpers';
+import { performChecks } from '../helpers';
 
 export interface BulkOperationError {
   message: string;
@@ -47,8 +47,6 @@ export interface BulkOperationError {
     id: string;
   };
 }
-
-export type BulkActionError = BulkOperationError | unknown;
 
 const buildBulkResponse = (
   response: KibanaResponseFactory,
@@ -162,22 +160,18 @@ export const bulkActionAnonymizationFieldsRoute = (
         request.events.completed$.subscribe(() => abortController.abort());
         try {
           const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
-          const license = ctx.licensing.license;
-          if (!hasAIAssistantLicense(license)) {
-            return response.forbidden({
-              body: {
-                message: UPGRADE_LICENSE_MESSAGE,
-              },
-            });
-          }
+          // Perform license and authenticated user checks
+          const checkResponse = performChecks({
+            context: ctx,
+            request,
+            response,
+          });
 
-          const authenticatedUser = ctx.elasticAssistant.getCurrentUser();
-          if (authenticatedUser == null) {
-            return assistantResponse.error({
-              body: `Authenticated user not found`,
-              statusCode: 401,
-            });
+          if (!checkResponse.isSuccess) {
+            return checkResponse.response;
           }
+          const authenticatedUser = checkResponse.currentUser;
+
           const dataClient =
             await ctx.elasticAssistant.getAIAssistantAnonymizationFieldsDataClient();
 
@@ -199,7 +193,7 @@ export const bulkActionAnonymizationFieldsRoute = (
           }
 
           const writer = await dataClient?.getWriter();
-          const changedAt = new Date().toISOString();
+          const createdAt = new Date().toISOString();
           const {
             errors,
             docs_created: docsCreated,
@@ -207,12 +201,12 @@ export const bulkActionAnonymizationFieldsRoute = (
             docs_deleted: docsDeleted,
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           } = await writer!.bulk({
-            documentsToCreate: body.create?.map((f) =>
-              transformToCreateScheme(authenticatedUser, changedAt, f)
+            documentsToCreate: body.create?.map((doc) =>
+              transformToCreateScheme(authenticatedUser, createdAt, doc)
             ),
             documentsToDelete: body.delete?.ids,
-            documentsToUpdate: body.update?.map((f) =>
-              transformToUpdateScheme(authenticatedUser, changedAt, f)
+            documentsToUpdate: body.update?.map((doc) =>
+              transformToUpdateScheme(authenticatedUser, createdAt, doc)
             ),
             getUpdateScript: (document: UpdateAnonymizationFieldSchema) =>
               getUpdateScript({ anonymizationField: document, isPatch: true }),

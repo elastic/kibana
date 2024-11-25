@@ -30,7 +30,12 @@
     "@kbn/console-plugin",
     "@kbn/test-jest-helpers",
     "@kbn/kibana-utils-plugin",
-    "@kbn/features-plugin"
+    "@kbn/features-plugin",
+    "@kbn/ui-theme",
+    "@kbn/deeplinks-search",
+    "@kbn/deeplinks-management",
+    "@kbn/serverless",
+    "@kbn/utility-types"
   ],
   "exclude": [
     "target/**/*",

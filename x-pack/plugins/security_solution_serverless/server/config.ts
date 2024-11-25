@@ -16,19 +16,19 @@ import type { ExperimentalFeatures } from '../common/experimental_features';
 import { productTypes } from '../common/config';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 
-const usageApiConfig = schema.maybe(
-  schema.object({
-    enabled: schema.maybe(schema.boolean()),
-    url: schema.string(),
-    tls: schema.maybe(
-      schema.object({
-        certificate: schema.string(),
-        key: schema.string(),
-        ca: schema.string(),
-      })
-    ),
-  })
-);
+const tlsConfig = schema.object({
+  certificate: schema.string(),
+  key: schema.string(),
+  ca: schema.string(),
+});
+export type TlsConfigSchema = TypeOf<typeof tlsConfig>;
+
+const usageApiConfig = schema.object({
+  enabled: schema.boolean({ defaultValue: false }),
+  url: schema.maybe(schema.string()),
+  tls: schema.maybe(tlsConfig),
+});
+export type UsageApiConfigSchema = TypeOf<typeof usageApiConfig>;
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),

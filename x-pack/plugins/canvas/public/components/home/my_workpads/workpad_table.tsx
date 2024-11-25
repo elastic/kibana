@@ -8,17 +8,16 @@
 import React, { useContext } from 'react';
 import { useSelector } from 'react-redux';
 
-import { canUserWrite as canUserWriteSelector } from '../../../state/selectors/app';
 import type { State } from '../../../../types';
-import { usePlatformService } from '../../../services';
-import { useCloneWorkpad } from '../hooks';
+import { canUserWrite as canUserWriteSelector } from '../../../state/selectors/app';
 import { useDownloadWorkpad } from '../../hooks';
+import { useCloneWorkpad } from '../hooks';
 
-import { WorkpadTable as Component } from './workpad_table.component';
+import { coreServices } from '../../../services/kibana_services';
 import { WorkpadsContext } from './my_workpads';
+import { WorkpadTable as Component } from './workpad_table.component';
 
 export const WorkpadTable = () => {
-  const platformService = usePlatformService();
   const onCloneWorkpad = useCloneWorkpad();
   const onExportWorkpad = useDownloadWorkpad();
   const context = useContext(WorkpadsContext);
@@ -33,7 +32,7 @@ export const WorkpadTable = () => {
 
   const { workpads } = context;
 
-  const dateFormat = platformService.getUISetting('dateFormat');
+  const dateFormat = coreServices.uiSettings.get('dateFormat');
 
   return <Component {...{ workpads, dateFormat, canUserWrite, onCloneWorkpad, onExportWorkpad }} />;
 };

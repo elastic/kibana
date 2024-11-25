@@ -25,7 +25,8 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import { merge } from 'rxjs';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
-import { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
+import { AggregateQuery, isOfAggregateQueryType, Query, TimeRange } from '@kbn/es-query';
+import { isFunction } from 'lodash';
 import { loadSavedSearch as loadSavedSearchFn } from './utils/load_saved_search';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
 import { FetchStatus } from '../../types';
@@ -219,6 +220,10 @@ export interface DiscoverStateContainer {
      * This is to prevent duplicate ids messing with our system
      */
     updateAdHocDataViewId: () => Promise<DataView | undefined>;
+    /**
+     * Updates the ES|QL query string
+     */
+    updateESQLQuery: (queryOrUpdater: string | ((prevQuery: string) => string)) => void;
   };
 }
 
@@ -572,6 +577,22 @@ export function getDiscoverStateContainer({
     }
   };
 
+  const updateESQLQuery = (queryOrUpdater: string | ((prevQuery: string) => string)) => {
+    addLog('updateESQLQuery');
+    const { query: currentQuery } = appStateContainer.getState();
+
+    if (!isOfAggregateQueryType(currentQuery)) {
+      throw new Error(
+        'Cannot update a non-ES|QL query. Make sure this function is only called once in ES|QL mode.'
+      );
+    }
+
+    const queryUpdater = isFunction(queryOrUpdater) ? queryOrUpdater : () => queryOrUpdater;
+    const query = { esql: queryUpdater(currentQuery.esql) };
+
+    appStateContainer.update({ query });
+  };
+
   return {
     globalState: globalStateContainer,
     appState: appStateContainer,
@@ -597,6 +618,7 @@ export function getDiscoverStateContainer({
       setDataView,
       undoSavedSearchChanges,
       updateAdHocDataViewId,
+      updateESQLQuery,
     },
   };
 }

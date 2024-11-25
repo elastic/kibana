@@ -17,6 +17,9 @@ import {
   DocumentDetailsRightPanelKey,
   DocumentDetailsAnalyzerPanelKey,
 } from '../constants/panel_keys';
+import { Flyouts } from '../constants/flyouts';
+import { isTimelineScope } from '../../../../helpers';
+import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 
 export interface UseNavigateToAnalyzerParams {
   /**
@@ -56,7 +59,11 @@ export const useNavigateToAnalyzer = ({
 }: UseNavigateToAnalyzerParams): UseNavigateToAnalyzerResult => {
   const { telemetry } = useKibana().services;
   const { openLeftPanel, openPreviewPanel, openFlyout } = useExpandableFlyoutApi();
-  const key = useWhichFlyout() ?? 'memory';
+  let key = useWhichFlyout() ?? 'memory';
+
+  if (!isFlyoutOpen) {
+    key = isTimelineScope(scopeId) ? Flyouts.timeline : Flyouts.securitySolution;
+  }
 
   const right: FlyoutPanelProps = useMemo(
     () => ({
@@ -101,7 +108,7 @@ export const useNavigateToAnalyzer = ({
     if (isFlyoutOpen) {
       openLeftPanel(left);
       openPreviewPanel(preview);
-      telemetry.reportDetailsFlyoutTabClicked({
+      telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutTabClicked, {
         location: scopeId,
         panel: 'left',
         tabId: 'visualize',
@@ -112,7 +119,7 @@ export const useNavigateToAnalyzer = ({
         left,
         preview,
       });
-      telemetry.reportDetailsFlyoutOpened({
+      telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
         location: scopeId,
         panel: 'left',
       });

@@ -8,36 +8,20 @@
 import { EntityDefinition, entityDefinitionSchema } from '@kbn/entities-schema';
 import { BUILT_IN_ID_PREFIX } from './constants';
 
-const serviceTransactionFilter = (additionalFilters: string[] = []) => {
-  const baseFilters = [
-    'processor.event: "metric"',
-    'metricset.name: "service_transaction"',
-    'metricset.interval: "1m"',
-  ];
-
-  return [...baseFilters, ...additionalFilters].join(' AND ');
-};
-
 export const builtInServicesFromEcsEntityDefinition: EntityDefinition =
   entityDefinitionSchema.parse({
-    version: '0.3.0',
+    version: '0.5.0',
     id: `${BUILT_IN_ID_PREFIX}services_from_ecs_data`,
     name: 'Services from ECS data',
     description:
       'This definition extracts service entities from common data streams by looking for the ECS field service.name',
     type: 'service',
     managed: true,
-    indexPatterns: [
-      'logs-*',
-      'filebeat*',
-      'metrics-apm.service_transaction.1m*',
-      'metrics-apm.service_summary.1m*',
-    ],
-    history: {
+    indexPatterns: ['logs-*', 'filebeat*', 'traces-*'],
+    latest: {
       timestampField: '@timestamp',
-      interval: '1m',
+      lookbackPeriod: '10m',
       settings: {
-        lookbackPeriod: '10m',
         frequency: '2m',
         syncDelay: '2m',
       },
@@ -45,7 +29,7 @@ export const builtInServicesFromEcsEntityDefinition: EntityDefinition =
     identityFields: ['service.name'],
     displayNameTemplate: '{{service.name}}',
     metadata: [
-      { source: '_index', destination: 'sourceIndex' },
+      { source: '_index', destination: 'source_index' },
       {
         source: 'data_stream.type',
         destination: 'source_data_stream.type',
@@ -54,7 +38,7 @@ export const builtInServicesFromEcsEntityDefinition: EntityDefinition =
         source: 'data_stream.dataset',
         destination: 'source_data_stream.dataset',
       },
-      { source: 'agent.name', aggregation: { type: 'terms', limit: 100 } },
+      'agent.name',
       'service.environment',
       'service.name',
       'service.namespace',
@@ -65,72 +49,9 @@ export const builtInServicesFromEcsEntityDefinition: EntityDefinition =
       'cloud.provider',
       'cloud.availability_zone',
       'cloud.machine.type',
-    ],
-    metrics: [
-      {
-        name: 'latency',
-        equation: 'A',
-        metrics: [
-          {
-            name: 'A',
-            aggregation: 'avg',
-            filter: serviceTransactionFilter(),
-            field: 'transaction.duration.histogram',
-          },
-        ],
-      },
-      {
-        name: 'throughput',
-        equation: 'A',
-        metrics: [
-          {
-            name: 'A',
-            aggregation: 'value_count',
-            filter: serviceTransactionFilter(),
-            field: 'transaction.duration.summary',
-          },
-        ],
-      },
-      {
-        name: 'failedTransactionRate',
-        equation: '1 - (A / B)',
-        metrics: [
-          {
-            name: 'A',
-            aggregation: 'sum',
-            filter: serviceTransactionFilter(),
-            field: 'event.success_count',
-          },
-          {
-            name: 'B',
-            aggregation: 'value_count',
-            filter: serviceTransactionFilter(),
-            field: 'event.success_count',
-          },
-        ],
-      },
-      {
-        name: 'logErrorRate',
-        equation: 'A',
-        metrics: [
-          {
-            name: 'A',
-            aggregation: 'doc_count',
-            filter:
-              'log.level: "error" OR log.level: "ERROR" OR error.log.level: "error" OR error.log.level: "ERROR"',
-          },
-        ],
-      },
-      {
-        name: 'logRate',
-        equation: 'A',
-        metrics: [
-          {
-            name: 'A',
-            aggregation: 'doc_count',
-            filter: 'data_stream.type: logs',
-          },
-        ],
-      },
+      'kubernetes.namespace',
+      'orchestrator.cluster.name',
+      'k8s.namespace.name',
+      'k8s.cluster.name',
     ],
   });

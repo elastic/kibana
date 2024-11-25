@@ -60,7 +60,7 @@ const anomalyDetectionJobsRoute = createApmServerRoute({
 const createAnomalyDetectionJobsRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/settings/anomaly-detection/jobs',
   options: {
-    tags: ['access:apm', 'access:apm_write', 'access:ml:canCreateJob'],
+    tags: ['access:apm', 'access:apm_settings_write', 'access:ml:canCreateJob'],
   },
   params: t.type({
     body: t.type({
@@ -129,7 +129,7 @@ const anomalyDetectionUpdateToV3Route = createApmServerRoute({
   options: {
     tags: [
       'access:apm',
-      'access:apm_write',
+      'access:apm_settings_write',
       'access:ml:canCreateJob',
       'access:ml:canGetJobs',
       'access:ml:canCloseJob',

@@ -21,7 +21,7 @@ export const txtMore = i18n.translate('uiActions.actionPanel.more', {
   defaultMessage: 'More',
 });
 
-interface ActionWithContext<Context extends object = object> {
+export interface ActionWithContext<Context extends object = object> {
   action: Action<Context> | ActionInternal<Context>;
   context: Context;
 
@@ -37,6 +37,7 @@ type ItemDescriptor = EuiContextMenuPanelItemDescriptor & {
 };
 
 type PanelDescriptor = EuiContextMenuPanelDescriptor & {
+  _order?: number;
   _level?: number;
   _icon?: string;
   items: ItemDescriptor[];
@@ -101,7 +102,7 @@ const removeItemMetaFields = (items: ItemDescriptor[]): EuiContextMenuPanelItemD
 const removePanelMetaFields = (panels: PanelDescriptor[]): EuiContextMenuPanelDescriptor[] => {
   const euiPanels: EuiContextMenuPanelDescriptor[] = [];
   for (const panel of panels) {
-    const { _level: omit, _icon: omit2, ...rest } = panel;
+    const { _level: omit, _icon: omit2, _order: omit3, ...rest } = panel;
     euiPanels.push({ ...rest, items: removeItemMetaFields(rest.items) });
   }
   return euiPanels;
@@ -124,15 +125,18 @@ export async function buildContextMenuForActions({
   const panels: Record<string, PanelDescriptor> = {
     mainMenu: {
       id: 'mainMenu',
-      title,
       items: [],
     },
   };
   const promises = actions.map(async (item) => {
     const { action } = item;
-    const context: ActionExecutionContext<object> = { ...item.context, trigger: item.trigger };
+    const context: ActionExecutionContext<object> = {
+      ...item.context,
+      trigger: item.trigger,
+    };
     const isCompatible = await item.action.isCompatible(context);
     if (!isCompatible) return;
+
     let parentPanel = '';
     let currentPanel = '';
     if (action.grouping) {
@@ -146,6 +150,7 @@ export async function buildContextMenuForActions({
             title: name,
             items: [],
             _level: i,
+            _order: group.order || 0,
             _icon: group.getIconType ? group.getIconType(context) : 'empty',
           };
           if (parentPanel) {
@@ -190,7 +195,11 @@ export async function buildContextMenuForActions({
 
   wrapMainPanelItemsIntoSubmenu(panels, 'mainMenu');
 
-  for (const panel of Object.values(panels)) {
+  const sortedPanels = Object.values(panels).sort((a, b) => {
+    return (b._order || 0) - (a._order || 0);
+  });
+
+  for (const panel of sortedPanels) {
     if (panel._level === 0) {
       if (panels.mainMenu.items.length > 0) {
         panels.mainMenu.items.push({
@@ -198,7 +207,7 @@ export async function buildContextMenuForActions({
           key: panel.id + '__separator',
         });
       }
-      if (panel.items.length > 3) {
+      if (panel.items.length > 4) {
         panels.mainMenu.items.push({
           name: panel.title || panel.id,
           icon: panel._icon || 'empty',

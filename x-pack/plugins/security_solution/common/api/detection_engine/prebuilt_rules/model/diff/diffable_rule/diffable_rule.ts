@@ -9,7 +9,6 @@ import { z } from '@kbn/zod';
 import {
   AlertSuppression,
   AnomalyThreshold,
-  EventCategoryOverride,
   HistoryWindowStart,
   InvestigationFields,
   InvestigationGuide,
@@ -21,11 +20,8 @@ import {
   RequiredFieldArray,
   RiskScore,
   RiskScoreMapping,
-  RuleAuthorArray,
   RuleDescription,
-  RuleExceptionList,
   RuleFalsePositiveArray,
-  RuleLicense,
   RuleName,
   RuleReferenceArray,
   RuleSignatureId,
@@ -40,8 +36,6 @@ import {
   ThreatMapping,
   Threshold,
   ThresholdAlertSuppression,
-  TiebreakerField,
-  TimestampField,
 } from '../../../../model/rule_schema';
 
 import {
@@ -82,12 +76,9 @@ export const DiffableCommonFields = z.object({
   setup: SetupGuide,
   related_integrations: RelatedIntegrationArray,
   required_fields: RequiredFieldArray,
-  author: RuleAuthorArray,
-  license: RuleLicense,
 
   // Other domain fields
   rule_schedule: RuleSchedule, // NOTE: new field
-  exceptions_list: z.array(RuleExceptionList),
   max_signals: MaxSignals,
 
   // Optional fields
@@ -119,9 +110,6 @@ export const DiffableEqlFields = z.object({
   type: z.literal('eql'),
   eql_query: RuleEqlQuery, // NOTE: new field
   data_source: RuleDataSource.optional(), // NOTE: new field
-  event_category_override: EventCategoryOverride.optional(),
-  timestamp_field: TimestampField.optional(),
-  tiebreaker_field: TiebreakerField.optional(),
   alert_suppression: AlertSuppression.optional(),
 });
 
@@ -174,6 +162,17 @@ export const DiffableNewTermsFields = z.object({
   alert_suppression: AlertSuppression.optional(),
 });
 
+export const DiffableFieldsByTypeUnion = z.discriminatedUnion('type', [
+  DiffableCustomQueryFields,
+  DiffableSavedQueryFields,
+  DiffableEqlFields,
+  DiffableEsqlFields,
+  DiffableThreatMatchFields,
+  DiffableThresholdFields,
+  DiffableMachineLearningFields,
+  DiffableNewTermsFields,
+]);
+
 /**
  * Represents a normalized rule object that is suitable for passing to the diff algorithm.
  * Every top-level field of a diffable rule can be compared separately on its own.
@@ -200,18 +199,6 @@ export const DiffableNewTermsFields = z.object({
  * NOTE: Every top-level field in a DiffableRule MUST BE LOGICALLY INDEPENDENT from other
  * top-level fields.
  */
-
-export const DiffableFieldsByTypeUnion = z.discriminatedUnion('type', [
-  DiffableCustomQueryFields,
-  DiffableSavedQueryFields,
-  DiffableEqlFields,
-  DiffableEsqlFields,
-  DiffableThreatMatchFields,
-  DiffableThresholdFields,
-  DiffableMachineLearningFields,
-  DiffableNewTermsFields,
-]);
-
 export type DiffableRule = z.infer<typeof DiffableRule>;
 export const DiffableRule = z.intersection(DiffableCommonFields, DiffableFieldsByTypeUnion);
 
@@ -246,3 +233,22 @@ export const DiffableAllFields = DiffableCommonFields.merge(
   .merge(DiffableMachineLearningFields.omit({ type: true }))
   .merge(DiffableNewTermsFields.omit({ type: true }))
   .merge(z.object({ type: DiffableRuleTypes }));
+
+const getRuleTypeFields = (schema: z.ZodObject<z.ZodRawShape>): string[] =>
+  Object.keys(schema.shape);
+
+const createDiffableFieldsPerRuleType = (specificFields: z.ZodObject<z.ZodRawShape>): string[] => [
+  ...getRuleTypeFields(DiffableCommonFields),
+  ...getRuleTypeFields(specificFields),
+];
+
+export const DIFFABLE_RULE_TYPE_FIELDS_MAP = new Map<DiffableRuleTypes, string[]>([
+  ['query', createDiffableFieldsPerRuleType(DiffableCustomQueryFields)],
+  ['saved_query', createDiffableFieldsPerRuleType(DiffableSavedQueryFields)],
+  ['eql', createDiffableFieldsPerRuleType(DiffableEqlFields)],
+  ['esql', createDiffableFieldsPerRuleType(DiffableEsqlFields)],
+  ['threat_match', createDiffableFieldsPerRuleType(DiffableThreatMatchFields)],
+  ['threshold', createDiffableFieldsPerRuleType(DiffableThresholdFields)],
+  ['machine_learning', createDiffableFieldsPerRuleType(DiffableMachineLearningFields)],
+  ['new_terms', createDiffableFieldsPerRuleType(DiffableNewTermsFields)],
+]);

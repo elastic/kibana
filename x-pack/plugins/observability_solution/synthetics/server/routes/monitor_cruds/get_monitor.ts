@@ -60,15 +60,18 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
           encryptedSavedObjectsClient,
           spaceId,
         });
-        return mapSavedObjectToMonitor({ monitor, internal });
+        return { ...mapSavedObjectToMonitor({ monitor, internal }), spaceId };
       } else {
-        return mapSavedObjectToMonitor({
-          monitor: await savedObjectsClient.get<EncryptedSyntheticsMonitorAttributes>(
-            syntheticsMonitorType,
-            monitorId
-          ),
-          internal,
-        });
+        return {
+          ...mapSavedObjectToMonitor({
+            monitor: await savedObjectsClient.get<EncryptedSyntheticsMonitorAttributes>(
+              syntheticsMonitorType,
+              monitorId
+            ),
+            internal,
+          }),
+          spaceId,
+        };
       }
     } catch (getErr) {
       if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {

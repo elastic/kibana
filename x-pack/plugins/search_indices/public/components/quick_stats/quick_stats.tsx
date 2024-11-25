@@ -22,10 +22,13 @@ import { Mappings } from '../../types';
 import { countVectorBasedTypesFromMappings } from './mappings_convertor';
 import { QuickStat } from './quick_stat';
 import { useKibana } from '../../hooks/use_kibana';
+import { IndexDocuments } from '../../hooks/api/use_document_search';
 
 export interface QuickStatsProps {
   index: Index;
   mappings: Mappings;
+  indexDocuments: IndexDocuments;
+  tooltipContent?: string;
 }
 
 export const SetupAISearchButton: React.FC = () => {
@@ -60,12 +63,13 @@ export const SetupAISearchButton: React.FC = () => {
   );
 };
 
-export const QuickStats: React.FC<QuickStatsProps> = ({ index, mappings }) => {
+export const QuickStats: React.FC<QuickStatsProps> = ({ index, mappings, indexDocuments }) => {
   const [open, setOpen] = useState<boolean>(false);
   const { euiTheme } = useEuiTheme();
   const mappingStats = useMemo(() => countVectorBasedTypesFromMappings(mappings), [mappings]);
   const vectorFieldCount =
     mappingStats.sparse_vector + mappingStats.dense_vector + mappingStats.semantic_text;
+  const docCount = indexDocuments?.results._meta.page.total ?? 0;
 
   return (
     <EuiPanel
@@ -84,18 +88,18 @@ export const QuickStats: React.FC<QuickStatsProps> = ({ index, mappings }) => {
             open={open}
             setOpen={setOpen}
             icon="documents"
-            iconColor="black"
+            iconColor={euiTheme.colors.fullShade}
             title={i18n.translate('xpack.searchIndices.quickStats.document_count_heading', {
               defaultMessage: 'Document count',
             })}
             data-test-subj="QuickStatsDocumentCount"
-            secondaryTitle={<EuiI18nNumber value={index.documents ?? 0} />}
+            secondaryTitle={<EuiI18nNumber value={docCount ?? 0} />}
             stats={[
               {
                 title: i18n.translate('xpack.searchIndices.quickStats.documents.totalTitle', {
                   defaultMessage: 'Total',
                 }),
-                description: <EuiI18nNumber value={index.documents ?? 0} />,
+                description: <EuiI18nNumber value={docCount ?? 0} />,
               },
               {
                 title: i18n.translate('xpack.searchIndices.quickStats.documents.indexSize', {
@@ -104,6 +108,10 @@ export const QuickStats: React.FC<QuickStatsProps> = ({ index, mappings }) => {
                 description: index.size ?? '0b',
               },
             ]}
+            tooltipContent={i18n.translate('xpack.searchIndices.quickStats.documentCountTooltip', {
+              defaultMessage:
+                'This excludes nested documents, which Elasticsearch uses internally to store chunks of vectors.',
+            })}
             first
           />
         </EuiFlexItem>
@@ -112,7 +120,7 @@ export const QuickStats: React.FC<QuickStatsProps> = ({ index, mappings }) => {
             open={open}
             setOpen={setOpen}
             icon="sparkles"
-            iconColor="black"
+            iconColor={euiTheme.colors.fullShade}
             title={i18n.translate('xpack.searchIndices.quickStats.ai_search_heading', {
               defaultMessage: 'AI Search',
             })}

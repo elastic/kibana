@@ -36,25 +36,6 @@ jest.mock('@kbn/core-saved-objects-utils-server', () => {
   };
 });
 
-jest.mock('../../../../lib/track_legacy_rbac_exemption', () => ({
-  trackLegacyRBACExemption: jest.fn(),
-}));
-
-jest.mock('../../../../authorization/get_authorization_mode_by_source', () => {
-  return {
-    getAuthorizationModeBySource: jest.fn(() => {
-      return 1;
-    }),
-    bulkGetAuthorizationModeBySource: jest.fn(() => {
-      return 1;
-    }),
-    AuthorizationMode: {
-      Legacy: 0,
-      RBAC: 1,
-    },
-  };
-});
-
 jest.mock('../../../../lib/get_oauth_jwt_access_token', () => ({
   getOAuthJwtAccessToken: jest.fn(),
 }));

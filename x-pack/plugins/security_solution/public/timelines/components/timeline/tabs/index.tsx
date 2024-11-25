@@ -11,6 +11,7 @@ import type { Ref, ReactElement, ComponentType } from 'react';
 import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { State } from '../../../../common/store';
@@ -42,6 +43,7 @@ import { useLicense } from '../../../../common/hooks/use_license';
 import { initializeTimelineSettings } from '../../../store/actions';
 import { selectTimelineById, selectTimelineESQLSavedSearchId } from '../../../store/selectors';
 import { fetchNotesBySavedObjectIds, selectSortedNotesBySavedObjectId } from '../../../../notes';
+import { ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING } from '../../../../../common/constants';
 
 const HideShowContainer = styled.div.attrs<{ $isVisible: boolean; isOverflowYScroll: boolean }>(
   ({ $isVisible = false, isOverflowYScroll = false }) => ({
@@ -251,8 +253,12 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
     selectTimelineESQLSavedSearchId(state, timelineId)
   );
 
-  const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesEnabled'
+  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesDisabled'
+  );
+
+  const [visualizationInFlyoutEnabled] = useUiSetting$<boolean>(
+    ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING
   );
 
   const activeTab = useShallowEqualSelector((state) => getActiveTab(state, timelineId));
@@ -314,16 +320,20 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
     }
   }, [fetchNotes, isTimelineSaved]);
 
-  const numberOfNotesNewSystem = useSelector((state: State) =>
+  const notesNewSystem = useSelector((state: State) =>
     selectSortedNotesBySavedObjectId(state, {
       savedObjectId: timelineSavedObjectId,
       sort: { field: 'created', direction: 'asc' },
     })
   );
+  const numberOfNotesNewSystem = useMemo(
+    () => notesNewSystem.length + (isEmpty(timelineDescription) ? 0 : 1),
+    [notesNewSystem, timelineDescription]
+  );
 
   const numberOfNotes = useMemo(
-    () => (securitySolutionNotesEnabled ? numberOfNotesNewSystem.length : numberOfNotesOldSystem),
-    [numberOfNotesNewSystem, numberOfNotesOldSystem, securitySolutionNotesEnabled]
+    () => (securitySolutionNotesDisabled ? numberOfNotesOldSystem : numberOfNotesNewSystem),
+    [numberOfNotesNewSystem, numberOfNotesOldSystem, securitySolutionNotesDisabled]
   );
 
   const setActiveTab = useCallback(
@@ -409,16 +419,18 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
               {showTimeline && <EqlEventsCountBadge />}
             </StyledEuiTab>
           )}
-          <EuiTab
-            data-test-subj={`timelineTabs-${TimelineTabs.graph}`}
-            onClick={setGraphAsActiveTab}
-            isSelected={activeTab === TimelineTabs.graph}
-            disabled={!graphEventId}
-            key={TimelineTabs.graph}
-          >
-            {i18n.ANALYZER_TAB}
-          </EuiTab>
-          {isEnterprisePlus && (
+          {!visualizationInFlyoutEnabled && (
+            <EuiTab
+              data-test-subj={`timelineTabs-${TimelineTabs.graph}`}
+              onClick={setGraphAsActiveTab}
+              isSelected={activeTab === TimelineTabs.graph}
+              disabled={!graphEventId}
+              key={TimelineTabs.graph}
+            >
+              {i18n.ANALYZER_TAB}
+            </EuiTab>
+          )}
+          {isEnterprisePlus && !visualizationInFlyoutEnabled && (
             <EuiTab
               data-test-subj={`timelineTabs-${TimelineTabs.session}`}
               onClick={setSessionAsActiveTab}
@@ -438,9 +450,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
           >
             <span>{i18n.NOTES_TAB}</span>
             {showTimeline && numberOfNotes > 0 && timelineType === TimelineTypeEnum.default && (
-              <div>
-                <CountBadge>{numberOfNotes}</CountBadge>
-              </div>
+              <CountBadge>{numberOfNotes}</CountBadge>
             )}
           </StyledEuiTab>
           <StyledEuiTab
@@ -454,9 +464,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
             {showTimeline &&
               numberOfPinnedEvents > 0 &&
               timelineType === TimelineTypeEnum.default && (
-                <div>
-                  <CountBadge>{numberOfPinnedEvents}</CountBadge>
-                </div>
+                <CountBadge>{numberOfPinnedEvents}</CountBadge>
               )}
           </StyledEuiTab>
         </StyledEuiTabs>

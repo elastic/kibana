@@ -43,10 +43,11 @@ export const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ hasTitle = true }) => {
         value={displayedApiKey}
         copyValue={apiKey}
         dataTestSubj="apiKeyFormAPIKey"
+        copyValueDataTestSubj="APIKeyButtonCopy"
         actions={[
           <EuiButtonIcon
             iconType={apiKeyIsVisible ? 'eyeClosed' : 'eye'}
-            color="success"
+            color="text"
             onClick={toggleApiKeyVisibility}
             data-test-subj="showAPIKeyButton"
             aria-label={i18n.translate('searchApiKeysComponents.apiKeyForm.showApiKey', {

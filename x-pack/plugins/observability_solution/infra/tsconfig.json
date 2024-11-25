@@ -110,9 +110,13 @@
     "@kbn/observability-alerting-rule-utils",
     "@kbn/core-application-browser",
     "@kbn/shared-ux-page-no-data-types",
+    "@kbn/xstate-utils",
+    "@kbn/management-settings-ids",
+    "@kbn/core-ui-settings-common",
     "@kbn/entityManager-plugin",
-    "@kbn/observability-utils",
-    "@kbn/entities-schema"
+    "@kbn/entities-schema",
+    "@kbn/zod",
+    "@kbn/observability-utils-server"
   ],
   "exclude": ["target/**/*"]
 }

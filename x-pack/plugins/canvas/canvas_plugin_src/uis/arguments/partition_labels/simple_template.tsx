@@ -39,7 +39,7 @@ export const SimpleTemplate: FunctionComponent<Props> = ({ onValueChange, argVal
     [argValue, onValueChange, showValuePath]
   );
 
-  const showLabels = getFieldValue(argValue, SHOW_FIELD, false);
+  const showLabels = getFieldValue(argValue, SHOW_FIELD, false) as boolean;
 
   return (
     <EuiSwitch compressed checked={showLabels} onChange={onToggle} showLabel={false} label="" />

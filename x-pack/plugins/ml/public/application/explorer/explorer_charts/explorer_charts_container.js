@@ -86,6 +86,7 @@ function getChartId(series, randomId) {
 // Wrapper for a single explorer chart
 function ExplorerChartContainer({
   id,
+  isEmbeddable,
   series,
   severity,
   tooManyBuckets,
@@ -251,6 +252,7 @@ function ExplorerChartContainer({
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <ExplorerChartLabel
+            isEmbeddable={isEmbeddable}
             detectorLabel={DetectorLabel}
             entityFields={entityFields}
             infoTooltip={{ ...series.infoTooltip, chartType }}
@@ -376,6 +378,7 @@ function ExplorerChartContainer({
 // Flex layout wrapper for all explorer charts
 export const ExplorerChartsContainerUI = ({
   id: uuid,
+  isEmbeddable,
   chartsPerRow,
   seriesToPlot,
   severity,
@@ -443,6 +446,7 @@ export const ExplorerChartsContainerUI = ({
                 <ExplorerChartContainer
                   key={chartId}
                   id={chartId}
+                  isEmbeddable={isEmbeddable}
                   series={series}
                   severity={severity}
                   tooManyBuckets={tooManyBuckets}

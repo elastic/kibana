@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import type { DataProvider } from '../../../../common/types/timeline';
 import { convertToBuildEsQuery, buildGlobalQuery } from '.';
-import { mockIndexPattern } from '../../mock';
+import { mockDataViewSpec } from '../../mock';
 
 describe('convertToBuildEsQuery', () => {
   /**
@@ -61,7 +61,7 @@ describe('convertToBuildEsQuery', () => {
     const [converted, _] = convertToBuildEsQuery({
       config,
       queries: queryWithNestedFields,
-      indexPattern: mockIndexPattern,
+      dataViewSpec: mockDataViewSpec,
       filters,
     });
 
@@ -176,7 +176,7 @@ describe('convertToBuildEsQuery', () => {
     const [converted, _] = convertToBuildEsQuery({
       config: configWithOverride,
       queries: queryWithNestedFields,
-      indexPattern: mockIndexPattern,
+      dataViewSpec: mockDataViewSpec,
       filters,
     });
 

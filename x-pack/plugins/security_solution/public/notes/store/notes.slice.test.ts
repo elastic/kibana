@@ -5,13 +5,15 @@
  * 2.0.
  */
 import * as uuid from 'uuid';
-import { miniSerializeError } from '@reduxjs/toolkit';
 import type { SerializedError } from '@reduxjs/toolkit';
+import { miniSerializeError } from '@reduxjs/toolkit';
+import type { NotesState } from './notes.slice';
 import {
   createNote,
   deleteNotes,
-  fetchNotesByDocumentIds,
   fetchNotes,
+  fetchNotesByDocumentIds,
+  fetchNotesBySavedObjectIds,
   initialNotesState,
   notesReducer,
   ReqStatus,
@@ -20,6 +22,7 @@ import {
   selectCreateNoteStatus,
   selectDeleteNotesError,
   selectDeleteNotesStatus,
+  selectDocumentNotesBySavedObjectId,
   selectFetchNotesByDocumentIdsError,
   selectFetchNotesByDocumentIdsStatus,
   selectFetchNotesError,
@@ -27,12 +30,16 @@ import {
   selectNoteById,
   selectNoteIds,
   selectNotesByDocumentId,
-  selectDocumentNotesBySavedObjectId,
+  selectNotesBySavedObjectId,
   selectNotesPagination,
   selectNotesTablePendingDeleteIds,
   selectNotesTableSearch,
   selectNotesTableSelectedIds,
   selectNotesTableSort,
+  selectSortedNotesByDocumentId,
+  selectSortedNotesBySavedObjectId,
+  selectNotesTableCreatedByFilter,
+  selectNotesTableAssociatedFilter,
   userClosedDeleteModal,
   userFilteredNotes,
   userSearchedNotes,
@@ -40,16 +47,15 @@ import {
   userSelectedPage,
   userSelectedPerPage,
   userSelectedRow,
-  userSelectedRowForDeletion,
+  userSelectedNotesForDeletion,
   userSortedNotes,
-  selectSortedNotesByDocumentId,
-  fetchNotesBySavedObjectIds,
-  selectNotesBySavedObjectId,
-  selectSortedNotesBySavedObjectId,
+  userFilterCreatedBy,
+  userClosedCreateErrorToast,
+  userFilterAssociatedNotes,
 } from './notes.slice';
-import type { NotesState } from './notes.slice';
 import { mockGlobalState } from '../../common/mock';
 import type { Note } from '../../../common/api/timeline';
+import { AssociatedFilter } from '../../../common/notes/constants';
 
 const initalEmptyState = initialNotesState;
 
@@ -68,7 +74,7 @@ const generateNoteMock = (documentId: string): Note => ({
 const mockNote1 = generateNoteMock('1');
 const mockNote2 = generateNoteMock('2');
 
-const initialNonEmptyState = {
+const initialNonEmptyState: NotesState = {
   entities: {
     [mockNote1.noteId]: mockNote1,
     [mockNote2.noteId]: mockNote2,
@@ -98,6 +104,8 @@ const initialNonEmptyState = {
     direction: 'desc' as const,
   },
   filter: '',
+  createdByFilter: '',
+  associatedFilter: AssociatedFilter.all,
   search: '',
   selectedIds: [],
   pendingDeleteIds: [],
@@ -500,6 +508,28 @@ describe('notesSlice', () => {
       });
     });
 
+    describe('userFilterCreatedBy', () => {
+      it('should set correct value to filter users', () => {
+        const action = { type: userFilterCreatedBy.type, payload: 'abc' };
+
+        expect(notesReducer(initalEmptyState, action)).toEqual({
+          ...initalEmptyState,
+          createdByFilter: 'abc',
+        });
+      });
+    });
+
+    describe('userFilterAssociatedNotes', () => {
+      it('should set correct value to filter associated notes', () => {
+        const action = { type: userFilterAssociatedNotes.type, payload: 'abc' };
+
+        expect(notesReducer(initalEmptyState, action)).toEqual({
+          ...initalEmptyState,
+          associatedFilter: 'abc',
+        });
+      });
+    });
+
     describe('userSearchedNotes', () => {
       it('should set correct value to search notes', () => {
         const action = { type: userSearchedNotes.type, payload: 'abc' };
@@ -533,9 +563,28 @@ describe('notesSlice', () => {
       });
     });
 
-    describe('userSelectedRowForDeletion', () => {
-      it('should set correct id when user selects a row', () => {
-        const action = { type: userSelectedRowForDeletion.type, payload: '1' };
+    describe('userClosedCreateErrorToast', () => {
+      it('should reset create note error', () => {
+        const action = { type: userClosedCreateErrorToast.type };
+
+        expect(
+          notesReducer(
+            {
+              ...initalEmptyState,
+              error: {
+                ...initalEmptyState.error,
+                createNote: new Error(),
+              },
+            },
+            action
+          ).error.createNote
+        ).toBe(null);
+      });
+    });
+
+    describe('userSelectedNotesForDeletion', () => {
+      it('should set correct id when user selects a note to delete', () => {
+        const action = { type: userSelectedNotesForDeletion.type, payload: '1' };
 
         expect(notesReducer(initalEmptyState, action)).toEqual({
           ...initalEmptyState,
@@ -815,6 +864,22 @@ describe('notesSlice', () => {
     it('should select notes table search', () => {
       const state = { ...mockGlobalState, notes: { ...initialNotesState, search: 'test search' } };
       expect(selectNotesTableSearch(state)).toBe('test search');
+    });
+
+    it('should select createdBy filter', () => {
+      const state = {
+        ...mockGlobalState,
+        notes: { ...initialNotesState, createdByFilter: 'abc' },
+      };
+      expect(selectNotesTableCreatedByFilter(state)).toBe('abc');
+    });
+
+    it('should select associated filter', () => {
+      const state = {
+        ...mockGlobalState,
+        notes: { ...initialNotesState, associatedFilter: AssociatedFilter.all },
+      };
+      expect(selectNotesTableAssociatedFilter(state)).toBe(AssociatedFilter.all);
     });
 
     it('should select notes table pending delete ids', () => {

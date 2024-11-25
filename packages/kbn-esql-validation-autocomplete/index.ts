@@ -62,7 +62,6 @@ export {
   isLiteralItem,
   isTimeIntervalItem,
   isAssignment,
-  isExpression,
   isAssignmentComplete,
   isSingleItem,
 } from './src/shared/helpers';

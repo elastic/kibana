@@ -14,6 +14,7 @@ import { getJiraConnectorType } from './jira';
 import { getOpenAIConnectorType } from './openai';
 import { getBedrockConnectorType } from './bedrock';
 import { getGeminiConnectorType } from './gemini';
+import { getInferenceConnectorType } from './inference';
 import { getOpsgenieConnectorType } from './opsgenie';
 import { getPagerDutyConnectorType } from './pagerduty';
 import { getResilientConnectorType } from './resilient';
@@ -79,5 +80,8 @@ export function registerConnectorTypes({
   }
   if (ExperimentalFeaturesService.get().crowdstrikeConnectorOn) {
     connectorTypeRegistry.register(getCrowdStrikeConnectorType());
+  }
+  if (ExperimentalFeaturesService.get().inferenceConnectorOn) {
+    connectorTypeRegistry.register(getInferenceConnectorType());
   }
 }

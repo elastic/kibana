@@ -8,7 +8,11 @@
 import { ManagementAppLocator } from '@kbn/management-plugin/common';
 import { LocatorDefinition } from '@kbn/share-plugin/public';
 import { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
-import { getDataStreamDetailsLink } from './application/services/routing';
+import {
+  getComponentTemplateDetailLink,
+  getDataStreamDetailsLink,
+  getTemplateDetailsLink,
+} from './application/services/routing';
 import { PLUGIN } from '../common/constants';
 
 export const INDEX_MANAGEMENT_LOCATOR_ID = 'INDEX_MANAGEMENT_LOCATOR_ID';
@@ -35,6 +39,18 @@ export class IndexManagementLocatorDefinition
         return {
           ...location,
           path: location.path + getDataStreamDetailsLink(params.dataStreamName!),
+        };
+      }
+      case 'index_template': {
+        return {
+          ...location,
+          path: location.path + getTemplateDetailsLink(params.indexTemplate),
+        };
+      }
+      case 'component_template': {
+        return {
+          ...location,
+          path: location.path + getComponentTemplateDetailLink(params.componentTemplate),
         };
       }
     }

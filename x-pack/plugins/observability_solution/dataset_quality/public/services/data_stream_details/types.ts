@@ -20,8 +20,15 @@ import {
 import {
   AnalyzeDegradedFieldsParams,
   GetDataStreamIntegrationParams,
+  UpdateFieldLimitParams,
 } from '../../../common/data_stream_details/types';
-import { Dashboard, DegradedFieldAnalysis, DegradedFieldValues } from '../../../common/api_types';
+import {
+  Dashboard,
+  DataStreamRolloverResponse,
+  DegradedFieldAnalysis,
+  DegradedFieldValues,
+  UpdateFieldLimitResponse,
+} from '../../../common/api_types';
 
 export type DataStreamDetailsServiceSetup = void;
 
@@ -47,4 +54,6 @@ export interface IDataStreamDetailsClient {
     params: GetDataStreamIntegrationParams
   ): Promise<Integration | undefined>;
   analyzeDegradedField(params: AnalyzeDegradedFieldsParams): Promise<DegradedFieldAnalysis>;
+  setNewFieldLimit(params: UpdateFieldLimitParams): Promise<UpdateFieldLimitResponse>;
+  rolloverDataStream(params: { dataStream: string }): Promise<DataStreamRolloverResponse>;
 }

@@ -1769,6 +1769,100 @@ describe('update()', () => {
     expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: myType/my alert name');
   });
 
+  it('should update rule flapping', async () => {
+    const flapping = {
+      lookBackWindow: 10,
+      statusChangeThreshold: 10,
+    };
+
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: {
+        enabled: true,
+        schedule: { interval: '1m' },
+        params: {
+          bar: true,
+        },
+        actions: [],
+        notifyWhen: 'onActiveAlert',
+        revision: 1,
+        scheduledTaskId: 'task-123',
+        executionStatus: {
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          status: 'pending',
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        flapping,
+      },
+      references: [],
+    });
+
+    const result = await rulesClient.update({
+      id: '1',
+      data: {
+        schedule: { interval: '1m' },
+        name: 'abc',
+        tags: ['foo'],
+        params: {
+          bar: true,
+        },
+        throttle: null,
+        notifyWhen: 'onActiveAlert',
+        actions: [],
+        systemActions: [],
+        flapping,
+      },
+      isFlappingEnabled: true,
+    });
+
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenNthCalledWith(
+      1,
+      RULE_SAVED_OBJECT_TYPE,
+      expect.objectContaining({
+        flapping,
+      }),
+      {
+        id: '1',
+        overwrite: true,
+        references: [],
+        version: '123',
+      }
+    );
+
+    expect(result.flapping).toEqual(flapping);
+  });
+
+  it('should throw error when updating a rule with flapping if global flapping is disabled', async () => {
+    const flapping = {
+      lookBackWindow: 10,
+      statusChangeThreshold: 10,
+    };
+
+    await expect(
+      rulesClient.update({
+        id: '1',
+        data: {
+          schedule: { interval: '1m' },
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
+          },
+          throttle: null,
+          notifyWhen: 'onActiveAlert',
+          actions: [],
+          systemActions: [],
+          flapping,
+        },
+        isFlappingEnabled: false,
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Error updating rule: can not update rule flapping if global flapping is disabled"`
+    );
+  });
+
   it('swallows error when invalidate API key throws', async () => {
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',

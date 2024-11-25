@@ -53,6 +53,7 @@ export const wrapSuppressedThresholdALerts = ({
   from,
   to,
   threshold,
+  intendedTimestamp,
 }: {
   buckets: ThresholdBucket[];
   spaceId: string;
@@ -69,6 +70,7 @@ export const wrapSuppressedThresholdALerts = ({
   to: Date;
   suppressionWindow: string;
   threshold: ThresholdNormalized;
+  intendedTimestamp: Date | undefined;
 }): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
   return buckets.map((bucket) => {
     const hit = transformBucketIntoHit(
@@ -100,6 +102,7 @@ export const wrapSuppressedThresholdALerts = ({
       ruleExecutionLogger,
       alertUuid: id,
       publicBaseUrl,
+      intendedTimestamp,
     });
 
     return {

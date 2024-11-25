@@ -31,7 +31,7 @@ export function CategoricalDataMappingPopover<DynamicOptions>(props: Props<Dynam
 
   return (
     <DataMappingPopover>
-      <EuiFormRow display="columnCompressedSwitch">
+      <EuiFormRow display="columnCompressed">
         <>
           <EuiSwitch
             label={i18n.translate('xpack.maps.styles.fieldMetaOptions.isEnabled.categoricalLabel', {

@@ -21,6 +21,7 @@ describe('builds navigation tree', () => {
   test('render reference UI and build the navigation tree', async () => {
     const { findByTestId } = renderNavigation({
       navTreeDef: of({
+        id: 'es',
         body: [
           {
             id: 'group1',
@@ -107,6 +108,7 @@ describe('builds navigation tree', () => {
     {
       const { findByTestId, unmount } = renderNavigation({
         navTreeDef: of({
+          id: 'es',
           body: [accordionNode],
         }),
         services: { navigateToUrl },
@@ -114,13 +116,14 @@ describe('builds navigation tree', () => {
 
       const accordionToggleButton = await findByTestId(/nav-item-group1\s/);
       accordionToggleButton.click();
-      expect(navigateToUrl).not.toHaveBeenCalled();
+      expect(navigateToUrl).not.toHaveBeenCalled(); // Should not navigate to the href
       unmount();
     }
 
     {
       const { findByTestId } = renderNavigation({
         navTreeDef: of({
+          id: 'es',
           body: [
             {
               ...accordionNode,
@@ -135,6 +138,88 @@ describe('builds navigation tree', () => {
       accordionToggleButton.click();
 
       expect(navigateToUrl).toHaveBeenCalledWith('/app/foo'); // Should navigate to the href
+    }
+  });
+
+  test('should render panel opener groups as accordion when the sideNav is collapsed', async () => {
+    const panelOpenerNode: ChromeProjectNavigationNode = {
+      id: 'nestedGroup1',
+      title: 'Nested Group 1',
+      path: 'group1.nestedGroup1',
+      renderAs: 'panelOpener', // Should be converted to accordion when sideNav is collapsed
+      children: [
+        {
+          id: 'item1',
+          title: 'Item 1',
+          href: 'https://foo',
+          path: 'group1.item1',
+        },
+      ],
+    };
+
+    const nodes: ChromeProjectNavigationNode = {
+      id: 'group1',
+      title: 'Group 1',
+      path: 'group1',
+      children: [panelOpenerNode],
+    };
+
+    {
+      // Side nav is collapsed
+      const { queryAllByTestId, unmount } = renderNavigation({
+        navTreeDef: of({
+          id: 'es',
+          body: [nodes],
+        }),
+        services: { isSideNavCollapsed: true },
+      });
+
+      const accordionButtonLabel = queryAllByTestId('accordionToggleBtn').map((c) => c.textContent);
+      expect(accordionButtonLabel).toEqual(['Group 1', 'Nested Group 1']); // 2 accordion buttons
+
+      unmount();
+    }
+
+    {
+      // Side nav is not collapsed
+      const { queryAllByTestId, unmount } = renderNavigation({
+        navTreeDef: of({
+          id: 'es',
+          body: [nodes],
+        }),
+        services: { isSideNavCollapsed: false }, // No conversion to accordion
+      });
+
+      const accordionButtonLabel = queryAllByTestId('accordionToggleBtn').map((c) => c.textContent);
+
+      expect(accordionButtonLabel).toEqual(['Group 1']); // Only 1 accordion button (top level)
+      unmount();
+    }
+
+    {
+      // Panel opener with a link
+      const { queryAllByTestId, unmount } = renderNavigation({
+        navTreeDef: of({
+          id: 'es',
+          body: [
+            {
+              ...nodes,
+              children: [
+                {
+                  ...panelOpenerNode,
+                  href: '/foo/bar', // Panel opener with a link should not be converted to accordion
+                },
+              ],
+            },
+          ],
+        }),
+        services: { isSideNavCollapsed: true }, // SideNav is collapsed
+      });
+
+      const accordionButtonLabel = queryAllByTestId('accordionToggleBtn').map((c) => c.textContent);
+
+      expect(accordionButtonLabel).toEqual(['Group 1']); // Only 1 accordion button (top level)
+      unmount();
     }
   });
 
@@ -159,6 +244,7 @@ describe('builds navigation tree', () => {
 
     const { findByTestId } = renderNavigation({
       navTreeDef: of({
+        id: 'es',
         body: [node],
       }),
       services: { navigateToUrl, eventTracker: new EventTracker({ reportEvent }) },
@@ -197,6 +283,7 @@ describe('builds navigation tree', () => {
 
     const { findByTestId } = renderNavigation({
       navTreeDef: of({
+        id: 'es',
         body: [node],
       }),
       services: { navigateToUrl },
@@ -211,6 +298,7 @@ describe('builds navigation tree', () => {
 
   test('should not render the group if it does not have children', async () => {
     const navTree: NavigationTreeDefinitionUI = {
+      id: 'es',
       body: [
         {
           id: 'root',
@@ -259,6 +347,7 @@ describe('builds navigation tree', () => {
     ]);
 
     const navTree: NavigationTreeDefinitionUI = {
+      id: 'es',
       body: [{ type: 'recentlyAccessed' }],
     };
 
@@ -285,6 +374,7 @@ describe('builds navigation tree', () => {
     ]);
 
     const navTree: NavigationTreeDefinitionUI = {
+      id: 'es',
       body: [{ type: 'recentlyAccessed' }],
     };
 

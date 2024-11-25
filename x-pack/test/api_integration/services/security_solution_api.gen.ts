@@ -32,6 +32,7 @@ import { CopyTimelineRequestBodyInput } from '@kbn/security-solution-plugin/comm
 import { CreateAlertsMigrationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/create_signals_migration/create_signals_migration.gen';
 import { CreateAssetCriticalityRecordRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/create_asset_criticality.gen';
 import { CreateRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/create_rule/create_rule_route.gen';
+import { CreateRuleMigrationRequestBodyInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import { CreateTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/create_timelines/create_timelines_route.gen';
 import {
   CreateUpdateProtectionUpdatesNoteRequestParamsInput,
@@ -55,12 +56,10 @@ import { EndpointGetActionsStatusRequestQueryInput } from '@kbn/security-solutio
 import { EndpointGetFileActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/get_file/get_file.gen';
 import { EndpointGetProcessesActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/running_procs/running_procs.gen';
 import { EndpointIsolateActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/isolate/isolate.gen';
-import { EndpointIsolateRedirectRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/isolate/deprecated_isolate.gen';
 import { EndpointKillProcessActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/kill_process/kill_process.gen';
 import { EndpointScanActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/scan/scan.gen';
 import { EndpointSuspendProcessActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/suspend_process/suspend_process.gen';
 import { EndpointUnisolateActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/unisolate/unisolate.gen';
-import { EndpointUnisolateRedirectRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/unisolate/deprecated_unisolate.gen';
 import { EndpointUploadActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/upload/upload.gen';
 import {
   ExportRulesRequestQueryInput,
@@ -73,7 +72,6 @@ import {
 import { FinalizeAlertsMigrationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/finalize_signals_migration/finalize_signals_migration.gen';
 import { FindAssetCriticalityRecordsRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/list_asset_criticality.gen';
 import { FindRulesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/find_rules/find_rules_route.gen';
-import { GetAgentPolicySummaryRequestQueryInput } from '@kbn/security-solution-plugin/common/api/endpoint/policy/deprecated_agent_policy_summary.gen';
 import { GetAssetCriticalityRecordRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/get_asset_criticality.gen';
 import { GetDraftTimelinesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/get_draft_timelines/get_draft_timelines_route.gen';
 import { GetEndpointMetadataListRequestQueryInput } from '@kbn/security-solution-plugin/common/api/endpoint/metadata/get_metadata.gen';
@@ -94,6 +92,12 @@ import {
   GetRuleExecutionResultsRequestQueryInput,
   GetRuleExecutionResultsRequestParamsInput,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route.gen';
+import { GetRuleMigrationRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
+import {
+  GetRuleMigrationResourcesRequestQueryInput,
+  GetRuleMigrationResourcesRequestParamsInput,
+} from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
+import { GetRuleMigrationStatsRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import { GetTimelineRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/get_timeline/get_timeline_route.gen';
 import { GetTimelinesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/get_timelines/get_timelines_route.gen';
 import { ImportRulesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/import_rules/import_rules_route.gen';
@@ -102,6 +106,7 @@ import {
   InitEntityEngineRequestParamsInput,
   InitEntityEngineRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/init.gen';
+import { InitEntityStoreRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/enablement.gen';
 import { InstallPrepackedTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/install_prepackaged_timelines/install_prepackaged_timelines_route.gen';
 import { ListEntitiesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/entities/list_entities.gen';
 import { PatchRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/patch_rule/patch_rule_route.gen';
@@ -126,10 +131,20 @@ import { SetAlertAssigneesRequestBodyInput } from '@kbn/security-solution-plugin
 import { SetAlertsStatusRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals/set_signal_status/set_signals_status_route.gen';
 import { SetAlertTagsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_tags/set_alert_tags/set_alert_tags.gen';
 import { StartEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/start.gen';
+import {
+  StartRuleMigrationRequestParamsInput,
+  StartRuleMigrationRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import { StopEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/stop.gen';
+import { StopRuleMigrationRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import { SuggestUserProfilesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/users/suggest_user_profiles_route.gen';
 import { TriggerRiskScoreCalculationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
 import { UpdateRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/update_rule/update_rule_route.gen';
+import { UpdateRuleMigrationRequestBodyInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
+import {
+  UpsertRuleMigrationResourcesRequestParamsInput,
+  UpsertRuleMigrationResourcesRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import { routeWithNamespace } from '../../common/utils/security_solution';
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -154,6 +169,13 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
+    },
+    applyEntityEngineDataviewIndices(kibanaSpace: string = 'default') {
+      return supertest
+        .post(routeWithNamespace('/api/entity_store/engines/apply_dataview_indices', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     assetCriticalityGetPrivileges(kibanaSpace: string = 'default') {
       return supertest
@@ -330,6 +352,17 @@ If a record already exists for the specified entity, that record is overwritten 
         .post(routeWithNamespace('/api/detection_engine/rules', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
+    /**
+     * Creates a new SIEM rules migration using the original vendor rules provided
+     */
+    createRuleMigration(props: CreateRuleMigrationProps, kibanaSpace: string = 'default') {
+      return supertest
+        .post(routeWithNamespace('/internal/siem_migrations/rules', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
@@ -589,20 +622,6 @@ If a record already exists for the specified entity, that record is overwritten 
         .send(props.body as object);
     },
     /**
-      * Isolate an endpoint from the network.
-> info
-> This URL will return a 308 permanent redirect to `POST <kibana host>:<port>/api/endpoint/action/isolate`.
-
-      */
-    endpointIsolateRedirect(props: EndpointIsolateRedirectProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(routeWithNamespace('/api/endpoint/isolate', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
      * Terminate a running process on an endpoint.
      */
     endpointKillProcessAction(
@@ -653,23 +672,6 @@ If a record already exists for the specified entity, that record is overwritten 
         .send(props.body as object);
     },
     /**
-      * Release an isolated endpoint, allowing it to rejoin a network.
-> info
-> This URL will return a 308 permanent redirect to `POST <kibana host>:<port>/api/endpoint/action/unisolate`.
-
-      */
-    endpointUnisolateRedirect(
-      props: EndpointUnisolateRedirectProps,
-      kibanaSpace: string = 'default'
-    ) {
-      return supertest
-        .post(routeWithNamespace('/api/endpoint/unisolate', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
      * Upload a file to an endpoint.
      */
     endpointUploadAction(props: EndpointUploadActionProps, kibanaSpace: string = 'default') {
@@ -679,6 +681,13 @@ If a record already exists for the specified entity, that record is overwritten 
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
+    },
+    entityStoreGetPrivileges(kibanaSpace: string = 'default') {
+      return supertest
+        .get(routeWithNamespace('/internal/entity_store/privileges', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
       * Export detection rules to an `.ndjson` file. The following configuration items are also included in the `.ndjson` file:
@@ -748,13 +757,15 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
-    getAgentPolicySummary(props: GetAgentPolicySummaryProps, kibanaSpace: string = 'default') {
+    /**
+     * Retrieves the rule migrations stats for all migrations stored in the system
+     */
+    getAllStatsRuleMigration(kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/api/endpoint/policy/summaries', kibanaSpace))
+        .get(routeWithNamespace('/internal/siem_migrations/rules/stats', kibanaSpace))
         .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
      * Get the asset criticality record for a specific entity.
@@ -800,7 +811,7 @@ finalize it.
       return supertest
         .post(
           routeWithNamespace(
-            replaceParams('/api/endpoint/suggestions/{suggestion_type}', props.params),
+            replaceParams('/internal/api/endpoint/suggestions/{suggestion_type}', props.params),
             kibanaSpace
           )
         )
@@ -829,6 +840,13 @@ finalize it.
             kibanaSpace
           )
         )
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    getEntityStoreStatus(kibanaSpace: string = 'default') {
+      return supertest
+        .get(routeWithNamespace('/api/entity_store/status', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
@@ -913,6 +931,55 @@ finalize it.
         .query(props.query);
     },
     /**
+     * Retrieves the rule documents stored in the system given the rule migration id
+     */
+    getRuleMigration(props: GetRuleMigrationProps, kibanaSpace: string = 'default') {
+      return supertest
+        .get(
+          routeWithNamespace(
+            replaceParams('/internal/siem_migrations/rules/{migration_id}', props.params),
+            kibanaSpace
+          )
+        )
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    /**
+     * Retrieves resources for an existing SIEM rules migration
+     */
+    getRuleMigrationResources(
+      props: GetRuleMigrationResourcesProps,
+      kibanaSpace: string = 'default'
+    ) {
+      return supertest
+        .get(
+          routeWithNamespace(
+            replaceParams('/internal/siem_migrations/rules/{migration_id}/resources', props.params),
+            kibanaSpace
+          )
+        )
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query(props.query);
+    },
+    /**
+     * Retrieves the stats of a SIEM rules migration using the migration id provided
+     */
+    getRuleMigrationStats(props: GetRuleMigrationStatsProps, kibanaSpace: string = 'default') {
+      return supertest
+        .get(
+          routeWithNamespace(
+            replaceParams('/internal/siem_migrations/rules/{migration_id}/stats', props.params),
+            kibanaSpace
+          )
+        )
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    /**
      * Get the details of an existing saved Timeline or Timeline template.
      */
     getTimeline(props: GetTimelineProps, kibanaSpace: string = 'default') {
@@ -967,6 +1034,14 @@ finalize it.
             kibanaSpace
           )
         )
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
+    initEntityStore(props: InitEntityStoreProps, kibanaSpace: string = 'default') {
+      return supertest
+        .post(routeWithNamespace('/api/entity_store/enable', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -1278,6 +1353,22 @@ detection engine rules.
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
+    /**
+     * Starts a SIEM rules migration using the migration id provided
+     */
+    startRuleMigration(props: StartRuleMigrationProps, kibanaSpace: string = 'default') {
+      return supertest
+        .put(
+          routeWithNamespace(
+            replaceParams('/internal/siem_migrations/rules/{migration_id}/start', props.params),
+            kibanaSpace
+          )
+        )
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
     stopEntityEngine(props: StopEntityEngineProps, kibanaSpace: string = 'default') {
       return supertest
         .post(
@@ -1288,6 +1379,21 @@ detection engine rules.
         )
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    /**
+     * Stops a running SIEM rules migration using the migration id provided
+     */
+    stopRuleMigration(props: StopRuleMigrationProps, kibanaSpace: string = 'default') {
+      return supertest
+        .put(
+          routeWithNamespace(
+            replaceParams('/internal/siem_migrations/rules/{migration_id}/stop', props.params),
+            kibanaSpace
+          )
+        )
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
@@ -1329,12 +1435,42 @@ detection engine rules.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+     * Updates rules migrations attributes
+     */
+    updateRuleMigration(props: UpdateRuleMigrationProps, kibanaSpace: string = 'default') {
+      return supertest
+        .put(routeWithNamespace('/internal/siem_migrations/rules', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
     uploadAssetCriticalityRecords(kibanaSpace: string = 'default') {
       return supertest
         .post(routeWithNamespace('/api/asset_criticality/upload_csv', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    /**
+     * Creates or updates resources for an existing SIEM rules migration
+     */
+    upsertRuleMigrationResources(
+      props: UpsertRuleMigrationResourcesProps,
+      kibanaSpace: string = 'default'
+    ) {
+      return supertest
+        .post(
+          routeWithNamespace(
+            replaceParams('/internal/siem_migrations/rules/{migration_id}/resources', props.params),
+            kibanaSpace
+          )
+        )
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
     },
   };
 }
@@ -1374,6 +1510,9 @@ export interface CreateAssetCriticalityRecordProps {
 }
 export interface CreateRuleProps {
   body: CreateRuleRequestBodyInput;
+}
+export interface CreateRuleMigrationProps {
+  body: CreateRuleMigrationRequestBodyInput;
 }
 export interface CreateTimelinesProps {
   body: CreateTimelinesRequestBodyInput;
@@ -1428,9 +1567,6 @@ export interface EndpointGetProcessesActionProps {
 export interface EndpointIsolateActionProps {
   body: EndpointIsolateActionRequestBodyInput;
 }
-export interface EndpointIsolateRedirectProps {
-  body: EndpointIsolateRedirectRequestBodyInput;
-}
 export interface EndpointKillProcessActionProps {
   body: EndpointKillProcessActionRequestBodyInput;
 }
@@ -1442,9 +1578,6 @@ export interface EndpointSuspendProcessActionProps {
 }
 export interface EndpointUnisolateActionProps {
   body: EndpointUnisolateActionRequestBodyInput;
-}
-export interface EndpointUnisolateRedirectProps {
-  body: EndpointUnisolateRedirectRequestBodyInput;
 }
 export interface EndpointUploadActionProps {
   body: EndpointUploadActionRequestBodyInput;
@@ -1465,9 +1598,6 @@ export interface FindAssetCriticalityRecordsProps {
 }
 export interface FindRulesProps {
   query: FindRulesRequestQueryInput;
-}
-export interface GetAgentPolicySummaryProps {
-  query: GetAgentPolicySummaryRequestQueryInput;
 }
 export interface GetAssetCriticalityRecordProps {
   query: GetAssetCriticalityRecordRequestQueryInput;
@@ -1505,6 +1635,16 @@ export interface GetRuleExecutionResultsProps {
   query: GetRuleExecutionResultsRequestQueryInput;
   params: GetRuleExecutionResultsRequestParamsInput;
 }
+export interface GetRuleMigrationProps {
+  params: GetRuleMigrationRequestParamsInput;
+}
+export interface GetRuleMigrationResourcesProps {
+  query: GetRuleMigrationResourcesRequestQueryInput;
+  params: GetRuleMigrationResourcesRequestParamsInput;
+}
+export interface GetRuleMigrationStatsProps {
+  params: GetRuleMigrationStatsRequestParamsInput;
+}
 export interface GetTimelineProps {
   query: GetTimelineRequestQueryInput;
 }
@@ -1520,6 +1660,9 @@ export interface ImportTimelinesProps {
 export interface InitEntityEngineProps {
   params: InitEntityEngineRequestParamsInput;
   body: InitEntityEngineRequestBodyInput;
+}
+export interface InitEntityStoreProps {
+  body: InitEntityStoreRequestBodyInput;
 }
 export interface InstallPrepackedTimelinesProps {
   body: InstallPrepackedTimelinesRequestBodyInput;
@@ -1577,8 +1720,15 @@ export interface SetAlertTagsProps {
 export interface StartEntityEngineProps {
   params: StartEntityEngineRequestParamsInput;
 }
+export interface StartRuleMigrationProps {
+  params: StartRuleMigrationRequestParamsInput;
+  body: StartRuleMigrationRequestBodyInput;
+}
 export interface StopEntityEngineProps {
   params: StopEntityEngineRequestParamsInput;
+}
+export interface StopRuleMigrationProps {
+  params: StopRuleMigrationRequestParamsInput;
 }
 export interface SuggestUserProfilesProps {
   query: SuggestUserProfilesRequestQueryInput;
@@ -1588,4 +1738,11 @@ export interface TriggerRiskScoreCalculationProps {
 }
 export interface UpdateRuleProps {
   body: UpdateRuleRequestBodyInput;
+}
+export interface UpdateRuleMigrationProps {
+  body: UpdateRuleMigrationRequestBodyInput;
+}
+export interface UpsertRuleMigrationResourcesProps {
+  params: UpsertRuleMigrationResourcesRequestParamsInput;
+  body: UpsertRuleMigrationResourcesRequestBodyInput;
 }

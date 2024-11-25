@@ -60,12 +60,14 @@ import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/publ
 import type { PluginStartContract } from '@kbn/alerting-plugin/public/plugin';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import type { IntegrationAssistantPluginStart } from '@kbn/integration-assistant-plugin/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
 import type { Cases } from './cases';
 import type { Exceptions } from './exceptions';
 import type { Kubernetes } from './kubernetes';
+import type { Onboarding } from './onboarding';
 import type { Overview } from './overview';
 import type { Rules } from './rules';
 import type { Timelines } from './timelines';
@@ -81,16 +83,18 @@ import type { EntityAnalytics } from './entity_analytics';
 import type { Assets } from './assets';
 import type { Investigations } from './investigations';
 import type { MachineLearning } from './machine_learning';
+import type { SiemMigrations } from './siem_migrations';
 
-import type { TelemetryClientStart } from './common/lib/telemetry';
 import type { Dashboards } from './dashboards';
 import type { BreadcrumbsNav } from './common/breadcrumbs/types';
 import type { TopValuesPopoverService } from './app/components/top_values_popover/top_values_popover_service';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import type { SetComponents, GetComponents$ } from './contract_components';
 import type { ConfigSettings } from '../common/config_settings';
-import type { OnboardingPageService } from './app/components/onboarding/onboarding_page_service';
+import type { OnboardingService } from './onboarding/service';
 import type { SolutionNavigation } from './app/solution_navigation/solution_navigation';
+import type { TelemetryServiceStart } from './common/lib/telemetry';
+import type { SiemMigrationsService } from './siem_migrations/service';
 
 export interface SetupPlugins {
   cloud?: CloudSetup;
@@ -153,6 +157,7 @@ export interface StartPlugins {
   alerting: PluginStartContract;
   core: CoreStart;
   integrationAssistant?: IntegrationAssistantPluginStart;
+  serverless?: ServerlessPluginStart;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {
@@ -163,7 +168,7 @@ export interface StartPluginsDependencies extends StartPlugins {
 export interface ContractStartServices {
   getComponents$: GetComponents$;
   upselling: UpsellingService;
-  onboarding: OnboardingPageService;
+  onboarding: OnboardingService;
 }
 
 export type StartServices = CoreStart &
@@ -185,10 +190,11 @@ export type StartServices = CoreStart &
       getPluginWrapper: () => typeof SecuritySolutionTemplateWrapper;
     };
     contentManagement: ContentManagementPublicStart;
-    telemetry: TelemetryClientStart;
+    telemetry: TelemetryServiceStart;
     customDataService: DataPublicPluginStart;
     topValuesPopover: TopValuesPopoverService;
     timelineDataService: DataPublicPluginStart;
+    siemMigrations: SiemMigrationsService;
   };
 
 export type StartRenderServices = Pick<
@@ -211,7 +217,7 @@ export interface PluginStart {
   setComponents: SetComponents;
   getBreadcrumbsNav$: () => Observable<BreadcrumbsNav>;
   getUpselling: () => UpsellingService;
-  setOnboardingPageSettings: OnboardingPageService;
+  setOnboardingSettings: OnboardingService['setSettings'];
   setIsSolutionNavigationEnabled: (isSolutionNavigationEnabled: boolean) => void;
   getSolutionNavigation: () => Promise<SolutionNavigation>;
 }
@@ -231,6 +237,7 @@ export interface SubPlugins {
   explore: Explore;
   kubernetes: Kubernetes;
   management: Management;
+  onboarding: Onboarding;
   overview: Overview;
   rules: Rules;
   threatIntelligence: ThreatIntelligence;
@@ -239,12 +246,13 @@ export interface SubPlugins {
   assets: Assets;
   investigations: Investigations;
   machineLearning: MachineLearning;
+  siemMigrations: SiemMigrations;
 }
 
 // TODO: find a better way to defined these types
 export interface StartedSubPlugins {
   [CASES_SUB_PLUGIN_KEY]: ReturnType<Cases['start']>;
-  alerts: ReturnType<Detections['start']>;
+  alerts: Awaited<ReturnType<Detections['start']>>;
   attackDiscovery: ReturnType<AttackDiscovery['start']>;
   cloudDefend: ReturnType<CloudDefend['start']>;
   cloudSecurityPosture: ReturnType<CloudSecurityPosture['start']>;
@@ -253,6 +261,7 @@ export interface StartedSubPlugins {
   explore: ReturnType<Explore['start']>;
   kubernetes: ReturnType<Kubernetes['start']>;
   management: ReturnType<Management['start']>;
+  onboarding: ReturnType<Onboarding['start']>;
   overview: ReturnType<Overview['start']>;
   rules: ReturnType<Rules['start']>;
   threatIntelligence: ReturnType<ThreatIntelligence['start']>;
@@ -261,4 +270,5 @@ export interface StartedSubPlugins {
   assets: ReturnType<Assets['start']>;
   investigations: ReturnType<Investigations['start']>;
   machineLearning: ReturnType<MachineLearning['start']>;
+  siemMigrations: ReturnType<SiemMigrations['start']>;
 }

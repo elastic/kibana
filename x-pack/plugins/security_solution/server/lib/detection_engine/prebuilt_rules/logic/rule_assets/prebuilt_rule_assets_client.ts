@@ -13,14 +13,14 @@ import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 import { validatePrebuiltRuleAssets } from './prebuilt_rule_assets_validation';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from './prebuilt_rule_assets_type';
-import type { RuleVersionSpecifier } from '../../model/rule_versions/rule_version_specifier';
+import type { RuleVersionSpecifier } from '../rule_versions/rule_version_specifier';
 
 const MAX_PREBUILT_RULES_COUNT = 10_000;
 
 export interface IPrebuiltRuleAssetsClient {
   fetchLatestAssets: () => Promise<PrebuiltRuleAsset[]>;
 
-  fetchLatestVersions(): Promise<RuleVersionSpecifier[]>;
+  fetchLatestVersions(ruleIds?: string[]): Promise<RuleVersionSpecifier[]>;
 
   fetchAssetsByVersion(versions: RuleVersionSpecifier[]): Promise<PrebuiltRuleAsset[]>;
 }
@@ -72,8 +72,12 @@ export const createPrebuiltRuleAssetsClient = (
       });
     },
 
-    fetchLatestVersions: (): Promise<RuleVersionSpecifier[]> => {
+    fetchLatestVersions: (ruleIds: string[] = []): Promise<RuleVersionSpecifier[]> => {
       return withSecuritySpan('IPrebuiltRuleAssetsClient.fetchLatestVersions', async () => {
+        const filter = ruleIds
+          .map((ruleId) => `${PREBUILT_RULE_ASSETS_SO_TYPE}.attributes.rule_id: ${ruleId}`)
+          .join(' OR ');
+
         const findResult = await savedObjectsClient.find<
           PrebuiltRuleAsset,
           {
@@ -83,6 +87,7 @@ export const createPrebuiltRuleAssetsClient = (
           }
         >({
           type: PREBUILT_RULE_ASSETS_SO_TYPE,
+          filter,
           aggs: {
             rules: {
               terms: {

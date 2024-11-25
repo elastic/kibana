@@ -16,6 +16,7 @@ import React, { useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { i18n } from '@kbn/i18n';
+import { RiskEngineStatusEnum } from '../../../../../common/api/entity_analytics';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { formatTimeFromNow } from '../helpers';
 import { useScheduleNowRiskEngineMutation } from '../../../api/hooks/use_schedule_now_risk_engine_mutation';
@@ -76,7 +77,10 @@ export const ScheduleRiskEngineCallout: React.FC = () => {
     scheduleRiskEngineMutation();
   }, [scheduleRiskEngineMutation]);
 
-  if (!riskEngineStatus?.isNewRiskScoreModuleInstalled) {
+  if (
+    !riskEngineStatus?.isNewRiskScoreModuleInstalled ||
+    riskEngineStatus?.risk_engine_status !== RiskEngineStatusEnum.ENABLED
+  ) {
     return null;
   }
 

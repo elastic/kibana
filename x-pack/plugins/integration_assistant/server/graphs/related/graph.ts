@@ -10,7 +10,7 @@ import { StateGraph, END, START } from '@langchain/langgraph';
 import { SamplesFormat } from '../../../common';
 import type { RelatedState } from '../../types';
 import { handleValidatePipeline } from '../../util/graph';
-import { formatSamples, prefixSamples } from '../../util/samples';
+import { prefixSamples } from '../../util/samples';
 import { RELATED_ECS_FIELDS, RELATED_EXAMPLE_ANSWER } from './constants';
 import { handleErrors } from './errors';
 import { handleRelated } from './related';
@@ -29,10 +29,6 @@ const graphState: StateGraphArgs<RelatedState>['channels'] = {
   samples: {
     value: (x: string[], y?: string[]) => y ?? x,
     default: () => [],
-  },
-  formattedSamples: {
-    value: (x: string, y?: string) => y ?? x,
-    default: () => '',
   },
   hasTriedOnce: {
     value: (x: boolean, y?: boolean) => y ?? x,
@@ -97,31 +93,22 @@ const graphState: StateGraphArgs<RelatedState>['channels'] = {
 };
 
 function modelInput({ state }: RelatedBaseNodeParams): Partial<RelatedState> {
-  const initialPipeline = JSON.parse(JSON.stringify(state.currentPipeline));
-  return {
-    exAnswer: JSON.stringify(RELATED_EXAMPLE_ANSWER, null, 2),
-    ecs: JSON.stringify(RELATED_ECS_FIELDS, null, 2),
-    samples: state.rawSamples,
-    initialPipeline,
-    finalized: false,
-    reviewed: false,
-    lastExecutedChain: 'modelInput',
-  };
-}
+  let samples: string[];
+  if (state.samplesFormat.name === 'json' || state.samplesFormat.name === 'ndjson') {
+    samples = prefixSamples(state);
+  } else {
+    samples = state.rawSamples;
+  }
 
-function modelJSONInput({ state }: RelatedBaseNodeParams): Partial<RelatedState> {
-  const samples = prefixSamples(state);
-  const formattedSamples = formatSamples(samples);
   const initialPipeline = JSON.parse(JSON.stringify(state.currentPipeline));
   return {
     exAnswer: JSON.stringify(RELATED_EXAMPLE_ANSWER, null, 2),
     ecs: JSON.stringify(RELATED_ECS_FIELDS, null, 2),
     samples,
-    formattedSamples,
     initialPipeline,
     finalized: false,
     reviewed: false,
-    lastExecutedChain: 'modelJSONInput',
+    lastExecutedChain: 'modelInput',
   };
 }
 
@@ -141,13 +128,6 @@ function inputRouter({ state }: RelatedBaseNodeParams): string {
     return 'validatePipeline';
   }
   return 'related';
-}
-
-function modelRouter({ state }: RelatedBaseNodeParams): string {
-  if (state.samplesFormat.name === 'json' || state.samplesFormat.name === 'ndjson') {
-    return 'modelJSONInput';
-  }
-  return 'modelInput';
 }
 
 function chainRouter({ state }: RelatedBaseNodeParams): string {
@@ -172,7 +152,6 @@ function chainRouter({ state }: RelatedBaseNodeParams): string {
 export async function getRelatedGraph({ client, model }: RelatedGraphParams) {
   const workflow = new StateGraph({ channels: graphState })
     .addNode('modelInput', (state: RelatedState) => modelInput({ state }))
-    .addNode('modelJSONInput', (state: RelatedState) => modelJSONInput({ state }))
     .addNode('modelOutput', (state: RelatedState) => modelOutput({ state }))
     .addNode('handleRelated', (state: RelatedState) => handleRelated({ state, model }))
     .addNode('handleValidatePipeline', (state: RelatedState) =>
@@ -180,19 +159,12 @@ export async function getRelatedGraph({ client, model }: RelatedGraphParams) {
     )
     .addNode('handleErrors', (state: RelatedState) => handleErrors({ state, model }))
     .addNode('handleReview', (state: RelatedState) => handleReview({ state, model }))
-    .addConditionalEdges(START, (state: RelatedState) => modelRouter({ state }), {
-      modelJSONInput: 'modelJSONInput',
-      modelInput: 'modelInput', // For Non JSON input samples
-    })
+    .addEdge(START, 'modelInput')
     .addEdge('modelOutput', END)
     .addEdge('handleRelated', 'handleValidatePipeline')
     .addEdge('handleErrors', 'handleValidatePipeline')
     .addEdge('handleReview', 'handleValidatePipeline')
     .addConditionalEdges('modelInput', (state: RelatedState) => inputRouter({ state }), {
-      related: 'handleRelated',
-      validatePipeline: 'handleValidatePipeline',
-    })
-    .addConditionalEdges('modelJSONInput', (state: RelatedState) => inputRouter({ state }), {
       related: 'handleRelated',
       validatePipeline: 'handleValidatePipeline',
     })

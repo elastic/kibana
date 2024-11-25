@@ -471,8 +471,7 @@
             "section": "def-common.NumberValidationResult",
             "text": "NumberValidationResult"
           },
-          " | null) & ",
-          "MemoizedFunction"
+          " | null) & _.MemoizedFunction"
         ],
         "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
         "deprecated": false,

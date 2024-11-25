@@ -598,6 +598,110 @@
       },
       {
         "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.RawKibanaFeaturePrivileges",
+        "type": "Interface",
+        "tags": [],
+        "label": "RawKibanaFeaturePrivileges",
+        "description": [],
+        "path": "x-pack/packages/security/plugin_types_common/src/authorization/raw_kibana_privileges.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.RawKibanaFeaturePrivileges.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[featureId: string]: { [privilegeId: string]: string[]; }",
+            "description": [],
+            "signature": [
+              "[featureId: string]:  { [privilegeId: string]: string[]; }"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/raw_kibana_privileges.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.RawKibanaPrivileges",
+        "type": "Interface",
+        "tags": [],
+        "label": "RawKibanaPrivileges",
+        "description": [],
+        "path": "x-pack/packages/security/plugin_types_common/src/authorization/raw_kibana_privileges.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.RawKibanaPrivileges.global",
+            "type": "Object",
+            "tags": [],
+            "label": "global",
+            "description": [],
+            "signature": [
+              "{ [x: string]: string[]; }"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/raw_kibana_privileges.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.RawKibanaPrivileges.features",
+            "type": "Object",
+            "tags": [],
+            "label": "features",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.RawKibanaFeaturePrivileges",
+                "text": "RawKibanaFeaturePrivileges"
+              }
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/raw_kibana_privileges.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.RawKibanaPrivileges.space",
+            "type": "Object",
+            "tags": [],
+            "label": "space",
+            "description": [],
+            "signature": [
+              "{ [x: string]: string[]; }"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/raw_kibana_privileges.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.RawKibanaPrivileges.reserved",
+            "type": "Object",
+            "tags": [],
+            "label": "reserved",
+            "description": [],
+            "signature": [
+              "{ [x: string]: string[]; }"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/raw_kibana_privileges.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
         "id": "def-common.RestApiKey",
         "type": "Interface",
         "tags": [],

@@ -63,6 +63,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
           match_all: {},
         },
         conflicts: 'proceed',
+        ignore_unavailable: true,
       });
       await objectRemover.removeAll();
     });

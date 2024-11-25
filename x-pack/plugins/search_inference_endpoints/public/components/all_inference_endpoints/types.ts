@@ -21,6 +21,7 @@ export enum ServiceProviderKeys {
   hugging_face = 'hugging_face',
   mistral = 'mistral',
   openai = 'openai',
+  watsonxai = 'watsonxai',
 }
 
 export enum SortFieldInferenceEndpoint {
@@ -59,5 +60,10 @@ export interface EuiBasicTableSortTypes {
 export interface InferenceEndpointUI {
   endpoint: string;
   provider: InferenceAPIConfigResponse;
+  type: string;
+}
+
+export interface InferenceUsageInfo {
+  id: string;
   type: string;
 }

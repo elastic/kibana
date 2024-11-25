@@ -25,6 +25,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const toasts = getService('toasts');
   const esClient = getService('es');
   const apmSynthtraceKibanaClient = getService('apmSynthtraceKibanaClient');
+  const filterBar = getService('filterBar');
+  const esArchiver = getService('esArchiver');
 
   async function getAlertsByName(name: string) {
     const {
@@ -92,9 +94,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await rules.common.cancelRuleCreation();
   }
 
-  describe('create alert', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/196153
+  describe.skip('create alert', function () {
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
     before(async () => {
+      await esArchiver.load(
+        'test/api_integration/fixtures/es_archiver/index_patterns/constant_keyword'
+      );
       const version = (await apmSynthtraceKibanaClient.installApmPackage()).version;
       apmSynthtraceEsClient = await getApmSynthtraceEsClient({
         client: esClient,
@@ -130,7 +136,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       return Promise.all([apmSynthtraceEsClient.index(events)]);
     });
 
-    after(() => apmSynthtraceEsClient.clean());
+    after(async () => {
+      await apmSynthtraceEsClient.clean();
+      await esArchiver.unload(
+        'test/api_integration/fixtures/es_archiver/index_patterns/constant_keyword'
+      );
+    });
 
     beforeEach(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
@@ -344,6 +355,57 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await deleteAlerts(alertsToDelete.map((alertItem: { id: string }) => alertItem.id));
     });
 
+    it('should create an alert with DSL filter for conditional action', async () => {
+      const alertName = generateUniqueKey();
+      await rules.common.defineIndexThresholdAlert(alertName);
+
+      // filterKuery validation
+      await testSubjects.setValue('filterKuery', 'group:');
+      const filterKueryInput = await testSubjects.find('filterKuery');
+      expect(await filterKueryInput.elementHasClass('euiFieldSearch-isInvalid')).to.eql(true);
+      await testSubjects.setValue('filterKuery', 'group: group-0');
+      expect(await filterKueryInput.elementHasClass('euiFieldSearch-isInvalid')).to.eql(false);
+
+      await testSubjects.click('.slack-alerting-ActionTypeSelectOption');
+      await testSubjects.click('addNewActionConnectorButton-.slack');
+      const slackConnectorName = generateUniqueKey();
+      await testSubjects.setValue('nameInput', slackConnectorName);
+      await testSubjects.setValue('slackWebhookUrlInput', 'https://test.com');
+      await find.clickByCssSelector('[data-test-subj="saveActionButtonModal"]:not(disabled)');
+      const createdConnectorToastTitle = await toasts.getTitleAndDismiss();
+      expect(createdConnectorToastTitle).to.eql(`Created '${slackConnectorName}'`);
+      await testSubjects.click('notifyWhenSelect');
+      await testSubjects.click('onThrottleInterval');
+      await testSubjects.setValue('throttleInput', '10');
+
+      await testSubjects.click('alertsFilterQueryToggle');
+
+      await pageObjects.header.waitUntilLoadingHasFinished();
+
+      const filter = `{
+        "bool": {
+          "filter": [{ "term": { "kibana.alert.rule.consumer": "*" } }]
+        }
+      }`;
+      await filterBar.addDslFilter(filter, true);
+
+      await testSubjects.click('saveRuleButton');
+
+      const toastTitle = await toasts.getTitleAndDismiss();
+      expect(toastTitle).to.eql(`Created rule "${alertName}"`);
+
+      await testSubjects.click('editActionHoverButton');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+
+      await testSubjects.scrollIntoView('globalQueryBar');
+
+      await filterBar.hasFilter('query', filter, true);
+
+      // clean up created alert
+      const alertsToDelete = await getAlertsByName(alertName);
+      await deleteAlerts(alertsToDelete.map((alertItem: { id: string }) => alertItem.id));
+    });
+
     it('should create an alert with actions in multiple groups', async () => {
       const alertName = generateUniqueKey();
       await defineAlwaysFiringAlert(alertName);
@@ -541,6 +603,35 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       ).to.eql(true);
 
       await deleteConnectorByName('webhook-test');
+    });
+
+    it('should add filter', async () => {
+      const ruleName = generateUniqueKey();
+      await defineAlwaysFiringAlert(ruleName);
+
+      await testSubjects.click('saveRuleButton');
+      await testSubjects.existOrFail('confirmRuleSaveModal');
+      await testSubjects.click('confirmRuleSaveModal > confirmModalConfirmButton');
+      await testSubjects.missingOrFail('confirmRuleSaveModal');
+
+      const toastTitle = await toasts.getTitleAndDismiss();
+      expect(toastTitle).to.eql(`Created rule "${ruleName}"`);
+
+      await testSubjects.click('triggersActionsAlerts');
+
+      const filter = `{
+        "bool": {
+          "filter": [{ "term": { "kibana.alert.rule.name": "${ruleName}" } }]
+        }
+      }`;
+
+      await filterBar.addDslFilter(filter, true);
+
+      await filterBar.hasFilter('query', filter, true);
+
+      // clean up created alert
+      const alertsToDelete = await getAlertsByName(ruleName);
+      await deleteAlerts(alertsToDelete.map((alertItem: { id: string }) => alertItem.id));
     });
   });
 };

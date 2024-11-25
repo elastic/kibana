@@ -29,13 +29,15 @@ import {
   createStructuredChatAgent,
   createToolCallingAgent,
 } from 'langchain/agents';
+import { omit } from 'lodash/fp';
 import { buildResponse } from '../../lib/build_response';
 import { AssistantDataClients } from '../../lib/langchain/executors/types';
 import { AssistantToolParams, ElasticAssistantRequestHandlerContext, GetElser } from '../../types';
-import { DEFAULT_PLUGIN_NAME, isV2KnowledgeBaseEnabled, performChecks } from '../helpers';
+import { DEFAULT_PLUGIN_NAME, performChecks } from '../helpers';
 import { fetchLangSmithDataset } from './utils';
 import { transformESSearchToAnonymizationFields } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
+import { evaluateAttackDiscovery } from '../../lib/attack_discovery/evaluation';
 import {
   DefaultAssistantGraph,
   getDefaultAssistantGraph,
@@ -47,9 +49,12 @@ import {
   structuredChatAgentPrompt,
 } from '../../lib/langchain/graphs/default_assistant_graph/prompts';
 import { getLlmClass, getLlmType, isOpenSourceModel } from '../utils';
+import { getGraphsFromNames } from './get_graphs_from_names';
 
 const DEFAULT_SIZE = 20;
 const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
+const LANG_CHAIN_TIMEOUT = ROUTE_HANDLER_TIMEOUT - 10_000; // 9 minutes 50 seconds
+const CONNECTOR_TIMEOUT = LANG_CHAIN_TIMEOUT - 10_000; // 9 minutes 40 seconds
 
 export const postEvaluateRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
@@ -86,19 +91,16 @@ export const postEvaluateRoute = (
         const actions = ctx.elasticAssistant.actions;
         const logger = assistantContext.logger.get('evaluate');
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
-        const v2KnowledgeBaseEnabled = isV2KnowledgeBaseEnabled({ context: ctx, request });
 
         // Perform license, authenticated user and evaluation FF checks
         const checkResponse = performChecks({
-          authenticatedUser: true,
           capability: 'assistantModelEvaluation',
           context: ctx,
-          license: true,
           request,
           response,
         });
-        if (checkResponse) {
-          return checkResponse;
+        if (!checkResponse.isSuccess) {
+          return checkResponse.response;
         }
 
         try {
@@ -106,8 +108,10 @@ export const postEvaluateRoute = (
           const {
             alertsIndexPattern,
             datasetName,
+            evaluatorConnectorId,
             graphs: graphNames,
             langSmithApiKey,
+            langSmithProject,
             connectorIds,
             size,
             replacements,
@@ -124,7 +128,9 @@ export const postEvaluateRoute = (
 
           logger.info('postEvaluateRoute:');
           logger.info(`request.query:\n${JSON.stringify(request.query, null, 2)}`);
-          logger.info(`request.body:\n${JSON.stringify(request.body, null, 2)}`);
+          logger.info(
+            `request.body:\n${JSON.stringify(omit(['langSmithApiKey'], request.body), null, 2)}`
+          );
           logger.info(`Evaluation ID: ${evaluationId}`);
 
           const totalExecutions = connectorIds.length * graphNames.length * dataset.length;
@@ -151,9 +157,7 @@ export const postEvaluateRoute = (
           const conversationsDataClient =
             (await assistantContext.getAIAssistantConversationsDataClient()) ?? undefined;
           const kbDataClient =
-            (await assistantContext.getAIAssistantKnowledgeBaseDataClient({
-              v2KnowledgeBaseEnabled,
-            })) ?? undefined;
+            (await assistantContext.getAIAssistantKnowledgeBaseDataClient()) ?? undefined;
           const dataClients: AssistantDataClients = {
             anonymizationFieldsDataClient,
             conversationsDataClient,
@@ -170,6 +174,38 @@ export const postEvaluateRoute = (
           // Fetch any tools registered to the security assistant
           const assistantTools = assistantContext.getRegisteredTools(DEFAULT_PLUGIN_NAME);
 
+          const { attackDiscoveryGraphs } = getGraphsFromNames(graphNames);
+
+          if (attackDiscoveryGraphs.length > 0) {
+            try {
+              // NOTE: we don't wait for the evaluation to finish here, because
+              // the client will retry / timeout when evaluations take too long
+              void evaluateAttackDiscovery({
+                actionsClient,
+                alertsIndexPattern,
+                attackDiscoveryGraphs,
+                connectors,
+                connectorTimeout: CONNECTOR_TIMEOUT,
+                datasetName,
+                esClient,
+                evaluationId,
+                evaluatorConnectorId,
+                langSmithApiKey,
+                langSmithProject,
+                logger,
+                runName,
+                size,
+              });
+            } catch (err) {
+              logger.error(() => `Error evaluating attack discovery: ${err}`);
+            }
+
+            // Return early if we're only running attack discovery graphs
+            return response.ok({
+              body: { evaluationId, success: true },
+            });
+          }
+
           const graphs: Array<{
             name: string;
             graph: DefaultAssistantGraph;
@@ -180,7 +216,7 @@ export const postEvaluateRoute = (
               const llmType = getLlmType(connector.actionTypeId);
               const isOssModel = isOpenSourceModel(connector);
               const isOpenAI = llmType === 'openai' && !isOssModel;
-              const llmClass = getLlmClass(llmType, true);
+              const llmClass = getLlmClass(llmType);
               const createLlmInstance = () =>
                 new llmClass({
                   actionsClient,
@@ -207,7 +243,7 @@ export const postEvaluateRoute = (
 
               // Check if KB is available
               const isEnabledKnowledgeBase =
-                (await dataClients.kbDataClient?.isModelDeployed()) ?? false;
+                (await dataClients.kbDataClient?.isInferenceEndpointExists()) ?? false;
 
               // Skeleton request from route to pass to the agents
               // params will be passed to the actions executor
@@ -236,7 +272,6 @@ export const postEvaluateRoute = (
                 llm,
                 isOssModel,
                 logger,
-                modelExists: isEnabledKnowledgeBase,
                 request: skeletonRequest,
                 alertsIndexPattern,
                 // onNewReplacements,
@@ -244,6 +279,7 @@ export const postEvaluateRoute = (
                 inference,
                 connectorId: connector.id,
                 size,
+                telemetry: ctx.elasticAssistant.telemetry,
               };
 
               const tools: StructuredTool[] = assistantTools.flatMap(
@@ -302,7 +338,6 @@ export const postEvaluateRoute = (
                   conversationId: undefined,
                   responseLanguage: 'English',
                   llmType,
-                  bedrockChatEnabled: true,
                   isStreaming: false,
                   isOssModel,
                 }, // TODO: Update to use the correct input format per dataset type

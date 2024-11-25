@@ -18,15 +18,9 @@ Before you begin, you should be familiar with the <<kibana-concepts-analysts>>.
 
 Add the sample web logs data, and create and set up the dashboard.
 
-. On the home page, click *Try sample data*.
+. <<gs-get-data-into-kibana,Install the web logs sample data set>>.
 
-. Expand *Other sample data sets*. 
-
-. On the *Sample web logs* card, click *Add data*.
-
-Create the dashboard where you'll display the visualization panels.
-
-. Open the main menu, then click *Dashboards*.
+. Go to *Dashboards*.
 
 . Click *Create dashboard*.
 
@@ -60,7 +54,7 @@ To create the visualizations in this tutorial, you'll use the following fields:
 Click a field name to view more details, such as its top values and distribution.
 
 [role="screenshot"]
-image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/bltff29bc11413cc5d8/66fdc386762d3a15135abec4/tutorial-field-top-values-distribution.gif[Clicking a field name to view more details]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt25c7a05e0f5daaa3/671966b9b1d3dd705a2ae650/tutorial-field-more-info.gif[Clicking a field name to view more details]
 
 [discrete]
 [[view-the-number-of-website-visitors]]
@@ -73,12 +67,12 @@ The only number function that you can use with *clientip* is *Unique count*, als
 . Open the *Visualization type* dropdown, then select *Metric*.
 +
 [role="screenshot"]
-image::images/lens_visualizationTypeDropdown_8.4.0.png[Visualization type dropdown]
+image::images/visualization-type-dropdown-8.16.0.png[Visualization type dropdown]
 
 . From the *Available fields* list, drag *clientip* to the workspace or layer pane.
 +
 [role="screenshot"]
-image::images/lens_metricUniqueCountOfClientip_8.4.0.png[Metric visualization of the clientip field]
+image::images/tutorial-unique-count-of-client-ip-8.16.0.png[Metric visualization of the clientip field]
 +
 In the layer pane, *Unique count of clientip* appears because the editor automatically applies the *Unique count* function to the *clientip* field. *Unique count* is the only numeric function that works with IP addresses.
 
@@ -133,12 +127,12 @@ To save space on the dashboard, hide the axis labels.
 . Open the *Left axis* menu, then select *None* from the *Axis title* dropdown.
 +
 [role="screenshot"]
-image::images/lens_lineChartMetricOverTimeLeftAxis_8.7.png[Left axis menu]
+image::images/line-chart-left-axis-8.16.0.png[Left axis menu, width=50%]
 
 . Open the *Bottom axis* menu, then select *None* from the *Axis title* dropdown.
 +
 [role="screenshot"]
-image::images/lens_lineChartMetricOverTimeBottomAxis_8.7.png[Bottom axis menu]
+image::images/line-chart-bottom-axis-8.16.0.png[Bottom axis menu, width=50%]
 
 . Click *Save and return*
 
@@ -180,7 +174,7 @@ The chart labels are unable to display because the *request.keyword* field conta
 . Open the *Visualization type* dropdown, then select *Table*.
 +
 [role="screenshot"]
-image::images/lens_end_to_end_2_1_2.png[Table with top values of request.keyword by most unique visitors]
+image::images/table-with-request-keyword-and-client-ip-8.16.0.png[Table with top values of request.keyword by most unique visitors, width=70%]
 
 . In the layer pane, click *Top 5 values of request.keyword*.
 

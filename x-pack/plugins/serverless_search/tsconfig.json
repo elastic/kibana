@@ -47,10 +47,14 @@
     "@kbn/search-connectors-plugin",
     "@kbn/index-management-shared-types",
     "@kbn/react-kibana-context-render",
-    "@kbn/search-playground",
     "@kbn/security-api-key-management",
     "@kbn/search-inference-endpoints",
     "@kbn/security-plugin-types-common",
     "@kbn/search-indices",
+    "@kbn/core-http-server",
+    "@kbn/logging",
+    "@kbn/security-plugin-types-public",
+    "@kbn/deeplinks-search",
+    "@kbn/core-application-browser",
   ]
 }

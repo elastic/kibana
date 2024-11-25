@@ -10,21 +10,17 @@ import { createConcreteWriteIndex, getDataStreamAdapter } from '@kbn/alerting-pl
 import type { CoreSetup, CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
-import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { once } from 'lodash';
-import {
-  AssistantScope,
-  KnowledgeBaseEntryRole,
-  ObservabilityAIAssistantScreenContextRequest,
-} from '../../common/types';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
+import { ObservabilityAIAssistantScreenContextRequest } from '../../common/types';
 import type { ObservabilityAIAssistantPluginStartDependencies } from '../types';
 import { ChatFunctionClient } from './chat_function_client';
 import { ObservabilityAIAssistantClient } from './client';
 import { conversationComponentTemplate } from './conversation_component_template';
 import { kbComponentTemplate } from './kb_component_template';
-import { KnowledgeBaseEntryOperationType, KnowledgeBaseService } from './knowledge_base_service';
+import { KnowledgeBaseService } from './knowledge_base_service';
 import type { RegistrationCallback, RespondFunctionResources } from './types';
-import { splitKbText } from './util/split_kb_text';
+import { ObservabilityAIAssistantConfig } from '../config';
 
 function getResourceName(resource: string) {
   return `.kibana-observability-ai-assistant-${resource}`;
@@ -47,81 +43,38 @@ export const resourceNames = {
     conversations: getResourceName('index-template-conversations'),
     kb: getResourceName('index-template-kb'),
   },
-  pipelines: {
-    kb: getResourceName('kb-ingest-pipeline'),
-  },
 };
-
-export const INDEX_QUEUED_DOCUMENTS_TASK_ID = 'observabilityAIAssistant:indexQueuedDocumentsTask';
-
-export const INDEX_QUEUED_DOCUMENTS_TASK_TYPE = INDEX_QUEUED_DOCUMENTS_TASK_ID + 'Type';
-
-type KnowledgeBaseEntryRequest = { id: string; labels?: Record<string, string> } & (
-  | {
-      text: string;
-    }
-  | {
-      texts: string[];
-    }
-);
 
 export class ObservabilityAIAssistantService {
   private readonly core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
   private readonly logger: Logger;
-  private readonly getModelId: () => Promise<string>;
   private kbService?: KnowledgeBaseService;
+  private config: ObservabilityAIAssistantConfig;
 
   private readonly registrations: RegistrationCallback[] = [];
 
   constructor({
     logger,
     core,
-    taskManager,
-    getModelId,
+    config,
   }: {
     logger: Logger;
     core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
-    taskManager: TaskManagerSetupContract;
-    getModelId: () => Promise<string>;
+    config: ObservabilityAIAssistantConfig;
   }) {
     this.core = core;
     this.logger = logger;
-    this.getModelId = getModelId;
+    this.config = config;
 
-    this.allowInit();
-
-    taskManager.registerTaskDefinitions({
-      [INDEX_QUEUED_DOCUMENTS_TASK_TYPE]: {
-        title: 'Index queued KB articles',
-        description:
-          'Indexes previously registered entries into the knowledge base when it is ready',
-        timeout: '30m',
-        maxAttempts: 2,
-        createTaskRunner: (context) => {
-          return {
-            run: async () => {
-              if (this.kbService) {
-                await this.kbService.processQueue();
-              }
-            },
-          };
-        },
-      },
-    });
-  }
-
-  getKnowledgeBaseStatus() {
-    return this.init().then(() => {
-      return this.kbService!.status();
-    });
+    this.resetInit();
   }
 
   init = async () => {};
 
-  private allowInit = () => {
+  private resetInit = () => {
     this.init = once(async () => {
       return this.doInit().catch((error) => {
-        this.allowInit();
+        this.resetInit(); // reset the once flag if an error occurs
         throw error;
       });
     });
@@ -129,18 +82,18 @@ export class ObservabilityAIAssistantService {
 
   private doInit = async () => {
     try {
-      const [coreStart, pluginsStart] = await this.core.getStartServices();
+      this.logger.debug('Setting up index assets');
+      const [coreStart] = await this.core.getStartServices();
 
-      const elserModelId = await this.getModelId();
+      const { asInternalUser } = coreStart.elasticsearch.client;
 
-      const esClient = coreStart.elasticsearch.client;
-      await esClient.asInternalUser.cluster.putComponentTemplate({
+      await asInternalUser.cluster.putComponentTemplate({
         create: false,
         name: resourceNames.componentTemplate.conversations,
         template: conversationComponentTemplate,
       });
 
-      await esClient.asInternalUser.indices.putIndexTemplate({
+      await asInternalUser.indices.putIndexTemplate({
         name: resourceNames.indexTemplate.conversations,
         composed_of: [resourceNames.componentTemplate.conversations],
         create: false,
@@ -151,18 +104,13 @@ export class ObservabilityAIAssistantService {
             auto_expand_replicas: '0-1',
             hidden: true,
           },
-          mappings: {
-            _meta: {
-              model: elserModelId,
-            },
-          },
         },
       });
 
       const conversationAliasName = resourceNames.aliases.conversations;
 
       await createConcreteWriteIndex({
-        esClient: esClient.asInternalUser,
+        esClient: asInternalUser,
         logger: this.logger,
         totalFieldsLimit: 10000,
         indexPatterns: {
@@ -175,34 +123,15 @@ export class ObservabilityAIAssistantService {
         dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts: false }),
       });
 
-      await esClient.asInternalUser.cluster.putComponentTemplate({
+      // Knowledge base: component template
+      await asInternalUser.cluster.putComponentTemplate({
         create: false,
         name: resourceNames.componentTemplate.kb,
         template: kbComponentTemplate,
       });
 
-      await esClient.asInternalUser.ingest.putPipeline({
-        id: resourceNames.pipelines.kb,
-        processors: [
-          {
-            inference: {
-              model_id: elserModelId,
-              target_field: 'ml',
-              field_map: {
-                text: 'text_field',
-              },
-              inference_config: {
-                // @ts-expect-error
-                text_expansion: {
-                  results_field: 'tokens',
-                },
-              },
-            },
-          },
-        ],
-      });
-
-      await esClient.asInternalUser.indices.putIndexTemplate({
+      // Knowledge base: index template
+      await asInternalUser.indices.putIndexTemplate({
         name: resourceNames.indexTemplate.kb,
         composed_of: [resourceNames.componentTemplate.kb],
         create: false,
@@ -218,8 +147,9 @@ export class ObservabilityAIAssistantService {
 
       const kbAliasName = resourceNames.aliases.kb;
 
+      // Knowledge base: write index
       await createConcreteWriteIndex({
-        esClient: esClient.asInternalUser,
+        esClient: asInternalUser,
         logger: this.logger,
         totalFieldsLimit: 10000,
         indexPatterns: {
@@ -233,15 +163,17 @@ export class ObservabilityAIAssistantService {
       });
 
       this.kbService = new KnowledgeBaseService({
+        core: this.core,
         logger: this.logger.get('kb'),
-        esClient,
-        taskManagerStart: pluginsStart.taskManager,
-        getModelId: this.getModelId,
+        config: this.config,
+        esClient: {
+          asInternalUser,
+        },
       });
 
       this.logger.info('Successfully set up index assets');
     } catch (error) {
-      this.logger.error(`Failed to initialize service: ${error.message}`);
+      this.logger.error(`Failed setting up index assets: ${error.message}`);
       this.logger.debug(error);
       throw error;
     }
@@ -249,10 +181,10 @@ export class ObservabilityAIAssistantService {
 
   async getClient({
     request,
-    scope,
+    scopes,
   }: {
     request: KibanaRequest;
-    scope?: AssistantScope;
+    scopes?: AssistantScope[];
   }): Promise<ObservabilityAIAssistantClient> {
     const controller = new AbortController();
 
@@ -291,7 +223,7 @@ export class ObservabilityAIAssistantService {
           }
         : undefined,
       knowledgeBaseService: this.kbService!,
-      scope: scope || 'all',
+      scopes: scopes || ['all'],
     });
   }
 
@@ -300,11 +232,13 @@ export class ObservabilityAIAssistantService {
     signal,
     resources,
     client,
+    scopes,
   }: {
     screenContexts: ObservabilityAIAssistantScreenContextRequest[];
     signal: AbortSignal;
     resources: RespondFunctionResources;
     client: ObservabilityAIAssistantClient;
+    scopes: AssistantScope[];
   }): Promise<ChatFunctionClient> {
     const fnClient = new ChatFunctionClient(screenContexts);
 
@@ -313,6 +247,7 @@ export class ObservabilityAIAssistantService {
       functions: fnClient,
       resources,
       client,
+      scopes,
     };
 
     await Promise.all(
@@ -325,61 +260,6 @@ export class ObservabilityAIAssistantService {
     );
 
     return fnClient;
-  }
-
-  addToKnowledgeBaseQueue(entries: KnowledgeBaseEntryRequest[]): void {
-    this.init()
-      .then(() => {
-        this.kbService!.queue(
-          entries.flatMap((entry) => {
-            const entryWithSystemProperties = {
-              ...entry,
-              '@timestamp': new Date().toISOString(),
-              doc_id: entry.id,
-              public: true,
-              confidence: 'high' as const,
-              type: 'contextual' as const,
-              is_correction: false,
-              labels: {
-                ...entry.labels,
-              },
-              role: KnowledgeBaseEntryRole.Elastic,
-            };
-
-            const operations =
-              'texts' in entryWithSystemProperties
-                ? splitKbText(entryWithSystemProperties)
-                : [
-                    {
-                      type: KnowledgeBaseEntryOperationType.Index,
-                      document: entryWithSystemProperties,
-                    },
-                  ];
-
-            return operations;
-          })
-        );
-      })
-      .catch((error) => {
-        this.logger.error(
-          `Could not index ${entries.length} entries because of an initialisation error`
-        );
-        this.logger.error(error);
-      });
-  }
-
-  addCategoryToKnowledgeBase(categoryId: string, entries: KnowledgeBaseEntryRequest[]) {
-    this.addToKnowledgeBaseQueue(
-      entries.map((entry) => {
-        return {
-          ...entry,
-          labels: {
-            ...entry.labels,
-            category: categoryId,
-          },
-        };
-      })
-    );
   }
 
   register(cb: RegistrationCallback) {

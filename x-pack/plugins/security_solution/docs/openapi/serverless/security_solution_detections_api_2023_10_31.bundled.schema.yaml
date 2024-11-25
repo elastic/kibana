@@ -850,17 +850,19 @@ components:
       type: object
       properties:
         unit:
-          enum:
-            - s
-            - m
-            - h
-          type: string
+          $ref: '#/components/schemas/AlertSuppressionDurationUnit'
         value:
           minimum: 1
           type: integer
       required:
         - value
         - unit
+    AlertSuppressionDurationUnit:
+      enum:
+        - s
+        - m
+        - h
+      type: string
     AlertSuppressionGroupBy:
       items:
         type: string
@@ -1325,10 +1327,6 @@ components:
           $ref: '#/components/schemas/RuleFilterArray'
         index:
           $ref: '#/components/schemas/IndexPatternArray'
-        response_actions:
-          items:
-            $ref: '#/components/schemas/ResponseAction'
-          type: array
         tiebreaker_field:
           $ref: '#/components/schemas/TiebreakerField'
         timestamp_field:
@@ -1410,6 +1408,10 @@ components:
             required_fields:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
@@ -1526,6 +1528,10 @@ components:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
             risk_score_mapping:
@@ -1638,6 +1644,10 @@ components:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
             risk_score_mapping:
@@ -1732,6 +1742,10 @@ components:
             required_fields:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
@@ -1858,6 +1872,10 @@ components:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
             risk_score_mapping:
@@ -1973,6 +1991,10 @@ components:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
             risk_score_mapping:
@@ -2016,10 +2038,6 @@ components:
       properties:
         alert_suppression:
           $ref: '#/components/schemas/AlertSuppression'
-        response_actions:
-          items:
-            $ref: '#/components/schemas/ResponseAction'
-          type: array
     EsqlRulePatchProps:
       allOf:
         - type: object
@@ -2082,6 +2100,10 @@ components:
             required_fields:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
@@ -2199,6 +2221,10 @@ components:
             required_fields:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
@@ -2429,6 +2455,10 @@ components:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
             risk_score_mapping:
@@ -2543,6 +2573,10 @@ components:
             required_fields:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
@@ -2659,6 +2693,10 @@ components:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
             risk_score_mapping:
@@ -2770,6 +2808,10 @@ components:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
             risk_score_mapping:
@@ -2872,6 +2914,10 @@ components:
             required_fields:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
@@ -2989,6 +3035,10 @@ components:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
             risk_score_mapping:
@@ -3043,10 +3093,6 @@ components:
           $ref: '#/components/schemas/RuleFilterArray'
         index:
           $ref: '#/components/schemas/IndexPatternArray'
-        response_actions:
-          items:
-            $ref: '#/components/schemas/ResponseAction'
-          type: array
     NewTermsRulePatchFields:
       allOf:
         - type: object
@@ -3121,6 +3167,10 @@ components:
             required_fields:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
@@ -3241,6 +3291,10 @@ components:
             required_fields:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
@@ -3465,6 +3519,10 @@ components:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
             risk_score_mapping:
@@ -3581,6 +3639,10 @@ components:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
             risk_score_mapping:
@@ -3637,10 +3699,6 @@ components:
           $ref: '#/components/schemas/RuleFilterArray'
         index:
           $ref: '#/components/schemas/IndexPatternArray'
-        response_actions:
-          items:
-            $ref: '#/components/schemas/ResponseAction'
-          type: array
         saved_id:
           $ref: '#/components/schemas/SavedQueryId'
     QueryRulePatchFields:
@@ -3711,6 +3769,10 @@ components:
             required_fields:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
@@ -3825,6 +3887,10 @@ components:
             required_fields:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
@@ -4512,6 +4578,10 @@ components:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
             risk_score_mapping:
@@ -4628,6 +4698,10 @@ components:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
             risk_score_mapping:
@@ -4684,10 +4758,6 @@ components:
           $ref: '#/components/schemas/IndexPatternArray'
         query:
           $ref: '#/components/schemas/RuleQuery'
-        response_actions:
-          items:
-            $ref: '#/components/schemas/ResponseAction'
-          type: array
     SavedQueryRulePatchFields:
       allOf:
         - type: object
@@ -4758,6 +4828,10 @@ components:
             required_fields:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
@@ -4872,6 +4946,10 @@ components:
             required_fields:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
@@ -5113,6 +5191,10 @@ components:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
             risk_score_mapping:
@@ -5228,6 +5310,10 @@ components:
             required_fields:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
@@ -5372,6 +5458,10 @@ components:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
             risk_score_mapping:
@@ -5494,6 +5584,10 @@ components:
             required_fields:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
@@ -5684,6 +5778,10 @@ components:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
             risk_score_mapping:
@@ -5799,6 +5897,10 @@ components:
             required_fields:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
@@ -5929,6 +6031,10 @@ components:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
             risk_score_mapping:
@@ -6045,6 +6151,10 @@ components:
             required_fields:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'

@@ -66,6 +66,18 @@ const transformCreateBodySystemActions = (actions: CreateRuleActionV1[]): System
   });
 };
 
+const transformCreateBodyFlapping = <Params extends RuleParams = never>(
+  flapping: CreateRuleRequestBodyV1<Params>['flapping']
+) => {
+  if (!flapping) {
+    return flapping;
+  }
+  return {
+    lookBackWindow: flapping.look_back_window,
+    statusChangeThreshold: flapping.status_change_threshold,
+  };
+};
+
 export const transformCreateBody = <Params extends RuleParams = never>({
   createBody,
   actions,
@@ -88,5 +100,8 @@ export const transformCreateBody = <Params extends RuleParams = never>({
     systemActions: transformCreateBodySystemActions(systemActions),
     ...(createBody.notify_when ? { notifyWhen: createBody.notify_when } : {}),
     ...(createBody.alert_delay ? { alertDelay: createBody.alert_delay } : {}),
+    ...(createBody.flapping !== undefined
+      ? { flapping: transformCreateBodyFlapping(createBody.flapping) }
+      : {}),
   };
 };

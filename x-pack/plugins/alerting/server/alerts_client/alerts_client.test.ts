@@ -60,7 +60,7 @@ import {
   LogAlertsOpts,
 } from './types';
 import { legacyAlertsClientMock } from './legacy_alerts_client.mock';
-import { keys, range } from 'lodash';
+import { keys, omit, range } from 'lodash';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
 import { expandFlattenedAlert } from './lib';
@@ -79,6 +79,7 @@ import { MaintenanceWindow } from '../application/maintenance_window/types';
 import { maintenanceWindowsServiceMock } from '../task_runner/maintenance_windows/maintenance_windows_service.mock';
 import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helpers';
 import { KibanaRequest } from '@kbn/core/server';
+import { rule } from './lib/test_fixtures';
 
 const date = '2023-03-28T22:27:28.159Z';
 const startedAtDate = '2023-03-28T13:00:00.000Z';
@@ -1107,11 +1108,13 @@ describe('Alerts Client', () => {
                 kibana: {
                   alert: {
                     instance: { id: '1' },
+                    rule: omit(rule, 'execution'),
                     uuid: 'abc',
                   },
                 },
                 [TIMESTAMP]: date,
                 [ALERT_RULE_EXECUTION_TIMESTAMP]: date,
+                [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
                 [EVENT_ACTION]: 'close',
                 [ALERT_ACTION_GROUP]: 'recovered',
                 [ALERT_CONSECUTIVE_MATCHES]: 0,
@@ -1120,16 +1123,6 @@ describe('Alerts Client', () => {
                 [ALERT_FLAPPING_HISTORY]: [true, true],
                 [ALERT_MAINTENANCE_WINDOW_IDS]: [],
                 [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
-                [ALERT_RULE_CATEGORY]: 'My test rule',
-                [ALERT_RULE_CONSUMER]: 'bar',
-                [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-                [ALERT_RULE_NAME]: 'rule-name',
-                [ALERT_RULE_PARAMETERS]: { bar: true },
-                [ALERT_RULE_PRODUCER]: 'alerts',
-                [ALERT_RULE_REVISION]: 0,
-                [ALERT_RULE_TYPE_ID]: 'test.rule-type',
-                [ALERT_RULE_TAGS]: ['rule-', '-tags'],
-                [ALERT_RULE_UUID]: '1',
                 [ALERT_SEVERITY_IMPROVING]: true,
                 [ALERT_START]: '2023-03-28T12:27:28.159Z',
                 [ALERT_END]: date,

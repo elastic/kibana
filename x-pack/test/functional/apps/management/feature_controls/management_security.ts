@@ -63,8 +63,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('should only render management entries controllable via Kibana privileges', async () => {
         await PageObjects.common.navigateToApp('management');
         const sections = await managementMenu.getSections();
-        expect(sections).to.have.length(2);
-        expect(sections[0]).to.eql({
+        expect(sections).to.have.length(3);
+        expect(sections[0]).to.eql({ sectionId: 'data', sectionLinks: ['data_quality'] });
+        expect(sections[1]).to.eql({
           sectionId: 'insightsAndAlerting',
           sectionLinks: [
             'triggersActionsAlerts',
@@ -75,7 +76,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             'maintenanceWindows',
           ],
         });
-        expect(sections[1]).to.eql({
+        expect(sections[2]).to.eql({
           sectionId: 'kibana',
           sectionLinks: [
             'dataViews',

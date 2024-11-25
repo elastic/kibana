@@ -12,6 +12,7 @@ import { requestContextMock } from '../../__mocks__/request_context';
 import { getFindPromptsResultWithSingleHit } from '../../__mocks__/response';
 import { findPromptsRoute } from './find_route';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 
 describe('Find user prompts route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -21,19 +22,26 @@ describe('Find user prompts route', () => {
   beforeEach(async () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
-
-    clients.elasticAssistant.getAIAssistantPromptsDataClient.findDocuments.mockResolvedValue(
-      Promise.resolve(getFindPromptsResultWithSingleHit())
-    );
-    clients.elasticAssistant.getCurrentUser.mockResolvedValue({
+    const mockUser1 = {
       username: 'my_username',
       authentication_realm: {
         type: 'my_realm_type',
         name: 'my_realm_name',
       },
-    });
-    logger = loggingSystemMock.createLogger();
+    } as AuthenticatedUser;
 
+    clients.elasticAssistant.getAIAssistantPromptsDataClient.findDocuments.mockResolvedValue(
+      Promise.resolve(getFindPromptsResultWithSingleHit())
+    );
+    context.elasticAssistant.getCurrentUser.mockReturnValue({
+      username: 'my_username',
+      authentication_realm: {
+        type: 'my_realm_type',
+        name: 'my_realm_name',
+      },
+    } as AuthenticatedUser);
+    logger = loggingSystemMock.createLogger();
+    context.elasticAssistant.getCurrentUser.mockReturnValue(mockUser1);
     findPromptsRoute(server.router, logger);
   });
 

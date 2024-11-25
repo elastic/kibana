@@ -36,7 +36,7 @@ import { CONNECTOR_DETAIL_PATH, SEARCH_INDEX_PATH } from '../../../routes';
 export interface GeneratedConfigFieldsProps {
   apiKey?: ApiKey;
   connector: Connector;
-  generateApiKey: () => void;
+  generateApiKey?: () => void;
   isGenerateLoading: boolean;
 }
 
@@ -93,7 +93,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
   };
 
   const onConfirm = () => {
-    generateApiKey();
+    if (generateApiKey) generateApiKey();
     setIsModalVisible(false);
   };
 
@@ -121,6 +121,8 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiLinkTo
+              external
+              target="_blank"
               to={generateEncodedPath(CONNECTOR_DETAIL_PATH, {
                 connectorId: connector.id,
               })}
@@ -137,6 +139,8 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
             >
               <EuiFlexItem grow={false}>
                 <EuiLinkTo
+                  external
+                  target="_blank"
                   to={generateEncodedPath(CONNECTOR_DETAIL_PATH, {
                     connectorId: connector.id,
                   })}
@@ -152,6 +156,10 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
                       data-test-subj="enterpriseSearchConnectorDeploymentButton"
                       iconType="copyClipboard"
                       onClick={copy}
+                      aria-label={i18n.translate(
+                        'xpack.enterpriseSearch.connectorDeployment.copyConnectorId',
+                        { defaultMessage: 'Copy connector ID' }
+                      )}
                     />
                   )}
                 </EuiCopy>
@@ -174,6 +182,8 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
           <EuiFlexItem>
             {connector.index_name && (
               <EuiLinkTo
+                external
+                target="_blank"
                 to={generateEncodedPath(SEARCH_INDEX_PATH, {
                   indexName: connector.index_name,
                 })}
@@ -222,22 +232,32 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
                         <EuiFlexItem>
                           <EuiCode>{apiKey?.encoded}</EuiCode>
                         </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiButtonIcon
-                            data-test-subj="enterpriseSearchGeneratedConfigFieldsButton"
-                            size="xs"
-                            iconType="refresh"
-                            isLoading={isGenerateLoading}
-                            onClick={refreshButtonClick}
-                            disabled={!connector.index_name}
-                          />
-                        </EuiFlexItem>
+                        {generateApiKey && (
+                          <EuiFlexItem grow={false}>
+                            <EuiButtonIcon
+                              data-test-subj="enterpriseSearchGeneratedConfigFieldsButton"
+                              size="xs"
+                              iconType="refresh"
+                              isLoading={isGenerateLoading}
+                              onClick={refreshButtonClick}
+                              disabled={!connector.index_name}
+                              aria-label={i18n.translate(
+                                'xpack.enterpriseSearch.connectorDeployment.refreshAPIKey',
+                                { defaultMessage: 'Refresh an Elasticsearch API key' }
+                              )}
+                            />
+                          </EuiFlexItem>
+                        )}
                         <EuiFlexItem grow={false}>
                           <EuiButtonIcon
                             size="xs"
                             data-test-subj="enterpriseSearchConnectorDeploymentButton"
                             iconType="copyClipboard"
                             onClick={copy}
+                            aria-label={i18n.translate(
+                              'xpack.enterpriseSearch.connectorDeployment.copyIndexName',
+                              { defaultMessage: 'Copy index name' }
+                            )}
                           />
                         </EuiFlexItem>
                       </EuiFlexGroup>
@@ -245,16 +265,18 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
                   </EuiCopy>
                 </EuiFlexItem>
               ) : (
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    data-test-subj="enterpriseSearchGeneratedConfigFieldsButton"
-                    size="xs"
-                    iconType="refresh"
-                    isLoading={isGenerateLoading}
-                    onClick={refreshButtonClick}
-                    disabled={!connector.index_name}
-                  />
-                </EuiFlexItem>
+                generateApiKey && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      data-test-subj="enterpriseSearchGeneratedConfigFieldsButton"
+                      size="xs"
+                      iconType="refresh"
+                      isLoading={isGenerateLoading}
+                      onClick={refreshButtonClick}
+                      disabled={!connector.index_name}
+                    />
+                  </EuiFlexItem>
+                )
               )}
             </EuiFlexGroup>
           </EuiFlexItem>

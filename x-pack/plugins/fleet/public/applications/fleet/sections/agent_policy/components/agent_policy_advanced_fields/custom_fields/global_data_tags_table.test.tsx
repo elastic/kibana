@@ -26,8 +26,7 @@ const TEST_IDS = {
   VALUE_INPUT: 'globalDataTagsValueInput',
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/192798
-describe.skip('GlobalDataTagsTable', () => {
+describe('GlobalDataTagsTable', () => {
   let renderResult: RenderResult;
   let mockUpdateAgentPolicy: jest.Mock;
   const globalDataTags: GlobalDataTag[] = [
@@ -49,8 +48,7 @@ describe.skip('GlobalDataTagsTable', () => {
         React.ComponentProps<typeof GlobalDataTagsTable>['updateAgentPolicy']
       >((policy) => {
         mockUpdateAgentPolicy(policy);
-        // @ts-expect-error - TODO: fix this, types do not match
-        _updateAgentPolicy(policy);
+        _updateAgentPolicy({ ...policy, global_data_tags: policy.global_data_tags ?? [] });
       }, []);
 
       return (
@@ -127,7 +125,7 @@ describe.skip('GlobalDataTagsTable', () => {
         { name: 'newTag2', value: '123 123' },
       ],
     });
-  });
+  }, 10000);
 
   it('should edit an existing tag', async () => {
     renderComponent(globalDataTags);

@@ -32,6 +32,7 @@ In addition, it is typically needed to set up a Fleet Server and enroll Elastic 
 - [Running a local Fleet Server and enrolling Elastic Agents](dev_docs/local_setup/enrolling_agents.md) for developing Kibana in stateful (not serverless) mode
 - [Developing Kibana in serverless mode](dev_docs/local_setup/developing_kibana_in_serverless.md) for developing Kibana in serverless mode
 - [Developing Kibana and Fleet Server simultaneously](dev_docs/local_setup/developing_kibana_and_fleet_server.md) for doing simultaneous Kibana and Fleet Server development
+- [Testing agentless integrations](dev_docs/local_setup/agentless.md)
 
 ### Running Fleet locally in stateful mode
 

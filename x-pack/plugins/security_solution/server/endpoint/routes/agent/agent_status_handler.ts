@@ -27,7 +27,12 @@ export const registerAgentStatusRoute = (
     .get({
       access: 'internal',
       path: AGENT_STATUS_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -78,18 +83,29 @@ export const getAgentStatusRouteHandler = (
       );
     }
 
-    const esClient = (await context.core).elasticsearch.client.asInternalUser;
-    const soClient = (await context.core).savedObjects.client;
-    const connectorActionsClient = (await context.actions).getActionsClient();
-    const agentStatusClient = getAgentStatusClient(agentType, {
-      esClient,
-      soClient,
-      connectorActionsClient,
-      endpointService: endpointContext.service,
-    });
-    const data = await agentStatusClient.getAgentStatuses(agentIds);
-
     try {
+      const [securitySolutionPlugin, corePlugin, actionsPlugin] = await Promise.all([
+        context.securitySolution,
+        context.core,
+        context.actions,
+      ]);
+      const esClient = corePlugin.elasticsearch.client.asInternalUser;
+      const spaceId = endpointContext.service.experimentalFeatures
+        .endpointManagementSpaceAwarenessEnabled
+        ? securitySolutionPlugin.getSpaceId()
+        : undefined;
+      const soClient = endpointContext.service.savedObjects.createInternalScopedSoClient({
+        spaceId,
+      });
+      const connectorActionsClient = actionsPlugin.getActionsClient();
+      const agentStatusClient = getAgentStatusClient(agentType, {
+        esClient,
+        soClient,
+        connectorActionsClient,
+        endpointService: endpointContext.service,
+      });
+      const data = await agentStatusClient.getAgentStatuses(agentIds);
+
       return response.ok({ body: { data } });
     } catch (e) {
       return errorHandler(logger, response, e);

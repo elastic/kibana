@@ -11,7 +11,7 @@ import { Plugin, CoreSetup } from '@kbn/core/public';
 import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { palette, systemPalette } from '../common';
 
-import { ThemeService, LegacyColorsService } from './services';
+import { ThemeService } from './services';
 import { PaletteService } from './services/palettes/service';
 import { ActiveCursor } from './services/active_cursor';
 
@@ -21,7 +21,6 @@ interface SetupDependencies {
 
 /** @public */
 export interface ChartsPluginSetup {
-  legacyColors: Omit<LegacyColorsService, 'init'>;
   theme: Omit<ThemeService, 'init'>;
   palettes: ReturnType<PaletteService['setup']>;
 }
@@ -34,7 +33,6 @@ export type ChartsPluginStart = ChartsPluginSetup & {
 /** @public */
 export class ChartsPlugin implements Plugin<ChartsPluginSetup, ChartsPluginStart> {
   private readonly themeService = new ThemeService();
-  private readonly legacyColorsService = new LegacyColorsService();
   private readonly paletteService = new PaletteService();
   private readonly activeCursor = new ActiveCursor();
 
@@ -44,13 +42,11 @@ export class ChartsPlugin implements Plugin<ChartsPluginSetup, ChartsPluginStart
     dependencies.expressions.registerFunction(palette);
     dependencies.expressions.registerFunction(systemPalette);
     this.themeService.init(core.theme);
-    this.legacyColorsService.init(core.uiSettings);
-    this.palettes = this.paletteService.setup(this.legacyColorsService);
+    this.palettes = this.paletteService.setup();
 
     this.activeCursor.setup();
 
     return {
-      legacyColors: this.legacyColorsService,
       theme: this.themeService,
       palettes: this.palettes,
     };
@@ -58,7 +54,6 @@ export class ChartsPlugin implements Plugin<ChartsPluginSetup, ChartsPluginStart
 
   public start(): ChartsPluginStart {
     return {
-      legacyColors: this.legacyColorsService,
       theme: this.themeService,
       palettes: this.palettes!,
       activeCursor: this.activeCursor,

@@ -8,51 +8,48 @@
 import { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { useNotifyService, useWorkpadService } from '../../../services';
+import { getCanvasNotifyService } from '../../../services/canvas_notify_service';
+import { getCanvasWorkpadService } from '../../../services/canvas_workpad_service';
 
 export const useDeleteWorkpads = () => {
-  const workpadService = useWorkpadService();
-  const notifyService = useNotifyService();
+  return useCallback(async (workpadIds: string[]) => {
+    const workpadService = getCanvasWorkpadService();
 
-  return useCallback(
-    async (workpadIds: string[]) => {
-      const removedWorkpads = workpadIds.map(async (id) => {
-        try {
-          await workpadService.remove(id);
-          return { id, err: null };
-        } catch (err) {
-          return { id, err };
-        }
-      });
+    const removedWorkpads = workpadIds.map(async (id) => {
+      try {
+        await workpadService.remove(id);
+        return { id, err: null };
+      } catch (err) {
+        return { id, err };
+      }
+    });
 
-      return Promise.all(removedWorkpads).then((results) => {
-        const [passes, errored] = results.reduce<[string[], string[]]>(
-          ([passesArr, errorsArr], result) => {
-            if (result.err) {
-              errorsArr.push(result.id);
-            } else {
-              passesArr.push(result.id);
-            }
+    return Promise.all(removedWorkpads).then((results) => {
+      const [passes, errored] = results.reduce<[string[], string[]]>(
+        ([passesArr, errorsArr], result) => {
+          if (result.err) {
+            errorsArr.push(result.id);
+          } else {
+            passesArr.push(result.id);
+          }
 
-            return [passesArr, errorsArr];
-          },
-          [[], []]
-        );
+          return [passesArr, errorsArr];
+        },
+        [[], []]
+      );
 
-        const removedIds = workpadIds.filter((id) => passes.includes(id));
+      const removedIds = workpadIds.filter((id) => passes.includes(id));
 
-        if (errored.length > 0) {
-          notifyService.error(errors.getDeleteFailureErrorMessage());
-        }
+      if (errored.length > 0) {
+        getCanvasNotifyService().error(errors.getDeleteFailureErrorMessage());
+      }
 
-        return {
-          removedIds,
-          errored,
-        };
-      });
-    },
-    [workpadService, notifyService]
-  );
+      return {
+        removedIds,
+        errored,
+      };
+    });
+  }, []);
 };
 
 const errors = {

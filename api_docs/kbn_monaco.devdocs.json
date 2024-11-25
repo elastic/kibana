@@ -509,10 +509,10 @@
           },
           {
             "parentPluginId": "@kbn/monaco",
-            "id": "def-common.ESQLCallbacks.getFieldsFor",
+            "id": "def-common.ESQLCallbacks.getColumnsFor",
             "type": "Function",
             "tags": [],
-            "label": "getFieldsFor",
+            "label": "getColumnsFor",
             "description": [],
             "signature": [
               "CallbackFn<{ query: string; }, ",
@@ -1111,7 +1111,7 @@
             "label": "kind",
             "description": [],
             "signature": [
-              "\"type\" | \"keyword\" | \"field\" | \"class\" | \"property\" | \"method\" | \"constructor\""
+              "\"type\" | \"keyword\" | \"property\" | \"field\" | \"class\" | \"method\" | \"constructor\""
             ],
             "path": "packages/kbn-monaco/src/painless/types.ts",
             "deprecated": false,
@@ -1387,6 +1387,21 @@
       },
       {
         "parentPluginId": "@kbn/monaco",
+        "id": "def-common.ESQL_DARK_THEME_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ESQL_DARK_THEME_ID",
+        "description": [],
+        "signature": [
+          "\"esqlThemeDark\""
+        ],
+        "path": "packages/kbn-monaco/src/esql/lib/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/monaco",
         "id": "def-common.ESQL_LANG_ID",
         "type": "string",
         "tags": [],
@@ -1402,13 +1417,13 @@
       },
       {
         "parentPluginId": "@kbn/monaco",
-        "id": "def-common.ESQL_THEME_ID",
+        "id": "def-common.ESQL_LIGHT_THEME_ID",
         "type": "string",
         "tags": [],
-        "label": "ESQL_THEME_ID",
+        "label": "ESQL_LIGHT_THEME_ID",
         "description": [],
         "signature": [
-          "\"esqlTheme\""
+          "\"esqlThemeLight\""
         ],
         "path": "packages/kbn-monaco/src/esql/lib/constants.ts",
         "deprecated": false,
@@ -1438,7 +1453,7 @@
         "label": "PainlessCompletionKind",
         "description": [],
         "signature": [
-          "\"type\" | \"keyword\" | \"field\" | \"class\" | \"property\" | \"method\" | \"constructor\""
+          "\"type\" | \"keyword\" | \"property\" | \"field\" | \"class\" | \"method\" | \"constructor\""
         ],
         "path": "packages/kbn-monaco/src/painless/types.ts",
         "deprecated": false,

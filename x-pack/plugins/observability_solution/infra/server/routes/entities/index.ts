@@ -7,10 +7,12 @@
 
 import { schema } from '@kbn/config-schema';
 import { METRICS_APP_ID } from '@kbn/deeplinks-observability/constants';
-import { SOURCE_DATA_STREAM_TYPE } from '@kbn/observability-shared-plugin/common/field_names/elasticsearch';
-import { createObservabilityEsClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
+import { entityCentricExperience } from '@kbn/observability-plugin/common';
+import { createObservabilityEsClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
+import { ENTITY_TYPES } from '@kbn/observability-shared-plugin/common';
+import { getInfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
 import { InfraBackendLibs } from '../../lib/infra_types';
-import { getLatestEntity } from './get_latest_entity';
+import { getDataStreamTypes } from './get_data_stream_types';
 
 export const initEntitiesConfigurationRoutes = (libs: InfraBackendLibs) => {
   const { framework, logger } = libs;
@@ -21,7 +23,10 @@ export const initEntitiesConfigurationRoutes = (libs: InfraBackendLibs) => {
       path: '/api/infra/entities/{entityType}/{entityId}/summary',
       validate: {
         params: schema.object({
-          entityType: schema.oneOf([schema.literal('host'), schema.literal('container')]),
+          entityType: schema.oneOf([
+            schema.literal(ENTITY_TYPES.HOST),
+            schema.literal(ENTITY_TYPES.CONTAINER),
+          ]),
           entityId: schema.string(),
         }),
       },
@@ -31,38 +36,42 @@ export const initEntitiesConfigurationRoutes = (libs: InfraBackendLibs) => {
     },
     async (requestContext, request, response) => {
       const { entityId, entityType } = request.params;
-      const coreContext = await requestContext.core;
-      const infraContext = await requestContext.infra;
-      const entityManager = await infraContext.entityManager.getScopedClient({ request });
+      const [coreContext, infraContext] = await Promise.all([
+        requestContext.core,
+        requestContext.infra,
+      ]);
 
-      const client = createObservabilityEsClient({
+      const entityManagerClient = await infraContext.entityManager.getScopedClient({ request });
+      const infraMetricsClient = await getInfraMetricsClient({
+        request,
+        libs,
+        context: requestContext,
+      });
+
+      const obsEsClient = createObservabilityEsClient({
         client: coreContext.elasticsearch.client.asCurrentUser,
         logger,
         plugin: `@kbn/${METRICS_APP_ID}-plugin`,
       });
 
-      try {
-        // Only fetch built in definitions
-        const { definitions } = await entityManager.getEntityDefinitions({
-          builtIn: true,
-          type: entityType,
-        });
-        if (definitions.length === 0) {
-          return response.ok({
-            body: { sourceDataStreams: [], entityId, entityType },
-          });
-        }
+      const entityCentriExperienceEnabled = await coreContext.uiSettings.client.get(
+        entityCentricExperience
+      );
 
-        const entity = await getLatestEntity({
-          inventoryEsClient: client,
+      try {
+        const sourceDataStreamTypes = await getDataStreamTypes({
+          entityCentriExperienceEnabled,
           entityId,
+          entityManagerClient,
           entityType,
-          entityDefinitions: definitions,
+          infraMetricsClient,
+          obsEsClient,
+          logger,
         });
 
         return response.ok({
           body: {
-            sourceDataStreams: [entity?.[SOURCE_DATA_STREAM_TYPE] || []].flat() as string[],
+            sourceDataStreams: sourceDataStreamTypes,
             entityId,
             entityType,
           },

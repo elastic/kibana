@@ -33,6 +33,10 @@ export function useCustomCardsForCategory(
   const { href: autoDetectUrl } = reactRouterNavigate(history, `/auto-detect/${location.search}`);
   const { href: otelLogsUrl } = reactRouterNavigate(history, `/otel-logs/${location.search}`);
   const { href: kubernetesUrl } = reactRouterNavigate(history, `/kubernetes/${location.search}`);
+  const { href: otelKubernetesUrl } = reactRouterNavigate(
+    history,
+    `/otel-kubernetes/${location.search}`
+  );
 
   const apmUrl = `${getUrlForApp?.('apm')}/${isServerless ? 'onboarding' : 'tutorial'}`;
   const otelApmUrl = isServerless ? `${apmUrl}?agent=openTelemetry` : apmUrl;
@@ -44,20 +48,25 @@ export function useCustomCardsForCategory(
           id: 'auto-detect-logs',
           name: 'auto-detect-logs-virtual',
           type: 'virtual',
-          title: 'Auto-detect Integrations with Elastic Agent',
-          description: i18n.translate(
-            'xpack.observability_onboarding.useCustomCardsForCategory.scanYourHostForLabel',
+          title: i18n.translate(
+            'xpack.observability_onboarding.useCustomCardsForCategory.autoDetectTitle',
             {
-              defaultMessage: 'Scan your host for log and metric files, auto-install integrations',
+              defaultMessage: 'Elastic Agent: Logs & Metrics',
+            }
+          ),
+          description: i18n.translate(
+            'xpack.observability_onboarding.useCustomCardsForCategory.autoDetectDescription',
+            {
+              defaultMessage: 'Scan your host for log files, metrics, auto-install integrations',
             }
           ),
           extraLabelsBadges: [
-            <EuiFlexItem grow={false}>
+            <ExtraLabelBadgeWrapper>
               <LogoIcon logo="apple" size="m" />
-            </EuiFlexItem>,
-            <EuiFlexItem grow={false}>
+            </ExtraLabelBadgeWrapper>,
+            <ExtraLabelBadgeWrapper>
               <LogoIcon logo="linux" size="m" />
-            </EuiFlexItem>,
+            </ExtraLabelBadgeWrapper>,
           ],
           categories: ['observability'],
           icons: [
@@ -75,15 +84,26 @@ export function useCustomCardsForCategory(
           id: 'otel-logs',
           name: 'custom-logs-virtual',
           type: 'virtual',
-          title: 'Elastic Distribution for OTel Collector',
-          description: 'Collect logs and host metrics using the Elastic Distro for OTel Collector ',
+          title: i18n.translate(
+            'xpack.observability_onboarding.useCustomCardsForCategory.logsOtelTitle',
+            {
+              defaultMessage: 'OpenTelemetry: Logs & Metrics',
+            }
+          ),
+          description: i18n.translate(
+            'xpack.observability_onboarding.useCustomCardsForCategory.logsOtelDescription',
+            {
+              defaultMessage:
+                'Collect logs and host metrics with the Elastic Distro for OTel Collector',
+            }
+          ),
           extraLabelsBadges: [
-            <EuiFlexItem grow={false}>
+            <ExtraLabelBadgeWrapper>
               <LogoIcon logo="apple" size="m" />
-            </EuiFlexItem>,
-            <EuiFlexItem grow={false}>
+            </ExtraLabelBadgeWrapper>,
+            <ExtraLabelBadgeWrapper>
               <LogoIcon logo="linux" size="m" />
-            </EuiFlexItem>,
+            </ExtraLabelBadgeWrapper>,
           ],
           categories: ['observability'],
           icons: [
@@ -96,6 +116,7 @@ export function useCustomCardsForCategory(
           version: '',
           integration: '',
           isQuickstart: true,
+          release: 'preview',
         },
       ];
 
@@ -105,12 +126,22 @@ export function useCustomCardsForCategory(
           id: 'kubernetes-quick-start',
           name: 'kubernetes-quick-start',
           type: 'virtual',
-          title: 'Elastic Agent',
-          description: 'Monitor your Kubernetes cluster with Elastic Agent, collect container logs',
+          title: i18n.translate(
+            'xpack.observability_onboarding.useCustomCardsForCategory.kubernetesTitle',
+            {
+              defaultMessage: 'Elastic Agent: Logs & Metrics',
+            }
+          ),
+          description: i18n.translate(
+            'xpack.observability_onboarding.useCustomCardsForCategory.kubernetesDescription',
+            {
+              defaultMessage: 'Collect logs and metrics from Kubernetes using Elastic Agent',
+            }
+          ),
           extraLabelsBadges: [
-            <EuiFlexItem grow={false}>
+            <ExtraLabelBadgeWrapper>
               <LogoIcon logo="kubernetes" size="m" />
-            </EuiFlexItem>,
+            </ExtraLabelBadgeWrapper>,
           ],
           categories: ['observability'],
           icons: [
@@ -125,15 +156,26 @@ export function useCustomCardsForCategory(
           isQuickstart: true,
         },
         {
-          id: 'otel-logs',
-          name: 'custom-logs-virtual',
+          id: 'otel-kubernetes',
+          name: 'otel-kubernetes-virtual',
           type: 'virtual',
-          title: 'Elastic Distribution for OTel Collector',
-          description: 'Collect logs, metrics and traces for Kubernetes cluster monitoring',
+          title: i18n.translate(
+            'xpack.observability_onboarding.useCustomCardsForCategory.kubernetesOtelTitle',
+            {
+              defaultMessage: 'OpenTelemetry: Full Observability',
+            }
+          ),
+          description: i18n.translate(
+            'xpack.observability_onboarding.useCustomCardsForCategory.kubernetesOtelDescription',
+            {
+              defaultMessage:
+                'Collect logs, traces and metrics with the Elastic Distro for OTel Collector',
+            }
+          ),
           extraLabelsBadges: [
-            <EuiFlexItem grow={false}>
+            <ExtraLabelBadgeWrapper>
               <LogoIcon logo="kubernetes" size="m" />
-            </EuiFlexItem>,
+            </ExtraLabelBadgeWrapper>,
           ],
           categories: ['observability'],
           icons: [
@@ -142,9 +184,11 @@ export function useCustomCardsForCategory(
               src: http?.staticAssets.getPluginAssetHref('opentelemetry.svg') ?? '',
             },
           ],
-          url: otelLogsUrl,
+          url: otelKubernetesUrl,
           version: '',
           integration: '',
+          isQuickstart: true,
+          release: 'preview',
         },
       ];
 
@@ -153,8 +197,18 @@ export function useCustomCardsForCategory(
         {
           id: 'apm-virtual',
           type: 'virtual',
-          title: 'Elastic APM',
-          description: 'Collect distributed traces from your applications with Elastic APM',
+          title: i18n.translate(
+            'xpack.observability_onboarding.useCustomCardsForCategory.apmTitle',
+            {
+              defaultMessage: 'Elastic APM',
+            }
+          ),
+          description: i18n.translate(
+            'xpack.observability_onboarding.useCustomCardsForCategory.apmDescription',
+            {
+              defaultMessage: 'Collect distributed traces from your applications with Elastic APM',
+            }
+          ),
           name: 'apm',
           categories: ['observability'],
           icons: [
@@ -170,8 +224,18 @@ export function useCustomCardsForCategory(
         {
           id: 'otel-virtual',
           type: 'virtual',
-          title: 'OpenTelemetry',
-          description: 'Collect distributed traces with OpenTelemetry',
+          title: i18n.translate(
+            'xpack.observability_onboarding.useCustomCardsForCategory.apmOtelTitle',
+            {
+              defaultMessage: 'OpenTelemetry',
+            }
+          ),
+          description: i18n.translate(
+            'xpack.observability_onboarding.useCustomCardsForCategory.apmOtelDescription',
+            {
+              defaultMessage: 'Collect distributed traces with OpenTelemetry',
+            }
+          ),
           name: 'otel',
           categories: ['observability'],
           icons: [
@@ -187,8 +251,18 @@ export function useCustomCardsForCategory(
         {
           id: 'synthetics-virtual',
           type: 'virtual',
-          title: 'Synthetic monitor',
-          description: 'Monitor endpoints, pages, and user journeys',
+          title: i18n.translate(
+            'xpack.observability_onboarding.useCustomCardsForCategory.syntheticsTitle',
+            {
+              defaultMessage: 'Synthetic monitor',
+            }
+          ),
+          description: i18n.translate(
+            'xpack.observability_onboarding.useCustomCardsForCategory.syntheticsDescription',
+            {
+              defaultMessage: 'Monitor endpoints, pages, and user journeys',
+            }
+          ),
           name: 'synthetics',
           categories: ['observability'],
           icons: [
@@ -208,8 +282,18 @@ export function useCustomCardsForCategory(
         {
           id: 'azure-logs-virtual',
           type: 'virtual',
-          title: 'Azure',
-          description: 'Collect logs from Microsoft Azure',
+          title: i18n.translate(
+            'xpack.observability_onboarding.useCustomCardsForCategory.azureTitle',
+            {
+              defaultMessage: 'Azure',
+            }
+          ),
+          description: i18n.translate(
+            'xpack.observability_onboarding.useCustomCardsForCategory.azureDescription',
+            {
+              defaultMessage: 'Collect logs from Microsoft Azure',
+            }
+          ),
           name: 'azure',
           categories: ['observability'],
           icons: [],
@@ -222,8 +306,18 @@ export function useCustomCardsForCategory(
         {
           id: 'aws-logs-virtual',
           type: 'virtual',
-          title: 'AWS',
-          description: 'Collect logs from Amazon Web Services (AWS)',
+          title: i18n.translate(
+            'xpack.observability_onboarding.useCustomCardsForCategory.awsTitle',
+            {
+              defaultMessage: 'AWS',
+            }
+          ),
+          description: i18n.translate(
+            'xpack.observability_onboarding.useCustomCardsForCategory.awsDescription',
+            {
+              defaultMessage: 'Collect logs from Amazon Web Services (AWS)',
+            }
+          ),
           name: 'aws',
           categories: ['observability'],
           icons: [],
@@ -236,8 +330,18 @@ export function useCustomCardsForCategory(
         {
           id: 'gcp-logs-virtual',
           type: 'virtual',
-          title: 'Google Cloud Platform',
-          description: 'Collect logs from Google Cloud Platform',
+          title: i18n.translate(
+            'xpack.observability_onboarding.useCustomCardsForCategory.gcpTitle',
+            {
+              defaultMessage: 'Google Cloud Platform',
+            }
+          ),
+          description: i18n.translate(
+            'xpack.observability_onboarding.useCustomCardsForCategory.gcpDescription',
+            {
+              defaultMessage: 'Collect logs from Google Cloud Platform',
+            }
+          ),
           name: 'gcp',
           categories: ['observability'],
           icons: [],
@@ -252,4 +356,12 @@ export function useCustomCardsForCategory(
     default:
       return undefined;
   }
+}
+
+function ExtraLabelBadgeWrapper({ children }: { children: React.ReactNode }) {
+  return (
+    <EuiFlexItem grow={false} css={{ alignSelf: 'center' }}>
+      {children}
+    </EuiFlexItem>
+  );
 }

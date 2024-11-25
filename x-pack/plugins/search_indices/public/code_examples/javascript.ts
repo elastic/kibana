@@ -19,7 +19,7 @@ export const JAVASCRIPT_INFO: CodeLanguage = {
   codeBlockLanguage: 'javascript',
 };
 
-const SERVERLESS_INSTALL_CMD = `npm install @elastic/elasticsearch-serverless`;
+const SERVERLESS_INSTALL_CMD = `npm install @elastic/elasticsearch`;
 
 export const JavascriptServerlessCreateIndexExamples: CreateIndexLanguageExamples = {
   default: {
@@ -28,7 +28,7 @@ export const JavascriptServerlessCreateIndexExamples: CreateIndexLanguageExample
       elasticsearchURL,
       apiKey,
       indexName,
-    }) => `import { Client } from "@elastic/elasticsearch-serverless"
+    }) => `import { Client } from "@elastic/elasticsearch"
 
 const client = new Client({
   node: '${elasticsearchURL}',
@@ -47,7 +47,7 @@ client.indices.create({
       elasticsearchURL,
       apiKey,
       indexName,
-    }) => `import { Client } from "@elastic/elasticsearch-serverless"
+    }) => `import { Client } from "@elastic/elasticsearch"
 
 const client = new Client({
   node: '${elasticsearchURL}',
@@ -73,7 +73,7 @@ export const JSServerlessIngestVectorDataExample: IngestDataCodeDefinition = {
   ingestCommand: ({
     apiKey,
     elasticsearchURL,
-    sampleDocument,
+    sampleDocuments,
     indexName,
   }) => `import { Client } from "@elastic/elasticsearch";
 
@@ -85,9 +85,7 @@ const client = new Client({
 });
 
 const index = "${indexName}";
-const docs = [
-${JSON.stringify(sampleDocument, null, 2)},
-]
+const docs = ${JSON.stringify(sampleDocuments, null, 2)};
 
 const bulkIngestResponse = await client.helpers.bulk({
   index,

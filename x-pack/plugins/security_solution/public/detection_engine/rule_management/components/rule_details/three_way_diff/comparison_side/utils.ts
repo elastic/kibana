@@ -17,13 +17,13 @@ import type {
  *
  * @param version - The version for which the field value is to be picked.
  * @param fieldThreeWayDiff - The three-way diff object containing the field values for different versions.
- * @param resolvedValue - The user-set resolved value resolved value. Used if it is set and the version is final.
+ * @param resolvedValue - A value field will be upgraded to.
  * @returns - The field value for the specified version
  */
 export function pickFieldValueForVersion<FieldName extends keyof DiffableAllFields>(
   version: Version,
   fieldThreeWayDiff: ThreeWayDiff<DiffableAllFields[FieldName]>,
-  resolvedValue?: DiffableAllFields[FieldName]
+  resolvedValue: DiffableAllFields[FieldName]
 ): DiffableAllFields[FieldName] | undefined {
   if (version === Version.Final) {
     return resolvedValue;

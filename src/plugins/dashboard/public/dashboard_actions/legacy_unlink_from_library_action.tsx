@@ -20,6 +20,7 @@ import {
   HasLegacyLibraryTransforms,
 } from '@kbn/presentation-publishing';
 import { dashboardUnlinkFromLibraryActionStrings } from './_dashboard_actions_strings';
+import { DASHBOARD_ACTION_GROUP } from '.';
 import { coreServices } from '../services/kibana_services';
 
 export const ACTION_LEGACY_UNLINK_FROM_LIBRARY = 'legacyUnlinkFromLibrary';
@@ -37,6 +38,7 @@ export class LegacyUnlinkFromLibraryAction implements Action<EmbeddableApiContex
   public readonly type = ACTION_LEGACY_UNLINK_FROM_LIBRARY;
   public readonly id = ACTION_LEGACY_UNLINK_FROM_LIBRARY;
   public order = 15;
+  public grouping = [DASHBOARD_ACTION_GROUP];
 
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
     if (!legacyUnlinkActionIsCompatible(embeddable)) throw new IncompatibleActionError();

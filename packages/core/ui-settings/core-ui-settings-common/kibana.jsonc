@@ -1,5 +1,9 @@
 {
   "type": "shared-common",
   "id": "@kbn/core-ui-settings-common",
-  "owner": "@elastic/appex-sharedux"
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "shared"
 }

@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import type { ConsolePluginStart } from '@kbn/console-plugin/public';
+import type { ConsolePluginSetup, ConsolePluginStart } from '@kbn/console-plugin/public';
 import { HttpStart } from '@kbn/core-http-browser';
 import { AppMountParameters } from '@kbn/core/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
+import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import React from 'react';
+
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { App } from './components/app';
 import type { InferenceEndpointsProvider } from './providers/inference_endpoints_provider';
 
@@ -27,10 +29,26 @@ export interface AppPluginStartDependencies {
   history: AppMountParameters['history'];
   share: SharePluginStart;
   console?: ConsolePluginStart;
+  serverless?: ServerlessPluginStart;
+}
+
+export interface AppPluginSetupDependencies {
+  history: AppMountParameters['history'];
+  share: SharePluginSetup;
+  console?: ConsolePluginSetup;
 }
 
 export interface AppServicesContext {
   http: HttpStart;
   ml?: MlPluginStart;
   console?: ConsolePluginStart;
+  serverless?: ServerlessPluginStart;
+  share: SharePluginStart;
+}
+
+export interface InferenceUsageResponse {
+  acknowledge: boolean;
+  error_message: string;
+  indexes: string[];
+  pipelines: string[];
 }
