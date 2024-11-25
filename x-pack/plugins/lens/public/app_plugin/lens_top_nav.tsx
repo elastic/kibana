@@ -657,7 +657,7 @@ export const LensTopNavMenu = ({
                       >
                         <FormattedMessage
                           id="xpack.lens.app.shareModal.draftModeCallout.link.warning"
-                          defaultMessage="Copy the link to get a temporary link. Save the lens visualization to create a permanent link."
+                          defaultMessage="The link will only work temporarily. Save the Lens visualization first to create a permanent link."
                         />
                       </EuiCallOut>
                     ),
