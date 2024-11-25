@@ -46,6 +46,7 @@
     "@kbn/es-query",
     "@kbn/serverless",
     "@kbn/data-views-plugin",
+    "@kbn/deeplinks-observability",
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }
