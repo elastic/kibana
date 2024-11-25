@@ -12,7 +12,6 @@ disabled:
   - x-pack/test/fleet_api_integration/config.base.ts
   - x-pack/test/functional_basic/apps/ml/config.base.ts
   - x-pack/test/functional_basic/apps/transform/config.base.ts
-  - x-pack/test/functional_gen_ai/config.base.ts
 
   # QA suites that are run out-of-band
   - x-pack/test/stack_functional_integration/configs/config.stack_functional_integration_base.js
@@ -43,7 +42,7 @@ disabled:
   # Default http2 config to use for performance journeys
   - x-pack/performance/configs/http2_config.ts
 
-  # Gen AI suites, disabled for now
+  # Gen AI suites, running with their own pipeline
   - x-pack/test/functional_gen_ai/inference/config.ts
 
 defaultQueue: 'n2-4-spot'
