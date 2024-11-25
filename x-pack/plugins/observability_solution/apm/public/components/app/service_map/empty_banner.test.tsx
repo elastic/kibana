@@ -58,11 +58,12 @@ describe('EmptyBanner', () => {
     it('does not render null', async () => {
       const component = renderWithTheme(<EmptyBanner />, { wrapper });
 
-      await act(async () => {
+      act(() => {
         cy.add({ data: { id: 'test id' } });
-        await waitFor(() => {
-          expect(component.container.children.length).toBeGreaterThan(0);
-        });
+      });
+
+      await waitFor(() => {
+        expect(component.container.children.length).toBeGreaterThan(0);
       });
     });
   });

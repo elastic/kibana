@@ -14,7 +14,8 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
 
   const utils = EntityStoreUtils(getService);
-  describe('@ess @skipInServerlessMKI Entity Store APIs', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/200758
+  describe.skip('@ess @skipInServerlessMKI Entity Store APIs', () => {
     const dataView = dataViewRouteHelpersFactory(supertest);
 
     before(async () => {
@@ -39,6 +40,19 @@ export default ({ getService }: FtrProviderContext) => {
       it('should have installed the expected host resources', async () => {
         await utils.initEntityEngineForEntityTypesAndWait(['host']);
         await utils.expectEngineAssetsExist('host');
+      });
+    });
+
+    describe('init error handling', () => {
+      afterEach(async () => {
+        await dataView.create('security-solution');
+        await utils.cleanEngines();
+      });
+
+      it('should return "error" when the security data view does not exist', async () => {
+        await dataView.delete('security-solution');
+        await utils.initEntityEngineForEntityType('host');
+        await utils.waitForEngineStatus('host', 'error');
       });
     });
 
@@ -194,7 +208,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('status', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/200758
+    describe.skip('status', () => {
       afterEach(async () => {
         await utils.cleanEngines();
       });

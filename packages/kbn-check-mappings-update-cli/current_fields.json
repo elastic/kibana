@@ -233,6 +233,7 @@
     "payload.connector.type",
     "type"
   ],
+  "cloud": [],
   "cloud-security-posture-settings": [],
   "config": [
     "buildNum"
@@ -510,6 +511,7 @@
   ],
   "fleet-message-signing-keys": [],
   "fleet-package-policies": [
+    "bump_agent_policy_revision",
     "created_at",
     "created_by",
     "description",
@@ -691,6 +693,7 @@
     "version"
   ],
   "ingest-package-policies": [
+    "bump_agent_policy_revision",
     "created_at",
     "created_by",
     "description",
@@ -854,6 +857,13 @@
   ],
   "policy-settings-protection-updates-note": [
     "note"
+  ],
+  "product-doc-install-status": [
+    "index_name",
+    "installation_status",
+    "last_installation_date",
+    "product_name",
+    "product_version"
   ],
   "query": [
     "description",
