@@ -9,6 +9,7 @@ import _ from 'lodash';
 import React from 'react';
 import { FeatureCollection } from 'geojson';
 import type { FeatureIdentifier, Map as MbMap } from '@kbn/mapbox-gl';
+import { DataRequest } from '../../../util/data_request';
 import { AbstractStyleProperty, IStyleProperty } from './style_property';
 import { DEFAULT_SIGMA } from '../vector_style_defaults';
 import {
@@ -97,6 +98,7 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
     mbMap: MbMap,
     mbSourceId: string
   ): boolean;
+  getStyleMetaDataRequest(): DataRequest | undefined;
 }
 
 export class DynamicStyleProperty<T extends object>

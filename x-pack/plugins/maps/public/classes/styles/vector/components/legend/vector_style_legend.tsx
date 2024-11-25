@@ -9,8 +9,10 @@ import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { StyleError } from './style_error';
-import { DataRequest } from '../../../../util/data_request';
-import { DynamicStyleProperty } from '../../properties/dynamic_style_property';
+import {
+  DynamicStyleProperty,
+  IDynamicStyleProperty,
+} from '../../properties/dynamic_style_property';
 import { FIELD_ORIGIN } from '../../../../../../common/constants';
 import { Mask } from '../../../../layers/vector_layer/mask';
 import { IStyleProperty } from '../../properties/style_property';
@@ -37,13 +39,13 @@ export function VectorStyleLegend({
 
   for (let i = 0; i < styles.length; i++) {
     const styleMetaDataRequest = styles[i].isDynamic()
-      ? (styles[i] as DynamicStyleProperty<DataRequest>).getStyleMetaDataRequest()
+      ? (styles[i] as IDynamicStyleProperty<any>).getStyleMetaDataRequest()
       : undefined;
 
     const error = styleMetaDataRequest?.getError();
 
     const row = error ? (
-      <StyleError error={error} style={styles[i] as DynamicStyleProperty<DataRequest>} />
+      <StyleError error={error} style={styles[i] as DynamicStyleProperty<any>} />
     ) : (
       styles[i].renderLegendDetailRow({
         isLinesOnly,
