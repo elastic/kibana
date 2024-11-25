@@ -208,6 +208,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         it('returns the correct number of alert counts', async () => {
+          // fails on MKI, see https://github.com/elastic/kibana/issues/201531
+          // @ts-expect-error
+          this.tags(['failsOnMKI']);
           const txGroupsTypeRequest = await getTransactionGroups({
             query: { transactionType: 'request' },
           });
