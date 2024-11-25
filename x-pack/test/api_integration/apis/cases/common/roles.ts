@@ -136,6 +136,56 @@ export const secCasesV2All: Role = {
   },
 };
 
+export const secCasesV2NoReopenWithCreateComment: Role = {
+  name: 'sec_cases_v2_no_reopen_role_api_int',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          siem: ['all'],
+          securitySolutionCasesV2: ['read', 'update', 'create', 'delete', 'create_comment'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
+export const secCasesV2NoCreateCommentWithReopen: Role = {
+  name: 'sec_cases_v2_create_comment_no_reopen_role_api_int',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          siem: ['all'],
+          securitySolutionCasesV2: ['read', 'update', 'create', 'delete', 'case_reopen'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
 export const secAllSpace1: Role = {
   name: 'sec_all_role_space1_api_int',
   privileges: {
@@ -434,6 +484,56 @@ export const casesV2All: Role = {
   },
 };
 
+export const casesV2NoReopenWithCreateComment: Role = {
+  name: 'cases_v2_no_reopen_role_api_int',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        spaces: ['*'],
+        base: [],
+        feature: {
+          generalCasesV2: ['read', 'update', 'create', 'delete', 'create_comment'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+      },
+    ],
+  },
+};
+
+export const casesV2NoCreateCommentWithReopen: Role = {
+  name: 'cases_v2_no_create_comment_role_api_int',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        spaces: ['*'],
+        base: [],
+        feature: {
+          generalCasesV2: ['read', 'update', 'create', 'delete', 'case_reopen'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+      },
+    ],
+  },
+};
+
 export const casesRead: Role = {
   name: 'cases_read_role_api_int',
   privileges: {
@@ -583,6 +683,56 @@ export const obsCasesV2All: Role = {
   },
 };
 
+export const obsCasesV2NoReopenWithCreateComment: Role = {
+  name: 'obs_cases_v2_no_reopen_role_api_int',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        spaces: ['*'],
+        base: [],
+        feature: {
+          observabilityCasesV2: ['read', 'update', 'create', 'delete', 'create_comment'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+      },
+    ],
+  },
+};
+
+export const obsCasesV2NoCreateCommentWithReopen: Role = {
+  name: 'obs_cases_v2_no_create_comment_role_api_int',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        spaces: ['*'],
+        base: [],
+        feature: {
+          observabilityCasesV2: ['read', 'update', 'create', 'delete', 'case_reopen'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+      },
+    ],
+  },
+};
+
 export const obsCasesRead: Role = {
   name: 'obs_cases_read_role_api_int',
   privileges: {
@@ -613,6 +763,8 @@ export const roles = [
   secAllCasesNoDelete,
   secAll,
   secCasesV2All,
+  secCasesV2NoReopenWithCreateComment,
+  secCasesV2NoCreateCommentWithReopen,
   secAllSpace1,
   secAllCasesRead,
   secAllCasesNone,
@@ -625,11 +777,15 @@ export const roles = [
   casesNoDelete,
   casesAll,
   casesV2All,
+  casesV2NoReopenWithCreateComment,
+  casesV2NoCreateCommentWithReopen,
   casesRead,
   obsCasesOnlyDelete,
   obsCasesOnlyReadDelete,
   obsCasesNoDelete,
   obsCasesAll,
   obsCasesV2All,
+  obsCasesV2NoReopenWithCreateComment,
+  obsCasesV2NoCreateCommentWithReopen,
   obsCasesRead,
 ];
