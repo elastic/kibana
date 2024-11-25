@@ -129,6 +129,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.searchPlayground.PlaygroundStartChatPage.expectToSelectIndicesAndLoadChat();
         });
 
+        it('load start page after removing selected index', async () => {
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectToSelectIndicesAndLoadChat();
+          await esArchiver.unload(esArchiveIndex);
+          await browser.refresh();
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectCreateIndexButtonToExists();
+        });
+
         after(async () => {
           await removeOpenAIConnector?.();
           await esArchiver.unload(esArchiveIndex);
