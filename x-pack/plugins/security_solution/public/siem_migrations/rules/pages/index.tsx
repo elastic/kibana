@@ -26,90 +26,92 @@ import { useLatestStats } from '../hooks/use_latest_stats';
 
 type RulesMigrationPageProps = RouteComponentProps<{ migrationId?: string }>;
 
-const RulesPageComponent: React.FC<RulesMigrationPageProps> = ({
-  match: {
-    params: { migrationId },
-  },
-}) => {
-  const { navigateTo } = useNavigation();
-
-  const { data: ruleMigrationsStatsAll, isLoading: isLoadingMigrationsStats } = useLatestStats();
-
-  const migrationsIds = useMemo(() => {
-    if (isLoadingMigrationsStats || !ruleMigrationsStatsAll?.length) {
-      return [];
-    }
-    return ruleMigrationsStatsAll
-      .filter((migration) => migration.status === 'finished')
-      .map((migration) => migration.id);
-  }, [isLoadingMigrationsStats, ruleMigrationsStatsAll]);
-
-  useEffect(() => {
-    if (isLoadingMigrationsStats) {
-      return;
-    }
-
-    // Navigate to landing page if there are no migrations
-    if (!migrationsIds.length) {
-      navigateTo({ deepLinkId: SecurityPageName.landing, path: 'siem_migrations' });
-      return;
-    }
-
-    // Navigate to the most recent migration if none is selected
-    if (!migrationId) {
-      navigateTo({ deepLinkId: SecurityPageName.siemMigrationsRules, path: migrationsIds[0] });
-    }
-  }, [isLoadingMigrationsStats, migrationId, migrationsIds, navigateTo]);
-
-  const onMigrationIdChange = (selectedId?: string) => {
-    navigateTo({ deepLinkId: SecurityPageName.siemMigrationsRules, path: selectedId });
-  };
-
-  const ruleActionsFactory = useCallback(
-    (ruleMigration: RuleMigration, closeRulePreview: () => void) => {
-      // TODO: Add flyout action buttons
-      return null;
+const RulesPage: React.FC<RulesMigrationPageProps> = React.memo(
+  ({
+    match: {
+      params: { migrationId },
     },
-    []
-  );
+  }) => {
+    const { navigateTo } = useNavigation();
 
-  const { rulePreviewFlyout, openRulePreview } = useRulePreviewFlyout({
-    ruleActionsFactory,
-  });
+    const { data: ruleMigrationsStatsAll, isLoading: isLoadingMigrationsStats } = useLatestStats();
 
-  const content = useMemo(() => {
-    if (!migrationId || !migrationsIds.includes(migrationId)) {
-      return <UnknownMigration />;
-    }
-    return <RulesTable migrationId={migrationId} openRulePreview={openRulePreview} />;
-  }, [migrationId, migrationsIds, openRulePreview]);
+    const migrationsIds = useMemo(() => {
+      if (isLoadingMigrationsStats || !ruleMigrationsStatsAll?.length) {
+        return [];
+      }
+      return ruleMigrationsStatsAll
+        .filter((migration) => migration.status === 'finished')
+        .map((migration) => migration.id);
+    }, [isLoadingMigrationsStats, ruleMigrationsStatsAll]);
 
-  return (
-    <>
-      <NeedAdminForUpdateRulesCallOut />
-      <MissingPrivilegesCallOut />
+    useEffect(() => {
+      if (isLoadingMigrationsStats) {
+        return;
+      }
 
-      <SecuritySolutionPageWrapper>
-        <HeaderPage title={i18n.PAGE_TITLE}>
-          <HeaderButtons
-            migrationsIds={migrationsIds}
-            selectedMigrationId={migrationId}
-            onMigrationIdChange={onMigrationIdChange}
+      // Navigate to landing page if there are no migrations
+      if (!migrationsIds.length) {
+        navigateTo({ deepLinkId: SecurityPageName.landing, path: 'siem_migrations' });
+        return;
+      }
+
+      // Navigate to the most recent migration if none is selected
+      if (!migrationId) {
+        navigateTo({ deepLinkId: SecurityPageName.siemMigrationsRules, path: migrationsIds[0] });
+      }
+    }, [isLoadingMigrationsStats, migrationId, migrationsIds, navigateTo]);
+
+    const onMigrationIdChange = (selectedId?: string) => {
+      navigateTo({ deepLinkId: SecurityPageName.siemMigrationsRules, path: selectedId });
+    };
+
+    const ruleActionsFactory = useCallback(
+      (ruleMigration: RuleMigration, closeRulePreview: () => void) => {
+        // TODO: Add flyout action buttons
+        return null;
+      },
+      []
+    );
+
+    const { rulePreviewFlyout, openRulePreview } = useRulePreviewFlyout({
+      ruleActionsFactory,
+    });
+
+    const content = useMemo(() => {
+      if (!migrationId || !migrationsIds.includes(migrationId)) {
+        return <UnknownMigration />;
+      }
+      return <RulesTable migrationId={migrationId} openRulePreview={openRulePreview} />;
+    }, [migrationId, migrationsIds, openRulePreview]);
+
+    return (
+      <>
+        <NeedAdminForUpdateRulesCallOut />
+        <MissingPrivilegesCallOut />
+
+        <SecuritySolutionPageWrapper>
+          <HeaderPage title={i18n.PAGE_TITLE}>
+            <HeaderButtons
+              migrationsIds={migrationsIds}
+              selectedMigrationId={migrationId}
+              onMigrationIdChange={onMigrationIdChange}
+            />
+          </HeaderPage>
+          <EuiSkeletonLoading
+            isLoading={isLoadingMigrationsStats}
+            loadingContent={
+              <>
+                <EuiSkeletonTitle />
+                <EuiSkeletonText />
+              </>
+            }
+            loadedContent={content}
           />
-        </HeaderPage>
-        <EuiSkeletonLoading
-          isLoading={isLoadingMigrationsStats}
-          loadingContent={
-            <>
-              <EuiSkeletonTitle />
-              <EuiSkeletonText />
-            </>
-          }
-          loadedContent={content}
-        />
-        {rulePreviewFlyout}
-      </SecuritySolutionPageWrapper>
-    </>
-  );
-});
+          {rulePreviewFlyout}
+        </SecuritySolutionPageWrapper>
+      </>
+    );
+  }
+);
 RulesPage.displayName = 'RulesPage';
