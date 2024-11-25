@@ -16,7 +16,11 @@ export const setupToolingLogLevel = (config: Cypress.PluginConfigOptions) => {
   const log = createToolingLogger();
   const defaultToolingLogLevel = config.env.TOOLING_LOG_LEVEL;
 
-  log.info(`Cypress config 'env.TOOLING_LOG_LEVEL': ${defaultToolingLogLevel}`);
+  log.info(`
+
+Cypress config 'env.TOOLING_LOG_LEVEL': ${defaultToolingLogLevel}
+
+  `);
 
   if (defaultToolingLogLevel && defaultToolingLogLevel !== createToolingLogger.defaultLogLevel) {
     createToolingLogger.defaultLogLevel = defaultToolingLogLevel;

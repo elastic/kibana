@@ -141,7 +141,8 @@ export const tryAddingDisabledResponseAction = (itemNumber = 0) => {
  */
 export const waitForActionToComplete = (
   actionId: string,
-  timeout = 120000
+  timeout = 120000,
+  onFailure?: () => void | Promise<void> | Cypress.Chainable<void>
 ): Cypress.Chainable<ActionDetails> => {
   let action: ActionDetails | undefined;
 
@@ -151,6 +152,8 @@ export const waitForActionToComplete = (
         return request<ActionDetailsApiResponse>({
           method: 'GET',
           url: resolvePathVariables(ACTION_DETAILS_ROUTE, { action_id: actionId || 'undefined' }),
+          // FIXME:PT DO NOT MERGE THIS CHANGE TO MAIN. Just for testing
+          failOnStatusCode: false,
         }).then((response) => {
           if (response.body.data.isCompleted) {
             action = response.body.data;
@@ -160,7 +163,12 @@ export const waitForActionToComplete = (
           return false;
         });
       },
-      { timeout, interval: 2000 }
+      {
+        timeout,
+        interval: 2000,
+        onFailure,
+      },
+      `waitForActionToComplete(${actionId})`
     )
     .then(() => {
       if (!action) {

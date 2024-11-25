@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { logger } from '../../../tasks/logger';
+import { deleteAllLoadedEndpointData } from '../../../tasks/delete_all_endpoint_data';
+import { waitForActionToComplete } from '../../../tasks/response_actions';
 import type { PolicyData } from '../../../../../../common/endpoint/types';
 import type { CreateAndEnrollEndpointHostResponse } from '../../../../../../scripts/endpoint/common/endpoint_host_services';
 import {
@@ -19,7 +22,6 @@ import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../../t
 import { login } from '../../../tasks/login';
 import { enableAllPolicyProtections } from '../../../tasks/endpoint_policy';
 import { createEndpointHost } from '../../../tasks/create_endpoint_host';
-import { deleteAllLoadedEndpointData } from '../../../tasks/delete_all_endpoint_data';
 
 describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
@@ -81,7 +83,20 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
       openResponseConsoleFromEndpointList();
       inputConsoleCommand(`get-file --path ${filePath}`);
       submitCommand();
-      cy.wait('@getFileAction', { timeout: 60000 });
+      cy.wait('@getFileAction', { timeout: 60000 }).then((interception) => {
+        return waitForActionToComplete(interception.response?.body.data.id, 20000, () => {
+          return cy
+            .task('execCommandOnHost', {
+              hostname: createdHost.hostname,
+              command: `sudo tail -n 500 /opt/Elastic/Endpoint/state/log/endpoint-000000.log`,
+            })
+            .then<void>((output) => {
+              logger.info(
+                `Endpoint log from host [${createdHost.hostname}] after action failed to complete:\n${output.stdout}`
+              );
+            });
+        });
+      });
 
       // verify that the file was retrieved
       // and that the file download link is available
