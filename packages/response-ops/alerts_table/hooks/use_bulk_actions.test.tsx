@@ -21,7 +21,7 @@ import { useAlertsTableContext } from '../contexts/alerts_table_context';
 import { testQueryClientConfig } from '../test_utils';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 
-jest.mock('./apis/bulk_get_cases');
+jest.mock('./bulk_get_cases');
 jest.mock('../contexts/alerts_table_context');
 jest.mocked(useAlertsTableContext).mockReturnValue({
   bulkActionsStore: [{}, jest.fn()],

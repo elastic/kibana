@@ -54,7 +54,7 @@ import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
-import type { Case } from './hooks/apis/bulk_get_cases';
+import type { Case } from './hooks/bulk_get_cases';
 
 export interface Consumer {
   id: AlertConsumers;
@@ -176,11 +176,11 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
     data: DataPublicPluginStart;
     http: HttpStart;
     notifications: NotificationsStart;
-    cases?: CasesService;
     fieldFormats: FieldFormatsStart;
     application: ApplicationStart;
     licensing: LicensingPluginStart;
     settings: SettingsStart;
+    cases?: CasesService;
   };
 }
 
