@@ -8,7 +8,8 @@
  */
 
 import { createMemoryHistory } from 'history';
-import { renderHook, act, cleanup } from '@testing-library/react-hooks';
+
+import { renderHook, act, cleanup, waitFor } from '@testing-library/react';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { CoreScopedHistory } from '@kbn/core/public';
@@ -73,7 +74,7 @@ describe('useUnsavedChangesPrompt', () => {
     act(() => history.push('/test'));
 
     // needed because we have an async useEffect
-    await act(() => new Promise((resolve) => resolve()));
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(navigateToUrl).toBeCalledWith('/mock/test', expect.anything());
     expect(coreStart.overlays.openConfirm).toBeCalled();

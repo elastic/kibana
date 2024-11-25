@@ -1,5 +1,9 @@
 {
   "type": "shared-browser",
   "id": "@kbn/core-security-browser-mocks",
-  "owner": "@elastic/kibana-core"
+  "owner": [
+    "@elastic/kibana-core"
+  ],
+  "group": "platform",
+  "visibility": "shared"
 }

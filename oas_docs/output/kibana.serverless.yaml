@@ -3,10 +3,6 @@ info:
   contact:
     name: Kibana Team
   description: |
-    **Technical preview**  
-    This functionality is in technical preview and may be changed or removed in a future release.
-    Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
-
     The Kibana REST APIs for Elastic serverless enable you to manage resources
     such as connectors, data views, and saved objects. The API calls are
     stateless. Each request that you make happens in isolation from other calls
@@ -29959,6 +29955,7 @@ paths:
                       secret_storage_requirements_met:
                         type: boolean
                       use_space_awareness_migration_started_at:
+                        nullable: true
                         type: string
                       use_space_awareness_migration_status:
                         enum:
@@ -30092,6 +30089,7 @@ paths:
                       secret_storage_requirements_met:
                         type: boolean
                       use_space_awareness_migration_started_at:
+                        nullable: true
                         type: string
                       use_space_awareness_migration_status:
                         enum:
@@ -31737,13 +31735,6 @@ paths:
         required: true
       responses:
         '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: object
           description: Indicates the note was successfully deleted.
       summary: Delete a note
       tags:
@@ -31805,9 +31796,7 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/Security_Timeline_API_GetNotesResult'
-                  - type: object
+                $ref: '#/components/schemas/Security_Timeline_API_GetNotesResult'
           description: Indicates the requested notes were returned.
       summary: Get notes
       tags:
@@ -31851,17 +31840,7 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      persistNote:
-                        $ref: '#/components/schemas/Security_Timeline_API_ResponseNote'
-                    required:
-                      - persistNote
-                required:
-                  - data
+                $ref: '#/components/schemas/Security_Timeline_API_ResponseNote'
           description: Indicates the note was successfully created.
       summary: Add or update a note
       tags:
@@ -32214,17 +32193,7 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      persistPinnedEventOnTimeline:
-                        $ref: '#/components/schemas/Security_Timeline_API_PersistPinnedEventResponse'
-                    required:
-                      - persistPinnedEventOnTimeline
-                required:
-                  - data
+                $ref: '#/components/schemas/Security_Timeline_API_PersistPinnedEventResponse'
           description: Indicates the event was successfully pinned to the Timeline.
       summary: Pin an event
       tags:
@@ -33835,20 +33804,6 @@ paths:
         required: true
       responses:
         '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      deleteTimeline:
-                        type: boolean
-                    required:
-                      - deleteTimeline
-                required:
-                  - data
           description: Indicates the Timeline was successfully deleted.
       summary: Delete Timelines or Timeline templates
       tags:
@@ -33873,20 +33828,7 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                oneOf:
-                  - type: object
-                    properties:
-                      data:
-                        type: object
-                        properties:
-                          getOneTimeline:
-                            $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
-                        required:
-                          - getOneTimeline
-                    required:
-                      - data
-                  - additionalProperties: false
-                    type: object
+                $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
           description: Indicates that the (template) Timeline was found and returned.
       summary: Get Timeline or Timeline template details
       tags:
@@ -34197,17 +34139,7 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      persistFavorite:
-                        $ref: '#/components/schemas/Security_Timeline_API_FavoriteTimelineResponse'
-                    required:
-                      - persistFavorite
-                required:
-                  - data
+                $ref: '#/components/schemas/Security_Timeline_API_FavoriteTimelineResponse'
           description: Indicates the favorite status was successfully updated.
         '403':
           content:
@@ -34364,15 +34296,7 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                oneOf:
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/Security_Timeline_API_ResolvedTimeline'
-                    required:
-                      - data
-                  - additionalProperties: false
-                    type: object
+                $ref: '#/components/schemas/Security_Timeline_API_ResolvedTimeline'
           description: The (template) Timeline has been found
         '400':
           description: The request is missing parameters
@@ -47423,16 +47347,10 @@ components:
     Security_Timeline_API_FavoriteTimelineResponse:
       type: object
       properties:
-        code:
-          nullable: true
-          type: number
         favorite:
           items:
             $ref: '#/components/schemas/Security_Timeline_API_FavoriteTimelineResult'
           type: array
-        message:
-          nullable: true
-          type: string
         savedObjectId:
           type: string
         templateTimelineId:
@@ -47601,28 +47519,15 @@ components:
             - version
     Security_Timeline_API_PersistPinnedEventResponse:
       oneOf:
-        - allOf:
-            - $ref: '#/components/schemas/Security_Timeline_API_PinnedEvent'
-            - $ref: '#/components/schemas/Security_Timeline_API_PinnedEventBaseResponseBody'
-        - nullable: true
-          type: object
-    Security_Timeline_API_PersistTimelineResponse:
-      type: object
-      properties:
-        data:
-          type: object
+        - $ref: '#/components/schemas/Security_Timeline_API_PinnedEvent'
+        - type: object
           properties:
-            persistTimeline:
-              type: object
-              properties:
-                timeline:
-                  $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
-              required:
-                - timeline
+            unpinned:
+              type: boolean
           required:
-            - persistTimeline
-      required:
-        - data
+            - unpinned
+    Security_Timeline_API_PersistTimelineResponse:
+      $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
     Security_Timeline_API_PinnedEvent:
       allOf:
         - $ref: '#/components/schemas/Security_Timeline_API_BarePinnedEvent'
@@ -47635,15 +47540,6 @@ components:
           required:
             - pinnedEventId
             - version
-    Security_Timeline_API_PinnedEventBaseResponseBody:
-      type: object
-      properties:
-        code:
-          type: number
-        message:
-          type: string
-      required:
-        - code
     Security_Timeline_API_QueryMatchResult:
       type: object
       properties:
@@ -47684,15 +47580,9 @@ components:
     Security_Timeline_API_ResponseNote:
       type: object
       properties:
-        code:
-          type: number
-        message:
-          type: string
         note:
           $ref: '#/components/schemas/Security_Timeline_API_Note'
       required:
-        - code
-        - message
         - note
     Security_Timeline_API_RowRendererId:
       enum:

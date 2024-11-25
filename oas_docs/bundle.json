@@ -36783,6 +36783,7 @@
                           "type": "boolean"
                         },
                         "use_space_awareness_migration_started_at": {
+                          "nullable": true,
                           "type": "string"
                         },
                         "use_space_awareness_migration_status": {
@@ -36984,6 +36985,7 @@
                           "type": "boolean"
                         },
                         "use_space_awareness_migration_started_at": {
+                          "nullable": true,
                           "type": "string"
                         },
                         "use_space_awareness_migration_status": {
