@@ -10,6 +10,7 @@ import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isEqual } from 'lodash';
 import { Query } from '@kbn/es-query';
+import { TextBasedLayerColumn } from '../../../text_based/types';
 import type { IndexPattern, IndexPatternField } from '../../../../types';
 import {
   type FieldBasedOperationErrorMessage,
@@ -178,12 +179,14 @@ export const isColumn = (
 };
 
 export function isColumnFormatted(
-  column: GenericIndexPatternColumn
+  column: GenericIndexPatternColumn | TextBasedLayerColumn
 ): column is FormattedIndexPatternColumn {
-  return Boolean(
-    'params' in column &&
-      (column as FormattedIndexPatternColumn).params &&
-      'format' in (column as FormattedIndexPatternColumn).params!
+  return (
+    Boolean(
+      'params' in column &&
+        (column as FormattedIndexPatternColumn).params &&
+        'format' in (column as FormattedIndexPatternColumn).params!
+    ) || Boolean('meta' in column && column.meta && 'params' in column.meta && column.meta.params)
   );
 }
 

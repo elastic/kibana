@@ -12,6 +12,8 @@ import type { VisualizeEditorContext } from '../../types';
 export interface TextBasedLayerColumn {
   columnId: string;
   fieldName: string;
+  label: string;
+  customLabel?: boolean;
   meta?: DatatableColumn['meta'];
   inMetricDimension?: boolean;
 }

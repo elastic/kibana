@@ -24,16 +24,20 @@ function getExpressionForLayer(
   layer.columns.forEach((col) => {
     if (idMapper[col.fieldName]) {
       idMapper[col.fieldName].push({
+        // ...col,
         id: col.columnId,
-        label: col.fieldName,
+        label: col.customLabel ? col.label : col.fieldName,
+        format: col.meta?.params,
       } as OriginalColumn);
     } else {
       idMapper = {
         ...idMapper,
         [col.fieldName]: [
           {
+            // ...col,
             id: col.columnId,
-            label: col.fieldName,
+            label: col.customLabel ? col.label : col.fieldName,
+            format: col.meta?.params,
           } as OriginalColumn,
         ],
       };

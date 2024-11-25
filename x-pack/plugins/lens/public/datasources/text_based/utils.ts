@@ -11,9 +11,15 @@ import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
+import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { generateId } from '../../id_generator';
 import { fetchDataFromAggregateQuery } from './fetch_data_from_aggregate_query';
-import type { IndexPatternRef, TextBasedPrivateState, TextBasedLayerColumn } from './types';
+import type {
+  IndexPatternRef,
+  TextBasedPrivateState,
+  TextBasedLayerColumn,
+  TextBasedLayer,
+} from './types';
 import type { DataViewsState } from '../../state_management';
 import { addColumnsToCache } from './fieldlist_cache';
 
@@ -153,4 +159,75 @@ export function canColumnBeUsedBeInMetricDimension(
     columns.length >= MAX_NUM_OF_COLUMNS ||
     (hasNumberTypeColumns && selectedColumnType === 'number')
   );
+}
+
+export function mergeLayer({
+  state,
+  layerId,
+  newLayer,
+}: {
+  state: TextBasedPrivateState;
+  layerId: string;
+  newLayer: Partial<TextBasedLayer>;
+}) {
+  return {
+    ...state,
+    layers: {
+      ...state.layers,
+      [layerId]: { ...state.layers[layerId], ...newLayer },
+    },
+  };
+}
+
+export function updateColumnLabel({
+  layer,
+  columnId,
+  value,
+}: {
+  layer: TextBasedLayer;
+  columnId: string;
+  value: string;
+}): TextBasedLayer {
+  const currentColumnIndex = layer.columns.findIndex((c) => c.columnId === columnId);
+  const currentColumn = layer.columns[currentColumnIndex];
+  return {
+    ...layer,
+    columns: [
+      ...layer.columns.slice(0, currentColumnIndex),
+      {
+        ...currentColumn,
+        label: value,
+        customLabel: true,
+      },
+      ...layer.columns.slice(currentColumnIndex + 1),
+    ],
+  };
+}
+
+export function updateColumnFormat({
+  layer,
+  columnId,
+  value,
+}: {
+  layer: TextBasedLayer;
+  columnId: string;
+  value: SerializedFieldFormat | undefined;
+}): TextBasedLayer {
+  const currentColumnIndex = layer.columns.findIndex((c) => c.columnId === columnId);
+  const currentColumn = layer.columns[currentColumnIndex];
+  return {
+    ...layer,
+    columns: [
+      ...layer.columns.slice(0, currentColumnIndex),
+      {
+        ...currentColumn,
+        meta: {
+          ...currentColumn.meta,
+          type: currentColumn.meta?.type || 'number',
+          params: value,
+        },
+      },
+      ...layer.columns.slice(currentColumnIndex + 1),
+    ],
+  };
 }
