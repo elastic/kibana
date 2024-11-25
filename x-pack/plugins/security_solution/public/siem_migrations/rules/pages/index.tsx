@@ -26,7 +26,7 @@ import { useLatestStats } from '../hooks/use_latest_stats';
 
 type RulesMigrationPageProps = RouteComponentProps<{ migrationId?: string }>;
 
-const RulesPage: React.FC<RulesMigrationPageProps> = React.memo(
+export const RulesPage: React.FC<RulesMigrationPageProps> = React.memo(
   ({
     match: {
       params: { migrationId },
