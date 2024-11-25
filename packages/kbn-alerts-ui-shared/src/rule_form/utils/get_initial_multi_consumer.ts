@@ -75,5 +75,5 @@ export const getInitialMultiConsumer = ({
   }
 
   // All else fails, just use the first valid consumer
-  return validConsumers[0];
+  return validConsumers[0] || null;
 };

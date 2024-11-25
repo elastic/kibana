@@ -34,7 +34,6 @@ export const HISTOGRAM_BAR_TARGET_ID = 'histogram:barTarget';
 export const HISTOGRAM_MAX_BARS_ID = 'histogram:maxBars';
 export const HISTORY_LIMIT_ID = 'history:limit';
 export const META_FIELDS_ID = 'metaFields';
-export const METRICS_ALLOW_CHECKING_FOR_FAILED_SHARDS_ID = 'metrics:allowCheckingForFailedShards';
 export const METRICS_ALLOW_STRING_INDICES_ID = 'metrics:allowStringIndices';
 export const METRICS_MAX_BUCKETS_ID = 'metrics:max_buckets';
 export const QUERY_ALLOW_LEADING_WILDCARDS_ID = 'query:allowLeadingWildcards';
@@ -46,6 +45,7 @@ export const SHORT_DOTS_ENABLE_ID = 'shortDots:enable';
 export const SORT_OPTIONS_ID = 'sort:options';
 export const STATE_STORE_IN_SESSION_STORAGE_ID = 'state:storeInSessionStorage';
 export const THEME_DARK_MODE_ID = 'theme:darkMode';
+export const THEME_NAME_ID = 'theme:name';
 export const TIMEPICKER_QUICK_RANGES_ID = 'timepicker:quickRanges';
 export const TIMEPICKER_REFRESH_INTERVAL_DEFAULTS_ID = 'timepicker:refreshIntervalDefaults';
 export const TIMEPICKER_TIME_DEFAULTS_ID = 'timepicker:timeDefaults';
@@ -83,7 +83,6 @@ export const DISCOVER_SAMPLE_SIZE_ID = 'discover:sampleSize';
 export const DISCOVER_SEARCH_FIELDS_FROM_SOURCE_ID = 'discover:searchFieldsFromSource';
 export const DISCOVER_SEARCH_ON_PAGE_LOAD_ID = 'discover:searchOnPageLoad';
 export const DISCOVER_SHOW_FIELD_STATISTICS_ID = 'discover:showFieldStatistics';
-export const DISCOVER_SHOW_LEGACY_FIELD_TOP_VALUES_ID = 'discover:showLegacyFieldTopValues';
 export const DISCOVER_SHOW_MULTI_FIELDS_ID = 'discover:showMultiFields';
 export const DISCOVER_SORT_DEFAULT_ORDER_ID = 'discover:sort:defaultOrder';
 export const DOC_TABLE_HIDE_TIME_COLUMNS_ID = 'doc_table:hideTimeColumn';
@@ -122,10 +121,6 @@ export const OBSERVABILITY_APM_TRACE_EXPLORER_TAB_ID = 'observability:apmTraceEx
 export const OBSERVABILITY_ENABLE_AWS_LAMBDA_METRICS_ID = 'observability:enableAwsLambdaMetrics';
 export const OBSERVABILITY_ENABLE_COMPARISON_BY_DEFAULT_ID =
   'observability:enableComparisonByDefault';
-export const OBSERVABILITY_ENABLE_INFRASTRUCTURE_HOSTS_VIEW_ID =
-  'observability:enableInfrastructureHostsView';
-export const OBSERVABILITY_ENABLE_INFRASTRUCTURE_CONTAINER_ASSET_VIEW_ID =
-  'observability:enableInfrastructureContainerAssetView';
 export const OBSERVABILITY_ENABLE_INFRASTRUCTURE_ASSET_CUSTOM_DASHBOARDS_ID =
   'observability:enableInfrastructureAssetCustomDashboards';
 export const OBSERVABILITY_ENABLE_INSPECT_ES_QUERIES_ID = 'observability:enableInspectEsQueries';
@@ -142,14 +137,15 @@ export const OBSERVABILITY_APM_ENABLE_SERVICE_INVENTORY_TABLE_SEARCH_BAR =
   'observability:apmEnableServiceInventoryTableSearchBar';
 export const OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID =
   'observability:logsExplorer:allowedDataViews';
+export const OBSERVABILITY_LOGS_SHARED_NEW_LOGS_OVERVIEW_ID = 'observability:newLogsOverview';
 export const OBSERVABILITY_ENTITY_CENTRIC_EXPERIENCE = 'observability:entityCentricExperience';
 export const OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID = 'observability:logSources';
-export const OBSERVABILITY_AI_ASSISTANT_LOGS_INDEX_PATTERN_ID =
-  'observability:aiAssistantLogsIndexPattern';
+export const OBSERVABILITY_ENABLE_LOGS_STREAM = 'observability:enableLogsStream';
 export const OBSERVABILITY_AI_ASSISTANT_SIMULATED_FUNCTION_CALLING =
   'observability:aiAssistantSimulatedFunctionCalling';
 export const OBSERVABILITY_AI_ASSISTANT_SEARCH_CONNECTOR_INDEX_PATTERN =
   'observability:aiAssistantSearchConnectorIndexPattern';
+export const OBSERVABILITY_SEARCH_EXCLUDED_DATA_TIERS = 'observability:searchExcludedDataTiers';
 
 // Reporting settings
 export const XPACK_REPORTING_CUSTOM_PDF_LOGO_ID = 'xpackReporting:customPdfLogo';
@@ -178,16 +174,14 @@ export const SECURITY_SOLUTION_RULES_TABLE_REFRESH_ID = 'securitySolution:rulesT
 export const SECURITY_SOLUTION_ENABLE_NEWS_FEED_ID = 'securitySolution:enableNewsFeed';
 export const SECURITY_SOLUTION_NEWS_FEED_URL_ID = 'securitySolution:newsFeedUrl';
 export const SECURITY_SOLUTION_IP_REPUTATION_LINKS_ID = 'securitySolution:ipReputationLinks';
-export const SECURITY_SOLUTION_ENABLE_CCS_WARNING_ID = 'securitySolution:enableCcsWarning';
 export const SECURITY_SOLUTION_SHOW_RELATED_INTEGRATIONS_ID =
   'securitySolution:showRelatedIntegrations';
 export const SECURITY_SOLUTION_DEFAULT_ALERT_TAGS_KEY = 'securitySolution:alertTags' as const;
-/** This Kibana Advanced Setting allows users to enable/disable querying cold and frozen data tiers in analyzer */
-export const SECURITY_SOLUTION_EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER =
-  'securitySolution:excludeColdAndFrozenTiersInAnalyzer' as const;
 /** This Kibana Advanced Setting allows users to enable/disable the Asset Criticality feature */
 export const SECURITY_SOLUTION_ENABLE_ASSET_CRITICALITY_SETTING =
   'securitySolution:enableAssetCriticality' as const;
+export const SECURITY_SOLUTION_ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING =
+  'securitySolution:enableVisualizationsInFlyout' as const;
 
 // Timelion settings
 export const TIMELION_ES_DEFAULT_INDEX_ID = 'timelion:es.default_index';

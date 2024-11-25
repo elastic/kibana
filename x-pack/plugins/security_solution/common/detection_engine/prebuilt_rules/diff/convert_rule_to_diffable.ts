@@ -53,6 +53,7 @@ import { extractRuleNameOverrideObject } from './extract_rule_name_override_obje
 import { extractRuleSchedule } from './extract_rule_schedule';
 import { extractTimelineTemplateReference } from './extract_timeline_template_reference';
 import { extractTimestampOverrideObject } from './extract_timestamp_override_object';
+import { extractThreatArray } from './extract_threat_array';
 
 /**
  * Normalizes a given rule to the form which is suitable for passing to the diff algorithm.
@@ -128,20 +129,18 @@ const extractDiffableCommonFields = (
     // About -> Advanced settings
     references: rule.references ?? [],
     false_positives: rule.false_positives ?? [],
-    threat: rule.threat ?? [],
+    threat: extractThreatArray(rule),
     note: rule.note ?? '',
     setup: rule.setup ?? '',
     related_integrations: rule.related_integrations ?? [],
     required_fields: addEcsToRequiredFields(rule.required_fields),
-    author: rule.author ?? [],
-    license: rule.license ?? '',
 
     // Other domain fields
     rule_schedule: extractRuleSchedule(rule),
-    exceptions_list: rule.exceptions_list ?? [],
     max_signals: rule.max_signals ?? DEFAULT_MAX_SIGNALS,
 
     // --------------------- OPTIONAL FIELDS
+    investigation_fields: rule.investigation_fields,
     rule_name_override: extractRuleNameOverrideObject(rule),
     timestamp_override: extractTimestampOverrideObject(rule),
     timeline_template: extractTimelineTemplateReference(rule),
@@ -156,6 +155,7 @@ const extractDiffableCustomQueryFields = (
     type: rule.type,
     kql_query: extractRuleKqlQuery(rule.query, rule.language, rule.filters, rule.saved_id),
     data_source: extractRuleDataSource(rule.index, rule.data_view_id),
+    alert_suppression: rule.alert_suppression,
   };
 };
 
@@ -166,6 +166,7 @@ const extractDiffableSavedQueryFieldsFromRuleObject = (
     type: rule.type,
     kql_query: extractRuleKqlQuery(rule.query, rule.language, rule.filters, rule.saved_id),
     data_source: extractRuleDataSource(rule.index, rule.data_view_id),
+    alert_suppression: rule.alert_suppression,
   };
 };
 
@@ -174,11 +175,16 @@ const extractDiffableEqlFieldsFromRuleObject = (
 ): RequiredOptional<DiffableEqlFields> => {
   return {
     type: rule.type,
-    eql_query: extractRuleEqlQuery(rule.query, rule.language, rule.filters),
+    eql_query: extractRuleEqlQuery({
+      query: rule.query,
+      language: rule.language,
+      filters: rule.filters,
+      eventCategoryOverride: rule.event_category_override,
+      timestampField: rule.timestamp_field,
+      tiebreakerField: rule.tiebreaker_field,
+    }),
     data_source: extractRuleDataSource(rule.index, rule.data_view_id),
-    event_category_override: rule.event_category_override,
-    timestamp_field: rule.timestamp_field,
-    tiebreaker_field: rule.tiebreaker_field,
+    alert_suppression: rule.alert_suppression,
   };
 };
 
@@ -188,6 +194,7 @@ const extractDiffableEsqlFieldsFromRuleObject = (
   return {
     type: rule.type,
     esql_query: extractRuleEsqlQuery(rule.query, rule.language),
+    alert_suppression: rule.alert_suppression,
   };
 };
 
@@ -206,6 +213,8 @@ const extractDiffableThreatMatchFieldsFromRuleObject = (
     threat_index: rule.threat_index,
     threat_mapping: rule.threat_mapping,
     threat_indicator_path: rule.threat_indicator_path,
+    threat_language: rule.threat_language,
+    alert_suppression: rule.alert_suppression,
   };
 };
 
@@ -217,6 +226,7 @@ const extractDiffableThresholdFieldsFromRuleObject = (
     kql_query: extractRuleKqlQuery(rule.query, rule.language, rule.filters, rule.saved_id),
     data_source: extractRuleDataSource(rule.index, rule.data_view_id),
     threshold: rule.threshold,
+    alert_suppression: rule.alert_suppression,
   };
 };
 
@@ -227,6 +237,7 @@ const extractDiffableMachineLearningFieldsFromRuleObject = (
     type: rule.type,
     machine_learning_job_id: rule.machine_learning_job_id,
     anomaly_threshold: rule.anomaly_threshold,
+    alert_suppression: rule.alert_suppression,
   };
 };
 
@@ -239,5 +250,6 @@ const extractDiffableNewTermsFieldsFromRuleObject = (
     data_source: extractRuleDataSource(rule.index, rule.data_view_id),
     new_terms_fields: rule.new_terms_fields,
     history_window_start: rule.history_window_start,
+    alert_suppression: rule.alert_suppression,
   };
 };

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 import type { HttpSetup } from '@kbn/core/public';
 import type { AutoCompleteEntitiesApiResponse } from '../lib/autocomplete_entities/types';
@@ -52,7 +53,10 @@ export class AutocompleteInfo {
       case ENTITIES.INDICES:
         const includeAliases = true;
         const collaborator = this.mapping;
-        return () => this.alias.getIndices(includeAliases, collaborator);
+        return () => [
+          ...this.alias.getIndices(includeAliases, collaborator),
+          ...this.dataStream.getDataStreams(),
+        ];
       case ENTITIES.FIELDS:
         return this.mapping.getMappings(
           context.indices,
@@ -72,8 +76,16 @@ export class AutocompleteInfo {
     }
   }
 
+  /**
+   * Indicates if autocomplete_entities fetching is in progress.
+   */
+  private readonly _isLoading$ = new BehaviorSubject<boolean>(false);
+  public readonly isLoading$ = this._isLoading$.asObservable();
+
   public retrieve(settings: Settings, settingsToRetrieve: DevToolsSettings['autocomplete']) {
     this.clearSubscriptions();
+    this._isLoading$.next(true);
+
     this.http
       .get<AutoCompleteEntitiesApiResponse>(`${API_BASE_PATH}/autocomplete_entities`, {
         query: { ...settingsToRetrieve },
@@ -88,6 +100,9 @@ export class AutocompleteInfo {
             this.retrieve(settings, settings.getAutocomplete());
           }
         }, settings.getPollInterval());
+      })
+      .finally(() => {
+        this._isLoading$.next(false);
       });
   }
 

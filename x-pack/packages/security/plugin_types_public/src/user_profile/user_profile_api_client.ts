@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import type { Observable } from 'rxjs';
+
 import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-browser';
 import type { UserProfileData } from '@kbn/core-user-profile-common';
-import type { Observable } from 'rxjs';
 
 export type {
   GetUserProfileResponse,

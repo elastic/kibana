@@ -25,9 +25,8 @@ describe('ruleActionsNotifyWhen', () => {
         frequency={frequency}
         throttle={frequency.throttle ? Number(frequency.throttle[0]) : null}
         throttleUnit={frequency.throttle ? frequency.throttle[1] : 'm'}
-        onNotifyWhenChange={jest.fn()}
-        onThrottleChange={jest.fn()}
-        onSummaryChange={jest.fn()}
+        onChange={jest.fn()}
+        onUseDefaultMessage={jest.fn()}
         hasAlertsMappings={hasAlertsMappings}
       />
     );

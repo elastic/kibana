@@ -428,7 +428,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                           theme={{
                             lineSeriesStyle: {
                               point: {
-                                visible: false,
+                                visible: 'never',
                               },
                             },
                           }}

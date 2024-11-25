@@ -15,10 +15,11 @@ import { RuleFormData } from '../../rule_form';
 export interface UseResolveProps {
   http: HttpStart;
   id?: string;
+  cacheTime?: number;
 }
 
 export const useResolveRule = (props: UseResolveProps) => {
-  const { id, http } = props;
+  const { id, http, cacheTime } = props;
 
   const queryFn = () => {
     if (id) {
@@ -30,6 +31,7 @@ export const useResolveRule = (props: UseResolveProps) => {
     queryKey: ['useResolveRule', id],
     queryFn,
     enabled: !!id,
+    cacheTime,
     select: (rule): RuleFormData | null => {
       if (!rule) {
         return null;
@@ -41,6 +43,7 @@ export const useResolveRule = (props: UseResolveProps) => {
       };
     },
     refetchOnWindowFocus: false,
+    retry: false,
   });
 
   return {

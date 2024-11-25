@@ -8,9 +8,11 @@ import { v4 as uuidv4 } from 'uuid';
 import type { GetLensAttributes } from '../../types';
 
 const layerId = uuidv4();
+// Exported for testing purposes
+export const stackByFieldAccessorId = '34919782-4546-43a5-b668-06ac934d3acd';
 
 export const getEventsHistogramLensAttributes: GetLensAttributes = (
-  stackByField = 'event.action',
+  stackByField,
   extraOptions = {}
 ) => {
   return {
@@ -37,7 +39,7 @@ export const getEventsHistogramLensAttributes: GetLensAttributes = (
             showGridlines: false,
             layerType: 'data',
             xAccessor: 'aac9d7d0-13a3-480a-892b-08207a787926',
-            splitAccessor: '34919782-4546-43a5-b668-06ac934d3acd',
+            splitAccessor: stackByField ? stackByFieldAccessorId : undefined,
           },
         ],
         yRightExtent: {
@@ -83,30 +85,32 @@ export const getEventsHistogramLensAttributes: GetLensAttributes = (
                   sourceField: '___records___',
                   params: { emptyAsNull: true },
                 },
-                '34919782-4546-43a5-b668-06ac934d3acd': {
-                  label: `Top values of ${stackByField}`,
-                  dataType: 'string',
-                  operationType: 'terms',
-                  scale: 'ordinal',
-                  sourceField: `${stackByField}`,
-                  isBucketed: true,
-                  params: {
-                    size: 10,
-                    orderBy: {
-                      type: 'column',
-                      columnId: 'e09e0380-0740-4105-becc-0a4ca12e3944',
-                    },
-                    orderDirection: 'desc',
-                    otherBucket: true,
-                    missingBucket: false,
-                    parentFormat: {
-                      id: 'terms',
+                ...(stackByField && {
+                  [stackByFieldAccessorId]: {
+                    label: `Top values of ${stackByField}`,
+                    dataType: 'string',
+                    operationType: 'terms',
+                    scale: 'ordinal',
+                    sourceField: `${stackByField}`,
+                    isBucketed: true,
+                    params: {
+                      size: 10,
+                      orderBy: {
+                        type: 'column',
+                        columnId: 'e09e0380-0740-4105-becc-0a4ca12e3944',
+                      },
+                      orderDirection: 'desc',
+                      otherBucket: true,
+                      missingBucket: false,
+                      parentFormat: {
+                        id: 'terms',
+                      },
                     },
                   },
-                },
+                }),
               },
               columnOrder: [
-                '34919782-4546-43a5-b668-06ac934d3acd',
+                ...(stackByField ? [stackByFieldAccessorId] : []),
                 'aac9d7d0-13a3-480a-892b-08207a787926',
                 'e09e0380-0740-4105-becc-0a4ca12e3944',
               ],

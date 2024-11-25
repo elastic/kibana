@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { ace } from '@kbn/es-ui-shared-plugin/public';
-
 export { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';

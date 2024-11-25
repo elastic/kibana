@@ -1,12 +1,19 @@
 {
   "type": "plugin",
   "id": "@kbn/observability-ai-assistant-app-plugin",
-  "owner": "@elastic/obs-ai-assistant",
+  "owner": [
+    "@elastic/obs-ai-assistant"
+  ],
+  "group": "observability",
+  "visibility": "private",
   "plugin": {
     "id": "observabilityAIAssistantApp",
-    "server": true,
     "browser": true,
-    "configPath": ["xpack", "observabilityAIAssistantApp"],
+    "server": true,
+    "configPath": [
+      "xpack",
+      "observabilityAIAssistantApp"
+    ],
     "requiredPlugins": [
       "aiAssistantManagementSelection",
       "observabilityAIAssistant",
@@ -24,10 +31,17 @@
       "ml",
       "alerting",
       "features",
-      "inference"
+      "inference",
+      "logsDataAccess",
+      "llmTasks"
     ],
-    "requiredBundles": ["kibanaReact", "esqlDataGrid"],
-    "optionalPlugins": ["cloud"],
+    "optionalPlugins": [
+      "cloud"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "esqlDataGrid"
+    ],
     "extraPublicDirs": []
   }
 }

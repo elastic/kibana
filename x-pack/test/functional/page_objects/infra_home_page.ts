@@ -201,18 +201,22 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async goToHost() {
+      await browser.pressKeys(browser.keys.ESCAPE);
       await testSubjects.click('openInventorySwitcher');
       await testSubjects.find('goToHost');
       return testSubjects.click('goToHost');
     },
 
     async goToPods() {
+      await browser.pressKeys(browser.keys.ESCAPE);
       await testSubjects.click('openInventorySwitcher');
       await testSubjects.find('goToHost');
+
       return testSubjects.click('goToPods');
     },
 
     async goToContainer() {
+      await browser.pressKeys(browser.keys.ESCAPE);
       await testSubjects.click('openInventorySwitcher');
       await testSubjects.find('goToHost');
       return testSubjects.click('goToContainer');

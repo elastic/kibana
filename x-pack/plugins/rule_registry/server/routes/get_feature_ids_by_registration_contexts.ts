@@ -26,8 +26,13 @@ export const getFeatureIdsByRegistrationContexts = (router: IRouter<RacRequestHa
           )
         ),
       },
+      security: {
+        authz: {
+          requiredPrivileges: ['rac'],
+        },
+      },
       options: {
-        tags: ['access:rac'],
+        access: 'internal',
       },
     },
     async (context, request, response) => {

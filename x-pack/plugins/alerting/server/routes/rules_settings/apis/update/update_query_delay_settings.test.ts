@@ -11,7 +11,7 @@ import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import {
   rulesSettingsClientMock,
   RulesSettingsClientMock,
-} from '../../../../rules_settings_client.mock';
+} from '../../../../rules_settings/rules_settings_client.mock';
 import { updateQueryDelaySettingsRoute } from './update_query_delay_settings';
 
 let rulesSettingsClient: RulesSettingsClientMock;
@@ -45,9 +45,7 @@ describe('updateQueryDelaySettingsRoute', () => {
     expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rules/settings/_query_delay"`);
     expect(config.options).toMatchInlineSnapshot(`
       Object {
-        "tags": Array [
-          "access:write-query-delay-settings",
-        ],
+        "access": "internal",
       }
     `);
 

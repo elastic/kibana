@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 
 import { debounce } from 'lodash';
+import { context } from '@kbn/kibana-react-plugin/public';
 import { ResultsLinks } from '../../../common/components/results_links';
 import { FilebeatConfigFlyout } from '../../../common/components/filebeat_config_flyout';
 import { ImportProgress, IMPORT_STATUS } from '../import_progress';
@@ -76,14 +77,17 @@ const DEFAULT_STATE = {
   combinedFields: [],
   importer: undefined,
   createPipeline: true,
+  initializeDeployment: false,
+  initializeDeploymentStatus: IMPORT_STATUS.INCOMPLETE,
 };
 
 export class ImportView extends Component {
+  static contextType = context;
+
   constructor(props) {
     super(props);
 
     this.state = getDefaultState(DEFAULT_STATE, this.props.results, this.props.capabilities);
-    this.dataViewsContract = props.dataViewsContract;
   }
 
   componentDidMount() {
@@ -98,7 +102,12 @@ export class ImportView extends Component {
   };
 
   clickImport = () => {
-    const { data, results, dataViewsContract, fileUpload } = this.props;
+    const { data, results } = this.props;
+    const {
+      data: { dataViews: dataViewsContract },
+      fileUpload,
+      http,
+    } = this.context.services;
     const {
       index,
       dataView,
@@ -109,8 +118,14 @@ export class ImportView extends Component {
       pipelineId,
     } = this.state;
 
+    const createPipeline = pipelineString !== '';
+
+    this.setState({
+      createPipeline,
+    });
+
     importData(
-      { data, results, dataViewsContract, fileUpload },
+      { data, results, dataViewsContract, fileUpload, http },
       {
         index,
         dataView,
@@ -119,6 +134,7 @@ export class ImportView extends Component {
         mappingsString,
         pipelineString,
         pipelineId,
+        createPipeline,
       },
       (state) => this.setState(state)
     );
@@ -144,7 +160,7 @@ export class ImportView extends Component {
       return;
     }
 
-    const exists = await this.props.fileUpload.checkIndexExists(index);
+    const exists = await this.context.services.fileUpload.checkIndexExists(index);
     const indexNameError = exists ? (
       <FormattedMessage
         id="xpack.dataVisualizer.file.importView.indexNameAlreadyExistsErrorMessage"
@@ -225,7 +241,7 @@ export class ImportView extends Component {
 
   async loadDataViewNames() {
     try {
-      const dataViewNames = await this.dataViewsContract.getTitles();
+      const dataViewNames = await this.context.services.data.dataViews.getTitles();
       this.setState({ dataViewNames });
     } catch (error) {
       console.error('failed to load data views', error);
@@ -265,6 +281,8 @@ export class ImportView extends Component {
       combinedFields,
       importer,
       createPipeline,
+      initializeDeployment,
+      initializeDeploymentStatus,
     } = this.state;
 
     const statuses = {
@@ -279,6 +297,8 @@ export class ImportView extends Component {
       uploadStatus,
       createDataView,
       createPipeline,
+      initializeDeployment,
+      initializeDeploymentStatus,
     };
 
     const disableImport =
@@ -385,7 +405,7 @@ export class ImportView extends Component {
                 this.props.results.format !== FILE_FORMATS.TIKA && (
                   <DocCountChart
                     statuses={statuses}
-                    dataStart={this.props.dataStart}
+                    dataStart={this.context.services.data}
                     importer={importer}
                   />
                 )}

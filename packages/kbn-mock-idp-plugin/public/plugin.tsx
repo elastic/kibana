@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializer } from '@kbn/core-plugins-browser';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import type { PluginInitializer } from '@kbn/core-plugins-browser';
 import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { MOCK_IDP_LOGIN_PATH } from '@kbn/mock-idp-utils/src/constants';
-import type { CloudStart, CloudSetup } from '@kbn/cloud-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+
 import { RoleSwitcher } from './role_switcher';
 
 export interface PluginSetupDependencies {

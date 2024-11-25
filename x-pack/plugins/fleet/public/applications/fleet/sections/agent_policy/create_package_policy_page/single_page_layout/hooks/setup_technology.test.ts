@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
-
-import { waitFor } from '@testing-library/react';
+import { waitFor, renderHook, act } from '@testing-library/react';
 
 import { createPackagePolicyMock } from '../../../../../../../../common/mocks';
 
+import type { RegistryPolicyTemplate, PackageInfo } from '../../../../../../../../common/types';
 import { SetupTechnology } from '../../../../../../../../common/types';
-import { ExperimentalFeaturesService } from '../../../../../services';
-import { sendGetOneAgentPolicy, useStartServices, useConfig } from '../../../../../hooks';
+import { useStartServices, useConfig } from '../../../../../hooks';
 import { SelectedPolicyTab } from '../../components';
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../../common/services/generate_new_agent_policy';
 
@@ -31,12 +29,7 @@ jest.mock('../../../../../../../../common/services/generate_new_agent_policy');
 type MockFn = jest.MockedFunction<any>;
 
 describe('useAgentless', () => {
-  const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
-
   beforeEach(() => {
-    mockedExperimentalFeaturesService.get.mockReturnValue({
-      agentless: false,
-    } as any);
     (useConfig as MockFn).mockReturnValue({
       agentless: undefined,
     } as any);
@@ -49,33 +42,25 @@ describe('useAgentless', () => {
     jest.clearAllMocks();
   });
 
-  it('should not return isAgentless when agentless is not enabled', () => {
+  it('should return isAgentlessEnabled as falsy when agentless is not enabled', () => {
     const { result } = renderHook(() => useAgentless());
 
     expect(result.current.isAgentlessEnabled).toBeFalsy();
-    expect(result.current.isAgentlessApiEnabled).toBeFalsy();
-    expect(result.current.isDefaultAgentlessPolicyEnabled).toBeFalsy();
   });
 
-  it('should return isAgentlessEnabled as falsy if agentless.enabled is true and experimental feature agentless is truthy without cloud or serverless', () => {
+  it('should return isAgentlessEnabled as falsy if agentless.enabled true without cloud or serverless', () => {
     (useConfig as MockFn).mockReturnValue({
       agentless: {
         enabled: true,
       },
     } as any);
 
-    mockedExperimentalFeaturesService.get.mockReturnValue({
-      agentless: false,
-    } as any);
-
     const { result } = renderHook(() => useAgentless());
 
     expect(result.current.isAgentlessEnabled).toBeFalsy();
-    expect(result.current.isAgentlessApiEnabled).toBeFalsy();
-    expect(result.current.isDefaultAgentlessPolicyEnabled).toBeFalsy();
   });
 
-  it('should return isAgentlessEnabled and isAgentlessApiEnabled as truthy with isCloudEnabled', () => {
+  it('should return isAgentlessEnabled as truthy with isCloudEnabled', () => {
     (useConfig as MockFn).mockReturnValue({
       agentless: {
         enabled: true,
@@ -92,14 +77,9 @@ describe('useAgentless', () => {
     const { result } = renderHook(() => useAgentless());
 
     expect(result.current.isAgentlessEnabled).toBeTruthy();
-    expect(result.current.isAgentlessApiEnabled).toBeTruthy();
-    expect(result.current.isDefaultAgentlessPolicyEnabled).toBeFalsy();
   });
-  it('should return isAgentlessEnabled and isDefaultAgentlessPolicyEnabled as truthy with isServerlessEnabled and experimental feature agentless is truthy', () => {
-    mockedExperimentalFeaturesService.get.mockReturnValue({
-      agentless: true,
-    } as any);
 
+  it('should return isAgentlessEnabled truthy with isServerlessEnabled', () => {
     (useStartServices as MockFn).mockReturnValue({
       cloud: {
         isServerlessEnabled: true,
@@ -107,18 +87,18 @@ describe('useAgentless', () => {
       },
     });
 
+    (useConfig as MockFn).mockReturnValue({
+      agentless: {
+        enabled: true,
+      },
+    } as any);
+
     const { result } = renderHook(() => useAgentless());
 
     expect(result.current.isAgentlessEnabled).toBeTruthy();
-    expect(result.current.isAgentlessApiEnabled).toBeFalsy();
-    expect(result.current.isDefaultAgentlessPolicyEnabled).toBeTruthy();
   });
 
-  it('should return isAgentlessEnabled as falsy and isDefaultAgentlessPolicyEnabled as falsy with isServerlessEnabled and experimental feature agentless is falsy', () => {
-    mockedExperimentalFeaturesService.get.mockReturnValue({
-      agentless: false,
-    } as any);
-
+  it('should return isAgentlessEnabled as falsy with isServerlessEnabled and without agentless config', () => {
     (useStartServices as MockFn).mockReturnValue({
       cloud: {
         isServerlessEnabled: true,
@@ -129,8 +109,6 @@ describe('useAgentless', () => {
     const { result } = renderHook(() => useAgentless());
 
     expect(result.current.isAgentlessEnabled).toBeFalsy();
-    expect(result.current.isAgentlessApiEnabled).toBeFalsy();
-    expect(result.current.isDefaultAgentlessPolicyEnabled).toBeFalsy();
   });
 });
 
@@ -143,23 +121,46 @@ describe('useSetupTechnology', () => {
     namespace: 'default',
     is_managed: false,
     supports_agentless: false,
+    inactivity_timeout: 3600,
   };
+
+  const packageInfoMock = {
+    policy_templates: [
+      {
+        name: 'cspm',
+        title: 'Template 1',
+        description: '',
+        deployment_modes: {
+          default: {
+            enabled: true,
+          },
+          agentless: {
+            enabled: true,
+            organization: 'org',
+            division: 'div',
+            team: 'team',
+          },
+        },
+      },
+      {
+        name: 'not-cspm',
+        title: 'Template 2',
+        description: '',
+        deployment_modes: {
+          default: {
+            enabled: true,
+          },
+        },
+      },
+    ] as RegistryPolicyTemplate[],
+  } as PackageInfo;
+
   const packagePolicyMock = createPackagePolicyMock();
 
-  const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
-
   beforeEach(() => {
-    mockedExperimentalFeaturesService.get.mockReturnValue({
-      agentless: true,
-    } as any);
     (useConfig as MockFn).mockReturnValue({
       agentless: undefined,
     } as any);
-    (sendGetOneAgentPolicy as MockFn).mockResolvedValue({
-      data: {
-        item: { id: 'agentless-policy-id' },
-      },
-    });
     (useStartServices as MockFn).mockReturnValue({
       cloud: {
         isServerlessEnabled: true,
@@ -169,15 +170,12 @@ describe('useSetupTechnology', () => {
     (generateNewAgentPolicyWithDefaults as MockFn).mockReturnValue({
       name: 'Agentless policy for endpoint-1',
       supports_agentless: true,
+      inactivity_timeout: 3600,
     });
     jest.clearAllMocks();
   });
 
   it('should initialize with default values when agentless is disabled', () => {
-    mockedExperimentalFeaturesService.get.mockReturnValue({
-      agentless: false,
-    } as any);
-
     const { result } = renderHook(() =>
       useSetupTechnology({
         setNewAgentPolicy,
@@ -188,24 +186,7 @@ describe('useSetupTechnology', () => {
       })
     );
 
-    expect(sendGetOneAgentPolicy).not.toHaveBeenCalled();
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
-  });
-
-  it('should fetch agentless policy if agentless feature is enabled and isServerless is true', async () => {
-    const { waitForNextUpdate } = renderHook(() =>
-      useSetupTechnology({
-        setNewAgentPolicy,
-        newAgentPolicy: newAgentPolicyMock,
-        updateAgentPolicies: updateAgentPoliciesMock,
-        setSelectedPolicyTab: setSelectedPolicyTabMock,
-        packagePolicy: packagePolicyMock,
-      })
-    );
-
-    await waitForNextUpdate();
-
-    expect(sendGetOneAgentPolicy).toHaveBeenCalled();
   });
 
   it('should set agentless setup technology if agent policy supports agentless in edit page', async () => {
@@ -237,7 +218,7 @@ describe('useSetupTechnology', () => {
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
   });
 
-  it('should create agentless policy if agentless feature is enabled and isCloud is true and agentless.api.url', async () => {
+  it('should create agentless policy if isCloud  and agentless.enabled', async () => {
     (useConfig as MockFn).mockReturnValue({
       agentless: {
         enabled: true,
@@ -251,7 +232,7 @@ describe('useSetupTechnology', () => {
         isCloudEnabled: true,
       },
     });
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useSetupTechnology({
         setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
@@ -266,12 +247,13 @@ describe('useSetupTechnology', () => {
     act(() => {
       result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS);
     });
-    waitForNextUpdate();
-
-    expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
-    expect(setNewAgentPolicy).toHaveBeenCalledWith({
-      name: 'Agentless policy for endpoint-1',
-      supports_agentless: true,
+    await waitFor(() => {
+      expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
+      expect(setNewAgentPolicy).toHaveBeenCalledWith({
+        name: 'Agentless policy for endpoint-1',
+        supports_agentless: true,
+        inactivity_timeout: 3600,
+      });
     });
   });
 
@@ -289,15 +271,18 @@ describe('useSetupTechnology', () => {
         isCloudEnabled: true,
       },
     });
-    const { result, rerender } = renderHook(() =>
-      useSetupTechnology({
-        setNewAgentPolicy,
-        newAgentPolicy: newAgentPolicyMock,
-        updateAgentPolicies: updateAgentPoliciesMock,
-        setSelectedPolicyTab: setSelectedPolicyTabMock,
-        packagePolicy: packagePolicyMock,
-      })
-    );
+
+    const initialProps = {
+      setNewAgentPolicy,
+      newAgentPolicy: newAgentPolicyMock,
+      updateAgentPolicies: updateAgentPoliciesMock,
+      setSelectedPolicyTab: setSelectedPolicyTabMock,
+      packagePolicy: packagePolicyMock,
+    };
+
+    const { result, rerender } = renderHook((props = initialProps) => useSetupTechnology(props), {
+      initialProps,
+    });
 
     expect(generateNewAgentPolicyWithDefaults).toHaveBeenCalled();
 
@@ -307,6 +292,7 @@ describe('useSetupTechnology', () => {
 
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
     expect(setNewAgentPolicy).toHaveBeenCalledWith({
+      inactivity_timeout: 3600,
       name: 'Agentless policy for endpoint-1',
       supports_agentless: true,
     });
@@ -322,15 +308,16 @@ describe('useSetupTechnology', () => {
       },
     });
 
-    waitFor(() => {
+    await waitFor(() => {
       expect(setNewAgentPolicy).toHaveBeenCalledWith({
         name: 'Agentless policy for endpoint-2',
+        inactivity_timeout: 3600,
         supports_agentless: true,
       });
     });
   });
 
-  it('should not create agentless policy if agentless feature is enabled and isCloud is true and agentless.api.url is not defined', async () => {
+  it('should not create agentless policy isCloud is true and agentless.api.url is not defined', async () => {
     (useConfig as MockFn).mockReturnValue({} as any);
     (useStartServices as MockFn).mockReturnValue({
       cloud: {
@@ -338,7 +325,7 @@ describe('useSetupTechnology', () => {
       },
     });
 
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useSetupTechnology({
         setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
@@ -354,14 +341,21 @@ describe('useSetupTechnology', () => {
       result.current.handleSetupTechnologyChange(SetupTechnology.AGENT_BASED);
     });
 
-    waitForNextUpdate();
-    expect(setNewAgentPolicy).toHaveBeenCalledTimes(0);
+    await waitFor(() => expect(setNewAgentPolicy).toHaveBeenCalledTimes(0));
   });
 
-  it('should not fetch agentless policy if agentless is enabled but serverless is disabled', async () => {
+  it('should update new agent policy and selected policy tab when setup technology is agent-based', async () => {
+    (useConfig as MockFn).mockReturnValue({
+      agentless: {
+        enabled: true,
+        api: {
+          url: 'https://agentless.api.url',
+        },
+      },
+    } as any);
     (useStartServices as MockFn).mockReturnValue({
       cloud: {
-        isServerlessEnabled: false,
+        isCloudEnabled: true,
       },
     });
 
@@ -374,44 +368,6 @@ describe('useSetupTechnology', () => {
         packagePolicy: packagePolicyMock,
       })
     );
-
-    expect(sendGetOneAgentPolicy).not.toHaveBeenCalled();
-    expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
-  });
-
-  it('should update agent policy and selected policy tab when setup technology is agentless', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useSetupTechnology({
-        setNewAgentPolicy,
-        newAgentPolicy: newAgentPolicyMock,
-        updateAgentPolicies: updateAgentPoliciesMock,
-        setSelectedPolicyTab: setSelectedPolicyTabMock,
-        packagePolicy: packagePolicyMock,
-      })
-    );
-
-    await waitForNextUpdate();
-
-    act(() => {
-      result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS);
-    });
-
-    expect(updateAgentPoliciesMock).toHaveBeenCalledWith([{ id: 'agentless-policy-id' }]);
-    expect(setSelectedPolicyTabMock).toHaveBeenCalledWith(SelectedPolicyTab.EXISTING);
-  });
-
-  it('should update new agent policy and selected policy tab when setup technology is agent-based', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useSetupTechnology({
-        setNewAgentPolicy,
-        newAgentPolicy: newAgentPolicyMock,
-        updateAgentPolicies: updateAgentPoliciesMock,
-        setSelectedPolicyTab: setSelectedPolicyTabMock,
-        packagePolicy: packagePolicyMock,
-      })
-    );
-
-    await waitForNextUpdate();
 
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
 
@@ -427,15 +383,13 @@ describe('useSetupTechnology', () => {
 
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
 
-    expect(setNewAgentPolicy).toHaveBeenCalledWith(newAgentPolicyMock);
-    expect(setSelectedPolicyTabMock).toHaveBeenCalledWith(SelectedPolicyTab.NEW);
+    await waitFor(() => {
+      expect(setNewAgentPolicy).toHaveBeenCalledWith(newAgentPolicyMock);
+      expect(setSelectedPolicyTabMock).toHaveBeenCalledWith(SelectedPolicyTab.NEW);
+    });
   });
 
-  it('should not update agent policy and selected policy tab when agentless is disabled', async () => {
-    mockedExperimentalFeaturesService.get.mockReturnValue({
-      agentless: false,
-    } as any);
-
+  it('should not update agent policy and selected policy tab when setup technology matches the current one ', async () => {
     const { result } = renderHook(() =>
       useSetupTechnology({
         setNewAgentPolicy,
@@ -446,29 +400,9 @@ describe('useSetupTechnology', () => {
       })
     );
 
-    expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
-
-    act(() => {
-      result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS);
-    });
-
-    expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
-  });
-
-  it('should not update agent policy and selected policy tab when setup technology matches the current one ', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useSetupTechnology({
-        setNewAgentPolicy,
-        newAgentPolicy: newAgentPolicyMock,
-        updateAgentPolicies: updateAgentPoliciesMock,
-        setSelectedPolicyTab: setSelectedPolicyTabMock,
-        packagePolicy: packagePolicyMock,
-      })
+    await waitFor(() =>
+      expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED)
     );
-
-    await waitForNextUpdate();
-
-    expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
 
     act(() => {
       result.current.handleSetupTechnologyChange(SetupTechnology.AGENT_BASED);
@@ -481,7 +415,20 @@ describe('useSetupTechnology', () => {
   });
 
   it('should revert the agent policy name to the original value when switching from agentless back to agent-based', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
+    (useConfig as MockFn).mockReturnValue({
+      agentless: {
+        enabled: true,
+        api: {
+          url: 'https://agentless.api.url',
+        },
+      },
+    } as any);
+    (useStartServices as MockFn).mockReturnValue({
+      cloud: {
+        isServerlessEnabled: true,
+      },
+    });
+    const { result } = renderHook(() =>
       useSetupTechnology({
         setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
@@ -491,20 +438,21 @@ describe('useSetupTechnology', () => {
       })
     );
 
-    await waitForNextUpdate();
-
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
 
     act(() => {
       result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS);
     });
 
-    expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
+    await waitFor(() =>
+      expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS)
+    );
 
-    waitFor(() => {
+    await waitFor(() => {
       expect(setNewAgentPolicy).toHaveBeenCalledWith({
         name: 'Agentless policy for endpoint-1',
         supports_agentless: true,
+        inactivity_timeout: 3600,
       });
     });
 
@@ -512,7 +460,252 @@ describe('useSetupTechnology', () => {
       result.current.handleSetupTechnologyChange(SetupTechnology.AGENT_BASED);
     });
 
-    expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
-    expect(setNewAgentPolicy).toHaveBeenCalledWith(newAgentPolicyMock);
+    await waitFor(() => {
+      expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
+      expect(setNewAgentPolicy).toHaveBeenCalledWith(newAgentPolicyMock);
+    });
+  });
+
+  it('should have global_data_tags with the integration team when creating agentless policy with global_data_tags', async () => {
+    (useConfig as MockFn).mockReturnValue({
+      agentless: {
+        enabled: true,
+        api: {
+          url: 'https://agentless.api.url',
+        },
+      },
+    } as any);
+    (useStartServices as MockFn).mockReturnValue({
+      cloud: {
+        isCloudEnabled: true,
+      },
+    });
+
+    const { result } = renderHook(() =>
+      useSetupTechnology({
+        setNewAgentPolicy,
+        newAgentPolicy: newAgentPolicyMock,
+        updateAgentPolicies: updateAgentPoliciesMock,
+        setSelectedPolicyTab: setSelectedPolicyTabMock,
+        packagePolicy: packagePolicyMock,
+        packageInfo: packageInfoMock,
+      })
+    );
+
+    act(() => {
+      result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS, 'cspm');
+    });
+
+    await waitFor(() => {
+      expect(setNewAgentPolicy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          supports_agentless: true,
+          global_data_tags: [
+            { name: 'organization', value: 'org' },
+            { name: 'division', value: 'div' },
+            { name: 'team', value: 'team' },
+          ],
+        })
+      );
+    });
+  });
+
+  it('should not fail and not have global_data_tags when creating the agentless policy when it cannot find the policy template', async () => {
+    (useConfig as MockFn).mockReturnValue({
+      agentless: {
+        enabled: true,
+        api: {
+          url: 'https://agentless.api.url',
+        },
+      },
+    } as any);
+    (useStartServices as MockFn).mockReturnValue({
+      cloud: {
+        isCloudEnabled: true,
+      },
+    });
+
+    const { result } = renderHook(() =>
+      useSetupTechnology({
+        setNewAgentPolicy,
+        newAgentPolicy: newAgentPolicyMock,
+        updateAgentPolicies: updateAgentPoliciesMock,
+        setSelectedPolicyTab: setSelectedPolicyTabMock,
+        packagePolicy: packagePolicyMock,
+        packageInfo: packageInfoMock,
+      })
+    );
+
+    act(() => {
+      result.current.handleSetupTechnologyChange(
+        SetupTechnology.AGENTLESS,
+        'never-gonna-give-you-up'
+      );
+    });
+
+    await waitFor(() => {
+      expect(setNewAgentPolicy).toHaveBeenCalledWith({
+        name: 'Agentless policy for endpoint-1',
+        supports_agentless: true,
+        inactivity_timeout: 3600,
+      });
+      expect(setNewAgentPolicy).not.toHaveBeenCalledWith({
+        global_data_tags: [
+          { name: 'organization', value: 'org' },
+          { name: 'division', value: 'div' },
+          { name: 'team', value: 'team' },
+        ],
+      });
+    });
+  });
+
+  it('should not fail and not have global_data_tags when creating the agentless policy without the policy template name', async () => {
+    (useConfig as MockFn).mockReturnValue({
+      agentless: {
+        enabled: true,
+        api: {
+          url: 'https://agentless.api.url',
+        },
+      },
+    } as any);
+    (useStartServices as MockFn).mockReturnValue({
+      cloud: {
+        isCloudEnabled: true,
+      },
+    });
+
+    const { result } = renderHook(() =>
+      useSetupTechnology({
+        setNewAgentPolicy,
+        newAgentPolicy: newAgentPolicyMock,
+        updateAgentPolicies: updateAgentPoliciesMock,
+        setSelectedPolicyTab: setSelectedPolicyTabMock,
+        packagePolicy: packagePolicyMock,
+        packageInfo: packageInfoMock,
+      })
+    );
+
+    act(() => {
+      result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS);
+    });
+
+    await waitFor(() => {
+      expect(setNewAgentPolicy).toHaveBeenCalledWith({
+        name: 'Agentless policy for endpoint-1',
+        supports_agentless: true,
+        inactivity_timeout: 3600,
+      });
+      expect(setNewAgentPolicy).not.toHaveBeenCalledWith({
+        global_data_tags: [
+          { name: 'organization', value: 'org' },
+          { name: 'division', value: 'div' },
+          { name: 'team', value: 'team' },
+        ],
+      });
+    });
+  });
+
+  it('should not fail and not have global_data_tags when creating the agentless policy without the packageInfo', async () => {
+    (useConfig as MockFn).mockReturnValue({
+      agentless: {
+        enabled: true,
+        api: {
+          url: 'https://agentless.api.url',
+        },
+      },
+    } as any);
+    (useStartServices as MockFn).mockReturnValue({
+      cloud: {
+        isCloudEnabled: true,
+      },
+    });
+
+    const { result } = renderHook(() =>
+      useSetupTechnology({
+        setNewAgentPolicy,
+        newAgentPolicy: newAgentPolicyMock,
+        updateAgentPolicies: updateAgentPoliciesMock,
+        setSelectedPolicyTab: setSelectedPolicyTabMock,
+        packagePolicy: packagePolicyMock,
+      })
+    );
+
+    act(() => {
+      result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS, 'cspm');
+    });
+
+    await waitFor(() => {
+      expect(setNewAgentPolicy).toHaveBeenCalledWith({
+        name: 'Agentless policy for endpoint-1',
+        supports_agentless: true,
+        inactivity_timeout: 3600,
+      });
+      expect(setNewAgentPolicy).not.toHaveBeenCalledWith({
+        global_data_tags: [
+          { name: 'organization', value: 'org' },
+          { name: 'division', value: 'div' },
+          { name: 'team', value: 'team' },
+        ],
+      });
+    });
+  });
+
+  it('should not have global_data_tags when switching from agentless to agent-based policy', async () => {
+    (useConfig as MockFn).mockReturnValue({
+      agentless: {
+        enabled: true,
+        api: {
+          url: 'https://agentless.api.url',
+        },
+      },
+    } as any);
+    (useStartServices as MockFn).mockReturnValue({
+      cloud: {
+        isCloudEnabled: true,
+      },
+    });
+
+    const { result } = renderHook(() =>
+      useSetupTechnology({
+        setNewAgentPolicy,
+        newAgentPolicy: newAgentPolicyMock,
+        updateAgentPolicies: updateAgentPoliciesMock,
+        setSelectedPolicyTab: setSelectedPolicyTabMock,
+        packagePolicy: packagePolicyMock,
+        packageInfo: packageInfoMock,
+      })
+    );
+
+    act(() => {
+      result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS, 'cspm');
+    });
+
+    await waitFor(() => {
+      expect(setNewAgentPolicy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          supports_agentless: true,
+          global_data_tags: [
+            { name: 'organization', value: 'org' },
+            { name: 'division', value: 'div' },
+            { name: 'team', value: 'team' },
+          ],
+        })
+      );
+    });
+
+    act(() => {
+      result.current.handleSetupTechnologyChange(SetupTechnology.AGENT_BASED);
+    });
+
+    await waitFor(() => {
+      expect(setNewAgentPolicy).toHaveBeenCalledWith(newAgentPolicyMock);
+      expect(setNewAgentPolicy).not.toHaveBeenCalledWith({
+        global_data_tags: [
+          { name: 'organization', value: 'org' },
+          { name: 'division', value: 'div' },
+          { name: 'team', value: 'team' },
+        ],
+      });
+    });
   });
 });

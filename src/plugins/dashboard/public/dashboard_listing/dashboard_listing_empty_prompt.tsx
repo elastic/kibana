@@ -8,24 +8,28 @@
  */
 
 import {
-  EuiLink,
   EuiButton,
-  EuiFlexItem,
-  EuiFlexGroup,
   EuiButtonEmpty,
   EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
 
 import {
-  noItemsStrings,
-  getNewDashboardTitle,
+  DASHBOARD_PANELS_UNSAVED_ID,
+  getDashboardBackupService,
+} from '../services/dashboard_backup_service';
+import { coreServices } from '../services/kibana_services';
+import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
+import {
   dashboardUnsavedListingStrings,
+  getNewDashboardTitle,
+  noItemsStrings,
 } from './_dashboard_listing_strings';
-import { pluginServices } from '../services/plugin_services';
 import { confirmDiscardUnsavedChanges } from './confirm_overlays';
-import { DASHBOARD_PANELS_UNSAVED_ID } from '../services/dashboard_backup/dashboard_backup_service';
 import { DashboardListingProps } from './types';
 
 export interface DashboardListingEmptyPromptProps {
@@ -45,12 +49,6 @@ export const DashboardListingEmptyPrompt = ({
   createItem,
   disableCreateDashboardButton,
 }: DashboardListingEmptyPromptProps) => {
-  const {
-    application,
-    dashboardBackup,
-    dashboardCapabilities: { showWriteControls },
-  } = pluginServices.getServices();
-
   const isEditingFirstDashboard = useMemo(
     () => useSessionStorageIntegration && unsavedDashboardIds.length === 1,
     [unsavedDashboardIds.length, useSessionStorageIntegration]
@@ -78,8 +76,9 @@ export const DashboardListingEmptyPrompt = ({
             color="danger"
             onClick={() =>
               confirmDiscardUnsavedChanges(() => {
-                dashboardBackup.clearState(DASHBOARD_PANELS_UNSAVED_ID);
-                setUnsavedDashboardIds(dashboardBackup.getDashboardIdsWithUnsavedChanges());
+                const dashboardBackupService = getDashboardBackupService();
+                dashboardBackupService.clearState(DASHBOARD_PANELS_UNSAVED_ID);
+                setUnsavedDashboardIds(dashboardBackupService.getDashboardIdsWithUnsavedChanges());
               })
             }
             data-test-subj="discardDashboardPromptButton"
@@ -106,12 +105,11 @@ export const DashboardListingEmptyPrompt = ({
     isEditingFirstDashboard,
     createItem,
     disableCreateDashboardButton,
-    dashboardBackup,
     goToDashboard,
     setUnsavedDashboardIds,
   ]);
 
-  if (!showWriteControls) {
+  if (!getDashboardCapabilities().showWriteControls) {
     return (
       <EuiEmptyPrompt
         iconType="glasses"
@@ -147,7 +145,7 @@ export const DashboardListingEmptyPrompt = ({
                   sampleDataInstallLink: (
                     <EuiLink
                       onClick={() =>
-                        application.navigateToApp('home', {
+                        coreServices.application.navigateToApp('home', {
                           path: '#/tutorial_directory/sampleData',
                         })
                       }

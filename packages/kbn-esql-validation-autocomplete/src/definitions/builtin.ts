@@ -425,6 +425,20 @@ const likeFunctions: FunctionDefinition[] = [
       },
       {
         params: [
+          { name: 'left', type: 'text' as const },
+          { name: 'right', type: 'keyword' as const },
+        ],
+        returnType: 'boolean',
+      },
+      {
+        params: [
+          { name: 'left', type: 'keyword' as const },
+          { name: 'right', type: 'text' as const },
+        ],
+        returnType: 'boolean',
+      },
+      {
+        params: [
           { name: 'left', type: 'keyword' as const },
           { name: 'right', type: 'keyword' as const },
         ],
@@ -514,7 +528,7 @@ const inFunctions: FunctionDefinition[] = [
   ],
 }));
 
-const logicFunctions: FunctionDefinition[] = [
+export const logicalOperators: FunctionDefinition[] = [
   {
     name: 'and',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.andDoc', {
@@ -609,25 +623,12 @@ const otherDefinitions: FunctionDefinition[] = [
           { name: 'left', type: 'any' },
           { name: 'right', type: 'any' },
         ],
-        returnType: 'void',
+        returnType: 'unknown',
       },
     ],
   },
   {
-    name: 'functions',
-    type: 'builtin',
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.functionsDoc', {
-      defaultMessage: 'Show ES|QL avaialble functions with signatures',
-    }),
-    supportedCommands: ['meta'],
-    signatures: [
-      {
-        params: [],
-        returnType: 'void',
-      },
-    ],
-  },
-  {
+    // TODO — this shouldn't be a function or an operator...
     name: 'info',
     type: 'builtin',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.infoDoc', {
@@ -637,7 +638,7 @@ const otherDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [],
-        returnType: 'void',
+        returnType: 'unknown', // meaningless
       },
     ],
   },
@@ -648,7 +649,7 @@ export const builtinFunctions: FunctionDefinition[] = [
   ...comparisonFunctions,
   ...likeFunctions,
   ...inFunctions,
-  ...logicFunctions,
+  ...logicalOperators,
   ...nullFunctions,
   ...otherDefinitions,
 ];

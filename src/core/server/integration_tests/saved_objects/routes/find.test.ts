@@ -22,7 +22,7 @@ import {
   registerFindRoute,
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
-import { setupConfig } from './routes_test_utils';
+import { deprecationMock, setupConfig } from './routes_test_utils';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -42,6 +42,7 @@ describe('GET /api/saved_objects/_find', () => {
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   let coreUsageStatsClient: jest.Mocked<ICoreUsageStatsClient>;
   let loggerWarnSpy: jest.SpyInstance;
+  let registrationSpy: jest.SpyInstance;
 
   const clientResponse = {
     total: 0,
@@ -71,11 +72,18 @@ describe('GET /api/saved_objects/_find', () => {
 
     const logger = loggerMock.create();
     loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
+    registrationSpy = jest.spyOn(router, 'get');
 
     const config = setupConfig();
     const access = 'public';
 
-    registerFindRoute(router, { config, coreUsageData, logger, access });
+    registerFindRoute(router, {
+      config,
+      coreUsageData,
+      logger,
+      access,
+      deprecationInfo: deprecationMock,
+    });
 
     await server.start();
   });
@@ -87,6 +95,7 @@ describe('GET /api/saved_objects/_find', () => {
   it('returns with status 400 when type is missing', async () => {
     const result = await supertest(httpSetup.server.listener)
       .get('/api/saved_objects/_find')
+      .set('x-elastic-internal-origin', 'kibana')
       .expect(400);
 
     expect(result.body.message).toContain(
@@ -102,6 +111,7 @@ describe('GET /api/saved_objects/_find', () => {
     };
     const result = await supertest(httpSetup.server.listener)
       .get('/api/saved_objects/_find?type=hidden-from-http')
+      .set('x-elastic-internal-origin', 'kibana')
       .expect(400);
 
     expect(result.body).toEqual(findResponse);
@@ -116,6 +126,7 @@ describe('GET /api/saved_objects/_find', () => {
     };
     const result = await supertest(httpSetup.server.listener)
       .get('/api/saved_objects/_find?type=hidden-type')
+      .set('x-elastic-internal-origin', 'kibana')
       .expect(200);
 
     expect(result.body).toEqual(findResponse);
@@ -155,6 +166,7 @@ describe('GET /api/saved_objects/_find', () => {
 
     const result = await supertest(httpSetup.server.listener)
       .get('/api/saved_objects/_find?type=index-pattern')
+      .set('x-elastic-internal-origin', 'kibana')
       .expect(200);
 
     expect(result.body).toEqual(findResponse);
@@ -167,6 +179,7 @@ describe('GET /api/saved_objects/_find', () => {
   it('calls upon savedObjectClient.find with defaults', async () => {
     await supertest(httpSetup.server.listener)
       .get('/api/saved_objects/_find?type=foo&type=bar')
+      .set('x-elastic-internal-origin', 'kibana')
       .expect(200);
 
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
@@ -186,6 +199,7 @@ describe('GET /api/saved_objects/_find', () => {
   it('accepts the query parameter page/per_page', async () => {
     await supertest(httpSetup.server.listener)
       .get('/api/saved_objects/_find?type=foo&per_page=10&page=50')
+      .set('x-elastic-internal-origin', 'kibana')
       .expect(200);
 
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
@@ -195,7 +209,10 @@ describe('GET /api/saved_objects/_find', () => {
   });
 
   it('accepts the optional query parameter has_reference', async () => {
-    await supertest(httpSetup.server.listener).get('/api/saved_objects/_find?type=foo').expect(200);
+    await supertest(httpSetup.server.listener)
+      .get('/api/saved_objects/_find?type=foo')
+      .set('x-elastic-internal-origin', 'kibana')
+      .expect(200);
 
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 
@@ -212,6 +229,7 @@ describe('GET /api/saved_objects/_find', () => {
     );
     await supertest(httpSetup.server.listener)
       .get(`/api/saved_objects/_find?type=foo&has_reference=${references}`)
+      .set('x-elastic-internal-origin', 'kibana')
       .expect(200);
 
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
@@ -238,6 +256,7 @@ describe('GET /api/saved_objects/_find', () => {
     );
     await supertest(httpSetup.server.listener)
       .get(`/api/saved_objects/_find?type=foo&has_reference=${references}`)
+      .set('x-elastic-internal-origin', 'kibana')
       .expect(200);
 
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
@@ -258,6 +277,7 @@ describe('GET /api/saved_objects/_find', () => {
   it('accepts the query parameter has_reference_operator', async () => {
     await supertest(httpSetup.server.listener)
       .get('/api/saved_objects/_find?type=foo&has_reference_operator=AND')
+      .set('x-elastic-internal-origin', 'kibana')
       .expect(200);
 
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
@@ -279,6 +299,7 @@ describe('GET /api/saved_objects/_find', () => {
     );
     await supertest(httpSetup.server.listener)
       .get(`/api/saved_objects/_find?type=foo&has_no_reference=${references}`)
+      .set('x-elastic-internal-origin', 'kibana')
       .expect(200);
 
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
@@ -305,6 +326,7 @@ describe('GET /api/saved_objects/_find', () => {
     );
     await supertest(httpSetup.server.listener)
       .get(`/api/saved_objects/_find?type=foo&has_no_reference=${references}`)
+      .set('x-elastic-internal-origin', 'kibana')
       .expect(200);
 
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
@@ -325,6 +347,7 @@ describe('GET /api/saved_objects/_find', () => {
   it('accepts the query parameter has_no_reference_operator', async () => {
     await supertest(httpSetup.server.listener)
       .get('/api/saved_objects/_find?type=foo&has_no_reference_operator=AND')
+      .set('x-elastic-internal-origin', 'kibana')
       .expect(200);
 
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
@@ -340,6 +363,7 @@ describe('GET /api/saved_objects/_find', () => {
   it('accepts the query parameter search_fields', async () => {
     await supertest(httpSetup.server.listener)
       .get('/api/saved_objects/_find?type=foo&search_fields=title')
+      .set('x-elastic-internal-origin', 'kibana')
       .expect(200);
 
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
@@ -355,6 +379,7 @@ describe('GET /api/saved_objects/_find', () => {
   it('accepts the query parameter fields as a string', async () => {
     await supertest(httpSetup.server.listener)
       .get('/api/saved_objects/_find?type=foo&fields=title')
+      .set('x-elastic-internal-origin', 'kibana')
       .expect(200);
 
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
@@ -370,6 +395,7 @@ describe('GET /api/saved_objects/_find', () => {
   it('accepts the query parameter fields as an array', async () => {
     await supertest(httpSetup.server.listener)
       .get('/api/saved_objects/_find?type=foo&fields=title&fields=description')
+      .set('x-elastic-internal-origin', 'kibana')
       .expect(200);
 
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
@@ -385,6 +411,7 @@ describe('GET /api/saved_objects/_find', () => {
   it('accepts the query parameter type as a string', async () => {
     await supertest(httpSetup.server.listener)
       .get('/api/saved_objects/_find?type=index-pattern')
+      .set('x-elastic-internal-origin', 'kibana')
       .expect(200);
 
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
@@ -400,6 +427,7 @@ describe('GET /api/saved_objects/_find', () => {
   it('accepts the query parameter type as an array', async () => {
     await supertest(httpSetup.server.listener)
       .get('/api/saved_objects/_find?type=index-pattern&type=visualization')
+      .set('x-elastic-internal-origin', 'kibana')
       .expect(200);
 
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
@@ -415,6 +443,7 @@ describe('GET /api/saved_objects/_find', () => {
   it('accepts the query parameter namespaces as a string', async () => {
     await supertest(httpSetup.server.listener)
       .get('/api/saved_objects/_find?type=index-pattern&namespaces=foo')
+      .set('x-elastic-internal-origin', 'kibana')
       .expect(200);
 
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
@@ -430,6 +459,7 @@ describe('GET /api/saved_objects/_find', () => {
   it('accepts the query parameter namespaces as an array', async () => {
     await supertest(httpSetup.server.listener)
       .get('/api/saved_objects/_find?type=index-pattern&namespaces=default&namespaces=foo')
+      .set('x-elastic-internal-origin', 'kibana')
       .expect(200);
 
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
@@ -445,7 +475,18 @@ describe('GET /api/saved_objects/_find', () => {
   it('logs a warning message when called', async () => {
     await supertest(httpSetup.server.listener)
       .get('/api/saved_objects/_find?type=foo&type=bar')
+      .set('x-elastic-internal-origin', 'kibana')
       .expect(200);
     expect(loggerWarnSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('passes deprecation configuration to the router arguments', async () => {
+    await supertest(httpSetup.server.listener)
+      .get('/api/saved_objects/_find?type=foo&type=bar')
+      .set('x-elastic-internal-origin', 'kibana')
+      .expect(200);
+    expect(registrationSpy.mock.calls[0][0]).toMatchObject({
+      options: { deprecated: deprecationMock },
+    });
   });
 });

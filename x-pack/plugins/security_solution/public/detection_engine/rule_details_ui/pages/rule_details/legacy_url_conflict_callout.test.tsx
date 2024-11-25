@@ -31,6 +31,7 @@ const mockSpacesApi: SpacesApi = {
     useSpaces: jest.fn(),
   },
   hasOnlyDefaultSpace: false,
+  isSolutionViewEnabled: true,
 };
 
 describe('<LegacyUrlConflictCallOut />', () => {
@@ -113,4 +114,5 @@ const mockRule: Rule = {
   related_integrations: [],
   required_fields: [],
   setup: '',
+  rule_source: { type: 'internal' },
 };

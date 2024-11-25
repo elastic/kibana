@@ -14,34 +14,19 @@ import {
   AlertsClientError,
 } from '@kbn/alerting-plugin/server';
 import { asyncForEach } from '@kbn/std';
-import { ALERT_REASON, ALERT_UUID } from '@kbn/rule-data-utils';
-import {
-  alertsLocatorID,
-  AlertsLocatorParams,
-  getAlertUrl,
-  observabilityPaths,
-} from '@kbn/observability-plugin/common';
-import { LocatorPublic } from '@kbn/share-plugin/common';
+import { getAlertDetailsUrl, observabilityPaths } from '@kbn/observability-plugin/common';
 import { schema } from '@kbn/config-schema';
 import { ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
 import { syntheticsRuleFieldMap } from '../../../common/rules/synthetics_rule_field_map';
 import { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from '../../types';
-import { TlsTranslations } from '../../../common/rules/synthetics/translations';
-import {
-  CERT_COMMON_NAME,
-  CERT_HASH_SHA256,
-  CERT_ISSUER_NAME,
-  CERT_VALID_NOT_AFTER,
-  CERT_VALID_NOT_BEFORE,
-} from '../../../common/field_names';
-import { getCertSummary, setTLSRecoveredAlertsContext } from './message_utils';
+import { getCertSummary, getTLSAlertDocument, setTLSRecoveredAlertsContext } from './message_utils';
 import { SyntheticsCommonState } from '../../../common/runtime_types/alert_rules/common';
 import { TLSRuleExecutor } from './tls_rule_executor';
 import {
   SYNTHETICS_ALERT_RULE_TYPES,
   TLS_CERTIFICATE,
 } from '../../../common/constants/synthetics_alerts';
-import { generateAlertMessage, SyntheticsRuleTypeAlertDefinition, updateState } from '../common';
+import { SyntheticsRuleTypeAlertDefinition, updateState } from '../common';
 import { ALERT_DETAILS_URL, getActionVariables } from '../action_variables';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { TLSParams } from '../../../common/runtime_types/alerts/tls';
@@ -92,14 +77,12 @@ export const registerSyntheticsTLSCheckRule = (
         TLSAlert
       >
     ) => {
-      const { state: ruleState, params, services, spaceId, previousStartedAt, startedAt } = options;
+      const { state: ruleState, params, services, spaceId, previousStartedAt } = options;
       const { alertsClient, savedObjectsClient, scopedClusterClient } = services;
       if (!alertsClient) {
         throw new AlertsClientError();
       }
-      const { basePath, share } = server;
-      const alertsLocator: LocatorPublic<AlertsLocatorParams> | undefined =
-        share.url.locators.get(alertsLocatorID);
+      const { basePath } = server;
 
       const tlsRule = new TLSRuleExecutor(
         previousStartedAt,
@@ -121,31 +104,16 @@ export const registerSyntheticsTLSCheckRule = (
         }
 
         const alertId = cert.sha256;
-        const { uuid, start } = alertsClient.report({
+        const { uuid } = alertsClient.report({
           id: alertId,
           actionGroup: TLS_CERTIFICATE.id,
           state: { ...updateState(ruleState, foundCerts), ...summary },
         });
-        const indexedStartedAt = start ?? startedAt.toISOString();
 
-        const payload = {
-          [CERT_COMMON_NAME]: cert.common_name,
-          [CERT_ISSUER_NAME]: cert.issuer,
-          [CERT_VALID_NOT_AFTER]: cert.not_after,
-          [CERT_VALID_NOT_BEFORE]: cert.not_before,
-          [CERT_HASH_SHA256]: cert.sha256,
-          [ALERT_UUID]: uuid,
-          [ALERT_REASON]: generateAlertMessage(TlsTranslations.defaultActionMessage, summary),
-        };
+        const payload = getTLSAlertDocument(cert, summary, uuid);
 
         const context = {
-          [ALERT_DETAILS_URL]: await getAlertUrl(
-            uuid,
-            spaceId,
-            indexedStartedAt,
-            alertsLocator,
-            basePath.publicBaseUrl
-          ),
+          [ALERT_DETAILS_URL]: await getAlertDetailsUrl(basePath, spaceId, uuid),
           ...summary,
         };
 
@@ -159,9 +127,7 @@ export const registerSyntheticsTLSCheckRule = (
       await setTLSRecoveredAlertsContext({
         alertsClient,
         basePath,
-        defaultStartedAt: startedAt.toISOString(),
         spaceId,
-        alertsLocator,
         latestPings,
       });
 

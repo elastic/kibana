@@ -22,6 +22,8 @@ import {
 import { AnyApiAction } from '../../panel_actions/types';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
 
+const disabledNotifications = ['ACTION_FILTERS_NOTIFICATION'];
+
 export const usePresentationPanelHeaderActions = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi
 >(
@@ -47,10 +49,8 @@ export const usePresentationPanelHeaderActions = <
           embeddable: api,
         })) as AnyApiAction[]) ?? [];
 
-      const disabledActions = api.disabledActionIds?.value;
-      if (disabledActions) {
-        nextActions = nextActions.filter((badge) => disabledActions.indexOf(badge.id) === -1);
-      }
+      const disabledActions = (api.disabledActionIds?.value ?? []).concat(disabledNotifications);
+      nextActions = nextActions.filter((badge) => disabledActions.indexOf(badge.id) === -1);
       return nextActions;
     };
 
@@ -85,8 +85,8 @@ export const usePresentationPanelHeaderActions = <
       );
       for (const badge of frequentlyChangingBadges) {
         subscriptions.add(
-          badge.subscribeToCompatibilityChanges(apiContext, (isComptaible, action) =>
-            handleActionCompatibilityChange('badge', isComptaible, action as AnyApiAction)
+          badge.subscribeToCompatibilityChanges(apiContext, (isCompatible, action) =>
+            handleActionCompatibilityChange('badge', isCompatible, action as AnyApiAction)
           )
         );
       }
@@ -97,11 +97,12 @@ export const usePresentationPanelHeaderActions = <
         apiContext
       );
       for (const notification of frequentlyChangingNotifications) {
-        subscriptions.add(
-          notification.subscribeToCompatibilityChanges(apiContext, (isComptaible, action) =>
-            handleActionCompatibilityChange('notification', isComptaible, action as AnyApiAction)
-          )
-        );
+        if (!disabledNotifications.includes(notification.id))
+          subscriptions.add(
+            notification.subscribeToCompatibilityChanges(apiContext, (isCompatible, action) =>
+              handleActionCompatibilityChange('notification', isCompatible, action as AnyApiAction)
+            )
+          );
       }
     })();
 

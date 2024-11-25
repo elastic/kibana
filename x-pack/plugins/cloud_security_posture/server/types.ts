@@ -39,6 +39,7 @@ import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CspServerPluginSetup {}
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CspServerPluginStart {}
 
@@ -78,6 +79,8 @@ export interface CspApiRequestHandlerContext {
   agentService: AgentService;
   packagePolicyService: PackagePolicyClient;
   packageService: PackageService;
+  spaces?: SpacesPluginStart;
+
   isPluginInitialized(): boolean;
 }
 

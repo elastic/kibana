@@ -105,6 +105,37 @@ describe('current status route', () => {
     });
   });
 
+  const testMonitors = [
+    {
+      attributes: {
+        id: 'id1',
+        type: 'browser',
+        enabled: true,
+        name: 'test monitor 1',
+        project_id: 'project-id',
+        tags: ['tag-1', 'tag-2'],
+        schedule: {
+          number: '1',
+          unit: 'm',
+        },
+      },
+    },
+    {
+      attributes: {
+        id: 'id2',
+        enabled: true,
+        type: 'browser',
+        name: 'test monitor 2',
+        project_id: 'project-id',
+        tags: ['tag-1', 'tag-2'],
+        schedule: {
+          number: '1',
+          unit: 'm',
+        },
+      },
+    },
+  ];
+
   describe('queryMonitorStatus', () => {
     it('parses expected agg fields', async () => {
       const { esClient, syntheticsEsClient } = getUptimeESMockClient();
@@ -214,52 +245,149 @@ describe('current status route', () => {
         took: 605,
       });
       expect(
-        await queryMonitorStatus(
-          syntheticsEsClient,
-          ['Europe - Germany', 'Asia/Pacific - Japan'],
-          { from: 'now-1d', to: 'now' },
-          ['id1', 'id2'],
-          { id1: ['Asia/Pacific - Japan'], id2: ['Europe - Germany', 'Asia/Pacific - Japan'] },
-          {
+        await queryMonitorStatus({
+          esClient: syntheticsEsClient,
+          monitorLocationIds: ['Europe - Germany', 'Asia/Pacific - Japan'],
+          range: { from: 'now-1d', to: 'now' },
+          monitorQueryIds: ['id1', 'id2'],
+          monitorLocationsMap: {
+            id1: ['Asia/Pacific - Japan'],
+            id2: ['Europe - Germany', 'Asia/Pacific - Japan'],
+          },
+          monitorQueryIdToConfigIdMap: {
             id1: 'id1',
             id2: 'id2',
-          }
-        )
-      ).toEqual({
-        pending: 0,
-        down: 1,
-        enabledMonitorQueryIds: ['id1', 'id2'],
-        up: 2,
-        upConfigs: {
-          'id1-Asia/Pacific - Japan': {
-            configId: 'id1',
-            monitorQueryId: 'id1',
-            locationId: 'Asia/Pacific - Japan',
-            status: 'up',
-            ping: expect.any(Object),
-            timestamp: expect.any(String),
           },
-          'id2-Asia/Pacific - Japan': {
-            configId: 'id2',
-            monitorQueryId: 'id2',
-            locationId: 'Asia/Pacific - Japan',
-            status: 'up',
-            ping: expect.any(Object),
-            timestamp: expect.any(String),
+          monitors: testMonitors as any,
+        })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "disabledConfigs": Object {},
+          "down": 1,
+          "downConfigs": Object {
+            "id2-Europe - Germany": Object {
+              "configId": "id2",
+              "isEnabled": true,
+              "isStatusAlertEnabled": false,
+              "locationId": "Europe - Germany",
+              "locationLabel": "Europe - Germany",
+              "monitorQueryId": "id2",
+              "name": "test monitor 2",
+              "ping": Object {
+                "@timestamp": "2022-09-15T16:19:16.724Z",
+                "config_id": "id2",
+                "monitor": Object {
+                  "id": "id2",
+                  "status": "down",
+                },
+                "observer": Object {
+                  "geo": Object {
+                    "name": "Europe - Germany",
+                  },
+                },
+                "summary": Object {
+                  "down": 1,
+                  "up": 0,
+                },
+              },
+              "projectId": "project-id",
+              "schedule": "1",
+              "spaceId": undefined,
+              "status": "down",
+              "tags": Array [
+                "tag-1",
+                "tag-2",
+              ],
+              "timestamp": "2022-09-15T16:19:16.724Z",
+              "type": "browser",
+              "updated_at": undefined,
+            },
           },
-        },
-        downConfigs: {
-          'id2-Europe - Germany': {
-            configId: 'id2',
-            monitorQueryId: 'id2',
-            locationId: 'Europe - Germany',
-            status: 'down',
-            ping: expect.any(Object),
-            timestamp: expect.any(String),
+          "enabledMonitorQueryIds": Array [
+            "id1",
+            "id2",
+          ],
+          "pending": 0,
+          "pendingConfigs": Object {},
+          "up": 2,
+          "upConfigs": Object {
+            "id1-Asia/Pacific - Japan": Object {
+              "configId": "id1",
+              "isEnabled": true,
+              "isStatusAlertEnabled": false,
+              "locationId": "Asia/Pacific - Japan",
+              "locationLabel": "Asia/Pacific - Japan",
+              "monitorQueryId": "id1",
+              "name": "test monitor 1",
+              "ping": Object {
+                "@timestamp": "2022-09-15T16:08:16.724Z",
+                "config_id": "id1",
+                "monitor": Object {
+                  "id": "id1",
+                  "status": "up",
+                },
+                "observer": Object {
+                  "geo": Object {
+                    "name": "Asia/Pacific - Japan",
+                  },
+                },
+                "summary": Object {
+                  "down": 0,
+                  "up": 1,
+                },
+              },
+              "projectId": "project-id",
+              "schedule": "1",
+              "spaceId": undefined,
+              "status": "up",
+              "tags": Array [
+                "tag-1",
+                "tag-2",
+              ],
+              "timestamp": "2022-09-15T16:08:16.724Z",
+              "type": "browser",
+              "updated_at": undefined,
+            },
+            "id2-Asia/Pacific - Japan": Object {
+              "configId": "id2",
+              "isEnabled": true,
+              "isStatusAlertEnabled": false,
+              "locationId": "Asia/Pacific - Japan",
+              "locationLabel": "Asia/Pacific - Japan",
+              "monitorQueryId": "id2",
+              "name": "test monitor 2",
+              "ping": Object {
+                "@timestamp": "2022-09-15T16:09:16.724Z",
+                "config_id": "id2",
+                "monitor": Object {
+                  "id": "id2",
+                  "status": "up",
+                },
+                "observer": Object {
+                  "geo": Object {
+                    "name": "Asia/Pacific - Japan",
+                  },
+                },
+                "summary": Object {
+                  "down": 0,
+                  "up": 1,
+                },
+              },
+              "projectId": "project-id",
+              "schedule": "1",
+              "spaceId": undefined,
+              "status": "up",
+              "tags": Array [
+                "tag-1",
+                "tag-2",
+              ],
+              "timestamp": "2022-09-15T16:09:16.724Z",
+              "type": "browser",
+              "updated_at": undefined,
+            },
           },
-        },
-        pendingConfigs: {},
-      });
+        }
+      `);
     });
 
     it('handles limits with multiple requests', async () => {
@@ -382,52 +510,153 @@ describe('current status route', () => {
         'Asia/Pacific - Japan',
       ];
       expect(
-        await queryMonitorStatus(
-          syntheticsEsClient,
-          [...concernedLocations, ...times(9997).map((n) => 'Europe - Germany' + n)],
-          { from: 'now-24h', to: 'now' },
-          ['id1', 'id2'],
-          { id1: [concernedLocations[0]], id2: [concernedLocations[1], concernedLocations[2]] },
-          {
+        await queryMonitorStatus({
+          esClient: syntheticsEsClient,
+          monitorLocationIds: [
+            ...concernedLocations,
+            ...times(9997).map((n) => 'Europe - Germany' + n),
+          ],
+
+          range: { from: 'now-24h', to: 'now' },
+          monitorQueryIds: ['id1', 'id2'],
+          monitorLocationsMap: {
+            id1: [concernedLocations[0]],
+            id2: [concernedLocations[1], concernedLocations[2]],
+          },
+          monitorQueryIdToConfigIdMap: {
             id1: 'id1',
             id2: 'id2',
-          }
-        )
-      ).toEqual({
-        pending: 0,
-        down: 1,
-        enabledMonitorQueryIds: ['id1', 'id2'],
-        up: 2,
-        upConfigs: {
-          'id1-Asia/Pacific - Japan': {
-            configId: 'id1',
-            monitorQueryId: 'id1',
-            locationId: 'Asia/Pacific - Japan',
-            status: 'up',
-            ping: expect.any(Object),
-            timestamp: expect.any(String),
           },
-          'id2-Asia/Pacific - Japan': {
-            configId: 'id2',
-            monitorQueryId: 'id2',
-            locationId: 'Asia/Pacific - Japan',
-            status: 'up',
-            ping: expect.any(Object),
-            timestamp: expect.any(String),
+          monitors: testMonitors as any,
+        })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "disabledConfigs": Object {},
+          "down": 1,
+          "downConfigs": Object {
+            "id2-Europe - Germany": Object {
+              "configId": "id2",
+              "isEnabled": true,
+              "isStatusAlertEnabled": false,
+              "locationId": "Europe - Germany",
+              "locationLabel": "Europe - Germany",
+              "monitorQueryId": "id2",
+              "name": "test monitor 2",
+              "ping": Object {
+                "@timestamp": "2022-09-15T16:19:16.724Z",
+                "config_id": "id2",
+                "monitor": Object {
+                  "id": "id2",
+                  "status": "down",
+                },
+                "observer": Object {
+                  "geo": Object {
+                    "name": "Europe - Germany",
+                  },
+                },
+                "summary": Object {
+                  "down": 1,
+                  "up": 0,
+                },
+              },
+              "projectId": "project-id",
+              "schedule": "1",
+              "spaceId": undefined,
+              "status": "down",
+              "tags": Array [
+                "tag-1",
+                "tag-2",
+              ],
+              "timestamp": "2022-09-15T16:19:16.724Z",
+              "type": "browser",
+              "updated_at": undefined,
+            },
           },
-        },
-        downConfigs: {
-          'id2-Europe - Germany': {
-            configId: 'id2',
-            monitorQueryId: 'id2',
-            locationId: 'Europe - Germany',
-            status: 'down',
-            ping: expect.any(Object),
-            timestamp: expect.any(String),
+          "enabledMonitorQueryIds": Array [
+            "id1",
+            "id2",
+          ],
+          "pending": 0,
+          "pendingConfigs": Object {},
+          "up": 2,
+          "upConfigs": Object {
+            "id1-Asia/Pacific - Japan": Object {
+              "configId": "id1",
+              "isEnabled": true,
+              "isStatusAlertEnabled": false,
+              "locationId": "Asia/Pacific - Japan",
+              "locationLabel": "Asia/Pacific - Japan",
+              "monitorQueryId": "id1",
+              "name": "test monitor 1",
+              "ping": Object {
+                "@timestamp": "2022-09-15T16:08:16.724Z",
+                "config_id": "id1",
+                "monitor": Object {
+                  "id": "id1",
+                  "status": "up",
+                },
+                "observer": Object {
+                  "geo": Object {
+                    "name": "Asia/Pacific - Japan",
+                  },
+                },
+                "summary": Object {
+                  "down": 0,
+                  "up": 1,
+                },
+              },
+              "projectId": "project-id",
+              "schedule": "1",
+              "spaceId": undefined,
+              "status": "up",
+              "tags": Array [
+                "tag-1",
+                "tag-2",
+              ],
+              "timestamp": "2022-09-15T16:08:16.724Z",
+              "type": "browser",
+              "updated_at": undefined,
+            },
+            "id2-Asia/Pacific - Japan": Object {
+              "configId": "id2",
+              "isEnabled": true,
+              "isStatusAlertEnabled": false,
+              "locationId": "Asia/Pacific - Japan",
+              "locationLabel": "Asia/Pacific - Japan",
+              "monitorQueryId": "id2",
+              "name": "test monitor 2",
+              "ping": Object {
+                "@timestamp": "2022-09-15T16:09:16.724Z",
+                "config_id": "id2",
+                "monitor": Object {
+                  "id": "id2",
+                  "status": "up",
+                },
+                "observer": Object {
+                  "geo": Object {
+                    "name": "Asia/Pacific - Japan",
+                  },
+                },
+                "summary": Object {
+                  "down": 0,
+                  "up": 1,
+                },
+              },
+              "projectId": "project-id",
+              "schedule": "1",
+              "spaceId": undefined,
+              "status": "up",
+              "tags": Array [
+                "tag-1",
+                "tag-2",
+              ],
+              "timestamp": "2022-09-15T16:09:16.724Z",
+              "type": "browser",
+              "updated_at": undefined,
+            },
           },
-        },
-        pendingConfigs: {},
-      });
+        }
+      `);
       expect(esClient.msearch).toHaveBeenCalledTimes(1);
       // These assertions are to ensure that we are paginating through the IDs we use for filtering
       expect(
@@ -548,84 +777,258 @@ describe('current status route', () => {
         took: 605,
       });
       expect(
-        await queryMonitorStatus(
-          syntheticsEsClient,
-          ['Europe - Germany', 'Asia/Pacific - Japan'],
-          { from: 'now-12h', to: 'now' },
-          ['id1', 'id2', 'project-monitor-id', 'id4'],
-          {
+        await queryMonitorStatus({
+          esClient: syntheticsEsClient,
+          monitorLocationIds: ['Europe - Germany', 'Asia/Pacific - Japan'],
+          range: { from: 'now-12h', to: 'now' },
+          monitorQueryIds: ['id1', 'id2', 'project-monitor-id', 'id4'],
+          monitorLocationsMap: {
             id1: ['Asia/Pacific - Japan'],
             id2: ['Europe - Germany', 'Asia/Pacific - Japan'],
             'project-monitor-id': ['Europe - Germany', 'Asia/Pacific - Japan'],
             id4: ['Europe - Germany', 'Asia/Pacific - Japan'],
           },
-          {
+          monitorQueryIdToConfigIdMap: {
             id1: 'id1',
             id2: 'id2',
             'project-monitor-id': 'id3',
             id4: 'id4',
-          }
-        )
-      ).toEqual({
-        pending: 4,
-        down: 1,
-        enabledMonitorQueryIds: ['id1', 'id2', 'project-monitor-id', 'id4'],
-        up: 2,
-        upConfigs: {
-          'id1-Asia/Pacific - Japan': {
-            configId: 'id1',
-            monitorQueryId: 'id1',
-            locationId: 'Asia/Pacific - Japan',
-            status: 'up',
-            ping: expect.any(Object),
-            timestamp: expect.any(String),
           },
-          'id2-Asia/Pacific - Japan': {
-            configId: 'id2',
-            monitorQueryId: 'id2',
-            locationId: 'Asia/Pacific - Japan',
-            status: 'up',
-            ping: expect.any(Object),
-            timestamp: expect.any(String),
+          monitors: [
+            ...testMonitors,
+            {
+              attributes: {
+                id: 'id4',
+                enabled: true,
+                type: 'browser',
+                name: 'test monitor 4',
+                project_id: 'project-id',
+                tags: ['tag-1', 'tag-2'],
+                schedule: {
+                  number: '1',
+                  unit: 'm',
+                },
+              },
+            },
+            {
+              attributes: {
+                id: 'project-monitor-id',
+                enabled: true,
+                type: 'browser',
+                name: 'test monitor 3',
+                project_id: 'project-id',
+                tags: ['tag-1', 'tag-2'],
+                schedule: {
+                  number: '1',
+                  unit: 'm',
+                },
+              },
+            },
+          ] as any,
+        })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "disabledConfigs": Object {},
+          "down": 1,
+          "downConfigs": Object {
+            "id2-Europe - Germany": Object {
+              "configId": "id2",
+              "isEnabled": true,
+              "isStatusAlertEnabled": false,
+              "locationId": "Europe - Germany",
+              "locationLabel": "Europe - Germany",
+              "monitorQueryId": "id2",
+              "name": "test monitor 2",
+              "ping": Object {
+                "@timestamp": "2022-09-15T16:19:16.724Z",
+                "config_id": "id2",
+                "monitor": Object {
+                  "id": "id2",
+                  "status": "down",
+                },
+                "observer": Object {
+                  "geo": Object {
+                    "name": "Europe - Germany",
+                  },
+                },
+                "summary": Object {
+                  "down": 1,
+                  "up": 0,
+                },
+              },
+              "projectId": "project-id",
+              "schedule": "1",
+              "spaceId": undefined,
+              "status": "down",
+              "tags": Array [
+                "tag-1",
+                "tag-2",
+              ],
+              "timestamp": "2022-09-15T16:19:16.724Z",
+              "type": "browser",
+              "updated_at": undefined,
+            },
           },
-        },
-        downConfigs: {
-          'id2-Europe - Germany': {
-            configId: 'id2',
-            monitorQueryId: 'id2',
-            locationId: 'Europe - Germany',
-            status: 'down',
-            ping: expect.any(Object),
-            timestamp: expect.any(String),
+          "enabledMonitorQueryIds": Array [
+            "id1",
+            "id2",
+            "project-monitor-id",
+            "id4",
+          ],
+          "pending": 4,
+          "pendingConfigs": Object {
+            "id3-Asia/Pacific - Japan": Object {
+              "configId": "id3",
+              "isEnabled": true,
+              "isStatusAlertEnabled": false,
+              "locationId": "Asia/Pacific - Japan",
+              "locationLabel": undefined,
+              "monitorQueryId": "project-monitor-id",
+              "name": "test monitor 3",
+              "projectId": "project-id",
+              "schedule": "1",
+              "status": "unknown",
+              "tags": Array [
+                "tag-1",
+                "tag-2",
+              ],
+              "type": "browser",
+              "updated_at": undefined,
+            },
+            "id3-Europe - Germany": Object {
+              "configId": "id3",
+              "isEnabled": true,
+              "isStatusAlertEnabled": false,
+              "locationId": "Europe - Germany",
+              "locationLabel": undefined,
+              "monitorQueryId": "project-monitor-id",
+              "name": "test monitor 3",
+              "projectId": "project-id",
+              "schedule": "1",
+              "status": "unknown",
+              "tags": Array [
+                "tag-1",
+                "tag-2",
+              ],
+              "type": "browser",
+              "updated_at": undefined,
+            },
+            "id4-Asia/Pacific - Japan": Object {
+              "configId": "id4",
+              "isEnabled": true,
+              "isStatusAlertEnabled": false,
+              "locationId": "Asia/Pacific - Japan",
+              "locationLabel": undefined,
+              "monitorQueryId": "id4",
+              "name": "test monitor 4",
+              "projectId": "project-id",
+              "schedule": "1",
+              "status": "unknown",
+              "tags": Array [
+                "tag-1",
+                "tag-2",
+              ],
+              "type": "browser",
+              "updated_at": undefined,
+            },
+            "id4-Europe - Germany": Object {
+              "configId": "id4",
+              "isEnabled": true,
+              "isStatusAlertEnabled": false,
+              "locationId": "Europe - Germany",
+              "locationLabel": undefined,
+              "monitorQueryId": "id4",
+              "name": "test monitor 4",
+              "projectId": "project-id",
+              "schedule": "1",
+              "status": "unknown",
+              "tags": Array [
+                "tag-1",
+                "tag-2",
+              ],
+              "type": "browser",
+              "updated_at": undefined,
+            },
           },
-        },
-        pendingConfigs: {
-          'id3-Asia/Pacific - Japan': {
-            configId: 'id3',
-            locationId: 'Asia/Pacific - Japan',
-            monitorQueryId: 'project-monitor-id',
-            status: 'unknown',
+          "up": 2,
+          "upConfigs": Object {
+            "id1-Asia/Pacific - Japan": Object {
+              "configId": "id1",
+              "isEnabled": true,
+              "isStatusAlertEnabled": false,
+              "locationId": "Asia/Pacific - Japan",
+              "locationLabel": "Asia/Pacific - Japan",
+              "monitorQueryId": "id1",
+              "name": "test monitor 1",
+              "ping": Object {
+                "@timestamp": "2022-09-15T16:08:16.724Z",
+                "config_id": "id1",
+                "monitor": Object {
+                  "id": "id1",
+                  "status": "up",
+                },
+                "observer": Object {
+                  "geo": Object {
+                    "name": "Asia/Pacific - Japan",
+                  },
+                },
+                "summary": Object {
+                  "down": 0,
+                  "up": 1,
+                },
+              },
+              "projectId": "project-id",
+              "schedule": "1",
+              "spaceId": undefined,
+              "status": "up",
+              "tags": Array [
+                "tag-1",
+                "tag-2",
+              ],
+              "timestamp": "2022-09-15T16:08:16.724Z",
+              "type": "browser",
+              "updated_at": undefined,
+            },
+            "id2-Asia/Pacific - Japan": Object {
+              "configId": "id2",
+              "isEnabled": true,
+              "isStatusAlertEnabled": false,
+              "locationId": "Asia/Pacific - Japan",
+              "locationLabel": "Asia/Pacific - Japan",
+              "monitorQueryId": "id2",
+              "name": "test monitor 2",
+              "ping": Object {
+                "@timestamp": "2022-09-15T16:09:16.724Z",
+                "config_id": "id2",
+                "monitor": Object {
+                  "id": "id2",
+                  "status": "up",
+                },
+                "observer": Object {
+                  "geo": Object {
+                    "name": "Asia/Pacific - Japan",
+                  },
+                },
+                "summary": Object {
+                  "down": 0,
+                  "up": 1,
+                },
+              },
+              "projectId": "project-id",
+              "schedule": "1",
+              "spaceId": undefined,
+              "status": "up",
+              "tags": Array [
+                "tag-1",
+                "tag-2",
+              ],
+              "timestamp": "2022-09-15T16:09:16.724Z",
+              "type": "browser",
+              "updated_at": undefined,
+            },
           },
-          'id3-Europe - Germany': {
-            configId: 'id3',
-            locationId: 'Europe - Germany',
-            monitorQueryId: 'project-monitor-id',
-            status: 'unknown',
-          },
-          'id4-Asia/Pacific - Japan': {
-            configId: 'id4',
-            locationId: 'Asia/Pacific - Japan',
-            monitorQueryId: 'id4',
-            status: 'unknown',
-          },
-          'id4-Europe - Germany': {
-            configId: 'id4',
-            locationId: 'Europe - Germany',
-            monitorQueryId: 'id4',
-            status: 'unknown',
-          },
-        },
-      });
+        }
+      `);
     });
   });
 

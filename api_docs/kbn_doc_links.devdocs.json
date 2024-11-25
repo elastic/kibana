@@ -140,6 +140,17 @@
           },
           {
             "parentPluginId": "@kbn/doc-links",
+            "id": "def-common.DocLinks.apiReference",
+            "type": "string",
+            "tags": [],
+            "label": "apiReference",
+            "description": [],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
             "id": "def-common.DocLinks.upgrade",
             "type": "Object",
             "tags": [],
@@ -300,7 +311,7 @@
             "label": "enterpriseSearch",
             "description": [],
             "signature": [
-              "{ readonly aiSearchDoc: string; readonly aiSearchHelp: string; readonly apiKeys: string; readonly behavioralAnalytics: string; readonly behavioralAnalyticsCORS: string; readonly behavioralAnalyticsEvents: string; readonly buildConnector: string; readonly bulkApi: string; readonly configuration: string; readonly connectors: string; readonly connectorsClientDeploy: string; readonly connectorsMappings: string; readonly connectorsAzureBlobStorage: string; readonly connectorsBox: string; readonly connectorsClients: string; readonly connectorsConfluence: string; readonly connectorsContentExtraction: string; readonly connectorsDropbox: string; readonly connectorsGithub: string; readonly connectorsGoogleCloudStorage: string; readonly connectorsGoogleDrive: string; readonly connectorsGmail: string; readonly connectorsJira: string; readonly connectorsMicrosoftSQL: string; readonly connectorsMongoDB: string; readonly connectorsMySQL: string; readonly connectorsNative: string; readonly connectorsNetworkDrive: string; readonly connectorsNotion: string; readonly connectorsOneDrive: string; readonly connectorsOracle: string; readonly connectorsOutlook: string; readonly connectorsPostgreSQL: string; readonly connectorsRedis: string; readonly connectorsS3: string; readonly connectorsSalesforce: string; readonly connectorsServiceNow: string; readonly connectorsSharepoint: string; readonly connectorsSharepointOnline: string; readonly connectorsTeams: string; readonly connectorsSlack: string; readonly connectorsZoom: string; readonly crawlerExtractionRules: string; readonly crawlerManaging: string; readonly crawlerOverview: string; readonly deployTrainedModels: string; readonly documentLevelSecurity: string; readonly e5Model: string; readonly elser: string; readonly engines: string; readonly indexApi: string; readonly inferenceApiCreate: string; readonly ingestionApis: string; readonly ingestPipelines: string; readonly knnSearch: string; readonly knnSearchCombine: string; readonly languageAnalyzers: string; readonly languageClients: string; readonly licenseManagement: string; readonly machineLearningStart: string; readonly mailService: string; readonly mlDocumentEnrichment: string; readonly searchApplicationsTemplates: string; readonly searchApplicationsSearchApi: string; readonly searchApplications: string; readonly searchApplicationsSearch: string; readonly searchLabs: string; readonly searchLabsRepo: string; readonly searchTemplates: string; readonly semanticTextField: string; readonly start: string; readonly supportedNlpModels: string; readonly syncRules: string; readonly syncRulesAdvanced: string; readonly trainedModels: string; readonly textEmbedding: string; readonly troubleshootSetup: string; readonly usersAccess: string; }"
+              "{ readonly aiSearchDoc: string; readonly aiSearchHelp: string; readonly apiKeys: string; readonly behavioralAnalytics: string; readonly behavioralAnalyticsCORS: string; readonly behavioralAnalyticsEvents: string; readonly buildConnector: string; readonly bulkApi: string; readonly configuration: string; readonly connectors: string; readonly connectorsClientDeploy: string; readonly connectorsMappings: string; readonly connectorsAzureBlobStorage: string; readonly connectorsBox: string; readonly connectorsClients: string; readonly connectorsConfluence: string; readonly connectorsContentExtraction: string; readonly connectorsDropbox: string; readonly connectorsGithub: string; readonly connectorsGoogleCloudStorage: string; readonly connectorsGoogleDrive: string; readonly connectorsGmail: string; readonly connectorsJira: string; readonly connectorsMicrosoftSQL: string; readonly connectorsMongoDB: string; readonly connectorsMySQL: string; readonly connectorsNative: string; readonly connectorsNetworkDrive: string; readonly connectorsNotion: string; readonly connectorsOneDrive: string; readonly connectorsOracle: string; readonly connectorsOutlook: string; readonly connectorsPostgreSQL: string; readonly connectorsRedis: string; readonly connectorsS3: string; readonly connectorsSalesforce: string; readonly connectorsServiceNow: string; readonly connectorsSharepoint: string; readonly connectorsSharepointOnline: string; readonly connectorsTeams: string; readonly connectorsSlack: string; readonly connectorsZoom: string; readonly crawlerExtractionRules: string; readonly crawlerManaging: string; readonly crawlerOverview: string; readonly deployTrainedModels: string; readonly documentLevelSecurity: string; readonly e5Model: string; readonly elser: string; readonly engines: string; readonly indexApi: string; readonly inferenceApiCreate: string; readonly ingestionApis: string; readonly ingestPipelines: string; readonly knnSearch: string; readonly knnSearchCombine: string; readonly languageAnalyzers: string; readonly languageClients: string; readonly licenseManagement: string; readonly machineLearningStart: string; readonly mailService: string; readonly mlDocumentEnrichment: string; readonly searchApplicationsTemplates: string; readonly searchApplicationsSearchApi: string; readonly searchApplications: string; readonly searchApplicationsSearch: string; readonly searchLabs: string; readonly searchLabsRepo: string; readonly semanticSearch: string; readonly searchTemplates: string; readonly semanticTextField: string; readonly start: string; readonly supportedNlpModels: string; readonly syncRules: string; readonly syncRulesAdvanced: string; readonly trainedModels: string; readonly textEmbedding: string; readonly troubleshootSetup: string; readonly usersAccess: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -357,20 +368,6 @@
             "description": [],
             "signature": [
               "{ readonly base: string; readonly inputElasticAgent: string; }"
-            ],
-            "path": "packages/kbn-doc-links/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/doc-links",
-            "id": "def-common.DocLinks.functionbeat",
-            "type": "Object",
-            "tags": [],
-            "label": "functionbeat",
-            "description": [],
-            "signature": [
-              "{ readonly base: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -479,7 +476,7 @@
             "label": "kibana",
             "description": [],
             "signature": [
-              "{ readonly askElastic: string; readonly createGithubIssue: string; readonly feedback: string; readonly guide: string; readonly autocompleteSuggestions: string; readonly secureSavedObject: string; readonly xpackSecurity: string; }"
+              "{ readonly askElastic: string; readonly createGithubIssue: string; readonly feedback: string; readonly guide: string; readonly autocompleteSuggestions: string; readonly secureSavedObject: string; readonly xpackSecurity: string; readonly dashboardImportExport: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -546,7 +543,7 @@
             "label": "securitySolution",
             "description": [],
             "signature": [
-              "{ readonly aiAssistant: string; readonly artifactControl: string; readonly avcResults: string; readonly trustedApps: string; readonly eventFilters: string; readonly blocklist: string; readonly endpointArtifacts: string; readonly policyResponseTroubleshooting: { full_disk_access: string; macos_system_ext: string; linux_deadlock: string; }; readonly packageActionTroubleshooting: { es_connection: string; }; readonly threatIntelInt: string; readonly responseActions: string; readonly configureEndpointIntegrationPolicy: string; readonly exceptions: { value_lists: string; }; readonly privileges: string; readonly manageDetectionRules: string; readonly createDetectionRules: string; readonly createEsqlRuleType: string; readonly ruleUiAdvancedParams: string; readonly entityAnalytics: { readonly riskScorePrerequisites: string; readonly entityRiskScoring: string; readonly assetCriticality: string; }; readonly detectionEngineOverview: string; }"
+              "{ readonly aiAssistant: string; readonly artifactControl: string; readonly avcResults: string; readonly bidirectionalIntegrations: string; readonly trustedApps: string; readonly eventFilters: string; readonly eventMerging: string; readonly blocklist: string; readonly endpointArtifacts: string; readonly policyResponseTroubleshooting: { full_disk_access: string; macos_system_ext: string; linux_deadlock: string; }; readonly packageActionTroubleshooting: { es_connection: string; }; readonly threatIntelInt: string; readonly responseActions: string; readonly configureEndpointIntegrationPolicy: string; readonly exceptions: { value_lists: string; }; readonly privileges: string; readonly manageDetectionRules: string; readonly createDetectionRules: string; readonly createEsqlRuleType: string; readonly ruleUiAdvancedParams: string; readonly entityAnalytics: { readonly riskScorePrerequisites: string; readonly entityRiskScoring: string; readonly assetCriticality: string; }; readonly detectionEngineOverview: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -742,7 +739,7 @@
             "label": "security",
             "description": [],
             "signature": [
-              "{ readonly apiKeyServiceSettings: string; readonly clusterPrivileges: string; readonly definingRoles: string; readonly elasticsearchSettings: string; readonly elasticsearchEnableSecurity: string; readonly elasticsearchEnableApiKeys: string; readonly indicesPrivileges: string; readonly kibanaTLS: string; readonly kibanaPrivileges: string; readonly mappingRoles: string; readonly mappingRolesFieldRules: string; readonly runAsPrivilege: string; }"
+              "{ readonly apiKeyServiceSettings: string; readonly clusterPrivileges: string; readonly definingRoles: string; readonly elasticsearchSettings: string; readonly elasticsearchEnableSecurity: string; readonly elasticsearchEnableApiKeys: string; readonly indicesPrivileges: string; readonly kibanaTLS: string; readonly kibanaPrivileges: string; readonly mappingRoles: string; readonly mappingRolesFieldRules: string; readonly runAsPrivilege: string; readonly deprecatedV1Endpoints: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -840,7 +837,7 @@
             "label": "fleet",
             "description": [],
             "signature": [
-              "{ readonly beatsAgentComparison: string; readonly guide: string; readonly fleetServer: string; readonly fleetServerAddFleetServer: string; readonly esSettings: string; readonly settings: string; readonly logstashSettings: string; readonly kafkaSettings: string; readonly settingsFleetServerHostSettings: string; readonly settingsFleetServerProxySettings: string; readonly troubleshooting: string; readonly elasticAgent: string; readonly datastreams: string; readonly datastreamsILM: string; readonly datastreamsNamingScheme: string; readonly datastreamsManualRollover: string; readonly datastreamsTSDS: string; readonly datastreamsTSDSMetrics: string; readonly datastreamsDownsampling: string; readonly installElasticAgent: string; readonly installElasticAgentStandalone: string; readonly grantESAccessToStandaloneAgents: string; readonly packageSignatures: string; readonly upgradeElasticAgent: string; readonly learnMoreBlog: string; readonly apiKeysLearnMore: string; readonly onPremRegistry: string; readonly secureLogstash: string; readonly agentPolicy: string; readonly api: string; readonly uninstallAgent: string; readonly installAndUninstallIntegrationAssets: string; readonly elasticAgentInputConfiguration: string; readonly policySecrets: string; readonly remoteESOoutput: string; readonly performancePresets: string; readonly scalingKubernetesResourcesAndLimits: string; readonly roleAndPrivileges: string; readonly proxiesSettings: string; readonly unprivilegedMode: string; }"
+              "{ readonly beatsAgentComparison: string; readonly guide: string; readonly fleetServer: string; readonly fleetServerAddFleetServer: string; readonly esSettings: string; readonly settings: string; readonly logstashSettings: string; readonly kafkaSettings: string; readonly settingsFleetServerHostSettings: string; readonly settingsFleetServerProxySettings: string; readonly troubleshooting: string; readonly elasticAgent: string; readonly datastreams: string; readonly datastreamsILM: string; readonly datastreamsNamingScheme: string; readonly datastreamsManualRollover: string; readonly datastreamsTSDS: string; readonly datastreamsTSDSMetrics: string; readonly datastreamsDownsampling: string; readonly installElasticAgent: string; readonly installElasticAgentStandalone: string; readonly grantESAccessToStandaloneAgents: string; readonly packageSignatures: string; readonly upgradeElasticAgent: string; readonly learnMoreBlog: string; readonly apiKeysLearnMore: string; readonly onPremRegistry: string; readonly secureLogstash: string; readonly agentPolicy: string; readonly api: string; readonly uninstallAgent: string; readonly installAndUninstallIntegrationAssets: string; readonly elasticAgentInputConfiguration: string; readonly policySecrets: string; readonly remoteESOoutput: string; readonly performancePresets: string; readonly scalingKubernetesResourcesAndLimits: string; readonly roleAndPrivileges: string; readonly proxiesSettings: string; readonly unprivilegedMode: string; readonly httpMonitoring: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -1023,6 +1020,20 @@
             "description": [],
             "signature": [
               "{ readonly chatPlayground: string; readonly retrievalOptimize: string; readonly retrieval: string; readonly context: string; readonly hiddenFields: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-common.DocLinks.inferenceManagement",
+            "type": "Object",
+            "tags": [],
+            "label": "inferenceManagement",
+            "description": [],
+            "signature": [
+              "{ readonly inferenceAPIDocumentation: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,

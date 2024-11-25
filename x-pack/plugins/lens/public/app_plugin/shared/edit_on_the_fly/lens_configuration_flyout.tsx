@@ -17,6 +17,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   euiScrollBarStyles,
+  EuiWindowEvent,
+  keys,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { Datatable } from '@kbn/expressions-plugin/public';
@@ -26,7 +28,7 @@ import {
   getLanguageDisplayName,
 } from '@kbn/es-query';
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import { TextBasedLangEditor } from '@kbn/esql/public';
+import { ESQLLangEditor } from '@kbn/esql/public';
 import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import { MAX_NUM_OF_COLUMNS } from '../../../datasources/text_based/utils';
@@ -117,7 +119,7 @@ export function LensEditConfigurationFlyout({
   useEffect(() => {
     const s = output$?.subscribe(() => {
       const activeData: Record<string, Datatable> = {};
-      const adaptersTables = previousAdapters.current?.tables?.tables as Record<string, Datatable>;
+      const adaptersTables = previousAdapters.current?.tables?.tables;
       const [table] = Object.values(adaptersTables || {});
       if (table) {
         // there are cases where a query can return a big amount of columns
@@ -337,6 +339,7 @@ export function LensEditConfigurationFlyout({
         setErrors([]);
         updateSuggestion?.(attrs);
       }
+      prevQuery.current = q;
       setIsVisualizationLoading(false);
     },
     [
@@ -391,40 +394,51 @@ export function LensEditConfigurationFlyout({
     getUserMessages,
   ]);
 
+  const onKeyDown = (e: KeyboardEvent) => {
+    if (e.key === keys.ESCAPE) {
+      closeFlyout?.();
+      setIsInlineFlyoutVisible(false);
+    }
+  };
+
   if (isLoading) return null;
   // Example is the Discover editing where we dont want to render the text based editor on the panel, neither the suggestions (for now)
   if (!canEditTextBasedQuery && hidesSuggestions) {
     return (
-      <FlyoutWrapper
-        isInlineFlyoutVisible={isInlineFlyoutVisible}
-        displayFlyoutHeader={displayFlyoutHeader}
-        onCancel={onCancel}
-        navigateToLensEditor={navigateToLensEditor}
-        onApply={onApply}
-        isScrollable
-        isNewPanel={isNewPanel}
-        isSaveable={isSaveable}
-      >
-        <LayerConfiguration
-          // TODO: remove this once we support switching to any chart in Discover
-          onlyAllowSwitchToSubtypes
-          getUserMessages={getUserMessages}
-          attributes={attributes}
-          coreStart={coreStart}
-          startDependencies={startDependencies}
-          visualizationMap={visualizationMap}
-          datasourceMap={datasourceMap}
-          datasourceId={datasourceId}
-          hasPadding
-          framePublicAPI={framePublicAPI}
-          setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
-        />
-      </FlyoutWrapper>
+      <>
+        {isInlineFlyoutVisible && <EuiWindowEvent event="keydown" handler={onKeyDown} />}
+        <FlyoutWrapper
+          isInlineFlyoutVisible={isInlineFlyoutVisible}
+          displayFlyoutHeader={displayFlyoutHeader}
+          onCancel={onCancel}
+          navigateToLensEditor={navigateToLensEditor}
+          onApply={onApply}
+          isScrollable
+          isNewPanel={isNewPanel}
+          isSaveable={isSaveable}
+        >
+          <LayerConfiguration
+            // TODO: remove this once we support switching to any chart in Discover
+            onlyAllowSwitchToSubtypes
+            getUserMessages={getUserMessages}
+            attributes={attributes}
+            coreStart={coreStart}
+            startDependencies={startDependencies}
+            visualizationMap={visualizationMap}
+            datasourceMap={datasourceMap}
+            datasourceId={datasourceId}
+            hasPadding
+            framePublicAPI={framePublicAPI}
+            setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
+          />
+        </FlyoutWrapper>
+      </>
     );
   }
 
   return (
     <>
+      {isInlineFlyoutVisible && <EuiWindowEvent event="keydown" handler={onKeyDown} />}
       <FlyoutWrapper
         isInlineFlyoutVisible={isInlineFlyoutVisible}
         displayFlyoutHeader={displayFlyoutHeader}
@@ -477,11 +491,10 @@ export function LensEditConfigurationFlyout({
         >
           {isOfAggregateQueryType(query) && canEditTextBasedQuery && (
             <EuiFlexItem grow={false} data-test-subj="InlineEditingESQLEditor">
-              <TextBasedLangEditor
+              <ESQLLangEditor
                 query={query}
                 onTextLangQueryChange={(q) => {
                   setQuery(q);
-                  prevQuery.current = q;
                 }}
                 detectedTimestamp={adHocDataViews?.[0]?.timeFieldName}
                 hideTimeFilterInfo={hideTimeFilterInfo}
@@ -497,7 +510,8 @@ export function LensEditConfigurationFlyout({
                 editorIsInline
                 hideRunQueryText
                 onTextLangQuerySubmit={async (q, a) => {
-                  if (q) {
+                  // do not run the suggestions if the query is the same as the previous one
+                  if (q && !isEqual(q, prevQuery.current)) {
                     setIsVisualizationLoading(true);
                     await runQuery(q, a);
                   }

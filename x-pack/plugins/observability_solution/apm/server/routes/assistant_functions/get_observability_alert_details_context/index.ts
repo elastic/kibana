@@ -38,8 +38,7 @@ export const getAlertDetailsContextHandler = (
   return async (requestContext, query) => {
     const resources = {
       getApmIndices: async () => {
-        const coreContext = await requestContext.core;
-        return resourcePlugins.apmDataAccess.setup.getApmIndices(coreContext.savedObjects.client);
+        return resourcePlugins.apmDataAccess.setup.getApmIndices();
       },
       request: requestContext.request,
       params: { query: { _inspect: false } },
@@ -87,6 +86,9 @@ export const getAlertDetailsContextHandler = (
       }),
     ]);
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
+    const logSourcesService = await (
+      await resourcePlugins.logsDataAccess.start()
+    ).services.logSourcesServiceFactory.getScopedLogSourcesService(requestContext.request);
 
     const alertStartedAt = query.alert_started_at;
     const serviceEnvironment = query['service.environment'];
@@ -97,13 +99,14 @@ export const getAlertDetailsContextHandler = (
       getServiceNameFromSignals({
         query,
         esClient,
-        coreContext,
+        logSourcesService,
         apmEventClient,
       }),
       getContainerIdFromSignals({
         query,
         esClient,
         coreContext,
+        logSourcesService,
         apmEventClient,
       }),
     ]);
@@ -165,7 +168,7 @@ export const getAlertDetailsContextHandler = (
     dataFetchers.push(async () => {
       const { logRateAnalysisType, significantItems } = await getLogRateAnalysisForAlert({
         esClient,
-        coreContext,
+        logSourcesService,
         arguments: {
           alertStartedAt: moment(alertStartedAt).toISOString(),
           alertRuleParameterTimeSize: query.alert_rule_parameter_time_size
@@ -203,7 +206,7 @@ export const getAlertDetailsContextHandler = (
       const { logCategories, entities } = await getLogCategories({
         apmEventClient,
         esClient,
-        coreContext,
+        logSourcesService,
         arguments: {
           start: moment(alertStartedAt).subtract(15, 'minute').toISOString(),
           end: alertStartedAt,

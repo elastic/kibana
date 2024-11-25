@@ -71,6 +71,7 @@ describe('updateAlertRoute', () => {
     const [config, handler] = router.put.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}"`);
+    expect(config.options?.access).toBe('public');
 
     rulesClient.update.mockResolvedValueOnce(mockedResponse as unknown as SanitizedRule);
 
@@ -138,6 +139,18 @@ describe('updateAlertRoute', () => {
     `);
 
     expect(res.ok).toHaveBeenCalled();
+  });
+
+  it('should have internal access for serverless', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    updateAlertRoute(router, licenseState, undefined, true);
+
+    const [config] = router.put.mock.calls[0];
+
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}"`);
+    expect(config.options?.access).toBe('internal');
   });
 
   it('ensures the license allows updating alerts', async () => {

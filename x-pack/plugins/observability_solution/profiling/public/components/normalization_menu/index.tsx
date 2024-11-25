@@ -187,26 +187,22 @@ export function NormalizationMenu(props: Props) {
         </h6>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiFormControlLayout
+      <EuiFieldNumber
         fullWidth
         prepend={<EuiFormLabel htmlFor={baselineScaleFactorInputId}>{SCALE_LABEL}</EuiFormLabel>}
-      >
-        <EuiFieldNumber
-          data-test-subj="profilingNormalizationMenuFieldNumber"
-          controlOnly
-          id={baselineScaleFactorInputId}
-          value={baseline}
-          onChange={(e) => {
-            if (mode === NormalizationMode.Scale) {
-              setOptions((prevOptions) => ({
-                ...prevOptions,
-                baselineScale: e.target.valueAsNumber,
-              }));
-            }
-          }}
-          disabled={mode === NormalizationMode.Time}
-        />
-      </EuiFormControlLayout>
+        data-test-subj="profilingNormalizationMenuFieldNumber"
+        id={baselineScaleFactorInputId}
+        value={baseline}
+        onChange={(e) => {
+          if (mode === NormalizationMode.Scale) {
+            setOptions((prevOptions) => ({
+              ...prevOptions,
+              baselineScale: e.target.valueAsNumber,
+            }));
+          }
+        }}
+        disabled={mode === NormalizationMode.Time}
+      />
       <EuiSpacer size="m" />
       <EuiTitle size="xxxs">
         <h6>
@@ -216,26 +212,22 @@ export function NormalizationMenu(props: Props) {
         </h6>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiFormControlLayout
+      <EuiFieldNumber
         fullWidth
         prepend={<EuiFormLabel htmlFor={comparisonScaleFactorInputId}>{SCALE_LABEL}</EuiFormLabel>}
-      >
-        <EuiFieldNumber
-          data-test-subj="profilingNormalizationMenuFieldNumber"
-          controlOnly
-          id={comparisonScaleFactorInputId}
-          value={comparison}
-          onChange={(e) => {
-            if (mode === NormalizationMode.Scale) {
-              setOptions((prevOptions) => ({
-                ...prevOptions,
-                comparisonScale: e.target.valueAsNumber,
-              }));
-            }
-          }}
-          disabled={mode === NormalizationMode.Time}
-        />
-      </EuiFormControlLayout>
+        data-test-subj="profilingNormalizationMenuFieldNumber"
+        id={comparisonScaleFactorInputId}
+        value={comparison}
+        onChange={(e) => {
+          if (mode === NormalizationMode.Scale) {
+            setOptions((prevOptions) => ({
+              ...prevOptions,
+              comparisonScale: e.target.valueAsNumber,
+            }));
+          }
+        }}
+        disabled={mode === NormalizationMode.Time}
+      />
       <EuiSpacer size="m" />
       <EuiButton
         data-test-subj="profilingNormalizationMenuApplyChangesButton"

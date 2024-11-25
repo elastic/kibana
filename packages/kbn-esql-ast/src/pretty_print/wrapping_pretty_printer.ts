@@ -9,16 +9,19 @@
 
 import { BinaryExpressionGroup } from '../ast/constants';
 import { binaryExpressionGroup, isBinaryExpression } from '../ast/helpers';
+import type { ESQLAstBaseItem, ESQLAstQueryExpression } from '../types';
 import {
   CommandOptionVisitorContext,
   CommandVisitorContext,
-  ESQLAstQueryNode,
   ExpressionVisitorContext,
   FunctionCallExpressionVisitorContext,
+  ListLiteralExpressionVisitorContext,
   Visitor,
 } from '../visitor';
-import { singleItems } from '../visitor/utils';
+import { children, singleItems } from '../visitor/utils';
 import { BasicPrettyPrinter, BasicPrettyPrinterOptions } from './basic_pretty_printer';
+import { commandOptionsWithEqualsSeparator, commandsWithNoCommaArgSeparator } from './constants';
+import { getPrettyPrintStats } from './helpers';
 import { LeafPrinter } from './leaf_printer';
 
 /**
@@ -51,11 +54,24 @@ interface Input {
    * ```
    */
   flattenBinExpOfType?: BinaryExpressionGroup;
+
+  /**
+   * Suffix text to append to the formatted output, before any comment
+   * decorations.
+   */
+  suffix?: string;
 }
 
 interface Output {
   txt: string;
   lines?: number;
+
+  /**
+   * Whether the node is returned already indented. This is done, when the
+   * node, for example, line braking decorations (multi-line comments), then
+   * the node and its decorations are returned already indented.
+   */
+  indented?: boolean;
 }
 
 export interface WrappingPrettyPrinterOptions extends BasicPrettyPrinterOptions {
@@ -96,7 +112,7 @@ export interface WrappingPrettyPrinterOptions extends BasicPrettyPrinterOptions 
 
 export class WrappingPrettyPrinter {
   public static readonly print = (
-    query: ESQLAstQueryNode,
+    query: ESQLAstQueryExpression,
     opts?: WrappingPrettyPrinterOptions
   ): string => {
     const printer = new WrappingPrettyPrinter(opts);
@@ -138,8 +154,12 @@ export class WrappingPrettyPrinter {
     const groupLeft = binaryExpressionGroup(left);
     const groupRight = binaryExpressionGroup(right);
     const continueVerticalFlattening = group && inp.flattenBinExpOfType === group;
+    const suffix = inp.suffix ?? '';
+    const oneArgumentPerLine =
+      getPrettyPrintStats(left).hasLineBreakingDecorations ||
+      getPrettyPrintStats(right).hasLineBreakingDecorations;
 
-    if (continueVerticalFlattening) {
+    if (continueVerticalFlattening || oneArgumentPerLine) {
       const parent = ctx.parent?.node;
       const isLeftChild = isBinaryExpression(parent) && parent.args[0] === node;
       const leftInput: Input = {
@@ -147,17 +167,25 @@ export class WrappingPrettyPrinter {
         remaining: inp.remaining,
         flattenBinExpOfType: group,
       };
+      const rightTab = isLeftChild ? this.opts.tab : '';
+      const rightIndent = inp.indent + rightTab + (oneArgumentPerLine ? this.opts.tab : '');
       const rightInput: Input = {
-        indent: inp.indent + this.opts.tab,
+        indent: rightIndent,
         remaining: inp.remaining - this.opts.tab.length,
         flattenBinExpOfType: group,
       };
       const leftOut = ctx.visitArgument(0, leftInput);
       const rightOut = ctx.visitArgument(1, rightInput);
-      const rightTab = isLeftChild ? this.opts.tab : '';
-      const txt = `${leftOut.txt} ${operator}\n${inp.indent}${rightTab}${rightOut.txt}`;
 
-      return { txt };
+      let txt = `${leftOut.txt} ${operator}\n`;
+
+      if (!rightOut.indented) {
+        txt += rightIndent;
+      }
+
+      txt += rightOut.txt + suffix;
+
+      return { txt, indented: leftOut.indented };
     }
 
     let txt: string = '';
@@ -175,8 +203,10 @@ export class WrappingPrettyPrinter {
     const length = leftFormatted.length + rightFormatted.length + operator.length + 2;
     const fitsOnOneLine = length <= inp.remaining;
 
+    let indented = false;
+
     if (fitsOnOneLine) {
-      txt = `${leftFormatted} ${operator} ${rightFormatted}`;
+      txt = `${leftFormatted} ${operator} ${rightFormatted}${suffix}`;
     } else {
       const flattenVertically = group === groupLeft || group === groupRight;
       const flattenBinExpOfType = flattenVertically ? group : undefined;
@@ -193,14 +223,25 @@ export class WrappingPrettyPrinter {
       const leftOut = ctx.visitArgument(0, leftInput);
       const rightOut = ctx.visitArgument(1, rightInput);
 
-      txt = `${leftOut.txt} ${operator}\n${inp.indent}${this.opts.tab}${rightOut.txt}`;
+      txt = `${leftOut.txt} ${operator}\n`;
+
+      if (!rightOut.indented) {
+        txt += `${inp.indent}${this.opts.tab}`;
+      }
+
+      txt += `${rightOut.txt}${suffix}`;
+      indented = leftOut.indented;
     }
 
-    return { txt };
+    return { txt, indented };
   }
 
   private printArguments(
-    ctx: CommandVisitorContext | CommandOptionVisitorContext | FunctionCallExpressionVisitorContext,
+    ctx:
+      | CommandVisitorContext
+      | CommandOptionVisitorContext
+      | FunctionCallExpressionVisitorContext
+      | ListLiteralExpressionVisitorContext,
     inp: Input
   ) {
     let txt = '';
@@ -212,53 +253,66 @@ export class WrappingPrettyPrinter {
     let remainingCurrentLine = inp.remaining;
     let oneArgumentPerLine = false;
 
-    ARGS: for (const arg of singleItems(ctx.arguments())) {
-      if (arg.type === 'option') {
-        continue;
+    for (const child of children(ctx.node)) {
+      if (getPrettyPrintStats(child).hasLineBreakingDecorations) {
+        oneArgumentPerLine = true;
+        break;
       }
+    }
 
-      const formattedArg = BasicPrettyPrinter.expression(arg, this.opts);
-      const formattedArgLength = formattedArg.length;
-      const needsWrap = remainingCurrentLine < formattedArgLength;
-      if (formattedArgLength > largestArg) {
-        largestArg = formattedArgLength;
-      }
-      let separator = txt ? ',' : '';
-      let fragment = '';
+    const commaBetweenArgs = !commandsWithNoCommaArgSeparator.has(ctx.node.name);
 
-      if (needsWrap) {
-        separator +=
-          '\n' +
-          inp.indent +
-          this.opts.tab +
-          (ctx instanceof CommandVisitorContext ? this.opts.commandTab : '');
-        fragment = separator + formattedArg;
-        lines++;
-        if (argsPerLine > maxArgsPerLine) {
-          maxArgsPerLine = argsPerLine;
+    if (!oneArgumentPerLine) {
+      ARGS: for (const arg of singleItems(ctx.arguments())) {
+        if (arg.type === 'option') {
+          continue;
         }
-        if (argsPerLine < minArgsPerLine) {
-          minArgsPerLine = argsPerLine;
-          if (minArgsPerLine < 2) {
-            oneArgumentPerLine = true;
-            break ARGS;
+
+        const formattedArg = BasicPrettyPrinter.expression(arg, this.opts);
+        const formattedArgLength = formattedArg.length;
+        const needsWrap = remainingCurrentLine < formattedArgLength;
+        if (formattedArgLength > largestArg) {
+          largestArg = formattedArgLength;
+        }
+
+        let separator = txt ? (commaBetweenArgs ? ',' : '') : '';
+        let fragment = '';
+
+        if (needsWrap) {
+          separator +=
+            '\n' +
+            inp.indent +
+            this.opts.tab +
+            (ctx instanceof CommandVisitorContext ? this.opts.commandTab : '');
+          fragment = separator + formattedArg;
+          lines++;
+          if (argsPerLine > maxArgsPerLine) {
+            maxArgsPerLine = argsPerLine;
           }
+          if (argsPerLine < minArgsPerLine) {
+            minArgsPerLine = argsPerLine;
+            if (minArgsPerLine < 2) {
+              oneArgumentPerLine = true;
+              break ARGS;
+            }
+          }
+          remainingCurrentLine =
+            inp.remaining - formattedArgLength - this.opts.tab.length - this.opts.commandTab.length;
+          argsPerLine = 1;
+        } else {
+          argsPerLine++;
+          fragment = separator + (separator ? ' ' : '') + formattedArg;
+          remainingCurrentLine -= fragment.length;
         }
-        remainingCurrentLine =
-          inp.remaining - formattedArgLength - this.opts.tab.length - this.opts.commandTab.length;
-        argsPerLine = 1;
-      } else {
-        argsPerLine++;
-        fragment = separator + (separator ? ' ' : '') + formattedArg;
-        remainingCurrentLine -= fragment.length;
+        txt += fragment;
       }
-      txt += fragment;
     }
 
     let indent = inp.indent + this.opts.tab;
 
     if (ctx instanceof CommandVisitorContext) {
-      const isFirstCommand = (ctx.parent?.node as ESQLAstQueryNode)?.[0] === ctx.node;
+      const isFirstCommand =
+        (ctx.parent?.node as ESQLAstQueryExpression)?.commands?.[0] === ctx.node;
       if (!isFirstCommand) {
         indent += this.opts.commandTab;
       }
@@ -266,21 +320,111 @@ export class WrappingPrettyPrinter {
 
     if (oneArgumentPerLine) {
       lines = 1;
-      txt = ctx instanceof CommandVisitorContext ? indent : '\n' + indent;
-      let i = 0;
-      for (const arg of ctx.visitArguments({
-        indent,
-        remaining: this.opts.wrap - indent.length,
-      })) {
+      txt = ctx instanceof CommandVisitorContext ? '' : '\n';
+      const args = [...ctx.arguments()].filter((arg) => {
+        if (arg.type === 'option') return arg.name === 'as';
+        return true;
+      });
+      const length = args.length;
+      const last = length - 1;
+      for (let i = 0; i <= last; i++) {
         const isFirstArg = i === 0;
-        const separator = isFirstArg ? '' : ',\n' + indent;
-        txt += separator + arg.txt;
+        const isLastArg = i === last;
+        const arg = ctx.visitExpression(args[i], {
+          indent,
+          remaining: this.opts.wrap - indent.length,
+          suffix: isLastArg ? '' : commaBetweenArgs ? ',' : '',
+        });
+        const separator = isFirstArg ? '' : '\n';
+        const indentation = arg.indented ? '' : indent;
+        txt += separator + indentation + arg.txt;
         lines++;
-        i++;
       }
     }
 
     return { txt, lines, indent, oneArgumentPerLine };
+  }
+
+  protected printTopDecorations(indent: string, node: ESQLAstBaseItem): string {
+    const formatting = node.formatting;
+
+    if (!formatting || !formatting.top || !formatting.top.length) {
+      return '';
+    }
+
+    let txt = '';
+
+    for (const decoration of formatting.top) {
+      if (decoration.type === 'comment') {
+        txt += indent + LeafPrinter.comment(decoration) + '\n';
+      }
+    }
+
+    return txt;
+  }
+
+  protected decorateWithComments(
+    indent: string,
+    node: ESQLAstBaseItem,
+    txt: string,
+    indented: boolean = false
+  ): { txt: string; indented: boolean } {
+    const formatting = node.formatting;
+
+    if (!formatting) {
+      return { txt, indented };
+    }
+
+    if (formatting.left) {
+      const comments = LeafPrinter.commentList(formatting.left);
+
+      if (comments) {
+        indented = true;
+        txt = `${indent}${comments} ${txt}`;
+      }
+    }
+
+    if (formatting.top) {
+      const top = formatting.top;
+      const length = top.length;
+
+      for (let i = length - 1; i >= 0; i--) {
+        const decoration = top[i];
+
+        if (decoration.type === 'comment') {
+          if (!indented) {
+            txt = indent + txt;
+            indented = true;
+          }
+          txt = indent + LeafPrinter.comment(decoration) + '\n' + txt;
+        }
+      }
+    }
+
+    if (formatting.right) {
+      const comments = LeafPrinter.commentList(formatting.right);
+
+      if (comments) {
+        txt = `${txt} ${comments}`;
+      }
+    }
+
+    if (formatting.rightSingleLine) {
+      const comment = LeafPrinter.comment(formatting.rightSingleLine);
+
+      txt += ` ${comment}`;
+    }
+
+    if (formatting.bottom) {
+      for (const decoration of formatting.bottom) {
+        if (decoration.type === 'comment') {
+          indented = true;
+          txt = txt + '\n' + indent + LeafPrinter.comment(decoration);
+        }
+      }
+    }
+
+    return { txt, indented };
   }
 
   protected readonly visitor = new Visitor()
@@ -289,25 +433,33 @@ export class WrappingPrettyPrinter {
       return { txt };
     })
 
-    .on(
-      'visitSourceExpression',
-      (ctx, inp: Input): Output => ({ txt: LeafPrinter.source(ctx.node) })
-    )
+    .on('visitSourceExpression', (ctx, inp: Input): Output => {
+      const formatted = LeafPrinter.source(ctx.node) + (inp.suffix ?? '');
+      const { txt, indented } = this.decorateWithComments(inp.indent, ctx.node, formatted);
 
-    .on(
-      'visitColumnExpression',
-      (ctx, inp: Input): Output => ({ txt: LeafPrinter.column(ctx.node) })
-    )
+      return { txt, indented };
+    })
 
-    .on(
-      'visitLiteralExpression',
-      (ctx, inp: Input): Output => ({ txt: LeafPrinter.literal(ctx.node) })
-    )
+    .on('visitColumnExpression', (ctx, inp: Input): Output => {
+      const formatted = LeafPrinter.column(ctx.node) + (inp.suffix ?? '');
+      const { txt, indented } = this.decorateWithComments(inp.indent, ctx.node, formatted);
 
-    .on(
-      'visitTimeIntervalLiteralExpression',
-      (ctx, inp: Input): Output => ({ txt: LeafPrinter.timeInterval(ctx.node) })
-    )
+      return { txt, indented };
+    })
+
+    .on('visitLiteralExpression', (ctx, inp: Input): Output => {
+      const formatted = LeafPrinter.literal(ctx.node) + (inp.suffix ?? '');
+      const { txt, indented } = this.decorateWithComments(inp.indent, ctx.node, formatted);
+
+      return { txt, indented };
+    })
+
+    .on('visitTimeIntervalLiteralExpression', (ctx, inp: Input): Output => {
+      const formatted = LeafPrinter.timeInterval(ctx.node) + (inp.suffix ?? '');
+      const { txt, indented } = this.decorateWithComments(inp.indent, ctx.node, formatted);
+
+      return { txt, indented };
+    })
 
     .on('visitInlineCastExpression', (ctx, inp: Input): Output => {
       const value = ctx.value();
@@ -326,26 +478,34 @@ export class WrappingPrettyPrinter {
         valueFormatted = `(${valueFormatted})`;
       }
 
-      const txt = `${valueFormatted}::${ctx.node.castType}`;
+      const formatted = `${valueFormatted}::${ctx.node.castType}${inp.suffix ?? ''}`;
+      const { txt, indented } = this.decorateWithComments(inp.indent, ctx.node, formatted);
 
-      return { txt };
+      return { txt, indented };
     })
 
     .on('visitRenameExpression', (ctx, inp: Input): Output => {
       const operator = this.keyword('AS');
+      const expression = this.visitBinaryExpression(ctx, operator, inp);
+      const { txt, indented } = this.decorateWithComments(
+        inp.indent,
+        ctx.node,
+        expression.txt,
+        expression.indented
+      );
 
-      return this.visitBinaryExpression(ctx, operator, inp);
+      return { txt, indented };
     })
 
     .on('visitListLiteralExpression', (ctx, inp: Input): Output => {
-      let elements = '';
+      const args = this.printArguments(ctx, {
+        indent: inp.indent,
+        remaining: inp.remaining - 1,
+      });
+      const formatted = `[${args.txt}]${inp.suffix ?? ''}`;
+      const { txt, indented } = this.decorateWithComments(inp.indent, ctx.node, formatted);
 
-      for (const out of ctx.visitElements()) {
-        elements += (elements ? ', ' : '') + out.txt;
-      }
-
-      const txt = `[${elements}]`;
-      return { txt };
+      return { txt, indented };
     })
 
     .on('visitFunctionCallExpression', (ctx, inp: Input): Output => {
@@ -363,7 +523,8 @@ export class WrappingPrettyPrinter {
           break;
         }
         case 'postfix-unary-expression': {
-          txt = `${ctx.visitArgument(0, inp).txt} ${operator}`;
+          const suffix = inp.suffix ?? '';
+          txt = `${ctx.visitArgument(0, { ...inp, suffix: '' }).txt} ${operator}${suffix}`;
           break;
         }
         case 'binary-expression': {
@@ -375,7 +536,19 @@ export class WrappingPrettyPrinter {
             remaining: inp.remaining - operator.length - 1,
           });
 
-          txt = `${operator}(${args.txt})`;
+          let breakClosingParenthesis = false;
+
+          if (getPrettyPrintStats(ctx.node).hasRightSingleLineComments) {
+            breakClosingParenthesis = true;
+          }
+
+          let closingParenthesisFormatted = ')';
+
+          if (breakClosingParenthesis) {
+            closingParenthesisFormatted = '\n' + inp.indent + ')';
+          }
+
+          txt = `${operator}(${args.txt}${closingParenthesisFormatted}${inp.suffix ?? ''}`;
         }
       }
 
@@ -388,8 +561,9 @@ export class WrappingPrettyPrinter {
         indent: inp.indent,
         remaining: inp.remaining - option.length - 1,
       });
-      const argsFormatted = args.txt ? ` ${args.txt}` : '';
-      const txt = `${option}${argsFormatted}`;
+      const argsFormatted = args.txt ? `${args.txt[0] === '\n' ? '' : ' '}${args.txt}` : '';
+      const separator = commandOptionsWithEqualsSeparator.has(ctx.node.name) ? ' =' : '';
+      const txt = `${option}${separator}${argsFormatted}`;
 
       return { txt, lines: args.lines };
     })
@@ -433,6 +607,7 @@ export class WrappingPrettyPrinter {
       const optionsWithWhitespace = options
         ? `${breakOptions ? '\n' + optionIndent : ' '}${options}`
         : '';
+
       const txt = `${cmd}${argsWithWhitespace}${optionsWithWhitespace}`;
 
       return { txt, lines: args.lines /* add options lines count */ };
@@ -441,8 +616,17 @@ export class WrappingPrettyPrinter {
     .on('visitQuery', (ctx) => {
       const opts = this.opts;
       const indent = opts.indent ?? '';
-      const commandCount = ctx.node.length;
+      const commands = ctx.node.commands;
+      const commandCount = commands.length;
+
       let multiline = opts.multiline ?? commandCount > 3;
+
+      if (!multiline) {
+        const stats = getPrettyPrintStats(ctx.node);
+        if (stats.hasLineBreakingDecorations) {
+          multiline = true;
+        }
+      }
 
       if (!multiline) {
         const oneLine = indent + BasicPrettyPrinter.print(ctx.node, opts);
@@ -454,18 +638,37 @@ export class WrappingPrettyPrinter {
       }
 
       let text = indent;
-      const cmdSeparator = multiline ? `\n${indent}${opts.pipeTab ?? '  '}| ` : ' | ';
+      const pipedCommandIndent = `${indent}${opts.pipeTab ?? '  '}`;
+      const cmdSeparator = multiline ? `${pipedCommandIndent}| ` : ' | ';
       let i = 0;
       let prevOut: Output | undefined;
 
       for (const out of ctx.visitCommands({ indent, remaining: opts.wrap - indent.length })) {
+        const isFirstCommand = i === 0;
         const isSecondCommand = i === 1;
+
         if (isSecondCommand) {
           const firstCommandIsMultiline = prevOut?.lines && prevOut.lines > 1;
           if (firstCommandIsMultiline) text += '\n' + indent;
         }
-        const isFirstCommand = i === 0;
-        if (!isFirstCommand) text += cmdSeparator;
+
+        const commandIndent = isFirstCommand ? indent : pipedCommandIndent;
+        const topDecorations = this.printTopDecorations(commandIndent, commands[i]);
+
+        if (topDecorations) {
+          if (!isFirstCommand) {
+            text += '\n';
+          }
+          text += topDecorations;
+        }
+
+        if (!isFirstCommand) {
+          if (multiline && !topDecorations) {
+            text += '\n';
+          }
+          text += cmdSeparator;
+        }
+
         text += out.txt;
         i++;
         prevOut = out;
@@ -474,7 +677,7 @@ export class WrappingPrettyPrinter {
       return text;
     });
 
-  public print(query: ESQLAstQueryNode) {
+  public print(query: ESQLAstQueryExpression) {
     return this.visitor.visitQuery(query);
   }
 }

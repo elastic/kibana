@@ -62,7 +62,6 @@ export {
   isLiteralItem,
   isTimeIntervalItem,
   isAssignment,
-  isExpression,
   isAssignmentComplete,
   isSingleItem,
 } from './src/shared/helpers';
@@ -76,3 +75,5 @@ export {
 } from './src/shared/resources_helpers';
 
 export { wrapAsEditorMessage } from './src/code_actions/utils';
+
+export { getRecommendedQueries } from './src/autocomplete/recommended_queries/templates';

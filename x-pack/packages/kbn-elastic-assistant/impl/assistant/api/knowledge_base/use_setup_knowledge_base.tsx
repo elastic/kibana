@@ -11,6 +11,7 @@ import type { IToasts } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
 import { postKnowledgeBase } from './api';
 import { useInvalidateKnowledgeBaseStatus } from './use_knowledge_base_status';
+import { useInvalidateKnowledgeBaseEntries } from './entries/use_knowledge_base_entries';
 
 const SETUP_KNOWLEDGE_BASE_MUTATION_KEY = ['elastic-assistant', 'post-knowledge-base'];
 
@@ -31,6 +32,7 @@ export interface UseSetupKnowledgeBaseParams {
  */
 export const useSetupKnowledgeBase = ({ http, toasts }: UseSetupKnowledgeBaseParams) => {
   const invalidateKnowledgeBaseStatus = useInvalidateKnowledgeBaseStatus();
+  const invalidateKnowledgeBaseEntries = useInvalidateKnowledgeBaseEntries();
 
   return useMutation(
     SETUP_KNOWLEDGE_BASE_MUTATION_KEY,
@@ -53,6 +55,7 @@ export const useSetupKnowledgeBase = ({ http, toasts }: UseSetupKnowledgeBasePar
       },
       onSettled: () => {
         invalidateKnowledgeBaseStatus();
+        invalidateKnowledgeBaseEntries();
       },
     }
   );

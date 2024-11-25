@@ -54,9 +54,15 @@ export enum ProductFeatureSecurityKey {
   osqueryAutomatedResponseActions = 'osquery_automated_response_actions',
 
   /**
-   * Enables Agent Tamper Protection
+   * Enables Protection Updates
    */
   endpointProtectionUpdates = 'endpoint_protection_updates',
+
+  /**
+   * Enables Endpoint Custom Notification
+   */
+
+  endpointCustomNotification = 'endpoint_custom_notification',
 
   /**
    * Enables Agent Tamper Protection
@@ -142,9 +148,12 @@ export enum SecuritySubFeatureId {
 export enum CasesSubFeatureId {
   deleteCases = 'deleteCasesSubFeature',
   casesSettings = 'casesSettingsSubFeature',
+  createComment = 'createCommentSubFeature',
+  reopenCase = 'reopenCaseSubFeature',
 }
 
 /** Sub-features IDs for Security Assistant */
 export enum AssistantSubFeatureId {
   updateAnonymization = 'updateAnonymizationSubFeature',
+  manageGlobalKnowledgeBase = 'manageGlobalKnowledgeBaseSubFeature',
 }

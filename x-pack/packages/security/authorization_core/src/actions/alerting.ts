@@ -40,4 +40,12 @@ export class AlertingActions implements AlertingActionsType {
 
     return `${this.prefix}${ruleTypeId}/${consumer}/${alertingEntity}/${operation}`;
   }
+
+  /**
+   * Checks if the action is a valid alerting action.
+   * @param action The action string to check.
+   */
+  public isValid(action: string) {
+    return action.startsWith(this.prefix);
+  }
 }

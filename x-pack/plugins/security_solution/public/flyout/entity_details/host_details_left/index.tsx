@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
-import { getRiskInputTab } from '../../../entity_analytics/components/entity_details_flyout';
+import {
+  getRiskInputTab,
+  getInsightsInputTab,
+} from '../../../entity_analytics/components/entity_details_flyout';
 import { LeftPanelContent } from '../shared/components/left_panel/left_panel_content';
+import type { CspInsightLeftPanelSubTab } from '../shared/components/left_panel/left_panel_header';
 import {
   EntityDetailsLeftPanelTab,
   LeftPanelHeader,
@@ -19,6 +23,13 @@ export interface HostDetailsPanelProps extends Record<string, unknown> {
   isRiskScoreExist: boolean;
   name: string;
   scopeId: string;
+  hasMisconfigurationFindings?: boolean;
+  hasVulnerabilitiesFindings?: boolean;
+  hasNonClosedAlerts?: boolean;
+  path?: {
+    tab?: EntityDetailsLeftPanelTab;
+    subTab?: CspInsightLeftPanelSubTab;
+  };
 }
 export interface HostDetailsExpandableFlyoutProps extends FlyoutPanelProps {
   key: 'host_details';
@@ -26,18 +37,41 @@ export interface HostDetailsExpandableFlyoutProps extends FlyoutPanelProps {
 }
 export const HostDetailsPanelKey: HostDetailsExpandableFlyoutProps['key'] = 'host_details';
 
-export const HostDetailsPanel = ({ name, isRiskScoreExist, scopeId }: HostDetailsPanelProps) => {
-  // Temporary implementation while Host details left panel don't have Asset tabs
-  const [tabs, selectedTabId, setSelectedTabId] = useMemo(() => {
+export const HostDetailsPanel = ({
+  name,
+  isRiskScoreExist,
+  scopeId,
+  path,
+  hasMisconfigurationFindings,
+  hasVulnerabilitiesFindings,
+  hasNonClosedAlerts,
+}: HostDetailsPanelProps) => {
+  const [selectedTabId, setSelectedTabId] = useState(
+    path?.tab === EntityDetailsLeftPanelTab.CSP_INSIGHTS
+      ? EntityDetailsLeftPanelTab.CSP_INSIGHTS
+      : EntityDetailsLeftPanelTab.RISK_INPUTS
+  );
+
+  const [tabs] = useMemo(() => {
     const isRiskScoreTabAvailable = isRiskScoreExist && name;
-    return [
-      isRiskScoreTabAvailable
-        ? [getRiskInputTab({ entityName: name, entityType: RiskScoreEntity.host, scopeId })]
-        : [],
-      EntityDetailsLeftPanelTab.RISK_INPUTS,
-      () => {},
-    ];
-  }, [name, isRiskScoreExist, scopeId]);
+    const riskScoreTab = isRiskScoreTabAvailable
+      ? [getRiskInputTab({ entityName: name, entityType: RiskScoreEntity.host, scopeId })]
+      : [];
+
+    // Determine if the Insights tab should be included
+    const insightsTab =
+      hasMisconfigurationFindings || hasVulnerabilitiesFindings || hasNonClosedAlerts
+        ? [getInsightsInputTab({ name, fieldName: 'host.name' })]
+        : [];
+    return [[...riskScoreTab, ...insightsTab], EntityDetailsLeftPanelTab.RISK_INPUTS, () => {}];
+  }, [
+    isRiskScoreExist,
+    name,
+    scopeId,
+    hasMisconfigurationFindings,
+    hasVulnerabilitiesFindings,
+    hasNonClosedAlerts,
+  ]);
 
   return (
     <>

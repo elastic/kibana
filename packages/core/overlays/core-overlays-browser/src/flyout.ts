@@ -30,7 +30,10 @@ export interface OverlayFlyoutStart {
 /**
  * @public
  */
-export type OverlayFlyoutOpenOptions = Omit<EuiFlyoutProps | EuiFlyoutResizableProps, 'onClose'> & {
+export type OverlayFlyoutOpenOptions = Omit<
+  EuiFlyoutProps | EuiFlyoutResizableProps,
+  'onClose' | 'onResize'
+> & {
   /**
    * EuiFlyout onClose handler.
    * If provided the consumer is responsible for calling flyout.close() to close the flyout;

@@ -31,6 +31,8 @@ import {
   RawRequest,
   FakeRawRequest,
   HttpProtocol,
+  RouteSecurityGetter,
+  RouteSecurity,
 } from '@kbn/core-http-server';
 import {
   ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM,
@@ -45,6 +47,12 @@ import { patchRequest } from './patch_requests';
 patchRequest();
 
 const requestSymbol = Symbol('request');
+
+const isRouteSecurityGetter = (
+  security?: RouteSecurityGetter | RecursiveReadonly<RouteSecurity>
+): security is RouteSecurityGetter => {
+  return typeof security === 'function';
+};
 
 /**
  * Core internal implementation of {@link KibanaRequest}
@@ -135,8 +143,12 @@ export class CoreKibanaRequest<
   public readonly rewrittenUrl?: URL;
   /** {@inheritDoc KibanaRequest.httpVersion} */
   public readonly httpVersion: string;
+  /** {@inheritDoc KibanaRequest.apiVersion} */
+  public readonly apiVersion: undefined;
   /** {@inheritDoc KibanaRequest.protocol} */
   public readonly protocol: HttpProtocol;
+  /** {@inheritDoc KibanaRequest.authzResult} */
+  public readonly authzResult?: Record<string, boolean>;
 
   /** @internal */
   protected readonly [requestSymbol]!: Request;
@@ -159,14 +171,20 @@ export class CoreKibanaRequest<
     this.id = appState?.requestId ?? uuidv4();
     this.uuid = appState?.requestUuid ?? uuidv4();
     this.rewrittenUrl = appState?.rewrittenUrl;
+    this.authzResult = appState?.authzResult;
 
     this.url = request.url ?? new URL('https://fake-request/url');
     this.headers = isRealReq ? deepFreeze({ ...request.headers }) : request.headers;
     this.isSystemRequest = this.headers['kbn-system-request'] === 'true';
     this.isFakeRequest = !isRealReq;
+    // set to false if elasticInternalOrigin is explicitly set to false
+    // otherwise check for the header or the query param
     this.isInternalApiRequest =
-      X_ELASTIC_INTERNAL_ORIGIN_REQUEST in this.headers ||
-      Boolean(this.url?.searchParams?.has(ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM));
+      this.url?.searchParams?.get(ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM) === 'false'
+        ? false
+        : X_ELASTIC_INTERNAL_ORIGIN_REQUEST in this.headers ||
+          this.url?.searchParams?.has(ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM);
+
     // prevent Symbol exposure via Object.getOwnPropertySymbols()
     Object.defineProperty(this, requestSymbol, {
       value: request,
@@ -174,6 +192,7 @@ export class CoreKibanaRequest<
     });
 
     this.httpVersion = isRealReq ? request.raw.req.httpVersion : '1.0';
+    this.apiVersion = undefined;
     this.protocol = getProtocolFromHttpVersion(this.httpVersion);
 
     this.route = deepFreeze(this.getRouteInfo(request));
@@ -204,6 +223,8 @@ export class CoreKibanaRequest<
         isAuthenticated: this.auth.isAuthenticated,
       },
       route: this.route,
+      authzResult: this.authzResult,
+      apiVersion: this.apiVersion,
     };
   }
 
@@ -240,7 +261,14 @@ export class CoreKibanaRequest<
     } = request.route?.settings?.payload || {};
 
     // the socket is undefined when using @hapi/shot, or when a "fake request" is used
-    const socketTimeout = isRealRawRequest(request) ? request.raw.req.socket?.timeout : undefined;
+    let socketTimeout: undefined | number;
+    let routePath: undefined | string;
+
+    if (isRealRawRequest(request)) {
+      socketTimeout = request.raw.req.socket?.timeout;
+      routePath = request.route.path;
+    }
+
     const options = {
       authRequired: this.getAuthRequired(request),
       // TypeScript note: Casting to `RouterOptions` to fix the following error:
@@ -254,8 +282,11 @@ export class CoreKibanaRequest<
       xsrfRequired:
         ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)?.xsrfRequired ??
         true, // some places in LP call KibanaRequest.from(request) manually. remove fallback to true before v8
+      deprecated: ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)
+        ?.deprecated,
       access: this.getAccess(request),
       tags: request.route?.settings?.tags || [],
+      security: this.getSecurity(request),
       timeout: {
         payload: payloadTimeout,
         idleSocket: socketTimeout === 0 ? undefined : socketTimeout,
@@ -272,9 +303,17 @@ export class CoreKibanaRequest<
 
     return {
       path: request.path ?? '/',
+      routePath,
       method,
       options,
     };
+  }
+
+  private getSecurity(request: RawRequest): RouteSecurity | undefined {
+    const securityConfig = ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)
+      ?.security;
+
+    return isRouteSecurityGetter(securityConfig) ? securityConfig(request) : securityConfig;
   }
 
   /** set route access to internal if not declared */
@@ -287,6 +326,12 @@ export class CoreKibanaRequest<
   private getAuthRequired(request: RawRequest): boolean | 'optional' {
     if (isFakeRawRequest(request)) {
       return true;
+    }
+
+    const security = this.getSecurity(request);
+
+    if (security?.authc !== undefined) {
+      return security.authc?.enabled ?? true;
     }
 
     const authOptions = request.route.settings.auth;
@@ -368,6 +413,7 @@ function isCompleted(request: Request) {
  */
 function sanitizeRequest(req: Request): { query: unknown; params: unknown; body: unknown } {
   const { [ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM]: __, ...query } = req.query ?? {};
+
   return {
     query,
     params: req.params,

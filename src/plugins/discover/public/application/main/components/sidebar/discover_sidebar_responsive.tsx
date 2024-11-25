@@ -23,11 +23,11 @@ import {
   FieldsGroupNames,
 } from '@kbn/unified-field-list';
 import { calcFieldCounts } from '@kbn/discover-utils/src/utils/calc_field_counts';
+import { Filter } from '@kbn/es-query';
 import { PLUGIN_ID } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DataDocuments$ } from '../../state_management/discover_data_state_container';
 import { FetchStatus, SidebarToggleState } from '../../../types';
-import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
 import {
   discoverSidebarReducer,
   getInitialState,
@@ -48,11 +48,6 @@ const getCreationOptions: UnifiedFieldListSidebarContainerProps['getCreationOpti
     showSidebarToggleButton: true,
     disableFieldsExistenceAutoFetching: true,
     buttonAddFieldVariant: 'toolbar',
-    buttonPropsToTriggerFlyout: {
-      contentProps: {
-        id: DISCOVER_TOUR_STEP_ANCHOR_IDS.addFields,
-      },
-    },
     buttonAddFieldToWorkspaceProps: {
       'aria-label': i18n.translate('discover.fieldChooser.discoverField.addFieldTooltip', {
         defaultMessage: 'Add field as column',
@@ -92,6 +87,10 @@ export interface DiscoverSidebarResponsiveProps {
    * hits fetched from ES, displayed in the doc table
    */
   documents$: DataDocuments$;
+  /**
+   * Callback to update breakdown field
+   */
+  onAddBreakdownField?: (breakdownField: DataViewField | undefined) => void;
   /**
    * Callback function when selecting a field
    */
@@ -133,6 +132,10 @@ export interface DiscoverSidebarResponsiveProps {
   fieldListVariant?: UnifiedFieldListSidebarContainerProps['variant'];
 
   sidebarToggleState$: BehaviorSubject<SidebarToggleState>;
+  /**
+   * Custom filters to apply for the field list, ex: namespace custom filter
+   */
+  additionalFilters?: Filter[];
 }
 
 /**
@@ -140,6 +143,7 @@ export interface DiscoverSidebarResponsiveProps {
  * Desktop: Sidebar view, all elements are visible
  * Mobile: Data view selector is visible and a button to trigger a flyout with all elements
  */
+
 export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps) {
   const [unifiedFieldListSidebarContainerApi, setUnifiedFieldListSidebarContainerApi] =
     useState<UnifiedFieldListSidebarContainerApi | null>(null);
@@ -151,6 +155,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     selectedDataView,
     columns,
     trackUiMetric,
+    onAddBreakdownField,
     onAddFilter,
     onFieldEdited,
     onDataViewCreated,
@@ -158,6 +163,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     onAddField,
     onRemoveField,
     sidebarToggleState$,
+    additionalFilters,
   } = props;
   const [sidebarState, dispatchSidebarStateAction] = useReducer(
     discoverSidebarReducer,
@@ -372,22 +378,24 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       <EuiFlexItem>
         {selectedDataView ? (
           <UnifiedFieldListSidebarContainer
-            ref={initializeUnifiedFieldListSidebarContainerApi}
-            variant={fieldListVariant}
-            getCreationOptions={getCreationOptions}
-            services={services}
-            dataView={selectedDataView}
-            trackUiMetric={trackUiMetric}
+            additionalFieldGroups={additionalFieldGroups}
+            additionalFilters={additionalFilters}
             allFields={sidebarState.allFields}
-            showFieldList={showFieldList}
-            workspaceSelectedFieldNames={columns}
+            dataView={selectedDataView}
             fullWidth
+            getCreationOptions={getCreationOptions}
+            onAddBreakdownField={onAddBreakdownField}
             onAddFieldToWorkspace={onAddFieldToWorkspace}
-            onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
             onAddFilter={onAddFilter}
             onFieldEdited={onFieldEdited}
+            onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
             prependInFlyout={prependDataViewPickerForMobile}
-            additionalFieldGroups={additionalFieldGroups}
+            ref={initializeUnifiedFieldListSidebarContainerApi}
+            services={services}
+            showFieldList={showFieldList}
+            trackUiMetric={trackUiMetric}
+            variant={fieldListVariant}
+            workspaceSelectedFieldNames={columns}
           />
         ) : null}
       </EuiFlexItem>

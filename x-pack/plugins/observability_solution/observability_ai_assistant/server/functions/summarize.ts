@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KnowledgeBaseType } from '../../common/types';
+import { v4 } from 'uuid';
 import type { FunctionRegistrationParameters } from '.';
 import { KnowledgeBaseEntryRole } from '../../common';
 
@@ -14,6 +14,7 @@ export const SUMMARIZE_FUNCTION_NAME = 'summarize';
 export function registerSummarizationFunction({
   client,
   functions,
+  resources,
 }: FunctionRegistrationParameters) {
   functions.registerFunction(
     {
@@ -28,10 +29,10 @@ export function registerSummarizationFunction({
       parameters: {
         type: 'object',
         properties: {
-          id: {
+          title: {
             type: 'string',
             description:
-              'An id for the document. This should be a short human-readable keyword field with only alphabetic characters and underscores, that allow you to update it later.',
+              'A human readable title that can be used to identify the document later. This should be no longer than 255 characters',
           },
           text: {
             type: 'string',
@@ -54,7 +55,7 @@ export function registerSummarizationFunction({
           },
         },
         required: [
-          'id' as const,
+          'title' as const,
           'text' as const,
           'is_correction' as const,
           'confidence' as const,
@@ -62,21 +63,23 @@ export function registerSummarizationFunction({
         ],
       },
     },
-    (
-      { arguments: { id, text, is_correction: isCorrection, confidence, public: isPublic } },
+    async (
+      { arguments: { title, text, is_correction: isCorrection, confidence, public: isPublic } },
       signal
     ) => {
+      const id = v4();
+      resources.logger.debug(`Creating new knowledge base entry with id: ${id}`);
+
       return client
         .addKnowledgeBaseEntry({
           entry: {
-            doc_id: id,
-            role: KnowledgeBaseEntryRole.AssistantSummarization,
             id,
+            title,
             text,
-            is_correction: isCorrection,
-            type: KnowledgeBaseType.Contextual,
-            confidence,
             public: isPublic,
+            role: KnowledgeBaseEntryRole.AssistantSummarization,
+            confidence,
+            is_correction: isCorrection,
             labels: {},
           },
           // signal,

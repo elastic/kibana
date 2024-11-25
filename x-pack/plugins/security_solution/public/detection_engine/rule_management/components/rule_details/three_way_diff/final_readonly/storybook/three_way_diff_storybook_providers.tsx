@@ -11,8 +11,13 @@ import { merge } from 'lodash';
 import { Subject } from 'rxjs';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import type { CoreStart } from '@kbn/core/public';
+import type { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { ReactQueryClientProvider } from '../../../../../../../common/containers/query_client/query_client_provider';
+import { UpsellingProvider } from '../../../../../../../common/components/upselling_provider';
+import { DiffableRuleContextProvider } from '../../diffable_rule_context';
+import type { DiffableRule } from '../../../../../../../../common/api/detection_engine';
+import { mockCustomQueryRule } from './mocks';
 
 function createKibanaServicesMock(overrides?: Partial<CoreStart>) {
   const baseMock = {
@@ -44,6 +49,10 @@ function createKibanaServicesMock(overrides?: Partial<CoreStart>) {
       },
     },
     uiSettings: {},
+    upsellingService: {
+      messages$: new Subject(),
+      getMessagesValue: () => new Map(),
+    } as unknown as UpsellingService,
   };
 
   return merge(baseMock, overrides);
@@ -63,23 +72,37 @@ function createMockStore() {
   return store;
 }
 
+const setRuleFieldResolvedValueMock = () => {};
+
 interface StorybookProvidersProps {
   children: React.ReactNode;
-  kibanaServicesMock?: Record<string, unknown>;
+  kibanaServicesOverrides?: Record<string, unknown>;
+  finalDiffableRule?: DiffableRule;
 }
 
 export function ThreeWayDiffStorybookProviders({
   children,
-  kibanaServicesMock,
+  kibanaServicesOverrides,
+  finalDiffableRule = mockCustomQueryRule(),
 }: StorybookProvidersProps) {
-  const KibanaReactContext = createKibanaReactContext(createKibanaServicesMock(kibanaServicesMock));
+  const kibanaServicesMock = createKibanaServicesMock(kibanaServicesOverrides);
+  const KibanaReactContext = createKibanaReactContext(kibanaServicesMock);
 
   const store = createMockStore();
 
   return (
     <KibanaReactContext.Provider>
       <ReactQueryClientProvider>
-        <ReduxStoreProvider store={store}>{children}</ReduxStoreProvider>
+        <ReduxStoreProvider store={store}>
+          <UpsellingProvider upsellingService={kibanaServicesMock.upsellingService}>
+            <DiffableRuleContextProvider
+              finalDiffableRule={finalDiffableRule}
+              setRuleFieldResolvedValue={setRuleFieldResolvedValueMock}
+            >
+              {children}
+            </DiffableRuleContextProvider>
+          </UpsellingProvider>
+        </ReduxStoreProvider>
       </ReactQueryClientProvider>
     </KibanaReactContext.Provider>
   );

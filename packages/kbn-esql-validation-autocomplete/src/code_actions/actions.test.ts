@@ -11,13 +11,15 @@ import { getActions } from './actions';
 import { validateQuery } from '../validation/validation';
 import { getAllFunctions } from '../shared/helpers';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
-import { CodeActionOptions } from './types';
-import { ESQLRealField } from '../validation/types';
-import { FieldType } from '../definitions/types';
+import type { CodeActionOptions } from './types';
+import type { ESQLRealField } from '../validation/types';
+import type { FieldType } from '../definitions/types';
+import type { ESQLCallbacks, PartialFieldsMetadataClient } from '../shared/types';
+import { FULL_TEXT_SEARCH_FUNCTIONS } from '../shared/constants';
 
-function getCallbackMocks() {
+function getCallbackMocks(): jest.Mocked<ESQLCallbacks> {
   return {
-    getFieldsFor: jest.fn<Promise<ESQLRealField[]>, any>(async ({ query }) => {
+    getColumnsFor: jest.fn<Promise<ESQLRealField[]>, any>(async ({ query }) => {
       if (/enrich/.test(query)) {
         const fields: ESQLRealField[] = [
           { name: 'otherField', type: 'keyword' },
@@ -65,6 +67,11 @@ function getCallbackMocks() {
         enrichFields: ['other-field', 'yetAnotherField'],
       },
     ]),
+    getFieldsMetadata: jest.fn(async () => ({
+      find: jest.fn(async () => ({
+        fields: {},
+      })),
+    })) as unknown as Promise<PartialFieldsMetadataClient>,
   };
 }
 
@@ -279,6 +286,16 @@ describe('quick fixes logic', () => {
       { relaxOnMissingCallbacks: false },
     ]) {
       for (const fn of getAllFunctions({ type: 'eval' })) {
+        if (FULL_TEXT_SEARCH_FUNCTIONS.includes(fn.name)) {
+          testQuickFixes(
+            `FROM index | WHERE ${BROKEN_PREFIX}${fn.name}()`,
+            [fn.name].map(toFunctionSignature),
+            { equalityCheck: 'include', ...options }
+          );
+        }
+      }
+      for (const fn of getAllFunctions({ type: 'eval' })) {
+        if (FULL_TEXT_SEARCH_FUNCTIONS.includes(fn.name)) continue;
         // add an A to the function name to make it invalid
         testQuickFixes(
           `FROM index | EVAL ${BROKEN_PREFIX}${fn.name}()`,
@@ -307,6 +324,8 @@ describe('quick fixes logic', () => {
         );
       }
       for (const fn of getAllFunctions({ type: 'agg' })) {
+        if (FULL_TEXT_SEARCH_FUNCTIONS.includes(fn.name)) continue;
+
         // add an A to the function name to make it invalid
         testQuickFixes(
           `FROM index | STATS ${BROKEN_PREFIX}${fn.name}()`,
@@ -369,11 +388,11 @@ describe('quick fixes logic', () => {
           const statement = `FROM index | DROP any#Char$Field`;
           const { errors } = await validateQuery(statement, getAstAndSyntaxErrors, undefined, {
             ...callbackMocks,
-            getFieldsFor: undefined,
+            getColumnsFor: undefined,
           });
           const edits = await getActions(statement, errors, getAstAndSyntaxErrors, undefined, {
             ...callbackMocks,
-            getFieldsFor: undefined,
+            getColumnsFor: undefined,
           });
           expect(edits.length).toBe(0);
         });
@@ -394,7 +413,8 @@ describe('quick fixes logic', () => {
           const statement = `FROM index | DROP any#Char$Field`;
           const { errors } = await validateQuery(statement, getAstAndSyntaxErrors, undefined, {
             ...callbackMocks,
-            getFieldsFor: undefined,
+            getColumnsFor: undefined,
+            getFieldsMetadata: undefined,
           });
           const actions = await getActions(
             statement,
@@ -403,7 +423,11 @@ describe('quick fixes logic', () => {
             {
               relaxOnMissingCallbacks: true,
             },
-            { ...callbackMocks, getFieldsFor: undefined }
+            {
+              ...callbackMocks,
+              getColumnsFor: undefined,
+              getFieldsMetadata: undefined,
+            }
           );
           const edits = actions.map(({ edits: actionEdits }) => actionEdits[0].text);
           expect(edits).toEqual(['`any#Char$Field`']);
@@ -424,7 +448,7 @@ describe('quick fixes logic', () => {
       );
       try {
         await getActions(statement, errors, getAstAndSyntaxErrors, undefined, {
-          getFieldsFor: undefined,
+          getColumnsFor: undefined,
           getSources: undefined,
           getPolicies: undefined,
         });
@@ -449,9 +473,10 @@ describe('quick fixes logic', () => {
           getAstAndSyntaxErrors,
           { relaxOnMissingCallbacks: true },
           {
-            getFieldsFor: undefined,
+            getColumnsFor: undefined,
             getSources: undefined,
             getPolicies: undefined,
+            getFieldsMetadata: undefined,
           }
         );
       } catch {

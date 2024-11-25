@@ -27,7 +27,7 @@
             "section": "def-public.TableListViewProps",
             "text": "TableListViewProps"
           },
-          "<T>) => JSX.Element"
+          "<T>) => React.JSX.Element"
         ],
         "path": "packages/content-management/table_list_view/src/table_list_view.tsx",
         "deprecated": false,

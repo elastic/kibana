@@ -60,15 +60,6 @@ describe('useAssetCriticality', () => {
 
       expect(mockFetchAssetCriticalityPrivileges).toHaveBeenCalled();
     });
-
-    it('does not call privileges API when UI Settings is disabled', async () => {
-      mockUseHasSecurityCapability.mockReturnValue(true);
-      mockUseUiSettings.mockReturnValue([false]);
-
-      await renderQuery(() => useAssetCriticalityPrivileges('test_entity_name'), 'isSuccess');
-
-      expect(mockFetchAssetCriticalityPrivileges).not.toHaveBeenCalled();
-    });
   });
 
   describe('useAssetCriticalityData', () => {

@@ -7,18 +7,12 @@
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { SyntheticsRestApiRouteFactory } from '../types';
-import { getAllMonitors } from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { isStatusEnabled } from '../../../common/runtime_types/monitor_management/alert_config';
-import {
-  ConfigKey,
-  EncryptedSyntheticsMonitorAttributes,
-  MonitorOverviewItem,
-} from '../../../common/runtime_types';
+import { ConfigKey, EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
-import { getMonitorFilters, MonitorsQuery, QuerySchema, SEARCH_FIELDS } from '../common';
-import { mapSavedObjectToMonitor } from './helper';
+import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
 import { getSyntheticsMonitor } from '../../queries/get_monitor';
 
 export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
@@ -31,7 +25,11 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
         monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
       }),
       query: schema.object({
-        decrypted: schema.maybe(schema.boolean()),
+        internal: schema.maybe(
+          schema.boolean({
+            defaultValue: false,
+          })
+        ),
       }),
     },
   },
@@ -40,37 +38,40 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
     response,
     server: { encryptedSavedObjects, coreStart },
     savedObjectsClient,
+    spaceId,
   }): Promise<any> => {
     const { monitorId } = request.params;
     try {
-      const { decrypted } = request.query;
+      const { internal } = request.query;
 
-      if (!decrypted) {
-        return mapSavedObjectToMonitor(
-          await savedObjectsClient.get<EncryptedSyntheticsMonitorAttributes>(
-            syntheticsMonitorType,
-            monitorId
-          )
-        );
-      } else {
+      const canSave =
+        (
+          await coreStart?.capabilities.resolveCapabilities(request, {
+            capabilityPath: 'uptime.*',
+          })
+        ).uptime.save ?? false;
+
+      if (Boolean(canSave)) {
         // only user with write permissions can decrypt the monitor
-        const canSave =
-          (
-            await coreStart?.capabilities.resolveCapabilities(request, {
-              capabilityPath: 'uptime.*',
-            })
-          ).uptime.save ?? false;
-        if (!canSave) {
-          return response.forbidden();
-        }
-
         const encryptedSavedObjectsClient = encryptedSavedObjects.getClient();
 
-        return await getSyntheticsMonitor({
+        const monitor = await getSyntheticsMonitor({
           monitorId,
           encryptedSavedObjectsClient,
-          savedObjectsClient,
+          spaceId,
         });
+        return { ...mapSavedObjectToMonitor({ monitor, internal }), spaceId };
+      } else {
+        return {
+          ...mapSavedObjectToMonitor({
+            monitor: await savedObjectsClient.get<EncryptedSyntheticsMonitorAttributes>(
+              syntheticsMonitorType,
+              monitorId
+            ),
+            internal,
+          }),
+          spaceId,
+        };
       }
     } catch (getErr) {
       if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
@@ -79,57 +80,6 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
 
       throw getErr;
     }
-  },
-});
-
-export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = () => ({
-  method: 'GET',
-  path: SYNTHETICS_API_URLS.SYNTHETICS_OVERVIEW,
-  validate: {
-    query: QuerySchema,
-  },
-  handler: async (routeContext): Promise<any> => {
-    const { request, savedObjectsClient } = routeContext;
-
-    const {
-      sortField,
-      sortOrder,
-      query,
-      locations: queriedLocations,
-    } = request.query as MonitorsQuery;
-
-    const { filtersStr } = await getMonitorFilters({
-      ...request.query,
-      context: routeContext,
-    });
-
-    const allMonitorConfigs = await getAllMonitors({
-      sortOrder,
-      filter: filtersStr,
-      soClient: savedObjectsClient,
-      sortField: sortField === 'status' ? `${ConfigKey.NAME}.keyword` : sortField,
-      search: query ? `${query}*` : undefined,
-      searchFields: SEARCH_FIELDS,
-    });
-
-    const allMonitorIds: string[] = [];
-    let total = 0;
-    const allMonitors: MonitorOverviewItem[] = [];
-
-    for (const { attributes } of allMonitorConfigs) {
-      const configId = attributes[ConfigKey.CONFIG_ID];
-      allMonitorIds.push(configId);
-
-      const monitorConfigsPerLocation = getOverviewConfigsPerLocation(attributes, queriedLocations);
-      allMonitors.push(...monitorConfigsPerLocation);
-      total += monitorConfigsPerLocation.length;
-    }
-
-    return {
-      monitors: allMonitors,
-      total,
-      allMonitorIds,
-    };
   },
 });
 

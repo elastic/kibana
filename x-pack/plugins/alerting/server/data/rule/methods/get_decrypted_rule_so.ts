@@ -8,8 +8,8 @@
 import { SavedObject } from '@kbn/core/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { SavedObjectsGetOptions } from '@kbn/core-saved-objects-api-server';
+import { RawRule } from '../../../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
-import { RuleAttributes } from '../types';
 
 export interface GetDecryptedRuleSoParams {
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
@@ -19,10 +19,10 @@ export interface GetDecryptedRuleSoParams {
 
 export const getDecryptedRuleSo = (
   params: GetDecryptedRuleSoParams
-): Promise<SavedObject<RuleAttributes>> => {
+): Promise<SavedObject<RawRule>> => {
   const { id, encryptedSavedObjectsClient, savedObjectsGetOptions } = params;
 
-  return encryptedSavedObjectsClient.getDecryptedAsInternalUser<RuleAttributes>(
+  return encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>(
     RULE_SAVED_OBJECT_TYPE,
     id,
     savedObjectsGetOptions

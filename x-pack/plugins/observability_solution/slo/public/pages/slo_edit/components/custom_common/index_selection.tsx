@@ -12,9 +12,11 @@ import React, { useEffect } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import { getDataViewPattern, useAdhocDataViews } from './use_adhoc_data_views';
-import { SloPublicPluginsStart } from '../../../..';
-import { useKibana } from '../../../../utils/kibana_react';
+import { SLOPublicPluginsStart } from '../../../..';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { CreateSLOForm } from '../../types';
+
+const BTN_MAX_WIDTH = 515;
 
 export const DATA_VIEW_FIELD = 'indicator.params.dataViewId';
 const INDEX_FIELD = 'indicator.params.index';
@@ -24,7 +26,7 @@ export function IndexSelection({ selectedDataView }: { selectedDataView?: DataVi
   const { control, getFieldState, setValue, watch } = useFormContext<CreateSLOForm>();
   const { dataViews: dataViewsService, dataViewFieldEditor } = useKibana().services;
 
-  const { dataViewEditor } = useKibana<SloPublicPluginsStart>().services;
+  const { dataViewEditor } = useKibana<SLOPublicPluginsStart>().services;
 
   const currentIndexPattern = watch(INDEX_FIELD);
   const currentDataViewId = watch(DATA_VIEW_FIELD);
@@ -53,7 +55,7 @@ export function IndexSelection({ selectedDataView }: { selectedDataView?: DataVi
   ]);
 
   return (
-    <EuiFormRow label={INDEX_LABEL} isInvalid={getFieldState(INDEX_FIELD).invalid}>
+    <EuiFormRow label={INDEX_LABEL} isInvalid={getFieldState(INDEX_FIELD).invalid} fullWidth>
       <Controller
         defaultValue=""
         name={DATA_VIEW_FIELD}
@@ -64,10 +66,10 @@ export function IndexSelection({ selectedDataView }: { selectedDataView?: DataVi
             adHocDataViews={adHocDataViews}
             trigger={{
               label: currentIndexPattern || SELECT_DATA_VIEW,
-              fullWidth: true,
-              color: fieldState.invalid ? 'danger' : 'text',
+              color: fieldState.invalid ? 'danger' : 'primary',
               isLoading: isDataViewsLoading,
               'data-test-subj': 'indexSelection',
+              style: { width: '100%', maxWidth: BTN_MAX_WIDTH },
             }}
             onChangeDataView={(newId: string) => {
               setValue(

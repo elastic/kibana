@@ -10,10 +10,12 @@ import { omit } from 'lodash/fp';
 import React, { useCallback, useMemo, useState, useRef } from 'react';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
-import { useLocalStorage, useSessionStorage } from 'react-use';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { AssistantFeatures, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
-import { NavigateToAppOptions } from '@kbn/core/public';
+import { NavigateToAppOptions, UserProfileService } from '@kbn/core/public';
+import { useQuery } from '@tanstack/react-query';
 import { updatePromptContexts } from './helpers';
 import type {
   PromptContext,
@@ -74,6 +76,7 @@ export interface AssistantProviderProps {
   title?: string;
   toasts?: IToasts;
   currentAppId: string;
+  userProfileService: UserProfileService;
 }
 
 export interface UserAvatar {
@@ -96,6 +99,7 @@ export interface UseAssistantContext {
   docLinks: Omit<DocLinksStart, 'links'>;
   basePath: string;
   baseConversations: Record<string, Conversation>;
+  currentUserAvatar?: UserAvatar;
   getComments: GetAssistantMessages;
   http: HttpSetup;
   knowledgeBase: KnowledgeBaseConfig;
@@ -123,6 +127,7 @@ export interface UseAssistantContext {
   unRegisterPromptContext: UnRegisterPromptContext;
   currentAppId: string;
   codeBlockRef: React.MutableRefObject<(codeBlock: string) => void>;
+  userProfileService: UserProfileService;
 }
 
 const AssistantContext = React.createContext<UseAssistantContext | undefined>(undefined);
@@ -145,6 +150,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   title = DEFAULT_ASSISTANT_TITLE,
   toasts,
   currentAppId,
+  userProfileService,
 }) => {
   /**
    * Session storage for traceOptions, including APM URL and LangSmith Project/API Key
@@ -219,6 +225,22 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   const [showAssistantOverlay, setShowAssistantOverlay] = useState<ShowAssistantOverlay>(() => {});
 
   /**
+   * Current User Avatar
+   */
+  const { data: currentUserAvatar } = useQuery({
+    queryKey: ['currentUserAvatar'],
+    queryFn: async () =>
+      userProfileService.getCurrent<{ avatar: UserAvatar }>({
+        dataPath: 'avatar',
+      }),
+    select: (data) => {
+      return data.data.avatar;
+    },
+    keepPreviousData: true,
+    refetchOnWindowFocus: false,
+  });
+
+  /**
    * Settings State
    */
   const [selectedSettingsTab, setSelectedSettingsTab] = useState<SettingsTabs | null>(null);
@@ -250,10 +272,14 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       augmentMessageCodeBlocks,
       basePath,
       basePromptContexts,
+      currentUserAvatar,
       docLinks,
       getComments,
       http,
-      knowledgeBase: { ...DEFAULT_KNOWLEDGE_BASE_SETTINGS, ...localStorageKnowledgeBase },
+      knowledgeBase: {
+        ...DEFAULT_KNOWLEDGE_BASE_SETTINGS,
+        ...localStorageKnowledgeBase,
+      },
       promptContexts,
       navigateToApp,
       nameSpace,
@@ -276,6 +302,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       baseConversations,
       currentAppId,
       codeBlockRef,
+      userProfileService,
     }),
     [
       actionTypeRegistry,
@@ -286,6 +313,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       augmentMessageCodeBlocks,
       basePath,
       basePromptContexts,
+      currentUserAvatar,
       docLinks,
       getComments,
       http,
@@ -309,6 +337,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       baseConversations,
       currentAppId,
       codeBlockRef,
+      userProfileService,
     ]
   );
 

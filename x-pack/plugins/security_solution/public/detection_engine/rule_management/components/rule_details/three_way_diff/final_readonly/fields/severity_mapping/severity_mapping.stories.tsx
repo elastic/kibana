@@ -8,8 +8,10 @@
 import React from 'react';
 import type { Story } from '@storybook/react';
 import { FieldReadOnly } from '../../field_readonly';
-import type { DiffableAllFields } from '../../../../../../../../../common/api/detection_engine';
+import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import { SeverityMappingReadOnly } from './severity_mapping';
+import { mockCustomQueryRule } from '../../storybook/mocks';
+import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
 
 export default {
   component: SeverityMappingReadOnly,
@@ -18,22 +20,21 @@ export default {
 };
 
 interface TemplateProps {
-  finalDiffableRule: Partial<DiffableAllFields>;
+  finalDiffableRule: DiffableRule;
 }
 
 const Template: Story<TemplateProps> = (args) => {
   return (
-    <FieldReadOnly
-      fieldName="severity_mapping"
-      finalDiffableRule={args.finalDiffableRule as DiffableAllFields}
-    />
+    <ThreeWayDiffStorybookProviders finalDiffableRule={args.finalDiffableRule}>
+      <FieldReadOnly fieldName="severity_mapping" />
+    </ThreeWayDiffStorybookProviders>
   );
 };
 
 export const Default = Template.bind({});
 
 Default.args = {
-  finalDiffableRule: {
+  finalDiffableRule: mockCustomQueryRule({
     severity_mapping: [
       {
         field: 'event.severity',
@@ -48,5 +49,5 @@ Default.args = {
         value: 'VERY HIGH',
       },
     ],
-  },
+  }),
 };

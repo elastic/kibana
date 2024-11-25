@@ -4,10 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { Outlet, createRouter } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
-import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import React from 'react';
 import { InventoryPageTemplate } from '../components/inventory_page_template';
+import { InventoryPage } from '../pages/inventory_page';
+import { defaultEntitySortField, entityColumnIdsRt, entityViewRt } from '../../common/entities';
 
 /**
  * The array of route definitions to be used when the application
@@ -20,6 +22,27 @@ const inventoryRoutes = {
         <Outlet />
       </InventoryPageTemplate>
     ),
+    params: t.type({
+      query: t.intersection([
+        t.type({
+          sortField: entityColumnIdsRt,
+          sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
+        }),
+        t.partial({
+          view: entityViewRt,
+          pagination: t.string,
+          _a: t.string,
+          controlPanels: t.string,
+        }),
+      ]),
+    }),
+    defaults: {
+      query: {
+        sortField: defaultEntitySortField,
+        sortDirection: 'desc',
+        view: 'grouped',
+      },
+    },
     children: {
       '/{type}': {
         element: <></>,
@@ -28,7 +51,7 @@ const inventoryRoutes = {
         }),
       },
       '/': {
-        element: <></>,
+        element: <InventoryPage />,
       },
     },
   },

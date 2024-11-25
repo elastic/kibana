@@ -8,10 +8,14 @@
 export const AGENT_NAME_DASHBOARD_FILE_MAPPING: Record<string, string> = {
   nodejs: 'nodejs',
   'opentelemetry/nodejs': 'opentelemetry_nodejs',
+  'opentelemetry/nodejs/elastic': 'opentelemetry_nodejs',
   java: 'java',
   'opentelemetry/java': 'opentelemetry_java',
   'opentelemetry/java/opentelemetry-java-instrumentation': 'opentelemetry_java',
   'opentelemetry/java/elastic': 'opentelemetry_java',
+  'opentelemetry/dotnet': 'opentelemetry_dotnet',
+  'opentelemetry/dotnet/opentelemetry-dotnet-instrumentation': 'opentelemetry_dotnet',
+  'opentelemetry/dotnet/elastic': 'opentelemetry_dotnet',
 };
 
 /**
@@ -42,6 +46,12 @@ export async function loadDashboardFile(filename: string): Promise<any> {
       return import(
         /* webpackChunkName: "lazyJavaDashboard" */
         './opentelemetry_java.json'
+      );
+    }
+    case 'opentelemetry_dotnet': {
+      return import(
+        /* webpackChunkName: "lazyOtelDotnetDashboard" */
+        './opentelemetry_dotnet.json'
       );
     }
     default: {

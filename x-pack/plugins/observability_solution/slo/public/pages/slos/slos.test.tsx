@@ -25,9 +25,9 @@ import { useFetchHistoricalSummary } from '../../hooks/use_fetch_historical_summ
 import { useFetchSloList } from '../../hooks/use_fetch_slo_list';
 import { useLicense } from '../../hooks/use_license';
 import { usePermissions } from '../../hooks/use_permissions';
-import { useKibana } from '../../utils/kibana_react';
+import { useKibana } from '../../hooks/use_kibana';
 import { render } from '../../utils/test_helper';
-import { useGetSettings } from '../slo_settings/use_get_settings';
+import { useGetSettings } from '../slo_settings/hooks/use_get_settings';
 import { SlosPage } from './slos';
 
 jest.mock('react-router-dom', () => ({
@@ -36,11 +36,11 @@ jest.mock('react-router-dom', () => ({
 }));
 
 jest.mock('@kbn/observability-shared-plugin/public');
-jest.mock('../../utils/kibana_react');
+jest.mock('../../hooks/use_kibana');
 jest.mock('../../hooks/use_license');
 jest.mock('../../hooks/use_fetch_slo_list');
 jest.mock('../../hooks/use_create_slo');
-jest.mock('../slo_settings/use_get_settings');
+jest.mock('../slo_settings/hooks/use_get_settings');
 jest.mock('../../hooks/use_delete_slo');
 jest.mock('../../hooks/use_delete_slo_instance');
 jest.mock('../../hooks/use_fetch_historical_summary');
@@ -285,7 +285,7 @@ describe('SLOs Page', () => {
         expect(await screen.findByTestId('compactView')).toBeTruthy();
         fireEvent.click(screen.getByTestId('compactView'));
 
-        (await screen.findAllByLabelText('All actions')).at(0)?.click();
+        (await screen.findByLabelText('All actions, row 1')).click();
 
         await waitForEuiPopoverOpen();
 
@@ -311,7 +311,7 @@ describe('SLOs Page', () => {
         });
         expect(await screen.findByTestId('compactView')).toBeTruthy();
         fireEvent.click(screen.getByTestId('compactView'));
-        screen.getAllByLabelText('All actions').at(0)?.click();
+        screen.getByLabelText('All actions, row 1').click();
 
         await waitForEuiPopoverOpen();
 
@@ -337,7 +337,7 @@ describe('SLOs Page', () => {
         });
         expect(await screen.findByTestId('compactView')).toBeTruthy();
         fireEvent.click(screen.getByTestId('compactView'));
-        screen.getAllByLabelText('All actions').at(0)?.click();
+        screen.getByLabelText('All actions, row 1').click();
 
         await waitForEuiPopoverOpen();
 
@@ -364,7 +364,7 @@ describe('SLOs Page', () => {
 
         expect(await screen.findByTestId('compactView')).toBeTruthy();
         fireEvent.click(screen.getByTestId('compactView'));
-        (await screen.findAllByLabelText('All actions')).at(0)?.click();
+        screen.getByLabelText('All actions, row 1').click();
 
         await waitForEuiPopoverOpen();
 
@@ -396,7 +396,7 @@ describe('SLOs Page', () => {
 
         expect(await screen.findByTestId('compactView')).toBeTruthy();
         fireEvent.click(screen.getByTestId('compactView'));
-        screen.getAllByLabelText('All actions').at(0)?.click();
+        screen.getByLabelText('All actions, row 1').click();
 
         await waitForEuiPopoverOpen();
 

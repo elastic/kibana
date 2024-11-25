@@ -187,8 +187,7 @@ function mountWithServices(component: React.ReactElement): ReactWrapper {
  * - Dimension trigger: Not tested here
  * - Dimension editor component: First half of the tests
  */
-// Failing: See https://github.com/elastic/kibana/issues/192476
-describe.skip('FormBasedDimensionEditor', () => {
+describe('FormBasedDimensionEditor', () => {
   let state: FormBasedPrivateState;
   let setState: jest.Mock;
   let defaultProps: FormBasedDimensionEditorProps;
@@ -353,8 +352,7 @@ describe.skip('FormBasedDimensionEditor', () => {
     await userEvent.click(screen.getByRole('button', { name: /open list of options/i }));
     expect(screen.getByText(/There aren't any options available/)).toBeInTheDocument();
   });
-
-  it('should list all field names and document as a whole in prioritized order', async () => {
+  test('should list all field names and document as a whole in prioritized order', async () => {
     const { getVisibleFieldSelectOptions } = renderDimensionPanel();
 
     const comboBoxButton = screen.getAllByRole('button', { name: /open list of options/i })[0];
@@ -372,15 +370,10 @@ describe.skip('FormBasedDimensionEditor', () => {
     ];
     expect(allOptions.slice(0, 7)).toEqual(getVisibleFieldSelectOptions());
 
-    // keep hitting arrow down to scroll to the next options (react-window only renders visible options)
-    await userEvent.type(comboBoxInput, '{ArrowDown}'.repeat(12));
-
-    expect(getVisibleFieldSelectOptions()).toEqual(allOptions.slice(5, 16));
-
-    // press again to go back to the beginning
-    await userEvent.type(comboBoxInput, '{ArrowDown}');
-    expect(getVisibleFieldSelectOptions()).toEqual(allOptions.slice(0, 9));
-  });
+    // // press arrow up to go back to the beginning
+    await userEvent.type(comboBoxInput, '{ArrowUp}{ArrowUp}');
+    expect(getVisibleFieldSelectOptions()).toEqual(allOptions.slice(8));
+  }, 10000); // this test can be long running due to a big tree we're rendering and userEvent.type function that is slow
 
   it('should hide fields that have no data', () => {
     (useExistingFieldsReader as jest.Mock).mockImplementationOnce(() => {

@@ -49,6 +49,7 @@ export function registerRulesValueSuggestionsRoute(
   router.post(
     {
       path: '/internal/rules/suggestions/values',
+      options: { access: 'internal' },
       validate: RulesSuggestionsSchema,
     },
     router.handleLegacyErrors(

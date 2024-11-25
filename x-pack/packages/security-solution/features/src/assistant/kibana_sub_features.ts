@@ -48,8 +48,48 @@ const updateAnonymizationSubFeature: SubFeatureConfig = {
   ],
 };
 
+const manageGlobalKnowledgeBaseSubFeature: SubFeatureConfig = {
+  name: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.assistant.manageGlobalKnowledgeBaseSubFeatureName',
+    {
+      defaultMessage: 'Knowledge Base',
+    }
+  ),
+  description: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.assistant.manageGlobalKnowledgeBaseSubFeatureDescription',
+    {
+      defaultMessage:
+        'Make changes to any space level (global) custom knowledge base entries. This will also allow users to modify global entries created by other users.',
+    }
+  ),
+  privilegeGroups: [
+    {
+      groupType: 'independent',
+      privileges: [
+        {
+          api: [`${APP_ID}-manageGlobalKnowledgeBaseAIAssistant`],
+          id: 'manage_global_knowledge_base',
+          name: i18n.translate(
+            'securitySolutionPackages.features.featureRegistry.assistant.manageGlobalKnowledgeBaseSubFeatureDetails',
+            {
+              defaultMessage: 'Allow Changes to Global Entries',
+            }
+          ),
+          includeIn: 'all',
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['manageGlobalKnowledgeBaseAIAssistant'],
+        },
+      ],
+    },
+  ],
+};
+
 export enum AssistantSubFeatureId {
   updateAnonymization = 'updateAnonymizationSubFeature',
+  manageGlobalKnowledgeBase = 'manageGlobalKnowledgeBaseSubFeature',
 }
 
 /**
@@ -62,8 +102,22 @@ export const getAssistantBaseKibanaSubFeatureIds = (): AssistantSubFeatureId[] =
  * Defines all the Security Assistant subFeatures available.
  * The order of the subFeatures is the order they will be displayed
  */
-export const assistantSubFeaturesMap = Object.freeze(
-  new Map<AssistantSubFeatureId, SubFeatureConfig>([
+export const getAssistantSubFeaturesMap = (
+  experimentalFeatures: Record<string, boolean>
+): Map<AssistantSubFeatureId, SubFeatureConfig> => {
+  const assistantSubFeaturesList: Array<[AssistantSubFeatureId, SubFeatureConfig]> = [
     [AssistantSubFeatureId.updateAnonymization, updateAnonymizationSubFeature],
-  ])
-);
+    [AssistantSubFeatureId.manageGlobalKnowledgeBase, manageGlobalKnowledgeBaseSubFeature],
+  ];
+
+  // Use the following code to add feature based on feature flag
+  // if (experimentalFeatures.featureFlagName) {
+  //   assistantSubFeaturesList.push([AssistantSubFeatureId.featureId, featureSubFeature]);
+  // }
+
+  const assistantSubFeaturesMap = new Map<AssistantSubFeatureId, SubFeatureConfig>(
+    assistantSubFeaturesList
+  );
+
+  return Object.freeze(assistantSubFeaturesMap);
+};

@@ -112,6 +112,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(degradedDocsColCellTexts).to.eql(['0%', '0%', '0%', '100%']);
     });
 
+    it('shows the value in the size column', async () => {
+      const cols = await PageObjects.datasetQuality.parseDatasetTable();
+
+      const sizeColCellTexts = await cols.Size.getCellTexts();
+      const sizeGreaterThanZero = sizeColCellTexts[3];
+      const sizeEqualToZero = sizeColCellTexts[2];
+
+      expect(sizeGreaterThanZero).to.not.eql('0.0 KB');
+      expect(sizeEqualToZero).to.eql('0.0 B');
+    });
+
     it('shows dataset from integration', async () => {
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
       const datasetNameCol = cols['Data Set Name'];

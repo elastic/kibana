@@ -46,9 +46,14 @@ export const Header: React.FC<HeaderProps> = ({
   const options = [
     {
       id: ViewMode.chat,
-      label: i18n.translate('xpack.searchPlayground.header.view.chat', {
-        defaultMessage: 'Chat',
-      }),
+      label:
+        selectedPageMode === PlaygroundPageMode.chat
+          ? i18n.translate('xpack.searchPlayground.header.view.chat', {
+              defaultMessage: 'Chat',
+            })
+          : i18n.translate('xpack.searchPlayground.header.view.preview', {
+              defaultMessage: 'Preview',
+            }),
       'data-test-subj': 'chatMode',
     },
     {
@@ -115,7 +120,7 @@ export const Header: React.FC<HeaderProps> = ({
       <EuiPageHeaderSection>
         <EuiFlexGroup alignItems="center">
           {showDocs && <PlaygroundHeaderDocs />}
-          <Toolbar />
+          <Toolbar selectedPageMode={selectedPageMode} />
         </EuiFlexGroup>
       </EuiPageHeaderSection>
     </EuiPageTemplate.Header>

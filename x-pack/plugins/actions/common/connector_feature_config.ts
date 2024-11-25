@@ -46,7 +46,7 @@ const compatibilityGenerativeAIForObservability = i18n.translate(
 const compatibilityGenerativeAIForSearchPlayground = i18n.translate(
   'xpack.actions.availableConnectorFeatures.compatibility.generativeAIForSearchPlayground',
   {
-    defaultMessage: 'Generative AI for Search Playground',
+    defaultMessage: 'Generative AI for Search',
   }
 );
 
@@ -54,6 +54,12 @@ const compatibilityAlertingRules = i18n.translate(
   'xpack.actions.availableConnectorFeatures.compatibility.alertingRules',
   {
     defaultMessage: 'Alerting Rules',
+  }
+);
+const compatibilitySecuritySolution = i18n.translate(
+  'xpack.actions.availableConnectorFeatures.compatibility.securitySolution',
+  {
+    defaultMessage: 'Security Solution',
   }
 );
 
@@ -93,7 +99,7 @@ export const SecuritySolutionFeature: ConnectorFeatureConfig = {
   name: i18n.translate('xpack.actions.availableConnectorFeatures.securitySolution', {
     defaultMessage: 'Security Solution',
   }),
-  compatibility: compatibilityAlertingRules,
+  compatibility: compatibilitySecuritySolution,
 };
 
 export const GenerativeAIForSecurityFeature: ConnectorFeatureConfig = {

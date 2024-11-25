@@ -7,9 +7,12 @@
 
 import { uniq } from 'lodash';
 import Boom from '@hapi/boom';
+
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { parseInterval } from '@kbn/ml-parse-interval';
+
 import {
   getSingleMetricViewerJobErrorMessage,
   parseTimeIntervalForJob,
@@ -52,7 +55,6 @@ import type { MlClient } from '../../lib/ml_client';
 import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
 import type { MlAnomalyDetectionAlertParams } from '../../routes/schemas/alerting_schema';
 import type { AuthorizationHeader } from '../../lib/request_authorization';
-import { parseInterval } from '../../../common/util/parse_interval';
 
 interface Results {
   [id: string]: {
@@ -352,6 +354,10 @@ export function jobsProvider(
     const result: { datafeed?: Datafeed; job?: Job } = { job: undefined, datafeed: undefined };
     if (datafeedResult && datafeedResult.job_id === jobId) {
       result.datafeed = datafeedResult;
+      if (result.datafeed.indices_options?.ignore_throttled !== undefined) {
+        // ignore_throttled is a deprecated setting, remove it from the response
+        delete result.datafeed.indices_options.ignore_throttled;
+      }
     }
 
     if (jobResults?.jobs?.length > 0) {

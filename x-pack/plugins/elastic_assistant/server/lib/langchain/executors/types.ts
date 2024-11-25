@@ -14,9 +14,11 @@ import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import { ExecuteConnectorRequestBody, Message, Replacements } from '@kbn/elastic-assistant-common';
 import { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import { TelemetryParams } from '@kbn/langchain/server/tracers/telemetry/telemetry_tracer';
 import { ResponseBody } from '../types';
 import type { AssistantTool } from '../../../types';
-import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 import { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_data_clients/knowledge_base';
 import { AIAssistantConversationsDataClient } from '../../../ai_assistant_data_clients/conversations';
 import { AIAssistantDataClient } from '../../../ai_assistant_data_clients';
@@ -37,16 +39,16 @@ export interface AgentExecutorParams<T extends boolean> {
   abortSignal?: AbortSignal;
   alertsIndexPattern?: string;
   actionsClient: PublicMethodsOf<ActionsClient>;
-  bedrockChatEnabled: boolean;
   assistantTools?: AssistantTool[];
   connectorId: string;
   conversationId?: string;
   dataClients?: AssistantDataClients;
   esClient: ElasticsearchClient;
-  esStore: ElasticsearchStore;
   langChainMessages: BaseMessage[];
   llmType?: string;
+  isOssModel?: boolean;
   logger: Logger;
+  inference: InferenceServerStart;
   onNewReplacements?: (newReplacements: Replacements) => void;
   replacements: Replacements;
   isStream?: T;
@@ -55,6 +57,8 @@ export interface AgentExecutorParams<T extends boolean> {
   response?: KibanaResponseFactory;
   size?: number;
   systemPrompt?: string;
+  telemetry: AnalyticsServiceSetup;
+  telemetryParams?: TelemetryParams;
   traceOptions?: TraceOptions;
   responseLanguage?: string;
 }
@@ -70,19 +74,6 @@ export type AgentExecutorResponse<T extends boolean> = T extends true
 export type AgentExecutor<T extends boolean> = (
   params: AgentExecutorParams<T>
 ) => Promise<AgentExecutorResponse<T>>;
-
-export type AgentExecutorEvaluator = (
-  langChainMessages: BaseMessage[],
-  exampleId?: string
-) => Promise<ResponseBody>;
-
-export interface AgentExecutorEvaluatorWithMetadata {
-  agentEvaluator: AgentExecutorEvaluator;
-  metadata: {
-    connectorName: string;
-    runName: string;
-  };
-}
 
 export interface TraceOptions {
   evaluationId?: string;

@@ -54,6 +54,7 @@ function executeFunctionAndCatchError({
   logger,
   tracer,
   connectorId,
+  useSimulatedFunctionCalling,
 }: {
   name: string;
   args: string | undefined;
@@ -64,6 +65,7 @@ function executeFunctionAndCatchError({
   logger: Logger;
   tracer: LangTracer;
   connectorId: string;
+  useSimulatedFunctionCalling: boolean;
 }): Observable<MessageOrChatEvent> {
   // hide token count events from functions to prevent them from
   // having to deal with it as well
@@ -84,6 +86,7 @@ function executeFunctionAndCatchError({
           signal,
           messages,
           connectorId,
+          useSimulatedFunctionCalling,
         })
       );
 
@@ -175,12 +178,13 @@ export function continueConversation({
   chat,
   signal,
   functionCallsLeft,
-  adHocInstructions,
+  adHocInstructions = [],
   userInstructions,
   logger,
   disableFunctions,
   tracer,
   connectorId,
+  useSimulatedFunctionCalling,
 }: {
   messages: Message[];
   functionClient: ChatFunctionClient;
@@ -197,6 +201,7 @@ export function continueConversation({
       };
   tracer: LangTracer;
   connectorId: string;
+  useSimulatedFunctionCalling: boolean;
 }): Observable<MessageOrChatEvent> {
   let nextFunctionCallsLeft = functionCallsLeft;
 
@@ -208,11 +213,14 @@ export function continueConversation({
     disableFunctions,
   });
 
+  const registeredAdhocInstructions = functionClient.getAdhocInstructions();
+  const allAdHocInstructions = adHocInstructions.concat(registeredAdhocInstructions);
+
   const messagesWithUpdatedSystemMessage = replaceSystemMessage(
     getSystemMessageFromInstructions({
       applicationInstructions: functionClient.getInstructions(),
       userInstructions,
-      adHocInstructions,
+      adHocInstructions: allAdHocInstructions,
       availableFunctionNames: definitions.map((def) => def.name),
     }),
     initialMessages
@@ -310,6 +318,7 @@ export function continueConversation({
       logger,
       tracer,
       connectorId,
+      useSimulatedFunctionCalling,
     });
   }
 
@@ -338,6 +347,7 @@ export function continueConversation({
               disableFunctions,
               tracer,
               connectorId,
+              useSimulatedFunctionCalling,
             });
           })
         )

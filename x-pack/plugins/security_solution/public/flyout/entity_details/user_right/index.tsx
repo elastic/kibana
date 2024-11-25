@@ -8,7 +8,8 @@
 import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { FlyoutLoading, FlyoutNavigation } from '@kbn/security-solution-common/src/flyout';
+import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
+import { useNonClosedAlerts } from '../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
 import type { Refetch } from '../../../common/types';
 import { RISK_INPUTS_TAB_QUERY_ID } from '../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
@@ -24,12 +25,16 @@ import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anomaly_table_provider';
 import { buildUserNamesFilter } from '../../../../common/search_strategy';
 import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
+import { FlyoutLoading } from '../../shared/components/flyout_loading';
+import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { UserPanelContent } from './content';
 import { UserPanelHeader } from './header';
 import { UserDetailsPanelKey } from '../user_details_left';
 import { useObservedUser } from './hooks/use_observed_user';
-import type { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
+import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { UserPreviewPanelFooter } from '../user_preview/footer';
+import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
+import { EntityEventTypes } from '../../../common/lib/telemetry';
 
 export interface UserPanelProps extends Record<string, unknown> {
   contextID: string;
@@ -81,6 +86,7 @@ export const UserPanel = ({
 
   const { data: userRisk } = riskScoreState;
   const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
+  const isRiskScoreExist = !!userRiskData?.user.risk;
 
   const refetchRiskInputsTab = useRefetchQueryById(RISK_INPUTS_TAB_QUERY_ID);
   const refetchRiskScore = useCallback(() => {
@@ -94,6 +100,16 @@ export const UserPanel = ({
     { onSuccess: refetchRiskScore }
   );
 
+  const { hasMisconfigurationFindings } = useHasMisconfigurations('user.name', userName);
+
+  const { hasNonClosedAlerts } = useNonClosedAlerts({
+    field: 'user.name',
+    value: userName,
+    to,
+    from,
+    queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}USER_NAME_RIGHT`,
+  });
+
   useQueryInspector({
     deleteQuery,
     inspect,
@@ -106,7 +122,7 @@ export const UserPanel = ({
   const { openLeftPanel } = useExpandableFlyoutApi();
   const openPanelTab = useCallback(
     (tab?: EntityDetailsLeftPanelTab) => {
-      telemetry.reportRiskInputsExpandedFlyoutOpened({
+      telemetry.reportEvent(EntityEventTypes.RiskInputsExpandedFlyoutOpened, {
         entity: 'user',
       });
 
@@ -119,14 +135,32 @@ export const UserPanel = ({
             name: userName,
             email,
           },
+          path: tab ? { tab } : undefined,
+          hasMisconfigurationFindings,
+          hasNonClosedAlerts,
         },
-        path: tab ? { tab } : undefined,
       });
     },
-    [telemetry, openLeftPanel, userRiskData?.user?.risk, userName, email, scopeId]
+    [
+      telemetry,
+      openLeftPanel,
+      userRiskData?.user?.risk,
+      scopeId,
+      userName,
+      email,
+      hasMisconfigurationFindings,
+      hasNonClosedAlerts,
+    ]
   );
-
-  const openPanelFirstTab = useCallback(() => openPanelTab(), [openPanelTab]);
+  const openPanelFirstTab = useCallback(
+    () =>
+      openPanelTab(
+        isRiskScoreExist
+          ? EntityDetailsLeftPanelTab.RISK_INPUTS
+          : EntityDetailsLeftPanelTab.CSP_INSIGHTS
+      ),
+    [isRiskScoreExist, openPanelTab]
+  );
 
   const hasUserDetailsData =
     !!userRiskData?.user.risk ||
@@ -156,7 +190,10 @@ export const UserPanel = ({
         return (
           <>
             <FlyoutNavigation
-              flyoutIsExpandable={!isPreviewMode && hasUserDetailsData}
+              flyoutIsExpandable={
+                !isPreviewMode &&
+                (hasUserDetailsData || hasMisconfigurationFindings || hasNonClosedAlerts)
+              }
               expandDetails={openPanelFirstTab}
             />
             <UserPanelHeader

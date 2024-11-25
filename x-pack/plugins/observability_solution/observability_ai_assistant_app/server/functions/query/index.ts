@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { isChatCompletionChunkEvent, isOutputEvent } from '@kbn/inference-plugin/common';
+import { isChatCompletionChunkEvent, isOutputEvent } from '@kbn/inference-common';
+import { correctCommonEsqlMistakes } from '@kbn/inference-plugin/common';
 import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
 import {
   FunctionVisibility,
@@ -16,6 +17,7 @@ import {
 import { createFunctionResponseMessage } from '@kbn/observability-ai-assistant-plugin/common/utils/create_function_response_message';
 import { map } from 'rxjs';
 import { v4 } from 'uuid';
+import { RegisterInstructionCallback } from '@kbn/observability-ai-assistant-plugin/server/service/types';
 import type { FunctionRegistrationParameters } from '..';
 import { runAndValidateEsqlQuery } from './validate_esql_query';
 import { convertMessagesForInference } from '../../../common/convert_messages_for_inference';
@@ -28,7 +30,7 @@ export function registerQueryFunction({
   resources,
   pluginsStart,
 }: FunctionRegistrationParameters) {
-  functions.registerInstruction(({ availableFunctionNames }) =>
+  const instruction: RegisterInstructionCallback = ({ availableFunctionNames }) =>
     availableFunctionNames.includes(QUERY_FUNCTION_NAME)
       ? `You MUST use the "${QUERY_FUNCTION_NAME}" function when the user wants to:
   - visualize data
@@ -47,8 +49,8 @@ export function registerQueryFunction({
 
   When the "visualize_query" function has been called, a visualization has been displayed to the user. DO NOT UNDER ANY CIRCUMSTANCES follow up a "visualize_query" function call with your own visualization attempt.
   If the "${EXECUTE_QUERY_NAME}" function has been called, summarize these results for the user. The user does not see a visualization in this case.`
-      : undefined
-  );
+      : undefined;
+  functions.registerInstruction(instruction);
 
   functions.registerFunction(
     {
@@ -61,7 +63,7 @@ export function registerQueryFunction({
         such as a metric or list of things, but does not want to visualize it in
         a table or chart. You do NOT need to ask permission to execute the query
         after generating it, use the "${EXECUTE_QUERY_NAME}" function directly instead.
-        
+
         Do not use when the user just asks for an example.`,
       parameters: {
         type: 'object',
@@ -74,9 +76,11 @@ export function registerQueryFunction({
       } as const,
     },
     async ({ arguments: { query } }) => {
+      const correctedQuery = correctCommonEsqlMistakes(query).output;
+
       const client = (await resources.context.core).elasticsearch.client.asCurrentUser;
       const { error, errorMessages, rows, columns } = await runAndValidateEsqlQuery({
-        query,
+        query: correctedQuery,
         client,
       });
 
@@ -108,7 +112,7 @@ export function registerQueryFunction({
       function takes no input.`,
       visibility: FunctionVisibility.AssistantOnly,
     },
-    async ({ messages, connectorId }, signal) => {
+    async ({ messages, connectorId, useSimulatedFunctionCalling }, signal) => {
       const esqlFunctions = functions
         .getFunctions()
         .filter(
@@ -132,6 +136,7 @@ export function registerQueryFunction({
             .concat(esqlFunctions)
             .map((fn) => [fn.name, { description: fn.description, schema: fn.parameters }])
         ),
+        functionCalling: useSimulatedFunctionCalling ? 'simulated' : 'native',
       });
 
       const chatMessageId = v4();

@@ -9,6 +9,7 @@
 
 import type { SavedObjectsImportResponse } from '@kbn/core-saved-objects-common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { Logger } from '@kbn/logging';
 import type {
   ISavedObjectTypeRegistry,
   ISavedObjectsImporter,
@@ -27,15 +28,18 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
   readonly #typeRegistry: ISavedObjectTypeRegistry;
   readonly #importSizeLimit: number;
   readonly #importHooks: Record<string, SavedObjectsImportHook[]>;
+  readonly #log: Logger;
 
   constructor({
     savedObjectsClient,
     typeRegistry,
     importSizeLimit,
+    logger,
   }: {
     savedObjectsClient: SavedObjectsClientContract;
     typeRegistry: ISavedObjectTypeRegistry;
     importSizeLimit: number;
+    logger: Logger;
   }) {
     this.#savedObjectsClient = savedObjectsClient;
     this.#typeRegistry = typeRegistry;
@@ -46,6 +50,7 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
       }
       return hooks;
     }, {} as Record<string, SavedObjectsImportHook[]>);
+    this.#log = logger;
   }
 
   public import({
@@ -69,6 +74,7 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
       typeRegistry: this.#typeRegistry,
       importHooks: this.#importHooks,
       managed,
+      log: this.#log,
     });
   }
 
@@ -80,6 +86,7 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
     retries,
     managed,
   }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse> {
+    this.#log.debug('Resolving import errors');
     return resolveSavedObjectsImportErrors({
       readStream,
       createNewCopies,

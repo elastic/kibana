@@ -550,9 +550,7 @@ export const getAgentHostNamesWithIds = async ({
   metadataService: EndpointMetadataService;
 }): Promise<{ [id: string]: string }> => {
   // get host metadata docs with queried agents
-  const metaDataDocs = await metadataService.findHostMetadataForFleetAgents(esClient, [
-    ...new Set(agentIds),
-  ]);
+  const metaDataDocs = await metadataService.findHostMetadataForFleetAgents([...new Set(agentIds)]);
   // agent ids and names from metadata
   // map this into an object as {id1: name1, id2: name2} etc
   const agentsMetadataInfo = agentIds.reduce<{ [id: string]: string }>((acc, id) => {

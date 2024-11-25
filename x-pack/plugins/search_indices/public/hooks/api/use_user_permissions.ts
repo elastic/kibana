@@ -7,15 +7,18 @@
 
 import { useQuery } from '@tanstack/react-query';
 
-import { GET_USER_PRIVILEGES_ROUTE } from '../../../common/routes';
 import type { UserStartPrivilegesResponse } from '../../../common/types';
+import { QueryKeys } from '../../constants';
 
 import { useKibana } from '../use_kibana';
 
-export const useUserPrivilegesQuery = () => {
+export const useUserPrivilegesQuery = (indexName: string) => {
   const { http } = useKibana().services;
   return useQuery({
-    queryKey: ['fetchUserStartPrivileges'],
-    queryFn: () => http.get<UserStartPrivilegesResponse>(GET_USER_PRIVILEGES_ROUTE),
+    queryKey: [QueryKeys.FetchUserStartPrivileges],
+    queryFn: () =>
+      http.get<UserStartPrivilegesResponse>(
+        `/internal/search_indices/start_privileges/${indexName}`
+      ),
   });
 };

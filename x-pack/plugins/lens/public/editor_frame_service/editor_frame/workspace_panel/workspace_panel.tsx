@@ -28,7 +28,7 @@ import { DropIllustration } from '@kbn/chart-icons';
 import { useDragDropContext, DragDropIdentifier, Droppable } from '@kbn/dom-drag-drop';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { ChartSizeSpec, isChartSizeEvent } from '@kbn/chart-expressions-common';
-import { estypes } from '@elastic/elasticsearch';
+import { getSuccessfulRequestTimings } from '../../../report_performance_metric_util';
 import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
 import { getSearchWarningMessages } from '../../../utils';
 import {
@@ -205,8 +205,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           eventName: 'lensVisualizationRenderTime',
           duration: currentTime - visualizationRenderStartTime.current,
           key1: 'time_to_data',
-          value1:
-            dataReceivedTime.current - visualizationRenderStartTime.current - esTookTime.current,
+          value1: dataReceivedTime.current - visualizationRenderStartTime.current,
           key2: 'time_to_render',
           value2: currentTime - dataReceivedTime.current,
           key3: 'es_took',
@@ -268,13 +267,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
               searchService: plugins.data.search,
             }
           );
-          esTookTime.current = adapters.requests.getRequests().reduce((maxTime, { response }) => {
-            const took =
-              (response?.json as { rawResponse: estypes.SearchResponse | undefined } | undefined)
-                ?.rawResponse?.took ?? 0;
 
-            return Math.max(maxTime, took);
-          }, 0);
+          const timings = getSuccessfulRequestTimings(adapters);
+          esTookTime.current = timings ? timings.esTookTotal : 0;
         }
 
         if (requestWarnings.length) {
@@ -493,7 +488,10 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     }
   }, [suggestionForDraggedField, dispatchLens]);
 
-  const IS_DARK_THEME: boolean = useObservable(core.theme.theme$, { darkMode: false }).darkMode;
+  const IS_DARK_THEME: boolean = useObservable(core.theme.theme$, {
+    darkMode: false,
+    name: 'amsterdam',
+  }).darkMode;
 
   const renderDragDropPrompt = () => {
     if (chartSizeSpec) {
@@ -681,13 +679,13 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
 function useReportingState(errors: UserMessage[]): {
   isRenderComplete: boolean;
-  hasDynamicError: boolean;
+  hasRequestError: boolean;
+  setHasRequestError: (state: boolean) => void;
   setIsRenderComplete: (state: boolean) => void;
-  setDynamicError: (state: boolean) => void;
   nodeRef: React.RefObject<HTMLDivElement>;
 } {
   const [isRenderComplete, setIsRenderComplete] = useState(Boolean(errors?.length));
-  const [hasDynamicError, setDynamicError] = useState(false);
+  const [hasRequestError, setHasRequestError] = useState(false);
   const nodeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -696,8 +694,12 @@ function useReportingState(errors: UserMessage[]): {
     }
   }, [isRenderComplete, errors]);
 
-  return { isRenderComplete, setIsRenderComplete, hasDynamicError, setDynamicError, nodeRef };
+  return { isRenderComplete, setIsRenderComplete, hasRequestError, setHasRequestError, nodeRef };
 }
+
+const dataLoadingErrorTitle = i18n.translate('xpack.lens.editorFrame.dataFailure', {
+  defaultMessage: `An error occurred when loading data`,
+});
 
 export const VisualizationWrapper = ({
   expression,
@@ -735,13 +737,14 @@ export const VisualizationWrapper = ({
 
   const searchContext = useLensSelector(selectExecutionContextSearch);
   // Used for reporting
-  const { isRenderComplete, hasDynamicError, setIsRenderComplete, setDynamicError, nodeRef } =
+  const { isRenderComplete, hasRequestError, setIsRenderComplete, setHasRequestError, nodeRef } =
     useReportingState(errors);
 
   const onRenderHandler = useCallback(() => {
+    setHasRequestError(false);
     setIsRenderComplete(true);
     onRender$();
-  }, [setIsRenderComplete, onRender$]);
+  }, [onRender$, setHasRequestError, setIsRenderComplete]);
 
   const searchSessionId = useLensSelector(selectSearchSessionId);
 
@@ -764,17 +767,13 @@ export const VisualizationWrapper = ({
     );
   }
 
-  const dataLoadingErrorTitle = i18n.translate('xpack.lens.editorFrame.dataFailure', {
-    defaultMessage: `An error occurred when loading data`,
-  });
-
   return (
     <div
       className="lnsExpressionRenderer"
       data-shared-items-container
       data-render-complete={isRenderComplete}
       data-shared-item=""
-      data-render-error={hasDynamicError ? dataLoadingErrorTitle : undefined}
+      data-render-error={hasRequestError ? dataLoadingErrorTitle : undefined}
       ref={nodeRef}
     >
       <ExpressionRendererComponent
@@ -800,11 +799,13 @@ export const VisualizationWrapper = ({
             ? [errorMessage]
             : [];
 
-          if (!hasDynamicError) {
-            setDynamicError(true);
-          }
-
-          return <WorkspaceErrors errors={visibleErrorMessages} title={dataLoadingErrorTitle} />;
+          return (
+            <WorkspaceErrors
+              errors={visibleErrorMessages}
+              title={dataLoadingErrorTitle}
+              onRender={() => setHasRequestError(true)}
+            />
+          );
         }}
       />
     </div>

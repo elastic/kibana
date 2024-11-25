@@ -25,7 +25,10 @@
     "@kbn/field-types",
     "@kbn/i18n",
     "@kbn/core-ui-settings-browser",
-    "@kbn/ui-theme",
-    "@kbn/expressions-plugin"
+    "@kbn/expressions-plugin",
+    "@kbn/logs-data-access-plugin",
+    "@kbn/i18n-react",
+    "@kbn/navigation-plugin",
+    "@kbn/ui-theme"
   ]
 }

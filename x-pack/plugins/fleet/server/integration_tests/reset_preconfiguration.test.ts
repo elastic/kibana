@@ -22,6 +22,7 @@ import { useDockerRegistry, waitForFleetSetup, getSupertestWithAdminUser } from 
 
 const logFilePath = Path.join(__dirname, 'logs.log');
 
+// Failing 9.0 version update: https://github.com/elastic/kibana/issues/192624
 describe('Fleet preconfiguration reset', () => {
   let esServer: TestElasticsearchUtils;
   let kbnServer: TestKibanaUtils;
@@ -46,6 +47,11 @@ describe('Fleet preconfiguration reset', () => {
           xpack: {
             fleet: {
               registryUrl,
+              internal: {
+                registry: {
+                  kibanaVersionCheckEnabled: false,
+                },
+              },
               packages: [
                 {
                   name: 'fleet_server',
@@ -252,7 +258,7 @@ describe('Fleet preconfiguration reset', () => {
       );
       await resetAPI
         .set('kbn-sxrf', 'xx')
-        .set('Elastic-Api-Version', `${API_VERSIONS.internal.v1}`)
+        .set('Elastic-Api-Version', `${API_VERSIONS.public.v1}`)
         .expect(200)
         .send();
 
@@ -297,7 +303,7 @@ describe('Fleet preconfiguration reset', () => {
       );
       await resetAPI
         .set('kbn-sxrf', 'xx')
-        .set('Elastic-Api-Version', `${API_VERSIONS.internal.v1}`)
+        .set('Elastic-Api-Version', `${API_VERSIONS.public.v1}`)
         .expect(200)
         .send();
 
@@ -335,7 +341,7 @@ describe('Fleet preconfiguration reset', () => {
       );
       await resetAPI
         .set('kbn-sxrf', 'xx')
-        .set('Elastic-Api-Version', `${API_VERSIONS.internal.v1}`)
+        .set('Elastic-Api-Version', `${API_VERSIONS.public.v1}`)
         .expect(200)
         .send();
 
@@ -372,7 +378,7 @@ describe('Fleet preconfiguration reset', () => {
       );
       await resetAPI
         .set('kbn-sxrf', 'xx')
-        .set('Elastic-Api-Version', `${API_VERSIONS.internal.v1}`)
+        .set('Elastic-Api-Version', `${API_VERSIONS.public.v1}`)
         .expect(200)
         .send();
 

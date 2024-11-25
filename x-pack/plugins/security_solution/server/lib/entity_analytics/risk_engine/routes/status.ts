@@ -20,8 +20,10 @@ export const riskEngineStatusRoute = (
     .get({
       access: 'internal',
       path: RISK_ENGINE_STATUS_URL,
-      options: {
-        tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
+        },
       },
     })
     .addVersion(
@@ -35,20 +37,15 @@ export const riskEngineStatusRoute = (
         const [_, { taskManager }] = await getStartServices();
 
         try {
-          const {
-            riskEngineStatus,
-            legacyRiskEngineStatus,
-            isMaxAmountOfRiskEnginesReached,
-            taskStatus,
-          } = await riskEngineClient.getStatus({
-            namespace: spaceId,
-            taskManager,
-          });
+          const { riskEngineStatus, legacyRiskEngineStatus, taskStatus } =
+            await riskEngineClient.getStatus({
+              namespace: spaceId,
+              taskManager,
+            });
 
           const body: RiskEngineStatusResponse = {
             risk_engine_status: riskEngineStatus,
             legacy_risk_engine_status: legacyRiskEngineStatus,
-            is_max_amount_of_risk_engines_reached: isMaxAmountOfRiskEnginesReached,
             risk_engine_task_status: taskStatus,
           };
 

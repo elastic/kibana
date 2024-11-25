@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-import { css } from '@emotion/css';
+import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
 import { type GlobalWidgetParameters } from '@kbn/investigate-plugin/public';
 import type { Suggestion } from '@kbn/lens-plugin/public';
-import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
+import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import React, { useMemo } from 'react';
 import { ErrorMessage } from '../../components/error_message';
 import { useKibana } from '../../hooks/use_kibana';
@@ -123,29 +122,28 @@ export function EsqlWidget({ suggestion, dataView, esqlQuery, dateHistogramResul
     [dataView, lens, dateHistogramResults]
   );
 
+  // in the case of a lnsDatatable, we want to render the preview of the histogram and not the datable (input) itself
   if (input.attributes.visualizationType === 'lnsDatatable') {
     let innerElement: React.ReactElement;
     if (previewInput.error) {
       innerElement = <ErrorMessage error={previewInput.error} />;
     } else if (previewInput.value) {
-      innerElement = <lens.EmbeddableComponent {...previewInput.value} />;
+      innerElement = (
+        <lens.EmbeddableComponent
+          {...previewInput.value}
+          style={{ height: 128 }}
+          overrides={{
+            axisX: { hide: true },
+            axisLeft: { style: { axisTitle: { visible: false } } },
+            settings: { showLegend: false },
+          }}
+        />
+      );
     } else {
       innerElement = <EuiLoadingSpinner size="s" />;
     }
-    return (
-      <EuiFlexGroup direction="column" gutterSize="s">
-        <EuiFlexItem
-          grow={false}
-          className={css`
-            > div {
-              height: 128px;
-            }
-          `}
-        >
-          {innerElement}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
+
+    return <EuiFlexItem grow={true}>{innerElement}</EuiFlexItem>;
   }
 
   return (
@@ -153,7 +151,11 @@ export function EsqlWidget({ suggestion, dataView, esqlQuery, dateHistogramResul
       <lens.EmbeddableComponent
         {...input}
         style={{ height: 128 }}
-        overrides={{ axisX: { hide: true } }}
+        overrides={{
+          axisX: { hide: true },
+          axisLeft: { style: { axisTitle: { visible: false } } },
+          settings: { showLegend: false },
+        }}
       />
     </EuiFlexItem>
   );

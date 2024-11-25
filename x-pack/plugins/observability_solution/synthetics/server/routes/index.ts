@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { deleteSyntheticsParamsBulkRoute } from './settings/params/delete_params_bulk';
+import { deleteSyntheticsMonitorBulkRoute } from './monitor_cruds/bulk_cruds/delete_monitor_bulk';
 import {
   createGetDynamicSettingsRoute,
   createPostDynamicSettingsRoute,
@@ -33,10 +35,7 @@ import {
   disableSyntheticsRoute,
   getSyntheticsEnablementRoute,
 } from './synthetics_service/enablement';
-import {
-  getSyntheticsMonitorOverviewRoute,
-  getSyntheticsMonitorRoute,
-} from './monitor_cruds/get_monitor';
+import { getSyntheticsMonitorRoute } from './monitor_cruds/get_monitor';
 import { deleteSyntheticsMonitorProjectRoute } from './monitor_cruds/delete_monitor_project';
 import { getSyntheticsProjectMonitorsRoute } from './monitor_cruds/get_monitor_project';
 import { runOnceSyntheticsMonitorRoute } from './synthetics_service/run_once_monitor';
@@ -69,8 +68,6 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   disableSyntheticsRoute,
   getServiceLocationsRoute,
   getSyntheticsProjectMonitorsRoute,
-  getAllSyntheticsMonitorRoute,
-  getSyntheticsMonitorOverviewRoute,
   installIndexTemplatesRoute,
   runOnceSyntheticsMonitorRoute,
   testNowMonitorRoute,
@@ -113,8 +110,11 @@ export const syntheticsAppPublicRestApiRoutes: SyntheticsRestApiRouteFactory[] =
   addPrivateLocationRoute,
   deletePrivateLocationRoute,
   getPrivateLocationsRoute,
+  getAllSyntheticsMonitorRoute,
   getSyntheticsMonitorRoute,
   addSyntheticsMonitorRoute,
   editSyntheticsMonitorRoute,
   deleteSyntheticsMonitorRoute,
+  deleteSyntheticsMonitorBulkRoute,
+  deleteSyntheticsParamsBulkRoute,
 ];

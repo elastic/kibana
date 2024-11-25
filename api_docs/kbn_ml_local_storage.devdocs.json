@@ -29,7 +29,7 @@
           "\nProvider to manage context for the `useStorage` hook."
         ],
         "signature": [
-          "({\n  children,\n  storage,\n  storageKeys,\n}: React.PropsWithChildren<StorageContextProviderProps<K>>) => JSX.Element"
+          "({\n  children,\n  storage,\n  storageKeys,\n}: React.PropsWithChildren<StorageContextProviderProps<K>>) => React.JSX.Element"
         ],
         "path": "x-pack/packages/ml/local_storage/src/storage_context.tsx",
         "deprecated": false,

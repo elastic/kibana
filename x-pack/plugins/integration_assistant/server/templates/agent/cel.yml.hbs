@@ -147,17 +147,3 @@ resource.rate_limit.burst: {{resource_rate_limit_burst}}
 resource.tracer.filename: "../../logs/cel/http-request-trace-*.ndjson"
 resource.tracer.maxbackups: 5
 {{/if}}
-
-{{#if tags}}
-tags:
-{{#each tags as |tag|}}
-  - {{tag}}
-{{/each}}
-{{/if}}
-{{#contains "forwarded" tags}}
-publisher_pipeline.disable_host: true
-{{/contains}}
-{{#if processors}}
-processors:
-{{processors}}
-{{/if}}

@@ -7,7 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import { API_KEY_PLACEHOLDER, INDEX_PLACEHOLDER } from '../constants';
-import { CodeLanguage, CodeSnippetParameters, CreateIndexLanguageExamples } from '../types';
+import {
+  CodeLanguage,
+  CodeSnippetParameters,
+  IngestCodeSnippetFunction,
+  IngestDataCodeDefinition,
+} from '../types';
+
+import { CreateIndexLanguageExamples } from './types';
 
 export const PYTHON_INFO: CodeLanguage = {
   id: 'python',
@@ -16,16 +23,16 @@ export const PYTHON_INFO: CodeLanguage = {
   codeBlockLanguage: 'python',
 };
 
-const SERVERLESS_PYTHON_INSTALL_CMD = 'pip install elasticsearch-serverless';
+const SERVERLESS_PYTHON_INSTALL_CMD = 'pip install elasticsearch';
 
-export const PythonServerlessExamples: CreateIndexLanguageExamples = {
+export const PythonServerlessCreateIndexExamples: CreateIndexLanguageExamples = {
   default: {
     installCommand: SERVERLESS_PYTHON_INSTALL_CMD,
     createIndex: ({
       elasticsearchURL,
       apiKey,
       indexName,
-    }: CodeSnippetParameters) => `from elasticsearch-serverless import Elasticsearch
+    }: CodeSnippetParameters) => `from elasticsearch import Elasticsearch
 
 client = Elasticsearch(
   "${elasticsearchURL}",
@@ -42,21 +49,65 @@ client.indices.create(
       elasticsearchURL,
       apiKey,
       indexName,
-    }: CodeSnippetParameters) => `from elasticsearch-serverless import Elasticsearch
+    }: CodeSnippetParameters) => `from elasticsearch import Elasticsearch
 
 client = Elasticsearch(
-  "${elasticsearchURL}",
-  api_key="${apiKey ?? API_KEY_PLACEHOLDER}"
+    "${elasticsearchURL}",
+    api_key="${apiKey ?? API_KEY_PLACEHOLDER}"
 )
 
 client.indices.create(
-  index="${indexName ?? INDEX_PLACEHOLDER}"
-  mappings={
-      "properties": {
-          "vector": {"type": "dense_vector", "dims": 3 },
-          "text": {"type": "text"}
-      }
-  }
+    index="${indexName ?? INDEX_PLACEHOLDER}",
+    mappings={
+        "properties": {
+            "vector": {"type": "dense_vector", "dims": 3 },
+            "text": {"type": "text"}
+        }
+    }
 )`,
   },
+};
+const serverlessIngestionCommand: IngestCodeSnippetFunction = ({
+  elasticsearchURL,
+  apiKey,
+  indexName,
+  sampleDocuments,
+}) => `from elasticsearch import Elasticsearch, helpers
+
+client = Elasticsearch(
+    "${elasticsearchURL}",
+    api_key="${apiKey ?? API_KEY_PLACEHOLDER}"
+)
+
+index_name = "${indexName}"
+
+docs = ${JSON.stringify(sampleDocuments, null, 4)}
+
+bulk_response = helpers.bulk(client, docs, index=index_name)
+print(bulk_response)`;
+
+const serverlessUpdateMappingsCommand: IngestCodeSnippetFunction = ({
+  elasticsearchURL,
+  apiKey,
+  indexName,
+  mappingProperties,
+}) => `from elasticsearch import Elasticsearch
+
+client = Elasticsearch(
+    "${elasticsearchURL}",
+    api_key="${apiKey ?? API_KEY_PLACEHOLDER}"
+)
+
+index_name = "${indexName}"
+
+mappings = ${JSON.stringify({ properties: mappingProperties }, null, 4)}
+
+mapping_response = client.indices.put_mapping(index=index_name, body=mappings)
+print(mapping_response)
+`;
+
+export const PythonServerlessVectorsIngestDataExample: IngestDataCodeDefinition = {
+  installCommand: SERVERLESS_PYTHON_INSTALL_CMD,
+  ingestCommand: serverlessIngestionCommand,
+  updateMappingsCommand: serverlessUpdateMappingsCommand,
 };

@@ -7,13 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { createSavedObjectClass } from './saved_object';
-export { checkForDuplicateTitle } from './helpers/check_for_duplicate_title';
-export { saveWithConfirmation } from './helpers/save_with_confirmation';
 export { isErrorNonFatal } from './helpers/save_saved_object';
-export type {
-  SavedObjectDecoratorFactory,
-  SavedObjectDecorator,
-  SavedObjectDecoratorConfig,
-} from './decorators';
-export { SavedObjectDecoratorRegistry } from './decorators';

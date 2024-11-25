@@ -65,7 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
-      await testSubjects.existOrFail('TextBasedLangEditor');
+      await testSubjects.existOrFail('ESQLEditor');
       await testSubjects.existOrFail('unifiedHistogramChart');
       const rows = await dataGrid.getDocTableRows();
       expect(rows.length).to.be.above(0);

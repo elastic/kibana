@@ -84,9 +84,19 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsCrowdstrikeManualHostIsolationEnabled: true,
 
   /**
-   * Enables new notes
+   * Space awareness for Elastic Defend management.
+   * Feature depends on Fleet's corresponding features also being enabled:
+   * - `subfeaturePrivileges`
+   * - `useSpaceAwareness`
+   * and Fleet must set it runtime mode to spaces by calling the following API:
+   * - `POST /internal/fleet/enable_space_awareness`
    */
-  securitySolutionNotesEnabled: false,
+  endpointManagementSpaceAwarenessEnabled: false,
+
+  /**
+   * Disables new notes
+   */
+  securitySolutionNotesDisabled: false,
 
   /**
    * Disables entity and alert previews
@@ -97,16 +107,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
    */
   assistantModelEvaluation: false,
-
-  /**
-   * Enables new Knowledge Base Entries features, introduced in `8.15.0`.
-   */
-  assistantKnowledgeBaseByDefault: false,
-
-  /**
-   * Enables the Assistant BedrockChat Langchain model, introduced in `8.15.0`.
-   */
-  assistantBedrockChat: true,
 
   /**
    * Enables the Managed User section inside the new user details flyout.
@@ -163,6 +163,12 @@ export const allowedExperimentalValues = Object.freeze({
   crowdstrikeDataInAnalyzerEnabled: true,
 
   /**
+   * Enables Response actions telemetry collection
+   * Should be enabled in 8.17.0
+   */
+  responseActionsTelemetryEnabled: false,
+
+  /**
    * Enables experimental JAMF integration data to be available in Analyzer
    */
   jamfDataInAnalyzerEnabled: true,
@@ -172,16 +178,17 @@ export const allowedExperimentalValues = Object.freeze({
    *
    */
   timelineEsqlTabDisabled: false,
-  /*
-   * Disables experimental Discover components, UnifiedFieldList and UnifiedDataTable in Timeline.
-   */
-  unifiedComponentsInTimelineDisabled: false,
 
   /*
    * Disables date pickers and sourcerer in analyzer if needed.
    *
    */
   analyzerDatePickersAndSourcererDisabled: false,
+
+  /**
+   * Enables graph visualization in alerts flyout
+   */
+  graphVisualizationInFlyoutEnabled: false,
 
   /**
    * Enables an ability to customize Elastic prebuilt rules.
@@ -210,11 +217,6 @@ export const allowedExperimentalValues = Object.freeze({
   valueListItemsModalEnabled: true,
 
   /**
-   * Enables the manual rule run
-   */
-  manualRuleRunEnabled: false,
-
-  /**
    * Adds a new option to filter descendants of a process for Management / Event Filters
    */
   filterProcessDescendantsForEventFiltersEnabled: true,
@@ -223,6 +225,22 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the new data ingestion hub
    */
   dataIngestionHubEnabled: false,
+
+  /**
+   * Disables Security's Entity Store engine routes. The Entity Store feature is available by default, but
+   * can be disabled if necessary in a given environment.
+   */
+  entityStoreDisabled: false,
+
+  /**
+   * Enables the siem migrations feature
+   */
+  siemMigrationsEnabled: false,
+
+  /**
+   * Enables the Defend Insights feature
+   */
+  defendInsights: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

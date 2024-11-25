@@ -8,18 +8,22 @@
  */
 
 import type { ESQLMessage, ESQLLocation } from '@kbn/esql-ast';
-import { FieldType } from '../definitions/types';
+import { FieldType, SupportedDataType } from '../definitions/types';
 import type { EditorError } from '../types';
 
 export interface ESQLVariable {
   name: string;
-  type: string;
+  // invalid expressions produce columns of type "unknown"
+  // also, there are some cases where we can't yet infer the type of
+  // a valid expression as with `CASE` which can return union types
+  type: SupportedDataType | 'unknown';
   location: ESQLLocation;
 }
 
 export interface ESQLRealField {
   name: string;
   type: FieldType;
+  isEcs?: boolean;
   metadata?: {
     description?: string;
   };
@@ -156,6 +160,10 @@ export interface ValidationErrors {
     message: string;
     type: { command: string; value: string; expected: string };
   };
+  fnUnsupportedAfterCommand: {
+    message: string;
+    type: { function: string; command: string };
+  };
   expectedConstant: {
     message: string;
     type: { fn: string; given: string };
@@ -191,6 +199,10 @@ export interface ValidationErrors {
     type: {
       nestedAgg: string;
     };
+  };
+  onlyWhereCommandSupported: {
+    message: string;
+    type: { fn: string };
   };
 }
 

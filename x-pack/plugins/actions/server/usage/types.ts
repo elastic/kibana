@@ -51,6 +51,7 @@ export const byGenAiProviderTypeSchema: MakeSchemaFrom<ActionsUsage>['count_by_t
   // Known providers:
   ['Azure OpenAI']: { type: 'long' },
   ['OpenAI']: { type: 'long' },
+  ['Other']: { type: 'long' },
 };
 
 export const byServiceProviderTypeSchema: MakeSchemaFrom<ActionsUsage>['count_active_email_connectors_by_service_type'] =
@@ -64,3 +65,18 @@ export const byServiceProviderTypeSchema: MakeSchemaFrom<ActionsUsage>['count_ac
     other: { type: 'long' },
     ses: { type: 'long' },
   };
+
+export interface ConnectorUsageReport {
+  id: string;
+  usage_timestamp: string;
+  creation_timestamp: string;
+  usage: {
+    type: string;
+    period_seconds: number;
+    quantity: number | string | undefined;
+  };
+  source: {
+    id: string | undefined;
+    instance_group_id: string;
+  };
+}

@@ -24,8 +24,10 @@ export const createPrebuiltSavedObjectsRoute = (
     .post({
       access: 'internal',
       path: PREBUILT_SAVED_OBJECTS_BULK_CREATE,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(

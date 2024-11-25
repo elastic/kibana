@@ -6,16 +6,39 @@
  */
 
 import Boom from '@hapi/boom';
-import type { SavedObjectsClientContract, SavedObjectsUpdateOptions } from '@kbn/core/server';
+import type {
+  SavedObject,
+  SavedObjectsClientContract,
+  SavedObjectsUpdateOptions,
+} from '@kbn/core/server';
+import { omit } from 'lodash';
 
-import { normalizeHostsForAgents } from '../../common/services';
 import { GLOBAL_SETTINGS_SAVED_OBJECT_TYPE, GLOBAL_SETTINGS_ID } from '../../common/constants';
 import type { Settings, BaseSettings } from '../../common/types';
 import type { SettingsSOAttributes } from '../types';
 
+import { DeleteUnenrolledAgentsPreconfiguredError } from '../errors';
+
 import { appContextService } from './app_context';
-import { listFleetServerHosts } from './fleet_server_host';
 import { auditLoggingService } from './audit_logging';
+
+function mapSettingsSO(settingsSo: SavedObject<SettingsSOAttributes>): Settings {
+  return {
+    id: settingsSo.id,
+    version: settingsSo.version,
+    secret_storage_requirements_met: settingsSo.attributes.secret_storage_requirements_met,
+    output_secret_storage_requirements_met:
+      settingsSo.attributes.output_secret_storage_requirements_met,
+    has_seen_add_data_notice: settingsSo.attributes.has_seen_add_data_notice,
+    prerelease_integrations_enabled: settingsSo.attributes.prerelease_integrations_enabled,
+    use_space_awareness_migration_status:
+      settingsSo.attributes.use_space_awareness_migration_status ?? undefined,
+    use_space_awareness_migration_started_at:
+      settingsSo.attributes.use_space_awareness_migration_started_at ?? undefined,
+    preconfigured_fields: getConfigFleetServerHosts() ? ['fleet_server_hosts'] : [],
+    delete_unenrolled_agents: settingsSo.attributes.delete_unenrolled_agents,
+  };
+}
 
 export async function getSettings(soClient: SavedObjectsClientContract): Promise<Settings> {
   const res = await soClient.find<SettingsSOAttributes>({
@@ -30,16 +53,7 @@ export async function getSettings(soClient: SavedObjectsClientContract): Promise
   if (res.total === 0) {
     throw Boom.notFound('Global settings not found');
   }
-  const settingsSo = res.saved_objects[0];
-  const fleetServerHosts = await listFleetServerHosts(soClient);
-
-  return {
-    id: settingsSo.id,
-    version: settingsSo.version,
-    ...settingsSo.attributes,
-    fleet_server_hosts: fleetServerHosts.items.flatMap((item) => item.host_urls),
-    preconfigured_fields: getConfigFleetServerHosts() ? ['fleet_server_hosts'] : [],
-  };
+  return mapSettingsSO(res.saved_objects[0]);
 }
 
 export async function getSettingsOrUndefined(
@@ -72,16 +86,27 @@ export async function settingsSetup(soClient: SavedObjectsClientContract) {
 export async function saveSettings(
   soClient: SavedObjectsClientContract,
   newData: Partial<Omit<Settings, 'id'>>,
-  options?: SavedObjectsUpdateOptions<SettingsSOAttributes> & { createWithOverwrite?: boolean }
-): Promise<Partial<Settings> & Pick<Settings, 'id'>> {
-  const data = { ...newData };
-  if (data.fleet_server_hosts) {
-    data.fleet_server_hosts = data.fleet_server_hosts.map(normalizeHostsForAgents);
+  options?: SavedObjectsUpdateOptions<SettingsSOAttributes> & {
+    createWithOverwrite?: boolean;
+    fromSetup?: boolean;
   }
+): Promise<Partial<Settings> & Pick<Settings, 'id'>> {
+  const data = omit({ ...newData }, 'fleet_server_hosts');
+
   const { createWithOverwrite, ...updateOptions } = options ?? {};
 
   try {
     const settings = await getSettings(soClient);
+
+    if (
+      !options?.fromSetup &&
+      settings.delete_unenrolled_agents?.is_preconfigured &&
+      data.delete_unenrolled_agents
+    ) {
+      throw new DeleteUnenrolledAgentsPreconfiguredError(
+        `Setting delete_unenrolled_agents is preconfigured as 'enableDeleteUnenrolledAgents' and cannot be updated outside of kibana config file.`
+      );
+    }
 
     auditLoggingService.writeCustomSoAuditLog({
       action: 'update',

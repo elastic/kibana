@@ -4,15 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { ComponentType, useMemo } from 'react';
-import { InventoryContextProvider } from '../public/components/inventory_context_provider';
+import React, { useMemo } from 'react';
+import { DecoratorFn } from '@storybook/react';
+import { InventoryContextProvider } from '../public/context/inventory_context_provider';
 import { getMockInventoryContext } from './get_mock_inventory_context';
 
-export function KibanaReactStorybookDecorator(Story: ComponentType) {
+export const KibanaReactStorybookDecorator: DecoratorFn = (story) => {
   const context = useMemo(() => getMockInventoryContext(), []);
-  return (
-    <InventoryContextProvider context={context}>
-      <Story />
-    </InventoryContextProvider>
-  );
-}
+  return <InventoryContextProvider context={context}>{story()}</InventoryContextProvider>;
+};

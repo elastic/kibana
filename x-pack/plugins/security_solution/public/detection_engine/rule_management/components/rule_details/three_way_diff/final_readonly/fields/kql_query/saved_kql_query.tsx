@@ -10,19 +10,19 @@ import { EuiDescriptionList } from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui';
 import type {
   SavedKqlQuery,
-  DiffableRule,
-  DiffableAllFields,
+  RuleDataSource,
+  DiffableRuleTypes,
 } from '../../../../../../../../../common/api/detection_engine';
 import { Query, SavedQueryName, Filters } from '../../../../rule_definition_section';
 import * as ruleDetailsI18n from '../../../../translations';
 import * as descriptionStepI18n from '../../../../../../../rule_creation_ui/components/description_step/translations';
 import { useGetSavedQuery } from '../../../../../../../../detections/pages/detection_engine/rules/use_get_saved_query';
-import { getDataSourceProps, getQueryLanguageLabel } from '../../../../helpers';
+import { getDataSourceProps, getQueryLanguageLabel, isFilters } from '../../../../helpers';
 
 interface SavedQueryProps {
   kqlQuery: SavedKqlQuery;
-  dataSource?: DiffableAllFields['data_source'];
-  ruleType: DiffableRule['type'];
+  dataSource?: RuleDataSource;
+  ruleType: DiffableRuleTypes;
 }
 
 export function SavedKqlQueryReadOnly({ kqlQuery, dataSource, ruleType }: SavedQueryProps) {
@@ -53,12 +53,14 @@ export function SavedKqlQueryReadOnly({ kqlQuery, dataSource, ruleType }: SavedQ
     });
   }
 
-  if (savedQuery.attributes.filters) {
+  const filters = savedQuery.attributes.filters ?? [];
+
+  if (isFilters(filters) && filters.length > 0) {
     const dataSourceProps = getDataSourceProps(dataSource);
 
     listItems.push({
       title: descriptionStepI18n.SAVED_QUERY_FILTERS_LABEL,
-      description: <Filters filters={savedQuery.attributes.filters} {...dataSourceProps} />,
+      description: <Filters filters={filters} {...dataSourceProps} />,
     });
   }
 

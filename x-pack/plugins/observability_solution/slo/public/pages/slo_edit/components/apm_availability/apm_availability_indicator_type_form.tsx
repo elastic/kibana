@@ -8,8 +8,9 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { APMTransactionErrorRateIndicator } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useFormContext } from 'react-hook-form';
+import { useApmDefaultValues } from '../apm_common/use_apm_default_values';
 import { DATA_VIEW_FIELD } from '../custom_common/index_selection';
 import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 import { GroupByField } from '../common/group_by_field';
@@ -22,7 +23,7 @@ import { formatAllFilters } from '../../helpers/format_filters';
 import { getGroupByCardinalityFilters } from '../apm_common/get_group_by_cardinality_filters';
 
 export function ApmAvailabilityIndicatorTypeForm() {
-  const { watch, setValue } = useFormContext<CreateSLOForm<APMTransactionErrorRateIndicator>>();
+  const { watch } = useFormContext<CreateSLOForm<APMTransactionErrorRateIndicator>>();
   const { data: apmIndex } = useFetchApmIndex();
   const dataViewId = watch(DATA_VIEW_FIELD);
 
@@ -47,11 +48,7 @@ export function ApmAvailabilityIndicatorTypeForm() {
   });
   const allFilters = formatAllFilters(globalFilters, indicatorParamsFilters);
 
-  useEffect(() => {
-    if (apmIndex !== '') {
-      setValue('indicator.params.index', apmIndex);
-    }
-  }, [setValue, apmIndex]);
+  useApmDefaultValues();
 
   const { dataView, loading: isIndexFieldsLoading } = useCreateDataView({
     indexPatternString: apmIndex,

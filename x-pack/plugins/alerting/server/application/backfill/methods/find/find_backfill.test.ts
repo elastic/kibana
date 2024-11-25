@@ -171,6 +171,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   uiSettings: uiSettingsServiceMock.createStartContract(),
 };
 
+const fakeRuleName = 'fakeRuleName';
+
 const mockAdHocRunSO: SavedObject<AdHocRunSO> = {
   id: '1',
   type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
@@ -181,7 +183,7 @@ const mockAdHocRunSO: SavedObject<AdHocRunSO> = {
     duration: '12h',
     enabled: true,
     rule: {
-      name: 'my rule name',
+      name: fakeRuleName,
       tags: ['foo'],
       alertTypeId: 'myType',
       // @ts-expect-error
@@ -266,10 +268,11 @@ describe('findBackfill()', () => {
         saved_object: {
           id: '1',
           type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
-          name: `backfill for rule "my rule name"`,
+          name: 'backfill for rule "fakeRuleName"',
         },
       },
-      message: 'User has found ad hoc run for ad_hoc_run_params [id=1]',
+      message:
+        'User has found ad hoc run for ad_hoc_run_params [id=1] backfill for rule "fakeRuleName"',
     });
 
     expect(result).toEqual({
@@ -311,10 +314,11 @@ describe('findBackfill()', () => {
         saved_object: {
           id: '1',
           type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
-          name: `backfill for rule "my rule name"`,
+          name: 'backfill for rule "fakeRuleName"',
         },
       },
-      message: 'User has found ad hoc run for ad_hoc_run_params [id=1]',
+      message:
+        'User has found ad hoc run for ad_hoc_run_params [id=1] backfill for rule "fakeRuleName"',
     });
 
     expect(result).toEqual({
@@ -374,10 +378,11 @@ describe('findBackfill()', () => {
         saved_object: {
           id: '1',
           type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
-          name: `backfill for rule "my rule name"`,
+          name: 'backfill for rule "fakeRuleName"',
         },
       },
-      message: 'User has found ad hoc run for ad_hoc_run_params [id=1]',
+      message:
+        'User has found ad hoc run for ad_hoc_run_params [id=1] backfill for rule "fakeRuleName"',
     });
 
     expect(result).toEqual({
@@ -437,10 +442,11 @@ describe('findBackfill()', () => {
         saved_object: {
           id: '1',
           type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
-          name: `backfill for rule "my rule name"`,
+          name: 'backfill for rule "fakeRuleName"',
         },
       },
-      message: 'User has found ad hoc run for ad_hoc_run_params [id=1]',
+      message:
+        'User has found ad hoc run for ad_hoc_run_params [id=1] backfill for rule "fakeRuleName"',
     });
 
     expect(result).toEqual({
@@ -516,10 +522,11 @@ describe('findBackfill()', () => {
         saved_object: {
           id: '1',
           type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
-          name: `backfill for rule "my rule name"`,
+          name: 'backfill for rule "fakeRuleName"',
         },
       },
-      message: 'User has found ad hoc run for ad_hoc_run_params [id=1]',
+      message:
+        'User has found ad hoc run for ad_hoc_run_params [id=1] backfill for rule "fakeRuleName"',
     });
 
     expect(result).toEqual({
@@ -597,10 +604,11 @@ describe('findBackfill()', () => {
         saved_object: {
           id: '1',
           type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
-          name: `backfill for rule "my rule name"`,
+          name: 'backfill for rule "fakeRuleName"',
         },
       },
-      message: 'User has found ad hoc run for ad_hoc_run_params [id=1]',
+      message:
+        'User has found ad hoc run for ad_hoc_run_params [id=1] backfill for rule "fakeRuleName"',
     });
 
     expect(result).toEqual({
@@ -648,10 +656,11 @@ describe('findBackfill()', () => {
         saved_object: {
           id: '1',
           type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
-          name: `backfill for rule "my rule name"`,
+          name: 'backfill for rule "fakeRuleName"',
         },
       },
-      message: 'User has found ad hoc run for ad_hoc_run_params [id=1]',
+      message:
+        'User has found ad hoc run for ad_hoc_run_params [id=1] backfill for rule "fakeRuleName"',
     });
 
     expect(result).toEqual({

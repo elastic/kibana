@@ -53,6 +53,9 @@ export const convertRuleResponseToAlertingRule = (
   const alertActions = ruleActions?.map((action) => transformRuleToAlertAction(action)) ?? [];
   const actions = transformToActionFrequency(alertActions as RuleActionCamel[], rule.throttle);
 
+  const responseActions = rule.response_actions?.map((ruleResponseAction) =>
+    transformRuleToAlertResponseAction(ruleResponseAction)
+  );
   // Because of Omit<RuleResponse, RuntimeFields> Typescript doesn't recognize
   // that rule is assignable to TypeSpecificCreateProps despite omitted fields
   // are not part of type specific props. So we need to cast here.
@@ -70,7 +73,7 @@ export const convertRuleResponseToAlertingRule = (
       from: rule.from,
       investigationFields: rule.investigation_fields,
       immutable: rule.immutable,
-      ruleSource: convertObjectKeysToCamelCase(rule.rule_source),
+      ruleSource: rule.rule_source ? convertObjectKeysToCamelCase(rule.rule_source) : undefined,
       license: rule.license,
       outputIndex: rule.output_index ?? '',
       timelineId: rule.timeline_id,
@@ -94,6 +97,7 @@ export const convertRuleResponseToAlertingRule = (
       note: rule.note,
       version: rule.version,
       exceptionsList: rule.exceptions_list,
+      responseActions,
       ...typeSpecificParams,
     },
     schedule: { interval: rule.interval },
@@ -118,7 +122,9 @@ const typeSpecificSnakeToCamel = (params: TypeSpecificCreateProps): TypeSpecific
         timestampField: params.timestamp_field,
         eventCategoryOverride: params.event_category_override,
         tiebreakerField: params.tiebreaker_field,
-        alertSuppression: convertObjectKeysToCamelCase(params.alert_suppression),
+        alertSuppression: params.alert_suppression
+          ? convertObjectKeysToCamelCase(params.alert_suppression)
+          : undefined,
       };
     }
     case 'esql': {
@@ -126,7 +132,9 @@ const typeSpecificSnakeToCamel = (params: TypeSpecificCreateProps): TypeSpecific
         type: params.type,
         language: params.language,
         query: params.query,
-        alertSuppression: convertObjectKeysToCamelCase(params.alert_suppression),
+        alertSuppression: params.alert_suppression
+          ? convertObjectKeysToCamelCase(params.alert_suppression)
+          : undefined,
       };
     }
     case 'threat_match': {
@@ -146,7 +154,9 @@ const typeSpecificSnakeToCamel = (params: TypeSpecificCreateProps): TypeSpecific
         threatIndicatorPath: params.threat_indicator_path,
         concurrentSearches: params.concurrent_searches,
         itemsPerSearch: params.items_per_search,
-        alertSuppression: convertObjectKeysToCamelCase(params.alert_suppression),
+        alertSuppression: params.alert_suppression
+          ? convertObjectKeysToCamelCase(params.alert_suppression)
+          : undefined,
       };
     }
     case 'query': {
@@ -158,10 +168,9 @@ const typeSpecificSnakeToCamel = (params: TypeSpecificCreateProps): TypeSpecific
         query: params.query ?? '',
         filters: params.filters,
         savedId: params.saved_id,
-        responseActions: params.response_actions?.map((rule) =>
-          transformRuleToAlertResponseAction(rule)
-        ),
-        alertSuppression: convertObjectKeysToCamelCase(params.alert_suppression),
+        alertSuppression: params.alert_suppression
+          ? convertObjectKeysToCamelCase(params.alert_suppression)
+          : undefined,
       };
     }
     case 'saved_query': {
@@ -173,10 +182,9 @@ const typeSpecificSnakeToCamel = (params: TypeSpecificCreateProps): TypeSpecific
         filters: params.filters,
         savedId: params.saved_id,
         dataViewId: params.data_view_id,
-        responseActions: params.response_actions?.map((rule) =>
-          transformRuleToAlertResponseAction(rule)
-        ),
-        alertSuppression: convertObjectKeysToCamelCase(params.alert_suppression),
+        alertSuppression: params.alert_suppression
+          ? convertObjectKeysToCamelCase(params.alert_suppression)
+          : undefined,
       };
     }
     case 'threshold': {
@@ -199,7 +207,9 @@ const typeSpecificSnakeToCamel = (params: TypeSpecificCreateProps): TypeSpecific
         type: params.type,
         anomalyThreshold: params.anomaly_threshold,
         machineLearningJobId: normalizeMachineLearningJobIds(params.machine_learning_job_id),
-        alertSuppression: convertObjectKeysToCamelCase(params.alert_suppression),
+        alertSuppression: params.alert_suppression
+          ? convertObjectKeysToCamelCase(params.alert_suppression)
+          : undefined,
       };
     }
     case 'new_terms': {
@@ -212,7 +222,9 @@ const typeSpecificSnakeToCamel = (params: TypeSpecificCreateProps): TypeSpecific
         filters: params.filters,
         language: params.language ?? 'kuery',
         dataViewId: params.data_view_id,
-        alertSuppression: convertObjectKeysToCamelCase(params.alert_suppression),
+        alertSuppression: params.alert_suppression
+          ? convertObjectKeysToCamelCase(params.alert_suppression)
+          : undefined,
       };
     }
     default: {

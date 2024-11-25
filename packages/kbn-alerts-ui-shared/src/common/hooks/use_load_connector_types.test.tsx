@@ -9,11 +9,10 @@
 
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { renderHook } from '@testing-library/react-hooks/dom';
-import { waitFor } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 
-import { useLoadActionTypes } from './use_load_connector_types';
+import { useLoadConnectorTypes } from './use_load_connector_types';
 
 const queryClient = new QueryClient();
 
@@ -46,7 +45,7 @@ describe('useLoadConnectorTypes', () => {
   test('should call API endpoint with the correct parameters', async () => {
     const { result } = renderHook(
       () =>
-        useLoadActionTypes({
+        useLoadConnectorTypes({
           http,
           includeSystemActions: true,
         }),
@@ -74,7 +73,7 @@ describe('useLoadConnectorTypes', () => {
   test('should call the correct endpoint if system actions is true', async () => {
     const { result } = renderHook(
       () =>
-        useLoadActionTypes({
+        useLoadConnectorTypes({
           http,
           includeSystemActions: true,
         }),
@@ -91,7 +90,7 @@ describe('useLoadConnectorTypes', () => {
   test('should call the correct endpoint if system actions is false', async () => {
     const { result } = renderHook(
       () =>
-        useLoadActionTypes({
+        useLoadConnectorTypes({
           http,
           includeSystemActions: false,
         }),

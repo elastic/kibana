@@ -58,7 +58,7 @@ async function unmuteInstanceWithOCC(
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.UNMUTE_ALERT,
-        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId, name: attributes.name },
         error,
       })
     );
@@ -69,7 +69,7 @@ async function unmuteInstanceWithOCC(
     ruleAuditEvent({
       action: RuleAuditAction.UNMUTE_ALERT,
       outcome: 'unknown',
-      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId, name: attributes.name },
     })
   );
 

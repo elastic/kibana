@@ -8,13 +8,14 @@
 import React from 'react';
 import type { Story } from '@storybook/react';
 import { FieldReadOnly } from '../../field_readonly';
-import type { DiffableAllFields } from '../../../../../../../../../common/api/detection_engine';
+import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import { ThreatQueryReadOnly } from './threat_query';
 import {
   dataSourceWithDataView,
   dataSourceWithIndexPatterns,
   inlineKqlQuery,
   mockDataView,
+  mockThreatMatchRule,
 } from '../../storybook/mocks';
 import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
 
@@ -24,17 +25,17 @@ export default {
 };
 
 interface TemplateProps {
-  finalDiffableRule: Partial<DiffableAllFields>;
-  kibanaServicesMock?: Record<string, unknown>;
+  finalDiffableRule: DiffableRule;
+  kibanaServicesOverrides?: Record<string, unknown>;
 }
 
 const Template: Story<TemplateProps> = (args) => {
   return (
-    <ThreeWayDiffStorybookProviders kibanaServicesMock={args.kibanaServicesMock}>
-      <FieldReadOnly
-        fieldName="threat_query"
-        finalDiffableRule={args.finalDiffableRule as DiffableAllFields}
-      />
+    <ThreeWayDiffStorybookProviders
+      kibanaServicesOverrides={args.kibanaServicesOverrides}
+      finalDiffableRule={args.finalDiffableRule}
+    >
+      <FieldReadOnly fieldName="threat_query" />
     </ThreeWayDiffStorybookProviders>
   );
 };
@@ -42,11 +43,11 @@ const Template: Story<TemplateProps> = (args) => {
 export const ThreatQueryWithIndexPatterns = Template.bind({});
 
 ThreatQueryWithIndexPatterns.args = {
-  finalDiffableRule: {
+  finalDiffableRule: mockThreatMatchRule({
     threat_query: inlineKqlQuery,
     data_source: dataSourceWithIndexPatterns,
-  },
-  kibanaServicesMock: {
+  }),
+  kibanaServicesOverrides: {
     data: {
       dataViews: {
         create: async () => mockDataView(),
@@ -58,11 +59,11 @@ ThreatQueryWithIndexPatterns.args = {
 export const ThreatQueryWithDataView = Template.bind({});
 
 ThreatQueryWithDataView.args = {
-  finalDiffableRule: {
+  finalDiffableRule: mockThreatMatchRule({
     threat_query: inlineKqlQuery,
     data_source: dataSourceWithDataView,
-  },
-  kibanaServicesMock: {
+  }),
+  kibanaServicesOverrides: {
     data: {
       dataViews: {
         get: async () => mockDataView(),

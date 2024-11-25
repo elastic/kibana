@@ -9,6 +9,11 @@ import type { TypeOf } from '@kbn/config-schema';
 
 import { createStandaloneAgentApiKey } from '../../services/api_keys';
 import type { FleetRequestHandler, PostStandaloneAgentAPIKeyRequestSchema } from '../../types';
+import {
+  INDEX_PRIVILEGES,
+  canCreateStandaloneAgentApiKey,
+} from '../../services/api_keys/create_standalone_agent_api_key';
+import { FleetUnauthorizedError } from '../../errors';
 
 export const createStandaloneAgentApiKeyHandler: FleetRequestHandler<
   undefined,
@@ -17,7 +22,18 @@ export const createStandaloneAgentApiKeyHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asCurrentUser;
+  const canCreate = await canCreateStandaloneAgentApiKey(esClient);
+
+  if (!canCreate) {
+    throw new FleetUnauthorizedError(
+      `Missing permissions to create standalone API key, You need ${INDEX_PRIVILEGES.privileges.join(
+        ', '
+      )} for indices ${INDEX_PRIVILEGES.names.join(', ')}`
+    );
+  }
+
   const key = await createStandaloneAgentApiKey(esClient, request.body.name);
+
   return response.ok({
     body: {
       item: key,

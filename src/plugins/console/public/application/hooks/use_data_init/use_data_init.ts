@@ -8,6 +8,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
+import { TextObject } from '../../../../common/text_object';
 import { migrateToTextObjects } from './data_migration';
 import { useEditorActionContext, useServicesContext } from '../../contexts';
 
@@ -37,16 +38,29 @@ export const useDataInit = () => {
           const newObject = await objectStorageClient.text.create({
             createdAt: Date.now(),
             updatedAt: Date.now(),
-            text: '',
+            text: undefined,
           });
           dispatch({ type: 'setCurrentTextObject', payload: newObject });
         } else {
-          dispatch({
-            type: 'setCurrentTextObject',
-            // For backwards compatibility, we sort here according to date created to
-            // always take the first item created.
-            payload: results.sort((a, b) => a.createdAt - b.createdAt)[0],
-          });
+          // For backwards compatibility, we sort here according to date created to
+          // always take the first item created.
+          const lastObject = results.sort((a, b) => a.createdAt - b.createdAt)[0];
+          if (lastObject.text === '') {
+            // If the last stored text is empty, add a new object with undefined text so that the default input is displayed at initial render
+            const textObject = {
+              ...lastObject,
+              text: undefined,
+              updatedAt: Date.now(),
+            } as TextObject;
+
+            objectStorageClient.text.update(textObject);
+            dispatch({ type: 'setCurrentTextObject', payload: textObject });
+          } else {
+            dispatch({
+              type: 'setCurrentTextObject',
+              payload: lastObject,
+            });
+          }
         }
       } catch (e) {
         setError(e);

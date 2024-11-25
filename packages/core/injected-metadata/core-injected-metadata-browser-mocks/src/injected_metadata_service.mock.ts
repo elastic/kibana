@@ -30,6 +30,7 @@ const createSetupContractMock = () => {
     getPlugins: jest.fn(),
     getKibanaBuildNumber: jest.fn(),
     getCustomBranding: jest.fn(),
+    getFeatureFlags: jest.fn(),
   };
   setupContract.getBasePath.mockReturnValue('/base-path');
   setupContract.getServerBasePath.mockReturnValue('/server-base-path');
@@ -56,6 +57,7 @@ const createSetupContractMock = () => {
   setupContract.getPlugins.mockReturnValue([]);
   setupContract.getTheme.mockReturnValue({
     darkMode: false,
+    name: 'amsterdam',
     version: 'v8',
     stylesheetPaths: {
       default: ['light-1.css'],

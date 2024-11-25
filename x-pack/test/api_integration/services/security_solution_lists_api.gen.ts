@@ -33,156 +33,216 @@ import { ReadListRequestQueryInput } from '@kbn/securitysolution-lists-common/ap
 import { ReadListItemRequestQueryInput } from '@kbn/securitysolution-lists-common/api/read_list_item/read_list_item.gen';
 import { UpdateListRequestBodyInput } from '@kbn/securitysolution-lists-common/api/update_list/update_list.gen';
 import { UpdateListItemRequestBodyInput } from '@kbn/securitysolution-lists-common/api/update_list_item/update_list_item.gen';
+import { routeWithNamespace } from '../../common/utils/security_solution';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   return {
-    createList(props: CreateListProps) {
-      return supertest
-        .post('/api/lists')
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    createListIndex() {
-      return supertest
-        .post('/api/lists/index')
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    createListItem(props: CreateListItemProps) {
-      return supertest
-        .post('/api/lists/items')
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    deleteList(props: DeleteListProps) {
-      return supertest
-        .delete('/api/lists')
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    deleteListIndex() {
-      return supertest
-        .delete('/api/lists/index')
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    deleteListItem(props: DeleteListItemProps) {
-      return supertest
-        .delete('/api/lists/items')
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
     /**
-     * Exports list item values from the specified list
+     * Create a new list.
      */
-    exportListItems(props: ExportListItemsProps) {
+    createList(props: CreateListProps, kibanaSpace: string = 'default') {
       return supertest
-        .post('/api/lists/items/_export')
+        .post(routeWithNamespace('/api/lists', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
+        .send(props.body as object);
     },
-    findListItems(props: FindListItemsProps) {
+    /**
+     * Create `.lists` and `.items` data streams in the relevant space.
+     */
+    createListIndex(kibanaSpace: string = 'default') {
       return supertest
-        .get('/api/lists/items/_find')
+        .post(routeWithNamespace('/api/lists/index', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    /**
+      * Create a list item and associate it with the specified list.
+
+All list items in the same list must be the same type. For example, each list item in an `ip` list must define a specific IP address.
+> info
+> Before creating a list item, you must create a list.
+
+      */
+    createListItem(props: CreateListItemProps, kibanaSpace: string = 'default') {
+      return supertest
+        .post(routeWithNamespace('/api/lists/items', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
+        .send(props.body as object);
     },
-    findLists(props: FindListsProps) {
+    /**
+      * Delete a list using the list ID.
+> info
+> When you delete a list, all of its list items are also deleted.
+
+      */
+    deleteList(props: DeleteListProps, kibanaSpace: string = 'default') {
       return supertest
-        .get('/api/lists/_find')
+        .delete(routeWithNamespace('/api/lists', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
     /**
-      * Imports a list of items from a `.txt` or `.csv` file. The maximum file size is 9 million bytes.
+     * Delete the `.lists` and `.items` data streams.
+     */
+    deleteListIndex(kibanaSpace: string = 'default') {
+      return supertest
+        .delete(routeWithNamespace('/api/lists/index', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    /**
+     * Delete a list item using its `id`, or its `list_id` and `value` fields.
+     */
+    deleteListItem(props: DeleteListItemProps, kibanaSpace: string = 'default') {
+      return supertest
+        .delete(routeWithNamespace('/api/lists/items', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query(props.query);
+    },
+    /**
+     * Export list item values from the specified list.
+     */
+    exportListItems(props: ExportListItemsProps, kibanaSpace: string = 'default') {
+      return supertest
+        .post(routeWithNamespace('/api/lists/items/_export', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query(props.query);
+    },
+    /**
+     * Get all list items in the specified list.
+     */
+    findListItems(props: FindListItemsProps, kibanaSpace: string = 'default') {
+      return supertest
+        .get(routeWithNamespace('/api/lists/items/_find', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query(props.query);
+    },
+    /**
+     * Get a paginated subset of lists. By default, the first page is returned, with 20 results per page.
+     */
+    findLists(props: FindListsProps, kibanaSpace: string = 'default') {
+      return supertest
+        .get(routeWithNamespace('/api/lists/_find', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query(props.query);
+    },
+    /**
+      * Import list items from a TXT or CSV file. The maximum file size is 9 million bytes.
 
 You can import items to a new or existing list.
 
       */
-    importListItems(props: ImportListItemsProps) {
+    importListItems(props: ImportListItemsProps, kibanaSpace: string = 'default') {
       return supertest
-        .post('/api/lists/items/_import')
+        .post(routeWithNamespace('/api/lists/items/_import', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
-    patchList(props: PatchListProps) {
+    /**
+     * Update specific fields of an existing list using the list ID.
+     */
+    patchList(props: PatchListProps, kibanaSpace: string = 'default') {
       return supertest
-        .patch('/api/lists')
+        .patch(routeWithNamespace('/api/lists', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
-    patchListItem(props: PatchListItemProps) {
+    /**
+     * Update specific fields of an existing list item using the list item ID.
+     */
+    patchListItem(props: PatchListItemProps, kibanaSpace: string = 'default') {
       return supertest
-        .patch('/api/lists/items')
+        .patch(routeWithNamespace('/api/lists/items', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
-    readList(props: ReadListProps) {
+    /**
+     * Get the details of a list using the list ID.
+     */
+    readList(props: ReadListProps, kibanaSpace: string = 'default') {
       return supertest
-        .get('/api/lists')
+        .get(routeWithNamespace('/api/lists', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
-    readListIndex() {
+    /**
+     * Verify that `.lists` and `.items` data streams exist.
+     */
+    readListIndex(kibanaSpace: string = 'default') {
       return supertest
-        .get('/api/lists/index')
+        .get(routeWithNamespace('/api/lists/index', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
-    readListItem(props: ReadListItemProps) {
+    /**
+     * Get the details of a list item.
+     */
+    readListItem(props: ReadListItemProps, kibanaSpace: string = 'default') {
       return supertest
-        .get('/api/lists/items')
+        .get(routeWithNamespace('/api/lists/items', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
-    readListPrivileges() {
+    readListPrivileges(kibanaSpace: string = 'default') {
       return supertest
-        .get('/api/lists/privileges')
+        .get(routeWithNamespace('/api/lists/privileges', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
-    updateList(props: UpdateListProps) {
+    /**
+      * Update a list using the list ID. The original list is replaced, and all unspecified fields are deleted.
+> info
+> You cannot modify the `id` value.
+
+      */
+    updateList(props: UpdateListProps, kibanaSpace: string = 'default') {
       return supertest
-        .put('/api/lists')
+        .put(routeWithNamespace('/api/lists', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
-    updateListItem(props: UpdateListItemProps) {
+    /**
+      * Update a list item using the list item ID. The original list item is replaced, and all unspecified fields are deleted.
+> info
+> You cannot modify the `id` value.
+
+      */
+    updateListItem(props: UpdateListItemProps, kibanaSpace: string = 'default') {
       return supertest
-        .put('/api/lists/items')
+        .put(routeWithNamespace('/api/lists/items', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')

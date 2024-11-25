@@ -7,29 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
-import { useEffect } from 'react';
-import type { Embeddable } from '@kbn/embeddable-plugin/public';
 import { getESQLQueryColumns } from '@kbn/esql-utils';
-import type { ISearchStart } from '@kbn/data-plugin/public';
 import {
   LensConfigBuilder,
+  LensDataset,
   type LensConfig,
-  type LensMetricConfig,
-  type LensPieConfig,
   type LensGaugeConfig,
-  type LensXYConfig,
   type LensHeatmapConfig,
+  type LensMetricConfig,
   type LensMosaicConfig,
+  type LensPieConfig,
   type LensRegionMapConfig,
   type LensTableConfig,
   type LensTagCloudConfig,
   type LensTreeMapConfig,
-  LensDataset,
+  type LensXYConfig,
 } from '@kbn/lens-embeddable-utils/config_builder';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { LensEmbeddableInput } from '@kbn/lens-plugin/public';
-import type { AwaitingDashboardAPI } from '../../dashboard_container';
+import { useEffect } from 'react';
+import { DashboardApi } from '../../dashboard_api/types';
+import { dataService, observabilityAssistantService } from '../../services/kibana_services';
 
 const chartTypes = [
   'xy',
@@ -46,30 +43,24 @@ const chartTypes = [
 ] as const;
 
 export function useObservabilityAIAssistantContext({
-  observabilityAIAssistant,
-  dashboardAPI,
-  search,
-  dataViews,
+  dashboardApi,
 }: {
-  observabilityAIAssistant: ObservabilityAIAssistantPublicStart | undefined;
-  dashboardAPI: AwaitingDashboardAPI;
-  search: ISearchStart;
-  dataViews: DataViewsPublicPluginStart;
+  dashboardApi: DashboardApi | undefined;
 }) {
   useEffect(() => {
-    if (!observabilityAIAssistant) {
+    if (!observabilityAssistantService) {
       return;
     }
 
     const {
       service: { setScreenContext },
       createScreenContextAction,
-    } = observabilityAIAssistant;
+    } = observabilityAssistantService;
 
     return setScreenContext({
       screenDescription:
         'The user is looking at the dashboard app. Here they can add visualizations to a dashboard and save them',
-      actions: dashboardAPI
+      actions: dashboardApi
         ? [
             createScreenContextAction(
               {
@@ -123,9 +114,11 @@ export function useObservabilityAIAssistantContext({
                         },
                         metric: {
                           type: 'object',
+                          properties: {},
                         },
                         gauge: {
                           type: 'object',
+                          properties: {},
                         },
                         pie: {
                           type: 'object',
@@ -167,6 +160,7 @@ export function useObservabilityAIAssistantContext({
                         },
                         table: {
                           type: 'object',
+                          properties: {},
                         },
                         tagcloud: {
                           type: 'object',
@@ -206,12 +200,12 @@ export function useObservabilityAIAssistantContext({
                 const [columns] = await Promise.all([
                   getESQLQueryColumns({
                     esqlQuery: query,
-                    search: search.search,
+                    search: dataService.search.search,
                     signal,
                   }),
                 ]);
 
-                const configBuilder = new LensConfigBuilder(dataViews);
+                const configBuilder = new LensConfigBuilder(dataService.dataViews);
 
                 let config: LensConfig;
 
@@ -361,8 +355,8 @@ export function useObservabilityAIAssistantContext({
                   query: dataset,
                 })) as LensEmbeddableInput;
 
-                return dashboardAPI
-                  .addNewPanel<Embeddable>({
+                return dashboardApi
+                  .addNewPanel({
                     panelType: 'lens',
                     initialState: embeddableInput,
                   })
@@ -383,5 +377,5 @@ export function useObservabilityAIAssistantContext({
           ]
         : [],
     });
-  }, [observabilityAIAssistant, dashboardAPI, search, dataViews]);
+  }, [dashboardApi]);
 }

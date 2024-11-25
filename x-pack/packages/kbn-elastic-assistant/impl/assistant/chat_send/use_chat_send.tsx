@@ -9,6 +9,7 @@ import React, { useCallback, useState } from 'react';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import { Replacements } from '@kbn/elastic-assistant-common';
+import { useKnowledgeBaseStatus } from '../api/knowledge_base/use_knowledge_base_status';
 import { DataStreamApis } from '../use_data_stream_apis';
 import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
 import type { ClientMessage } from '../../assistant_context/types';
@@ -51,11 +52,21 @@ export const useChatSend = ({
   setSelectedPromptContexts,
   setCurrentConversation,
 }: UseChatSendProps): UseChatSend => {
-  const { assistantTelemetry, toasts } = useAssistantContext();
+  const {
+    assistantTelemetry,
+    toasts,
+    assistantAvailability: { isAssistantEnabled },
+  } = useAssistantContext();
   const [userPrompt, setUserPrompt] = useState<string | null>(null);
 
   const { isLoading, sendMessage, abortStream } = useSendMessage();
   const { clearConversation, removeLastMessage } = useConversation();
+  const { data: kbStatus } = useKnowledgeBaseStatus({ http, enabled: isAssistantEnabled });
+  const isSetupComplete =
+    kbStatus?.elser_exists &&
+    kbStatus?.index_exists &&
+    kbStatus?.pipeline_exists &&
+    kbStatus?.security_labs_exists;
 
   // Handles sending latest user prompt to API
   const handleSendMessage = useCallback(
@@ -116,6 +127,7 @@ export const useChatSend = ({
         actionTypeId: currentConversation.apiConfig.actionTypeId,
         model: currentConversation.apiConfig.model,
         provider: currentConversation.apiConfig.provider,
+        isEnabledKnowledgeBase: isSetupComplete ?? false,
       });
 
       const responseMessage: ClientMessage = getMessageFromRawResponse(rawResponse);
@@ -131,12 +143,14 @@ export const useChatSend = ({
         actionTypeId: currentConversation.apiConfig.actionTypeId,
         model: currentConversation.apiConfig.model,
         provider: currentConversation.apiConfig.provider,
+        isEnabledKnowledgeBase: isSetupComplete ?? false,
       });
     },
     [
       assistantTelemetry,
       currentConversation,
       http,
+      isSetupComplete,
       selectedPromptContexts,
       sendMessage,
       setCurrentConversation,

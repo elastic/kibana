@@ -15,6 +15,9 @@ export const END_DATE = '2020-01-01T00:00:00Z';
 export const DOCUMENT_SOURCE = 'queryDataEndpointTests';
 export const DOCUMENT_REFERENCE = '-na-';
 
+// Higher than the configured yml setting to avoid race conditions
+export const TEST_CACHE_EXPIRATION_TIME = 12000;
+
 export async function createEsDocuments(
   es: Client,
   esTestIndexTool: ESTestIndexTool,

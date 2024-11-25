@@ -16,7 +16,7 @@ describe('PingListExpandedRow', () => {
 
     expect(screen.getByText(/Body not recorded. Read our/));
     expect(
-      screen.getByRole('link', { name: 'docs External link (opens in a new tab or window)' })
+      screen.getByRole('link', { name: 'docs (external, opens in a new tab or window)' })
     ).toBeInTheDocument();
     expect(screen.getByText(/for more information on recording response bodies./));
   });

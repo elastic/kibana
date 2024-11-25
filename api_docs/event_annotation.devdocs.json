@@ -382,7 +382,7 @@
                 "section": "def-common.EventAnnotationGroupConfig",
                 "text": "EventAnnotationGroupConfig"
               },
-              ", \"ignoreGlobalFilters\" | \"annotations\" | \"indexPatternId\">[]; }) => ",
+              ", \"annotations\" | \"ignoreGlobalFilters\" | \"indexPatternId\">[]; }) => ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -434,7 +434,7 @@
                         "section": "def-common.EventAnnotationGroupConfig",
                         "text": "EventAnnotationGroupConfig"
                       },
-                      ", \"ignoreGlobalFilters\" | \"annotations\" | \"indexPatternId\">[]"
+                      ", \"annotations\" | \"ignoreGlobalFilters\" | \"indexPatternId\">[]"
                     ],
                     "path": "packages/kbn-event-annotation-components/types.ts",
                     "deprecated": false,
@@ -1911,7 +1911,7 @@
                     "label": "options",
                     "description": [],
                     "signature": [
-                      "(\"alert\" | \"tag\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"starFilled\" | \"circle\" | \"triangle\")[]"
+                      "(\"alert\" | \"circle\" | \"tag\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"starFilled\" | \"triangle\")[]"
                     ],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
                     "deprecated": false,
@@ -3033,7 +3033,7 @@
                     "label": "options",
                     "description": [],
                     "signature": [
-                      "(\"alert\" | \"tag\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"starFilled\" | \"circle\" | \"triangle\")[]"
+                      "(\"alert\" | \"circle\" | \"tag\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"starFilled\" | \"triangle\")[]"
                     ],
                     "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
                     "deprecated": false,

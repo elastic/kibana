@@ -14,7 +14,7 @@
 import apm from 'elastic-apm-node';
 import { v4 as uuidv4 } from 'uuid';
 import { withSpan } from '@kbn/apm-utils';
-import { defaults, flow, identity, omit } from 'lodash';
+import { flow, identity, omit } from 'lodash';
 import { ExecutionContextStart, Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { Middleware } from '../lib/middleware';
@@ -41,6 +41,7 @@ import {
   TaskManagerStat,
 } from '../task_events';
 import { intervalFromDate } from '../lib/intervals';
+import { createWrappedLogger } from '../lib/wrapped_logger';
 import {
   CancelFunction,
   CancellableTask,
@@ -48,15 +49,18 @@ import {
   FailedRunResult,
   FailedTaskResult,
   isFailedRunResult,
+  PartialConcreteTaskInstance,
   SuccessfulRunResult,
   TaskDefinition,
   TaskStatus,
 } from '../task';
 import { TaskTypeDictionary } from '../task_type_dictionary';
-import { isUnrecoverableError } from './errors';
-import { CLAIM_STRATEGY_MGET, type EventLoopDelayConfig } from '../config';
+import { isUnrecoverableError, isUserError } from './errors';
+import { CLAIM_STRATEGY_MGET, type TaskManagerConfig } from '../config';
 import { TaskValidator } from '../task_validator';
 import { getRetryAt, getRetryDate, getTimeout } from '../lib/get_retry_at';
+import { getNextRunAt } from '../lib/get_next_run_at';
+import { TaskErrorSource } from '../../common/constants';
 
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 
@@ -95,6 +99,10 @@ export interface TaskRunning<Stage extends TaskRunningStage, Instance> {
 
 export interface Updatable {
   update(doc: ConcreteTaskInstance, options: { validate: boolean }): Promise<ConcreteTaskInstance>;
+  partialUpdate(
+    partialDoc: PartialConcreteTaskInstance,
+    options: { validate: boolean; doc: ConcreteTaskInstance }
+  ): Promise<ConcreteTaskInstance>;
   remove(id: string): Promise<void>;
 }
 
@@ -107,9 +115,10 @@ type Opts = {
   defaultMaxAttempts: number;
   executionContext: ExecutionContextStart;
   usageCounter?: UsageCounter;
-  eventLoopDelayConfig: EventLoopDelayConfig;
+  config: TaskManagerConfig;
   allowReadingInvalidState: boolean;
   strategy: string;
+  getPollInterval: () => number;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 export enum TaskRunResult {
@@ -159,9 +168,10 @@ export class TaskManagerRunner implements TaskRunner {
   private uuid: string;
   private readonly executionContext: ExecutionContextStart;
   private usageCounter?: UsageCounter;
-  private eventLoopDelayConfig: EventLoopDelayConfig;
+  private config: TaskManagerConfig;
   private readonly taskValidator: TaskValidator;
   private readonly claimStrategy: string;
+  private getPollInterval: () => number;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -184,9 +194,10 @@ export class TaskManagerRunner implements TaskRunner {
     onTaskEvent = identity,
     executionContext,
     usageCounter,
-    eventLoopDelayConfig,
+    config,
     allowReadingInvalidState,
     strategy,
+    getPollInterval,
   }: Opts) {
     this.instance = asPending(sanitizeInstance(instance));
     this.definitions = definitions;
@@ -199,13 +210,14 @@ export class TaskManagerRunner implements TaskRunner {
     this.executionContext = executionContext;
     this.usageCounter = usageCounter;
     this.uuid = uuidv4();
-    this.eventLoopDelayConfig = eventLoopDelayConfig;
+    this.config = config;
     this.taskValidator = new TaskValidator({
       logger: this.logger,
       definitions: this.definitions,
       allowReadingInvalidState,
     });
     this.claimStrategy = strategy;
+    this.getPollInterval = getPollInterval;
   }
 
   /**
@@ -294,6 +306,10 @@ export class TaskManagerRunner implements TaskRunner {
    * running a task, the task should be deleted instead of ran.
    */
   public get isAdHocTaskAndOutOfAttempts() {
+    if (this.instance.task.status === 'running') {
+      // This function gets called with tasks marked as running when using MGET, so attempts is already incremented
+      return !this.instance.task.schedule && this.instance.task.attempts > this.getMaxAttempts();
+    }
     return !this.instance.task.schedule && this.instance.task.attempts >= this.getMaxAttempts();
   }
 
@@ -330,7 +346,7 @@ export class TaskManagerRunner implements TaskRunner {
     const apmTrans = apm.startTransaction(this.taskType, TASK_MANAGER_RUN_TRANSACTION_TYPE, {
       childOf: this.instance.task.traceparent,
     });
-    const stopTaskTimer = startTaskTimerWithEventLoopMonitoring(this.eventLoopDelayConfig);
+    const stopTaskTimer = startTaskTimerWithEventLoopMonitoring(this.config.event_loop_delay);
 
     // Validate state
     const stateValidationResult = this.validateTaskState(this.instance.task);
@@ -382,8 +398,9 @@ export class TaskManagerRunner implements TaskRunner {
       if (apmTrans) apmTrans.end('success');
       return processedResult;
     } catch (err) {
+      const errorSource = isUserError(err) ? TaskErrorSource.USER : TaskErrorSource.FRAMEWORK;
       this.logger.error(`Task ${this} failed: ${err}`, {
-        tags: [this.taskType, this.instance.task.id, 'task-run-failed'],
+        tags: [this.taskType, this.instance.task.id, 'task-run-failed', `${errorSource}-error`],
         error: { stack_trace: err.stack },
       });
       // in error scenario, we can not get the RunResult
@@ -546,18 +563,21 @@ export class TaskManagerRunner implements TaskRunner {
         });
   }
 
-  private async releaseClaimAndIncrementAttempts(): Promise<Result<ConcreteTaskInstance, Error>> {
+  private async releaseClaimAndIncrementAttempts(): Promise<
+    Result<PartialConcreteTaskInstance, Error>
+  > {
     return promiseResult(
-      this.bufferedTaskStore.update(
+      this.bufferedTaskStore.partialUpdate(
         {
-          ...taskWithoutEnabled(this.instance.task),
+          id: this.instance.task.id,
+          version: this.instance.task.version,
           status: TaskStatus.Idle,
           attempts: this.instance.task.attempts + 1,
           startedAt: null,
           retryAt: null,
           ownerId: null,
         },
-        { validate: false }
+        { validate: false, doc: this.instance.task }
       )
     );
   }
@@ -632,13 +652,20 @@ export class TaskManagerRunner implements TaskRunner {
             return asOk({ status: TaskStatus.ShouldDelete });
           }
 
-          const { startedAt, schedule } = this.instance.task;
-
+          const updatedTaskSchedule = reschedule ?? this.instance.task.schedule;
           return asOk({
             runAt:
-              runAt || intervalFromDate(startedAt!, reschedule?.interval ?? schedule?.interval)!,
+              runAt ||
+              getNextRunAt(
+                {
+                  runAt: this.instance.task.runAt,
+                  startedAt: this.instance.task.startedAt,
+                  schedule: updatedTaskSchedule,
+                },
+                this.getPollInterval()
+              ),
             state,
-            schedule: reschedule ?? schedule,
+            schedule: updatedTaskSchedule,
             attempts,
             status: TaskStatus.Idle,
           });
@@ -662,20 +689,22 @@ export class TaskManagerRunner implements TaskRunner {
       await this.removeTask();
     } else {
       const { shouldValidate = true } = unwrap(result);
+
+      const partialTask = {
+        ...fieldUpdates,
+        // reset fields that track the lifecycle of the concluded `task run`
+        startedAt: null,
+        retryAt: null,
+        ownerId: null,
+        id: this.instance.task.id,
+        version: this.instance.task.version,
+      };
+
       this.instance = asRan(
-        await this.bufferedTaskStore.update(
-          defaults(
-            {
-              ...fieldUpdates,
-              // reset fields that track the lifecycle of the concluded `task run`
-              startedAt: null,
-              retryAt: null,
-              ownerId: null,
-            },
-            taskWithoutEnabled(this.instance.task)
-          ),
-          { validate: shouldValidate }
-        )
+        await this.bufferedTaskStore.partialUpdate(partialTask, {
+          validate: shouldValidate,
+          doc: this.instance.task,
+        })
       );
     }
 
@@ -709,7 +738,7 @@ export class TaskManagerRunner implements TaskRunner {
   ): Promise<Result<SuccessfulRunResult, FailedRunResult>> {
     const { task } = this.instance;
 
-    const debugLogger = this.logger.get(`metrics-debugger`);
+    const debugLogger = createWrappedLogger({ logger: this.logger, tags: [`metrics-debugger`] });
 
     const taskHasExpired = this.isExpired;
 
@@ -786,7 +815,7 @@ export class TaskManagerRunner implements TaskRunner {
 
     const { eventLoopBlockMs = 0 } = taskTiming;
     const taskLabel = `${this.taskType} ${this.instance.task.id}`;
-    if (eventLoopBlockMs > this.eventLoopDelayConfig.warn_threshold) {
+    if (eventLoopBlockMs > this.config.event_loop_delay.warn_threshold) {
       this.logger.warn(
         `event loop blocked for at least ${eventLoopBlockMs} ms while running task ${taskLabel}`,
         {

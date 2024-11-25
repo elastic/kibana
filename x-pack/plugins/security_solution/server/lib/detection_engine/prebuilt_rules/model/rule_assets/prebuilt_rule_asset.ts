@@ -10,9 +10,16 @@ import {
   RuleSignatureId,
   RuleVersion,
   BaseCreateProps,
-  TypeSpecificCreateProps,
+  TypeSpecificCreatePropsInternal,
 } from '../../../../../../common/api/detection_engine/model/rule_schema';
 
+function zodMaskFor<T>() {
+  return function <U extends keyof T>(props: U[]): Record<U, true> {
+    type PropObject = Record<string, boolean>;
+    const propObjects: PropObject[] = props.map((p: U) => ({ [p]: true }));
+    return Object.assign({}, ...propObjects);
+  };
+}
 /**
  * The PrebuiltRuleAsset schema is created based on the rule schema defined in our OpenAPI specs.
  * However, we don't need all the rule schema fields to be present in the PrebuiltRuleAsset.
@@ -21,6 +28,7 @@ import {
  */
 const BASE_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET = zodMaskFor<BaseCreateProps>()([
   'actions',
+  'response_actions',
   'throttle',
   'meta',
   'output_index',
@@ -30,34 +38,10 @@ const BASE_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET = zodMaskFor<BaseCreateProps>(
   'outcome',
 ]);
 
-/**
- * Aditionally remove fields which are part only of the optional fields in the rule types that make up
- * the TypeSpecificCreateProps discriminatedUnion, by using a Zod transformation which extracts out the
- * necessary fields in the rules types where they exist. Fields to extract:
- *  - response_actions: from Query and SavedQuery rules
- */
-const TypeSpecificFields = TypeSpecificCreateProps.transform((val) => {
-  switch (val.type) {
-    case 'query': {
-      const { response_actions: _, ...rest } = val;
-      return rest;
-    }
-    case 'saved_query': {
-      const { response_actions: _, ...rest } = val;
-      return rest;
-    }
-    default:
-      return val;
-  }
-});
-
-function zodMaskFor<T>() {
-  return function <U extends keyof T>(props: U[]): Record<U, true> {
-    type PropObject = Record<string, boolean>;
-    const propObjects: PropObject[] = props.map((p: U) => ({ [p]: true }));
-    return Object.assign({}, ...propObjects);
-  };
-}
+export type PrebuiltAssetBaseProps = z.infer<typeof PrebuiltAssetBaseProps>;
+export const PrebuiltAssetBaseProps = BaseCreateProps.omit(
+  BASE_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET
+);
 
 /**
  * Asset containing source content of a prebuilt Security detection rule.
@@ -75,11 +59,9 @@ function zodMaskFor<T>() {
  *  - some fields are omitted because they are not present in https://github.com/elastic/detection-rules
  */
 export type PrebuiltRuleAsset = z.infer<typeof PrebuiltRuleAsset>;
-export const PrebuiltRuleAsset = BaseCreateProps.omit(BASE_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET)
-  .and(TypeSpecificFields)
-  .and(
-    z.object({
-      rule_id: RuleSignatureId,
-      version: RuleVersion,
-    })
-  );
+export const PrebuiltRuleAsset = PrebuiltAssetBaseProps.and(TypeSpecificCreatePropsInternal).and(
+  z.object({
+    rule_id: RuleSignatureId,
+    version: RuleVersion,
+  })
+);

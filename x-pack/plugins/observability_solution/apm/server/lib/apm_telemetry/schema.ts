@@ -7,7 +7,7 @@
 
 import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 import { AggregatedTransactionsCounts, APMUsage, APMPerService, DataStreamCombined } from './types';
-import { ElasticAgentName } from '../../../typings/es_schemas/ui/fields/agent';
+import type { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 
 const aggregatedTransactionCountSchema: MakeSchemaFrom<AggregatedTransactionsCounts, true> = {
   expected_metric_document_count: {
@@ -63,7 +63,7 @@ const dataStreamCombinedSchema: MakeSchemaFrom<DataStreamCombined, true> = {
   },
 };
 
-const agentSchema: MakeSchemaFrom<APMUsage, true>['agents'][ElasticAgentName] = {
+const agentSchema: MakeSchemaFrom<APMUsage, true>['agents'][AgentName] = {
   agent: {
     version: {
       type: 'array',
@@ -264,6 +264,92 @@ const apmPerAgentSchema: Pick<MakeSchemaFrom<APMUsage, true>, 'services_per_agen
         description: 'Total number of services utilizing the otlp agent within the last day',
       },
     },
+    'otlp/cpp': {
+      type: 'long',
+      _meta: {
+        description: 'Total number of services utilizing the otlp/cpp agent within the last day',
+      },
+    },
+    'otlp/dotnet': {
+      type: 'long',
+      _meta: {
+        description: 'Total number of services utilizing the otlp/dotnet agent within the last day',
+      },
+    },
+    'otlp/erlang': {
+      type: 'long',
+      _meta: {
+        description: 'Total number of services utilizing the otlp/erlang agent within the last day',
+      },
+    },
+    'otlp/go': {
+      type: 'long',
+      _meta: {
+        description: 'Total number of services utilizing the otlp/go agent within the last day',
+      },
+    },
+    'otlp/java': {
+      type: 'long',
+      _meta: {
+        description: 'Total number of services utilizing the otlp/java agent within the last day',
+      },
+    },
+    'otlp/nodejs': {
+      type: 'long',
+      _meta: {
+        description: 'Total number of services utilizing the otlp/nodejs agent within the last day',
+      },
+    },
+    'otlp/php': {
+      type: 'long',
+      _meta: {
+        description: 'Total number of services utilizing the otlp/php agent within the last day',
+      },
+    },
+    'otlp/python': {
+      type: 'long',
+      _meta: {
+        description: 'Total number of services utilizing the otlp/python agent within the last day',
+      },
+    },
+    'otlp/ruby': {
+      type: 'long',
+      _meta: {
+        description: 'Total number of services utilizing the otlp/ruby agent within the last day',
+      },
+    },
+    'otlp/rust': {
+      type: 'long',
+      _meta: {
+        description: 'Total number of services utilizing the otlp/rust agent within the last day',
+      },
+    },
+    'otlp/swift': {
+      type: 'long',
+      _meta: {
+        description: 'Total number of services utilizing the otlp/swift agent within the last day',
+      },
+    },
+    'otlp/android': {
+      type: 'long',
+      _meta: {
+        description:
+          'Total number of services utilizing the otlp/android agent within the last day',
+      },
+    },
+    'otlp/webjs': {
+      type: 'long',
+      _meta: {
+        description: 'Total number of services utilizing the otlp/webjs agent within the last day',
+      },
+    },
+    opentelemetry: {
+      type: 'long',
+      _meta: {
+        description:
+          'Total number of services utilizing the opentelemetry agent within the last day',
+      },
+    },
     'opentelemetry/cpp': {
       type: 'long',
       _meta: {
@@ -355,6 +441,12 @@ const apmPerAgentSchema: Pick<MakeSchemaFrom<APMUsage, true>, 'services_per_agen
           'Total number of services utilizing the opentelemetry/webjs agent within the last day',
       },
     },
+    'ios/swift': {
+      type: 'long',
+      _meta: {
+        description: 'Total number of services utilizing the ios/swift agent within the last day',
+      },
+    },
   },
   agents: {
     'android/java': agentSchema,
@@ -368,6 +460,35 @@ const apmPerAgentSchema: Pick<MakeSchemaFrom<APMUsage, true>, 'services_per_agen
     python: agentSchema,
     ruby: agentSchema,
     'rum-js': agentSchema,
+    otlp: agentSchema,
+    opentelemetry: agentSchema,
+    'opentelemetry/cpp': agentSchema,
+    'opentelemetry/dotnet': agentSchema,
+    'opentelemetry/erlang': agentSchema,
+    'opentelemetry/go': agentSchema,
+    'opentelemetry/java': agentSchema,
+    'opentelemetry/nodejs': agentSchema,
+    'opentelemetry/php': agentSchema,
+    'opentelemetry/python': agentSchema,
+    'opentelemetry/ruby': agentSchema,
+    'opentelemetry/rust': agentSchema,
+    'opentelemetry/swift': agentSchema,
+    'opentelemetry/android': agentSchema,
+    'opentelemetry/webjs': agentSchema,
+    'otlp/cpp': agentSchema,
+    'otlp/dotnet': agentSchema,
+    'otlp/erlang': agentSchema,
+    'otlp/go': agentSchema,
+    'otlp/java': agentSchema,
+    'otlp/nodejs': agentSchema,
+    'otlp/php': agentSchema,
+    'otlp/python': agentSchema,
+    'otlp/ruby': agentSchema,
+    'otlp/rust': agentSchema,
+    'otlp/swift': agentSchema,
+    'otlp/android': agentSchema,
+    'otlp/webjs': agentSchema,
+    'ios/swift': agentSchema,
   },
 };
 

@@ -26,8 +26,13 @@ import { css } from '@emotion/react';
 import { AggregateQuery, getAggregateQueryMode, isOfQueryType } from '@kbn/es-query';
 import { getEditPanelAction } from '@kbn/presentation-panel-plugin/public';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
-import { FiltersNotificationActionApi } from './filters_notification_action';
+import {
+  apiCanLockHoverActions,
+  getViewModeSubject,
+  useBatchedOptionalPublishingSubjects,
+} from '@kbn/presentation-publishing';
 import { dashboardFilterNotificationActionStrings } from './_dashboard_actions_strings';
+import { FiltersNotificationActionApi } from './filters_notification_action';
 
 export function FiltersNotificationPopover({ api }: { api: FiltersNotificationActionApi }) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -57,7 +62,10 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
     }
   }, [api, setDisableEditButton]);
 
-  const dataViews = useMemo(() => api.parentApi?.getAllDataViews(), [api]);
+  const [dataViews, parentViewMode] = useBatchedOptionalPublishingSubjects(
+    api.parentApi?.dataViews,
+    getViewModeSubject(api ?? undefined)
+  );
 
   return (
     <EuiPopover
@@ -65,13 +73,23 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
         <EuiButtonIcon
           color="text"
           iconType={'filter'}
-          onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+          onClick={() => {
+            setIsPopoverOpen(!isPopoverOpen);
+            if (apiCanLockHoverActions(api)) {
+              api?.lockHoverActions(!api.hasLockedHoverActions$.value);
+            }
+          }}
           data-test-subj={`embeddablePanelNotification-${api.uuid}`}
           aria-label={displayName}
         />
       }
       isOpen={isPopoverOpen}
-      closePopover={() => setIsPopoverOpen(false)}
+      closePopover={() => {
+        setIsPopoverOpen(false);
+        if (apiCanLockHoverActions(api)) {
+          api.lockHoverActions(false);
+        }
+      }}
       anchorPosition="upCenter"
     >
       <EuiPopoverTitle>{displayName}</EuiPopoverTitle>
@@ -103,13 +121,13 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
             data-test-subj={'filtersNotificationModal__filterItems'}
           >
             <EuiFlexGroup wrap={true} gutterSize="xs">
-              <FilterItems filters={filters} indexPatterns={dataViews} readOnly={true} />
+              <FilterItems filters={filters} indexPatterns={dataViews ?? []} readOnly={true} />
             </EuiFlexGroup>
           </EuiFormRow>
         )}
       </EuiForm>
-      <EuiPopoverFooter>
-        {!disableEditbutton && (
+      {!disableEditbutton && parentViewMode === 'edit' && (
+        <EuiPopoverFooter>
           <EuiFlexGroup
             gutterSize="s"
             alignItems="center"
@@ -128,8 +146,8 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
-        )}
-      </EuiPopoverFooter>
+        </EuiPopoverFooter>
+      )}
     </EuiPopover>
   );
 }

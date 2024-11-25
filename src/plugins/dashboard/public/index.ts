@@ -17,12 +17,10 @@ export {
   DASHBOARD_GRID_COLUMN_COUNT,
   PanelPlacementStrategy,
 } from './dashboard_constants';
+export type { DashboardApi, DashboardCreationOptions } from './dashboard_api/types';
 export {
-  type DashboardAPI,
-  type AwaitingDashboardAPI,
-  DashboardRenderer,
+  LazyDashboardRenderer as DashboardRenderer,
   DASHBOARD_CONTAINER_TYPE,
-  type DashboardCreationOptions,
   type DashboardLocatorParams,
   type IProvidesLegacyPanelPlacementSettings,
 } from './dashboard_container';
@@ -32,6 +30,8 @@ export { DashboardListingTable } from './dashboard_listing';
 export { DashboardTopNav } from './dashboard_top_nav';
 export { type DashboardAppLocator, cleanEmptyKeys } from './dashboard_app/locator/locator';
 export { getDashboardLocatorParamsFromEmbeddable } from './dashboard_app/locator/get_dashboard_locator_params';
+
+export { type SearchDashboardsResponse } from './services/dashboard_content_management_service/lib/find_dashboards';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DashboardPlugin(initializerContext);

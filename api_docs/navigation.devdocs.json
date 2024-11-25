@@ -106,7 +106,9 @@
                 "section": "def-public.CoreSetup",
                 "text": "CoreSetup"
               },
-              "<object, unknown>) => ",
+              "<object, unknown>, deps: ",
+              "NavigationPublicSetupDependencies",
+              ") => ",
               {
                 "pluginId": "navigation",
                 "scope": "public",
@@ -135,6 +137,21 @@
                     "text": "CoreSetup"
                   },
                   "<object, unknown>"
+                ],
+                "path": "src/plugins/navigation/public/plugin.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "navigation",
+                "id": "def-public.NavigationPublicPlugin.setup.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "deps",
+                "description": [],
+                "signature": [
+                  "NavigationPublicSetupDependencies"
                 ],
                 "path": "src/plugins/navigation/public/plugin.tsx",
                 "deprecated": false,
@@ -299,7 +316,7 @@
             "section": "def-public.TopNavMenuBadgeProps",
             "text": "TopNavMenuBadgeProps"
           },
-          "[] | undefined; }) => JSX.Element | null"
+          "[] | undefined; }) => React.JSX.Element | null"
         ],
         "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_badges.tsx",
         "deprecated": false,
@@ -351,15 +368,7 @@
         "label": "TopNavMenuItems",
         "description": [],
         "signature": [
-          "({ config, className, }: { config: ",
-          {
-            "pluginId": "navigation",
-            "scope": "public",
-            "docId": "kibNavigationPluginApi",
-            "section": "def-public.TopNavMenuData",
-            "text": "TopNavMenuData"
-          },
-          "[] | undefined; className?: string | undefined; }) => JSX.Element | null"
+          "({ config, className, popoverBreakpoints, }: TopNavMenuItemsProps) => React.JSX.Element | null"
         ],
         "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_items.tsx",
         "deprecated": false,
@@ -370,48 +379,15 @@
             "id": "def-public.TopNavMenuItems.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  config,\n  className,\n}",
+            "label": "{\n  config,\n  className,\n  popoverBreakpoints = POPOVER_BREAKPOINTS,\n}",
             "description": [],
+            "signature": [
+              "TopNavMenuItemsProps"
+            ],
             "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_items.tsx",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "navigation",
-                "id": "def-public.TopNavMenuItems.$1.config",
-                "type": "Array",
-                "tags": [],
-                "label": "config",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "navigation",
-                    "scope": "public",
-                    "docId": "kibNavigationPluginApi",
-                    "section": "def-public.TopNavMenuData",
-                    "text": "TopNavMenuData"
-                  },
-                  "[] | undefined"
-                ],
-                "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_items.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "navigation",
-                "id": "def-public.TopNavMenuItems.$1.className",
-                "type": "string",
-                "tags": [],
-                "label": "className",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_items.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -578,7 +554,7 @@
               "ToolTipPositions",
               " | undefined; anchorProps?: (",
               "CommonProps",
-              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
+              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"subdued\" | \"accent\" | \"accentSecondary\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
               "DisambiguateSet",
               "<LabelAsNode, LabelAsString> & LabelAsString) | (",
               "CommonProps",
@@ -594,7 +570,7 @@
               "ToolTipPositions",
               " | undefined; anchorProps?: (",
               "CommonProps",
-              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
+              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"subdued\" | \"accent\" | \"accentSecondary\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
               "DisambiguateSet",
               "<LabelAsString, LabelAsNode> & ",
               "DisambiguateSet",
@@ -614,7 +590,7 @@
               "ToolTipPositions",
               " | undefined; anchorProps?: (",
               "CommonProps",
-              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
+              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"subdued\" | \"accent\" | \"accentSecondary\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
               "DisambiguateSet",
               "<LabelAsNode, LabelAsString> & LabelAsString) | (",
               "CommonProps",
@@ -632,7 +608,7 @@
               "ToolTipPositions",
               " | undefined; anchorProps?: (",
               "CommonProps",
-              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
+              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"subdued\" | \"accent\" | \"accentSecondary\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
               "DisambiguateSet",
               "<LabelAsString, LabelAsNode> & ",
               "DisambiguateSet",
@@ -652,7 +628,7 @@
               "ToolTipPositions",
               " | undefined; anchorProps?: (",
               "CommonProps",
-              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
+              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"subdued\" | \"accent\" | \"accentSecondary\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
               "DisambiguateSet",
               "<LabelAsString, LabelAsNode> & ",
               "DisambiguateSet",
@@ -672,7 +648,7 @@
               "ToolTipPositions",
               " | undefined; anchorProps?: (",
               "CommonProps",
-              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
+              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"subdued\" | \"accent\" | \"accentSecondary\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
               "DisambiguateSet",
               "<LabelAsNode, LabelAsString> & LabelAsString) | (",
               "CommonProps",
@@ -690,7 +666,7 @@
               "ToolTipPositions",
               " | undefined; anchorProps?: (",
               "CommonProps",
-              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
+              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"subdued\" | \"accent\" | \"accentSecondary\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
               "DisambiguateSet",
               "<LabelAsString, LabelAsNode> & ",
               "DisambiguateSet",
@@ -710,7 +686,7 @@
               "ToolTipPositions",
               " | undefined; anchorProps?: (",
               "CommonProps",
-              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
+              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"subdued\" | \"accent\" | \"accentSecondary\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
               "DisambiguateSet",
               "<LabelAsString, LabelAsNode> & ",
               "DisambiguateSet",
@@ -799,6 +775,20 @@
             "description": [],
             "signature": [
               "\"right\" | \"left\" | undefined"
+            ],
+            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "navigation",
+            "id": "def-public.TopNavMenuData.iconOnly",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "iconOnly",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false,
@@ -959,7 +949,7 @@
             "section": "def-public.MountPoint",
             "text": "MountPoint"
           },
-          "<HTMLElement> | undefined) => void) | undefined; }"
+          "<HTMLElement> | undefined) => void) | undefined; popoverBreakpoints?: string[] | undefined; }"
         ],
         "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx",
         "deprecated": false,
@@ -1109,7 +1099,7 @@
               "section": "def-public.TopNavMenuProps",
               "text": "TopNavMenuProps"
             },
-            "<QT>) => JSX.Element; }"
+            "<QT>) => React.JSX.Element; }"
           ],
           "path": "src/plugins/navigation/public/types.ts",
           "deprecated": false,

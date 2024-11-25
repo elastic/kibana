@@ -110,7 +110,7 @@ describe('initNavigation()', () => {
 
     beforeAll(() => {
       projectNavigation.initNavigation<any>(
-        'foo',
+        'es',
         of({
           body: [
             {
@@ -185,7 +185,7 @@ describe('initNavigation()', () => {
       const { projectNavigation: projNavigation, getNavigationTree: getNavTree } =
         setupInitNavigation();
       projNavigation.initNavigation<any>(
-        'foo',
+        'es',
         of({
           body: [
             {
@@ -210,7 +210,7 @@ describe('initNavigation()', () => {
       const { projectNavigation: projNavigation } = setupInitNavigation();
 
       projNavigation.initNavigation<any>(
-        'foo',
+        'es',
         of({
           body: [
             {
@@ -399,7 +399,7 @@ describe('initNavigation()', () => {
 
     // 2. initNavigation() is called
     projectNavigation.initNavigation<any>(
-      'foo',
+      'es',
       of({
         body: [
           {
@@ -427,7 +427,7 @@ describe('initNavigation()', () => {
     });
 
     projectNavigation.initNavigation<any>(
-      'foo',
+      'es',
       // @ts-expect-error - We pass a non valid cloudLink that is not TS valid
       of({
         body: [
@@ -533,7 +533,7 @@ describe('breadcrumbs', () => {
     const obs = subj.asObservable();
 
     if (initiateNavigation) {
-      projectNavigation.initNavigation('foo', obs);
+      projectNavigation.initNavigation('es', obs);
     }
 
     return {
@@ -740,7 +740,7 @@ describe('breadcrumbs', () => {
       { text: 'custom1', href: '/custom1' },
       { text: 'custom2', href: '/custom1/custom2' },
     ]);
-    projectNavigation.initNavigation('foo', of(mockNavigation)); // init navigation
+    projectNavigation.initNavigation('es', of(mockNavigation)); // init navigation
 
     const breadcrumbs = await firstValueFrom(projectNavigation.getProjectBreadcrumbs$());
     expect(breadcrumbs).toHaveLength(4);
@@ -779,7 +779,7 @@ describe('getActiveNodes$()', () => {
     expect(activeNodes).toEqual([]);
 
     projectNavigation.initNavigation<any>(
-      'foo',
+      'es',
       of({
         body: [
           {
@@ -835,7 +835,7 @@ describe('getActiveNodes$()', () => {
     expect(activeNodes).toEqual([]);
 
     projectNavigation.initNavigation<any>(
-      'foo',
+      'es',
       of({
         body: [
           {
@@ -889,7 +889,7 @@ describe('getActiveNodes$()', () => {
 
 describe('solution navigations', () => {
   const solution1: SolutionNavigationDefinition<any> = {
-    id: 'solution1',
+    id: 'es',
     title: 'Solution 1',
     icon: 'logoSolution1',
     homePage: 'discover',
@@ -897,7 +897,7 @@ describe('solution navigations', () => {
   };
 
   const solution2: SolutionNavigationDefinition<any> = {
-    id: 'solution2',
+    id: 'oblt',
     title: 'Solution 2',
     icon: 'logoSolution2',
     homePage: 'app2',
@@ -906,7 +906,7 @@ describe('solution navigations', () => {
   };
 
   const solution3: SolutionNavigationDefinition<any> = {
-    id: 'solution3',
+    id: 'security',
     title: 'Solution 3',
     icon: 'logoSolution3',
     homePage: 'discover',
@@ -943,30 +943,30 @@ describe('solution navigations', () => {
     }
 
     {
-      projectNavigation.updateSolutionNavigations({ 1: solution1, 2: solution2 });
+      projectNavigation.updateSolutionNavigations({ es: solution1, oblt: solution2 });
 
       const solutionNavs = await lastValueFrom(
         projectNavigation.getSolutionsNavDefinitions$().pipe(take(1))
       );
-      expect(solutionNavs).toEqual({ 1: solution1, 2: solution2 });
+      expect(solutionNavs).toEqual({ es: solution1, oblt: solution2 });
     }
 
     {
       // Test partial update
-      projectNavigation.updateSolutionNavigations({ 3: solution3 }, false);
+      projectNavigation.updateSolutionNavigations({ security: solution3 }, false);
       const solutionNavs = await lastValueFrom(
         projectNavigation.getSolutionsNavDefinitions$().pipe(take(1))
       );
-      expect(solutionNavs).toEqual({ 1: solution1, 2: solution2, 3: solution3 });
+      expect(solutionNavs).toEqual({ es: solution1, oblt: solution2, security: solution3 });
     }
 
     {
       // Test full replacement
-      projectNavigation.updateSolutionNavigations({ 4: solution3 }, true);
+      projectNavigation.updateSolutionNavigations({ security: solution3 }, true);
       const solutionNavs = await lastValueFrom(
         projectNavigation.getSolutionsNavDefinitions$().pipe(take(1))
       );
-      expect(solutionNavs).toEqual({ 4: solution3 });
+      expect(solutionNavs).toEqual({ security: solution3 });
     }
   });
 
@@ -980,8 +980,8 @@ describe('solution navigations', () => {
       expect(activeSolution).toBeNull();
     }
 
-    projectNavigation.changeActiveSolutionNavigation('2'); // Set **before** the navs are registered
-    projectNavigation.updateSolutionNavigations({ 1: solution1, 2: solution2 });
+    projectNavigation.changeActiveSolutionNavigation('oblt'); // Set **before** the navs are registered
+    projectNavigation.updateSolutionNavigations({ es: solution1, oblt: solution2 });
 
     {
       const activeSolution = await lastValueFrom(
@@ -994,13 +994,78 @@ describe('solution navigations', () => {
       expect(activeSolution).toEqual(rest);
     }
 
-    projectNavigation.changeActiveSolutionNavigation('1'); // Set **after** the navs are registered
+    projectNavigation.changeActiveSolutionNavigation('es'); // Set **after** the navs are registered
 
     {
       const activeSolution = await lastValueFrom(
         projectNavigation.getActiveSolutionNavDefinition$().pipe(take(1))
       );
       expect(activeSolution).toEqual(solution1);
+    }
+  });
+
+  it('should set and return the nav panel selected node', async () => {
+    const { projectNavigation } = setup({ navLinkIds: ['link1', 'link2', 'link3'] });
+
+    {
+      const selectedNode = await firstValueFrom(projectNavigation.getPanelSelectedNode$());
+      expect(selectedNode).toBeNull();
+    }
+
+    {
+      const node: ChromeProjectNavigationNode = {
+        id: 'node1',
+        title: 'Node 1',
+        path: 'node1',
+      };
+      projectNavigation.setPanelSelectedNode(node);
+
+      const selectedNode = await firstValueFrom(projectNavigation.getPanelSelectedNode$());
+
+      expect(selectedNode).toBe(node);
+    }
+
+    {
+      const fooSolution: SolutionNavigationDefinition<any> = {
+        id: 'es',
+        title: 'Foo solution',
+        icon: 'logoSolution',
+        homePage: 'discover',
+        navigationTree$: of({
+          body: [
+            {
+              type: 'navGroup',
+              id: 'group1',
+              children: [
+                { link: 'link1' },
+                {
+                  id: 'group2',
+                  children: [
+                    {
+                      link: 'link2', // We'll target this node using its id
+                    },
+                  ],
+                },
+                { link: 'link3' },
+              ],
+            },
+          ],
+        }),
+      };
+
+      projectNavigation.changeActiveSolutionNavigation('es');
+      projectNavigation.updateSolutionNavigations({ es: fooSolution });
+
+      projectNavigation.setPanelSelectedNode('link2'); // Set the selected node using its id
+
+      const selectedNode = await firstValueFrom(projectNavigation.getPanelSelectedNode$());
+
+      expect(selectedNode).toMatchObject({
+        id: 'link2',
+        href: '/app/link2',
+        path: 'group1.group2.link2',
+        title: 'LINK2',
+      });
     }
   });
 });

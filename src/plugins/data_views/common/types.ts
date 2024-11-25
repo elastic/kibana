@@ -173,10 +173,7 @@ export interface DataViewAttributes {
  * @public
  * Storage of field attributes. Necessary since the field list isn't saved.
  */
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type FieldAttrs = {
-  [key: string]: FieldAttrSet;
-};
+export type FieldAttrs = Map<string, FieldAttrSet>;
 
 /**
  * Field attributes that are stored on the data view
@@ -197,6 +194,8 @@ export type FieldAttrSet = {
    */
   count?: number;
 };
+
+export type FieldAttrsAsObject = Record<string, FieldAttrSet>;
 
 /**
  * Handler for data view notifications
@@ -537,7 +536,7 @@ export type DataViewSpec = {
   /**
    * Map of field attributes by field name, currently customName and count
    */
-  fieldAttrs?: FieldAttrs;
+  fieldAttrs?: FieldAttrsAsObject;
   /**
    * Determines whether failure to load field list should be reported as error
    */
@@ -572,4 +571,5 @@ export interface ClientConfigType {
   scriptedFieldsEnabled?: boolean;
   dataTiersExcludedForFields?: string;
   fieldListCachingEnabled?: boolean;
+  hasEsDataTimeout: number;
 }

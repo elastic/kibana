@@ -8733,7 +8733,7 @@
             "label": "renderingMode",
             "description": [],
             "signature": [
-              "\"2d\" | \"3d\" | undefined"
+              "\"3d\" | \"2d\" | undefined"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,

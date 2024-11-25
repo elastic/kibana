@@ -22,6 +22,8 @@ import { alertsClientMock } from '../alerts_client.mock';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { legacyAlertsClientMock } from '../legacy_alerts_client.mock';
 import { initializeAlertsClient, RuleData } from './initialize_alerts_client';
+import { maintenanceWindowsServiceMock } from '../../task_runner/maintenance_windows/maintenance_windows_service.mock';
+import { KibanaRequest } from '@kbn/core/server';
 
 const alertingEventLogger = alertingEventLoggerMock.create();
 const ruleRunMetricsStore = ruleRunMetricsStoreMock.create();
@@ -29,6 +31,23 @@ const alertsService = alertsServiceMock.create();
 const alertsClient = alertsClientMock.create();
 const legacyAlertsClient = legacyAlertsClientMock.create();
 const logger = loggingSystemMock.create().get();
+const maintenanceWindowsService = maintenanceWindowsServiceMock.create();
+
+const fakeRequest = {
+  headers: {},
+  getBasePath: () => '',
+  path: '/',
+  route: { settings: {} },
+  url: {
+    href: '/',
+  },
+  raw: {
+    req: {
+      url: '/',
+    },
+  },
+  getSavedObjectsClient: jest.fn(),
+} as unknown as KibanaRequest;
 
 const ruleTypeWithAlerts: jest.Mocked<UntypedNormalizedRuleType> = {
   ...ruleType,
@@ -75,6 +94,8 @@ describe('initializeAlertsClient', () => {
       context: {
         alertingEventLogger,
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        maintenanceWindowsService,
+        request: fakeRequest,
         ruleId: RULE_ID,
         ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
         ruleRunMetricsStore,
@@ -90,9 +111,13 @@ describe('initializeAlertsClient', () => {
     });
 
     expect(alertsService.createAlertsClient).toHaveBeenCalledWith({
+      alertingEventLogger,
       logger,
+      request: fakeRequest,
       ruleType: ruleTypeWithAlerts,
+      maintenanceWindowsService,
       namespace: 'default',
+      spaceId: 'default',
       rule: {
         alertDelay: 0,
         consumer: 'bar',
@@ -128,6 +153,8 @@ describe('initializeAlertsClient', () => {
       alertsService,
       context: {
         alertingEventLogger,
+        maintenanceWindowsService,
+        request: fakeRequest,
         ruleId: RULE_ID,
         ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
         ruleRunMetricsStore,
@@ -143,9 +170,13 @@ describe('initializeAlertsClient', () => {
     });
 
     expect(alertsService.createAlertsClient).toHaveBeenCalledWith({
+      alertingEventLogger,
       logger,
+      request: fakeRequest,
       ruleType: ruleTypeWithAlerts,
+      maintenanceWindowsService,
       namespace: 'default',
+      spaceId: 'default',
       rule: {
         alertDelay: 0,
         consumer: 'bar',
@@ -182,6 +213,8 @@ describe('initializeAlertsClient', () => {
       context: {
         alertingEventLogger,
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        maintenanceWindowsService,
+        request: fakeRequest,
         ruleId: RULE_ID,
         ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
         ruleRunMetricsStore,
@@ -197,9 +230,13 @@ describe('initializeAlertsClient', () => {
     });
 
     expect(alertsService.createAlertsClient).toHaveBeenCalledWith({
+      alertingEventLogger,
       logger,
+      request: fakeRequest,
       ruleType: ruleTypeWithAlerts,
+      maintenanceWindowsService,
       namespace: 'default',
+      spaceId: 'default',
       rule: {
         alertDelay: 0,
         consumer: 'bar',
@@ -215,8 +252,12 @@ describe('initializeAlertsClient', () => {
       },
     });
     expect(LegacyAlertsClientModule.LegacyAlertsClient).toHaveBeenCalledWith({
+      alertingEventLogger,
       logger,
+      request: fakeRequest,
       ruleType: ruleTypeWithAlerts,
+      spaceId: 'default',
+      maintenanceWindowsService,
     });
     expect(legacyAlertsClient.initializeExecution).toHaveBeenCalledWith({
       activeAlertsFromState: {},
@@ -241,6 +282,8 @@ describe('initializeAlertsClient', () => {
       context: {
         alertingEventLogger,
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        maintenanceWindowsService,
+        request: fakeRequest,
         ruleId: RULE_ID,
         ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
         ruleRunMetricsStore,
@@ -256,9 +299,13 @@ describe('initializeAlertsClient', () => {
     });
 
     expect(alertsService.createAlertsClient).toHaveBeenCalledWith({
+      alertingEventLogger,
       logger,
+      request: fakeRequest,
       ruleType: ruleTypeWithAlerts,
+      maintenanceWindowsService,
       namespace: 'default',
+      spaceId: 'default',
       rule: {
         alertDelay: 0,
         consumer: 'bar',
@@ -274,8 +321,12 @@ describe('initializeAlertsClient', () => {
       },
     });
     expect(LegacyAlertsClientModule.LegacyAlertsClient).toHaveBeenCalledWith({
+      alertingEventLogger,
       logger,
+      request: fakeRequest,
       ruleType: ruleTypeWithAlerts,
+      spaceId: 'default',
+      maintenanceWindowsService,
     });
     expect(logger.error).toHaveBeenCalledWith(
       `Error initializing AlertsClient for context test. Using legacy alerts client instead. - fail fail`

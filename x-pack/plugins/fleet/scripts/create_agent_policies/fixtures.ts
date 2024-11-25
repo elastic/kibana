@@ -8,11 +8,13 @@
 export const packagePolicyFixture = ({
   agentPolicyId,
   idx,
+  space,
 }: {
   idx: number;
   agentPolicyId: string;
+  space: string;
 }) => ({
-  'ingest-package-policies': {
+  'fleet-package-policies': {
     name: `system-test-${idx}`,
     namespace: '',
     description: '',
@@ -790,11 +792,12 @@ export const packagePolicyFixture = ({
     updated_at: '2024-08-30T13:45:51.197Z',
     updated_by: 'system',
   },
-  type: 'ingest-package-policies',
+  namespaces: [space],
+  type: 'fleet-package-policies',
   references: [],
   managed: false,
   coreMigrationVersion: '8.8.0',
-  typeMigrationVersion: '10.14.0',
+  typeMigrationVersion: '10.1.0',
   updated_at: '2024-08-30T13:45:51.197Z',
   created_at: '2024-08-30T13:45:51.197Z',
 });

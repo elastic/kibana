@@ -38,9 +38,13 @@ export const useConversationsTable = () => {
   const getActions = useInlineActions<ConversationTableItem>();
   const getColumns = useCallback(
     ({
+      isDeleteEnabled,
+      isEditEnabled,
       onDeleteActionClicked,
       onEditActionClicked,
     }: {
+      isDeleteEnabled: (conversation: ConversationTableItem) => boolean;
+      isEditEnabled: (conversation: ConversationTableItem) => boolean;
       onDeleteActionClicked: (conversation: ConversationTableItem) => void;
       onEditActionClicked: (conversation: ConversationTableItem) => void;
     }): Array<EuiBasicTableColumn<ConversationTableItem>> => {
@@ -91,6 +95,8 @@ export const useConversationsTable = () => {
           width: '120px',
           align: 'center',
           ...getActions({
+            isDeleteEnabled,
+            isEditEnabled,
             onDelete: onDeleteActionClicked,
             onEdit: onEditActionClicked,
           }),

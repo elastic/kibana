@@ -9,7 +9,7 @@
 
 import { chunk } from 'lodash';
 import { Key } from 'selenium-webdriver';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { WebElementWrapper, CustomCheerioStatic } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
 export interface TabbedGridData {
@@ -34,12 +34,10 @@ export class DataGridService extends FtrService {
     const table = await this.find.byCssSelector('.euiDataGrid');
     const $ = await table.parseDomContent();
 
-    const columns = $('.euiDataGridHeaderCell__content')
-      .toArray()
-      .map((cell) => $(cell).text());
+    const columns = this.getHeaderText($);
     const cells = $.findTestSubjects('dataGridRowCell')
       .toArray()
-      .map((cell) => $(cell).text());
+      .map((cell) => $(cell).find('.euiDataGridRowCell__content').text());
 
     const rows = chunk(cells, columns.length);
 
@@ -59,7 +57,7 @@ export class DataGridService extends FtrService {
     cellDataTestSubj: string
   ): Promise<string[][]> {
     const $ = await element.parseDomContent();
-    const columnNumber = $('.euiDataGridHeaderCell__content').length;
+    const columnNumber = $('.euiDataGridHeaderCell').length;
     const cells = $.findTestSubjects('dataGridRowCell')
       .toArray()
       .map((cell) =>
@@ -76,12 +74,25 @@ export class DataGridService extends FtrService {
   /**
    * Returns an array of data grid headers names
    */
+  public getHeaderText(parsedDomContent: CustomCheerioStatic) {
+    const $ = parsedDomContent;
+    return $('.euiDataGridHeaderCell')
+      .toArray()
+      .map((cell) => {
+        const content = $(cell).find('.euiDataGridHeaderCell__content');
+        if (content.length) {
+          return content.text();
+        } else {
+          // Control columns will need hidden text manually stripped
+          $(cell).find('[hidden], [data-tabular-copy-marker]').remove();
+          return $(cell).text();
+        }
+      });
+  }
+
   public async getHeaders() {
     const header = await this.testSubjects.find('euiDataGridBody > dataGridHeader');
-    const $ = await header.parseDomContent();
-    return $('.euiDataGridHeaderCell__content')
-      .toArray()
-      .map((cell) => $(cell).text());
+    return this.getHeaderText(await header.parseDomContent());
   }
 
   public getHeaderElement(field: string) {
@@ -91,9 +102,38 @@ export class DataGridService extends FtrService {
   public async resizeColumn(field: string, delta: number) {
     const header = await this.getHeaderElement(field);
     const originalWidth = (await header.getSize()).width;
-    const resizer = await header.findByCssSelector(
-      this.testSubjects.getCssSelector('dataGridColumnResizer')
-    );
+
+    let resizer: WebElementWrapper | undefined;
+
+    if (await this.testSubjects.exists('euiDataGridHeaderDroppable')) {
+      // if drag & drop is enabled for data grid columns
+      const headerDraggableColumns = await this.find.allByCssSelector(
+        '[data-test-subj="euiDataGridHeaderDroppable"] > div'
+      );
+      // searching for a common parent of the field column header and its resizer
+      const fieldHeader: WebElementWrapper | null | undefined = (
+        await Promise.all(
+          headerDraggableColumns.map(async (column) => {
+            const hasFieldColumn =
+              (await column.findAllByCssSelector(`[data-gridcell-column-id="${field}"]`)).length >
+              0;
+            return hasFieldColumn ? column : null;
+          })
+        )
+      ).find(Boolean);
+
+      resizer = await fieldHeader?.findByTestSubject('dataGridColumnResizer');
+    } else {
+      // if drag & drop is not enabled for data grid columns
+      resizer = await header.findByCssSelector(
+        this.testSubjects.getCssSelector('dataGridColumnResizer')
+      );
+    }
+
+    if (!resizer) {
+      throw new Error(`Unable to find column resizer for field ${field}`);
+    }
+
     await this.browser.dragAndDrop({ location: resizer }, { location: { x: delta, y: 0 } });
     return { originalWidth, newWidth: (await header.getSize()).width };
   }
@@ -126,14 +166,23 @@ export class DataGridService extends FtrService {
     );
   }
 
+  public async getCellElementByColumnName(rowIndex: number, columnName: string) {
+    return await this.find.byCssSelector(
+      `[data-test-subj="euiDataGridBody"] [data-test-subj="dataGridRowCell"][data-gridcell-column-id="${columnName}"][data-gridcell-visible-row-index="${rowIndex}"]`
+    );
+  }
+
   private async getCellActionButton(
     rowIndex: number = 0,
-    columnIndex: number = 0,
+    { columnIndex = 0, columnName }: { columnIndex?: number; columnName?: string },
     selector: string
   ): Promise<WebElementWrapper> {
     let actionButton: WebElementWrapper | undefined;
     await this.retry.try(async () => {
-      const cell = await this.getCellElement(rowIndex, columnIndex);
+      const cell = columnName
+        ? await this.getCellElementByColumnName(rowIndex, columnName)
+        : await this.getCellElement(rowIndex, columnIndex);
+      await cell.moveMouseTo();
       await cell.click();
       actionButton = await cell.findByTestSubject(selector);
       if (!actionButton) {
@@ -147,13 +196,18 @@ export class DataGridService extends FtrService {
    * Clicks grid cell 'expand' action button
    * @param rowIndex data row index starting from 0 (0 means 1st row)
    * @param columnIndex column index starting from 0 (0 means 1st column)
+   * @param columnName column/field name
    */
-  public async clickCellExpandButton(rowIndex: number = 0, columnIndex: number = 0) {
+  public async clickCellExpandButton(
+    rowIndex: number = 0,
+    { columnIndex = 0, columnName }: { columnIndex?: number; columnName?: string }
+  ) {
     const actionButton = await this.getCellActionButton(
       rowIndex,
-      columnIndex,
+      { columnIndex, columnName },
       'euiDataGridCellExpandButton'
     );
+    await actionButton.moveMouseTo();
     await actionButton.click();
     await this.retry.waitFor('popover to be opened', async () => {
       return await this.testSubjects.exists('euiDataGridExpansionPopover');
@@ -170,7 +224,7 @@ export class DataGridService extends FtrService {
     columnIndex: number = 0
   ) {
     const controlsCount = await this.getControlColumnsCount();
-    await this.clickCellExpandButton(rowIndex, controlsCount + columnIndex);
+    await this.clickCellExpandButton(rowIndex, { columnIndex: controlsCount + columnIndex });
   }
 
   /**
@@ -196,7 +250,12 @@ export class DataGridService extends FtrService {
    * @param columnIndex column index starting from 0 (0 means 1st column)
    */
   public async clickCellFilterForButton(rowIndex: number = 0, columnIndex: number = 0) {
-    const actionButton = await this.getCellActionButton(rowIndex, columnIndex, 'filterForButton');
+    const actionButton = await this.getCellActionButton(
+      rowIndex,
+      { columnIndex },
+      'filterForButton'
+    );
+    await actionButton.moveMouseTo();
     await actionButton.click();
   }
 
@@ -212,14 +271,20 @@ export class DataGridService extends FtrService {
     const controlsCount = await this.getControlColumnsCount();
     const actionButton = await this.getCellActionButton(
       rowIndex,
-      controlsCount + columnIndex,
+      { columnIndex: controlsCount + columnIndex },
       'filterForButton'
     );
+    await actionButton.moveMouseTo();
     await actionButton.click();
   }
 
   public async clickCellFilterOutButton(rowIndex: number = 0, columnIndex: number = 0) {
-    const actionButton = await this.getCellActionButton(rowIndex, columnIndex, 'filterOutButton');
+    const actionButton = await this.getCellActionButton(
+      rowIndex,
+      { columnIndex },
+      'filterOutButton'
+    );
+    await actionButton.moveMouseTo();
     await actionButton.click();
   }
 
@@ -230,9 +295,10 @@ export class DataGridService extends FtrService {
     const controlsCount = await this.getControlColumnsCount();
     const actionButton = await this.getCellActionButton(
       rowIndex,
-      controlsCount + columnIndex,
+      { columnIndex: controlsCount + columnIndex },
       'filterOutButton'
     );
+    await actionButton.moveMouseTo();
     await actionButton.click();
   }
 
@@ -351,7 +417,7 @@ export class DataGridService extends FtrService {
   }
 
   public async clickRowToggle(
-    { defaultTabId, ...options }: SelectOptions & { defaultTabId?: string } = {
+    { defaultTabId, ...options }: SelectOptions & { defaultTabId?: string | false } = {
       isAnchorRow: false,
       rowIndex: 0,
     }
@@ -374,6 +440,7 @@ export class DataGridService extends FtrService {
 
     if (toggle) {
       await toggle.scrollIntoViewIfNecessary();
+      await toggle.moveMouseTo();
       await toggle.click();
       await this.retry.waitFor('doc viewer to open', async () => {
         return this.isShowingDocViewer();
@@ -382,7 +449,9 @@ export class DataGridService extends FtrService {
       throw new Error('Unable to find row toggle element');
     }
 
-    await this.clickDocViewerTab(defaultTabId ?? 'doc_view_table');
+    if (defaultTabId !== false) {
+      await this.clickDocViewerTab(defaultTabId ?? 'doc_view_table');
+    }
   }
 
   public async isShowingDocViewer() {
@@ -402,9 +471,7 @@ export class DataGridService extends FtrService {
   }
 
   public async getHeaderFields(): Promise<string[]> {
-    const result = await this.find.allByCssSelector(
-      '.euiDataGridHeaderCell:not(.euiDataGridHeaderCell--controlColumn) .euiDataGridHeaderCell__content'
-    );
+    const result = await this.find.allByCssSelector('.euiDataGridHeaderCell__content');
 
     const textArr = [];
     for (const cell of result) {
@@ -415,9 +482,7 @@ export class DataGridService extends FtrService {
   }
 
   public async getControlColumnHeaderFields(): Promise<string[]> {
-    const result = await this.find.allByCssSelector(
-      '.euiDataGridHeaderCell--controlColumn .euiDataGridHeaderCell__content'
-    );
+    const result = await this.find.allByCssSelector('.euiDataGridHeaderCell--controlColumn');
 
     const textArr = [];
     for (const cell of result) {
@@ -628,7 +693,9 @@ export class DataGridService extends FtrService {
     const cellSelector = ['addFilterForValueButton', 'addFilterOutValueButton'].includes(actionName)
       ? `tableDocViewRow-${fieldName}-value`
       : `tableDocViewRow-${fieldName}-name`;
+    await this.testSubjects.moveMouseTo(cellSelector);
     await this.testSubjects.click(cellSelector);
+
     await this.retry.waitFor('grid cell actions to appear', async () => {
       return this.testSubjects.exists(`${actionName}-${fieldName}`);
     });
@@ -636,7 +703,10 @@ export class DataGridService extends FtrService {
 
   public async clickFieldActionInFlyout(fieldName: string, actionName: string): Promise<void> {
     await this.showFieldCellActionInFlyout(fieldName, actionName);
-    await this.testSubjects.click(`${actionName}-${fieldName}`);
+
+    const actionSelector = `${actionName}-${fieldName}`;
+    await this.testSubjects.moveMouseTo(actionSelector);
+    await this.testSubjects.click(actionSelector);
   }
 
   public async isFieldPinnedInFlyout(fieldName: string): Promise<boolean> {
@@ -658,11 +728,14 @@ export class DataGridService extends FtrService {
   }
 
   public async expandFieldNameCellInFlyout(fieldName: string): Promise<void> {
+    const cellSelector = `tableDocViewRow-${fieldName}-name`;
     const buttonSelector = 'euiDataGridCellExpandButton';
-    await this.testSubjects.click(`tableDocViewRow-${fieldName}-name`);
+    await this.testSubjects.moveMouseTo(cellSelector);
+    await this.testSubjects.click(cellSelector);
     await this.retry.waitFor('grid cell actions to appear', async () => {
       return this.testSubjects.exists(buttonSelector);
     });
+    await this.testSubjects.moveMouseTo(buttonSelector);
     await this.testSubjects.click(buttonSelector);
   }
 
@@ -689,12 +762,21 @@ export class DataGridService extends FtrService {
     await this.checkCurrentRowsPerPageToBe(newValue);
   }
 
-  public async selectRow(rowIndex: number) {
+  public async selectRow(rowIndex: number, { pressShiftKey }: { pressShiftKey?: boolean } = {}) {
     const checkbox = await this.find.byCssSelector(
       `.euiDataGridRow[data-grid-visible-row-index="${rowIndex}"] [data-gridcell-column-id="select"] .euiCheckbox__input`
     );
 
-    await checkbox.click();
+    if (pressShiftKey) {
+      await this.browser
+        .getActions()
+        .keyDown(Key.SHIFT)
+        .click(checkbox._webElement)
+        .keyUp(Key.SHIFT)
+        .perform();
+    } else {
+      await checkbox.click();
+    }
   }
 
   public async getNumberOfSelectedRows() {

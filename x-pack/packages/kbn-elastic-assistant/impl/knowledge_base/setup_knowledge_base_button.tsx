@@ -6,23 +6,30 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiButton, EuiToolTip } from '@elastic/eui';
+import { EuiButton, EuiButtonIcon, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { css } from '@emotion/react';
 import { useAssistantContext } from '../..';
 import { useSetupKnowledgeBase } from '../assistant/api/knowledge_base/use_setup_knowledge_base';
 import { useKnowledgeBaseStatus } from '../assistant/api/knowledge_base/use_knowledge_base_status';
 
-const ESQL_RESOURCE = 'esql';
+interface Props {
+  display?: 'mini' | 'refresh';
+}
 
 /**
  * Self-contained component that renders a button to set up the knowledge base.
  *
  */
-export const SetupKnowledgeBaseButton: React.FC = React.memo(() => {
-  const { http, toasts } = useAssistantContext();
+export const SetupKnowledgeBaseButton: React.FC<Props> = React.memo(({ display }: Props) => {
+  const {
+    http,
+    toasts,
+    assistantAvailability: { isAssistantEnabled },
+  } = useAssistantContext();
 
-  const { data: kbStatus } = useKnowledgeBaseStatus({ http, resource: ESQL_RESOURCE });
+  const { data: kbStatus } = useKnowledgeBaseStatus({ http, enabled: isAssistantEnabled });
   const { mutate: setupKB, isLoading: isSettingUpKB } = useSetupKnowledgeBase({ http, toasts });
 
   const isSetupInProgress = kbStatus?.is_setup_in_progress || isSettingUpKB;
@@ -30,10 +37,10 @@ export const SetupKnowledgeBaseButton: React.FC = React.memo(() => {
     kbStatus?.elser_exists &&
     kbStatus?.index_exists &&
     kbStatus?.pipeline_exists &&
-    kbStatus?.esql_exists;
+    kbStatus?.security_labs_exists;
 
   const onInstallKnowledgeBase = useCallback(() => {
-    setupKB(ESQL_RESOURCE);
+    setupKB();
   }, [setupKB]);
 
   if (isSetupComplete) {
@@ -46,21 +53,54 @@ export const SetupKnowledgeBaseButton: React.FC = React.memo(() => {
       })
     : undefined;
 
-  return (
-    <EuiToolTip position={'bottom'} content={toolTipContent}>
-      <EuiButton
+  if (display === 'refresh') {
+    return (
+      <EuiButtonIcon
         color="primary"
         data-test-subj="setup-knowledge-base-button"
-        fill
         disabled={!kbStatus?.is_setup_available}
         isLoading={isSetupInProgress}
-        iconType="importAction"
+        iconType="refresh"
         onClick={onInstallKnowledgeBase}
-      >
-        {i18n.translate('xpack.elasticAssistant.knowledgeBase.installKnowledgeBaseButton', {
-          defaultMessage: 'Setup Knowledge Base',
-        })}
-      </EuiButton>
+        size="xs"
+        css={css`
+          margin-left: 8px;
+        `}
+      />
+    );
+  }
+
+  return (
+    <EuiToolTip position={'bottom'} content={toolTipContent}>
+      {display === 'mini' ? (
+        <EuiButtonEmpty
+          color="primary"
+          data-test-subj="setup-knowledge-base-button"
+          disabled={!kbStatus?.is_setup_available}
+          isLoading={isSetupInProgress}
+          iconType="importAction"
+          onClick={onInstallKnowledgeBase}
+          size={'xs'}
+        >
+          {i18n.translate('xpack.elasticAssistant.knowledgeBase.installKnowledgeBaseButton', {
+            defaultMessage: 'Setup Knowledge Base',
+          })}
+        </EuiButtonEmpty>
+      ) : (
+        <EuiButton
+          color="primary"
+          data-test-subj="setup-knowledge-base-button"
+          fill
+          disabled={!kbStatus?.is_setup_available}
+          isLoading={isSetupInProgress}
+          iconType="importAction"
+          onClick={onInstallKnowledgeBase}
+        >
+          {i18n.translate('xpack.elasticAssistant.knowledgeBase.installKnowledgeBaseButton', {
+            defaultMessage: 'Setup Knowledge Base',
+          })}
+        </EuiButton>
+      )}
     </EuiToolTip>
   );
 });

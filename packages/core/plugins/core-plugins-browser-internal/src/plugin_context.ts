@@ -82,6 +82,7 @@ export function createPluginSetupContext<
     },
     customBranding: deps.customBranding,
     fatalErrors: deps.fatalErrors,
+    featureFlags: deps.featureFlags,
     executionContext: deps.executionContext,
     http: {
       ...deps.http,
@@ -142,11 +143,13 @@ export function createPluginStartContext<
       navigateToApp: deps.application.navigateToApp,
       navigateToUrl: deps.application.navigateToUrl,
       getUrlForApp: deps.application.getUrlForApp,
+      isAppRegistered: deps.application.isAppRegistered,
       currentLocation$: deps.application.currentLocation$,
     },
     customBranding: deps.customBranding,
     docLinks: deps.docLinks,
     executionContext: deps.executionContext,
+    featureFlags: deps.featureFlags,
     http: {
       ...deps.http,
       staticAssets: {

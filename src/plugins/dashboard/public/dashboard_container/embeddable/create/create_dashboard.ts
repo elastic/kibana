@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { cloneDeep, omit } from 'lodash';
+import { Subject } from 'rxjs';
+import { v4 } from 'uuid';
+
+import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
 import { GlobalQueryStateFromUrl, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { TimeRange } from '@kbn/es-query';
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
-import { cloneDeep, omit } from 'lodash';
-import { Subject } from 'rxjs';
-import { v4 } from 'uuid';
+
 import {
   DashboardContainerInput,
   DashboardPanelMap,
@@ -27,20 +30,26 @@ import {
   PanelPlacementStrategy,
 } from '../../../dashboard_constants';
 import {
+  PANELS_CONTROL_GROUP_KEY,
+  getDashboardBackupService,
+} from '../../../services/dashboard_backup_service';
+import { getDashboardContentManagementService } from '../../../services/dashboard_content_management_service';
+import {
   LoadDashboardReturn,
   SavedDashboardInput,
-} from '../../../services/dashboard_content_management/types';
-import { pluginServices } from '../../../services/plugin_services';
+} from '../../../services/dashboard_content_management_service/types';
+import { coreServices, dataService, embeddableService } from '../../../services/kibana_services';
+import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { runPanelPlacementStrategy } from '../../panel_placement/place_new_panel_strategies';
 import { startDiffingDashboardState } from '../../state/diffing/dashboard_diffing_integration';
-import { DashboardPublicState, UnsavedPanelState } from '../../types';
+import { UnsavedPanelState } from '../../types';
 import { DashboardContainer } from '../dashboard_container';
-import { DashboardCreationOptions } from '../dashboard_container_factory';
+import type { DashboardCreationOptions } from '../../..';
 import { startSyncingDashboardDataViews } from './data_views/sync_dashboard_data_views';
 import { startQueryPerformanceTracking } from './performance/query_performance_tracking';
 import { startDashboardSearchSessionIntegration } from './search_sessions/start_dashboard_search_session_integration';
 import { syncUnifiedSearchState } from './unified_search/sync_dashboard_unified_search_state';
-import { PANELS_CONTROL_GROUP_KEY } from '../../../services/dashboard_backup/dashboard_backup_service';
+import { InitialComponentState } from '../../../dashboard_api/get_dashboard_api';
 
 /**
  * Builds a new Dashboard from scratch.
@@ -50,11 +59,6 @@ export const createDashboard = async (
   dashboardCreationStartTime?: number,
   savedObjectId?: string
 ): Promise<DashboardContainer | undefined> => {
-  const {
-    data: { dataViews },
-    dashboardContentManagement: { loadDashboardState },
-  } = pluginServices.getServices();
-
   // --------------------------------------------------------------------------------------
   // Create method which allows work to be done on the dashboard container when it's ready.
   // --------------------------------------------------------------------------------------
@@ -71,8 +75,11 @@ export const createDashboard = async (
   // Lazy load required systems and Dashboard saved object.
   // --------------------------------------------------------------------------------------
   const reduxEmbeddablePackagePromise = lazyLoadReduxToolsPackage();
-  const defaultDataViewExistsPromise = dataViews.defaultDataViewExists();
-  const dashboardSavedObjectPromise = loadDashboardState({ id: savedObjectId });
+  const defaultDataViewExistsPromise = dataService.dataViews.defaultDataViewExists();
+  const dashboardContentManagementService = getDashboardContentManagementService();
+  const dashboardSavedObjectPromise = dashboardContentManagementService.loadDashboardState({
+    id: savedObjectId,
+  });
 
   const [reduxEmbeddablePackage, savedObjectResult] = await Promise.all([
     reduxEmbeddablePackagePromise,
@@ -94,17 +101,16 @@ export const createDashboard = async (
   // --------------------------------------------------------------------------------------
   // Build the dashboard container.
   // --------------------------------------------------------------------------------------
-  const initialComponentState: DashboardPublicState = {
+  const initialComponentState: InitialComponentState = {
+    anyMigrationRun: savedObjectResult.anyMigrationRun ?? false,
+    isEmbeddedExternally: creationOptions?.isEmbeddedExternally ?? false,
     lastSavedInput: omit(savedObjectResult?.dashboardInput, 'controlGroupInput') ?? {
       ...DEFAULT_DASHBOARD_INPUT,
       id: input.id,
     },
-    hasRunClientsideMigrations: savedObjectResult.anyMigrationRun,
-    isEmbeddedExternally: creationOptions?.isEmbeddedExternally,
-    animatePanelTransforms: false, // set panel transforms to false initially to avoid panels animating on initial render.
-    hasUnsavedChanges: false, // if there is initial unsaved changes, the initial diff will catch them.
-    managed: savedObjectResult.managed,
     lastSavedId: savedObjectId,
+    managed: savedObjectResult.managed ?? false,
+    fullScreenMode: creationOptions?.fullScreenMode ?? false,
   };
 
   const dashboardContainer = new DashboardContainer(
@@ -141,20 +147,11 @@ export const initializeDashboard = async ({
   creationOptions?: DashboardCreationOptions;
 }) => {
   const {
-    dashboardBackup,
-    dashboardCapabilities: { showWriteControls },
-    embeddable: { reactEmbeddableRegistryHasKey },
-    data: {
-      query: queryService,
-      search: { session },
-    },
-    dashboardContentInsights,
-  } = pluginServices.getServices();
-  const {
     queryString,
     filterManager,
     timefilter: { timefilter: timefilterService },
-  } = queryService;
+  } = dataService.query;
+  const dashboardBackupService = getDashboardBackupService();
 
   const {
     getInitialInput,
@@ -179,7 +176,7 @@ export const initializeDashboard = async ({
   // --------------------------------------------------------------------------------------
   // Combine input from saved object, and session storage
   // --------------------------------------------------------------------------------------
-  const dashboardBackupState = dashboardBackup.getState(loadDashboardReturn.dashboardId);
+  const dashboardBackupState = dashboardBackupService.getState(loadDashboardReturn.dashboardId);
   const runtimePanelsToRestore: UnsavedPanelState = useSessionStorageIntegration
     ? dashboardBackupState?.panels ?? {}
     : {};
@@ -189,15 +186,16 @@ export const initializeDashboard = async ({
     return dashboardBackupState?.dashboardState;
   })();
   const initialViewMode = (() => {
-    if (loadDashboardReturn.managed || !showWriteControls) return ViewMode.VIEW;
+    if (loadDashboardReturn.managed || !getDashboardCapabilities().showWriteControls)
+      return ViewMode.VIEW;
     if (
       loadDashboardReturn.newDashboardCreated ||
-      dashboardBackup.dashboardHasUnsavedEdits(loadDashboardReturn.dashboardId)
+      dashboardBackupService.dashboardHasUnsavedEdits(loadDashboardReturn.dashboardId)
     ) {
       return ViewMode.EDIT;
     }
 
-    return dashboardBackup.getViewMode();
+    return dashboardBackupService.getViewMode();
   })();
 
   const combinedSessionInput: DashboardContainerInput = {
@@ -218,7 +216,7 @@ export const initializeDashboard = async ({
     const overridePanels: DashboardPanelMap = {};
 
     for (const panel of Object.values(overrideInput?.panels)) {
-      if (reactEmbeddableRegistryHasKey(panel.type)) {
+      if (embeddableService.reactEmbeddableRegistryHasKey(panel.type)) {
         overridePanels[panel.explicitInput.id] = {
           ...panel,
 
@@ -263,7 +261,7 @@ export const initializeDashboard = async ({
 
   // Back up any view mode passed in explicitly.
   if (overrideInput?.viewMode) {
-    dashboardBackup.storeViewMode(overrideInput?.viewMode);
+    dashboardBackupService.storeViewMode(overrideInput?.viewMode);
   }
 
   initialDashboardInput.executionContext = {
@@ -319,7 +317,7 @@ export const initializeDashboard = async ({
 
     // start syncing global query state with the URL.
     const { stop: stopSyncingQueryServiceStateWithUrl } = syncGlobalQueryStateWithUrl(
-      queryService,
+      dataService.query,
       kbnUrlStateStorage
     );
 
@@ -363,7 +361,7 @@ export const initializeDashboard = async ({
         // maintain hide panel titles setting.
         hidePanelTitles: panelToUpdate.explicitInput.hidePanelTitles,
       };
-      if (reactEmbeddableRegistryHasKey(incomingEmbeddable.type)) {
+      if (embeddableService.reactEmbeddableRegistryHasKey(incomingEmbeddable.type)) {
         panelToUpdate.explicitInput = { id: panelToUpdate.explicitInput.id };
         runtimePanelsToRestore[incomingEmbeddable.embeddableId] = nextRuntimeState;
       } else {
@@ -399,7 +397,7 @@ export const initializeDashboard = async ({
             }
           );
           const newPanelState: DashboardPanelState = (() => {
-            if (reactEmbeddableRegistryHasKey(incomingEmbeddable.type)) {
+            if (embeddableService.reactEmbeddableRegistryHasKey(incomingEmbeddable.type)) {
               runtimePanelsToRestore[embeddableId] = incomingEmbeddable.input;
               return {
                 explicitInput: { id: embeddableId },
@@ -475,7 +473,7 @@ export const initializeDashboard = async ({
   // Start animating panel transforms 500 ms after dashboard is created.
   // --------------------------------------------------------------------------------------
   untilDashboardReady().then((dashboard) =>
-    setTimeout(() => dashboard.dispatch.setAnimatePanelTransforms(true), 500)
+    setTimeout(() => dashboard.setAnimatePanelTransforms(true), 500)
   );
 
   // --------------------------------------------------------------------------------------
@@ -487,16 +485,18 @@ export const initializeDashboard = async ({
 
     // if this incoming embeddable has a session, continue it.
     if (incomingEmbeddable?.searchSessionId) {
-      session.continue(incomingEmbeddable.searchSessionId);
+      dataService.search.session.continue(incomingEmbeddable.searchSessionId);
     }
     if (sessionIdToRestore) {
-      session.restore(sessionIdToRestore);
+      dataService.search.session.restore(sessionIdToRestore);
     }
-    const existingSession = session.getSessionId();
+    const existingSession = dataService.search.session.getSessionId();
 
     initialSearchSessionId =
       sessionIdToRestore ??
-      (existingSession && incomingEmbeddable ? existingSession : session.start());
+      (existingSession && incomingEmbeddable
+        ? existingSession
+        : dataService.search.session.start());
 
     untilDashboardReady().then(async (container) => {
       await container.untilContainerInitialized();
@@ -511,7 +511,11 @@ export const initializeDashboard = async ({
     // We don't count views when a user is editing a dashboard and is returning from an editor after saving
     // however, there is an edge case that we now count a new view when a user is editing a dashboard and is returning from an editor by canceling
     // TODO: this should be revisited by making embeddable transfer support canceling logic https://github.com/elastic/kibana/issues/190485
-    dashboardContentInsights.trackDashboardView(loadDashboardReturn.dashboardId);
+    const contentInsightsClient = new ContentInsightsClient(
+      { http: coreServices.http },
+      { domainId: 'dashboard' }
+    );
+    contentInsightsClient.track(loadDashboardReturn.dashboardId, 'viewed');
   }
 
   return { input: initialDashboardInput, searchSessionId: initialSearchSessionId };

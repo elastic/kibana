@@ -110,7 +110,7 @@ describe('findMinMaxByColumnId', () => {
           { a: 'shoes', b: 53 },
         ],
       })
-    ).toEqual({ b: { min: 2, max: 53 } });
+    ).toEqual(new Map([['b', { min: 2, max: 53 }]]));
   });
 });
 

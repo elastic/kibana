@@ -8,11 +8,18 @@
 /* eslint-disable max-classes-per-file */
 
 import type { DeepPartial } from 'utility-types';
-import { merge, set } from 'lodash';
+import { merge } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import { gte } from 'semver';
+import type { Agent } from '@kbn/fleet-plugin/common';
 import type { EndpointCapabilities } from '../service/response_actions/constants';
 import { BaseDataGenerator } from './base_data_generator';
-import type { HostMetadataInterface, OSFields, HostInfoInterface } from '../types';
+import type {
+  HostMetadataInterface,
+  OSFields,
+  HostInfoInterface,
+  UnitedAgentMetadataPersistedData,
+} from '../types';
 import { EndpointStatus, HostPolicyResponseActionStatus, HostStatus } from '../types';
 
 export interface GetCustomEndpointMetadataGeneratorOptions {
@@ -223,6 +230,30 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
       last_checkin: new Date().toISOString(),
     };
     return merge(hostInfo, overrides);
+  }
+
+  generateUnitedAgentMetadata(
+    overrides: DeepPartial<UnitedAgentMetadataPersistedData> = {}
+  ): UnitedAgentMetadataPersistedData {
+    const endpointMetadata = this.generate();
+
+    return merge(
+      {
+        agent: {
+          id: endpointMetadata.agent.id,
+        },
+        united: {
+          endpoint: endpointMetadata,
+          agent: {
+            agent: {
+              id: endpointMetadata.agent.id,
+            },
+            policy_id: this.seededUUIDv4(),
+          } as Agent,
+        },
+      } as UnitedAgentMetadataPersistedData,
+      overrides
+    );
   }
 
   protected randomOsFields(): OSFields {

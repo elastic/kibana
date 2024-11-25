@@ -5,30 +5,12 @@
  * 2.0.
  */
 
-import { debounce, call, takeLeading, takeEvery, put, select } from 'redux-saga/effects';
-import type { TrendTable } from '../../../../../common/types';
-import { fetchEffectFactory } from '../utils/fetch_effect';
-import { selectOverviewState, selectOverviewTrends } from './selectors';
-import {
-  fetchMonitorOverviewAction,
-  quietFetchOverviewAction,
-  refreshOverviewTrends,
-  trendStatsBatch,
-} from './actions';
-import { fetchMonitorOverview, fetchOverviewTrendStats as trendsApi } from './api';
-import { MonitorOverviewState } from '.';
-
-export function* fetchMonitorOverviewEffect() {
-  yield debounce(
-    200, // Only take the latest while ignoring any intermediate triggers
-    [fetchMonitorOverviewAction.get, quietFetchOverviewAction.get],
-    fetchEffectFactory(
-      fetchMonitorOverview,
-      fetchMonitorOverviewAction.success,
-      fetchMonitorOverviewAction.fail
-    )
-  );
-}
+import { call, takeLeading, takeEvery, put, select } from 'redux-saga/effects';
+import { OverviewStatusStateReducer, selectOverviewStatus } from '../overview_status';
+import type { OverviewTrend, TrendTable } from '../../../../../common/types';
+import { selectOverviewTrends } from './selectors';
+import { refreshOverviewTrends, trendStatsBatch } from './actions';
+import { fetchOverviewTrendStats as trendsApi } from './api';
 
 export const TRENDS_CHUNK_SIZE = 50;
 
@@ -41,11 +23,11 @@ export function* fetchTrendEffect(
       const chunk = action.payload.slice(Math.max(i - TRENDS_CHUNK_SIZE, 0), i);
       if (chunk.length > 0) {
         const trendStats = yield call(trendsApi, chunk);
-        yield put(trendStatsBatch.success(trendStats));
+        yield put(trendStatsBatch.success({ trendStats, batch: chunk }));
       }
     }
   } catch (e: any) {
-    yield put(trendStatsBatch.fail(e));
+    yield put(trendStatsBatch.fail(action.payload));
   }
 }
 
@@ -55,9 +37,10 @@ export function* fetchOverviewTrendStats() {
 
 export function* refreshTrends(): Generator<unknown, void, any> {
   const existingTrends: TrendTable = yield select(selectOverviewTrends);
-  const overviewState: MonitorOverviewState = yield select(selectOverviewState);
+  const { allConfigs }: OverviewStatusStateReducer = yield select(selectOverviewStatus);
 
-  let acc = {};
+  const monitorConfigs = Object.values(allConfigs ?? {});
+
   const keys = Object.keys(existingTrends);
   while (keys.length) {
     const chunk = keys
@@ -65,24 +48,23 @@ export function* refreshTrends(): Generator<unknown, void, any> {
       .filter(
         (key: string) =>
           existingTrends[key] !== null &&
-          overviewState.data.monitors.some(
-            ({ configId }) => configId === existingTrends[key]!.configId
+          existingTrends[key] !== 'loading' &&
+          monitorConfigs.some(
+            ({ configId }) => configId === (existingTrends[key] as OverviewTrend)!.configId
           )
       )
-      .map((key: string) => ({
-        configId: existingTrends[key]!.configId,
-        locationId: existingTrends[key]!.locationId,
-        schedule: overviewState.data.monitors.find(
-          ({ configId }) => configId === existingTrends[key]!.configId
-        )!.schedule,
-      }));
+      .map((key: string) => {
+        const trend = existingTrends[key] as OverviewTrend;
+        return {
+          configId: trend.configId,
+          locationId: trend.locationId,
+          schedule: monitorConfigs.find(({ configId }) => configId === trend.configId)!.schedule,
+        };
+      });
     if (chunk.length) {
-      const res = yield call(trendsApi, chunk);
-      acc = { ...acc, ...res };
+      const trendStats = yield call(trendsApi, chunk);
+      yield put(trendStatsBatch.success({ trendStats, batch: chunk }));
     }
-  }
-  if (Object.keys(acc).length) {
-    yield put(trendStatsBatch.success(acc));
   }
 }
 

@@ -2,6 +2,8 @@
   "type": "plugin",
   "id": "@kbn/investigate-app-plugin",
   "owner": "@elastic/obs-ux-management-team",
+  "group": "observability",
+  "visibility": "private",
   "plugin": {
     "id": "investigateApp",
     "server": true,
@@ -9,9 +11,9 @@
     "configPath": ["xpack", "investigateApp"],
     "requiredPlugins": [
       "investigate",
-      "observabilityAIAssistant",
       "observabilityShared",
       "lens",
+      "charts",
       "dataViews",
       "data",
       "embeddable",
@@ -19,13 +21,17 @@
       "datasetQuality",
       "unifiedSearch",
       "security",
+      "observability",
+      "licensing",
+      "ruleRegistry",
+      "usageCollection"
     ],
     "requiredBundles": [
       "esql",
       "kibanaReact",
-      "kibanaUtils",
+      "kibanaUtils"
     ],
-    "optionalPlugins": [],
+    "optionalPlugins": ["observabilityAIAssistant"],
     "extraPublicDirs": []
   }
 }

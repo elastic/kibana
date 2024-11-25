@@ -6,10 +6,5 @@
  */
 
 export { Actions } from './src/actions';
-export { privilegesFactory } from './src/privileges';
-export type {
-  CasesSupportedOperations,
-  PrivilegesService,
-  RawKibanaPrivileges,
-  RawKibanaFeaturePrivileges,
-} from './src/privileges';
+export { privilegesFactory, getReplacedByForPrivilege } from './src/privileges';
+export type { CasesSupportedOperations, PrivilegesService } from './src/privileges';

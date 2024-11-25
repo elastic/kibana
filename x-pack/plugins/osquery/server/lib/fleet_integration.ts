@@ -21,13 +21,16 @@ export const getPackagePolicyDeleteCallback =
     ]);
     await Promise.all(
       map(deletedOsqueryManagerPolicies, async (deletedOsqueryManagerPolicy) => {
-        if (deletedOsqueryManagerPolicy.policy_id) {
+        const policyIds = deletedOsqueryManagerPolicy.policy_ids?.length
+          ? deletedOsqueryManagerPolicy.policy_ids
+          : ([deletedOsqueryManagerPolicy.policy_id] as string[]);
+        if (policyIds[0] !== undefined) {
           const foundPacks = await packsClient.find({
             type: packSavedObjectType,
-            hasReference: {
+            hasReference: policyIds.map((policyId: string) => ({
               type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
-              id: deletedOsqueryManagerPolicy.policy_id,
-            },
+              id: policyId,
+            })),
             perPage: 1000,
           });
 
@@ -43,15 +46,13 @@ export const getPackagePolicyDeleteCallback =
                   packSavedObjectType,
                   pack.id,
                   {
-                    shards: filter(
-                      pack.attributes.shards,
-                      (shard) => shard.key !== deletedOsqueryManagerPolicy.policy_id
+                    shards: filter(pack.attributes.shards, (shard) =>
+                      policyIds.includes(shard.key)
                     ),
                   },
                   {
-                    references: filter(
-                      pack.references,
-                      (reference) => reference.id !== deletedOsqueryManagerPolicy.policy_id
+                    references: filter(pack.references, (reference) =>
+                      policyIds.includes(reference.id)
                     ),
                   }
                 )

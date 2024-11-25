@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SamlSessionManager } from '@kbn/test';
+import { GetCookieOptions, SamlSessionManager } from '@kbn/test';
 import expect from '@kbn/expect';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { resolve } from 'path';
@@ -18,8 +18,27 @@ import { InternalRequestHeader } from './default_request_headers';
 export interface RoleCredentials {
   apiKey: { id: string; name: string };
   apiKeyHeader: { Authorization: string };
-  cookieHeader: { Cookie: string };
 }
+
+export interface CookieCredentials {
+  Cookie: string;
+  // supertest.set() expects an object that matches IncomingHttpHeaders type, that needs to accept arbitrary key-value pairs as headers
+  // We extend the interface with an index signature to resolve this.
+  [header: string]: string;
+}
+
+export interface KibanaRoleDescriptors {
+  kibana: any;
+  elasticsearch?: any;
+}
+
+const throwIfRoleNotSet = (role: string, customRole: string, roleDescriptors: Map<string, any>) => {
+  if (role === customRole && !roleDescriptors.get(customRole)) {
+    throw new Error(
+      `Set privileges for '${customRole}' using 'samlAuth.setCustomRole' before authentication.`
+    );
+  }
+};
 
 export function SamlAuthProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
@@ -29,9 +48,8 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
 
   const authRoleProvider = getAuthProvider({ config });
   const supportedRoleDescriptors = authRoleProvider.getSupportedRoleDescriptors();
-  const supportedRoles = Object.keys(supportedRoleDescriptors);
-
-  const customRolesFileName: string | undefined = process.env.ROLES_FILENAME_OVERRIDE;
+  const supportedRoles = Array.from(supportedRoleDescriptors.keys());
+  const customRolesFileName = process.env.ROLES_FILENAME_OVERRIDE;
   const cloudUsersFilePath = resolve(REPO_ROOT, '.ftr', customRolesFileName ?? 'role_users.json');
 
   // Sharing the instance within FTR config run means cookies are persistent for each role between tests.
@@ -55,14 +73,59 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
   const DEFAULT_ROLE = authRoleProvider.getDefaultRole();
   const COMMON_REQUEST_HEADERS = authRoleProvider.getCommonRequestHeader();
   const INTERNAL_REQUEST_HEADERS = authRoleProvider.getInternalRequestHeader();
+  const CUSTOM_ROLE = authRoleProvider.getCustomRole();
+  const isCustomRoleEnabled = authRoleProvider.isCustomRoleEnabled();
+
+  const getAdminCredentials = async () => {
+    return await sessionManager.getApiCredentialsForRole('admin');
+  };
+
+  const createApiKeyPayload = (role: string, roleDescriptors: any) => {
+    return {
+      name: `myTestApiKey_${role}`,
+      metadata: {},
+      ...(role === CUSTOM_ROLE
+        ? { kibana_role_descriptors: roleDescriptors }
+        : { role_descriptors: roleDescriptors }),
+    };
+  };
 
   return {
-    async getInteractiveUserSessionCookieWithRoleScope(role: string) {
-      return sessionManager.getInteractiveUserSessionCookieWithRoleScope(role);
+    /**
+     * Returns a Cookie string containing the session token for the specified role.
+     * This string can be used to update browser cookies and login with the designated role.
+     *
+     * @param role - The SAML role for which the session token is required.
+     * @param options - Optional settings to control session behavior, such as forcing a new session.
+     * @returns A string with the Cookie token
+     *
+     * @throws If the specified role is a custom role without a predefined descriptor.
+     */
+    async getInteractiveUserSessionCookieWithRoleScope(role: string, options?: GetCookieOptions) {
+      // Custom role has no descriptors by default, check if it was added before authentication
+      throwIfRoleNotSet(role, CUSTOM_ROLE, supportedRoleDescriptors);
+      return sessionManager.getInteractiveUserSessionCookieWithRoleScope(role, options);
     },
-    async getM2MApiCredentialsWithRoleScope(role: string) {
-      return sessionManager.getApiCredentialsForRole(role);
+
+    /**
+     * Returns an object containing a Cookie header with the session token for the specified role.
+     * This header can be used for authenticating API requests as the designated role.
+     *
+     * @param role - The SAML role for which the session token is required.
+     * @param options - Optional settings to control session behavior, such as forcing a new session.
+     * @returns An object with the Cookie header for API authentication.
+     *
+     * @throws If the specified role is a custom role without a predefined descriptor.
+     */
+    async getM2MApiCookieCredentialsWithRoleScope(
+      role: string,
+      options?: GetCookieOptions
+    ): Promise<CookieCredentials> {
+      // Custom role has no descriptors by default, check if it was added before authentication
+      throwIfRoleNotSet(role, CUSTOM_ROLE, supportedRoleDescriptors);
+      return sessionManager.getApiCredentialsForRole(role, options);
     },
+
     async getEmail(role: string) {
       return sessionManager.getEmail(role);
     },
@@ -70,67 +133,117 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
     async getUserData(role: string) {
       return sessionManager.getUserData(role);
     },
+
     async createM2mApiKeyWithDefaultRoleScope() {
-      log.debug(`Creating api key for default role: [${this.DEFAULT_ROLE}]`);
-      return this.createM2mApiKeyWithRoleScope(this.DEFAULT_ROLE);
+      log.debug(`Creating API key for default role: [${DEFAULT_ROLE}]`);
+      return this.createM2mApiKeyWithRoleScope(DEFAULT_ROLE);
     },
+
     async createM2mApiKeyWithRoleScope(role: string): Promise<RoleCredentials> {
       // Get admin credentials in order to create the API key
-      const adminCookieHeader = await this.getM2MApiCredentialsWithRoleScope('admin');
-
-      // Get the role descrtiptor for the role
+      const adminCookieHeader = await getAdminCredentials();
       let roleDescriptors = {};
+
       if (role !== 'admin') {
-        const roleDescriptor = supportedRoleDescriptors[role];
+        if (role === CUSTOM_ROLE && !isCustomRoleEnabled) {
+          throw new Error(`Custom roles are not supported for the current deployment`);
+        }
+        const roleDescriptor = supportedRoleDescriptors.get(role);
         if (!roleDescriptor) {
-          throw new Error(`Cannot create API key for non-existent role "${role}"`);
+          throw new Error(
+            role === CUSTOM_ROLE
+              ? `Before creating API key for '${CUSTOM_ROLE}', use 'samlAuth.setCustomRole' to set the role privileges`
+              : `Cannot create API key for non-existent role "${role}"`
+          );
         }
         log.debug(
-          `Creating api key for ${role} role with the following privileges ${JSON.stringify(
-            roleDescriptor
-          )}`
+          `Creating API key for ${role} with privileges: ${JSON.stringify(roleDescriptor)}`
         );
-        roleDescriptors = {
-          [role]: roleDescriptor,
-        };
+        roleDescriptors = { [role]: roleDescriptor };
       }
 
-      const { body, status } = await supertestWithoutAuth
+      const payload = createApiKeyPayload(role, roleDescriptors);
+      const response = await supertestWithoutAuth
         .post('/internal/security/api_key')
         .set(INTERNAL_REQUEST_HEADERS)
         .set(adminCookieHeader)
-        .send({
-          name: 'myTestApiKey',
-          metadata: {},
-          role_descriptors: roleDescriptors,
-        });
-      expect(status).to.be(200);
+        .send(payload);
 
-      const apiKey = body;
+      if (response.status !== 200) {
+        throw new Error(
+          `Failed to create API key for '${role}' role with response text: ${response.text}`
+        );
+      }
+
+      const apiKey = response.body;
       const apiKeyHeader = { Authorization: 'ApiKey ' + apiKey.encoded };
 
-      log.debug(`Created api key for role: [${role}]`);
-      return { apiKey, apiKeyHeader, cookieHeader: adminCookieHeader };
+      log.debug(`Created API key for role: [${role}]`);
+      return { apiKey, apiKeyHeader };
     },
+
     async invalidateM2mApiKeyWithRoleScope(roleCredentials: RoleCredentials) {
-      const requestBody = {
-        apiKeys: [
-          {
-            id: roleCredentials.apiKey.id,
-            name: roleCredentials.apiKey.name,
-          },
-        ],
-        isAdmin: true,
-      };
+      // Get admin credentials in order to invalidate the API key
+      const adminCookieHeader = await getAdminCredentials();
 
       const { status } = await supertestWithoutAuth
         .post('/internal/security/api_key/invalidate')
         .set(INTERNAL_REQUEST_HEADERS)
-        .set(roleCredentials.cookieHeader)
-        .send(requestBody);
+        .set(adminCookieHeader)
+        .send({
+          apiKeys: [{ id: roleCredentials.apiKey.id, name: roleCredentials.apiKey.name }],
+          isAdmin: true,
+        });
 
       expect(status).to.be(200);
     },
+
+    async setCustomRole(descriptors: KibanaRoleDescriptors) {
+      if (!isCustomRoleEnabled) {
+        throw new Error(`Custom roles are not supported for the current deployment`);
+      }
+      log.debug(`Updating role '${CUSTOM_ROLE}'`);
+      const adminCookieHeader = await getAdminCredentials();
+
+      const customRoleDescriptors = {
+        kibana: descriptors.kibana,
+        elasticsearch: descriptors.elasticsearch ?? [],
+      };
+
+      const { status } = await supertestWithoutAuth
+        .put(`/api/security/role/${CUSTOM_ROLE}`)
+        .set(INTERNAL_REQUEST_HEADERS)
+        .set(adminCookieHeader)
+        .send(customRoleDescriptors);
+
+      expect(status).to.be(204);
+
+      // Update descriptors for the custom role, it will be used to create API key
+      supportedRoleDescriptors.set(CUSTOM_ROLE, customRoleDescriptors);
+    },
+
+    async deleteCustomRole() {
+      if (!isCustomRoleEnabled) {
+        throw new Error(`Custom roles are not supported for the current deployment`);
+      }
+
+      if (supportedRoleDescriptors.get(CUSTOM_ROLE)) {
+        log.debug(`Deleting role '${CUSTOM_ROLE}'`);
+        const adminCookieHeader = await getAdminCredentials();
+
+        // Resetting descriptors for the custom role, even if role deletion fails
+        supportedRoleDescriptors.set(CUSTOM_ROLE, null);
+        log.debug(`'${CUSTOM_ROLE}' descriptors  were reset`);
+
+        const { status } = await supertestWithoutAuth
+          .delete(`/api/security/role/${CUSTOM_ROLE}`)
+          .set(INTERNAL_REQUEST_HEADERS)
+          .set(adminCookieHeader);
+
+        expect(status).to.be(204);
+      }
+    },
+
     getCommonRequestHeader() {
       return COMMON_REQUEST_HEADERS;
     },
@@ -138,6 +251,8 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
     getInternalRequestHeader(): InternalRequestHeader {
       return INTERNAL_REQUEST_HEADERS;
     },
+
     DEFAULT_ROLE,
+    CUSTOM_ROLE,
   };
 }

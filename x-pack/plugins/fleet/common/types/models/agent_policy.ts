@@ -44,6 +44,26 @@ export interface NewAgentPolicy {
   keep_monitoring_alive?: boolean | null;
   supports_agentless?: boolean | null;
   global_data_tags?: GlobalDataTag[];
+  monitoring_pprof_enabled?: boolean;
+  monitoring_http?: {
+    enabled: boolean;
+    host?: string;
+    port?: number;
+    buffer?: {
+      enabled: boolean;
+    };
+  };
+  monitoring_diagnostics?: {
+    limit?: {
+      interval?: string;
+      burst?: number;
+    };
+    uploader?: {
+      max_retries?: number;
+      init_dur?: string;
+      max_dur?: string;
+    };
+  };
 }
 
 export interface GlobalDataTag {
@@ -71,7 +91,7 @@ export interface FullAgentPolicyInputStream {
   id: string;
   data_stream: {
     dataset: string;
-    type: string;
+    type?: string;
   };
   [key: string]: any;
 }
@@ -119,6 +139,25 @@ export interface FullAgentPolicyMonitoring {
   metrics: boolean;
   logs: boolean;
   traces: boolean;
+  pprof?: {
+    enabled: boolean;
+  };
+  http?: {
+    enabled: boolean;
+    host?: string;
+    port?: number;
+  };
+  diagnostics?: {
+    limit?: {
+      interval?: string;
+      burst?: number;
+    };
+    uploader?: {
+      max_retries?: number;
+      init_dur?: string;
+      max_dur?: string;
+    };
+  };
 }
 
 export interface FullAgentPolicy {
@@ -145,6 +184,18 @@ export interface FullAgentPolicy {
       enabled: boolean;
       uninstall_token_hash: string;
       signing_key: string;
+    };
+    logging?: {
+      level?: string;
+      to_files?: boolean;
+      files?: {
+        rotateeverybytes?: number;
+        keepfiles?: number;
+        interval?: string;
+      };
+    };
+    limits?: {
+      go_max_procs?: number;
     };
   };
   secret_references?: PolicySecretReference[];
@@ -221,5 +272,25 @@ export interface FleetServerPolicy {
 
 export interface AgentlessApiResponse {
   id: string;
-  region_id: string;
+}
+
+// Definitions for agent policy outputs endpoints
+export interface MinimalOutput {
+  name?: string;
+  id?: string;
+}
+export interface IntegrationsOutput extends MinimalOutput {
+  pkgName?: string;
+  integrationPolicyName?: string;
+}
+
+export interface OutputsForAgentPolicy {
+  agentPolicyId?: string;
+  monitoring: {
+    output: MinimalOutput;
+  };
+  data: {
+    output: MinimalOutput;
+    integrations?: IntegrationsOutput[];
+  };
 }

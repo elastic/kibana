@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALL_VALUE } from '@kbn/slo-schema';
 import {
   getSLOPipelineId,
   SLO_INGEST_PIPELINE_INDEX_NAME_PREFIX,
@@ -16,6 +17,12 @@ export const getSLOPipelineTemplate = (slo: SLODefinition) => ({
   id: getSLOPipelineId(slo.id, slo.revision),
   description: `Ingest pipeline for SLO rollup data [id: ${slo.id}, revision: ${slo.revision}]`,
   processors: [
+    {
+      set: {
+        field: '_id',
+        value: `{{{_id}}}-${slo.id}-${slo.revision}`,
+      },
+    },
     {
       set: {
         field: 'event.ingested',
@@ -43,47 +50,31 @@ export const getSLOPipelineTemplate = (slo: SLODefinition) => ({
       },
     },
     {
-      script: {
-        description: 'Generated the instanceId field for SLO rollup data',
-        source: `
-        // This function will recursively collect all the values of a HashMap of HashMaps
-        Collection collectValues(HashMap subject) {
-          Collection values = new ArrayList();
-          // Iterate through the values
-          for(Object value: subject.values()) {
-            // If the value is a HashMap, recurse
-            if (value instanceof HashMap) {
-              values.addAll(collectValues((HashMap) value));
-            } else {
-              values.add(String.valueOf(value));
-            } 
-          }
-          return values;
-        }
-
-        // Create the string builder
-        StringBuilder instanceId = new StringBuilder();
-
-        if (ctx["slo"]["groupings"] == null) {
-          ctx["slo"]["instanceId"] = "*";
-        } else {
-          // Get the values as a collection
-          Collection values = collectValues(ctx["slo"]["groupings"]);
-
-          // Convert to a list and sort
-          List sortedValues = new ArrayList(values);
-          Collections.sort(sortedValues);
-
-          // Create comma delimited string
-          for(String instanceValue: sortedValues) {
-            instanceId.append(instanceValue);
-            instanceId.append(",");
-          }
-
-            // Assign the slo.instanceId
-          ctx["slo"]["instanceId"] = instanceId.length() > 0 ? instanceId.substring(0, instanceId.length() - 1) : "*";
-        }
-       `,
+      dot_expander: {
+        path: 'slo.groupings',
+        field: '*',
+        ignore_failure: true,
+        if: 'ctx.slo.groupings != null',
+      },
+    },
+    {
+      set: {
+        description: 'Generated the instanceId field based on the groupings field',
+        field: 'slo.instanceId',
+        value:
+          [slo.groupBy].flat().includes(ALL_VALUE) || [slo.groupBy].flat().length === 0
+            ? ALL_VALUE
+            : [slo.groupBy]
+                .flat()
+                .map((field) => `{{{slo.groupings.${field}}}}`)
+                .join(','),
+      },
+    },
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        ignore_failure: true,
+        name: `slo-${slo.id}@custom`,
       },
     },
   ],

@@ -8,7 +8,7 @@ import { EuiLoadingSpinner, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { GlobalWidgetParameters } from '@kbn/investigate-plugin/public';
-import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
+import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { v4 } from 'uuid';
 import { ErrorMessage } from '../../components/error_message';
@@ -88,6 +88,11 @@ function LegacyEmbeddable({ type, config, timeRange: { from, to }, savedObjectId
       timeRange: {
         from,
         to,
+      },
+      overrides: {
+        axisX: { hide: true },
+        axisLeft: { style: { axisTitle: { visible: false } } },
+        settings: { showLegend: false },
       },
     };
 
@@ -188,7 +193,7 @@ export function registerEmbeddableItem({
           grow={true}
           className={css`
             > div {
-              height: 196px;
+              height: 128px;
             }
           `}
         >

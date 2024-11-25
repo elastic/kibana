@@ -4472,7 +4472,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          " | undefined, params: TabifyDocsOptions | undefined) => Record<string, any>"
+          " | undefined, params: (TabifyDocsOptions & { flattenedFieldsComparator?: ((a: string | symbol, b: string | symbol) => 0 | 1 | -1) | undefined; }) | undefined) => Record<string, any>"
         ],
         "path": "packages/kbn-data-service/src/search/tabify/tabify_docs.ts",
         "deprecated": false,
@@ -4522,14 +4522,14 @@
           {
             "parentPluginId": "data",
             "id": "def-public.flattenHit.$3",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "params",
             "description": [
               "Parameters how to flatten the hit"
             ],
             "signature": [
-              "TabifyDocsOptions | undefined"
+              "(TabifyDocsOptions & { flattenedFieldsComparator?: ((a: string | symbol, b: string | symbol) => 0 | 1 | -1) | undefined; }) | undefined"
             ],
             "path": "packages/kbn-data-service/src/search/tabify/tabify_docs.ts",
             "deprecated": false,
@@ -8074,10 +8074,6 @@
                 "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
               },
               {
-                "plugin": "@kbn/core-saved-objects-browser-mocks",
-                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
-              },
-              {
                 "plugin": "@kbn/core-saved-objects-api-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/utils/internal_utils.ts"
               },
@@ -8088,6 +8084,10 @@
               {
                 "plugin": "@kbn/core-saved-objects-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/import_dashboards.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-mocks",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
               },
               {
                 "plugin": "fleet",
@@ -9614,7 +9614,7 @@
           },
           "; history: ",
           "SearchRequest",
-          "<Record<string, any>>[]; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; setField: <K extends keyof ",
+          "<Record<string, any>>[]; destroy: () => void; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; setField: <K extends keyof ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -9792,7 +9792,7 @@
             "section": "def-common.SearchSourceSearchOptions",
             "text": "SearchSourceSearchOptions"
           },
-          " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; loadDataViewFields: (dataView: ",
+          " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; loadDataViewFields: (dataView: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -10195,7 +10195,7 @@
                 "section": "def-common.Datatable",
                 "text": "Datatable"
               },
-              ", { csvSeparator, quoteValues, formatFactory, raw, escapeFormulaValues, columnsSorting }: CSVOptions) => string"
+              ", { csvSeparator, quoteValues, formatFactory, raw, escapeFormulaValues }: CSVOptions) => string"
             ],
             "path": "src/plugins/data/public/index.ts",
             "deprecated": false,
@@ -11731,14 +11731,6 @@
             {
               "plugin": "securitySolution",
               "path": "x-pack/plugins/security_solution/public/common/mock/endpoint/dependencies_start_mock.ts"
-            },
-            {
-              "plugin": "savedObjects",
-              "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
-            },
-            {
-              "plugin": "savedObjects",
-              "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
             }
           ]
         },
@@ -11796,14 +11788,6 @@
           "deprecated": true,
           "trackAdoption": false,
           "references": [
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/data/types.ts"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/data/data_service.ts"
-            },
             {
               "plugin": "dataVisualizer",
               "path": "x-pack/plugins/data_visualizer/public/application/common/components/stats_table/components/field_data_row/document_stats.tsx"
@@ -12697,22 +12681,6 @@
                 "path": "src/plugins/data_view_management/public/components/edit_index_pattern/source_filters_table/components/table/table.tsx"
               },
               {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/common/data_views/data_view.test.ts"
               },
@@ -12765,6 +12733,14 @@
               {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/common/data_views/data_views.ts"
+              },
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/management_app/data_view_management_service.ts"
+              },
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/management_app/data_view_management_service.ts"
               },
               {
                 "plugin": "dataViewManagement",
@@ -14199,13 +14175,7 @@
                 "text": "FieldSpec"
               },
               "[], fieldAttrs?: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldAttrs",
-                "text": "FieldAttrs"
-              },
+              "FieldAttrsAsObject",
               " | undefined) => ",
               {
                 "pluginId": "dataViews",
@@ -14253,13 +14223,7 @@
                   ": FieldAttrs"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "dataViews",
-                    "scope": "common",
-                    "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.FieldAttrs",
-                    "text": "FieldAttrs"
-                  },
+                  "FieldAttrsAsObject",
                   " | undefined"
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_views.ts",
@@ -17562,7 +17526,7 @@
                 "section": "def-common.Datatable",
                 "text": "Datatable"
               },
-              ", { csvSeparator, quoteValues, formatFactory, raw, escapeFormulaValues, columnsSorting }: CSVOptions) => string"
+              ", { csvSeparator, quoteValues, formatFactory, raw, escapeFormulaValues }: CSVOptions) => string"
             ],
             "path": "src/plugins/data/server/index.ts",
             "deprecated": false,
@@ -19248,22 +19212,6 @@
                 "path": "src/plugins/data_view_management/public/components/edit_index_pattern/source_filters_table/components/table/table.tsx"
               },
               {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/common/data_views/data_view.test.ts"
               },
@@ -19316,6 +19264,14 @@
               {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/common/data_views/data_views.ts"
+              },
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/management_app/data_view_management_service.ts"
+              },
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/management_app/data_view_management_service.ts"
               },
               {
                 "plugin": "dataViewManagement",
@@ -21680,13 +21636,7 @@
                 "text": "FieldSpec"
               },
               "[], fieldAttrs?: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldAttrs",
-                "text": "FieldAttrs"
-              },
+              "FieldAttrsAsObject",
               " | undefined) => ",
               {
                 "pluginId": "dataViews",
@@ -21734,13 +21684,7 @@
                   ": FieldAttrs"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "dataViews",
-                    "scope": "common",
-                    "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.FieldAttrs",
-                    "text": "FieldAttrs"
-                  },
+                  "FieldAttrsAsObject",
                   " | undefined"
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_views.ts",
@@ -23028,7 +22972,7 @@
             "section": "def-common.Datatable",
             "text": "Datatable"
           },
-          ", { csvSeparator, quoteValues, formatFactory, raw, escapeFormulaValues, columnsSorting }: CSVOptions) => string"
+          ", { csvSeparator, quoteValues, formatFactory, raw, escapeFormulaValues }: CSVOptions) => string"
         ],
         "path": "src/plugins/data/common/exports/export_csv.tsx",
         "deprecated": false,
@@ -23060,7 +23004,7 @@
             "id": "def-common.datatableToCSV.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ csvSeparator, quoteValues, formatFactory, raw, escapeFormulaValues, columnsSorting }",
+            "label": "{ csvSeparator, quoteValues, formatFactory, raw, escapeFormulaValues }",
             "description": [],
             "signature": [
               "CSVOptions"
@@ -23162,7 +23106,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          " | undefined, params: TabifyDocsOptions | undefined) => Record<string, any>"
+          " | undefined, params: (TabifyDocsOptions & { flattenedFieldsComparator?: ((a: string | symbol, b: string | symbol) => 0 | 1 | -1) | undefined; }) | undefined) => Record<string, any>"
         ],
         "path": "packages/kbn-data-service/src/search/tabify/tabify_docs.ts",
         "deprecated": false,
@@ -23212,14 +23156,14 @@
           {
             "parentPluginId": "data",
             "id": "def-common.flattenHit.$3",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "params",
             "description": [
               "Parameters how to flatten the hit"
             ],
             "signature": [
-              "TabifyDocsOptions | undefined"
+              "(TabifyDocsOptions & { flattenedFieldsComparator?: ((a: string | symbol, b: string | symbol) => 0 | 1 | -1) | undefined; }) | undefined"
             ],
             "path": "packages/kbn-data-service/src/search/tabify/tabify_docs.ts",
             "deprecated": false,
@@ -24352,13 +24296,7 @@
                 "text": "RuntimeFieldSpec"
               },
               "> | undefined; fieldAttrs?: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldAttrs",
-                "text": "FieldAttrs"
-              },
+              "FieldAttrsAsObject",
               " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; allowHidden?: boolean | undefined; }"
             ],
             "path": "src/plugins/data_views/common/expressions/load_index_pattern.ts",
@@ -24665,10 +24603,6 @@
                 "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
               },
               {
-                "plugin": "@kbn/core-saved-objects-browser-mocks",
-                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
-              },
-              {
                 "plugin": "@kbn/core-saved-objects-api-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/utils/internal_utils.ts"
               },
@@ -24679,6 +24613,10 @@
               {
                 "plugin": "@kbn/core-saved-objects-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/import_dashboards.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-mocks",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
               },
               {
                 "plugin": "fleet",
@@ -25366,13 +25304,7 @@
             "text": "FieldSpec"
           },
           "[], fieldAttrs?: ",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.FieldAttrs",
-            "text": "FieldAttrs"
-          },
+          "FieldAttrsAsObject",
           " | undefined) => ",
           {
             "pluginId": "dataViews",
@@ -25599,13 +25531,7 @@
             "text": "RuntimeFieldSpec"
           },
           "> | undefined; fieldAttrs?: ",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.FieldAttrs",
-            "text": "FieldAttrs"
-          },
+          "FieldAttrsAsObject",
           " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; allowHidden?: boolean | undefined; }"
         ],
         "path": "src/plugins/data_views/common/types.ts",
@@ -25638,7 +25564,7 @@
           "\nSet of field attributes"
         ],
         "signature": [
-          "{ [key: string]: ",
+          "Map<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -25646,7 +25572,7 @@
             "section": "def-common.FieldAttrSet",
             "text": "FieldAttrSet"
           },
-          "; }"
+          ">"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,

@@ -17,24 +17,23 @@ import { genericErrorResponse, internalErrorResponse } from '../schema/errors';
 
 import { getFleetStatusHandler, fleetSetupHandler } from './handlers';
 
-const fleetSetupResponseBody = () =>
-  schema.object(
-    {
-      isInitialized: schema.boolean(),
-      nonFatalErrors: schema.arrayOf(
-        schema.object({
-          name: schema.string(),
-          message: schema.string(),
-        })
-      ),
+export const FleetSetupResponseSchema = schema.object(
+  {
+    isInitialized: schema.boolean(),
+    nonFatalErrors: schema.arrayOf(
+      schema.object({
+        name: schema.string(),
+        message: schema.string(),
+      })
+    ),
+  },
+  {
+    meta: {
+      description:
+        "A summary of the result of Fleet's `setup` lifecycle. If `isInitialized` is true, Fleet is ready to accept agent enrollment. `nonFatalErrors` may include useful insight into non-blocking issues with Fleet setup.",
     },
-    {
-      meta: {
-        description:
-          "A summary of the result of Fleet's `setup` lifecycle. If `isInitialized` is true, Fleet is ready to accept agent enrollment. `nonFatalErrors` may include useful insight into non-blocking issues with Fleet setup.",
-      },
-    }
-  );
+  }
+);
 
 export const registerFleetSetupRoute = (router: FleetAuthzRouter) => {
   router.versioned
@@ -43,7 +42,7 @@ export const registerFleetSetupRoute = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { setup: true },
       },
-      description: `Initiate Fleet setup`,
+      summary: `Initiate Fleet setup`,
       options: {
         tags: ['oas-tag:Fleet internals'],
       },
@@ -55,7 +54,7 @@ export const registerFleetSetupRoute = (router: FleetAuthzRouter) => {
           request: {},
           response: {
             200: {
-              body: fleetSetupResponseBody,
+              body: () => FleetSetupResponseSchema,
             },
             400: {
               body: genericErrorResponse,
@@ -70,6 +69,33 @@ export const registerFleetSetupRoute = (router: FleetAuthzRouter) => {
     );
 };
 
+export const GetAgentsSetupResponseSchema = schema.object(
+  {
+    isReady: schema.boolean(),
+    missing_requirements: schema.arrayOf(
+      schema.oneOf([
+        schema.literal('security_required'),
+        schema.literal('tls_required'),
+        schema.literal('api_keys'),
+        schema.literal('fleet_admin_user'),
+        schema.literal('fleet_server'),
+      ])
+    ),
+    missing_optional_features: schema.arrayOf(
+      schema.oneOf([schema.literal('encrypted_saved_object_encryption_key_required')])
+    ),
+    package_verification_key_id: schema.maybe(schema.string()),
+    is_space_awareness_enabled: schema.maybe(schema.boolean()),
+    is_secrets_storage_enabled: schema.maybe(schema.boolean()),
+  },
+  {
+    meta: {
+      description:
+        'A summary of the agent setup status. `isReady` indicates whether the setup is ready. If the setup is not ready, `missing_requirements` lists which requirements are missing.',
+    },
+  }
+);
+
 // That route is used by agent to setup Fleet
 export const registerCreateFleetSetupRoute = (router: FleetAuthzRouter) => {
   router.versioned
@@ -78,7 +104,7 @@ export const registerCreateFleetSetupRoute = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { setup: true },
       },
-      description: `Initiate agent setup`,
+      summary: `Initiate agent setup`,
       options: {
         tags: ['oas-tag:Elastic Agents'],
       },
@@ -90,7 +116,7 @@ export const registerCreateFleetSetupRoute = (router: FleetAuthzRouter) => {
           request: {},
           response: {
             200: {
-              body: fleetSetupResponseBody,
+              body: () => FleetSetupResponseSchema,
             },
             400: {
               body: genericErrorResponse,
@@ -109,7 +135,7 @@ export const registerGetFleetStatusRoute = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { setup: true },
       },
-      description: `Get agent setup info`,
+      summary: `Get agent setup info`,
       options: {
         tags: ['oas-tag:Elastic Agents'],
       },
@@ -121,35 +147,7 @@ export const registerGetFleetStatusRoute = (router: FleetAuthzRouter) => {
           request: {},
           response: {
             200: {
-              body: () =>
-                schema.object(
-                  {
-                    isReady: schema.boolean(),
-                    missing_requirements: schema.arrayOf(
-                      schema.oneOf([
-                        schema.literal('security_required'),
-                        schema.literal('tls_required'),
-                        schema.literal('api_keys'),
-                        schema.literal('fleet_admin_user'),
-                        schema.literal('fleet_server'),
-                      ])
-                    ),
-                    missing_optional_features: schema.arrayOf(
-                      schema.oneOf([
-                        schema.literal('encrypted_saved_object_encryption_key_required'),
-                      ])
-                    ),
-                    package_verification_key_id: schema.maybe(schema.string()),
-                    is_space_awareness_enabled: schema.maybe(schema.boolean()),
-                    is_secrets_storage_enabled: schema.maybe(schema.boolean()),
-                  },
-                  {
-                    meta: {
-                      description:
-                        'A summary of the agent setup status. `isReady` indicates whether the setup is ready. If the setup is not ready, `missing_requirements` lists which requirements are missing.',
-                    },
-                  }
-                ),
+              body: () => GetAgentsSetupResponseSchema,
             },
             400: {
               body: genericErrorResponse,

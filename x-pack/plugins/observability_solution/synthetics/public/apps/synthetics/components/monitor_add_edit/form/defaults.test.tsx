@@ -27,6 +27,7 @@ describe('defaults', () => {
       {
         id: 'us_central',
         isServiceManaged: true,
+        label: 'US Central',
       },
     ],
     name: 'Browser monitor',
@@ -89,6 +90,7 @@ describe('defaults', () => {
         {
           id: 'us_central',
           isServiceManaged: true,
+          label: 'US Central',
         },
       ],
       name: 'Browser monitor',

@@ -6,12 +6,8 @@
  */
 
 import { KSPM_POLICY_TEMPLATE, CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
-import {
-  AwsCredentialsTypeFieldMap,
-  GcpCredentialsTypeFieldMap,
-  PostureTypes,
-  VulnSeverity,
-} from './types_old';
+
+import { AwsCredentialsTypeFieldMap, GcpCredentialsTypeFieldMap, PostureTypes } from './types_old';
 
 export const CLOUD_SECURITY_INTERTAL_PREFIX_ROUTE_PATH = '/internal/cloud_security_posture/';
 
@@ -25,6 +21,9 @@ export const BENCHMARKS_API_CURRENT_VERSION = '1';
 
 export const FIND_CSP_BENCHMARK_RULE_ROUTE_PATH = '/internal/cloud_security_posture/rules/_find';
 export const FIND_CSP_BENCHMARK_RULE_API_CURRENT_VERSION = '1';
+
+export const GRAPH_ROUTE_PATH = '/internal/cloud_security_posture/graph';
+export const GRAPH_API_CURRENT_VERSION = '1';
 
 export const CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH =
   '/internal/cloud_security_posture/rules/_bulk_action';
@@ -60,14 +59,6 @@ export const VULNERABILITIES_INDEX_DEFAULT_NS =
 
 export const LATEST_VULNERABILITIES_INDEX_TEMPLATE_NAME =
   'logs-cloud_security_posture.vulnerabilities_latest';
-
-export const CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN =
-  'logs-cloud_security_posture.vulnerabilities_latest-default';
-export const CDR_LATEST_THIRD_PARTY_VULNERABILITIES_INDEX_PATTERN =
-  'security_solution-*.vulnerability_latest';
-export const CDR_VULNERABILITIES_INDEX_PATTERN = `${CDR_LATEST_THIRD_PARTY_VULNERABILITIES_INDEX_PATTERN},${CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN}`;
-
-export const LATEST_VULNERABILITIES_RETENTION_POLICY = '3d';
 
 export const SECURITY_DEFAULT_DATA_VIEW_ID = 'security-solution-default';
 
@@ -137,14 +128,6 @@ export const POSTURE_TYPES: { [x: string]: PostureTypes } = {
   [POSTURE_TYPE_ALL]: POSTURE_TYPE_ALL,
 };
 
-export const VULNERABILITIES_SEVERITY: Record<VulnSeverity, VulnSeverity> = {
-  LOW: 'LOW',
-  MEDIUM: 'MEDIUM',
-  HIGH: 'HIGH',
-  CRITICAL: 'CRITICAL',
-  UNKNOWN: 'UNKNOWN',
-};
-
 export const AWS_CREDENTIALS_TYPE_TO_FIELDS_MAP: AwsCredentialsTypeFieldMap = {
   assume_role: ['role_arn'],
   direct_access_keys: ['access_key_id', 'secret_access_key'],
@@ -191,4 +174,4 @@ export const SINGLE_ACCOUNT = 'single-account';
 
 export const CLOUD_SECURITY_PLUGIN_VERSION = '1.9.0';
 // Cloud Credentials Template url was implemented in 1.10.0-preview01. See PR - https://github.com/elastic/integrations/pull/9828
-export const CLOUD_CREDENTIALS_PACKAGE_VERSION = '1.10.0-preview01';
+export const CLOUD_CREDENTIALS_PACKAGE_VERSION = '1.11.0-preview13';

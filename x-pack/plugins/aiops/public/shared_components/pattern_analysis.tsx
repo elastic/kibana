@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
+import { AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { UI_SETTINGS } from '@kbn/data-service';
 import type { TimeRange } from '@kbn/es-query';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { pick } from 'lodash';
 import React, { useEffect, useMemo, useState, type FC } from 'react';
 import type { Observable } from 'rxjs';
@@ -20,8 +19,8 @@ import type {
   RandomSamplerOption,
   RandomSamplerProbability,
 } from '../components/log_categorization/sampling_menu/random_sampler';
-import { PatternAnalysisEmbeddableWrapper } from '../embeddables/pattern_analysis/pattern_analysys_component_wrapper';
-import { AiopsAppContext, type AiopsAppDependencies } from '../hooks/use_aiops_app_context';
+import { PatternAnalysisEmbeddableWrapper } from '../embeddables/pattern_analysis/pattern_analysis_component_wrapper';
+import { AiopsAppContext, type AiopsAppContextValue } from '../hooks/use_aiops_app_context';
 import { DataSourceContextProvider } from '../hooks/use_data_source';
 import { FilterQueryContextProvider } from '../hooks/use_filters_query';
 import { ReloadContextProvider } from '../hooks/use_reload';
@@ -82,19 +81,19 @@ const PatternAnalysisWrapper: FC<PatternAnalysisPropsWithDeps> = ({
   onChange,
 }) => {
   const deps = useMemo(() => {
-    const { http, uiSettings, notifications, ...startServices } = coreStart;
-    const { lens, data, usageCollection, fieldFormats, charts } = pluginStart;
+    const { lens, data, usageCollection, fieldFormats, charts, share, storage, unifiedSearch } =
+      pluginStart;
 
     return {
-      http,
-      uiSettings,
       data,
-      notifications,
       lens,
       usageCollection,
       fieldFormats,
       charts,
-      ...startServices,
+      share,
+      storage,
+      unifiedSearch,
+      ...coreStart,
     };
   }, [coreStart, pluginStart]);
 
@@ -103,11 +102,11 @@ const PatternAnalysisWrapper: FC<PatternAnalysisPropsWithDeps> = ({
     uiSettingsKeys: UI_SETTINGS,
   };
 
-  const aiopsAppContextValue = useMemo<AiopsAppDependencies>(() => {
+  const aiopsAppContextValue = useMemo<AiopsAppContextValue>(() => {
     return {
-      embeddingOrigin: embeddingOrigin ?? EMBEDDABLE_ORIGIN,
+      embeddingOrigin: embeddingOrigin ?? AIOPS_EMBEDDABLE_ORIGIN.DEFAULT,
       ...deps,
-    } as unknown as AiopsAppDependencies;
+    };
   }, [deps, embeddingOrigin]);
 
   const [manualReload$] = useState<BehaviorSubject<number>>(
@@ -139,31 +138,32 @@ const PatternAnalysisWrapper: FC<PatternAnalysisPropsWithDeps> = ({
         padding: '10px',
       }}
     >
-      <KibanaRenderContextProvider {...coreStart}>
-        <AiopsAppContext.Provider value={aiopsAppContextValue}>
-          <DatePickerContextProvider {...datePickerDeps}>
-            <ReloadContextProvider reload$={resultObservable$}>
-              <DataSourceContextProvider dataViewId={dataViewId}>
-                <FilterQueryContextProvider timeRange={timeRange}>
-                  <PatternAnalysisEmbeddableWrapper
-                    dataViewId={dataViewId}
-                    timeRange={timeRange}
-                    fieldName={fieldName}
-                    minimumTimeRangeOption={minimumTimeRangeOption}
-                    randomSamplerMode={randomSamplerMode}
-                    randomSamplerProbability={randomSamplerProbability}
-                    lastReloadRequestTime={lastReloadRequestTime}
-                    onLoading={onLoading}
-                    onRenderComplete={onRenderComplete}
-                    onError={onError}
-                    onChange={onChange}
-                  />
-                </FilterQueryContextProvider>
-              </DataSourceContextProvider>
-            </ReloadContextProvider>
-          </DatePickerContextProvider>
-        </AiopsAppContext.Provider>
-      </KibanaRenderContextProvider>
+      <AiopsAppContext.Provider value={aiopsAppContextValue}>
+        <DatePickerContextProvider {...datePickerDeps}>
+          <ReloadContextProvider reload$={resultObservable$}>
+            <DataSourceContextProvider
+              dataViews={pluginStart.data.dataViews}
+              dataViewId={dataViewId}
+            >
+              <FilterQueryContextProvider timeRange={timeRange}>
+                <PatternAnalysisEmbeddableWrapper
+                  dataViewId={dataViewId}
+                  timeRange={timeRange}
+                  fieldName={fieldName}
+                  minimumTimeRangeOption={minimumTimeRangeOption}
+                  randomSamplerMode={randomSamplerMode}
+                  randomSamplerProbability={randomSamplerProbability}
+                  lastReloadRequestTime={lastReloadRequestTime}
+                  onLoading={onLoading}
+                  onRenderComplete={onRenderComplete}
+                  onError={onError}
+                  onChange={onChange}
+                />
+              </FilterQueryContextProvider>
+            </DataSourceContextProvider>
+          </ReloadContextProvider>
+        </DatePickerContextProvider>
+      </AiopsAppContext.Provider>
     </div>
   );
 };

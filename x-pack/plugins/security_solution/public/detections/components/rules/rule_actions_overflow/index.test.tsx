@@ -16,6 +16,7 @@ import { RuleActionsOverflow } from '.';
 import { mockRule } from '../../../../detection_engine/rule_management_ui/components/rules_table/__mocks__/mock';
 import { TestProviders } from '../../../../common/mock';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { ManualRuleRunEventTypes } from '../../../../common/lib/telemetry';
 
 const showBulkDuplicateExceptionsConfirmation = () => Promise.resolve(null);
 const showManualRuleRunConfirmation = () => Promise.resolve(null);
@@ -28,7 +29,7 @@ jest.mock('../../../../detection_engine/rule_management/logic/bulk_actions/use_b
 jest.mock('../../../../detection_engine/rule_gaps/logic/use_schedule_rule_run');
 jest.mock('../../../../common/lib/apm/use_start_transaction');
 jest.mock('../../../../common/hooks/use_app_toasts');
-const mockReportManualRuleRunOpenModal = jest.fn();
+const mockReportEvent = jest.fn();
 jest.mock('../../../../common/lib/kibana', () => {
   const actual = jest.requireActual('../../../../common/lib/kibana');
   return {
@@ -36,8 +37,8 @@ jest.mock('../../../../common/lib/kibana', () => {
     useKibana: jest.fn().mockReturnValue({
       services: {
         telemetry: {
-          reportManualRuleRunOpenModal: (params: { type: 'single' | 'bulk' }) =>
-            mockReportManualRuleRunOpenModal(params),
+          reportEvent: (eventType: ManualRuleRunEventTypes, params: { type: 'single' | 'bulk' }) =>
+            mockReportEvent(eventType, params),
         },
         application: {
           navigateToApp: jest.fn(),
@@ -274,26 +275,7 @@ describe('RuleActionsOverflow', () => {
       expect(getByTestId('rules-details-popover')).not.toHaveTextContent(/.+/);
     });
 
-    test('it does not show "Manual run" action item when feature flag "manualRuleRunEnabled" is set to false', () => {
-      useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
-
-      const { getByTestId } = render(
-        <RuleActionsOverflow
-          showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
-          showManualRuleRunConfirmation={showManualRuleRunConfirmation}
-          rule={mockRule('id')}
-          userHasPermissions
-          canDuplicateRuleWithActions={true}
-          confirmDeletion={() => Promise.resolve(true)}
-        />,
-        { wrapper: TestProviders }
-      );
-      fireEvent.click(getByTestId('rules-details-popover-button-icon'));
-
-      expect(getByTestId('rules-details-menu-panel')).not.toHaveTextContent('Manual run');
-    });
-
-    test('it calls telemetry.reportManualRuleRunOpenModal when rules-details-manual-rule-run is clicked', async () => {
+    test('it calls telemetry.reportEvent when rules-details-manual-rule-run is clicked', async () => {
       const { getByTestId } = render(
         <RuleActionsOverflow
           showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
@@ -309,9 +291,12 @@ describe('RuleActionsOverflow', () => {
       fireEvent.click(getByTestId('rules-details-manual-rule-run'));
 
       await waitFor(() => {
-        expect(mockReportManualRuleRunOpenModal).toHaveBeenCalledWith({
-          type: 'single',
-        });
+        expect(mockReportEvent).toHaveBeenCalledWith(
+          ManualRuleRunEventTypes.ManualRuleRunOpenModal,
+          {
+            type: 'single',
+          }
+        );
       });
     });
   });

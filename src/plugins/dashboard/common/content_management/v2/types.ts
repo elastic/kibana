@@ -12,21 +12,18 @@ import type {
   SavedObjectCreateOptions,
   SavedObjectUpdateOptions,
 } from '@kbn/content-management-utils';
-import { RawControlGroupAttributes } from '@kbn/controls-plugin/common';
 import { DashboardContentType } from '../types';
-import { DashboardAttributes as DashboardAttributesV1 } from '../v1/types';
+import {
+  ControlGroupAttributesV1,
+  DashboardAttributes as DashboardAttributesV1,
+} from '../v1/types';
 
-type ControlGroupAttributesV2 = Pick<
-  RawControlGroupAttributes,
-  | 'panelsJSON'
-  | 'chainingSystem'
-  | 'controlStyle'
-  | 'ignoreParentSettingsJSON'
-  | 'showApplySelections'
->;
+export type ControlGroupAttributes = ControlGroupAttributesV1 & {
+  showApplySelections?: boolean;
+};
 
 export type DashboardAttributes = Omit<DashboardAttributesV1, 'controlGroupInput'> & {
-  controlGroupInput?: ControlGroupAttributesV2;
+  controlGroupInput?: ControlGroupAttributes;
 };
 
 export type DashboardCrudTypes = ContentManagementCrudTypes<

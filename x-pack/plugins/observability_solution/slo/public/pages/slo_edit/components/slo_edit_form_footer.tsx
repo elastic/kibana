@@ -11,8 +11,8 @@ import type { GetSLOResponse } from '@kbn/slo-schema';
 import React, { useCallback, useMemo } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { InPortal } from 'react-reverse-portal';
-import { useCreateRule } from '../../../hooks/use_create_rule';
-import { useKibana } from '../../../utils/kibana_react';
+import { useCreateRule } from '../../../hooks/use_create_burn_rate_rule';
+import { useKibana } from '../../../hooks/use_kibana';
 import { sloEditFormFooterPortal } from '../shared_flyout/slo_add_form_flyout';
 import { paths } from '../../../../common/locators/paths';
 import { useCreateSlo } from '../../../hooks/use_create_slo';
@@ -32,8 +32,6 @@ export interface Props {
   onSave?: () => void;
 }
 
-export const maxWidth = 775;
-
 export function SloEditFormFooter({ slo, onSave }: Props) {
   const {
     application: { navigateToUrl },
@@ -45,7 +43,7 @@ export function SloEditFormFooter({ slo, onSave }: Props) {
 
   const { mutateAsync: createSlo, isLoading: isCreateSloLoading } = useCreateSlo();
   const { mutateAsync: updateSlo, isLoading: isUpdateSloLoading } = useUpdateSlo();
-  const { mutateAsync: createBurnRateRule, isLoading: isCreateBurnRateRuleLoading } =
+  const { mutate: createBurnRateRule, isLoading: isCreateBurnRateRuleLoading } =
     useCreateRule<BurnRateRuleParams>();
 
   const navigate = useCallback(
@@ -70,7 +68,7 @@ export function SloEditFormFooter({ slo, onSave }: Props) {
     } else {
       const processedValues = transformCreateSLOFormToCreateSLOInput(values);
       const resp = await createSlo({ slo: processedValues });
-      await createBurnRateRule({
+      createBurnRateRule({
         rule: createBurnRateRuleRequestBody({ ...processedValues, id: resp.id }),
       });
       if (onSave) {

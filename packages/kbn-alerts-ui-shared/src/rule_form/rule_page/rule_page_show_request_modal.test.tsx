@@ -35,6 +35,7 @@ const formData: RuleFormData = {
     index: ['.kibana'],
     timeField: 'created_at',
   },
+  actions: [],
   consumer: 'stackAlerts',
   ruleTypeId: '.es-query',
   schedule: { interval: '1m' },

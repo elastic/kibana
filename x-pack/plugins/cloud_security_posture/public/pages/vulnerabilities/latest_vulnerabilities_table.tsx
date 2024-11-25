@@ -11,15 +11,15 @@ import { i18n } from '@kbn/i18n';
 import { EuiDataGridCellValueElementProps, EuiSpacer } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
 import { HttpSetup } from '@kbn/core-http-browser';
-import { getDatasetDisplayName } from '../../common/utils/get_dataset_display_name';
-import { CspVulnerabilityFinding } from '../../../common/schemas';
+import type { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/latest';
+import { CVSScoreBadge, SeverityStatusBadge } from '@kbn/cloud-security-posture';
+import { getVendorName } from '../../common/utils/get_vendor_name';
 import { CloudSecurityDataTable } from '../../components/cloud_security_data_table';
 import { useLatestVulnerabilitiesTable } from './hooks/use_latest_vulnerabilities_table';
 import { LATEST_VULNERABILITIES_TABLE } from './test_subjects';
 import { getDefaultQuery, defaultColumns } from './constants';
 import { VulnerabilityFindingFlyout } from './vulnerabilities_finding_flyout/vulnerability_finding_flyout';
 import { ErrorCallout } from '../configurations/layout/error_callout';
-import { CVSScoreBadge, SeverityStatusBadge } from '../../components/vulnerability_badges';
 import { createDetectionRuleFromVulnerabilityFinding } from './utils/create_detection_rule_from_vulnerability';
 import { vulnerabilitiesTableFieldLabels } from './vulnerabilities_table_field_labels';
 
@@ -89,9 +89,9 @@ const customCellRenderer = (rows: DataTableRecord[]) => ({
       {({ finding }) => <SeverityStatusBadge severity={finding.vulnerability.severity} />}
     </CspVulnerabilityFindingRenderer>
   ),
-  'data_stream.dataset': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
+  'observer.vendor': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
     <CspVulnerabilityFindingRenderer row={rows[rowIndex]}>
-      {({ finding }) => <>{getDatasetDisplayName(finding.data_stream.dataset) || '-'}</>}
+      {({ finding }) => <>{getVendorName(finding) || '-'}</>}
     </CspVulnerabilityFindingRenderer>
   ),
 });
@@ -108,11 +108,11 @@ export const LatestVulnerabilitiesTable = ({
     });
 
   const createVulnerabilityRuleFn = (rowIndex: number) => {
-    const finding = getCspVulnerabilityFinding(rows[rowIndex].raw._source);
-    if (!finding) return;
+    const vulnerabilityFinding = getCspVulnerabilityFinding(rows[rowIndex].raw._source);
+    if (!vulnerabilityFinding) return;
 
     return async (http: HttpSetup) =>
-      createDetectionRuleFromVulnerabilityFinding(http, finding.vulnerability);
+      createDetectionRuleFromVulnerabilityFinding(http, vulnerabilityFinding);
   };
 
   return (

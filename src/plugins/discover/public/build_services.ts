@@ -58,11 +58,14 @@ import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import type { AiopsPluginStart } from '@kbn/aiops-plugin/public';
 import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
+import { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { DiscoverStartPlugins } from './types';
 import type { DiscoverContextAppLocator } from './application/context/services/locator';
 import type { DiscoverSingleDocLocator } from './application/doc/locator';
 import type { DiscoverAppLocator } from '../common';
 import type { ProfilesManager } from './context_awareness';
+import type { DiscoverEBTManager } from './services/discover_ebt_manager';
 
 /**
  * Location state of internal Discover history instance
@@ -87,6 +90,7 @@ export interface DiscoverServices {
   chrome: ChromeStart;
   core: CoreStart;
   data: DataPublicPluginStart;
+  discoverShared: DiscoverSharedPublicStart;
   docLinks: DocLinksStart;
   embeddable: EmbeddableStart;
   history: History<HistoryLocationState>;
@@ -130,7 +134,9 @@ export interface DiscoverServices {
   noDataPage?: NoDataPagePluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   profilesManager: ProfilesManager;
+  ebtManager: DiscoverEBTManager;
   fieldsMetadata?: FieldsMetadataPublicStart;
+  logsDataAccess?: LogsDataAccessPluginStart;
 }
 
 export const buildServices = memoize(
@@ -145,6 +151,7 @@ export const buildServices = memoize(
     scopedHistory,
     urlTracker,
     profilesManager,
+    ebtManager,
     setHeaderActionMenu = noop,
   }: {
     core: CoreStart;
@@ -157,6 +164,7 @@ export const buildServices = memoize(
     scopedHistory?: ScopedHistory;
     urlTracker: UrlTracker;
     profilesManager: ProfilesManager;
+    ebtManager: DiscoverEBTManager;
     setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
   }): DiscoverServices => {
     const { usageCollection } = plugins;
@@ -172,6 +180,7 @@ export const buildServices = memoize(
       core,
       data: plugins.data,
       dataVisualizer: plugins.dataVisualizer,
+      discoverShared: plugins.discoverShared,
       docLinks: core.docLinks,
       embeddable: plugins.embeddable,
       i18n: core.i18n,
@@ -217,7 +226,9 @@ export const buildServices = memoize(
       noDataPage: plugins.noDataPage,
       observabilityAIAssistant: plugins.observabilityAIAssistant,
       profilesManager,
+      ebtManager,
       fieldsMetadata: plugins.fieldsMetadata,
+      logsDataAccess: plugins.logsDataAccess,
     };
   }
 );

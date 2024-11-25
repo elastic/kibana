@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`useTimelineColumns leadingControlColumns should return the leading control columns 1`] = `
+exports[`useTimelineControlColumns leadingControlColumns should return the leading control columns 1`] = `
 Array [
   Object {
     "headerCellRender": [Function],

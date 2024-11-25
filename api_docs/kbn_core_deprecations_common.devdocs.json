@@ -22,6 +22,62 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-deprecations-common",
+        "id": "def-common.ApiDeprecationDetails",
+        "type": "Interface",
+        "tags": [],
+        "label": "ApiDeprecationDetails",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-deprecations-common",
+            "scope": "common",
+            "docId": "kibKbnCoreDeprecationsCommonPluginApi",
+            "section": "def-common.ApiDeprecationDetails",
+            "text": "ApiDeprecationDetails"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/core-deprecations-common",
+            "scope": "common",
+            "docId": "kibKbnCoreDeprecationsCommonPluginApi",
+            "section": "def-common.BaseDeprecationDetails",
+            "text": "BaseDeprecationDetails"
+          }
+        ],
+        "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-deprecations-common",
+            "id": "def-common.ApiDeprecationDetails.apiId",
+            "type": "string",
+            "tags": [],
+            "label": "apiId",
+            "description": [],
+            "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-deprecations-common",
+            "id": "def-common.ApiDeprecationDetails.deprecationType",
+            "type": "string",
+            "tags": [],
+            "label": "deprecationType",
+            "description": [],
+            "signature": [
+              "\"api\""
+            ],
+            "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-deprecations-common",
         "id": "def-common.BaseDeprecationDetails",
         "type": "Interface",
         "tags": [],
@@ -49,11 +105,14 @@
           {
             "parentPluginId": "@kbn/core-deprecations-common",
             "id": "def-common.BaseDeprecationDetails.message",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "message",
             "description": [
               "\nThe description message to be displayed for the deprecation.\nCheck the README for writing deprecations in `src/core/server/deprecations/README.mdx`"
+            ],
+            "signature": [
+              "string | string[]"
             ],
             "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
             "deprecated": false,
@@ -85,7 +144,7 @@
               "\n(optional) Used to identify between different deprecation types.\nExample use case: in Upgrade Assistant, we may want to allow the user to sort by\ndeprecation type or show each type in a separate tab.\n\nFeel free to add new types if necessary.\nPredefined types are necessary to reduce having similar definitions with different keywords\nacross kibana deprecations."
             ],
             "signature": [
-              "\"config\" | \"feature\" | undefined"
+              "\"config\" | \"api\" | \"feature\" | undefined"
             ],
             "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
             "deprecated": false,
@@ -133,7 +192,7 @@
               "corrective action needed to fix this deprecation."
             ],
             "signature": [
-              "{ api?: { path: string; method: \"POST\" | \"PUT\"; body?: { [key: string]: any; } | undefined; omitContextFromBody?: boolean | undefined; } | undefined; manualSteps: string[]; }"
+              "{ api?: { path: string; method: \"POST\" | \"PUT\"; body?: { [key: string]: any; } | undefined; omitContextFromBody?: boolean | undefined; } | undefined; manualSteps: string[]; mark_as_resolved_api?: { apiTotalCalls: number; totalMarkedAsResolved: number; timestamp: string | number | Date; routePath: string; routeMethod: string; routeVersion?: string | undefined; } | undefined; }"
             ],
             "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
             "deprecated": false,
@@ -224,7 +283,15 @@
                 "section": "def-common.DomainDeprecationDetails",
                 "text": "DomainDeprecationDetails"
               },
-              "[]"
+              "<",
+              {
+                "pluginId": "@kbn/core-deprecations-common",
+                "scope": "common",
+                "docId": "kibKbnCoreDeprecationsCommonPluginApi",
+                "section": "def-common.DeprecationsDetails",
+                "text": "DeprecationsDetails"
+              },
+              ">[]"
             ],
             "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
             "deprecated": false,
@@ -301,6 +368,14 @@
             "pluginId": "@kbn/core-deprecations-common",
             "scope": "common",
             "docId": "kibKbnCoreDeprecationsCommonPluginApi",
+            "section": "def-common.ApiDeprecationDetails",
+            "text": "ApiDeprecationDetails"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/core-deprecations-common",
+            "scope": "common",
+            "docId": "kibKbnCoreDeprecationsCommonPluginApi",
             "section": "def-common.FeatureDeprecationDetails",
             "text": "FeatureDeprecationDetails"
           }
@@ -318,14 +393,7 @@
         "label": "DomainDeprecationDetails",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-deprecations-common",
-            "scope": "common",
-            "docId": "kibKbnCoreDeprecationsCommonPluginApi",
-            "section": "def-common.DeprecationsDetails",
-            "text": "DeprecationsDetails"
-          },
-          " & { domainId: string; }"
+          "ExtendedDetails & { domainId: string; }"
         ],
         "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
         "deprecated": false,

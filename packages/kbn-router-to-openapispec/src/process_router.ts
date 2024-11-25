@@ -23,14 +23,17 @@ import {
   getVersionedHeaderParam,
   mergeResponseContent,
   prepareRoutes,
+  setXState,
+  GetOpId,
 } from './util';
-import type { OperationIdCounter } from './operation_id_counter';
 import type { GenerateOpenApiDocumentOptionsFilters } from './generate_oas';
+import type { CustomOperationObject, InternalRouterRoute } from './type';
+import { extractAuthzDescription } from './extract_authz_description';
 
 export const processRouter = (
   appRouter: Router,
   converter: OasConverter,
-  getOpId: OperationIdCounter,
+  getOpId: GetOpId,
   filters?: GenerateOpenApiDocumentOptionsFilters
 ) => {
   const paths: OpenAPIV3.PathsObject = {};
@@ -61,11 +64,23 @@ export const processRouter = (
         parameters.push(...pathObjects, ...queryObjects);
       }
 
-      const operation: OpenAPIV3.OperationObject = {
+      let description = `${route.options.description ?? ''}`;
+      if (route.security) {
+        const authzDescription = extractAuthzDescription(route.security);
+
+        description += `${route.options.description && authzDescription ? `<br/><br/>` : ''}${
+          authzDescription ?? ''
+        }`;
+      }
+
+      const hasDeprecations = !!route.options.deprecated;
+
+      const operation: CustomOperationObject = {
         summary: route.options.summary ?? '',
         tags: route.options.tags ? extractTags(route.options.tags) : [],
-        ...(route.options.description ? { description: route.options.description } : {}),
-        ...(route.options.deprecated ? { deprecated: route.options.deprecated } : {}),
+        ...(description ? { description } : {}),
+        ...(hasDeprecations ? { deprecated: true } : {}),
+        ...(route.options.discontinued ? { 'x-discontinued': route.options.discontinued } : {}),
         requestBody: !!validationSchemas?.body
           ? {
               content: {
@@ -77,8 +92,10 @@ export const processRouter = (
           : undefined,
         responses: extractResponses(route, converter),
         parameters,
-        operationId: getOpId(route.path),
+        operationId: getOpId({ path: route.path, method: route.method }),
       };
+
+      setXState(route.options.availability, operation);
 
       const path: OpenAPIV3.PathItemObject = {
         [route.method]: operation,
@@ -93,7 +110,6 @@ export const processRouter = (
   return { paths };
 };
 
-export type InternalRouterRoute = ReturnType<Router['getRoutes']>[0];
 export const extractResponses = (route: InternalRouterRoute, converter: OasConverter) => {
   const responses: OpenAPIV3.ResponsesObject = {};
   if (!route.validationSchemas) return responses;

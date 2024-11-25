@@ -38,6 +38,7 @@ import type {
 import { FieldStatsInitializerViewType } from '../grid_embeddable/types';
 import { isESQLQuery } from '../../search_strategy/requests/esql_utils';
 import { DataSourceTypeSelector } from './field_stats_initializer_view_type';
+import { getReasonIfFieldStatsUnavailableForQuery } from '../../utils/get_reason_fieldstats_unavailable_for_esql_query';
 
 export interface FieldStatsInitializerProps {
   initialInput?: Partial<FieldStatisticsTableEmbeddableState>;
@@ -94,6 +95,12 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataViewId, viewType, esqlQuery.esql, isEsqlMode]);
+
+  const unsupportedReason = useMemo(
+    () => getReasonIfFieldStatsUnavailableForQuery(esqlQuery),
+    [esqlQuery]
+  );
+
   const onESQLQuerySubmit = useCallback(
     async (query: AggregateQuery, abortController?: AbortController) => {
       const adhocDataView = await getESQLAdHocDataview(query.esql, dataViews);
@@ -101,11 +108,14 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
         setDataViewId(adhocDataView.id);
       }
 
-      await onPreview({
-        viewType,
-        dataViewId: adhocDataView?.id,
-        query,
-      });
+      const supported = getReasonIfFieldStatsUnavailableForQuery(query) === undefined;
+      if (supported) {
+        await onPreview({
+          viewType,
+          dataViewId: adhocDataView?.id,
+          query,
+        });
+      }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [isEsqlMode]
@@ -202,6 +212,7 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
               }
             />
           ) : null}
+
           {initialInput?.viewType === FieldStatsInitializerViewType.ESQL && !isEsqlEnabled ? (
             <>
               <DataSourceTypeSelector value={viewType} onChange={setViewType} />
@@ -223,6 +234,7 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
                   defaultMessage: 'Data view',
                 }
               )}
+              css={css({ padding: euiThemeVars.euiSizeM })}
             >
               <IndexPatternSelect
                 autoFocus={!dataViewId}
@@ -246,6 +258,7 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
               query={esqlQuery}
               setQuery={setQuery}
               onQuerySubmit={onESQLQuerySubmit}
+              disableSubmitAction={!!unsupportedReason}
             />
           ) : null}
         </EuiFlexGroup>
@@ -271,26 +284,39 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              onClick={onCreate.bind(null, updatedProps)}
-              fill
-              aria-label={i18n.translate(
-                'xpack.dataVisualizer.fieldStatisticsDashboardPanel.config.applyFlyoutAriaLabel',
-                {
-                  defaultMessage: 'Apply changes',
-                }
-              )}
-              disabled={!isEsqlFormValid || !isDataViewFormValid}
-              iconType="check"
-              data-test-subj="applyFlyoutButton"
-            >
-              <FormattedMessage
-                id="xpack.dataVisualizer.fieldStatisticsDashboardPanel.config.applyAndCloseLabel"
-                defaultMessage="Apply and close"
-              />
-            </EuiButton>
-          </EuiFlexItem>
+          <EuiFlexGroup
+            direction="row"
+            alignItems="center"
+            justifyContent="flexEnd"
+            gutterSize="xs"
+          >
+            {unsupportedReason ? (
+              <EuiFlexItem grow={false}>
+                <EuiIconTip type="warning" content={unsupportedReason} color="warning" />
+              </EuiFlexItem>
+            ) : null}
+
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                onClick={onCreate.bind(null, updatedProps)}
+                fill
+                aria-label={i18n.translate(
+                  'xpack.dataVisualizer.fieldStatisticsDashboardPanel.config.applyFlyoutAriaLabel',
+                  {
+                    defaultMessage: 'Apply changes',
+                  }
+                )}
+                disabled={!isEsqlFormValid || !isDataViewFormValid || !!unsupportedReason}
+                iconType="check"
+                data-test-subj="applyFlyoutButton"
+              >
+                <FormattedMessage
+                  id="xpack.dataVisualizer.fieldStatisticsDashboardPanel.config.applyAndCloseLabel"
+                  defaultMessage="Apply and close"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </>

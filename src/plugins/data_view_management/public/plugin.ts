@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { CoreSetup, Plugin, PluginInitializerContext, IUiSettingsClient } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -21,6 +21,7 @@ import { ManagementSetup } from '@kbn/management-plugin/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 
 export interface IndexPatternManagementSetupDependencies {
   management: ManagementSetup;
@@ -34,9 +35,11 @@ export interface IndexPatternManagementStartDependencies {
   dataViewEditor: DataViewEditorStart;
   dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
+  share?: SharePluginStart;
   spaces?: SpacesPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
+  uiSettings: IUiSettingsClient;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

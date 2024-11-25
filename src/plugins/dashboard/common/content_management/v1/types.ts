@@ -14,7 +14,7 @@ import type {
 } from '@kbn/content-management-utils';
 import { Serializable } from '@kbn/utility-types';
 import { RefreshInterval } from '@kbn/data-plugin/common';
-import { RawControlGroupAttributes } from '@kbn/controls-plugin/common';
+import { ControlGroupChainingSystem, ControlLabelPosition } from '@kbn/controls-plugin/common';
 
 import { DashboardContentType } from '../types';
 
@@ -62,10 +62,13 @@ export interface SavedDashboardPanel {
   version?: string;
 }
 
-type ControlGroupAttributesV1 = Pick<
-  RawControlGroupAttributes,
-  'panelsJSON' | 'chainingSystem' | 'controlStyle' | 'ignoreParentSettingsJSON'
->;
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type ControlGroupAttributesV1 = {
+  chainingSystem?: ControlGroupChainingSystem;
+  panelsJSON: string; // stringified version of ControlSerializedState
+  ignoreParentSettingsJSON: string;
+  controlStyle?: ControlLabelPosition;
+};
 
 /* eslint-disable-next-line @typescript-eslint/consistent-type-definitions */
 export type DashboardAttributes = {
@@ -77,7 +80,7 @@ export type DashboardAttributes = {
   description: string;
   panelsJSON: string;
   timeFrom?: string;
-  version: number;
+  version?: number;
   timeTo?: string;
   title: string;
   kibanaSavedObjectMeta: {

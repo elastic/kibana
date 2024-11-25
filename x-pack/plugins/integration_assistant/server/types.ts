@@ -42,7 +42,6 @@ export interface SimplifiedProcessors {
 export interface CategorizationState {
   rawSamples: string[];
   samples: string[];
-  formattedSamples: string;
   ecsTypes: string;
   ecsCategories: string;
   exAnswer: string;
@@ -52,9 +51,11 @@ export interface CategorizationState {
   errors: object;
   previousError: string;
   pipelineResults: object[];
+  previousPipelineResults: object[];
+  lastReviewedSamples: number[]; // Filled when reviewing.
+  stableSamples: number[]; // Samples that did not change due to a review.
+  reviewCount: number;
   finalized: boolean;
-  reviewed: boolean;
-  hasTriedOnce: boolean;
   currentPipeline: object;
   currentProcessors: object[];
   invalidCategorization: object[];
@@ -62,6 +63,20 @@ export interface CategorizationState {
   initialPipeline: object;
   results: object;
   samplesFormat: SamplesFormat;
+}
+
+export interface CelInputState {
+  dataStreamName: string;
+  apiDefinition: string;
+  lastExecutedChain: string;
+  finalized: boolean;
+  apiQuerySummary: string;
+  exampleCelPrograms: string[];
+  currentProgram: string;
+  stateVarNames: string[];
+  stateSettings: object;
+  redactVars: string[];
+  results: object;
 }
 
 export interface EcsMappingState {
@@ -95,6 +110,8 @@ export interface LogFormatDetectionState {
   lastExecutedChain: string;
   packageName: string;
   dataStreamName: string;
+  packageTitle: string;
+  dataStreamTitle: string;
   logSamples: string[];
   jsonSamples: string[];
   exAnswer: string;
@@ -103,7 +120,7 @@ export interface LogFormatDetectionState {
   header: boolean;
   ecsVersion: string;
   results: object;
-  additionalProcessors: ESProcessorItem[]; // # This will be generated in the sub-graphs
+  additionalProcessors: ESProcessorItem[]; // Generated in handleXXX nodes or subgraphs.
 }
 
 export interface KVState {
@@ -122,10 +139,22 @@ export interface KVState {
   ecsVersion: string;
 }
 
+export interface UnstructuredLogState {
+  lastExecutedChain: string;
+  packageName: string;
+  dataStreamName: string;
+  grokPatterns: string[];
+  logSamples: string[];
+  jsonSamples: string[];
+  finalized: boolean;
+  errors: object;
+  additionalProcessors: object[];
+  ecsVersion: string;
+}
+
 export interface RelatedState {
   rawSamples: string[];
   samples: string[];
-  formattedSamples: string;
   ecs: string;
   exAnswer: string;
   packageName: string;

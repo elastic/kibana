@@ -19,6 +19,7 @@ import {
   StreamingChatResponseEventType,
 } from '@kbn/observability-ai-assistant-plugin/common';
 import type { ObservabilityAIAssistantScreenContext } from '@kbn/observability-ai-assistant-plugin/common/types';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { throwSerializedChatCompletionErrors } from '@kbn/observability-ai-assistant-plugin/common/utils/throw_serialized_chat_completion_errors';
 import {
   isSupportedConnectorType,
@@ -107,7 +108,7 @@ export class KibanaClient {
     const url = format({
       ...parsed,
       pathname: `/${[
-        baseUrl,
+        ...(baseUrl ? [baseUrl] : []),
         ...(props.ignoreSpaceId || !this.spaceId ? [] : ['s', this.spaceId]),
         props.pathname.startsWith('/') ? props.pathname.substring(1) : props.pathname,
       ].join('/')}`,
@@ -238,11 +239,13 @@ export class KibanaClient {
     evaluationConnectorId,
     persist,
     suite,
+    scopes,
   }: {
     connectorId: string;
     evaluationConnectorId: string;
     persist: boolean;
     suite?: Mocha.Suite;
+    scopes: AssistantScope[];
   }): ChatClient {
     function getMessages(message: string | Array<Message['message']>): Array<Message['message']> {
       if (typeof message === 'string') {
@@ -370,6 +373,7 @@ export class KibanaClient {
             connectorId: connectorIdOverride || connectorId,
             functions: functions.map((fn) => pick(fn, 'name', 'description', 'parameters')),
             functionCall,
+            scopes,
           };
 
         return that.axios.post(
@@ -459,6 +463,7 @@ export class KibanaClient {
                 connectorId,
                 persist,
                 title: currentTitle,
+                scopes,
               },
               { responseType: 'stream', timeout: NaN }
             )
@@ -534,7 +539,7 @@ export class KibanaClient {
                 which helps our users make sense of their Observability data.
 
                 Your goal is to verify whether a conversation between the user and the assistant matches the given criteria.
-                
+
                 For each criterion, calculate a score. Explain your score, by describing what the assistant did right, and describing and quoting what the
                 assistant did wrong, where it could improve, and what the root cause was in case of a failure.`,
               },
@@ -544,13 +549,13 @@ export class KibanaClient {
               message: {
                 role: MessageRole.User,
                 content: `Evaluate the conversation according to the following criteria, using the "scores" tool:
-                
+
                 ${criteria.map((criterion, index) => {
                   return `${index}: ${criterion}`;
                 })}
-                
+
                 This is the conversation:
-                
+
                 ${JSON.stringify(
                   messages
                     .filter((msg) => msg.role !== MessageRole.System)

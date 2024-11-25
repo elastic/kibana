@@ -200,6 +200,18 @@ describe('SyntheticsService', () => {
         isServiceManaged: true,
         status: LocationStatus.EXPERIMENTAL,
       },
+      {
+        geo: {
+          lat: 0,
+          lon: 0,
+        },
+        id: 'dev2',
+        isInvalid: false,
+        isServiceManaged: true,
+        label: 'Dev Service 2',
+        status: 'experimental',
+        url: 'http://localhost',
+      },
     ]);
   });
 

@@ -105,6 +105,8 @@ describe('GenerationModal', () => {
     it('should call runAnalyzeLogsGraph with correct parameters', () => {
       expect(mockRunAnalyzeLogsGraph).toHaveBeenCalledWith({
         ...defaultRequest,
+        packageTitle: 'Mocked Integration title',
+        dataStreamTitle: 'Mocked Data Stream Title',
         logSamples: integrationSettingsNonJSON.logSamples ?? [],
       });
     });
@@ -277,7 +279,78 @@ describe('GenerationModal', () => {
       );
     });
 
-    describe('when the retrying successfully', () => {
+    describe('when retrying successfully', () => {
+      beforeEach(async () => {
+        await act(async () => {
+          result.getByTestId('retryButton').click();
+          await waitFor(() => expect(mockOnComplete).toBeCalled());
+        });
+      });
+
+      it('should not render the error callout', () => {
+        expect(result.queryByTestId('generationErrorCallout')).not.toBeInTheDocument();
+      });
+      it('should not render the retry button', () => {
+        expect(result.queryByTestId('retryButton')).not.toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('when there are errors and a message body with error code', () => {
+    const errorMessage = 'error message';
+    const errorCode = 'error code';
+    const error = JSON.stringify({
+      body: {
+        message: errorMessage,
+        attributes: {
+          errorCode,
+        },
+      },
+    });
+    let result: RenderResult;
+    beforeEach(async () => {
+      mockRunEcsGraph.mockImplementationOnce(() => {
+        throw new Error(error);
+      });
+
+      await act(async () => {
+        result = render(
+          <GenerationModal
+            integrationSettings={integrationSettings}
+            connector={connector}
+            onComplete={mockOnComplete}
+            onClose={mockOnClose}
+          />,
+          { wrapper }
+        );
+        await waitFor(() =>
+          expect(result.queryByTestId('generationErrorCallout')).toBeInTheDocument()
+        );
+      });
+    });
+
+    it('should show the error text', () => {
+      expect(result.queryByText(error)).toBeInTheDocument();
+    });
+    it('should render the retry button', () => {
+      expect(result.queryByTestId('retryButton')).toBeInTheDocument();
+    });
+    it('should report telemetry for generation error', () => {
+      expect(mockReportEvent).toHaveBeenCalledWith(
+        TelemetryEventType.IntegrationAssistantGenerationComplete,
+        {
+          sessionId: expect.any(String),
+          sampleRows: integrationSettings.logSamples?.length ?? 0,
+          actionTypeId: connector.actionTypeId,
+          model: expect.anything(),
+          provider: connector.apiProvider ?? 'unknown',
+          durationMs: expect.any(Number),
+          errorMessage: error,
+        }
+      );
+    });
+
+    describe('when retrying successfully', () => {
       beforeEach(async () => {
         await act(async () => {
           result.getByTestId('retryButton').click();

@@ -18,7 +18,7 @@ import { Logger } from '@kbn/core/server';
 import { TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { TaskInstanceWithDeprecatedFields } from '@kbn/task-manager-plugin/server/task';
 import { bulkCreateRulesSo } from '../../../../data/rule';
-import { RawRule, RawRuleAction } from '../../../../types';
+import { RawRule } from '../../../../types';
 import { RuleDomain, RuleParams } from '../../types';
 import { convertRuleIdsToKueryNode } from '../../../../lib';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
@@ -37,7 +37,6 @@ import {
 } from '../../../../rules_client/lib';
 import { RulesClientContext, BulkOperationError } from '../../../../rules_client/types';
 import { validateScheduleLimit } from '../get_schedule_frequency';
-import { RuleAttributes } from '../../../../data/rule/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { BulkEnableRulesParams, BulkEnableRulesResult } from './types';
 import { bulkEnableRulesParamsSchema } from './schemas';
@@ -122,7 +121,7 @@ export const bulkEnableRules = async <Params extends RuleParams>(
     // when we are doing the bulk delete and this should fix itself
     const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
     const ruleDomain: RuleDomain<Params> = transformRuleAttributesToRuleDomain<Params>(
-      attributes as RuleAttributes,
+      attributes as RawRule,
       {
         id,
         logger: context.logger,
@@ -159,7 +158,7 @@ const bulkEnableRulesWithOCC = async (
       type: 'rules',
     },
     async () =>
-      await context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RuleAttributes>(
+      await context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>(
         {
           filter,
           type: RULE_SAVED_OBJECT_TYPE,
@@ -169,8 +168,8 @@ const bulkEnableRulesWithOCC = async (
       )
   );
 
-  const rulesFinderRules: Array<SavedObjectsFindResult<RuleAttributes>> = [];
-  const rulesToEnable: Array<SavedObjectsBulkUpdateObject<RuleAttributes>> = [];
+  const rulesFinderRules: Array<SavedObjectsFindResult<RawRule>> = [];
+  const rulesToEnable: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
   const tasksToSchedule: TaskInstanceWithDeprecatedFields[] = [];
   const errors: BulkOperationError[] = [];
   const ruleNameToRuleIdMapping: Record<string, string> = {};
@@ -204,6 +203,8 @@ const bulkEnableRulesWithOCC = async (
       await pMap(
         rulesFinderRules,
         async (rule) => {
+          const ruleName = rule.attributes.name;
+
           try {
             if (scheduleValidationError) {
               throw Error(scheduleValidationError);
@@ -215,16 +216,15 @@ const bulkEnableRulesWithOCC = async (
                 throw Error(`Rule not authorized for bulk enable - ${error.message}`);
               }
             }
-            if (rule.attributes.name) {
-              ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
+            if (ruleName) {
+              ruleNameToRuleIdMapping[rule.id] = ruleName;
             }
 
-            // TODO (http-versioning) Remove RawRuleAction and RawRule casts
             const migratedActions = await migrateLegacyActions(context, {
               ruleId: rule.id,
-              actions: rule.attributes.actions as RawRuleAction[],
+              actions: rule.attributes.actions,
               references: rule.references,
-              attributes: rule.attributes as RawRule,
+              attributes: rule.attributes,
             });
 
             const updatedAttributes = updateMetaAttributes(context, {
@@ -232,7 +232,7 @@ const bulkEnableRulesWithOCC = async (
               ...(!rule.attributes.apiKey &&
                 (await createNewAPIKeySet(context, {
                   id: rule.attributes.alertTypeId,
-                  ruleName: rule.attributes.name,
+                  ruleName,
                   username,
                   shouldUpdateApiKey: true,
                 }))),
@@ -293,7 +293,11 @@ const bulkEnableRulesWithOCC = async (
               ruleAuditEvent({
                 action: RuleAuditAction.ENABLE,
                 outcome: 'unknown',
-                savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: rule.id },
+                savedObject: {
+                  type: RULE_SAVED_OBJECT_TYPE,
+                  id: rule.id,
+                  name: ruleName,
+                },
               })
             );
           } catch (error) {
@@ -307,6 +311,11 @@ const bulkEnableRulesWithOCC = async (
             context.auditLogger?.log(
               ruleAuditEvent({
                 action: RuleAuditAction.ENABLE,
+                savedObject: {
+                  type: RULE_SAVED_OBJECT_TYPE,
+                  id: rule.id,
+                  name: ruleName,
+                },
                 error,
               })
             );
@@ -333,16 +342,14 @@ const bulkEnableRulesWithOCC = async (
       // bulk_disable, bulk_enable, etc. to fix this cast
       bulkCreateRulesSo({
         savedObjectsClient: context.unsecuredSavedObjectsClient,
-        bulkCreateRuleAttributes: rulesToEnable as Array<
-          SavedObjectsBulkCreateObject<RuleAttributes>
-        >,
+        bulkCreateRuleAttributes: rulesToEnable as Array<SavedObjectsBulkCreateObject<RawRule>>,
         savedObjectsBulkCreateOptions: {
           overwrite: true,
         },
       })
   );
 
-  const rules: Array<SavedObjectsBulkUpdateObject<RuleAttributes>> = [];
+  const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
   const taskIdsToEnable: string[] = [];
 
   result.saved_objects.forEach((rule) => {
@@ -365,7 +372,7 @@ const bulkEnableRulesWithOCC = async (
   return {
     errors,
     // TODO: delete the casting when we do versioning of bulk disable api
-    rules: rules as Array<SavedObjectsBulkUpdateObject<RuleAttributes>>,
+    rules: rules as Array<SavedObjectsBulkUpdateObject<RawRule>>,
     accListSpecificForBulkOperation: [taskIdsToEnable],
   };
 };

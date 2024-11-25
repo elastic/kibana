@@ -56,7 +56,12 @@
     "@kbn/core-analytics-browser",
     "@kbn/core-lifecycle-browser",
     "@kbn/core-notifications-browser",
-    "@kbn/rison"
+    "@kbn/telemetry-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/rison",
+    "@kbn/task-manager-plugin",
+    "@kbn/core-application-browser",
+    "@kbn/field-utils"
   ],
   "exclude": [
     "target/**/*"

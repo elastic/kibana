@@ -22,6 +22,7 @@ export const bulkUntrackAlertsByQueryRoute = (
   router.post(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/alerts/_bulk_untrack_by_query`,
+      options: { access: 'internal' },
       validate: {
         body: bulkUntrackByQueryBodySchemaV1,
       },

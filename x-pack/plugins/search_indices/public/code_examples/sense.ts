@@ -6,9 +6,10 @@
  */
 
 import { INDEX_PLACEHOLDER } from '../constants';
-import { CreateIndexLanguageExamples } from '../types';
+import { IngestDataCodeDefinition } from '../types';
+import { CreateIndexLanguageExamples } from './types';
 
-export const ConsoleExamples: CreateIndexLanguageExamples = {
+export const ConsoleCreateIndexExamples: CreateIndexLanguageExamples = {
   default: {
     createIndex: ({ indexName }) => `PUT /${indexName ?? INDEX_PLACEHOLDER}`,
   },
@@ -28,4 +29,18 @@ export const ConsoleExamples: CreateIndexLanguageExamples = {
   }
 }`,
   },
+};
+
+export const ConsoleVectorsIngestDataExample: IngestDataCodeDefinition = {
+  ingestCommand: ({ indexName, sampleDocuments }) => {
+    let result = 'POST /_bulk?pretty\n';
+    sampleDocuments.forEach((document) => {
+      result += `{ "index": { "_index": "${indexName}" } }
+${JSON.stringify(document)}\n`;
+    });
+    result += '\n';
+    return result;
+  },
+  updateMappingsCommand: ({ indexName, mappingProperties }) => `PUT /${indexName}/_mapping
+${JSON.stringify({ properties: mappingProperties }, null, 2)}`,
 };

@@ -17,9 +17,15 @@ export async function createFailureIssue(
   failure: TestFailure,
   api: GithubApi,
   branch: string,
-  pipeline: string
+  pipeline: string,
+  prependTitle: string = ''
 ) {
-  const title = `Failing test: ${failure.classname} - ${failure.name}`;
+  // PrependTitle is introduced to provide some clarity by prepending the failing test title
+  // in order to give the whole info in the title according to each team's preference.
+  const title =
+    prependTitle && prependTitle.trim() !== ''
+      ? `Failing test: ${prependTitle} ${failure.classname} - ${failure.name}`
+      : `Failing test: ${failure.classname} - ${failure.name}`;
 
   // Github API body length maximum is 65536 characters
   // Let's keep consistency with Mocha output that is truncated to 8192 characters

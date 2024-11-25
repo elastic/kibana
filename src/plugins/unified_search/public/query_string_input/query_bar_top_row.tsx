@@ -20,7 +20,7 @@ import {
   isOfAggregateQueryType,
   getLanguageDisplayName,
 } from '@kbn/es-query';
-import { TextBasedLangEditor } from '@kbn/esql/public';
+import { ESQLLangEditor } from '@kbn/esql/public';
 import { EMPTY } from 'rxjs';
 import { map } from 'rxjs';
 import { throttle } from 'lodash';
@@ -51,7 +51,7 @@ import { NoDataPopover } from './no_data_popover';
 import { shallowEqual } from '../utils/shallow_equal';
 import { AddFilterPopover } from './add_filter_popover';
 import { DataViewPicker, DataViewPickerProps } from '../dataview_picker';
-import { ESQLMenuPopover } from './esql_menu_popover';
+import { ESQLMenuPopover, type ESQLMenuPopoverProps } from './esql_menu_popover';
 
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
 import type {
@@ -186,6 +186,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   submitOnBlur?: boolean;
   renderQueryInputAppend?: () => React.ReactNode;
   disableExternalPadding?: boolean;
+  onESQLDocsFlyoutVisibilityChanged?: ESQLMenuPopoverProps['onESQLDocsFlyoutVisibilityChanged'];
 }
 
 export const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -208,7 +209,7 @@ export const SharingMetaFields = React.memo(function SharingMetaFields({
   try {
     const dateRangePretty = usePrettyDuration({
       timeFrom: toAbsoluteString(from),
-      timeTo: toAbsoluteString(to),
+      timeTo: toAbsoluteString(to, true),
       quickRanges: [],
       dateFormat,
     });
@@ -728,7 +729,7 @@ export const QueryBarTopRow = React.memo(
         isQueryLangSelected &&
         props.query &&
         isOfAggregateQueryType(props.query) && (
-          <TextBasedLangEditor
+          <ESQLLangEditor
             query={props.query}
             onTextLangQueryChange={props.onTextLangQueryChange}
             errors={props.textBasedLanguageModeErrors}
@@ -774,7 +775,18 @@ export const QueryBarTopRow = React.memo(
               wrap
             >
               {props.dataViewPickerOverride || renderDataViewsPicker()}
-              {Boolean(isQueryLangSelected) && <ESQLMenuPopover />}
+              {Boolean(isQueryLangSelected) && (
+                <ESQLMenuPopover
+                  onESQLDocsFlyoutVisibilityChanged={props.onESQLDocsFlyoutVisibilityChanged}
+                  onESQLQuerySubmit={(queryString: string) => {
+                    onSubmit({
+                      query: { esql: queryString } as QT,
+                      dateRange: dateRangeRef.current,
+                    });
+                  }}
+                  adHocDataview={props.indexPatterns?.[0]}
+                />
+              )}
               <EuiFlexItem
                 grow={!shouldShowDatePickerAsBadge()}
                 style={{ minWidth: shouldShowDatePickerAsBadge() ? 'auto' : 320, maxWidth: '100%' }}

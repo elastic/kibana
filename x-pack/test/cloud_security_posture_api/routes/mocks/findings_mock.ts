@@ -32,6 +32,9 @@ export const findingsMockData = [
     orchestrator: {
       cluster: { id: 'Upper case cluster id' },
     },
+    data_stream: {
+      dataset: 'cloud_security_posture.findings',
+    },
   },
   {
     '@timestamp': '2023-06-29T02:08:44.993Z',
@@ -54,6 +57,9 @@ export const findingsMockData = [
     },
     cloud: {
       account: { id: 'Another Upper case account id' },
+    },
+    data_stream: {
+      dataset: 'cloud_security_posture.findings',
     },
   },
 ];

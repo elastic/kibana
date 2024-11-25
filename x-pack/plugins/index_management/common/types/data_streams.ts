@@ -33,15 +33,21 @@ export type DataStreamIndexFromEs = IndicesDataStreamIndex;
 
 export type Health = 'green' | 'yellow' | 'red';
 
+export type IndexMode = 'standard' | 'logsdb' | 'time_series';
+
 export interface EnhancedDataStreamFromEs extends IndicesDataStream {
+  global_max_retention?: string;
   store_size?: IndicesDataStreamsStatsDataStreamsStatsItem['store_size'];
   store_size_bytes?: IndicesDataStreamsStatsDataStreamsStatsItem['store_size_bytes'];
   maximum_timestamp?: IndicesDataStreamsStatsDataStreamsStatsItem['maximum_timestamp'];
+  metering_size_in_bytes?: number;
+  metering_doc_count?: number;
   indices: DataStreamIndexFromEs[];
   privileges: {
     delete_index: boolean;
     manage_data_stream_lifecycle: boolean;
   };
+  index_mode?: string | null;
 }
 
 export interface DataStream {
@@ -55,6 +61,9 @@ export interface DataStream {
   storageSize?: ByteSize;
   storageSizeBytes?: number;
   maxTimeStamp?: number;
+  meteringStorageSizeBytes?: number;
+  meteringStorageSize?: string;
+  meteringDocsCount?: number;
   _meta?: Metadata;
   privileges: Privileges;
   hidden: boolean;
@@ -63,7 +72,9 @@ export interface DataStream {
     enabled?: boolean;
     effective_retention?: string;
     retention_determined_by?: string;
+    globalMaxRetention?: string;
   };
+  indexMode: IndexMode;
 }
 
 export interface DataStreamIndex {

@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import {
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   ENTERPRISE_SEARCH_ELASTICSEARCH_URL,
+  CRAWLER,
 } from '../../../../../common/constants';
 
 import apiLogo from '../../../../assets/images/api_image.png';
@@ -37,6 +38,7 @@ import { HttpLogic } from '../../../shared/http/http_logic';
 
 import { ConnectorIcon } from '../../../shared/icons/connector';
 import { CrawlerIcon } from '../../../shared/icons/crawler';
+import { GithubIcon } from '../../../shared/icons/github_icon';
 import { KibanaLogic } from '../../../shared/kibana';
 
 export const IngestionSelector: React.FC = () => {
@@ -76,13 +78,22 @@ export const IngestionSelector: React.FC = () => {
         {productFeatures.hasWebCrawler && (
           <EuiFlexItem>
             <IngestionCard
-              buttonLabel={i18n.translate(
-                'xpack.enterpriseSearch.ingestSelector.method.crawlerButtonLabel',
-                {
-                  defaultMessage: 'Crawl URL',
-                }
-              )}
-              buttonIcon={CrawlerIcon}
+              buttonLabel={
+                crawlerDisabled
+                  ? i18n.translate(
+                      'xpack.enterpriseSearch.ingestSelector.method.sourceCodeButtonLabel',
+                      {
+                        defaultMessage: 'Source code',
+                      }
+                    )
+                  : i18n.translate(
+                      'xpack.enterpriseSearch.ingestSelector.method.crawler.description',
+                      {
+                        defaultMessage: 'Crawl URL',
+                      }
+                    )
+              }
+              buttonIcon={crawlerDisabled ? GithubIcon : CrawlerIcon}
               description={i18n.translate(
                 'xpack.enterpriseSearch.ingestSelector.method.crawler.description',
                 {
@@ -90,8 +101,12 @@ export const IngestionSelector: React.FC = () => {
                     'Discover, extract, and index searchable content from websites and knowledge bases.',
                 }
               )}
-              href={generatePath(ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + NEW_CRAWLER_PATH)}
-              isDisabled={crawlerDisabled}
+              href={
+                crawlerDisabled
+                  ? CRAWLER.github_repo
+                  : generatePath(ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + NEW_CRAWLER_PATH)
+              }
+              isBeta={crawlerDisabled}
               logo={crawlerLogo}
               title={i18n.translate('xpack.enterpriseSearch.ingestSelector.method.crawler', {
                 defaultMessage: 'Web Crawler',

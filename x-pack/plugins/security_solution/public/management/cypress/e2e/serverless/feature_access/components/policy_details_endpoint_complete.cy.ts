@@ -49,7 +49,7 @@ describe(
       login();
     });
 
-    it('should display upselling section for protection updates', () => {
+    it('should not display upselling section for protection updates', () => {
       loadPage(`${APP_POLICIES_PATH}/${policyId}/protectionUpdates`);
       [
         'endpointPolicy-protectionUpdatesLockedCard-title',
@@ -65,6 +65,30 @@ describe(
         'protection-updates-manifest-name-title',
       ].forEach((testSubj) => {
         cy.getByTestSubj(testSubj).should('exist').and('be.visible');
+      });
+    });
+
+    it(`should not display upselling section for custom notification`, () => {
+      const testData = ['malware', 'ransomware', 'memory', 'behaviour'];
+
+      loadPage(`${APP_POLICIES_PATH}/${policyId}/settings`);
+
+      testData.forEach((protection) => {
+        cy.getByTestSubj(`endpointPolicyForm-${protection}`).within(() => {
+          cy.getByTestSubj(`endpointPolicyForm-${protection}-enableDisableSwitch`).click();
+          // User should not see the locked card since the feature is available under Endpoint Complete tier
+          [
+            'endpointPolicy-customNotificationLockedCard-title',
+            'endpointPolicy-customNotificationLockedCard',
+            'endpointPolicy-customNotificationLockedCard-badge',
+          ].forEach((testSubj) => {
+            cy.getByTestSubj(testSubj).should('not.exist');
+          });
+          // User should see the custom notification section
+          cy.getByTestSubj(`endpointPolicyForm-${protection}-notifyUser-customMessage`)
+            .should('exist')
+            .and('be.visible');
+        });
       });
     });
   }

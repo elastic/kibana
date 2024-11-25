@@ -48,8 +48,7 @@ describe('GlobalDataTagsTable', () => {
         React.ComponentProps<typeof GlobalDataTagsTable>['updateAgentPolicy']
       >((policy) => {
         mockUpdateAgentPolicy(policy);
-        // @ts-expect-error - TODO: fix this, types do not match
-        _updateAgentPolicy(policy);
+        _updateAgentPolicy({ ...policy, global_data_tags: policy.global_data_tags ?? [] });
       }, []);
 
       return (
@@ -126,7 +125,7 @@ describe('GlobalDataTagsTable', () => {
         { name: 'newTag2', value: '123 123' },
       ],
     });
-  });
+  }, 10000);
 
   it('should edit an existing tag', async () => {
     renderComponent(globalDataTags);

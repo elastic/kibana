@@ -22,16 +22,16 @@ export function registerGetApmDownstreamDependenciesFunction({
   registerFunction(
     {
       name: 'get_apm_downstream_dependencies',
-      description: `Get the downstream dependencies (services or uninstrumented backends) for a 
-      service. This allows you to map the downstream dependency name to a service, by 
-      returning both span.destination.service.resource and service.name. Use this to 
+      description: `Get the downstream dependencies (services or uninstrumented backends) for a
+      service. This allows you to map the downstream dependency name to a service, by
+      returning both span.destination.service.resource and service.name. Use this to
       drilldown further if needed.`,
       descriptionForUser: i18n.translate(
         'xpack.apm.observabilityAiAssistant.functions.registerGetApmDownstreamDependencies.descriptionForUser',
         {
-          defaultMessage: `Get the downstream dependencies (services or uninstrumented backends) for a 
-      service. This allows you to map the dowstream dependency name to a service, by 
-      returning both span.destination.service.resource and service.name. Use this to 
+          defaultMessage: `Get the downstream dependencies (services or uninstrumented backends) for a
+      service. This allows you to map the dowstream dependency name to a service, by
+      returning both span.destination.service.resource and service.name. Use this to
       drilldown further if needed.`,
         }
       ),

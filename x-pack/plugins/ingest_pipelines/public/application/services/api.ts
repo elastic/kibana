@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
+import { HttpSetup, ResponseErrorBody } from '@kbn/core/public';
 
-import { FieldCopyAction, Pipeline } from '../../../common/types';
+import type { FieldCopyAction, GeoipDatabase, Pipeline } from '../../../common/types';
 import { API_BASE_PATH } from '../../../common/constants';
 import {
   UseRequestConfig,
@@ -139,6 +139,39 @@ export class ApiService {
       body: JSON.stringify(reqBody),
     });
     return result;
+  }
+
+  public useLoadDatabases() {
+    return this.useRequest<GeoipDatabase[], ResponseErrorBody>({
+      path: `${API_BASE_PATH}/databases`,
+      method: 'get',
+    });
+  }
+
+  public async createDatabase(database: {
+    databaseType: string;
+    maxmind?: string;
+    databaseName: string;
+  }) {
+    return this.sendRequest({
+      path: `${API_BASE_PATH}/databases`,
+      method: 'post',
+      body: JSON.stringify(database),
+    });
+  }
+
+  public async deleteDatabase(id: string) {
+    return this.sendRequest({
+      path: `${API_BASE_PATH}/databases/${id}`,
+      method: 'delete',
+    });
+  }
+
+  public useLoadManageProcessorsPrivileges() {
+    return this.useRequest<{ hasAllPrivileges: boolean }>({
+      path: `${API_BASE_PATH}/privileges/manage_processors`,
+      method: 'get',
+    });
   }
 }
 

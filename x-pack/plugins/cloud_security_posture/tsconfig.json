@@ -38,7 +38,6 @@
     "@kbn/monaco",
     "@kbn/utility-types",
     "@kbn/core-logging-server-mocks",
-    "@kbn/utility-types-jest",
     "@kbn/securitysolution-es-utils",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/core-elasticsearch-server",
@@ -65,7 +64,8 @@
     "@kbn/react-kibana-mount",
     "@kbn/spaces-plugin",
     "@kbn/cloud-security-posture-common",
-    "@kbn/cloud-security-posture"
+    "@kbn/cloud-security-posture",
+    "@kbn/analytics",
   ],
   "exclude": ["target/**/*"]
 }

@@ -13,6 +13,7 @@ export const ALERTS_LABEL = i18n.translate(
     defaultMessage: 'Alerts',
   }
 );
+
 export const LATEST_AND_RISKIEST_OPEN_ALERTS = (alertsCount: number) =>
   i18n.translate(
     'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.latestAndRiskiestOpenAlertsLabel',
@@ -105,26 +106,5 @@ export const KNOWLEDGE_BASE_ELSER_LABEL = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.elserLabel',
   {
     defaultMessage: 'ELSER Configured',
-  }
-);
-
-export const ESQL_LABEL = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.esqlLabel',
-  {
-    defaultMessage: 'ES|QL Knowledge Base Documents',
-  }
-);
-
-export const ESQL_DESCRIPTION = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.esqlDescription',
-  {
-    defaultMessage: 'Knowledge Base docs for generating ES|QL queries',
-  }
-);
-
-export const ESQL_DESCRIPTION_INSTALLED = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.esqlInstalledDescription',
-  {
-    defaultMessage: 'ES|QL Knowledge Base docs loaded',
   }
 );

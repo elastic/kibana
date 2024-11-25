@@ -9,34 +9,27 @@ import {
   EuiDescribedFormGroup,
   EuiFieldText,
   EuiFormRow,
-  EuiLoadingSpinner,
   EuiText,
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
 import type { ChangeEvent } from 'react';
-import React, { Component, lazy, Suspense } from 'react';
+import React, { Component } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { CustomizeSpaceAvatar } from './customize_space_avatar';
-import { getSpaceAvatarComponent, getSpaceColor, getSpaceInitials } from '../../../space_avatar';
-import type { FormValues } from '../../edit_space/manage_space_page';
+import { getSpaceColor, getSpaceInitials } from '../../../space_avatar';
 import type { SpaceValidator } from '../../lib';
 import { toSpaceIdentifier } from '../../lib';
+import type { CustomizeSpaceFormValues } from '../../types';
 import { SectionPanel } from '../section_panel';
-
-// No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
-const LazySpaceAvatar = lazy(() =>
-  getSpaceAvatarComponent().then((component) => ({ default: component }))
-);
 
 interface Props {
   validator: SpaceValidator;
-  space: FormValues;
+  space: CustomizeSpaceFormValues;
   editingExistingSpace: boolean;
-  onChange: (space: FormValues) => void;
+  onChange: (space: CustomizeSpaceFormValues) => void;
   title?: string;
 }
 
@@ -71,7 +64,7 @@ export class CustomizeSpace extends Component<Props, State> {
           description={i18n.translate(
             'xpack.spaces.management.manageSpacePage.describeSpaceDescription',
             {
-              defaultMessage: "Give your space a name that's memorable.",
+              defaultMessage: 'Give your space a meaningful name and description.',
             }
           )}
           fullWidth
@@ -112,7 +105,7 @@ export class CustomizeSpace extends Component<Props, State> {
             helpText={i18n.translate(
               'xpack.spaces.management.manageSpacePage.spaceDescriptionHelpText',
               {
-                defaultMessage: 'The description appears on the space selection screen.',
+                defaultMessage: 'Appears on the space selection screen and spaces list.',
               }
             )}
             {...validator.validateSpaceDescription(this.props.space)}
@@ -155,58 +148,6 @@ export class CustomizeSpace extends Component<Props, State> {
               />
             </EuiFormRow>
           )}
-        </EuiDescribedFormGroup>
-
-        <EuiDescribedFormGroup
-          title={
-            <EuiTitle size="xs">
-              <h3>
-                <FormattedMessage
-                  id="xpack.spaces.management.manageSpacePage.avatarTitle"
-                  defaultMessage="Create an avatar"
-                />
-              </h3>
-            </EuiTitle>
-          }
-          description={
-            <>
-              <p>
-                {i18n.translate('xpack.spaces.management.manageSpacePage.avatarDescription', {
-                  defaultMessage: 'Choose how your space avatar appears across Kibana.',
-                })}
-              </p>
-              {space.avatarType === 'image' ? (
-                <Suspense fallback={<EuiLoadingSpinner />}>
-                  <LazySpaceAvatar
-                    space={{
-                      ...space,
-                      initials: '?',
-                      name: undefined,
-                    }}
-                    size="xl"
-                  />
-                </Suspense>
-              ) : (
-                <Suspense fallback={<EuiLoadingSpinner />}>
-                  <LazySpaceAvatar
-                    space={{
-                      name: '?',
-                      ...space,
-                      imageUrl: undefined,
-                    }}
-                    size="xl"
-                  />
-                </Suspense>
-              )}
-            </>
-          }
-          fullWidth
-        >
-          <CustomizeSpaceAvatar
-            space={this.props.space}
-            onChange={this.onAvatarChange}
-            validator={validator}
-          />
         </EuiDescribedFormGroup>
       </SectionPanel>
     );
@@ -258,7 +199,7 @@ export class CustomizeSpace extends Component<Props, State> {
     });
   };
 
-  public onAvatarChange = (space: FormValues) => {
+  public onAvatarChange = (space: CustomizeSpaceFormValues) => {
     this.props.onChange(space);
   };
 }

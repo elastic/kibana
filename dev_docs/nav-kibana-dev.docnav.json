@@ -51,6 +51,9 @@
         },
         {
           "id": "kibGitHub"
+        },
+        {
+          "id": "kibThirdPartyDependencies"
         }
       ]
     },
@@ -98,7 +101,10 @@
           "id": "kibBuildingBlocks"
         },
         {
-          "id": "kibDevDocsSecurityIntro"
+          "id": "kibDevDocsSecurityAPIAuthorization"
+        },
+        {
+          "id": "kibDevDocsSecurityKibanaSystemUser"
         },
         {
           "id": "kibDevFeaturePrivileges",
@@ -136,10 +142,6 @@
         },
         {
           "id": "kibDevDocsEmbeddables"
-        },
-        {
-          "id": "kibCloudExperimentsPlugin",
-          "label": "A/B testing on Elastic Cloud"
         }
       ]
     },
@@ -181,8 +183,13 @@
           "label": "data.search"
         },
         {
-          "id": "kibDevTutorialFileService",
-          "label": "File service"
+          "id": "kibDevTutorialScreenshotting",
+          "label": "Screenshotting",
+          "items": [
+            {
+              "id": "kibDevDocsUpdatingPuppeteerAndChromium"
+            }
+          ]
         },
         {
           "id": "kibDevTutorialDataViews"
@@ -205,6 +212,10 @@
         },
         {
           "id": "kibDevTutorialCcsSetup"
+        },
+        {
+          "id": "kibFeatureFlagsService",
+          "label": "Feature Flags"
         }
       ]
     },
@@ -222,7 +233,7 @@
           "id": "ktCustomServerlessImage"
         },
         {
-          "id": "kibDevTutorialsServerlessProjectNavigation"
+          "id": "kibDevTutorialsSolutionNavigation"
         }
       ]
     },
@@ -240,8 +251,8 @@
       "pageId": "kibDevDocsSharedUxOverview",
       "items": [
         {
-          "label": "Serverless Project Navigation",
-          "id": "kibDevTutorialsServerlessProjectNavigation"
+          "label": "Solution Navigation (stateful solution nav and serverless navigation",
+          "id": "kibDevTutorialsSolutionNavigation"
         },
         {
           "id": "kibDevTutorialFileService",
@@ -261,10 +272,6 @@
           ]
         },
         {
-          "id": "kibDevTutorialScreenshotting",
-          "label": "Screenshotting"
-        },
-        {
           "id": "kibDevTutorialAdvancedSettings",
           "label": "Advanced Settings"
         },
@@ -275,6 +282,10 @@
         {
           "id": "kibDevReactKibanaContext",
           "label": "Kibana React Contexts"
+        },
+        {
+          "id": "kibDevDocsChromeRecentlyAccessed",
+          "label": "Recently Viewed"
         }
       ]
     },
@@ -612,9 +623,6 @@
         },
         {
           "id": "kibTelemetryCollectionManagerPluginApi"
-        },
-        {
-          "id": "kibTelemetryCollectionXpackPluginApi"
         },
         {
           "id": "kibTelemetryManagementSectionPluginApi"

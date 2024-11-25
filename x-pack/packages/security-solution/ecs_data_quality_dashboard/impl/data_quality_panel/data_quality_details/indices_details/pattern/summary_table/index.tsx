@@ -12,7 +12,6 @@ import React, { useCallback, useMemo } from 'react';
 import { defaultSort } from '../../../../constants';
 import { IndexSummaryTableItem, SortConfig } from '../../../../types';
 import { useDataQualityContext } from '../../../../data_quality_context';
-import { UseIndicesCheckCheckState } from '../../../../hooks/use_indices_check/types';
 import { MIN_PAGE_SIZE } from '../constants';
 import { getShowPagination } from './utils/get_show_pagination';
 
@@ -20,19 +19,18 @@ export interface Props {
   getTableColumns: ({
     formatBytes,
     formatNumber,
-    checkState,
     isILMAvailable,
     pattern,
-    onExpandAction,
     onCheckNowAction,
+    onViewHistoryAction,
   }: {
     formatBytes: (value: number | undefined) => string;
     formatNumber: (value: number | undefined) => string;
-    checkState: UseIndicesCheckCheckState;
     isILMAvailable: boolean;
     pattern: string;
-    onExpandAction: (indexName: string) => void;
     onCheckNowAction: (indexName: string) => void;
+    onViewHistoryAction: (indexName: string) => void;
+    firstIndexName?: string;
   }) => Array<EuiBasicTableColumn<IndexSummaryTableItem>>;
   items: IndexSummaryTableItem[];
   pageIndex: number;
@@ -42,9 +40,8 @@ export interface Props {
   setPageSize: (pageSize: number) => void;
   setSorting: (sortConfig: SortConfig) => void;
   sorting: SortConfig;
-  onExpandAction: (indexName: string) => void;
   onCheckNowAction: (indexName: string) => void;
-  checkState: UseIndicesCheckCheckState;
+  onViewHistoryAction: (indexName: string) => void;
 }
 
 const SummaryTableComponent: React.FC<Props> = ({
@@ -57,9 +54,8 @@ const SummaryTableComponent: React.FC<Props> = ({
   setPageSize,
   setSorting,
   sorting,
-  onExpandAction,
   onCheckNowAction,
-  checkState,
+  onViewHistoryAction,
 }) => {
   const { isILMAvailable, formatBytes, formatNumber } = useDataQualityContext();
   const columns = useMemo(
@@ -67,21 +63,21 @@ const SummaryTableComponent: React.FC<Props> = ({
       getTableColumns({
         formatBytes,
         formatNumber,
-        checkState,
         isILMAvailable,
         pattern,
-        onExpandAction,
         onCheckNowAction,
+        onViewHistoryAction,
+        firstIndexName: items[0]?.indexName,
       }),
     [
+      getTableColumns,
       formatBytes,
       formatNumber,
-      getTableColumns,
-      checkState,
       isILMAvailable,
-      onCheckNowAction,
-      onExpandAction,
       pattern,
+      onCheckNowAction,
+      onViewHistoryAction,
+      items,
     ]
   );
   const getItemId = useCallback((item: IndexSummaryTableItem) => item.indexName, []);

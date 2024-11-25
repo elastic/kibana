@@ -15,6 +15,7 @@ import {
   enableSecrets,
 } from '../../helpers';
 import { testUsers } from '../test_users';
+import { getInstallationInfo } from './helper';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -26,11 +27,6 @@ export default function (providerContext: FtrProviderContext) {
 
   const expectIdArraysEqual = (arr1: any[], arr2: any[]) => {
     expect(sortBy(arr1, 'id')).to.eql(sortBy(arr2, 'id'));
-  };
-
-  const getInstallationSavedObject = async (name: string, version: string) => {
-    const res = await supertest.get(`/api/fleet/epm/packages/${name}/${version}`).expect(200);
-    return res.body.item.savedObject.attributes;
   };
 
   const getPackagePolicyById = async (id: string) => {
@@ -935,7 +931,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        const installation = await getInstallationSavedObject('integration_to_input', '2.0.0');
+        const installation = await getInstallationInfo(supertest, 'integration_to_input', '2.0.0');
 
         expectIdArraysEqual(installation.installed_es, [
           // assets from version 1.0.0
@@ -948,6 +944,7 @@ export default function (providerContext: FtrProviderContext) {
           { id: 'logs-somedataset', type: 'index_template' },
           { id: 'logs-somedataset@package', type: 'component_template' },
           { id: 'logs-somedataset@custom', type: 'component_template' },
+          { id: 'logs@custom', type: 'component_template' },
         ]);
 
         const dataset3PkgComponentTemplate = await getComponentTemplate('logs-somedataset@package');

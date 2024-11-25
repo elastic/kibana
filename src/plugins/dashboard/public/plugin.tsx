@@ -7,75 +7,79 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
-import { BehaviorSubject } from 'rxjs';
-import { filter, map } from 'rxjs';
+import { BehaviorSubject, filter, map } from 'rxjs';
 
-import {
-  App,
-  Plugin,
-  AppUpdater,
-  ScopedHistory,
-  type CoreSetup,
-  type CoreStart,
-  AppMountParameters,
-  DEFAULT_APP_CATEGORIES,
-  PluginInitializerContext,
-} from '@kbn/core/public';
-import type {
-  ScreenshotModePluginSetup,
-  ScreenshotModePluginStart,
-} from '@kbn/screenshot-mode-plugin/public';
-import type {
-  UsageCollectionSetup,
-  UsageCollectionStart,
-} from '@kbn/usage-collection-plugin/public';
-import { APP_WRAPPER_CLASS } from '@kbn/core/public';
-import { type UiActionsSetup, type UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
-import { createKbnUrlTracker } from '@kbn/kibana-utils-plugin/public';
-import type { VisualizationsStart } from '@kbn/visualizations-plugin/public';
-import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
-import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
+import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
+import {
+  APP_WRAPPER_CLASS,
+  App,
+  AppMountParameters,
+  AppUpdater,
+  DEFAULT_APP_CATEGORIES,
+  Plugin,
+  PluginInitializerContext,
+  ScopedHistory,
+  type CoreSetup,
+  type CoreStart,
+} from '@kbn/core/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
-import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public/plugin';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { i18n } from '@kbn/i18n';
+import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
+import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
+import { createKbnUrlTracker } from '@kbn/kibana-utils-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import type {
   ObservabilityAIAssistantPublicSetup,
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type {
+  ScreenshotModePluginSetup,
+  ScreenshotModePluginStart,
+} from '@kbn/screenshot-mode-plugin/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { type UiActionsSetup, type UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
+import type {
+  UsageCollectionSetup,
+  UsageCollectionStart,
+} from '@kbn/usage-collection-plugin/public';
+import type { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 
-import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
-import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
-import { DashboardContainerFactoryDefinition } from './dashboard_container/embeddable/dashboard_container_factory';
-import { registerDashboardPanelPlacementSetting } from './dashboard_container/panel_placement';
+import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import {
-  type DashboardAppLocator,
   DashboardAppLocatorDefinition,
+  type DashboardAppLocator,
 } from './dashboard_app/locator/locator';
+import { DashboardMountContextProps } from './dashboard_app/types';
 import {
   DASHBOARD_APP_ID,
   LANDING_PAGE_PATH,
   LEGACY_DASHBOARD_APP_ID,
   SEARCH_SESSION_ID,
 } from './dashboard_constants';
-import { DashboardMountContextProps } from './dashboard_app/types';
-import type { FindDashboardsService } from './services/dashboard_content_management/types';
-import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
-import { GetPanelPlacementSettings } from './dashboard_container/panel_placement';
+import {
+  GetPanelPlacementSettings,
+  registerDashboardPanelPlacementSetting,
+} from './dashboard_container/panel_placement';
+import type { FindDashboardsService } from './services/dashboard_content_management_service/types';
+import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
+import { buildAllDashboardActions } from './dashboard_actions';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
@@ -93,12 +97,14 @@ export interface DashboardSetupDependencies {
   urlForwarding: UrlForwardingSetup;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
+  lens?: LensPublicSetup;
 }
 
 export interface DashboardStartDependencies {
   data: DataPublicPluginStart;
   dataViewEditor: DataViewEditorStart;
   embeddable: EmbeddableStart;
+  fieldFormats: FieldFormatsStart;
   inspector: InspectorStartContract;
   navigation: NavigationPublicPluginStart;
   presentationUtil: PresentationUtilPluginStart;
@@ -116,6 +122,7 @@ export interface DashboardStartDependencies {
   customBranding: CustomBrandingStart;
   serverless?: ServerlessPluginStart;
   noDataPage?: NoDataPagePluginStart;
+  lens?: LensPublicStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
 }
 
@@ -134,7 +141,6 @@ export interface DashboardStart {
 }
 
 export let resolveServicesReady: () => void;
-export const servicesReady = new Promise<void>((resolve) => (resolveServicesReady = resolve));
 
 export class DashboardPlugin
   implements
@@ -148,27 +154,9 @@ export class DashboardPlugin
   private dashboardFeatureFlagConfig?: DashboardFeatureFlagConfig;
   private locator?: DashboardAppLocator;
 
-  private async startDashboardKibanaServices(
-    coreStart: CoreStart,
-    startPlugins: DashboardStartDependencies,
-    initContext: PluginInitializerContext
-  ) {
-    const { registry, pluginServices } = await import('./services/plugin_services');
-    pluginServices.setRegistry(registry.start({ coreStart, startPlugins, initContext }));
-    resolveServicesReady();
-  }
-
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
-    {
-      share,
-      embeddable,
-      home,
-      urlForwarding,
-      data,
-      contentManagement,
-      uiActions,
-    }: DashboardSetupDependencies
+    { share, embeddable, home, urlForwarding, data, contentManagement }: DashboardSetupDependencies
   ): DashboardSetup {
     this.dashboardFeatureFlagConfig =
       this.initializerContext.config.get<DashboardFeatureFlagConfig>();
@@ -183,11 +171,14 @@ export class DashboardPlugin
         new DashboardAppLocatorDefinition({
           useHashedUrl: core.uiSettings.get('state:storeInSessionStorage'),
           getDashboardFilterFields: async (dashboardId: string) => {
-            const { pluginServices } = await import('./services/plugin_services');
-            const {
-              dashboardContentManagement: { loadDashboardState },
-            } = pluginServices.getServices();
-            return (await loadDashboardState({ id: dashboardId })).dashboardInput?.filters ?? [];
+            const [{ getDashboardContentManagementService }] = await Promise.all([
+              import('./services/dashboard_content_management_service'),
+              untilPluginStartServicesReady(),
+            ]);
+            return (
+              (await getDashboardContentManagementService().loadDashboardState({ id: dashboardId }))
+                .dashboardInput?.filters ?? []
+            );
           },
         })
       );
@@ -239,14 +230,6 @@ export class DashboardPlugin
       },
     });
 
-    core.getStartServices().then(([, deps]) => {
-      const dashboardContainerFactory = new DashboardContainerFactoryDefinition(deps.embeddable);
-      embeddable.registerEmbeddableFactory(
-        dashboardContainerFactory.type,
-        dashboardContainerFactory
-      );
-    });
-
     this.stopUrlTracking = () => {
       stopUrlTracker();
     };
@@ -262,6 +245,7 @@ export class DashboardPlugin
       mount: async (params: AppMountParameters) => {
         this.currentHistory = params.history;
         params.element.classList.add(APP_WRAPPER_CLASS);
+        await untilPluginStartServicesReady();
         const { mountApp } = await import('./dashboard_app/dashboard_router');
         appMounted();
 
@@ -340,10 +324,10 @@ export class DashboardPlugin
   }
 
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
-    this.startDashboardKibanaServices(core, plugins, this.initializerContext).then(async () => {
-      const { buildAllDashboardActions } = await import('./dashboard_actions');
+    setKibanaServices(core, plugins);
+
+    untilPluginStartServicesReady().then(() => {
       buildAllDashboardActions({
-        core,
         plugins,
         allowByValueEmbeddables: this.dashboardFeatureFlagConfig?.allowByValueEmbeddables,
       });
@@ -354,11 +338,10 @@ export class DashboardPlugin
       dashboardFeatureFlagConfig: this.dashboardFeatureFlagConfig!,
       registerDashboardPanelPlacementSetting,
       findDashboardsService: async () => {
-        const { pluginServices } = await import('./services/plugin_services');
-        const {
-          dashboardContentManagement: { findDashboards },
-        } = pluginServices.getServices();
-        return findDashboards;
+        const { getDashboardContentManagementService } = await import(
+          './services/dashboard_content_management_service'
+        );
+        return getDashboardContentManagementService().findDashboards;
       },
     };
   }

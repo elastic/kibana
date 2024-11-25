@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { IKibanaResponse } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
-import type { ConfigType } from '../../../../..';
-import { deleteTimelinesSchema } from '../../../../../../common/api/timeline';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { DeleteTimelinesRequestBody } from '../../../../../../common/api/timeline';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { TIMELINE_URL } from '../../../../../../common/constants';
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
@@ -16,12 +16,14 @@ import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 import { buildFrameworkRequest } from '../../../utils/common';
 import { deleteTimeline } from '../../../saved_object/timelines';
 
-export const deleteTimelinesRoute = (router: SecuritySolutionPluginRouter, config: ConfigType) => {
+export const deleteTimelinesRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .delete({
       path: TIMELINE_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
       access: 'public',
     })
@@ -29,10 +31,10 @@ export const deleteTimelinesRoute = (router: SecuritySolutionPluginRouter, confi
       {
         version: '2023-10-31',
         validate: {
-          request: { body: buildRouteValidationWithExcess(deleteTimelinesSchema) },
+          request: { body: buildRouteValidationWithZod(DeleteTimelinesRequestBody) },
         },
       },
-      async (context, request, response) => {
+      async (context, request, response): Promise<IKibanaResponse> => {
         const siemResponse = buildSiemResponse(response);
 
         try {
@@ -40,7 +42,7 @@ export const deleteTimelinesRoute = (router: SecuritySolutionPluginRouter, confi
           const { savedObjectIds, searchIds } = request.body;
 
           await deleteTimeline(frameworkRequest, savedObjectIds, searchIds);
-          return response.ok({ body: { data: { deleteTimeline: true } } });
+          return response.ok();
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

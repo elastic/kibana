@@ -18,7 +18,31 @@ You can also run a specific test by passing the filepath as an argument, e.g.:
 yarn jest --config x-pack/plugins/observability_solution/dataset_quality/jest.config.js x-pack/plugins/observability_solution/dataset_quality/server/routes/data_streams/get_data_streams/get_data_streams.test.ts
 ```
 
-#### API integration tests
+### Deployment-agnostic API tests
+
+The deployment-agnostic API tests are located in [`x-pack/test/api_integration/deployment_agnostic/apis/observability/dataset_quality`](/x-pack/test/api_integration/deployment_agnostic/apis/observability/dataset_quality/).
+
+#### Start server and run test (stateful)
+
+```sh
+# start server
+node scripts/functional_tests_server --config x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.stateful.config.ts
+
+# run tests
+node scripts/functional_test_runner --config x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.stateful.config.ts --include ./x-pack/test/api_integration/deployment_agnostic/apis/observability/dataset_quality/$
+```
+
+#### Start server and run test (serverless)
+
+```sh
+# start server
+node scripts/functional_tests_server --config x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.serverless.config.ts
+
+# run tests
+node scripts/functional_test_runner --config x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.serverless.config.ts --include ./x-pack/test/api_integration/deployment_agnostic/apis/observability/dataset_quality/$
+```
+
+### API integration tests
 
 | Option       | Description                                     |
 | ------------ | ----------------------------------------------- |
@@ -68,34 +92,34 @@ unset FLEET_PACKAGE_REGISTRY_PORT
 
 ### Functional Tests
 
-### Stateful
-#### FTR Server
+#### Stateful
+##### FTR Server
 ```
 yarn test:ftr:server --config ./x-pack/test/functional/apps/dataset_quality/config.ts
 ```
 
-#### FTR Runner
+##### FTR Runner
 ```
 yarn test:ftr:runner --config ./x-pack/test/functional/apps/dataset_quality/config.ts --include ./x-pack/test/functional/apps/dataset_quality/index.ts
 ```
 
-#### Running Individual Tests
+##### Running Individual Tests
 ```
 yarn test:ftr:runner --config ./x-pack/test/functional/apps/dataset_quality/config.ts --include ./x-pack/test/functional/apps/dataset_quality/$1
 ```
 
-### Serverless
+#### Serverless
 
-#### Server
+##### Server
 ```
 yarn test:ftr:server --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts
 ```
 
-#### Runner
+##### Runner
 ```
 yarn test:ftr:runner --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts --include ./x-pack/test_serverless/functional/test_suites/observability/dataset_quality/index.ts
 ```
-#### Running Individual Tests
+##### Running Individual Tests
 ```
 yarn test:ftr:runner --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts --include ./x-pack/test_serverless/functional/test_suites/observability/dataset_quality/$1
 ```

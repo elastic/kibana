@@ -12,16 +12,16 @@ import { Socket } from 'net';
 import { stringify } from 'query-string';
 import { hapiMocks } from '@kbn/hapi-mocks';
 import { schema } from '@kbn/config-schema';
-import type {
-  IRouter,
-  KibanaRequest,
-  RouteMethod,
-  RouteValidationSpec,
-  KibanaRouteOptions,
-  KibanaRequestState,
-  KibanaResponseFactory,
+import {
+  type IRouter,
+  type KibanaRequest,
+  type RouteMethod,
+  type RouteValidationSpec,
+  type KibanaRouteOptions,
+  type KibanaRequestState,
+  type KibanaResponseFactory,
 } from '@kbn/core-http-server';
-import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { createVersionedRouterMock, type MockedVersionedRouter } from './versioned_router.mock';
 
 export type RouterMock = jest.Mocked<IRouter<any>> & { versioned: MockedVersionedRouter };
@@ -84,7 +84,7 @@ function createKibanaRequestMock<P = any, Q = any, B = any>({
   const queryString = stringify(query, { sort: false });
   const url = new URL(`${path}${queryString ? `?${queryString}` : ''}`, 'http://localhost');
 
-  return CoreKibanaRequest.from<P, Q, B>(
+  return kibanaRequestFactory<P, Q, B>(
     hapiMocks.createRequest({
       app: kibanaRequestState,
       auth,
@@ -118,6 +118,19 @@ function createKibanaRequestMock<P = any, Q = any, B = any>({
   );
 }
 
+function createFakeKibanaRequestMock({
+  headers = { accept: 'something/html' },
+}: {
+  headers?: Record<string, string>;
+}): KibanaRequest {
+  const fakeRequest = {
+    headers,
+    path: '/',
+  };
+
+  return kibanaRequestFactory(fakeRequest);
+}
+
 const createResponseFactoryMock = (): jest.Mocked<KibanaResponseFactory> => ({
   ok: jest.fn(),
   created: jest.fn(),
@@ -140,5 +153,6 @@ const createResponseFactoryMock = (): jest.Mocked<KibanaResponseFactory> => ({
 export const mockRouter = {
   create: createRouterMock,
   createKibanaRequest: createKibanaRequestMock,
+  createFakeKibanaRequest: createFakeKibanaRequestMock,
   createResponseFactory: createResponseFactoryMock,
 };

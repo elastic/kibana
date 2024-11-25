@@ -13,9 +13,6 @@ import {
   EuiCodeBlock,
   EuiSpacer,
   EuiSkeletonText,
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiText,
   useGeneratedHtmlId,
   EuiIcon,
@@ -26,6 +23,7 @@ import {
 } from '@kbn/deeplinks-observability/locators';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import { ASSET_DETAILS_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
 import { getAutoDetectCommand } from './get_auto_detect_command';
 import { DASHBOARDS, useOnboardingFlow } from './use_onboarding_flow';
 import { ProgressIndicator } from '../shared/progress_indicator';
@@ -38,6 +36,7 @@ import { isSupportedLogo, LogoIcon } from '../../shared/logo_icon';
 import { FeedbackButtons } from '../shared/feedback_buttons';
 import { ObservabilityOnboardingContextValue } from '../../../plugin';
 import { useAutoDetectTelemetry } from './use_auto_detect_telemetry';
+import { SupportedIntegrationsList } from './supported_integrations_list';
 
 export const AutoDetectPanel: FunctionComponent = () => {
   const { status, data, error, refetch, installedIntegrations } = useOnboardingFlow();
@@ -58,7 +57,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
   );
 
   if (error) {
-    return <EmptyPrompt error={error} onRetryClick={refetch} />;
+    return <EmptyPrompt onboardingFlowType="auto-detect" error={error} onRetryClick={refetch} />;
   }
 
   const registryIntegrations = installedIntegrations.filter(
@@ -68,6 +67,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
     (integration) => integration.installSource === 'custom'
   );
   const dashboardLocator = share.url.locators.get(DASHBOARD_APP_LOCATOR);
+  const assetDetailsLocator = share.url.locators.get(ASSET_DETAILS_LOCATOR_ID);
 
   return (
     <EuiPanel hasBorder paddingSize="xl">
@@ -92,13 +92,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
                   </p>
                 </EuiText>
                 <EuiSpacer size="s" />
-                <EuiFlexGroup gutterSize="s">
-                  {['Apache', 'Docker', 'Nginx', 'System', 'Custom .log files'].map((item) => (
-                    <EuiFlexItem key={item} grow={false}>
-                      <EuiBadge color="hollow">{item}</EuiBadge>
-                    </EuiFlexItem>
-                  ))}
-                </EuiFlexGroup>
+                <SupportedIntegrationsList />
                 <EuiSpacer />
                 {/* Bash syntax highlighting only highlights a few random numbers (badly) so it looks less messy to go with plain text */}
                 <EuiCodeBlock paddingSize="m" language="text">
@@ -155,78 +149,133 @@ export const AutoDetectPanel: FunctionComponent = () => {
                 installedIntegrations.length > 0 ? (
                   <>
                     <EuiSpacer />
-                    {registryIntegrations.map((integration) => (
-                      <AccordionWithIcon
-                        key={integration.pkgName}
-                        id={`${accordionId}_${integration.pkgName}`}
-                        icon={
-                          isSupportedLogo(integration.pkgName) ? (
-                            <LogoIcon size="l" logo={integration.pkgName} />
-                          ) : (
-                            <EuiIcon type="desktop" size="l" />
-                          )
-                        }
-                        title={i18n.translate(
-                          'xpack.observability_onboarding.autoDetectPanel.h3.getStartedWithNginxLabel',
-                          {
-                            defaultMessage: 'Get started with {title}',
-                            values: { title: integration.title },
-                          }
-                        )}
-                        isDisabled={status !== 'dataReceived'}
-                        initialIsOpen
-                      >
-                        <GetStartedPanel
-                          integration={integration.pkgName}
-                          newTab
-                          isLoading={status !== 'dataReceived'}
-                          actionLinks={integration.kibanaAssets
-                            .filter((asset) => asset.type === 'dashboard')
-                            .map((asset) => {
-                              const dashboard = DASHBOARDS[asset.id as keyof typeof DASHBOARDS];
-                              const href =
-                                dashboardLocator?.getRedirectUrl({
-                                  dashboardId: asset.id,
-                                }) ?? '';
+                    {registryIntegrations
+                      .slice()
+                      /**
+                       * System integration should always be on top
+                       */
+                      .sort((a, b) => (a.pkgName === 'system' ? -1 : 0))
+                      .map((integration) => {
+                        let actionLinks;
 
-                              return {
-                                id: asset.id,
-                                title:
-                                  dashboard.type === 'metrics'
-                                    ? i18n.translate(
-                                        'xpack.observability_onboarding.autoDetectPanel.exploreMetricsDataTitle',
+                        switch (integration.pkgName) {
+                          case 'system':
+                            actionLinks =
+                              assetDetailsLocator !== undefined
+                                ? [
+                                    {
+                                      id: 'inventory-host-details',
+                                      title: i18n.translate(
+                                        'xpack.observability_onboarding.autoDetectPanel.systemOverviewTitle',
                                         {
                                           defaultMessage:
-                                            'Overview your metrics data with this pre-made dashboard',
-                                        }
-                                      )
-                                    : i18n.translate(
-                                        'xpack.observability_onboarding.autoDetectPanel.exploreLogsDataTitle',
-                                        {
-                                          defaultMessage:
-                                            'Overview your logs data with this pre-made dashboard',
+                                            'Overview your system health within the Hosts Inventory',
                                         }
                                       ),
-                                label:
-                                  dashboard.type === 'metrics'
-                                    ? i18n.translate(
-                                        'xpack.observability_onboarding.autoDetectPanel.exploreMetricsDataLabel',
+                                      label: i18n.translate(
+                                        'xpack.observability_onboarding.autoDetectPanel.systemOverviewLabel',
                                         {
                                           defaultMessage: 'Explore metrics data',
                                         }
-                                      )
-                                    : i18n.translate(
-                                        'xpack.observability_onboarding.autoDetectPanel.exploreLogsDataLabel',
-                                        {
-                                          defaultMessage: 'Explore logs data',
-                                        }
                                       ),
-                                href,
-                              };
-                            })}
-                        />
-                      </AccordionWithIcon>
-                    ))}
+                                      href: assetDetailsLocator.getRedirectUrl({
+                                        assetType: 'host',
+                                        assetId: integration.metadata?.hostname,
+                                      }),
+                                    },
+                                  ]
+                                : [];
+                            break;
+                          default:
+                            actionLinks =
+                              dashboardLocator !== undefined
+                                ? integration.kibanaAssets
+                                    .filter((asset) => asset.type === 'dashboard')
+                                    .map((asset) => {
+                                      const dashboard =
+                                        DASHBOARDS[asset.id as keyof typeof DASHBOARDS];
+                                      const href = dashboardLocator.getRedirectUrl({
+                                        dashboardId: asset.id,
+                                      });
+
+                                      return {
+                                        id: asset.id,
+                                        title:
+                                          dashboard.type === 'metrics'
+                                            ? i18n.translate(
+                                                'xpack.observability_onboarding.autoDetectPanel.exploreMetricsDataTitle',
+                                                {
+                                                  defaultMessage:
+                                                    'Overview your metrics data with this pre-made dashboard',
+                                                }
+                                              )
+                                            : i18n.translate(
+                                                'xpack.observability_onboarding.autoDetectPanel.exploreLogsDataTitle',
+                                                {
+                                                  defaultMessage:
+                                                    'Overview your logs data with this pre-made dashboard',
+                                                }
+                                              ),
+                                        label:
+                                          dashboard.type === 'metrics'
+                                            ? i18n.translate(
+                                                'xpack.observability_onboarding.autoDetectPanel.exploreMetricsDataLabel',
+                                                {
+                                                  defaultMessage: 'Explore metrics data',
+                                                }
+                                              )
+                                            : i18n.translate(
+                                                'xpack.observability_onboarding.autoDetectPanel.exploreLogsDataLabel',
+                                                {
+                                                  defaultMessage: 'Explore logs data',
+                                                }
+                                              ),
+                                        href,
+                                      };
+                                    })
+                                : [];
+                        }
+
+                        return (
+                          <AccordionWithIcon
+                            key={integration.pkgName}
+                            id={`${accordionId}_${integration.pkgName}`}
+                            icon={
+                              isSupportedLogo(integration.pkgName) ? (
+                                <LogoIcon size="l" logo={integration.pkgName} />
+                              ) : (
+                                <EuiIcon type="desktop" size="l" />
+                              )
+                            }
+                            title={i18n.translate(
+                              'xpack.observability_onboarding.autoDetectPanel.h3.getStartedWithNginxLabel',
+                              {
+                                defaultMessage: 'Get started with {title}',
+                                values: { title: integration.title },
+                              }
+                            )}
+                            isDisabled={status !== 'dataReceived'}
+                            initialIsOpen
+                          >
+                            <GetStartedPanel
+                              onboardingFlowType="auto-detect"
+                              dataset={integration.pkgName}
+                              onboardingId={data?.onboardingFlow?.id}
+                              telemetryEventContext={{
+                                autoDetect: {
+                                  installSource: integration.installSource,
+                                  pkgVersion: integration.pkgVersion,
+                                  title: integration.title,
+                                },
+                              }}
+                              integration={integration.pkgName}
+                              newTab
+                              isLoading={status !== 'dataReceived'}
+                              actionLinks={actionLinks}
+                            />
+                          </AccordionWithIcon>
+                        );
+                      })}
                     {customIntegrations.length > 0 && (
                       <AccordionWithIcon
                         id={`${accordionId}_custom`}

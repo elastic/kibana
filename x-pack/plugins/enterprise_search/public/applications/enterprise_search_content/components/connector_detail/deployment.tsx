@@ -30,6 +30,7 @@ import { ConnectorStatus } from '@kbn/search-connectors';
 
 import { Status } from '../../../../../common/types/api';
 
+import { KibanaLogic } from '../../../shared/kibana';
 import { GetApiKeyByIdLogic } from '../../api/api_key/get_api_key_by_id_api_logic';
 
 import { GenerateConnectorApiKeyApiLogic } from '../../api/connector/generate_connector_api_key_api_logic';
@@ -48,6 +49,7 @@ export const ConnectorDeployment: React.FC = () => {
   const [selectedDeploymentMethod, setSelectedDeploymentMethod] = useState<'docker' | 'source'>(
     'docker'
   );
+  const { kibanaVersion } = useValues(KibanaLogic);
   const { generatedData, isGenerateLoading } = useValues(DeploymentLogic);
   const { index, isLoading, connector, connectorId } = useValues(ConnectorViewLogic);
   const { fetchConnector } = useActions(ConnectorViewLogic);
@@ -62,30 +64,31 @@ export const ConnectorDeployment: React.FC = () => {
   >('search:connector-ui-options', {});
 
   useEffect(() => {
+    if (connectorId && connector && connector.api_key_id) {
+      getApiKeyById(connector.api_key_id);
+    }
+  }, [connector, connectorId]);
+
+  const selectDeploymentMethod = (deploymentMethod: 'docker' | 'source') => {
+    if (connector) {
+      setSelectedDeploymentMethod(deploymentMethod);
+      setConnectorUiOptions({
+        ...connectorUiOptions,
+        [connector.id]: { deploymentMethod },
+      });
+    }
+  };
+
+  useEffect(() => {
     if (connectorUiOptions && connectorId && connectorUiOptions[connectorId]) {
       setSelectedDeploymentMethod(connectorUiOptions[connectorId].deploymentMethod);
     } else {
       selectDeploymentMethod('docker');
     }
   }, [connectorUiOptions, connectorId]);
-
-  useEffect(() => {
-    if (connectorId && connector && connector.api_key_id) {
-      getApiKeyById(connector.api_key_id);
-    }
-  }, [connector, connectorId]);
-
   if (!connector || connector.is_native) {
     return <></>;
   }
-
-  const selectDeploymentMethod = (deploymentMethod: 'docker' | 'source') => {
-    setSelectedDeploymentMethod(deploymentMethod);
-    setConnectorUiOptions({
-      ...connectorUiOptions,
-      [connector.id]: { deploymentMethod },
-    });
-  };
 
   const hasApiKey = !!(connector.api_key_id ?? generatedData?.apiKey);
 
@@ -133,7 +136,7 @@ export const ConnectorDeployment: React.FC = () => {
                       <EuiText size="s">
                         <FormattedMessage
                           id="xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.configureIndexAndApiKey.description.source"
-                          defaultMessage="Generate a connector configuration with the attached index and a new API key. This information will be added to the {configYaml} file of your connector. Alternatively use an existing API key. "
+                          defaultMessage="We automatically generate a connector configuration, an API key, and create a new Elasticsearch index. Connector information and API key will be added to the {configYaml} file of your connector. You can also use an existing API key."
                           values={{
                             configYaml: (
                               <EuiCode>
@@ -175,7 +178,7 @@ export const ConnectorDeployment: React.FC = () => {
                   title: i18n.translate(
                     'xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.generateApiKey.title',
                     {
-                      defaultMessage: 'Configure index and API key',
+                      defaultMessage: 'Create index and generate API key',
                     }
                   ),
                   titleSize: 'xs',
@@ -190,6 +193,7 @@ export const ConnectorDeployment: React.FC = () => {
                           serviceType={connector.service_type ?? ''}
                           apiKeyData={apiKey}
                           isWaitingForConnector={isWaitingForConnector}
+                          connectorVersion={kibanaVersion ? `v${kibanaVersion}` : 'main'}
                         />
                       ) : (
                         <DockerInstructionsStep
@@ -198,6 +202,7 @@ export const ConnectorDeployment: React.FC = () => {
                           serviceType={connector.service_type ?? ''}
                           isWaitingForConnector={isWaitingForConnector}
                           apiKeyData={apiKey}
+                          connectorVersion={kibanaVersion ?? ''}
                         />
                       )}
                     </>

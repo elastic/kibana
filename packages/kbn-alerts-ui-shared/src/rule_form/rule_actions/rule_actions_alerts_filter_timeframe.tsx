@@ -24,9 +24,10 @@ import {
 import deepEqual from 'fast-deep-equal';
 import { ISO_WEEKDAYS, type IsoWeekday, type AlertsFilterTimeframe } from '@kbn/alerting-types';
 import { I18N_WEEKDAY_OPTIONS_DDD } from '../../common/constants';
+import { RuleAction } from '../../common';
 
-interface RuleActionsAlertsFilterTimeframeProps {
-  state?: AlertsFilterTimeframe;
+export interface RuleActionsAlertsFilterTimeframeProps {
+  action: RuleAction;
   settings: SettingsStart;
   onChange: (update?: AlertsFilterTimeframe) => void;
 }
@@ -76,29 +77,30 @@ const useTimeFormat = (settings: SettingsStart) => {
 };
 
 export const RuleActionsAlertsFilterTimeframe: React.FC<RuleActionsAlertsFilterTimeframeProps> = ({
-  state,
+  action,
   settings,
   onChange,
 }) => {
+  const actionTimeFrame = action.alertsFilter?.timeframe;
   const timeFormat = useTimeFormat(settings);
   const [timeframe, setTimeframe] = useTimeframe({
-    initialTimeframe: state,
+    initialTimeframe: actionTimeFrame,
     settings,
   });
   const [selectedTimezone, setSelectedTimezone] = useState([{ label: timeframe.timezone }]);
 
-  const timeframeEnabled = useMemo(() => Boolean(state), [state]);
+  const timeframeEnabled = useMemo(() => Boolean(actionTimeFrame), [actionTimeFrame]);
 
   const weekdayOptions = useSortedWeekdayOptions(settings);
 
   useEffect(() => {
     const nextState = timeframeEnabled ? timeframe : undefined;
-    if (!deepEqual(state, nextState)) onChange(nextState);
-  }, [timeframeEnabled, timeframe, state, onChange]);
+    if (!deepEqual(actionTimeFrame, nextState)) onChange(nextState);
+  }, [timeframeEnabled, timeframe, actionTimeFrame, onChange]);
 
   const toggleTimeframe = useCallback(
-    () => onChange(state ? undefined : timeframe),
-    [state, timeframe, onChange]
+    () => onChange(actionTimeFrame ? undefined : timeframe),
+    [actionTimeFrame, timeframe, onChange]
   );
   const updateTimeframe = useCallback(
     (update: Partial<AlertsFilterTimeframe>) => {

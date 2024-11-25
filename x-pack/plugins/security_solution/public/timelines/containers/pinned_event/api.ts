@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { PINNED_EVENT_URL } from '../../../../common/constants';
-import type { PinnedEvent } from '../../../../common/api/timeline';
+import type { PersistPinnedEventRouteResponse } from '../../../../common/api/timeline';
 import { KibanaServices } from '../../../common/lib/kibana';
 
 export const persistPinnedEvent = async ({
@@ -23,10 +23,13 @@ export const persistPinnedEvent = async ({
   } catch (err) {
     return Promise.reject(new Error(`Failed to stringify query: ${JSON.stringify(err)}`));
   }
-  const response = await KibanaServices.get().http.patch<PinnedEvent | null>(PINNED_EVENT_URL, {
-    method: 'PATCH',
-    body: requestBody,
-    version: '2023-10-31',
-  });
+  const response = await KibanaServices.get().http.patch<PersistPinnedEventRouteResponse>(
+    PINNED_EVENT_URL,
+    {
+      method: 'PATCH',
+      body: requestBody,
+      version: '2023-10-31',
+    }
+  );
   return response;
 };

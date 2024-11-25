@@ -170,10 +170,10 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@kbn/security-authorization-core",
-                    "scope": "server",
-                    "docId": "kibKbnSecurityAuthorizationCorePluginApi",
-                    "section": "def-server.RawKibanaPrivileges",
+                    "pluginId": "@kbn/security-plugin-types-common",
+                    "scope": "common",
+                    "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                    "section": "def-common.RawKibanaPrivileges",
                     "text": "RawKibanaPrivileges"
                   }
                 ],
@@ -475,22 +475,6 @@
                 "isRequired": true
               }
             ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/security-role-management-model",
-            "id": "def-common.PrimaryFeaturePrivilege.isMinimalFeaturePrivilege",
-            "type": "Function",
-            "tags": [],
-            "label": "isMinimalFeaturePrivilege",
-            "description": [],
-            "signature": [
-              "() => boolean"
-            ],
-            "path": "x-pack/packages/security/role_management_model/src/primary_feature_privilege.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
             "returnComment": []
           },
           {

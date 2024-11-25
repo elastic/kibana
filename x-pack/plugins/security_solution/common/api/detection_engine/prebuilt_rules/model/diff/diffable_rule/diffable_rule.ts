@@ -6,12 +6,13 @@
  */
 
 import { z } from '@kbn/zod';
-
 import {
+  AlertSuppression,
   AnomalyThreshold,
-  EventCategoryOverride,
   HistoryWindowStart,
+  InvestigationFields,
   InvestigationGuide,
+  KqlQueryLanguage,
   MachineLearningJobId,
   MaxSignals,
   NewTermsFields,
@@ -19,11 +20,8 @@ import {
   RequiredFieldArray,
   RiskScore,
   RiskScoreMapping,
-  RuleAuthorArray,
   RuleDescription,
-  RuleExceptionList,
   RuleFalsePositiveArray,
-  RuleLicense,
   RuleName,
   RuleReferenceArray,
   RuleSignatureId,
@@ -37,8 +35,7 @@ import {
   ThreatIndicatorPath,
   ThreatMapping,
   Threshold,
-  TiebreakerField,
-  TimestampField,
+  ThresholdAlertSuppression,
 } from '../../../../model/rule_schema';
 
 import {
@@ -79,15 +76,13 @@ export const DiffableCommonFields = z.object({
   setup: SetupGuide,
   related_integrations: RelatedIntegrationArray,
   required_fields: RequiredFieldArray,
-  author: RuleAuthorArray,
-  license: RuleLicense,
 
   // Other domain fields
   rule_schedule: RuleSchedule, // NOTE: new field
-  exceptions_list: z.array(RuleExceptionList),
   max_signals: MaxSignals,
 
   // Optional fields
+  investigation_fields: InvestigationFields.optional(),
   rule_name_override: RuleNameOverrideObject.optional(), // NOTE: new field
   timestamp_override: TimestampOverrideObject.optional(), // NOTE: new field
   timeline_template: TimelineTemplateReference.optional(), // NOTE: new field
@@ -99,6 +94,7 @@ export const DiffableCustomQueryFields = z.object({
   type: z.literal('query'),
   kql_query: RuleKqlQuery, // NOTE: new field
   data_source: RuleDataSource.optional(), // NOTE: new field
+  alert_suppression: AlertSuppression.optional(),
 });
 
 export type DiffableSavedQueryFields = z.infer<typeof DiffableSavedQueryFields>;
@@ -106,6 +102,7 @@ export const DiffableSavedQueryFields = z.object({
   type: z.literal('saved_query'),
   kql_query: RuleKqlQuery, // NOTE: new field
   data_source: RuleDataSource.optional(), // NOTE: new field
+  alert_suppression: AlertSuppression.optional(),
 });
 
 export type DiffableEqlFields = z.infer<typeof DiffableEqlFields>;
@@ -113,9 +110,7 @@ export const DiffableEqlFields = z.object({
   type: z.literal('eql'),
   eql_query: RuleEqlQuery, // NOTE: new field
   data_source: RuleDataSource.optional(), // NOTE: new field
-  event_category_override: EventCategoryOverride.optional(),
-  timestamp_field: TimestampField.optional(),
-  tiebreaker_field: TiebreakerField.optional(),
+  alert_suppression: AlertSuppression.optional(),
 });
 
 // this is a new type of rule, no prebuilt rules created yet.
@@ -124,6 +119,7 @@ export type DiffableEsqlFields = z.infer<typeof DiffableEsqlFields>;
 export const DiffableEsqlFields = z.object({
   type: z.literal('esql'),
   esql_query: RuleEsqlQuery, // NOTE: new field
+  alert_suppression: AlertSuppression.optional(),
 });
 
 export type DiffableThreatMatchFields = z.infer<typeof DiffableThreatMatchFields>;
@@ -135,6 +131,8 @@ export const DiffableThreatMatchFields = z.object({
   threat_mapping: ThreatMapping,
   data_source: RuleDataSource.optional(), // NOTE: new field
   threat_indicator_path: ThreatIndicatorPath.optional(),
+  threat_language: KqlQueryLanguage.optional(),
+  alert_suppression: AlertSuppression.optional(),
 });
 
 export type DiffableThresholdFields = z.infer<typeof DiffableThresholdFields>;
@@ -143,6 +141,7 @@ export const DiffableThresholdFields = z.object({
   kql_query: RuleKqlQuery, // NOTE: new field
   threshold: Threshold,
   data_source: RuleDataSource.optional(), // NOTE: new field
+  alert_suppression: ThresholdAlertSuppression.optional(),
 });
 
 export type DiffableMachineLearningFields = z.infer<typeof DiffableMachineLearningFields>;
@@ -150,6 +149,7 @@ export const DiffableMachineLearningFields = z.object({
   type: z.literal('machine_learning'),
   machine_learning_job_id: MachineLearningJobId,
   anomaly_threshold: AnomalyThreshold,
+  alert_suppression: AlertSuppression.optional(),
 });
 
 export type DiffableNewTermsFields = z.infer<typeof DiffableNewTermsFields>;
@@ -159,7 +159,19 @@ export const DiffableNewTermsFields = z.object({
   new_terms_fields: NewTermsFields,
   history_window_start: HistoryWindowStart,
   data_source: RuleDataSource.optional(), // NOTE: new field
+  alert_suppression: AlertSuppression.optional(),
 });
+
+export const DiffableFieldsByTypeUnion = z.discriminatedUnion('type', [
+  DiffableCustomQueryFields,
+  DiffableSavedQueryFields,
+  DiffableEqlFields,
+  DiffableEsqlFields,
+  DiffableThreatMatchFields,
+  DiffableThresholdFields,
+  DiffableMachineLearningFields,
+  DiffableNewTermsFields,
+]);
 
 /**
  * Represents a normalized rule object that is suitable for passing to the diff algorithm.
@@ -187,37 +199,56 @@ export const DiffableNewTermsFields = z.object({
  * NOTE: Every top-level field in a DiffableRule MUST BE LOGICALLY INDEPENDENT from other
  * top-level fields.
  */
-
 export type DiffableRule = z.infer<typeof DiffableRule>;
-const DiffableRule = z.intersection(
-  DiffableCommonFields,
-  z.discriminatedUnion('type', [
-    DiffableCustomQueryFields,
-    DiffableSavedQueryFields,
-    DiffableEqlFields,
-    DiffableEsqlFields,
-    DiffableThreatMatchFields,
-    DiffableThresholdFields,
-    DiffableMachineLearningFields,
-    DiffableNewTermsFields,
-  ])
-);
+export const DiffableRule = z.intersection(DiffableCommonFields, DiffableFieldsByTypeUnion);
+
+/**
+ * Union of all possible rule types
+ */
+export type DiffableRuleTypes = z.infer<typeof DiffableRuleTypes>;
+export const DiffableRuleTypes = z.union([
+  DiffableCustomQueryFields.shape.type,
+  DiffableSavedQueryFields.shape.type,
+  DiffableEqlFields.shape.type,
+  DiffableEsqlFields.shape.type,
+  DiffableThreatMatchFields.shape.type,
+  DiffableThresholdFields.shape.type,
+  DiffableMachineLearningFields.shape.type,
+  DiffableNewTermsFields.shape.type,
+]);
 
 /**
  * This is a merge of all fields from all rule types into a single TS type.
  * This is NOT a union discriminated by rule type, as DiffableRule is.
  */
-export type DiffableAllFields = DiffableCommonFields &
-  Omit<DiffableCustomQueryFields, 'type'> &
-  Omit<DiffableSavedQueryFields, 'type'> &
-  Omit<DiffableEqlFields, 'type'> &
-  Omit<DiffableEsqlFields, 'type'> &
-  Omit<DiffableThreatMatchFields, 'type'> &
-  Omit<DiffableThresholdFields, 'type'> &
-  Omit<DiffableMachineLearningFields, 'type'> &
-  Omit<DiffableNewTermsFields, 'type'> &
-  DiffableRuleTypeField;
+export type DiffableAllFields = z.infer<typeof DiffableAllFields>;
+export const DiffableAllFields = DiffableCommonFields.merge(
+  DiffableCustomQueryFields.omit({ type: true })
+)
+  .merge(DiffableSavedQueryFields.omit({ type: true }))
+  .merge(DiffableEqlFields.omit({ type: true }))
+  .merge(DiffableEsqlFields.omit({ type: true }))
+  .merge(DiffableThreatMatchFields.omit({ type: true }))
+  .merge(DiffableThresholdFields.omit({ type: true }))
+  .merge(DiffableMachineLearningFields.omit({ type: true }))
+  .merge(DiffableNewTermsFields.omit({ type: true }))
+  .merge(z.object({ type: DiffableRuleTypes }));
 
-interface DiffableRuleTypeField {
-  type: DiffableRule['type'];
-}
+const getRuleTypeFields = (schema: z.ZodObject<z.ZodRawShape>): string[] =>
+  Object.keys(schema.shape);
+
+const createDiffableFieldsPerRuleType = (specificFields: z.ZodObject<z.ZodRawShape>): string[] => [
+  ...getRuleTypeFields(DiffableCommonFields),
+  ...getRuleTypeFields(specificFields),
+];
+
+export const DIFFABLE_RULE_TYPE_FIELDS_MAP = new Map<DiffableRuleTypes, string[]>([
+  ['query', createDiffableFieldsPerRuleType(DiffableCustomQueryFields)],
+  ['saved_query', createDiffableFieldsPerRuleType(DiffableSavedQueryFields)],
+  ['eql', createDiffableFieldsPerRuleType(DiffableEqlFields)],
+  ['esql', createDiffableFieldsPerRuleType(DiffableEsqlFields)],
+  ['threat_match', createDiffableFieldsPerRuleType(DiffableThreatMatchFields)],
+  ['threshold', createDiffableFieldsPerRuleType(DiffableThresholdFields)],
+  ['machine_learning', createDiffableFieldsPerRuleType(DiffableMachineLearningFields)],
+  ['new_terms', createDiffableFieldsPerRuleType(DiffableNewTermsFields)],
+]);

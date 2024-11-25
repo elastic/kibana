@@ -23,9 +23,11 @@ import { getValue as getResolvedArgsValue } from '../selectors/resolved_args';
 import { getDefaultElement } from '../defaults';
 import { ErrorStrings } from '../../../i18n';
 import { subMultitree } from '../../lib/aeroelastic/functional';
-import { pluginServices } from '../../services';
+import { getCanvasExpressionService } from '../../services/canvas_expressions_service';
+import { getCanvasNotifyService } from '../../services/canvas_notify_service';
 import { selectToplevelNodes } from './transient';
 import * as args from './resolved_args';
+import { setFilter } from './filters';
 
 const { actionsElements: strings } = ErrorStrings;
 
@@ -63,9 +65,12 @@ function getBareElement(el, includeId = false) {
 
 export const elementLayer = createAction('elementLayer');
 
-export const setMultiplePositions = createAction('setMultiplePosition', (repositionedElements) => ({
-  repositionedElements,
-}));
+export const setMultiplePositions = createAction(
+  'setMultiplePositions',
+  (repositionedElements) => ({
+    repositionedElements,
+  })
+);
 
 export const flushContext = createAction('flushContext');
 export const flushContextAfterIndex = createAction('flushContextAfterIndex');
@@ -101,7 +106,7 @@ const fetchContextFn = ({ dispatch, getState }, index, element, fullRefresh = fa
 
   const variables = getWorkpadVariablesAsObject(getState());
 
-  const { expressions } = pluginServices.getServices();
+  const expressions = getCanvasExpressionService();
   const elementWithNewAst = set(element, pathToTarget, astChain);
 
   // get context data from a partial AST
@@ -129,7 +134,8 @@ const fetchRenderableWithContextFn = ({ dispatch, getState }, element, ast, cont
     });
 
   const variables = getWorkpadVariablesAsObject(getState());
-  const { expressions, notify } = pluginServices.getServices();
+  const expressions = getCanvasExpressionService();
+  const notify = getCanvasNotifyService();
 
   return expressions
     .runInterpreter(ast, context, variables, { castToRender: true })
@@ -177,7 +183,8 @@ export const fetchAllRenderables = createThunk(
         const argumentPath = [element.id, 'expressionRenderable'];
 
         const variables = getWorkpadVariablesAsObject(getState());
-        const { expressions, notify } = pluginServices.getServices();
+        const expressions = getCanvasExpressionService();
+        const notify = getCanvasNotifyService();
 
         return expressions
           .runInterpreter(ast, null, variables, { castToRender: true })
@@ -260,18 +267,6 @@ export const removeElements = createThunk(
   }
 );
 
-export const setFilter = createThunk(
-  'setFilter',
-  ({ dispatch }, filter, elementId, doRender = true) => {
-    const _setFilter = createAction('setFilter');
-    dispatch(_setFilter({ filter, elementId }));
-
-    if (doRender === true) {
-      dispatch(fetchAllRenderables());
-    }
-  }
-);
-
 export const setExpression = createThunk('setExpression', setExpressionFn);
 function setExpressionFn({ dispatch, getState }, expression, elementId, pageId, doRender = true) {
   // dispatch action to update the element in state
@@ -290,7 +285,11 @@ function setExpressionFn({ dispatch, getState }, expression, elementId, pageId, 
     )
   ) {
     const filter = '';
-    dispatch(setFilter(filter, elementId, pageId, doRender));
+    dispatch(setFilter(filter, elementId, pageId));
+
+    if (doRender) {
+      dispatch(fetchAllRenderables(updatedElement));
+    }
     // setFilter will trigger a re-render so we can skip the fetch here
   } else if (doRender === true) {
     dispatch(fetchRenderable(updatedElement));
@@ -302,7 +301,7 @@ const setAst = createThunk('setAst', ({ dispatch }, ast, element, pageId, doRend
     const expression = toExpression(ast);
     dispatch(setExpression(expression, element.id, pageId, doRender));
   } catch (err) {
-    const notifyService = pluginServices.getServices().notify;
+    const notifyService = getCanvasNotifyService();
     notifyService.error(err);
 
     // TODO: remove this, may have been added just to cause a re-render, but why?

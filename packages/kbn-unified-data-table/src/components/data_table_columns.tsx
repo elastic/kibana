@@ -18,12 +18,13 @@ import {
 import { type DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { ExpandButton } from './data_table_expand_button';
 import { CustomGridColumnsConfiguration, UnifiedDataTableSettings } from '../types';
 import type { ValueToStringConverter, DataTableColumnsMeta } from '../types';
 import { buildCellActions } from './default_cell_actions';
 import { getSchemaByKbnType } from './data_table_schema';
-import { SelectButton, SelectAllButton } from './data_table_document_selection';
+import { SelectButton, getSelectAllButton } from './data_table_document_selection';
 import {
   defaultTimeColumnWidth,
   ROWS_HEIGHT_OPTIONS,
@@ -45,7 +46,7 @@ export const getColumnDisplayName = (
 
   if (columnName === '_source') {
     return i18n.translate('unifiedDataTable.grid.documentHeader', {
-      defaultMessage: 'Document',
+      defaultMessage: 'Summary',
     });
   }
 
@@ -73,18 +74,24 @@ const openDetails = {
   rowCellRender: ExpandButton,
 };
 
-const select = {
+const getSelect = (rows: DataTableRecord[]) => ({
   id: SELECT_ROW,
   width: DEFAULT_CONTROL_COLUMN_WIDTH,
   rowCellRender: SelectButton,
-  headerCellRender: SelectAllButton,
-};
+  headerCellRender: getSelectAllButton(rows),
+});
 
-export function getLeadControlColumns(canSetExpandedDoc: boolean) {
+export function getLeadControlColumns({
+  rows,
+  canSetExpandedDoc,
+}: {
+  rows: DataTableRecord[];
+  canSetExpandedDoc: boolean;
+}) {
   if (!canSetExpandedDoc) {
-    return [select];
+    return [getSelect(rows)];
   }
-  return [openDetails, select];
+  return [openDetails, getSelect(rows)];
 }
 
 function buildEuiGridColumn({
@@ -182,7 +189,13 @@ function buildEuiGridColumn({
     cellActions = columnCellActions;
   } else {
     cellActions = dataViewField
-      ? buildCellActions(dataViewField, toastNotifications, valueToStringConverter, onFilter)
+      ? buildCellActions(
+          dataViewField,
+          isPlainRecord,
+          toastNotifications,
+          valueToStringConverter,
+          onFilter
+        )
       : [];
 
     if (columnCellActions?.length && cellActionsHandling === 'append') {
@@ -245,6 +258,7 @@ function buildEuiGridColumn({
     },
     cellActions,
     visibleCellActions,
+    displayHeaderCellProps: { className: 'unifiedDataTable__headerCell' },
   };
 
   if (column.id === dataView.timeFieldName) {

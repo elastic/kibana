@@ -78,6 +78,36 @@ export const CONNECTORS_LABEL = i18n.translate(
   }
 );
 
+export const EVALUATOR_MODEL = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.evaluationSettings.evaluatorModelLabel',
+  {
+    defaultMessage: 'Evaluator model (optional)',
+  }
+);
+
+export const DEFAULT_MAX_ALERTS = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.evaluationSettings.defaultMaxAlertsLabel',
+  {
+    defaultMessage: 'Default max alerts',
+  }
+);
+
+export const EVALUATOR_MODEL_DESCRIPTION = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.evaluationSettings.evaluatorModelDescription',
+  {
+    defaultMessage:
+      'Judge the quality of all predictions using a single model. (Default: use the same model as the connector)',
+  }
+);
+
+export const DEFAULT_MAX_ALERTS_DESCRIPTION = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.evaluationSettings.defaultMaxAlertsDescription',
+  {
+    defaultMessage:
+      'The default maximum number of alerts to send as context, which may be overridden by the Example input',
+  }
+);
+
 export const CONNECTORS_DESCRIPTION = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.evaluationSettings.connectorsDescription',
   {
@@ -163,7 +193,8 @@ export const EVALUATOR_DATASET_LABEL = i18n.translate(
 export const LANGSMITH_DATASET_DESCRIPTION = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.evaluationSettings.langsmithDatasetDescription',
   {
-    defaultMessage: 'Name of dataset hosted on LangSmith to evaluate.',
+    defaultMessage:
+      'Name of dataset hosted on LangSmith to evaluate. Must manually enter on cloud environments.',
   }
 );
 

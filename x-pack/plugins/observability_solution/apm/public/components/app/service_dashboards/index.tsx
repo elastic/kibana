@@ -19,7 +19,7 @@ import {
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import {
-  AwaitingDashboardAPI,
+  DashboardApi,
   DashboardCreationOptions,
   DashboardRenderer,
 } from '@kbn/dashboard-plugin/public';
@@ -40,12 +40,14 @@ import { useDashboardFetcher } from '../../../hooks/use_dashboards_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { APM_APP_LOCATOR_ID } from '../../../locator/service_detail_locator';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { isLogsOnlySignal } from '../../../utils/get_signal_type';
 
 export interface MergedServiceDashboard extends SavedApmCustomDashboard {
   title: string;
 }
 
-export function ServiceDashboards({ checkForEntities = false }: { checkForEntities?: boolean }) {
+export function ServiceDashboards() {
   const {
     path: { serviceName },
     query: { environment, kuery, rangeFrom, rangeTo, dashboardId },
@@ -53,7 +55,11 @@ export function ServiceDashboards({ checkForEntities = false }: { checkForEntiti
     '/services/{serviceName}/dashboards',
     '/mobile-services/{serviceName}/dashboards'
   );
-  const [dashboard, setDashboard] = useState<AwaitingDashboardAPI>();
+  const { serviceEntitySummary, serviceEntitySummaryStatus } = useApmServiceContext();
+  const checkForEntities = serviceEntitySummary?.dataStreamTypes
+    ? isLogsOnlySignal(serviceEntitySummary.dataStreamTypes)
+    : false;
+  const [dashboard, setDashboard] = useState<DashboardApi | undefined>();
   const [serviceDashboards, setServiceDashboards] = useState<MergedServiceDashboard[]>([]);
   const [currentDashboard, setCurrentDashboard] = useState<MergedServiceDashboard>();
   const { data: allAvailableDashboards } = useDashboardFetcher();
@@ -103,23 +109,21 @@ export function ServiceDashboards({ checkForEntities = false }: { checkForEntiti
     });
     return Promise.resolve<DashboardCreationOptions>({
       getInitialInput,
-      useControlGroupIntegration: true,
     });
   }, [rangeFrom, rangeTo]);
 
   useEffect(() => {
     if (!dashboard) return;
 
-    dashboard.updateInput({
-      filters:
-        dataView &&
+    dashboard.setFilters(
+      dataView &&
         currentDashboard?.serviceEnvironmentFilterEnabled &&
         currentDashboard?.serviceNameFilterEnabled
-          ? getFilters(serviceName, environment, dataView)
-          : [],
-      timeRange: { from: rangeFrom, to: rangeTo },
-      query: { query: kuery, language: 'kuery' },
-    });
+        ? getFilters(serviceName, environment, dataView)
+        : []
+    );
+    dashboard.setQuery({ query: kuery, language: 'kuery' });
+    dashboard.setTimeRange({ from: rangeFrom, to: rangeTo });
   }, [dataView, serviceName, environment, kuery, dashboard, rangeFrom, rangeTo, currentDashboard]);
 
   const getLocatorParams = useCallback(
@@ -152,7 +156,7 @@ export function ServiceDashboards({ checkForEntities = false }: { checkForEntiti
 
   return (
     <EuiPanel hasBorder={true}>
-      {status === FETCH_STATUS.LOADING ? (
+      {status === FETCH_STATUS.LOADING || serviceEntitySummaryStatus === FETCH_STATUS.LOADING ? (
         <EuiEmptyPrompt
           icon={<EuiLoadingLogo logo="logoObservability" size="xl" />}
           title={
@@ -213,7 +217,7 @@ export function ServiceDashboards({ checkForEntities = false }: { checkForEntiti
                 locator={locator}
                 savedObjectId={dashboardId}
                 getCreationOptions={getCreationOptions}
-                ref={setDashboard}
+                onApiAvailable={setDashboard}
               />
             )}
           </EuiFlexItem>

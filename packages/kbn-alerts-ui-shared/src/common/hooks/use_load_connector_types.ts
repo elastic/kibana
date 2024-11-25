@@ -11,13 +11,14 @@ import { useQuery } from '@tanstack/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { fetchConnectorTypes } from '../apis';
 
-export interface UseLoadActionTypesProps {
+export interface UseLoadConnectorTypesProps {
   http: HttpStart;
   includeSystemActions?: boolean;
+  enabled?: boolean;
 }
 
-export const useLoadActionTypes = (props: UseLoadActionTypesProps) => {
-  const { http, includeSystemActions } = props;
+export const useLoadConnectorTypes = (props: UseLoadConnectorTypesProps) => {
+  const { http, includeSystemActions, enabled = true } = props;
 
   const queryFn = () => {
     return fetchConnectorTypes({ http, includeSystemActions });
@@ -27,6 +28,7 @@ export const useLoadActionTypes = (props: UseLoadActionTypesProps) => {
     queryKey: ['useLoadConnectorTypes', includeSystemActions],
     queryFn,
     refetchOnWindowFocus: false,
+    enabled,
   });
 
   return {

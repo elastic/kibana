@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { VectorScoreBase } from '../../../common/schemas';
+import { VectorScoreBase } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/latest';
 
 export type Vendor = 'NVD' | 'Red Hat' | 'GHSA';
 

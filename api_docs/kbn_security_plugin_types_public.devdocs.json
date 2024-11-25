@@ -31,10 +31,10 @@
               },
               ") => Promise<",
               {
-                "pluginId": "@kbn/security-authorization-core",
-                "scope": "server",
-                "docId": "kibKbnSecurityAuthorizationCorePluginApi",
-                "section": "def-server.RawKibanaPrivileges",
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.RawKibanaPrivileges",
                 "text": "RawKibanaPrivileges"
               },
               ">"
@@ -201,6 +201,97 @@
               }
             ],
             "path": "x-pack/packages/security/plugin_types_public/src/authorization/authorization_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-public",
+        "id": "def-public.BulkUpdatePayload",
+        "type": "Interface",
+        "tags": [],
+        "label": "BulkUpdatePayload",
+        "description": [],
+        "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.BulkUpdatePayload.rolesUpdate",
+            "type": "Array",
+            "tags": [],
+            "label": "rolesUpdate",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.Role",
+                "text": "Role"
+              },
+              "[]"
+            ],
+            "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-public",
+        "id": "def-public.BulkUpdateRoleResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "BulkUpdateRoleResponse",
+        "description": [],
+        "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.BulkUpdateRoleResponse.created",
+            "type": "Array",
+            "tags": [],
+            "label": "created",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.BulkUpdateRoleResponse.updated",
+            "type": "Array",
+            "tags": [],
+            "label": "updated",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.BulkUpdateRoleResponse.errors",
+            "type": "Object",
+            "tags": [],
+            "label": "errors",
+            "description": [],
+            "signature": [
+              "Record<string, { type: string; reason: string; }> | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -505,6 +596,60 @@
                     "docId": "kibKbnSecurityPluginTypesPublicPluginApi",
                     "section": "def-public.RolePutPayload",
                     "text": "RolePutPayload"
+                  }
+                ],
+                "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.RolesAPIClient.bulkUpdateRoles",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkUpdateRoles",
+            "description": [],
+            "signature": [
+              "(payload: ",
+              {
+                "pluginId": "@kbn/security-plugin-types-public",
+                "scope": "public",
+                "docId": "kibKbnSecurityPluginTypesPublicPluginApi",
+                "section": "def-public.BulkUpdatePayload",
+                "text": "BulkUpdatePayload"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/security-plugin-types-public",
+                "scope": "public",
+                "docId": "kibKbnSecurityPluginTypesPublicPluginApi",
+                "section": "def-public.BulkUpdateRoleResponse",
+                "text": "BulkUpdateRoleResponse"
+              },
+              ">"
+            ],
+            "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-plugin-types-public",
+                "id": "def-public.RolesAPIClient.bulkUpdateRoles.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "payload",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/security-plugin-types-public",
+                    "scope": "public",
+                    "docId": "kibKbnSecurityPluginTypesPublicPluginApi",
+                    "section": "def-public.BulkUpdatePayload",
+                    "text": "BulkUpdatePayload"
                   }
                 ],
                 "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
@@ -873,10 +1018,6 @@
                 "path": "x-pack/plugins/security_solution/public/common/components/user_profiles/use_get_current_user_profile.tsx"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/assistant/overlay.tsx"
-              },
-              {
                 "plugin": "cases",
                 "path": "x-pack/plugins/cases/public/containers/user_profiles/api.test.ts"
               },
@@ -982,7 +1123,7 @@
               "Render a custom ReactNode instead of the default <EuiContextMenuItem />"
             ],
             "signature": [
-              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "x-pack/packages/security/plugin_types_public/src/nav_control/nav_control_service.ts",
             "deprecated": false,
@@ -1174,6 +1315,18 @@
           }
         ],
         "path": "x-pack/packages/security/plugin_types_public/src/authorization/authorization_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-public",
+        "id": "def-public.SecurityLicense",
+        "type": "Type",
+        "tags": [],
+        "label": "SecurityLicense",
+        "description": [],
+        "path": "x-pack/packages/security/plugin_types_public/src/license/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

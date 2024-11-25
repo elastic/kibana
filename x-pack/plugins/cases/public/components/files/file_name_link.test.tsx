@@ -6,18 +6,13 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import type { AppMockRenderer } from '../../common/mock';
-
-import { createAppMockRenderer } from '../../common/mock';
 import { basicFileMock } from '../../containers/mock';
 import { FileNameLink } from './file_name_link';
 
 describe('FileNameLink', () => {
-  let appMockRender: AppMockRenderer;
-
   const defaultProps = {
     file: basicFileMock,
     showPreview: jest.fn(),
@@ -25,11 +20,10 @@ describe('FileNameLink', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
   });
 
   it('renders clickable name if file is image', async () => {
-    appMockRender.render(<FileNameLink {...defaultProps} />);
+    render(<FileNameLink {...defaultProps} />);
 
     const nameLink = await screen.findByTestId('cases-files-name-link');
 
@@ -41,7 +35,7 @@ describe('FileNameLink', () => {
   });
 
   it('renders simple text name if file is not image', async () => {
-    appMockRender.render(
+    render(
       <FileNameLink
         showPreview={defaultProps.showPreview}
         file={{ ...basicFileMock, mimeType: 'text/csv' }}

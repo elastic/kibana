@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BuildFlavor } from '@kbn/config';
+import type { BuildFlavor } from '@kbn/config';
 import type { IRouter, Logger } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 

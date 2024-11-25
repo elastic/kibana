@@ -9,8 +9,9 @@
 
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { renderHook } from '@testing-library/react-hooks';
-import { act } from 'react-test-renderer';
+import { waitFor, renderHook, act } from '@testing-library/react';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
 import { UnifiedHistogramFetchStatus, UnifiedHistogramSuggestionContext } from '../../types';
 import { dataViewMock } from '../../__mocks__/data_view';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
@@ -60,6 +61,7 @@ describe('useStateProps', () => {
         query: { language: 'kuery', query: '' },
         requestAdapter: new RequestAdapter(),
         searchSessionId: '123',
+        columns: undefined,
       })
     );
     expect(result.current).toMatchInlineSnapshot(`
@@ -150,11 +152,14 @@ describe('useStateProps', () => {
         query: { esql: 'FROM index' },
         requestAdapter: new RequestAdapter(),
         searchSessionId: '123',
+        columns: undefined,
       })
     );
     expect(result.current).toMatchInlineSnapshot(`
       Object {
-        "breakdown": undefined,
+        "breakdown": Object {
+          "field": undefined,
+        },
         "chart": Object {
           "hidden": false,
           "timeInterval": "auto",
@@ -220,9 +225,87 @@ describe('useStateProps', () => {
         },
       }
     `);
+
+    expect(result.current.chart).toStrictEqual({ hidden: false, timeInterval: 'auto' });
+    expect(result.current.breakdown).toStrictEqual({ field: undefined });
+    expect(result.current.isPlainRecord).toBe(true);
   });
 
-  it('should return the correct props when a text based language is used', () => {
+  it('should return the correct props when an ES|QL query is used with transformational commands', () => {
+    const stateService = getStateService({
+      initialState: {
+        ...initialState,
+        currentSuggestionContext: undefined,
+      },
+    });
+    const { result } = renderHook(() =>
+      useStateProps({
+        stateService,
+        dataView: dataViewWithTimefieldMock,
+        query: { esql: 'FROM index | keep field1' },
+        requestAdapter: new RequestAdapter(),
+        searchSessionId: '123',
+        columns: undefined,
+      })
+    );
+    expect(result.current.chart).toStrictEqual({ hidden: false, timeInterval: 'auto' });
+    expect(result.current.breakdown).toBe(undefined);
+    expect(result.current.isPlainRecord).toBe(true);
+  });
+
+  it('should return the correct props when an ES|QL query is used with breakdown field', () => {
+    const breakdownField = 'extension';
+    const esqlColumns = [
+      {
+        name: 'bytes',
+        meta: { type: 'number' },
+        id: 'bytes',
+      },
+      {
+        name: 'extension',
+        meta: { type: 'string' },
+        id: 'extension',
+      },
+    ] as DatatableColumn[];
+    const stateService = getStateService({
+      initialState: {
+        ...initialState,
+        currentSuggestionContext: undefined,
+        breakdownField,
+      },
+    });
+    const { result } = renderHook(() =>
+      useStateProps({
+        stateService,
+        dataView: dataViewWithTimefieldMock,
+        query: { esql: 'FROM index' },
+        requestAdapter: new RequestAdapter(),
+        searchSessionId: '123',
+        columns: esqlColumns,
+      })
+    );
+
+    const breakdownColumn = esqlColumns.find((c) => c.name === breakdownField)!;
+    const selectedField = new DataViewField(
+      convertDatatableColumnToDataViewFieldSpec(breakdownColumn)
+    );
+    expect(result.current.breakdown).toStrictEqual({ field: selectedField });
+  });
+
+  it('should call the setBreakdown cb when an ES|QL query is used', () => {
+    const breakdownField = 'extension';
+    const esqlColumns = [
+      {
+        name: 'bytes',
+        meta: { type: 'number' },
+        id: 'bytes',
+      },
+      {
+        name: 'extension',
+        meta: { type: 'string' },
+        id: 'extension',
+      },
+    ] as DatatableColumn[];
     const stateService = getStateService({
       initialState: {
         ...initialState,
@@ -236,11 +319,14 @@ describe('useStateProps', () => {
         query: { esql: 'FROM index' },
         requestAdapter: new RequestAdapter(),
         searchSessionId: '123',
+        columns: esqlColumns,
       })
     );
-    expect(result.current.chart).toStrictEqual({ hidden: false, timeInterval: 'auto' });
-    expect(result.current.breakdown).toBe(undefined);
-    expect(result.current.isPlainRecord).toBe(true);
+    const { onBreakdownFieldChange } = result.current;
+    act(() => {
+      onBreakdownFieldChange({ name: breakdownField } as DataViewField);
+    });
+    expect(stateService.setBreakdownField).toHaveBeenLastCalledWith(breakdownField);
   });
 
   it('should return the correct props when a rollup data view is used', () => {
@@ -255,6 +341,7 @@ describe('useStateProps', () => {
         query: { language: 'kuery', query: '' },
         requestAdapter: new RequestAdapter(),
         searchSessionId: '123',
+        columns: undefined,
       })
     );
     expect(result.current).toMatchInlineSnapshot(`
@@ -333,6 +420,7 @@ describe('useStateProps', () => {
         query: { language: 'kuery', query: '' },
         requestAdapter: new RequestAdapter(),
         searchSessionId: '123',
+        columns: undefined,
       })
     );
     expect(result.current).toMatchInlineSnapshot(`
@@ -402,7 +490,7 @@ describe('useStateProps', () => {
     `);
   });
 
-  it('should execute callbacks correctly', () => {
+  it('should execute callbacks correctly', async () => {
     const stateService = getStateService({ initialState });
     const { result } = renderHook(() =>
       useStateProps({
@@ -411,8 +499,24 @@ describe('useStateProps', () => {
         query: { language: 'kuery', query: '' },
         requestAdapter: new RequestAdapter(),
         searchSessionId: '123',
+        columns: undefined,
       })
     );
+
+    await waitFor(() =>
+      expect(result.current).toEqual(
+        expect.objectContaining({
+          onTopPanelHeightChange: expect.any(Function),
+          onTimeIntervalChange: expect.any(Function),
+          onTotalHitsChange: expect.any(Function),
+          onChartHiddenChange: expect.any(Function),
+          onChartLoad: expect.any(Function),
+          onBreakdownFieldChange: expect.any(Function),
+          onSuggestionContextChange: expect.any(Function),
+        })
+      )
+    );
+
     const {
       onTopPanelHeightChange,
       onTimeIntervalChange,
@@ -470,6 +574,7 @@ describe('useStateProps', () => {
         query: { language: 'kuery', query: '' },
         requestAdapter: new RequestAdapter(),
         searchSessionId: '123',
+        columns: undefined,
       })
     );
     (stateService.setLensRequestAdapter as jest.Mock).mockClear();
@@ -489,6 +594,7 @@ describe('useStateProps', () => {
       query: { language: 'kuery', query: '' },
       requestAdapter: new RequestAdapter(),
       searchSessionId: '123',
+      columns: undefined,
     };
     const hook = renderHook((props: Parameters<typeof useStateProps>[0]) => useStateProps(props), {
       initialProps,

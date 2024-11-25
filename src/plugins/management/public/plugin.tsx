@@ -119,6 +119,7 @@ export class ManagementPlugin
       async mount(params: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart, deps] = await core.getStartServices();
+        const chromeStyle$ = coreStart.chrome.getChromeStyle$();
 
         return renderApp(params, {
           sections: getSectionsServiceStartPrivate(),
@@ -130,11 +131,14 @@ export class ManagementPlugin
               const [, ...trailingBreadcrumbs] = newBreadcrumbs;
               deps.serverless.setBreadcrumbs(trailingBreadcrumbs);
             } else {
-              coreStart.chrome.setBreadcrumbs(newBreadcrumbs);
+              coreStart.chrome.setBreadcrumbs(newBreadcrumbs, {
+                project: { value: newBreadcrumbs, absolute: true },
+              });
             }
           },
           isSidebarEnabled$: managementPlugin.isSidebarEnabled$,
           cardsNavigationConfig$: managementPlugin.cardsNavigationConfig$,
+          chromeStyle$,
         });
       },
     });

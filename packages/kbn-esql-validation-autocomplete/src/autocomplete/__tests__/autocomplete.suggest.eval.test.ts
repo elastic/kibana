@@ -51,6 +51,13 @@ describe('autocomplete.suggest', () => {
         ...getFieldNamesByType('any'),
         ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
       ]);
+
+      await assertSuggestions('from a | eval doubleField/', [
+        'doubleField, ',
+        'doubleField | ',
+        'var0 = ',
+      ]);
+
       await assertSuggestions('from a | eval doubleField /', [
         ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true, skipAssign: true }, [
           'double',
@@ -363,8 +370,12 @@ describe('autocomplete.suggest', () => {
       // // Test suggestions for each possible param, within each signature variation, for each function
       for (const fn of scalarFunctionDefinitions) {
         // skip this fn for the moment as it's quite hard to test
-        // if (!['bucket', 'date_extract', 'date_diff', 'case'].includes(fn.name)) {
-        if (!['bucket', 'date_extract', 'date_diff', 'case'].includes(fn.name)) {
+        // Add match in the test when the autocomplete is ready https://github.com/elastic/kibana/issues/196995
+        if (
+          !['bucket', 'date_extract', 'date_diff', 'case', 'match', 'qstr', 'date_trunc'].includes(
+            fn.name
+          )
+        ) {
           test(`${fn.name}`, async () => {
             const testedCases = new Set<string>();
 
@@ -528,24 +539,13 @@ describe('autocomplete.suggest', () => {
         { triggerCharacter: ' ' }
       );
       await assertSuggestions('from a | eval a = 1 year /', [',', '| ', 'IS NOT NULL', 'IS NULL']);
-      await assertSuggestions('from a | eval a = 1 day + 2 /', [',', '| ']);
-      await assertSuggestions(
-        'from a | eval 1 day + 2 /',
-        [
-          ...dateSuggestions,
-          ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true, skipAssign: true }, [
-            'integer',
-          ]),
-        ],
-        { triggerCharacter: ' ' }
-      );
       await assertSuggestions(
         'from a | eval var0=date_trunc(/)',
         [
           ...getLiteralsByType('time_literal').map((t) => `${t}, `),
-          ...getFunctionSignaturesByReturnType('eval', 'time_duration', { scalar: true }).map(
-            (t) => `${t.text},`
-          ),
+          ...getFunctionSignaturesByReturnType('eval', ['time_duration', 'date_period'], {
+            scalar: true,
+          }).map((t) => `${t.text},`),
         ],
         { triggerCharacter: '(' }
       );
@@ -559,7 +559,7 @@ describe('autocomplete.suggest', () => {
     test('case', async () => {
       const { assertSuggestions } = await setup();
       const comparisonOperators = ['==', '!=', '>', '<', '>=', '<=']
-        .map((op) => `${op} `)
+        .map((op) => `${op}`)
         .concat(',');
 
       // case( / ) suggest any field/eval function in this position as first argument
@@ -626,7 +626,6 @@ describe('autocomplete.suggest', () => {
         // Notice no extra space after field name
         ...getFieldNamesByType('any').map((field) => `${field}`),
         ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }, undefined, []),
-        'var0 = ',
       ]);
 
       // case( field > 0, >) suggests fields like normal

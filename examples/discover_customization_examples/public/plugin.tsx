@@ -7,17 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiButton,
-  EuiContextMenu,
-  EuiFlexItem,
-  EuiPopover,
-  EuiWrappingPopover,
-  IconType,
-} from '@elastic/eui';
+import { EuiButton, EuiContextMenu, EuiFlexItem, EuiPopover, IconType } from '@elastic/eui';
 import { CoreSetup, CoreStart, Plugin, SimpleSavedObject } from '@kbn/core/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type {
   CustomizationCallback,
   DiscoverSetup,
@@ -28,7 +20,7 @@ import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
 import { ControlGroupRendererApi, ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import { css } from '@emotion/react';
-import type { ControlsPanels } from '@kbn/controls-plugin/common';
+import type { ControlPanelsState } from '@kbn/controls-plugin/common';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
@@ -102,112 +94,14 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
   }
 
   start(core: CoreStart, plugins: DiscoverCustomizationExamplesStartPlugins) {
-    const { discover } = plugins;
-
-    let isOptionsOpen = false;
-    const optionsContainer = document.createElement('div');
-    const closeOptionsPopover = () => {
-      ReactDOM.unmountComponentAtNode(optionsContainer);
-      document.body.removeChild(optionsContainer);
-      isOptionsOpen = false;
-    };
-
     this.customizationCallback = ({ customizations, stateContainer }) => {
       customizations.set({
         id: 'top_nav',
         defaultMenu: {
           newItem: { disabled: true },
           openItem: { disabled: true },
-          shareItem: { order: 200 },
           alertsItem: { disabled: true },
           inspectItem: { disabled: true },
-          saveItem: { order: 400 },
-        },
-        getMenuItems: () => [
-          {
-            data: {
-              id: 'options',
-              label: 'Options',
-              iconType: 'arrowDown',
-              iconSide: 'right',
-              testId: 'customOptionsButton',
-              run: (anchorElement: HTMLElement) => {
-                if (isOptionsOpen) {
-                  closeOptionsPopover();
-                  return;
-                }
-
-                isOptionsOpen = true;
-                document.body.appendChild(optionsContainer);
-
-                const element = (
-                  <KibanaRenderContextProvider {...core}>
-                    <EuiWrappingPopover
-                      ownFocus
-                      button={anchorElement}
-                      isOpen={true}
-                      panelPaddingSize="s"
-                      closePopover={closeOptionsPopover}
-                    >
-                      <EuiContextMenu
-                        size="s"
-                        initialPanelId={0}
-                        panels={[
-                          {
-                            id: 0,
-                            items: [
-                              {
-                                name: 'Create new',
-                                icon: 'plusInCircle',
-                                onClick: () => alert('Create new clicked'),
-                              },
-                              {
-                                name: 'Make a copy',
-                                icon: 'copy',
-                                onClick: () => alert('Make a copy clicked'),
-                              },
-                              {
-                                name: 'Manage saved searches',
-                                icon: 'gear',
-                                onClick: () => alert('Manage saved searches clicked'),
-                              },
-                            ],
-                          },
-                        ]}
-                        data-test-subj="customOptionsPopover"
-                      />
-                    </EuiWrappingPopover>
-                  </KibanaRenderContextProvider>
-                );
-
-                ReactDOM.render(element, optionsContainer);
-              },
-            },
-            order: 100,
-          },
-          {
-            data: {
-              id: 'documentExplorer',
-              label: 'Document explorer',
-              iconType: 'discoverApp',
-              testId: 'documentExplorerButton',
-              run: () => {
-                discover.locator?.navigate({});
-              },
-            },
-            order: 300,
-          },
-        ],
-        getBadges: () => {
-          return [
-            {
-              data: {
-                badgeText: 'Example badge',
-                color: 'warning',
-              },
-              order: 10,
-            },
-          ];
         },
       });
 
@@ -357,7 +251,7 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
             }
 
             const stateSubscription = stateStorage
-              .change$<ControlsPanels>('controlPanels')
+              .change$<ControlPanelsState>('controlPanels')
               .subscribe((panels) =>
                 controlGroupAPI.updateInput({ initialChildControlState: panels ?? undefined })
               );
@@ -410,7 +304,7 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
               <ControlGroupRenderer
                 onApiAvailable={setControlGroupAPI}
                 getCreationOptions={async (initialState, builder) => {
-                  const panels = stateStorage.get<ControlsPanels>('controlPanels');
+                  const panels = stateStorage.get<ControlPanelsState>('controlPanels');
 
                   if (!panels) {
                     builder.addOptionsListControl(initialState, {

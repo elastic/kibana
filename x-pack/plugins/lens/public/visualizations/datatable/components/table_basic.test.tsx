@@ -11,7 +11,6 @@ import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import faker from 'faker';
 import { act } from 'react-dom/test-utils';
-import { IAggType } from '@kbn/data-plugin/public';
 import { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import { coreMock } from '@kbn/core/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
@@ -21,9 +20,9 @@ import type { DatatableProps } from '../../../../common/expressions';
 import { LENS_EDIT_PAGESIZE_ACTION } from './constants';
 import { DatatableRenderProps } from './types';
 import { PaletteOutput } from '@kbn/coloring';
+import { getTransposeId } from '@kbn/transpose-utils';
 import { CustomPaletteState } from '@kbn/charts-plugin/common';
 import { getCellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
-import { getTransposeId } from '../../../../common/expressions/datatable/transpose_helpers';
 
 jest.mock('../../../shared_components/coloring/get_cell_color_fn', () => {
   const mod = jest.requireActual('../../../shared_components/coloring/get_cell_color_fn');
@@ -73,6 +72,17 @@ function sampleArgs() {
           sourceParams: { indexPatternId, type: 'count' },
         },
       },
+      {
+        id: 'd',
+        name: 'd',
+        meta: {
+          type: 'number',
+          source: 'esaggs',
+          field: 'd',
+          params: { id: 'range' },
+          sourceParams: { indexPatternId, type: 'range' },
+        },
+      },
     ],
     rows: [{ a: 'shoes', b: 1588024800000, c: 3 }],
   };
@@ -119,7 +129,9 @@ describe('DatatableComponent', () => {
       args,
       formatFactory: () => ({ convert: (x) => x } as IFieldFormat),
       dispatchEvent: onDispatchEvent,
-      getType: jest.fn(() => ({ type: 'buckets' } as IAggType)),
+      getType: jest.fn().mockReturnValue({
+        type: 'buckets',
+      }),
       paletteService: chartPluginMock.createPaletteRegistry(),
       theme: setUpMockTheme,
       renderMode: 'edit' as const,
@@ -141,9 +153,9 @@ describe('DatatableComponent', () => {
     expect(screen.getByLabelText('My fanci metric chart')).toBeInTheDocument();
     expect(screen.getByRole('row')).toBeInTheDocument();
     expect(screen.queryAllByRole('gridcell').map((cell) => cell.textContent)).toEqual([
-      'shoes- a, column 1, row 1',
-      '1588024800000- b, column 2, row 1',
-      '3- c, column 3, row 1',
+      'shoes',
+      '1588024800000',
+      '3',
     ]);
   });
 
@@ -352,19 +364,44 @@ describe('DatatableComponent', () => {
       },
     });
     expect(screen.queryAllByRole('gridcell').map((cell) => cell.textContent)).toEqual([
-      '1588024800000- b, column 1, row 1',
-      '3- c, column 2, row 1',
+      '1588024800000',
+      '3',
     ]);
   });
 
-  test('it adds alignment data to context', () => {
+  test('it adds explicit alignment to context', () => {
     renderDatatableComponent({
       args: {
         ...args,
         columns: [
           { columnId: 'a', alignment: 'center', type: 'lens_datatable_column', colorMode: 'none' },
+          { columnId: 'b', alignment: 'center', type: 'lens_datatable_column', colorMode: 'none' },
+          { columnId: 'c', alignment: 'center', type: 'lens_datatable_column', colorMode: 'none' },
+          { columnId: 'd', alignment: 'center', type: 'lens_datatable_column', colorMode: 'none' },
+        ],
+      },
+    });
+    const alignmentsClassNames = screen
+      .getAllByTestId('lnsTableCellContent')
+      .map((cell) => cell.className);
+
+    expect(alignmentsClassNames).toEqual([
+      'lnsTableCell--center', // set via args
+      'lnsTableCell--center', // set via args
+      'lnsTableCell--center', // set via args
+      'lnsTableCell--center', // set via args
+    ]);
+  });
+
+  test('it adds default alignment data to context', () => {
+    renderDatatableComponent({
+      args: {
+        ...args,
+        columns: [
+          { columnId: 'a', type: 'lens_datatable_column', colorMode: 'none' },
           { columnId: 'b', type: 'lens_datatable_column', colorMode: 'none' },
           { columnId: 'c', type: 'lens_datatable_column', colorMode: 'none' },
+          { columnId: 'd', type: 'lens_datatable_column', colorMode: 'none' },
         ],
         sortingColumnId: 'b',
         sortingDirection: 'desc',
@@ -375,9 +412,10 @@ describe('DatatableComponent', () => {
       .map((cell) => cell.className);
 
     expect(alignmentsClassNames).toEqual([
-      'lnsTableCell--center', // set via args
+      'lnsTableCell--left', // default for string
       'lnsTableCell--left', // default for date
       'lnsTableCell--right', // default for number
+      'lnsTableCell--left', // default for range
     ]);
   });
 
@@ -698,9 +736,9 @@ describe('DatatableComponent', () => {
           .map((cell) => [cell.textContent, cell.style.backgroundColor]);
 
         expect(cellColors).toEqual([
-          ['shoes- a, column 1, row 1', 'red'],
-          ['1588024800000- b, column 2, row 1', ''],
-          ['3- c, column 3, row 1', ''],
+          ['shoes', 'red'],
+          ['1588024800000', ''],
+          ['3', ''],
         ]);
       });
 
@@ -717,9 +755,9 @@ describe('DatatableComponent', () => {
           .map((cell) => [cell.textContent, cell.style.backgroundColor]);
 
         expect(cellColors).toEqual([
-          ['shoes- a, column 1, row 1', ''],
-          ['1588024800000- b, column 2, row 1', ''],
-          ['3- c, column 3, row 1', 'red'],
+          ['shoes', ''],
+          ['1588024800000', ''],
+          ['3', 'red'],
         ]);
       });
     });

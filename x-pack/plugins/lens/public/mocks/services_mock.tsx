@@ -145,7 +145,7 @@ export function makeDefaultServices(
       inspect: jest.fn(),
       close: jest.fn(),
     },
-    presentationUtil: presentationUtilPluginMock.createStartContract(core),
+    presentationUtil: presentationUtilPluginMock.createStartContract(),
     savedObjectStore: {
       load: jest.fn(),
       search: jest.fn(),

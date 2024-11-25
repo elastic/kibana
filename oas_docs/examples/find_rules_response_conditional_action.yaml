@@ -1,4 +1,5 @@
-summary: Retrieve information about a rule that has conditional actions.
+summary: Security rule
+description: A response that contains information about a security rule that has conditional actions.
 value:
   page: 1
   total: 1

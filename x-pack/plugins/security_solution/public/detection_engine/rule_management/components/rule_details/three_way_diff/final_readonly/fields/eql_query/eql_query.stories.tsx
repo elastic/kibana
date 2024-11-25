@@ -8,7 +8,7 @@
 import React from 'react';
 import type { Story } from '@storybook/react';
 import { FieldReadOnly } from '../../field_readonly';
-import type { DiffableAllFields } from '../../../../../../../../../common/api/detection_engine';
+import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
 import { EqlQueryReadOnly } from './eql_query';
 import {
@@ -16,6 +16,7 @@ import {
   dataSourceWithIndexPatterns,
   eqlQuery,
   mockDataView,
+  mockEqlRule,
 } from '../../storybook/mocks';
 
 export default {
@@ -24,17 +25,17 @@ export default {
 };
 
 interface TemplateProps {
-  finalDiffableRule: Partial<DiffableAllFields>;
-  kibanaServicesMock?: Record<string, unknown>;
+  finalDiffableRule: DiffableRule;
+  kibanaServicesOverrides?: Record<string, unknown>;
 }
 
 const Template: Story<TemplateProps> = (args) => {
   return (
-    <ThreeWayDiffStorybookProviders kibanaServicesMock={args.kibanaServicesMock}>
-      <FieldReadOnly
-        fieldName="eql_query"
-        finalDiffableRule={args.finalDiffableRule as DiffableAllFields}
-      />
+    <ThreeWayDiffStorybookProviders
+      kibanaServicesOverrides={args.kibanaServicesOverrides}
+      finalDiffableRule={args.finalDiffableRule}
+    >
+      <FieldReadOnly fieldName="eql_query" />
     </ThreeWayDiffStorybookProviders>
   );
 };
@@ -42,11 +43,11 @@ const Template: Story<TemplateProps> = (args) => {
 export const EqlQueryWithIndexPatterns = Template.bind({});
 
 EqlQueryWithIndexPatterns.args = {
-  finalDiffableRule: {
+  finalDiffableRule: mockEqlRule({
     eql_query: eqlQuery,
     data_source: dataSourceWithIndexPatterns,
-  },
-  kibanaServicesMock: {
+  }),
+  kibanaServicesOverrides: {
     data: {
       dataViews: {
         create: async () => mockDataView(),
@@ -58,11 +59,11 @@ EqlQueryWithIndexPatterns.args = {
 export const EqlQueryWithDataView = Template.bind({});
 
 EqlQueryWithDataView.args = {
-  finalDiffableRule: {
+  finalDiffableRule: mockEqlRule({
     eql_query: eqlQuery,
     data_source: dataSourceWithDataView,
-  },
-  kibanaServicesMock: {
+  }),
+  kibanaServicesOverrides: {
     data: {
       dataViews: {
         get: async () => mockDataView(),

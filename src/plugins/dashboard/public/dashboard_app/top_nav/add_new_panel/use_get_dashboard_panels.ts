@@ -7,19 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useMemo, useRef, useCallback } from 'react';
-import type { IconType } from '@elastic/eui';
-import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
-import { type Subscription, AsyncSubject, from, defer, map, lastValueFrom } from 'rxjs';
-import { EmbeddableFactory, COMMON_EMBEDDABLE_GROUPING } from '@kbn/embeddable-plugin/public';
-import { PresentationContainer } from '@kbn/presentation-containers';
-import { type BaseVisType, VisGroups, type VisTypeAlias } from '@kbn/visualizations-plugin/public';
+import { useCallback, useMemo, useRef } from 'react';
+import { AsyncSubject, defer, from, lastValueFrom, map, type Subscription } from 'rxjs';
 
-import { pluginServices } from '../../../services/plugin_services';
+import type { IconType } from '@elastic/eui';
+import { COMMON_EMBEDDABLE_GROUPING, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { PresentationContainer } from '@kbn/presentation-containers';
+import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import { VisGroups, type BaseVisType, type VisTypeAlias } from '@kbn/visualizations-plugin/public';
+
+import { uiActionsService, visualizationsService } from '../../../services/kibana_services';
 import {
   getAddPanelActionMenuItemsGroup,
-  type PanelSelectionMenuItem,
   type GroupedAddPanelActions,
+  type PanelSelectionMenuItem,
 } from './add_panel_action_menu_items';
 
 interface UseGetDashboardPanelsArgs {
@@ -46,13 +47,9 @@ export const useGetDashboardPanels = ({ api, createNewVisType }: UseGetDashboard
   const panelsComputeResultCache = useRef(new AsyncSubject<GroupedAddPanelActions[]>());
   const panelsComputeSubscription = useRef<Subscription | null>(null);
 
-  const {
-    uiActions,
-    visualizations: { getAliases: getVisTypeAliases, getByGroup: getVisTypesByGroup },
-  } = pluginServices.getServices();
-
   const getSortedVisTypesByGroup = (group: VisGroups) =>
-    getVisTypesByGroup(group)
+    visualizationsService
+      .getByGroup(group)
       .sort((a: BaseVisType | VisTypeAlias, b: BaseVisType | VisTypeAlias) => {
         const labelA = 'titleInWizard' in a ? a.titleInWizard || a.title : a.title;
         const labelB = 'titleInWizard' in b ? b.titleInWizard || a.title : a.title;
@@ -70,7 +67,8 @@ export const useGetDashboardPanels = ({ api, createNewVisType }: UseGetDashboard
   const toolVisTypes = getSortedVisTypesByGroup(VisGroups.TOOLS);
   const legacyVisTypes = getSortedVisTypesByGroup(VisGroups.LEGACY);
 
-  const visTypeAliases = getVisTypeAliases()
+  const visTypeAliases = visualizationsService
+    .getAliases()
     .sort(({ promotion: a = false }: VisTypeAlias, { promotion: b = false }: VisTypeAlias) =>
       a === b ? 0 : a ? -1 : 1
     )
@@ -133,12 +131,12 @@ export const useGetDashboardPanels = ({ api, createNewVisType }: UseGetDashboard
     () =>
       defer(() => {
         return from(
-          uiActions?.getTriggerCompatibleActions?.(ADD_PANEL_TRIGGER, {
+          uiActionsService.getTriggerCompatibleActions?.(ADD_PANEL_TRIGGER, {
             embeddable: api,
           }) ?? []
         );
       }),
-    [api, uiActions]
+    [api]
   );
 
   const computeAvailablePanels = useCallback(

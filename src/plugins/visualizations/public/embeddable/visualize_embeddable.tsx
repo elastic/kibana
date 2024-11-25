@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiEmptyPrompt, EuiFlexGroup, EuiLoadingChart } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiLoadingChart, EuiText } from '@elastic/eui';
 import { isChartSizeEvent } from '@kbn/chart-expressions-common';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -22,14 +22,12 @@ import { i18n } from '@kbn/i18n';
 import { dispatchRenderComplete } from '@kbn/kibana-utils-plugin/public';
 import { apiPublishesSettings } from '@kbn/presentation-containers';
 import {
-  apiHasAppContext,
   apiHasDisableTriggers,
   apiHasExecutionContext,
   apiIsOfType,
   apiPublishesTimeRange,
   apiPublishesTimeslice,
   apiPublishesUnifiedSearch,
-  apiPublishesViewMode,
   fetch$,
   getUnchangingComparator,
   initializeTimeRange,
@@ -40,11 +38,11 @@ import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfac
 import { get, isEmpty, isEqual, isNil, omitBy } from 'lodash';
 import React, { useEffect, useRef } from 'react';
 import { BehaviorSubject, switchMap } from 'rxjs';
+import { useErrorTextStyle } from '@kbn/react-hooks';
 import { VISUALIZE_APP_NAME, VISUALIZE_EMBEDDABLE_TYPE } from '../../common/constants';
 import { VIS_EVENT_TO_TRIGGER } from './events';
-import { getCapabilities, getInspector, getUiActions, getUsageCollection } from '../services';
+import { getInspector, getUiActions, getUsageCollection } from '../services';
 import { ACTION_CONVERT_TO_LENS } from '../triggers';
-import { urlFor } from '../utils/saved_visualize_utils';
 import type { SerializedVis, Vis } from '../vis';
 import { createVisInstance } from './create_vis_instance';
 import { getExpressionRendererProps } from './get_expression_renderer_props';
@@ -58,6 +56,7 @@ import {
   VisualizeSerializedState,
   isVisualizeSavedObjectState,
 } from './types';
+import { initializeEditApi } from './initialize_edit_api';
 
 export const getVisualizeEmbeddableFactory: (deps: {
   embeddableStart: EmbeddableStart;
@@ -148,10 +147,6 @@ export const getVisualizeEmbeddableFactory: (deps: {
 
     const searchSessionId$ = new BehaviorSubject<string | undefined>('');
 
-    const viewMode$ = apiPublishesViewMode(parentApi)
-      ? parentApi.viewMode
-      : new BehaviorSubject('view');
-
     const executionContext = apiHasExecutionContext(parentApi)
       ? parentApi.executionContext
       : undefined;
@@ -159,8 +154,6 @@ export const getVisualizeEmbeddableFactory: (deps: {
     const disableTriggers = apiHasDisableTriggers(parentApi)
       ? parentApi.disableTriggers
       : undefined;
-
-    const parentApiContext = apiHasAppContext(parentApi) ? parentApi.getAppContext() : undefined;
 
     const inspectorAdapters$ = new BehaviorSubject<Record<string, unknown>>({});
 
@@ -186,6 +179,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
         defaultPanelTitle,
         dataLoading: dataLoading$,
         dataViews: new BehaviorSubject<DataView[] | undefined>(initialDataViews),
+        rendered$: hasRendered$,
         supportedTriggers: () => [
           ACTION_CONVERT_TO_LENS,
           APPLY_FILTER_TRIGGER,
@@ -209,47 +203,16 @@ export const getVisualizeEmbeddableFactory: (deps: {
         },
         getVis: () => vis$.getValue(),
         getInspectorAdapters: () => inspectorAdapters$.getValue(),
-        getTypeDisplayName: () =>
-          i18n.translate('visualizations.displayName', {
-            defaultMessage: 'visualization',
-          }),
-        onEdit: async () => {
-          const stateTransferService = embeddableStart.getStateTransfer();
-          const visId = savedObjectId$.getValue();
-          const editPath = visId ? urlFor(visId) : '#/edit_by_value';
-          const parentTimeRange = apiPublishesTimeRange(parentApi)
-            ? parentApi.timeRange$.getValue()
-            : {};
-          const customTimeRange = customTimeRangeApi.timeRange$.getValue();
-
-          await stateTransferService.navigateToEditor('visualize', {
-            path: editPath,
-            state: {
-              embeddableId: uuid,
-              valueInput: {
-                savedVis: vis$.getValue().serialize(),
-                title: api.panelTitle?.getValue(),
-                description: api.panelDescription?.getValue(),
-                timeRange: customTimeRange ?? parentTimeRange,
-              },
-              originatingApp: parentApiContext?.currentAppId ?? '',
-              searchSessionId: searchSessionId$.getValue() || undefined,
-              originatingPath: parentApiContext?.getCurrentPath?.(),
-            },
-          });
-        },
-        isEditingEnabled: () => {
-          if (viewMode$.getValue() !== 'edit') return false;
-          const readOnly = Boolean(vis$.getValue().type.disableEdit);
-          if (readOnly) return false;
-          const capabilities = getCapabilities();
-          const isByValue = !savedObjectId$.getValue();
-          if (isByValue)
-            return Boolean(
-              capabilities.dashboard?.showWriteControls && capabilities.visualize?.show
-            );
-          else return Boolean(capabilities.visualize?.save);
-        },
+        ...initializeEditApi({
+          customTimeRange$: customTimeRangeApi.timeRange$,
+          description$: titlesApi.panelDescription,
+          parentApi,
+          savedObjectId$,
+          searchSessionId$,
+          title$: titlesApi.panelTitle,
+          vis$,
+          uuid,
+        }),
         updateVis: async (visUpdates) => {
           const currentSerializedVis = vis$.getValue().serialize();
           serializedVis$.next({
@@ -435,7 +398,6 @@ export const getVisualizeEmbeddableFactory: (deps: {
 
                 if (hasRendered$.getValue() === true) return;
                 hasRendered$.next(true);
-                hasRendered$.complete();
               },
               onEvent: async (event) => {
                 // Visualize doesn't respond to sizing events, so ignore.
@@ -444,7 +406,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
                 }
                 const currentVis = vis$.getValue();
                 if (!disableTriggers) {
-                  const triggerId = get(
+                  const triggerId: string = get(
                     VIS_EVENT_TO_TRIGGER,
                     event.name,
                     VIS_EVENT_TO_TRIGGER.filter
@@ -493,6 +455,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
         const hasRendered = useStateFromPublishingSubject(hasRendered$);
         const domNode = useRef<HTMLDivElement>(null);
         const { error, isLoading } = useExpressionRenderer(domNode, expressionParams);
+        const errorTextStyle = useErrorTextStyle();
 
         useEffect(() => {
           return () => {
@@ -534,9 +497,9 @@ export const getVisualizeEmbeddableFactory: (deps: {
                     </h2>
                   }
                   body={
-                    <p>
+                    <EuiText css={errorTextStyle}>
                       {error.name}: {error.message}
-                    </p>
+                    </EuiText>
                   }
                 />
               )}

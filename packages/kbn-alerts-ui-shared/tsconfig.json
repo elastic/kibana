@@ -49,5 +49,7 @@
     "@kbn/core-ui-settings-browser",
     "@kbn/core-http-browser-mocks",
     "@kbn/core-notifications-browser-mocks",
+    "@kbn/kibana-react-plugin",
+    "@kbn/shared-ux-table-persist"
   ]
 }

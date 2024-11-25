@@ -41,6 +41,7 @@ export interface InjectedMetadataExternalUrlPolicy {
 /** @internal */
 export interface InjectedMetadataTheme {
   darkMode: DarkModeValue;
+  name: string;
   version: ThemeVersion;
   stylesheetPaths: {
     default: string[];
@@ -62,6 +63,9 @@ export interface InjectedMetadata {
   env: {
     mode: EnvironmentMode;
     packageInfo: PackageInfo;
+  };
+  featureFlags?: {
+    overrides: Record<string, unknown>;
   };
   anonymousStatusPage: boolean;
   i18n: {

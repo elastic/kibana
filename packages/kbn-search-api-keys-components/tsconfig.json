@@ -1,0 +1,21 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    "src/**/*",
+    "index.ts",
+  ],
+  "kbn_references": [
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/kibana-react-plugin",
+    "@kbn/security-api-key-management",
+    "@kbn/search-shared-ui",
+    "@kbn/search-api-keys-server"
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

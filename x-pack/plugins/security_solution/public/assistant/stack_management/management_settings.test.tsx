@@ -7,6 +7,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { MemoryRouter } from '@kbn/shared-ux-router';
 import { ManagementSettings } from './management_settings';
 import type { Conversation } from '@kbn/elastic-assistant';
 import {
@@ -16,6 +17,7 @@ import {
 } from '@kbn/elastic-assistant';
 import { useKibana } from '../../common/lib/kibana';
 import { useConversation } from '@kbn/elastic-assistant/impl/assistant/use_conversation';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // Mock the necessary hooks and components
 jest.mock('@kbn/elastic-assistant', () => ({
@@ -40,9 +42,11 @@ const useKibanaMock = useKibana as jest.Mock;
 const useConversationMock = useConversation as jest.Mock;
 
 describe('ManagementSettings', () => {
+  const queryClient = new QueryClient();
   const baseConversations = { base: 'conversation' };
   const http = {};
   const getDefaultConversation = jest.fn();
+  const setCurrentUserAvatar = jest.fn();
   const navigateToApp = jest.fn();
   const mockConversations = {
     [WELCOME_CONVERSATION_TITLE]: { title: WELCOME_CONVERSATION_TITLE },
@@ -59,6 +63,7 @@ describe('ManagementSettings', () => {
       baseConversations,
       http,
       assistantAvailability: { isAssistantEnabled },
+      setCurrentUserAvatar,
     });
 
     useFetchCurrentUserConversationsMock.mockReturnValue({
@@ -73,6 +78,22 @@ describe('ManagementSettings', () => {
             securitySolutionAssistant: { 'ai-assistant': false },
           },
         },
+        chrome: {
+          docTitle: {
+            change: jest.fn(),
+          },
+          setBreadcrumbs: jest.fn(),
+        },
+        data: {
+          dataViews: {
+            getIndices: jest.fn(),
+          },
+        },
+        security: {
+          userProfiles: {
+            getCurrent: jest.fn().mockResolvedValue({ data: { color: 'blue', initials: 'P' } }),
+          },
+        },
       },
     });
 
@@ -80,7 +101,13 @@ describe('ManagementSettings', () => {
       getDefaultConversation,
     });
 
-    return render(<ManagementSettings />);
+    return render(
+      <MemoryRouter>
+        <QueryClientProvider client={queryClient}>
+          <ManagementSettings />
+        </QueryClientProvider>
+      </MemoryRouter>
+    );
   };
 
   beforeEach(() => {

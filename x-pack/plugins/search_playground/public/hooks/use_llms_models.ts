@@ -34,11 +34,22 @@ const mapLlmToModels: Record<
   },
   [LLMs.openai_azure]: {
     icon: OpenAILogo,
-    getModels: (connectorName, includeName) => [
+    getModels: (connectorName) => [
       {
         label: i18n.translate('xpack.searchPlayground.openAIAzureModel', {
-          defaultMessage: 'Azure OpenAI {name}',
-          values: { name: includeName ? `(${connectorName})` : '' },
+          defaultMessage: '{name} (Azure OpenAI)',
+          values: { name: connectorName },
+        }),
+      },
+    ],
+  },
+  [LLMs.openai_other]: {
+    icon: OpenAILogo,
+    getModels: (connectorName) => [
+      {
+        label: i18n.translate('xpack.searchPlayground.otherOpenAIModel', {
+          defaultMessage: '{name} (OpenAI Compatible Service)',
+          values: { name: connectorName },
         }),
       },
     ],

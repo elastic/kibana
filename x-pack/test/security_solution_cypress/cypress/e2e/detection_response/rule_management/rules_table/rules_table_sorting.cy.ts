@@ -37,7 +37,7 @@ import {
 import { TABLE_FIRST_PAGE, TABLE_SECOND_PAGE } from '../../../../screens/table_pagination';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 
-describe('Rules table: sorting', { tags: ['@ess', '@serverless'] }, () => {
+describe('Rules table: sorting', { tags: ['@ess', '@serverless', '@serverlessQA'] }, () => {
   beforeEach(() => {
     login();
     deleteAlertsAndRules();

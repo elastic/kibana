@@ -155,8 +155,7 @@ export const serviceDetailRoute = {
             defaultMessage: 'Overview',
           }),
           searchBarOptions: {
-            showTransactionTypeSelector: true,
-            showTimeComparison: true,
+            hidden: true,
           },
         }),
         params: t.partial({
@@ -331,7 +330,7 @@ export const serviceDetailRoute = {
         }),
         element: <ServiceLogs />,
         searchBarOptions: {
-          showUnifiedSearchBar: false,
+          showQueryInput: false,
         },
       }),
       '/services/{serviceName}/infrastructure': {

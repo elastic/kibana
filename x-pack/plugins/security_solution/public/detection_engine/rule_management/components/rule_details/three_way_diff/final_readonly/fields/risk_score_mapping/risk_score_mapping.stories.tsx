@@ -8,8 +8,10 @@
 import React from 'react';
 import type { Story } from '@storybook/react';
 import { FieldReadOnly } from '../../field_readonly';
-import type { DiffableAllFields } from '../../../../../../../../../common/api/detection_engine';
+import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import { RiskScoreMappingReadOnly } from './risk_score_mapping';
+import { mockCustomQueryRule } from '../../storybook/mocks';
+import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
 
 export default {
   component: RiskScoreMappingReadOnly,
@@ -18,22 +20,21 @@ export default {
 };
 
 interface TemplateProps {
-  finalDiffableRule: Partial<DiffableAllFields>;
+  finalDiffableRule: DiffableRule;
 }
 
 const Template: Story<TemplateProps> = (args) => {
   return (
-    <FieldReadOnly
-      fieldName="risk_score_mapping"
-      finalDiffableRule={args.finalDiffableRule as DiffableAllFields}
-    />
+    <ThreeWayDiffStorybookProviders finalDiffableRule={args.finalDiffableRule}>
+      <FieldReadOnly fieldName="risk_score_mapping" />
+    </ThreeWayDiffStorybookProviders>
   );
 };
 
 export const Default = Template.bind({});
 
 Default.args = {
-  finalDiffableRule: {
+  finalDiffableRule: mockCustomQueryRule({
     risk_score_mapping: [{ field: 'event.risk_score', operator: 'equals', value: '' }],
-  },
+  }),
 };

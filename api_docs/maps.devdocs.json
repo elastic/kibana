@@ -3056,7 +3056,7 @@
           "MapExtent",
           " | undefined; mapSettings?: Partial<",
           "MapSettings",
-          "> | undefined; hiddenLayers?: string[] | undefined; hideFilterActions?: boolean | undefined; timeRange?: ",
+          "> | undefined; hiddenLayers?: string[] | undefined; timeRange?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -3064,9 +3064,7 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          " | undefined; filterByMapExtent?: boolean | undefined; isMovementSynchronized?: boolean | undefined; isSharable?: boolean | undefined; tooltipRenderer?: ",
-          "RenderToolTipContent",
-          " | undefined; }"
+          " | undefined; filterByMapExtent?: boolean | undefined; isMovementSynchronized?: boolean | undefined; }"
         ],
         "path": "x-pack/plugins/maps/public/react_embeddable/types.ts",
         "deprecated": false,
@@ -3291,14 +3289,14 @@
             {
               "parentPluginId": "maps",
               "id": "def-public.MapsStartApi.Map.$1",
-              "type": "CompoundType",
+              "type": "Uncategorized",
               "tags": [],
               "label": "props",
               "description": [],
               "signature": [
-                "P & { children?: React.ReactNode; }"
+                "P"
               ],
-              "path": "node_modules/@types/react/index.d.ts",
+              "path": "node_modules/@types/react/ts5.0/index.d.ts",
               "deprecated": false,
               "trackAdoption": false
             },
@@ -3312,7 +3310,7 @@
               "signature": [
                 "any"
               ],
-              "path": "node_modules/@types/react/index.d.ts",
+              "path": "node_modules/@types/react/ts5.0/index.d.ts",
               "deprecated": false,
               "trackAdoption": false
             }
@@ -3338,14 +3336,14 @@
             {
               "parentPluginId": "maps",
               "id": "def-public.MapsStartApi.PassiveMap.$1",
-              "type": "CompoundType",
+              "type": "Uncategorized",
               "tags": [],
               "label": "props",
               "description": [],
               "signature": [
-                "P & { children?: React.ReactNode; }"
+                "P"
               ],
-              "path": "node_modules/@types/react/index.d.ts",
+              "path": "node_modules/@types/react/ts5.0/index.d.ts",
               "deprecated": false,
               "trackAdoption": false
             },
@@ -3359,7 +3357,7 @@
               "signature": [
                 "any"
               ],
-              "path": "node_modules/@types/react/index.d.ts",
+              "path": "node_modules/@types/react/ts5.0/index.d.ts",
               "deprecated": false,
               "trackAdoption": false
             }

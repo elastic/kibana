@@ -14,6 +14,7 @@ import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-ty
 import { SqlQueryRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SqlGetAsyncResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ESQLSearchParams } from '@kbn/es-types';
+import { toAsyncKibanaSearchResponse } from './response_utils';
 import {
   getCommonDefaultAsyncSubmitParams,
   getCommonDefaultAsyncGetParams,
@@ -22,7 +23,6 @@ import { pollSearch } from '../../../../common';
 import { getKbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type { IAsyncSearchOptions } from '../../../../common';
-import { toAsyncKibanaSearchResponse } from './response_utils';
 import { SearchConfigSchema } from '../../../config';
 
 // `drop_null_columns` is going to change the response
@@ -74,14 +74,19 @@ export const esqlAsyncSearchStrategyProvider = (
             ...(await getCommonDefaultAsyncSubmitParams(searchConfig, options)),
             ...requestParams,
           };
-      const { body, headers, meta } = id
+      const response = id
         ? await client.transport.request<SqlGetAsyncResponse>(
             {
               method: 'GET',
               path: `/_query/async/${id}`,
-              querystring: { ...params },
+              querystring: { ...params, drop_null_columns: dropNullColumns },
             },
-            { ...options.transport, signal: options.abortSignal, meta: true }
+            {
+              ...options.transport,
+              signal: options.abortSignal,
+              meta: true,
+              asStream: options.stream,
+            }
           )
         : await client.transport.request<SqlGetAsyncResponse>(
             {
@@ -90,16 +95,17 @@ export const esqlAsyncSearchStrategyProvider = (
               body: params,
               querystring: dropNullColumns ? 'drop_null_columns' : '',
             },
-            { ...options.transport, signal: options.abortSignal, meta: true }
+            {
+              ...options.transport,
+              signal: options.abortSignal,
+              meta: true,
+              asStream: options.stream,
+            }
           );
 
-      const finalResponse = toAsyncKibanaSearchResponse(
-        body,
-        headers?.warning,
-        // do not return requestParams on polling calls
-        id ? undefined : meta?.request?.params
-      );
-      return finalResponse;
+      const { body, headers, meta } = response;
+
+      return toAsyncKibanaSearchResponse(body, headers, meta?.request?.params);
     };
 
     const cancel = async () => {

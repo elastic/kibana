@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// eslint-disable-next-line @kbn/eslint/no_unsafe_js_yaml
 import { dump } from 'js-yaml';
 import { BuildkiteClient, BuildkiteCommandStep } from './buildkite';
 
@@ -59,7 +58,7 @@ const expandAgentQueue = (queueName: string = 'n2-4-spot') => {
   const additionalProps =
     {
       spot: { preemptible: true },
-      virt: { localSsdInterface: 'nvme', enableNestedVirtualization: true, localSsds: 1 },
+      virt: { enableNestedVirtualization: true },
     }[addition] || {};
 
   return {

@@ -11,6 +11,7 @@ import {
   geminiSuccessResponse,
 } from '@kbn/actions-simulators-plugin/server/gemini_simulation';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
+import { DEFAULT_GEMINI_MODEL } from '@kbn/stack-connectors-plugin/common/gemini/constants';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 const connectorTypeId = '.gemini';
@@ -20,7 +21,7 @@ const defaultConfig = {
   gcpProjectID: 'test-project',
 };
 const secrets = {
-  credentialsJSON: JSON.stringify({
+  credentialsJson: JSON.stringify({
     type: 'service_account',
     project_id: '',
     private_key_id: '',
@@ -39,14 +40,14 @@ export default function geminiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const configService = getService('config');
 
-  const createConnector = async (url: string) => {
+  const createConnector = async (apiUrl: string) => {
     const { body } = await supertest
       .post('/api/actions/connector')
       .set('kbn-xsrf', 'foo')
       .send({
         name,
         connector_type_id: connectorTypeId,
-        config: { ...defaultConfig, url },
+        config: { ...defaultConfig, apiUrl },
         secrets,
       })
       .expect(200);
@@ -62,10 +63,10 @@ export default function geminiTest({ getService }: FtrProviderContext) {
           config: configService.get('kbnTestServer.serverArgs'),
         },
       });
-      const config = { ...defaultConfig, url: '' };
+      const config = { ...defaultConfig, apiUrl: '' };
 
       before(async () => {
-        config.url = await simulator.start();
+        config.apiUrl = await simulator.start();
       });
 
       after(() => {
@@ -92,7 +93,10 @@ export default function geminiTest({ getService }: FtrProviderContext) {
           name,
           connector_type_id: connectorTypeId,
           is_missing_secrets: false,
-          config,
+          config: {
+            ...config,
+            defaultModel: DEFAULT_GEMINI_MODEL,
+          },
         });
       });
 
@@ -112,20 +116,20 @@ export default function geminiTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: [url, gcpRegion, gcpProjectID]: expected value of type [string] but got [undefined]',
+                'error validating action type config: [apiUrl]: expected value of type [string] but got [undefined]',
             });
           });
       });
 
       it('should return 400 Bad Request when creating the connector without the project id', async () => {
-        const testConfig = { gcpRegion: 'us-central-1', url: '' };
+        const testConfig = { gcpRegion: 'us-central-1', apiUrl: 'https://url.co' };
         await supertest
           .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name,
             connector_type_id: connectorTypeId,
-            testConfig,
+            config: testConfig,
             secrets,
           })
           .expect(400)
@@ -140,14 +144,14 @@ export default function geminiTest({ getService }: FtrProviderContext) {
       });
 
       it('should return 400 Bad Request when creating the connector without the region', async () => {
-        const testConfig = { gcpProjectID: 'test-project', url: '' };
+        const testConfig = { gcpProjectID: 'test-project', apiUrl: 'https://url.co' };
         await supertest
           .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name,
             connector_type_id: connectorTypeId,
-            testConfig,
+            config: testConfig,
             secrets,
           })
           .expect(400)
@@ -169,7 +173,8 @@ export default function geminiTest({ getService }: FtrProviderContext) {
             name,
             connector_type_id: connectorTypeId,
             config: {
-              url: 'http://gemini.mynonexistent.com',
+              ...defaultConfig,
+              apiUrl: 'http://gemini.mynonexistent.com',
             },
             secrets,
           })
@@ -179,7 +184,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: error validating url: target url "http://gemini.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
+                'error validating action type config: Error configuring Google Gemini action: Error: error validating url: target url "http://gemini.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
             });
           });
       });
@@ -199,7 +204,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type secrets: [token]: expected value of type [string] but got [undefined]',
+                'error validating action type secrets: [credentialsJson]: expected value of type [string] but got [undefined]',
             });
           });
       });
@@ -238,7 +243,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
             message:
               'error validating action params: [subAction]: expected value of type [string] but got [undefined]',
             retry: false,
-            errorSource: TaskErrorSource.FRAMEWORK,
+            errorSource: TaskErrorSource.USER,
           });
         });
 
@@ -257,7 +262,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
             retry: true,
             message: 'an error occurred while running the action',
             errorSource: TaskErrorSource.FRAMEWORK,
-            service_message: `Sub action "invalidAction" is not registered. Connector id: ${geminiActionId}. Connector name: Gemini. Connector type: .gemini`,
+            service_message: `Sub action "invalidAction" is not registered. Connector id: ${geminiActionId}. Connector name: Google Gemini. Connector type: .gemini`,
           });
         });
       });
@@ -269,19 +274,21 @@ export default function geminiTest({ getService }: FtrProviderContext) {
               config: configService.get('kbnTestServer.serverArgs'),
             },
           });
-          let url: string;
+          let apiUrl: string;
           let geminiActionId: string;
 
           before(async () => {
-            url = await simulator.start();
-            geminiActionId = await createConnector(url);
+            apiUrl = await simulator.start();
+            geminiActionId = await createConnector(apiUrl);
           });
 
           after(() => {
             simulator.close();
           });
 
-          it('should invoke AI with assistant AI body argument formatted to gemini expectations', async () => {
+          // TODO to fix, we need to figure out how to mock the gcp oauth token
+          // https://github.com/elastic/kibana/issues/195437
+          it.skip('should invoke AI with assistant AI body argument formatted to gemini expectations', async () => {
             const { body } = await supertest
               .post(`/api/actions/connector/${geminiActionId}/_execute`)
               .set('kbn-xsrf', 'foo')
@@ -289,7 +296,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
                 params: {
                   subAction: 'invokeAI',
                   subActionParams: {
-                    contents: [
+                    messages: [
                       {
                         role: 'user',
                         parts: [
@@ -315,7 +322,6 @@ export default function geminiTest({ getService }: FtrProviderContext) {
                         ],
                       },
                     ],
-                    generation_config: { temperature: 0, maxOutputTokens: 8192 },
                   },
                 },
               })
@@ -372,7 +378,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
               message:
                 'error validating action params: [subAction]: expected value of type [string] but got [undefined]',
               retry: false,
-              errorSource: TaskErrorSource.FRAMEWORK,
+              errorSource: TaskErrorSource.USER,
             });
           });
         });

@@ -21,7 +21,11 @@ export function appendWhereClauseToESQLQuery(
   value: unknown,
   operation: '+' | '-' | 'is_not_null' | 'is_null',
   fieldType?: string
-): string {
+): string | undefined {
+  // multivalues filtering is not supported yet
+  if (Array.isArray(value)) {
+    return undefined;
+  }
   let operator;
   switch (operation) {
     case 'is_not_null':
@@ -36,7 +40,8 @@ export function appendWhereClauseToESQLQuery(
     default:
       operator = '==';
   }
-  let filterValue = typeof value === 'string' ? `"${value.replace(/"/g, '\\"')}"` : value;
+  let filterValue =
+    typeof value === 'string' ? `"${value.replace(/\\/g, '\\\\').replace(/\"/g, '\\"')}"` : value;
   // Adding the backticks here are they are needed for special char fields
   let fieldName = `\`${field}\``;
 

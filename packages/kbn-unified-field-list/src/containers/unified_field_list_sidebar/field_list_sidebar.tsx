@@ -48,8 +48,10 @@ export type UnifiedFieldListSidebarCustomizableProps = Pick<
   | 'dataView'
   | 'trackUiMetric'
   | 'onAddFilter'
+  | 'onAddBreakdownField'
   | 'onAddFieldToWorkspace'
   | 'onRemoveFieldFromWorkspace'
+  | 'additionalFilters'
 > & {
   /**
    * All fields: fields from data view and unmapped fields or columns from text-based search
@@ -160,6 +162,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   fullWidth,
   isAffectedByGlobalFilter,
   prepend,
+  onAddBreakdownField,
   onAddFieldToWorkspace,
   onRemoveFieldFromWorkspace,
   onAddFilter,
@@ -168,6 +171,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   onDeleteField,
   onToggleSidebar,
   additionalFieldGroups,
+  additionalFilters,
 }) => {
   const { dataViews, core } = services;
   const useNewFieldsApi = useMemo(
@@ -262,29 +266,31 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
     ({ field, groupName, groupIndex, itemIndex, fieldSearchHighlight }) => (
       <li key={`field${field.name}`} data-attr-field={field.name}>
         <UnifiedFieldListItem
-          stateService={stateService}
-          searchMode={searchMode}
-          services={services}
+          additionalFilters={additionalFilters}
           alwaysShowActionButton={alwaysShowActionButton}
-          field={field}
-          size={compressed ? 'xs' : 's'}
-          highlight={fieldSearchHighlight}
           dataView={dataView!}
-          onAddFieldToWorkspace={onAddFieldToWorkspace}
-          onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
-          onAddFilter={onAddFilter}
-          trackUiMetric={trackUiMetric}
-          multiFields={multiFieldsMap?.get(field.name)} // ideally we better calculate multifields when they are requested first from the popover
-          onEditField={onEditField}
-          onDeleteField={onDeleteField}
-          workspaceSelectedFieldNames={workspaceSelectedFieldNames}
+          field={field}
           groupIndex={groupIndex}
-          itemIndex={itemIndex}
+          highlight={fieldSearchHighlight}
           isEmpty={groupName === FieldsGroupNames.EmptyFields}
           isSelected={
             groupName === FieldsGroupNames.SelectedFields ||
             Boolean(selectedFieldsState.selectedFieldsMap[field.name])
           }
+          itemIndex={itemIndex}
+          multiFields={multiFieldsMap?.get(field.name)} // ideally we better calculate multifields when they are requested first from the popover
+          onAddBreakdownField={onAddBreakdownField}
+          onAddFieldToWorkspace={onAddFieldToWorkspace}
+          onAddFilter={onAddFilter}
+          onDeleteField={onDeleteField}
+          onEditField={onEditField}
+          onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
+          searchMode={searchMode}
+          services={services}
+          size={compressed ? 'xs' : 's'}
+          stateService={stateService}
+          trackUiMetric={trackUiMetric}
+          workspaceSelectedFieldNames={workspaceSelectedFieldNames}
         />
       </li>
     ),
@@ -295,6 +301,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
       alwaysShowActionButton,
       compressed,
       dataView,
+      onAddBreakdownField,
       onAddFieldToWorkspace,
       onRemoveFieldFromWorkspace,
       onAddFilter,
@@ -304,6 +311,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
       onDeleteField,
       workspaceSelectedFieldNames,
       selectedFieldsState.selectedFieldsMap,
+      additionalFilters,
     ]
   );
 

@@ -14,6 +14,7 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import type { InvestigateAppSetupDependencies, InvestigateAppStartDependencies } from '../types';
 
 export type InvestigateAppRequestHandlerContext = Omit<
@@ -33,6 +34,7 @@ export type InvestigateAppRequestHandlerContext = Omit<
     };
     coreStart: CoreStart;
   }>;
+  licensing: Promise<LicensingApiRequestHandlerContext>;
 };
 
 export interface InvestigateAppRouteHandlerResources {
@@ -51,10 +53,7 @@ export interface InvestigateAppRouteHandlerResources {
 }
 
 export interface InvestigateAppRouteCreateOptions {
-  options: {
-    timeout?: {
-      idleSocket?: number;
-    };
-    tags: [];
+  timeout?: {
+    idleSocket?: number;
   };
 }

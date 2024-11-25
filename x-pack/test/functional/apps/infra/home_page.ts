@@ -143,7 +143,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.header.waitUntilLoadingHasFinished();
 
         const documentTitle = await browser.getTitle();
-        expect(documentTitle).to.contain('Inventory - Infrastructure - Observability - Elastic');
+        expect(documentTitle).to.contain(
+          'Infrastructure inventory - Infrastructure - Observability - Elastic'
+        );
       });
 
       it('renders the inventory survey link', async () => {
@@ -424,8 +426,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(nodesWithValue).to.eql([
             { name: 'host-5', value: 10, color: '#6092c0' },
             { name: 'host-4', value: 30, color: '#9ab6d5' },
-            { name: 'host-1', value: 50, color: '#f1d9b9' },
-            { name: 'host-2', value: 70, color: '#eba47a' },
+            { name: 'host-1', value: 50, color: '#f6e0b9' },
+            { name: 'host-2', value: 70, color: '#eda77a' },
             { name: 'host-3', value: 90, color: '#e7664c' },
           ]);
         });
@@ -457,7 +459,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await retry.tryForTime(5000, async () => {
             const documentTitle = await browser.getTitle();
             expect(documentTitle).to.contain(
-              'host-5 - Inventory - Infrastructure - Observability - Elastic'
+              'host-5 - Infrastructure inventory - Infrastructure - Observability - Elastic'
             );
           });
 
@@ -474,7 +476,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await retry.tryForTime(5000, async () => {
               const documentTitle = await browser.getTitle();
               expect(documentTitle).to.contain(
-                'pod-0 - Inventory - Infrastructure - Observability - Elastic'
+                'pod-0 - Infrastructure inventory - Infrastructure - Observability - Elastic'
               );
             });
 
@@ -492,7 +494,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await retry.tryForTime(5000, async () => {
               const documentTitle = await browser.getTitle();
               expect(documentTitle).to.contain(
-                'container-id-4 - Inventory - Infrastructure - Observability - Elastic'
+                'container-id-4 - Infrastructure inventory - Infrastructure - Observability - Elastic'
               );
             });
 

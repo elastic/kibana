@@ -11,9 +11,11 @@ import type { Plugin, CoreStart, CoreSetup } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { IndexManagementPluginSetup } from '@kbn/index-management';
+import type { IndexManagementPluginSetup } from '@kbn/index-management-shared-types';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   updateESQLQueryTrigger,
   UpdateESQLQueryAction,
@@ -27,6 +29,7 @@ interface EsqlPluginStart {
   uiActions: UiActionsStart;
   data: DataPublicPluginStart;
   fieldsMetadata: FieldsMetadataPublicStart;
+  usageCollection?: UsageCollectionStart;
 }
 
 interface EsqlPluginSetup {
@@ -47,11 +50,20 @@ export class EsqlPlugin implements Plugin<{}, void> {
 
   public start(
     core: CoreStart,
-    { dataViews, expressions, data, uiActions, fieldsMetadata }: EsqlPluginStart
+    { dataViews, expressions, data, uiActions, fieldsMetadata, usageCollection }: EsqlPluginStart
   ): void {
+    const storage = new Storage(localStorage);
     const appendESQLAction = new UpdateESQLQueryAction(data);
     uiActions.addTriggerAction(UPDATE_ESQL_QUERY_TRIGGER, appendESQLAction);
-    setKibanaServices(core, dataViews, expressions, this.indexManagement, fieldsMetadata);
+    setKibanaServices(
+      core,
+      dataViews,
+      expressions,
+      storage,
+      this.indexManagement,
+      fieldsMetadata,
+      usageCollection
+    );
   }
 
   public stop() {}

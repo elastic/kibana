@@ -48,9 +48,9 @@ interface AutocompleteFieldMatchProps {
   selectedField: DataViewFieldBase | undefined;
   selectedValue: string | undefined;
   indexPattern: DataViewBase | undefined;
-  isLoading: boolean;
-  isDisabled: boolean;
-  isClearable: boolean;
+  isLoading?: boolean;
+  isDisabled?: boolean;
+  isClearable?: boolean;
   isRequired?: boolean;
   fieldInputWidth?: number;
   rowLabel?: string;
@@ -68,7 +68,7 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
   selectedField,
   selectedValue,
   indexPattern,
-  isLoading,
+  isLoading = false,
   isDisabled = false,
   isClearable = false,
   isRequired = false,
@@ -168,10 +168,26 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
         handleWarning(warning);
 
         if (!err) handleSpacesWarning(searchVal);
-        setSearchQuery(searchVal);
       }
+
+      if (searchVal) {
+        // Clear selected option when user types to allow user to modify value without {backspace}
+        onChange('');
+      }
+
+      // Update search query unconditionally to show correct suggestions even when input is cleared
+      setSearchQuery(searchVal);
     },
-    [handleError, handleSpacesWarning, isRequired, selectedField, touched, handleWarning, warning]
+    [
+      selectedField,
+      onChange,
+      isRequired,
+      touched,
+      handleError,
+      handleWarning,
+      warning,
+      handleSpacesWarning,
+    ]
   );
 
   const handleCreateOption = useCallback(

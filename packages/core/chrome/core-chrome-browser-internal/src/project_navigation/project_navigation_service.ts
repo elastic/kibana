@@ -11,13 +11,13 @@ import { InternalApplicationStart } from '@kbn/core-application-browser-internal
 import type {
   ChromeNavLinks,
   SideNavComponent,
-  ChromeProjectBreadcrumb,
   ChromeBreadcrumb,
   ChromeSetProjectBreadcrumbsParams,
   ChromeProjectNavigationNode,
   NavigationTreeDefinition,
   SolutionNavigationDefinitions,
   CloudLinks,
+  SolutionId,
 } from '@kbn/core-chrome-browser';
 import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import {
@@ -74,18 +74,22 @@ export class ProjectNavigationService {
   // The navigation tree for the Side nav UI that still contains layout information (body, footer, etc.)
   private navigationTreeUi$ = new BehaviorSubject<NavigationTreeDefinitionUI | null>(null);
   private activeNodes$ = new BehaviorSubject<ChromeProjectNavigationNode[][]>([]);
+  // Keep a reference to the nav node selected when the navigation panel is opened
+  private readonly panelSelectedNode$ = new BehaviorSubject<ChromeProjectNavigationNode | null>(
+    null
+  );
 
   private projectBreadcrumbs$ = new BehaviorSubject<{
-    breadcrumbs: ChromeProjectBreadcrumb[];
+    breadcrumbs: ChromeBreadcrumb[];
     params: ChromeSetProjectBreadcrumbsParams;
   }>({ breadcrumbs: [], params: { absolute: false } });
   private readonly stop$ = new ReplaySubject<void>(1);
   private readonly solutionNavDefinitions$ = new BehaviorSubject<SolutionNavigationDefinitions>({});
   // As the active definition **id** and the definitions are set independently, one before the other without
   // any guarantee of order, we need to store the next active definition id in a separate BehaviorSubject
-  private readonly nextSolutionNavDefinitionId$ = new BehaviorSubject<string | null>(null);
+  private readonly nextSolutionNavDefinitionId$ = new BehaviorSubject<SolutionId | null>(null);
   // The active solution navigation definition id that has been initiated and is currently active
-  private readonly activeSolutionNavDefinitionId$ = new BehaviorSubject<string | null>(null);
+  private readonly activeSolutionNavDefinitionId$ = new BehaviorSubject<SolutionId | null>(null);
   private readonly location$ = new BehaviorSubject<Location>(createLocation('/'));
   private deepLinksMap$: Observable<Record<string, ChromeNavLink>> = of({});
   private cloudLinks$ = new BehaviorSubject<CloudLinks>({});
@@ -135,7 +139,7 @@ export class ProjectNavigationService {
         return this.projectName$.asObservable();
       },
       initNavigation: <LinkId extends AppDeepLinkId = AppDeepLinkId>(
-        id: string,
+        id: SolutionId,
         navTreeDefinition$: Observable<NavigationTreeDefinition<LinkId>>
       ) => {
         this.initNavigation(id, navTreeDefinition$);
@@ -149,7 +153,7 @@ export class ProjectNavigationService {
         return this.customProjectSideNavComponent$.asObservable();
       },
       setProjectBreadcrumbs: (
-        breadcrumbs: ChromeProjectBreadcrumb | ChromeProjectBreadcrumb[],
+        breadcrumbs: ChromeBreadcrumb | ChromeBreadcrumb[],
         params?: Partial<ChromeSetProjectBreadcrumbsParams>
       ) => {
         this.projectBreadcrumbs$.next({
@@ -157,7 +161,7 @@ export class ProjectNavigationService {
           params: { absolute: false, ...params },
         });
       },
-      getProjectBreadcrumbs$: (): Observable<ChromeProjectBreadcrumb[]> => {
+      getProjectBreadcrumbs$: (): Observable<ChromeBreadcrumb[]> => {
         return combineLatest([
           this.projectBreadcrumbs$,
           this.activeNodes$,
@@ -187,6 +191,8 @@ export class ProjectNavigationService {
       getActiveSolutionNavDefinition$: this.getActiveSolutionNavDefinition$.bind(this),
       /** In stateful Kibana, get the id of the active solution navigation */
       getActiveSolutionNavId$: () => this.activeSolutionNavDefinitionId$.asObservable(),
+      getPanelSelectedNode$: () => this.panelSelectedNode$.asObservable(),
+      setPanelSelectedNode: this.setPanelSelectedNode.bind(this),
     };
   }
 
@@ -197,7 +203,7 @@ export class ProjectNavigationService {
    * @param id Id for the navigation tree definition
    * @param navTreeDefinition$ The navigation tree definition
    */
-  private initNavigation(id: string, navTreeDefinition$: Observable<NavigationTreeDefinition>) {
+  private initNavigation(id: SolutionId, navTreeDefinition$: Observable<NavigationTreeDefinition>) {
     if (this.activeSolutionNavDefinitionId$.getValue() === id) return;
 
     if (this.navigationChangeSubscription) {
@@ -215,7 +221,7 @@ export class ProjectNavigationService {
       .pipe(
         takeUntil(this.stop$),
         map(([def, deepLinksMap, cloudLinks]) => {
-          return parseNavigationTree(def, {
+          return parseNavigationTree(id, def, {
             deepLinks: deepLinksMap,
             cloudLinks,
           });
@@ -377,7 +383,7 @@ export class ProjectNavigationService {
     this.projectHome$.next(homeHref);
   }
 
-  private changeActiveSolutionNavigation(id: string | null) {
+  private changeActiveSolutionNavigation(id: SolutionId | null) {
     if (this.nextSolutionNavDefinitionId$.getValue() === id) return;
     this.nextSolutionNavDefinitionId$.next(id);
   }
@@ -395,7 +401,7 @@ export class ProjectNavigationService {
         if (!definitions[id]) return null;
 
         // We strip out the sideNavComponent from the definition as it should only be used internally
-        const { sideNavComponent, ...definition } = definitions[id];
+        const { sideNavComponent, ...definition } = definitions[id]!;
         return definition;
       })
     );
@@ -413,6 +419,34 @@ export class ProjectNavigationService {
         ...solutionNavs,
       });
     }
+  }
+
+  private setPanelSelectedNode = (_node: string | ChromeProjectNavigationNode | null) => {
+    const node = typeof _node === 'string' ? this.findNodeById(_node) : _node;
+    this.panelSelectedNode$.next(node);
+  };
+
+  private findNodeById(id: string): ChromeProjectNavigationNode | null {
+    const allNodes = this.navigationTree$.getValue();
+    if (!allNodes) return null;
+
+    const find = (nodes: ChromeProjectNavigationNode[]): ChromeProjectNavigationNode | null => {
+      // Recursively search for the node with the given id
+      for (const node of nodes) {
+        if (node.id === id) {
+          return node;
+        }
+        if (node.children) {
+          const found = find(node.children);
+          if (found) {
+            return found;
+          }
+        }
+      }
+      return null;
+    };
+
+    return find(allNodes);
   }
 
   private get http() {

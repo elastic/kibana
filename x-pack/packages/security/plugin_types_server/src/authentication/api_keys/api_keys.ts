@@ -6,7 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { getKibanaRoleSchema, elasticsearchRoleSchema } from '../../authorization';
+
+import { elasticsearchRoleSchema, getKibanaRoleSchema } from '../../authorization';
 
 export const restApiKeySchema = schema.object({
   type: schema.maybe(schema.literal('rest')),

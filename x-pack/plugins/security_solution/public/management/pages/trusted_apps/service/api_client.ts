@@ -10,7 +10,7 @@ import type {
   ExceptionListItemSchema,
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 
 import type { HttpStart } from '@kbn/core/public';
 import type { ConditionEntry } from '../../../../../common/endpoint/types';
@@ -46,7 +46,7 @@ export class TrustedAppsApiClient extends ExceptionsListApiClient {
   constructor(http: HttpStart) {
     super(
       http,
-      ENDPOINT_TRUSTED_APPS_LIST_ID,
+      ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
       TRUSTED_APPS_EXCEPTION_LIST_DEFINITION,
       readTransform,
       writeTransform
@@ -56,7 +56,7 @@ export class TrustedAppsApiClient extends ExceptionsListApiClient {
   public static getInstance(http: HttpStart): ExceptionsListApiClient {
     return super.getInstance(
       http,
-      ENDPOINT_TRUSTED_APPS_LIST_ID,
+      ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
       TRUSTED_APPS_EXCEPTION_LIST_DEFINITION,
       readTransform,
       writeTransform

@@ -53,6 +53,7 @@ export function PassiveMap(props: Props) {
       <ReactEmbeddableRenderer<MapSerializedState, MapRuntimeState, MapApi>
         type={MAP_SAVED_OBJECT_TYPE}
         getParentApi={() => ({
+          hideFilterActions: true,
           getSerializedStateForChild: () => {
             const basemapLayerDescriptor = createBasemapLayerDescriptor();
             const intialLayers = basemapLayerDescriptor ? [basemapLayerDescriptor] : [];
@@ -66,7 +67,6 @@ export function PassiveMap(props: Props) {
                 hidePanelTitles: true,
                 viewMode: ViewMode.VIEW,
                 isLayerTOCOpen: false,
-                hideFilterActions: true,
                 mapSettings: {
                   disableInteractive: false,
                   hideToolbarOverlay: false,

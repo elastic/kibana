@@ -177,7 +177,7 @@
             "label": "render",
             "description": [],
             "signature": [
-              "() => JSX.Element"
+              "() => React.JSX.Element"
             ],
             "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
             "deprecated": false,
@@ -361,7 +361,7 @@
           "\nApplies extra styling to a typical EuiAvatar"
         ],
         "signature": [
-          "({ solution, recommended, title, href, button, layout, category, ...cardRest }: React.PropsWithChildren<",
+          "({ solution, recommended, title, href, button, layout, category, ...cardRest }: ",
           {
             "pluginId": "kibanaReact",
             "scope": "public",
@@ -369,7 +369,7 @@
             "section": "def-public.ElasticAgentCardProps",
             "text": "ElasticAgentCardProps"
           },
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_card/elastic_agent_card.tsx",
         "deprecated": false,
@@ -383,15 +383,13 @@
             "label": "{\n  solution,\n  recommended,\n  title,\n  href,\n  button,\n  layout,\n  category,\n  ...cardRest\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "kibanaReact",
                 "scope": "public",
                 "docId": "kibKibanaReactPluginApi",
                 "section": "def-public.ElasticAgentCardProps",
                 "text": "ElasticAgentCardProps"
-              },
-              ">"
+              }
             ],
             "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_card/elastic_agent_card.tsx",
             "deprecated": false,
@@ -420,14 +418,14 @@
           {
             "parentPluginId": "kibanaReact",
             "id": "def-public.KibanaContextProvider.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -441,7 +439,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -458,9 +456,9 @@
           "\nApplies extra styling to a typical EuiAvatar"
         ],
         "signature": [
-          "({ className, size, ...rest }: React.PropsWithChildren<",
+          "({ className, size, ...rest }: ",
           "KibanaPageTemplateSolutionNavAvatarProps",
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/kibana_react/public/page_template/solution_nav/solution_nav_avatar.tsx",
         "deprecated": false,
@@ -474,9 +472,7 @@
             "label": "{ className, size, ...rest }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
-              "KibanaPageTemplateSolutionNavAvatarProps",
-              ">"
+              "KibanaPageTemplateSolutionNavAvatarProps"
             ],
             "path": "src/plugins/kibana_react/public/page_template/solution_nav/solution_nav_avatar.tsx",
             "deprecated": false,
@@ -505,7 +501,7 @@
             "section": "def-public.KibanaThemeProviderProps",
             "text": "KibanaThemeProviderProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/kibana_react/public/theme.tsx",
         "deprecated": true,
@@ -547,7 +543,7 @@
         "signature": [
           "(props: ",
           "MarkdownProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/kibana_react/public/markdown/index.tsx",
         "deprecated": false,
@@ -582,7 +578,7 @@
         "signature": [
           "(props: ",
           "MarkdownSimpleProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/kibana_react/public/markdown/index.tsx",
         "deprecated": false,
@@ -615,7 +611,7 @@
         "label": "NoDataCard",
         "description": [],
         "signature": [
-          "({ recommended, title, button, layout, ...cardRest }: React.PropsWithChildren<",
+          "({ recommended, title, button, layout, ...cardRest }: ",
           {
             "pluginId": "kibanaReact",
             "scope": "public",
@@ -623,7 +619,7 @@
             "section": "def-public.NoDataPageActions",
             "text": "NoDataPageActions"
           },
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_card/no_data_card.tsx",
         "deprecated": false,
@@ -637,15 +633,13 @@
             "label": "{\n  recommended,\n  title,\n  button,\n  layout,\n  ...cardRest\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "kibanaReact",
                 "scope": "public",
                 "docId": "kibKibanaReactPluginApi",
                 "section": "def-public.NoDataPageActions",
                 "text": "NoDataPageActions"
-              },
-              ">"
+              }
             ],
             "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_card/no_data_card.tsx",
             "deprecated": false,
@@ -664,7 +658,7 @@
         "label": "NoDataPage",
         "description": [],
         "signature": [
-          "({ solution, logo, actions, docsLink, pageTitle, ...rest }: React.PropsWithChildren<",
+          "({ solution, logo, actions, docsLink, pageTitle, ...rest }: ",
           {
             "pluginId": "kibanaReact",
             "scope": "public",
@@ -672,7 +666,7 @@
             "section": "def-public.NoDataPageProps",
             "text": "NoDataPageProps"
           },
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
         "deprecated": false,
@@ -681,20 +675,18 @@
           {
             "parentPluginId": "kibanaReact",
             "id": "def-public.NoDataPage.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{\n  solution,\n  logo,\n  actions,\n  docsLink,\n  pageTitle,\n  ...rest\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "kibanaReact",
                 "scope": "public",
                 "docId": "kibKibanaReactPluginApi",
                 "section": "def-public.NoDataPageProps",
                 "text": "NoDataPageProps"
-              },
-              ">"
+              }
             ],
             "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
             "deprecated": false,
@@ -713,7 +705,7 @@
         "label": "overviewPageActions",
         "description": [],
         "signature": [
-          "({ addDataHref, application, devToolsHref, hidden, managementHref, showDevToolsLink, showManagementLink, }: Props) => (JSX.Element | null)[]"
+          "({ addDataHref, application, devToolsHref, hidden, managementHref, showDevToolsLink, showManagementLink, }: Props) => (React.JSX.Element | null)[]"
         ],
         "path": "src/plugins/kibana_react/public/overview_page/overview_page_actions/overview_page_actions.tsx",
         "deprecated": false,
@@ -746,7 +738,7 @@
         "label": "OverviewPageFooter",
         "description": [],
         "signature": [
-          "({ addBasePath, path, onSetDefaultRoute, onChangeDefaultRoute, }: React.PropsWithChildren<Props>) => JSX.Element"
+          "({ addBasePath, path, onSetDefaultRoute, onChangeDefaultRoute, }: Props) => React.JSX.Element"
         ],
         "path": "src/plugins/kibana_react/public/overview_page/overview_page_footer/overview_page_footer.tsx",
         "deprecated": false,
@@ -755,12 +747,12 @@
           {
             "parentPluginId": "kibanaReact",
             "id": "def-public.OverviewPageFooter.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{\n  addBasePath,\n  path,\n  onSetDefaultRoute,\n  onChangeDefaultRoute,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<Props>"
+              "Props"
             ],
             "path": "src/plugins/kibana_react/public/overview_page/overview_page_footer/overview_page_footer.tsx",
             "deprecated": false,
@@ -1025,7 +1017,7 @@
         "label": "UrlTemplateEditor",
         "description": [],
         "signature": [
-          "({ height, fitToContent, value, variables, onChange, placeholder, onEditor, Editor, }: React.PropsWithChildren<",
+          "({ height, fitToContent, value, variables, onChange, placeholder, onEditor, Editor, }: ",
           {
             "pluginId": "kibanaReact",
             "scope": "public",
@@ -1033,7 +1025,7 @@
             "section": "def-public.UrlTemplateEditorProps",
             "text": "UrlTemplateEditorProps"
           },
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
         "deprecated": false,
@@ -1042,20 +1034,18 @@
           {
             "parentPluginId": "kibanaReact",
             "id": "def-public.UrlTemplateEditor.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{\n  height = 105,\n  fitToContent,\n  value,\n  variables,\n  onChange,\n  placeholder,\n  onEditor,\n  Editor = CodeEditor,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "kibanaReact",
                 "scope": "public",
                 "docId": "kibKibanaReactPluginApi",
                 "section": "def-public.UrlTemplateEditorProps",
                 "text": "UrlTemplateEditorProps"
-              },
-              ">"
+              }
             ],
             "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
             "deprecated": false,
@@ -1465,12 +1455,12 @@
           "<",
           {
             "pluginId": "@kbn/react-kibana-context-common",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnReactKibanaContextCommonPluginApi",
-            "section": "def-public.KibanaTheme",
+            "section": "def-common.KibanaTheme",
             "text": "KibanaTheme"
           },
-          ">) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "src/plugins/kibana_react/public/theme.tsx",
         "deprecated": false,
@@ -1503,9 +1493,9 @@
               "<",
               {
                 "pluginId": "@kbn/react-kibana-context-common",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibKbnReactKibanaContextCommonPluginApi",
-                "section": "def-public.KibanaTheme",
+                "section": "def-common.KibanaTheme",
                 "text": "KibanaTheme"
               },
               ">"
@@ -1581,14 +1571,14 @@
               {
                 "parentPluginId": "kibanaReact",
                 "id": "def-public.KibanaReactContext.Provider.$1",
-                "type": "CompoundType",
+                "type": "Uncategorized",
                 "tags": [],
                 "label": "props",
                 "description": [],
                 "signature": [
-                  "P & { children?: React.ReactNode; }"
+                  "P"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1602,7 +1592,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1641,7 +1631,7 @@
                 "signature": [
                   "P"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2066,7 +2056,7 @@
             "label": "title",
             "description": [],
             "signature": [
-              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "src/plugins/kibana_react/public/notifications/types.ts",
             "deprecated": false,
@@ -2080,7 +2070,7 @@
             "label": "body",
             "description": [],
             "signature": [
-              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "src/plugins/kibana_react/public/notifications/types.ts",
             "deprecated": false,
@@ -2531,6 +2521,14 @@
             "section": "def-public.ExecutionContextSetup",
             "text": "ExecutionContextSetup"
           },
+          " | undefined; featureFlags?: ",
+          {
+            "pluginId": "@kbn/core-feature-flags-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreFeatureFlagsBrowserPluginApi",
+            "section": "def-public.FeatureFlagsStart",
+            "text": "FeatureFlagsStart"
+          },
           " | undefined; http?: ",
           {
             "pluginId": "@kbn/core-http-browser",
@@ -2655,17 +2653,17 @@
           "Pick<",
           {
             "pluginId": "@kbn/react-kibana-context-theme",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnReactKibanaContextThemePluginApi",
-            "section": "def-public.KibanaThemeProviderProps",
+            "section": "def-common.KibanaThemeProviderProps",
             "text": "KibanaThemeProviderProps"
           },
           ", \"children\" | \"modify\"> & ",
           {
             "pluginId": "@kbn/react-kibana-context-common",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnReactKibanaContextCommonPluginApi",
-            "section": "def-public.ThemeServiceStart",
+            "section": "def-common.ThemeServiceStart",
             "text": "ThemeServiceStart"
           }
         ],
@@ -3012,7 +3010,7 @@
             "section": "def-common.EuiTheme",
             "text": "EuiTheme"
           },
-          ">, \"theme\"> & { darkMode?: boolean | undefined; }) => JSX.Element"
+          ">, \"theme\"> & { darkMode?: boolean | undefined; }) => React.JSX.Element"
         ],
         "path": "packages/react/kibana_context/styled/styled_provider.tsx",
         "deprecated": false,
@@ -3071,7 +3069,7 @@
           "StoryFnReactReturnType",
           ">, ",
           "Args",
-          ">) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/react/kibana_context/styled/styled_provider.tsx",
         "deprecated": true,

@@ -15,7 +15,13 @@ import { i18n } from '@kbn/i18n';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { getHttp } from '../kibana_services';
 import { MB } from '../../common/constants';
-import type { ImportDoc, ImportFailure, ImportResponse, IngestPipeline } from '../../common/types';
+import type {
+  ImportDoc,
+  ImportFailure,
+  ImportResponse,
+  IngestPipeline,
+  IngestPipelineWrapper,
+} from '../../common/types';
 import { CreateDocsResponse, IImporter, ImportResults } from './types';
 
 const CHUNK_SIZE = 5000;
@@ -79,25 +85,24 @@ export abstract class Importer implements IImporter {
     index: string,
     settings: IndicesIndexSettings,
     mappings: MappingTypeMapping,
-    pipeline: IngestPipeline
+    pipeline: IngestPipeline | undefined
   ) {
-    updatePipelineTimezone(pipeline);
+    let ingestPipeline: IngestPipelineWrapper | undefined;
+    if (pipeline !== undefined) {
+      updatePipelineTimezone(pipeline);
 
-    if (pipelineContainsSpecialProcessors(pipeline)) {
-      // pipeline contains processors which we know are slow
-      // so reduce the chunk size significantly to avoid timeouts
-      this._chunkSize = REDUCED_CHUNK_SIZE;
+      if (pipelineContainsSpecialProcessors(pipeline)) {
+        // pipeline contains processors which we know are slow
+        // so reduce the chunk size significantly to avoid timeouts
+        this._chunkSize = REDUCED_CHUNK_SIZE;
+      }
+      // if no pipeline has been supplied,
+      // send an empty object
+      ingestPipeline = {
+        id: `${index}-pipeline`,
+        pipeline,
+      };
     }
-
-    // if no pipeline has been supplied,
-    // send an empty object
-    const ingestPipeline =
-      pipeline !== undefined
-        ? {
-            id: `${index}-pipeline`,
-            pipeline,
-          }
-        : {};
 
     this._index = index;
     this._pipeline = pipeline;
@@ -139,9 +144,11 @@ export abstract class Importer implements IImporter {
 
     const chunks = createDocumentChunks(this._docArray, this._chunkSize);
 
-    const ingestPipeline = {
-      id: pipelineId,
-    };
+    const ingestPipeline: IngestPipelineWrapper | undefined = pipelineId
+      ? {
+          id: pipelineId,
+        }
+      : undefined;
 
     let success = true;
     const failures: ImportFailure[] = [];
@@ -345,10 +352,7 @@ export function callImportRoute({
   data: ImportDoc[];
   settings: IndicesIndexSettings;
   mappings: MappingTypeMapping;
-  ingestPipeline: {
-    id?: string;
-    pipeline?: IngestPipeline;
-  };
+  ingestPipeline: IngestPipelineWrapper | undefined;
 }) {
   const query = id !== undefined ? { id } : {};
   const body = JSON.stringify({

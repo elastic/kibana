@@ -7,12 +7,11 @@
 
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import {
-  createMockEndpointAppContext,
   createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
 } from '../../mocks';
-import { getHostPolicyResponseHandler, getAgentPolicySummaryHandler } from './handlers';
+import { getHostPolicyResponseHandler } from './handlers';
 import type { KibanaResponseFactory, SavedObjectsClientContract } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
@@ -23,10 +22,10 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { requestContextMock } from '../../../lib/detection_engine/routes/__mocks__';
-import type { Agent } from '@kbn/fleet-plugin/common/types/models';
-import type { AgentClient } from '@kbn/fleet-plugin/server/services';
 import { get } from 'lodash';
 import type { ScopedClusterClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import type { TypeOf } from '@kbn/config-schema';
+import type { GetPolicyResponseSchema } from '../../../../common/api/endpoint';
 
 describe('test policy response handler', () => {
   let endpointAppContextService: EndpointAppContextService;
@@ -48,11 +47,15 @@ describe('test policy response handler', () => {
 
     it('should return the latest policy response for a host', async () => {
       const response = createSearchResponse(new EndpointDocGenerator().generatePolicyResponse());
-      const hostPolicyResponseHandler = getHostPolicyResponseHandler();
+      const hostPolicyResponseHandler = getHostPolicyResponseHandler(endpointAppContextService);
 
       mockScopedClient.asInternalUser.search.mockResponseOnce(response);
-      const mockRequest = httpServerMock.createKibanaRequest({
-        params: { agentId: 'id' },
+      const mockRequest = httpServerMock.createKibanaRequest<
+        never,
+        TypeOf<typeof GetPolicyResponseSchema.query>,
+        never
+      >({
+        query: { agentId: 'id' },
       });
 
       await hostPolicyResponseHandler(
@@ -71,12 +74,16 @@ describe('test policy response handler', () => {
     });
 
     it('should return not found when there is no response policy for host', async () => {
-      const hostPolicyResponseHandler = getHostPolicyResponseHandler();
+      const hostPolicyResponseHandler = getHostPolicyResponseHandler(endpointAppContextService);
 
       mockScopedClient.asInternalUser.search.mockResponseOnce(createSearchResponse());
 
-      const mockRequest = httpServerMock.createKibanaRequest({
-        params: { agentId: 'id' },
+      const mockRequest = httpServerMock.createKibanaRequest<
+        never,
+        TypeOf<typeof GetPolicyResponseSchema.query>,
+        never
+      >({
+        query: { agentId: 'foo' },
       });
 
       await hostPolicyResponseHandler(
@@ -87,144 +94,34 @@ describe('test policy response handler', () => {
         mockResponse
       );
 
-      expect(mockResponse.notFound).toBeCalled();
-      const message = mockResponse.notFound.mock.calls[0][0]?.body;
-      expect(message).toEqual('Policy Response Not Found');
-    });
-  });
-
-  describe('test agent policy summary handler', () => {
-    let mockAgentClient: jest.Mocked<AgentClient>;
-
-    let agentListResult: {
-      agents: Agent[];
-      total: number;
-      page: number;
-      perPage: number;
-    };
-
-    let emptyAgentListResult: {
-      agents: Agent[];
-      total: number;
-      page: number;
-      perPage: number;
-    };
-
-    beforeEach(() => {
-      mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
-      mockSavedObjectClient = savedObjectsClientMock.create();
-      mockResponse = httpServerMock.createResponseFactory();
-      endpointAppContextService = new EndpointAppContextService();
-      emptyAgentListResult = {
-        agents: [],
-        total: 2,
-        page: 1,
-        perPage: 1,
-      };
-
-      agentListResult = {
-        agents: [
-          {
-            local_metadata: {
-              elastic: {
-                agent: {
-                  version: '8.0.0',
-                },
-              },
-            },
-          } as unknown as Agent,
-          {
-            local_metadata: {
-              elastic: {
-                agent: {
-                  version: '8.0.0',
-                },
-              },
-            },
-          } as unknown as Agent,
-          {
-            local_metadata: {
-              elastic: {
-                agent: {
-                  version: '8.1.0',
-                },
-              },
-            },
-          } as unknown as Agent,
-        ],
-        total: 2,
-        page: 1,
-        perPage: 1,
-      };
-      endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
-      endpointAppContextService.start({
-        ...createMockEndpointAppContextServiceStartContract(),
+      expect(mockResponse.notFound).toHaveBeenCalledWith({
+        body: expect.objectContaining({
+          message: 'Policy response for endpoint id [foo] not found',
+        }),
       });
-      mockAgentClient = endpointAppContextService.getInternalFleetServices()
-        .agent as jest.Mocked<AgentClient>;
     });
 
-    afterEach(() => endpointAppContextService.stop());
-
-    it('should return the summary of all the agent with the given policy name', async () => {
-      mockAgentClient.listAgents
-        .mockImplementation(() => Promise.resolve(emptyAgentListResult))
-        .mockImplementationOnce(() => Promise.resolve(agentListResult));
-
-      const policySummarysHandler = getAgentPolicySummaryHandler({
-        ...createMockEndpointAppContext(),
-        service: endpointAppContextService,
-      });
-
-      const mockRequest = httpServerMock.createKibanaRequest({
-        query: { policy_id: '41a1b470-221b-11eb-8fba-fb9c0d46ace3', package_name: 'endpoint' },
-      });
-
-      await policySummarysHandler(
-        requestContextMock.convertContext(
-          createRouteHandlerContext(mockScopedClient, mockSavedObjectClient)
-        ),
-        mockRequest,
-        mockResponse
+    it('should retrieve internal fleet services using space id', async () => {
+      mockScopedClient.asInternalUser.search.mockResponseOnce(createSearchResponse());
+      const getInternalFleetServicesSpy = jest.spyOn(
+        endpointAppContextService,
+        'getInternalFleetServices'
       );
-      expect(mockResponse.ok).toBeCalled();
-      expect(mockResponse.ok.mock.calls[0][0]?.body).toEqual({
-        summary_response: {
-          policy_id: '41a1b470-221b-11eb-8fba-fb9c0d46ace3',
-          package: 'endpoint',
-          versions_count: { '8.0.0': 2, '8.1.0': 1 },
-        },
+      const hostPolicyResponseHandler = getHostPolicyResponseHandler(endpointAppContextService);
+      const mockRequest = httpServerMock.createKibanaRequest<
+        never,
+        TypeOf<typeof GetPolicyResponseSchema.query>,
+        never
+      >({
+        query: { agentId: 'foo' },
       });
-    });
-
-    it('should return the agent summary', async () => {
-      mockAgentClient.listAgents
-        .mockImplementationOnce(() => Promise.resolve(agentListResult))
-        .mockImplementationOnce(() => Promise.resolve(emptyAgentListResult));
-
-      const agentPolicySummaryHandler = getAgentPolicySummaryHandler({
-        ...createMockEndpointAppContext(),
-        service: endpointAppContextService,
-      });
-
-      const mockRequest = httpServerMock.createKibanaRequest({
-        query: { package_name: 'endpoint' },
-      });
-
-      await agentPolicySummaryHandler(
-        requestContextMock.convertContext(
-          createRouteHandlerContext(mockScopedClient, mockSavedObjectClient)
-        ),
-        mockRequest,
-        mockResponse
+      const mockContext = requestContextMock.convertContext(
+        createRouteHandlerContext(mockScopedClient, mockSavedObjectClient)
       );
-      expect(mockResponse.ok).toBeCalled();
-      expect(mockResponse.ok.mock.calls[0][0]?.body).toEqual({
-        summary_response: {
-          package: 'endpoint',
-          versions_count: { '8.0.0': 2, '8.1.0': 1 },
-        },
-      });
+      ((await mockContext.securitySolution).getSpaceId as jest.Mock).mockReturnValue('foo');
+      await hostPolicyResponseHandler(mockContext, mockRequest, mockResponse);
+
+      expect(getInternalFleetServicesSpy).toHaveBeenCalledWith('foo');
     });
   });
 });

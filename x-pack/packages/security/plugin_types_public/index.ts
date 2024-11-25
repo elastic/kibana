@@ -16,6 +16,12 @@ export type {
   UserProfileSuggestParams,
   UserProfileAPIClient,
 } from './src/user_profile';
-export type { RolePutPayload, RolesAPIClient } from './src/roles';
+export type {
+  BulkUpdatePayload,
+  BulkUpdateRoleResponse,
+  RolePutPayload,
+  RolesAPIClient,
+} from './src/roles';
 export { PrivilegesAPIClientPublicContract } from './src/privileges';
 export type { PrivilegesAPIClientGetAllArgs } from './src/privileges';
+export type { SecurityLicense } from './src/license';

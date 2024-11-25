@@ -33,14 +33,32 @@ export const RulePageFooter = (props: RulePageFooterProps) => {
 
   const { isEdit = false, isSaving = false, onCancel, onSave } = props;
 
-  const { baseErrors, paramsErrors } = useRuleFormState();
+  const {
+    plugins: { application },
+    formData: { actions },
+    connectors,
+    baseErrors = {},
+    paramsErrors = {},
+    actionsErrors = {},
+    actionsParamsErrors = {},
+  } = useRuleFormState();
 
   const hasErrors = useMemo(() => {
-    return hasRuleErrors({
-      baseErrors: baseErrors || {},
-      paramsErrors: paramsErrors || {},
+    const hasBrokenConnectors = actions.some((action) => {
+      return !connectors.find((connector) => connector.id === action.id);
     });
-  }, [baseErrors, paramsErrors]);
+
+    if (hasBrokenConnectors) {
+      return true;
+    }
+
+    return hasRuleErrors({
+      baseErrors,
+      paramsErrors,
+      actionsErrors,
+      actionsParamsErrors,
+    });
+  }, [actions, connectors, baseErrors, paramsErrors, actionsErrors, actionsParamsErrors]);
 
   const saveButtonText = useMemo(() => {
     if (isEdit) {
@@ -59,11 +77,14 @@ export const RulePageFooter = (props: RulePageFooterProps) => {
 
   const onSaveClick = useCallback(() => {
     if (isEdit) {
-      onSave();
-    } else {
-      setShowCreateConfirmation(true);
+      return onSave();
     }
-  }, [isEdit, onSave]);
+    const canReadConnectors = !!application.capabilities.actions?.show;
+    if (actions.length === 0 && canReadConnectors) {
+      return setShowCreateConfirmation(true);
+    }
+    onSave();
+  }, [actions, isEdit, application, onSave]);
 
   const onCreateConfirmClick = useCallback(() => {
     setShowCreateConfirmation(false);

@@ -12,14 +12,10 @@ const uiStateSelector = (appState: SyntheticsAppState) => appState.ui;
 
 export const selectAlertFlyoutVisibility = createSelector(
   uiStateSelector,
-  ({ alertFlyoutVisible }) => alertFlyoutVisible
+  ({ ruleFlyoutVisible }) => ruleFlyoutVisible
 );
 
-export const selectRefreshPaused = createSelector(
+export const selectIsNewRule = createSelector(
   uiStateSelector,
-  ({ refreshPaused }) => refreshPaused
-);
-export const selectRefreshInterval = createSelector(
-  uiStateSelector,
-  ({ refreshInterval }) => refreshInterval
+  ({ isNewRuleFlyout }) => isNewRuleFlyout
 );

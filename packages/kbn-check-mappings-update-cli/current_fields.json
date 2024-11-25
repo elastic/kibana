@@ -233,9 +233,8 @@
     "payload.connector.type",
     "type"
   ],
-  "cloud-security-posture-settings": [
-    "rules"
-  ],
+  "cloud": [],
+  "cloud-security-posture-settings": [],
   "config": [
     "buildNum"
   ],
@@ -311,6 +310,13 @@
   ],
   "entity-discovery-api-key": [
     "apiKey"
+  ],
+  "entity-engine-status": [
+    "fieldHistoryLength",
+    "filter",
+    "indexPattern",
+    "status",
+    "type"
   ],
   "epm-packages": [
     "additional_spaces_installed_kibana",
@@ -438,6 +444,7 @@
   ],
   "favorites": [
     "favoriteIds",
+    "favoriteMetadata",
     "type",
     "userId"
   ],
@@ -504,6 +511,7 @@
   ],
   "fleet-message-signing-keys": [],
   "fleet-package-policies": [
+    "bump_agent_policy_revision",
     "created_at",
     "created_by",
     "description",
@@ -599,8 +607,11 @@
     "is_preconfigured",
     "is_protected",
     "keep_monitoring_alive",
+    "monitoring_diagnostics",
     "monitoring_enabled",
+    "monitoring_http",
     "monitoring_output_id",
+    "monitoring_pprof_enabled",
     "name",
     "namespace",
     "overrides",
@@ -682,6 +693,7 @@
     "version"
   ],
   "ingest-package-policies": [
+    "bump_agent_policy_revision",
     "created_at",
     "created_by",
     "description",
@@ -708,6 +720,9 @@
     "vars"
   ],
   "ingest_manager_settings": [
+    "delete_unenrolled_agents",
+    "delete_unenrolled_agents.enabled",
+    "delete_unenrolled_agents.is_preconfigured",
     "fleet_server_hosts",
     "has_seen_add_data_notice",
     "output_secret_storage_requirements_met",
@@ -843,6 +858,13 @@
   "policy-settings-protection-updates-note": [
     "note"
   ],
+  "product-doc-install-status": [
+    "index_name",
+    "installation_status",
+    "last_installation_date",
+    "product_name",
+    "product_version"
+  ],
   "query": [
     "description",
     "title",
@@ -852,6 +874,7 @@
     "alertSampleSizePerShard",
     "dataViewId",
     "enabled",
+    "excludeAlertStatuses",
     "filter",
     "identifierType",
     "interval",
@@ -1061,6 +1084,7 @@
     "urls"
   ],
   "synthetics-param": [],
+  "synthetics-private-location": [],
   "synthetics-privates-locations": [],
   "tag": [
     "color",

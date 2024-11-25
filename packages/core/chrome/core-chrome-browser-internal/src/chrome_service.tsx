@@ -27,6 +27,7 @@ import type {
   ChromeNavLink,
   ChromeBadge,
   ChromeBreadcrumb,
+  ChromeSetBreadcrumbsParams,
   ChromeBreadcrumbsAppendExtension,
   ChromeGlobalHelpExtensionMenuLink,
   ChromeHelpExtension,
@@ -35,6 +36,7 @@ import type {
   ChromeSetProjectBreadcrumbsParams,
   NavigationTreeDefinition,
   AppDeepLinkId,
+  SolutionId,
 } from '@kbn/core-chrome-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import type {
@@ -54,6 +56,7 @@ import type { InternalChromeStart } from './types';
 import { HeaderTopBanner } from './ui/header/header_top_banner';
 
 const IS_LOCKED_KEY = 'core.chrome.isLocked';
+const IS_SIDENAV_COLLAPSED_KEY = 'core.chrome.isSideNavCollapsed';
 const SNAPSHOT_REGEX = /-snapshot/i;
 
 interface ConstructorParams {
@@ -86,7 +89,10 @@ export class ChromeService {
   private readonly docTitle = new DocTitleService();
   private readonly projectNavigation: ProjectNavigationService;
   private mutationObserver: MutationObserver | undefined;
-  private readonly isSideNavCollapsed$ = new BehaviorSubject<boolean>(true);
+  private readonly isSideNavCollapsed$ = new BehaviorSubject(
+    localStorage.getItem(IS_SIDENAV_COLLAPSED_KEY) === 'true'
+  );
+  private readonly isFeedbackBtnVisible$ = new BehaviorSubject(false);
   private logger: Logger;
   private isServerless = false;
 
@@ -338,7 +344,10 @@ export class ChromeService {
       LinkId extends AppDeepLinkId = AppDeepLinkId,
       Id extends string = string,
       ChildrenId extends string = Id
-    >(id: string, navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>) {
+    >(
+      id: SolutionId,
+      navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>
+    ) {
       validateChromeStyle();
       projectNavigation.initNavigation(id, navigationTree$);
     }
@@ -350,6 +359,17 @@ export class ChromeService {
       projectNavigation.setProjectBreadcrumbs(breadcrumbs, params);
     };
 
+    const setClassicBreadcrumbs = (
+      newBreadcrumbs: ChromeBreadcrumb[],
+      { project }: ChromeSetBreadcrumbsParams = {}
+    ) => {
+      breadcrumbs$.next(newBreadcrumbs);
+      if (project) {
+        const { value: projectValue, absolute = false } = project;
+        setProjectBreadcrumbs(projectValue ?? [], { absolute });
+      }
+    };
+
     const setProjectHome = (homeHref: string) => {
       validateChromeStyle();
       projectNavigation.setProjectHome(homeHref);
@@ -358,6 +378,11 @@ export class ChromeService {
     const setProjectName = (projectName: string) => {
       validateChromeStyle();
       projectNavigation.setProjectName(projectName);
+    };
+
+    const setIsSideNavCollapsed = (isCollapsed: boolean) => {
+      localStorage.setItem(IS_SIDENAV_COLLAPSED_KEY, JSON.stringify(isCollapsed));
+      this.isSideNavCollapsed$.next(isCollapsed);
     };
 
     if (!this.params.browserSupportsCsp && injectedMetadata.getCspConfig().warnLegacyBrowsers) {
@@ -414,6 +439,7 @@ export class ChromeService {
 
             return (
               <ProjectHeader
+                isServerless={this.isServerless}
                 application={application}
                 globalHelpExtensionMenuLinks$={globalHelpExtensionMenuLinks$}
                 actionMenu$={application.currentActionMenu$}
@@ -431,9 +457,8 @@ export class ChromeService {
                 docLinks={docLinks}
                 kibanaVersion={injectedMetadata.getKibanaVersion()}
                 prependBasePath={http.basePath.prepend}
-                toggleSideNav={(isCollapsed) => {
-                  this.isSideNavCollapsed$.next(isCollapsed);
-                }}
+                isSideNavCollapsed$={this.isSideNavCollapsed$}
+                toggleSideNav={setIsSideNavCollapsed}
               >
                 <SideNavComponent activeNodes={activeNodes} />
               </ProjectHeader>
@@ -445,6 +470,7 @@ export class ChromeService {
 
         return (
           <Header
+            isServerless={this.isServerless}
             loadingCount$={http.getLoadingCount$()}
             application={application}
             headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))}
@@ -497,9 +523,7 @@ export class ChromeService {
 
       getBreadcrumbs$: () => breadcrumbs$.pipe(takeUntil(this.stop$)),
 
-      setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => {
-        breadcrumbs$.next(newBreadcrumbs);
-      },
+      setBreadcrumbs: setClassicBreadcrumbs,
 
       getBreadcrumbsAppendExtension$: () => breadcrumbsAppendExtension$.pipe(takeUntil(this.stop$)),
 
@@ -556,7 +580,17 @@ export class ChromeService {
       getBodyClasses$: () => bodyClasses$.pipe(takeUntil(this.stop$)),
       setChromeStyle,
       getChromeStyle$: () => chromeStyle$,
-      getIsSideNavCollapsed$: () => this.isSideNavCollapsed$.asObservable(),
+      sideNav: {
+        getIsCollapsed$: () => this.isSideNavCollapsed$.asObservable(),
+        setIsCollapsed: setIsSideNavCollapsed,
+        getPanelSelectedNode$: projectNavigation.getPanelSelectedNode$.bind(projectNavigation),
+        setPanelSelectedNode: projectNavigation.setPanelSelectedNode.bind(projectNavigation),
+        getIsFeedbackBtnVisible$: () =>
+          combineLatest([this.isFeedbackBtnVisible$, this.isSideNavCollapsed$]).pipe(
+            map(([isVisible, isCollapsed]) => isVisible && !isCollapsed)
+          ),
+        setIsFeedbackBtnVisible: (isVisible: boolean) => this.isFeedbackBtnVisible$.next(isVisible),
+      },
       getActiveSolutionNavId$: () => projectNavigation.getActiveSolutionNavId$(),
       project: {
         setHome: setProjectHome,
@@ -566,6 +600,7 @@ export class ChromeService {
         getNavigationTreeUi$: () => projectNavigation.getNavigationTreeUi$(),
         setSideNavComponent: setProjectSideNavComponent,
         setBreadcrumbs: setProjectBreadcrumbs,
+        getBreadcrumbs$: projectNavigation.getProjectBreadcrumbs$.bind(projectNavigation),
         getActiveNavigationNodes$: () => projectNavigation.getActiveNodes$(),
         updateSolutionNavigations: projectNavigation.updateSolutionNavigations,
         changeActiveSolutionNavigation: projectNavigation.changeActiveSolutionNavigation,

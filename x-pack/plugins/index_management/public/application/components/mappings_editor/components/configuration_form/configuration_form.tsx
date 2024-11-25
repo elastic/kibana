@@ -5,17 +5,21 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
-import { FormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useAppContext } from '../../../../app_context';
 import { useForm, Form } from '../../shared_imports';
 import { GenericObject, MappingsConfiguration } from '../../types';
 import { MapperSizePluginId } from '../../constants';
 import { useDispatch } from '../../mappings_state_context';
 import { DynamicMappingSection } from './dynamic_mapping_section';
-import { SourceFieldSection } from './source_field_section';
+import {
+  SourceFieldSection,
+  STORED_SOURCE_OPTION,
+  SYNTHETIC_SOURCE_OPTION,
+  DISABLED_SOURCE_OPTION,
+} from './source_field_section';
 import { MetaFieldSection } from './meta_field_section';
 import { RoutingSection } from './routing_section';
 import { MapperSizePluginSection } from './mapper_size_plugin_section';
@@ -28,32 +32,53 @@ interface Props {
   esNodesPlugins: string[];
 }
 
-const formSerializer = (formData: GenericObject, sourceFieldMode?: string) => {
-  const {
-    dynamicMapping: {
-      enabled: dynamicMappingsEnabled,
-      throwErrorsForUnmappedFields,
-      /* eslint-disable @typescript-eslint/naming-convention */
-      numeric_detection,
-      date_detection,
-      dynamic_date_formats,
-      /* eslint-enable @typescript-eslint/naming-convention */
-    },
-    sourceField,
-    metaField,
-    _routing,
-    _size,
-    subobjects,
-  } = formData;
+interface SerializedSourceField {
+  enabled?: boolean;
+  mode?: string;
+  includes?: string[];
+  excludes?: string[];
+}
 
-  const dynamic = dynamicMappingsEnabled ? true : throwErrorsForUnmappedFields ? 'strict' : false;
+const serializeSourceField = (sourceField: any): SerializedSourceField | undefined => {
+  if (sourceField?.option === SYNTHETIC_SOURCE_OPTION) {
+    return { mode: SYNTHETIC_SOURCE_OPTION };
+  }
+  if (sourceField?.option === DISABLED_SOURCE_OPTION) {
+    return { enabled: false };
+  }
+  if (sourceField?.option === STORED_SOURCE_OPTION) {
+    return {
+      mode: 'stored',
+      includes: sourceField.includes,
+      excludes: sourceField.excludes,
+    };
+  }
+  if (sourceField?.includes || sourceField?.excludes) {
+    // If sourceField?.option is undefined, the user hasn't explicitly selected
+    // this option, so don't include the `mode` property
+    return {
+      includes: sourceField.includes,
+      excludes: sourceField.excludes,
+    };
+  }
+  return undefined;
+};
+
+export const formSerializer = (formData: GenericObject) => {
+  const { dynamicMapping, sourceField, metaField, _routing, _size, subobjects } = formData;
+
+  const dynamic = dynamicMapping?.enabled
+    ? true
+    : dynamicMapping?.throwErrorsForUnmappedFields
+    ? 'strict'
+    : dynamicMapping?.enabled;
 
   const serialized = {
     dynamic,
-    numeric_detection,
-    date_detection,
-    dynamic_date_formats,
-    _source: sourceFieldMode ? { mode: sourceFieldMode } : sourceField,
+    numeric_detection: dynamicMapping?.numeric_detection,
+    date_detection: dynamicMapping?.date_detection,
+    dynamic_date_formats: dynamicMapping?.dynamic_date_formats,
+    _source: serializeSourceField(sourceField),
     _meta: metaField,
     _routing,
     _size,
@@ -63,7 +88,7 @@ const formSerializer = (formData: GenericObject, sourceFieldMode?: string) => {
   return serialized;
 };
 
-const formDeserializer = (formData: GenericObject) => {
+export const formDeserializer = (formData: GenericObject) => {
   const {
     dynamic,
     /* eslint-disable @typescript-eslint/naming-convention */
@@ -71,11 +96,7 @@ const formDeserializer = (formData: GenericObject) => {
     date_detection,
     dynamic_date_formats,
     /* eslint-enable @typescript-eslint/naming-convention */
-    _source: { enabled, includes, excludes } = {} as {
-      enabled?: boolean;
-      includes?: string[];
-      excludes?: string[];
-    },
+    _source: { enabled, mode, includes, excludes } = {} as SerializedSourceField,
     _meta,
     _routing,
     // For the Mapper Size plugin
@@ -85,18 +106,25 @@ const formDeserializer = (formData: GenericObject) => {
 
   return {
     dynamicMapping: {
-      enabled: dynamic === true || dynamic === undefined,
-      throwErrorsForUnmappedFields: dynamic === 'strict',
+      enabled: dynamic === 'strict' ? false : dynamic,
+      throwErrorsForUnmappedFields: dynamic === 'strict' ? true : undefined,
       numeric_detection,
       date_detection,
       dynamic_date_formats,
     },
     sourceField: {
-      enabled: enabled === true || enabled === undefined,
+      option:
+        mode === 'stored'
+          ? STORED_SOURCE_OPTION
+          : mode === 'synthetic'
+          ? SYNTHETIC_SOURCE_OPTION
+          : enabled === false
+          ? DISABLED_SOURCE_OPTION
+          : undefined,
       includes,
       excludes,
     },
-    metaField: _meta ?? {},
+    metaField: _meta,
     _routing,
     _size,
     subobjects,
@@ -110,17 +138,13 @@ export const ConfigurationForm = React.memo(({ value, esNodesPlugins }: Props) =
 
   const isMounted = useRef(false);
 
-  const serializerCallback = useCallback(
-    (formData: FormData) => formSerializer(formData, value?._source?.mode),
-    [value?._source?.mode]
-  );
-
   const { form } = useForm({
     schema: configurationFormSchema,
-    serializer: serializerCallback,
+    serializer: formSerializer,
     deserializer: formDeserializer,
     defaultValue: value,
     id: 'configurationForm',
+    options: { stripUnsetFields: true },
   });
   const dispatch = useDispatch();
   const { subscribe, submit, reset, getFormData } = form;
@@ -175,7 +199,7 @@ export const ConfigurationForm = React.memo(({ value, esNodesPlugins }: Props) =
       <EuiSpacer size="xl" />
       <MetaFieldSection />
       <EuiSpacer size="xl" />
-      {enableMappingsSourceFieldSection && !value?._source?.mode && (
+      {enableMappingsSourceFieldSection && (
         <>
           <SourceFieldSection /> <EuiSpacer size="xl" />
         </>

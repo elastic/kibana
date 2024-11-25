@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, render, waitFor } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { shallow } from 'enzyme';
 import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
@@ -17,6 +17,17 @@ import {
 } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import * as hooks from '../../../hooks/use_fetcher';
 import * as useApmParamsHooks from '../../../hooks/use_apm_params';
+
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
+  useKibana: jest.fn().mockReturnValue({
+    services: {
+      data: {
+        query: { timefilter: { timefilter: { getTime: () => ({ from: 'now-1h', to: 'now' }) } } },
+      },
+    },
+  }),
+}));
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
@@ -56,12 +67,9 @@ describe('TraceLink', () => {
       },
     });
 
-    let result;
-    act(() => {
-      const component = render(<TraceLink />, renderOptions);
+    const component = render(<TraceLink />, renderOptions);
 
-      result = component.getByText('Fetching trace...');
-    });
+    const result = component.getByText('Fetching trace...');
     await waitFor(() => {});
     expect(result).toBeDefined();
   });
@@ -123,6 +131,21 @@ describe('TraceLink', () => {
 
       expect(component.prop('to')).toEqual(
         '/services/foo/transactions/view?traceId=123&transactionId=456&transactionName=bar&transactionType=GET&rangeFrom=now-24h&rangeTo=now&waterfallItemId='
+      );
+    });
+
+    it('sets time range from data plugin when client does not pass it', () => {
+      jest.spyOn(useApmParamsHooks as any, 'useApmParams').mockReturnValue({
+        path: {
+          traceId: '123',
+        },
+        query: {},
+      });
+
+      const component = shallow(<TraceLink />);
+
+      expect(component.prop('to')).toEqual(
+        '/services/foo/transactions/view?traceId=123&transactionId=456&transactionName=bar&transactionType=GET&rangeFrom=now-1h&rangeTo=now&waterfallItemId='
       );
     });
   });

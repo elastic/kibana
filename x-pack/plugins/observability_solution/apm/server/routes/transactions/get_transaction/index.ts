@@ -6,7 +6,26 @@
  */
 
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import { TRACE_ID, TRANSACTION_ID } from '../../../../common/es_fields/apm';
+import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { Transaction } from '@kbn/apm-types';
+import { maybe } from '../../../../common/utils/maybe';
+import {
+  AGENT_NAME,
+  PROCESSOR_EVENT,
+  SERVICE_NAME,
+  TIMESTAMP_US,
+  TRACE_ID,
+  TRANSACTION_DURATION,
+  TRANSACTION_ID,
+  TRANSACTION_NAME,
+  TRANSACTION_SAMPLED,
+  TRANSACTION_TYPE,
+  AT_TIMESTAMP,
+  PROCESSOR_NAME,
+  SPAN_LINKS,
+  TRANSACTION_AGENT_MARKS,
+  SERVICE_LANGUAGE_NAME,
+} from '../../../../common/es_fields/apm';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { ApmDocumentType } from '../../../../common/document_type';
@@ -24,7 +43,23 @@ export async function getTransaction({
   apmEventClient: APMEventClient;
   start: number;
   end: number;
-}) {
+}): Promise<Transaction | undefined> {
+  const requiredFields = asMutableArray([
+    TRACE_ID,
+    AGENT_NAME,
+    PROCESSOR_EVENT,
+    AT_TIMESTAMP,
+    TIMESTAMP_US,
+    SERVICE_NAME,
+    TRANSACTION_ID,
+    TRANSACTION_DURATION,
+    TRANSACTION_NAME,
+    TRANSACTION_SAMPLED,
+    TRANSACTION_TYPE,
+  ] as const);
+
+  const optionalFields = asMutableArray([PROCESSOR_NAME, SERVICE_LANGUAGE_NAME] as const);
+
   const resp = await apmEventClient.search('get_transaction', {
     apm: {
       sources: [
@@ -47,8 +82,37 @@ export async function getTransaction({
           ]),
         },
       },
+      fields: [...requiredFields, ...optionalFields],
+      _source: [SPAN_LINKS, TRANSACTION_AGENT_MARKS],
     },
   });
 
-  return resp.hits.hits[0]?._source;
+  const hit = maybe(resp.hits.hits[0]);
+
+  if (!hit) {
+    return undefined;
+  }
+
+  const event = unflattenKnownApmEventFields(hit.fields, requiredFields);
+
+  const source =
+    'span' in hit._source && 'transaction' in hit._source
+      ? (hit._source as {
+          transaction: Pick<Required<Transaction>['transaction'], 'marks'>;
+          span?: Pick<Required<Transaction>['span'], 'links'>;
+        })
+      : undefined;
+
+  return {
+    ...event,
+    transaction: {
+      ...event.transaction,
+      marks: source?.transaction.marks,
+    },
+    processor: {
+      name: 'transaction',
+      event: 'transaction',
+    },
+    span: source?.span,
+  };
 }

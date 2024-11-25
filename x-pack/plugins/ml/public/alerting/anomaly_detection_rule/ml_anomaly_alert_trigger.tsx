@@ -14,6 +14,7 @@ import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plu
 import { isDefined } from '@kbn/ml-is-defined';
 import { ML_ANOMALY_RESULT_TYPE, ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { parseInterval } from '@kbn/ml-parse-interval';
 import type { MlCapabilities } from '../../../common/types/capabilities';
 import { ML_PAGES } from '../../../common/constants/locator';
 import type { MlCoreSetup } from '../../plugin';
@@ -34,7 +35,6 @@ import { ConfigValidator } from './config_validator';
 import { type CombinedJobWithStats } from '../../../common/types/anomaly_detection_jobs';
 import { AdvancedSettings } from './advanced_settings';
 import { getLookbackInterval, getTopNBuckets } from '../../../common/util/alerts';
-import { parseInterval } from '../../../common/util/parse_interval';
 
 export type MlAnomalyAlertTriggerProps =
   RuleTypeParamsExpressionProps<MlAnomalyDetectionAlertParams> & {

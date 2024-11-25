@@ -9,11 +9,11 @@ import { renderHook } from '@testing-library/react-hooks';
 import React, { FC, PropsWithChildren } from 'react';
 
 import { DataQualityProvider } from '../../../../../data_quality_context';
-import { mockStatsAuditbeatIndex } from '../../../../../mock/stats/mock_stats_packetbeat_index';
 import { ERROR_LOADING_STATS } from '../../../../../translations';
 import { useStats, UseStats } from '.';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { Theme } from '@elastic/charts';
+import { mockStatsAuditbeatIndex } from '../../../../../mock/stats/mock_stats_auditbeat_index';
 
 const mockHttpFetch = jest.fn();
 const mockReportDataQualityIndexChecked = jest.fn();
@@ -69,6 +69,8 @@ const ContextWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
       },
     ]}
     setSelectedIlmPhaseOptions={jest.fn()}
+    defaultStartTime={'now-7d'}
+    defaultEndTime={'now'}
   >
     {children}
   </DataQualityProvider>
@@ -119,6 +121,8 @@ const ContextWrapperILMNotAvailable: FC<PropsWithChildren<unknown>> = ({ childre
       },
     ]}
     setSelectedIlmPhaseOptions={jest.fn()}
+    defaultStartTime={'now-7d'}
+    defaultEndTime={'now'}
   >
     {children}
   </DataQualityProvider>

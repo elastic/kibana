@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { get } from 'lodash';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { errors } from '@elastic/elasticsearch';
 import { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
@@ -26,37 +27,29 @@ export const isModelAlreadyExistsError = (error: Error) => {
  *
  * @param filter - Optional filter to apply to the search
  * @param kbResource - Specific resource tag to filter for, e.g. 'esql' or 'user'
- * @param modelId - ID of the model to search with, e.g. `.elser_model_2`
  * @param query - The search query provided by the user
  * @param required - Whether to only include required entries
  * @param user - The authenticated user
- * @param v2KnowledgeBaseEnabled whether the new v2 KB is enabled
  * @returns
  */
 export const getKBVectorSearchQuery = ({
   filter,
   kbResource,
-  modelId,
   query,
   required,
   user,
-  v2KnowledgeBaseEnabled = false,
 }: {
   filter?: QueryDslQueryContainer | undefined;
   kbResource?: string | undefined;
-  modelId: string;
-  query: string;
+  query?: string;
   required?: boolean | undefined;
   user: AuthenticatedUser;
-  v2KnowledgeBaseEnabled: boolean;
 }): QueryDslQueryContainer => {
-  const kbResourceKey = v2KnowledgeBaseEnabled ? 'kb_resource' : 'metadata.kbResource';
-  const requiredKey = v2KnowledgeBaseEnabled ? 'required' : 'metadata.required';
   const resourceFilter = kbResource
     ? [
         {
           term: {
-            [kbResourceKey]: kbResource,
+            kb_resource: kbResource,
           },
         },
       ]
@@ -65,47 +58,77 @@ export const getKBVectorSearchQuery = ({
     ? [
         {
           term: {
-            [requiredKey]: required,
+            required,
           },
         },
       ]
     : [];
 
-  const userFilter = [
-    {
-      nested: {
-        path: 'users',
-        query: {
-          bool: {
-            must: [
-              {
-                match: user.profile_uid
-                  ? { 'users.id': user.profile_uid }
-                  : { 'users.name': user.username },
-              },
-            ],
-          },
-        },
-      },
-    },
-  ];
-
-  return {
-    bool: {
-      must: [
-        {
-          text_expansion: {
-            'vector.tokens': {
-              model_id: modelId,
-              model_text: query,
+  const userFilter = {
+    should: [
+      {
+        nested: {
+          path: 'users',
+          query: {
+            bool: {
+              minimum_should_match: 1,
+              should: [
+                {
+                  match: user.profile_uid
+                    ? { 'users.id': user.profile_uid }
+                    : { 'users.name': user.username },
+                },
+              ],
             },
           },
         },
-        ...requiredFilter,
-        ...resourceFilter,
-        ...userFilter,
-      ],
+      },
+      {
+        bool: {
+          must_not: [
+            {
+              nested: {
+                path: 'users',
+                query: {
+                  bool: {
+                    filter: {
+                      exists: {
+                        field: 'users',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+    ],
+  };
+
+  let semanticTextFilter:
+    | Array<{ semantic: { field: string; query: string } }>
+    | Array<{
+        text_expansion: { 'vector.tokens': { model_id: string; model_text: string } };
+      }> = [];
+
+  if (query) {
+    semanticTextFilter = [
+      {
+        semantic: {
+          field: 'semantic_text',
+          query,
+        },
+      },
+    ];
+  }
+
+  return {
+    bool: {
+      must: [...semanticTextFilter, ...requiredFilter, ...resourceFilter],
+      ...userFilter,
       filter,
+      minimum_should_match: 1,
     },
   };
 };
@@ -137,7 +160,7 @@ export const getStructuredToolForIndexEntry = ({
   }, {});
 
   return new DynamicStructuredTool({
-    name: indexEntry.name.replaceAll(' ', ''), // Tool names cannot contain spaces, further sanitization possibly needed
+    name: indexEntry.name.replace(/[^a-zA-Z0-9-]/g, ''), // // Tool names expects a string that matches the pattern '^[a-zA-Z0-9-]+$'
     description: indexEntry.description,
     schema: z.object({
       query: z.string().describe(indexEntry.queryDescription),
@@ -150,13 +173,11 @@ export const getStructuredToolForIndexEntry = ({
 
       // Generate filters for inputSchema fields
       const filter =
-        indexEntry.inputSchema?.reduce((prev, i) => {
-          return [
-            ...prev,
-            // @ts-expect-error Possible to override types with dynamic input schema?
-            { term: { [`${i.fieldName}`]: input?.[i.fieldName] } },
-          ];
-        }, [] as Array<{ term: { [key: string]: string } }>) ?? [];
+        indexEntry.inputSchema?.reduce(
+          // @ts-expect-error Possible to override types with dynamic input schema?
+          (prev, i) => [...prev, { term: { [`${i.fieldName}`]: input?.[i.fieldName] } }],
+          [] as Array<{ term: { [key: string]: string } }>
+        ) ?? [];
 
       const params: SearchRequest = {
         index: indexEntry.index,
@@ -165,7 +186,7 @@ export const getStructuredToolForIndexEntry = ({
           standard: {
             query: {
               nested: {
-                path: 'semantic_text.inference.chunks',
+                path: `${indexEntry.field}.inference.chunks`,
                 query: {
                   sparse_vector: {
                     inference_id: elserId,
@@ -195,8 +216,19 @@ export const getStructuredToolForIndexEntry = ({
               return { ...prev, [field]: hit._source[field] };
             }, {});
           }
+
+          // We want to send relevant inner hits (chunks) to the LLM as a context
+          const innerHitPath = `${indexEntry.name}.${indexEntry.field}`;
+          if (hit.inner_hits?.[innerHitPath]) {
+            return {
+              text: hit.inner_hits[innerHitPath].hits.hits
+                .map((innerHit) => innerHit._source.text)
+                .join('\n --- \n'),
+            };
+          }
+
           return {
-            text: (hit._source as { text: string }).text,
+            text: get(hit._source, `${indexEntry.field}.inference.chunks[0].text`),
           };
         });
 

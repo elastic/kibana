@@ -7,7 +7,7 @@
 
 export * from './api';
 
-export * from './policies';
+export * from '@kbn/index-lifecycle-management-common-shared';
 
 /**
  * These roles reflect how nodes are stratified into different data tiers.

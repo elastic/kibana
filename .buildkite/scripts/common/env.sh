@@ -146,7 +146,7 @@ if [[ "${KBN_ENABLE_FIPS:-}" == "true" ]] || is_pr_with_label "ci:enable-fips-ag
   fi
 
   if [[ -f "$KIBANA_DIR/config/kibana.yml" ]]; then
-    echo -e '\nxpack.security.experimental.fipsMode.enabled: true' >>"$KIBANA_DIR/config/kibana.yml"
+    echo -e '\nxpack.security.fipsMode.enabled: true' >>"$KIBANA_DIR/config/kibana.yml"
   fi
 fi
 

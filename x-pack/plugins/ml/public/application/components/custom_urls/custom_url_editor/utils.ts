@@ -25,8 +25,9 @@ import {
   type DataFrameAnalyticsConfig,
   DEFAULT_RESULTS_FIELD,
 } from '@kbn/ml-data-frame-analytics-utils';
-
 import { isDefined } from '@kbn/ml-is-defined';
+import { parseInterval } from '@kbn/ml-parse-interval';
+
 import type { DashboardItems } from '../../../services/dashboard_service';
 import { categoryFieldTypes } from '../../../../../common/util/fields_utils';
 import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
@@ -35,7 +36,6 @@ import {
   getPartitioningFieldNames,
   getFiltersForDSLQuery,
 } from '../../../../../common/util/job_utils';
-import { parseInterval } from '../../../../../common/util/parse_interval';
 import { replaceStringTokens } from '../../../util/string_utils';
 import {
   replaceTokensInUrlValue,
@@ -285,13 +285,12 @@ async function buildDashboardUrlFromSettings(
   let query;
 
   // Override with filters and queries from saved dashboard if they are available.
-  const searchSourceJSON = dashboard.attributes.kibanaSavedObjectMeta.searchSourceJSON;
-  if (searchSourceJSON !== undefined) {
-    const searchSourceData = JSON.parse(searchSourceJSON);
-    if (Array.isArray(searchSourceData.filter) && searchSourceData.filter.length > 0) {
-      filters = searchSourceData.filter;
+  const { searchSource } = dashboard.attributes.kibanaSavedObjectMeta;
+  if (searchSource !== undefined) {
+    if (Array.isArray(searchSource.filter) && searchSource.filter.length > 0) {
+      filters = searchSource.filter;
     }
-    query = searchSourceData.query;
+    query = searchSource.query;
   }
 
   const queryFromEntityFieldNames = buildAppStateQueryParam(queryFieldNames ?? []);

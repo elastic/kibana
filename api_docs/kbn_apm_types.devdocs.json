@@ -53,7 +53,7 @@
             "label": "name",
             "description": [],
             "signature": [
-              "\"java\" | \"dotnet\" | \"go\" | \"iOS/swift\" | \"js-base\" | \"nodejs\" | \"php\" | \"python\" | \"ruby\" | \"rum-js\" | \"android/java\" | \"otlp\" | \"opentelemetry/cpp\" | \"opentelemetry/dotnet\" | \"opentelemetry/erlang\" | \"opentelemetry/go\" | \"opentelemetry/java\" | \"opentelemetry/nodejs\" | \"opentelemetry/php\" | \"opentelemetry/python\" | \"opentelemetry/ruby\" | \"opentelemetry/rust\" | \"opentelemetry/swift\" | \"opentelemetry/android\" | \"opentelemetry/webjs\""
+              "\"java\" | \"ruby\" | \"opentelemetry\" | \"dotnet\" | \"go\" | \"iOS/swift\" | \"js-base\" | \"nodejs\" | \"php\" | \"python\" | \"rum-js\" | \"android/java\" | \"otlp\" | `opentelemetry/${string}` | `otlp/${string}` | \"ios/swift\""
             ],
             "path": "packages/kbn-apm-types/src/es_schemas/ui/fields/agent.ts",
             "deprecated": false,
@@ -66,6 +66,9 @@
             "tags": [],
             "label": "version",
             "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-apm-types/src/es_schemas/ui/fields/agent.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -103,7 +106,7 @@
             "label": "agent",
             "description": [],
             "signature": [
-              "{ name: string; version: string; }"
+              "{ name: string; version?: string | undefined; }"
             ],
             "path": "packages/kbn-apm-types/src/es_schemas/raw/apm_base_doc.ts",
             "deprecated": false,
@@ -117,7 +120,7 @@
             "label": "parent",
             "description": [],
             "signature": [
-              "{ id: string; } | undefined"
+              "{ id?: string | undefined; } | undefined"
             ],
             "path": "packages/kbn-apm-types/src/es_schemas/raw/apm_base_doc.ts",
             "deprecated": false,
@@ -131,7 +134,7 @@
             "label": "trace",
             "description": [],
             "signature": [
-              "{ id: string; } | undefined"
+              "{ id?: string | undefined; } | undefined"
             ],
             "path": "packages/kbn-apm-types/src/es_schemas/raw/apm_base_doc.ts",
             "deprecated": false,
@@ -259,7 +262,7 @@
             "label": "instance",
             "description": [],
             "signature": [
-              "{ name: string; id: string; } | undefined"
+              "{ name?: string | undefined; id?: string | undefined; } | undefined"
             ],
             "path": "packages/kbn-apm-types/src/es_schemas/raw/fields/cloud.ts",
             "deprecated": false,
@@ -273,7 +276,7 @@
             "label": "machine",
             "description": [],
             "signature": [
-              "{ type: string; } | undefined"
+              "{ type?: string | undefined; } | undefined"
             ],
             "path": "packages/kbn-apm-types/src/es_schemas/raw/fields/cloud.ts",
             "deprecated": false,
@@ -287,7 +290,7 @@
             "label": "project",
             "description": [],
             "signature": [
-              "{ id: string; name: string; } | undefined"
+              "{ id?: string | undefined; name?: string | undefined; } | undefined"
             ],
             "path": "packages/kbn-apm-types/src/es_schemas/raw/fields/cloud.ts",
             "deprecated": false,
@@ -329,7 +332,7 @@
             "label": "account",
             "description": [],
             "signature": [
-              "{ id: string; name: string; } | undefined"
+              "{ id?: string | undefined; name?: string | undefined; } | undefined"
             ],
             "path": "packages/kbn-apm-types/src/es_schemas/raw/fields/cloud.ts",
             "deprecated": false,
@@ -343,7 +346,7 @@
             "label": "image",
             "description": [],
             "signature": [
-              "{ id: string; } | undefined"
+              "{ id?: string | undefined; } | undefined"
             ],
             "path": "packages/kbn-apm-types/src/es_schemas/raw/fields/cloud.ts",
             "deprecated": false,
@@ -357,7 +360,7 @@
             "label": "service",
             "description": [],
             "signature": [
-              "{ name: string; } | undefined"
+              "{ name?: string | undefined; } | undefined"
             ],
             "path": "packages/kbn-apm-types/src/es_schemas/raw/fields/cloud.ts",
             "deprecated": false,
@@ -394,12 +397,12 @@
           {
             "parentPluginId": "@kbn/apm-types",
             "id": "def-common.Container.image",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "image",
             "description": [],
             "signature": [
-              "string | null | undefined"
+              "{ name?: string | undefined; } | undefined"
             ],
             "path": "packages/kbn-apm-types/src/es_schemas/raw/fields/container.ts",
             "deprecated": false,
@@ -1131,7 +1134,7 @@
             "label": "request",
             "description": [],
             "signature": [
-              "{ [key: string]: unknown; method: string; } | undefined"
+              "{ method?: string | undefined; } | undefined"
             ],
             "path": "packages/kbn-apm-types/src/es_schemas/raw/fields/http.ts",
             "deprecated": false,
@@ -1145,7 +1148,7 @@
             "label": "response",
             "description": [],
             "signature": [
-              "{ [key: string]: unknown; status_code: number; } | undefined"
+              "{ status_code?: number | undefined; } | undefined"
             ],
             "path": "packages/kbn-apm-types/src/es_schemas/raw/fields/http.ts",
             "deprecated": false,
@@ -1187,7 +1190,7 @@
             "label": "pod",
             "description": [],
             "signature": [
-              "{ [key: string]: unknown; uid?: string | null | undefined; } | undefined"
+              "{ uid?: string | null | undefined; name?: string | undefined; } | undefined"
             ],
             "path": "packages/kbn-apm-types/src/es_schemas/raw/fields/kubernetes.ts",
             "deprecated": false,
@@ -1386,6 +1389,9 @@
             "tags": [],
             "label": "version",
             "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-apm-types/src/es_schemas/raw/fields/observer.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1397,6 +1403,9 @@
             "tags": [],
             "label": "version_major",
             "description": [],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "packages/kbn-apm-types/src/es_schemas/raw/fields/observer.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1422,6 +1431,9 @@
             "tags": [],
             "label": "url",
             "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-apm-types/src/es_schemas/raw/fields/page.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1582,7 +1594,7 @@
             "label": "framework",
             "description": [],
             "signature": [
-              "{ name: string; version?: string | undefined; } | undefined"
+              "{ name?: string | undefined; version?: string | undefined; } | undefined"
             ],
             "path": "packages/kbn-apm-types/src/es_schemas/raw/fields/service.ts",
             "deprecated": false,
@@ -1610,7 +1622,7 @@
             "label": "runtime",
             "description": [],
             "signature": [
-              "{ name: string; version: string; } | undefined"
+              "{ name?: string | undefined; version?: string | undefined; } | undefined"
             ],
             "path": "packages/kbn-apm-types/src/es_schemas/raw/fields/service.ts",
             "deprecated": false,
@@ -1624,7 +1636,7 @@
             "label": "language",
             "description": [],
             "signature": [
-              "{ name: string; version?: string | undefined; } | undefined"
+              "{ name?: string | undefined; version?: string | undefined; } | undefined"
             ],
             "path": "packages/kbn-apm-types/src/es_schemas/raw/fields/service.ts",
             "deprecated": false,
@@ -2480,6 +2492,9 @@
             "tags": [],
             "label": "full",
             "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-apm-types/src/es_schemas/raw/fields/url.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2519,6 +2534,9 @@
             "tags": [],
             "label": "id",
             "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-apm-types/src/es_schemas/raw/fields/user.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2678,7 +2696,7 @@
         "label": "AgentName",
         "description": [],
         "signature": [
-          "\"java\" | \"dotnet\" | \"go\" | \"iOS/swift\" | \"js-base\" | \"nodejs\" | \"php\" | \"python\" | \"ruby\" | \"rum-js\" | \"android/java\" | \"otlp\" | \"opentelemetry/cpp\" | \"opentelemetry/dotnet\" | \"opentelemetry/erlang\" | \"opentelemetry/go\" | \"opentelemetry/java\" | \"opentelemetry/nodejs\" | \"opentelemetry/php\" | \"opentelemetry/python\" | \"opentelemetry/ruby\" | \"opentelemetry/rust\" | \"opentelemetry/swift\" | \"opentelemetry/android\" | \"opentelemetry/webjs\""
+          "\"java\" | \"ruby\" | \"opentelemetry\" | \"dotnet\" | \"go\" | \"iOS/swift\" | \"js-base\" | \"nodejs\" | \"php\" | \"python\" | \"rum-js\" | \"android/java\" | \"otlp\" | `opentelemetry/${string}` | `otlp/${string}` | \"ios/swift\""
         ],
         "path": "packages/kbn-elastic-agent-utils/src/agent_names.ts",
         "deprecated": false,
@@ -2694,6 +2712,21 @@
         "description": [],
         "signature": [
           "\"application.launch.time\""
+        ],
+        "path": "packages/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.AT_TIMESTAMP",
+        "type": "string",
+        "tags": [],
+        "label": "AT_TIMESTAMP",
+        "description": [],
+        "signature": [
+          "\"@timestamp\""
         ],
         "path": "packages/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
@@ -2822,6 +2855,21 @@
       },
       {
         "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.CLOUD_ACCOUNT_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "CLOUD_ACCOUNT_NAME",
+        "description": [],
+        "signature": [
+          "\"cloud.account.name\""
+        ],
+        "path": "packages/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
         "id": "def-common.CLOUD_AVAILABILITY_ZONE",
         "type": "string",
         "tags": [],
@@ -2874,6 +2922,21 @@
         "description": [],
         "signature": [
           "\"cloud.machine.type\""
+        ],
+        "path": "packages/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.CLOUD_PROJECT_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "CLOUD_PROJECT_NAME",
+        "description": [],
+        "signature": [
+          "\"cloud.project.name\""
         ],
         "path": "packages/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
@@ -3025,7 +3088,7 @@
           "\nWe cannot mark these arrays as const and derive their type\nbecause we need to be able to assign them as mutable entities for ES queries."
         ],
         "signature": [
-          "\"java\" | \"dotnet\" | \"go\" | \"iOS/swift\" | \"js-base\" | \"nodejs\" | \"php\" | \"python\" | \"ruby\" | \"rum-js\" | \"android/java\""
+          "\"java\" | \"ruby\" | \"dotnet\" | \"go\" | \"iOS/swift\" | \"js-base\" | \"nodejs\" | \"php\" | \"python\" | \"rum-js\" | \"android/java\""
         ],
         "path": "packages/kbn-elastic-agent-utils/src/agent_names.ts",
         "deprecated": false,
@@ -3191,6 +3254,21 @@
         "description": [],
         "signature": [
           "\"error.page.url\""
+        ],
+        "path": "packages/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.ERROR_STACK_TRACE",
+        "type": "string",
+        "tags": [],
+        "label": "ERROR_STACK_TRACE",
+        "description": [],
+        "signature": [
+          "\"error.stack_trace\""
         ],
         "path": "packages/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
@@ -3529,6 +3607,81 @@
       },
       {
         "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.KUBERNETES_CONTAINER_ID",
+        "type": "string",
+        "tags": [],
+        "label": "KUBERNETES_CONTAINER_ID",
+        "description": [],
+        "signature": [
+          "\"kubernetes.container.id\""
+        ],
+        "path": "packages/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.KUBERNETES_CONTAINER_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "KUBERNETES_CONTAINER_NAME",
+        "description": [],
+        "signature": [
+          "\"kubernetes.container.name\""
+        ],
+        "path": "packages/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.KUBERNETES_DEPLOYMENT_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "KUBERNETES_DEPLOYMENT_NAME",
+        "description": [],
+        "signature": [
+          "\"kubernetes.deployment.name\""
+        ],
+        "path": "packages/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.KUBERNETES_NAMESPACE",
+        "type": "string",
+        "tags": [],
+        "label": "KUBERNETES_NAMESPACE",
+        "description": [],
+        "signature": [
+          "\"kubernetes.namespace\""
+        ],
+        "path": "packages/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.KUBERNETES_NODE_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "KUBERNETES_NODE_NAME",
+        "description": [],
+        "signature": [
+          "\"kubernetes.node.name\""
+        ],
+        "path": "packages/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
         "id": "def-common.KUBERNETES_POD_NAME",
         "type": "string",
         "tags": [],
@@ -3551,6 +3704,21 @@
         "description": [],
         "signature": [
           "\"kubernetes.pod.uid\""
+        ],
+        "path": "packages/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.KUBERNETES_REPLICASET_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "KUBERNETES_REPLICASET_NAME",
+        "description": [],
+        "signature": [
+          "\"kubernetes.replicaset.name\""
         ],
         "path": "packages/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
@@ -4130,13 +4298,43 @@
       },
       {
         "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.OBSERVER_VERSION",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVER_VERSION",
+        "description": [],
+        "signature": [
+          "\"observer.version\""
+        ],
+        "path": "packages/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.OBSERVER_VERSION_MAJOR",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVER_VERSION_MAJOR",
+        "description": [],
+        "signature": [
+          "\"observer.version_major\""
+        ],
+        "path": "packages/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
         "id": "def-common.OpenTelemetryAgentName",
         "type": "Type",
         "tags": [],
         "label": "OpenTelemetryAgentName",
         "description": [],
         "signature": [
-          "\"otlp\" | \"opentelemetry/cpp\" | \"opentelemetry/dotnet\" | \"opentelemetry/erlang\" | \"opentelemetry/go\" | \"opentelemetry/java\" | \"opentelemetry/nodejs\" | \"opentelemetry/php\" | \"opentelemetry/python\" | \"opentelemetry/ruby\" | \"opentelemetry/rust\" | \"opentelemetry/swift\" | \"opentelemetry/android\" | \"opentelemetry/webjs\""
+          "\"opentelemetry\" | \"otlp\" | `opentelemetry/${string}` | `otlp/${string}`"
         ],
         "path": "packages/kbn-elastic-agent-utils/src/agent_names.ts",
         "deprecated": false,
@@ -4160,6 +4358,36 @@
       },
       {
         "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.PROCESS_ARGS",
+        "type": "string",
+        "tags": [],
+        "label": "PROCESS_ARGS",
+        "description": [],
+        "signature": [
+          "\"process.args\""
+        ],
+        "path": "packages/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.PROCESS_PID",
+        "type": "string",
+        "tags": [],
+        "label": "PROCESS_PID",
+        "description": [],
+        "signature": [
+          "\"process.pid\""
+        ],
+        "path": "packages/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
         "id": "def-common.PROCESSOR_EVENT",
         "type": "string",
         "tags": [],
@@ -4167,6 +4395,21 @@
         "description": [],
         "signature": [
           "\"processor.event\""
+        ],
+        "path": "packages/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.PROCESSOR_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PROCESSOR_NAME",
+        "description": [],
+        "signature": [
+          "\"processor.name\""
         ],
         "path": "packages/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
@@ -4595,6 +4838,21 @@
       },
       {
         "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.SPAN_STACKTRACE",
+        "type": "string",
+        "tags": [],
+        "label": "SPAN_STACKTRACE",
+        "description": [],
+        "signature": [
+          "\"span.stacktrace\""
+        ],
+        "path": "packages/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
         "id": "def-common.SPAN_SUBTYPE",
         "type": "string",
         "tags": [],
@@ -4739,6 +4997,51 @@
       },
       {
         "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.TELEMETRY_SDK_LANGUAGE",
+        "type": "string",
+        "tags": [],
+        "label": "TELEMETRY_SDK_LANGUAGE",
+        "description": [],
+        "signature": [
+          "\"telemetry.sdk.language\""
+        ],
+        "path": "packages/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.TELEMETRY_SDK_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "TELEMETRY_SDK_NAME",
+        "description": [],
+        "signature": [
+          "\"telemetry.sdk.name\""
+        ],
+        "path": "packages/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.TELEMETRY_SDK_VERSION",
+        "type": "string",
+        "tags": [],
+        "label": "TELEMETRY_SDK_VERSION",
+        "description": [],
+        "signature": [
+          "\"telemetry.sdk.version\""
+        ],
+        "path": "packages/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
         "id": "def-common.TIER",
         "type": "string",
         "tags": [],
@@ -4754,10 +5057,10 @@
       },
       {
         "parentPluginId": "@kbn/apm-types",
-        "id": "def-common.TIMESTAMP",
+        "id": "def-common.TIMESTAMP_US",
         "type": "string",
         "tags": [],
-        "label": "TIMESTAMP",
+        "label": "TIMESTAMP_US",
         "description": [],
         "signature": [
           "\"timestamp.us\""
@@ -4776,6 +5079,21 @@
         "description": [],
         "signature": [
           "\"trace.id\""
+        ],
+        "path": "packages/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.TRANSACTION_AGENT_MARKS",
+        "type": "string",
+        "tags": [],
+        "label": "TRANSACTION_AGENT_MARKS",
+        "description": [],
+        "signature": [
+          "\"transaction.agent.marks\""
         ],
         "path": "packages/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
