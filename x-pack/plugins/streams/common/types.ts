@@ -20,7 +20,10 @@ export const unaryFilterConditionSchema = z.object({
   operator: z.enum(['exists', 'notExists']),
 });
 
-export const filterConditionSchema = z. discriminatedUnion('operator', [unaryFilterConditionSchema, binaryConditionSchema]);
+export const filterConditionSchema = z.discriminatedUnion('operator', [
+  unaryFilterConditionSchema,
+  binaryConditionSchema,
+]);
 
 export type FilterCondition = z.infer<typeof filterConditionSchema>;
 export type BinaryFilterCondition = z.infer<typeof binaryConditionSchema>;
