@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { createObservabilityEsClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import { z } from '@kbn/zod';
 import {
   CREATE_ENTITY_TYPE_DEFINITION_PRIVILEGE,
   READ_ENTITY_TYPE_DEFINITION_PRIVILEGE,
 } from '../../lib/v2/constants';
-import { readTypeDefinitions, storeTypeDefinition } from '../../lib/v2/type_definition';
 import { entityTypeDefinitionRt } from '../../lib/v2/types';
 import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
 
@@ -27,14 +25,9 @@ const createTypeDefinitionRoute = createEntityManagerServerRoute({
       type: entityTypeDefinitionRt,
     }),
   }),
-  handler: async ({ context, response, params, logger }) => {
-    const esClient = createObservabilityEsClient({
-      client: (await context.core).elasticsearch.client.asInternalUser,
-      logger,
-      plugin: '@kbn/entityManager-plugin',
-    });
-
-    const result = await storeTypeDefinition(params.body.type, esClient);
+  handler: async ({ request, response, params, getScopedClient }) => {
+    const client = await getScopedClient({ request });
+    const result = await client.v2.storeTypeDefinition(params.body.type);
 
     if (result.status === 'success') {
       return response.created({
@@ -42,7 +35,7 @@ const createTypeDefinitionRoute = createEntityManagerServerRoute({
           type: result.resource,
         },
         headers: {
-          location: `GET /internal/entities/v2/definitions/types/${result.resource!.id}`,
+          location: `GET /internal/entities/v2/definitions/types/${result.resource.id}`,
         },
       });
     } else if (result.status === 'conflict') {
@@ -69,14 +62,9 @@ const readTypeDefinitionsRoute = createEntityManagerServerRoute({
       requiredPrivileges: [READ_ENTITY_TYPE_DEFINITION_PRIVILEGE],
     },
   },
-  handler: async ({ context, response, logger }) => {
-    const esClient = createObservabilityEsClient({
-      client: (await context.core).elasticsearch.client.asInternalUser,
-      logger,
-      plugin: '@kbn/entityManager-plugin',
-    });
-
-    const result = await readTypeDefinitions(esClient);
+  handler: async ({ request, response, getScopedClient }) => {
+    const client = await getScopedClient({ request });
+    const result = await client.v2.readTypeDefinitions();
 
     if (result.status === 'success') {
       return response.ok({

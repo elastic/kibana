@@ -30,11 +30,13 @@ import {
   EntityManagerPluginStartDependencies,
   EntityManagerServerSetup,
 } from './types';
-import { setupEntityDefinitionsIndex } from './lib/v2/setup_entity_definitions_index';
+import { setupEntityDefinitionsIndex } from './lib/v2/definitions/setup_entity_definitions_index';
 import {
   CREATE_ENTITY_TYPE_DEFINITION_PRIVILEGE,
-  READ_ENTITY_TYPE_DEFINITION_PRIVILEGE,
   CREATE_ENTITY_SOURCE_DEFINITION_PRIVILEGE,
+  READ_ENTITY_TYPE_DEFINITION_PRIVILEGE,
+  READ_ENTITY_SOURCE_DEFINITION_PRIVILEGE,
+  READ_ENTITIES_PRIVILEGE,
 } from './lib/v2/constants';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -82,8 +84,10 @@ export class EntityManagerServerPlugin
           app: [ENTITY_MANAGER_FEATURE_ID],
           api: [
             CREATE_ENTITY_TYPE_DEFINITION_PRIVILEGE,
-            READ_ENTITY_TYPE_DEFINITION_PRIVILEGE,
             CREATE_ENTITY_SOURCE_DEFINITION_PRIVILEGE,
+            READ_ENTITY_TYPE_DEFINITION_PRIVILEGE,
+            READ_ENTITY_SOURCE_DEFINITION_PRIVILEGE,
+            READ_ENTITIES_PRIVILEGE,
           ],
           ui: [],
           savedObject: {
@@ -93,7 +97,11 @@ export class EntityManagerServerPlugin
         },
         read: {
           app: [ENTITY_MANAGER_FEATURE_ID],
-          api: [READ_ENTITY_TYPE_DEFINITION_PRIVILEGE],
+          api: [
+            READ_ENTITY_TYPE_DEFINITION_PRIVILEGE,
+            READ_ENTITY_SOURCE_DEFINITION_PRIVILEGE,
+            READ_ENTITIES_PRIVILEGE,
+          ],
           ui: [],
           savedObject: {
             all: [],
@@ -139,9 +147,9 @@ export class EntityManagerServerPlugin
     request: KibanaRequest;
     coreStart: CoreStart;
   }) {
-    const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
+    const clusterClient = coreStart.elasticsearch.client.asScoped(request);
     const soClient = coreStart.savedObjects.getScopedClient(request);
-    return new EntityClient({ esClient, soClient, logger: this.logger });
+    return new EntityClient({ clusterClient, soClient, logger: this.logger });
   }
 
   public start(
@@ -157,6 +165,7 @@ export class EntityManagerServerPlugin
 
     const esClient = core.elasticsearch.client.asInternalUser;
 
+    // Setup v1 definitions index
     installEntityManagerTemplates({ esClient, logger: this.logger })
       .then(async () => {
         // the api key validation requires a check against the cluster license
@@ -173,7 +182,8 @@ export class EntityManagerServerPlugin
       })
       .catch((err) => this.logger.error(err));
 
-    setupEntityDefinitionsIndex(core.elasticsearch.client, this.logger).catch((error) => {
+    // Setup v2 definitions index
+    setupEntityDefinitionsIndex(core.elasticsearch.client).catch((error) => {
       this.logger.error(error);
     });
 

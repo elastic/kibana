@@ -5,20 +5,31 @@
  * 2.0.
  */
 
-import { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
-import { DEFINITIONS_ALIAS, TEMPLATE_VERSION } from './constants';
-import { EntityTypeDefinition, OperationStatus, StoredEntityTypeDefinition } from './types';
+import { IScopedClusterClient, Logger } from '@kbn/core/server';
+import { DEFINITIONS_ALIAS, TEMPLATE_VERSION } from '../constants';
+import {
+  EntityTypeDefinition,
+  CreateOperationStatus,
+  ReadOperationStatus,
+  StoredEntityTypeDefinition,
+} from '../types';
+import { runESQLQuery } from '../run_esql_query';
 
 export async function storeTypeDefinition(
   type: EntityTypeDefinition,
-  esClient: ObservabilityElasticsearchClient
-): Promise<OperationStatus<EntityTypeDefinition>> {
+  clusterClient: IScopedClusterClient,
+  logger: Logger
+): Promise<CreateOperationStatus<EntityTypeDefinition>> {
   try {
-    const result = await esClient.esql('fetch type definition for conflict check', {
+    const esClient = clusterClient.asInternalUser;
+
+    const types = await runESQLQuery('fetch type definition for conflict check', {
+      esClient,
       query: `FROM ${DEFINITIONS_ALIAS} METADATA _id | WHERE definition_type == "type" AND _id == "type:${type.id}"`,
+      logger,
     });
 
-    if (result.length !== 0) {
+    if (types.length !== 0) {
       return {
         status: 'conflict',
         reason: `An entity type definition with the ID "${type.id}" already exists.`,
@@ -31,7 +42,7 @@ export async function storeTypeDefinition(
       type,
     };
 
-    await esClient.client.index({
+    await esClient.index({
       index: DEFINITIONS_ALIAS,
       id: `type:${definition.type.id}`,
       document: definition,
@@ -50,11 +61,16 @@ export async function storeTypeDefinition(
 }
 
 export async function readTypeDefinitions(
-  esClient: ObservabilityElasticsearchClient
-): Promise<OperationStatus<EntityTypeDefinition[]>> {
+  clusterClient: IScopedClusterClient,
+  logger: Logger
+): Promise<ReadOperationStatus<EntityTypeDefinition[]>> {
   try {
-    const types = await esClient.esql<StoredEntityTypeDefinition>('fetch all type definitions', {
+    const esClient = clusterClient.asInternalUser;
+
+    const types = await runESQLQuery<StoredEntityTypeDefinition>('fetch all type definitions', {
+      esClient,
       query: `FROM ${DEFINITIONS_ALIAS} | WHERE definition_type == "type"`,
+      logger,
     });
 
     return {

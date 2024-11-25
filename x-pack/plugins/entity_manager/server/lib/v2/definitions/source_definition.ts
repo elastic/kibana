@@ -5,20 +5,31 @@
  * 2.0.
  */
 
-import { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
-import { DEFINITIONS_ALIAS, TEMPLATE_VERSION } from './constants';
-import { EntitySourceDefinition, OperationStatus, StoredEntitySourceDefinition } from './types';
+import { IScopedClusterClient, Logger } from '@kbn/core/server';
+import { DEFINITIONS_ALIAS, TEMPLATE_VERSION } from '../constants';
+import {
+  EntitySourceDefinition,
+  CreateOperationStatus,
+  ReadOperationStatus,
+  StoredEntitySourceDefinition,
+} from '../types';
+import { runESQLQuery } from '../run_esql_query';
 
 export async function storeSourceDefinition(
   source: EntitySourceDefinition,
-  esClient: ObservabilityElasticsearchClient
-): Promise<OperationStatus<EntitySourceDefinition>> {
+  clusterClient: IScopedClusterClient,
+  logger: Logger
+): Promise<CreateOperationStatus<EntitySourceDefinition>> {
   try {
-    const result = await esClient.esql('fetch source definition for conflict check', {
+    const esClient = clusterClient.asInternalUser;
+
+    const sources = await runESQLQuery('fetch source definition for conflict check', {
+      esClient,
       query: `FROM ${DEFINITIONS_ALIAS} METADATA _id | WHERE definition_type == "source" AND _id == "source:${source.id}"`,
+      logger,
     });
 
-    if (result.length !== 0) {
+    if (sources.length !== 0) {
       return {
         status: 'conflict',
         reason: `An entity source definition with the ID "${source.id}" already exists.`,
@@ -31,7 +42,7 @@ export async function storeSourceDefinition(
       source,
     };
 
-    await esClient.client.index({
+    await esClient.index({
       index: DEFINITIONS_ALIAS,
       id: `source:${definition.source.id}`,
       document: definition,
@@ -49,14 +60,25 @@ export async function storeSourceDefinition(
   }
 }
 
+export interface ReadSourceDefinitionOptions {
+  type?: string;
+}
+
 export async function readSourceDefinitions(
-  esClient: ObservabilityElasticsearchClient
-): Promise<OperationStatus<EntitySourceDefinition[]>> {
+  clusterClient: IScopedClusterClient,
+  logger: Logger,
+  options?: ReadSourceDefinitionOptions
+): Promise<ReadOperationStatus<EntitySourceDefinition[]>> {
   try {
-    const sources = await esClient.esql<StoredEntitySourceDefinition>(
+    const esClient = clusterClient.asInternalUser;
+
+    const typeFilter = options?.type ? `AND source.type_id == "${options.type}"` : '';
+    const sources = await runESQLQuery<StoredEntitySourceDefinition>(
       'fetch all source definitions',
       {
-        query: `FROM ${DEFINITIONS_ALIAS} | WHERE definition_type == "source"`,
+        esClient,
+        query: `FROM ${DEFINITIONS_ALIAS} | WHERE definition_type == "source" ${typeFilter}`,
+        logger,
       }
     );
 

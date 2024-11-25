@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { searchRoutes } from './search';
 import { typeDefinitionRoutes } from './type_definition_routes';
 import { sourceDefinitionRoutes } from './source_definition_routes';
 
 export const v2Routes = {
+  ...searchRoutes,
   ...typeDefinitionRoutes,
   ...sourceDefinitionRoutes,
 };

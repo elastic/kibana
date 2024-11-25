@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { IClusterClient, Logger } from '@kbn/core/server';
-import { createObservabilityEsClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
-import { DEFINITIONS_ALIAS, TEMPLATE_VERSION } from './constants';
+import { IClusterClient } from '@kbn/core/server';
+import { DEFINITIONS_ALIAS, TEMPLATE_VERSION } from '../constants';
 
 const definitionsIndexTemplate = {
   name: `${DEFINITIONS_ALIAS}-template`,
@@ -37,16 +36,12 @@ const definitionsIndexTemplate = {
 
 const CURRENT_INDEX = `${DEFINITIONS_ALIAS}-${TEMPLATE_VERSION}` as const;
 
-export async function setupEntityDefinitionsIndex(clusterClient: IClusterClient, logger: Logger) {
-  const esClient = createObservabilityEsClient({
-    client: clusterClient.asInternalUser,
-    logger,
-    plugin: '@kbn/entityManager-plugin',
-  });
+export async function setupEntityDefinitionsIndex(clusterClient: IClusterClient) {
+  const esClient = clusterClient.asInternalUser;
 
-  await esClient.client.indices.putIndexTemplate(definitionsIndexTemplate);
+  await esClient.indices.putIndexTemplate(definitionsIndexTemplate);
 
-  const indices = await esClient.client.indices.get({
+  const indices = await esClient.indices.get({
     index: `${DEFINITIONS_ALIAS}-*`,
   });
   const indexNames = Object.keys(indices);
@@ -55,7 +50,7 @@ export async function setupEntityDefinitionsIndex(clusterClient: IClusterClient,
     return;
   }
 
-  await esClient.client.indices.create({
+  await esClient.indices.create({
     index: CURRENT_INDEX,
   });
 }

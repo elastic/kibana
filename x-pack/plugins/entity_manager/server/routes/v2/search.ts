@@ -8,11 +8,17 @@
 import moment from 'moment';
 import { z } from '@kbn/zod';
 import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
-import { entitySourceSchema } from '../../lib/queries';
-import { UnknownEntityType } from '../../lib/entities/errors/unknown_entity_type';
+import { UnknownEntityType } from '../../lib/v2/errors/unknown_entity_type';
+import { entitySourceDefinitionRt } from '../../lib/v2/types';
+import { READ_ENTITIES_PRIVILEGE } from '../../lib/v2/constants';
 
 export const searchEntitiesRoute = createEntityManagerServerRoute({
   endpoint: 'POST /internal/entities/v2/_search',
+  security: {
+    authz: {
+      requiredPrivileges: [READ_ENTITIES_PRIVILEGE],
+    },
+  },
   params: z.object({
     body: z.object({
       type: z.string(),
@@ -38,7 +44,7 @@ export const searchEntitiesRoute = createEntityManagerServerRoute({
       const { type, start, end, limit, filters, metadata_fields: metadataFields } = params.body;
 
       const client = await getScopedClient({ request });
-      const entities = await client.searchEntities({
+      const entities = await client.v2.searchEntities({
         type,
         filters,
         metadataFields,
@@ -62,9 +68,14 @@ export const searchEntitiesRoute = createEntityManagerServerRoute({
 
 export const searchEntitiesPreviewRoute = createEntityManagerServerRoute({
   endpoint: 'POST /internal/entities/v2/_search/preview',
+  security: {
+    authz: {
+      requiredPrivileges: [READ_ENTITIES_PRIVILEGE],
+    },
+  },
   params: z.object({
     body: z.object({
-      sources: z.array(entitySourceSchema),
+      sources: z.array(entitySourceDefinitionRt),
       start: z
         .optional(z.string())
         .default(() => moment().subtract(5, 'minutes').toISOString())
@@ -80,11 +91,11 @@ export const searchEntitiesPreviewRoute = createEntityManagerServerRoute({
       limit: z.optional(z.number()).default(10),
     }),
   }),
-  handler: async ({ request, response, params, logger, getScopedClient }) => {
+  handler: async ({ request, response, params, getScopedClient }) => {
     const { sources, start, end, limit } = params.body;
 
     const client = await getScopedClient({ request });
-    const entities = await client.searchEntitiesBySources({
+    const entities = await client.v2.searchEntitiesBySources({
       sources,
       start,
       end,
@@ -94,3 +105,8 @@ export const searchEntitiesPreviewRoute = createEntityManagerServerRoute({
     return response.ok({ body: { entities } });
   },
 });
+
+export const searchRoutes = {
+  ...searchEntitiesRoute,
+  ...searchEntitiesPreviewRoute,
+};

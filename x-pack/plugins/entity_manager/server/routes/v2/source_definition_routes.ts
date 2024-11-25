@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { createObservabilityEsClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import { z } from '@kbn/zod';
 import {
   CREATE_ENTITY_SOURCE_DEFINITION_PRIVILEGE,
   READ_ENTITY_SOURCE_DEFINITION_PRIVILEGE,
 } from '../../lib/v2/constants';
-import { readSourceDefinitions, storeSourceDefinition } from '../../lib/v2/source_definition';
 import { entitySourceDefinitionRt } from '../../lib/v2/types';
 import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
 
@@ -27,14 +25,9 @@ const createSourceDefinitionRoute = createEntityManagerServerRoute({
       source: entitySourceDefinitionRt,
     }),
   }),
-  handler: async ({ context, response, params, logger }) => {
-    const esClient = createObservabilityEsClient({
-      client: (await context.core).elasticsearch.client.asInternalUser,
-      logger,
-      plugin: '@kbn/entityManager-plugin',
-    });
-
-    const result = await storeSourceDefinition(params.body.source, esClient);
+  handler: async ({ request, response, params, getScopedClient }) => {
+    const client = await getScopedClient({ request });
+    const result = await client.v2.storeSourceDefinition(params.body.source);
 
     if (result.status === 'success') {
       return response.created({
@@ -42,7 +35,7 @@ const createSourceDefinitionRoute = createEntityManagerServerRoute({
           type: result.resource,
         },
         headers: {
-          location: `GET /internal/entities/v2/definitions/sources/${result.resource!.id}`,
+          location: `GET /internal/entities/v2/definitions/sources/${result.resource.id}`,
         },
       });
     } else if (result.status === 'conflict') {
@@ -69,14 +62,9 @@ const readSourceDefinitionsRoute = createEntityManagerServerRoute({
       requiredPrivileges: [READ_ENTITY_SOURCE_DEFINITION_PRIVILEGE],
     },
   },
-  handler: async ({ context, response, logger }) => {
-    const esClient = createObservabilityEsClient({
-      client: (await context.core).elasticsearch.client.asInternalUser,
-      logger,
-      plugin: '@kbn/entityManager-plugin',
-    });
-
-    const result = await readSourceDefinitions(esClient);
+  handler: async ({ request, response, getScopedClient }) => {
+    const client = await getScopedClient({ request });
+    const result = await client.v2.readSourceDefinitions();
 
     if (result.status === 'success') {
       return response.ok({

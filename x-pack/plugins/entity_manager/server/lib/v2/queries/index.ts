@@ -5,20 +5,9 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { EntitySourceDefinition } from '../types';
 
-export const entitySourceSchema = z.object({
-  type: z.string(),
-  timestamp_field: z.optional(z.string()).default('@timestamp'),
-  index_patterns: z.array(z.string()),
-  identity_fields: z.array(z.string()),
-  metadata_fields: z.array(z.string()),
-  filters: z.array(z.string()),
-});
-
-export type EntitySource = z.infer<typeof entitySourceSchema>;
-
-const sourceCommand = ({ source }: { source: EntitySource }) => {
+const sourceCommand = ({ source }: { source: EntitySourceDefinition }) => {
   let query = `FROM ${source.index_patterns}`;
 
   const esMetadataFields = source.metadata_fields.filter((field) =>
@@ -36,7 +25,7 @@ const filterCommands = ({
   start,
   end,
 }: {
-  source: EntitySource;
+  source: EntitySourceDefinition;
   start: string;
   end: string;
 }) => {
@@ -56,7 +45,7 @@ const filterCommands = ({
   return commands;
 };
 
-const statsCommand = ({ source }: { source: EntitySource }) => {
+const statsCommand = ({ source }: { source: EntitySourceDefinition }) => {
   const aggs = [
     // default 'last_seen' attribute
     `entity.last_seen_timestamp=MAX(${source.timestamp_field})`,
@@ -74,7 +63,7 @@ export function getEntityInstancesQuery({
   start,
   end,
 }: {
-  source: EntitySource;
+  source: EntitySourceDefinition;
   limit: number;
   start: string;
   end: string;
