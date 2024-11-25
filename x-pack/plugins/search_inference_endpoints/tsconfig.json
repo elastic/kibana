@@ -33,7 +33,9 @@
     "@kbn/features-plugin",
     "@kbn/ui-theme",
     "@kbn/deeplinks-search",
-    "@kbn/deeplinks-management"
+    "@kbn/deeplinks-management",
+    "@kbn/serverless",
+    "@kbn/utility-types"
   ],
   "exclude": [
     "target/**/*",
