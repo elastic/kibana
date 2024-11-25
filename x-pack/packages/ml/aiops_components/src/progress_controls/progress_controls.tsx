@@ -40,6 +40,7 @@ interface ProgressControlProps {
   shouldRerunAnalysis: boolean;
   runAnalysisDisabled?: boolean;
   analysisInfo?: React.ReactNode;
+  resetDisabled?: boolean;
 }
 
 /**
@@ -63,6 +64,7 @@ export const ProgressControls: FC<PropsWithChildren<ProgressControlProps>> = (pr
     shouldRerunAnalysis,
     runAnalysisDisabled = false,
     analysisInfo = null,
+    resetDisabled = false,
   } = props;
 
   const progressOutput = Math.round(progress * 100);
@@ -120,6 +122,7 @@ export const ProgressControls: FC<PropsWithChildren<ProgressControlProps>> = (pr
             size="s"
             onClick={onReset}
             color="text"
+            disabled={resetDisabled}
           >
             <FormattedMessage id="xpack.aiops.resetLabel" defaultMessage="Reset" />
           </EuiButton>

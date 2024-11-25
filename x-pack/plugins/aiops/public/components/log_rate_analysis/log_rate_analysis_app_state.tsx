@@ -58,6 +58,8 @@ export const LogRateAnalysisAppState: FC<LogRateAnalysisAppStateProps> = ({
   if (warning !== null) {
     return <>{warning}</>;
   }
+  const CasesContext = appContextValue.cases?.ui.getCasesContext() ?? React.Fragment;
+  const casesPermissions = appContextValue.cases?.helpers.canUseCases();
 
   const datePickerDeps: DatePickerDependencies = {
     ...pick(appContextValue, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
@@ -67,17 +69,19 @@ export const LogRateAnalysisAppState: FC<LogRateAnalysisAppStateProps> = ({
 
   return (
     <AiopsAppContext.Provider value={appContextValue}>
-      <UrlStateProvider>
-        <DataSourceContext.Provider value={{ dataView, savedSearch }}>
-          <LogRateAnalysisReduxProvider>
-            <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
-              <DatePickerContextProvider {...datePickerDeps}>
-                <LogRateAnalysisPage showContextualInsights={showContextualInsights} />
-              </DatePickerContextProvider>
-            </StorageContextProvider>
-          </LogRateAnalysisReduxProvider>
-        </DataSourceContext.Provider>
-      </UrlStateProvider>
+      <CasesContext permissions={casesPermissions!} owner={[]}>
+        <UrlStateProvider>
+          <DataSourceContext.Provider value={{ dataView, savedSearch }}>
+            <LogRateAnalysisReduxProvider>
+              <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
+                <DatePickerContextProvider {...datePickerDeps}>
+                  <LogRateAnalysisPage showContextualInsights={showContextualInsights} />
+                </DatePickerContextProvider>
+              </StorageContextProvider>
+            </LogRateAnalysisReduxProvider>
+          </DataSourceContext.Provider>
+        </UrlStateProvider>
+      </CasesContext>
     </AiopsAppContext.Provider>
   );
 };

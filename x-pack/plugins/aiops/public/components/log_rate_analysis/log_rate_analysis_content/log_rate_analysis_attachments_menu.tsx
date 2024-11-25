@@ -26,15 +26,22 @@ import {
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
+import type { WindowParameters } from '@kbn/aiops-log-rate-analysis/window_parameters';
+import { useCasesModal } from '../../../hooks/use_cases_modal';
 import { useDataSource } from '../../../hooks/use_data_source';
 import type { LogRateAnalysisEmbeddableState } from '../../../embeddables/log_rate_analysis/types';
 import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
-export const LogRateAnalysisAttachmentsMenu = () => {
+export const LogRateAnalysisAttachmentsMenu = ({
+  windowParameters,
+}: {
+  windowParameters?: WindowParameters;
+}) => {
   const {
     application: { capabilities },
+    cases,
     embeddable,
   } = useAiopsAppContext();
   const { dataView } = useDataSource();
@@ -44,8 +51,16 @@ export const LogRateAnalysisAttachmentsMenu = () => {
   const [dashboardAttachmentReady, setDashboardAttachmentReady] = useState(false);
 
   const timeRange = useTimeRangeUpdates();
+  const absoluteTimeRange = useTimeRangeUpdates(true);
+
+  const openCasesModalCallback = useCasesModal(EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE);
 
   const canEditDashboards = capabilities.dashboard.createNew;
+
+  const { create: canCreateCase, update: canUpdateCase } = cases?.helpers?.canUseCases() ?? {
+    create: false,
+    update: false,
+  };
 
   const onSave: SaveModalDashboardProps['onSave'] = useCallback(
     ({ dashboardId, newTitle, newDescription }) => {
@@ -85,6 +100,24 @@ export const LogRateAnalysisAttachmentsMenu = () => {
                   }),
                   panel: 'attachToDashboardPanel',
                   'data-test-subj': 'aiopsLogRateAnalysisAttachToDashboardButton',
+                },
+              ]
+            : []),
+          ...(canUpdateCase || canCreateCase
+            ? [
+                {
+                  name: i18n.translate('xpack.aiops.logRateAnalysis.attachToCaseLabel', {
+                    defaultMessage: 'Add to case',
+                  }),
+                  'data-test-subj': 'aiopsLogRateAnalysisAttachToCaseButton',
+                  onClick: () => {
+                    setIsActionMenuOpen(false);
+                    openCasesModalCallback({
+                      dataViewId: dataView.id,
+                      timeRange: absoluteTimeRange,
+                      ...(windowParameters && { windowParameters }),
+                    });
+                  },
                 },
               ]
             : []),
@@ -131,7 +164,16 @@ export const LogRateAnalysisAttachmentsMenu = () => {
         ),
       },
     ];
-  }, [canEditDashboards, applyTimeRange]);
+  }, [
+    canEditDashboards,
+    canUpdateCase,
+    canCreateCase,
+    applyTimeRange,
+    openCasesModalCallback,
+    dataView.id,
+    absoluteTimeRange,
+    windowParameters,
+  ]);
 
   return (
     <>

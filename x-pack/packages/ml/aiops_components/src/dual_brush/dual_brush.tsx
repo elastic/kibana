@@ -88,6 +88,11 @@ interface DualBrushProps {
    * Width
    */
   width: number;
+  /**
+   * Whether the brush should be non-interactive. When true, the brush is still visible
+   * but cannot be moved or resized by the user.
+   */
+  nonInteractive?: boolean;
 }
 
 /**
@@ -98,7 +103,16 @@ interface DualBrushProps {
  * @returns The DualBrush component.
  */
 export const DualBrush: FC<DualBrushProps> = (props) => {
-  const { windowParameters, min, max, onChange, marginLeft, snapTimestamps, width } = props;
+  const {
+    windowParameters,
+    min,
+    max,
+    onChange,
+    marginLeft,
+    snapTimestamps,
+    width,
+    nonInteractive,
+  } = props;
   const d3BrushContainer = useRef(null);
   const brushes = useRef<DualBrush[]>([]);
 
@@ -301,6 +315,10 @@ export const DualBrush: FC<DualBrushProps> = (props) => {
           .attr('rx', BRUSH_HANDLE_ROUNDED_CORNER)
           .attr('ry', BRUSH_HANDLE_ROUNDED_CORNER);
 
+        if (nonInteractive) {
+          mlBrushSelection.merge(mlBrushSelection).attr('pointer-events', 'none');
+        }
+
         mlBrushSelection.exit().remove();
       }
 
@@ -355,6 +373,7 @@ export const DualBrush: FC<DualBrushProps> = (props) => {
     deviationMax,
     snapTimestamps,
     onChange,
+    nonInteractive,
   ]);
 
   return (

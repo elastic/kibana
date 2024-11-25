@@ -217,7 +217,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
           barColorOverride={barColorOverride}
           barHighlightColorOverride={barHighlightColorOverride}
           barStyleAccessor={barStyleAccessor}
-          attachmentsMenu={<LogRateAnalysisAttachmentsMenu />}
+          attachmentsMenu={<LogRateAnalysisAttachmentsMenu windowParameters={windowParameters} />}
         />
       )}
       <EuiSpacer size="m" />
