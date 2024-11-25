@@ -34,7 +34,7 @@ const createBaseTimelineEdges = (): TimelineEdges => ({
 
 function deepMerge(target: EventSource, source: EventSource) {
   for (const key in source) {
-    if (source[key] instanceof Object && key in target) {
+    if (source && source[key] instanceof Object && target && target[key] instanceof Object) {
       deepMerge(target[key], source[key]);
     } else {
       target[key] = source[key];
