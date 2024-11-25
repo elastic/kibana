@@ -1288,7 +1288,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test/functional/apps/infra/logs @elastic/obs-ux-logs-team
 
 # Observability UX management team
-/x-pack/test/api_integration/services/data_view_api.ts @elastic/obs-ux-management-team
+/test/api_integration/apis/suggestions  @elastic/obs-ux-management-team # Assigned per https://github.com/elastic/kibana/pull/200950#discussion_r1853705079
 /x-pack/test/api_integration/services/slo.ts @elastic/obs-ux-management-team
 /x-pack/test/functional/services/slo @elastic/obs-ux-management-team
 /x-pack/test/functional/apps/slo @elastic/obs-ux-management-team
@@ -1664,6 +1664,16 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test/api_integration/deployment_agnostic/services/ @elastic/appex-qa
 
 # Core
+/test/api_integration/fixtures/kbn_archiver/management/saved_objects/relationships.json @elastic/kibana-core @elastic/kibana-data-discovery
+/x-pack/test/functional/es_archives/lists @elastic/kibana-core
+/test/functional/fixtures/kbn_archiver/saved_search.json @elastic/kibana-core # Assigned per only use: https://github.com/elastic/kibana/blob/main/test/interpreter_functional/test_suites/run_pipeline/esaggs.ts#L100
+/test/functional/fixtures/kbn_archiver/saved_objects_management/show_relationships.json @elastic/kibana-core # Assigned per only use: https://github.com/elastic/kibana/blob/main/test/functional/apps/saved_objects_management/show_relationships.ts#L20
+/test/functional/fixtures/kbn_archiver/saved_objects_management/hidden_from_http_apis.json @elastic/kibana-core
+/test/functional/fixtures/kbn_archiver/saved_objects_management/edit_saved_object.json @elastic/kibana-core # Assigned per only use: https://github.com/elastic/kibana/blob/main/test/functional/apps/saved_objects_management/inspect_saved_objects.ts#L40
+/test/functional/fixtures/es_archiver/saved_objects_management @elastic/kibana-core
+/test/api_integration/fixtures/es_archiver/saved_objects @elastic/kibana-core
+/test/api_integration/fixtures/kbn_archiver/saved_objects @elastic/kibana-core
+/test/interpreter_functional @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/blob/main/test/interpreter_functional/plugins/kbn_tp_run_pipeline/kibana.jsonc#L4
 /test/api_integration/apis/general/*.js @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/199795/files/894a8ede3f9d0398c5af56bf5a82654a9bc0610b#r1846691639
 /x-pack/test/plugin_api_integration/plugins/feature_usage_test @elastic/kibana-core
 /x-pack/test/functional/page_objects/navigational_search.ts @elastic/kibana-core
