@@ -40,6 +40,12 @@ import {
   secReadCasesNoneUser,
   secReadCasesReadUser,
   secReadUser,
+  casesV2NoReopenWithCreateCommentUser,
+  casesV2NoCreateCommentWithReopenUser,
+  obsCasesV2NoReopenWithCreateCommentUser,
+  obsCasesV2NoCreateCommentWithReopenUser,
+  secCasesV2NoReopenWithCreateCommentUser,
+  secCasesV2NoCreateCommentWithReopenUser,
 } from './common/users';
 import { getPostCaseRequest } from '../../../cases_api_integration/common/lib/mock';
 
@@ -183,6 +189,9 @@ export default ({ getService }: FtrProviderContext): void => {
       { user: obsCasesV2AllUser, owner: OBSERVABILITY_APP_ID },
       { user: casesAllUser, owner: CASES_APP_ID },
       { user: casesV2AllUser, owner: CASES_APP_ID },
+      { user: casesV2NoCreateCommentWithReopenUser, owner: CASES_APP_ID },
+      { user: obsCasesV2NoCreateCommentWithReopenUser, owner: OBSERVABILITY_APP_ID },
+      { user: secCasesV2NoCreateCommentWithReopenUser, owner: SECURITY_SOLUTION_APP_ID },
     ]) {
       it(`User ${user.username} with role(s) ${user.roles.join()} can reopen a case`, async () => {
         const caseInfo = await createCase(supertest, getPostCaseRequest({ owner }));
@@ -207,12 +216,44 @@ export default ({ getService }: FtrProviderContext): void => {
     }
 
     for (const { user, owner } of [
+      { user: casesV2NoReopenWithCreateCommentUser, owner: CASES_APP_ID },
+      { user: obsCasesV2NoReopenWithCreateCommentUser, owner: OBSERVABILITY_APP_ID },
+      { user: secCasesV2NoReopenWithCreateCommentUser, owner: SECURITY_SOLUTION_APP_ID },
+    ]) {
+      it(`User ${
+        user.username
+      } with role(s) ${user.roles.join()} CANNOT reopen a case`, async () => {
+        const caseInfo = await createCase(supertest, getPostCaseRequest({ owner }));
+        await updateCaseStatus({
+          supertest: supertestWithoutAuth,
+          caseId: caseInfo.id,
+          status: 'closed' as CaseStatuses,
+          version: '2',
+          expectedHttpCode: 200,
+          auth: { user, space: null },
+        });
+
+        await updateCaseStatus({
+          supertest: supertestWithoutAuth,
+          caseId: caseInfo.id,
+          status: 'open' as CaseStatuses,
+          version: '3',
+          expectedHttpCode: 403,
+          auth: { user, space: null },
+        });
+      });
+    }
+
+    for (const { user, owner } of [
       { user: secAllUser, owner: SECURITY_SOLUTION_APP_ID },
       { user: secCasesV2AllUser, owner: SECURITY_SOLUTION_APP_ID },
       { user: obsCasesAllUser, owner: OBSERVABILITY_APP_ID },
       { user: obsCasesV2AllUser, owner: OBSERVABILITY_APP_ID },
       { user: casesAllUser, owner: CASES_APP_ID },
       { user: casesV2AllUser, owner: CASES_APP_ID },
+      { user: casesV2NoReopenWithCreateCommentUser, owner: CASES_APP_ID },
+      { user: obsCasesV2NoReopenWithCreateCommentUser, owner: OBSERVABILITY_APP_ID },
+      { user: secCasesV2NoReopenWithCreateCommentUser, owner: SECURITY_SOLUTION_APP_ID },
     ]) {
       it(`User ${user.username} with role(s) ${user.roles.join()} can add comments`, async () => {
         const caseInfo = await createCase(supertest, getPostCaseRequest({ owner }));
@@ -226,6 +267,30 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest: supertestWithoutAuth,
           caseId: caseInfo.id,
           expectedHttpCode: 200,
+          auth: { user, space: null },
+        });
+      });
+    }
+
+    for (const { user, owner } of [
+      { user: casesV2NoCreateCommentWithReopenUser, owner: CASES_APP_ID },
+      { user: obsCasesV2NoCreateCommentWithReopenUser, owner: OBSERVABILITY_APP_ID },
+      { user: secCasesV2NoCreateCommentWithReopenUser, owner: SECURITY_SOLUTION_APP_ID },
+    ]) {
+      it(`User ${
+        user.username
+      } with role(s) ${user.roles.join()} CANNOT add comments`, async () => {
+        const caseInfo = await createCase(supertest, getPostCaseRequest({ owner }));
+        const comment: UserCommentAttachmentPayload = {
+          comment: 'test',
+          owner,
+          type: AttachmentType.user,
+        };
+        await createComment({
+          params: comment,
+          supertest: supertestWithoutAuth,
+          caseId: caseInfo.id,
+          expectedHttpCode: 403,
           auth: { user, space: null },
         });
       });

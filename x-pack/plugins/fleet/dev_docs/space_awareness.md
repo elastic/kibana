@@ -15,7 +15,7 @@ xpack.fleet.enableExperimental: ['useSpaceAwareness', 'subfeaturePrivileges']
 After the feature flag is enabled you will have to do another step to opt-in for the feature, that call will migrate the current space agnostic saved objects to new space aware saved objects.
 
 ```shell
-curl -u elastic:changeme -XPOST "http://localhost:5601/internal/fleet/enable_space_awareness" -H "kbn-xsrf: reporting" -H 'elastic-api-version: 1'
+curl -u elastic:changeme -XPOST "http://localhost:5601/internal/fleet/enable_space_awareness" -H "kbn-xsrf: reporting" -H 'elastic-api-version: 1' -H 'x-elastic-internal-origin: 1'
 ```
 
 ## Space aware entities in Fleet
