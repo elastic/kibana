@@ -61,13 +61,6 @@ export class GetSLOsOverview {
                 },
               },
             },
-            aggs: {
-              by_status: {
-                terms: {
-                  field: 'status',
-                },
-              },
-            },
           },
           not_stale: {
             filter: {
@@ -78,19 +71,6 @@ export class GetSLOsOverview {
               },
             },
             aggs: {
-              worst: {
-                top_hits: {
-                  sort: {
-                    errorBudgetRemaining: {
-                      order: 'asc',
-                    },
-                  },
-                  _source: {
-                    includes: ['sliValue', 'status', 'slo.id', 'slo.instanceId', 'slo.name'],
-                  },
-                  size: 1,
-                },
-              },
               violated: {
                 filter: {
                   term: {
