@@ -28,6 +28,7 @@ export const AddPrebuiltRulesHeaderButtons = () => {
       loadingRules,
       isRefetching,
       isUpgradingSecurityPackages,
+      isInstallAllRulesMutationPending,
       hasRulesToInstall,
     },
     actions: { installAllRules, installSelectedRules },
@@ -111,7 +112,12 @@ export const AddPrebuiltRulesHeaderButtons = () => {
           iconType="plusInCircle"
           data-test-subj="installAllRulesButton"
           onClick={installAllRules}
-          disabled={!canUserEditRules || !hasRulesToInstall || isRequestInProgress}
+          disabled={
+            !canUserEditRules ||
+            !hasRulesToInstall ||
+            isRequestInProgress ||
+            isInstallAllRulesMutationPending
+          }
           aria-label={i18n.INSTALL_ALL_ARIA_LABEL}
         >
           {i18n.INSTALL_ALL}
