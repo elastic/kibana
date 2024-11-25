@@ -239,9 +239,6 @@ const eqlFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableEqlFields> = {
   type: ruleTypeDiffAlgorithm,
   eql_query: eqlQueryDiffAlgorithm,
   data_source: dataSourceDiffAlgorithm,
-  event_category_override: singleLineStringDiffAlgorithm,
-  timestamp_field: singleLineStringDiffAlgorithm,
-  tiebreaker_field: singleLineStringDiffAlgorithm,
   alert_suppression: simpleDiffAlgorithm,
 };
 

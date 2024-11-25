@@ -6,7 +6,7 @@
  */
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React, { ReactNode } from 'react';
 import { ServerlessType } from '../../../../../common/serverless';

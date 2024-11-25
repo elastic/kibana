@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { CasesClientFactory } from './factory';
 import { createCasesClientFactoryMockArgs } from './mocks';
 import { createCasesClient } from './client';
 import type { FakeRawRequest } from '@kbn/core-http-server';
-import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 
 jest.mock('./client');
 
@@ -23,7 +25,7 @@ describe('CasesClientFactory', () => {
     path: '/',
   };
 
-  const fakeRequest = CoreKibanaRequest.from(rawRequest);
+  const fakeRequest = kibanaRequestFactory(rawRequest);
   const createCasesClientMocked = createCasesClient as jest.Mock;
   const logger = loggingSystemMock.createLogger();
   const args = createCasesClientFactoryMockArgs();

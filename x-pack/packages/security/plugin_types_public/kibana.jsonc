@@ -1,5 +1,9 @@
 {
   "type": "shared-browser",
   "id": "@kbn/security-plugin-types-public",
-  "owner": "@elastic/kibana-security"
+  "owner": [
+    "@elastic/kibana-security"
+  ],
+  "group": "platform",
+  "visibility": "shared"
 }
