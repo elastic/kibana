@@ -20,6 +20,8 @@ export const transformBackfillParamToAdHocRun = (
   spaceId: string
 ): AdHocRunSO => {
   const schedule = calculateSchedule(param.start, rule.schedule.interval, param.end);
+  const shouldRunActions = param.runActions !== undefined ? param.runActions : true;
+
   return {
     apiKeyId: Buffer.from(rule.apiKey!, 'base64').toString().split(':')[0],
     apiKeyToUse: rule.apiKey!,
@@ -34,7 +36,7 @@ export const transformBackfillParamToAdHocRun = (
       params: rule.params,
       apiKeyOwner: rule.apiKeyOwner,
       apiKeyCreatedByUser: rule.apiKeyCreatedByUser,
-      actions: param.runActions ? actions : [],
+      actions: shouldRunActions ? actions : [],
       consumer: rule.consumer,
       enabled: rule.enabled,
       schedule: rule.schedule,
