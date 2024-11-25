@@ -43,6 +43,7 @@ export const Footer: FunctionComponent = () => {
         { defaultMessage: 'Explore demo' }
       ),
       link: URL_DEMO_ENV,
+      testSubject: 'observabilityOnboardingFooterExploreDemoLink',
     },
     {
       iconUrl: forumIconUrl,
@@ -65,6 +66,7 @@ export const Footer: FunctionComponent = () => {
         { defaultMessage: 'Open Elastic Discuss forum' }
       ),
       link: URL_FORUM,
+      testSubject: 'observabilityOnboardingFooterDiscussForumLink',
     },
     {
       iconUrl: docsIconUrl,
@@ -87,6 +89,7 @@ export const Footer: FunctionComponent = () => {
         { defaultMessage: 'Learn more about all Elastic features' }
       ),
       link: docLinks.links.observability.guide,
+      testSubject: 'observabilityOnboardingFooterLearnMoreLink',
     },
     {
       iconUrl: supportIconUrl,
@@ -105,6 +108,7 @@ export const Footer: FunctionComponent = () => {
         { defaultMessage: 'Open Support Hub' }
       ),
       link: helpSupportUrl,
+      testSubject: 'observabilityOnboardingFooterOpenSupportHubLink',
     },
   ];
 
@@ -127,7 +131,7 @@ export const Footer: FunctionComponent = () => {
             <EuiText size="xs">
               <p>
                 <EuiLink
-                  data-test-subj="observabilityOnboardingFooterLearnMoreLink"
+                  data-test-subj={section.testSubject}
                   aria-label={section.linkARIALabel}
                   href={section.link}
                   target="_blank"

@@ -19,7 +19,6 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiFormRow,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
@@ -90,25 +89,22 @@ export const AddIndicesFlyout: React.FC<AddIndicesFlyoutProps> = ({ onClose }) =
         )}
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiFormRow
+        <IndicesSelectComboBox
           fullWidth
+          onChange={onIndicesChange}
+          selectedOptions={selectedOptions}
+          ignoredOptions={existingIndices}
           label={i18n.translate(
             'xpack.enterpriseSearch.searchApplications.searchApplication.indices.addIndicesFlyout.selectableLabel',
             { defaultMessage: 'Select searchable indices' }
           )}
-        >
-          <IndicesSelectComboBox
-            fullWidth
-            onChange={onIndicesChange}
-            selectedOptions={selectedOptions}
-            ignoredOptions={existingIndices}
-          />
-        </EuiFormRow>
+        />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween" direction="rowReverse">
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="enterpriseSearchAddIndicesFlyoutAddSelectedButton"
               fill
               data-telemetry-id="entSearchApplications-indices-addNewIndices-submit"
               iconType="plusInCircle"
@@ -122,6 +118,7 @@ export const AddIndicesFlyout: React.FC<AddIndicesFlyoutProps> = ({ onClose }) =
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              data-test-subj="enterpriseSearchAddIndicesFlyoutCancelButton"
               data-telemetry-id="entSearchApplications-indices-addNewIndices-cancel"
               flush="left"
               onClick={onClose}

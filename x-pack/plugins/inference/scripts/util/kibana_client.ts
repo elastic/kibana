@@ -28,7 +28,7 @@ import {
 } from '@kbn/inference-common';
 import type { ChatCompleteRequestBody } from '../../common/http_apis';
 import type { InferenceConnector } from '../../common/connectors';
-import { createOutputApi } from '../../common/create_output_api';
+import { createOutputApi } from '../../common/output/create_output_api';
 import { eventSourceStreamIntoObservable } from '../../server/util/event_source_stream_into_observable';
 
 // eslint-disable-next-line spaced-comment
