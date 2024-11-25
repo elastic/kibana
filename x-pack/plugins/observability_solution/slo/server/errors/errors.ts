@@ -7,20 +7,18 @@
 
 /* eslint-disable max-classes-per-file */
 
-export class ObservabilityError extends Error {
+export class SLOError extends Error {
   constructor(message?: string) {
     super(message);
     this.name = this.constructor.name;
   }
 }
 
-export class SLONotFound extends ObservabilityError {}
-export class SLOIdConflict extends ObservabilityError {}
+export class SLONotFound extends SLOError {}
+export class SLOIdConflict extends SLOError {}
 
-export class InvalidQueryError extends ObservabilityError {}
-export class InternalQueryError extends ObservabilityError {}
-export class NotSupportedError extends ObservabilityError {}
-export class IllegalArgumentError extends ObservabilityError {}
-export class InvalidTransformError extends ObservabilityError {}
+export class InternalQueryError extends SLOError {}
+export class IllegalArgumentError extends SLOError {}
+export class InvalidTransformError extends SLOError {}
 
-export class SecurityException extends ObservabilityError {}
+export class SecurityException extends SLOError {}

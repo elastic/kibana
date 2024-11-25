@@ -6,16 +6,18 @@
  */
 
 import { DoneInvokeEvent } from 'xstate';
-import { DatasetUserPrivileges, NonAggregatableDatasets } from '../../../../common/api_types';
 import {
-  DataStreamDegradedDocsStatServiceResponse,
+  DataStreamDocsStat,
+  DatasetUserPrivileges,
+  NonAggregatableDatasets,
+} from '../../../../common/api_types';
+import {
   DataStreamDetails,
   DataStreamStat,
   DataStreamStatServiceResponse,
   DataStreamStatType,
 } from '../../../../common/data_streams_stats';
 import { Integration } from '../../../../common/data_streams_stats/integration';
-import { DegradedDocsStat } from '../../../../common/data_streams_stats/malformed_docs_stat';
 import {
   DataStreamType,
   QualityIndicators,
@@ -50,8 +52,12 @@ export interface WithDataStreamStats {
   dataStreamStats: DataStreamStatType[];
 }
 
+export interface WithTotalDocs {
+  totalDocsStats: DictionaryType<DataStreamDocsStat>;
+}
+
 export interface WithDegradedDocs {
-  degradedDocStats: DictionaryType<DegradedDocsStat>;
+  degradedDocStats: DataStreamDocsStat[];
 }
 
 export interface WithNonAggregatableDatasets {
@@ -68,6 +74,7 @@ export interface WithIntegrations {
 
 export type DefaultDatasetQualityControllerState = WithTableOptions &
   WithDataStreamStats &
+  WithTotalDocs &
   WithDegradedDocs &
   WithDatasets &
   WithFilters &
@@ -146,7 +153,7 @@ export type DatasetQualityControllerEvent =
       type: 'UPDATE_TYPES';
       types: DataStreamType[];
     }
-  | DoneInvokeEvent<DataStreamDegradedDocsStatServiceResponse>
+  | DoneInvokeEvent<DataStreamDocsStat[]>
   | DoneInvokeEvent<NonAggregatableDatasets>
   | DoneInvokeEvent<DataStreamDetails>
   | DoneInvokeEvent<DataStreamStatServiceResponse>

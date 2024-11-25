@@ -20,6 +20,7 @@ import type {
   RequestHandlerContext,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkUpdateObject,
+  SavedObject,
 } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
@@ -446,7 +447,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     }
 
-    const createdPackagePolicy = { id: newSo.id, version: newSo.version, ...newSo.attributes };
+    const createdPackagePolicy = mapPackagePolicySavedObjectToPackagePolicy(newSo);
     logger.debug(`Created new package policy with id ${newSo.id} and version ${newSo.version}`);
 
     return packagePolicyService.runExternalCallbacks(
@@ -480,22 +481,21 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       user?: AuthenticatedUser;
       bumpRevision?: boolean;
       force?: true;
+      asyncDeploy?: boolean;
     }
   ): Promise<{
     created: PackagePolicy[];
     failed: Array<{ packagePolicy: NewPackagePolicy; error?: Error | SavedObjectError }>;
   }> {
-    const useSpaceAwareness = await isSpaceAwarenessEnabled();
-    const savedObjectType = await getPackagePolicySavedObjectType();
-    for (const packagePolicy of packagePolicies) {
+    const [useSpaceAwareness, savedObjectType, packageInfos] = await Promise.all([
+      isSpaceAwarenessEnabled(),
+      getPackagePolicySavedObjectType(),
+      getPackageInfoForPackagePolicies(packagePolicies, soClient),
+    ]);
+
+    await pMap(packagePolicies, async (packagePolicy) => {
       const basePkgInfo = packagePolicy.package
-        ? await getPackageInfo({
-            savedObjectsClient: soClient,
-            pkgName: packagePolicy.package.name,
-            pkgVersion: packagePolicy.package.version,
-            ignoreUnverified: true,
-            prerelease: true,
-          })
+        ? packageInfos.get(`${packagePolicy.package.name}-${packagePolicy.package.version}`)
         : undefined;
       if (!packagePolicy.id) {
         packagePolicy.id = SavedObjectsUtils.generateId();
@@ -508,7 +508,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
       this.keepPolicyIdInSync(packagePolicy);
       await preflightCheckPackagePolicy(soClient, packagePolicy, basePkgInfo);
-    }
+    });
 
     const agentPolicyIds = new Set(packagePolicies.flatMap((pkgPolicy) => pkgPolicy.policy_ids));
 
@@ -527,8 +527,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         );
       }
     }
-
-    const packageInfos = await getPackageInfoForPackagePolicies(packagePolicies, soClient);
 
     const isoDate = new Date().toISOString();
 
@@ -665,16 +663,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       for (const agentPolicyId of agentPolicyIds) {
         await agentPolicyService.bumpRevision(soClient, esClient, agentPolicyId, {
           user: options?.user,
+          asyncDeploy: options?.asyncDeploy,
         });
       }
     }
     logger.debug(`Created new package policies`);
     return {
-      created: newSos.map((newSo) => ({
-        id: newSo.id,
-        version: newSo.version,
-        ...newSo.attributes,
-      })),
+      created: newSos.map((newSo) => mapPackagePolicySavedObjectToPackagePolicy(newSo)),
       failed: failedPolicies,
     };
   }
@@ -756,11 +751,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     }
 
-    const response = {
-      id: packagePolicySO.id,
-      version: packagePolicySO.version,
-      ...packagePolicySO.attributes,
-    };
+    const response = mapPackagePolicySavedObjectToPackagePolicy(packagePolicySO);
 
     // If possible, return the experimental features map for the package policy's `package` field
     if (experimentalFeatures && response.package) {
@@ -790,11 +781,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       return [];
     }
 
-    const packagePolicies = packagePolicySO.saved_objects.map((so) => ({
-      id: so.id,
-      version: so.version,
-      ...so.attributes,
-    }));
+    const packagePolicies = packagePolicySO.saved_objects.map((so) =>
+      mapPackagePolicySavedObjectToPackagePolicy(so)
+    );
 
     for (const packagePolicy of packagePolicies) {
       auditLoggingService.writeCustomSoAuditLog({
@@ -837,11 +826,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           }
         }
 
-        return {
-          id: so.id,
-          version: so.version,
-          ...so.attributes,
-        };
+        return mapPackagePolicySavedObjectToPackagePolicy(so);
       })
       .filter((packagePolicy): packagePolicy is PackagePolicy => packagePolicy !== null);
 
@@ -891,12 +876,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
 
     return {
-      items: packagePolicies?.saved_objects.map((packagePolicySO) => ({
-        id: packagePolicySO.id,
-        version: packagePolicySO.version,
-        ...packagePolicySO.attributes,
-        spaceIds: packagePolicySO.namespaces,
-      })),
+      items: packagePolicies?.saved_objects.map((so) =>
+        mapPackagePolicySavedObjectToPackagePolicy(so, so.namespaces)
+      ),
       total: packagePolicies?.total,
       page,
       perPage,
@@ -1176,7 +1158,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     packagePolicyUpdates: Array<NewPackagePolicy & { version?: string; id: string }>,
-    options?: { user?: AuthenticatedUser; force?: boolean }
+    options?: { user?: AuthenticatedUser; force?: boolean; asyncDeploy?: boolean }
   ): Promise<{
     updatedPolicies: PackagePolicy[] | null;
     failedPolicies: Array<{
@@ -1347,6 +1329,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       await agentPolicyService.bumpRevision(soClient, esClient, agentPolicyId, {
         user: options?.user,
         removeProtection,
+        asyncDeploy: options?.asyncDeploy,
       });
     });
 
@@ -1393,13 +1376,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const updatedPoliciesSuccess = updatedPolicies
       .filter((policy) => !policy.error && policy.attributes)
-      .map(
-        (soPolicy) =>
-          ({
-            id: soPolicy.id,
-            version: soPolicy.version,
-            ...soPolicy.attributes,
-          } as PackagePolicy)
+      .map((soPolicy) =>
+        mapPackagePolicySavedObjectToPackagePolicy(
+          soPolicy as SavedObject<PackagePolicySOAttributes>
+        )
       );
 
     return { updatedPolicies: updatedPoliciesSuccess, failedPolicies };
@@ -2190,7 +2170,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           perPage: SO_SEARCH_LIMIT,
           namespaces: ['*'],
         })
-    ).saved_objects.map(mapPackagePolicySavedObjectToPackagePolicy);
+    ).saved_objects.map((so) => mapPackagePolicySavedObjectToPackagePolicy(so, so.namespaces));
 
     if (packagePolicies.length > 0) {
       const getPackagePolicyUpdate = (packagePolicy: PackagePolicy) => ({
@@ -2307,7 +2287,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             savedObjectType,
           });
 
-          return mapPackagePolicySavedObjectToPackagePolicy(packagePolicySO);
+          return mapPackagePolicySavedObjectToPackagePolicy(
+            packagePolicySO,
+            packagePolicySO.namespaces
+          );
         });
       },
     });
@@ -2368,6 +2351,7 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
           user?: AuthenticatedUser | undefined;
           bumpRevision?: boolean | undefined;
           force?: true | undefined;
+          asyncDeploy?: boolean;
         }
       | undefined
   ): Promise<{

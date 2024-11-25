@@ -64,10 +64,8 @@ describe('Security Plugin', () => {
 
     mockCoreStart = coreMock.createStart();
 
-    const mockFeaturesStart = featuresPluginMock.createStart();
-    mockFeaturesStart.getKibanaFeatures.mockReturnValue([]);
     mockStartDependencies = {
-      features: mockFeaturesStart,
+      features: featuresPluginMock.createStart(),
       licensing: licensingMock.createStart(),
       taskManager: taskManagerMock.createStart(),
     };

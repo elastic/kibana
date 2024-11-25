@@ -19,6 +19,7 @@ import {
 import { ESQLAstBaseItem, ESQLAstCommand, ESQLAstQueryExpression } from '../types';
 import { ESQLAstExpressionNode, Visitor } from '../visitor';
 import { resolveItem } from '../visitor/utils';
+import { commandOptionsWithEqualsSeparator, commandsWithNoCommaArgSeparator } from './constants';
 import { LeafPrinter } from './leaf_printer';
 
 export interface BasicPrettyPrinterOptions {
@@ -378,7 +379,8 @@ export class BasicPrettyPrinter {
         args += (args ? ', ' : '') + arg;
       }
 
-      const argsFormatted = args ? ` ${args}` : '';
+      const separator = commandOptionsWithEqualsSeparator.has(ctx.node.name) ? ' = ' : ' ';
+      const argsFormatted = args ? `${separator}${args}` : '';
       const optionFormatted = `${option}${argsFormatted}`;
 
       return optionFormatted;
@@ -392,7 +394,10 @@ export class BasicPrettyPrinter {
       let options = '';
 
       for (const source of ctx.visitArguments()) {
-        args += (args ? ', ' : '') + source;
+        const needsSeparator = !!args;
+        const needsComma = !commandsWithNoCommaArgSeparator.has(ctx.node.name);
+        const separator = needsSeparator ? (needsComma ? ',' : '') + ' ' : '';
+        args += separator + source;
       }
 
       for (const option of ctx.visitOptions()) {

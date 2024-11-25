@@ -90,7 +90,7 @@
   }
 
   & [data-gridcell-column-id='pin_field'] .euiDataGridRowCell__content {
-    padding: $euiSizeXS / 2 0 0 $euiSizeXS;
+    padding: calc($euiSizeXS / 2) 0 0 $euiSizeXS;
   }
 
   .kbnDocViewer__fieldsGrid__pinAction {

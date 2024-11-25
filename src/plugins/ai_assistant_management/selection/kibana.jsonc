@@ -4,8 +4,9 @@
   "owner": [
     "@elastic/obs-knowledge-team"
   ],
+  // This should probably be platform. While the code owner is currently observability, the package is a platform AI assistant selector.
   "group": "platform",
-  "visibility": "private",
+  "visibility": "shared",
   "plugin": {
     "id": "aiAssistantManagementSelection",
     "browser": true,

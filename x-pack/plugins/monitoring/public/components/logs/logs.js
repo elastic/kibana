@@ -10,11 +10,12 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { upperFirst } from 'lodash';
 import { Legacy } from '../../legacy_shims';
 import { EuiBasicTable, EuiTitle, EuiSpacer, EuiText, EuiCallOut, EuiLink } from '@elastic/eui';
-import { INFRA_SOURCE_ID } from '../../../common/constants';
 import { formatDateTimeLocal } from '../../../common/formatting';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Reason } from './reason';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
 
 const getFormattedDateTimeLocal = (timestamp) => {
   const timezone = Legacy.shims.uiSettings?.get('dateFormat:tz');
@@ -110,7 +111,7 @@ const clusterColumns = [
   },
 ];
 
-function getLogsUiLink(clusterUuid, nodeId, indexUuid) {
+function getLogsUiLink(clusterUuid, nodeId, indexUuid, sharePlugin) {
   const params = [];
   if (clusterUuid) {
     params.push(`elasticsearch.cluster.uuid:${clusterUuid}`);
@@ -122,15 +123,23 @@ function getLogsUiLink(clusterUuid, nodeId, indexUuid) {
     params.push(`elasticsearch.index.name:${indexUuid}`);
   }
 
-  const base = Legacy.shims.infra.locators.logsLocator.getRedirectUrl({
-    logView: { logViewId: INFRA_SOURCE_ID, type: 'log-view-reference' },
-    ...(params.length ? { filter: params.join(' and ') } : {}),
+  const filter = params.join(' and ');
+  const { logsLocator } = getLogsLocatorsFromUrlService(sharePlugin.url);
+
+  const base = logsLocator.getRedirectUrl({
+    filter,
   });
 
   return base;
 }
 
-export class Logs extends PureComponent {
+export const Logs = (props) => {
+  const {
+    services: { share },
+  } = useKibana();
+  return <LogsContent sharePlugin={share} {...props} />;
+};
+export class LogsContent extends PureComponent {
   renderLogs() {
     const {
       logs: { enabled, logs },
@@ -165,7 +174,9 @@ export class Logs extends PureComponent {
       nodeId,
       clusterUuid,
       indexUuid,
+      sharePlugin,
     } = this.props;
+
     if (!enabled || !show) {
       return null;
     }
@@ -184,7 +195,7 @@ export class Logs extends PureComponent {
             defaultMessage="Visit {link} to dive deeper."
             values={{
               link: (
-                <EuiLink href={getLogsUiLink(clusterUuid, nodeId, indexUuid)}>
+                <EuiLink href={getLogsUiLink(clusterUuid, nodeId, indexUuid, sharePlugin)}>
                   {i18n.translate('xpack.monitoring.logs.listing.calloutLinkText', {
                     defaultMessage: 'Logs',
                   })}

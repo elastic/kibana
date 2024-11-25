@@ -37,8 +37,10 @@ export const getNotesRoute = (
   router.versioned
     .get({
       path: NOTE_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
       access: 'public',
     })
@@ -74,8 +76,7 @@ export const getNotesRoute = (
                 perPage: maxUnassociatedNotes,
               };
               const res = await getAllSavedNote(frameworkRequest, options);
-              const body: GetNotesResponse = res ?? {};
-              return response.ok({ body });
+              return response.ok({ body: res });
             }
 
             // searching for all the notes associated with a specific document id
@@ -86,7 +87,7 @@ export const getNotesRoute = (
               perPage: maxUnassociatedNotes,
             };
             const res = await getAllSavedNote(frameworkRequest, options);
-            return response.ok({ body: res ?? {} });
+            return response.ok({ body: res });
           }
 
           // if savedObjectIds is provided, we will search for all the notes associated with the savedObjectIds
@@ -104,8 +105,7 @@ export const getNotesRoute = (
                 perPage: maxUnassociatedNotes,
               };
               const res = await getAllSavedNote(frameworkRequest, options);
-              const body: GetNotesResponse = res ?? {};
-              return response.ok({ body });
+              return response.ok({ body: res });
             }
 
             // searching for all the notes associated with a specific saved object id
@@ -118,8 +118,7 @@ export const getNotesRoute = (
               perPage: maxUnassociatedNotes,
             };
             const res = await getAllSavedNote(frameworkRequest, options);
-            const body: GetNotesResponse = res ?? {};
-            return response.ok({ body });
+            return response.ok({ body: res });
           }
 
           // retrieving all the notes following the query parameters
@@ -234,8 +233,7 @@ export const getNotesRoute = (
           options.filter = nodeBuilder.and(filterKueryNodeArray);
 
           const res = await getAllSavedNote(frameworkRequest, options);
-          const body: GetNotesResponse = res ?? {};
-          return response.ok({ body });
+          return response.ok({ body: res });
         } catch (err) {
           const error = transformError(err);
           const siemResponse = buildSiemResponse(response);

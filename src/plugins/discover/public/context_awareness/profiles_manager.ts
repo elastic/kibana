@@ -10,7 +10,7 @@
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { isEqual } from 'lodash';
-import { BehaviorSubject, combineLatest, map } from 'rxjs';
+import { BehaviorSubject, combineLatest, map, skip } from 'rxjs';
 import { DataSourceType, isDataSourceType } from '../../common/data_sources';
 import { addLog } from '../utils/add_log';
 import type {
@@ -25,7 +25,8 @@ import type {
   DocumentContext,
 } from './profiles';
 import type { ContextWithProfileId } from './profile_service';
-import { DiscoverEBTManager } from '../services/discover_ebt_manager';
+import type { DiscoverEBTManager } from '../services/discover_ebt_manager';
+import type { AppliedProfile } from './composable_profile';
 
 interface SerializedRootProfileParams {
   solutionNavId: RootProfileProviderParams['solutionNavId'];
@@ -53,8 +54,9 @@ export interface GetProfilesOptions {
 export class ProfilesManager {
   private readonly rootContext$: BehaviorSubject<ContextWithProfileId<RootContext>>;
   private readonly dataSourceContext$: BehaviorSubject<ContextWithProfileId<DataSourceContext>>;
-  private readonly ebtManager: DiscoverEBTManager;
 
+  private rootProfile: AppliedProfile;
+  private dataSourceProfile: AppliedProfile;
   private prevRootProfileParams?: SerializedRootProfileParams;
   private prevDataSourceProfileParams?: SerializedDataSourceProfileParams;
   private rootProfileAbortController?: AbortController;
@@ -64,11 +66,22 @@ export class ProfilesManager {
     private readonly rootProfileService: RootProfileService,
     private readonly dataSourceProfileService: DataSourceProfileService,
     private readonly documentProfileService: DocumentProfileService,
-    ebtManager: DiscoverEBTManager
+    private readonly ebtManager: DiscoverEBTManager
   ) {
     this.rootContext$ = new BehaviorSubject(rootProfileService.defaultContext);
     this.dataSourceContext$ = new BehaviorSubject(dataSourceProfileService.defaultContext);
-    this.ebtManager = ebtManager;
+    this.rootProfile = rootProfileService.getProfile({ context: this.rootContext$.getValue() });
+    this.dataSourceProfile = dataSourceProfileService.getProfile({
+      context: this.dataSourceContext$.getValue(),
+    });
+
+    this.rootContext$.pipe(skip(1)).subscribe((context) => {
+      this.rootProfile = rootProfileService.getProfile({ context });
+    });
+
+    this.dataSourceContext$.pipe(skip(1)).subscribe((context) => {
+      this.dataSourceProfile = dataSourceProfileService.getProfile({ context });
+    });
   }
 
   /**
@@ -79,7 +92,7 @@ export class ProfilesManager {
     const serializedParams = serializeRootProfileParams(params);
 
     if (isEqual(this.prevRootProfileParams, serializedParams)) {
-      return;
+      return { getRenderAppWrapper: this.rootProfile.getRenderAppWrapper };
     }
 
     const abortController = new AbortController();
@@ -95,11 +108,13 @@ export class ProfilesManager {
     }
 
     if (abortController.signal.aborted) {
-      return;
+      return { getRenderAppWrapper: this.rootProfile.getRenderAppWrapper };
     }
 
     this.rootContext$.next(context);
     this.prevRootProfileParams = serializedParams;
+
+    return { getRenderAppWrapper: this.rootProfile.getRenderAppWrapper };
   }
 
   /**
@@ -181,11 +196,13 @@ export class ProfilesManager {
    */
   public getProfiles({ record }: GetProfilesOptions = {}) {
     return [
-      this.rootProfileService.getProfile(this.rootContext$.getValue()),
-      this.dataSourceProfileService.getProfile(this.dataSourceContext$.getValue()),
-      this.documentProfileService.getProfile(
-        recordHasContext(record) ? record.context : this.documentProfileService.defaultContext
-      ),
+      this.rootProfile,
+      this.dataSourceProfile,
+      this.documentProfileService.getProfile({
+        context: recordHasContext(record)
+          ? record.context
+          : this.documentProfileService.defaultContext,
+      }),
     ];
   }
 

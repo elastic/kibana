@@ -1553,17 +1553,6 @@
           },
           {
             "parentPluginId": "@kbn/reporting-common",
-            "id": "def-common.INTERNAL_ROUTES.DOWNLOAD_CSV",
-            "type": "string",
-            "tags": [],
-            "label": "DOWNLOAD_CSV",
-            "description": [],
-            "path": "packages/kbn-reporting/common/routes.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/reporting-common",
             "id": "def-common.INTERNAL_ROUTES.GENERATE_PREFIX",
             "type": "string",
             "tags": [],

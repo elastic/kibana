@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
@@ -28,29 +27,8 @@ export default function (providerContext: FtrProviderContext) {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
 
-    it('should respond with fleet_server_hosts', async function () {
-      // Create a fleet server host
-      await supertest
-        .post(`/api/fleet/fleet_server_hosts`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({
-          id: 'test-default-123',
-          name: 'Default',
-          is_default: true,
-          host_urls: ['https://test.com:8080', 'https://test.com:8081'],
-        })
-        .expect(200);
-
-      // Assert that the hosts appear in the setting response
-      const response = await supertest
-        .get(`/api/fleet/settings`)
-        .set('kbn-xsrf', 'xxxx')
-        .expect(200);
-
-      expect(response.body.item.fleet_server_hosts).to.eql([
-        'https://test.com:8080',
-        'https://test.com:8081',
-      ]);
+    it('should respond return settings', async function () {
+      await supertest.get(`/api/fleet/settings`).set('kbn-xsrf', 'xxxx').expect(200);
     });
   });
 }

@@ -5,31 +5,8 @@
  * 2.0.
  */
 
-export const knowledgeBaseIngestPipeline = ({
-  id,
-  modelId,
-  v2KnowledgeBaseEnabled,
-}: {
-  id: string;
-  modelId: string;
-  v2KnowledgeBaseEnabled: boolean;
-}) => ({
+export const knowledgeBaseIngestPipeline = ({ id }: { id: string }) => ({
   id,
   description: 'Embedding pipeline for Elastic AI Assistant ELSER Knowledge Base',
-  processors: !v2KnowledgeBaseEnabled
-    ? [
-        {
-          inference: {
-            if: 'ctx?.text != null',
-            model_id: modelId,
-            input_output: [
-              {
-                input_field: 'text',
-                output_field: 'vector.tokens',
-              },
-            ],
-          },
-        },
-      ]
-    : [],
+  processors: [],
 });

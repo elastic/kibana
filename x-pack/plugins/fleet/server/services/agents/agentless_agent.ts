@@ -220,9 +220,11 @@ class AgentlessAgentService {
       agentlessAgentPolicy.global_data_tags?.find((tag) => tag.name === name)?.value;
 
     return {
-      organization: getGlobalTagValueByName(AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION),
-      division: getGlobalTagValueByName(AGENTLESS_GLOBAL_TAG_NAME_DIVISION),
-      team: getGlobalTagValueByName(AGENTLESS_GLOBAL_TAG_NAME_TEAM),
+      owner: {
+        org: getGlobalTagValueByName(AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION),
+        division: getGlobalTagValueByName(AGENTLESS_GLOBAL_TAG_NAME_DIVISION),
+        team: getGlobalTagValueByName(AGENTLESS_GLOBAL_TAG_NAME_TEAM),
+      },
     };
   }
 

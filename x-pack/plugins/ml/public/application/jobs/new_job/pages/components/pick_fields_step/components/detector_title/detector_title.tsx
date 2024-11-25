@@ -51,7 +51,12 @@ export const DetectorTitle: FC<PropsWithChildren<DetectorTitleProps>> = ({
             onClick={() => deleteDetector(index)}
             iconType="cross"
             size="s"
-            aria-label="Next"
+            aria-label={i18n.translate(
+              'xpack.ml.newJob.wizard.pickFieldsStep.nextButtonAriaLabel',
+              {
+                defaultMessage: 'Next',
+              }
+            )}
           />
         )}
       </EuiFlexItem>

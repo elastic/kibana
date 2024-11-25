@@ -34,7 +34,7 @@ class FilterByMapExtentModal extends Component<Props> {
   _renderSwitches() {
     return mapEmbeddablesSingleton.getMapPanels().map((mapPanel) => {
       return (
-        <EuiFormRow display="columnCompressedSwitch" key={mapPanel.id}>
+        <EuiFormRow display="columnCompressed" key={mapPanel.id}>
           <EuiSwitch
             label={mapPanel.getTitle()}
             checked={mapPanel.getIsFilterByMapExtent()}

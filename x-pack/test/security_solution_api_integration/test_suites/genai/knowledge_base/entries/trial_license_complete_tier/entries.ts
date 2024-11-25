@@ -32,7 +32,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const ml = getService('ml') as ReturnType<typeof MachineLearningProvider>;
 
-  describe.skip('@ess Basic Security AI Assistant Knowledge Base Entries', () => {
+  describe('@ess Basic Security AI Assistant Knowledge Base Entries', () => {
     before(async () => {
       await installTinyElser(ml);
       await setupKnowledgeBase(supertest, log);

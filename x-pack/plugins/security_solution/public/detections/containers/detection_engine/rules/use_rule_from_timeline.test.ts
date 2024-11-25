@@ -16,6 +16,7 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 import { mockTimeline } from '../../../../../server/lib/timeline/__mocks__/create_timelines';
 import type { TimelineModel } from '../../../..';
+import type { ResolveTimelineResponse } from '../../../../../common/api/timeline';
 
 jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock('../../../../common/utils/global_query_string/helpers');
@@ -45,53 +46,52 @@ jest.mock('react-redux', () => {
 
 const timelineId = 'eb2781c0-1df5-11eb-8589-2f13958b79f7';
 
-const selectedTimeline = {
-  data: {
-    timeline: {
-      ...mockTimeline,
-      id: timelineId,
-      savedObjectId: timelineId,
-      indexNames: ['awesome-*'],
-      dataViewId: 'custom-data-view-id',
-      kqlQuery: {
-        filterQuery: {
-          serializedQuery:
-            '{"bool":{"filter":[{"bool":{"should":[{"exists":{"field":"host.name"}}],"minimum_should_match":1}},{"bool":{"should":[{"exists":{"field":"user.name"}}],"minimum_should_match":1}}]}}',
-          kuery: {
-            expression: 'host.name:* AND user.name:*',
-            kind: 'kuery',
-          },
+const selectedTimeline: ResolveTimelineResponse = {
+  outcome: 'exactMatch',
+  timeline: {
+    ...mockTimeline,
+    savedObjectId: timelineId,
+    version: 'wedwed',
+    indexNames: ['awesome-*'],
+    dataViewId: 'custom-data-view-id',
+    kqlQuery: {
+      filterQuery: {
+        serializedQuery:
+          '{"bool":{"filter":[{"bool":{"should":[{"exists":{"field":"host.name"}}],"minimum_should_match":1}},{"bool":{"should":[{"exists":{"field":"user.name"}}],"minimum_should_match":1}}]}}',
+        kuery: {
+          expression: 'host.name:* AND user.name:*',
+          kind: 'kuery',
         },
       },
-      dataProviders: [
-        {
-          excluded: false,
-          and: [],
-          kqlQuery: '',
-          name: 'Stephs-MBP.lan',
-          queryMatch: {
-            field: 'host.name',
-            value: 'Stephs-MBP.lan',
-            operator: ':',
-          },
-          id: 'draggable-badge-default-draggable-process_stopped-timeline-1-NH9UwoMB2HTqQ3G4wUFM-host_name-Stephs-MBP_lan',
-          enabled: true,
-        },
-        {
-          excluded: false,
-          and: [],
-          kqlQuery: '',
-          name: '--lang=en-US',
-          queryMatch: {
-            field: 'process.args',
-            value: '--lang=en-US',
-            operator: ':',
-          },
-          id: 'draggable-badge-default-draggable-process_started-timeline-1-args-5---lang=en-US-MH9TwoMB2HTqQ3G4_UH--process_args---lang=en-US',
-          enabled: true,
-        },
-      ],
     },
+    dataProviders: [
+      {
+        excluded: false,
+        and: [],
+        kqlQuery: '',
+        name: 'Stephs-MBP.lan',
+        queryMatch: {
+          field: 'host.name',
+          value: 'Stephs-MBP.lan',
+          operator: ':',
+        },
+        id: 'draggable-badge-default-draggable-process_stopped-timeline-1-NH9UwoMB2HTqQ3G4wUFM-host_name-Stephs-MBP_lan',
+        enabled: true,
+      },
+      {
+        excluded: false,
+        and: [],
+        kqlQuery: '',
+        name: '--lang=en-US',
+        queryMatch: {
+          field: 'process.args',
+          value: '--lang=en-US',
+          operator: ':',
+        },
+        id: 'draggable-badge-default-draggable-process_started-timeline-1-args-5---lang=en-US-MH9TwoMB2HTqQ3G4_UH--process_args---lang=en-US',
+        enabled: true,
+      },
+    ],
   },
 };
 
@@ -121,7 +121,6 @@ describe('useRuleFromTimeline', () => {
       expect(result.current.loading).toEqual(true);
       await waitForNextUpdate();
       expect(setRuleQuery).toHaveBeenCalled();
-      expect(mockDispatch).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -153,28 +152,13 @@ describe('useRuleFromTimeline', () => {
       await waitForNextUpdate();
       expect(setRuleQuery).toHaveBeenCalled();
 
-      expect(mockDispatch).toHaveBeenCalledTimes(4);
+      expect(mockDispatch).toHaveBeenCalledTimes(2);
       expect(mockDispatch).toHaveBeenNthCalledWith(1, {
-        type: 'x-pack/security_solution/local/timeline/UPDATE_LOADING',
-        payload: {
-          id: 'timeline-1',
-          isLoading: true,
-        },
-      });
-
-      expect(mockDispatch).toHaveBeenNthCalledWith(2, {
         type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_DATA_VIEW',
         payload: {
           id: 'timeline',
-          selectedDataViewId: selectedTimeline.data.timeline.dataViewId,
-          selectedPatterns: selectedTimeline.data.timeline.indexNames,
-        },
-      });
-      expect(mockDispatch).toHaveBeenNthCalledWith(3, {
-        type: 'x-pack/security_solution/local/timeline/UPDATE_LOADING',
-        payload: {
-          id: 'timeline-1',
-          isLoading: false,
+          selectedDataViewId: selectedTimeline.timeline.dataViewId,
+          selectedPatterns: selectedTimeline.timeline.indexNames,
         },
       });
     });
@@ -236,16 +220,15 @@ describe('useRuleFromTimeline', () => {
         query: 'find it EQL',
         size: 100,
       };
-      const eqlTimeline = {
-        data: {
-          timeline: {
-            ...mockTimeline,
-            id: timelineId,
-            savedObjectId: timelineId,
-            indexNames: ['awesome-*'],
-            dataViewId: 'custom-data-view-id',
-            eqlOptions,
-          },
+      const eqlTimeline: ResolveTimelineResponse = {
+        outcome: 'exactMatch',
+        timeline: {
+          ...mockTimeline,
+          version: '123',
+          savedObjectId: timelineId,
+          indexNames: ['awesome-*'],
+          dataViewId: 'custom-data-view-id',
+          eqlOptions,
         },
       };
       (resolveTimeline as jest.Mock).mockResolvedValue(eqlTimeline);
@@ -272,7 +255,7 @@ describe('useRuleFromTimeline', () => {
       const { result } = renderHook(() => useRuleFromTimeline(setRuleQuery));
       expect(result.current.loading).toEqual(false);
       await act(async () => {
-        result.current.onOpenTimeline(selectedTimeline.data.timeline as unknown as TimelineModel);
+        result.current.onOpenTimeline(selectedTimeline.timeline as unknown as TimelineModel);
       });
 
       // not loading anything as an external call to onOpenTimeline provides the timeline
@@ -323,7 +306,7 @@ describe('useRuleFromTimeline', () => {
       const { result } = renderHook(() => useRuleFromTimeline(setRuleQuery));
       expect(result.current.loading).toEqual(false);
       const tl = {
-        ...selectedTimeline.data.timeline,
+        ...selectedTimeline.timeline,
         dataProviders: [
           {
             property: 'bad',
@@ -347,7 +330,7 @@ describe('useRuleFromTimeline', () => {
       const { waitForNextUpdate } = renderHook(() => useRuleFromTimeline(setRuleQuery));
       await waitForNextUpdate();
       expect(setRuleQuery).toHaveBeenCalled();
-      expect(mockDispatch).toHaveBeenNthCalledWith(4, {
+      expect(mockDispatch).toHaveBeenNthCalledWith(2, {
         type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_DATA_VIEW',
         payload: {
           id: 'timeline',

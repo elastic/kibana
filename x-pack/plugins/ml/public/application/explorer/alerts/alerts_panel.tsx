@@ -101,6 +101,9 @@ export const AlertsPanel: FC = () => {
             </>
           );
         })}
+        ariaLabel={i18n.translate('xpack.ml.explorer.alertsPanel.ariaLabel', {
+          defaultMessage: 'alerts panel',
+        })}
       >
         <AnomalyDetectionAlertsOverviewChart />
 

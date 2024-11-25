@@ -28,8 +28,10 @@ export const assetCriticalityInternalPrivilegesRoute = (
     .get({
       access: 'internal',
       path: ASSET_CRITICALITY_INTERNAL_PRIVILEGES_URL,
-      options: {
-        tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
+        },
       },
     })
     .addVersion(

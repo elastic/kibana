@@ -55,7 +55,7 @@ const EntityStoreDashboardPanelsComponent = () => {
 
   const { mutate: initRiskEngine } = useInitRiskEngineMutation();
 
-  const callouts = entityStore.errors.map((err, i) => (
+  const callouts = entityStore.errors.map((err) => (
     <EuiCallOut
       title={
         <FormattedMessage

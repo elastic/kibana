@@ -135,6 +135,8 @@ const TestDataQualityProvidersComponent: React.FC<TestDataQualityProvidersProps>
     ilmPhases,
     selectedIlmPhaseOptions,
     setSelectedIlmPhaseOptions,
+    defaultStartTime,
+    defaultEndTime,
   } = getMergedDataQualityContextProps(dataQualityContextProps);
 
   const mergedResultsRollupContextProps =
@@ -162,6 +164,8 @@ const TestDataQualityProvidersComponent: React.FC<TestDataQualityProvidersProps>
       ilmPhases={ilmPhases}
       selectedIlmPhaseOptions={selectedIlmPhaseOptions}
       setSelectedIlmPhaseOptions={setSelectedIlmPhaseOptions}
+      defaultStartTime={defaultStartTime}
+      defaultEndTime={defaultEndTime}
     >
       <ResultsRollupContext.Provider value={mergedResultsRollupContextProps}>
         <IndicesCheckContext.Provider

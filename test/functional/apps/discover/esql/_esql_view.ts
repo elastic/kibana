@@ -25,14 +25,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const esql = getService('esql');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const { common, discover, dashboard, header, timePicker, unifiedFieldList } = getPageObjects([
-    'common',
-    'discover',
-    'dashboard',
-    'header',
-    'timePicker',
-    'unifiedFieldList',
-  ]);
+  const dataViews = getService('dataViews');
+  const { common, discover, dashboard, header, timePicker, unifiedFieldList, unifiedSearch } =
+    getPageObjects([
+      'common',
+      'discover',
+      'dashboard',
+      'header',
+      'timePicker',
+      'unifiedFieldList',
+      'unifiedSearch',
+    ]);
 
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -88,7 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         expect(await testSubjects.exists('showQueryBarMenu')).to.be(false);
         expect(await testSubjects.exists('addFilter')).to.be(false);
-        expect(await testSubjects.exists('dscViewModeDocumentButton')).to.be(true);
+        expect(await testSubjects.exists('dscViewModeDocumentButton')).to.be(false);
         // when Lens suggests a table, we render an ESQL based histogram
         expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
         expect(await testSubjects.exists('discoverQueryHits')).to.be(true);
@@ -139,9 +142,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should perform test query correctly', async function () {
         await timePicker.setDefaultAbsoluteRange();
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
         await discover.selectTextBaseLang();
-        const testQuery = `from logstash-* | limit 10 | stats countB = count(bytes) by geo.dest | sort countB`;
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
 
+        const testQuery = `from logstash-* | sort @timestamp | limit 10 | stats countB = count(bytes) by geo.dest | sort countB`;
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
         await header.waitUntilLoadingHasFinished();
@@ -155,7 +162,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should render when switching to a time range with no data, then back to a time range with data', async () => {
         await discover.selectTextBaseLang();
-        const testQuery = `from logstash-* | limit 10 | stats countB = count(bytes) by geo.dest | sort countB`;
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        const testQuery = `from logstash-* | sort @timestamp | limit 10 | stats countB = count(bytes) by geo.dest | sort countB`;
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
         await header.waitUntilLoadingHasFinished();
@@ -178,8 +188,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should query an index pattern that doesnt translate to a dataview correctly', async function () {
         await discover.selectTextBaseLang();
-        const testQuery = `from logstash* | limit 10 | stats countB = count(bytes) by geo.dest | sort countB`;
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
 
+        const testQuery = `from logstash* | sort @timestamp | limit 10 | stats countB = count(bytes) by geo.dest | sort countB`;
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
         await header.waitUntilLoadingHasFinished();
@@ -190,6 +202,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should render correctly if there are empty fields', async function () {
         await discover.selectTextBaseLang();
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
         const testQuery = `from logstash-* | limit 10 | keep machine.ram_range, bytes`;
 
         await monacoEditor.setCodeEditorValue(testQuery);
@@ -198,11 +212,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilSearchingHasFinished();
         const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
         expect(await cell.getVisibleText()).to.be(' - ');
-        expect(await dataGrid.getHeaders()).to.eql([
-          'Select column',
-          'Control column',
-          'Access to degraded docs',
-          'Access to available stacktraces',
+        expect((await dataGrid.getHeaders()).slice(-2)).to.eql([
           'Numberbytes',
           'machine.ram_range',
         ]);
@@ -295,6 +305,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
         await discover.saveSearch('esql_test2');
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
         const testQuery = 'from logstash-* | limit 100 | drop @timestamp';
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
@@ -304,6 +316,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async () => {
           await testSubjects.existOrFail('discover-esql-to-dataview-modal');
         });
+      });
+
+      it('should show available data views after switching to classic mode', async () => {
+        await discover.selectTextBaseLang();
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        await browser.refresh();
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+        await unifiedSearch.switchToDataViewMode();
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+        const availableDataViews = await unifiedSearch.getDataViewList(
+          'discover-dataView-switch-link'
+        );
+        expect(availableDataViews).to.eql(['kibana_sample_data_flights', 'logstash-*']);
+        await dataViews.switchToAndValidate('kibana_sample_data_flights');
       });
     });
 
@@ -382,12 +412,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await testSubjects.click('ESQLEditor-toggle-query-history-button');
         const historyItems = await esql.getHistoryItems();
-        log.debug(historyItems);
-        const queryAdded = historyItems.some((item) => {
-          return item[1] === 'FROM logstash-* | LIMIT 10';
-        });
-
-        expect(queryAdded).to.be(true);
+        await esql.isQueryPresentInTable('FROM logstash-* | LIMIT 10', historyItems);
       });
 
       it('updating the query should add this to the history', async () => {
@@ -404,12 +429,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await testSubjects.click('ESQLEditor-toggle-query-history-button');
         const historyItems = await esql.getHistoryItems();
-        log.debug(historyItems);
-        const queryAdded = historyItems.some((item) => {
-          return item[1] === 'from logstash-* | limit 100 | drop @timestamp';
-        });
-
-        expect(queryAdded).to.be(true);
+        await esql.isQueryPresentInTable(
+          'from logstash-* | limit 100 | drop @timestamp',
+          historyItems
+        );
       });
 
       it('should select a query from the history and submit it', async () => {
@@ -423,12 +446,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esql.clickHistoryItem(1);
 
         const historyItems = await esql.getHistoryItems();
-        log.debug(historyItems);
-        const queryAdded = historyItems.some((item) => {
-          return item[1] === 'from logstash-* | limit 100 | drop @timestamp';
-        });
-
-        expect(queryAdded).to.be(true);
+        await esql.isQueryPresentInTable(
+          'from logstash-* | limit 100 | drop @timestamp',
+          historyItems
+        );
       });
 
       it('should add a failed query to the history', async () => {
@@ -676,6 +697,94 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB | where countB > 0\nAND \`geo.dest\`=="BT"`
         );
       });
+
+      it('should append a where clause by clicking the table without changing the chart type', async () => {
+        await discover.selectTextBaseLang();
+        const testQuery = `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB`;
+        await monacoEditor.setCodeEditorValue(testQuery);
+
+        await testSubjects.click('querySubmitButton');
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
+
+        // change the type to line
+        await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
+        await header.waitUntilLoadingHasFinished();
+        await testSubjects.click('lnsChartSwitchPopover');
+        await testSubjects.click('lnsChartSwitchPopover_line');
+        await header.waitUntilLoadingHasFinished();
+        await testSubjects.click('applyFlyoutButton');
+
+        await dataGrid.clickCellFilterForButtonExcludingControlColumns(0, 1);
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
+
+        const editorValue = await monacoEditor.getCodeEditorValue();
+        expect(editorValue).to.eql(
+          `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB\n| WHERE \`geo.dest\`=="BT"`
+        );
+
+        // check that the type is still line
+        await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
+        await header.waitUntilLoadingHasFinished();
+        const chartSwitcher = await testSubjects.find('lnsChartSwitchPopover');
+        const type = await chartSwitcher.getVisibleText();
+        expect(type).to.be('Line');
+      });
+
+      it('should append a where clause by clicking the table without changing the chart type nor the visualization state', async () => {
+        await discover.selectTextBaseLang();
+        const testQuery = `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB`;
+        await monacoEditor.setCodeEditorValue(testQuery);
+
+        await testSubjects.click('querySubmitButton');
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
+
+        // change the type to line
+        await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
+        await header.waitUntilLoadingHasFinished();
+        await testSubjects.click('lnsChartSwitchPopover');
+        await testSubjects.click('lnsChartSwitchPopover_line');
+
+        // change the color to red
+        await testSubjects.click('lnsXY_yDimensionPanel');
+        const colorPickerInput = await testSubjects.find('~indexPattern-dimension-colorPicker');
+        await colorPickerInput.clearValueWithKeyboard();
+        await colorPickerInput.type('#ff0000');
+        await common.sleep(1000); // give time for debounced components to rerender
+
+        await header.waitUntilLoadingHasFinished();
+        await testSubjects.click('lns-indexPattern-dimensionContainerClose');
+        await testSubjects.click('applyFlyoutButton');
+
+        await dataGrid.clickCellFilterForButtonExcludingControlColumns(0, 1);
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
+
+        const editorValue = await monacoEditor.getCodeEditorValue();
+        expect(editorValue).to.eql(
+          `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB\n| WHERE \`geo.dest\`=="BT"`
+        );
+
+        // check that the type is still line
+        await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
+        await header.waitUntilLoadingHasFinished();
+        const chartSwitcher = await testSubjects.find('lnsChartSwitchPopover');
+        const type = await chartSwitcher.getVisibleText();
+        expect(type).to.be('Line');
+
+        // check that the color is still red
+        await testSubjects.click('lnsXY_yDimensionPanel');
+        const colorPickerInputAfterFilter = await testSubjects.find(
+          '~indexPattern-dimension-colorPicker'
+        );
+        expect(await colorPickerInputAfterFilter.getAttribute('value')).to.be('#FF0000');
+      });
     });
 
     describe('histogram breakdown', () => {
@@ -730,6 +839,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(prevList).to.eql([]);
 
         await discover.loadSavedSearch('esql view with breakdown');
+        await header.waitUntilLoadingHasFinished();
+        const list = await discover.getHistogramLegendList();
+        expect(list).to.eql(['css', 'gif', 'jpg', 'php', 'png']);
+      });
+
+      it('should choose breakdown field when selected from field stats', async () => {
+        await discover.selectTextBaseLang();
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        const testQuery = 'from logstash-*';
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        await unifiedFieldList.clickFieldListAddBreakdownField('extension');
         await header.waitUntilLoadingHasFinished();
         const list = await discover.getHistogramLegendList();
         expect(list).to.eql(['css', 'gif', 'jpg', 'php', 'png']);

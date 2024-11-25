@@ -38,7 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
     }
   };
 
-  describe('@ess @serverless Resolver handling of entity ids', function () {
+  describe('@ess @serverless @serverlessQA Resolver handling of entity ids', function () {
     let adminSupertest: TestAgent;
 
     before(async () => {

@@ -23,7 +23,6 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import * as i18n from './translations';
 import { TimelineTabs } from '../../../../../../common/types/timeline';
 import { SourcererScopeName } from '../../../../../sourcerer/store/model';
-import { isFullScreen } from '../../body/column_headers';
 import { SCROLLING_DISABLED_CLASS_NAME } from '../../../../../../common/constants';
 import { FULL_SCREEN } from '../../body/column_headers/translations';
 import { EXIT_FULL_SCREEN } from '../../../../../common/components/exit_full_screen/translations';
@@ -35,6 +34,8 @@ import { useUserPrivileges } from '../../../../../common/components/user_privile
 import { timelineActions, timelineSelectors } from '../../../../store';
 import { timelineDefaults } from '../../../../store/defaults';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
+import { DocumentEventTypes } from '../../../../../common/lib/telemetry';
+import { isFullScreen } from '../../helpers';
 
 const FullScreenButtonIcon = styled(EuiButtonIcon)`
   margin: 4px 0 4px 0;
@@ -287,7 +288,7 @@ export const useSessionView = ({ scopeId, height }: { scopeId: string; height?: 
           },
         },
       });
-      telemetry.reportDetailsFlyoutOpened({
+      telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
         location: scopeId,
         panel: 'right',
       });

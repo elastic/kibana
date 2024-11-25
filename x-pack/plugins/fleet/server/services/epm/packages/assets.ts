@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { ArchiveEntry } from '../../../../common/types';
 import type { AssetsMap, PackageInfo } from '../../../types';
 import { getAssetFromAssetsMap } from '../archive';
-import type { ArchiveEntry } from '../archive';
 
 const maybeFilterByDataset =
   (packageInfo: Pick<PackageInfo, 'version' | 'name' | 'type'>, datasetName: string) =>

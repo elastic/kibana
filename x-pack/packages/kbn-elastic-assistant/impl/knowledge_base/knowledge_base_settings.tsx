@@ -149,7 +149,7 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
         <EuiHorizontalRule margin={'s'} />
 
         <EuiFormRow
-          display="columnCompressedSwitch"
+          display="columnCompressed"
           label={i18n.KNOWLEDGE_BASE_LABEL}
           css={css`
             .euiFormRow__labelWrapper {

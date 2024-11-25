@@ -1,0 +1,1447 @@
+{
+  "id": "@kbn/index-lifecycle-management-common-shared",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+        "id": "def-common.AllocateAction",
+        "type": "Interface",
+        "tags": [],
+        "label": "AllocateAction",
+        "description": [],
+        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.AllocateAction.number_of_replicas",
+            "type": "number",
+            "tags": [],
+            "label": "number_of_replicas",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.AllocateAction.include",
+            "type": "Object",
+            "tags": [],
+            "label": "include",
+            "description": [],
+            "signature": [
+              "{} | undefined"
+            ],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.AllocateAction.exclude",
+            "type": "Object",
+            "tags": [],
+            "label": "exclude",
+            "description": [],
+            "signature": [
+              "{} | undefined"
+            ],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.AllocateAction.require",
+            "type": "Object",
+            "tags": [],
+            "label": "require",
+            "description": [],
+            "signature": [
+              "{ [attribute: string]: string; } | undefined"
+            ],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+        "id": "def-common.CommonPhaseSettings",
+        "type": "Interface",
+        "tags": [],
+        "label": "CommonPhaseSettings",
+        "description": [],
+        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.CommonPhaseSettings.phaseEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "phaseEnabled",
+            "description": [],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+        "id": "def-common.DeletePhase",
+        "type": "Interface",
+        "tags": [],
+        "label": "DeletePhase",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/index-lifecycle-management-common-shared",
+            "scope": "common",
+            "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+            "section": "def-common.DeletePhase",
+            "text": "DeletePhase"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/index-lifecycle-management-common-shared",
+            "scope": "common",
+            "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+            "section": "def-common.CommonPhaseSettings",
+            "text": "CommonPhaseSettings"
+          },
+          ",",
+          {
+            "pluginId": "@kbn/index-lifecycle-management-common-shared",
+            "scope": "common",
+            "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+            "section": "def-common.PhaseWithMinAge",
+            "text": "PhaseWithMinAge"
+          }
+        ],
+        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.DeletePhase.waitForSnapshotPolicy",
+            "type": "string",
+            "tags": [],
+            "label": "waitForSnapshotPolicy",
+            "description": [],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+        "id": "def-common.DownsampleAction",
+        "type": "Interface",
+        "tags": [],
+        "label": "DownsampleAction",
+        "description": [],
+        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.DownsampleAction.fixed_interval",
+            "type": "string",
+            "tags": [],
+            "label": "fixed_interval",
+            "description": [],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+        "id": "def-common.ForcemergeAction",
+        "type": "Interface",
+        "tags": [],
+        "label": "ForcemergeAction",
+        "description": [],
+        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.ForcemergeAction.max_num_segments",
+            "type": "number",
+            "tags": [],
+            "label": "max_num_segments",
+            "description": [],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.ForcemergeAction.index_codec",
+            "type": "string",
+            "tags": [],
+            "label": "index_codec",
+            "description": [],
+            "signature": [
+              "\"best_compression\" | undefined"
+            ],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+        "id": "def-common.MigrateAction",
+        "type": "Interface",
+        "tags": [],
+        "label": "MigrateAction",
+        "description": [],
+        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.MigrateAction.enabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "enabled",
+            "description": [
+              "\nIf enabled is ever set it will probably only be set to `false` because the default value\nfor this is `true`. Rather leave unspecified for true when serialising."
+            ],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+        "id": "def-common.Phases",
+        "type": "Interface",
+        "tags": [],
+        "label": "Phases",
+        "description": [],
+        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.Phases.hot",
+            "type": "Object",
+            "tags": [],
+            "label": "hot",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/index-lifecycle-management-common-shared",
+                "scope": "common",
+                "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+                "section": "def-common.SerializedHotPhase",
+                "text": "SerializedHotPhase"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.Phases.warm",
+            "type": "Object",
+            "tags": [],
+            "label": "warm",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/index-lifecycle-management-common-shared",
+                "scope": "common",
+                "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+                "section": "def-common.SerializedWarmPhase",
+                "text": "SerializedWarmPhase"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.Phases.cold",
+            "type": "Object",
+            "tags": [],
+            "label": "cold",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/index-lifecycle-management-common-shared",
+                "scope": "common",
+                "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+                "section": "def-common.SerializedColdPhase",
+                "text": "SerializedColdPhase"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.Phases.frozen",
+            "type": "Object",
+            "tags": [],
+            "label": "frozen",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/index-lifecycle-management-common-shared",
+                "scope": "common",
+                "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+                "section": "def-common.SerializedFrozenPhase",
+                "text": "SerializedFrozenPhase"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.Phases.delete",
+            "type": "Object",
+            "tags": [],
+            "label": "delete",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/index-lifecycle-management-common-shared",
+                "scope": "common",
+                "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+                "section": "def-common.SerializedDeletePhase",
+                "text": "SerializedDeletePhase"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+        "id": "def-common.PhaseWithMinAge",
+        "type": "Interface",
+        "tags": [],
+        "label": "PhaseWithMinAge",
+        "description": [],
+        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.PhaseWithMinAge.selectedMinimumAge",
+            "type": "string",
+            "tags": [],
+            "label": "selectedMinimumAge",
+            "description": [],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.PhaseWithMinAge.selectedMinimumAgeUnits",
+            "type": "string",
+            "tags": [],
+            "label": "selectedMinimumAgeUnits",
+            "description": [],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+        "id": "def-common.PolicyFromES",
+        "type": "Interface",
+        "tags": [],
+        "label": "PolicyFromES",
+        "description": [],
+        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.PolicyFromES.modifiedDate",
+            "type": "string",
+            "tags": [],
+            "label": "modifiedDate",
+            "description": [],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.PolicyFromES.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.PolicyFromES.policy",
+            "type": "Object",
+            "tags": [],
+            "label": "policy",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/index-lifecycle-management-common-shared",
+                "scope": "common",
+                "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+                "section": "def-common.SerializedPolicy",
+                "text": "SerializedPolicy"
+              }
+            ],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.PolicyFromES.version",
+            "type": "number",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.PolicyFromES.indices",
+            "type": "Array",
+            "tags": [],
+            "label": "indices",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.PolicyFromES.dataStreams",
+            "type": "Array",
+            "tags": [],
+            "label": "dataStreams",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.PolicyFromES.indexTemplates",
+            "type": "Array",
+            "tags": [],
+            "label": "indexTemplates",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+        "id": "def-common.RolloverAction",
+        "type": "Interface",
+        "tags": [],
+        "label": "RolloverAction",
+        "description": [],
+        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.RolloverAction.max_age",
+            "type": "string",
+            "tags": [],
+            "label": "max_age",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.RolloverAction.max_docs",
+            "type": "number",
+            "tags": [],
+            "label": "max_docs",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.RolloverAction.max_primary_shard_size",
+            "type": "string",
+            "tags": [],
+            "label": "max_primary_shard_size",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.RolloverAction.max_primary_shard_docs",
+            "type": "number",
+            "tags": [],
+            "label": "max_primary_shard_docs",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.RolloverAction.max_size",
+            "type": "string",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "max_size",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "indexLifecycleManagement",
+                "path": "x-pack/plugins/index_lifecycle_management/__jest__/mocks.ts"
+              },
+              {
+                "plugin": "indexLifecycleManagement",
+                "path": "x-pack/plugins/index_lifecycle_management/public/application/sections/edit_policy/form/deserializer.ts"
+              },
+              {
+                "plugin": "indexLifecycleManagement",
+                "path": "x-pack/plugins/index_lifecycle_management/public/application/sections/edit_policy/form/deserializer.ts"
+              },
+              {
+                "plugin": "indexLifecycleManagement",
+                "path": "x-pack/plugins/index_lifecycle_management/public/application/sections/edit_policy/form/deserializer.ts"
+              },
+              {
+                "plugin": "indexLifecycleManagement",
+                "path": "x-pack/plugins/index_lifecycle_management/public/application/sections/edit_policy/form/serializer/serializer.ts"
+              },
+              {
+                "plugin": "indexLifecycleManagement",
+                "path": "x-pack/plugins/index_lifecycle_management/public/application/sections/edit_policy/form/serializer/serializer.ts"
+              },
+              {
+                "plugin": "indexLifecycleManagement",
+                "path": "x-pack/plugins/index_lifecycle_management/public/application/sections/edit_policy/form/serializer/serializer.ts"
+              },
+              {
+                "plugin": "indexLifecycleManagement",
+                "path": "x-pack/plugins/index_lifecycle_management/public/application/sections/edit_policy/form/serializer/serializer.ts"
+              },
+              {
+                "plugin": "indexLifecycleManagement",
+                "path": "x-pack/plugins/index_lifecycle_management/public/application/sections/policy_list/policy_flyout/components/rollover.tsx"
+              },
+              {
+                "plugin": "indexLifecycleManagement",
+                "path": "x-pack/plugins/index_lifecycle_management/public/application/sections/policy_list/policy_flyout/components/rollover.tsx"
+              },
+              {
+                "plugin": "indexLifecycleManagement",
+                "path": "x-pack/plugins/index_lifecycle_management/integration_tests/edit_policy/constants.ts"
+              },
+              {
+                "plugin": "indexLifecycleManagement",
+                "path": "x-pack/plugins/index_lifecycle_management/integration_tests/edit_policy/constants.ts"
+              },
+              {
+                "plugin": "indexLifecycleManagement",
+                "path": "x-pack/plugins/index_lifecycle_management/integration_tests/edit_policy/constants.ts"
+              },
+              {
+                "plugin": "indexLifecycleManagement",
+                "path": "x-pack/plugins/index_lifecycle_management/integration_tests/edit_policy/constants.ts"
+              },
+              {
+                "plugin": "indexLifecycleManagement",
+                "path": "x-pack/plugins/index_lifecycle_management/public/application/sections/edit_policy/form/deserializer_and_serializer.test.ts"
+              },
+              {
+                "plugin": "indexLifecycleManagement",
+                "path": "x-pack/plugins/index_lifecycle_management/public/application/sections/edit_policy/form/deserializer_and_serializer.test.ts"
+              },
+              {
+                "plugin": "indexLifecycleManagement",
+                "path": "x-pack/plugins/index_lifecycle_management/public/application/sections/edit_policy/form/deserializer_and_serializer.test.ts"
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+        "id": "def-common.SearchableSnapshotAction",
+        "type": "Interface",
+        "tags": [],
+        "label": "SearchableSnapshotAction",
+        "description": [],
+        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.SearchableSnapshotAction.snapshot_repository",
+            "type": "string",
+            "tags": [],
+            "label": "snapshot_repository",
+            "description": [],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.SearchableSnapshotAction.force_merge_index",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "force_merge_index",
+            "description": [
+              "\nWe do not configure this value in the UI as it is an advanced setting that will\nnot suit the vast majority of cases."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+        "id": "def-common.SerializedActionWithAllocation",
+        "type": "Interface",
+        "tags": [],
+        "label": "SerializedActionWithAllocation",
+        "description": [],
+        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.SerializedActionWithAllocation.allocate",
+            "type": "Object",
+            "tags": [],
+            "label": "allocate",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/index-lifecycle-management-common-shared",
+                "scope": "common",
+                "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+                "section": "def-common.AllocateAction",
+                "text": "AllocateAction"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.SerializedActionWithAllocation.migrate",
+            "type": "Object",
+            "tags": [],
+            "label": "migrate",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/index-lifecycle-management-common-shared",
+                "scope": "common",
+                "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+                "section": "def-common.MigrateAction",
+                "text": "MigrateAction"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+        "id": "def-common.SerializedColdPhase",
+        "type": "Interface",
+        "tags": [],
+        "label": "SerializedColdPhase",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/index-lifecycle-management-common-shared",
+            "scope": "common",
+            "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+            "section": "def-common.SerializedColdPhase",
+            "text": "SerializedColdPhase"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/index-lifecycle-management-common-shared",
+            "scope": "common",
+            "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+            "section": "def-common.SerializedPhase",
+            "text": "SerializedPhase"
+          }
+        ],
+        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.SerializedColdPhase.actions",
+            "type": "Object",
+            "tags": [],
+            "label": "actions",
+            "description": [],
+            "signature": [
+              "{ freeze?: {} | undefined; readonly?: {} | undefined; downsample?: ",
+              {
+                "pluginId": "@kbn/index-lifecycle-management-common-shared",
+                "scope": "common",
+                "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+                "section": "def-common.DownsampleAction",
+                "text": "DownsampleAction"
+              },
+              " | undefined; allocate?: ",
+              {
+                "pluginId": "@kbn/index-lifecycle-management-common-shared",
+                "scope": "common",
+                "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+                "section": "def-common.AllocateAction",
+                "text": "AllocateAction"
+              },
+              " | undefined; set_priority?: ",
+              {
+                "pluginId": "@kbn/index-lifecycle-management-common-shared",
+                "scope": "common",
+                "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+                "section": "def-common.SetPriorityAction",
+                "text": "SetPriorityAction"
+              },
+              " | undefined; migrate?: ",
+              {
+                "pluginId": "@kbn/index-lifecycle-management-common-shared",
+                "scope": "common",
+                "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+                "section": "def-common.MigrateAction",
+                "text": "MigrateAction"
+              },
+              " | undefined; searchable_snapshot?: ",
+              {
+                "pluginId": "@kbn/index-lifecycle-management-common-shared",
+                "scope": "common",
+                "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+                "section": "def-common.SearchableSnapshotAction",
+                "text": "SearchableSnapshotAction"
+              },
+              " | undefined; }"
+            ],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+        "id": "def-common.SerializedDeletePhase",
+        "type": "Interface",
+        "tags": [],
+        "label": "SerializedDeletePhase",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/index-lifecycle-management-common-shared",
+            "scope": "common",
+            "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+            "section": "def-common.SerializedDeletePhase",
+            "text": "SerializedDeletePhase"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/index-lifecycle-management-common-shared",
+            "scope": "common",
+            "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+            "section": "def-common.SerializedPhase",
+            "text": "SerializedPhase"
+          }
+        ],
+        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.SerializedDeletePhase.actions",
+            "type": "Object",
+            "tags": [],
+            "label": "actions",
+            "description": [],
+            "signature": [
+              "{ wait_for_snapshot?: { policy: string; } | undefined; delete?: { delete_searchable_snapshot?: boolean | undefined; } | undefined; }"
+            ],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+        "id": "def-common.SerializedFrozenPhase",
+        "type": "Interface",
+        "tags": [],
+        "label": "SerializedFrozenPhase",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/index-lifecycle-management-common-shared",
+            "scope": "common",
+            "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+            "section": "def-common.SerializedFrozenPhase",
+            "text": "SerializedFrozenPhase"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/index-lifecycle-management-common-shared",
+            "scope": "common",
+            "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+            "section": "def-common.SerializedPhase",
+            "text": "SerializedPhase"
+          }
+        ],
+        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.SerializedFrozenPhase.actions",
+            "type": "Object",
+            "tags": [],
+            "label": "actions",
+            "description": [],
+            "signature": [
+              "{ searchable_snapshot?: ",
+              {
+                "pluginId": "@kbn/index-lifecycle-management-common-shared",
+                "scope": "common",
+                "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+                "section": "def-common.SearchableSnapshotAction",
+                "text": "SearchableSnapshotAction"
+              },
+              " | undefined; }"
+            ],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+        "id": "def-common.SerializedHotPhase",
+        "type": "Interface",
+        "tags": [],
+        "label": "SerializedHotPhase",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/index-lifecycle-management-common-shared",
+            "scope": "common",
+            "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+            "section": "def-common.SerializedHotPhase",
+            "text": "SerializedHotPhase"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/index-lifecycle-management-common-shared",
+            "scope": "common",
+            "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+            "section": "def-common.SerializedPhase",
+            "text": "SerializedPhase"
+          }
+        ],
+        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.SerializedHotPhase.actions",
+            "type": "Object",
+            "tags": [],
+            "label": "actions",
+            "description": [],
+            "signature": [
+              "{ rollover?: ",
+              {
+                "pluginId": "@kbn/index-lifecycle-management-common-shared",
+                "scope": "common",
+                "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+                "section": "def-common.RolloverAction",
+                "text": "RolloverAction"
+              },
+              " | undefined; forcemerge?: ",
+              {
+                "pluginId": "@kbn/index-lifecycle-management-common-shared",
+                "scope": "common",
+                "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+                "section": "def-common.ForcemergeAction",
+                "text": "ForcemergeAction"
+              },
+              " | undefined; readonly?: {} | undefined; shrink?: ",
+              {
+                "pluginId": "@kbn/index-lifecycle-management-common-shared",
+                "scope": "common",
+                "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+                "section": "def-common.ShrinkAction",
+                "text": "ShrinkAction"
+              },
+              " | undefined; downsample?: ",
+              {
+                "pluginId": "@kbn/index-lifecycle-management-common-shared",
+                "scope": "common",
+                "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+                "section": "def-common.DownsampleAction",
+                "text": "DownsampleAction"
+              },
+              " | undefined; set_priority?: ",
+              {
+                "pluginId": "@kbn/index-lifecycle-management-common-shared",
+                "scope": "common",
+                "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+                "section": "def-common.SetPriorityAction",
+                "text": "SetPriorityAction"
+              },
+              " | undefined; searchable_snapshot?: ",
+              {
+                "pluginId": "@kbn/index-lifecycle-management-common-shared",
+                "scope": "common",
+                "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+                "section": "def-common.SearchableSnapshotAction",
+                "text": "SearchableSnapshotAction"
+              },
+              " | undefined; }"
+            ],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+        "id": "def-common.SerializedPhase",
+        "type": "Interface",
+        "tags": [],
+        "label": "SerializedPhase",
+        "description": [],
+        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.SerializedPhase.min_age",
+            "type": "string",
+            "tags": [],
+            "label": "min_age",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.SerializedPhase.actions",
+            "type": "Object",
+            "tags": [],
+            "label": "actions",
+            "description": [],
+            "signature": [
+              "{ [action: string]: any; }"
+            ],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+        "id": "def-common.SerializedPolicy",
+        "type": "Interface",
+        "tags": [],
+        "label": "SerializedPolicy",
+        "description": [],
+        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.SerializedPolicy.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.SerializedPolicy.phases",
+            "type": "Object",
+            "tags": [],
+            "label": "phases",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/index-lifecycle-management-common-shared",
+                "scope": "common",
+                "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+                "section": "def-common.Phases",
+                "text": "Phases"
+              }
+            ],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.SerializedPolicy.deprecated",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "deprecated",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.SerializedPolicy._meta",
+            "type": "Object",
+            "tags": [],
+            "label": "_meta",
+            "description": [],
+            "signature": [
+              "Record<string, any> | undefined"
+            ],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+        "id": "def-common.SerializedWarmPhase",
+        "type": "Interface",
+        "tags": [],
+        "label": "SerializedWarmPhase",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/index-lifecycle-management-common-shared",
+            "scope": "common",
+            "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+            "section": "def-common.SerializedWarmPhase",
+            "text": "SerializedWarmPhase"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/index-lifecycle-management-common-shared",
+            "scope": "common",
+            "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+            "section": "def-common.SerializedPhase",
+            "text": "SerializedPhase"
+          }
+        ],
+        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.SerializedWarmPhase.actions",
+            "type": "Object",
+            "tags": [],
+            "label": "actions",
+            "description": [],
+            "signature": [
+              "{ allocate?: ",
+              {
+                "pluginId": "@kbn/index-lifecycle-management-common-shared",
+                "scope": "common",
+                "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+                "section": "def-common.AllocateAction",
+                "text": "AllocateAction"
+              },
+              " | undefined; shrink?: ",
+              {
+                "pluginId": "@kbn/index-lifecycle-management-common-shared",
+                "scope": "common",
+                "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+                "section": "def-common.ShrinkAction",
+                "text": "ShrinkAction"
+              },
+              " | undefined; forcemerge?: ",
+              {
+                "pluginId": "@kbn/index-lifecycle-management-common-shared",
+                "scope": "common",
+                "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+                "section": "def-common.ForcemergeAction",
+                "text": "ForcemergeAction"
+              },
+              " | undefined; readonly?: {} | undefined; downsample?: ",
+              {
+                "pluginId": "@kbn/index-lifecycle-management-common-shared",
+                "scope": "common",
+                "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+                "section": "def-common.DownsampleAction",
+                "text": "DownsampleAction"
+              },
+              " | undefined; set_priority?: ",
+              {
+                "pluginId": "@kbn/index-lifecycle-management-common-shared",
+                "scope": "common",
+                "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+                "section": "def-common.SetPriorityAction",
+                "text": "SetPriorityAction"
+              },
+              " | undefined; migrate?: ",
+              {
+                "pluginId": "@kbn/index-lifecycle-management-common-shared",
+                "scope": "common",
+                "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+                "section": "def-common.MigrateAction",
+                "text": "MigrateAction"
+              },
+              " | undefined; }"
+            ],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+        "id": "def-common.SetPriorityAction",
+        "type": "Interface",
+        "tags": [],
+        "label": "SetPriorityAction",
+        "description": [],
+        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.SetPriorityAction.priority",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "priority",
+            "description": [],
+            "signature": [
+              "number | null"
+            ],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+        "id": "def-common.ShrinkAction",
+        "type": "Interface",
+        "tags": [],
+        "label": "ShrinkAction",
+        "description": [],
+        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.ShrinkAction.number_of_shards",
+            "type": "number",
+            "tags": [],
+            "label": "number_of_shards",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.ShrinkAction.max_primary_shard_size",
+            "type": "string",
+            "tags": [],
+            "label": "max_primary_shard_size",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.ShrinkAction.allow_write_after_shrink",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allow_write_after_shrink",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+        "id": "def-common.ILM_LOCATOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ILM_LOCATOR_ID",
+        "description": [],
+        "signature": [
+          "\"ILM_LOCATOR_ID\""
+        ],
+        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+        "id": "def-common.Phase",
+        "type": "Type",
+        "tags": [],
+        "label": "Phase",
+        "description": [],
+        "signature": [
+          "keyof ",
+          {
+            "pluginId": "@kbn/index-lifecycle-management-common-shared",
+            "scope": "common",
+            "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+            "section": "def-common.Phases",
+            "text": "Phases"
+          }
+        ],
+        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+        "id": "def-common.PhaseExceptDelete",
+        "type": "Type",
+        "tags": [],
+        "label": "PhaseExceptDelete",
+        "description": [],
+        "signature": [
+          "\"warm\" | \"hot\" | \"frozen\" | \"cold\""
+        ],
+        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+        "id": "def-common.PhaseWithAllocation",
+        "type": "Type",
+        "tags": [],
+        "label": "PhaseWithAllocation",
+        "description": [],
+        "signature": [
+          "\"warm\" | \"cold\""
+        ],
+        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+        "id": "def-common.PhaseWithDownsample",
+        "type": "Type",
+        "tags": [],
+        "label": "PhaseWithDownsample",
+        "description": [],
+        "signature": [
+          "\"warm\" | \"hot\" | \"cold\""
+        ],
+        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+        "id": "def-common.PhaseWithTiming",
+        "type": "Type",
+        "tags": [],
+        "label": "PhaseWithTiming",
+        "description": [],
+        "signature": [
+          "\"delete\" | \"warm\" | \"frozen\" | \"cold\""
+        ],
+        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

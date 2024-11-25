@@ -14,6 +14,12 @@ export const registerHitsStatusRoute = (router: IRouter) => {
   router.post(
     {
       path: '/api/home/hits_status',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           index: schema.string(),

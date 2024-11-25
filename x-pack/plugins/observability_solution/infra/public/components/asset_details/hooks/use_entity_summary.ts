@@ -6,10 +6,10 @@
  */
 
 import * as z from '@kbn/zod';
-import { EntityDataStreamType, EntityType } from '@kbn/observability-shared-plugin/common';
+import { EntityDataStreamType, ENTITY_TYPES } from '@kbn/observability-shared-plugin/common';
 import { useFetcher } from '../../../hooks/use_fetcher';
 
-const EntityTypeSchema = z.union([z.literal(EntityType.HOST), z.literal(EntityType.CONTAINER)]);
+const EntityTypeSchema = z.union([z.literal(ENTITY_TYPES.HOST), z.literal(ENTITY_TYPES.CONTAINER)]);
 const EntityDataStreamSchema = z.union([
   z.literal(EntityDataStreamType.METRICS),
   z.literal(EntityDataStreamType.LOGS),
