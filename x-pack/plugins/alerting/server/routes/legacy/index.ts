@@ -24,10 +24,11 @@ import { healthRoute } from './health';
 import { RouteOptions } from '..';
 
 export function defineLegacyRoutes(opts: RouteOptions) {
-  const { router, licenseState, encryptedSavedObjects, usageCounter, isServerless } = opts;
+  const { router, licenseState, encryptedSavedObjects, usageCounter, isServerless, docLinks } =
+    opts;
 
   createAlertRoute(opts);
-  deleteAlertRoute(router, licenseState, usageCounter, isServerless);
+  deleteAlertRoute(router, licenseState, docLinks, usageCounter, isServerless);
   findAlertRoute(router, licenseState, usageCounter, isServerless);
   getAlertRoute(router, licenseState, usageCounter, isServerless);
   getAlertStateRoute(router, licenseState, usageCounter, isServerless);
