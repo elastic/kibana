@@ -9,23 +9,20 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { EuiSkeletonLoading, EuiSkeletonText, EuiSkeletonTitle } from '@elastic/eui';
 import type { RuleMigration } from '../../../../common/siem_migrations/model/rule_migration.gen';
-import { SecurityPageName } from '../../../app/types';
 import { HeaderPage } from '../../../common/components/header_page';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
-import { SpyRoute } from '../../../common/utils/route/spy_routes';
 
 import * as i18n from './translations';
 import { RulesTable } from '../components/rules_table';
 import { NeedAdminForUpdateRulesCallOut } from '../../../detections/components/callouts/need_admin_for_update_callout';
 import { MissingPrivilegesCallOut } from '../../../detections/components/callouts/missing_privileges_callout';
 import { HeaderButtons } from '../components/header_buttons';
-import { useGetRuleMigrationsStatsAllQuery } from '../api/hooks/use_get_rule_migrations_stats_all';
 import { useRulePreviewFlyout } from '../hooks/use_rule_preview_flyout';
 import { NoMigrations } from '../components/no_migrations';
+import { useLatestStats } from '../hooks/use_latest_stats';
 
-const RulesPageComponent: React.FC = () => {
-  const { data: ruleMigrationsStatsAll, isLoading: isLoadingMigrationsStats } =
-    useGetRuleMigrationsStatsAllQuery();
+export const RulesPage = React.memo(() => {
+  const { data: ruleMigrationsStatsAll, isLoading: isLoadingMigrationsStats } = useLatestStats();
 
   const migrationsIds = useMemo(() => {
     if (isLoadingMigrationsStats || !ruleMigrationsStatsAll?.length) {
@@ -33,7 +30,7 @@ const RulesPageComponent: React.FC = () => {
     }
     return ruleMigrationsStatsAll
       .filter((migration) => migration.status === 'finished')
-      .map((migration) => migration.migration_id);
+      .map((migration) => migration.id);
   }, [isLoadingMigrationsStats, ruleMigrationsStatsAll]);
 
   const [selectedMigrationId, setSelectedMigrationId] = useState<string | undefined>();
@@ -94,11 +91,7 @@ const RulesPageComponent: React.FC = () => {
         />
         {rulePreviewFlyout}
       </SecuritySolutionPageWrapper>
-
-      <SpyRoute pageName={SecurityPageName.siemMigrationsRules} />
     </>
   );
-};
-
-export const RulesPage = React.memo(RulesPageComponent);
+});
 RulesPage.displayName = 'RulesPage';
