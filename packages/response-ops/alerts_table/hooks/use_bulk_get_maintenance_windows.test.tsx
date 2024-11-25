@@ -17,7 +17,6 @@ import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import React, { PropsWithChildren } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { testQueryClientConfig } from '../test_utils';
-import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 
 jest.mock('./use_license');
 jest.mock('./apis/bulk_get_maintenance_windows');
@@ -66,11 +65,7 @@ const response = {
 const queryClient = new QueryClient(testQueryClientConfig);
 
 const wrapper = ({ children }: PropsWithChildren) => {
-  return (
-    <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
-      {children}
-    </QueryClientProvider>
-  );
+  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
 };
 
 describe('useBulkGetMaintenanceWindows', () => {

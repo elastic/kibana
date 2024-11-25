@@ -6,10 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/packages/response-ops/alerts_apis'],
-  setupFilesAfterEnv: ['<rootDir>/packages/response-ops/alerts_apis/setup_tests.ts'],
-};
+/* eslint-disable import/no-extraneous-dependencies */
+import '@testing-library/jest-dom';
+import 'jest-styled-components';
