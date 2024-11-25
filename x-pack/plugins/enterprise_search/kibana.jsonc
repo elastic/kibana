@@ -2,9 +2,11 @@
   "type": "plugin",
   "id": "@kbn/enterprise-search-plugin",
   "owner": "@elastic/search-kibana",
-  // Could be categorised as Search in the future, but it currently needs to run in Observability too
-  "group": "platform",
-  "visibility": "shared",
+  // TODO this is currently used from Observability too, must be refactored before solution-specific builds
+  // see x-pack/plugins/observability_solution/observability_ai_assistant_management/public/routes/components/search_connector_tab.tsx
+  // cc sphilipse
+  "group": "search",
+  "visibility": "private",
   "description": "Adds dashboards for discovering and managing Enterprise Search products.",
   "plugin": {
     "id": "enterpriseSearch",
@@ -18,7 +20,7 @@
       "logsShared",
       "logsDataAccess",
       "esUiShared",
-      "navigation"
+      "navigation",
     ],
     "optionalPlugins": [
       "customIntegrations",
@@ -32,8 +34,9 @@
       "guidedOnboarding",
       "console",
       "searchConnectors",
-      "searchPlayground",
       "searchInferenceEndpoints",
+      "searchNavigation",
+      "searchPlayground",
       "embeddable",
       "discover",
       "charts",

@@ -6,6 +6,7 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
+import { AI_ASSISTANT_KB_INFERENCE_ID } from '@kbn/observability-ai-assistant-plugin/server/service/inference_endpoint';
 import { MachineLearningProvider } from '../../../api_integration/services/ml';
 import { SUPPORTED_TRAINED_MODELS } from '../../../functional/services/ml/api';
 
@@ -29,7 +30,6 @@ export async function createKnowledgeBaseModel(ml: ReturnType<typeof MachineLear
 export async function deleteKnowledgeBaseModel(ml: ReturnType<typeof MachineLearningProvider>) {
   await ml.api.stopTrainedModelDeploymentES(TINY_ELSER.id, true);
   await ml.api.deleteTrainedModelES(TINY_ELSER.id);
-  await ml.api.cleanMlIndices();
   await ml.testResources.cleanMLSavedObjects();
 }
 
@@ -53,4 +53,14 @@ export async function clearConversations(es: Client) {
     query: { match_all: {} },
     refresh: true,
   });
+}
+
+export async function deleteInferenceEndpoint({
+  es,
+  name = AI_ASSISTANT_KB_INFERENCE_ID,
+}: {
+  es: Client;
+  name?: string;
+}) {
+  return es.inference.delete({ inference_id: name, force: true });
 }
