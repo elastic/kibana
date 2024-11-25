@@ -2352,7 +2352,8 @@ x-pack/plugins/security_solution/common/api/entity_analytics @elastic/security-e
 x-pack/test/security_solution_api_integration/test_suites/genai @elastic/security-generative-ai
 
 # Security Defend Workflows - OSQuery Ownership
-x-pack/plugins/osquery @elastic/security-defend-workflows
+/x-pack/test/osquery_cypress @elastic/security-defend-workflows
+/x-pack/plugins/osquery @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/common/api/detection_engine/model/rule_response_actions @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/public/detection_engine/rule_response_actions @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/server/lib/detection_engine/rule_response_actions @elastic/security-defend-workflows
