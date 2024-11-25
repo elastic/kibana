@@ -46,7 +46,7 @@ export interface LensEmbeddableStartServices {
   dataViews: DataViewsContract;
   uiActions?: UiActionsStart;
   usageCollection?: UsageCollectionSetup;
-  documentToExpression: (doc: Document) => Promise<DocumentToExpressionReturnType>;
+  documentToExpression: (id: string, doc: Document) => Promise<DocumentToExpressionReturnType>;
   injectFilterReferences: FilterManager['inject'];
   visualizationMap: VisualizationMap;
   datasourceMap: DatasourceMap;
@@ -94,6 +94,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
   };
 
   async create(input: LensEmbeddableInput, parent?: IContainer) {
+    performance.mark('Lens:embeddable:create', { detail: { id: input.id } });
     try {
       const {
         data,

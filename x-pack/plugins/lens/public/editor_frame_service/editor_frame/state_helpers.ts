@@ -356,6 +356,7 @@ export interface DocumentToExpressionReturnType {
 }
 
 export async function persistedStateToExpression(
+  id: string,
   datasourceMap: DatasourceMap,
   visualizations: VisualizationMap,
   doc: Document,
@@ -368,6 +369,7 @@ export async function persistedStateToExpression(
     eventAnnotationService: EventAnnotationServiceType;
   }
 ): Promise<DocumentToExpressionReturnType> {
+  performance.mark('Lens:persistedStateToExpression', { detail: { id } });
   const {
     state: {
       visualization: persistedVisualizationState,
@@ -400,8 +402,8 @@ export async function persistedStateToExpression(
     references: [...references, ...(internalReferences || [])],
   });
   const datasourceStatesFromSO = Object.fromEntries(
-    Object.entries(persistedDatasourceStates).map(([id, state]) => [
-      id,
+    Object.entries(persistedDatasourceStates).map(([dataSourceId, state]) => [
+      dataSourceId,
       { isLoading: false, state },
     ])
   );
@@ -442,6 +444,7 @@ export async function persistedStateToExpression(
 
   return {
     ast: buildExpression({
+      id,
       title,
       description,
       visualization,

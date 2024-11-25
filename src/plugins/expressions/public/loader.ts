@@ -140,6 +140,8 @@ export class ExpressionLoader {
       this.execution.cancel();
     }
     this.setParams(params);
+    const executionId = this.params.executionContext?.child?.id;
+    performance.mark('Lens:expressionsService:execute', { detail: { id: executionId } });
     this.execution = getExpressionsService().execute(expression, params.context, {
       searchContext: params.searchContext,
       variables: params.variables || {},
@@ -158,7 +160,10 @@ export class ExpressionLoader {
       .getData()
       // delaying until the next tick since we execute the expression in the constructor
       .pipe(delay(0))
-      .subscribe((value) => this.dataSubject.next(value));
+      .subscribe((value) => {
+        performance.mark('Lens:expressionsService:dataReceived', { detail: { id: executionId } });
+        this.dataSubject.next(value);
+      });
   };
 
   private render(data: Data): void {

@@ -69,6 +69,7 @@ export function useExpressionRenderer(
   });
 
   const memoizedOptions = useShallowMemo({ expression, params: useShallowMemo(loaderParams) });
+
   const [{ expression: debouncedExpression, params: debouncedLoaderParams }, isDebounced] =
     useDebouncedValue(memoizedOptions, debounce);
 

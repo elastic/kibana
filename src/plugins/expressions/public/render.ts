@@ -100,6 +100,9 @@ export class ExpressionRenderHandler {
         this.updateSubject.next(params);
       },
       event: (data) => {
+        performance.mark(`Lens:event:${data.name}`, {
+          detail: { id: executionContext?.child?.id },
+        });
         this.eventsSubject.next(data);
       },
       getRenderMode: () => {

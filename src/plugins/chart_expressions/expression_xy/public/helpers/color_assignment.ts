@@ -101,11 +101,13 @@ export const getAllSeries = (
  * The returned function `getRank` should return the position of a series name in this unified list by palette.
  */
 export function getColorAssignments(
+  chartId: string,
   layers: CommonXYLayerConfig[],
   titles: LayersAccessorsTitles,
   fieldFormats: LayersFieldFormats,
   formattedDatatables: DatatablesWithFormatInfo
 ): ColorAssignments {
+  performance.mark('Lens:colorAssigmnents:start', { detail: { id: chartId } });
   const layersPerPalette: Record<string, CommonXYDataLayerConfig[]> = {};
 
   layers.forEach((layer) => {
@@ -142,7 +144,8 @@ export function getColorAssignments(
       (sum, perLayer) => sum + perLayer.numberOfSeries,
       0
     );
-    return {
+
+    const assignments = {
       totalSeriesCount,
       getRank(layerId: string, seriesName: string) {
         const layerIndex = paletteLayers.findIndex((layer) => layerId === layer.layerId);
@@ -158,5 +161,7 @@ export function getColorAssignments(
         );
       },
     };
+    performance.mark('Lens:colorAssigmnents:end', { detail: { id: chartId } });
+    return assignments;
   });
 }

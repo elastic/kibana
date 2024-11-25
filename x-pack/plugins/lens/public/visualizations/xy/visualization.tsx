@@ -303,7 +303,7 @@ export const getXyVisualization = ({
     references?: SavedObjectReference[]
   ) {
     if (state) {
-      return convertToRuntime(state, annotationGroups!, references);
+      return convertToRuntime(state, annotationGroups, references);
     }
     return {
       title: 'Empty XY chart',

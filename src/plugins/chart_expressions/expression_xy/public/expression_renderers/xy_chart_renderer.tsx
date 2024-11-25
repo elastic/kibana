@@ -203,7 +203,7 @@ export const getXyChartRenderer = ({
   reuseDomNode: true,
   render: async (domNode: Element, config: XYChartProps, handlers) => {
     const deps = await getStartDeps();
-
+    const chartId = handlers.getExecutionContext()?.child?.id;
     // Lazy loaded parts
     const [{ XYChartReportable }, { calculateMinInterval, getDataLayers }] = await Promise.all([
       import('../components/xy_chart'),
@@ -263,6 +263,7 @@ export const getXyChartRenderer = ({
       <KibanaRenderContextProvider {...deps.startServices}>
         <div css={chartContainerStyle} data-test-subj="xyVisChart">
           <XYChartReportable
+            chartId={chartId ?? 'NA'}
             {...config}
             data={deps.data}
             formatFactory={deps.formatFactory}

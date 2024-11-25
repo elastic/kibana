@@ -56,6 +56,7 @@ export function getDatasourceExpressionsByLayers(
 }
 
 export function buildExpression({
+  id,
   visualization,
   visualizationState,
   datasourceMap,
@@ -68,6 +69,7 @@ export function buildExpression({
   nowInstant,
   searchSessionId,
 }: {
+  id?: string;
   title?: string;
   description?: string;
   visualization: Visualization | null;
@@ -85,6 +87,7 @@ export function buildExpression({
   if (visualization == null) {
     return null;
   }
+  performance.mark('Lens:buildExpression:start', { detail: { id } });
 
   const datasourceExpressionsByLayers = getDatasourceExpressionsByLayers(
     datasourceMap,
@@ -109,7 +112,11 @@ export function buildExpression({
     return null;
   }
 
-  return typeof visualizationExpression === 'string'
-    ? fromExpression(visualizationExpression)
-    : visualizationExpression;
+  const exp =
+    typeof visualizationExpression === 'string'
+      ? fromExpression(visualizationExpression)
+      : visualizationExpression;
+
+  performance.mark('Lens:toExpression:end', { detail: { id } });
+  return exp;
 }

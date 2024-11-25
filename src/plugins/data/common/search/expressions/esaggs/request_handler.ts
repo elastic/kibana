@@ -108,8 +108,11 @@ export const handleRequest = ({
 
     return { allTimeFields, forceNow, requestSearchSource };
   }).pipe(
-    switchMap(({ allTimeFields, forceNow, requestSearchSource }) =>
-      requestSearchSource
+    switchMap(({ allTimeFields, forceNow, requestSearchSource }) => {
+      performance.mark('Lens:expressions:fetchStart', {
+        detail: { id: executionContext?.child?.id },
+      });
+      return requestSearchSource
         .fetch$({
           abortSignal,
           disableWarningToasts,
@@ -132,6 +135,9 @@ export const handleRequest = ({
         })
         .pipe(
           map(({ rawResponse: response }) => {
+            performance.mark('Lens:expressions:fetchEnd', {
+              detail: { id: executionContext?.child?.id },
+            });
             const parsedTimeRange = timeRange ? calculateBounds(timeRange, { forceNow }) : null;
             const tabifyParams = {
               metricsAtAllLevels: aggs.hierarchical,
@@ -143,7 +149,7 @@ export const handleRequest = ({
 
             return tabifyAggResponse(aggs, response, tabifyParams);
           })
-        )
-    )
+        );
+    })
   );
 };

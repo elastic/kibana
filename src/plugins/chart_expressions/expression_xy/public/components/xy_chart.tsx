@@ -127,6 +127,7 @@ declare global {
 }
 
 export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
+  chartId: string;
   chartsThemeService: ChartsPluginSetup['theme'];
   chartsActiveCursorService: ChartsPluginStart['activeCursor'];
   data: DataPublicPluginStart;
@@ -190,7 +191,22 @@ function getIconForSeriesType(layer: CommonXYDataLayerConfig): IconType {
 
 export const XYChartReportable = React.memo(XYChart);
 
+function createMeasure(
+  marks: PerformanceMark[],
+  chartId: string,
+  measureName: string,
+  start: string,
+  end: string
+) {
+  performance.measure(`${measureName}:${chartId.split('-')[0]}`, {
+    start: marks.find((m) => m.name === start)?.startTime,
+    end: marks.find((m) => m.name === end)?.startTime,
+    detail: { id: chartId },
+  });
+}
+
 export function XYChart({
+  chartId,
   args,
   data,
   formatFactory,
@@ -214,6 +230,7 @@ export function XYChart({
   timeFormat,
   overrides,
 }: XYChartRenderProps) {
+  performance.mark('Lens:xy:init', { detail: { id: chartId } });
   const {
     legend,
     layers,
@@ -290,10 +307,54 @@ export function XYChart({
   const onRenderChange = useCallback(
     (isRendered: boolean = true) => {
       if (isRendered) {
+        performance.mark('Lens:xy:renderCompleted', { detail: { id: chartId } });
+
+        const marks = (performance.getEntriesByType('mark') as PerformanceMark[]).filter(
+          (m) => (m.name.startsWith('Lens') || m.name.startsWith('ECH')) && m.detail?.id === chartId
+        );
+        // performance.clearMeasures();
+        createMeasure(
+          marks,
+          chartId,
+          'Lens:componentRuntime',
+          'Lens:xy:init',
+          'Lens:xy:renderCompleted'
+        );
+        createMeasure(
+          marks,
+          chartId,
+          'Lens:expressionsService',
+          'Lens:expressionsService:execute',
+          'Lens:expressionsService:dataReceived'
+        );
+        createMeasure(
+          marks,
+          chartId,
+          'Lens:initialization',
+          'Lens:xy:init',
+          'ECH:computeSeriesDomains:start'
+        );
+        createMeasure(
+          marks,
+          chartId,
+          'ECH:domain',
+          'ECH:computeSeriesDomains:start',
+          'ECH:computeSeriesDomains:end'
+        );
+        createMeasure(
+          marks,
+          chartId,
+          'ECH:geoms',
+          'ECH:computeSeriesGeometries:start',
+          'ECH:computeSeriesGeometries:end'
+        );
+        createMeasure(marks, chartId, 'ECH:legend', 'ECH:legend:start', 'ECH:lenged:end');
+        createMeasure(marks, chartId, 'ECH:canvas', 'ECH:drawCanvas:start', 'ECH:drawCanvas:end');
+        // performance.clearMarks();
         renderComplete();
       }
     },
-    [renderComplete]
+    [renderComplete, chartId]
   );
 
   const dataLayers: CommonXYDataLayerConfig[] = filteredLayers.filter(isDataLayer);
@@ -638,6 +699,7 @@ export function XYChart({
   };
 
   const brushHandler = ({ x }: XYBrushEvent) => {
+    performance.mark('Lens:xy:brushEnd', { detail: { id: chartId } });
     if (!x) {
       return;
     }
@@ -743,7 +805,7 @@ export function XYChart({
     referenceLineLayers,
     formatFactory
   );
-
+  performance.mark('Lens:xy:chartConfigured', { detail: { id: chartId } });
   return (
     <div css={chartContainerStyle}>
       {showLegend !== undefined && uiState && (
@@ -765,7 +827,7 @@ export function XYChart({
           singleTable,
         }}
       >
-        <Chart ref={chartRef} {...getOverridesFor(overrides, 'chart')}>
+        <Chart ref={chartRef} {...getOverridesFor(overrides, 'chart')} id={chartId}>
           <Tooltip<Record<string, string | number>, XYChartSeriesIdentifier>
             boundary={document.getElementById('app-fixed-viewport') ?? undefined}
             headerFormatter={
@@ -977,6 +1039,7 @@ export function XYChart({
 
           {dataLayers.length && (
             <DataLayers
+              chartId={chartId}
               titles={titles}
               layers={dataLayers}
               endValue={endValue}

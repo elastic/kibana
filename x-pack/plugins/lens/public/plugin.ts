@@ -323,6 +323,7 @@ export class LensPlugin {
       contentManagement,
     }: LensPluginSetupDependencies
   ) {
+    performance.mark('Lens:pluginSetup');
     const startServices = createStartServicesGetter(core.getStartServices);
 
     const getStartServicesForEmbeddable = async (): Promise<LensEmbeddableStartServices> => {
@@ -361,8 +362,8 @@ export class LensPlugin {
         data: plugins.data,
         timefilter: plugins.data.query.timefilter.timefilter,
         expressionRenderer: plugins.expressions.ReactExpressionRenderer,
-        documentToExpression: (doc) =>
-          this.editorFrameService!.documentToExpression(doc, {
+        documentToExpression: (id, doc) =>
+          this.editorFrameService!.documentToExpression(id, doc, {
             dataViews: plugins.dataViews,
             storage: new Storage(localStorage),
             uiSettings: core.uiSettings,

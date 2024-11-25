@@ -40,6 +40,7 @@ import {
 } from '../helpers';
 
 interface Props {
+  chartId: string;
   titles?: LayersAccessorsTitles;
   layers: CommonXYDataLayerConfig[];
   formatFactory: FormatFactory;
@@ -87,6 +88,7 @@ export const DataLayers: FC<Props> = ({
   uiState,
   singleTable,
   isDarkMode,
+  chartId,
 }) => {
   // for singleTable mode we should use y accessors from all layers for creating correct series name and getting color
   const allYAccessors = layers.flatMap((layer) => layer.accessors);
@@ -105,6 +107,7 @@ export const DataLayers: FC<Props> = ({
   }, {});
   const colorAssignments = singleTable
     ? getColorAssignments(
+        chartId,
         [
           {
             ...layers[0],
@@ -117,7 +120,7 @@ export const DataLayers: FC<Props> = ({
         { commonLayerId: fieldFormats[layers[0].layerId] },
         { commonLayerId: formattedDatatables[layers[0].layerId] }
       )
-    : getColorAssignments(layers, titles, fieldFormats, formattedDatatables);
+    : getColorAssignments(chartId, layers, titles, fieldFormats, formattedDatatables);
   const multipleLayersWithSplits = hasMultipleLayersWithSplits(layers);
   return (
     <>

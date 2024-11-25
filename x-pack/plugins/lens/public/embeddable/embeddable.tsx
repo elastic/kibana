@@ -219,7 +219,7 @@ export interface LensEmbeddableOutput extends EmbeddableOutput {
 export interface LensEmbeddableDeps {
   attributeService: LensAttributeService;
   data: DataPublicPluginStart;
-  documentToExpression: (doc: Document) => Promise<DocumentToExpressionReturnType>;
+  documentToExpression: (id: string, doc: Document) => Promise<DocumentToExpressionReturnType>;
   injectFilterReferences: FilterManager['inject'];
   visualizationMap: VisualizationMap;
   datasourceMap: DatasourceMap;
@@ -298,11 +298,12 @@ function VisualizationErrorPanel({ errors, canEdit }: { errors: UserMessage[]; c
 }
 
 const getExpressionFromDocument = async (
+  id: string,
   document: Document,
   documentToExpression: LensEmbeddableDeps['documentToExpression']
 ) => {
   const { ast, indexPatterns, indexPatternRefs, activeVisualizationState } =
-    await documentToExpression(document);
+    await documentToExpression(id, document);
   return {
     ast: ast ? toExpression(ast) : null,
     indexPatterns,
@@ -929,6 +930,7 @@ export class Embeddable
   }
 
   async initializeSavedVis(input: LensEmbeddableInput) {
+    performance.mark('Lens:initializeSavedVis', { detail: { id: input.id } });
     const unwrapResult: LensUnwrapResult | false = await this.deps.attributeService
       .unwrapAttributes(input)
       .catch((e: Error) => {
@@ -955,7 +957,7 @@ export class Embeddable
 
     try {
       const { ast, indexPatterns, indexPatternRefs, activeVisualizationState } =
-        await getExpressionFromDocument(this.savedVis, this.deps.documentToExpression);
+        await getExpressionFromDocument(input.id, this.savedVis, this.deps.documentToExpression);
 
       this.expression = ast;
       this.indexPatterns = indexPatterns;
@@ -1462,6 +1464,7 @@ export class Embeddable
       this.savedVis = newVis;
 
       const { ast } = await getExpressionFromDocument(
+        this.input.id,
         this.savedVis,
         this.deps.documentToExpression
       );
