@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { AGENTS_PREFIX, MAX_FLYOUT_WIDTH } from '../../constants';
-import type { Agent, AgentPolicy, PackageInfo, PackagePolicy } from '../../types';
+import type { Agent, AgentPolicy, PackagePolicy } from '../../types';
 import { sendGetAgents, useStartServices, useGetPackageInfoByKeyQuery } from '../../hooks';
 
 import { AgentlessStepConfirmEnrollment } from './step_confirm_enrollment';
@@ -123,11 +123,9 @@ export const AgentlessEnrollmentFlyout = ({
       prerelease: true,
     }
   );
-  const [packageInfo, setPackageInfo] = useState<PackageInfo>();
-  const [integrationTitle, setIntegrationTitle] = useState<string>(packagePolicy.name);
-  useEffect(() => {
+
+  const integrationTitle = useMemo(() => {
     if (packageInfoData?.item) {
-      setPackageInfo(packageInfoData.item);
       const enabledInputs = packagePolicy.inputs?.filter((input) => input.enabled);
 
       // If only one input is enabled, find the input name from the package info and
@@ -140,12 +138,13 @@ export const AgentlessEnrollmentFlyout = ({
           policyTemplate && 'inputs' in policyTemplate
             ? policyTemplate.inputs?.find((i) => i.type === enabledInputs[0].type)
             : null;
-        setIntegrationTitle(input?.title || packageInfoData.item.title);
+        return input?.title || packageInfoData.item.title;
       } else {
-        setIntegrationTitle(packageInfoData.item.title);
+        return packageInfoData.item.title;
       }
     }
-  }, [packageInfo, packageInfoData, packagePolicy]);
+    return packagePolicy.name;
+  }, [packageInfoData, packagePolicy]);
 
   return (
     <EuiFlyout

@@ -354,7 +354,7 @@ describe('useSetupTechnology', () => {
     await waitFor(() => expect(setNewAgentPolicy).toHaveBeenCalledTimes(0));
   });
 
-  it.only('should update new agent policy and selected policy tab when setup technology is agent-based', async () => {
+  it('should update new agent policy and selected policy tab when setup technology is agent-based', async () => {
     (useConfig as MockFn).mockReturnValue({
       agentless: {
         enabled: true,
