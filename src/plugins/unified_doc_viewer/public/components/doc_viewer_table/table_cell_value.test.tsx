@@ -9,23 +9,9 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { TRUNCATE_MAX_HEIGHT, TRUNCATE_MAX_HEIGHT_DEFAULT_VALUE } from '@kbn/discover-utils';
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { TableFieldValue } from './table_cell_value';
 import { setUnifiedDocViewerServices } from '../../plugin';
 import { mockUnifiedDocViewerServices } from '../../__mocks__';
-
-const mockServices = {
-  ...mockUnifiedDocViewerServices,
-};
-
-let mockTruncateMaxHeightSetting: number | undefined;
-mockServices.uiSettings.get = ((key: string) => {
-  if (key === TRUNCATE_MAX_HEIGHT) {
-    return mockTruncateMaxHeightSetting ?? TRUNCATE_MAX_HEIGHT_DEFAULT_VALUE;
-  }
-  return;
-}) as IUiSettingsClient['get'];
 
 setUnifiedDocViewerServices(mockUnifiedDocViewerServices);
 
@@ -35,7 +21,6 @@ jest.spyOn(HTMLElement.prototype, 'scrollHeight', 'get').mockImplementation(() =
 describe('TableFieldValue', () => {
   afterEach(() => {
     mockScrollHeight = 0;
-    mockTruncateMaxHeightSetting = undefined;
   });
 
   it('should render correctly', async () => {

@@ -208,10 +208,6 @@ The default refresh interval for the time filter. Example:
 [[timepicker-timedefaults]]`timepicker:timeDefaults`::
 The default selection in the time filter.
 
-[[truncate-maxheight]]`truncate:maxHeight`::
-deprecated:[8.16.0]The maximum height that a cell occupies in a table. Set to 0 to disable
-truncation.
-
 [[enableESQL]]`enableESQL`::
 This setting enables ES|QL in Kibana.
 

@@ -27,8 +27,6 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
   MAX_DOC_FIELDS_DISPLAYED,
   SHOW_MULTIFIELDS,
-  TRUNCATE_MAX_HEIGHT,
-  TRUNCATE_MAX_HEIGHT_DEFAULT_VALUE,
   SHOW_FIELD_STATISTICS,
   ROW_HEIGHT_OPTION,
 } from '@kbn/discover-utils';
@@ -278,24 +276,5 @@ export const getUiSettings: (
         'The number of lines to allow in a row. A value of -1 automatically adjusts the row height to fit the contents. A value of 0 displays the content in a single line.',
     }),
     schema: schema.number({ min: -1 }),
-  },
-  [TRUNCATE_MAX_HEIGHT]: {
-    name: i18n.translate('discover.advancedSettings.params.maxCellHeightTitle', {
-      defaultMessage: 'Maximum cell height in the classic table',
-    }),
-    value: TRUNCATE_MAX_HEIGHT_DEFAULT_VALUE,
-    category: ['discover'],
-    description: i18n.translate('discover.advancedSettings.params.maxCellHeightText', {
-      defaultMessage:
-        'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation.',
-    }),
-    schema: schema.number({ min: 0 }),
-    requiresPageReload: true,
-    deprecation: {
-      message: i18n.translate('discover.advancedSettings.discover.maxCellHeightDeprecation', {
-        defaultMessage: 'This setting is deprecated and will be removed in Kibana 9.0.',
-      }),
-      docLinksKey: 'discoverSettings',
-    },
   },
 });
