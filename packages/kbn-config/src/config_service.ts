@@ -12,7 +12,7 @@ import { SchemaTypeError, Type, ValidationError } from '@kbn/config-schema';
 import { cloneDeep, isEqual, merge, unset } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import { BehaviorSubject, combineLatest, firstValueFrom, Observable, identity } from 'rxjs';
-import { distinctUntilChanged, first, map, shareReplay, tap } from 'rxjs';
+import { distinctUntilChanged, map, shareReplay, tap } from 'rxjs';
 import { Logger, LoggerFactory } from '@kbn/logging';
 import { getDocLinks, DocLinks } from '@kbn/doc-links';
 
@@ -210,7 +210,14 @@ export class ConfigService {
     }
 
     const validatedConfig = hasSchema
-      ? await this.atPath<{ enabled?: boolean }>(path).pipe(first()).toPromise()
+      ? await firstValueFrom(
+          this.getValidatedConfigAtPath$(
+            path,
+            // At this point we don't care about how valid the config is: we just want to read `enabled`
+            { stripUnknownKeys: true }
+          ) as Observable<{ enabled?: boolean }>,
+          { defaultValue: undefined }
+        )
       : undefined;
 
     const isDisabled = validatedConfig?.enabled === false;
@@ -325,7 +332,13 @@ export class ConfigService {
     });
   }
 
-  private validateAtPath(path: ConfigPath, config: Record<string, unknown>) {
+  private validateAtPath(
+    path: ConfigPath,
+    config: Record<string, unknown>,
+    validateOptions?: { stripUnknownKeys?: boolean }
+  ) {
+    const stripUnknownKeys = validateOptions?.stripUnknownKeys || this.stripUnknownKeys;
+
     const namespace = pathToString(path);
     const schema = this.schemas.get(namespace);
     if (!schema) {
@@ -340,18 +353,21 @@ export class ConfigService {
         ...this.env.packageInfo,
       },
       `config validation of [${namespace}]`,
-      this.stripUnknownKeys ? { stripUnknownKeys: this.stripUnknownKeys } : {}
+      stripUnknownKeys ? { stripUnknownKeys } : {}
     );
   }
 
   private getValidatedConfigAtPath$(
     path: ConfigPath,
-    { ignoreUnchanged = true }: { ignoreUnchanged?: boolean } = {}
+    {
+      ignoreUnchanged = true,
+      stripUnknownKeys,
+    }: { ignoreUnchanged?: boolean; stripUnknownKeys?: boolean } = {}
   ) {
     return this.config$.pipe(
       map((config) => config.get(path)),
       ignoreUnchanged ? distinctUntilChanged(isEqual) : identity,
-      map((config) => this.validateAtPath(path, config))
+      map((config) => this.validateAtPath(path, config, { stripUnknownKeys }))
     );
   }
 
