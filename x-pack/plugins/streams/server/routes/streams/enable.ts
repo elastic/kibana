@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { badRequest, internal } from '@hapi/boom';
 import { SecurityException } from '../../lib/streams/errors';
 import { createServerRoute } from '../create_server_route';
 import { syncStream } from '../../lib/streams/stream_crud';
@@ -13,22 +14,24 @@ import { rootStreamDefinition } from '../../lib/streams/root_stream_definition';
 import { createStreamsIndex } from '../../lib/streams/internal_stream_mapping';
 
 export const enableStreamsRoute = createServerRoute({
-  endpoint: 'POST /api/streams/_enable 2023-10-31',
+  endpoint: 'POST /api/streams/_enable',
   params: z.object({}),
   options: {
-    access: 'public',
-    availability: {
-      stability: 'experimental',
-    },
-    security: {
-      authz: {
-        enabled: false,
-        reason:
-          'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
-      },
+    access: 'internal',
+  },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
     },
   },
-  handler: async ({ request, response, logger, getScopedClients }) => {
+  handler: async ({
+    request,
+    response,
+    logger,
+    getScopedClients,
+  }): Promise<{ acknowledged: true }> => {
     try {
       const { scopedClusterClient } = await getScopedClients({ request });
       await createStreamsIndex(scopedClusterClient);
@@ -37,12 +40,12 @@ export const enableStreamsRoute = createServerRoute({
         definition: rootStreamDefinition,
         logger,
       });
-      return response.ok({ body: { acknowledged: true } });
+      return { acknowledged: true };
     } catch (e) {
       if (e instanceof SecurityException) {
-        return response.customError({ body: e, statusCode: 400 });
+        throw badRequest(e);
       }
-      return response.customError({ body: e, statusCode: 500 });
+      throw internal(e);
     }
   },
 });

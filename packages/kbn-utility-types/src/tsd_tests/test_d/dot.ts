@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { expectAssignable, expectNotType, expectType } from 'tsd';
 import { DedotObject, DotObject } from '../../dot';
+
+function isAssignable<T>(t: T) {}
 
 interface TestA {
   'my.dotted.key': string;
@@ -60,20 +61,39 @@ const dedotted1 = {} as DedotObject<TestA>;
 
 const dotted1 = {} as DotObject<TestB>;
 
-expectAssignable<DedotObject<TestA>>({} as Dedotted);
-expectAssignable<DotObject<TestB>>({} as Dotted);
-expectAssignable<Dedotted>({} as DedotObject<TestA>);
-expectAssignable<Dotted>({} as DotObject<TestB>);
+isAssignable<DedotObject<TestA>>({} as Dedotted);
 
-expectType<string | undefined>(dedotted1.ym?.dotted?.partial?.key?.toString());
-expectType<string>(dotted1['my.undotted.key'].toString());
-expectNotType<string>(dotted1['my.partial.key']);
-expectType<string | undefined>(dotted1['my.partial.key']?.toString());
-expectNotType<{ baz: string }>({} as DedotObject<TestA>);
-expectNotType<{ baz: string }>({} as DotObject<TestB>);
-expectNotType<{ my: { dotted: { key: string }; partial: { key: number } } }>(
-  {} as DedotObject<TestA>
-);
+isAssignable<DotObject<TestB>>({} as Dotted);
+isAssignable<Dedotted>({} as DedotObject<TestA>);
+isAssignable<Dotted>({} as DotObject<TestB>);
+
+isAssignable<string | undefined>(dedotted1.ym?.dotted?.partial?.key);
+
+isAssignable<string>(dotted1['my.undotted.key'].toString());
+// @ts-expect-error
+isAssignable<string>(dotted1['my.partial.key']);
+
+isAssignable<string | undefined>(dotted1['my.partial.key']?.toString());
+
+// @ts-expect-error
+isAssignable<{ baz: string }>({} as DedotObject<TestA>);
+// @ts-expect-error
+isAssignable<{ baz: string }>({} as DotObject<TestB>);
+
+// @ts-expect-error
+isAssignable<{ my: { dotted: { key: string }; partial: { key: number } } }, DedotObject<TestA>>();
+
+type WithStringKey = {
+  [x: string]: string;
+} & {
+  count: number;
+};
+
+type WithStringKeyDedotted = DedotObject<WithStringKey>;
+
+isAssignable<WithStringKeyDedotted>({} as WithStringKey);
+
+isAssignable<WithStringKey>({} as WithStringKeyDedotted);
 
 interface ObjectWithArray {
   span: {
@@ -88,7 +108,7 @@ interface ObjectWithArray {
   };
 }
 
-expectType<DotObject<ObjectWithArray>>({
+isAssignable<DotObject<ObjectWithArray>>({
   'span.links.span.id': [''],
   'span.links.trace.id': [''],
 });

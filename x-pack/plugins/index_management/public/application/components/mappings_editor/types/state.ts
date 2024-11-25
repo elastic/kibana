@@ -108,7 +108,6 @@ export interface State {
   };
   templates: TemplatesFormState;
   inferenceToModelIdMap?: InferenceToModelIdMap;
-  hasEnterpriseLicense: boolean;
   mappingViewFields: NormalizedFields; // state of the incoming index mappings, separate from the editor state above
 }
 
@@ -141,7 +140,6 @@ export type Action =
   | { type: 'fieldsJsonEditor.update'; value: { json: { [key: string]: any }; isValid: boolean } }
   | { type: 'search:update'; value: string }
   | { type: 'validity:update'; value: boolean }
-  | { type: 'filter:update'; value: { selectedOptions: EuiSelectableOption[] } }
-  | { type: 'hasEnterpriseLicense.update'; value: boolean };
+  | { type: 'filter:update'; value: { selectedOptions: EuiSelectableOption[] } };
 
 export type Dispatch = (action: Action) => void;
