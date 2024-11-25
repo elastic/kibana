@@ -26,49 +26,6 @@ export const MANAGE_INFERENCE_ENDPOINTS_LABEL = i18n.translate(
   }
 );
 
-export const CREATE_FIRST_INFERENCE_ENDPOINT_DESCRIPTION = i18n.translate(
-  'xpack.searchInferenceEndpoints.addEmptyPrompt.createFirstInferenceEndpointDescription',
-  {
-    defaultMessage:
-      "Inference endpoints enable you to perform inference tasks using NLP models provided by third-party services or Elastic's built-in models like ELSER and E5. Set up tasks such as text embedding, completions, reranking, and more by using the Create Inference API.",
-  }
-);
-
-export const START_WITH_PREPARED_ENDPOINTS_LABEL = i18n.translate(
-  'xpack.searchInferenceEndpoints.addEmptyPrompt.startWithPreparedEndpointsLabel',
-  {
-    defaultMessage: 'Learn more about built-in NLP models:',
-  }
-);
-
-export const ELSER_TITLE = i18n.translate(
-  'xpack.searchInferenceEndpoints.addEmptyPrompt.elserTitle',
-  {
-    defaultMessage: 'ELSER',
-  }
-);
-
-export const LEARN_HOW_TO_CREATE_INFERENCE_ENDPOINTS_LINK = i18n.translate(
-  'xpack.searchInferenceEndpoints.addEmptyPrompt.learnHowToCreateInferenceEndpoints',
-  {
-    defaultMessage: 'Learn how to create inference endpoints',
-  }
-);
-
-export const SEMANTIC_SEARCH_WITH_ELSER_LINK = i18n.translate(
-  'xpack.searchInferenceEndpoints.addEmptyPrompt.semanticSearchWithElser',
-  {
-    defaultMessage: 'Semantic search with ELSER',
-  }
-);
-
-export const SEMANTIC_SEARCH_WITH_E5_LINK = i18n.translate(
-  'xpack.searchInferenceEndpoints.addEmptyPrompt.semanticSearchWithE5',
-  {
-    defaultMessage: 'Semantic search with E5 Multilingual',
-  }
-);
-
 export const VIEW_YOUR_MODELS_LINK = i18n.translate(
   'xpack.searchInferenceEndpoints.viewYourModels',
   {
@@ -80,25 +37,6 @@ export const API_DOCUMENTATION_LINK = i18n.translate(
   'xpack.searchInferenceEndpoints.apiDocumentationLink',
   {
     defaultMessage: 'API Documentation',
-  }
-);
-
-export const ELSER_DESCRIPTION = i18n.translate(
-  'xpack.searchInferenceEndpoints.addEmptyPrompt.elserDescription',
-  {
-    defaultMessage: "ELSER is Elastic's sparse vector NLP model for semantic search in English.",
-  }
-);
-
-export const E5_TITLE = i18n.translate('xpack.searchInferenceEndpoints.addEmptyPrompt.e5Title', {
-  defaultMessage: 'E5 Multilingual',
-});
-
-export const E5_DESCRIPTION = i18n.translate(
-  'xpack.searchInferenceEndpoints.addEmptyPrompt.e5Description',
-  {
-    defaultMessage:
-      'E5 is a third-party NLP model that enables you to perform multilingual semantic search by using dense vector representations.',
   }
 );
 
