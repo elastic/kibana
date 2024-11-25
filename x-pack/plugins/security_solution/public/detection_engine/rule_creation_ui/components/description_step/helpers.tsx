@@ -27,7 +27,6 @@ import { FilterBadgeGroup } from '@kbn/unified-search-plugin/public';
 import { IntervalAbbrScreenReader } from '../../../../common/components/accessibility';
 import type {
   RequiredFieldArray,
-  Threshold,
   AlertSuppressionMissingFieldsStrategy,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
@@ -50,6 +49,7 @@ import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { RequiredFieldIcon } from '../../../rule_management/components/rule_details/required_field_icon';
 import { ThreatEuiFlexGroup } from './threat_description';
 import { AlertSuppressionLabel } from './alert_suppression_label';
+import type { FieldValueThreshold } from '../threshold_input';
 
 const NoteDescriptionContainer = styled(EuiFlexItem)`
   height: 105px;
@@ -490,7 +490,10 @@ export const buildRuleTypeDescription = (label: string, ruleType: Type): ListIte
   }
 };
 
-export const buildThresholdDescription = (label: string, threshold: Threshold): ListItems[] => {
+export const buildThresholdDescription = (
+  label: string,
+  threshold: FieldValueThreshold
+): ListItems[] => {
   let thresholdDescription = isEmpty(threshold.field[0])
     ? `${i18n.THRESHOLD_RESULTS_ALL} >= ${threshold.value}`
     : `${i18n.THRESHOLD_RESULTS_AGGREGATED_BY} ${
