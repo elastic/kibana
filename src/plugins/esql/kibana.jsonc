@@ -19,11 +19,11 @@
       "dataViews",
       "uiActions",
       "contentManagement",
-      "esqlVariables",
     ],
     "requiredBundles": [
       "kibanaReact",
       "kibanaUtils",
+      "esqlVariables"
     ]
   }
 }

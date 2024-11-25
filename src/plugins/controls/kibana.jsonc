@@ -18,9 +18,8 @@
       "data",
       "unifiedSearch",
       "uiActions",
-      "esqlVariables",
     ],
-    "requiredBundles": [],
+    "requiredBundles": ["esqlVariables"],
     "extraPublicDirs": [
       "common"
     ]

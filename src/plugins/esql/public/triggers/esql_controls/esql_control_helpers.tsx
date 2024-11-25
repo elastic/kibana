@@ -15,7 +15,7 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { monaco } from '@kbn/monaco';
-import { esqlVariablesService } from '@kbn/esql-variables/public';
+import { esqlVariablesService } from '@kbn/esql-variables/common';
 
 interface Context {
   queryString: string;
@@ -52,8 +52,9 @@ export async function executeAction({
     });
   };
 
-  const addVariable = (key: string, value: string) => {
-    esqlVariablesService.addVariable({ key, value });
+  const addToESQLVariablesService = (variable: string, variableValue: string, query: string) => {
+    esqlVariablesService.addVariable({ key: variable, value: variableValue });
+    esqlVariablesService.setEsqlQueryWithVariables(query);
   };
 
   const handle = core.overlays.openFlyout(
@@ -69,7 +70,7 @@ export async function executeAction({
           panelId={panelId}
           cursorPosition={cursorPosition}
           openEditFlyout={openEditFlyout}
-          addVariable={addVariable}
+          addToESQLVariablesService={addToESQLVariablesService}
         />,
         {
           closeFlyout: () => {

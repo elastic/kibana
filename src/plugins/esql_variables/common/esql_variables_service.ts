@@ -14,17 +14,23 @@ interface ESQLVariables {
   value: string;
 }
 
-// interface EsqlVariablesServiceParams {
-//   esqlVariables: ESQLVariables[];
-// }
-
 export class EsqlVariablesService {
   esqlVariables$: BehaviorSubject<ESQLVariables[]>;
+  esqlQueryWithVariables: string;
   esqlVariables: ESQLVariables[] = [];
 
   constructor() {
     this.esqlVariables$ = new BehaviorSubject<ESQLVariables[]>([]);
     this.esqlVariables = [];
+    this.esqlQueryWithVariables = '';
+  }
+
+  setEsqlQueryWithVariables(esqlQueryWithVariables: string) {
+    this.esqlQueryWithVariables = esqlQueryWithVariables;
+  }
+
+  getEsqlQueryWithVariables() {
+    return this.esqlQueryWithVariables;
   }
 
   addVariable(variable: ESQLVariables) {

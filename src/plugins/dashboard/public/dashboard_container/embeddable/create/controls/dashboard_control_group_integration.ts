@@ -8,6 +8,7 @@
  */
 
 import { COMPARE_ALL_OPTIONS, compareFilters, type Filter } from '@kbn/es-query';
+import { esqlVariablesService } from '@kbn/esql-variables/common';
 import {
   BehaviorSubject,
   combineLatest,
@@ -81,6 +82,10 @@ export function startSyncingDashboardControlGroup(dashboard: DashboardContainer)
         skip(1) // skip first filter output because it will have been applied in initialize
       )
       .subscribe(() => dashboard.forceRefresh(false)) // we should not reload the control group when the control group output changes - otherwise, performance is severely impacted
+  );
+
+  dashboard.publishingSubscription.add(
+    esqlVariablesService.esqlVariables$.subscribe(() => dashboard.forceRefresh(false)) // we should not reload the control group when the control group output changes - otherwise, performance is severely impacted
   );
 
   // --------------------------------------------------------------------------------------

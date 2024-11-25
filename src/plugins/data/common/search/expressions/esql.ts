@@ -15,7 +15,7 @@ import type {
   IKibanaSearchResponse,
   ISearchGeneric,
 } from '@kbn/search-types';
-import { esqlVariablesService } from '@kbn/esql-variables/public';
+import { esqlVariablesService } from '@kbn/esql-variables/common';
 import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { getStartEndParams } from '@kbn/esql-utils';
@@ -177,7 +177,6 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               input.timeRange
             );
             const variables = esqlVariablesService.getVariables();
-            console.log('variables', variables);
 
             if (variables?.length) {
               variables?.forEach(({ key, value }) => {

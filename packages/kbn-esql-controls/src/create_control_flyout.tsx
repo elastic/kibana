@@ -36,7 +36,7 @@ interface ESQLControlsFlyoutProps {
   panelId?: string;
   cursorPosition?: monaco.Position;
   closeFlyout: () => void;
-  addVariable: (key: string, value: string) => void;
+  addToESQLVariablesService: (variable: string, variableValue: string, query: string) => void;
   openEditFlyout: (embeddable: unknown) => Promise<void>;
 }
 
@@ -111,7 +111,7 @@ export function ESQLControlsFlyout({
   dashboardApi,
   panelId,
   cursorPosition,
-  addVariable,
+  addToESQLVariablesService,
   closeFlyout,
   openEditFlyout,
 }: ESQLControlsFlyoutProps) {
@@ -120,7 +120,8 @@ export function ESQLControlsFlyout({
     controlTypeOptions.find((option) => option.key === flyoutType)!,
   ]);
   const controlGroupApi = useStateFromPublishingSubject(dashboardApi.controlGroupApi$);
-  const panels = useStateFromPublishingSubject(dashboardApi.panels$);
+  const children = useStateFromPublishingSubject(dashboardApi.children$);
+  const embeddable = children[panelId!];
   const suggestedVariableName = getVariableName(controlType);
   const [variableName, setVariableName] = useState(suggestedVariableName);
 
@@ -166,6 +167,7 @@ export function ESQLControlsFlyout({
       width: minimumWidth,
       title: label || varName,
       variableName: varName,
+      grow: false,
     };
     controlGroupApi?.addNewControl('esqlControlStaticValues', state);
 
@@ -176,41 +178,24 @@ export function ESQLControlsFlyout({
         variableName,
         queryString.slice(cursorColumn - 1),
       ].join('');
-      const panel = panels[panelId];
-      const updatedPanelInput = {
-        ...panel.explicitInput,
-        attributes: {
-          ...panel.explicitInput.attributes,
-          state: {
-            ...panel.explicitInput.attributes.state,
-            queryWithVariables: {
-              esql: query,
-            },
-          },
-        },
-      };
-      const factory = await dashboardApi.getFactory(panel.type);
-      const embeddable = await factory?.create(updatedPanelInput);
-      embeddable.updateInput(updatedPanelInput);
+
+      addToESQLVariablesService(varName, availableOptions[0], query);
       await openEditFlyout(embeddable);
-      // add the variable to the service
-      addVariable(varName, availableOptions[0]);
     }
     closeFlyout();
   }, [
     closeFlyout,
     controlGroupApi,
-    dashboardApi,
     label,
     minimumWidth,
     panelId,
     values,
     variableName,
-    panels,
+    embeddable,
     queryString,
     cursorPosition,
     openEditFlyout,
-    addVariable,
+    addToESQLVariablesService,
   ]);
 
   return (

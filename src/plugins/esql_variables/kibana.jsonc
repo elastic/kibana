@@ -9,5 +9,8 @@
     "server": false,
     "browser": true,
     "requiredPlugins": [],
+    "extraPublicDirs": [
+      "common"
+    ]
   }
 }

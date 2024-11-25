@@ -29,7 +29,7 @@ import {
   getLanguageDisplayName,
 } from '@kbn/es-query';
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import { esqlVariablesService } from '@kbn/esql-variables/public';
+import { esqlVariablesService } from '@kbn/esql-variables/common';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
@@ -87,8 +87,9 @@ export function LensEditConfigurationFlyout({
   const previousAttributes = useRef<TypedLensByValueInput['attributes']>(attributes);
   const previousAdapters = useRef<Partial<DefaultInspectorAdapters> | undefined>(lensAdapters);
   const prevQuery = useRef<AggregateQuery | Query>(attributes.state.query);
+  const queryWithVariables = esqlVariablesService.getEsqlQueryWithVariables();
   const [query, setQuery] = useState<AggregateQuery | Query>(
-    attributes.state.queryWithVariables ?? attributes.state.query
+    queryWithVariables ? { esql: queryWithVariables } : attributes.state.query
   );
 
   const [esqlVariables, setEsqlVariables] = useState<
@@ -518,6 +519,7 @@ export function LensEditConfigurationFlyout({
                 query={query}
                 onTextLangQueryChange={(q) => {
                   setQuery(q);
+                  esqlVariablesService.setEsqlQueryWithVariables('');
                 }}
                 detectedTimestamp={adHocDataViews?.[0]?.timeFieldName}
                 hideTimeFilterInfo={hideTimeFilterInfo}
