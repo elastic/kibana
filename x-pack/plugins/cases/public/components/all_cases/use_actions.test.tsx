@@ -6,8 +6,7 @@
  */
 
 import userEvent, { type UserEvent } from '@testing-library/user-event';
-import { waitFor } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks/dom';
+import { waitFor, renderHook } from '@testing-library/react';
 import {
   waitForEuiPopoverOpen,
   waitForEuiContextMenuPanelTransition,
