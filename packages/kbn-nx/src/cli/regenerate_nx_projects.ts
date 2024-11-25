@@ -15,33 +15,44 @@ import { run } from '@kbn/dev-cli-runner';
 import { getPackages, Package } from '@kbn/repo-packages';
 import { ToolingLog } from '@kbn/tooling-log';
 
+import projectTemplate from './project.template.json';
+
 function generateProjectConfig(
   tsConfig: { include?: string[]; exclude?: string[]; kbn_references?: [] },
   template: string,
-  pkg: Package
+  pkg: Package,
+  { implicitDependencies }: { implicitDependencies?: boolean } = { implicitDependencies: true }
 ) {
-  const tsInclude = tsConfig.include || [];
-  const tsExclude = tsConfig.exclude || [];
-  const src = tsInclude.concat(tsExclude.map((ex: string) => `!${ex}`));
-  const dependencies = tsConfig.kbn_references || [];
+  const tsInclude = (tsConfig.include || []).map((e) => `{projectRoot}/${e}`);
+  const tsExclude = (tsConfig.exclude || []).map((e) => `!{projectRoot}/${e}`);
+  const src = tsInclude
+    .concat(tsExclude)
+    .map((e) => e.replace(/.*typings/, '{workspaceRoot}/typings'));
+  const dependencies = tsConfig.kbn_references;
 
   const projectConfig = JSON.parse(template);
   projectConfig.name = pkg.name;
+  projectConfig.projectType = pkg.isPlugin() ? 'application' : 'library';
+  projectConfig.sourceRoot = pkg.normalizedRepoRelativeDir;
   projectConfig.namedInputs = projectConfig.namedInputs || {};
   projectConfig.namedInputs.src = src;
-  projectConfig.implicitDependencies = dependencies;
+  if (implicitDependencies && dependencies) {
+    // TODO: some dependencies are referenced as objects
+    projectConfig.implicitDependencies = dependencies.filter((e) => typeof e === 'string');
+  }
   return projectConfig;
 }
 
 export function regenerateNxProjects() {
-  run(
+  return run(
     async ({ log, flags }) => {
       const filter: string | string[] | undefined =
         (flags.filter as string | string[]) || undefined;
       const update = flags.update as boolean | undefined;
       const dryRun = flags['dry-run'] as boolean | undefined;
+      const implicitDependencies = (flags['implicit-dependencies'] as boolean) || true;
 
-      const template = fs.readFileSync(path.resolve(__dirname, 'project.template.json'), 'utf8');
+      const template = JSON.stringify(projectTemplate, null, 2);
       const allPackages: Package[] = getPackages(REPO_ROOT);
 
       const filteredPackages = filter ? filterPackages(allPackages, filter) : allPackages;
@@ -63,7 +74,9 @@ export function regenerateNxProjects() {
         const tsConfig = eval('0,' + fs.readFileSync(tsConfigPath, 'utf8'));
 
         log.verbose(`Generating project configuration for ${pkg.name}`);
-        const projectConfig = generateProjectConfig(tsConfig, template, pkg);
+        const projectConfig = generateProjectConfig(tsConfig, template, pkg, {
+          implicitDependencies,
+        });
         const targetPath = path.resolve(pkg.normalizedRepoRelativeDir, 'project.json');
 
         log.verbose(`Writing project configuration to ${targetPath}`);
@@ -90,10 +103,15 @@ export function regenerateNxProjects() {
         Generates NX project configuration for a package/plugin from available hints around the package/plugin.
       `,
       flags: {
-        string: ['filter', 'dry-run', 'update'],
+        string: ['filter'],
+        boolean: ['dry-run', 'update', 'implicit-dependencies'],
         default: {},
         alias: {},
         help: `
+          --filter                    Filter packages by name or directory
+          --update                    Update existing project configuration(s)
+          --no-implicit-dependencies  Do not include implicitDependencies section in the project configuration
+          --dry-run                   Do not write to disk
         `,
       },
     }

@@ -1,9 +1,19 @@
 {
   "$schema": "http://json-schema.org/schema",
   "executors": {
-    "typecheck": {
-      "implementation": "./src/executors/typecheck/executor",
-      "schema": "./src/executors/typecheck/schema.json",
+    "typecheck-js": {
+      "implementation": "./src/executors/typecheck_js/executor",
+      "schema": "./src/executors/typecheck_js/schema.json",
+      "description": "typecheck executor"
+    },
+    "typecheck-js-sock": {
+      "implementation": "./src/executors/typecheck_js_sock/executor",
+      "schema": "./src/executors/typecheck_js_sock/schema.json",
+      "description": "typecheck executor"
+    },
+    "typecheck-spalger": {
+      "implementation": "./src/executors/typecheck_spalger/executor",
+      "schema": "./src/executors/typecheck_spalger/schema.json",
       "description": "typecheck executor"
     }
   }

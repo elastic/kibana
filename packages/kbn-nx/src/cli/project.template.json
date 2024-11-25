@@ -15,8 +15,7 @@
         "^global:tsConfigs"
       ],
       "outputs": [
-        "{projectRoot}/target",
-        "{projectRoot}/tsconfig.type_check.json"
+        "{projectRoot}/target"
       ]
     }
   }

@@ -7,5 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { regenerateNxProjects } from './cli/regenerate_nx_projects';
-export { clearMissingImplicitDependencies } from './cli/clear_missing_implicit_dependencies';
+import type { ExecutorContext } from '@nx/devkit';
+
+// eslint-disable-next-line import/no-default-export
+export default async function noopExecutor(
+  options: {},
+  context: ExecutorContext
+): Promise<{ success: boolean }> {
+  return { success: true };
+}

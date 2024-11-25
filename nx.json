@@ -24,7 +24,10 @@
       "{projectRoot}/tsconfig.json",
       "{projectRoot}/tsconfig.type_check.json",
       "{workspaceRoot}/tsconfig.base.json",
-      "{workspaceRoot}/tsconfig.base.type_check.json"
+      "{workspaceRoot}/tsconfig.base.type_check.json",
+      "!{workspaceRoot}/nx.json",
+      "!{workspaceRoot}/package.json",
+      "!{workspaceRoot}/yarn.lock"
     ]
   },
   "targetDefaults": {
@@ -38,8 +41,9 @@
       "cache": true
     },
     "typecheck": {
-      "executor": "@kbn/nx:typecheck",
+      "executor": "@kbn/nx:typecheck-js",
       "dependsOn": [
+        "^@kbn/nx",
         "^typecheck"
       ],
       "inputs": [
@@ -49,8 +53,7 @@
         "^global:tsConfigs"
       ],
       "outputs": [
-        "{projectRoot}/target",
-        "{projectRoot}/tsconfig.type_check.json"
+        "{projectRoot}/target"
       ],
       "options": {
       },

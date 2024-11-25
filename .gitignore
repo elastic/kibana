@@ -116,6 +116,7 @@ report.asciidoc
 # Automatically generated and user-modifiable
 /tsconfig.refs.json
 *.type_check.json
+*.nx_type_check.json
 
 # Yarn local mirror content
 .yarn-local-mirror

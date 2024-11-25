@@ -115,7 +115,7 @@ export class TsProject {
   ) {
     const cached = cache.get(abs);
     if (cached) {
-      cached._disableTypeCheck ||= !!opts?.disableTypeCheck;
+      cached._disableTypeCheck = cached._disableTypeCheck || !!opts?.disableTypeCheck;
       return cached;
     }
 
