@@ -6,15 +6,27 @@
  */
 
 import type { FtrConfigProviderContext } from '@kbn/test';
+import { getPreconfiguredConnectorConfig } from '@kbn/gen-ai-functional-testing';
 import { services } from './ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const baseConfig = await readConfigFile(require.resolve('../config.base.ts'));
+  const xpackFunctionalConfig = await readConfigFile(
+    require.resolve('../../functional/config.base.js')
+  );
+
+  const preconfiguredConnectors = getPreconfiguredConnectorConfig();
 
   return {
-    ...baseConfig.getAll(),
+    ...xpackFunctionalConfig.getAll(),
     services,
     testFiles: [require.resolve('./tests')],
+    kbnTestServer: {
+      ...xpackFunctionalConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
+        `--xpack.actions.preconfigured=${JSON.stringify(preconfiguredConnectors)}`,
+      ],
+    },
   };
 }
