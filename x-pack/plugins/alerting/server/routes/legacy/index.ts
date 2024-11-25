@@ -31,7 +31,7 @@ export function defineLegacyRoutes(opts: RouteOptions) {
   deleteAlertRoute(router, licenseState, docLinks, usageCounter, isServerless);
   findAlertRoute(router, licenseState, docLinks, usageCounter, isServerless);
   getAlertRoute(router, licenseState, docLinks, usageCounter, isServerless);
-  getAlertStateRoute(router, licenseState, usageCounter, isServerless);
+  getAlertStateRoute(router, licenseState, docLinks, usageCounter, isServerless);
   getAlertInstanceSummaryRoute(router, licenseState, docLinks, usageCounter, isServerless);
   listAlertTypesRoute(router, licenseState, usageCounter, isServerless);
   updateAlertRoute(router, licenseState, usageCounter, isServerless);
