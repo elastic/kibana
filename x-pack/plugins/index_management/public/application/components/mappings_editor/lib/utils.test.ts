@@ -421,7 +421,6 @@ describe('utils', () => {
         selectedDataTypes: ['Boolean'],
       },
       inferenceToModelIdMap: {},
-      hasEnterpriseLicense: true,
       mappingViewFields: { byId: {}, rootLevelFields: [], aliases: {}, maxNestedDepth: 0 },
     };
     test('returns list of matching fields with search term', () => {
