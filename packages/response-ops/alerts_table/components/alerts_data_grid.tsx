@@ -44,7 +44,6 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { BulkActionsCell } from './bulk_actions_cell';
 import { BulkActionsHeader } from './bulk_actions_header_cell';
 import { useAlertsTableContext } from '../contexts/alerts_table_context';
-import { useBulkActions, useSorting } from '../hooks';
 import { BulkActionsVerbs } from '../types';
 import {
   AdditionalContext,
@@ -60,6 +59,8 @@ import { SystemCell, systemCells } from './system_cell';
 import { typedMemo } from '../utils/react';
 import type { AlertsFlyout as AlertsFlyoutType } from './alerts_flyout';
 import { ErrorBoundary } from './error_boundary';
+import { useBulkActions } from '../hooks/use_bulk_actions';
+import { useSorting } from '../hooks/use_sorting';
 
 const AlertsFlyout = lazy(() => import('./alerts_flyout')) as typeof AlertsFlyoutType;
 

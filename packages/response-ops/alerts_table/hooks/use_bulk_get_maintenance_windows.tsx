@@ -19,7 +19,7 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import {
   bulkGetMaintenanceWindows,
   BulkGetMaintenanceWindowsResult,
-} from './apis/bulk_get_maintenance_windows';
+} from './bulk_get_maintenance_windows';
 import { queryKeys } from '../constants';
 import { useLicense } from './use_license';
 

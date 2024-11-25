@@ -37,7 +37,7 @@ import {
   UseDataGridColumnsCellActionsProps,
 } from '@kbn/cell-actions';
 import { FieldSpec } from '@kbn/data-views-plugin/common';
-import { FieldBrowser, FieldBrowserOptions } from '@kbn/response-ops-alerts-fields-browser';
+import { FieldBrowser, type FieldBrowserOptions } from '@kbn/response-ops-alerts-fields-browser';
 import { DataTableModel, DataTableState } from '../../store/data_table/types';
 
 import { getColumnHeader, getColumnHeaders } from './column_headers/helpers';

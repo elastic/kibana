@@ -15,7 +15,7 @@ import { useMuteAlertInstanceMutation } from '@kbn/response-ops-alerts-apis/hook
 import { useUnmuteAlertInstanceMutation } from '@kbn/response-ops-alerts-apis/hooks/use_unmute_alert_instance_mutation';
 import type { AlertActionsProps } from '../types';
 import { MUTE, UNMUTE } from '../hooks/translations';
-import { useAlertMutedState } from '../hooks/alert_mute/use_alert_muted_state';
+import { useAlertMutedState } from '../hooks/use_alert_muted_state';
 
 /**
  * Alerts table row action to mute/unmute the selected alert
