@@ -60,7 +60,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('works in non default space', async () => {
-      const { SPACE_ID } = await monitorTestService.addsNewSpace();
+      const { SPACE_ID } = await monitorTestService.addNewSpace();
 
       const resp = await supertest
         .post(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)

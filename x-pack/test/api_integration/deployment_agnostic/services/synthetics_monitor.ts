@@ -190,7 +190,7 @@ export class SyntheticsMonitorTestService {
     }
   }
 
-  async addsNewSpace() {
+  async addNewSpace() {
     const SPACE_ID = `test-space-${uuidv4()}`;
     const SPACE_NAME = `test-space-name ${uuidv4()}`;
 

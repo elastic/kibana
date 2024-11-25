@@ -370,10 +370,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('should not return values for non admin user', async () => {
-      const { username, password } = await monitorTestService.addsNewSpace();
-      const resp = await supertestWithoutAuth
+      const resp = await supertest
         .get(`${SYNTHETICS_API_URLS.PARAMS}`)
-        .auth(username, password)
         .set(adminRoleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send()
