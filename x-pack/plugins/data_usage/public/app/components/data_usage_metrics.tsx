@@ -107,6 +107,11 @@ export const DataUsageMetrics = memo(
       }));
     }, [metricTypesFromUrl, dataStreamsFromUrl]);
 
+    const enableFetchUsageMetricsData = useMemo(
+      () => metricsFilters.dataStreams.length > 0 && metricsFilters.metricTypes.length > 0,
+      [metricsFilters.dataStreams, metricsFilters.metricTypes]
+    );
+
     const { dateRangePickerState, onRefreshChange, onTimeChange } = useDateRangePicker();
 
     const {
@@ -123,7 +128,7 @@ export const DataUsageMetrics = memo(
       },
       {
         retry: false,
-        enabled: !!(metricsFilters.dataStreams.length && metricsFilters.metricTypes.length),
+        enabled: enableFetchUsageMetricsData,
       }
     );
 
@@ -206,6 +211,7 @@ export const DataUsageMetrics = memo(
           <ChartFilters
             dateRangePickerState={dateRangePickerState}
             isDataLoading={isFetchingDataStreams}
+            isUpdateDisabled={!enableFetchUsageMetricsData}
             onClick={refetchDataUsageMetrics}
             onRefresh={onRefresh}
             onRefreshChange={onRefreshChange}
