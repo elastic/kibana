@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { ReactNode } from 'react';
 
 export const UPDATE_ALL = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.upgradeAll',
@@ -91,5 +94,34 @@ export const RULE_TYPE_CHANGE_CALLOUT_DESCRIPTION = i18n.translate(
   {
     defaultMessage:
       'Your customization will be lost at update. Please take note of your customization or clone this rule before updating.',
+  }
+);
+
+export const LAST_UPDATE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.upgradeFlyout.header.lastUpdate',
+  {
+    defaultMessage: 'Last update',
+  }
+);
+
+export const UPDATED_BY_AND_WHEN = (updatedBy: ReactNode, updatedAt: ReactNode) => (
+  <FormattedMessage
+    id="xpack.securitySolution.detectionEngine.upgradeFlyout.header.updated"
+    defaultMessage="{updatedBy} on {updatedAt}"
+    values={{ updatedBy, updatedAt }}
+  />
+);
+
+export const SEVERITY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.upgradeFlyout.header.severity',
+  {
+    defaultMessage: 'Severity',
+  }
+);
+
+export const FIELD_UPDATES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.upgradeFlyout.header.fieldUpdates',
+  {
+    defaultMessage: 'Field updates',
   }
 );
