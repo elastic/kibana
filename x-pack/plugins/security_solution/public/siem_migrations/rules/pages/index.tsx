@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { EuiSkeletonLoading, EuiSkeletonText, EuiSkeletonTitle } from '@elastic/eui';
+import type { RouteComponentProps } from 'react-router-dom';
+import { useNavigation } from '../../../common/lib/kibana';
 import type { RuleMigration } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import { SecurityPageName } from '../../../app/types';
 import { HeaderPage } from '../../../common/components/header_page';
@@ -22,8 +24,18 @@ import { HeaderButtons } from '../components/header_buttons';
 import { useGetRuleMigrationsStatsAllQuery } from '../api/hooks/use_get_rule_migrations_stats_all';
 import { useRulePreviewFlyout } from '../hooks/use_rule_preview_flyout';
 import { NoMigrations } from '../components/no_migrations';
+import { NoSelectedMigrations } from '../components/no_selected_migrations';
+import { UnknownMigration } from '../components/unknown_migration';
 
-const RulesPageComponent: React.FC = () => {
+type RulesMigrationPageProps = RouteComponentProps<{ migrationId?: string }>;
+
+const RulesPageComponent: React.FC<RulesMigrationPageProps> = ({
+  match: {
+    params: { migrationId },
+  },
+}) => {
+  const { navigateTo } = useNavigation();
+
   const { data: ruleMigrationsStatsAll, isLoading: isLoadingMigrationsStats } =
     useGetRuleMigrationsStatsAllQuery();
 
@@ -36,20 +48,9 @@ const RulesPageComponent: React.FC = () => {
       .map((migration) => migration.migration_id);
   }, [isLoadingMigrationsStats, ruleMigrationsStatsAll]);
 
-  const [selectedMigrationId, setSelectedMigrationId] = useState<string | undefined>();
   const onMigrationIdChange = (selectedId?: string) => {
-    setSelectedMigrationId(selectedId);
+    navigateTo({ deepLinkId: SecurityPageName.siemMigrationsRules, path: selectedId });
   };
-
-  useEffect(() => {
-    if (!migrationsIds.length) {
-      return;
-    }
-    const index = migrationsIds.findIndex((id) => id === selectedMigrationId);
-    if (index === -1) {
-      setSelectedMigrationId(migrationsIds[0]);
-    }
-  }, [migrationsIds, selectedMigrationId]);
 
   const ruleActionsFactory = useCallback(
     (ruleMigration: RuleMigration, closeRulePreview: () => void) => {
@@ -63,6 +64,19 @@ const RulesPageComponent: React.FC = () => {
     ruleActionsFactory,
   });
 
+  const content = useMemo(() => {
+    if (!migrationsIds.length) {
+      return <NoMigrations />;
+    }
+    if (!migrationId) {
+      return <NoSelectedMigrations />;
+    }
+    if (migrationsIds.includes(migrationId)) {
+      return <RulesTable migrationId={migrationId} openRulePreview={openRulePreview} />;
+    }
+    return <UnknownMigration />;
+  }, [migrationId, migrationsIds, openRulePreview]);
+
   return (
     <>
       <NeedAdminForUpdateRulesCallOut />
@@ -72,7 +86,7 @@ const RulesPageComponent: React.FC = () => {
         <HeaderPage title={i18n.PAGE_TITLE}>
           <HeaderButtons
             migrationsIds={migrationsIds}
-            selectedMigrationId={selectedMigrationId}
+            selectedMigrationId={migrationId}
             onMigrationIdChange={onMigrationIdChange}
           />
         </HeaderPage>
@@ -84,13 +98,7 @@ const RulesPageComponent: React.FC = () => {
               <EuiSkeletonText />
             </>
           }
-          loadedContent={
-            selectedMigrationId ? (
-              <RulesTable migrationId={selectedMigrationId} openRulePreview={openRulePreview} />
-            ) : (
-              <NoMigrations />
-            )
-          }
+          loadedContent={content}
         />
         {rulePreviewFlyout}
       </SecuritySolutionPageWrapper>
