@@ -59,7 +59,8 @@ export const ChartFilters = memo<ChartFiltersProps>(
     const onClickRefreshButton = useCallback(() => onClick(), [onClick]);
 
     return (
-      <EuiFlexGroup responsive gutterSize="m">
+      <EuiFlexGroup responsive gutterSize="m" alignItems="center" justifyContent="flexEnd">
+        <EuiFlexItem grow={2} />
         <EuiFlexItem grow={1}>
           <EuiFilterGroup>{filters}</EuiFilterGroup>
         </EuiFlexItem>
