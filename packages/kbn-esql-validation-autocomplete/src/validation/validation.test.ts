@@ -506,7 +506,7 @@ describe('validation logic', () => {
     });
 
     describe('lookup', () => {
-      testErrorsAndWarnings('ROW a=1::LONG | LOOKUP t ON a', []);
+      testErrorsAndWarnings('ROW a=1::LONG | LOOKUP JOIN t ON a', []);
     });
 
     describe('keep', () => {
