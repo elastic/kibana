@@ -94,7 +94,9 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
      * Granular permission check for each action is performed
      * in the useBulkActions hook.
      */
-    const showBulkActions = (permissions.update || permissions.delete) && selectedCases.length > 0;
+    const showBulkActions =
+      (permissions.update || permissions.delete || permissions.reopenCase) &&
+      selectedCases.length > 0;
 
     const visibleCases =
       pagination?.pageSize && totalCases > pagination.pageSize ? pagination.pageSize : totalCases;
