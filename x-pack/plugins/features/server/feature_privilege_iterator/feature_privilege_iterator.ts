@@ -159,6 +159,10 @@ function mergeWithSubFeatures(
         mergedConfig.cases?.reopenCase ?? [],
         subFeaturePrivilege.cases?.reopenCase ?? []
       ),
+      assignCase: mergeArrays(
+        mergedConfig.cases?.assignCase ?? [],
+        subFeaturePrivilege.cases?.assignCase ?? []
+      ),
     };
   }
   return mergedConfig;
