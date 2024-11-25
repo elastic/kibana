@@ -12,7 +12,7 @@ import { DynamicStyleProperty } from '../../properties/dynamic_style_property';
 
 interface Props {
   error: Error;
-  style: DynamicStyleProperty<any>;
+  style: DynamicStyleProperty<object>;
 }
 
 export const StyleError = ({ error, style }: Props) => {

@@ -39,13 +39,13 @@ export function VectorStyleLegend({
 
   for (let i = 0; i < styles.length; i++) {
     const styleMetaDataRequest = styles[i].isDynamic()
-      ? (styles[i] as IDynamicStyleProperty<any>).getStyleMetaDataRequest()
+      ? (styles[i] as IDynamicStyleProperty<object>).getStyleMetaDataRequest()
       : undefined;
 
     const error = styleMetaDataRequest?.getError();
 
     const row = error ? (
-      <StyleError error={error} style={styles[i] as DynamicStyleProperty<any>} />
+      <StyleError error={error} style={styles[i] as DynamicStyleProperty<object>} />
     ) : (
       styles[i].renderLegendDetailRow({
         isLinesOnly,
