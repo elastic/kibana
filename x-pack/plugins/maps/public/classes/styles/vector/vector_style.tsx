@@ -75,7 +75,7 @@ import { IStyle } from '../style';
 import { IStyleProperty } from './properties/style_property';
 import { IField } from '../../fields/field';
 import { IVectorLayer } from '../../layers/vector_layer';
-import { IMvtVectorSource, IVectorSource } from '../../sources/vector_source';
+import { IVectorSource } from '../../sources/vector_source';
 import { createStyleFieldsHelper, StyleFieldsHelper } from './style_fields_helper';
 import { IESAggField } from '../../fields/agg';
 
@@ -721,20 +721,18 @@ export class VectorStyle implements IVectorStyle {
   };
 
   async hasLegendDetails() {
-    if (!this._source.isMvt()) {
-      return this._getLegendDetailStyleProperties().length > 0;
-    }
-    const source = this._source as IMvtVectorSource;
-
-    return source.hasLegendDetails && source.renderLegendDetails
-      ? await source.hasLegendDetails()
+    return this._source.hasLegendDetails && this._source.renderLegendDetails
+      ? await this._source.hasLegendDetails()
       : this._getLegendDetailStyleProperties().length > 0;
   }
 
   renderLegendDetails() {
     const symbolId = this._getSymbolId();
     const svg = symbolId ? this.getIconSvg(symbolId) : undefined;
-    const VectorLegend = (
+
+    return this._source.renderLegendDetails ? (
+      this._source.renderLegendDetails(this)
+    ) : (
       <VectorStyleLegend
         masks={this._layer.getMasks()}
         styles={this._getLegendDetailStyleProperties()}
@@ -744,13 +742,6 @@ export class VectorStyle implements IVectorStyle {
         svg={svg}
       />
     );
-
-    if (!this._source.isMvt()) {
-      return VectorLegend;
-    }
-
-    const source = this._source as IMvtVectorSource;
-    return source.renderLegendDetails ? source.renderLegendDetails(this) : VectorLegend;
   }
 
   clearFeatureState(featureCollection: FeatureCollection, mbMap: MbMap, sourceId: string) {

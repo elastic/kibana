@@ -6,10 +6,8 @@
  */
 
 import type { Map as MbMap } from '@kbn/mapbox-gl';
-import { ReactElement } from 'react';
 import { VectorSourceRequestMeta } from '../../../../common/descriptor_types';
 import { IVectorSource } from '.';
-import { IVectorStyle } from '../../styles/vector/vector_style';
 
 export interface IMvtVectorSource extends IVectorSource {
   /*
@@ -33,13 +31,4 @@ export interface IMvtVectorSource extends IVectorSource {
    * Syncs source specific styling with mbMap this allows custom sources to further style the map layers/filters
    */
   syncSourceStyle?(mbMap: MbMap, getLayerIds: () => string[]): void;
-
-  /**
-   * specifies if a source provides its own legend details or if the default vector_style is used if the source has this method it must also implement renderLegendDetails
-   */
-  hasLegendDetails?(): Promise<boolean>;
-  /**
-   * specifies if a source provides its own legend details or if the default vector_style is used
-   */
-  renderLegendDetails?(vectorStyle: IVectorStyle): ReactElement<any> | null;
 }
