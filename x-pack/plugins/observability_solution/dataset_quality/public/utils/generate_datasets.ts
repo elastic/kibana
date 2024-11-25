@@ -66,7 +66,7 @@ export function generateDatasets(
         [dataset]: {
           count,
           percentage: calculatePercentage({
-            totalDocs: totalDocsMap[dataset] ? totalDocsMap[dataset] + count : 0,
+            totalDocs: (totalDocsMap[dataset] ?? 0) + count,
             count,
           }),
         },
@@ -86,7 +86,7 @@ export function generateDatasets(
         [dataset]: {
           count,
           percentage: calculatePercentage({
-            totalDocs: totalDocsMap[dataset] + (failedMap[dataset]?.count ?? 0),
+            totalDocs: (totalDocsMap[dataset] ?? 0) + (failedMap[dataset]?.count ?? 0),
             count,
           }),
         },
@@ -109,7 +109,7 @@ export function generateDatasets(
         degradedDocStat: degradedMap[dataset] || DEFAULT_QUALITY_DOC_STATS,
         failedDocStat: failedMap[dataset] || DEFAULT_QUALITY_DOC_STATS,
         datasetIntegrationMap,
-        totalDocs: totalDocsMap[dataset] ?? 0,
+        totalDocs: (totalDocsMap[dataset] ?? 0) + (failedMap[dataset]?.count ?? 0),
       })
     );
   }
@@ -129,7 +129,8 @@ export function generateDatasets(
         integrationsMap[dataStream.integration ?? ''],
       degradedDocs: degradedMap[dataset.rawName] || dataset.degradedDocs,
       failedDocs: failedMap[dataset.rawName] || dataset.failedDocs,
-      docsInTimeRange: totalDocsMap[dataset.rawName] ?? 0,
+      docsInTimeRange:
+        (totalDocsMap[dataset.rawName] ?? 0) + (failedMap[dataset.rawName]?.count ?? 0),
       quality: mapPercentageToQuality(qualityStats),
     };
   });

@@ -189,7 +189,7 @@ export function createDegradedFieldsRecord({
     });
 }
 
-export const datasetNames = ['synth.1', 'synth.2', 'synth.3'];
+export const datasetNames = ['synth.1', 'synth.2', 'synth.3', 'synth.failed'];
 export const defaultNamespace = 'default';
 export const productionNamespace = 'production';
 

@@ -19,6 +19,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const samlAuth = getService('samlAuth');
   const roleScopedSupertest = getService('roleScopedSupertest');
   const synthtrace = getService('synthtrace');
+  const retry = getService('retry');
   const from = '2024-09-20T11:00:00.000Z';
   const to = '2024-09-20T11:01:00.000Z';
   const dataStreamType = 'logs';
@@ -108,9 +109,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               .create()
               .message('This is a log message')
               .timestamp(timestamp)
-              .dataset(dataset)
+              .dataset(syntheticsDataset)
               .namespace(namespace)
-              .logLevel('0')
+              .logLevel('5')
               .defaults({
                 'log.file.path': '/my-service.log',
                 'service.name': serviceName,
@@ -120,9 +121,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               .create()
               .message('This is a log message')
               .timestamp(timestamp)
-              .dataset(syntheticsDataset)
+              .dataset(dataset)
               .namespace(namespace)
-              .logLevel('5')
+              .logLevel('0')
               .defaults({
                 'log.file.path': '/my-service.log',
                 'service.name': serviceName,
@@ -138,17 +139,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('returns number of failed documents per DataStream', async () => {
-      const resp = await callApiAs({
-        roleScopedSupertestWithCookieCredentials: supertestAdminWithCookieCredentials,
-        apiParams: {
-          start: from,
-          end: to,
-        },
-      });
+      await retry.tryForTime(180 * 1000, async () => {
+        const resp = await callApiAs({
+          roleScopedSupertestWithCookieCredentials: supertestAdminWithCookieCredentials,
+          apiParams: {
+            start: from,
+            end: new Date().toISOString(),
+          },
+        });
 
-      expect(resp.body.failedDocs.length).to.be(1);
-      expect(resp.body.totalDocs[0].dataset).to.be(syntheticsDataStreamName);
-      expect(resp.body.totalDocs[0].count).to.be(1);
+        expect(resp.body.failedDocs.length).to.be(1);
+        expect(resp.body.failedDocs[0].dataset).to.be(syntheticsDataStreamName);
+        expect(resp.body.failedDocs[0].count).to.be(1);
+      });
     });
 
     it('returns empty when all documents are outside timeRange', async () => {

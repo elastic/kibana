@@ -107,6 +107,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         defaultNamespace,
         defaultNamespace,
         defaultNamespace,
+        defaultNamespace,
         productionNamespace,
       ]);
 
@@ -118,11 +119,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
       const lastActivityCol = cols['Last activity'];
       const activityCells = await lastActivityCol.getCellTexts();
-      const lastActivityCell = activityCells[activityCells.length - 1];
-      const restActivityCells = activityCells.slice(0, -1);
+      const lastActivityDegradedCell = activityCells[activityCells.length - 2];
+      const lastActivityFailedCell = activityCells[activityCells.length - 1];
+      const restActivityCells = activityCells.slice(0, -2);
 
       // The first cell of lastActivity should have data
-      expect(lastActivityCell).to.not.eql(PageObjects.datasetQuality.texts.noActivityText);
+      expect(lastActivityDegradedCell).to.not.eql(PageObjects.datasetQuality.texts.noActivityText);
+      expect(lastActivityFailedCell).to.not.eql(PageObjects.datasetQuality.texts.noActivityText);
       // The rest of the rows must show no activity
       expect(restActivityCells).to.eql([
         PageObjects.datasetQuality.texts.noActivityText,
@@ -136,7 +139,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const degradedDocsCol = cols['Degraded docs (%)'];
       const degradedDocsColCellTexts = await degradedDocsCol.getCellTexts();
-      expect(degradedDocsColCellTexts).to.eql(['0%', '0%', '0%', '100%']);
+      expect(degradedDocsColCellTexts).to.eql(['0%', '0%', '0%', '100%', '0%']);
     });
 
     it('shows failed docs percentage', async () => {
