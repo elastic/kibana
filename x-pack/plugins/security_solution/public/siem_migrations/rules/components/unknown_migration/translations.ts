@@ -17,6 +17,7 @@ export const UNKNOWN_MIGRATION = i18n.translate(
 export const UNKNOWN_MIGRATION_BODY = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.unknownMigrationBodyTitle',
   {
-    defaultMessage: 'Selected migration is unknown. Please select one of the available migraitons',
+    defaultMessage:
+      'Selected migration does not exist. Please select one of the available migraitons',
   }
 );

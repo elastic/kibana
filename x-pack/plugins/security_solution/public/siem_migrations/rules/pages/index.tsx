@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 
 import { EuiSkeletonLoading, EuiSkeletonText, EuiSkeletonTitle } from '@elastic/eui';
 import type { RouteComponentProps } from 'react-router-dom';
@@ -23,8 +23,6 @@ import { MissingPrivilegesCallOut } from '../../../detections/components/callout
 import { HeaderButtons } from '../components/header_buttons';
 import { useGetRuleMigrationsStatsAllQuery } from '../api/hooks/use_get_rule_migrations_stats_all';
 import { useRulePreviewFlyout } from '../hooks/use_rule_preview_flyout';
-import { NoMigrations } from '../components/no_migrations';
-import { NoSelectedMigrations } from '../components/no_selected_migrations';
 import { UnknownMigration } from '../components/unknown_migration';
 
 type RulesMigrationPageProps = RouteComponentProps<{ migrationId?: string }>;
@@ -48,6 +46,23 @@ const RulesPageComponent: React.FC<RulesMigrationPageProps> = ({
       .map((migration) => migration.migration_id);
   }, [isLoadingMigrationsStats, ruleMigrationsStatsAll]);
 
+  useEffect(() => {
+    if (isLoadingMigrationsStats) {
+      return;
+    }
+
+    // Navigate to landing page if there are no migrations
+    if (!migrationsIds.length) {
+      navigateTo({ deepLinkId: SecurityPageName.landing, path: 'siem_migrations' });
+      return;
+    }
+
+    // Navigate to the most recent migration if none is selected
+    if (!migrationId) {
+      navigateTo({ deepLinkId: SecurityPageName.siemMigrationsRules, path: migrationsIds[0] });
+    }
+  }, [isLoadingMigrationsStats, migrationId, migrationsIds, navigateTo]);
+
   const onMigrationIdChange = (selectedId?: string) => {
     navigateTo({ deepLinkId: SecurityPageName.siemMigrationsRules, path: selectedId });
   };
@@ -65,16 +80,10 @@ const RulesPageComponent: React.FC<RulesMigrationPageProps> = ({
   });
 
   const content = useMemo(() => {
-    if (!migrationsIds.length) {
-      return <NoMigrations />;
+    if (!migrationId || !migrationsIds.includes(migrationId)) {
+      return <UnknownMigration />;
     }
-    if (!migrationId) {
-      return <NoSelectedMigrations />;
-    }
-    if (migrationsIds.includes(migrationId)) {
-      return <RulesTable migrationId={migrationId} openRulePreview={openRulePreview} />;
-    }
-    return <UnknownMigration />;
+    return <RulesTable migrationId={migrationId} openRulePreview={openRulePreview} />;
   }, [migrationId, migrationsIds, openRulePreview]);
 
   return (
