@@ -37,7 +37,6 @@ export const useGridLayoutState = ({
   setDimensionsRef: (instance: HTMLDivElement | null) => void;
 } => {
   const rowRefs = useRef<Array<HTMLDivElement | null>>([]);
-  const rowContainerRefs = useRef<Array<HTMLDivElement | null>>([]);
   const panelRefs = useRef<Array<{ [id: string]: HTMLDivElement | null }>>([]);
 
   const expandedPanelId$ = useMemo(
@@ -74,7 +73,6 @@ export const useGridLayoutState = ({
 
     return {
       rowRefs,
-      rowContainerRefs,
       panelRefs,
       panelIds$,
       gridLayout$,

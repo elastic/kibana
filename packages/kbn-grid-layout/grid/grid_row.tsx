@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { forwardRef, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { combineLatest, map, pairwise, skip } from 'rxjs';
 
 import { EuiButtonIcon, EuiFlexGroup, EuiSpacer, EuiTitle, transparentize } from '@elastic/eui';
@@ -54,6 +54,7 @@ export const GridRow = forwardRef<
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [rowIndex]
     );
+    const rowContainer = useRef<HTMLDivElement | null>(null);
 
     /** Set initial styles based on state at mount to prevent styles from "blipping" */
     const initialStyles = useMemo(() => {
@@ -91,7 +92,7 @@ export const GridRow = forwardRef<
               gridLayout[rowIndex]
             )}, ${rowHeight}px)`;
 
-            const rowContainerRef = gridLayoutStateManager.rowContainerRefs.current[rowIndex];
+            const rowContainerRef = rowContainer.current;
             if (!rowContainerRef) return;
 
             if (expandedPanelId) {
@@ -231,7 +232,7 @@ export const GridRow = forwardRef<
     }, [panelIds, rowIndex, gridLayoutStateManager, renderPanelContents, setInteractionEvent]);
 
     return (
-      <div ref={(element) => (gridLayoutStateManager.rowContainerRefs.current[rowIndex] = element)}>
+      <div ref={rowContainer}>
         {rowIndex !== 0 && (
           <GridRowSummary
             isCollapsed={isCollapsed}
