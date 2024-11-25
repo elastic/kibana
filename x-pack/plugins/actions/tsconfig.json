@@ -47,7 +47,8 @@
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/security-plugin-types-server",
     "@kbn/core-application-common",
-    "@kbn/cloud-plugin"
+    "@kbn/cloud-plugin",
+    "@kbn/core-http-server-utils"
   ],
   "exclude": [
     "target/**/*",

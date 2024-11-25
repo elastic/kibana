@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { waitFor, renderHook } from '@testing-library/react';
 
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { useGetChoices, UseGetChoices, UseGetChoicesProps } from './use_get_choices';
+import { useGetChoices } from './use_get_choices';
 import { getChoices } from './api';
 
 jest.mock('./api');
@@ -69,7 +69,7 @@ describe('useGetChoices', () => {
   const fields = ['priority'];
 
   it('init', async () => {
-    const { result, waitForNextUpdate } = renderHook<UseGetChoicesProps, UseGetChoices>(() =>
+    const { result } = renderHook(() =>
       useGetChoices({
         http: services.http,
         actionConnector,
@@ -79,16 +79,16 @@ describe('useGetChoices', () => {
       })
     );
 
-    await waitForNextUpdate();
-
-    expect(result.current).toEqual({
-      isLoading: false,
-      choices: getChoicesResponse,
-    });
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        isLoading: false,
+        choices: getChoicesResponse,
+      })
+    );
   });
 
   it('returns an empty array when connector is not presented', async () => {
-    const { result } = renderHook<UseGetChoicesProps, UseGetChoices>(() =>
+    const { result } = renderHook(() =>
       useGetChoices({
         http: services.http,
         actionConnector: undefined,
@@ -105,7 +105,7 @@ describe('useGetChoices', () => {
   });
 
   it('it calls onSuccess', async () => {
-    const { waitForNextUpdate } = renderHook<UseGetChoicesProps, UseGetChoices>(() =>
+    renderHook(() =>
       useGetChoices({
         http: services.http,
         actionConnector,
@@ -115,9 +115,7 @@ describe('useGetChoices', () => {
       })
     );
 
-    await waitForNextUpdate();
-
-    expect(onSuccess).toHaveBeenCalledWith(getChoicesResponse);
+    await waitFor(() => expect(onSuccess).toHaveBeenCalledWith(getChoicesResponse));
   });
 
   it('it displays an error when service fails', async () => {
@@ -126,7 +124,7 @@ describe('useGetChoices', () => {
       serviceMessage: 'An error occurred',
     });
 
-    const { waitForNextUpdate } = renderHook<UseGetChoicesProps, UseGetChoices>(() =>
+    renderHook(() =>
       useGetChoices({
         http: services.http,
         actionConnector,
@@ -136,12 +134,12 @@ describe('useGetChoices', () => {
       })
     );
 
-    await waitForNextUpdate();
-
-    expect(services.notifications.toasts.addDanger).toHaveBeenCalledWith({
-      text: 'An error occurred',
-      title: 'Unable to get choices',
-    });
+    await waitFor(() =>
+      expect(services.notifications.toasts.addDanger).toHaveBeenCalledWith({
+        text: 'An error occurred',
+        title: 'Unable to get choices',
+      })
+    );
   });
 
   it('it displays an error when http throws an error', async () => {
@@ -149,7 +147,7 @@ describe('useGetChoices', () => {
       throw new Error('An error occurred');
     });
 
-    renderHook<UseGetChoicesProps, UseGetChoices>(() =>
+    renderHook(() =>
       useGetChoices({
         http: services.http,
         actionConnector,
@@ -159,10 +157,12 @@ describe('useGetChoices', () => {
       })
     );
 
-    expect(services.notifications.toasts.addDanger).toHaveBeenCalledWith({
-      text: 'An error occurred',
-      title: 'Unable to get choices',
-    });
+    await waitFor(() =>
+      expect(services.notifications.toasts.addDanger).toHaveBeenCalledWith({
+        text: 'An error occurred',
+        title: 'Unable to get choices',
+      })
+    );
   });
 
   it('returns an empty array if the response is not an array', async () => {
@@ -171,7 +171,7 @@ describe('useGetChoices', () => {
       data: {},
     });
 
-    const { result } = renderHook<UseGetChoicesProps, UseGetChoices>(() =>
+    const { result } = renderHook(() =>
       useGetChoices({
         http: services.http,
         actionConnector: undefined,
@@ -181,9 +181,11 @@ describe('useGetChoices', () => {
       })
     );
 
-    expect(result.current).toEqual({
-      isLoading: false,
-      choices: [],
+    await waitFor(() => {
+      expect(result.current).toEqual({
+        isLoading: false,
+        choices: [],
+      });
     });
   });
 });
