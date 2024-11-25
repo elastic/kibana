@@ -12,6 +12,7 @@ import {
 } from '../../lib/v2/constants';
 import { entityTypeDefinitionRt } from '../../lib/v2/types';
 import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
+import { EntityDefinitionConflict } from '../../lib/v2/errors/entity_definition_conflict';
 
 const createTypeDefinitionRoute = createEntityManagerServerRoute({
   endpoint: 'POST /internal/entities/v2/definitions/types',
@@ -26,31 +27,28 @@ const createTypeDefinitionRoute = createEntityManagerServerRoute({
     }),
   }),
   handler: async ({ request, response, params, getScopedClient }) => {
-    const client = await getScopedClient({ request });
-    const result = await client.v2.storeTypeDefinition(params.body.type);
+    try {
+      const client = await getScopedClient({ request });
+      const type = await client.v2.storeTypeDefinition(params.body.type);
 
-    if (result.status === 'success') {
       return response.created({
         body: {
-          type: result.resource,
+          type,
         },
         headers: {
-          location: `GET /internal/entities/v2/definitions/types/${result.resource.id}`,
+          location: `GET /internal/entities/v2/definitions/types/${type.id}`,
         },
       });
-    } else if (result.status === 'conflict') {
-      return response.conflict({
-        body: {
-          message: result.reason,
-        },
-      });
-    } else if (result.status === 'error') {
-      return response.customError({
-        statusCode: 500,
-        body: {
-          message: result.reason,
-        },
-      });
+    } catch (error) {
+      if (error instanceof EntityDefinitionConflict) {
+        return response.conflict({
+          body: {
+            message: error.message,
+          },
+        });
+      }
+
+      throw error;
     }
   },
 });
@@ -64,22 +62,13 @@ const readTypeDefinitionsRoute = createEntityManagerServerRoute({
   },
   handler: async ({ request, response, getScopedClient }) => {
     const client = await getScopedClient({ request });
-    const result = await client.v2.readTypeDefinitions();
+    const types = await client.v2.readTypeDefinitions();
 
-    if (result.status === 'success') {
-      return response.ok({
-        body: {
-          types: result.resource,
-        },
-      });
-    } else if (result.status === 'error') {
-      return response.customError({
-        statusCode: 500,
-        body: {
-          message: result.reason,
-        },
-      });
-    }
+    return response.ok({
+      body: {
+        types,
+      },
+    });
   },
 });
 

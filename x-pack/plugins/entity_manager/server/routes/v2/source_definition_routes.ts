@@ -12,6 +12,7 @@ import {
 } from '../../lib/v2/constants';
 import { entitySourceDefinitionRt } from '../../lib/v2/types';
 import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
+import { EntityDefinitionConflict } from '../../lib/v2/errors/entity_definition_conflict';
 
 const createSourceDefinitionRoute = createEntityManagerServerRoute({
   endpoint: 'POST /internal/entities/v2/definitions/sources',
@@ -26,31 +27,28 @@ const createSourceDefinitionRoute = createEntityManagerServerRoute({
     }),
   }),
   handler: async ({ request, response, params, getScopedClient }) => {
-    const client = await getScopedClient({ request });
-    const result = await client.v2.storeSourceDefinition(params.body.source);
+    try {
+      const client = await getScopedClient({ request });
+      const source = await client.v2.storeSourceDefinition(params.body.source);
 
-    if (result.status === 'success') {
       return response.created({
         body: {
-          type: result.resource,
+          source,
         },
         headers: {
-          location: `GET /internal/entities/v2/definitions/sources/${result.resource.id}`,
+          location: `GET /internal/entities/v2/definitions/sources/${source.id}`,
         },
       });
-    } else if (result.status === 'conflict') {
-      return response.conflict({
-        body: {
-          message: result.reason,
-        },
-      });
-    } else if (result.status === 'error') {
-      return response.customError({
-        statusCode: 500,
-        body: {
-          message: result.reason,
-        },
-      });
+    } catch (error) {
+      if (error instanceof EntityDefinitionConflict) {
+        response.conflict({
+          body: {
+            message: error.message,
+          },
+        });
+      }
+
+      throw error;
     }
   },
 });
@@ -64,22 +62,13 @@ const readSourceDefinitionsRoute = createEntityManagerServerRoute({
   },
   handler: async ({ request, response, getScopedClient }) => {
     const client = await getScopedClient({ request });
-    const result = await client.v2.readSourceDefinitions();
+    const sources = await client.v2.readSourceDefinitions();
 
-    if (result.status === 'success') {
-      return response.ok({
-        body: {
-          sources: result.resource,
-        },
-      });
-    } else if (result.status === 'error') {
-      return response.customError({
-        statusCode: 500,
-        body: {
-          message: result.reason,
-        },
-      });
-    }
+    return response.ok({
+      body: {
+        sources,
+      },
+    });
   },
 });
 

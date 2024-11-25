@@ -29,8 +29,10 @@ export type EntitySourceDefinition = z.TypeOf<typeof entitySourceDefinitionRt>;
 
 // Stored definitions
 
+export type DefinitionType = 'type' | 'source';
+
 export interface BaseEntityDefinition {
-  definition_type: 'type' | 'source';
+  definition_type: DefinitionType;
   template_version: number;
 }
 
@@ -41,26 +43,3 @@ export interface StoredEntityTypeDefinition extends BaseEntityDefinition {
 export interface StoredEntitySourceDefinition extends BaseEntityDefinition {
   source: EntitySourceDefinition;
 }
-
-// Operation statuses
-
-interface SuccessStatus<TResource> {
-  status: 'success';
-  resource: TResource;
-}
-
-interface ConflictStatus {
-  status: 'conflict';
-  reason: string;
-}
-
-interface ErrorStatus {
-  status: 'error';
-  reason: string;
-}
-
-export type CreateOperationStatus<TResource> =
-  | SuccessStatus<TResource>
-  | ConflictStatus
-  | ErrorStatus;
-export type ReadOperationStatus<TResource> = SuccessStatus<TResource> | ErrorStatus;

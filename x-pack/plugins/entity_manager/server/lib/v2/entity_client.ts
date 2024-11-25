@@ -44,13 +44,8 @@ export class EntityClient {
     filters?: string[];
     limit?: number;
   }) {
-    const result = await this.readSourceDefinitions({ type });
+    const sources = await this.readSourceDefinitions({ type });
 
-    if (result.status === 'error') {
-      throw new Error(result.reason);
-    }
-
-    const sources = result.resource;
     if (sources.length === 0) {
       throw new UnknownEntityType(`No sources found for entity type [${type}]`);
     }
