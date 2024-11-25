@@ -21,7 +21,7 @@ export function UpdateExecutionContextOnRouteChange({
   useExecutionContext(core.executionContext, {
     type: 'application',
     name: 'apm',
-    page: 'mary-test',
+    page: lastMatch?.match?.path,
   });
 
   return children;
