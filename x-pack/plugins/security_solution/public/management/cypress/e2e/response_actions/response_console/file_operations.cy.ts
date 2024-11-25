@@ -88,7 +88,7 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
           return cy
             .task('execCommandOnHost', {
               hostname: createdHost.hostname,
-              command: `sudo tail -n 500 /opt/Elastic/Endpoint/state/log/endpoint-000000.log`,
+              command: `sudo tail -n 50 /opt/Elastic/Endpoint/state/log/endpoint-000000.log`,
             })
             .then<void>((output) => {
               logger.info(
