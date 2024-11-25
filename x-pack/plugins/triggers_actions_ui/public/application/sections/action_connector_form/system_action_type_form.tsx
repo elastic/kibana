@@ -27,7 +27,7 @@ import {
 import { isEmpty, partition, some } from 'lodash';
 import { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
 import { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
-import { transformActionVariables } from '@kbn/alerts-ui-shared';
+import { checkActionFormActionTypeEnabled, transformActionVariables } from '@kbn/alerts-ui-shared';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import {
   IErrorObject,
@@ -167,8 +167,12 @@ export const SystemActionTypeForm = ({
   };
 
   const ParamsFieldsComponent = actionTypeRegistered.actionParamsFields;
+  const checkEnabledResult = checkActionFormActionTypeEnabled(
+    actionTypesIndex[actionConnector.actionTypeId],
+    []
+  );
 
-  const accordionContent = (
+  const accordionContent = checkEnabledResult.isEnabled ? (
     <>
       <EuiSplitPanel.Inner color="plain">
         {ParamsFieldsComponent ? (
@@ -212,6 +216,8 @@ export const SystemActionTypeForm = ({
         ) : null}
       </EuiSplitPanel.Inner>
     </>
+  ) : (
+    checkEnabledResult.messageCard
   );
 
   return (

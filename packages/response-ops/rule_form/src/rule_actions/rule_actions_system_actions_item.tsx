@@ -23,13 +23,19 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { RuleActionParam, RuleSystemAction } from '@kbn/alerting-types';
-import { getAvailableActionVariables } from '@kbn/alerts-ui-shared';
+import {
+  getAvailableActionVariables,
+  IsDisabledResult,
+  IsEnabledResult,
+  checkActionFormActionTypeEnabled,
+  ActionConnector,
+} from '@kbn/alerts-ui-shared';
 import { SavedObjectAttribute } from '@kbn/core/types';
 import { i18n } from '@kbn/i18n';
 import { isEmpty, some } from 'lodash';
 import React, { Suspense, useCallback, useMemo, useState } from 'react';
-import { RuleFormParamsErrors } from '../common';
 import { useRuleFormDispatch, useRuleFormState } from '../hooks';
+import { RuleFormParamsErrors } from '../common';
 import {
   ACTION_ERROR_TOOLTIP,
   ACTION_WARNING_TITLE,
@@ -45,6 +51,64 @@ interface RuleActionsSystemActionsItemProps {
   producerId: string;
 }
 
+interface SystemActionAccordionContentProps extends RuleActionsSystemActionsItemProps {
+  connector: ActionConnector;
+  checkEnabledResult?: IsEnabledResult | IsDisabledResult | null;
+  warning?: string | null;
+  onParamsChange: (key: string, value: RuleActionParam) => void;
+}
+
+const SystemActionAccordionContent: React.FC<SystemActionAccordionContentProps> = React.memo(
+  ({ connector, checkEnabledResult, action, index, producerId, warning, onParamsChange }) => {
+    const { aadTemplateFields } = useRuleFormState();
+    const { euiTheme } = useEuiTheme();
+    const plain = useEuiBackgroundColor('plain');
+
+    if (!connector || !checkEnabledResult) {
+      return null;
+    }
+
+    if (!checkEnabledResult.isEnabled) {
+      return (
+        <EuiFlexGroup
+          direction="column"
+          style={{
+            padding: euiTheme.size.l,
+            backgroundColor: plain,
+            borderRadius: euiTheme.border.radius.medium,
+          }}
+        >
+          <EuiFlexItem>{checkEnabledResult.messageCard}</EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
+    return (
+      <EuiFlexGroup
+        data-test-subj="ruleActionsSystemActionsItemAccordionContent"
+        direction="column"
+        style={{
+          padding: euiTheme.size.l,
+          backgroundColor: plain,
+        }}
+      >
+        <EuiFlexItem>
+          <RuleActionsMessage
+            useDefaultMessage
+            action={action}
+            index={index}
+            connector={connector}
+            producerId={producerId}
+            warning={warning}
+            templateFields={aadTemplateFields}
+            onParamsChange={onParamsChange}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+);
+
 export const RuleActionsSystemActionsItem = (props: RuleActionsSystemActionsItemProps) => {
   const { action, index, producerId } = props;
 
@@ -54,7 +118,6 @@ export const RuleActionsSystemActionsItem = (props: RuleActionsSystemActionsItem
     selectedRuleType,
     connectorTypes,
     connectors,
-    aadTemplateFields,
   } = useRuleFormState();
 
   const [isOpen, setIsOpen] = useState(true);
@@ -64,7 +127,6 @@ export const RuleActionsSystemActionsItem = (props: RuleActionsSystemActionsItem
   const [warning, setWarning] = useState<string | null>(null);
 
   const subdued = useEuiBackgroundColor('subdued');
-  const plain = useEuiBackgroundColor('plain');
   const { euiTheme } = useEuiTheme();
 
   const dispatch = useRuleFormDispatch();
@@ -155,6 +217,13 @@ export const RuleActionsSystemActionsItem = (props: RuleActionsSystemActionsItem
       storedActionParamsForAadToggle,
     ]
   );
+
+  const checkEnabledResult = useMemo(() => {
+    if (!actionType) {
+      return null;
+    }
+    return checkActionFormActionTypeEnabled(actionType, []);
+  }, [actionType]);
 
   return (
     <EuiAccordion
@@ -247,27 +316,15 @@ export const RuleActionsSystemActionsItem = (props: RuleActionsSystemActionsItem
         </EuiPanel>
       }
     >
-      <EuiFlexGroup
-        data-test-subj="ruleActionsSystemActionsItemAccordionContent"
-        direction="column"
-        style={{
-          padding: euiTheme.size.l,
-          backgroundColor: plain,
-        }}
-      >
-        <EuiFlexItem>
-          <RuleActionsMessage
-            useDefaultMessage
-            action={action}
-            index={index}
-            connector={connector}
-            producerId={producerId}
-            warning={warning}
-            templateFields={aadTemplateFields}
-            onParamsChange={onParamsChange}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <SystemActionAccordionContent
+        action={action}
+        index={index}
+        producerId={producerId}
+        warning={warning}
+        connector={connector}
+        checkEnabledResult={checkEnabledResult}
+        onParamsChange={onParamsChange}
+      />
     </EuiAccordion>
   );
 };
