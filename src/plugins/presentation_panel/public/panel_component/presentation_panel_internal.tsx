@@ -48,7 +48,6 @@ export const PresentationPanelInternal = <
   const setDragHandle = useCallback(
     (node: HTMLElement | null) => {
       dragHandleRefs.current.test = node;
-      console.log('SET DRAG HANDLES', node);
       setDragHandles?.(Object.values(dragHandleRefs.current).filter((value) => Boolean(value)));
     },
     [setDragHandles]

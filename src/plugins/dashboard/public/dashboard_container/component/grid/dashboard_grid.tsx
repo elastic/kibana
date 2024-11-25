@@ -7,75 +7,47 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import 'react-resizable/css/styles.css';
 import 'react-grid-layout/css/styles.css';
+import 'react-resizable/css/styles.css';
 
-import { pick } from 'lodash';
-import classNames from 'classnames';
-import React, { useState, useMemo, useCallback, useEffect, Profiler } from 'react';
 import { GridLayout, type GridLayoutData } from '@kbn/grid-layout';
+import classNames from 'classnames';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
+import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import {
   useBatchedPublishingSubjects,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
-import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { DashboardPanelState } from '../../../../common';
-import { DashboardGridItem } from './dashboard_grid_item';
-import { useDashboardGridSettings } from './use_dashboard_grid_settings';
-import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 import { arePanelLayoutsEqual } from '../../../dashboard_api/are_panel_layouts_equal';
+import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../../dashboard_api/use_dashboard_internal_api';
 import {
   DASHBOARD_GRID_COLUMN_COUNT,
   DASHBOARD_GRID_HEIGHT,
   DASHBOARD_MARGIN_SIZE,
 } from '../../../dashboard_constants';
+import { DashboardGridItem } from './dashboard_grid_item';
 
-export const DashboardGrid = ({
-  dashboardContainer,
-  viewportWidth,
-}: {
-  dashboardContainer?: HTMLElement;
-  viewportWidth: number;
-}) => {
+export const DashboardGrid = () => {
   const dashboardApi = useDashboardApi();
   const dashboardInternalApi = useDashboardInternalApi();
 
   const animatePanelTransforms = useStateFromPublishingSubject(
     dashboardInternalApi.animatePanelTransforms$
   );
-  const [expandedPanelId, focusedPanelId, panels, useMargins, viewMode] =
+  const [expandedPanelId, focusedPanelId, panels, useMargins, viewMode, controlGroupApi] =
     useBatchedPublishingSubjects(
       dashboardApi.expandedPanelId,
       dashboardApi.focusedPanelId$,
       dashboardApi.panels$,
       dashboardApi.settings.useMargins$,
-      dashboardApi.viewMode
+      dashboardApi.viewMode,
+      dashboardApi.controlGroupApi$
     );
-
-  // const [currentLayout, setCurrentLayout] = useState(() => {
-  //   const singleRow: GridLayoutData[number] = {
-  //     title: 'First row',
-  //     isCollapsed: false,
-  //     panels: {},
-  //   };
-
-  //   Object.keys(panels).forEach((panelId) => {
-  //     const gridData = panels[panelId].gridData;
-  //     singleRow.panels[panelId] = {
-  //       id: panelId,
-  //       row: gridData.y,
-  //       column: gridData.x,
-  //       width: gridData.w,
-  //       height: gridData.h,
-  //     };
-  //   });
-
-  //   return [singleRow] as GridLayoutData;
-  // });
 
   const currentLayout: GridLayoutData = useMemo(() => {
     const singleRow: GridLayoutData[number] = {
@@ -98,25 +70,11 @@ export const DashboardGrid = ({
     return [singleRow];
   }, [panels]);
 
-  /**
-   *  Track panel maximized state delayed by one tick and use it to prevent
-   * panel sliding animations on maximize and minimize.
-   */
-  const [delayedIsPanelExpanded, setDelayedIsPanelMaximized] = useState(false);
-  useEffect(() => {
-    if (expandedPanelId) {
-      setDelayedIsPanelMaximized(true);
-    } else {
-      setTimeout(() => setDelayedIsPanelMaximized(false), 0);
-    }
-  }, [expandedPanelId]);
-
   const appFixedViewport = useAppFixedViewport();
 
   const onLayoutChange = useCallback(
     (newLayout: GridLayoutData) => {
       if (viewMode !== ViewMode.EDIT) return;
-      console.log('ON LAYOUT CHANGE', newLayout[0]);
 
       const currentPanels = dashboardApi.panels$.getValue();
       const updatedPanels: { [key: string]: DashboardPanelState } = Object.values(
@@ -137,7 +95,6 @@ export const DashboardGrid = ({
       if (!arePanelLayoutsEqual(currentPanels, updatedPanels)) {
         dashboardApi.setPanels(updatedPanels);
       }
-      // setCurrentLayout(newLayout);
     },
     [dashboardApi, viewMode]
   );
@@ -146,7 +103,7 @@ export const DashboardGrid = ({
     'dshLayout-withoutMargins': !useMargins,
     'dshLayout--viewing': viewMode === ViewMode.VIEW,
     'dshLayout--editing': viewMode !== ViewMode.VIEW,
-    'dshLayout--noAnimation': !animatePanelTransforms || delayedIsPanelExpanded,
+    'dshLayout--noAnimation': !animatePanelTransforms,
     'dshLayout-isMaximizedPanel': expandedPanelId !== undefined,
   });
 
@@ -154,7 +111,6 @@ export const DashboardGrid = ({
     (id: string, setDragHandles: (refs: Array<HTMLElement | null>) => void) => {
       const currentPanels = dashboardApi.panels$.getValue();
       if (!currentPanels[id]) return;
-      console.log('renderPanelContents');
 
       const type = currentPanels[id].type;
       return (
@@ -181,33 +137,40 @@ export const DashboardGrid = ({
     };
   }, []);
 
+  const [controlGroupReady, setControlGroupReady] = useState<boolean>(false);
+  useEffect(() => {
+    // used to wait for the "true height" when the dashboard is loading with an expanded panel VIA the url
+    let mounted = true;
+    controlGroupApi?.untilInitialized().then(() => {
+      if (!mounted) return;
+      setControlGroupReady(true);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, [controlGroupApi]);
+
+  const memoizedgridLayout = useMemo(() => {
+    // TODO - test to see if this memo makes a difference
+    return (
+      <GridLayout
+        layout={currentLayout}
+        gridSettings={gridSettings}
+        renderPanelContents={renderPanelContents}
+        onLayoutChange={onLayoutChange}
+        expandedPanelId={expandedPanelId}
+      />
+    );
+  }, [currentLayout, gridSettings, renderPanelContents, onLayoutChange, expandedPanelId]);
+
   // // in print mode, dashboard layout is not controlled by React Grid Layout
   // if (viewMode === ViewMode.PRINT) {
   //   return <>{panelComponents}</>;
   // }
 
   return (
-    <Profiler
-      id="KbnGridLayout"
-      onRender={(id, phase, actualDuration, baseDuration, startTime, commitTime) => {
-        console.log('on render', {
-          id,
-          phase,
-          actualDuration,
-          baseDuration,
-          startTime,
-          commitTime,
-        });
-      }}
-    >
-      <div className={classes}>
-        <GridLayout
-          layout={currentLayout}
-          gridSettings={gridSettings}
-          renderPanelContents={renderPanelContents}
-          onLayoutChange={onLayoutChange}
-        />
-      </div>
-    </Profiler>
+    <div className={classes}>
+      {!expandedPanelId || controlGroupReady ? memoizedgridLayout : <></>}
+    </div>
   );
 };

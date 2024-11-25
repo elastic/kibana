@@ -69,7 +69,7 @@ const createAndMountDashboardGrid = async (panels: DashboardPanelMap = PANELS) =
   const component = mountWithIntl(
     <DashboardContext.Provider value={api}>
       <DashboardInternalContext.Provider value={internalApi}>
-        <DashboardGrid viewportWidth={1000} />
+        <DashboardGrid />
       </DashboardInternalContext.Provider>
     </DashboardContext.Provider>
   );

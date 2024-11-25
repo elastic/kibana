@@ -64,6 +64,9 @@ export interface GridLayoutStateManager {
   activePanel$: BehaviorSubject<ActivePanel | undefined>;
   interactionEvent$: BehaviorSubject<PanelInteractionEvent | undefined>;
 
+  expandedPanelId$: BehaviorSubject<string | undefined>;
+  isMobileView$: BehaviorSubject<boolean>;
+
   rowRefs: React.MutableRefObject<Array<HTMLDivElement | null>>;
   panelRefs: React.MutableRefObject<Array<{ [id: string]: HTMLDivElement | null }>>;
 }
@@ -117,3 +120,5 @@ export interface PanelPlacementSettings {
   height: number;
   width: number;
 }
+
+export type GridAccessMode = 'VIEW' | 'EDIT';

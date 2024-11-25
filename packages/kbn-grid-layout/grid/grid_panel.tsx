@@ -10,18 +10,12 @@
 import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { combineLatest, skip } from 'rxjs';
 
-import {
-  EuiIcon,
-  EuiPanel,
-  euiFullHeight,
-  transparentize,
-  useEuiOverflowScroll,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiIcon, transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 
 import { GridLayoutStateManager, PanelInteractionEvent } from './types';
+import { getKeysInOrder } from './utils/resolve_grid_row';
 
 export const GridPanel = forwardRef<
   HTMLDivElement,
@@ -138,8 +132,55 @@ export const GridPanel = forwardRef<
             }
           });
 
+        const expandPanelSubscription = combineLatest([
+          gridLayoutStateManager.expandedPanelId$,
+          gridLayoutStateManager.isMobileView$,
+        ])
+          .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
+          .subscribe(([expandedPanelId, isMobileView]) => {
+            const ref = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
+            const gridLayout = gridLayoutStateManager.gridLayout$.getValue();
+            const allPanels = gridLayout[rowIndex].panels;
+            const panel = allPanels[panelId];
+            if (!ref || !panel) return;
+
+            if (expandedPanelId && expandedPanelId === panelId) {
+              // Translate the expanded panel back to its initial position
+              // since all other GridRow elements have been moved off-screen
+              ref.style.transform = 'translate(9999px, 9999px)';
+
+              // Stretch the expanded panel to occupy the remaining available space in the viewport.
+              ref.style.position = `absolute`;
+              ref.style.top = `0`;
+              ref.style.left = `0`;
+              ref.style.width = `100%`;
+              ref.style.height = `100%`;
+              return;
+            } else {
+              ref.style.position = ``;
+              ref.style.transform = ``;
+            }
+
+            if (isMobileView) {
+              const sortedKeys = getKeysInOrder(gridLayout[rowIndex]);
+              const currentPanelPosition = sortedKeys.indexOf(panelId);
+              const sortedKeysBefore = sortedKeys.slice(0, currentPanelPosition);
+              const responsiveGridRowStart = sortedKeysBefore.reduce(
+                (acc, key) => acc + allPanels[key].height,
+                1
+              );
+              ref.style.gridColumnStart = `1`;
+              ref.style.gridColumnEnd = `-1`;
+              ref.style.gridRowStart = `${responsiveGridRowStart}`;
+              ref.style.gridRowEnd = `${responsiveGridRowStart + panel.height}`;
+              // we shouldn't allow interactions on mobile view so we can return early
+              return;
+            }
+          });
+
         return () => {
           styleSubscription.unsubscribe();
+          expandPanelSubscription.unsubscribe();
         };
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -182,7 +223,6 @@ export const GridPanel = forwardRef<
      */
     const onMouseDown = useCallback(
       (e: MouseEvent) => {
-        e.stopPropagation();
         interactionStart(panelId, 'drag', e);
       },
       [panelId, interactionStart]
@@ -242,7 +282,7 @@ export const GridPanel = forwardRef<
             {/* drag handle */}
             {!dragHandleCount && (
               <div
-                className="dragHandle"
+                className="kbnGridPanel__dragHandle"
                 css={css`
                   opacity: 0;
                   display: flex;
@@ -266,6 +306,10 @@ export const GridPanel = forwardRef<
                     cursor: grabbing;
                     opacity: 1 !important;
                   }
+                  .kbnGrid--static & {
+                    opacity: 0 !important;
+                    display: none;
+                  }
                 `}
                 onMouseDown={(e) => interactionStart(panelId, 'drag', e)}
               >
@@ -275,7 +319,7 @@ export const GridPanel = forwardRef<
             {/* Resize handle */}
             <div
               // ref={resizeHandleRef}
-              className="resizeHandle"
+              className="kbnGridPanel__resizeHandle"
               onMouseDown={(e) => interactionStart(panelId, 'resize', e)}
               css={css`
                 right: 0;
@@ -294,6 +338,10 @@ export const GridPanel = forwardRef<
                   opacity: 1;
                   background-color: ${transparentize(euiThemeVars.euiColorSuccess, 0.05)};
                   cursor: se-resize;
+                }
+                .kbnGrid--static & {
+                  opacity: 0 !important;
+                  display: none;
                 }
               `}
             />

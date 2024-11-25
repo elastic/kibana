@@ -115,7 +115,6 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
         `;
 
     const renderedEmbeddable = useMemo(() => {
-      console.log('renderedEmbeddable');
       const panelProps = {
         showBadges: true,
         showBorder: useMargins,
