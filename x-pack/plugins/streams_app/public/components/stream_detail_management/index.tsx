@@ -12,6 +12,8 @@ import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { RedirectTo } from '../redirect_to';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { StreamDetailRouting } from '../stream_detail_routing';
+import { StreamDetailEnriching } from '../stream_detail_enriching';
+import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
 
 type ManagementSubTabs = 'route' | 'enrich' | 'schemaEditor';
 
@@ -41,13 +43,17 @@ export function StreamDetailManagement({
       }),
     },
     enrich: {
-      content: <></>,
+      content: (
+        <StreamDetailEnriching definition={definition} refreshDefinition={refreshDefinition} />
+      ),
       label: i18n.translate('xpack.streams.streamDetailView.enrichingTab', {
         defaultMessage: 'Extract field',
       }),
     },
     schemaEditor: {
-      content: <></>,
+      content: (
+        <StreamDetailSchemaEditor definition={definition} refreshDefinition={refreshDefinition} />
+      ),
       label: i18n.translate('xpack.streams.streamDetailView.schemaEditorTab', {
         defaultMessage: 'Schema editor',
       }),
