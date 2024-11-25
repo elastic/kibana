@@ -117,18 +117,13 @@ export class CrowdstrikeConnector extends SubActionConnector<
       schema: CrowdstrikeGetAgentsParamsSchema,
     });
 
-    this.registerSubAction({
-      name: SUB_ACTION.EXECUTE_RTR_COMMAND,
-      method: 'executeRTRCommand',
-      schema: CrowdstrikeRTRCommandParamsSchema, // Define a proper schema for the command
-    });
-    // if (this.experimentalFeatures.crowdstrikeConnectorRTROn) {
-    //   this.registerSubAction({
-    //     name: SUB_ACTION.BATCH_INIT_RTR_SESSION,
-    //     method: 'batchInitRTRSession',
-    //     schema: CrowdstrikeInitRTRParamsSchema,
-    //   });
-    // }
+    if (this.experimentalFeatures.crowdstrikeConnectorRTROn) {
+      this.registerSubAction({
+        name: SUB_ACTION.EXECUTE_RTR_COMMAND,
+        method: 'executeRTRCommand',
+        schema: CrowdstrikeRTRCommandParamsSchema, // Define a proper schema for the command
+      });
+    }
   }
 
   public async executeHostActions(
