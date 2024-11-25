@@ -45,7 +45,6 @@ export {
   getMessageFieldWithFallbacks,
   getShouldShowFieldHandler,
   isNestedFieldParent,
-  isLegacyTableEnabled,
   usePager,
   calcFieldCounts,
   getLogLevelColor,

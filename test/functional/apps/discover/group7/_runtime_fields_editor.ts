@@ -235,7 +235,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const fieldName = '_runtimefield-doc-view';
       await createRuntimeField(fieldName);
       const table = await discover.getDocTable();
-      const useLegacyTable = await discover.useLegacyTable();
       await table.clickRowToggle();
 
       // click the open action
@@ -244,7 +243,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         if (!rowActions.length) {
           throw new Error('row actions empty, trying again');
         }
-        const idxToClick = useLegacyTable ? 1 : 0;
+        const idxToClick = 0;
         await rowActions[idxToClick].click();
       });
 

@@ -96,7 +96,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('navigation to context cleans the session', async () => {
       const table = await discover.getDocTable();
-      const isLegacy = await discover.useLegacyTable();
       await table.clickRowToggle({ rowIndex: 0 });
 
       await retry.try(async () => {
@@ -104,7 +103,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         if (!rowActions.length) {
           throw new Error('row actions empty, trying again');
         }
-        const idxToClick = isLegacy ? 0 : 1;
+        const idxToClick = 1;
         await rowActions[idxToClick].click();
       });
 

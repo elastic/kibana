@@ -23,7 +23,6 @@ import {
   CONTEXT_DEFAULT_SIZE_SETTING,
   CONTEXT_STEP_SETTING,
   CONTEXT_TIE_BREAKER_FIELDS_SETTING,
-  DOC_TABLE_LEGACY,
   MODIFY_COLUMNS_ON_SWITCH,
   SEARCH_FIELDS_FROM_SOURCE,
   MAX_DOC_FIELDS_DISPLAYED,
@@ -182,42 +181,6 @@ export const getUiSettings: (
     }),
     category: ['discover'],
     schema: schema.arrayOf(schema.string()),
-  },
-  [DOC_TABLE_LEGACY]: {
-    name: i18n.translate('discover.advancedSettings.disableDocumentExplorer', {
-      defaultMessage: 'Document Explorer or classic view',
-    }),
-    value: false,
-    description: i18n.translate('discover.advancedSettings.disableDocumentExplorerDescription', {
-      defaultMessage:
-        'To use the new {documentExplorerDocs} instead of the classic view, turn off this option. ' +
-        'The Document Explorer offers better data sorting, resizable columns, and a full screen view.',
-      values: {
-        documentExplorerDocs:
-          `<a href=${docLinks.links.discover.documentExplorer} style="font-weight: 600;"
-            target="_blank" rel="noopener">` +
-          i18n.translate('discover.advancedSettings.documentExplorerLinkText', {
-            defaultMessage: 'Document Explorer',
-          }) +
-          '</a>',
-      },
-    }),
-    requiresPageReload: true,
-    category: ['discover'],
-    schema: schema.boolean(),
-    metric: {
-      type: METRIC_TYPE.CLICK,
-      name: 'discover:useLegacyDataGrid',
-    },
-    deprecation: {
-      message: i18n.translate(
-        'discover.advancedSettings.discover.disableDocumentExplorerDeprecation',
-        {
-          defaultMessage: 'This setting is deprecated and will be removed in Kibana 9.0.',
-        }
-      ),
-      docLinksKey: 'discoverSettings',
-    },
   },
   [MODIFY_COLUMNS_ON_SWITCH]: {
     name: i18n.translate('discover.advancedSettings.discover.modifyColumnsOnSwitchTitle', {

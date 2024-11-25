@@ -24,7 +24,6 @@ export class DiscoverPageObject extends FtrService {
   private readonly elasticChart = this.ctx.getService('elasticChart');
   private readonly config = this.ctx.getService('config');
   private readonly dataGrid = this.ctx.getService('dataGrid');
-  private readonly kibanaServer = this.ctx.getService('kibanaServer');
   private readonly fieldEditor = this.ctx.getService('fieldEditor');
   private readonly queryBar = this.ctx.getService('queryBar');
   private readonly savedObjectsFinder = this.ctx.getService('savedObjectsFinder');
@@ -356,11 +355,6 @@ export class DiscoverPageObject extends FtrService {
     return await table.getBodyRows();
   }
 
-  // TODO: remove
-  public async useLegacyTable() {
-    return (await this.kibanaServer.uiSettings.get('doc_table:legacy')) === true;
-  }
-
   public async getDocTableIndex(index: number, visibleText = false) {
     const row = await this.dataGrid.getRow({ rowIndex: index - 1 });
     const result = await Promise.all(
@@ -377,53 +371,15 @@ export class DiscoverPageObject extends FtrService {
     return result.slice(await this.dataGrid.getControlColumnsCount()).join(' ');
   }
 
-  public async getDocTableIndexLegacy(index: number) {
-    const row = await this.find.byCssSelector(`tr.kbnDocTable__row:nth-child(${index})`);
-    return await row.getVisibleText();
-  }
-
   public async getDocTableField(index: number, cellIdx: number = -1) {
-    const isLegacyDefault = await this.useLegacyTable();
-    const usedDefaultCellIdx = isLegacyDefault ? 0 : await this.dataGrid.getControlColumnsCount();
+    const usedDefaultCellIdx = await this.dataGrid.getControlColumnsCount();
     const usedCellIdx = cellIdx === -1 ? usedDefaultCellIdx : cellIdx;
-    if (isLegacyDefault) {
-      const fields = await this.find.allByCssSelector(
-        `tr.kbnDocTable__row:nth-child(${index}) [data-test-subj='docTableField']`
-      );
-      return await fields[usedCellIdx].getVisibleText();
-    }
+
     await this.testSubjects.click('dataGridFullScreenButton');
     const row = await this.dataGrid.getRow({ rowIndex: index - 1 });
     const result = await Promise.all(row.map(async (cell) => (await cell.getVisibleText()).trim()));
     await this.testSubjects.click('dataGridFullScreenButton');
     return result[usedCellIdx];
-  }
-
-  public async clickDocTableRowToggle(rowIndex: number = 0) {
-    const docTable = await this.getDocTable();
-    await docTable.clickRowToggle({ rowIndex });
-  }
-
-  public async skipToEndOfDocTable() {
-    // add the focus to the button to make it appear
-    const skipButton = await this.testSubjects.find('discoverSkipTableButton');
-    // force focus on it, to make it interactable
-    await skipButton.focus();
-    // now click it!
-    return skipButton.click();
-  }
-
-  /**
-   * When scrolling down the legacy table there's a link to scroll up
-   * So this is done by this function
-   */
-  public async backToTop() {
-    const skipButton = await this.testSubjects.find('discoverBackToTop');
-    return skipButton.click();
-  }
-
-  public async getDocTableFooter() {
-    return await this.testSubjects.find('discoverDocTableFooter');
   }
 
   public isShowingDocViewer() {
@@ -552,10 +508,6 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async clickFieldSort(field: string, text = 'Sort New-Old') {
-    const isLegacyDefault = await this.useLegacyTable();
-    if (isLegacyDefault) {
-      return await this.testSubjects.click(`docTableHeaderFieldSort_${field}`);
-    }
     return await this.dataGrid.clickDocSortAsc(field, text);
   }
 
@@ -587,13 +539,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async removeHeaderColumn(name: string) {
-    const isLegacyDefault = await this.useLegacyTable();
-    if (isLegacyDefault) {
-      await this.testSubjects.moveMouseTo(`docTableHeader-${name}`);
-      await this.testSubjects.click(`docTableRemoveHeader-${name}`);
-    } else {
-      await this.dataGrid.clickRemoveColumn(name);
-    }
+    await this.dataGrid.clickRemoveColumn(name);
   }
 
   public async waitForChartLoadingComplete(renderCount: number) {
