@@ -40,7 +40,7 @@ export function defineLegacyRoutes(opts: RouteOptions) {
   updateApiKeyRoute(router, licenseState, usageCounter, isServerless);
   muteAllAlertRoute(router, licenseState, docLinks, usageCounter, isServerless);
   unmuteAllAlertRoute(router, licenseState, usageCounter, isServerless);
-  muteAlertInstanceRoute(router, licenseState, usageCounter, isServerless);
+  muteAlertInstanceRoute(router, licenseState, docLinks, usageCounter, isServerless);
   unmuteAlertInstanceRoute(router, licenseState, usageCounter, isServerless);
   healthRoute(router, licenseState, encryptedSavedObjects, docLinks, usageCounter, isServerless);
 }
