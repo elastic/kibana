@@ -24,6 +24,7 @@ export default createTestConfig({
     `--xpack.cloud.base_url=https://fake-cloud.elastic.co`,
     `--xpack.cloud.projects_url=/projects/`,
     '--xpack.dataUsage.enabled=true',
+    '--xpack.dataUsage.enableExperimental=[]',
     // dataUsage.autoops* config is set in kibana controller
     '--xpack.dataUsage.autoops.enabled=true',
     '--xpack.dataUsage.autoops.api.url=http://localhost:9000',
@@ -45,6 +46,9 @@ export default createTestConfig({
     },
     elasticsearchIndices: {
       pathname: '/app/elasticsearch/indices',
+    },
+    searchInferenceEndpoints: {
+      pathname: '/app/elasticsearch/relevance/inference_endpoints',
     },
   },
 });

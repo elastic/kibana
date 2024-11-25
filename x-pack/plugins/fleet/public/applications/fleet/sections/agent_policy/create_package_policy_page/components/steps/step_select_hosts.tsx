@@ -105,7 +105,7 @@ export const StepSelectHosts: React.FunctionComponent<Props> = ({
   const handleOnTabClick = (tab: EuiTabbedContentTab) =>
     updateSelectedTab(tab.id as SelectedPolicyTab);
 
-  return existingAgentPolicies.length > 0 ? (
+  return (
     <StyledEuiTabbedContent
       initialSelectedTab={
         initialSelectedTabIndex
@@ -116,14 +116,6 @@ export const StepSelectHosts: React.FunctionComponent<Props> = ({
       }
       tabs={tabs}
       onTabClick={handleOnTabClick}
-    />
-  ) : (
-    <AgentPolicyIntegrationForm
-      agentPolicy={newAgentPolicy}
-      updateAgentPolicy={updateNewAgentPolicy}
-      withSysMonitoring={withSysMonitoring}
-      updateSysMonitoring={updateSysMonitoring}
-      validation={validation}
     />
   );
 };

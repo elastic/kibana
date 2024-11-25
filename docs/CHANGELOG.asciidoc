@@ -150,12 +150,37 @@ For more information, refer to {kibana-issue}199891[#199891] and {kibana-issue}1
 ====
 
 [float]
+[[breaking-changes-8.16.0]]
+=== Breaking changes
+
+Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade to 8.16.0, review the breaking changes, then mitigate the impact to your application.
+
+[discrete]
+.Updated request processing during shutdown.
+[%collapsible]
+====
+*Details* +
+During shutdown, {kib} now waits for all the ongoing requests to complete according to the `server.shutdownTimeout` setting. During that period, the incoming socket is closed and any new incoming requests are rejected. Before this update, new incoming requests received a response with the status code 503 and body `{"message": "Kibana is shutting down and not accepting new incoming requests"}`. For more information, refer to {kibana-pull}180986[#180986].
+==== 
+
+[float]
 [[deprecations-8.16.0]]
 === Deprecations
 
 The following functionality is deprecated in 8.16.0, and will be removed in 9.0.0.
 Deprecated functionality does not have an immediate impact on your application, but we strongly recommend
 you make the necessary updates after you upgrade to 8.16.0.
+
+[discrete]
+.New versions of Kibana for macOS x86_64 will end after 8.17.
+[%collapsible]
+====
+*Details* +
+New versions of Kibana builds for macOS x86_64 are deprecated and will no longer be released after 8.17.  Kibana for macOS AArch64 is unaffected. 
+
+Use Docker to run new versions of Kibana on macOS 86x_64.
+====
 
 [discrete]
 .The Logs Stream is now hidden by default in favor of the Logs Explorer app.
@@ -179,20 +204,6 @@ The Observability AI Assistant specific advanced setting for Logs index patterns
 //!!TODO!!
 ====
 
-[float]
-[[breaking-changes-8.16.0]]
-=== Breaking changes
-
-Breaking changes can prevent your application from optimal operation and performance.
-Before you upgrade to 8.16.0, review the breaking changes, then mitigate the impact to your application.
-
-[discrete]
-.Updated request processing during shutdown.
-[%collapsible]
-====
-*Details* +
-During shutdown, {kib} now waits for all the ongoing requests to complete according to the `server.shutdownTimeout` setting. During that period, the incoming socket is closed and any new incoming requests are rejected. Before this update, new incoming requests received a response with the status code 503 and body `{"message": "Kibana is shutting down and not accepting new incoming requests"}`. For more information, refer to {kibana-pull}180986[#180986].
-==== 
   
 [float]
 [[features-8.16.0]]
