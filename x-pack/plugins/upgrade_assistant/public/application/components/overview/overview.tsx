@@ -120,7 +120,6 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
               }}
             />
           </EuiCallOut>
-          <EuiSpacer />
         </EuiPageHeader>
         <EuiSpacer size="l" />
         <EuiSteps
