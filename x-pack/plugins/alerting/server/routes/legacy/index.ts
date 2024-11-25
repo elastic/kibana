@@ -33,7 +33,7 @@ export function defineLegacyRoutes(opts: RouteOptions) {
   getAlertRoute(router, licenseState, docLinks, usageCounter, isServerless);
   getAlertStateRoute(router, licenseState, docLinks, usageCounter, isServerless);
   getAlertInstanceSummaryRoute(router, licenseState, docLinks, usageCounter, isServerless);
-  listAlertTypesRoute(router, licenseState, usageCounter, isServerless);
+  listAlertTypesRoute(router, licenseState, docLinks, usageCounter, isServerless);
   updateAlertRoute(router, licenseState, usageCounter, isServerless);
   enableAlertRoute(router, licenseState, docLinks, usageCounter, isServerless);
   disableAlertRoute(router, licenseState, docLinks, usageCounter, isServerless);
