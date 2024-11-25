@@ -228,7 +228,7 @@ export const useDashboardMenuItems = ({
         testId: 'dashboardShowSourceButton',
         disableButton: disableTopNav,
         run: () => {
-          dashboard.showSource();
+          dashboardApi.showSource();
         },
       },
     };

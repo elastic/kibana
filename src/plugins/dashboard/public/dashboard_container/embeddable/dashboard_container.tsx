@@ -969,6 +969,10 @@ export class DashboardContainer
   };
 
   public showSource() {
+    alert('All the code below is broken.');
+
+    return;
+
     const {
       analytics,
       settings: { i18n, theme },
