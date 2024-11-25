@@ -223,10 +223,7 @@ describe('Home page', () => {
         cy.getByTestSubj('inventoryGroupTitle_entity.type_container').click();
         cy.getByTestSubj('inventoryEntityActionsButton-foo').click();
         cy.getByTestSubj('inventoryEntityActionOpenInDiscover').click();
-        cy.url().should(
-          'include',
-          "query:'container.id:%20%22foo%22%20AND%20entity.definition_id%20:%20builtin*"
-        );
+        cy.url().should('include', "query:'container.id:%20%22foo%22%20");
       });
     });
   });
