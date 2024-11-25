@@ -191,7 +191,7 @@ export const Threshold = ({ threshold }: ThresholdProps) => {
     : `${descriptionStepI18n.THRESHOLD_RESULTS_AGGREGATED_BY} ${
         Array.isArray(threshold.field) ? threshold.field.join(',') : threshold.field
       } >= ${threshold.value}`;
-  if (threshold.cardinality) {
+  if (threshold.cardinality && threshold.cardinality.length > 0) {
     const cardinalityDescriptions = threshold.cardinality.map(
       (cardinality) =>
         `${descriptionStepI18n.THRESHOLD_CARDINALITY} ${cardinality.field} >= ${cardinality.value}`
@@ -200,11 +200,7 @@ export const Threshold = ({ threshold }: ThresholdProps) => {
       ` ${descriptionStepI18n.THRESHOLD_AND_JOINER} `
     )}`;
   }
-  return (
-    <div data-test-subj="thresholdPropertyValue">
-      <div data-test-subj="thresholdPropertyValue">{thresholdDescription}</div>
-    </div>
-  );
+  return <div data-test-subj="thresholdPropertyValue">{thresholdDescription}</div>;
 };
 
 interface AnomalyThresholdProps {
