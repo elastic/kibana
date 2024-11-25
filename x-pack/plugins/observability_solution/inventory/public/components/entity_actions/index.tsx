@@ -27,7 +27,7 @@ export const EntityActions = ({ entity, setShowActions }: Props) => {
   const { getDiscoverEntitiesRedirectUrl, isEntityDefinitionLoading } = useDiscoverRedirect(entity);
   const discoverUrl = getDiscoverEntitiesRedirectUrl();
 
-  const actions = [];
+  const actions: React.ReactElement[] = [];
 
   if (!discoverUrl && !isEntityDefinitionLoading) {
     setShowActions(false);
