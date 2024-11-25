@@ -83,6 +83,7 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
   const getInitialOptions = () => {
     return allConnectors.map((connector, key) => {
       const _append: JSX.Element[] = [];
+      let _ariaLabelAppend = '';
       if (connector.isTechPreview) {
         _append.push(
           <EuiBadge key={key + '-preview'} iconType="beaker" color="hollow">
@@ -92,6 +93,7 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
             )}
           </EuiBadge>
         );
+        _ariaLabelAppend += ', Tech preview';
       }
       if (connector.isBeta) {
         _append.push(
@@ -104,6 +106,7 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
             )}
           </EuiBadge>
         );
+        _ariaLabelAppend += ', Beta';
       }
       if (selfManaged === 'native' && !connector.isNative) {
         _append.push(
@@ -120,6 +123,7 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
       return {
         _append,
         _prepend: <EuiIcon size="l" type={connector.iconPath} />,
+        'aria-label': connector.name + _ariaLabelAppend,
         key: key.toString(),
         label: connector.name,
       };
