@@ -369,22 +369,22 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       assertHas(getResponse.body[0], testParam);
     });
 
-    // it('should not return values for non admin user', async () => {
-    //   const { username, password } = await monitorTestService.addsNewSpace();
-    //   const resp = await supertestWithoutAuth
-    //     .get(`${SYNTHETICS_API_URLS.PARAMS}`)
-    //     .auth(username, password)
-    //     .set(adminRoleAuthc.apiKeyHeader)
-    //     .set(samlAuth.getInternalRequestHeader())
-    //     .send()
-    //     .expect(200);
+    it('should not return values for non admin user', async () => {
+      const { username, password } = await monitorTestService.addsNewSpace();
+      const resp = await supertestWithoutAuth
+        .get(`${SYNTHETICS_API_URLS.PARAMS}`)
+        .auth(username, password)
+        .set(adminRoleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(200);
 
-    //   const params = resp.body;
-    //   expect(params.length).to.eql(6);
-    //   params.forEach((param: any) => {
-    //     expect(param.value).to.eql(undefined);
-    //     expect(param.key).to.not.empty();
-    //   });
-    // });
+      const params = resp.body;
+      expect(params.length).to.eql(6);
+      params.forEach((param: any) => {
+        expect(param.value).to.eql(undefined);
+        expect(param.key).to.not.empty();
+      });
+    });
   });
 }

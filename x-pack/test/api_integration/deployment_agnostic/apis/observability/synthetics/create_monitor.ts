@@ -5,7 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import { RoleCredentials, SamlAuthProviderType } from '@kbn/ftr-common-functional-services';
 import epct from 'expect';
 import moment from 'moment/moment';
 import { v4 as uuidv4 } from 'uuid';
@@ -26,13 +26,12 @@ import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_cont
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { SyntheticsMonitorTestService } from '../../../services/synthetics_monitor';
 
-// adjust the type of samlAuth
 export const addMonitorAPIHelper = async (
   supertestAPI: any,
   monitor: any,
   statusCode = 200,
   roleAuthc: RoleCredentials,
-  samlAuth: any
+  samlAuth: SamlAuthProviderType
 ) => {
   const result = await supertestAPI
     .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
@@ -74,8 +73,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     this.tags('skipCloud');
 
     const supertestAPI = getService('supertestWithoutAuth');
-    const supertestWithAuth = getService('supertest');
-    const security = getService('security');
     const samlAuth = getService('samlAuth');
     const kibanaServer = getService('kibanaServer');
     const monitorTestService = new SyntheticsMonitorTestService(getService);
@@ -83,7 +80,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     let _httpMonitorJson: HTTPFields;
     let httpMonitorJson: HTTPFields;
     let editorRoleAuthc: RoleCredentials;
-    let viewerRoleAuthc: RoleCredentials;
 
     const addMonitorAPI = async (monitor: any, statusCode = 200) => {
       return addMonitorAPIHelper(supertestAPI, monitor, statusCode, editorRoleAuthc, samlAuth);
@@ -101,7 +97,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       _httpMonitorJson = getFixtureJson('http_monitor');
       await kibanaServer.savedObjects.cleanStandardList();
       editorRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('editor');
-      viewerRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('viewer');
     });
 
     beforeEach(async () => {

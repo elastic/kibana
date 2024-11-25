@@ -186,7 +186,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     let testFleetPolicyID2: string;
-    let newLocations = [];
+    let newLocations: PrivateLocation[] = [];
 
     it('edits a monitor with additional private location', async () => {
       const resPolicy = await testPrivateLocations.addFleetPolicy(testPolicyName + 1);

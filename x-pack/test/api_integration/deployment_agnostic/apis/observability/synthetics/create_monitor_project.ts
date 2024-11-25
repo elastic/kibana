@@ -11,6 +11,7 @@ import {
   ConfigKey,
   ProjectMonitorsRequest,
   PrivateLocation,
+  ServiceLocation,
 } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
@@ -1253,59 +1254,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .expect(403);
     });
 
-    // STATEFUL ONLY TEST
-    // it('project monitors - returns a successful monitor when user defines a private location, even without fleet permissions', async () => {
-    //   const project = `test-project-${uuidv4()}`;
-    //   const secondMonitor = {
-    //     ...projectMonitors.monitors[0],
-    //     id: 'test-id-2',
-    //     privateLocations: ['Test private location 0'],
-    //   };
-    //   const testMonitors = [projectMonitors.monitors[0], secondMonitor];
-    //   const username = 'admin';
-    //   const roleName = 'uptime with fleet';
-    //   const password = `${username}-password`;
-    //   try {
-    //     await security.role.create(roleName, {
-    //       kibana: [
-    //         {
-    //           feature: {
-    //             uptime: ['all'],
-    //           },
-    //           spaces: ['*'],
-    //         },
-    //       ],
-    //     });
-    //     await security.user.create(username, {
-    //       password,
-    //       roles: [roleName],
-    //       full_name: 'a kibana user',
-    //     });
-    //     const { body } = await supertest
-    //       .put(
-    //         SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
-    //       )
-    //       .set(editorUser.apiKeyHeader)
-    //       .set(samlAuth.getInternalRequestHeader())
-    //       .send({ monitors: testMonitors })
-    //       .expect(200);
-
-    //     expect(body).to.eql({
-    //       createdMonitors: [testMonitors[0].id, 'test-id-2'],
-    //       updatedMonitors: [],
-    //       failedMonitors: [],
-    //     });
-    //   } finally {
-    //     await Promise.all([
-    //       testMonitors.map((monitor) => {
-    //         return deleteMonitor(monitor.id, project, 'default');
-    //       }),
-    //     ]);
-    //     await security.user.delete(username);
-    //     await security.role.delete(roleName);
-    //   }
-    // });
-
     it('creates integration policies for project monitors with private locations', async () => {
       const project = `test-project-${uuidv4()}`;
 
@@ -1730,26 +1678,30 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           })
         );
 
-        updatedMonitorsResponse.forEach((response) => {
-          expect(response.body.monitors[0].locations).eql([
-            {
-              id: 'dev',
-              label: 'Dev Service',
-              geo: { lat: 0, lon: 0 },
-              isServiceManaged: true,
-            },
-            {
-              label: privateLocations[0].label,
-              isServiceManaged: false,
-              agentPolicyId: testPolicyId,
-              id: testPolicyId,
-              geo: {
-                lat: 0,
-                lon: 0,
+        updatedMonitorsResponse.forEach(
+          (response: {
+            body: { monitors: Array<{ locations: Array<PrivateLocation | ServiceLocation> }> };
+          }) => {
+            expect(response.body.monitors[0].locations).eql([
+              {
+                id: 'dev',
+                label: 'Dev Service',
+                geo: { lat: 0, lon: 0 },
+                isServiceManaged: true,
               },
-            },
-          ]);
-        });
+              {
+                label: privateLocations[0].label,
+                isServiceManaged: false,
+                agentPolicyId: testPolicyId,
+                id: testPolicyId,
+                geo: {
+                  lat: 0,
+                  lon: 0,
+                },
+              },
+            ]);
+          }
+        );
       } finally {
         await Promise.all([
           projectMonitors.monitors.map((monitor) => {
