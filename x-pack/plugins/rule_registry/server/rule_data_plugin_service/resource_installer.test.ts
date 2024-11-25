@@ -17,7 +17,6 @@ import {
 
 import { Dataset } from './index_options';
 import { IndexInfo } from './index_info';
-import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
 import type { DataStreamAdapter } from '@kbn/alerting-plugin/server';
 import { getDataStreamAdapter } from '@kbn/alerting-plugin/server/alerts_service/lib/data_stream_adapter';
 
