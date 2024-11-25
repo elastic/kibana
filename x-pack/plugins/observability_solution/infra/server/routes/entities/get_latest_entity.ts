@@ -8,7 +8,8 @@
 import { ENTITY_LATEST, entitiesAliasPattern } from '@kbn/entities-schema';
 import { type EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
 import { ENTITY_TYPE, SOURCE_DATA_STREAM_TYPE } from '@kbn/observability-shared-plugin/common';
-import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
+import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
+import type { Logger } from '@kbn/logging';
 
 const ENTITIES_LATEST_ALIAS = entitiesAliasPattern({
   type: '*',
@@ -24,32 +25,45 @@ export async function getLatestEntity({
   entityId,
   entityType,
   entityManagerClient,
+  logger,
 }: {
   inventoryEsClient: ObservabilityElasticsearchClient;
   entityType: 'host' | 'container';
   entityId: string;
   entityManagerClient: EntityClient;
+  logger: Logger;
 }): Promise<EntitySourceResponse | undefined> {
-  const { definitions } = await entityManagerClient.getEntityDefinitions({
-    builtIn: true,
-    type: entityType,
-  });
+  try {
+    const { definitions } = await entityManagerClient.getEntityDefinitions({
+      builtIn: true,
+      type: entityType,
+    });
 
-  const hostOrContainerIdentityField = definitions[0]?.identityFields?.[0]?.field;
-  if (hostOrContainerIdentityField === undefined) {
-    return undefined;
-  }
+    const hostOrContainerIdentityField = definitions[0]?.identityFields?.[0]?.field;
+    if (hostOrContainerIdentityField === undefined) {
+      return undefined;
+    }
 
-  const response = await inventoryEsClient.esql<{
-    source_data_stream?: { type?: string | string[] };
-  }>('get_latest_entities', {
-    query: `FROM ${ENTITIES_LATEST_ALIAS}
+    const response = await inventoryEsClient.esql<
+      {
+        'source_data_stream.type'?: string | string;
+      },
+      { transform: 'plain' }
+    >(
+      'get_latest_entities',
+      {
+        query: `FROM ${ENTITIES_LATEST_ALIAS}
         | WHERE ${ENTITY_TYPE} == ?
         | WHERE ${hostOrContainerIdentityField} == ?
         | KEEP ${SOURCE_DATA_STREAM_TYPE}
       `,
-    params: [entityType, entityId],
-  });
+        params: [entityType, entityId],
+      },
+      { transform: 'plain' }
+    );
 
-  return { sourceDataStreamType: response[0].source_data_stream?.type };
+    return { sourceDataStreamType: response.hits[0]['source_data_stream.type'] };
+  } catch (e) {
+    logger.error(e);
+  }
 }

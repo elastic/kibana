@@ -43,19 +43,6 @@ const LensComponentWrapper = styled.div<{
   height: ${({ $height }) => ($height ? `${$height}px` : 'auto')};
   width: ${({ width }) => width ?? 'auto'};
 
-  .embPanel {
-    outline: none;
-  }
-
-  .embPanel__hoverActions.embPanel__hoverActionsRight {
-    border-radius: 6px !important;
-    border-bottom: 1px solid #d3dae6 !important;
-  }
-
-  .embPanel__hoverActionsAnchor .embPanel__hoverActionsWrapper {
-    top: -20px;
-  }
-
   .expExpressionRenderer__expression {
     padding: 2px 0 0 0 !important;
   }

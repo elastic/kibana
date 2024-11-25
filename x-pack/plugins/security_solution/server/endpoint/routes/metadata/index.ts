@@ -24,7 +24,6 @@ import {
   HOST_METADATA_GET_ROUTE,
   HOST_METADATA_LIST_ROUTE,
   METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE,
-  METADATA_TRANSFORMS_STATUS_ROUTE,
 } from '../../../../common/endpoint/constants';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 
@@ -84,6 +83,11 @@ export function registerEndpointRoutes(
     .addVersion(
       {
         version: '2023-10-31',
+        security: {
+          authz: {
+            requiredPrivileges: ['securitySolution'],
+          },
+        },
         validate: {
           request: GetMetadataRequestSchema,
         },
@@ -92,31 +96,6 @@ export function registerEndpointRoutes(
         { any: ['canReadSecuritySolution', 'canAccessFleet'] },
         logger,
         getMetadataRequestHandler(endpointAppContext, logger)
-      )
-    );
-
-  router.versioned
-    .get({
-      access: 'public',
-      path: METADATA_TRANSFORMS_STATUS_ROUTE,
-      security: {
-        authz: {
-          requiredPrivileges: ['securitySolution'],
-        },
-      },
-      options: { authRequired: true },
-      // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
-      deprecated: true,
-    })
-    .addVersion(
-      {
-        version: '2023-10-31',
-        validate: false,
-      },
-      withEndpointAuthz(
-        { all: ['canReadSecuritySolution'] },
-        logger,
-        getMetadataTransformStatsHandler(endpointAppContext, logger)
       )
     );
 

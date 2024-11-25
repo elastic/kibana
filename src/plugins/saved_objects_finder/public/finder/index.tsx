@@ -12,10 +12,11 @@ import React from 'react';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { ContentClient } from '@kbn/content-management-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import type { SavedObjectFinderProps } from './saved_object_finder';
+import type { HOCProps } from '@kbn/shared-ux-table-persist';
+import type { SavedObjectFinderItem, SavedObjectFinderProps } from './saved_object_finder';
 
 const LazySavedObjectFinder = React.lazy(() => import('./saved_object_finder'));
-const SavedObjectFinder = (props: SavedObjectFinderProps) => (
+const SavedObjectFinder = (props: HOCProps<SavedObjectFinderItem, SavedObjectFinderProps>) => (
   <React.Suspense
     fallback={
       <EuiDelayRender delay={300}>
@@ -32,7 +33,7 @@ export const getSavedObjectFinder = (
   uiSettings: IUiSettingsClient,
   savedObjectsTagging?: SavedObjectsTaggingApi
 ) => {
-  return (props: SavedObjectFinderProps) => (
+  return (props: HOCProps<SavedObjectFinderItem, SavedObjectFinderProps>) => (
     <SavedObjectFinder {...props} services={{ savedObjectsTagging, contentClient, uiSettings }} />
   );
 };

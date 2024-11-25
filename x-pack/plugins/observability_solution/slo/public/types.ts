@@ -14,6 +14,7 @@ import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
+import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -77,6 +78,7 @@ export interface SLOPublicPluginsStart {
   dataViewFieldEditor: DataViewFieldEditorStart;
   dataViews: DataViewsPublicPluginStart;
   discover?: DiscoverStart;
+  discoverShared: DiscoverSharedPublicStart;
   embeddable: EmbeddableStart;
   fieldFormats: FieldFormatsStart;
   lens: LensPublicStart;

@@ -40,7 +40,11 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
     .post({
       access: 'public',
       path: '/api/osquery/packs',
-      options: { tags: [`access:${PLUGIN_ID}-writePacks`] },
+      security: {
+        authz: {
+          requiredPrivileges: [`${PLUGIN_ID}-writePacks`],
+        },
+      },
     })
     .addVersion(
       {

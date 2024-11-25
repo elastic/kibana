@@ -198,6 +198,7 @@ export class SLOPlugin
 
   public start(core: CoreStart, plugins: SLOPublicPluginsStart) {
     const kibanaVersion = this.initContext.env.packageInfo.version;
+
     const sloClient = createRepositoryClient<SLORouteRepository, DefaultClientOptions>(core);
 
     const lazyWithContextProviders = getLazyWithContextProviders({
@@ -212,11 +213,18 @@ export class SLOPlugin
       sloClient,
     });
 
+    const getCreateSLOFlyout = lazyWithContextProviders(
+      lazy(() => import('./pages/slo_edit/shared_flyout/slo_add_form_flyout')),
+      { spinnerSize: 'm' }
+    );
+
+    plugins.discoverShared.features.registry.register({
+      id: 'observability-create-slo',
+      createSLOFlyout: getCreateSLOFlyout,
+    });
+
     return {
-      getCreateSLOFlyout: lazyWithContextProviders(
-        lazy(() => import('./pages/slo_edit/shared_flyout/slo_add_form_flyout')),
-        { spinnerSize: 'm' }
-      ),
+      getCreateSLOFlyout,
     };
   }
 

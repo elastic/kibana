@@ -7,7 +7,7 @@
 
 import type { PreviewChartResponseItem } from '@kbn/apm-plugin/server/routes/alerts/route';
 import expect from '@kbn/expect';
-import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import {
   ERROR_GROUP_ID,
   SERVICE_ENVIRONMENT,

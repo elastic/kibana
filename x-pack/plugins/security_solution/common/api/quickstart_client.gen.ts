@@ -153,10 +153,6 @@ import type {
   EndpointGetFileActionResponse,
 } from './endpoint/actions/response_actions/get_file/get_file.gen';
 import type {
-  EndpointIsolateRedirectRequestBodyInput,
-  EndpointIsolateRedirectResponse,
-} from './endpoint/actions/response_actions/isolate/deprecated_isolate.gen';
-import type {
   EndpointIsolateActionRequestBodyInput,
   EndpointIsolateActionResponse,
 } from './endpoint/actions/response_actions/isolate/isolate.gen';
@@ -177,10 +173,6 @@ import type {
   EndpointSuspendProcessActionResponse,
 } from './endpoint/actions/response_actions/suspend_process/suspend_process.gen';
 import type {
-  EndpointUnisolateRedirectRequestBodyInput,
-  EndpointUnisolateRedirectResponse,
-} from './endpoint/actions/response_actions/unisolate/deprecated_unisolate.gen';
-import type {
   EndpointUnisolateActionRequestBodyInput,
   EndpointUnisolateActionResponse,
 } from './endpoint/actions/response_actions/unisolate/unisolate.gen';
@@ -197,10 +189,6 @@ import type {
   GetEndpointMetadataListRequestQueryInput,
   GetEndpointMetadataListResponse,
 } from './endpoint/metadata/get_metadata.gen';
-import type {
-  GetAgentPolicySummaryRequestQueryInput,
-  GetAgentPolicySummaryResponse,
-} from './endpoint/policy/deprecated_agent_policy_summary.gen';
 import type {
   GetPolicyResponseRequestQueryInput,
   GetPolicyResponseResponse,
@@ -243,6 +231,11 @@ import type {
   InternalUploadAssetCriticalityRecordsResponse,
   UploadAssetCriticalityRecordsResponse,
 } from './entity_analytics/asset_criticality/upload_asset_criticality_csv.gen';
+import type {
+  GetEntityStoreStatusResponse,
+  InitEntityStoreRequestBodyInput,
+  InitEntityStoreResponse,
+} from './entity_analytics/entity_store/enablement.gen';
 import type { ApplyEntityEngineDataviewIndicesResponse } from './entity_analytics/entity_store/engine/apply_dataview_indices.gen';
 import type {
   DeleteEntityEngineRequestQueryInput,
@@ -306,14 +299,8 @@ import type {
   CreateTimelinesRequestBodyInput,
   CreateTimelinesResponse,
 } from './timeline/create_timelines/create_timelines_route.gen';
-import type {
-  DeleteNoteRequestBodyInput,
-  DeleteNoteResponse,
-} from './timeline/delete_note/delete_note_route.gen';
-import type {
-  DeleteTimelinesRequestBodyInput,
-  DeleteTimelinesResponse,
-} from './timeline/delete_timelines/delete_timelines_route.gen';
+import type { DeleteNoteRequestBodyInput } from './timeline/delete_note/delete_note_route.gen';
+import type { DeleteTimelinesRequestBodyInput } from './timeline/delete_timelines/delete_timelines_route.gen';
 import type {
   ExportTimelinesRequestQueryInput,
   ExportTimelinesRequestBodyInput,
@@ -368,6 +355,9 @@ import type {
   GetAllStatsRuleMigrationResponse,
   GetRuleMigrationRequestParamsInput,
   GetRuleMigrationResponse,
+  GetRuleMigrationResourcesRequestQueryInput,
+  GetRuleMigrationResourcesRequestParamsInput,
+  GetRuleMigrationResourcesResponse,
   GetRuleMigrationStatsRequestParamsInput,
   GetRuleMigrationStatsResponse,
   StartRuleMigrationRequestParamsInput,
@@ -375,7 +365,12 @@ import type {
   StartRuleMigrationResponse,
   StopRuleMigrationRequestParamsInput,
   StopRuleMigrationResponse,
-} from '../siem_migrations/model/api/rules/rules_migration.gen';
+  UpdateRuleMigrationRequestBodyInput,
+  UpdateRuleMigrationResponse,
+  UpsertRuleMigrationResourcesRequestParamsInput,
+  UpsertRuleMigrationResourcesRequestBodyInput,
+  UpsertRuleMigrationResourcesResponse,
+} from '../siem_migrations/model/api/rules/rule_migration.gen';
 
 export interface ClientOptions {
   kbnClient: KbnClient;
@@ -767,7 +762,7 @@ If a record already exists for the specified entity, that record is overwritten 
   async deleteNote(props: DeleteNoteProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeleteNote`);
     return this.kbnClient
-      .request<DeleteNoteResponse>({
+      .request({
         path: '/api/note',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -800,7 +795,7 @@ If a record already exists for the specified entity, that record is overwritten 
   async deleteTimelines(props: DeleteTimelinesProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeleteTimelines`);
     return this.kbnClient
-      .request<DeleteTimelinesResponse>({
+      .request({
         path: '/api/timeline',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -1012,25 +1007,6 @@ If a record already exists for the specified entity, that record is overwritten 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * Isolate an endpoint from the network.
-> info
-> This URL will return a 308 permanent redirect to `POST <kibana host>:<port>/api/endpoint/action/isolate`.
-
-    */
-  async endpointIsolateRedirect(props: EndpointIsolateRedirectProps) {
-    this.log.info(`${new Date().toISOString()} Calling API EndpointIsolateRedirect`);
-    return this.kbnClient
-      .request<EndpointIsolateRedirectResponse>({
-        path: '/api/endpoint/isolate',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'POST',
-        body: props.body,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
    * Terminate a running process on an endpoint.
    */
   async endpointKillProcessAction(props: EndpointKillProcessActionProps) {
@@ -1086,25 +1062,6 @@ If a record already exists for the specified entity, that record is overwritten 
     return this.kbnClient
       .request<EndpointUnisolateActionResponse>({
         path: '/api/endpoint/action/unisolate',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'POST',
-        body: props.body,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
-    * Release an isolated endpoint, allowing it to rejoin a network.
-> info
-> This URL will return a 308 permanent redirect to `POST <kibana host>:<port>/api/endpoint/action/unisolate`.
-
-    */
-  async endpointUnisolateRedirect(props: EndpointUnisolateRedirectProps) {
-    this.log.info(`${new Date().toISOString()} Calling API EndpointUnisolateRedirect`);
-    return this.kbnClient
-      .request<EndpointUnisolateRedirectResponse>({
-        path: '/api/endpoint/unisolate',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -1233,20 +1190,6 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  async getAgentPolicySummary(props: GetAgentPolicySummaryProps) {
-    this.log.info(`${new Date().toISOString()} Calling API GetAgentPolicySummary`);
-    return this.kbnClient
-      .request<GetAgentPolicySummaryResponse>({
-        path: '/api/endpoint/policy/summaries',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'GET',
-
-        query: props.query,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
   /**
    * Retrieves the rule migrations stats for all migrations stored in the system
    */
@@ -1326,7 +1269,7 @@ finalize it.
     this.log.info(`${new Date().toISOString()} Calling API GetEndpointSuggestions`);
     return this.kbnClient
       .request<GetEndpointSuggestionsResponse>({
-        path: replaceParams('/api/endpoint/suggestions/{suggestion_type}', props.params),
+        path: replaceParams('/internal/api/endpoint/suggestions/{suggestion_type}', props.params),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -1356,6 +1299,18 @@ finalize it.
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'POST',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async getEntityStoreStatus() {
+    this.log.info(`${new Date().toISOString()} Calling API GetEntityStoreStatus`);
+    return this.kbnClient
+      .request<GetEntityStoreStatusResponse>({
+        path: '/api/entity_store/status',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -1470,6 +1425,26 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Retrieves resources for an existing SIEM rules migration
+   */
+  async getRuleMigrationResources(props: GetRuleMigrationResourcesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetRuleMigrationResources`);
+    return this.kbnClient
+      .request<GetRuleMigrationResourcesResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/rules/{migration_id}/resources',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Retrieves the stats of a SIEM rules migration using the migration id provided
    */
   async getRuleMigrationStats(props: GetRuleMigrationStatsProps) {
@@ -1559,6 +1534,19 @@ finalize it.
     return this.kbnClient
       .request<InitEntityEngineResponse>({
         path: replaceParams('/api/entity_store/engines/{entityType}/init', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async initEntityStore(props: InitEntityStoreProps) {
+    this.log.info(`${new Date().toISOString()} Calling API InitEntityStore`);
+    return this.kbnClient
+      .request<InitEntityStoreResponse>({
+        path: '/api/entity_store/enable',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -2107,6 +2095,22 @@ detection engine rules.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Updates rules migrations attributes
+   */
+  async updateRuleMigration(props: UpdateRuleMigrationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpdateRuleMigration`);
+    return this.kbnClient
+      .request<UpdateRuleMigrationResponse>({
+        path: '/internal/siem_migrations/rules',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'PUT',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async uploadAssetCriticalityRecords(props: UploadAssetCriticalityRecordsProps) {
     this.log.info(`${new Date().toISOString()} Calling API UploadAssetCriticalityRecords`);
     return this.kbnClient
@@ -2117,6 +2121,25 @@ detection engine rules.
         },
         method: 'POST',
         body: props.attachment,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Creates or updates resources for an existing SIEM rules migration
+   */
+  async upsertRuleMigrationResources(props: UpsertRuleMigrationResourcesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpsertRuleMigrationResources`);
+    return this.kbnClient
+      .request<UpsertRuleMigrationResourcesResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/rules/{migration_id}/resources',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2214,9 +2237,6 @@ export interface EndpointGetProcessesActionProps {
 export interface EndpointIsolateActionProps {
   body: EndpointIsolateActionRequestBodyInput;
 }
-export interface EndpointIsolateRedirectProps {
-  body: EndpointIsolateRedirectRequestBodyInput;
-}
 export interface EndpointKillProcessActionProps {
   body: EndpointKillProcessActionRequestBodyInput;
 }
@@ -2228,9 +2248,6 @@ export interface EndpointSuspendProcessActionProps {
 }
 export interface EndpointUnisolateActionProps {
   body: EndpointUnisolateActionRequestBodyInput;
-}
-export interface EndpointUnisolateRedirectProps {
-  body: EndpointUnisolateRedirectRequestBodyInput;
 }
 export interface EndpointUploadActionProps {
   body: EndpointUploadActionRequestBodyInput;
@@ -2251,9 +2268,6 @@ export interface FindAssetCriticalityRecordsProps {
 }
 export interface FindRulesProps {
   query: FindRulesRequestQueryInput;
-}
-export interface GetAgentPolicySummaryProps {
-  query: GetAgentPolicySummaryRequestQueryInput;
 }
 export interface GetAssetCriticalityRecordProps {
   query: GetAssetCriticalityRecordRequestQueryInput;
@@ -2294,6 +2308,10 @@ export interface GetRuleExecutionResultsProps {
 export interface GetRuleMigrationProps {
   params: GetRuleMigrationRequestParamsInput;
 }
+export interface GetRuleMigrationResourcesProps {
+  query: GetRuleMigrationResourcesRequestQueryInput;
+  params: GetRuleMigrationResourcesRequestParamsInput;
+}
 export interface GetRuleMigrationStatsProps {
   params: GetRuleMigrationStatsRequestParamsInput;
 }
@@ -2313,6 +2331,9 @@ export interface ImportTimelinesProps {
 export interface InitEntityEngineProps {
   params: InitEntityEngineRequestParamsInput;
   body: InitEntityEngineRequestBodyInput;
+}
+export interface InitEntityStoreProps {
+  body: InitEntityStoreRequestBodyInput;
 }
 export interface InstallPrepackedTimelinesProps {
   body: InstallPrepackedTimelinesRequestBodyInput;
@@ -2392,6 +2413,13 @@ export interface TriggerRiskScoreCalculationProps {
 export interface UpdateRuleProps {
   body: UpdateRuleRequestBodyInput;
 }
+export interface UpdateRuleMigrationProps {
+  body: UpdateRuleMigrationRequestBodyInput;
+}
 export interface UploadAssetCriticalityRecordsProps {
   attachment: FormData;
+}
+export interface UpsertRuleMigrationResourcesProps {
+  params: UpsertRuleMigrationResourcesRequestParamsInput;
+  body: UpsertRuleMigrationResourcesRequestBodyInput;
 }

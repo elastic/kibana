@@ -7,10 +7,10 @@
 import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
-  describe('Serverless Observability - Deployment-agnostic api integration tests', function () {
+  describe('Serverless Observability - Deployment-agnostic API integration tests', function () {
     this.tags(['esGate']);
 
-    // load new oblt and platform deployment-agnostic test here
+    // load new oblt (except APM) and platform deployment-agnostic test here
     loadTestFile(require.resolve('../../apis/console'));
     loadTestFile(require.resolve('../../apis/core'));
     loadTestFile(require.resolve('../../apis/management'));
@@ -21,6 +21,5 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('../../apis/saved_objects_management'));
     loadTestFile(require.resolve('../../apis/observability/slo'));
     loadTestFile(require.resolve('../../apis/observability/synthetics'));
-    loadTestFile(require.resolve('../../apis/observability/apm'));
   });
 }

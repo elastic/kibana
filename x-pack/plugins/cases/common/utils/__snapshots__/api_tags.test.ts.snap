@@ -6,8 +6,10 @@ Object {
     "casesSuggestUserProfiles",
     "bulkGetUserProfiles",
     "casesGetConnectorsConfigure",
-    "casesFilesCasesCreate",
     "casesFilesCasesRead",
+  ],
+  "createComment": Array [
+    "casesFilesCasesCreate",
   ],
   "delete": Array [
     "casesFilesCasesDelete",
@@ -27,8 +29,10 @@ Object {
     "casesSuggestUserProfiles",
     "bulkGetUserProfiles",
     "casesGetConnectorsConfigure",
-    "observabilityFilesCasesCreate",
     "observabilityFilesCasesRead",
+  ],
+  "createComment": Array [
+    "observabilityFilesCasesCreate",
   ],
   "delete": Array [
     "observabilityFilesCasesDelete",
@@ -48,8 +52,10 @@ Object {
     "casesSuggestUserProfiles",
     "bulkGetUserProfiles",
     "casesGetConnectorsConfigure",
-    "securitySolutionFilesCasesCreate",
     "securitySolutionFilesCasesRead",
+  ],
+  "createComment": Array [
+    "securitySolutionFilesCasesCreate",
   ],
   "delete": Array [
     "securitySolutionFilesCasesDelete",

@@ -91,7 +91,7 @@ export const validateIndexPatternIsTimeBased = (indexPattern: DataView): FormVal
     : [
         {
           type: 'missing_timestamp_field' as const,
-          indexPatternTitle: indexPattern.title,
+          indexPatternTitle: indexPattern.getIndexPattern(),
         },
       ];
 
@@ -104,14 +104,14 @@ export const validateIndexPatternHasStringMessageField = (
     return [
       {
         type: 'missing_message_field' as const,
-        indexPatternTitle: indexPattern.title,
+        indexPatternTitle: indexPattern.getIndexPattern(),
       },
     ];
   } else if (messageField.type !== KBN_FIELD_TYPES.STRING) {
     return [
       {
         type: 'invalid_message_field_type' as const,
-        indexPatternTitle: indexPattern.title,
+        indexPatternTitle: indexPattern.getIndexPattern(),
       },
     ];
   } else {
@@ -124,7 +124,7 @@ export const validateIndexPatternIsntRollup = (indexPattern: DataView): FormVali
     ? [
         {
           type: 'rollup_index_pattern' as const,
-          indexPatternTitle: indexPattern.title,
+          indexPatternTitle: indexPattern.getIndexPattern(),
         },
       ]
     : [];
