@@ -186,6 +186,27 @@ export namespace Builder {
         };
       };
 
+      export const call = (
+        nameOrOperator: string | ESQLIdentifier | ESQLParamLiteral,
+        args: ESQLAstItem[],
+        template?: Omit<AstNodeTemplate<ESQLFunction>, 'subtype' | 'name' | 'operator' | 'args'>,
+        fromParser?: Partial<AstNodeParserFields>
+      ): ESQLFunction => {
+        let name: string;
+        let operator: ESQLIdentifier | ESQLParamLiteral;
+        if (typeof nameOrOperator === 'string') {
+          name = nameOrOperator;
+          operator = Builder.identifier({ name });
+        } else {
+          operator = nameOrOperator;
+          name = LeafPrinter.print(operator);
+        }
+        return Builder.expression.func.node(
+          { ...template, name, operator, args, subtype: 'variadic-call' },
+          fromParser
+        );
+      };
+
       export const binary = (
         name: string,
         args: [left: ESQLAstItem, right: ESQLAstItem],
@@ -216,6 +237,21 @@ export namespace Builder {
         };
 
         return node;
+      };
+
+      export const integer = (
+        value: number,
+        template?: Omit<AstNodeTemplate<ESQLIntegerLiteral | ESQLDecimalLiteral>, 'name'>,
+        fromParser?: Partial<AstNodeParserFields>
+      ): ESQLIntegerLiteral | ESQLDecimalLiteral => {
+        return Builder.expression.literal.numeric(
+          {
+            ...template,
+            value,
+            literalType: 'integer',
+          },
+          fromParser
+        );
       };
 
       export const list = (

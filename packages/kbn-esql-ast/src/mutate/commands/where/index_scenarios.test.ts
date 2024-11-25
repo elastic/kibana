@@ -11,9 +11,10 @@ import { BasicPrettyPrinter } from '../../../pretty_print';
 import * as mutate from '../..';
 import { EsqlQuery } from '../../../query';
 import { Builder } from '../../../builder';
+import { ESQLFunction } from '../../../types';
 
 describe('scenarios', () => {
-  it('can remove found WHERE command', () => {
+  it('can remove the found WHERE command', () => {
     const src =
       'FROM index | LIMIT 1 | WHERE 1 == a | LIMIT 2 | WHERE 123 == add(1 + fn(NOT -(a.b.c::ip)::INTEGER /* comment */))';
     const query = EsqlQuery.fromSrc(src);
@@ -56,5 +57,48 @@ describe('scenarios', () => {
     const text = BasicPrettyPrinter.print(query.ast);
 
     expect(text).toBe('FROM index | WHERE a == 1 | LIMIT 1');
+  });
+
+  it('can insert a new WHERE command with function call condition and param in column name', () => {
+    const src = 'FROM index | LIMIT 1';
+    const query = EsqlQuery.fromSrc(src);
+    const command = Builder.command({
+      name: 'where',
+      args: [
+        Builder.expression.func.binary('==', [
+          Builder.expression.func.call('add', [
+            Builder.expression.literal.integer(1),
+            Builder.expression.literal.integer(2),
+            Builder.expression.literal.integer(3),
+          ]),
+          Builder.expression.column({
+            args: [
+              Builder.identifier({ name: 'a' }),
+              Builder.identifier({ name: 'b' }),
+              Builder.param.build('?param'),
+            ],
+          }),
+        ]),
+      ],
+    });
+
+    mutate.generic.commands.insert(query.ast, command, 1);
+
+    const text = BasicPrettyPrinter.print(query.ast);
+
+    expect(text).toBe('FROM index | WHERE ADD(1, 2, 3) == a.b.?param | LIMIT 1');
+  });
+
+  it('can update WHERE command condition', () => {
+    const src = 'FROM index | WHERE a /* important field */ == 1 | LIMIT 1';
+    const query = EsqlQuery.fromSrc(src, { withFormatting: true });
+    const [command] = mutate.commands.where.byField(query.ast, ['a'])!;
+    const fn = command.args[0] as ESQLFunction;
+
+    fn.args[1] = Builder.expression.literal.integer(2);
+
+    const text = BasicPrettyPrinter.print(query.ast);
+
+    expect(text).toBe('FROM index | WHERE a /* important field */ == 2 | LIMIT 1');
   });
 });
