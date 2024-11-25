@@ -7,7 +7,7 @@
 
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, waitFor, renderHook } from '@testing-library/react';
 import { useTagsAction } from './use_tags_action';
 
 import * as api from '../../../containers/api';
@@ -56,7 +56,7 @@ describe('useTagsAction', () => {
   it('update the tags correctly', async () => {
     const updateSpy = jest.spyOn(api, 'updateCases');
 
-    const { result, waitFor } = renderHook(
+    const { result } = renderHook(
       () => useTagsAction({ onAction, onActionSuccess, isDisabled: false }),
       {
         wrapper: appMockRender.AppWrapper,
@@ -86,7 +86,7 @@ describe('useTagsAction', () => {
   });
 
   it('shows the success toaster correctly when updating one case', async () => {
-    const { result, waitFor } = renderHook(
+    const { result } = renderHook(
       () => useTagsAction({ onAction, onActionSuccess, isDisabled: false }),
       {
         wrapper: appMockRender.AppWrapper,
@@ -112,7 +112,7 @@ describe('useTagsAction', () => {
   });
 
   it('shows the success toaster correctly when updating multiple cases', async () => {
-    const { result, waitFor } = renderHook(
+    const { result } = renderHook(
       () => useTagsAction({ onAction, onActionSuccess, isDisabled: false }),
       {
         wrapper: appMockRender.AppWrapper,
